@@ -61,6 +61,7 @@
     * [Creating MetaHuman Characters](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters/README.md)
       * [Adding MetaHuman](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters/adding-metahuman.md)
       * [Adding LipSync to MetaHuman](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters/adding-lipsync-to-metahuman.md)
+      * [Adding LipSync to MetaHuman (From plugin version 3.0.0 or later )](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters/adding-lipsync-to-metahuman-from-plugin-version-3.0.0-or-later.md)
       * [Change the Parent Class for MetaHuman](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters/change-the-parent-class-for-metahuman.md)
       * [Change the parent class for Player.](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters/change-the-parent-class-for-player..md)
     * [Creating Reallusion Characters](plugins-and-integrations/unreal-engine/guides/creating-reallusion-characters/README.md)
