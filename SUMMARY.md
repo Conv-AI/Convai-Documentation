@@ -32,7 +32,7 @@
     * [Animations have Facial Blendshapes](plugins-and-integrations/unity-plugin/troubleshooting-guide/animations-have-facial-blendshapes.md)
     * [Jaw Bone in Avatar is not Free](plugins-and-integrations/unity-plugin/troubleshooting-guide/jaw-bone-in-avatar-is-not-free.md)
     * [macOS Permission Issues](plugins-and-integrations/unity-plugin/troubleshooting-guide/macos-permission-issues.md)
-    * [Microphone Permission Issue on Intel Macs with Universal Builds](plugins-and-integrations/unity-plugin/troubleshooting-guide/microphone-permission-issue-on-intel-macs-with-universal-builds.md)
+    * [Building Universal macOS Applications with Unity](plugins-and-integrations/unity-plugin/troubleshooting-guide/building-universal-macos-applications-with-unity.md)
   * [Setting Up Unity Plugin](plugins-and-integrations/unity-plugin/setting-up-unity-plugin.md)
   * [Building for WebGL](plugins-and-integrations/unity-plugin/building-for-webgl.md)
   * [Importing a character from Convai Playground](plugins-and-integrations/unity-plugin/importing-a-character-from-convai-playground.md)

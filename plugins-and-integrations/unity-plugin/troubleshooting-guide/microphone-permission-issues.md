@@ -10,7 +10,7 @@ If you see the microphone indicator turning on in the top left corner, but no us
 
 First, we want to ensure that the correct microphone is set as the default microphone.&#x20;
 
-<figure><img src="../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
 Second, we head into microphone properties (the > icon on the right of the selected Microphone) and ensure the we have access to the microphone.
 
