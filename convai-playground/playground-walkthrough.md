@@ -1,3 +1,3 @@
 # Playground Walkthrough
 
-### Coming Soon
+{% embed url="https://youtu.be/1BxASw6JjQo" %}
