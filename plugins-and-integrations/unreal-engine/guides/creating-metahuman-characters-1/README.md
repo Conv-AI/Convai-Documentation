@@ -6,3 +6,4 @@ description: >-
 
 # Creating ReadyPlayerMe Characters
 
+<figure><img src="../../../../.gitbook/assets/image (249).png" alt=""><figcaption></figcaption></figure>
