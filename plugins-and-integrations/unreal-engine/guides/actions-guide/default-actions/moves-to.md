@@ -10,10 +10,6 @@ description: >-
 By default, Convai Characters possess knowledge about the presence of other Convai characters within their environment.
 {% endhint %}
 
-{% hint style="warning" %}
-The action system may not consistently align with the verbal expressions of the character. Consequently, there are instances where characters may verbally claim an inability to execute specific actions, while, in fact, they are capable of performing those actions within the virtual world.
-{% endhint %}
-
 ### 1. Use Moves to with other Convai Characters present in the Environment.&#x20;
 
 Let's assume there are two Convai characters present in the virtual environment. We can ask one of the characters to move to the other character as shown here.&#x20;
