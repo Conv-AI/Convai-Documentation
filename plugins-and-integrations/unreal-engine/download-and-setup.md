@@ -18,13 +18,14 @@ Before getting started with plugin its recommended to install Visual Studio, by 
 ### Installing XCode for Mac
 
 * Download [XCode from the app store](https://apps.apple.com/us/app/xcode/id497799835?mt=12)
+* For UE 5.3 and UE 5.0, you will need to follow this [guide to enable microphone permissions](mac-microphone-permission-required-for-ue-5.0-and-5.3.md).
 
 ### There are two options to install the plugin:
 
-* **For UE 5.0 - 5.3** install directly from the Marketplace\
+* **For UE 5.1 - 5.3** install directly from the Marketplace\
   Go to the plugin's [Marketplace link](https://www.unrealengine.com/marketplace/en-US/product/convai) and choose your engine version.
-* **For UE 4.26 and 4.27** install to engine manually\
-  UE4 is not on the Marketplace, so you need to do an [**Engine Install**](download-and-setup.md#engine-install) as described below.
+* **For UE 4.26, 4.27 and 5.0** install to engine manually\
+  These versions are not on the Marketplace, so you need to do an [**Engine Install**](download-and-setup.md#engine-install) as described below.
 
 ## **Engine Install**
 
