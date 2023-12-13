@@ -10,10 +10,14 @@ description: Install the Unreal Engine Plugin with your project.
 Before getting started with plugin its recommended to install Visual Studio, by referring to this [<mark style="color:green;">guide</mark>](https://docs.unrealengine.com/5.1/en-US/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine/).
 {% endhint %}
 
-### Installing Visual Studio
+### Installing Visual Studio for Windows
 
-* Download  [<mark style="color:green;">**Visual Studio**</mark>](https://visualstudio.microsoft.com/downloads/) from here.
+* Download  [Visual Studio from here](https://visualstudio.microsoft.com/downloads/).
 * Once downloaded make sure that you have the required C++ toolchains as mentioned [<mark style="color:green;">**here**</mark>](https://docs.unrealengine.com/5.1/en-US/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine/) for Unreal Engine. If you already have Visual Studio installed, you may open the installer and select **'Modify'** to add the above mentioned toolchains.&#x20;
+
+### Installing XCode for Mac
+
+* Download [XCode from the app store](https://apps.apple.com/us/app/xcode/id497799835?mt=12)
 
 ### There are two options to install the plugin:
 
@@ -41,21 +45,21 @@ Before getting started with plugin its recommended to install Visual Studio, by 
 
     <div align="left">
 
-    <figure><img src="../../../.gitbook/assets/image (99).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (99).png" alt=""><figcaption></figcaption></figure>
 
     </div>
 5. Restart Unreal Engine.&#x20;
 
 ## Set up the API key
 
-1. [Find your API key.](../../../convai-playground/get-started.md#get-your-unique-api-key)
+1. [Find your API key.](../../convai-playground/get-started.md#get-your-unique-api-key)
 2. Go to **Edit > Project Settings**.
 3.  Choose **Convai** under the **Plugins** section on the left bar.\
 
 
     <div align="left">
 
-    <figure><img src="../../../.gitbook/assets/image (165).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (165).png" alt=""><figcaption></figcaption></figure>
 
     </div>
 4. Paste the API key into the **API Key** field.
