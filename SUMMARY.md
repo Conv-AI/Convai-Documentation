@@ -72,6 +72,7 @@
       * [Creating a Reallusion Character](plugins-and-integrations/unreal-engine/guides/creating-reallusion-characters/creating-a-reallusion-character.md)
       * [Importing Reallusion character and setting up the Convai plugin](plugins-and-integrations/unreal-engine/guides/creating-reallusion-characters/importing-reallusion-character-and-setting-up-the-convai-plugin.md)
       * [Binding objects to Reallusion Character](plugins-and-integrations/unreal-engine/guides/creating-reallusion-characters/binding-objects-to-reallusion-character.md)
+    * [Event-Aware Convai Characters](plugins-and-integrations/unreal-engine/guides/event-aware-convai-characters.md)
     * [Actions Guide](plugins-and-integrations/unreal-engine/guides/actions-guide/README.md)
       * [Default Actions](plugins-and-integrations/unreal-engine/guides/actions-guide/default-actions/README.md)
         * [Moves To](plugins-and-integrations/unreal-engine/guides/actions-guide/default-actions/moves-to.md)
