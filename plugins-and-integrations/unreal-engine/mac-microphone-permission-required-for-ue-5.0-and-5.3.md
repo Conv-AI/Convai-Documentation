@@ -13,7 +13,7 @@ description: >-
    `git clone https://github.com/DocSystem/tccutil`&#x20;
 3. Navigate to the tccutil Directory by entering `cd tccutil` into the terminal.
 4. Ensure [Python is installed](https://www.dataquest.io/blog/installing-python-on-mac/) on your system. Run the tccutil command In the Terminal to allow microphone access for Unreal Engine:\
-   `sudo python3 tccutil.py -e -id com.epicgames.UnrealEditor --microphone`
+   `sudo python3 tccutil.py -e -id com.epicgames.UnrealEditor --microphone --enable`
 5. Re-enable SIP Once the modifications are complete, [follow the same guide](https://developer.apple.com/documentation/security/disabling\_and\_enabling\_system\_integrity\_protection) to re-enable System Integrity Protection but this time run the command `csrutil enable`.
 
 ## Packaging the app with Convai (Not required for MacOS 14.x)
