@@ -33,7 +33,7 @@ After completing a Universal build on an Intel Mac, you must manually update the
     \
 
 
-    <figure><img src="../../../.gitbook/assets/image (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 3.  Navigate to the `Contents/Plugins` folder within the package.\
     \
 
