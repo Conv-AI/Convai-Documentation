@@ -8,15 +8,23 @@ description: >-
 
 ## Editor Mic **Permission Setup**
 
-1. Temporarily disable SIP following instructions on [Disabling and Enabling SIP](https://developer.apple.com/documentation/security/disabling\_and\_enabling\_system\_integrity\_protection).
-2. Clone the `tccutil` repository from GitHub: [tccutil on GitHub](https://github.com/DocSystem/tccutil).
-3. Open a terminal and cd into the directory where `tccutil.py` is found.
-4. Make sure [Python is installed](https://www.dataquest.io/blog/installing-python-on-mac/) and run the command: `sudo python3 tccutil.py -e -id com.epicgames.UnrealEditor --microphone.`
-5. [Reenable SIP](https://developer.apple.com/documentation/security/disabling\_and\_enabling\_system\_integrity\_protection).
+1.  Temporarily Disable SIP
 
-## Packaging Games with Convai
+    Follow the instructions provided in the [Disabling and Enabling SIP](https://developer.apple.com/documentation/security/disabling\_and\_enabling\_system\_integrity\_protection) guide - Note: make sure to run the command `csrutil disable`  in the terminal.
+2. Clone the tccutil Repository
+   1. Open the Terminal.&#x20;
+   2. Enter the following command to clone the repository: \
+      `git clone https://github.com/DocSystem/tccutil`&#x20;
+3. Navigate to the tccutil Directory by entering `cd tccutil` into the terminal.
+4. Ensure [Python is installed](https://www.dataquest.io/blog/installing-python-on-mac/) on your system. Run the tccutil command In the Terminal to allow microphone access for Unreal Engine:\
+   `sudo python3 tccutil.py -e -id com.epicgames.UnrealEditor --microphone`
+5. Re-enable SIP Once the modifications are complete, [follow the same guide](https://developer.apple.com/documentation/security/disabling\_and\_enabling\_system\_integrity\_protection) to re-enable System Integrity Protection but this time run the command `csrutil enable`.
 
-1. After packaging your game, locate the `Info.plist` file in the packaged game directory. This is typically found by right-clicking the package, selecting 'Show Package Contents', and editing `/Contents/Mac/Info.plist`.
+## Packaging the app with Convai (Not required for MacOS 14.x)
+
+After packaging your game, if you notice any crash or microphone not working then proceed to doing the following steps
+
+1. &#x20;locate the `Info.plist` file in the packaged game directory. This is typically found by right-clicking the package, selecting 'Show Package Contents', and editing `/Contents/Mac/Info.plist`.
 2. Add the following entries to request microphone access:
 
 ```xml
