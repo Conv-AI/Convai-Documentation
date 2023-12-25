@@ -8,13 +8,9 @@ description: >-
 
 ## Editor Mic **Permission Setup**
 
-1.  Temporarily Disable SIP
-
-    Follow the instructions provided in the [Disabling and Enabling SIP](https://developer.apple.com/documentation/security/disabling\_and\_enabling\_system\_integrity\_protection) guide - Note: make sure to run the command `csrutil disable`  in the terminal.
-2. Clone the tccutil Repository
-   1. Open the Terminal.&#x20;
-   2. Enter the following command to clone the repository: \
-      `git clone https://github.com/DocSystem/tccutil`&#x20;
+1. Temporarily Disable SIP - Follow the instructions provided in the [Disabling and Enabling SIP](https://developer.apple.com/documentation/security/disabling\_and\_enabling\_system\_integrity\_protection) guide - Note: make sure to run the command `csrutil disable`  in the terminal.
+2. Clone the tccutil Repository - Open the Terminal, and enter the following command to clone the repository: \
+   `git clone https://github.com/DocSystem/tccutil`&#x20;
 3. Navigate to the tccutil Directory by entering `cd tccutil` into the terminal.
 4. Ensure [Python is installed](https://www.dataquest.io/blog/installing-python-on-mac/) on your system. Run the tccutil command In the Terminal to allow microphone access for Unreal Engine:\
    `sudo python3 tccutil.py -e -id com.epicgames.UnrealEditor --microphone`
