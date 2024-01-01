@@ -12,5 +12,5 @@ description: >-
 2.  Apply the following blueprint setup in the player blueprint.\
 
 
-    <figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/image (270).png" alt=""><figcaption></figcaption></figure>
 3. Hit play to test, press and hold space to talk and release to print a transcription of your input voice.
