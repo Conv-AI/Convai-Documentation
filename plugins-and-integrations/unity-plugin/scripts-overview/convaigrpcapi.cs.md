@@ -14,187 +14,231 @@ Only go through this if you want to customize the behavior of the NPC. Only proc
 To understand the script in even more depth, please check out the comments in the script.
 {% endhint %}
 
-ConvaiGRPCAPI is responsible for all server-client communications and other data processing. This function effectively handles the nitty-gritty side of our plugin and is **not meant to be edited**.&#x20;
+The `ConvaiGRPCAPI` class is a critical component that manages all communications between the Convai server and the Unity plugin, as well as processing the data exchanged during these interactions. This class abstracts the underlying complexities of the Convai Unity plugin, providing a seamless interface for users. Modifying this class is discouraged as it may affect the stability and functionality of the system. The class is maintained by the development team to ensure compatibility and performance.
 
-This script is usually added as part of the Camera GameObject in the player controller. This is so that the attached trigger collider can be used to determine which is the active character currently being spoken to.
+## Class Overview
 
-Let's go through the individual functions that are being called and understand the flow of control:
+The `ConvaiGRPCAPI` class serves as a central component for managing communications between the Convai server and your Unity project. It abstracts the complexities of communication, enabling seamless interactions with NPC characters. This class is crucial for creating immersive conversational experiences within your game.
 
-#### Imports
+### Requirements
+
+To use the `ConvaiGRPCAPI` class effectively, you must ensure:
+
+* The `ConvaiAPIKeySetup` ScriptableObject is set up correctly with your Convai API key.
+* Your Unity project includes essential UI components like `ConvaiChatUIHandler` and `ConvaiGlobalActionSettings` to facilitate user interactions.
+* NPC characters in your scene are configured with their character settings.
+
+***
+
+## Properties
+
+The `ConvaiGRPCAPI` class features the following properties:
+
+* `Instance`: A public static instance of the ConvaiGRPCAPI class. This singleton instance allows for easy access from other scripts within the project.
+* `APIKey`: A hidden string field that stores the Convai API key.
+* `_stringUserText`: A hidden list of strings to manage pending user text for display.
+* `_activeConvaiNPC`: A hidden reference to the currently active Convai NPC character.
+* `_chatUIHandler`: A reference to the `ConvaiChatUIHandler` component for user interface handling.
+* `_cancellationTokenSource`: A private field that is used for potential task cancellation.
+
+***
+
+## Functions
+
+Functions in the `ConvaiGRPCAPI` script:
+
+* [`Awake()`](convaigrpcapi.cs.md#awake): Initializes references to components and loads the API key.
+* [`Start()`](convaigrpcapi.cs.md#awake): Initializes gRPC and event handlers for audio processing.
+* [`FixedUpdate()`](convaigrpcapi.cs.md#fixedupdate): Sends user text to the chat UI for display.
+* [`OnDestroy()`](convaigrpcapi.cs.md#ondestroy): Unsubscribes from event handlers.
+* [`HandleActiveNPCChanged()`](convaigrpcapi.cs.md#handleactivenpcchanged): Called when the active NPC changes.
+* [`ProcessRequestAudioToWav()`](convaigrpcapi.cs.md#processrequestaudiotowav): Converts an audio clip into WAV byte data.
+* [`Convert16BitByteArrayToFloatAudioClipDat()`](convaigrpcapi.cs.md#convert16bitbytearraytofloataudioclipdata): Converts 16-bit audio byte array to a float array.
+* [`ProcessStringAudioDataToAudioClip()`](convaigrpcapi.cs.md#processstringaudiodatatoaudioclip): Converts string-encoded audio data to an AudioClip.
+* [`ProcessByteAudioDataToAudioClip()`](convaigrpcapi.cs.md#processbyteaudiodatatoaudioclip): Converts a byte array containing audio data into an AudioClip.
+* [`StartRecordAudio()`](convaigrpcapi.cs.md#startrecordaudio): Initiates audio recording and sends it to the server for processing.
+* [`StopRecordAudio()`](convaigrpcapi.cs.md#stoprecordaudio): Stops audio recording.
+* [`ProcessAudioChunk()`](convaigrpcapi.cs.md#processaudiochunk): Processes and sends audio chunks to the server.
+* [`ReceiveResultFromServer()`](convaigrpcapi.cs.md#receiveresultfromserver): Periodically receives responses from the server and adds them to an NPC's response list.
+* [`AddByteToArray()`](convaigrpcapi.cs.md#addbytetoarray): Adds a WAV header to audio data for playback.
+
+***
+
+## Imports
 
 We will import Service which is a script that has been created from a gRPC protocol buffer. This includes all the tools necessary for communicating with the server.&#x20;
 
 {% code overflow="wrap" lineNumbers="true" %}
 ```csharp
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-
-using UnityEngine;
-
+using Google.Protobuf;
 using Grpc.Core;
 using Service;
+using UnityEngine;
 using static Service.GetResponseRequest.Types;
-using Google.Protobuf;
-
-using Convai.NPC;
-using Convai.APIKeySetup;
-using Convai.UIHandler;
-
-using System.Collections.Generic;
 ```
 {% endcode %}
 
-#### Awake()
+***
+
+## ConvaiGRPCAPI Script Functions
+
+### `Awake()`
 
 The awake function sets up the API key and initializes the script. It also gets the reference to the Chat UI Handler so that transcripts from users and the character can be handled.
 
-```csharp
-private void Awake()
-```
+### `Update()`
 
-#### Update()
+This method is responsible for managing the `ConvaiGRPCAPI` component during every frame update. It checks for pending user texts, updates the active NPC, and controls audio playback.&#x20;
 
-The update function primarily handles the Chat UI and sends the user's transcript to the chat handler.
+* This method checks if there are pending user texts to be displayed. If so, it sends the first user text to the chat UI for presentation and removes it from the list.
+* It also monitors the active NPC and keeps track of it to manage interactions.
+* This function plays a role in controlling the playback of audio.
 
-```csharp
-private void Update()
-```
+### **`FixedUpdate()`**
 
-#### OnTriggerEnter()
+This method is called at fixed time intervals and is used to handle specific tasks within the `ConvaiGRPCAPI` script. In this context, it is responsible for processing and sending pending user text to the chat user interface (UI). It operates by checking if there is user text to display, and if so, it utilizes the chat UI handler to send the first user text in the list.
 
-This function listens to any trigger collisions. Here it is looking for trigger collision with the collider attached to the camera, that we use to identify which character is currently being spoken to.
+### **`OnDestroy()`**
 
-We check if the object that triggered the collider has the tag character and has the ConvaiNPC component attached to it. If there is, the current character is set as active and the previous character is set as inactive.
+The `OnDestroy()` function is a Unity callback method that is automatically called when the GameObject to which the script is attached is destroyed. In the `ConvaiGRPCAPI` script, this method is responsible for cleaning up resources and unsubscribing from event handlers to ensure proper memory management.
 
-{% code overflow="wrap" %}
-```csharp
-/// <summary>
-/// This function is called when a collider enters the trigger zone of the GameObject.
-/// It sets the active character based on the character the player is facing.
-/// </summary>
-/// <param name="other">The collider of the object that entered the trigger zone</param>
-private void OnTriggerEnter(Collider other)
-```
-{% endcode %}
+### **`HandleActiveNPCChanged()`**
 
-#### ProcessRequestAudiotoWav()
+This method is called whenever the active NPC changes. It updates the `_activeConvaiNPC` field with the new active NPC.
 
-This function converts the audio recorded an as Unity audioClip and converts it to byte data in the wav format.
+* **Parameters:**
+  * `newActiveNPC` (ConvaiNPC): The new active NPC that has been selected.
+
+### **`ProcessRequestAudioToWav()`**
 
 ```csharp
-/// <summary>
-/// Converts an audio clip into WAV byte data.
-/// </summary>
-/// <param name="requestAudioClip">The audio clip to be converted</param>
-/// <returns>Byte array containing WAV audio data</returns>
 public byte[] ProcessRequestAudiotoWav(AudioClip requestAudioClip)
 ```
 
-#### Convert16BitByteArrayToFloatAudioClipData()
+This method converts an audio clip into WAV byte data. It takes an `AudioClip` as input, retrieves audio data, and converts it into a byte array containing WAV audio data.
 
-This function converts 16-bit byte audio data into to an array of float data that can be used to create a Unity audioClip.
+* **Parameters:**
+  * `requestAudioClip` (AudioClip): The audio clip to be converted
+* **Returns:**
+  * Byte array containing WAV audio data
+
+### **Convert16BitByteArrayToFloatAudioClipData()**
 
 ```csharp
-/// <summary>
-/// Converts a byte array representing 16-bit audio samples to a float array.
-/// </summary>
-/// <param name="source">Byte array containing 16-bit audio data</param>
-/// <returns>Float array containing audio samples in the range [-1, 1]</returns>
 float[] Convert16BitByteArrayToFloatAudioClipData(byte[] source)
 ```
 
-#### ProcessStringAudioDataToAudioClip()
+This private method converts a byte array representing 16-bit audio samples to a float array. It is used to convert audio data from Convai server responses into a format suitable for Unity's `AudioClip`.
 
-This function converts string audio data into to a Unity audioClip.
+* **Parameters:**
+  * `source` (byte\[]): Byte array containing 16-bit audio data
+* **Returns:**
+  * Float array containing audio samples in the range \[-1, 1
+
+### ProcessStringAudioDataToAudioClip()
 
 {% code overflow="wrap" %}
 ```csharp
-/// <summary>
-/// Converts string-encoded audio data to an AudioClip.
-/// </summary>
-/// <param name="audioData">String containing base64-encoded audio data</param>
-/// <param name="stringSampleRate">String representing the sample rate of the audio</param>
-/// <returns>AudioClip containing the decoded audio data</returns>
 public AudioClip ProcessStringAudioDataToAudioClip(string audioData, string stringSampleRate)
 ```
 {% endcode %}
 
-#### ProcessByteAudioDataToAudioClip()
+This method converts string-encoded audio data to an `AudioClip`. It takes a base64-encoded audio data string and the sample rate as input, decodes the audio data, and creates an `AudioClip` from it.
 
-This function converts byte audio data into to a Unity audioClip.
+* **Parameters:**
+  * `audioData` (string): String containing base64-encoded audio data
+  * `stringSampleRate` (string): String representing the sample rate of the audio
+* **Returns:**
+  * AudioClip containing the decoded audio data
+
+### ProcessByteAudioDataToAudioClip()
 
 {% code overflow="wrap" %}
 ```csharp
-/// <summary>
-/// Converts a byte array containing audio data into an AudioClip.
-/// </summary>
-/// <param name="byteAudio">Byte array containing the audio data</param>
-/// <param name="stringSampleRate">String containing the sample rate of the audio</param>
-/// <returns>AudioClip containing the decoded audio data</returns>
 public AudioClip ProcessByteAudioDataToAudioClip(byte[] byteAudio, string stringSampleRate)
 ```
 {% endcode %}
 
-#### StartRecordAudio()
+This method converts a byte array containing audio data into an `AudioClip`. It is capable of processing audio data received from the Convai server, trimming the WAV header, and creating an `AudioClip`.
 
-The function initializes the connection to the server and the stream with the configuration of the data and some headers to be sent the server. The script starts recording the audio using the default microphone. It then starts a coroutine that will listen to any responses from the server (`ReceiveResultFromServer()`). &#x20;
+* **Parameters:**
+  * `byteAudio` (byte\[]): Byte array containing the audio data
+  * `stringSampleRate` (string): String containing the sample rate of the audio
+* **Returns:**
+  * AudioClip containing the decoded audio data
 
-While the mic is recording, we get the data from the audioclip to which the Unity microphone class is writing and then asynchronously calls a function that will process the audio and send it to the server as a stream of audio data (`ProcessAudioChunk()`).&#x20;
-
-Once the microphone stops recording (handled by the `StopRecordAudio()` function). The final audio data is sent for processing. After this we close the request stream to the server.&#x20;
+### StartRecordAudio()
 
 {% code overflow="wrap" %}
 ```csharp
-/// <summary>
-/// Starts recording audio and sends it to the server for processing.
-/// </summary>
-/// <param name="client">gRPC service Client object</param>
-/// <param name="isActionActive">Bool specifying whether we are expecting action responses</param>
-/// <param name="recordingFrequency">Frequency of the audio being sent</param>
-/// <param name="recordingLength">Length of the recording from the microphone</param>
-/// <param name="characterID">Character ID obtained from the playground</param>
-/// <param name="actionConfig">Object containing the action configuration</param>
 public async Task StartRecordAudio(ConvaiService.ConvaiServiceClient client, bool isActionActive, int recordingFrequency, int recordingLength, string characterID, ActionConfig actionConfig)
 ```
 {% endcode %}
 
-#### StopRecordAudio()
+This method starts recording audio and sends it to the Convai server for processing. It is asynchronous and takes several parameters, including the gRPC client, recording configuration, character ID, and action configuration. It sends audio data in chunks to the server for real-time processing.
 
-Stops the microphone from recording audio.
+* **Parameters:**
+  * `client` (ConvaiService.ConvaiServiceClient): gRPC service Client object
+  * `isActionActive` (bool): Bool specifying whether we are expecting action responses
+  * `isLipSyncActive` (bool): (Description of isLipSyncActive parameter)
+  * `recordingFrequency` (int): Frequency of the audio being sent
+  * `recordingLength` (int): Length of the recording from the microphone
+  * `characterID` (string): Character ID obtained from the playground
+  * `actionConfig` (ActionConfig): Object containing the action configuration
+
+### StopRecordAudio()
+
+This method stops recording and processing audio, effectively ending microphone recording. It logs information about the cessation of audio recording.
 
 ```csharp
- /// <summary>
- /// Stops recording and processing the audio.
- /// </summary>
  public void StopRecordAudio()
 ```
 
-#### ReceiveResultFromServer()
-
-This function listens to the server for any results that it sends for the current query until the complete response is received from the server. This response is received in chunks. The chunks are classified into Audio Response or Action Response and then sent to the ConvaiNPC and ConvaiActionHandler respectively for processing.&#x20;
+### **`ProcessAudioChunk()`**
 
 {% code overflow="wrap" %}
 ```csharp
-/// <summary>
-/// Periodically receives responses from the server and adds it to a static list in streaming NPC
-/// </summary>
-/// <param name="call">gRPC Streaming call connecting to the getResponse function</param>
+ProcessAudioChunk(AsyncDuplexStreamingCall<GetResponseRequest, GetResponseResponse> call, int diff, float[] audioData)
+```
+{% endcode %}
+
+This private method processes each audio chunk and sends it to the server. It is used internally to send audio data in chunks to the server for real-time processing.
+
+* **Parameters:**
+  * `call` (AsyncDuplexStreamingCall\<GetResponseRequest, GetResponseResponse>): gRPC Streaming call connecting to the getResponse function
+  * `diff` (int): Length of the audio data from the current position to the position of the last sent chunk
+  * `audioData` (float\[]): Chunk of audio data that we want to be processed
+
+### ReceiveResultFromServer()
+
+{% code overflow="wrap" %}
+```csharp
 async Task ReceiveResultFromServer(AsyncDuplexStreamingCall<GetResponseRequest, GetResponseResponse> call)
 ```
 {% endcode %}
 
-#### AddByteToArray()
+This private method continuously receives responses from the Convai server and adds them to a static list in the active NPC. It processes different types of responses, including user queries, audio responses, and action responses. Additionally, it updates the session ID in the active NPC.
 
-A utility function that adds wav header to audioByteData to make it compatible with wav format.
+* **Parameters:**
+  * `call` (AsyncDuplexStreamingCall\<GetResponseRequest, GetResponseResponse>): gRPC Streaming call connecting to the getResponse function
+
+This function listens to the server for any results that it sends for the current query until the complete response is received from the server. This response is received in chunks. The chunks are classified into Audio Response or Action Response and then sent to the ConvaiNPC and ConvaiActionHandler respectively for processing.
+
+### AddByteToArray()
 
 {% code overflow="wrap" %}
 ```csharp
-/// <summary>
-/// Adds WAV header to the audio data
-/// </summary>
-/// <param name="audioByteArray">Byte array containing audio data</param>
-/// <param name="sampleRate">Sample rate of the audio that needs to be processed</param>
-/// <returns>Byte array with added WAV header</returns>
 byte[] AddByteToArray(byte[] audioByteArray, string sampleRate)
 ```
 {% endcode %}
+
+A utility function that adds wav header to audioByteData to make it compatible with wav format. This private method adds a WAV header to the audio data, converting it into a byte array suitable for playback and storage. It takes an audio byte array and the sample rate as input and returns a new byte array with the WAV header added.
+
+* **Parameters:**
+  * `audioByteArray` (byte\[]): Byte array containing audio data
+  * `sampleRate` (string): Sample rate of the audio that needs to be processed
+* **Returns:**
+  * Byte array with added WAV header

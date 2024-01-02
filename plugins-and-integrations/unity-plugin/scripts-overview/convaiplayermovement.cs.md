@@ -1,8 +1,21 @@
+---
+description: >-
+  The ConvaiPlayerMovement class provides essential functionality for
+  first-person character control in a Unity scene.
+---
+
 # ConvaiPlayerMovement.cs
+
+## Class Overview
 
 The `ConvaiPlayerMovement` script is designed for controlling the movement and camera rotation of a character in a Unity game using the CharacterController component. It provides a straightforward way to handle player input for walking, running, jumping, and looking around with the mouse. This script is essential for creating responsive and immersive player controls in your Unity projects.
 
-### Properties
+### **Requirements**
+
+* This class requires the GameObject to which it is attached to have a `CharacterController` component.
+* The script is designed for first-person player control.
+
+## Properties
 
 #### Movement Properties
 
@@ -50,41 +63,42 @@ The `ConvaiPlayerMovement` script is designed for controlling the movement and c
 * **Type:** bool
 * **Description:** Determines whether the character can move. When set to false, player input is ignored.
 
-### Methods
+## Functions&#x20;
 
-#### `Start()`
+1. `Start()`: Initializes the character controller and locks the cursor for player control.
+2. `Update()`: Main update function that handles cursor locking/unlocking, player movement, and player and camera rotation.
+3. `HandleCursorLocking()`: Unlocks the cursor when the ESC key is pressed and re-locks it when the left mouse button is pressed. Prevents locking when the mouse is over a UI element.
+4. `LockCursor()`: Locks the cursor for player control.
+5. `MovePlayer()`: Moves the player based on input, including walking, running, and jumping. Handles gravity and character movement.
+6. `RotatePlayerAndCamera()`: Rotates the player and camera based on mouse input. Handles both horizontal and vertical rotation.
 
-* **Description:** This method is called on Start and performs initial setup for character movement and camera control. It locks the cursor to provide a more immersive experience.
+## ConvaiPlayerMovement Script Functions:
 
-#### `Update()`
+### **`Start()`**
 
-* **Description:** This method is called on Update and handles player input for movement and camera rotation. It allows the player to switch between walking and running, jump, and look around with the mouse.
+This method is called when the script instance is being loaded. It initializes the character controller and locks the cursor to enable player control
 
-#### `SetupCharacter()`
+### **`Update()`**
 
-* **Description:** Initializes the `_characterController` by getting the CharacterController component attached to the GameObject.
+The `Update()` method is executed every frame. It handles cursor locking/unlocking, player movement, and player and camera rotation.
 
-#### `LockCursor()`
+### **`HandleCursorLocking()`**
 
-* **Description:** Locks the cursor to the center of the screen and hides it. This function is used to provide a clean and immersive gameplay experience.
+This private method manages cursor locking and unlocking. It unlocks the cursor when the ESC key is pressed and re-locks it when the left mouse button is pressed. It also prevents cursor locking when the mouse is over a UI element.
 
-#### `Jump()`
+### **`LockCursor()`**
 
-* **Description:** Handles character jumping. If the jump button is pressed (`"Jump"`) and the character is grounded, it applies an upward force to make the character jump.
+This static method is used to lock the cursor, making it invisible and confined to the game window, ensuring a smooth player control experience.
 
-#### `ApplyGravity()`
+### **`MovePlayer()`**
 
-* **Description:** Applies gravity to the character's vertical movement. If the character is not grounded, it simulates the effect of gravity.
+The `MovePlayer()` method handles player movement based on input, including walking, running, and jumping. It calculates the player's movement direction, handles jump, and applies gravity.
 
-#### `MovePlayer(bool isRunning)`
+### **`RotatePlayerAndCamera()`**
 
-* **Description:** Moves the character based on user input. It calculates the movement direction based on the character's forward and right vectors, as well as the user's input for walking or running.
+This method is responsible for rotating the player and the camera based on mouse input. It handles both vertical and horizontal rotation, controlling the player's view direction
 
-#### `RotatePlayerAndCamera()`
-
-* **Description:** Rotates both the player and the camera based on mouse input. It allows the player to look around in a first-person perspective. The camera's vertical rotation is limited to prevent over-rotation.
-
-### How to Use
+## How to Use
 
 To implement player movement and camera control in your Unity project using `ConvaiPlayerMovement`, follow these steps:
 

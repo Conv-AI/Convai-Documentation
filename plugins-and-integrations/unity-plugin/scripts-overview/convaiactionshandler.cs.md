@@ -8,23 +8,60 @@ Only go through this if you want to customize the behavior of the NPC. Only proc
 To understand the script in even more depth, please check out the comments in the script.
 {% endhint %}
 
-The ConvaiActionHandler script is responsible for handling the character specific actions settings. These specifically contain the actions that the character can perform. The script also parses the action responses received from the server and performs them in a sequence.
+## Class Overview
 
-#### Imports
+The `ConvaiActionsHandler` class is a component in Unity used to handle and execute a list of custom actions for a Convai NPC. It allows parsing and processing of user-defined actions, including animations and interactions.
+
+### Requirements
+
+* This class assumes the existence of a `ConvaiInteractablesData` object in the scene to provide global action settings.
+* The GameObject containing this script should have a `ConvaiNPC` component attached to it for NPC-related actions.
+
+## Properties
+
+* `actionMethods`: An array of `ActionMethod` objects, defining custom actions with names, animations, and choices.
+* `ActionConfig`: An instance of the `ActionConfig` class used to store action configuration data.
+
+### Hidden Fields
+
+* `_actionList`: A list that stores parsed actions to be executed.
+* `_actions`: A list of strings representing individual actions extracted from the input string.
+* `_currentNPC`: A reference to the `ConvaiNPC` component attached to the GameObject containing this script.
+* `_interactablesData`: A reference to the global action settings object, `ConvaiInteractablesData`, in the scene
+
+### Other Reference
+
+* `ActionMethod`: A serializable class used to define individual action methods with name, animation, and choice.
+* `ConvaiAction`: A private class used to represent a parsed action with a verb, target GameObject, and animation name.
+
+## Functions
+
+1. `Awake()`: Initializes the Convai Actions Handler, finding global settings and checking for a Convai NPC component.
+2. `Start()`: Sets up action configuration, including actions, characters, and objects, and starts playing the action list.
+3. `ParseActions(string actionsString)`: Parses a string of actions and matches them with defined Convai actions and global action settings.
+4. `PlayActionList()`: Manages playing actions from the action list using a coroutine.
+5. `DoAction(ConvaiAction action)`: Executes specific actions based on the `ActionChoice` enum.
+6. `AnimationActions(string animationName)`: Plays an animation for the Convai NPC with the provided animation name.
+7. `ActionMethod` (Serializable Class): Defines individual action methods with name, animation, and choice.
+8. `ConvaiAction` (Private Class): Represents a parsed action with a verb, target GameObject, and animation name.
+9. `Crouch()`: Handles the crouching action, including animation and collider adjustments.
+10. `MoveTo(GameObject target)`: Moves the Convai NPC to a target GameObject.
+11. `PickUp(GameObject target)`: Performs the pick-up action on a target GameObject.
+12. `Drop(GameObject target)`: Drops a target GameObject.
+13. `Jump()`: Initiates a jump action with a specified jump force.
+
+### Imports
 
 We will import Convai NPC Script which we will use to keep track of the current NPC by which the actions are supposed to be performed by.
 
 ```csharp
-using Convai.NPC;
-using Service;
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-
-using TMPro;
+using System.Linq;
+using Service;
 using UnityEngine;
+using UnityEngine.Serialization;
 ```
 
 #### ActionChoice

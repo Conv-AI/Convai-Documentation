@@ -34,7 +34,6 @@
 '32': i
 '33': o
 '34': 'n'
-description: Convai API and Plugin Documentation
 ---
 
 # Welcome
