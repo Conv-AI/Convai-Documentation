@@ -6,7 +6,7 @@ The ConvaiNPC and ConvaiGRPCAPI scripts look for GameObjects with Convai Chat UI
 
 ## Types of UI
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 ### ChatBox
 
@@ -14,7 +14,7 @@ The ConvaiNPC and ConvaiGRPCAPI scripts look for GameObjects with Convai Chat UI
 
 Both the user's and the character's transcripts are displayed one after other in a scrollable chat box.
 
-<figure><img src="../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
 ### Subtitle
 
@@ -22,7 +22,7 @@ Both the user's and the character's transcripts are displayed one after other in
 
 The user and character transcripts are displayed in the bottom like subtitles.
 
-<figure><img src="../../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
 
 ### Question-Answer
 
@@ -30,7 +30,7 @@ The user and character transcripts are displayed in the bottom like subtitles.
 
 The user's transcript is displayed in the top where as the character's transcript is displayed in the bottom.
 
-<figure><img src="../../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
 
 ### Mobile Optimised UI Styles
 
@@ -38,19 +38,19 @@ The user's transcript is displayed in the top where as the character's transcrip
 
 Identical to [#subtitle](convai-ui-prefabs.md#subtitle "mention") UI. Includes a button that can be pressed and held for the user to speak. Ideal for portrait orientation of screen.
 
-<figure><img src="../../../.gitbook/assets/image (3).png" alt="" width="328"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3).png" alt="" width="328"><figcaption></figcaption></figure>
 
 **Prefab Name**: Convai Transcript Canvas - Mobile QA
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt="" width="331"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2).png" alt="" width="331"><figcaption></figcaption></figure>
 
 **Prefab Name**: Convai Transcript Canvas - Mobile Chat
 
-<figure><img src="../../../.gitbook/assets/image (1).png" alt="" width="327"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt="" width="327"><figcaption></figcaption></figure>
 
-## [Convai Chat UI Handler Component](dynamic-ui-system.md)
+## [Convai Chat UI Handler Component](utilities/dynamic-ui-system.md)
 
-<figure><img src="../../../.gitbook/assets/image 2.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image 2.png" alt=""><figcaption></figcaption></figure>
 
 ### Functions to Know
 

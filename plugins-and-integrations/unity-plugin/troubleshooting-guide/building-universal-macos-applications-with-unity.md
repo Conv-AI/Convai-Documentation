@@ -19,7 +19,7 @@ The issue stems from the `grpc_csharp_ext.bundle`, which is crucial for networki
 * **For Intel Macs:** Use Standalone builds targeted specifically for the Intel architecture to ensure compatibility.
 * **For Apple Silicon Macs:** Prefer Standalone builds for the ARM64 framework for optimal performance, although Universal builds are also an option.
 
-<figure><img src="../../../.gitbook/assets/image (6) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (6) (2).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ### New Procedure for Universal Builds from Intel Macs
 
