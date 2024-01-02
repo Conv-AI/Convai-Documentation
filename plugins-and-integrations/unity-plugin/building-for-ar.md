@@ -39,7 +39,7 @@ The following processes will be performed:
 
 <figure><img src="../../.gitbook/assets/ARLogs (1).png" alt=""><figcaption></figcaption></figure>
 
-4. Open the " _Convai / Scenes / Convai Demo - AR_ " demo scene. If the TMP Importer window appears, click " **Import TMP Essentials** " to install TextMeshPro for UI text objects.
+4. Open the " _Convai / Scenes / Convai Demo - AR_ " demo scene. If the TMP Importer window appears ( It will appear if TMP Essentials is not installed in your project ), click " **Import TMP Essentials** " to install TextMeshPro Essentials for UI text objects.
 
 <figure><img src="../../.gitbook/assets/AutomaticallyImportTMPEssentials.png" alt=""><figcaption></figcaption></figure>
 
@@ -47,7 +47,11 @@ Alternatively, you can use the " _Window / TextMeshPro / Import TMP Essential Re
 
 <figure><img src="../../.gitbook/assets/ManualImportTMPEssentialsResources.png" alt=""><figcaption></figcaption></figure>
 
-5. Build your project by going to " _File/Build Settings/Build_ " Ensure that the " **Convai Demo - AR** " scene is included in the Scenes in Build section.
+5. After importing TMP Essentials, you can remove the empty GameObject in your scene that triggers the Prompt window to appear.
+
+<figure><img src="../../.gitbook/assets/TMPEssentialsPromptImportReminder.png" alt=""><figcaption></figcaption></figure>
+
+6. Build your project by going to " _File/Build Settings/Build_ " Ensure that the " **Convai Demo - AR** " scene is included in the Scenes in Build section.
 
 <figure><img src="../../.gitbook/assets/ARBuildSettings (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -57,7 +61,53 @@ Ensure you've set up your API Key. ( Convai / Convai Setup )
 
 Now everything is ready for testing. 🙂✅
 
+### Method 2 : Manual Setup&#x20;
 
+{% hint style="danger" %}
+Ensure you have the following packages installed in your project:
+
+* ARCore
+* URP (Universal Render Pipeline) - Recommended for optimization, though not mandatory
+{% endhint %}
+
+1. Double-click on " Convai/Convai Custom Unity Packages/ConvaiVRUpgrader.unitypackage "
+
+<figure><img src="../../.gitbook/assets/ConvaiARUpgrader (1).png" alt=""><figcaption></figcaption></figure>
+
+2. You'll see a warning that the settings will overwrite your project settings. You can either allow it by clicking " **Import** " or create a temporary project by clicking " **Switch Project** "
+
+<figure><img src="../../.gitbook/assets/VRUpgraderWarning (1).png" alt=""><figcaption></figcaption></figure>
+
+3. In the Import Unity Package window, review the assets to be imported and click " **Next** "
+
+<figure><img src="../../.gitbook/assets/ConvaiARUpgraderimport_1 (1).png" alt=""><figcaption></figcaption></figure>
+
+4. Select all settings to be changed in the Project Settings and complete the installation by clicking    " **Import** "
+
+<figure><img src="../../.gitbook/assets/ConvaiARUpgraderimport_2 (1).png" alt=""><figcaption></figcaption></figure>
+
+5. Open the " _Convai / Scenes / Convai Demo - AR_ " demo scene. If the TMP Importer window appears ( It will appear if TMP Essentials is not installed in your project ), click " **Import TMP Essentials** " to install TextMeshPro Essentials for UI text objects.
+
+<figure><img src="../../.gitbook/assets/AutomaticallyImportTMPEssentials.png" alt=""><figcaption></figcaption></figure>
+
+Alternatively, you can use the " _Window / TextMeshPro / Import TMP Essential Resources_ " to install it.
+
+<figure><img src="../../.gitbook/assets/ManualImportTMPEssentialsResources.png" alt=""><figcaption></figcaption></figure>
+
+6. After importing TMP Essentials, you can remove the empty GameObject in your scene that triggers the Prompt window to appear.
+
+<figure><img src="../../.gitbook/assets/TMPEssentialsPromptImportReminder.png" alt=""><figcaption></figcaption></figure>
+
+7. If you see 3D objects in pink, it's a shader issue. If you're using URP, convert the materials to URP by double-clicking on " _Convai / Convai Custom Unity Packages / ConvaiURPConverter_ " and importing all assets in the window that appears.
+
+<figure><img src="../../.gitbook/assets/ConvaiURPConverter.png" alt=""><figcaption></figcaption></figure>
+
+8. Ensure you've set up your API Key ( Convai / Convai Setup ).
+9. Build your project by going to " _File / Build Settings / Build_ " Ensure that the " **Convai Demo - AR** " scene is included in the Scenes in **Build** section.
+
+<figure><img src="../../.gitbook/assets/ARBuildSettings (1).png" alt=""><figcaption></figcaption></figure>
+
+Now everything is ready for testing. 🙂✅
 
 ## How to Add and Adjust Size Of My Own Character?
 
@@ -103,43 +153,3 @@ Creating this prefab variant is to prevent automatic scaling ( 1,1,1 ) of your p
 
 To avoid issues with scale adjustments, we added our character as a child to an empty parent object. For convenience, we created an empty prefab variant.
 {% endhint %}
-
-### Method 2 : Manual Setup&#x20;
-
-{% hint style="danger" %}
-Ensure you have the following packages installed in your project:
-
-* ARCore
-* URP (Universal Render Pipeline) - Recommended for optimization, though not mandatory
-{% endhint %}
-
-1. Double-click on " Convai/Convai Custom Unity Packages/ConvaiVRUpgrader.unitypackage "
-
-<figure><img src="../../.gitbook/assets/ConvaiARUpgrader (1).png" alt=""><figcaption></figcaption></figure>
-
-2. You'll see a warning that the settings will overwrite your project settings. You can either allow it by clicking " **Import** " or create a temporary project by clicking " **Switch Project** "
-
-<figure><img src="../../.gitbook/assets/VRUpgraderWarning (1).png" alt=""><figcaption></figcaption></figure>
-
-3. In the Import Unity Package window, review the assets to be imported and click " **Next** "
-
-<figure><img src="../../.gitbook/assets/ConvaiARUpgraderimport_1 (1).png" alt=""><figcaption></figcaption></figure>
-
-4. Select all settings to be changed in the Project Settings and complete the installation by clicking    " **Import** "
-
-<figure><img src="../../.gitbook/assets/ConvaiARUpgraderimport_2 (1).png" alt=""><figcaption></figcaption></figure>
-
-5. Open the " _Convai/Scenes/Convai Demo - AR_ " demo scene. If the TMP Importer window appears, click " **Import TMP Essentials** " to install TextMeshPro for UI text objects.
-
-<figure><img src="../../.gitbook/assets/AutomaticallyImportTMPEssentials.png" alt=""><figcaption></figcaption></figure>
-
-6. If you see 3D objects in pink, it's a shader issue. If you're using URP, convert the materials to URP by double-clicking on " _Convai / Convai Custom Unity Packages / ConvaiURPConverter_ " and importing all assets in the window that appears.
-
-<figure><img src="../../.gitbook/assets/ConvaiURPConverter.png" alt=""><figcaption></figcaption></figure>
-
-7. Ensure you've set up your API Key (Convai/Convai Setup).
-8. Build your project by going to " _File / Build Settings / Build_ " Ensure that the " **Convai Demo - AR** " scene is included in the Scenes in **Build** section.
-
-<figure><img src="../../.gitbook/assets/ARBuildSettings (1).png" alt=""><figcaption></figcaption></figure>
-
-Now everything is ready for testing. 🙂✅
