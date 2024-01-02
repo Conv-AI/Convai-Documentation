@@ -22,11 +22,11 @@ Select `Convai Lip Sync` to add the Lip Sync component.
 
 You can also select Add Components.
 
-<figure><img src="../../.gitbook/assets/image (271).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 Select the Lip-Sync checkmark and click Apply Changes.
 
-<figure><img src="../../.gitbook/assets/image (1) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 ## Step 2: Set up the Lip Sync Component
 
@@ -48,7 +48,7 @@ If your character's mouth seems not to be opening enough for a proper lip sync, 
 
 **For Ready Player Me models**, the type of lipsync will be `OVR` and the appropriate facial skinned mesh renderers for the Head will be `Renderer_Head` and the appropriate facial skinned mesh renderer for the Teeth will be `Renderer_Teeth`. There is no need for adding any of the other mesh renderers or bones.&#x20;
 
-<figure><img src="../../.gitbook/assets/image (271) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (271).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 The above process of assigning the skinned mesh renderer is not necessary. The `ConvaiLipSync.cs` script is capable of assigning the necessary skinned mesh renderers by itself if you have left the fields empty.

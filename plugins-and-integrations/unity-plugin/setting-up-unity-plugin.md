@@ -12,7 +12,13 @@ The file structure belongs to the Core version of the plugin downloaded from the
 
 In the Menu Bar, go the Convai > Convai Setup.
 
-<figure><img src="../../.gitbook/assets/image (34).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (275).png" alt=""><figcaption></figcaption></figure>
+
+Go to [convai.com](https://convai.com), and sign in to your Convai account. Signing in will redirect you to the Dashboard. From the dashboard, grab your API key.
+
+<figure><img src="../../.gitbook/assets/image (272).png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/image (273).png" alt=""><figcaption></figcaption></figure>
 
 Enter the API Key and click begin.
 
@@ -20,15 +26,15 @@ Enter the API Key and click begin.
 
 This will create an APIKey asset in the resources folder. This contains your API Key.&#x20;
 
-<figure><img src="../../.gitbook/assets/image (84).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (276).png" alt=""><figcaption></figcaption></figure>
 
-Click the Convai gRPC NPC GameObject and add the Character ID. Now you can converse with the character. The script is set up so that you have to get near to the character for them to hear you.
+Click the Convai NPC Amelia and add the Character ID (or you can keep the default character ID). You can get the character ID for your custom character from this page [create-character.md](../../convai-playground/character-creator-tool/create-character.md "mention"). Now you can converse with the character. The script is set up so that you have to go near the character for them to hear you.
 
-<figure><img src="../../.gitbook/assets/image (125).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (290).png" alt=""><figcaption></figcaption></figure>
 
-Now you can test out the Convai Streaming Demo Scene and talk to the Character Present there. Her name is Ellen, by the way, and she is a member of the Stellar Survey Corps.
+Now you can test out the Convai Demo Scene and talk to the character present there. Her name is Amelia and she loves hiking!
 
-<figure><img src="../../.gitbook/assets/image (178).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (287).png" alt=""><figcaption></figcaption></figure>
 
 You can open the Convai NPC Script to replicate or build on the script to create new NPCs.
 
