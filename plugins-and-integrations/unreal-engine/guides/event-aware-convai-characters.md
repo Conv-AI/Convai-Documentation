@@ -10,4 +10,4 @@ description: >-
 
 Let's assume the player steps into a region and wants the Convai Character to greet him. Let's have an event to detect player overlap within the region. So whenever the event gets fired the Covnai character knows that the player has arrived
 
-<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (2).png" alt=""><figcaption></figcaption></figure>
