@@ -7,7 +7,7 @@ If you want to make your Convai Plugin compatible with VR, you can do so in two 
 ### Method 1 : Automatic Setup
 
 {% hint style="success" %}
-Recommended for new projects
+Recommended for new projects.
 {% endhint %}
 
 {% hint style="danger" %}
@@ -46,7 +46,7 @@ Alternatively, you can use the " _Window / TextMeshPro / Import TMP Essential Re
 
 <figure><img src="../../.gitbook/assets/ManualImportTMPEssentialsResources.png" alt=""><figcaption></figcaption></figure>
 
-5. Build your project by going to " _File/Build Settings/Build_ " Ensure that the " **Convai Demo - VR** " scene is included in the Scenes in Build section.
+5. Build your project by going to " _File /Build Settings / Build_ " Ensure that the " **Convai Demo - VR** " scene is included in the Scenes in Build section.
 
 Now everything is ready for testing. 🙂✅
 
@@ -61,10 +61,10 @@ Ensure you have the following packages installed in your project:
 
 * OpenXR or Oculus XR
 * XR Interaction Toolkit
-* URP (Universal Render Pipeline) - Recommended for optimization, though not mandatory.
+* URP (Universal Render Pipeline)
 {% endhint %}
 
-1. Double-click on " _Convai/Convai Custom Unity Packages/ConvaiVRUpgrader.unitypackage_ "
+1. Double-click on " _Convai / Convai Custom Unity Packages / ConvaiVRUpgrader.unitypackage_ "
 
 <figure><img src="../../.gitbook/assets/ConvaiVRUpgrader.png" alt=""><figcaption></figcaption></figure>
 
@@ -76,11 +76,11 @@ Ensure you have the following packages installed in your project:
 
 <figure><img src="../../.gitbook/assets/ConvaiVRUpgraderimport_1.png" alt=""><figcaption></figcaption></figure>
 
-4. Select all settings to be changed in the Project Settings and complete the installation by clicking    " **Import** "
+4. In this window, select the project settings you want to import and complete the installation by clicking " **Import** ".
 
 <figure><img src="../../.gitbook/assets/ConvaiVRUpgraderimport_2.png" alt=""><figcaption></figcaption></figure>
 
-5. Open the " _Convai/Scenes/Convai Demo - VR_ " demo scene. If the TMP Importer window appears, click " **Import TMP Essentials** " to install TextMeshPro for UI text objects.
+5. Open the " _Convai / Scenes/ Convai Demo - VR_ " demo scene. If the TMP Importer window appears, click " **Import TMP Essentials** " to install TextMeshPro for UI text objects.
 
 <figure><img src="../../.gitbook/assets/AutomaticallyImportTMPEssentials.png" alt=""><figcaption></figcaption></figure>
 
