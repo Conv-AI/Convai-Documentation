@@ -1,12 +1,12 @@
 # Dynamic UI System
 
-### Overview
+## Overview
 
 The Dynamic UI system is a feature within the Convai Unity SDK that provides developers a robust system for in-game communication. This feature allows for displaying messages from characters and players and supports various UI components for chat, Q\&A sessions, subtitles, and custom UI types. This document will guide you through the integration, usage, and creation of custom UI types of the Dynamic UI feature in your Unity project.
 
-### Usage
+## Usage
 
-#### Accessing the Chat UI Handler
+### Accessing the Chat UI Handler
 
 To interact with the chat system, you need to reference the `ConvaiChatUIHandler` in your scripts. You can find the Transcript UI prefab in the Prefabs folder.&#x20;
 
@@ -26,7 +26,7 @@ private void OnEnable()
 }
 ```
 
-#### Sending Messages
+### Sending Messages
 
 Once you have a reference to the `ConvaiChatUIHandler`, you can send messages using the following methods:
 
@@ -40,7 +40,7 @@ _convaiChatUIHandler.SendPlayerText(input);
 
 * `input`: The string containing the player's message.
 
-**Sending Character Text**
+### **Sending Character Text**
 
 To send text as a character:
 

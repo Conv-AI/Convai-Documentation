@@ -4,22 +4,22 @@
 
 ### What's Changed
 
-* AR Support: Integrate Augmented Reality capabilities, allowing characters and environments to interact with the real world.&#x20;
-* VR Support: Implement Virtual Reality features to create a fully immersive experience.&#x20;
+* VR Support: Implement Virtual Reality features to create a fully immersive experience with the press of a button.&#x20;
+* AR Support: Integrate Augmented Reality capabilities, allowing characters and environments to interact with you in the real world with the press of a button.&#x20;
 * Settings Panel: Introduce a comprehensive settings panel that allows users to customize their experience.
 * Microphone Test System: Incorporate a microphone testing feature to ensure optimal audio input quality.&#x20;
 * Notification System: Implement a robust notification system to inform users of in-game events - specifically microphone-based issues.
-* Input Manager: Develop an advanced input management system that supports various input devices such as keyboards, gamepads, and touchscreens.
+* Input Manager: Develop a custom input management system that supports various input devices such as keyboards, gamepads, and touchscreens using Unity's new Input System.&#x20;
 
 ### Bugs and Improvement
 
 * Fixed: Head Tracking Doesn’t Work Without Action Component issue fixed.
-* Improvement: Added support for a customizable and dynamic Chatbox
-* Improvement: Improved Lip-Sync Smoothing and audio-visual synchronization
-* Improvement: Implement Action Events and Event Callbacks
-* Improvement: Improved Logging System
-* Improvement: Added ability to interrupt Character Response with Voice Interruption
-* Improvement: Improved mobile platform transcription UI
+* Improvement: Added support for a customizable and dynamic Chatbox.
+* Improvement: Improved Lip-Sync Smoothing and audio-visual synchronization.
+* Improvement: Implement Action Events and Event Callbacks.
+* Improvement: Improved Logging System.
+* Improvement: Added ability to interrupt Character Response with Voice Interruption.
+* Improvement: Improved mobile platform transcription UI.
 
 ## Version 2.0.0
 
