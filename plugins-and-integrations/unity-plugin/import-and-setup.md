@@ -1,7 +1,5 @@
 ---
-description: >-
-  Follow these steps to import and configure the nightly version of the Unity
-  SDK.
+description: Follow these steps to import and configure the Unity SDK.
 ---
 
 # Import and Setup (nightly)

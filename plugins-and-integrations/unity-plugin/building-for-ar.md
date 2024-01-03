@@ -51,7 +51,7 @@ Alternatively, you can use the " _Window / TextMeshPro / Import TMP Essential Re
 
 <figure><img src="../../.gitbook/assets/TMPEssentialsPromptImportReminder.png" alt=""><figcaption></figcaption></figure>
 
-6. Build your project by going to " _File/Build Settings/Build_ " Ensure that the " **Convai Demo - AR** " scene is included in the Scenes in Build section.
+6. Build your project by going to " _File / Build Settings / Build_ " Ensure that the " **Convai Demo - AR** " scene is included in the Scenes in Build section.
 
 <figure><img src="../../.gitbook/assets/ARBuildSettings (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -70,7 +70,7 @@ Ensure you have the following packages installed in your project:
 * URP (Universal Render Pipeline) - Recommended for optimization, though not mandatory
 {% endhint %}
 
-1. Double-click on " Convai/Convai Custom Unity Packages/ConvaiVRUpgrader.unitypackage "
+1. Double-click on " Convai / Convai Custom Unity Packages / ConvaiVRUpgrader.unitypackage "
 
 <figure><img src="../../.gitbook/assets/ConvaiARUpgrader (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -128,7 +128,7 @@ If you've created a Ready Player Me character on convai.com playground and want 
 <figure><img src="../../.gitbook/assets/AddYourCharacter.png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
-Use the " [Importing a character from Convai Playground](importing-a-character-from-convai-playground.md) " guide to add your character to your project.
+Use the " [importing-a-character-from-convai-playground.md](importing-a-character-from-convai-playground.md "mention") " guide to add your character to your project.
 {% endhint %}
 
 6. After adding your character, click on your character.

@@ -30,5 +30,8 @@ Other platforms will be tested and updated shortly.
 | Tested Platform | Scripting Backend | API Level                      |
 | --------------- | ----------------- | ------------------------------ |
 | Windows         | MONO              | .NET Standard 2.1 or .NET 4.x+ |
+| MacOS           | MONO              | .NET Standard 2.1 or .NET 4.x+ |
+| WebGL           | MONO              | .NET Standard 2.1 or .NET 4.x+ |
 | Android         | IL2CPP            | .NET 4.x                       |
 | Oculus          | IL2CPP            | .NET 4.x                       |
+

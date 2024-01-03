@@ -161,7 +161,7 @@ public enum UIType
 }
 ```
 
-5. Now you can set your custom UI type as the active UI from the Settings Panel (link to Settings panel page by [Kaan Akay](https://app.gitbook.com/u/7lmTPHpjkSXuPBUANxZYt5XYrIM2 "mention"))
+5. Now you can set your custom UI type as the active UI from the Settings Panel [settings-panel.md](settings-panel.md "mention").
 
 By following these steps, you can integrate your custom UI type into the Dynamic Chatbox system and switch between different UI types at runtime.
 
