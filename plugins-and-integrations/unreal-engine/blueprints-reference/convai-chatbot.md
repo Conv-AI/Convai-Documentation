@@ -51,7 +51,7 @@ description: Actor component for the AI character
 
 ### Events
 
-<figure><img src="../../../.gitbook/assets/image (164).png" alt=""><figcaption><p><strong>Convai Chatbot</strong> component events schematic</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (195).png" alt=""><figcaption><p><strong>Convai Chatbot</strong> component events schematic</p></figcaption></figure>
 
 ### Event Names and Description.&#x20;
 

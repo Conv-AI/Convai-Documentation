@@ -6,4 +6,4 @@ To enable it, head to the NPC GameObject and scroll down to the OVR Lip Sync Con
 
 &#x20;
 
-<figure><img src="../../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (49).png" alt=""><figcaption></figcaption></figure>

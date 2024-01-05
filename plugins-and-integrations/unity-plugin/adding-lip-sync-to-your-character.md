@@ -12,21 +12,21 @@ Convai's Lip-Sync uses [**OVR**](https://developer.oculus.com/documentation/unit
 
 Select the character GameObject and click Add Component in the Inspector.
 
-<figure><img src="../../.gitbook/assets/image (228).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (259).png" alt=""><figcaption></figcaption></figure>
 
 Select `Convai Lip Sync` to add the Lip Sync component.
 
-<figure><img src="../../.gitbook/assets/image (227).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (258).png" alt=""><figcaption></figcaption></figure>
 
 ### Using Convai NPC Component
 
 You can also select Add Components.
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 Select the Lip-Sync checkmark and click Apply Changes.
 
-<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 ## Step 2: Set up the Lip Sync Component
 
@@ -38,7 +38,7 @@ In the new component, select the type of lipsync, and assign the Skinned Mesh Re
 Currently, only Reallusion Plus and OVR are supported as a type of lip sync.
 {% endhint %}
 
-<figure><img src="../../.gitbook/assets/image (226).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (257).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 If your character's mouth seems not to be opening enough for a proper lip sync, this could indicate an issue with the animator or animations.
@@ -48,7 +48,7 @@ If your character's mouth seems not to be opening enough for a proper lip sync, 
 
 **For Ready Player Me models**, the type of lipsync will be `OVR` and the appropriate facial skinned mesh renderers for the Head will be `Renderer_Head` and the appropriate facial skinned mesh renderer for the Teeth will be `Renderer_Teeth`. There is no need for adding any of the other mesh renderers or bones.&#x20;
 
-<figure><img src="../../.gitbook/assets/image (271).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (277).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 The above process of assigning the skinned mesh renderer is not necessary. The `ConvaiLipSync.cs` script is capable of assigning the necessary skinned mesh renderers by itself if you have left the fields empty.

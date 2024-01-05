@@ -4,7 +4,7 @@ description: This problem arises when ConvaiOVRLipSync is not added to the proje
 
 # Convai Module Not Found
 
-<figure><img src="../../../.gitbook/assets/image (219).png" alt=""><figcaption><p>Convai not found </p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (252).png" alt=""><figcaption><p>Convai not found </p></figcaption></figure>
 
 ### There are two ways to resolve this issue.
 

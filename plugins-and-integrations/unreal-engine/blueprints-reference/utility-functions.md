@@ -4,7 +4,7 @@
 
 * **Description:** Create a new character and get the character ID for it.
 
-<figure><img src="../../../.gitbook/assets/image (114).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (145).png" alt=""><figcaption></figcaption></figure>
 
 **Inputs:**
 
@@ -28,7 +28,7 @@ _Nothing is returned, check logs for details on why it failed._
 
 * **Description:** Get a list of character IDs belonging to the user.
 
-<figure><img src="../../../.gitbook/assets/image (107).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (138).png" alt=""><figcaption></figcaption></figure>
 
 **Outputs:**
 
@@ -44,7 +44,7 @@ _Nothing is returned, check logs for details on why it failed._
 
 * **Description:** Fetch all details of a character including backstory, voice, etc.
 
-<figure><img src="../../../.gitbook/assets/image (93).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (124).png" alt=""><figcaption></figcaption></figure>
 
 **Inputs:**
 
@@ -68,7 +68,7 @@ _Nothing is returned, check logs for details on why it failed._
 
 * **Description:** Update a particular character.
 
-<figure><img src="../../../.gitbook/assets/image (85).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (116).png" alt=""><figcaption></figcaption></figure>
 
 **Inputs:**
 

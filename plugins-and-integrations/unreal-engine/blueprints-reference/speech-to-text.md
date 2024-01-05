@@ -4,7 +4,7 @@
 
 * **Description:** Transcribes the provided audio.
 
-<figure><img src="../../../.gitbook/assets/image (158).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (189).png" alt=""><figcaption></figcaption></figure>
 
 **Inputs:**
 
@@ -24,7 +24,7 @@ _Nothing is returned, check logs for details on why it failed._
 
 * **Description:** Transcribes the provided audio file.
 
-<figure><img src="../../../.gitbook/assets/image (199).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (230).png" alt=""><figcaption></figcaption></figure>
 
 **Inputs:**
 

@@ -16,7 +16,7 @@ Please note that the action section discussed here is specifically for using act
 
 Let's examine the Actions interface, and then explore how to assign actions to your characters.
 
-<figure><img src="../../.gitbook/assets/image (221).png" alt=""><figcaption><p>Action Dashboard</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (250).png" alt=""><figcaption><p>Action Dashboard</p></figcaption></figure>
 
 #### Character without Actions
 
@@ -27,10 +27,10 @@ Let us prompt the character, and observe their response before enabling any spec
 ### Adding Actions
 
 * Activate the 'Enable Action Generation' feature\
-  ![](<../../.gitbook/assets/image (223).png>)
+  ![](<../../.gitbook/assets/image (254).png>)
 *   Add your preferred action
 
-    <figure><img src="../../.gitbook/assets/image (224).png" alt=""><figcaption><p>Adding Action</p></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (255).png" alt=""><figcaption><p>Adding Action</p></figcaption></figure>
 * Click the 'Update' button to refresh your character, then prompt it to execute the chosen action.
 
 <figure><img src="../../.gitbook/assets/ezgif.com-video-to-gif (1).gif" alt=""><figcaption><p>Response with Actions Enabled</p></figcaption></figure>
@@ -40,7 +40,7 @@ Let us prompt the character, and observe their response before enabling any spec
 *   Add Further Actions to Your Character and click 'Update'\
 
 
-    <figure><img src="../../.gitbook/assets/image (225).png" alt=""><figcaption><p>Adding further Actions</p></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (256).png" alt=""><figcaption><p>Adding further Actions</p></figcaption></figure>
 
 
 *   Prompt your complex action\

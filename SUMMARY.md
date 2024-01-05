@@ -35,7 +35,7 @@
   * [Setting Up Unity Plugin](plugins-and-integrations/unity-plugin/setting-up-unity-plugin.md)
   * [Utilities](plugins-and-integrations/unity-plugin/utilities/README.md)
     * [Dynamic UI System](plugins-and-integrations/unity-plugin/utilities/dynamic-ui-system.md)
-    * [Convai UI Prefabs](plugins-and-integrations/unity-plugin/convai-ui-prefabs.md)
+    * [Convai UI Prefabs](plugins-and-integrations/unity-plugin/utilities/convai-ui-prefabs.md)
     * [Input Management](plugins-and-integrations/unity-plugin/utilities/input-management.md)
     * [Notification System](plugins-and-integrations/unity-plugin/utilities/notification-system.md)
     * [Settings Panel](plugins-and-integrations/unity-plugin/utilities/settings-panel.md)

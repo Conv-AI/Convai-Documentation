@@ -2,11 +2,11 @@
 
 Our plugin has various scripts and dependencies that use Newtonsoft Json. If Newtonsoft Json is missing from the plugin, it could lead to a large number of errors as shown below:
 
-<figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (33).png" alt=""><figcaption></figcaption></figure>
 
 Ensure that NewtonSoft.Json is present in your packages. Go to your project folder.&#x20;
 
-<figure><img src="../../../.gitbook/assets/image (185).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (216).png" alt=""><figcaption></figcaption></figure>
 
 Then navigate to Packages folder. In the Packages folder. Click on manifest.json. A json file containing the project dependacies should open up.
 

@@ -22,11 +22,11 @@ The actions version of the plugin is a fork of the RPM Version of the plugin. Th
 
 After setting it up, add the script name ConvaiActionsHandler.cs to the GameObject. This script keeps track of all the actions that the character can do along with an enum that is used internally to trigger the functions corresponding to the actions.&#x20;
 
-<figure><img src="../../.gitbook/assets/image (22).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (53).png" alt=""><figcaption></figcaption></figure>
 
 Add the ConvaiGlobalActionSettings.cs to an empty GameObject in the scene. This script will contain all the interactable objects and characters in the scene.
 
-<figure><img src="../../.gitbook/assets/image (23).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (54).png" alt=""><figcaption></figcaption></figure>
 
 Add the following fields:
 
@@ -129,11 +129,11 @@ Add the Function that the action will be doing at the end.&#x20;
 
 Now, add the corresponding animation to the Animator. Take note of the animation state.
 
-<figure><img src="../../.gitbook/assets/image (37).png" alt=""><figcaption><p>Add the animation for the new action.</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (68).png" alt=""><figcaption><p>Add the animation for the new action.</p></figcaption></figure>
 
 Finally, in the Action Methods add the action information.
 
-<figure><img src="../../.gitbook/assets/image (175).png" alt=""><figcaption><p>Add the new action information to the action methods array.</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (206).png" alt=""><figcaption><p>Add the new action information to the action methods array.</p></figcaption></figure>
 
 {% hint style="info" %}
 If your action is cosmetic and is only an animation, you do not need to edit the code. Simply select the Action Choice `None`.

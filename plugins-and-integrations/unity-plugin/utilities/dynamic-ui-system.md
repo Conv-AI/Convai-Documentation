@@ -55,7 +55,7 @@ _convaiChatUIHandler.SendCharacterText(characterName, currentResponseAudio.Audio
 
 ## Adding Custom UI Types to the Dynamic Chatbox
 
-While the Dynamic UI system within the [SDK provides several pre-built UI types](../convai-ui-prefabs.md), you may want to create a custom UI that better fits the style and needs of your game and it designed to be extensible, allowing developers to add their custom UI types. This is achieved by inheriting from the `ChatUIBase` class and implementing the required methods. The `ConvaiChatUIHandler` manages the different UI types and provides a system to switch between them.
+While the Dynamic UI system within the [SDK provides several pre-built UI types](convai-ui-prefabs.md), you may want to create a custom UI that better fits the style and needs of your game and it designed to be extensible, allowing developers to add their custom UI types. This is achieved by inheriting from the `ChatUIBase` class and implementing the required methods. The `ConvaiChatUIHandler` manages the different UI types and provides a system to switch between them.
 
 ### Creating a Custom UI Class
 

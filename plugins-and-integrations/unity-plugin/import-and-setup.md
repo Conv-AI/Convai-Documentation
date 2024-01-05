@@ -22,12 +22,12 @@ The file structure belongs to the nightly version of the plugin downloaded from 
 3. Verify that your project uses Unity 2022.3.0f1 LTS or later (check the Pre-Requisites section of the documentation).
 4. Open your project.
 5. &#x20;Select **Assets > Import Package > Custom Package.**\
-   ![](<../../.gitbook/assets/image (68).png>)
+   ![](<../../.gitbook/assets/image (99).png>)
 6. In the file explorer, select the Convai Unity package. \
    The filename is similar to `ConvaiforUnity_vX.Y.Z.unitypackage`. X, Y, and Z are numbers containing the version information of the plugin.
 7. Click **Import.**&#x20;
 8. When the Import begins, a prompt for using the new Unity Input System will appear. Press **Yes**.\
-   ![](../../.gitbook/assets/image.png)
+   ![](<../../.gitbook/assets/image (1).png>)
 9. The project will automatically restart. After the project is restarted, you need to import the package in the same way.
 10. If you are using a Unity Version pre-2022.3.0f1, Disable Assembly Version Validation (use this troubleshooting page: [enabled-assembly-validation.md](troubleshooting-guide/enabled-assembly-validation.md "mention"))
 11. Verify there were no compiler errors.&#x20;
@@ -44,6 +44,6 @@ After importing, by default, the Convai folder will be in your project. It shoul
 The file structure belongs to the Core version of the plugin downloaded from the documentation.
 {% endhint %}
 
-<figure><img src="../../.gitbook/assets/image (289).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (295).png" alt=""><figcaption></figcaption></figure>
 
 Open the Convai Streaming Demo scene in the Scenes folder you'll see a Scene setup with Convai Tools and a Default character (named Ellen) with whom you can converse. This will not work right now, since you have not added the API key yet. Continue to see how you can talk to this character and set up your own character.

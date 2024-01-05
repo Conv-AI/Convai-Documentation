@@ -4,7 +4,7 @@
 
 *   **Description:** Creates audio for the corresponding text.
 
-    <figure><img src="../../../.gitbook/assets/image (106).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/image (137).png" alt=""><figcaption></figcaption></figure>
 
 
 

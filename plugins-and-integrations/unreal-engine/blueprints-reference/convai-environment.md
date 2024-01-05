@@ -12,7 +12,7 @@ description: >-
 A **Convai Environment** object must have a **Main Character** set to be considered valid.
 {% endhint %}
 
-<figure><img src="../../../.gitbook/assets/image (209).png" alt=""><figcaption><p><strong>Convai Environment class</strong> blueprint functions schematic - Omitting some functions for improved visibility.</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (240).png" alt=""><figcaption><p><strong>Convai Environment class</strong> blueprint functions schematic - Omitting some functions for improved visibility.</p></figcaption></figure>
 
 ## Functions
 

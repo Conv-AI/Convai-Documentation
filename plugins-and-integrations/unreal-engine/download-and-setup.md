@@ -46,7 +46,7 @@ Before getting started with plugin its recommended to install Visual Studio, by 
 
     <div align="left">
 
-    <figure><img src="../../.gitbook/assets/image (99).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (130).png" alt=""><figcaption></figcaption></figure>
 
     </div>
 5. Restart Unreal Engine.&#x20;
@@ -60,7 +60,7 @@ Before getting started with plugin its recommended to install Visual Studio, by 
 
     <div align="left">
 
-    <figure><img src="../../.gitbook/assets/image (165).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (196).png" alt=""><figcaption></figcaption></figure>
 
     </div>
 4. Paste the API key into the **API Key** field.

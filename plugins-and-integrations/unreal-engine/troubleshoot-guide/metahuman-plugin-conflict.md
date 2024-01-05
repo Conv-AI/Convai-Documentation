@@ -6,7 +6,7 @@ description: >-
 
 # MetaHuman plugin conflict
 
-<figure><img src="../../../.gitbook/assets/image (220).png" alt=""><figcaption><p>MetaHuman Plugin</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (253).png" alt=""><figcaption><p>MetaHuman Plugin</p></figcaption></figure>
 
 ### Steps to resolve this error: -
 
