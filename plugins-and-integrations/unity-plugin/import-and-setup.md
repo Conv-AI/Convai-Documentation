@@ -45,5 +45,3 @@ The file structure belongs to the Core version of the plugin downloaded from the
 {% endhint %}
 
 <figure><img src="../../.gitbook/assets/image (295).png" alt=""><figcaption></figcaption></figure>
-
-Open the Convai Streaming Demo scene in the Scenes folder you'll see a Scene setup with Convai Tools and a Default character (named Ellen) with whom you can converse. This will not work right now, since you have not added the API key yet. Continue to see how you can talk to this character and set up your own character.
