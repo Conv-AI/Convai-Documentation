@@ -28,6 +28,6 @@ After packaging your game, if you notice any crash or microphone not working the
 <string>Your custom message explaining why Convai needs microphone access</string>
 ```
 
-<figure><img src="../../.gitbook/assets/image (20).png" alt=""><figcaption><p>Example Info.plist after adding the microphone permission lines</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (20) (1).png" alt=""><figcaption><p>Example Info.plist after adding the microphone permission lines</p></figcaption></figure>
 
 3. Save the changes to the `Info.plist` file.

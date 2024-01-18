@@ -78,7 +78,7 @@ Once the platform conversion is complete:
     <figure><img src="../../.gitbook/assets/image (300).png" alt=""><figcaption></figcaption></figure>
 3. A web page with the WebGL version of the game will open. Allow microphone access when prompted.
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (23).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 First build may take some time.\

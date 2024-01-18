@@ -1,140 +1,151 @@
 ---
 description: >-
-  Follow these instructions to enable actions for your Convai-powered
-  characters.
+  Follow this guide on setting up character interactions, where we will walk you
+  through the process of incorporating actions into your Convai-powered NPC
 ---
 
 # Adding Actions to your Character
 
-{% hint style="danger" %}
-This feature is currently experimental and can misbehave. You are free to try it out and leave us any feedback.
+## Setting Up Action Configurations
+
+1. Select the Convai NPC character from the hierarchy.
+2. Scroll down to the ConvaiNPC script attached to your character.
+3. Click the "Add Component" button.
+
+<figure><img src="../../.gitbook/assets/image.png" alt="" width="438"><figcaption></figcaption></figure>
+
+4. Use the checkbox to add the action script to the NPC Actions.
+5. Click "Apply Changes" to confirm.
+
+<figure><img src="../../.gitbook/assets/image (1).png" alt="" width="563"><figcaption></figcaption></figure>
+
+## Pre-defined Actions
+
+Convai offers predefined actions for a quick start.
+
+1. Click the "+" button to add a new action.
+2. From the dropdown menu, select "Move To."
+
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+3. Enter the action name as "Move To" (the name doesn't have to match the action choice name).
+4. Leave the Animation Name field empty for now.
+
+Repeat these steps to add more actions like "Pickup" and "Drop" etc.
+
+### Adding an Object in the Scene
+
+1. Add any object into the scene—a sphere, a cube, a rock, etc.—that can be interacted with
+2. Resize and place the object in your scene.
+
+<figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+
+### Adding the Convai Interactables Data Script
+
+1. Create an empty GameObject and name it "Convai Interactables."![](<../../.gitbook/assets/image (7).png>)
+2. Attach the Convai Interactables Data script to this GameObject.
+3. Add characters and objects to the script by clicking the "+" button and attaching the corresponding GameObjects.
+
+<div align="left">
+
+<figure><img src="../../.gitbook/assets/image (6).png" alt="" width="563"><figcaption></figcaption></figure>
+
+</div>
+
+### Test the Setup
+
+1. Click "Play" to start the scene.
+2. Ask the NPC, "Bring me the Box."&#x20;
+3. If setup properly, the NPC should walk upto the box and bring it to you
+
+{% hint style="warning" %}
+This feature is currently experimental and can misbehave. Feel free to try it out and leave us any feedback.
 {% endhint %}
 
-{% hint style="info" %}
-[**Download the Actions Version of our plugin from this link**](https://drive.google.com/file/d/1wWyecai-srBuzPrYT7FeeeW-Pk\_ifcJU/view)
-{% endhint %}
+## Adding Custom Actions to Your Unity NPC in Convai
 
-The actions version of the plugin is a fork of the RPM Version of the plugin. This means that you can easily import characters and play around with them. To use custom characters with the actions version, first set up the character with Convai.
+### Introduction
 
-{% content-ref url="importing-custom-characters.md" %}
-[importing-custom-characters.md](importing-custom-characters.md)
-{% endcontent-ref %}
+Make your NPC perform custom actions like dancing.
 
-After setting it up, add the script name ConvaiActionsHandler.cs to the GameObject. This script keeps track of all the actions that the character can do along with an enum that is used internally to trigger the functions corresponding to the actions.&#x20;
+### Action that Only Requires an Animation
 
-<figure><img src="../../.gitbook/assets/image (53).png" alt=""><figcaption></figcaption></figure>
+1.  Locate the dance animation file within our plugin.
 
-Add the ConvaiGlobalActionSettings.cs to an empty GameObject in the scene. This script will contain all the interactable objects and characters in the scene.
+    <figure><img src="../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+2. Incorporate this animation into your NPC's actions.
 
-<figure><img src="../../.gitbook/assets/image (54).png" alt=""><figcaption></figcaption></figure>
+### Setting Up the Animator Controller
 
-Add the following fields:
+1. Open the Animator Controller from the Inspector window.
+2.  Drag and drop the dance animation onto the controller, creating a new node named "Dancing."
 
-<table><thead><tr><th width="238.5">Field</th><th>Description</th></tr></thead><tbody><tr><td>Characters<br>(in <code>Convai Global Action Settings</code>)</td><td>Characters that are present in the scene.<br>Add the GameObject of the Character and the Description of the Character.</td></tr><tr><td>Objects<br>(in <code>Convai Global Action Settings</code>)</td><td>Interactable Objects that are present in the scene. <br>Add the GameObject of the Interactable Object and the Description of the object.</td></tr><tr><td>Action Methods<br>(in <code>Convai Actions Handler</code>)</td><td><p>Actions that can be performed by the character. </p><p>Add the ActionChoice describing the action and the name of the animation state corresponding to the action (the animation must be present in the animator). </p></td></tr></tbody></table>
+    <figure><img src="../../.gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
 
+### Adding custom Animation Action
 
+1. Go to the Action Handler Script attached to your Convai NPC.
+2. Add a new action named "Dancing."&#x20;
+3. In the Animation Name field, enter "Dancing" (it must exactly match the Animator Controller node name).
+4. Leave the enum as "None."
 
-## Adding Custom Actions
+<figure><img src="../../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
 
-To add custom actions, edit the ConvaiActionsHandler.cs script.
+### Testing the Custom Action
 
-{% hint style="info" %}
-If your action is cosmetic and is only an animation, you do not need to edit the code. Simply select the Action Choice `None`.
-{% endhint %}
+1. Click "Play" to start the scene.
+2. Instruct the NPC, "Show me a dance move," and the NPC should start dancing.
 
-Add the `ActionChoice` enum at the beginning to identify the action in script.
+## Creating Complex Custom Actions in Unity with Convai: Throwing a Rock
 
-{% code lineNumbers="true" %}
-```csharp
-// STEP 1: Add the enum for your custom action here. 
-public enum ActionChoice
-{
-    NONE,
-    JUMP,
-    CROUCH,
-    MOVE_TO,
-    PICK_UP,
-    DROP,
-    DANCE,
-    // add your action choice enum here.
-}
-```
-{% endcode %}
+### Introduction
 
-Add the Function call corresponding to the action and the `ActionChoice` enum in the switch case in the `DoActions()` function.
+Adding advanced custom actions, such as a throw action, to your NPC.
 
-```csharp
-public IEnumerator DoAction(ConvaiAction action)
-{
-    // STEP 2: Add the function call for your action here corresponding to your enum.
-    //         Remember to yield until its return if it is a Enumerator function.
+### Animation Requirement
 
-    switch (action.verb)
-    {
-        case ActionChoice.MOVE_TO:
+1. Grab a [throw animation from Mixamo](https://www.mixamo.com/#/?page=1\&query=throw) or anywhere you like.
+2. Import it into Unity.
 
-            yield return MoveTo(action.target);
+### Setting Up the Animator Controller
 
-            break;
+1. Drag and drop the throw animation onto the controller, creating a new node named "Throwing." (Follow steps in [#action-that-only-requires-an-animation](adding-actions-to-your-character.md#action-that-only-requires-an-animation "mention"))
 
-        case ActionChoice.PICK_UP:
+### Action Handler Script Setup
 
-            yield return PickUp(action.target);
+1.  Add the "Throw" enum to the script.
 
-            break;
+    <figure><img src="../../.gitbook/assets/image (13).png" alt=""><figcaption></figcaption></figure>
+2.  In the "Do Action" function, add a switch case for the throw action.&#x20;
 
-        case ActionChoice.DROP:
+    <figure><img src="../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
+3.  Define the "Throw()" function.&#x20;
 
-            Drop(action.target);
+    <figure><img src="../../.gitbook/assets/image (19).png" alt=""><figcaption></figcaption></figure>
 
-            break;
+### Adding the Throw Action
 
-        case ActionChoice.DANCE:
+1. Add a new action named "Throw" and select the "Throw" enum.&#x20;
+2.  Leave the animation name field empty.&#x20;
 
-            yield return Dance();
+    <figure><img src="../../.gitbook/assets/image (21).png" alt=""><figcaption></figcaption></figure>
 
-            break;
+### Adding the Object (Rock) to the Convai Interactables Data script
 
-        case ActionChoice.JUMP:
+1. Add any rock prefab into the scene.
+2. Add the rock to the Convai Interactable Data script.
 
-            Jump();
+### Adding a location to Convai Interactables Data script
 
-            break;
+1. Add a stage/new location in the ground of the scene.
+2.  Add that new location game object in the Convai Interactable Data.
 
-        case ActionChoice.CROUCH:
+    <figure><img src="../../.gitbook/assets/image (22).png" alt=""><figcaption></figcaption></figure>
 
-            yield return Crouch();
+### Testing the Complex Action
 
-            break;
+1. Click "Play" to start the scene.
+2. Instruct the NPC, "Pick up the rock and throw it from the stage."
+3. If everything is set up properly, the NPC should pick up the rock and throw it from the stage.&#x20;
 
-        // Add a new case with the ActionChoice Enum.
-        // Call the function in this Case.
-
-        case ActionChoice.NONE:
-
-            yield return AnimationActions(action.animation);
-
-            break;
-
-        default:
-
-            break;
-    }
-
-    yield return null;
-}
-```
-
-Add the Function that the action will be doing at the end.&#x20;
-
-Now, add the corresponding animation to the Animator. Take note of the animation state.
-
-<figure><img src="../../.gitbook/assets/image (68).png" alt=""><figcaption><p>Add the animation for the new action.</p></figcaption></figure>
-
-Finally, in the Action Methods add the action information.
-
-<figure><img src="../../.gitbook/assets/image (206).png" alt=""><figcaption><p>Add the new action information to the action methods array.</p></figcaption></figure>
-
-{% hint style="info" %}
-If your action is cosmetic and is only an animation, you do not need to edit the code. Simply select the Action Choice `None`.
-{% endhint %}
+***

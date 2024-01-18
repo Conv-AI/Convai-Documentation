@@ -27,7 +27,7 @@ The file structure belongs to the nightly version of the plugin downloaded from 
    The filename is similar to `ConvaiforUnity_vX.Y.Z.unitypackage`. X, Y, and Z are numbers containing the version information of the plugin.
 7. Click **Import.**&#x20;
 8. When the Import begins, a prompt for using the new Unity Input System will appear. Press **Yes**.\
-   ![](<../../.gitbook/assets/image (1).png>)
+   ![](<../../.gitbook/assets/image (1) (1).png>)
 9. The project will automatically restart. After the project is restarted, you need to import the package in the same way.
 10. If you are using a Unity Version pre-2022.3.0f1, Disable Assembly Version Validation (use this troubleshooting page: [enabled-assembly-validation.md](troubleshooting-guide/enabled-assembly-validation.md "mention"))
 11. Verify there were no compiler errors.&#x20;
