@@ -32,6 +32,7 @@
     * [Jaw Bone in Avatar is not Free](plugins-and-integrations/unity-plugin/troubleshooting-guide/jaw-bone-in-avatar-is-not-free.md)
     * [macOS Permission Issues](plugins-and-integrations/unity-plugin/troubleshooting-guide/macos-permission-issues.md)
     * [Building Universal macOS Applications with Unity](plugins-and-integrations/unity-plugin/troubleshooting-guide/microphone-permission-issue-on-intel-macs-with-universal-builds.md)
+    * [Player Falling and Input Manager Error](plugins-and-integrations/unity-plugin/troubleshooting-guide/player-falling-and-input-manager-error.md)
   * [Setting Up Unity Plugin](plugins-and-integrations/unity-plugin/setting-up-unity-plugin.md)
   * [Utilities](plugins-and-integrations/unity-plugin/utilities/README.md)
     * [Dynamic UI System](plugins-and-integrations/unity-plugin/utilities/dynamic-ui-system.md)

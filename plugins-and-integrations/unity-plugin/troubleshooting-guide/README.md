@@ -8,6 +8,12 @@ A. Please check if there are any errors in the console. Unity needs to be able t
 
 
 
+#### Q. Player Falling and Input Manager Error.
+
+A.  [player-falling-and-input-manager-error.md](player-falling-and-input-manager-error.md "mention")
+
+
+
 #### Q. There are a lot of errors on my console.
 
 A. Primarily, three issues cause errors in the console that can stem from the Convai Unity Plugin. You can use the links below to fix them quickly.&#x20;
@@ -39,6 +45,12 @@ A. If we are using OVR with our models, we might need to enable audio loopback s
 A. The animation avatar that we are using might be incompatible with the character mesh. Fixing that can solve the issue.
 
 [default-animations-incompatibility.md](default-animations-incompatibility.md "mention")
+
+
+
+#### Q. There are two Settings Panel Buttons in Mobile Transcript UI.
+
+A. If you are using Unity 2021, unexpected prefab variant issues may arise. This is because Unity Mobile Transcript UIs are variants of the main transcript UI prefab. With changes in the Prefab system in Unity 2022, it works correctly in Unity 2022. If you are using Unity 2021, you may encounter issues with prefabs. You can remove the redundant Settings Panel Button to address this problem.
 
 
 
