@@ -16,11 +16,11 @@ Convai's Unity WebGL SDK is designed to complement the standalone application ca
 ### Download the SDK and Demos
 
 {% hint style="info" %}
-[**Download the WebGL version of the Convai Unity SDK here.**](https://drive.google.com/file/d/1ZDRh7hyRDIX6yGGoZFb6zmDQfszjjye7/view?usp=sharing)
+[**Download the WebGL version of the Convai Unity SDK here.**](https://drive.google.com/file/d/1DYzgDk-myJ-3ulz5Q3w8\_AvlOQdy0yYL/view?usp=sharing)
 {% endhint %}
 
 {% hint style="info" %}
-[**Download the Complete  WebGL Demo here.**](https://drive.google.com/file/d/1NnkPZflOpSNYRrfFyV01chkoEMNj5YTp/view?usp=sharing)
+[**Download the Complete  WebGL Demo here.**](https://github.com/Conv-AI/Unity-WebGL-Demo-Game)
 {% endhint %}
 
 {% hint style="info" %}
@@ -62,11 +62,11 @@ This error occurs because the WebGL SDK cannot be tested directly within the Uni
 
 ### Configuring Player Settings
 
-Once the platform conversion is complete:
+Once the platform conversion is complete,
 
-1. Open the `Player Settings`.
-2. Navigate to the `WebGL settings`.
-3. Under the `Resolution and Presentation` tab, select the `Convai PWA Template`.
+1. Open the file`Player Settings`.
+2. Navigate to the page`WebGL settings`.
+3. Under the`Resolution and Presentation` tab, select the`Convai PWA Template`.
 
 <figure><img src="../../.gitbook/assets/image (299).png" alt=""><figcaption></figcaption></figure>
 
@@ -81,8 +81,8 @@ Once the platform conversion is complete:
 <figure><img src="../../.gitbook/assets/image (23).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
-First build may take some time.\
-For subsequent Build and Runs, use the Unity shortcut key Ctrl + B.
+The first build may take some time.\
+For subsequent builds and runs, use the Unity shortcut key Ctrl + B.
 {% endhint %}
 
 {% hint style="info" %}
