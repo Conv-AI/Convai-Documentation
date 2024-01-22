@@ -34,8 +34,8 @@ Select the Lip-Sync checkmark and click Apply Changes.
 
 In the new component, select the type of lipsync, and assign the Skinned Mesh Renderer with the Facial Blendshapes (here for Reallusion Characters, `CC_Base_Body`, `CC_Base_Teeth` and `CC_Base_Tongue`)  and the game objects corresponding to the bones for Jaw and Tongue (here for Reallusion Characters, `CC_Base_JawRoot` and `CC_Base_Tongue01`). Feel free to adjust the position of the tongue with the Tongue Bone Offset field. &#x20;
 
-{% hint style="warning" %}
-Currently, only Reallusion Plus and OVR are supported as a type of lip sync.
+{% hint style="danger" %}
+The screenshot shows "Reallusion Plus" already selected. You must now manually change this **option from "OVR" to "Reallusion Plus"** for the lip sync to work. This was due to a recent Unity update that changed the default settings.
 {% endhint %}
 
 <figure><img src="../../.gitbook/assets/image (257).png" alt=""><figcaption></figcaption></figure>
