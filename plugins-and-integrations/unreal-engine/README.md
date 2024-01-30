@@ -5,7 +5,10 @@ description: Set up the Convai Unreal Engine plugin and add conversational AI to
 # Unreal Engine
 
 {% hint style="info" %}
-The demo project is continuously being developed to integrate new features and is available for UE 5.0 or above. You can access the [latest version here](https://drive.google.com/drive/u/4/folders/1HNcghI9SG1NpCUaJWRX9Yh28HUF00-U0).
+Get started with sample projects for some of our popular tutorials:
+
+* [Actions sample project (UE5.3)](https://drive.google.com/drive/u/1/folders/1UWgQMHTTSq4O45PtKCyr8sjZbbkq-2\_o)
+* [NPC conversating with NPC sample project (UE5.3)](https://drive.google.com/drive/u/1/folders/1a\_rzPDfjTxDju3q2ykzeJuzIeKlolg4V)
 {% endhint %}
 
 {% embed url="https://www.youtube.com/watch?ab_channel=Convai&list=PLn_7tCx0ChiogfggG1AVo6IkELQSLt6o3&v=HHJvY9dmwwg" %}
