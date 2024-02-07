@@ -129,6 +129,7 @@
 * [JavaScript Chat UI SDK](plugins-and-integrations/javascript-chat-ui-sdk/README.md)
   * [Getting Started](plugins-and-integrations/javascript-chat-ui-sdk/getting-started.md)
   * [ChatBubble Props](plugins-and-integrations/javascript-chat-ui-sdk/chatbubble-props.md)
+* [Elevenlabs API Integration](plugins-and-integrations/elevenlabs-api-integration.md)
 
 ## Reference
 
