@@ -105,6 +105,7 @@
     * [Convai Module Not Found](plugins-and-integrations/unreal-engine/troubleshoot-guide/convai-module-not-found.md)
     * [MetaHuman plugin conflict](plugins-and-integrations/unreal-engine/troubleshoot-guide/metahuman-plugin-conflict.md)
   * [Microphone Settings](plugins-and-integrations/unreal-engine/microphone-settings/README.md)
+    * [Set Audio Gain](plugins-and-integrations/unreal-engine/microphone-settings/set-audio-gain.md)
     * [Microphone test](plugins-and-integrations/unreal-engine/microphone-settings/microphone-test.md)
   * [Mac Microphone Permission: Required for UE 5.0 and 5.3](plugins-and-integrations/unreal-engine/mac-microphone-permission-required-for-ue-5.0-and-5.3.md)
   * [Guides V2 (Under Development)](plugins-and-integrations/unreal-engine/guides-v2-under-development/README.md)
