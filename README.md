@@ -41,7 +41,7 @@ description: Convai API and Plugin Documentation
 
 ## Welcome to Convai
 
-Convai is a platform for developers and creators. It provides the most intuitive interface for designing characters with multimodal perception abilities in both the virtual and real world environments. Creators, game designers, and developers can modify the NPC's backstory, personality, and knowledge at any given moment via the playground or programmatically through the API.
+Convai is a platform for developers and creators. It provides the most intuitive interface for designing characters with multimodal perception abilities in both virtual and real world environments. Creators, game designers, and developers can modify the NPC's backstory, personality, and knowledge at any given moment via the playground or programmatically through the API.
 
 ## Want to deep dive?
 
