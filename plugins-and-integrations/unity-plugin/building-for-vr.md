@@ -2,7 +2,11 @@
 
 ## VR Installation
 
-If you want to make your Convai Plugin compatible with VR, you can do so in two ways.
+If you want to make your Convai Plugin compatible with VR, you can do so using the automatic or manual process. Please see the instructions below or check out our [_latest tutorial video_](https://www.youtube.com/watch?v=Q0TUT5vtEyg) on YouTube.
+
+{% embed url="https://www.youtube.com/watch?v=Q0TUT5vtEyg" %}
+Unleash the Power of Convai AI NPCs in Your Unity VR Game
+{% endembed %}
 
 ### Method 1 : Automatic Setup
 
