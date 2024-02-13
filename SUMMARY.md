@@ -107,6 +107,7 @@
     * [MetaHuman plugin conflict](plugins-and-integrations/unreal-engine/troubleshoot-guide/metahuman-plugin-conflict.md)
   * [Microphone Settings](plugins-and-integrations/unreal-engine/microphone-settings/README.md)
     * [Set Audio Gain](plugins-and-integrations/unreal-engine/microphone-settings/set-audio-gain.md)
+    * [Set Microphone](plugins-and-integrations/unreal-engine/microphone-settings/set-microphone.md)
     * [Microphone test](plugins-and-integrations/unreal-engine/microphone-settings/microphone-test.md)
     * [List Microphone Devices](plugins-and-integrations/unreal-engine/microphone-settings/list-microphone-devices.md)
   * [Mac Microphone Permission: Required for UE 5.0 and 5.3](plugins-and-integrations/unreal-engine/mac-microphone-permission-required-for-ue-5.0-and-5.3.md)
