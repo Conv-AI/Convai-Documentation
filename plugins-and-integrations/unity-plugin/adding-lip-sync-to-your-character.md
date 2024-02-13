@@ -48,7 +48,7 @@ If your character's mouth seems not to be opening enough for a proper lip sync, 
 
 **For Ready Player Me models**, the type of lipsync will be `OVR` and the appropriate facial skinned mesh renderers for the Head will be `Renderer_Head` and the appropriate facial skinned mesh renderer for the Teeth will be `Renderer_Teeth`. There is no need for adding any of the other mesh renderers or bones.&#x20;
 
-<figure><img src="../../.gitbook/assets/image (277).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (277) (1).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 The above process of assigning the skinned mesh renderer is not necessary. The `ConvaiLipSync.cs` script is capable of assigning the necessary skinned mesh renderers by itself if you have left the fields empty.

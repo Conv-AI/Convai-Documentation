@@ -81,6 +81,7 @@
       * [Binding objects to Reallusion Character](plugins-and-integrations/unreal-engine/guides/creating-reallusion-characters/binding-objects-to-reallusion-character.md)
     * [Event-Aware Convai Characters](plugins-and-integrations/unreal-engine/guides/event-aware-convai-characters.md)
     * [Operations based on presence of certain words.](plugins-and-integrations/unreal-engine/guides/operations-based-on-presence-of-certain-words..md)
+    * [Narrative Design Trigger](plugins-and-integrations/unreal-engine/guides/narrative-design-trigger.md)
     * [Actions Guide](plugins-and-integrations/unreal-engine/guides/actions-guide/README.md)
       * [Default Actions](plugins-and-integrations/unreal-engine/guides/actions-guide/default-actions/README.md)
         * [Moves To](plugins-and-integrations/unreal-engine/guides/actions-guide/default-actions/moves-to.md)

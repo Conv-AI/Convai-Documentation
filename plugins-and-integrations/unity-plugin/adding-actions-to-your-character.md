@@ -1,7 +1,7 @@
 ---
 description: >-
-  Follow this guide on setting up character interactions, where we will walk you
-  through the process of incorporating actions into your Convai-powered NPC
+  Follow these instructions to enable actions for your Convai-powered
+  characters.
 ---
 
 # Adding Actions to your Character

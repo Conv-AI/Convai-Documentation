@@ -6,7 +6,7 @@ The ConvaiNPC and ConvaiGRPCAPI scripts look for GameObjects with Convai Chat UI
 
 ## Types of UI
 
-<figure><img src="../../../.gitbook/assets/image (278).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (278) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### ChatBox
 
@@ -14,7 +14,7 @@ The ConvaiNPC and ConvaiGRPCAPI scripts look for GameObjects with Convai Chat UI
 
 Both the user's and the character's transcripts are displayed one after other in a scrollable chat box.
 
-<figure><img src="../../../.gitbook/assets/image (282).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (282) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Subtitle
 
@@ -38,15 +38,15 @@ The user's transcript is displayed in the top where as the character's transcrip
 
 Identical to [#subtitle](convai-ui-prefabs.md#subtitle "mention") UI. Includes a button that can be pressed and held for the user to speak. Ideal for portrait orientation of screen.
 
-<figure><img src="../../../.gitbook/assets/image (281).png" alt="" width="328"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (281) (1).png" alt="" width="328"><figcaption></figcaption></figure>
 
 **Prefab Name**: Convai Transcript Canvas - Mobile QA
 
-<figure><img src="../../../.gitbook/assets/image (280).png" alt="" width="331"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (280) (1).png" alt="" width="331"><figcaption></figcaption></figure>
 
 **Prefab Name**: Convai Transcript Canvas - Mobile Chat
 
-<figure><img src="../../../.gitbook/assets/image (279).png" alt="" width="327"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (279) (1).png" alt="" width="327"><figcaption></figcaption></figure>
 
 ## [Convai Chat UI Handler Component](dynamic-ui-system.md)
 
