@@ -89,6 +89,7 @@
         * [Simple actions](plugins-and-integrations/unreal-engine/guides/actions-guide/custom-actions/simple-actions.md)
     * [Customization](plugins-and-integrations/unreal-engine/guides/customization/README.md)
       * [Push to Talk](plugins-and-integrations/unreal-engine/guides/customization/push-to-talk.md)
+      * [Alter character response audio rate](plugins-and-integrations/unreal-engine/guides/customization/alter-character-response-audio-rate.md)
     * [Speech To Text Transcription](plugins-and-integrations/unreal-engine/guides/speech-to-text-transcription.md)
   * [Blueprints Reference](plugins-and-integrations/unreal-engine/blueprints-reference/README.md)
     * [Convai Player](plugins-and-integrations/unreal-engine/blueprints-reference/convai-player.md)
