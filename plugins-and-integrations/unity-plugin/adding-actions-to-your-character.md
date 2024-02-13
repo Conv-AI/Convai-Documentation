@@ -12,12 +12,12 @@ description: >-
 2. Scroll down to the ConvaiNPC script attached to your character.
 3. Click the "Add Component" button.
 
-<figure><img src="../../.gitbook/assets/image.png" alt="" width="438"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt="" width="438"><figcaption></figcaption></figure>
 
 4. Use the checkbox to add the action script to the NPC Actions.
 5. Click "Apply Changes" to confirm.
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (2).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Pre-defined Actions
 
