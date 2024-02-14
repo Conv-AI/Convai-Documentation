@@ -88,7 +88,7 @@
         * [Follows](plugins-and-integrations/unreal-engine/guides/actions-guide/default-actions/follows.md)
       * [Custom Actions](plugins-and-integrations/unreal-engine/guides/actions-guide/custom-actions/README.md)
         * [Simple actions](plugins-and-integrations/unreal-engine/guides/actions-guide/custom-actions/simple-actions.md)
-      * [Environment: Setting Main Character](plugins-and-integrations/unreal-engine/guides/actions-guide/environment-setting-main-character.md)
+      * [Main Character and Attention Object](plugins-and-integrations/unreal-engine/guides/actions-guide/main-character-and-attention-object.md)
     * [Customization](plugins-and-integrations/unreal-engine/guides/customization/README.md)
       * [Push to Talk](plugins-and-integrations/unreal-engine/guides/customization/push-to-talk.md)
       * [Alter character response audio rate](plugins-and-integrations/unreal-engine/guides/customization/alter-character-response-audio-rate.md)
