@@ -12,12 +12,12 @@ description: >-
 2. Scroll down to the ConvaiNPC script attached to your character.
 3. Click the "Add Component" button.
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt="" width="438"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (2).png" alt="" width="438"><figcaption></figcaption></figure>
 
 4. Use the checkbox to add the action script to the NPC Actions.
 5. Click "Apply Changes" to confirm.
 
-<figure><img src="../../.gitbook/assets/image (1) (2).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (2) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 ## Pre-defined Actions
 
@@ -26,7 +26,7 @@ Convai offers predefined actions for a quick start.
 1. Click the "+" button to add a new action.
 2. From the dropdown menu, select "Move To."
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (2).png" alt=""><figcaption></figcaption></figure>
 
 3. Enter the action name as "Move To" (the name doesn't have to match the action choice name).
 4. Leave the Animation Name field empty for now.

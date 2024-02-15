@@ -4,9 +4,7 @@ description: >-
   talking to and the Object In Attention
 ---
 
-# Environment: Setting Main Character
-
-
+# Main Character and Attention Object
 
 1. Navigate to your AI character blueprint.
 2. Drag the `Convai Chatbot` component into the event graph.
@@ -18,4 +16,4 @@ description: >-
 The character blueprint can be a MetaHuman, ReadyPlayerMe, Reallusion or even a custom one you have created, just ensure that it has the `Convai Chatbot` component.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption><p>Illustrative schematic for the Set Main Character and Set Attention Object functions</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3).png" alt=""><figcaption><p>Illustrative schematic for the Set Main Character and Set Attention Object functions</p></figcaption></figure>

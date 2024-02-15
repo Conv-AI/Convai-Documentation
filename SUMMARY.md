@@ -88,6 +88,7 @@
         * [Follows](plugins-and-integrations/unreal-engine/guides/actions-guide/default-actions/follows.md)
       * [Custom Actions](plugins-and-integrations/unreal-engine/guides/actions-guide/custom-actions/README.md)
         * [Simple actions](plugins-and-integrations/unreal-engine/guides/actions-guide/custom-actions/simple-actions.md)
+        * [Adding Descriptions to Actions](plugins-and-integrations/unreal-engine/guides/actions-guide/custom-actions/adding-descriptions-to-actions.md)
       * [Main Character and Attention Object](plugins-and-integrations/unreal-engine/guides/actions-guide/main-character-and-attention-object.md)
     * [Customization](plugins-and-integrations/unreal-engine/guides/customization/README.md)
       * [Push to Talk](plugins-and-integrations/unreal-engine/guides/customization/push-to-talk.md)
