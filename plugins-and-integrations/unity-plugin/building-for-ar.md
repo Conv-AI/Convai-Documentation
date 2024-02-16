@@ -2,7 +2,9 @@
 
 ## AR Installation
 
-If you want to make your Convai Plugin compatible with AR, you can do so in two ways.
+If you want to make your Convai Plugin compatible with AR, you can do so in two ways. Please see the instructions below or check out our [_latest tutorial video_](https://www.youtube.com/watch?v=j0l\_paOQxvI) on YouTube.
+
+{% embed url="https://www.youtube.com/watch?v=j0l_paOQxvI" %}
 
 ### Method 1 : Automatic Setup
 
