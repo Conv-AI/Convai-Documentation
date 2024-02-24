@@ -5,4 +5,4 @@
    ![](<../../../.gitbook/assets/image (350).png>)
 3. Search for the variable `MaxChatDistance`.\
    ![](<../../../.gitbook/assets/image (349).png>)
-4. Set it to a number of your choice. Note: Set it to 0 if you would like infinite to distance.
+4. Set it to a number of your choice. Note: Set it to 0 for infinite distance.
