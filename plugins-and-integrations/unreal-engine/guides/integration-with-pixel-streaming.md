@@ -6,6 +6,10 @@ description: >-
 
 # Integration with Pixel Streaming
 
+{% hint style="info" %}
+To setup the Pixel Streaming server, we recommend taking a look over [this excellent guide](https://github.com/TensorWorks/PixelStreamingCloudGuide/blob/main/Pixel%20Streaming%20UE5.md).
+{% endhint %}
+
 1. Ensure you have the latest Convai 3.1.0 plugin or later.
 2.  Enable Unreal Engine's `Pixel Streaming` and the `Pixel Streaming Player` Plugins from the Plugins window.\
 
