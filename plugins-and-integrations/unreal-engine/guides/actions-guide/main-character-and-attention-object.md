@@ -16,4 +16,4 @@ description: >-
 The character blueprint can be a MetaHuman, ReadyPlayerMe, Reallusion or even a custom one you have created, just ensure that it has the `Convai Chatbot` component.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (3).png" alt=""><figcaption><p>Illustrative schematic for the Set Main Character and Set Attention Object functions</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (3).png" alt=""><figcaption><p>Illustrative schematic for the Set Main Character and Set Attention Object functions</p></figcaption></figure>

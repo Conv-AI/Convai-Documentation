@@ -41,7 +41,7 @@ Action descriptions offer contextual hints to the AI, helping determine when and
 
     <div data-full-width="false">
 
-    <figure><img src="../../../../../.gitbook/assets/image (1).png" alt="" width="296"><figcaption></figcaption></figure>
+    <figure><img src="../../../../../.gitbook/assets/image (1) (3).png" alt="" width="296"><figcaption></figcaption></figure>
 
     </div>
 2. **Adding Action with Description**: Click the Add Element (+) icon to input the action along with its description as previously formatted.

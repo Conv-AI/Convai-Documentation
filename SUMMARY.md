@@ -65,6 +65,7 @@
   * [Supported Platforms](plugins-and-integrations/unreal-engine/supported-platforms.md)
   * [Installation](plugins-and-integrations/unreal-engine/installation.md)
   * [Guides](plugins-and-integrations/unreal-engine/guides/README.md)
+    * [Integration with Pixel Streaming](plugins-and-integrations/unreal-engine/guides/integration-with-pixel-streaming.md)
     * [Adjust Interaction Radius](plugins-and-integrations/unreal-engine/guides/adjust-interaction-radius.md)
     * [Creating MetaHuman Characters](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters/README.md)
       * [Adding MetaHuman](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters/adding-metahuman.md)
