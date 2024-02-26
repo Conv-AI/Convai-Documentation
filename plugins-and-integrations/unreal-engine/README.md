@@ -9,6 +9,7 @@ Get started with sample projects for some of our popular tutorials:
 
 * [Actions sample project (UE5.3)](https://drive.google.com/drive/u/1/folders/1UWgQMHTTSq4O45PtKCyr8sjZbbkq-2\_o)
 * [NPC conversating with NPC sample project (UE5.3)](https://drive.google.com/drive/u/1/folders/1a\_rzPDfjTxDju3q2ykzeJuzIeKlolg4V)
+* [MetaHuman and ReadyPlayerMe sample project (UE5.0-5.2)](https://drive.google.com/drive/u/4/folders/1HNcghI9SG1NpCUaJWRX9Yh28HUF00-U0)
 {% endhint %}
 
 {% embed url="https://www.youtube.com/watch?ab_channel=Convai&list=PLn_7tCx0ChiogfggG1AVo6IkELQSLt6o3&v=HHJvY9dmwwg" %}
