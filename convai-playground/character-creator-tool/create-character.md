@@ -1,31 +1,27 @@
 ---
-description: Steps to create an intelligent Character with Convai
+description: Creating an Intelligent Character with Convai
 ---
 
 # Create Character
 
-Here, we will list the steps to follow to create your own character in the most simple ways. We will dive into the advanced properties in different sections, which will be updated soon.
+Here, we outline the steps to create your own AI character on Convai.com in a simple way. We will cover advanced configuration options in separate sections later.
 
 ### Steps
 
-1.  Visit the character creation page at [https://convai.com/pipeline/create-character](https://convai.com/pipeline/create-character)
+1. Sign in to Convai and click on the Create Character button from your [Dashboard](https://convai.com/pipeline/dashboard).
+2. The landing page provides intuitive fields for creating a character. Don't worry about configuring an avatar yet - we'll cover that later.
 
-    Make sure you are logged in, to access this page.
-2.  The landing page is very intuitive, with the details you need to provide to create your character.
+<figure><img src="../../.gitbook/assets/new-chars-0.png" alt=""><figcaption></figcaption></figure>
 
+3. Enter a **name** for your character, select a **voice** from the provided options, and write a **backstory**.  ready.&#x20;
 
+<figure><img src="../../.gitbook/assets/new-chars-1.png" alt=""><figcaption></figcaption></figure>
 
-    <figure><img src="../../.gitbook/assets/cct-ss-3.png" alt=""><figcaption></figcaption></figure>
-3. You do not have to focus on configuring an avatar for now. We will get into that later.
-4.  Enter a name for the character, select a voice for the character from the list and provide a backstory for the character. For reference, here is a sample of the details you need to provide.
+4. Click **Create Character** when you are satisfied with your character details.
+5. You will receive a unique ID for your new character. This will allow you to access the character outside of Convai.com. A default avatar will be loaded that you can customize later.
 
+<figure><img src="../../.gitbook/assets/new-chars-3.png" alt=""><figcaption></figcaption></figure>
 
+4. That's it! You now have a basic character to work with. You can start talking to your character in the chat window on the right side of the page.
 
-    <figure><img src="../../.gitbook/assets/cct-ss-4.png" alt=""><figcaption></figcaption></figure>
-5. Next click on **Create Character**.
-6.  When the new character is created, you will get a unique ID for the character. This will be used to interact with the character outside of the Convai website.
-
-    A sample avatar will be loaded for you. You can safely ignore it for now. We will handle this in the Advanced section.
-
-    <figure><img src="../../.gitbook/assets/cct-ss-5.png" alt=""><figcaption></figcaption></figure>
-7. That is it, you now have a simple character to work with. You can start asking it questions in the chatbot.
+In the next few pages we'll go through more advanced options for enhancing your character.
