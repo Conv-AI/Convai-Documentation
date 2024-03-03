@@ -96,6 +96,7 @@
       * [Push to Talk](plugins-and-integrations/unreal-engine/guides/customization/push-to-talk.md)
       * [Alter character response audio rate](plugins-and-integrations/unreal-engine/guides/customization/alter-character-response-audio-rate.md)
     * [Speech To Text Transcription](plugins-and-integrations/unreal-engine/guides/speech-to-text-transcription.md)
+    * [Enable Multiplayer](plugins-and-integrations/unreal-engine/guides/enable-multiplayer.md)
   * [Blueprints Reference](plugins-and-integrations/unreal-engine/blueprints-reference/README.md)
     * [Convai Player](plugins-and-integrations/unreal-engine/blueprints-reference/convai-player.md)
     * [Convai Chatbot](plugins-and-integrations/unreal-engine/blueprints-reference/convai-chatbot.md)
