@@ -1,5 +1,5 @@
 ---
-description: Add Personality and Style to Your Characters
+description: Configure the Personality and Style of Your Characters
 ---
 
 # Personality and Style
