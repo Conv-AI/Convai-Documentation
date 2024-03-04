@@ -11,6 +11,7 @@
   * [Connect a ReadyPlayerMe 3D Avatar](convai-playground/character-creator-tool/connect-a-readyplayerme-3d-avatar.md)
   * [Language and Speech](convai-playground/character-creator-tool/language-and-speech.md)
   * [Knowledge Bank](convai-playground/character-creator-tool/knowledge-bank.md)
+  * [Personality and Style](convai-playground/character-creator-tool/personality-and-style.md)
   * [Actions](convai-playground/character-creator-tool/actions.md)
 
 ## Plugins & Integrations
