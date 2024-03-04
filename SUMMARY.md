@@ -12,6 +12,7 @@
   * [Language and Speech](convai-playground/character-creator-tool/language-and-speech.md)
   * [Knowledge Bank](convai-playground/character-creator-tool/knowledge-bank.md)
   * [Personality and Style](convai-playground/character-creator-tool/personality-and-style.md)
+  * [State of Mind](convai-playground/character-creator-tool/state-of-mind.md)
   * [Actions](convai-playground/character-creator-tool/actions.md)
 
 ## Plugins & Integrations
