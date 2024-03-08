@@ -40,8 +40,6 @@ Please ensure that Git is installed on your computer prior to proceeding.\
 
 Follow the Import and Setup Instructions from [import-and-setup.md](import-and-setup.md "mention") and [setting-up-unity-plugin.md](setting-up-unity-plugin.md "mention").&#x20;
 
-## Development and Testing
-
 ### WebGL Incompatibility with Unity Editor
 
 When attempting to play the scene in the Unity Editor, you may encounter the following error:
@@ -54,11 +52,19 @@ WebGL SDK does not run in Unity Editor. Please build and run in WebGL.
 
 This error occurs because the WebGL SDK cannot be tested directly within the Unity Editor. To test your WebGL application, you must create a development build.
 
-### Building for WebGL
+## Switching to WebGL
 
-1. Go to `File` > `Build Settings` and switch the platform to WebGL.
-2. Check the `Development Build` option for faster iterations.
-3. Click on `Switch Platform`.
+Now, your Unity setup is done, let's setup WebGL
+
+Head on over to `File` → `Build Settings`, then:
+
+1. Click on `WebGL`.
+2. Check the `Development Build` box.
+3. Select `Switch Platform.`
+
+Patience, remember? This shift takes a bit.
+
+After the platform is switched to WebGL, click on `Player Settings`.This is where the fun begins:
 
 <figure><img src="../../.gitbook/assets/image (297).png" alt=""><figcaption></figcaption></figure>
 
@@ -72,20 +78,42 @@ Once the platform conversion is complete,
 
 <figure><img src="../../.gitbook/assets/image (299).png" alt=""><figcaption></figcaption></figure>
 
-### Running the Build
+## Importing Characters and Building the Scene
 
-1. Select the folder where you want the build to be located.
-2.
+After the reloads is completed, check if the settings have changed. then, close all the open menus and follow these steps :
 
-    <figure><img src="../../.gitbook/assets/image (300).png" alt=""><figcaption></figcaption></figure>
-3. A web page with the WebGL version of the game will open. Allow microphone access when prompted.
+<figure><img src="https://cdn.videotap.com/6608/screenshots/RM98hWOigrswo0Uksw8F-202.29.png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/image (23).png" alt=""><figcaption></figcaption></figure>
+1. Double-click the `Convai folder` and go to scenes.
+2. Open the `Convey Demo WebGL` scene.
+3. Head to Convai's website, grab your API key, and input it back in Unity via `Convai` → `Convai Setup`.
+4. Now, head again to the Convai’s website and grab your favourite character’s id and paste it to `Convai` → `Character Importer`.
+
+Remember, Unity's editor won't let us test WebGL directly. But fear not, there's a `Build and Run` option:
+
+<figure><img src="https://cdn.videotap.com/6608/screenshots/suKZ4w5jIDskFWyBqyO1-261.69.png" alt=""><figcaption></figcaption></figure>
+
+1. Go back to `File` → `Build Settings`.
+2. Click `Add Open Scenes` and then `Build and Run`.
+
+Choose a folder for the build output, make a new one if needed, and name it "WebGL."
+
+<figure><img src="https://cdn.videotap.com/6608/screenshots/z5kMvyZPsvD8V5dvudCN-274.6.png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
-The first build may take some time.\
+The First build may take some time.\
 For subsequent builds and runs, use the Unity shortcut key Ctrl + B.
 {% endhint %}
+
+The first build is the longest, so feel free to stretch a bit – but don't venture too far. Soon, you'll greet our demo character, Amelia, or any other character you brought into your digital oasis. Just give your Microphone permissions and here you go!
+
+## Engaging with your Convai AI NPCs
+
+Now the magic happens. Press and hold 'T' to chat with your carefully cultivated character. Or click on the text box to type out a question. And for the attention to detail – press F10 to access the settings panel where you can change your name and the UI style to your liking.
+
+<figure><img src="https://cdn.videotap.com/6608/screenshots/hnaNRdZthU6yzX7gmIvw-318.59.png" alt=""><figcaption></figcaption></figure>
+
+Feeling accomplished? You should! You now have a successfully working WebGL build in your browser. Curious developers can take a step further by downloading the project files from GitHub, available for all who desire to peek behind the curtain.
 
 {% hint style="info" %}
 When you are ready with your production build, just uncheck the Development Build field in the Build Settings before publishing

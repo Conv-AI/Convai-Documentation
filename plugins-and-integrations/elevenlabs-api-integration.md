@@ -24,9 +24,9 @@ Step 4. On the bottom right corner "API Integration" click on "Add New Key" butt
 
 Step 5. A pop up will appear then, select Elevenlabs, paste your API key and click Add
 
-
-
+{% hint style="info" %}
 **Note : Currently, only Elevenlabs account with the Independent Publisher plan and higher are compatible. It will take some time (around 12 hrs) for your voices be visible in convai.**
+{% endhint %}
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FtvHXv9Cpl8QzA5tY9MJh%2Fuploads%2Fs8EbPIU1l9PpKRJNuseC%2FScreenshot%202024-02-06%20at%206.48.43%E2%80%AFPM.png?alt=media&#x26;token=774991bb-c41a-4743-afed-6e0094850c81" alt=""><figcaption></figcaption></figure>
 
@@ -34,4 +34,6 @@ Step 6. Go to any character and select Character's Voice, scroll to the bottom a
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FtvHXv9Cpl8QzA5tY9MJh%2Fuploads%2FS9INCC48hKOpkP85fLXI%2FScreenshot%202024-02-06%20at%207.04.09%E2%80%AFPM.png?alt=media&#x26;token=f0168791-2e67-49fe-bc8b-21eee468870b" alt=""><figcaption></figcaption></figure>
 
-Note : If you receive any error, plz do check your elevenlabs quota or subscription level&#x20;
+{% hint style="info" %}
+Note : If you recieve error while talking, do confirm your elevenlabs subscription level
+{% endhint %}
