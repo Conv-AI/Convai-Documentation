@@ -12,7 +12,7 @@ Step 1.  Go to elevenlabs.io and head to Profile section
 
 Step 2. On the profile section, copy your API key
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FtvHXv9Cpl8QzA5tY9MJh%2Fuploads%2FalVo61ZOonUchiuW2Rcs%2FScreenshot%202024-02-06%20at%206.43.38%E2%80%AFPM.png?alt=media&#x26;token=46c2afc6-19f9-4683-b6d3-0eee70d99cc2" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/Untitled design.png" alt=""><figcaption></figcaption></figure>
 
 Step 3. Next, login to convai.com and open your profile page
 
@@ -20,12 +20,12 @@ Step 3. Next, login to convai.com and open your profile page
 
 Step 4. On the bottom right corner "API Integration" click on "Add New Key" button
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FtvHXv9Cpl8QzA5tY9MJh%2Fuploads%2F020q6KHXzBGa8n8G2e5U%2FScreenshot%202024-02-06%20at%206.45.53%E2%80%AFPM.png?alt=media&#x26;token=dd50f22d-9d5d-4a38-8ade-9687e944b4f7" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/Untitled design (1).png" alt=""><figcaption></figcaption></figure>
 
 Step 5. A pop up will appear then, select Elevenlabs, paste your API key and click Add
 
 {% hint style="info" %}
-**Note : Currently, only Elevenlabs account with the Independent Publisher plan and higher are compatible. It will take some time (around 12 hrs) for your voices be visible in convai.**
+**Note : Currently, only Elevenlabs account with the Pro plan and higher are compatible. It will take some time (around 12 hrs) for your voices be visible in convai dashboard.**
 {% endhint %}
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FtvHXv9Cpl8QzA5tY9MJh%2Fuploads%2Fs8EbPIU1l9PpKRJNuseC%2FScreenshot%202024-02-06%20at%206.48.43%E2%80%AFPM.png?alt=media&#x26;token=774991bb-c41a-4743-afed-6e0094850c81" alt=""><figcaption></figcaption></figure>
