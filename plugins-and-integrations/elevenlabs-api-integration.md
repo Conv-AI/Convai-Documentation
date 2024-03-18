@@ -8,11 +8,11 @@ description: >-
 
 Step 1.  Go to elevenlabs.io and head to Profile section
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FtvHXv9Cpl8QzA5tY9MJh%2Fuploads%2FTXs8m6sfTkHUGY88wCg1%2FScreenshot%202024-02-06%20at%206.40.25%E2%80%AFPM.png?alt=media&#x26;token=81ef9ec3-862f-43ab-bce4-80c04276894c" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/Untitled design (5) (2).png" alt=""><figcaption></figcaption></figure>
 
 Step 2. On the profile section, copy your API key
 
-<figure><img src="../.gitbook/assets/Untitled design.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/Untitled design (4).png" alt=""><figcaption></figcaption></figure>
 
 Step 3. Next, login to convai.com and open your profile page
 
@@ -20,7 +20,7 @@ Step 3. Next, login to convai.com and open your profile page
 
 Step 4. On the bottom right corner "API Integration" click on "Add New Key" button
 
-<figure><img src="../.gitbook/assets/Untitled design (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/Untitled design (2).png" alt=""><figcaption></figcaption></figure>
 
 Step 5. A pop up will appear then, select Elevenlabs, paste your API key and click Add
 
@@ -30,7 +30,7 @@ Step 5. A pop up will appear then, select Elevenlabs, paste your API key and cli
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FtvHXv9Cpl8QzA5tY9MJh%2Fuploads%2Fs8EbPIU1l9PpKRJNuseC%2FScreenshot%202024-02-06%20at%206.48.43%E2%80%AFPM.png?alt=media&#x26;token=774991bb-c41a-4743-afed-6e0094850c81" alt=""><figcaption></figcaption></figure>
 
-Step 6. Go to any character and select Character's Voice, scroll to the bottom and you will see a section "Elevenlabs-Private-Voices" and all of your voices will be there. Select anyone and use it.
+![](<../.gitbook/assets/spaces\_tvHXv9Cpl8QzA5tY9MJh\_uploads\_TXs8m6sfTkHUGY88wCg1\_Screenshot 2024-02-06 at 6.webp>)Step 6. Go to any character and select Character's Voice, scroll to the bottom and you will see a section "Elevenlabs-Private-Voices" and all of your voices will be there. Select anyone and use it.
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FtvHXv9Cpl8QzA5tY9MJh%2Fuploads%2FS9INCC48hKOpkP85fLXI%2FScreenshot%202024-02-06%20at%207.04.09%E2%80%AFPM.png?alt=media&#x26;token=f0168791-2e67-49fe-bc8b-21eee468870b" alt=""><figcaption></figcaption></figure>
 

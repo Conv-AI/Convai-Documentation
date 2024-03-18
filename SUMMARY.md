@@ -13,6 +13,7 @@
   * [Knowledge Bank](convai-playground/character-creator-tool/knowledge-bank.md)
   * [Personality and Style](convai-playground/character-creator-tool/personality-and-style.md)
   * [State of Mind](convai-playground/character-creator-tool/state-of-mind.md)
+  * [Memory](convai-playground/character-creator-tool/memory.md)
   * [Actions](convai-playground/character-creator-tool/actions.md)
 
 ## Plugins & Integrations
@@ -143,6 +144,8 @@
   * [Getting Started](plugins-and-integrations/javascript-chat-ui-sdk/getting-started.md)
   * [ChatBubble Props](plugins-and-integrations/javascript-chat-ui-sdk/chatbubble-props.md)
 * [Elevenlabs API Integration](plugins-and-integrations/elevenlabs-api-integration.md)
+* [Modding Framework](plugins-and-integrations/modding-framework/README.md)
+  * [Modding Cyberpunk 2077](plugins-and-integrations/modding-framework/modding-cyberpunk-2077.md)
 
 ## Reference
 
