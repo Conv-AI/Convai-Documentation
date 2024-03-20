@@ -6,6 +6,10 @@ description: >-
 
 # Enable Multiplayer
 
+Please see the instructions below or check out our [_latest tutorial video_](https://www.youtube.com/watch?v=CjQEYw9Df8A) on YouTube.
+
+{% embed url="https://www.youtube.com/watch?v=CjQEYw9Df8A" %}
+
 1. Navigate to your player blueprint.
 2.  Under `My Blueprints` tab, click the gear icon and select `Show Inherited Variables`.\
 
