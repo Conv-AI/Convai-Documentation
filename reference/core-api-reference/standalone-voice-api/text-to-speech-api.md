@@ -4,73 +4,31 @@ description: All the available APIs needed to generate audio from text.
 
 # Text To Speech API
 
-{% swagger method="post" path="/" baseUrl="https://api.convai.com/tts" summary="Convai's Text-To-Speech API endpoint" %}
-{% swagger-description %}
+## Convai's Text-To-Speech API endpoint
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/tts/`
+
 This endpoint is called to convert a user provided text to audio in the voice mentioned by the user.
-{% endswagger-description %}
 
-{% swagger-parameter in="header" name="CONVAI-API-KEY" type="String" required="true" %}
-Your Convai API Key.&#x20;
-{% endswagger-parameter %}
+#### Headers
 
-{% swagger-parameter in="header" name="Content-Type" type="String" required="true" %}
-application/json
-{% endswagger-parameter %}
+| Name                                             | Type   | Description           |
+| ------------------------------------------------ | ------ | --------------------- |
+| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | Your Convai API Key.  |
+| Content-Type<mark style="color:red;">\*</mark>   | String | application/json      |
 
-{% swagger-parameter in="body" name="transcript" type="String" required="true" %}
-The text which is to be converted to audio.
-{% endswagger-parameter %}
+#### Request Body
 
-{% swagger-parameter in="body" name="voice" type="String" required="true" %}
-The type of voice for the audio response.
-{% endswagger-parameter %}
+| Name                                         | Type   | Description                                                                                                                                                                                                                                   |
+| -------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| transcript<mark style="color:red;">\*</mark> | String | The text which is to be converted to audio.                                                                                                                                                                                                   |
+| voice<mark style="color:red;">\*</mark>      | String | The type of voice for the audio response.                                                                                                                                                                                                     |
+| filename                                     | String | The name for the audio file.                                                                                                                                                                                                                  |
+| encoding                                     | String | <p>The format for the audio file. We currently support wav and mp3 format for the stt audio. Please refer to the below table which lists down the supported audio format corresponding to the voices.</p><p>By default, it is set to wav.</p> |
+| language                                     | String | <p>The language code you want the audio to be in. Please refer to the list of available languages.</p><p>By default it will consider "en-US"</p>                                                                                              |
 
-{% swagger-parameter in="body" name="language" %}
-The language code you want the audio to be in. Please refer to the list of available languages.
-
-By default it will consider "en-US"
-{% endswagger-parameter %}
-
-{% swagger-parameter in="body" name="filename" type="String" %}
-The name for the audio file.
-{% endswagger-parameter %}
-
-{% swagger-parameter in="body" name="encoding" type="String" %}
-The format for the audio file. We currently support wav and mp3 format for the stt audio. Please refer to the below table which lists down the supported audio format corresponding to the voices.
-
-By default, it is set to wav.
-{% endswagger-parameter %}
-
-{% swagger-response status="200: OK" description="transcript not specified in the request body." %}
-```javascript
-{
-    "result" : "No transcript found in the request"
-}
-```
-{% endswagger-response %}
-
-{% swagger-response status="200: OK" description="voice not specified in the request body." %}
-```javascript
-{
-    "result" : "No voice found in the request"
-}
-```
-{% endswagger-response %}
-
-{% swagger-response status="200: OK" description="successful response : an audio file" %}
-```javascript
-```
-{% endswagger-response %}
-
-{% swagger-response status="400: Bad Request" description="The mentioned voice doesn't support the requested audio encoding format. Please refer to the voice-encoding table below." %}
-```javascript
-{
-    "result" : "Incorrect encoding for the mentioned voice."
-}
-```
-{% endswagger-response %}
-
-{% swagger-response status="403: Forbidden" description="Error with the user's Convai API Key." %}
+{% tabs %}
+{% tab title="403: Forbidden Error with the user's Convai API Key." %}
 {% code lineNumbers="true" %}
 ```javascript
 {
@@ -78,24 +36,53 @@ By default, it is set to wav.
 }
 ```
 {% endcode %}
-{% endswagger-response %}
+{% endtab %}
 
-{% swagger-response status="403: Forbidden" description="Incorrect Convai API Key provided by the user." %}
+{% tab title="200: OK transcript not specified in the request body." %}
+```javascript
+{
+    "result" : "No transcript found in the request"
+}
+```
+{% endtab %}
+
+{% tab title="200: OK voice not specified in the request body." %}
+```javascript
+{
+    "result" : "No voice found in the request"
+}
+```
+{% endtab %}
+
+{% tab title="403: Forbidden Incorrect Convai API Key provided by the user." %}
 ```javascript
 {
     "API_ERROR" : "Invalid API key provided."
 }
 ```
-{% endswagger-response %}
+{% endtab %}
 
-{% swagger-response status="500: Internal Server Error" description="Error encountered while processing the TTS request." %}
+{% tab title="400: Bad Request The mentioned voice doesn't support the requested audio encoding format. Please refer to the voice-encoding table below." %}
+```javascript
+{
+    "result" : "Incorrect encoding for the mentioned voice."
+}
+```
+{% endtab %}
+
+{% tab title="500: Internal Server Error Error encountered while processing the TTS request." %}
 ```javascript
 {
     "result" : "Error encountered while processing the TTS request."
 }
 ```
-{% endswagger-response %}
-{% endswagger %}
+{% endtab %}
+
+{% tab title="200: OK successful response : an audio file" %}
+```javascript
+```
+{% endtab %}
+{% endtabs %}
 
 #### List of available voices and their supported languages:
 

@@ -14,57 +14,52 @@ Access Convai endpoints for developing and interacting with an intelligent chara
 
 ## Create / Update Character
 
-{% swagger method="post" summary="This endpoint is called to create a new character." baseUrl="https://api.convai.com/character" path="/create" %}
-{% swagger-description %}
+## This endpoint is called to create a new character.
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/create`
+
 Users can either use the character creator tool to create their own characters or directly use this endpoint to dynamically create characters, by providing some basic information
-{% endswagger-description %}
 
-{% swagger-parameter in="header" name="CONVAI-API-KEY" required="true" %}
-The unique api-key provided for every user.
-{% endswagger-parameter %}
+#### Headers
 
-{% swagger-parameter in="body" name="charName" required="true" %}
-Name of the new character being created.
-{% endswagger-parameter %}
+| Name                                             | Type   | Description                                 |
+| ------------------------------------------------ | ------ | ------------------------------------------- |
+| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. |
 
-{% swagger-parameter in="body" name="voiceType" required="true" %}
-The type of voice the character is expected to have.
+#### Request Body
 
-\[Please refer to the list of available voices mentioned below]
-{% endswagger-parameter %}
+| Name                                        | Type   | Description                                                                                                                      |
+| ------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| charName<mark style="color:red;">\*</mark>  | String | Name of the new character being created.                                                                                         |
+| voiceType<mark style="color:red;">\*</mark> | String | <p>The type of voice the character is expected to have.</p><p>[Please refer to the list of available voices mentioned below]</p> |
+| backstory<mark style="color:red;">\*</mark> | String | Basic background information of the character to start with.                                                                     |
+| actions                                     | String | A list of actions for the character to choose from, to be performed by the character based on the interactions with the user.    |
 
-{% swagger-parameter in="body" name="backstory" required="true" %}
-Basic background information of the character to start with.
-{% endswagger-parameter %}
-
-{% swagger-parameter in="body" name="actions" %}
-A list of actions for the character to choose from, to be performed by the character based on the interactions with the user.
-{% endswagger-parameter %}
-
-{% swagger-response status="201: Created" description="A new character has bee created with the necessary details" %}
+{% tabs %}
+{% tab title="201: Created A new character has bee created with the necessary details" %}
 ```json
 {
     "charID": "<character id for new character>"
 }
 ```
-{% endswagger-response %}
+{% endtab %}
 
-{% swagger-response status="400: Bad Request" description="The registration of the new character has failed" %}
+{% tab title="400: Bad Request The registration of the new character has failed" %}
 ```json
 {
     "INTERNAL_ERROR": "Error in creating the character. Check if all the input data is valid. Contact support for more info."
 }
 ```
-{% endswagger-response %}
+{% endtab %}
 
-{% swagger-response status="401" description="API Key validation has failed" %}
+{% tab title="401 API Key validation has failed" %}
 ```json
 {
     "API_ERROR": "Invalid API key provided." / "api_key not found."
 }
 ```
-{% endswagger-response %}
-{% endswagger %}
+{% endtab %}
+{% endtabs %}
 
 Here are some sample codes to demonstrate the request format for the endpoint -->
 
@@ -106,44 +101,38 @@ curl --location --request POST 'https://api.convai.com/character/create' \
 {% endtab %}
 {% endtabs %}
 
-{% swagger method="post" path="/update" baseUrl="https://api.convai.com/character" summary="This endpoint is called to update the details of an existing character" %}
-{% swagger-description %}
+## This endpoint is called to update the details of an existing character
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/update`
+
 Users can update some of the existing information of a character that the user has created. They can pass only the new character information that needs to be updated, through the request. The rest of the information remains the same.
-{% endswagger-description %}
 
-{% swagger-parameter in="header" name="CONVAI-API-KEY" required="true" %}
-The unique api-key provided for every user.
-{% endswagger-parameter %}
+#### Headers
 
-{% swagger-parameter in="body" name="charID" required="true" %}
-Character ID of the character to update for.
-{% endswagger-parameter %}
+| Name                                             | Type   | Description                                 |
+| ------------------------------------------------ | ------ | ------------------------------------------- |
+| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. |
 
-{% swagger-parameter in="body" name="charName" required="false" %}
-New name of the character
-{% endswagger-parameter %}
+#### Request Body
 
-{% swagger-parameter in="body" name="backstory" %}
-Updated backstory
-{% endswagger-parameter %}
+| Name                                     | Type   | Description                                  |
+| ---------------------------------------- | ------ | -------------------------------------------- |
+| charID<mark style="color:red;">\*</mark> | String | Character ID of the character to update for. |
+| charName                                 | String | New name of the character                    |
+| backstory                                | String | Updated backstory                            |
+| voiceType                                | String | New voice name                               |
+| action                                   | String | New list of actions for the character        |
 
-{% swagger-parameter in="body" name="voiceType" %}
-New voice name
-{% endswagger-parameter %}
-
-{% swagger-parameter in="body" name="action" %}
-New list of actions for the character
-{% endswagger-parameter %}
-
-{% swagger-response status="200: OK" description="The details have been updated successfully" %}
+{% tabs %}
+{% tab title="200: OK The details have been updated successfully" %}
 ```json
 {
    "STATUS": "SUCCESS"
 }
 ```
-{% endswagger-response %}
+{% endtab %}
 
-{% swagger-response status="400: Bad Request" description="The update might be unsuccessful due to various reason " %}
+{% tab title="400: Bad Request The update might be unsuccessful due to various reason " %}
 ```json
 {
     "ERROR": "Could not fetch character details from all_characters table." / 
@@ -151,16 +140,16 @@ New list of actions for the character
              "Could not update all_characters table."
 }
 ```
-{% endswagger-response %}
+{% endtab %}
 
-{% swagger-response status="401" description="API Key validation has failed" %}
+{% tab title="401 API Key validation has failed" %}
 ```json
 {
     "API_ERROR": "Invalid API key provided." / "api_key not found."
 }
 ```
-{% endswagger-response %}
-{% endswagger %}
+{% endtab %}
+{% endtabs %}
 
 {% hint style="info" %}
 For the list of supported voices please refer to the table in Text To Speech API
@@ -214,20 +203,26 @@ curl --location --request POST 'https://api.convai.com/character/update' \
 
 Get Details of Characters
 
-{% swagger method="post" path="/get" baseUrl="https://api.convai.com/character" summary="This endpoint is called to fetch all the necessary details of a particular character." %}
-{% swagger-description %}
+## This endpoint is called to fetch all the necessary details of a particular character.
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/get`
+
 Users can retrieve all the information about a particular character that they have created or that has been listed public.
-{% endswagger-description %}
 
-{% swagger-parameter in="header" name="CONVAI-API-KEY" required="true" %}
-The unique api-key provided for every user.
-{% endswagger-parameter %}
+#### Headers
 
-{% swagger-parameter in="body" name="charID" required="true" %}
-Character ID of the character for which to fetch all the details.
-{% endswagger-parameter %}
+| Name                                             | Type   | Description                                 |
+| ------------------------------------------------ | ------ | ------------------------------------------- |
+| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. |
 
-{% swagger-response status="200: OK" description="Returns all the information of the corresponding character" %}
+#### Request Body
+
+| Name                                     | Type   | Description                                                       |
+| ---------------------------------------- | ------ | ----------------------------------------------------------------- |
+| charID<mark style="color:red;">\*</mark> | String | Character ID of the character for which to fetch all the details. |
+
+{% tabs %}
+{% tab title="200: OK Returns all the information of the corresponding character" %}
 ```json
 {
     "character_name": "<name of the character>",
@@ -238,16 +233,16 @@ Character ID of the character for which to fetch all the details.
     "backstory": "<backstory of the character>"
 }
 ```
-{% endswagger-response %}
+{% endtab %}
 
-{% swagger-response status="400: Bad Request" description="Failed to fetch the information. Check if the character-id is valid" %}
+{% tab title="400: Bad Request Failed to fetch the information. Check if the character-id is valid" %}
 ```json
 {
     "ERROR": "INTERNAL SERVER ERROR, one or more database calls failed!"
 }
 ```
-{% endswagger-response %}
-{% endswagger %}
+{% endtab %}
+{% endtabs %}
 
 Here are some sample codes to demonstrate the request format for the endpoint -->
 
@@ -325,42 +320,33 @@ curl --location --request POST 'https://api.convai.com/character/get' \
 
 ## Interact with a Character
 
-{% swagger method="post" path="/getResponse" baseUrl="https://api.convai.com/character" summary="This endpoint is called to converse with the character" %}
-{% swagger-description %}
+## This endpoint is called to converse with the character
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/getResponse`
+
 Users can implement a chatbot session for the end-users to converse with their character. The users can maintain the context of a conversation by maintaining the session-id in the API requests made.
 
 Please remember to go through the list of "Important Points to Remember" mentioned at the end. They contain some information on the constraints and requirements to execute a successful API call to this endpoint
-{% endswagger-description %}
 
-{% swagger-parameter in="header" name="CONVAI-API-KEY" required="true" %}
-The unique api-key provided for every user.
-{% endswagger-parameter %}
+#### Headers
 
-{% swagger-parameter in="body" name="userText" required="true" %}
-The query of the user interacting with the charater
-{% endswagger-parameter %}
+| Name                                             | Type   | Description                                 |
+| ------------------------------------------------ | ------ | ------------------------------------------- |
+| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. |
 
-{% swagger-parameter in="body" name="file" type="File" required="true" %}
-The audio file containing the query of the user
-{% endswagger-parameter %}
+#### Request Body
 
-{% swagger-parameter in="body" name="charID" required="true" %}
-The ID of the character, the user is interacting with
-{% endswagger-parameter %}
+| Name                                            | Type    | Description                                                              |
+| ----------------------------------------------- | ------- | ------------------------------------------------------------------------ |
+| userText<mark style="color:red;">\*</mark>      | String  | The query of the user interacting with the charater                      |
+| charID<mark style="color:red;">\*</mark>        | String  | The ID of the character, the user is interacting with                    |
+| sessionID<mark style="color:red;">\*</mark>     | String  | Used to identify a session of conversation to maintain the context.      |
+| voiceResponse<mark style="color:red;">\*</mark> | Boolean | To generate an audio file for the response in the voice of the character |
+|                                                 | String  |                                                                          |
+| file<mark style="color:red;">\*</mark>          | File    | The audio file containing the query of the user                          |
 
-{% swagger-parameter in="body" name="sessionID" required="true" %}
-Used to identify a session of conversation to maintain the context.
-{% endswagger-parameter %}
-
-{% swagger-parameter in="body" name="voiceResponse" type="Boolean" required="true" %}
-To generate an audio file for the response in the voice of the character
-{% endswagger-parameter %}
-
-{% swagger-parameter in="body" %}
-
-{% endswagger-parameter %}
-
-{% swagger-response status="200: OK" description="The character is able to generate a response to the user's query" %}
+{% tabs %}
+{% tab title="200: OK The character is able to generate a response to the user's query" %}
 ```json
 {
     "charID": "<character id sent in the request body>",
@@ -370,25 +356,25 @@ To generate an audio file for the response in the voice of the character
     "sessionID": "<your session id. In case of a new session, it returns a newly generated value or returns the old one>"
 }
 ```
-{% endswagger-response %}
+{% endtab %}
 
-{% swagger-response status="404: Not Found" description="Response generation failed for the request" %}
+{% tab title="404: Not Found Response generation failed for the request" %}
 ```json
 {
     "charID": "<character id sent in the request body>",
     "text": "process_failure, error: <error representation>"
 }
 ```
-{% endswagger-response %}
+{% endtab %}
 
-{% swagger-response status="400: Bad Request" description="In case of bad input" %}
+{% tab title="400: Bad Request In case of bad input" %}
 ```json
 {
     "ERROR": "Expecting only one; either an audio file or user's query as a string"
 }
 ```
-{% endswagger-response %}
-{% endswagger %}
+{% endtab %}
+{% endtabs %}
 
 {% hint style="warning" %}
 Important Points to Remember:
