@@ -17,7 +17,7 @@ Download the WebGL version of the plugin, if you want to build for WebGL.
 The file structure belongs to the nightly version of the plugin downloaded from the documentation.
 {% endhint %}
 
-1. If you haven't already done so, download the SDK [here](https://convai.com/download/UnityPlugin).
+1. If you haven't already done so, download the SDK [here](https://drive.google.com/file/d/1dslrRcI6e02LvL-coupUoTFRlBDLjvMA).
 2. Start the Unity Hub.
 3. Verify that your project uses Unity 2022.3.0f1 LTS or later (check the Pre-Requisites section of the documentation).
 4. Open your project.
