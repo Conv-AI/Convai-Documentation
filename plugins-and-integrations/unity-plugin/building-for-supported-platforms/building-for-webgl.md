@@ -38,7 +38,7 @@ Please ensure that Git is installed on your computer prior to proceeding.\
 
 ### Import and Setup Instructions
 
-Follow the Import and Setup Instructions from [import-and-setup.md](import-and-setup.md "mention") and [setting-up-unity-plugin.md](setting-up-unity-plugin.md "mention").&#x20;
+Follow the Import and Setup Instructions from [import-and-setup.md](../import-and-setup.md "mention") and [setting-up-unity-plugin.md](../setting-up-unity-plugin.md "mention").&#x20;
 
 ### WebGL Incompatibility with Unity Editor
 
@@ -66,7 +66,7 @@ Patience, remember? This shift takes a bit.
 
 After the platform is switched to WebGL, click on `Player Settings`.This is where the fun begins:
 
-<figure><img src="../../.gitbook/assets/image (297).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (297).png" alt=""><figcaption></figcaption></figure>
 
 ### Configuring Player Settings
 
@@ -76,7 +76,7 @@ Once the platform conversion is complete,
 2. Navigate to the page`WebGL settings`.
 3. Under the`Resolution and Presentation` tab, select the`Convai PWA Template`.
 
-<figure><img src="../../.gitbook/assets/image (299).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (299).png" alt=""><figcaption></figcaption></figure>
 
 ## Importing Characters and Building the Scene
 
