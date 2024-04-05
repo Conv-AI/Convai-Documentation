@@ -9,7 +9,7 @@ description: Integrating Convai Character with Discord Bot
 In this documentation, we list out the steps needed to create your own discord bot and connect that with a Convai Character and host a server for the bot to make it accessible to the users in discord.
 
 {% hint style="info" %}
-Feel free to join our [Discord Server](https://discord.gg/Ws37cTZGWC) and be a part of innovative and passionate developers, while you build your own Convai Character.
+Feel free to join our [Discord Server](https://discord.gg/kwU7pcqU7k) and be a part of innovative and passionate developers, while you build your own Convai Character.
 {% endhint %}
 
 ### Let's Create a Character
