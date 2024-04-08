@@ -1,39 +1,39 @@
 ---
 description: >-
-  All the available APIs needed to create your own intelligent character with
+  All the relevant APIs needed to create your own intelligent AI characters with
   Convai.
 ---
 
 # Character API
 
-Access Convai endpoints for developing and interacting with an intelligent character, starting with some information like the character name, some background information, and a voice. Unveil the character to the end-user through your custom UI or through other services where Convai provides custom plugins/libraries, for them to have engaging conversations with your creation.
+Access Convai endpoints for developing and interacting with an intelligent character, starting with some basic information like the character 's name, background information, and a voice selection.\
+\
+Unveil the character to the end-user through your custom UI or through other services where Convai provides custom plugins/libraries, for users to have engaging conversations with your new characters.
 
 {% hint style="info" %}
-**Missing Something?** In case you are missing something that is essential for your innovative application, please reach out to us through the Contact Page form on our page and we will positively get back to you for more discussion on the requirement.
+**Missing Something?** In case you are missing something that is essential for your application, please reach out to us through the **support@convai.com** email and we'll get to your inquiry shortly!
 {% endhint %}
 
-## Create / Update Character
-
-## This endpoint is called to create a new character.
+## Create Character
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/create`
 
-Users can either use the character creator tool to create their own characters or directly use this endpoint to dynamically create characters, by providing some basic information
+Users can either use the character creator tool to create their own characters on the platform or use this API endpoint to dynamically create characters, by providing some basic information as defined below.
 
 #### Headers
 
-| Name                                             | Type   | Description                                 |
-| ------------------------------------------------ | ------ | ------------------------------------------- |
-| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. |
+| Name                                             | Type   | Description                                                                                                |
+| ------------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------- |
+| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. Found under the Key icon when logged into your Convai account. |
 
 #### Request Body
 
-| Name                                        | Type   | Description                                                                                                                      |
-| ------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| charName<mark style="color:red;">\*</mark>  | String | Name of the new character being created.                                                                                         |
-| voiceType<mark style="color:red;">\*</mark> | String | <p>The type of voice the character is expected to have.</p><p>[Please refer to the list of available voices mentioned below]</p> |
-| backstory<mark style="color:red;">\*</mark> | String | Basic background information of the character to start with.                                                                     |
-| actions                                     | String | A list of actions for the character to choose from, to be performed by the character based on the interactions with the user.    |
+| Name                                        | Type   | Description                                                                                                                                                                                            |
+| ------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| charName<mark style="color:red;">\*</mark>  | String | Name of the new character being created.                                                                                                                                                               |
+| voiceType<mark style="color:red;">\*</mark> | String | <p>The type of voice the character is expected to have.</p><p>[Please refer to the list of available voices in the <a href="../standalone-voice-api/text-to-speech-api.md">Text to Speech API</a>]</p> |
+| backstory<mark style="color:red;">\*</mark> | String | Basic background information of the character to start with.                                                                                                                                           |
+| actions                                     | String | A list of actions for the character to choose from, to be performed by the character based on the interactions with the user.                                                                          |
 
 {% tabs %}
 {% tab title="201: Created A new character has bee created with the necessary details" %}
@@ -96,32 +96,32 @@ curl --location --request POST 'https://api.convai.com/character/create' \
     "charName": "Raymond",
     "voiceType": "MALE",
     "backstory": "Raymond Reddington is a main character in the NBC series The Blacklist. Reddington is a criminal mastermind, making it to #4 and later to #1 on the FBI'\''s Ten Most Wanted Fugitives, who suddenly turns himself in after 20+ years of evading the FBI."
-}'e
+}'
 ```
 {% endtab %}
 {% endtabs %}
 
-## This endpoint is called to update the details of an existing character
+## Update Character
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/update`
 
-Users can update some of the existing information of a character that the user has created. They can pass only the new character information that needs to be updated, through the request. The rest of the information remains the same.
+Users can update some of the existing details of a character that has been previously created. Users need to only pass any new character information that needs to be updated. The rest of the character information will not be changed.
 
 #### Headers
 
-| Name                                             | Type   | Description                                 |
-| ------------------------------------------------ | ------ | ------------------------------------------- |
-| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. |
+| Name                                             | Type   | Description                                                                                                |
+| ------------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------- |
+| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. Found under the Key icon when logged into your Convai account. |
 
 #### Request Body
 
-| Name                                     | Type   | Description                                  |
-| ---------------------------------------- | ------ | -------------------------------------------- |
-| charID<mark style="color:red;">\*</mark> | String | Character ID of the character to update for. |
-| charName                                 | String | New name of the character                    |
-| backstory                                | String | Updated backstory                            |
-| voiceType                                | String | New voice name                               |
-| action                                   | String | New list of actions for the character        |
+| Name                                     | Type   | Description                                                                                                                                                |
+| ---------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| charID<mark style="color:red;">\*</mark> | String | Character ID of the character to update for.                                                                                                               |
+| charName                                 | String | New name of the character                                                                                                                                  |
+| backstory                                | String | Updated backstory                                                                                                                                          |
+| voiceType                                | String | New voice type of the character \[Please refer to the list of available voices in the [Text to Speech API](../standalone-voice-api/text-to-speech-api.md)] |
+| action                                   | String | New list of actions for the character                                                                                                                      |
 
 {% tabs %}
 {% tab title="200: OK The details have been updated successfully" %}
@@ -150,10 +150,6 @@ Users can update some of the existing information of a character that the user h
 ```
 {% endtab %}
 {% endtabs %}
-
-{% hint style="info" %}
-For the list of supported voices please refer to the table in Text To Speech API
-{% endhint %}
 
 Here are some sample codes to demonstrate the request format for the endpoint -->
 
@@ -201,13 +197,11 @@ curl --location --request POST 'https://api.convai.com/character/update' \
 {% endtab %}
 {% endtabs %}
 
-Get Details of Characters
-
-## This endpoint is called to fetch all the necessary details of a particular character.
+## Get Details
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/get`
 
-Users can retrieve all the information about a particular character that they have created or that has been listed public.
+Users can retrieve all the information about a particular character that they have created or that has been listed as public.
 
 #### Headers
 
@@ -318,15 +312,13 @@ curl --location --request POST 'https://api.convai.com/character/get' \
 {% endtab %}
 {% endtabs %}
 
-## Interact with a Character
-
-## This endpoint is called to converse with the character
+## Interacting with a Character
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/getResponse`
 
 Users can implement a chatbot session for the end-users to converse with their character. The users can maintain the context of a conversation by maintaining the session-id in the API requests made.
 
-Please remember to go through the list of "Important Points to Remember" mentioned at the end. They contain some information on the constraints and requirements to execute a successful API call to this endpoint
+Please remember to go through the list of "Important Points to Remember" mentioned at the end. They contain key information on the constraints and requirements to execute a successful API call to this endpoint.
 
 #### Headers
 
@@ -336,14 +328,14 @@ Please remember to go through the list of "Important Points to Remember" mention
 
 #### Request Body
 
-| Name                                            | Type    | Description                                                              |
-| ----------------------------------------------- | ------- | ------------------------------------------------------------------------ |
-| userText<mark style="color:red;">\*</mark>      | String  | The query of the user interacting with the charater                      |
-| charID<mark style="color:red;">\*</mark>        | String  | The ID of the character, the user is interacting with                    |
-| sessionID<mark style="color:red;">\*</mark>     | String  | Used to identify a session of conversation to maintain the context.      |
-| voiceResponse<mark style="color:red;">\*</mark> | Boolean | To generate an audio file for the response in the voice of the character |
-|                                                 | String  |                                                                          |
-| file<mark style="color:red;">\*</mark>          | File    | The audio file containing the query of the user                          |
+| Name                                            | Type    | Description                                                               |
+| ----------------------------------------------- | ------- | ------------------------------------------------------------------------- |
+| userText<mark style="color:red;">\*</mark>      | String  | The query or input of the user interacting with the charater.             |
+| charID<mark style="color:red;">\*</mark>        | String  | The ID of the character that the user is interacting with.                |
+| sessionID<mark style="color:red;">\*</mark>     | String  | Used to identify a session of conversation to maintain the context.       |
+| voiceResponse<mark style="color:red;">\*</mark> | Boolean | To generate an audio file for the response in the voice of the character. |
+| audio<mark style="color:red;">\*</mark>         | File    | The audio file containing the query of the user, in base64 format.        |
+| sample\_rate                                    | String  | Sample rate of the audio file being sent.                                 |
 
 {% tabs %}
 {% tab title="200: OK The character is able to generate a response to the user's query" %}
@@ -379,10 +371,10 @@ Please remember to go through the list of "Important Points to Remember" mention
 {% hint style="warning" %}
 Important Points to Remember:
 
-* The API endpoint expects the request body to contain only one type of input (either text input, via **userText**, or audio input via file). Including both types of input or none will result in an error.
-* We strictly adhere to OpenAI’s Content Policy for API usage and expect the user to respect the rules as well, to prevent the generation of toxic and inappropriate content.
+* The API endpoint expects the request body to contain only one type of input (either text input, via **userText**, or audio input via file). Including **both types of input or none will result in an error.**
+* We strictly adhere to OpenAI’s Content Policy for API usage and expect the user to respect the rules as well, to prevent the generation of toxic and inappropriate content. Repeated violations will result in the API key being blacklisted.
 * Please note that the body of the request should be **form-data**. This is to maintain consistency of format while uploading audio files.
-* Sending -1 as the session ID value starts a new chat session. Use the returned session ID in subsequent getResponse requests to ensure conversation context is maintained.
+* Sending -1 as the session ID value **starts a new chat session**. Use the returned session ID in subsequent getResponse requests to ensure conversation context is maintained.
 * While sending an audio file, make sure that it should have a **bit depth** of at least **16 bits or higher**.
 {% endhint %}
 

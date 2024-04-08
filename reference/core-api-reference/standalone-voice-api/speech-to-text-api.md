@@ -1,5 +1,5 @@
 ---
-description: All the available APIs needed to generate transcript from audio.
+description: All the available APIs needed to generate transcript from audio files.
 ---
 
 # Speech To Text API
@@ -74,7 +74,7 @@ This endpoint also has an option for enabling time stamps, which will provide th
 {% endtab %}
 {% endtabs %}
 
-Here are some sample codes to demonstrate the request format for the endpoint -->
+Here some ample codeto demonstrate the request format for th endpoint -->
 
 {% tabs %}
 {% tab title="Python" %}
@@ -110,7 +110,7 @@ curl --location --request POST 'https://api.convai.com/stt/' \
 {% endtabs %}
 
 {% hint style="warning" %}
-Please note currently the API only supports **wav** and **mp3** format for audio files. Sending audio files of other formats such as aac, flac, etc will result in an error.
+Please note currently the API only supports and format for audio files. Sending audio files of other formats such as aac, flac, etc will result in a rror.
 {% endhint %}
 
 {% hint style="info" %}
