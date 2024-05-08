@@ -101,3 +101,9 @@ Now everything is ready for testing. 🙂✅
 {% hint style="warning" %}
 Ensure you've set up your API Key (Convai/Convai Setup).
 {% endhint %}
+
+
+
+### Convai Default VR Controller Scheme
+
+<figure><img src="../../../.gitbook/assets/ConvaiDefaultVRControllerScheme.png" alt=""><figcaption></figcaption></figure>
