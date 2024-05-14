@@ -16,6 +16,7 @@
   * [Memory](convai-playground/character-creator-tool/memory.md)
   * [Actions](convai-playground/character-creator-tool/actions.md)
   * [Narrative Design](convai-playground/character-creator-tool/narrative-design.md)
+* [F.A.Q](convai-playground/f.a.q.md)
 
 ## Plugins & Integrations
 
