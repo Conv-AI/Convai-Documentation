@@ -22,11 +22,11 @@ Select `Convai Lip Sync` to add the Lip Sync component.
 
 You can also select Add Components.
 
-<figure><img src="../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Select the Lip-Sync checkmark and click Apply Changes.
 
-<figure><img src="../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ## Step 2: Set up the Lip Sync Component
 

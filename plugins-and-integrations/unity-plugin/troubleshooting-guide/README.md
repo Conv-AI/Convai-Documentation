@@ -2,19 +2,19 @@
 
 ## Common Issues (FAQ)
 
-#### Q. I cannot see the Convai menu.
+### Q. I cannot see the Convai menu.
 
 A. Please check if there are any errors in the console. Unity needs to be able to compile all the scripts to be able to display any custom editor menu options. Resolving all the console errors will fix this issue.&#x20;
 
 
 
-#### Q. Player Falling and Input Manager Error.
+### Q. Player Falling and Input Manager Error.
 
 A.  [player-falling-and-input-manager-error.md](player-falling-and-input-manager-error.md "mention")
 
 
 
-#### Q. There are a lot of errors on my console.
+### Q. There are a lot of errors on my console.
 
 A. Primarily, three issues cause errors in the console that can stem from the Convai Unity Plugin. You can use the links below to fix them quickly.&#x20;
 
@@ -24,7 +24,7 @@ A. Primarily, three issues cause errors in the console that can stem from the Co
 
 
 
-#### Q. I am talking to the character, but I cannot see the user transcript and the character does not seem to be coherently responding to what I am saying.
+### Q. I am talking to the character, but I cannot see the user transcript and the character does not seem to be coherently responding to what I am saying.
 
 A. This may indicate issues with the microphone. Please ensure that the microphone is connected correctly. You also need to ensure that the applications have permission to access the menu.
 
@@ -32,7 +32,7 @@ A. This may indicate issues with the microphone. Please ensure that the micropho
 
 
 
-#### Q. My character seems to be saying something and I can see the transcript but I cannot hear the character.
+### Q. My character seems to be saying something and I can see the transcript but I cannot hear the character.
 
 A. If we are using OVR with our models, we might need to enable audio loopback so that the audio can play.&#x20;
 
@@ -40,7 +40,7 @@ A. If we are using OVR with our models, we might need to enable audio loopback s
 
 
 
-#### Q. The animations for my characters are looking very weird.
+### Q. The animations for my characters are looking very weird.
 
 A. The animation avatar that we are using might be incompatible with the character mesh. Fixing that can solve the issue.
 
@@ -48,13 +48,13 @@ A. The animation avatar that we are using might be incompatible with the charact
 
 
 
-#### Q. There are two Settings Panel Buttons in Mobile Transcript UI.
+### Q. There are two Settings Panel Buttons in Mobile Transcript UI.
 
 A. If you are using Unity 2021, unexpected prefab variant issues may arise. This is because Unity Mobile Transcript UIs are variants of the main transcript UI prefab. With changes in the Prefab system in Unity 2022, it works correctly in Unity 2022. If you are using Unity 2021, you may encounter issues with prefabs. You can remove the redundant Settings Panel Button to address this problem.
 
 
 
-#### Q: The lipsync is very faint or not visible.
+### Q: The lipsync is very faint or not visible.
 
 **A:** The animations that we are using may be modifying facial animations. Editing the animations to remove facial animations should fix any issues related to lipsync.
 
@@ -66,7 +66,7 @@ A. If you are using Unity 2021, unexpected prefab variant issues may arise. This
 
 
 
-**Q: I'm facing security permission issues using the `grpc_csharp_ext.bundle` DLL inside the Unity Editor on MacOS**
+### **Q: I'm facing security permission issues using the `grpc_csharp_ext.bundle` DLL inside the Unity Editor on MacOS**
 
 **A:** macOS's strict security measures can block certain external unsigned DLLs. To address this, you can manually allow the DLL in "Security & Privacy" settings, modify Gatekeeper's settings through Terminal, ensure correct file permissions for the DLL, check its settings in Unity, and update the Mac Configuration in Unity's Player Settings
 
@@ -74,7 +74,7 @@ A. If you are using Unity 2021, unexpected prefab variant issues may arise. This
 
 
 
-**Q: I'm not able to talk to my character after building my Unity project for macOS (Intel64+Apple Silicon builds), especially on Intel Macs**
+### **Q: I'm not able to talk to my character after building my Unity project for macOS (Intel64+Apple Silicon builds), especially on Intel Macs**
 
 **A:** The issue is rooted in the `grpc_csharp_ext.bundle` used in Unity for networking. This DLL has separate versions optimized for Intel and Apple Silicon architectures. When trying to create a Universal build that serves both, compatibility problems arise, especially on Intel Macs. Presently, the best solution is to use Standalone build settings specific to each architecture.
 

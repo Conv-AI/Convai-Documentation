@@ -4,13 +4,13 @@ description: >-
   your Unity Project.
 ---
 
-# Importing a character from Convai Playground
+# Importing Characters into a Scene
 
 {% hint style="info" %}
 You can import the character created in the Convai Playground **only** in the Core, Complete, and Actions versions of the plugin.
 {% endhint %}
 
-### Core Plugin
+## Import RPM characters from the Convai Playground
 
 This is how you can import characters from the Convai Playground into your Unity Project.
 
@@ -26,15 +26,17 @@ If you are unsure how to get the character ID, click the "How do I create a char
 
 You can get the character ID from the Character Description.
 
-<figure><img src="../../.gitbook/assets/image (119).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 The downloading will take a while. On successful download, you will see the character in the scene with the same GameObject as the character ID.&#x20;
 
-<figure><img src="../../.gitbook/assets/image (64).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 This character will automatically be set up with the basic Convai Setup including the ConvaiNPC Script and Out-Of-Box Animations.&#x20;
 
-<figure><img src="../../.gitbook/assets/image (180).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 If you are facing issues with the animations in your imported character, make sure to change the animation type of `Ellen@IdleNew` and `Ellen@TalkingNew` Animations in the `Assets/Convai/Animations` folder to `Humanoid`.
 
@@ -42,15 +44,17 @@ If you are facing issues with the animations in your imported character, make su
 
 Now you are ready to set up the character with transcriptions.&#x20;
 
+## Importing Custom Characters
+
 Follow the tutorial on importing custom characters below to see how you can set up the character with Transcriptions and Custom Animations.
 
 {% content-ref url="importing-custom-characters.md" %}
 [importing-custom-characters.md](importing-custom-characters.md)
 {% endcontent-ref %}
 
-### Complete Plugin
+## Making a new scene with Convai embedded
 
-For the Complete Plugin, the process of importing the character is different. First, we will want to create a scene that is compatible with the Convai. This scene needs to have the Convai Player Character and the Convai Transcript Canvas prefabs (or similar prefabs). For the Core Plugin, we do this manually, but for the Complete Plugin, the setup process is automated.&#x20;
+First, we will want to create a scene that is compatible with the Convai. This scene needs to have the Convai Player Character and the Convai Transcript Canvas prefabs (or similar prefabs).
 
 First, we will click on File > New Scene.
 
