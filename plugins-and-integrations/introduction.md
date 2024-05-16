@@ -22,12 +22,12 @@ Convai provides a variety of plugins and integrations to help integrate conversa
 
 ## &#x20;Web and Chat SDK's
 
-{% content-ref url="convai-web-sdk/" %}
-[convai-web-sdk](convai-web-sdk/)
+{% content-ref url="web-plugin/convai-web-sdk/" %}
+[convai-web-sdk](web-plugin/convai-web-sdk/)
 {% endcontent-ref %}
 
-{% content-ref url="javascript-chat-ui-sdk/" %}
-[javascript-chat-ui-sdk](javascript-chat-ui-sdk/)
+{% content-ref url="web-plugin/javascript-chat-ui-sdk/" %}
+[javascript-chat-ui-sdk](web-plugin/javascript-chat-ui-sdk/)
 {% endcontent-ref %}
 
 {% content-ref url="discord/" %}

@@ -36,16 +36,16 @@ There are 4 types of chat variants that you can choose from:
 
 1. Toggle History Chat&#x20;
 
-<figure><img src="../../.gitbook/assets/Screenshot (110).png" alt=""><figcaption><p>Toggle History Chat variant features a bottom panel, displaying only the current user and NPC text. It also includes a 'toggle chat history' button, allowing users to choose whether or not to display previous messages.</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Screenshot (110).png" alt=""><figcaption><p>Toggle History Chat variant features a bottom panel, displaying only the current user and NPC text. It also includes a 'toggle chat history' button, allowing users to choose whether or not to display previous messages.</p></figcaption></figure>
 
 2. Unified Compact Chat
 
-<figure><img src="../../.gitbook/assets/Screenshot (111).png" alt=""><figcaption><p>Unified Compact chat features a bottom left panel, where both the current messages and the chat history is displayed.</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Screenshot (111).png" alt=""><figcaption><p>Unified Compact chat features a bottom left panel, where both the current messages and the chat history is displayed.</p></figcaption></figure>
 
 3. Sequential Line Chat
 
-<figure><img src="../../.gitbook/assets/Screenshot (112).png" alt=""><figcaption><p>Sequential line chat version features a bottom panel where only a single line of the most recent output is displayed at a given time, maintaining a minimalist view.</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Screenshot (112).png" alt=""><figcaption><p>Sequential line chat version features a bottom panel where only a single line of the most recent output is displayed at a given time, maintaining a minimalist view.</p></figcaption></figure>
 
 4. Expanded Side Chat
 
-<figure><img src="../../.gitbook/assets/Screenshot (113).png" alt=""><figcaption><p>'Expanded Side Chat' version closely resembles the 'Unified Compact Chat', but it features a larger, rectangular panel at the bottom left, providing a more spacious layout for your chat interactions.</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Screenshot (113).png" alt=""><figcaption><p>'Expanded Side Chat' version closely resembles the 'Unified Compact Chat', but it features a larger, rectangular panel at the bottom left, providing a more spacious layout for your chat interactions.</p></figcaption></figure>
