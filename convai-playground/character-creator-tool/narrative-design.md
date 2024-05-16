@@ -44,10 +44,10 @@ You can have a variety of decisions that result from the same Section, each with
 
 These special character can be utilized in the nodes to trigger specific outcomes.
 
-| Special Characters | Example                      | Use                                                                                             |
-| ------------------ | ---------------------------- | ----------------------------------------------------------------------------------------------- |
-| \<speak>           | \<speak> I'll say this line! | Characters will respond with exactly the phrase used after \<speak> in the node when activated. |
-| \*                 |                              | Forces transition to the next node                                                              |
+| Special Characters | Example                                      | Use                                                                                                                               |
+| ------------------ | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| \<speak>           | \<speak> I'll say this exact line! \</speak> | Characters will respond with exactly the phrase used after \<speak> in the node when activated, until the closing \</speak> tag.  |
+| \*                 |                                              | Forces transition to the next node                                                                                                |
 
 ### Triggers
 
