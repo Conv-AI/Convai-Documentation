@@ -28,7 +28,7 @@
   * [Import and Setup (nightly)](plugins-and-integrations/unity-plugin/import-and-setup.md)
   * [Setting Up Unity Plugin](plugins-and-integrations/unity-plugin/setting-up-unity-plugin.md)
   * [Troubleshooting Guide](plugins-and-integrations/unity-plugin/troubleshooting-guide/README.md)
-    * [Enabled Assembly Validation](plugins-and-integrations/unity-plugin/troubleshooting-guide/enabled-assembly-validation.md)
+    * [Disable Assembly Validation](plugins-and-integrations/unity-plugin/troubleshooting-guide/enabled-assembly-validation.md)
     * [Missing Newtonsoft Json](plugins-and-integrations/unity-plugin/troubleshooting-guide/missing-newtonsoft-json.md)
     * [Missing Animation Rigging](plugins-and-integrations/unity-plugin/troubleshooting-guide/missing-animation-rigging.md)
     * [FindObjectsOfTypeAll Error](plugins-and-integrations/unity-plugin/troubleshooting-guide/findobjectsoftypeall-error.md)
