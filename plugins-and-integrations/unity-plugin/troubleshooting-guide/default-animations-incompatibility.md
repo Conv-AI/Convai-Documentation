@@ -6,7 +6,13 @@ If the default animations that ship with the animator look bugged such that the 
 
 You can easily fix that by heading to the character's animator component and assigning the correct animator to the Avatar field.
 
-<figure><img src="../../../.gitbook/assets/image (52).png" alt=""><figcaption></figcaption></figure>
+<div align="center">
+
+<figure><img src="../../../.gitbook/assets/image (363).png" alt=""><figcaption><p>For male avatars</p></figcaption></figure>
+
+</div>
+
+<figure><img src="../../../.gitbook/assets/image (364).png" alt=""><figcaption><p>For female avatars</p></figcaption></figure>
 
 The correct animation will look something like this. The hands should not intersect the body.
 
