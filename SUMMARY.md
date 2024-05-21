@@ -30,8 +30,6 @@
   * [Troubleshooting Guide](plugins-and-integrations/unity-plugin/troubleshooting-guide/README.md)
     * [Disable Assembly Validation](plugins-and-integrations/unity-plugin/troubleshooting-guide/enabled-assembly-validation.md)
     * [Missing Newtonsoft Json](plugins-and-integrations/unity-plugin/troubleshooting-guide/missing-newtonsoft-json.md)
-    * [Missing Animation Rigging](plugins-and-integrations/unity-plugin/troubleshooting-guide/missing-animation-rigging.md)
-    * [FindObjectsOfTypeAll Error](plugins-and-integrations/unity-plugin/troubleshooting-guide/findobjectsoftypeall-error.md)
     * [Microphone Permission Issues](plugins-and-integrations/unity-plugin/troubleshooting-guide/microphone-permission-issues.md)
     * [OVR Lipsync Audio Loopback not Enabled](plugins-and-integrations/unity-plugin/troubleshooting-guide/ovr-lipsync-audio-loopback-not-enabled.md)
     * [Default Animations Incompatibility](plugins-and-integrations/unity-plugin/troubleshooting-guide/default-animations-incompatibility.md)
