@@ -122,9 +122,8 @@ public class SessionManager : MonoBehaviour
 3. **Retrieve Session ID**: Use `PlayerPrefs.GetString(characterID, string.Empty)` to retrieve the stored session ID.
 4. **Use Session ID**: Pass the session ID to your Convai API calls to maintain session continuity.
 
-#### Best Practices
+## Best Practices
 
 * **Error Handling**: Ensure proper error handling when fetching and storing session IDs.
 * **Security**: Consider encrypting sensitive information stored in `PlayerPrefs`.
 * **Performance**: Use asynchronous methods to avoid blocking the main thread when fetching session IDs.
-* **Documentation**: Document your session management logic for easier maintenance and troubleshooting.
