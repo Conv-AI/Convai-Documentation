@@ -47,6 +47,7 @@
     * [Building for VR](plugins-and-integrations/unity-plugin/building-for-supported-platforms/building-for-vr.md)
     * [Building for AR](plugins-and-integrations/unity-plugin/building-for-supported-platforms/building-for-ar.md)
   * [Utilities](plugins-and-integrations/unity-plugin/utilities/README.md)
+    * [Managing Session IDs in Convai Unity Plugin](plugins-and-integrations/unity-plugin/utilities/managing-session-ids-in-convai-unity-plugin.md)
     * [Dynamic UI System](plugins-and-integrations/unity-plugin/utilities/dynamic-ui-system.md)
     * [Convai UI Prefabs](plugins-and-integrations/unity-plugin/utilities/convai-ui-prefabs.md)
     * [Input Management](plugins-and-integrations/unity-plugin/utilities/input-management.md)
