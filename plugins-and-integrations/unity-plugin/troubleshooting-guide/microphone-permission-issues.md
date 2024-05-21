@@ -9,3 +9,7 @@ If you see the microphone indicator turning on in the top left corner but no use
 <figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption><p>Click on Record to make sure microphone is recording properly</p></figcaption></figure>
 
 <figure><img src="../../../.gitbook/assets/image (4).png" alt=""><figcaption><p>Press Stop to listen to the audio recorded through the selected mic</p></figcaption></figure>
+
+
+
+## Check [Notification System page](../utilities/notification-system.md) to learn more about various issues related to microphone
