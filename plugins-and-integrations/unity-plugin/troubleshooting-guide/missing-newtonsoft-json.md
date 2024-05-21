@@ -13,7 +13,7 @@ Then navigate to Packages folder. In the Packages folder. Click on manifest.json
 Add the Newtonsoft Json Package on top.
 
 ```json
-"com.unity.nuget.newtonsoft-json": "3.0.2",
+    "com.unity.nuget.newtonsoft-json": "3.2.1",
 ```
 
 The final manifest.json should look like this.
@@ -21,7 +21,7 @@ The final manifest.json should look like this.
 ```json
 {  
     "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.0.2", 
+        "com.unity.nuget.newtonsoft-json": "3.2.1", 
         "com.unity.animation.rigging": "1.1.1",
         "com.unity.ide.rider": "3.0.16",
         "com.unity.ide.visualstudio": "2.0.16",
