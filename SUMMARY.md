@@ -51,6 +51,7 @@
     * [Settings Panel](plugins-and-integrations/unity-plugin/utilities/settings-panel.md)
   * [Adding Actions to your Character](plugins-and-integrations/unity-plugin/adding-actions-to-your-character.md)
   * [Adding Lip-Sync to your Character](plugins-and-integrations/unity-plugin/adding-lip-sync-to-your-character.md)
+  * [Adding Narrative Design to your Character](plugins-and-integrations/unity-plugin/adding-narrative-design-to-your-character.md)
   * [Adding Scene Reference and Point-At Crosshairs](plugins-and-integrations/unity-plugin/adding-scene-reference-and-point-at-crosshairs.md)
   * [Scripts Overview](plugins-and-integrations/unity-plugin/scripts-overview/README.md)
     * [ConvaiNPC.cs](plugins-and-integrations/unity-plugin/scripts-overview/convainpc.cs.md)

@@ -26,17 +26,17 @@ If you are unsure how to get the character ID, click the "How do I create a char
 
 You can get the character ID from the Character Description.
 
-<figure><img src="../../.gitbook/assets/image (2) (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (4) (1).png" alt=""><figcaption></figcaption></figure>
 
 The downloading will take a while. On successful download, you will see the character in the scene with the same GameObject as the character ID.&#x20;
 
 <figure><img src="../../.gitbook/assets/image (361).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/image (1) (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (4) (1).png" alt=""><figcaption></figcaption></figure>
 
 This character will automatically be set up with the basic Convai Setup including the ConvaiNPC Script and Out-Of-Box Animations.&#x20;
 
-<figure><img src="../../.gitbook/assets/image (3) (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (4) (1).png" alt=""><figcaption></figcaption></figure>
 
 If you are facing issues with the animations in your imported character, make sure to change the animation type of `Ellen@IdleNew` and `Ellen@TalkingNew` Animations in the `Assets/Convai/Animations` folder to `Humanoid`.
 
