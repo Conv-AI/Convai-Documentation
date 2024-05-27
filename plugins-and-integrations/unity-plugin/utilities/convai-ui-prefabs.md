@@ -1,4 +1,4 @@
-# Convai UI Prefabs
+# Pre-built UI Prefabs
 
 We provide several UI options to display character and user's transcript out of the box that players can use with the Convai Plugin. You can use and customize these prefabs.&#x20;
 
@@ -48,7 +48,7 @@ Identical to [#subtitle](convai-ui-prefabs.md#subtitle "mention") UI. Includes a
 
 <figure><img src="../../../.gitbook/assets/image (279) (1).png" alt="" width="327"><figcaption></figcaption></figure>
 
-## [Convai Chat UI Handler Component](dynamic-ui-system.md)
+## [Convai Chat UI Handler Component](transcript-ui-system.md)
 
 <figure><img src="../../../.gitbook/assets/image 2.png" alt=""><figcaption></figcaption></figure>
 

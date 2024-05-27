@@ -1,4 +1,4 @@
-# Dynamic UI System
+# Transcript UI System
 
 ## Overview
 
@@ -93,7 +93,7 @@ public override void SendCharacterText(string charName, string text, Color chara
 
 public override void SendPlayerText(string playerName, string text, Color playerTextColor)
 {
-    // Handle sending player text to your custom UI here.
+    Handle sending player text to your custom UI here.
 }
 ```
 {% endcode %}
@@ -104,7 +104,7 @@ Add any additional functionality or customization options that your custom UI ma
 
 #### Step 4: Assign and Use Your Custom UI
 
-To use your custom UI class within the `ConvaiChatUIHandler`, you need to add it to the `GetUIAppearances` dictionary. This involves creating a prefab for your custom UI and assigning it in the `ConvaiChatUIHandler`.
+To use your custom UI class within the dictionary`ConvaiChatUIHandler`, you need to add it to the `GetUIAppearances` dictionary. This involves creating a prefab for your custom UI and assigning it in the `ConvaiChatUIHandler`.
 
 Here's an example of how to do this:
 
@@ -114,12 +114,12 @@ Here's an example of how to do this:
 
 {% code overflow="wrap" lineNumbers="true" %}
 ```csharp
-[Tooltip("Prefab for the customChatUI.")]
+[Tooltip (Prefab for the customChatUI.")]
 public GameObject customChatUIPrefab;
 
 private void InitializeUIStrategies()
 {
-    // Existing UI types
+    Existing UI types
     InitializeUI(chatBoxPrefab, UIType.ChatBox);
     InitializeUI(questionAnswerPrefab, UIType.QuestionAnswer);
     InitializeUI(subtitlePrefab, UIType.Subtitle);
@@ -128,11 +128,11 @@ private void InitializeUIStrategies()
     InitializeUI(customChatUIPrefab, UIType.Custom); // Make sure to define UIType.Custom in the UIType enum
 }
 
-private void InitializeUI(GameObject uiPrefab, UIType uiType)
+private void InitializeUI (GameObject uiPrefab, UIType uiType)
 {
-    // ... existing code...
+    // existing code...
 
-    // Add your custom UI initialization here
+    Add your custom UI initialization here
     if (uiType == UIType.Custom)
     {
         CustomChatUI customUIComponent = uiPrefab.GetComponent<CustomChatUI>();

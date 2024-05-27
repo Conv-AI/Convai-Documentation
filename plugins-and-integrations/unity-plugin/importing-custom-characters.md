@@ -46,7 +46,7 @@ We will adjust the Center, Radius and Height of the collider such that it fits o
 
 ### Step 3: Add [ConvaiNPC](scripts-overview/convainpc.cs.md) Component
 
-With your Custom Character Selection add ConvaiNPC component. By doing so, your Game Object should look like this:
+With your Custom Character Selection add ConvaiNPC component. By doing so, your Game objectgame should look like this:
 
 {% hint style="info" %}
 We assume that nothing other than pre-instructed components were added by you; your Game Object component list may be different
