@@ -6,9 +6,9 @@ description: >-
 
 # Importing Custom Characters
 
-To import your custom characters into your Convai-powered Unity project, you will first need to bring your model into your project. The model needs at least two animations: one for Talking and one for Idle.
+To import your custom characters into your Convai-powered Unity project, you will first need to bring your model into your project. The model needs at least two animations: one for talking and one for Idle.
 
-## Part 1: Character
+## Park 1: Character
 
 ### Prerequisites
 
@@ -18,7 +18,7 @@ Create an animator controller with the two animations that looks like this. You 
 
 <figure><img src="../../.gitbook/assets/image (222).png" alt=""><figcaption><p>The animator controller should look like this. This is the in-box NPC Animator. </p></figcaption></figure>
 
-### Step 1) Add Animator to your custom character
+### Step 1: Add Animator to your custom character
 
 Select your character from the Hierarchy and Add Animator Component
 
@@ -28,13 +28,15 @@ Convai Plugin ships with two pre-made animation controller, you can choose these
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 195607.png" alt=""><figcaption><p>Screenshot showing selection of Animation Controller</p></figcaption></figure>
 
-### Step 2) Adding a Trigger Volume
+### Step 2: Adding a Trigger Volume
 
-With your custom character selected add a Collision shape of your choice, for this demo we are going with a `Capsule Collider`
+With your custom character selected, add a Collision shape of your choice, for this demo we are going with a `Capsule Collider`
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 200002.png" alt=""><figcaption><p>Screenshot showing newly added Capsule Collider</p></figcaption></figure>
 
 We will make this Collider a trigger, for this we will enable the `Is Trigger` option in the inspector panel
+
+
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 200219.png" alt=""><figcaption><p>Screenshot showing enable of Is Trigger option</p></figcaption></figure>
 
@@ -42,21 +44,21 @@ We will adjust the Center, Radius and Height of the collider such that it fits o
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 203103 (1).png" alt=""><figcaption></figcaption></figure>
 
-### Step 3) Add [ConvaiNPC](scripts-overview/convainpc.cs.md) Component
+### Step 3: Add [ConvaiNPC](scripts-overview/convainpc.cs.md) Component
 
-With your Custom Character Selection add ConvaiNPC component, doing so your Game Object should look like this
+With your Custom Character Selection add ConvaiNPC component. By doing so, your Game Object should look like this:
 
 {% hint style="info" %}
-We assume that nothing other than pre-instructed components were added by you, your Game Object component list may be different
+We assume that nothing other than pre-instructed components were added by you; your Game Object component list may be different
 {% endhint %}
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 201324.png" alt=""><figcaption><p>Screenshot showing newly added ConvaiNPC Component</p></figcaption></figure>
 
-We will fill out the Character Information Section, so copy your Character ID and Character Name from [Convai Playground](broken-reference) and paste them in respective field.
+## Part 2: Transcriptions and Captions
 
-<figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 201727.png" alt=""><figcaption><p>Screenshot showing filled character information.</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 201727.png" alt=""><figcaption><p>Screenshot showing filled-in character information.</p></figcaption></figure>
 
-### Step 4) Setup Game Object for Convai Character
+### Step 4: Setup a: game object for Convai Character
 
 We will assign `Convai Character` layer to your Custom Character Game Object&#x20;
 
