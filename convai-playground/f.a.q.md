@@ -19,4 +19,6 @@ Our [Discord](https://discord.com/invite/TG98s8FWKN) and [YouTube Channels](http
 4. **Is there an API to change my character's information?**
    * _Yes! You can see the list of API calls and their functions for characters_ [_here._](https://docs.convai.com/api-docs/reference/core-api-reference/character-tool-api/character-api)
 5. **Do the SDK's support Custom Characters?**
-   * _Yes, you can use custom characters! here is the_ [_Unreal custom character tutorial_](https://youtu.be/JJf1avEy0aM)_, and the Unity video will be shared soon._
+   * _Yes, you can use your own custom characters! Note that your custom characters will require facial blendshapes and a rigged skeleton in order for the default animations and lipsync to function as similar to the other natively supported Avatar systems._\
+     \
+     _Here is the_ [_Unreal custom character tutorial_](https://www.youtube.com/watch?v=69ueqmUShq4)_, and the Unity video will be shared soon._
