@@ -8,9 +8,7 @@ description: >-
 
 To import your custom characters into your Convai-powered Unity project, you will first need to bring your model into your project. The model needs at least two animations: one for talking and one for Idle.
 
-## Park 1: Character
-
-### Prerequisites
+## Prerequisites
 
 When you want to set up your custom character with Convai, you will need your character model and two animations: Idle and Talking.&#x20;
 
@@ -54,7 +52,7 @@ We assume that nothing other than pre-instructed components were added by you; y
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 201324.png" alt=""><figcaption><p>Screenshot showing newly added ConvaiNPC Component</p></figcaption></figure>
 
-## Part 2: Transcriptions and Captions
+Copy your character's ID and name from [Convai Playground](broken-reference) and paste them here.
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 201727.png" alt=""><figcaption><p>Screenshot showing filled-in character information.</p></figcaption></figure>
 
