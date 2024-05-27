@@ -112,7 +112,7 @@ Make sure that game object you have decided to be a trigger have a collider atta
 
 Now you can select from the "Trigger" dropdown which trigger should be invoked when player enters this trigger box.&#x20;
 
-We have also added a way for you to manually invoke this trigger. also, you can use `InvokeSelectedTrigger` function to invoke the trigger from anywhere.You
+We have also added a way for you to manually invoke this trigger. You can use `InvokeSelectedTrigger` function to invoke the trigger from anywhere.
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 123713.png" alt=""><figcaption><p>Screenshot showing ability to select your desired trigger</p></figcaption></figure>
 
