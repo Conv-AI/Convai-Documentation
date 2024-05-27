@@ -10,7 +10,7 @@ The file structure belongs to the Core version of the plugin downloaded from the
 
 ### Setting up Unity Plugin
 
-In the Menu Bar, go the Convai > Convai Setup.
+In the Menu Bar, go to Convai > Convai Setup.
 
 <figure><img src="../../.gitbook/assets/image (291).png" alt=""><figcaption></figcaption></figure>
 

@@ -66,6 +66,7 @@
     * [ConvaiPlayerMovement.cs](plugins-and-integrations/unity-plugin/scripts-overview/convaiplayermovement.cs.md)
     * [ConvaiNPEditor.cs](plugins-and-integrations/unity-plugin/scripts-overview/convainpeditor.cs.md)
   * [Changelogs](plugins-and-integrations/unity-plugin/changelogs.md)
+  * [Creating a Convai Powered Scene from Template](plugins-and-integrations/unity-plugin/creating-a-convai-powered-scene-from-template.md)
 * [Unreal Engine](plugins-and-integrations/unreal-engine/README.md)
   * [Supported Platforms](plugins-and-integrations/unreal-engine/supported-platforms.md)
   * [Installation](plugins-and-integrations/unreal-engine/installation.md)
