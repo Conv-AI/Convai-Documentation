@@ -16,7 +16,7 @@ For this demo, we are using Seraphine Whisperwind.\
 You can select whatever character you want to enable Narrative Design.
 {% endhint %}
 
-<figure><img src="../../.gitbook/assets/Screenshot 2024-05-22 114710.png" alt=""><figcaption><p>Screenshot showing selection of character in <a href="adding-narrative-design-to-your-character.md#convai-playground">Convai Playground</a></p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2024-05-27 113409.png" alt=""><figcaption><p>Screenshot showing selection of character in <a href="adding-narrative-design-to-your-character.md#convai-playground">Convai Playground</a></p></figcaption></figure>
 
 ### Step 2: Open Narrative Design in Convai Playground
 
@@ -32,9 +32,9 @@ For more information how to create narrative design in the [Convai Playground](a
 Video series showing how to create Narrative Design
 {% endembed %}
 
-For this sample, we have created the following Narrative design graph:design
+For this sample, we have created the following Narrative design
 
-<figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 123350.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2024-05-27 113820.png" alt=""><figcaption><p>Screenshot showing demo Narrative Design</p></figcaption></figure>
 
 You are all set to bring your character from Convai Playground to Unity, let's hope over to Unity to continue the guide
 
