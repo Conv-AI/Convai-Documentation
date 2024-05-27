@@ -10,50 +10,56 @@ To import your custom characters into your Convai-powered Unity project, you wil
 
 ## Part 1: Character
 
+### Prerequisites
+
 When you want to set up your custom character with Convai, you will need your character model and two animations: Idle and Talking.&#x20;
 
-Create an animator controller with the two animations that looks like this. You should also add a 'Talk' boolean to ensure that you can trigger the animation. [Here is a YouTube tutorial on how to set up an animator controller](https://www.youtube.com/watch?v=JeZkctmoBPw\&t=53s). This is the bare minimum animator setup that you need to do.&#x20;
+Create an animator controller with the two animations that looks like this. You should also add a 'Talk' Boolean to ensure that you can trigger the animation. [Here is a YouTube tutorial on how to set up an animator controller](https://www.youtube.com/watch?v=JeZkctmoBPw\&t=53s). This is the bare minimum animator setup that you need to do.&#x20;
 
-<figure><img src="../../.gitbook/assets/image (222).png" alt=""><figcaption><p>The animator controller should look like this. This is the the in-box NPC Animator. </p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (222).png" alt=""><figcaption><p>The animator controller should look like this. This is the in-box NPC Animator. </p></figcaption></figure>
 
-Add an animator component and the created animator controller to the component. NPC Animator is the name of the animator that ships out of the box with the plugin. You will want to replace this with your own animator.&#x20;
+### Step 1) Add Animator to your custom character
 
-<figure><img src="../../.gitbook/assets/image (129).png" alt=""><figcaption><p>The animator component with the in-box "NPC Animator"</p></figcaption></figure>
+Select your character from the Hierarchy and Add Animator Component
 
-Add a Capsule (or any other shape of choice) Collider and make it into a trigger by selecting the IsTrigger field.
+<figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 195315.png" alt=""><figcaption><p>Screenshot showing newly added Animator Component</p></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/image (152).png" alt=""><figcaption></figcaption></figure>
+Convai Plugin ships with two pre-made animation controller, you can choose these controllers or can assign your custom controller, whatever fits your need. For this demo we are going with `Feminine NPC Animator`
 
-Add an Audio Source component to the character.
+<figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 195607.png" alt=""><figcaption><p>Screenshot showing selection of Animation Controller</p></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/image (58).png" alt=""><figcaption></figcaption></figure>
+### Step 2) Adding a Trigger Volume
 
-The GameObject should look like this.
+With your custom character selected add a Collision shape of your choice, for this demo we are going with a `Capsule Collider`
 
-<figure><img src="../../.gitbook/assets/image (155).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 200002.png" alt=""><figcaption><p>Screenshot showing newly added Capsule Collider</p></figcaption></figure>
 
-Finally, change the Tag of the Convai-powered NPC to "Character" so that it can work with the in-box Convai Player Character.
+We will make this Collider a trigger, for this we will enable the `Is Trigger` option in the inspector panel
 
-<figure><img src="../../.gitbook/assets/image (182).png" alt=""><figcaption><p>Change the tag from "Untagged" to "Character"</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 200219.png" alt=""><figcaption><p>Screenshot showing enable of Is Trigger option</p></figcaption></figure>
 
-The next page gives a brief overview of the ConvaiNPC.cs script.
+We will adjust the Center, Radius and Height of the collider such that it fits our character
 
-## Part 2: Transcriptions and Captions
+<figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 203103 (1).png" alt=""><figcaption></figcaption></figure>
+
+### Step 3) Add [ConvaiNPC](scripts-overview/convainpc.cs.md) Component
+
+With your Custom Character Selection add ConvaiNPC component, doing so your Game Object should look like this
 
 {% hint style="info" %}
-You will have to do this part of the setup for characters downloaded from the playground through the character downloader if you are using the Core version of the plugin.
+We assume that nothing other than pre-instructed components were added by you, your Game Object component list may be different
 {% endhint %}
 
-Create a Canvas with two TextMeshPro GameObjects. One of these will be where the transcript appears as we speak and the other will be where the character's transcript appears.&#x20;
+<figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 201324.png" alt=""><figcaption><p>Screenshot showing newly added ConvaiNPC Component</p></figcaption></figure>
 
-Drag the User Transcript TextMeshPro (named User Text here) to the User Text field in the Convai GRPCAPI script present in the Camera component in the Convai Player Character.
+We will fill out the Character Information Section, so copy your Character ID and Character Name from [Convai Playground](broken-reference) and paste them in respective field.
 
-<figure><img src="../../.gitbook/assets/image (185).png" alt=""><figcaption><p>Go to the camera component of the Convai Player Character.</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 201727.png" alt=""><figcaption><p>Screenshot showing filled character information.</p></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/image (161).png" alt=""><figcaption><p>Add the User Text TextMeshPro GameObject to the User Text field.</p></figcaption></figure>
+### Step 4) Setup Game Object for Convai Character
 
-Drag the Character's Transcript TextMeshPro to the Character Text field in the Convai NPC script in the character that you added.
+We will assign `Convai Character` layer to your Custom Character Game Object&#x20;
 
-<figure><img src="../../.gitbook/assets/image (173).png" alt=""><figcaption><p>Add the Character Text TextMeshPro GameObject to the Character Text field.</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 202613.png" alt=""><figcaption><p>Screenshot showing selection of Convai Character</p></figcaption></figure>
 
-This will set up the new Character and you can talk to it.&#x20;
+Now your Custom Character is all set to work with Convai Plugin
