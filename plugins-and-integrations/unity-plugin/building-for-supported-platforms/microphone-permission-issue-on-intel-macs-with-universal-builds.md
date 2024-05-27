@@ -1,4 +1,4 @@
-# Building Universal macOS Applications with Unity
+# Building for macOS Universal apps
 
 ## Overview
 
@@ -6,7 +6,7 @@ When building Unity projects for macOS, developers may encounter issues with mic
 
 ### Problem Description
 
-Users have reported that while Apple Silicon Macs handle microphone permissions without issue, Intel Macs may fail to access the microphone due to differences in architecture. This can result in a lack of microphone response, DLL not found Exceptions, error messages, potential application crashes, or no audio input being detected.
+Some users have reported that while building macOS universal apps, Apple Silicon Macs handle microphone permissions without issue, while Intel Macs may fail to access the microphone due to differences in architecture. This can result in a lack of microphone response, DLL not found Exceptions, error messages, potential application crashes, or no audio input being detected.
 
 ### Cause
 
@@ -52,5 +52,5 @@ After completing a Universal build on an Intel Mac, you must manually update the
 
 ## Conclusion
 
-Building for macOS requires careful consideration of the distinct Intel and Apple Silicon architectures. The current best practice is to use Standalone build settings tailored to the specific architecture of the target Mac. As we progress, we will have a more integrated solution for managing DLLs that will simplify the development process for Universal macOS applications.
+Building for macOS requires careful consideration of the distinct Intel and Apple Silicon architectures. The current best practice is to use Standalone build settings tailored to the specific architecture of the target Mac. As we progress, we will have a more integrated solution for managing DLLs that will simplify the development process for universal macOS applications.
 

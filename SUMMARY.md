@@ -41,7 +41,7 @@
     * [Building for WebGL](plugins-and-integrations/unity-plugin/building-for-supported-platforms/building-for-webgl.md)
     * [Building for VR](plugins-and-integrations/unity-plugin/building-for-supported-platforms/building-for-vr.md)
     * [Building for AR](plugins-and-integrations/unity-plugin/building-for-supported-platforms/building-for-ar.md)
-    * [Building Universal macOS Applications with Unity](plugins-and-integrations/unity-plugin/building-for-supported-platforms/microphone-permission-issue-on-intel-macs-with-universal-builds.md)
+    * [Building for macOS Universal apps](plugins-and-integrations/unity-plugin/building-for-supported-platforms/microphone-permission-issue-on-intel-macs-with-universal-builds.md)
   * [Utilities](plugins-and-integrations/unity-plugin/utilities/README.md)
     * [Session ID Management](plugins-and-integrations/unity-plugin/utilities/session-id-management.md)
     * [Dynamic UI System](plugins-and-integrations/unity-plugin/utilities/dynamic-ui-system.md)
