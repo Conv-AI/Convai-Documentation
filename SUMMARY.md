@@ -22,7 +22,8 @@
 
 * [Introduction](plugins-and-integrations/introduction.md)
 * [Unity Plugin](plugins-and-integrations/unity-plugin/README.md)
-  * [Downloads](plugins-and-integrations/unity-plugin/downloads.md)
+  * [Downloads](plugins-and-integrations/unity-plugin/downloads/README.md)
+    * [Limitations of WebGL Plugin](plugins-and-integrations/unity-plugin/downloads/limitations-of-webgl-plugin.md)
   * [Pre-Requisites](plugins-and-integrations/unity-plugin/pre-requisites.md)
   * [Compatibility](plugins-and-integrations/unity-plugin/compatibility.md)
   * [Import and Setup (nightly)](plugins-and-integrations/unity-plugin/import-and-setup.md)
