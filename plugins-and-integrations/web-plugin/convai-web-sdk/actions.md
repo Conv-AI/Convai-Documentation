@@ -14,7 +14,7 @@ To set up the Actions you need to follow the following steps:
 const [actionText, setActionText] = useState("");
 ```
 
-3. Inside the same useEffect where we check the audio response. Refer to the [Getting Started](broken-reference) page to quickly understand how and where we check audio response.
+3. Inside the same useEffect where we check the audio response. Refer to the [Getting Started](getting-started.md) page to quickly understand how and where we check audio response.
 
 ```javascript
 useEffect(()=>{
