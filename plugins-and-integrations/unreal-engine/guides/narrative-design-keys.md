@@ -11,8 +11,9 @@ We will create a simple scenario where the character welcomes the player and ask
 1. In the playground, enable Narrative Design on your character and change the starting section name to `Welcome`.\
 
 2.  Add the following to the Objective field of the Welcome section:\
-    `` Welcome the player and ask him how his {TimeOfDay} is.` `` \
-    Notice that we adding any string between curly brackets becomes a variable, and what we did here is adding the time of day as a variable, then from Unreal we can pass either the word "Morning" or "Evening" and the character will respond accordingly.
+    `The time of day currently is {TimeOfDay} . Welcome the player and ask him how his {TimeOfDay} is.` \
+    \
+    Notice that by adding any string between curly brackets it becomes a variable, and what we did here is adding the time of day as a variable, then from Unreal we can pass either the word "Morning" or "Evening" and the character will respond accordingly.
 
     <figure><img src="../../../.gitbook/assets/image (372).png" alt=""><figcaption><p><br></p></figcaption></figure>
 3. Back in Unreal, open the character's blueprint.\
