@@ -14,19 +14,19 @@ Before proceeding with this section, it is advisable to familiarize yourself wit
 
 1. Develop the logical flow for your specific use case. In this instance, we have created a simple museum tour guide scenario.
 
-<figure><img src="../../../.gitbook/assets/image (347).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (347).png" alt=""><figcaption></figcaption></figure>
 
-1. Once the logic is decided we can move to Unreal Engine. (In this guide we will use the same setup described in this [<mark style="color:green;">guide</mark>](event-aware-convai-characters.md))
+1. Once the logic is decided we can move to Unreal Engine. (In this guide we will use the same setup described in this [<mark style="color:green;">guide</mark>](../event-aware-convai-characters.md))
 2. Our goal is to invoke the trigger `Start Tour` in the narrative Design graph, using the `Invoke Narrative Design Trigger` .
 3. The `Trigger Name` in  the function should be the same as  the `Trigger` name on the graph.
 
 <div align="left">
 
-<figure><img src="../../../.gitbook/assets/websiteTrigger (2).jpg" alt="" width="343"><figcaption><p>Website</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/websiteTrigger (2).jpg" alt="" width="343"><figcaption><p>Website</p></figcaption></figure>
 
  
 
-<figure><img src="../../../.gitbook/assets/UE Trigger (2).jpg" alt=""><figcaption><p>Unreal Engine</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/UE Trigger (2).jpg" alt=""><figcaption><p>Unreal Engine</p></figcaption></figure>
 
 </div>
 
