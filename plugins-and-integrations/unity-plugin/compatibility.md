@@ -2,7 +2,7 @@
 
 ## Unity Version[​](https://docs.inworld.ai/docs/tutorial-integrations/Unity/compatibility/#unity-version) <a href="#unity-version" id="unity-version"></a>
 
-The minimum supported Unity version is **2020.3.x**. Any version below that may not be compatible.
+The minimum supported Unity version is **2022.3.x**. Any version below that may not be compatible.
 
 ## Supported Platform[​](https://docs.inworld.ai/docs/tutorial-integrations/Unity/get-started/compatibility#platform)s <a href="#platform" id="platform"></a>
 

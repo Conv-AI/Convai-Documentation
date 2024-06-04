@@ -15,5 +15,4 @@ iOS browsers impose strict limitations on the size of WebGL builds. These constr
 
 ### Browser Compatibility
 
-* Safari: The default browser on iOS, Safari, is generally the best option for WebGL builds, but it still has significant limitations compared to desktop browsers.
-* Third-Party Browsers: Other browsers like Chrome or Firefox on iOS use the WebKit engine due to Apple’s restrictions. Therefore, they inherit the same limitations as Safari.
+* Safari: The default browser on iOS, Safari, is generally the best option for WebGL builds, but it still has significant limitations compared to other desktop browsers.
