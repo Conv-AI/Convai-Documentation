@@ -3,7 +3,11 @@
 ### Unity Version
 
 {% hint style="warning" %}
-The Convai Unity SDK supports a minimum of Unity 2019.4.11f1 LTS or later.&#x20;
+The Convai Unity SDK supports a minimum of Unity 2022.3.x or later.&#x20;
+{% endhint %}
+
+{% hint style="info" %}
+You should have Git installed locally on your system.
 {% endhint %}
 
 ## Skills and Knowledge
