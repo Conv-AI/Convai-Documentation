@@ -135,7 +135,6 @@
       * [Installation](plugins-and-integrations/unreal-engine/guides-v2-under-development/getting-started/download-and-setup.md)
       * [Simple Talking Cube](plugins-and-integrations/unreal-engine/guides-v2-under-development/getting-started/simple-talking-cube.md)
       * [Adding Premade Chat and Settings UI](plugins-and-integrations/unreal-engine/guides-v2-under-development/getting-started/adding-premade-chat-and-settings-ui.md)
-  * [Copy of Narrative Design Trigger](plugins-and-integrations/unreal-engine/copy-of-narrative-design-trigger.md)
 * [Roblox](plugins-and-integrations/roblox/README.md)
   * [Sample Game 1](plugins-and-integrations/roblox/sample-game-1.md)
   * [Sample Game 2](plugins-and-integrations/roblox/sample-game-2.md)
