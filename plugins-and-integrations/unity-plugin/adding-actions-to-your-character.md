@@ -38,17 +38,17 @@ Repeat these steps to add more actions like "Pickup" and "Drop" etc.
 1. Add any object into the scene—a sphere, a cube, a rock, etc.—that can be interacted with
 2. Resize and place the object in your scene.
 
-<figure><img src="../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (5) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Adding the Convai Interactables Data Script
 
-1. Create an empty GameObject and name it "Convai Interactables."![](<../../.gitbook/assets/image (7) (1).png>)
+1. Create an empty GameObject and name it "Convai Interactables."![](<../../.gitbook/assets/image (7) (1) (1).png>)
 2. Attach the Convai Interactables Data script to this GameObject.
 3. Add characters and objects to the script by clicking the "+" button and attaching the corresponding GameObjects.
 
 <div align="left">
 
-<figure><img src="../../.gitbook/assets/image (6) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (6) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 </div>
 
