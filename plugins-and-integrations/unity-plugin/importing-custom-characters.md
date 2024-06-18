@@ -42,7 +42,7 @@ We will adjust the Center, Radius and Height of the collider such that it fits o
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 203103 (1).png" alt=""><figcaption></figcaption></figure>
 
-### Step 3: Add [ConvaiNPC](scripts-overview/convainpc.cs.md) Component
+### Step 3: Add [ConvaiNPC](broken-reference) Component
 
 With your Custom Character Selection add ConvaiNPC component. By doing so, your Game objectgame should look like this:
 
