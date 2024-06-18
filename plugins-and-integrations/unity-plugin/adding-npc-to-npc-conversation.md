@@ -16,7 +16,7 @@ description: >-
 
 
        <figure><img src="https://lh7-us.googleusercontent.com/JUlMGlkifNW_8JQ1FJO-55h_c754kh1kgepM0gJFaZ0Ek6FNUyCLvrn2EqtfDORjY8k6-2fsSTzry9LLEWihFhnv0ZGFBSMFIkQ6xGFd0qk9z87p4pz91O6Bvc1vzMqBi_hpxaTvPwvjTMg70iaAm9U" alt=""><figcaption></figcaption></figure>
-3. **Create or Find a Speech Bubble Prefab**:
+3. **Create or Find the Speech Bubble Prefab**:
    *   Create a new speech bubble prefab or use the one provided in the `Prefabs` folder.\
 
 
