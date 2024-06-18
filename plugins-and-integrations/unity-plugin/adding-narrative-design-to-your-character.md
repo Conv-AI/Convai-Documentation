@@ -1,8 +1,8 @@
 ---
 description: >-
-  This guide provides the ultimate instructions for incorporating Narrative
-  Design into your Convai-powered characters. Follow this step-by-step tutorial,
-  open your project, and let's begin!
+  Follow this guide to incorporate Narrative Design into your Convai-powered
+  characters. Follow this step-by-step tutorial, open your project, and let's
+  begin!
 ---
 
 # Adding Narrative Design to your Character
