@@ -4,7 +4,7 @@
 
 Released: Jun 13, 2024
 
-### **New Features**
+### **What's Changed**
 
 #### **NPC2NPC System**
 
@@ -61,7 +61,7 @@ Released: Jun 13, 2024
 1. **Transcript UI Bug Fixes:** Fixed bugs and improved system for Transcript UI character list
 2. **Microphone Permission:** Fixed Android and iOS microphone permission issues
 
-## Version 2.1.0 (current)
+## Version 2.1.0
 
 ### What's Changed
 
