@@ -10,7 +10,7 @@ The file structure belongs to the Core version of the plugin downloaded from the
 
 ### Setting up Unity Plugin
 
-In the Menu Bar, go to Convai > Convai Setup.
+In the Menu Bar, go the Convai > Convai Setup.
 
 <figure><img src="../../.gitbook/assets/image (291).png" alt=""><figcaption></figcaption></figure>
 
@@ -22,11 +22,19 @@ Go to [convai.com](https://convai.com), and sign in to your Convai account. Sign
 
 Enter the API Key and click begin.
 
-<figure><img src="../../.gitbook/assets/image (120).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (120).png" alt=""><figcaption><p>Screenshot showing the API Key setup window</p></figcaption></figure>
 
 This will create an APIKey asset in the resources folder. This contains your API Key.&#x20;
 
-<figure><img src="../../.gitbook/assets/image (292).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (292).png" alt=""><figcaption><p>Screenshot showing where is the API Key in the project folder</p></figcaption></figure>
+
+Open the demo scene by going to Convai > Demo > Scenes&#x20;
+
+<figure><img src="broken-reference" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="broken-reference" alt=""><figcaption></figcaption></figure>
+
+
 
 Click the Convai NPC Amelia and add the Character ID (or you can keep the default character ID). You can get the character ID for your custom character from this page [create-character.md](../../convai-playground/character-creator-tool/create-character.md "mention"). Now you can converse with the character. The script is set up so that you have to go near the character for them to hear you.
 
