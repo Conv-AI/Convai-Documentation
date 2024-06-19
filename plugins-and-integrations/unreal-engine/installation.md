@@ -1,5 +1,7 @@
 ---
-description: Install the Convai Plugin in Unreal Engine.
+description: >-
+  Install Convai plugin for Unreal Engine. Follow step-by-step instructions for
+  Visual Studio and XCode setup.
 ---
 
 # Installation

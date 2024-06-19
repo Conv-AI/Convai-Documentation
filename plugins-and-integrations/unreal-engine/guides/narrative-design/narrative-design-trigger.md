@@ -1,7 +1,7 @@
 ---
 description: >-
-  This document explains how to use Narrative Design Triggers with Unreal
-  Engine.
+  Use Convai's Narrative Design Triggers in Unreal Engine to enhance your game
+  stories.
 ---
 
 # Narrative Design Trigger

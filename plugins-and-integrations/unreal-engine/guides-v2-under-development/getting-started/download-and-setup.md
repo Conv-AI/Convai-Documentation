@@ -1,5 +1,7 @@
 ---
-description: Install the Convai Plugin in Unreal Engine.
+description: >-
+  Easily install the Convai Plugin in Unreal Engine with our step-by-step guide.
+  Set up your API key to add Convai to your Unreal Engine project.
 ---
 
 # Installation
