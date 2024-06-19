@@ -1,3 +1,9 @@
+---
+description: >-
+  Notification System - Implement notifications with Convai Unity plugin
+  utilities.
+---
+
 # Notification System
 
 The Convai plugin comes with default notifications, totaling four. Here they are:

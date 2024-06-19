@@ -1,3 +1,9 @@
+---
+description: >-
+  Fix missing Newtonsoft JSON issues in Unity with Convai. Resolve integration
+  problems efficiently.
+---
+
 # Missing Newtonsoft Json
 
 Our plugin has various scripts and dependencies that use Newtonsoft Json. If Newtonsoft Json is missing from the plugin, it could lead to a large number of errors as shown below:

@@ -1,3 +1,9 @@
+---
+description: >-
+  Explore Convai's character creator tool. Design and develop AI characters with
+  advanced features.
+---
+
 # Character Creator Tool
 
 The Character Creator tool enables you to create and update characters with human-like capabilities for use in your applications. Use this tool to configure, test, and even share your characters with others online. Your characters will be available for use in any Convai plugin or SDK, and any updates will be reflected immediately in your applications.

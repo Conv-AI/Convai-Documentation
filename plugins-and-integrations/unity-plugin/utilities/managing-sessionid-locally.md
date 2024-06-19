@@ -1,4 +1,10 @@
-# Session ID Management
+---
+description: >-
+  Session ID Management - Manage unique session IDs for Convai Unity
+  integration.
+---
+
+# Managing sessionID Locally
 
 In a typical application integrating with the Convai API, maintaining a consistent session ID across different sessions is crucial for providing a seamless user experience. This documentation outlines the best practices for storing and retrieving session IDs using Unity's `PlayerPrefs`, including detailed steps and example scripts.
 

@@ -1,3 +1,9 @@
+---
+description: >-
+  Introduction to Convai's plugins and integrations. Learn how to enhance your
+  projects with AI.
+---
+
 # Introduction
 
 Convai provides a variety of plugins and integrations to help integrate conversational AI and avatars into your projects.&#x20;

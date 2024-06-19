@@ -1,3 +1,9 @@
+---
+description: >-
+  Check Convai plugin compatibility with Unity. Ensure smooth integration with
+  your development tools.
+---
+
 # Compatibility
 
 ## Unity Version[​](https://docs.inworld.ai/docs/tutorial-integrations/Unity/compatibility/#unity-version) <a href="#unity-version" id="unity-version"></a>

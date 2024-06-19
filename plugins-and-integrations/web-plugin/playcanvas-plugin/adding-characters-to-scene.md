@@ -1,3 +1,7 @@
+---
+description: Adding Characters to Scene - PlayCanvas Plugin Guide for Convai integration.
+---
+
 # Adding characters to scene
 
 {% hint style="info" %}

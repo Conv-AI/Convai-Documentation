@@ -1,3 +1,7 @@
+---
+description: Building for VR - Unity Plugin Guide for VR development with Convai.
+---
+
 # Building for VR
 
 ## VR Installation

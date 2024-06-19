@@ -1,3 +1,9 @@
+---
+description: >-
+  Resolve microphone permission issues in Unity with Convai. Ensure smooth voice
+  interactions.
+---
+
 # Microphone Permission Issues
 
 If you see the microphone indicator turning on in the top left corner but no user transcript in the chat UI and the character's response doesn't seem coherent to what you said, then it is likely that the game or Unity is not accessing the correct microphone or does not have sufficient microphone privilege. To fix this, please follow along.

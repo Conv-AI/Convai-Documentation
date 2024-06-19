@@ -1,3 +1,7 @@
+---
+description: Convai Integration - PlayCanvas Plugin Guide for seamless integration.
+---
+
 # Convai Integration
 
 After the addition of Convai web-sdk-cdn to url section, ConvaiClient class will be available to the browser directly.

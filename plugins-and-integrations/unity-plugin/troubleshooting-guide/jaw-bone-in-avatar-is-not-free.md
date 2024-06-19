@@ -1,3 +1,9 @@
+---
+description: >-
+  Fix jaw bone issues in Unity avatars with Convai. Ensure smooth lip sync and
+  animations.
+---
+
 # Jaw Bone in Avatar is not Free
 
 If the Lip Sync does not seem to cause any facial animations, even after removing all blendshapes from animations, then the following steps should help resolve the issue.

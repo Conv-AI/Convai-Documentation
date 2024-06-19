@@ -1,3 +1,7 @@
+---
+description: Add Descriptions to Actions - Custom Actions Guide for Unreal Engine.
+---
+
 # Adding Descriptions to Actions
 
 ### Overview

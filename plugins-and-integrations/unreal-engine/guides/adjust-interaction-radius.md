@@ -1,3 +1,7 @@
+---
+description: Adjust Interaction Radius - Unreal Engine Guide for Convai integration.
+---
+
 # Adjust Interaction Radius
 
 1. Go to your player blueprint.

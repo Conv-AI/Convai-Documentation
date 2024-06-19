@@ -1,3 +1,7 @@
+---
+description: Character Conversation API - Code Example for Roblox integration with Convai.
+---
+
 # Character Conversation API
 
 The following piece of code is the most essential section to make a successful call to the Convai server to get a response in a conversation with a character.

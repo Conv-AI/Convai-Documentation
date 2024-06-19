@@ -1,3 +1,7 @@
+---
+description: Adding External Script - PlayCanvas Plugin Guide for Convai integration.
+---
+
 # Adding External Script
 
 Here we will add the [Convai Web SDK](https://www.npmjs.com/package/convai-web-sdk) to our project, a JavaScript library that enables integration of conversational AI capabilities.

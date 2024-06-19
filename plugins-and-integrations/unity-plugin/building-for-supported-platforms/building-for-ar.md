@@ -1,3 +1,7 @@
+---
+description: Building for AR - Unity Plugin Guide for AR development with Convai.
+---
+
 # Building for AR
 
 ## AR Installation

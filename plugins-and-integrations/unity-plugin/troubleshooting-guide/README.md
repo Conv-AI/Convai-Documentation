@@ -1,3 +1,9 @@
+---
+description: >-
+  Troubleshoot common issues with Convai's Unity plugin. Get solutions for
+  seamless AI integration.
+---
+
 # Troubleshooting Guide
 
 ## Common Issues (FAQ)

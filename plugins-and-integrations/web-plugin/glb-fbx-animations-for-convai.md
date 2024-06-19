@@ -1,3 +1,9 @@
+---
+description: >-
+  Learn to integrate GLB and FBX animations into Convai's web plugin for dynamic
+  character actions.
+---
+
 # GLB/FBX animations for Convai
 
 ### Mixamo

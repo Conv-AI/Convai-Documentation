@@ -1,3 +1,7 @@
+---
+description: Chat Overlay - PlayCanvas Plugin Guide for Convai integration.
+---
+
 # Chat Overlay
 
 Let's add a chat window to enhance user interaction and immersion. Create a New entity called Convai Chat.&#x20;

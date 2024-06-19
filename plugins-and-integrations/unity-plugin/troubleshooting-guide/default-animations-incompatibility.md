@@ -1,3 +1,9 @@
+---
+description: >-
+  Fix default animation incompatibilities in Unity with Convai. Ensure smooth AI
+  character animations.
+---
+
 # Default Animations Incompatibility
 
 If the default animations that ship with the animator look bugged such that the hand seems to intersect with the body, it could indicate an issue with the wrong animation avatar being selected.&#x20;

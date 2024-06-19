@@ -1,3 +1,7 @@
+---
+description: Settings Panel - Customize settings using Convai's Unity plugin utilities.
+---
+
 # Settings Panel
 
 <figure><img src="../../../.gitbook/assets/SettingsPanel.png" alt=""><figcaption><p>On the PC platform, you can open the Settings Panel by pressing F10.                                                                                                                        For mobile platforms, you need to press the Settings button in the UI designs.</p></figcaption></figure>

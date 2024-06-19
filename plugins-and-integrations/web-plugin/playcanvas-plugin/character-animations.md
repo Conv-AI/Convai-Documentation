@@ -1,3 +1,9 @@
+---
+description: >-
+  Add character animations in PlayCanvas with Convai. Enhance your web projects
+  with interactive AI.
+---
+
 # Character Animations
 
 {% content-ref url="../glb-fbx-animations-for-convai.md" %}

@@ -1,3 +1,9 @@
+---
+description: >-
+  Input Management - Efficiently handle input for Convai's Unity plugin
+  integration.
+---
+
 # Input Management
 
 {% hint style="success" %}

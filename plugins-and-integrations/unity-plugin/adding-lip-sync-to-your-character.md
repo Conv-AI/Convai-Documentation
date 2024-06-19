@@ -1,3 +1,9 @@
+---
+description: >-
+  Learn to add lip sync to your Unity characters using Convai. Improve realism
+  and interactivity.
+---
+
 # Adding Lip-Sync to your Character
 
 ## Step 1: Add Lip-Sync Component

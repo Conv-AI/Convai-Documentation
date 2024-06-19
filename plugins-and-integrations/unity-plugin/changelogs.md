@@ -1,3 +1,7 @@
+---
+description: Convai Unity Plugin Changelogs - Stay updated with the latest changes.
+---
+
 # Changelogs
 
 ## Version 3.0.0（current）

@@ -1,3 +1,7 @@
+---
+description: Transcript UI System - Integrate transcript UI with Convai's Unity plugin.
+---
+
 # Transcript UI System
 
 ## Overview

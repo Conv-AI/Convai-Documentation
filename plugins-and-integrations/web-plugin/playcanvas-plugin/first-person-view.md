@@ -1,3 +1,7 @@
+---
+description: First Person View - PlayCanvas Plugin Guide for Convai integration.
+---
+
 # First Person View
 
 ### Adding Physics components to plane

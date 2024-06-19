@@ -1,3 +1,7 @@
+---
+description: Convai UI Prefabs - Utilize ready-to-use UI elements for Convai integration.
+---
+
 # Pre-built UI Prefabs
 
 We provide several UI options to display character and user's transcript out of the box that players can use with the Convai Plugin. You can use and customize these prefabs.&#x20;

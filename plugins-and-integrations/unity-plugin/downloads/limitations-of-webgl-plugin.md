@@ -1,3 +1,9 @@
+---
+description: >-
+  Understand the limitations of the WebGL plugin for Unity with Convai. Optimize
+  your development.
+---
+
 # Limitations of WebGL Plugin
 
 ### Size Constraints

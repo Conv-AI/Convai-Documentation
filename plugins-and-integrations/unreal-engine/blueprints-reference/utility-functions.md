@@ -1,3 +1,7 @@
+---
+description: Utility Functions - Blueprint Reference for Convai Unreal Engine integration.
+---
+
 # Utility Functions
 
 ### Create Character

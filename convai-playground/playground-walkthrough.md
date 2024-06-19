@@ -1,3 +1,9 @@
+---
+description: >-
+  Get started with Convai Playground. Follow our walkthrough to create and
+  manage your AI characters.
+---
+
 # Playground Walkthrough
 
 {% embed url="https://youtu.be/1BxASw6JjQo" %}

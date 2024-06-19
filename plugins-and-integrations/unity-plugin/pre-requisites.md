@@ -1,3 +1,9 @@
+---
+description: >-
+  Review the prerequisites for integrating Convai with Unity. Ensure seamless
+  setup and functionality.
+---
+
 # Pre-Requisites
 
 ### Unity Version

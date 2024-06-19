@@ -1,3 +1,9 @@
+---
+description: >-
+  Master narrative design with Convai's character creator tool. Create engaging
+  AI-driven stories.
+---
+
 # Narrative Design
 
 ## Introduction

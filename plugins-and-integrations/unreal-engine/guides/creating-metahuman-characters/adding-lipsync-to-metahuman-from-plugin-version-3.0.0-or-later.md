@@ -1,5 +1,7 @@
 ---
-description: Add lip sync to your MetaHuman from base plugin
+description: >-
+  Add lip sync to MetaHuman characters in Unreal Engine with Convai. Enhance
+  realism and engagement.
 ---
 
 # Adding LipSync to MetaHuman (From plugin version 3.0.0 or later )

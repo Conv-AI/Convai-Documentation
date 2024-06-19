@@ -1,3 +1,9 @@
+---
+description: >-
+  Enhance AI characters with Convai's memory tool. Create more responsive and
+  engaging interactions.
+---
+
 # Memory
 
 Memory section allows you to view your previous conversations with the character, organized by date and time. Each chat session is assigned a unique ID for easy reference. You can download, copy, or delete individual chat logs from the character's memory as needed.

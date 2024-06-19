@@ -1,3 +1,9 @@
+---
+description: >-
+  Access Convai's core API reference documentation to enhance your AI character
+  development.
+---
+
 # Core API Reference
 
 Dive into the specifics of each API endpoint by checking out our complete documentation. The section is divided into all the services provided by Convai to it's developers.

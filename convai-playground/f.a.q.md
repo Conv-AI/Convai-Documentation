@@ -1,3 +1,9 @@
+---
+description: >-
+  Find answers to common questions about Convai Playground. Get help with AI
+  character creation.
+---
+
 # F.A.Q
 
 We'll be updating this page with the most frequently asked questions from our users! \
