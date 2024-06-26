@@ -1,10 +1,16 @@
 ---
 description: >-
-  This is a guide on how to integrate your elevenlabs voices to convai
+  This is a guide on how to integrate your ElevenLabs voices with Convai
   characters
 ---
 
 # ElevenLabs API Integration
+
+{% hint style="danger" %}
+**Currently, only ElevenLabs accounts with their associated Pro plans and higher are compatible due to the 44.1kHz audio output.** \
+\
+**All tiers of Convai accounts can add an ElevenLabs API key integration.**
+{% endhint %}
 
 {% hint style="info" %}
 **Note : If you are receiving token errors while speaking with your characters,  please confirm your ElevenLabs subscription is valid and you have a remaining token quota on your** [**ElevenLabs.io**](https://elevenlabs.io/) **dashboard.**
@@ -28,10 +34,9 @@ Step 4. On the bottom right corner "API Integration" click on "Add New Key" butt
 
 Step 5. A pop up will appear then, select ElevenLabs, then paste your API key and click Add.
 
-{% hint style="info" %}
-**Note : Currently, only ElevenLabs account with the Pro plan and higher are compatible.** \
+{% hint style="danger" %}
 **It will take some time (\~12 hrs) for your voices be visible in Convai dashboard.** \
-**You can accelerate the process for viewing new voices by removing and adding your API key again.**
+**You can accelerate the process for viewing newly added voices by removing and adding your ElevenLabs API key again.**
 {% endhint %}
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FtvHXv9Cpl8QzA5tY9MJh%2Fuploads%2Fs8EbPIU1l9PpKRJNuseC%2FScreenshot%202024-02-06%20at%206.48.43%E2%80%AFPM.png?alt=media&#x26;token=774991bb-c41a-4743-afed-6e0094850c81" alt=""><figcaption></figcaption></figure>
