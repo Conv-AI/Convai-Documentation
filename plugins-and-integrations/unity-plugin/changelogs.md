@@ -4,7 +4,17 @@ description: Convai Unity Plugin Changelogs - Stay updated with the latest chang
 
 # Changelogs
 
-## Version 3.0.0（current）
+## Version 3.0.1（current）
+
+Released: Jun 21, 2024
+
+### **Bug Fixes:**
+
+* Fix macOS TMP UGUI render issue in demo scene
+* Prefab missing animator
+* Updated ActiveNPC layer check logic
+
+## Version 3.0.0
 
 Released: Jun 13, 2024
 
