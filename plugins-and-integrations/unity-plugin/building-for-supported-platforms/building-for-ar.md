@@ -31,6 +31,10 @@ The following processes will be performed:
 **If the target build platform is not Android, it will be switched to **_**Android.**_
 {% endhint %}
 
+{% hint style="warning" %}
+Make sure to download the Android platform support from Unity Hub for your project's version.
+{% endhint %}
+
 1. Click on " _Convai / Convai Custom Package Installer / Install AR Package_ "
 
 <figure><img src="../../../.gitbook/assets/ConvaiCustomPackageInstaller (2).png" alt=""><figcaption></figcaption></figure>
