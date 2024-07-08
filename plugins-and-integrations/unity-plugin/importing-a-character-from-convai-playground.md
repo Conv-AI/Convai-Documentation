@@ -4,11 +4,7 @@ description: >-
   your Unity Project.
 ---
 
-# Importing Characters into a Scene
-
-{% hint style="info" %}
-You can import the character created in the Convai Playground **only** in the Core, Complete, and Actions versions of the plugin.
-{% endhint %}
+# Importing RPM Characters
 
 ## Import RPM characters from the Convai Playground
 
