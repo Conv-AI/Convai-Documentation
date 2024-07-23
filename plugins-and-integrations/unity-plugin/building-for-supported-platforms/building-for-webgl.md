@@ -9,9 +9,9 @@ description: >-
 
 ## Description
 
-Convai's Unity WebGL SDK is designed to complement the standalone application capabilities of our Unity Asset Store version. With this specialized SDK, you can build and deploy interactive WebGL applications that leverage Convai's advanced conversation pipeline. Please see the instructions below or check out our [_latest tutorial video_](https://youtu.be/JXjcHEnEPCQ) on YouTube.
+Convai's Unity WebGL SDK is designed to complement the standalone application capabilities of our Unity Asset Store version. With this specialized SDK, you can build and deploy interactive WebGL applications that leverage Convai's advanced conversation pipeline. Please see the instructions below or check out our [_latest tutorial video_](https://youtu.be/2F2\_tjtu-lY?feature=shared) on YouTube.
 
-{% embed url="https://youtu.be/JXjcHEnEPCQ" %}
+{% embed url="https://youtu.be/2F2_tjtu-lY?feature=shared" %}
 
 ## Getting Started
 
