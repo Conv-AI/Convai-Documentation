@@ -18,7 +18,7 @@ Convai's Unity WebGL SDK is designed to complement the standalone application ca
 ### Download the SDK and Demos
 
 {% hint style="info" %}
-[**Download the WebGL version of the Convai Unity SDK here.**](https://drive.google.com/file/d/1mSgdWNnttNXjjA5Qvclwyy2\_33zncefv/view?usp=sharing)
+[**Download the WebGL version of the Convai Unity SDK here.**](https://github.com/Conv-AI/Convai-Unity-WebGL-SDK/releases)
 {% endhint %}
 
 {% hint style="info" %}
