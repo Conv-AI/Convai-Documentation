@@ -5,7 +5,7 @@ description: Follow these steps to import and configure the Unity SDK.
 # Import and Setup (nightly)
 
 {% hint style="info" %}
-[**Download the nightly version Unity Package from this link.** ](https://drive.google.com/file/d/1dslrRcI6e02LvL-coupUoTFRlBDLjvMA/view)\
+[**Download the nightly version Unity Package from this link.** ](https://github.com/Conv-AI/Convai-Unity-Nightly-SDK/releases/latest)\
 The package contains sample scenes to get started.
 {% endhint %}
 
@@ -48,4 +48,4 @@ After importing, by default, the Convai folder will be in your project. It shoul
 The file structure belongs to the Core version of the plugin downloaded from the documentation.
 {% endhint %}
 
-<figure><img src="../../.gitbook/assets/image (295).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (381).png" alt=""><figcaption></figcaption></figure>
