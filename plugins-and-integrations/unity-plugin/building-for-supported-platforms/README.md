@@ -7,7 +7,7 @@ description: >-
 
 # Building for supported platforms
 
-1. iOS/iPadOS
+1. [iOS/iPadOS](building-for-ios-ipados.md)
 2. [Virtual Reality](building-for-vr.md)
 3. Augmented Reality&#x20;
    1. [Android AR](building-for-ar.md)
