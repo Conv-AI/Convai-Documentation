@@ -11,13 +11,13 @@
 3.  Create a new character on [Convai Playground](https://convai.com/pipeline/dashboard) and copy the Character ID, you can also edit the avatar by clicking on the `Edit Avatar` icon on the top right of the avatar preview window.\
 
 
-    <figure><img src="../../../../.gitbook/assets/image (8) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (8) (1) (1).png" alt=""><figcaption></figcaption></figure>
 4.  Back to Unreal, click the character in the scene and under the details panel find the Char ID field and paste the copied character ID into it.
 
     <figure><img src="../../../../.gitbook/assets/image (6) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 5.  Hit `Play` , and wait for a few seconds then the character should now load into the game.
 
-    <figure><img src="../../../../.gitbook/assets/image (9) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (9) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 The first time the character loads will take more time but after that it will be cached and loaded faster.

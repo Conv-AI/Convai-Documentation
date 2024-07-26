@@ -7,9 +7,10 @@ description: >-
 
 # Building for supported platforms
 
-1. [WebGL](building-for-webgl.md)
+1. iOS/iPadOS
 2. [Virtual Reality](building-for-vr.md)
 3. Augmented Reality&#x20;
    1. [Android AR](building-for-ar.md)
    2. iOS AR
-4. [Universal macOS applications](microphone-permission-issue-on-intel-macs-with-universal-builds.md)
+4. [WebGL](building-for-webgl.md)
+5. [Universal macOS applications](microphone-permission-issue-on-intel-macs-with-universal-builds.md)

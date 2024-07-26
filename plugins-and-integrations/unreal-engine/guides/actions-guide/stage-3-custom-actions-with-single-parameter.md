@@ -13,12 +13,12 @@ Referencing objects requires that you add the object to the [Environment](../../
 
     <div align="center">
 
-    <figure><img src="../../../../.gitbook/assets/image (4).png" alt="" width="405"><figcaption></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (4) (2).png" alt="" width="405"><figcaption></figcaption></figure>
 
     </div>
 2.  At the `begin play` event on the character blueprint, loop over all the objects that you want the character to know about then add to the environment object, in the following blueprint, we tagged the objects we want to add to the environment to make it easier to fetch those at begin play, then we used the second and third tags for names and descriptions respectively.
 
-    <figure><img src="../../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (5) (2).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 * Adding, editing or removing objects at runtime is possible.
@@ -33,21 +33,21 @@ Once you have managed to add your objects and characters to the environment, let
 *   Create an action named `Looks At`  that forces the AI character to look towards a certain object or character.\
 
 
-    <figure><img src="../../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (373).png" alt=""><figcaption></figcaption></figure>
 *   Create an event with the same name in the character blueprint, and add an input parameter of type [Convai Result Action](../../blueprints-reference/convai-result-action.md), this will contain the parameters required for the action which is in our case the object/character to look at.\
 
 
-    <figure><img src="../../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (1) (6).png" alt=""><figcaption></figcaption></figure>
 *   Now let's finish the implementation as follows, we will break the `Action Parameter` structure and then set the `The Related Object Or Character` as the `Main Character`, note that this is a quick trick to get the AI character to look at the referenced object or character.\
 
 
-    <figure><img src="../../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (2) (6).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 *   Break the `Related Object Or Character` structure to get more details about the object or character such as its reference, name and description.\
 
 
-    <figure><img src="../../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (3) (5).png" alt=""><figcaption></figcaption></figure>
 * If you have not added the reference for the object you will get an invalid reference but you will still get the name and description.
 {% endhint %}
 

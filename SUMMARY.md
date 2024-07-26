@@ -55,6 +55,7 @@
     * [Notification System](plugins-and-integrations/unity-plugin/utilities/notification-system.md)
     * [Settings Panel](plugins-and-integrations/unity-plugin/utilities/settings-panel.md)
   * [Building for supported platforms](plugins-and-integrations/unity-plugin/building-for-supported-platforms/README.md)
+    * [Building for iOS/iPadOS](plugins-and-integrations/unity-plugin/building-for-supported-platforms/building-for-ios-ipados.md)
     * [Building for WebGL](plugins-and-integrations/unity-plugin/building-for-supported-platforms/building-for-webgl.md)
     * [Building for VR](plugins-and-integrations/unity-plugin/building-for-supported-platforms/building-for-vr.md)
     * [Building for AR](plugins-and-integrations/unity-plugin/building-for-supported-platforms/building-for-ar.md)

@@ -72,7 +72,7 @@ Make your NPC perform custom actions like dancing.
 
 1.  Locate the dance animation file within our plugin.
 
-    <figure><img src="../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (9) (1).png" alt=""><figcaption></figcaption></figure>
 2. Incorporate this animation into your NPC's actions.
 
 ### Setting Up the Animator Controller

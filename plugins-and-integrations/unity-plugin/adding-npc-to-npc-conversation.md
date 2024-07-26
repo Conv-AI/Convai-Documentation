@@ -20,7 +20,7 @@ description: >-
    *   Create a new speech bubble prefab or use the one provided in the `Prefabs` folder.\
 
 
-       <figure><img src="../../.gitbook/assets/image (373).png" alt=""><figcaption></figcaption></figure>
+       <figure><img src="../../.gitbook/assets/image (373) (1).png" alt=""><figcaption></figcaption></figure>
 4. **Attach Required Components**:
    * Add the speech bubble prefab and the player transform (optional, defaults to the main camera if not provided).
    *   Set the conversation distance threshold variable (set it to zero to disable this feature, meaning NPC to NPC conversations will always happen regardless of the player’s distance).\

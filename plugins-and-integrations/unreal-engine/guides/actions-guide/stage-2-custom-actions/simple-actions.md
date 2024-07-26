@@ -18,7 +18,7 @@ Steps to add simple actions to your Convai character:-&#x20;
 *   Add a new event with the same name. `Print` in this case and define the logic for the function you just named and run the function `Handle Actions Completion` with `Is Successful` set to true. \
 
 
-    <figure><img src="../../../../../.gitbook/assets/image (7).png" alt=""><figcaption><p>Print action implementation</p></figcaption></figure>
+    <figure><img src="../../../../../.gitbook/assets/image (7) (2).png" alt=""><figcaption><p>Print action implementation</p></figcaption></figure>
 * Hit compile and ask your Convai Character to perform the action.&#x20;
 
 <figure><img src="../../../../../.gitbook/assets/image (27).png" alt=""><figcaption><p>The Convai Character Prints when asked to perform. </p></figcaption></figure>
