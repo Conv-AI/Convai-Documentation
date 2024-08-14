@@ -12,7 +12,7 @@ description: >-
 ### Step 1: Select your Character in which you want to enable Narrative Design
 
 {% hint style="info" %}
-For this demo, we are using Seraphine Whisperwind, you can select whatever character you want to enable Narrative Design.
+For this demo, we are using `Seraphine Whisperwind`, you can select whatever character you want to enable Narrative Design.
 {% endhint %}
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-22 114710.png" alt=""><figcaption><p>Screenshot showing selection of character in <a href="adding-narrative-design-to-your-character.md#convai-playground">Convai Playground</a></p></figcaption></figure>
@@ -43,11 +43,11 @@ You are all set to bring your character from Convai Playground to Unity, let's h
 
 #### Using <mark style="color:green;">Add Components</mark> Button in Convai NPC (Recommended Way)
 
-#### **1)** Select your Convai Character in the scene and look for [ConvaiNPC ](broken-reference)component in the inspector panel. Click on <mark style="color:green;">**Add Components**</mark> button
+#### **1:** Select your Convai Character in the scene and look for [ConvaiNPC ](broken-reference)component in the inspector panel. Click on <mark style="color:green;">**Add Components**</mark> button
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-22 122312.png" alt=""><figcaption><p>Screenshot showing location of <mark style="color:green;">Add Components</mark> button in the Convai NPC inspector panel </p></figcaption></figure>
 
-#### **2)** Select **Narrative Design Manager** checkbox and then click on <mark style="color:green;">Apply Changes</mark> button
+#### **2:** Select **Narrative Design Manager** checkbox and then click on <mark style="color:green;">Apply Changes</mark> button
 
 <figure><img src="../../.gitbook/assets/ND Component Selected.png" alt=""><figcaption><p>Screenshot showing selection of Narrative design option in the Add Component Window</p></figcaption></figure>
 
@@ -89,7 +89,7 @@ Expanding the section event, you will see two unity events you can subscribe to,
 
 Section triggers are a way to directly invoke a section in narrative design and can be used to jump to a different section in your narrative design
 
-#### Step 1) Select the game object you want to make a trigger, in this example we have selected a simple cube, but it's up to your imagination.
+#### Step 1: Select the game object you want to make a trigger, in this example we have selected a simple cube, but it's up to your imagination.
 
 {% hint style="info" %}
 Make sure that game object you have decided to be a trigger have a collider attach to it
@@ -114,6 +114,3 @@ Now you can select from the "Trigger" dropdown which trigger should be invoked w
 We have added a way for you to manually invoke this trigger also, you can use `InvokeSelectedTrigger` function to invoke the trigger from any where
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 123713.png" alt=""><figcaption><p>Screenshot showing ability to select your desired trigger</p></figcaption></figure>
-
-
-

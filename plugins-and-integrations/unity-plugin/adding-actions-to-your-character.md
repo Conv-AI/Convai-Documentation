@@ -42,15 +42,12 @@ Repeat these steps to add more actions like "Pickup" and "Drop" etc.
 
 ### Adding the Convai Interactables Data Script
 
-1. Create an empty GameObject and name it "Convai Interactables."![](<../../.gitbook/assets/image (7) (1) (1).png>)
+1. Create an empty GameObject and name it "Convai Interactables."
 2. Attach the Convai Interactables Data script to this GameObject.
 3. Add characters and objects to the script by clicking the "+" button and attaching the corresponding GameObjects.
+4. Add the Dynamic Move Target Indicator.
 
-<div align="left">
-
-<figure><img src="../../.gitbook/assets/image (6) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
-
-</div>
+<figure><img src="../../.gitbook/assets/image (391).png" alt=""><figcaption><p>Convai Interactables Setup</p></figcaption></figure>
 
 ### Test the Setup
 

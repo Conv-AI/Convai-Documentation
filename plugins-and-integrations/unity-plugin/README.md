@@ -23,7 +23,7 @@ Convai's Unity SDK provides you with all the tools you need to integrate convers
 
 This is the Core version of the plugin. It has a sample scene for anyone to get started. This version of the plugin only contains the basic Convai scripts and Character Downloader.
 
-Visit our [website ](broken-reference)for more information and support.
+Visit [convai.com](https://convai.com/pipeline/dashboard) for more information and support.
 
 ## Quick Setup Tutorial
 

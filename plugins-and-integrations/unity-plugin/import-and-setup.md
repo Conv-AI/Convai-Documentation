@@ -1,5 +1,6 @@
 ---
 description: Follow these steps to import and configure the Unity SDK.
+hidden: true
 ---
 
 # Import and Setup (nightly)
