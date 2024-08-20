@@ -42,12 +42,41 @@ Repeat these steps to add more actions like "Pickup" and "Drop" etc.
 
 ### Adding the Convai Interactables Data Script
 
-1. Create an empty GameObject and name it "Convai Interactables."
-2. Attach the Convai Interactables Data script to this GameObject.
-3. Add characters and objects to the script by clicking the "+" button and attaching the corresponding GameObjects.
-4. Add the Dynamic Move Target Indicator.
+* Create an empty GameObject and name it "Convai Interactables."
+* Attach the Convai Interactables Data script to this GameObject.
+* Add characters and objects to the script by clicking the "+" button and attaching the corresponding GameObjects.
 
 <figure><img src="../../.gitbook/assets/image (391).png" alt=""><figcaption><p>Convai Interactables Setup</p></figcaption></figure>
+
+*   Add the "There" object in Objects list, so that we can use the Dynamic Move Target indicator.\
+
+
+    <figure><img src="../../.gitbook/assets/image (394).png" alt=""><figcaption></figcaption></figure>
+* Add the [Dynamic Move Target Indicator](adding-actions-to-your-character.md#adding-a-dynamic-move-target-indicator) and setup [NavMesh agent](adding-actions-to-your-character.md#setting-up-navmesh) to you NPC.
+
+### Setting Up NavMesh
+
+To ensure your NPCs can navigate the scene:
+
+1. **Bake a NavMesh** for your scene if you haven't already:
+   * Go to **Window > AI > Navigation**.
+   * In the **Navigation** window, under the **Bake** tab, adjust the settings as needed.
+   * Click **"Bake"** to generate the NavMesh.
+2.  Ensure that the NPC character has a **NavMeshAgent** component:
+
+    * If not already attached, click **"Add Component"** and search for **NavMeshAgent**.
+    * Adjust the **Agent Radius, Speed,** and other parameters according to your NPC's requirements.
+
+    <figure><img src="../../.gitbook/assets/image (392).png" alt=""><figcaption></figcaption></figure>
+
+### Adding a Dynamic Move Target Indicator
+
+To visually indicate where your NPC will move:
+
+* Create a new empty GameObject in the scene and name it accordingly or use the pre-made prefab named **Dynamic Move Target Indicator.**
+* Link this **Move Target Indicator** to your NPC's action script so it updates dynamically when you point the cursor to the ground and ask the NPC to move to "There".
+
+<figure><img src="../../.gitbook/assets/image (393).png" alt=""><figcaption></figcaption></figure>
 
 ### Test the Setup
 
