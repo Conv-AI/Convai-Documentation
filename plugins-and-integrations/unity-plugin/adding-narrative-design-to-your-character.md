@@ -114,3 +114,17 @@ Now you can select from the "Trigger" dropdown which trigger should be invoked w
 We have added a way for you to manually invoke this trigger also, you can use `InvokeSelectedTrigger` function to invoke the trigger from any where
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 123713.png" alt=""><figcaption><p>Screenshot showing ability to select your desired trigger</p></figcaption></figure>
+
+### Invoke Trigger from any script
+
+You can use this code block as a reference to invoke the trigger from anywhere
+
+```csharp
+if(convaiNPC.TryGetComponent(out NarrativeDesignTrigger narrativeDesignTrigger))
+{
+    //Optional message parameter if you want to send some message while invoking
+    //the trigger 
+    string message = "Player has collected enough resources";
+    narrativeDesignTrigger.InvokeSelectedTrigger(message);
+}
+```
