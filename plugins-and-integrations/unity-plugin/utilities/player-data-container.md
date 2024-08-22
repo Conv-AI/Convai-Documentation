@@ -39,3 +39,21 @@ Copies the data into system buffer so you can paste it anywhere for debugging pu
 1. **Load:** Loads the **Player Name** and associated **Speaker ID** from the player Prefs
 2. **Save:** Saves the **Player Name** and associated **Speaker ID** from the player Prefs
 3. **Delete:** Deletes the **Player Name** and associated **Speaker ID** from the player Prefs
+
+### How to maintain the Player Data
+
+Convai provides a pre-made component which you can add to any `GameObject` to make the `PlayerDataContainer` work out of the box.
+
+Choose an existing GameObject or create a new `GameObject` in the scene and add the `ConvaiPlayerDataHandler` component to your chosen `GameObject` and it should start working
+
+<figure><img src="../../../.gitbook/assets/ConvaiPlayerDataHandler Component.png" alt=""><figcaption></figcaption></figure>
+
+#### Optional Step
+
+You can also create the required Scriptable Object by going to **`Assets > Convai > Resources`** and right clicking in the project panel and navigating to **`Create > Convai > Player Data`** and name it **`ConvaiPlayerDataSO`**
+
+<figure><img src="../../../.gitbook/assets/Creating Player Data SO.png" alt=""><figcaption></figcaption></figure>
+
+{% hint style="danger" %}
+Make sure you name the created Scriptable Object exactly **`ConvaiPlayerDataSO`** as our system looks for this exact name
+{% endhint %}
