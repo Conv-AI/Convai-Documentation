@@ -21,7 +21,7 @@ Before you begin, make sure you have the following:
 1. Open your Convai-powered Unity project.
 2. Ensure you have the latest version of the Convai Unity SDK [imported](../setting-up-unity-plugin.md)[ and setup](../setting-up-unity-plugin.md) into your project.
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption><p>Unity project with Convai SDK imported</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption><p>Unity project with Convai SDK imported</p></figcaption></figure>
 
 ### Step 2: Configure Build Settings
 
@@ -30,7 +30,7 @@ Before you begin, make sure you have the following:
 3. Click `Switch Platform` if it's not already selected.
 4. Check the `Development Build` option for testing purposes.
 
-<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption><p>Unity Build Settings window with iOS selected and Development Build checked</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption><p>Unity Build Settings window with iOS selected and Development Build checked</p></figcaption></figure>
 
 
 

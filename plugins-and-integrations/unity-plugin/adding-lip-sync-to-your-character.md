@@ -6,60 +6,111 @@ description: >-
 
 # Adding Lip-Sync to your Character
 
-## Step 1: Add Lip-Sync Component
+## Lip Sync System
 
-To add Lip-Sync to your character, follow these steps.
+Convai sends Visemes or Blend Shape Frame from back-end depending upon the face model developer chooses to use and when return Convai SDK out of the box extracts and parses it and provides it to the **`Convai LipSync Component`**, after which the component relies of the **`SkinMeshRen derer`**'s **`Blendshape Effectors`** and **`Bone Effectors`** to give Convai powered NPC's realistic lipsync.
 
-{% hint style="info" %}
-Convai's Lip-Sync uses [**OVR**](https://developer.oculus.com/documentation/unity/audio-ovrlipsync-viseme-reference/) or **Reallusion CC4 Extended** (Reallusion CC4+) Blendshapes. The lip-sync will work best with models that have **OVR** or **Reallusion CC4 Extended** (Reallusion CC4+) compatible Blendshapes.&#x20;
-{% endhint %}
+### Components of LipSync System
 
-### Using Unity Inspector
+#### Viseme Effector List
 
-Select the character GameObject and click Add Component in the Inspector.
+This is where developer will tell the Convai SDK, which index of Blendshape Array will be effector how much from which value. To better explain its working lets understand it with a diagram.
 
-<figure><img src="../../.gitbook/assets/image (259).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/VisemeSkimEffector.png" alt=""><figcaption></figcaption></figure>
 
-Select `Convai Lip Sync` to add the Lip Sync component.
+Here, its saying that whatever value is coming from the server will affect Blendshape at 116th index by 0.2 multiplier and Blendshape at 114th index by 0.5 multiplier. The engine representation of this would look something like this.
 
-<figure><img src="../../.gitbook/assets/image (258).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2024-08-23 123918.png" alt=""><figcaption></figcaption></figure>
 
-### Using Convai NPC Component
+So, you can make you own Effector list or use one of the many that we ship in the SDK.
 
-You can also select Add Components.
+**How to Create your own Viseme Effector List**
 
-<figure><img src="../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
+Right click inside project panel and head over to **`Create > Convai > Expression > Viseme Skin Effector`** which will create a **Viseme Effector List Scriptable Object** and now you can define your own values
 
-Select the Lip-Sync checkmark and click Apply Changes.
+<figure><img src="../../.gitbook/assets/Untitled.png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+#### Viseme Bone Effector List
 
-## Step 2: Set up the Lip Sync Component
+This is where developer will tell the Convai SDK, how much each value coming from server will affect the rotation of the bone. To better explain its working lets understand it with a diagram.&#x20;
 
-### For Reallusion Character Models
+<figure><img src="../../.gitbook/assets/untiteld.png" alt=""><figcaption></figcaption></figure>
 
-In the new component, select the type of lipsync, and assign the Skinned Mesh Renderer with the Facial Blendshapes (here for Reallusion Characters, `CC_Base_Body`, `CC_Base_Teeth` and `CC_Base_Tongue`)  and the game objects corresponding to the bones for Jaw and Tongue (here for Reallusion Characters, `CC_Base_JawRoot` and `CC_Base_Tongue01`). Feel free to adjust the position of the tongue with the Tongue Bone Offset field. &#x20;
+Here, bone's rotation will be effect by the values coming from server multiplied by the values in effects. Example, for TH the value will affect bone's rotation by 0.2 multiplier and etc. The engine representation of this would look something like this.
 
-{% hint style="danger" %}
-The screenshot shows "Reallusion Plus" already selected. You must now manually change this **option from "OVR" to "Reallusion Plus"** for the lip sync to work. This was due to a recent Unity update that changed the default settings.
-{% endhint %}
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/image (257).png" alt=""><figcaption></figcaption></figure>
+So, you can make you own Bone Effector list or use one of the many that we ship in the SDK.
 
-{% hint style="info" %}
-If your character's mouth seems not to be opening enough for a proper lip sync, this could indicate an issue with the animator or animations.
-{% endhint %}
+We use this formula to calucate the roatation
 
-### For Ready Player Me Character Models
+```csharp
+UpdateJawBoneRotation(
+new Vector3(
+        0.0f, 
+        0.0f, 
+        -90.0f - CalculateBoneEffect(FacialExpressionData.JawBoneEffector) * 30f
+    )
+);
+UpdateTongueBoneRotation(
+new Vector3(
+        0.0f,
+        0.0f,
+        CalculateBoneEffect(FacialExpressionData.TongueBoneEffector) * 80f - 5f
+    )
+);
+```
 
-**For Ready Player Me models**, the type of lipsync will be `OVR` and the appropriate facial skinned mesh renderers for the Head will be `Renderer_Head` and the appropriate facial skinned mesh renderer for the Teeth will be `Renderer_Teeth`. There is no need for adding any of the other mesh renderers or bones.&#x20;
+**How to Create your own Viseme Bone Effector List**
 
-<figure><img src="../../.gitbook/assets/image (277) (1).png" alt=""><figcaption></figcaption></figure>
+Right click inside project panel and head over to **`Create > Convai > Expression > Viseme Bone Effector`** which will create a **Viseme Bone Effector List Scriptable Object** and now you can define your own values.
 
-{% hint style="info" %}
-The above process of assigning the skinned mesh renderer is not necessary. The `ConvaiLipSync.cs` script is capable of assigning the necessary skinned mesh renderers by itself if you have left the fields empty.
-{% endhint %}
+<figure><img src="../../.gitbook/assets/Screenshot 2024-08-23 165836.png" alt=""><figcaption></figcaption></figure>
 
-To resolve common issues caused by the animator and animations, follow the troubleshooting guides below.
+#### Convai Lipsync Component
 
-[animations-have-facial-blendshapes.md](troubleshooting-guide/animations-have-facial-blendshapes.md "mention")
+When you attach this component to your Convai Character, you will see something like this. &#x20;
+
+<figure><img src="../../.gitbook/assets/Screenshot 2024-08-23 170102.png" alt=""><figcaption></figcaption></figure>
+
+Let's learn what these learns are
+
+1. Facial Expression Data
+   1. Head | Teeth | Tongue
+      1. Renderer: Skin Mesh Renderer which correspond to that specified part of the body
+      2. Viseme Effectors List: How the SkinMeshRenderer's Blendshape will be affected by values coming from server.
+   2. Jaw | Tongue Bone Effector
+      1. How much Bone's rotation will be affected by values coming from server.
+   3. Jaw | Tongue Bone
+      1. Reference to the bone which control jaw and tongue respectively
+2. Weight Blending Power
+   1. Percentage to interpolate between two frames in late update.
+3. Character Emotions
+   1. Learn More about Character Emotions here
+
+### Steps to add Lipsync to your Convai Character
+
+{% tabs %}
+{% tab title=" Using Convai Add Component Button" %}
+1. Select you Convai Powered Character in the hierarchy.
+2. In the inspector panel search for ConvaiNPC component, there you will see Add Component Button.
+3. Click on it and select Convai Lipsync Component and click on apply
+
+<figure><img src="../../.gitbook/assets/Screenshot 2024-08-23 175552.png" alt=""><figcaption></figcaption></figure>
+{% endtab %}
+
+{% tab title="Using Unity Add Component Button " %}
+1. Select you Convai Powered Character in the hierarchy.
+2. Click on Add Component
+3. Search for Convai Lipsync
+4. Select Convai Lipsync component
+
+<figure><img src="../../.gitbook/assets/Screenshot 2024-08-23 180619 (1).png" alt=""><figcaption></figcaption></figure>
+{% endtab %}
+{% endtabs %}
+
+Now you can configure the Component according to your custom configuration or use one of the many Presets Convai ships with the SDK
+
+<figure><img src="../../.gitbook/assets/Screenshot 2024-08-23 181343.png" alt=""><figcaption></figcaption></figure>
+
+Now your lipsync component would be ready to use in your application.

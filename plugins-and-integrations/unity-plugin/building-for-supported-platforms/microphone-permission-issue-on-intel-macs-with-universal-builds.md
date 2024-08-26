@@ -33,16 +33,16 @@ After completing a Universal build on an Intel Mac, you must manually update the
     \
 
 
-    <figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 3.  Navigate to the `Contents/Plugins` folder within the package.\
     \
 
 
-    <figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 4.  Replace the contents of this folder with the components from the provided plugin folder ([link to plugin folder](https://drive.google.com/drive/folders/1oZSsFbd3SLSagJafwrLq1swdgL0Hr3Hm?usp=drive\_link)).\
 
 
-    <figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
     <figure><img src="../../../.gitbook/assets/image (4) (1) (1) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
