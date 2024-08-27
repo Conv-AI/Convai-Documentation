@@ -48,6 +48,7 @@
   * [Adding NPC to NPC Conversation](plugins-and-integrations/unity-plugin/adding-npc-to-npc-conversation.md)
   * [Adding Scene Reference and Point-At Crosshairs](plugins-and-integrations/unity-plugin/adding-scene-reference-and-point-at-crosshairs.md)
   * [Utilities](plugins-and-integrations/unity-plugin/utilities/README.md)
+    * [Character Emotion](plugins-and-integrations/unity-plugin/utilities/character-emotion.md)
     * [Player Data Container](plugins-and-integrations/unity-plugin/utilities/player-data-container.md)
     * [Long Term Memory](plugins-and-integrations/unity-plugin/utilities/long-term-memory.md)
     * [Managing sessionID Locally](plugins-and-integrations/unity-plugin/utilities/managing-sessionid-locally.md)

@@ -86,7 +86,7 @@ Let's learn what these learns are
 2. Weight Blending Power
    1. Percentage to interpolate between two frames in late update.
 3. Character Emotions
-   1. Learn More about Character Emotions here
+   1. Learn More about Character Emotions here [character-emotion.md](utilities/character-emotion.md "mention")
 
 ### Steps to add Lipsync to your Convai Character
 
