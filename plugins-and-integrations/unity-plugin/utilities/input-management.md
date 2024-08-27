@@ -18,19 +18,21 @@ Our recommendation is Both. This way, you can use both the new and old input sys
 
 ## How to Change the Talk Button or Any Input?
 
-1. Click on the "**Convai Input Manager**" object in your scene.
+1.  Double click on the "**Controls**" asset in your project tab. \
 
-<figure><img src="../../../.gitbook/assets/SelectInputManagerObject.png" alt=""><figcaption></figcaption></figure>
 
-2. Find the Input Action you want to change in the Inspector. If you want to add a new Input Action, refer to this documentation. In this case, we selected "**Talk Key Action**" to change the talk button. Double-click on "**T \[Keyboard]**".
+    <figure><img src="../../../.gitbook/assets/image (399).png" alt=""><figcaption></figcaption></figure>
+2. You can setup multiple control schemes for different devices here, currently we have it for PC (Keyboard & Mouse) and Gamepad. For mobile, we have provided joystick and buttons, which are mapped to Gamepad controls for functionality, but you can directly add touchscreen and use its different features to trigger an Input Action. You can also add your own control scheme if you want support for a different device by clicking on "Add Control Scheme".&#x20;
 
-<figure><img src="../../../.gitbook/assets/InputManagerInspector.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (400).png" alt=""><figcaption></figcaption></figure>
 
-4. In the opened window, click on the " **T \[Keyboard** " button in the Path field.
+3.  Find the Input Action you want to change in the above window. If you want to add a new Input Action, refer to the other section in documentation. In this case, we selected "**Talk Key Action**" to change the talk button. Click on "**T \[Keyboard]**". In the Binding Properties window, click on the " **T \[Keyboard]** " button in the Path field.\
 
-<figure><img src="../../../.gitbook/assets/PressPathButton.png" alt=""><figcaption></figcaption></figure>
 
-5. Press the " **Listen** " button in the top left of the opened window. If you prefer, you can choose your desired input from the categories below.
+    <figure><img src="../../../.gitbook/assets/image (401).png" alt=""><figcaption></figcaption></figure>
+
+
+4. Press the " **Listen** " button in the top left of the opened window. If you prefer, you can choose your desired input from the categories below.
 
 <figure><img src="../../../.gitbook/assets/PressListenButton.png" alt=""><figcaption></figcaption></figure>
 
