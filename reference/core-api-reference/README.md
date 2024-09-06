@@ -36,8 +36,8 @@ All APIs you might need to deploy a fast and efficient transcription feature to 
 
 All APIs related to giving your NPC / Smart Assistant their very own voice
 
-{% content-ref url="standalone-voice-api/text-to-speech-api.md" %}
-[text-to-speech-api.md](standalone-voice-api/text-to-speech-api.md)
+{% content-ref url="standalone-voice-api/text-to-speech-api/" %}
+[text-to-speech-api](standalone-voice-api/text-to-speech-api/)
 {% endcontent-ref %}
 
 ## Core NLP API

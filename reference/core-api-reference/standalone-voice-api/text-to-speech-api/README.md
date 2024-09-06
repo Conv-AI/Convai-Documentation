@@ -100,6 +100,12 @@ Please provide the Voice Code in the voice field of the payload.
 Please note if an unsupported audio encoding is specified along with a voice in the request body, it will result in a 400 error response.
 {% endhint %}
 
+{% hint style="info" %}
+The above section only lists the public voices. As Convai supports third-party integrations, to get the full list of voices available to a user, please check out [voice-list-api.md](voice-list-api.md "mention").
+{% endhint %}
+
+
+
 List of available voices:
 
 | Language                | Language Code |

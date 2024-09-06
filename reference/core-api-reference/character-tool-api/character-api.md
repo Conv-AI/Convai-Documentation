@@ -28,12 +28,12 @@ Users can either use the character creator tool to create their own characters o
 
 #### Request Body
 
-| Name                                        | Type   | Description                                                                                                                                                                                            |
-| ------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| charName<mark style="color:red;">\*</mark>  | String | Name of the new character being created.                                                                                                                                                               |
-| voiceType<mark style="color:red;">\*</mark> | String | <p>The type of voice the character is expected to have.</p><p>[Please refer to the list of available voices in the <a href="../standalone-voice-api/text-to-speech-api.md">Text to Speech API</a>]</p> |
-| backstory<mark style="color:red;">\*</mark> | String | Basic background information of the character to start with.                                                                                                                                           |
-| actions                                     | String | A list of actions for the character to choose from, to be performed by the character based on the interactions with the user.                                                                          |
+| Name                                        | Type   | Description                                                                                                                                                                                          |
+| ------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| charName<mark style="color:red;">\*</mark>  | String | Name of the new character being created.                                                                                                                                                             |
+| voiceType<mark style="color:red;">\*</mark> | String | <p>The type of voice the character is expected to have.</p><p>[Please refer to the list of available voices in the <a href="../standalone-voice-api/text-to-speech-api/">Text to Speech API</a>]</p> |
+| backstory<mark style="color:red;">\*</mark> | String | Basic background information of the character to start with.                                                                                                                                         |
+| actions                                     | String | A list of actions for the character to choose from, to be performed by the character based on the interactions with the user.                                                                        |
 
 {% tabs %}
 {% tab title="201: Created A new character has bee created with the necessary details" %}
@@ -115,13 +115,13 @@ Users can update some of the existing details of a character that has been previ
 
 #### Request Body
 
-| Name                                     | Type   | Description                                                                                                                                                |
-| ---------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| charID<mark style="color:red;">\*</mark> | String | Character ID of the character to update for.                                                                                                               |
-| charName                                 | String | New name of the character                                                                                                                                  |
-| backstory                                | String | Updated backstory                                                                                                                                          |
-| voiceType                                | String | New voice type of the character \[Please refer to the list of available voices in the [Text to Speech API](../standalone-voice-api/text-to-speech-api.md)] |
-| action                                   | String | New list of actions for the character                                                                                                                      |
+| Name                                     | Type   | Description                                                                                                                                              |
+| ---------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| charID<mark style="color:red;">\*</mark> | String | Character ID of the character to update for.                                                                                                             |
+| charName                                 | String | New name of the character                                                                                                                                |
+| backstory                                | String | Updated backstory                                                                                                                                        |
+| voiceType                                | String | New voice type of the character \[Please refer to the list of available voices in the [Text to Speech API](../standalone-voice-api/text-to-speech-api/)] |
+| action                                   | String | New list of actions for the character                                                                                                                    |
 
 {% tabs %}
 {% tab title="200: OK The details have been updated successfully" %}
