@@ -168,6 +168,7 @@
 * [Core API Reference](reference/core-api-reference/README.md)
   * [Character Tool API](reference/core-api-reference/character-tool-api/README.md)
     * [Character API](reference/core-api-reference/character-tool-api/character-api.md)
+    * [Knowledge Bank API](reference/core-api-reference/character-tool-api/knowledge-bank-api.md)
     * [Action API](reference/core-api-reference/character-tool-api/action-api.md)
   * [Standalone Voice API](reference/core-api-reference/standalone-voice-api/README.md)
     * [Speech To Text API](reference/core-api-reference/standalone-voice-api/speech-to-text-api.md)
