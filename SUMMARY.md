@@ -167,6 +167,7 @@
 
 * [Core API Reference](reference/core-api-reference/README.md)
   * [Character Tool API](reference/core-api-reference/character-tool-api/README.md)
+    * [Core AI Setting API](reference/core-api-reference/character-tool-api/core-ai-setting-api.md)
     * [Character API](reference/core-api-reference/character-tool-api/character-api.md)
     * [Knowledge Bank API](reference/core-api-reference/character-tool-api/knowledge-bank-api.md)
     * [Action API](reference/core-api-reference/character-tool-api/action-api.md)
