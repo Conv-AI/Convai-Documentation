@@ -312,6 +312,78 @@ curl --location --request POST 'https://api.convai.com/character/get' \
 {% endtab %}
 {% endtabs %}
 
+## Clone Character
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/user/clone_character`
+
+Users can clone their character using this API.
+
+#### Headers
+
+| Name                                             | Type   | Description                                 |
+| ------------------------------------------------ | ------ | ------------------------------------------- |
+| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. |
+
+#### Request Body
+
+| Name                                     | Type   | Description                                                         |
+| ---------------------------------------- | ------ | ------------------------------------------------------------------- |
+| charID<mark style="color:red;">\*</mark> | String | ID of the character to Clone.                                       |
+| KB                                       | Bool   | True, if KB should be cloned as well. Else False. Default is False. |
+
+
+
+{% tabs %}
+{% tab title="200: OK Returns all the information of the corresponding character" %}
+```json
+{
+    "charID": "<id of the newly created cloned character>"
+}
+```
+{% endtab %}
+{% endtabs %}
+
+Here are some sample codes to demonstrate the request format for the endpoint -->
+
+{% tabs %}
+{% tab title="Python" %}
+```python
+import requests
+import json
+
+url = "https://api.convai.com/user/clone_character"
+
+
+headers = { 
+  'CONVAI-API-KEY': '<Your-API-Key>',
+  'Content-Type': 'application/json'
+}
+
+# Create a dictionary for the form data
+payload = { 
+    'charID': '<Your-Character-Id>'
+}
+
+
+# Convert the payload to JSON
+json_payload = json.dumps(payload)
+
+response = requests.post(url, headers=headers, data=json_payload)
+
+print(response.text)
+```
+{% endtab %}
+
+{% tab title="cURL" %}
+```shell
+curl -X POST "https://api.convai.com/user/clone_character" \
+     -H "CONVAI-API-KEY: <Your-API-Key>" \
+     -H "Content-Type: application/json" \
+     -d '{"charID": "<Your-Character-Id>"}'
+```
+{% endtab %}
+{% endtabs %}
+
 ## Interacting with a Character
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/getResponse`
@@ -474,11 +546,11 @@ curl --location --request POST 'https://api.convai.com/character/getResponse' \
 {% endtab %}
 {% endtabs %}
 
-## Update Character Knowledge Bank
+## Update Character Details
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/update`
 
-Users can connect or disconnect already uploaded Knowledge Bank files to a character.
+Users can different properties of a Character like Backstory, Voice and Actions using an Update API.
 
 #### Headers
 
