@@ -38,7 +38,7 @@ When calling update API to update Model for your Character, please ensure to pas
 | model\_group\_name | String | Model Code of the Model to which you want to update. See the table above. |
 
 {% tabs %}
-{% tab title="200: OK The file is successfully uploaded" %}
+{% tab title="200: OK The model has been sucessfuly updated." %}
 ```json
 {"STATUS": "SUCCESS"}
 ```
