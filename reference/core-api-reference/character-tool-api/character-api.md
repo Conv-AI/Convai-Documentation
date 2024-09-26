@@ -115,13 +115,14 @@ Users can update some of the existing details of a character that has been previ
 
 #### Request Body
 
-| Name                                     | Type   | Description                                                                                                                                              |
-| ---------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| charID<mark style="color:red;">\*</mark> | String | Character ID of the character to update for.                                                                                                             |
-| charName                                 | String | New name of the character                                                                                                                                |
-| backstory                                | String | Updated backstory                                                                                                                                        |
-| voiceType                                | String | New voice type of the character \[Please refer to the list of available voices in the [Text to Speech API](../standalone-voice-api/text-to-speech-api/)] |
-| action                                   | String | New list of actions for the character                                                                                                                    |
+| Name                                     | Type           | Description                                                                                                                                                                            |
+| ---------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| charID<mark style="color:red;">\*</mark> | String         | Character ID of the character to update for.                                                                                                                                           |
+| charName                                 | String         | New name of the character                                                                                                                                                              |
+| backstory                                | String         | Updated backstory                                                                                                                                                                      |
+| voiceType                                | String         | New voice type of the character \[Please refer to the list of available voices in the [Text to Speech API](../standalone-voice-api/text-to-speech-api/)]                               |
+| action                                   | String         | New list of actions for the character                                                                                                                                                  |
+| languageCodes                            | List \<String> | The list of language codes, the character needs to support \[Please refer to the list of available languages in the [Text to Speech API](../standalone-voice-api/text-to-speech-api/)] |
 
 {% tabs %}
 {% tab title="200: OK The details have been updated successfully" %}
