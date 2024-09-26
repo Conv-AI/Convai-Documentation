@@ -4,7 +4,7 @@
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/generate-backstory`
 
-Generate Backstory API is implemented as Server Side Event (SSE). Given some initial description about the character and their name, this API can generate a description for the character.
+Generate Backstory API is implemented as Server Sent Event (SSE). Given some initial description about the character and their name, this API can generate a description for the character.
 
 #### Headers
 
