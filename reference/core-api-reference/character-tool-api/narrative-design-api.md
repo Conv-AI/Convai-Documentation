@@ -203,10 +203,14 @@ Edit section for your Character. You would send all the fields that you want to 
 | section\_id              | String | Id of the section to update.      |
 
 {% tabs %}
-{% tab title="200: OK Section Created " %}
+{% tab title="200: OK Section Updated " %}
 ```json
 {
-    "section_id": "<New-Section-Id>"
+    "status": "success",
+    "section_id": "<Section-Id>",
+    "updated_data": {
+        "objective": "Some new objective."
+    }
 }
 ```
 {% endtab %}
@@ -369,6 +373,639 @@ curl -X POST "https://api.convai.com/character/narrative/get-section" \
            "character_id": "<Your-Character-Id>",
            "section_id": "<Section-Id->"
          }'
+```
+{% endcode %}
+{% endtab %}
+{% endtabs %}
+
+## List Sections
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/narrative/list-sections`
+
+List details of all narrative sections for a given character.
+
+#### Headers
+
+<table><thead><tr><th width="226">Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>CONVAI-API-KEY<mark style="color:red;">*</mark></td><td>String</td><td>The unique api-key provided for every user. Found under the Key icon when logged into your Convai account.</td></tr></tbody></table>
+
+#### Request Body
+
+| Name          | Type   | Description           |
+| ------------- | ------ | --------------------- |
+| character\_id | String | Id of your character. |
+
+{% tabs %}
+{% tab title="200: OK List of Section Details " %}
+```json
+[
+  {
+    "character_id": "<Your-Character-Id>",
+    "section_id": "123456789-7ddd-dddd-bbbb-424242424242",
+    "objective": "",
+    "decisions": null,
+    "parents": null,
+    "updated_character_data": {},
+    "bt_constants": "",
+    "behavior_tree_code": "",
+    "section_name": "section 1",
+    "triggers": null,
+    "node_position": []
+  },
+  {
+    "character_id": "<Your-Character-Id>",
+    "section_id": "100000789-7ddd-dddd-bbbb-42424242424",
+    "objective": "Offer user tour of History Museum.",
+    "decisions": [
+      {
+        "criteria": "User agrees to take tour.",
+        "next_section_id": "123456789-7ddd-dddd-bbbb-424242424242"
+      }
+    ],
+    "parents": null,
+    "updated_character_data": {},
+    "bt_constants": "",
+    "behavior_tree_code": "",
+    "section_name": "Welcome Section",
+    "triggers": null,
+    "node_position": []
+  }
+]
+```
+{% endtab %}
+
+{% tab title="401 API Key validation has failed" %}
+```json
+{
+    "ERROR": "Invalid API key provided."
+}
+```
+{% endtab %}
+{% endtabs %}
+
+Here are some sample codes to demonstrate the request format for the endpoint -->
+
+{% tabs %}
+{% tab title="Python" %}
+{% code overflow="wrap" %}
+```python
+import requests
+import json
+
+url = "https://api.convai.com/character/narrative/list-sections"
+headers = { 
+    'CONVAI-API-KEY': '<Your-API-Key>',
+    'Content-Type': 'application/json'
+}
+
+# Create a dictionary for the JSON payload
+payload = { 
+    "character_id":"<Your-Character-Id>",
+}
+
+# Convert the payload to JSON
+json_payload = json.dumps(payload)
+
+response = requests.post(url, headers=headers, data=json_payload)
+
+print(response.text)
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="cURL" %}
+{% code overflow="wrap" %}
+```shell
+curl -X POST "https://api.convai.com/character/narrative/list-sections" \
+     -H "CONVAI-API-KEY: <Your-API-Key>" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "character_id": "<Your-Character-Id>"
+         }'
+```
+{% endcode %}
+{% endtab %}
+{% endtabs %}
+
+## Delete Section
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/narrative/delete-section`
+
+Delete a narrative section of your Character.&#x20;
+
+#### Headers
+
+<table><thead><tr><th width="226">Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>CONVAI-API-KEY<mark style="color:red;">*</mark></td><td>String</td><td>The unique api-key provided for every user. Found under the Key icon when logged into your Convai account.</td></tr></tbody></table>
+
+#### Request Body
+
+| Name          | Type   | Description                  |
+| ------------- | ------ | ---------------------------- |
+| character\_id | String | Id of your character.        |
+| section\_id   | String | Id of the section to delete. |
+
+{% tabs %}
+{% tab title="200: OK Section Deleted " %}
+```json
+{"STATUS": "Successful"}
+```
+{% endtab %}
+
+{% tab title="401 API Key validation has failed" %}
+```json
+{
+    "ERROR": "Invalid API key provided."
+}
+```
+{% endtab %}
+{% endtabs %}
+
+Here are some sample codes to demonstrate the request format for the endpoint -->
+
+{% tabs %}
+{% tab title="Python" %}
+{% code overflow="wrap" %}
+```python
+import requests
+import json
+
+url = "https://api.convai.com/character/narrative/delete-section"
+headers = { 
+    'CONVAI-API-KEY': '<Your-API-Key>',
+    'Content-Type': 'application/json'
+}
+
+# Create a dictionary for the JSON payload
+payload = { 
+    "character_id":"<Your-Character-Id>",
+    "section_id":"<Section-Id->", 
+}
+
+# Convert the payload to JSON
+json_payload = json.dumps(payload)
+
+response = requests.post(url, headers=headers, data=json_payload)
+
+print(response.text)
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="cURL" %}
+{% code overflow="wrap" %}
+```shell
+curl -X POST "https://api.convai.com/character/narrative/delete-section" \
+     -H "CONVAI-API-KEY: <Your-API-Key>" \
+     -H "Content-Type: application/json" \
+     -d '{
+         "character_id": "<Your-Character-Id>",
+         "section_id": "<Section-Id->"
+     }'
+```
+{% endcode %}
+{% endtab %}
+{% endtabs %}
+
+## Create Trigger
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/narrative/create-trigger`
+
+Create a new Trigger for your Character.
+
+#### Headers
+
+<table><thead><tr><th width="226">Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>CONVAI-API-KEY<mark style="color:red;">*</mark></td><td>String</td><td>The unique api-key provided for every user. Found under the Key icon when logged into your Convai account.</td></tr></tbody></table>
+
+#### Request Body
+
+| Name                 | Type   | Description                                                                                                          |
+| -------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
+| character\_id        | String | Id of your character.                                                                                                |
+| trigger\_name        | String | Name of the trigger. Must be unique for a character.                                                                 |
+| trigger\_message     | String | Message for the trigger. Commonly tell the event for which the Trigger is invoked. E.g. User entered the scene.      |
+| desgination\_section | String | Destination section-id for this trigger. Do not pass this field if you don't want to connect Trigger to any section. |
+
+{% tabs %}
+{% tab title="200: OK Trigger Created " %}
+```json
+{
+    "character_id": "<Your-Character-Id>,
+    "trigger_id": "<ID-Of-The-Newly-Created-Trigger>",
+    "trigger_name": "StartTrigger",
+    "trigger_message": "User has entered the museum.",
+    "destination_section": "<Destination-Section-ID>",
+    "node_position": []
+}
+```
+{% endtab %}
+
+{% tab title="401 API Key validation has failed" %}
+```json
+{
+    "ERROR": "Invalid API key provided."
+}
+```
+{% endtab %}
+{% endtabs %}
+
+Here are some sample codes to demonstrate the request format for the endpoint -->
+
+{% tabs %}
+{% tab title="Python" %}
+{% code overflow="wrap" %}
+```python
+import requests
+import json
+
+url = "https://api.convai.com/character/narrative/create-trigger"
+headers = { 
+    'CONVAI-API-KEY': '<Your-API-Key>',
+    'Content-Type': 'application/json'
+}
+
+# Create a dictionary for the JSON payload
+payload = { 
+    "character_id":"<Your-Character-Id>",
+    "trigger_message":"User has entered the museum.",
+    "trigger_name":"StartTrigger",
+    "destination_section": "<Destination-Section-ID-to-connect-to>"
+}
+
+# Convert the payload to JSON
+json_payload = json.dumps(payload)
+
+response = requests.post(url, headers=headers, data=json_payload)
+
+print(response.text)
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="cURL" %}
+{% code overflow="wrap" %}
+```shell
+curl -X POST "https://api.convai.com/character/narrative/create-trigger" \
+     -H "CONVAI-API-KEY: <Your-API-Key>" \
+     -H "Content-Type: application/json" \
+     -d '{
+         "character_id": "<Your-Character-Id>",
+         "trigger_message": "User has entered the museum.",
+         "trigger_name": "StartTrigger",
+         "destination_section": "<Destination-Section-ID-to-connect-to>"
+     }'
+```
+{% endcode %}
+{% endtab %}
+{% endtabs %}
+
+## Update Trigger
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/narrative/update-trigger`
+
+Edit a Trigger. You would send all the fields that you want to update for a trigger via updated\_data json. Following are the valid key.
+
+* "trigger\_name": New trigger name. Must be unique.
+* "trigger\_message": New trigger message.
+* "destination\_section": New destination section-id for the trigger.
+
+#### Headers
+
+<table><thead><tr><th width="226">Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>CONVAI-API-KEY<mark style="color:red;">*</mark></td><td>String</td><td>The unique api-key provided for every user. Found under the Key icon when logged into your Convai account.</td></tr></tbody></table>
+
+#### Request Body
+
+| Name          | Type   | Description                       |
+| ------------- | ------ | --------------------------------- |
+| character\_id | String | Id of your character.             |
+| updated\_data | Json   | Contains fields that are updated. |
+| trigger\_id   | String | Id of the trigger to update.      |
+
+{% tabs %}
+{% tab title="200: OK Trigger Updated " %}
+```json
+{
+    "STATUS": "Successful",
+    "message": "Trigger updated successfully"
+}
+```
+{% endtab %}
+
+{% tab title="401 API Key validation has failed" %}
+```json
+{
+    "ERROR": "Invalid API key provided."
+}
+```
+{% endtab %}
+{% endtabs %}
+
+Here are some sample codes to demonstrate the request format for the endpoint -->
+
+{% tabs %}
+{% tab title="Python" %}
+{% code overflow="wrap" %}
+```python
+import requests
+import json
+
+url = "https://api.convai.com/character/narrative/update-trigger"
+headers = { 
+    'CONVAI-API-KEY': '<Your-API-Key>',
+    'Content-Type': 'application/json'
+}
+
+# Create a dictionary for the JSON payload
+payload = { 
+    "character_id":"<Character-Id>",
+    "trigger_id": "<Trigger-Id>",
+    "updated_data": {
+        "destination_section":"<New-Destination-Section-Id>",
+        "trigger_message":"User has entered the Computer history museum"
+    }   
+}
+
+# Convert the payload to JSON
+json_payload = json.dumps(payload)
+
+response = requests.post(url, headers=headers, data=json_payload)
+
+print(response.text)                  
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="cURL" %}
+{% code overflow="wrap" %}
+```shell
+curl -X POST "https://api.convai.com/character/narrative/update-trigger" \
+     -H "CONVAI-API-KEY: <Your-API-Key>" \
+     -H "Content-Type: application/json" \
+     -d '{
+         "character_id": "<Character-Id>",
+         "trigger_id": "<Section-Id>",
+         "updated_data": {
+             "destination_section": "<New-Destination-Section-Id>",
+             "trigger_message": "User has entered the Computer history museum"
+         }
+     }'
+```
+{% endcode %}
+{% endtab %}
+{% endtabs %}
+
+## Delete Trigger
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/narrative/delete-trigger`
+
+Delete an existing Trigger.&#x20;
+
+#### Headers
+
+<table><thead><tr><th width="226">Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>CONVAI-API-KEY<mark style="color:red;">*</mark></td><td>String</td><td>The unique api-key provided for every user. Found under the Key icon when logged into your Convai account.</td></tr></tbody></table>
+
+#### Request Body
+
+| Name          | Type   | Description                  |
+| ------------- | ------ | ---------------------------- |
+| character\_id | String | Id of your character.        |
+| trigger\_id   | String | Id of the trigger to delete. |
+
+{% tabs %}
+{% tab title="200: OK Trigger Deleted " %}
+```json
+{
+    "STATUS": "Successful",
+    "message": "Trigger deleted successfully"
+}
+```
+{% endtab %}
+
+{% tab title="401 API Key validation has failed" %}
+```json
+{
+    "ERROR": "Invalid API key provided."
+}
+```
+{% endtab %}
+{% endtabs %}
+
+Here are some sample codes to demonstrate the request format for the endpoint -->
+
+{% tabs %}
+{% tab title="Python" %}
+{% code overflow="wrap" %}
+```python
+import requests
+import json
+
+url = "https://api.convai.com/character/narrative/delete-trigger"
+headers = { 
+    'CONVAI-API-KEY': '<Your-API-Key>',
+    'Content-Type': 'application/json'
+}
+
+# Create a dictionary for the JSON payload
+payload = { 
+    "character_id":"<Character-Id>",
+    "trigger_id": "<Trigger-Id>",  
+}
+
+# Convert the payload to JSON
+json_payload = json.dumps(payload)
+
+response = requests.post(url, headers=headers, data=json_payload)
+
+print(response.text)                 
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="cURL" %}
+{% code overflow="wrap" %}
+```shell
+curl -X POST "https://api.convai.com/character/narrative/delete-trigger" \
+     -H "CONVAI-API-KEY: <Your-API-Key>" \
+     -H "Content-Type: application/json" \
+     -d '{
+         "character_id": "<Character-Id>",
+         "trigger_id": "<Trigger-Id>"
+     }'
+```
+{% endcode %}
+{% endtab %}
+{% endtabs %}
+
+## Get Trigger
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/narrative/get-trigger`
+
+Fetch details of an existing Trigger.&#x20;
+
+#### Headers
+
+<table><thead><tr><th width="226">Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>CONVAI-API-KEY<mark style="color:red;">*</mark></td><td>String</td><td>The unique api-key provided for every user. Found under the Key icon when logged into your Convai account.</td></tr></tbody></table>
+
+#### Request Body
+
+| Name          | Type   | Description                 |
+| ------------- | ------ | --------------------------- |
+| character\_id | String | Id of your character.       |
+| trigger\_id   | String | Id of the trigger to fetch. |
+
+{% tabs %}
+{% tab title="200: OK Trigger Details " %}
+```json
+{
+    "character_id": "<Character-Id>",
+    "trigger_id": "<Trigger-Id>",
+    "trigger_name": "UserEntry",
+    "trigger_message": "User has entered the museum.",
+    "destination_section": null,
+    "node_position": []
+}
+```
+{% endtab %}
+
+{% tab title="401 API Key validation has failed" %}
+```json
+{
+    "ERROR": "Invalid API key provided."
+}
+```
+{% endtab %}
+{% endtabs %}
+
+Here are some sample codes to demonstrate the request format for the endpoint -->
+
+{% tabs %}
+{% tab title="Python" %}
+{% code overflow="wrap" %}
+```python
+import requests
+import json
+
+url = "https://api.convai.com/character/narrative/get-trigger"
+headers = { 
+    'CONVAI-API-KEY': '<Your-API-Key>',
+    'Content-Type': 'application/json'
+}
+
+# Create a dictionary for the JSON payload
+payload = { 
+    "character_id":"<Character-Id>",
+    "trigger_id": "<Trigger-Id>",  
+}
+
+# Convert the payload to JSON
+json_payload = json.dumps(payload)
+
+response = requests.post(url, headers=headers, data=json_payload)
+
+print(response.text)              
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="cURL" %}
+{% code overflow="wrap" %}
+```shell
+curl -X POST "https://api.convai.com/character/narrative/get-trigger" \
+     -H "CONVAI-API-KEY: <Your-API-Key>" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "character_id": "<Character-Id>",
+           "trigger_id": "<Trigger-Id>"
+         }'
+```
+{% endcode %}
+{% endtab %}
+{% endtabs %}
+
+## List Triggers
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/narrative/list-triggers`
+
+List all the triggers for a Character.&#x20;
+
+#### Headers
+
+<table><thead><tr><th width="226">Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>CONVAI-API-KEY<mark style="color:red;">*</mark></td><td>String</td><td>The unique api-key provided for every user. Found under the Key icon when logged into your Convai account.</td></tr></tbody></table>
+
+#### Request Body
+
+| Name          | Type   | Description           |
+| ------------- | ------ | --------------------- |
+| character\_id | String | Id of your character. |
+
+{% tabs %}
+{% tab title="200: OK List of Trigger Details " %}
+```json
+[
+  {
+    "character_id": "<Character-Id>",
+    "trigger_id": "<Trigger-ID1>",
+    "trigger_name": "trigger 1",
+    "trigger_message": "",
+    "destination_section": null,
+    "node_position": []
+  },
+  {
+    "character_id": "<Character-Id>",
+    "trigger_id": "<Trigger-ID2>",
+    "trigger_name": "UserEntry",
+    "trigger_message": "User has entered the museum.",
+    "destination_section": null,
+    "node_position": [ ]
+  }
+]
+```
+{% endtab %}
+
+{% tab title="401 API Key validation has failed" %}
+```json
+{
+    "ERROR": "Invalid API key provided."
+}
+```
+{% endtab %}
+{% endtabs %}
+
+Here are some sample codes to demonstrate the request format for the endpoint -->
+
+{% tabs %}
+{% tab title="Python" %}
+{% code overflow="wrap" %}
+```python
+import requests
+import json
+
+url = "https://api.convai.com/character/narrative/list-triggers"
+headers = { 
+    'CONVAI-API-KEY': '<Your-API-Key>',
+    'Content-Type': 'application/json'
+}
+
+# Create a dictionary for the JSON payload
+payload = { 
+    "character_id":"<Character-Id>", 
+}
+
+# Convert the payload to JSON
+json_payload = json.dumps(payload)
+
+response = requests.post(url, headers=headers, data=json_payload)
+
+print(response.text)              
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="cURL" %}
+{% code overflow="wrap" %}
+```shell
+curl -X POST "https://api.convai.com/character/narrative/list-triggers" \
+     -H "CONVAI-API-KEY: <Your-API-Key>" \
+     -H "Content-Type: application/json" \
+     -d '{"character_id":"<Character-Id>"}'
 ```
 {% endcode %}
 {% endtab %}
