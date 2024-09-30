@@ -16,8 +16,8 @@ Update API can be used to change the LLM to be used for Character. Currently fol
 | ------------------------- | ----------------- | ---------- |
 | Claude-3-5-Sonnet         | claude-3-5-sonnet | No         |
 | Gemini-1.5-pro            | gemini-1.5-pro    | No         |
-| LLama3-70B                | llama-2-13b       | Yes        |
-| LLama2-13B                | llama3-70b        | Yes        |
+| LLama3-70B                | llama3-70b        | Yes        |
+| LLama2-13B                | llama-2-13b       | Yes        |
 | GPT-4o                    | gpt-4o            | No         |
 | GPT-4o-mini               | gpt-4o-mini       | No         |
 | Fine Tuned - Mistral - 7B | uncensored-small  | Yes        |

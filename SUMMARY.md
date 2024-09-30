@@ -167,6 +167,7 @@
 
 * [Core API Reference](reference/core-api-reference/README.md)
   * [Character Tool API](reference/core-api-reference/character-tool-api/README.md)
+    * [Narrative Design API](reference/core-api-reference/character-tool-api/narrative-design-api.md)
     * [Backstory API](reference/core-api-reference/character-tool-api/backstory-api.md)
     * [Chat History API](reference/core-api-reference/character-tool-api/chat-history-api.md)
     * [Interaction API](reference/core-api-reference/character-tool-api/interaction-api.md)
