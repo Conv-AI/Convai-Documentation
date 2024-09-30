@@ -157,10 +157,17 @@ print(response.text)
 {% tab title="cURL" %}
 {% code overflow="wrap" %}
 ```shell
-curl -X POST "https://api.convai.com/character/toggle-is-narrative-driven" \
+curl -X POST "https://api.convai.com/character/narrative/create-section" \
      -H "CONVAI-API-KEY: <Your-API-Key>" \
      -H "Content-Type: application/json" \
-     -d '{"character_id": "<Your-Character-Id>", "is_narrative_driven": true}'
+     -d '{
+         "character_id": "<Your-Character-Id>",
+         "objective": "Section Objective",
+         "section_name": "SectionName",
+         "updated_character_data": {},
+         "behavior_tree_code": "",
+         "bt_constants": ""
+     }'
 ```
 {% endcode %}
 {% endtab %}
@@ -254,10 +261,114 @@ print(response.text)
 {% tab title="cURL" %}
 {% code overflow="wrap" %}
 ```shell
-curl -X POST "https://api.convai.com/character/toggle-is-narrative-driven" \
+curl -X POST "https://api.convai.com/character/narrative/edit-section" \
      -H "CONVAI-API-KEY: <Your-API-Key>" \
      -H "Content-Type: application/json" \
-     -d '{"character_id": "<Your-Character-Id>", "is_narrative_driven": true}'
+     -d '{
+         "character_id": "<Your-Character-Id>",
+         "section_id": "<Section-Id->",
+         "updated_data": {
+             "decisions": [
+                 {
+                     "criteria": "User agrees to take tour.",
+                     "next_section_id": "b9d7f568-7d06-11ef-be6a-42010a7be011"
+                 }
+             ],
+             "objective": "Offer user tour of a Museum.",
+             "section_name": "Welcome Section"
+         }
+     }'
+```
+{% endcode %}
+{% endtab %}
+{% endtabs %}
+
+## Get Section
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/narrative/get-section`
+
+Get details for a particular narrative section of your Character.&#x20;
+
+#### Headers
+
+<table><thead><tr><th width="226">Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>CONVAI-API-KEY<mark style="color:red;">*</mark></td><td>String</td><td>The unique api-key provided for every user. Found under the Key icon when logged into your Convai account.</td></tr></tbody></table>
+
+#### Request Body
+
+| Name          | Type   | Description                 |
+| ------------- | ------ | --------------------------- |
+| character\_id | String | Id of your character.       |
+| section\_id   | String | Id of the section to fetch. |
+
+{% tabs %}
+{% tab title="200: OK Section Details " %}
+```json
+{
+   "character_id": "<Your-CharacterId>",
+   "section_id": "<Your-SectionId>",
+   "objective": "Offer user tour of History Museum.",
+   "decisions": [{"criteria": "User agrees to take tour.", "next_section_id": "12345568-7890-1123-4456-424242424242"}],
+   "parents": null,
+   "updated_character_data": {},
+   "bt_constants": "",
+   "behavior_tree_code": "",
+   "section_name": "Welcome Section",
+   "triggers": null,
+   "node_position": []
+}
+```
+{% endtab %}
+
+{% tab title="401 API Key validation has failed" %}
+```json
+{
+    "ERROR": "Invalid API key provided."
+}
+```
+{% endtab %}
+{% endtabs %}
+
+Here are some sample codes to demonstrate the request format for the endpoint -->
+
+{% tabs %}
+{% tab title="Python" %}
+{% code overflow="wrap" %}
+```python
+import requests
+import json
+
+url = "https://api.convai.com/character/narrative/get-section"
+headers = { 
+    'CONVAI-API-KEY': '<Your-API-Key>',
+    'Content-Type': 'application/json'
+}
+
+# Create a dictionary for the JSON payload
+payload = { 
+    "character_id":"<Your-Character-Id>",
+    "section_id":"<Section-Id->", 
+}
+
+# Convert the payload to JSON
+json_payload = json.dumps(payload)
+
+response = requests.post(url, headers=headers, data=json_payload)
+
+print(response.text)
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="cURL" %}
+{% code overflow="wrap" %}
+```shell
+curl -X POST "https://api.convai.com/character/narrative/get-section" \
+     -H "CONVAI-API-KEY: <Your-API-Key>" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "character_id": "<Your-Character-Id>",
+           "section_id": "<Section-Id->"
+         }'
 ```
 {% endcode %}
 {% endtab %}
