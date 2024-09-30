@@ -82,7 +82,7 @@ curl -X POST "https://api.convai.com/character/toggle-is-narrative-driven" \
 
 ## Create Section
 
-<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/narrate/create-section`
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/narrative/create-section`
 
 Create new section for your Character.
 
@@ -168,7 +168,7 @@ curl -X POST "https://api.convai.com/character/toggle-is-narrative-driven" \
 
 ## Edit Section
 
-<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/narrate/edit-section`
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/narrative/edit-section`
 
 Edit section for your Character. You would send all the fields that you want to update for a section updated\_character\_data json. Following are the valid key.
 
