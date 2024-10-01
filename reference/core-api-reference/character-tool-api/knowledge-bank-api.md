@@ -270,7 +270,7 @@ print(response.text)
 {% tab title="cURL" %}
 {% code overflow="wrap" %}
 ```shell
-curl -X POST 'https://api.convai.com/character/knowledge-bank/update' \
+curl -X POST 'https://api.convai.com/character/update' \
 -H 'CONVAI-API-KEY: <Your-API-Key>' \
 -H 'Content-Type: application/json' \
 -d '{
@@ -284,5 +284,83 @@ curl -X POST 'https://api.convai.com/character/knowledge-bank/update' \
 }'
 ```
 {% endcode %}
+{% endtab %}
+{% endtabs %}
+
+## Delete a KB file
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/knowledge-bank/delete`
+
+The knowledge bank delete API can be used to permanently remove documents from the user's account. Note that deleting a document will remove it from all characters it is associated with.
+
+#### Headers
+
+| Name                                             | Type   | Description                                                                                                |
+| ------------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------- |
+| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. Found under the Key icon when logged into your Convai account. |
+
+#### Request Body
+
+| Name         | Type   | Description                                |
+| ------------ | ------ | ------------------------------------------ |
+| document\_id | String | Id of the document that should be deleted. |
+
+{% tabs %}
+{% tab title="200: OK The file is successfully deleted" %}
+```json
+{"Successfully deleted document"}
+```
+{% endtab %}
+
+{% tab title="401 API Key validation has failed" %}
+```
+{
+    "API_ERROR": "Invalid API key provided.
+}
+```
+{% endtab %}
+{% endtabs %}
+
+Here are some sample codes to demonstrate the request format for the endpoint -->
+
+{% tabs %}
+{% tab title="Python" %}
+{% code overflow="wrap" %}
+```python
+import requests
+import json
+
+url = "https://api.convai.com/character/knowledge-bank/delete"
+
+headers = { 
+    'CONVAI-API-KEY': '<Your-API-Key>',
+    'Content-Type': 'application/json'
+}
+
+# Create a dictionary for the JSON payload
+payload = { 
+    "document_id": "<File-UUID>"   
+}
+
+# Convert the payload to JSON
+json_payload = json.dumps(payload)
+
+response = requests.post(url, headers=headers, data=json_payload)
+
+print(response.text)
+
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="cURL" %}
+```bash
+curl -X POST 'https://api.convai.com/character/knowledge-bank/delete' \
+-H 'CONVAI-API-KEY: <Your-API-Key>' \
+-H 'Content-Type: application/json' \
+-d '{
+  "document_id": "<File-UUID>"
+}'
+```
 {% endtab %}
 {% endtabs %}
