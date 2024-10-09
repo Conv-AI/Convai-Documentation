@@ -64,6 +64,8 @@
     * [Building for AR](plugins-and-integrations/unity-plugin/building-for-supported-platforms/building-for-ar.md)
     * [Building for macOS Universal apps](plugins-and-integrations/unity-plugin/building-for-supported-platforms/microphone-permission-issue-on-intel-macs-with-universal-builds.md)
   * [Changelogs](plugins-and-integrations/unity-plugin/changelogs.md)
+  * [Tutorials](plugins-and-integrations/unity-plugin/tutorials/README.md)
+    * [Narrative Design](plugins-and-integrations/unity-plugin/tutorials/narrative-design.md)
 * [Unreal Engine](plugins-and-integrations/unreal-engine/README.md)
   * [Supported Platforms](plugins-and-integrations/unreal-engine/supported-platforms.md)
   * [Installation](plugins-and-integrations/unreal-engine/installation.md)
