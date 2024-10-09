@@ -120,6 +120,7 @@
     * [Missing Unreal Engine Tool Set in Microsoft Visual Studio Toolchain](plugins-and-integrations/unreal-engine/troubleshoot-guide/missing-unreal-engine-tool-set-in-microsoft-visual-studio-toolchain.md)
     * [Convai Module Not Found](plugins-and-integrations/unreal-engine/troubleshoot-guide/convai-module-not-found.md)
     * [MetaHuman plugin conflict](plugins-and-integrations/unreal-engine/troubleshoot-guide/metahuman-plugin-conflict.md)
+    * [Failure to load character IDs](plugins-and-integrations/unreal-engine/troubleshoot-guide/failure-to-load-character-ids.md)
   * [Microphone Settings](plugins-and-integrations/unreal-engine/microphone-settings/README.md)
     * [Set Audio Gain](plugins-and-integrations/unreal-engine/microphone-settings/set-audio-gain.md)
     * [Set Microphone](plugins-and-integrations/unreal-engine/microphone-settings/set-microphone.md)
