@@ -1,20 +1,22 @@
----
-description: Render other language character transcripts
----
-
 # Language Support
 
 Convai offers comprehensive transcript and voice support for a wide range of languages. To facilitate seamless integration, our Unity plugin comes with a custom TextMeshPro (TMP) package, which includes essential fonts and required settings for major languages.
+
+{% hint style="warning" %}
+This requires TMP Essentials pre-installed, which can be done through the TextMeshPro option in the Window tab or through a prompt on starting the project.&#x20;
+{% endhint %}
+
+<figure><img src="../../../.gitbook/assets/TMP_Prompt.png" alt=""><figcaption><p>TMP Importer (will appear automatically if TMP Essentials are not imported)</p></figcaption></figure>
+
+<figure><img src="../../../.gitbook/assets/TMP_Window.png" alt=""><figcaption><p>TMP Essentials Manual Import Process</p></figcaption></figure>
+
+## Setup
 
 To implement these language-specific features in your project:
 
 1. Navigate to the Convai Setup Window within Unity.
 2. Locate the Package Management section.
 3. Click on the "Convai Custom TMP Package" button.
-
-{% hint style="warning" %}
-This requires TMP essentials pre-installed, which can be done through TextMeshPro option in the Window tab or through a prompt on starting the project.&#x20;
-{% endhint %}
 
 <figure><img src="../../../.gitbook/assets/Doc.png" alt=""><figcaption></figcaption></figure>
 
