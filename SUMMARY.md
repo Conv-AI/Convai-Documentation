@@ -51,6 +51,7 @@
     * [Character Emotion](plugins-and-integrations/unity-plugin/utilities/character-emotion.md)
     * [Player Data Container](plugins-and-integrations/unity-plugin/utilities/player-data-container.md)
     * [Long Term Memory](plugins-and-integrations/unity-plugin/utilities/long-term-memory.md)
+    * [Language Support](plugins-and-integrations/unity-plugin/utilities/language-support.md)
     * [Managing sessionID Locally](plugins-and-integrations/unity-plugin/utilities/managing-sessionid-locally.md)
     * [Transcript UI System](plugins-and-integrations/unity-plugin/utilities/transcript-ui-system.md)
     * [Pre-built UI Prefabs](plugins-and-integrations/unity-plugin/utilities/convai-ui-prefabs.md)
