@@ -20,9 +20,9 @@ To implement these language-specific features in your project:
 
 <figure><img src="../../../.gitbook/assets/Doc.png" alt=""><figcaption></figcaption></figure>
 
-Once installed, just import your character for which you require the language support, talk with it and the font will automatically render in the transcript.
+Once installed, just import the character for which you require the language support, talk with it and the font will automatically render in the transcript.
 
-For now, we provide fonts for these langauges:
+For now, we provide fonts for these languages:
 
 * Arabic
 * Japanese
