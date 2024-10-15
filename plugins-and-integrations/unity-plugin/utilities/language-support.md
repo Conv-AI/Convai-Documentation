@@ -31,4 +31,4 @@ For now, we provide fonts for these langauges:
 
 We also provide support for Right-to-Left languages, like Urdu, Persian and Arabic through our Chat UIs.  So, for example, if you talk with an Arabic character or if the character's name is in Arabic, the text will automatically enable the RTL feature provided by unity to reflect proper transcripts.
 
-<figure><img src="../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (414).png" alt=""><figcaption></figcaption></figure>

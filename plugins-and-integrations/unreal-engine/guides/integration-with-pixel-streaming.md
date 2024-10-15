@@ -14,7 +14,7 @@ To setup the Pixel Streaming server, we recommend taking a look over [this excel
 2.  Enable Unreal Engine's `Pixel Streaming` and the `Pixel Streaming Player` Plugins from the Plugins window.\
 
 
-    <figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 3.  In the player blueprint which has the Convai Player component, add the PixelStreamingAudio component to the list of components.\
 
 
