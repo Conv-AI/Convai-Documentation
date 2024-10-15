@@ -25,7 +25,7 @@ Once installed, just import your character for which you require the language su
 For now, we provide fonts for these langauges:
 
 * Arabic
-* Japanesec
+* Japanese
 * Korean
 * Chinese
 
