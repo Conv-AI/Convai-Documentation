@@ -4,6 +4,10 @@ This Unity tutorial shows you how to add a Convai-powered Tour Guide character f
 
 ***
 
+{% embed url="https://youtu.be/wmhoNXUhc1U" %}
+Narrative Design Tour Guide Tutorial
+{% endembed %}
+
 Download the free Sample project files:
 
 {% embed url="https://drive.google.com/file/d/1ddaxaRmdh_BTwO41KkipqwtD18Q11kYX/view?usp=drivesdk" %}
