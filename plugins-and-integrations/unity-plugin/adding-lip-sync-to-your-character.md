@@ -28,7 +28,7 @@ So, you can make you own Effector list or use one of the many that we ship in th
 
 Right click inside project panel and head over to **`Create > Convai > Expression > Viseme Skin Effector`** which will create a **Viseme Effector List Scriptable Object** and now you can define your own values
 
-<figure><img src="../../.gitbook/assets/Untitled.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Untitled (3).png" alt=""><figcaption></figcaption></figure>
 
 #### Viseme Bone Effector List
 

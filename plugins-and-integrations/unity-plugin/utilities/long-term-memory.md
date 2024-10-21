@@ -57,3 +57,31 @@ Grpc.Core.RpcException: Status(StatusCode=InvalidArgument, Detail="Cannot find s
 {% endhint %}
 
 If you encounter this error, ensure that the **SpeakerID** was created using the same API key currently in use. If you're uncertain about the API key used, you can reset the **SpeakerID** and **PlayerName** by accessing the `ConvaiPlayerDataSO` file located in `Assets > Convai > Resources`, allowing you to start the process anew.
+
+### Management of Speaker ID(s)
+
+It is essential for developers to efficiently manage the Speaker ID(s) generated using their API key, as the number of IDs that can be created is limited and dependent on the subscription tier. Proper management ensures optimal usage of resources and prevents potential disruptions in the application's functionality.
+
+#### Speaker ID limit per API key are as follows
+
+| Tier                         | Limit                   |
+| ---------------------------- | ----------------------- |
+| Personal                     | 1                       |
+| Gamer / Indie / Professional | 5                       |
+| Partner / Enterprise         | 100 (Can be Customized) |
+
+You can view all the Speaker ID(s) associated with a specific API key by accessing the **Convai Window** within your Unity project. This feature provides a comprehensive list of IDs, allowing for easier management and monitoring.
+
+{% hint style="danger" %}
+Ensure that the API key is correctly entered; otherwise, the feature will not function as expected. Accurate API key input is critical for accessing and managing Speaker ID(s) through the Convai Window in Unity.
+{% endhint %}
+
+<figure><img src="../../../.gitbook/assets/Untitled.png" alt=""><figcaption></figcaption></figure>
+
+Head over to Long Term Memory Section
+
+<figure><img src="../../../.gitbook/assets/Untitled (1).png" alt=""><figcaption></figcaption></figure>
+
+If the message "No Speaker ID(s) Found" appears, there is no need to proceed with this guide. However, if a Speaker ID list is displayed, it's advisable to delete any ID(s) that are no longer in use or needed to optimize your available resources.
+
+<figure><img src="../../../.gitbook/assets/Untitled (2).png" alt=""><figcaption></figcaption></figure>
