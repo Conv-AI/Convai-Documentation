@@ -1,13 +1,13 @@
 ---
-description: This guide explains how to add a 3D chat widget to Convai Characte
+description: This guide explains how to add a 3D chat widget to Convai Character
 ---
 
 # 3D Chat Widget
 
 #### Steps to Set Up the 3D chat widget
 
-1. Go to the [Google Drive link](https://drive.google.com/drive/folders/109XAhnnozXsuIyx\_68lkz0mhcFGXMSeE?usp=drive\_link) and download the **Convai Convenience Pack**.
-2. Unzip the file and place it in the `ProjectDirectory/Content` folder.
+1. Go to the following [Google Drive link](https://drive.google.com/drive/folders/109XAhnnozXsuIyx\_68lkz0mhcFGXMSeE?usp=drive\_link) and download the **Convai Convenience Pack**.
+2. Unzip the file and place it in `ProjectDirectory/Content` folder.
 
 #### Adding the BP Convai 3DWidget Component
 
