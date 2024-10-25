@@ -27,6 +27,7 @@ Visit [convai.com](https://convai.com/pipeline/dashboard) for more information a
 
 ## Quick Setup Tutorial
 
-{% embed url="https://youtu.be/Vhr7IvfITgU" %}
-Unity Plugin Quick Setup Video
+{% embed url="https://youtu.be/anb9ityi0MQ?feature=shared" %}
+Quick Guide On Adding AI Characters to Your Unity Project
 {% endembed %}
+
