@@ -4,5 +4,8 @@ description: >-
   characters.
 ---
 
-# Character Tool API
+# Character API
 
+{% hint style="info" %}
+These APIs are available on Enterprise tier only.
+{% endhint %}

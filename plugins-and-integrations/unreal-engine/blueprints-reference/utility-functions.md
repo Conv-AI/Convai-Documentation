@@ -82,7 +82,7 @@ _Nothing is returned, check logs for details on why it failed._
 * **New Char Name:** Name of the character.
 
 {% hint style="info" %}
-For the list of supported voices please refer to the [table](../../../reference/core-api-reference/standalone-voice-api/text-to-speech-api/#list-of-available-voices-and-their-supported-audio-file-encodings) in Text To Speech API.
+For the list of supported voices please refer to the [table](broken-reference) in Text To Speech API.
 {% endhint %}
 
 {% hint style="info" %}

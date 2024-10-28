@@ -54,6 +54,6 @@ Convai provides a variety of plugins and integrations to help integrate conversa
 
 * ### [Character API](../reference/core-api-reference/character-tool-api/character-api.md)
 * ### [Action API](../reference/core-api-reference/character-tool-api/action-api.md)
-* ### [Speech To Text API](../reference/core-api-reference/standalone-voice-api/speech-to-text-api.md)
-* ### [Text To Speech API](../reference/core-api-reference/standalone-voice-api/text-to-speech-api/)
-* ### [Voice Capture](../reference/core-api-reference/standalone-voice-api/)
+* ### [Speech To Text API](broken-reference)
+* ### [Text To Speech API](broken-reference)
+* ### [Voice Capture](broken-reference)
