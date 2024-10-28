@@ -334,18 +334,14 @@ url = "https://api.convai.com/character/knowledge-bank/delete"
 
 headers = { 
     'CONVAI-API-KEY': '<Your-API-Key>',
-    'Content-Type': 'application/json'
 }
 
 # Create a dictionary for the JSON payload
-payload = { 
+form_data = { 
     "document_id": "<File-UUID>"   
 }
 
-# Convert the payload to JSON
-json_payload = json.dumps(payload)
-
-response = requests.post(url, headers=headers, data=json_payload)
+response = requests.post(url, headers=headers, data=form_data)
 
 print(response.text)
 
@@ -355,12 +351,9 @@ print(response.text)
 
 {% tab title="cURL" %}
 ```bash
-curl -X POST 'https://api.convai.com/character/knowledge-bank/delete' \
--H 'CONVAI-API-KEY: <Your-API-Key>' \
--H 'Content-Type: application/json' \
--d '{
-  "document_id": "<File-UUID>"
-}'
+curl -X POST "https://api.convai.com/character/knowledge-bank/delete" \
+-H "CONVAI-API-KEY: <Your-API-Key>" \
+-d "document_id=<File-UUID>"
 ```
 {% endtab %}
 {% endtabs %}
