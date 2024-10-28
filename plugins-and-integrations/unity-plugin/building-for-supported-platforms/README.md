@@ -5,10 +5,10 @@ description: >-
   these platforms:
 ---
 
-# Building for supported platforms
+# Building For Supported Platforms
 
 1. [iOS/iPadOS](building-for-ios-ipados.md)
 2. [Virtual Reality](building-for-vr.md) (Occulus)
-3. [Augmented Reality ](building-for-ar.md)(Android/iOS)
+3. [Augmented Reality ](convai-xr/building-for-ar.md)(Android/iOS)
 4. [WebGL](building-for-webgl.md)
 5. [Universal macOS applications](microphone-permission-issue-on-intel-macs-with-universal-builds.md)

@@ -1,5 +1,7 @@
 ---
 description: Building for VR - Unity Plugin Guide for VR development with Convai.
+hidden: true
+noIndex: true
 ---
 
 # Building for VR

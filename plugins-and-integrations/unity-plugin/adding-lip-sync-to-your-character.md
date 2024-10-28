@@ -38,7 +38,7 @@ This is where developer will tell the Convai SDK, how much each value coming fro
 
 Here, bone's rotation will be effect by the values coming from server multiplied by the values in effects. Example, for TH the value will affect bone's rotation by 0.2 multiplier and etc. The engine representation of this would look something like this.
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 So, you can make you own Bone Effector list or use one of the many that we ship in the SDK.
 

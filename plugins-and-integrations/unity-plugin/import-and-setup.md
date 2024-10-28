@@ -32,7 +32,7 @@ The file structure belongs to the nightly version of the plugin downloaded from 
 8.  When the Import begins, a prompt for using the new Unity Input System will appear. Press **Yes**.\
 
 
-    <figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt="" width="295"><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt="" width="295"><figcaption></figcaption></figure>
 9. The project will automatically restart. After the project is restarted, you need to import the package in the same way.
 10. If you are using a Unity Version pre-2022.3.0f1, Disable Assembly Version Validation (use this troubleshooting page: [enabled-assembly-validation.md](troubleshooting-guide/enabled-assembly-validation.md "mention"))
 11. Verify there were no compiler errors.&#x20;
