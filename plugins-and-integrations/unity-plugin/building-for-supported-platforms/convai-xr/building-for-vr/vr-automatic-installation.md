@@ -48,7 +48,7 @@ Once the installation is complete, it’s time to open the demo scene.
 
 <figure><img src="../../../../../.gitbook/assets/VRAfterAutomaticInstallation.png" alt=""><figcaption></figcaption></figure>
 
-### Step 9
+### Step 8
 
 If you don’t have the **TextMeshPro** package installed, you’ll need it to display text properly in the demo scene. To install it:
 
@@ -60,7 +60,7 @@ If you don’t have the **TextMeshPro** package installed, you’ll need it to d
 
 <figure><img src="../../../../../.gitbook/assets/TextMeshProInstallation_2 (2).png" alt="" width="375"><figcaption></figcaption></figure>
 
-### **Step 10**
+### **Step 9**
 
 Everything is now set up! :tada::sunglasses:&#x20;
 
