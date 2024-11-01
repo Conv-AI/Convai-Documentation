@@ -4,7 +4,53 @@ description: Convai Unity Plugin Changelogs - Stay updated with the latest chang
 
 # Changelogs
 
-## Version 3.1.0（current）
+## Version 3.2.0 (Current)
+
+Released: October 31, 2024
+
+### **New Features**
+
+* **Implemented Dynamic Config Feature**:
+  * This feature allows you to dynamically pass variables to NPCs. For example, you can update NPCs with the player’s current health, inventory items, or information about the world, enhancing interactivity and immersion.
+* **Implemented Narrative Design Keys:**
+  * This feature enables dynamic variable passing within the Narrative Design section and triggers. For instance, you can use placeholders like {TimeOfDay} to create personalized dialogues, such as "Welcome, player! How is your {TimeOfDay} going?"
+* Added MR Demo Scene
+* Added MR Automatic Installation and Manual Installation
+* Added Convai XR Package (compatibility with Meta SDK and other XR SDKs provided)
+
+### **Improvements**
+
+* Added Long Term Memory API(s) to View and Delete Speaker ID(s)
+* Improved VR Manual Installation
+* Improved Custom Package Installation
+
+### **Hotfix**
+
+* Minor Bug Fixes
+
+
+
+## Version 3.1.2
+
+Released: September 16, 2024
+
+### Hotfix
+
+Minor Bug Fixes
+
+
+
+## Version 3.1.1
+
+Released: September 12, 2024
+
+### Hotfix
+
+Fixed NPC2NPC response delay
+
+
+
+## Version 3.1.0
 
 Released: Aug 28, 2024
 
@@ -64,6 +110,8 @@ Released: Jun 21, 2024
 * Fix macOS TMP UGUI render issue in demo scene
 * Prefab missing animator
 * Updated ActiveNPC layer check logic
+
+
 
 ## Version 3.0.0
 
@@ -126,6 +174,8 @@ Released: Jun 13, 2024
 1. **Transcript UI Bug Fixes:** Fixed bugs and improved system for Transcript UI character list
 2. **Microphone Permission:** Fixed Android and iOS microphone permission issues
 
+
+
 ## Version 2.1.0
 
 ### What's Changed
@@ -146,6 +196,8 @@ Released: Jun 13, 2024
 * Improvement: Improved Logging System.
 * Improvement: Added ability to interrupt Character Response with Voice Interruption.
 * Improvement: Improved mobile platform transcription UI.
+
+
 
 ## Version 2.0.0
 
