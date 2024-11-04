@@ -22,7 +22,7 @@ description: >-
 
 There are two methods to install the plugin depending on your requirements
 
-1. [Directly from the Marketplace Link](https://www.unrealengine.com/marketplace/en-US/product/convai): Recommended for easy installation and tracking updates to the plugin. (UE 5.1 - 5.3)
+1. [Directly from the Marketplace Link](https://www.fab.com/listings/ba3145af-d2ef-434a-8bc3-f3fa1dfe7d5c): Recommended for easy installation and tracking updates to the plugin. (UE 5.1 - 5.3)
 2. [Building from Github Source](https://github.com/Conv-AI/Convai-UnrealEngine-SDK?tab=readme-ov-file#installation): For source UE builds and for unsupported UE versions on the marketplace, but not guranteed as the marketplace approach. (UE 4.26 - 5.0)
 
 ## Set up your project
