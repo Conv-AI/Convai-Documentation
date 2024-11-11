@@ -48,7 +48,7 @@ On success, the API will return a nested JSON object in the following format :&#
 
 
 
-## Current List of supported languages :&#x20;
+## List of supported languages :&#x20;
 
 | Language                | Language Code |
 | ----------------------- | ------------- |
