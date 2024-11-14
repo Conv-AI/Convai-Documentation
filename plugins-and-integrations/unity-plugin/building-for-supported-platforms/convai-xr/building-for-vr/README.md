@@ -6,6 +6,8 @@ description: VR development with Convai
 
 ## Integrating Convai with VR: Quick and Flexible Setup Options
 
+{% embed url="https://youtu.be/ixV077g2xX0" %}
+
 Setting up Convai for Virtual Reality (VR) is easier than you might think. With just a few clicks, you can get Convai integrated directly into your VR projects.
 
 To give users flexibility and customization options, we offer **two installation methods**:
