@@ -19,6 +19,7 @@
     * [Unreal Engine](convai-playground/character-creator-tool/narrative-design/unreal-engine/README.md)
       * [Narrative Design Keys](convai-playground/character-creator-tool/narrative-design/unreal-engine/narrative-design-keys.md)
       * [Narrative Design Trigger](convai-playground/character-creator-tool/narrative-design/unreal-engine/narrative-design-trigger.md)
+  * [Character Versioning](convai-playground/character-creator-tool/character-versioning.md)
 * [F.A.Q](convai-playground/f.a.q.md)
 
 ## Plugins & Integrations
