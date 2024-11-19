@@ -193,3 +193,4 @@
     * [Knowledge Bank API](reference/core-api-reference/character-tool-api/knowledge-bank-api.md)
     * [Action API](reference/core-api-reference/character-tool-api/action-api.md)
 * [Language List API](reference/language-list-api.md)
+* [Voice List API](reference/voice-list-api.md)
