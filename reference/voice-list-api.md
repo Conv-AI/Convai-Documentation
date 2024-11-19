@@ -126,7 +126,7 @@ else:
           "PRODUCTION",
           "DEVELOPMENT"
         ],
-        "sample_link": "https://storage.googleapis.com/tts-voice-samples/HiuManNeuralzh_sampleVoice.wav"
+        "sample_link": "https://storage.googleapis.com/voice-samples-eg/HiuManNeuralzh_sampleVoice.wav"
       }
     },...
     ],
@@ -145,7 +145,7 @@ else:
             "PRODUCTION",
             "DEVELOPMENT"
           ],
-          "sample_link": "https://storage.googleapis.com/tts-voice-samples/Elli-en-US_sampleVoice.wav"
+          "sample_link": "https://storage.googleapis.com/voice-samples-eg/Elli-en-US_sampleVoice.wav"
         }
       },...
       ],
