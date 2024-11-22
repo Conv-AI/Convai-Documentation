@@ -4,6 +4,10 @@ description: This page describes the Action API and how to use it.
 
 # Action API
 
+{% hint style="warning" %}
+API access requires an active Enterprise or Partner subscription.
+{% endhint %}
+
 ### Introduction
 
 Conversations can be made even more engaging if they result in driving the behaviour of your character and give it the ability to manipulate the environment. The Action API enables this by allowing you to define various actions that the character can perform. The actions are often tied to the available objects in the environment.&#x20;

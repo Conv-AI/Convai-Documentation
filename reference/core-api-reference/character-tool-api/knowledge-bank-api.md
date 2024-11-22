@@ -6,6 +6,10 @@ description: >-
 
 # Knowledge Bank API
 
+{% hint style="warning" %}
+API access requires an active Enterprise or Partner subscription.
+{% endhint %}
+
 ## Upload a new KB File
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/knowledge-bank/upload`

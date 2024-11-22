@@ -4,6 +4,10 @@ description: This page details on how you can interact with Character.
 
 # Interaction API
 
+{% hint style="warning" %}
+API access requires an active Enterprise or Partner subscription.
+{% endhint %}
+
 ## Interacting with a Character
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/getResponse`

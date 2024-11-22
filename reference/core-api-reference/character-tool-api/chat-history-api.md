@@ -6,6 +6,10 @@ description: >-
 
 # Chat History API
 
+{% hint style="info" %}
+API access requires an active Enterprise or Partner subscription.
+{% endhint %}
+
 ## List Sessions for a Character
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/chatHistory/list`

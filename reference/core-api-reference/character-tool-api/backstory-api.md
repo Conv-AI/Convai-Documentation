@@ -1,5 +1,9 @@
 # Backstory API
 
+{% hint style="warning" %}
+API access requires an active Enterprise or Partner subscription.
+{% endhint %}
+
 ## Generate Backstory for Character
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/generate-backstory`
