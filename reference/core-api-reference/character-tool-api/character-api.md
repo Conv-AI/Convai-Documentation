@@ -14,6 +14,10 @@ Unveil the character to the end-user through your custom UI or through other ser
 **Missing Something?** In case you are missing something that is essential for your application, please reach out to us through the **support@convai.com** email and we'll get to your inquiry shortly!
 {% endhint %}
 
+{% hint style="warning" %}
+API access requires an active Enterprise or Partner subscription.
+{% endhint %}
+
 ## Create Character
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/create`

@@ -6,7 +6,7 @@ description: >-
 
 # Chat History API
 
-{% hint style="info" %}
+{% hint style="warning" %}
 API access requires an active Enterprise or Partner subscription.
 {% endhint %}
 
