@@ -24,14 +24,7 @@ Please remember to go through the list of "Important Points to Remember" mention
 
 #### Request Body
 
-| Name                                            | Type    | Description                                                               |
-| ----------------------------------------------- | ------- | ------------------------------------------------------------------------- |
-| userText<mark style="color:red;">\*</mark>      | String  | The query or input of the user interacting with the charater.             |
-| charID<mark style="color:red;">\*</mark>        | String  | The ID of the character that the user is interacting with.                |
-| sessionID<mark style="color:red;">\*</mark>     | String  | Used to identify a session of conversation to maintain the context.       |
-| voiceResponse<mark style="color:red;">\*</mark> | Boolean | To generate an audio file for the response in the voice of the character. |
-| audio<mark style="color:red;">\*</mark>         | File    | The audio file containing the query of the user, in base64 format.        |
-| sample\_rate                                    | String  | Sample rate of the audio file being sent.                                 |
+<table><thead><tr><th width="166">Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>userText<mark style="color:red;">*</mark></td><td>String</td><td>The query or input of the user interacting with the charater.</td></tr><tr><td>charID<mark style="color:red;">*</mark></td><td>String</td><td>The ID of the character that the user is interacting with.</td></tr><tr><td>sessionID<mark style="color:red;">*</mark></td><td>String</td><td>Used to identify a session of conversation to maintain the context.</td></tr><tr><td>voiceResponse<mark style="color:red;">*</mark></td><td>Boolean</td><td>To generate an audio file for the response in the voice of the character.</td></tr><tr><td>file<mark style="color:red;">*</mark></td><td>File</td><td>The audio file containing the user's query. Must be in WAV format and mono channel.</td></tr><tr><td>sample_rate</td><td>String</td><td>Sample rate of the audio file being sent.</td></tr></tbody></table>
 
 {% tabs %}
 {% tab title="200: OK The character is able to generate a response to the user's query" %}
