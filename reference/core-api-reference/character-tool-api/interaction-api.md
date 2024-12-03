@@ -162,3 +162,86 @@ curl --location --request POST 'https://api.convai.com/character/getResponse' \
 ```
 {% endtab %}
 {% endtabs %}
+
+## Generate Conversation Options
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/generate-starter-conversation`
+
+Generate Starter Conversation API is implemented as Server Sent Event (SSE).  It uses Character backstory and current chat history to generate next set of possible follow-ups with Character.
+
+#### Headers
+
+| Name                                             | Type   | Description                                                                                                |
+| ------------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------- |
+| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. Found under the Key icon when logged into your Convai account. |
+
+#### Request Body
+
+| Name      | Type   | Description                                                                                                           |
+| --------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
+| charId    | String | Id of the character for which to generate the conversation options.                                                   |
+| sessionId | String | Session Id for which to generate next round of conversation. Set it to "-1" to generate opening conversation options. |
+
+
+
+{% tabs %}
+{% tab title="200: OK Returns multiple SSE events." %}
+```json
+# Output Format:
+# The response will be streamed as Server-Sent Events (SSE).
+# Each event will have a 'data' field containing a string which is a single chat suggestion.
+# Example of a single event:
+
+data: I'm curious about your most challenging match ever.
+
+# Multiple events will be received, each containing a single chat suggestion.
+```
+{% endtab %}
+
+{% tab title="401 API Key validation has failed" %}
+```json
+{
+    "ERROR": "Invalid API key provided."
+}
+```
+{% endtab %}
+{% endtabs %}
+
+Here are some sample codes to demonstrate the request format for the endpoint -->
+
+{% tabs %}
+{% tab title="Python" %}
+{% code overflow="wrap" %}
+```python
+import json
+import requests
+
+url = "https://api.convai.com/character/generate-starter-conversation"
+
+headers = { 
+    'CONVAI-API-KEY': '<Your-API-Key>',
+}
+
+form_data = { 
+    'charId': '<Your-Character-ID>',
+    'sessionId': '<Your-Session-ID>'
+}
+
+response = requests.post(url, headers=headers, data=form_data)
+
+print(response.text)
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="cURL" %}
+{% code overflow="wrap" %}
+```shell
+curl -X POST "https://api.convai.com/character/generate-starter-conversation" \
+-H "CONVAI-API-KEY: <Your-API-Key>" \
+-d "charId=<Your-Character-ID>" \
+-d "sessionId=<Your-Session-ID>"
+```
+{% endcode %}
+{% endtab %}
+{% endtabs %}
