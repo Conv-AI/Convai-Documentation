@@ -136,7 +136,3 @@ public class iOSBuild : MonoBehaviour
 * If you face any GRPC-related issues, verify that the `libgrpc_csharp_ext.a` and `libgrpc.a` files are correctly placed in the `Assets/Convai/Plugins/gRPC/Grpc.Core/runtime/ios` folder.
 
 <figure><img src="../../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
-
-### Conclusion
-
-You should now have successfully installed your Convai-powered Unity app on your iOS or iPadOS device. If you encounter any issues or need further assistance, please visit our [discord channel](https://discord.com/invite/5mRtu2WhEm) or contact Convai support.

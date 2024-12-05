@@ -8,7 +8,7 @@ description: >-
 
 We'll be updating this page with the most frequently asked questions from our users! \
 \
-Our [Discord](https://discord.com/invite/TG98s8FWKN) and [YouTube Channels](https://www.youtube.com/@convai) are also great resources if you have further questions or want to learn more!
+Our [Convai Developer Forum](https://forum.convai.com/) and [YouTube Channels](https://www.youtube.com/@convai) are also great resources if you have further questions or want to learn more!
 
 1. **What is "Character Concurrency"?**
    * _Character Concurrency is the **number of users who can interact** with the NPC at the **same time.**_&#x20;

@@ -36,4 +36,4 @@ Unity Factory Scene HDRP:
 
 {% embed url="https://assetstore.unity.com/packages/3d/environments/industrial/unity-factory-276400" %}
 
-Sign up at [Convai ](https://convai.com)to try it out. Write to us at **support@convai.com** for any queries, bug reports, collab, or business-related engagement.
+Sign up at [Convai](https://convai.com/) to get started. For any questions or bug reports, please visit the [Convai Developer Forum](https://forum.convai.com/) where our community and support team will be happy to assist you.
