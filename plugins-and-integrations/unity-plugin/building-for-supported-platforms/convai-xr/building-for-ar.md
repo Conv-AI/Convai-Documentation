@@ -6,7 +6,7 @@ description: Building for AR - Unity Plugin Guide for AR development with Convai
 
 ## AR Installation
 
-If you want to make your Convai Plugin compatible with AR, you can do so in two ways. Please see the instructions below or check out our [_latest tutorial video_](https://www.youtube.com/watch?v=j0l\_paOQxvI) on YouTube.
+If you want to make your Convai Plugin compatible with AR, you can do so in two ways. Please see the instructions below or check out our [_latest tutorial video_](https://www.youtube.com/watch?v=j0l_paOQxvI) on YouTube.
 
 {% embed url="https://www.youtube.com/watch?v=j0l_paOQxvI" %}
 
@@ -28,7 +28,7 @@ The following processes will be performed:
 {% endhint %}
 
 {% hint style="danger" %}
-**If the target build platform is not Android, it will be switched to **_**Android.**_
+**If the target build platform is not Android, it will be switched to&#x20;**_**Android.**_
 {% endhint %}
 
 {% hint style="warning" %}

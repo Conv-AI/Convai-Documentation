@@ -15,10 +15,7 @@
   * [State of Mind](convai-playground/character-creator-tool/state-of-mind.md)
   * [Memory](convai-playground/character-creator-tool/memory.md)
   * [Actions](convai-playground/character-creator-tool/actions.md)
-  * [Narrative Design](convai-playground/character-creator-tool/narrative-design/README.md)
-    * [Unreal Engine](convai-playground/character-creator-tool/narrative-design/unreal-engine/README.md)
-      * [Narrative Design Keys](convai-playground/character-creator-tool/narrative-design/unreal-engine/narrative-design-keys.md)
-      * [Narrative Design Trigger](convai-playground/character-creator-tool/narrative-design/unreal-engine/narrative-design-trigger.md)
+  * [Narrative Design](convai-playground/character-creator-tool/narrative-design.md)
   * [Character Versioning](convai-playground/character-creator-tool/character-versioning.md)
 * [F.A.Q](convai-playground/f.a.q.md)
 

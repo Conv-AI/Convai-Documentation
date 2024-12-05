@@ -36,11 +36,7 @@ Once installation is complete, the **Convai Essentials - XR Prefab** will be add
 
 This is the only GameObject required for Convai to run in your scene.
 
-<div data-full-width="true">
-
-<figure><img src="../../../../../.gitbook/assets/AfterManualInstallation_2 (1).png" alt=""><figcaption></figcaption></figure>
-
-</div>
+<div data-full-width="false"><figure><img src="../../../../../.gitbook/assets/AfterManualInstallation_2 (1).png" alt=""><figcaption></figcaption></figure></div>
 
 ### Step 6
 

@@ -6,7 +6,7 @@ The **Dynamic Config** feature enables you to pass variables to NPCs in real tim
 
 ## **Step-by-Step Guide to Setting Up Dynamic Config**
 
-First**, Add the Dynamic Info Controller** Component to your Convai NPC.
+Firs&#x74;**, Add the Dynamic Info Controller** Component to your Convai NPC.
 
 <figure><img src="../../../.gitbook/assets/Unity_DynamicInfoControllerComponent (1).png" alt=""><figcaption></figcaption></figure>
 

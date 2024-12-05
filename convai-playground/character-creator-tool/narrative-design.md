@@ -18,19 +18,19 @@ Here is a helpful series of videos outlining how to create a Narrative Design Gr
 
 ## Narrative Graph
 
-<figure><img src="../../../.gitbook/assets/image (355).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (355).png" alt=""><figcaption></figcaption></figure>
 
-You can find this tool under the "Narrative Design" tab on the Convai [Playground](../../playground-walkthrough.md).\
+You can find this tool under the "Narrative Design" tab on the Convai [Playground](../playground-walkthrough.md).\
 \
 \
-There are three fundamental elements to the graph, [Sections](./#sections), [Triggers ](./#triggers)and [Decisions](./#decisions).\
+There are three fundamental elements to the graph, [Sections](narrative-design.md#sections), [Triggers ](narrative-design.md#triggers)and [Decisions](narrative-design.md#decisions).\
 
 
 ### Sections
 
 <figure><img src="https://lh7-us.googleusercontent.com/deI0u_G_0x9SW1UXR_KrctHYu6EwhyI8Q-9zYfYD_WYJZbBFngMNX7nhZNGiSzpzTmti9BJEnO0Dtk9tSBfAV7vcl42Co9AFblg1bSlH4inaqFqZbTQUW3SPQ0sgtI_VZF_dHimLiHCihtFErYfU20E" alt=""><figcaption></figcaption></figure>
 
-Sections consist of two components [Objectives ](./#objectives)and [Decisions](./#decisions); and each Section also has a unique ID for ease of reference and tracking.&#x20;
+Sections consist of two components [Objectives ](narrative-design.md#objectives)and [Decisions](narrative-design.md#decisions); and each Section also has a unique ID for ease of reference and tracking.&#x20;
 
 #### Objectives
 
@@ -40,7 +40,7 @@ This defines the overarching goal that the character aims to fulfill. For exampl
 
 As the conversation unfolds, it becomes essential to adapt to the player's preferences and responses, adjusting the NPC's objectives accordingly. Decisions are critical in this context. Taking the tour guide example further, when the NPC poses the question about taking a tour, the player's affirmative or negative response will lead the NPC to pursue a different objective, tailored to the player's choice. Decisions lead to new sections and allow for the storyline or experience to progress.
 
-<figure><img src="../../../.gitbook/assets/image (358).png" alt=""><figcaption><p>In this example, you can see the the branching paths of a decision when the player tells the AI character their opinion on pineapple.</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (358).png" alt=""><figcaption><p>In this example, you can see the the branching paths of a decision when the player tells the AI character their opinion on pineapple.</p></figcaption></figure>
 
 {% hint style="info" %}
 You can have a variety of decisions that result from the same Section, each with their own corresponding connection and new objective.
@@ -57,9 +57,9 @@ These special character can be utilized in the nodes to trigger specific outcome
 
 ### Triggers
 
-<figure><img src="../../../.gitbook/assets/image (359).png" alt=""><figcaption><p>You can see a variety of trigger types in this example.</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (359).png" alt=""><figcaption><p>You can see a variety of trigger types in this example.</p></figcaption></figure>
 
-There are three types of triggers currently: Spatial, Time-Based, and Event-Based. These are essential mechanisms that enable NPCs to discern when certain conditions have been met or events have occurred before proceeding to the next [Section.](./#sections) Each trigger has a unique ID for referencing and tracking.
+There are three types of triggers currently: Spatial, Time-Based, and Event-Based. These are essential mechanisms that enable NPCs to discern when certain conditions have been met or events have occurred before proceeding to the next [Section.](narrative-design.md#sections) Each trigger has a unique ID for referencing and tracking.
 
 #### Spatial
 

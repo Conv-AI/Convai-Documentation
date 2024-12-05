@@ -8,41 +8,41 @@ description: >-
 
 ## Lip Sync System
 
-Convai sends Visemes or Blend Shape Frame from back-end depending upon the face model developer chooses to use and when return Convai SDK out of the box extracts and parses it and provides it to the **`Convai LipSync Component`**, after which the component relies of the **`SkinMeshRen derer`**'s **`Blendshape Effectors`** and **`Bone Effectors`** to give Convai powered NPC's realistic lipsync.
+Convai sends Visemes or Blend Shape Frame from back-end depending upon the face model the developer chooses to use and when returned Convai SDK out of the box extracts and parses it and provides it to the **`Convai LipSync Component`**, after which the component relies on the **`SkinMeshRenderer`**'s **`Blendshape Effectors`** and **`Bone Effectors`** to give Convai powered NPC's realistic lipsync.
 
 ### Components of LipSync System
 
 #### Viseme Effector List
 
-This is where developer will tell the Convai SDK, which index of Blendshape Array will be effector how much from which value. To better explain its working lets understand it with a diagram.
+This is where the developer will tell the Convai SDK, which index of Blendshape Array will be effector how much from which value. To better explain its working let's understand it with a diagram.
 
 <figure><img src="../../.gitbook/assets/VisemeSkimEffector.png" alt=""><figcaption></figcaption></figure>
 
-Here, its saying that whatever value is coming from the server will affect Blendshape at 116th index by 0.2 multiplier and Blendshape at 114th index by 0.5 multiplier. The engine representation of this would look something like this.
+Here, it is saying that whatever value is coming from the server will affect Blendshape at the 116th index by 0.2 multipliers and Blendshape at the 114th index by 0.5 multipliers. The engine representation of this would look something like this.
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-08-23 123918.png" alt=""><figcaption></figcaption></figure>
 
-So, you can make you own Effector list or use one of the many that we ship in the SDK.
+So, you can make your own Effector list or use one of the many that we ship in the SDK.
 
 **How to Create your own Viseme Effector List**
 
-Right click inside project panel and head over to **`Create > Convai > Expression > Viseme Skin Effector`** which will create a **Viseme Effector List Scriptable Object** and now you can define your own values
+Right click inside project panel and head over to **`Create > Convai > Expression > Viseme Skin Effector`** which will create a **Viseme Effector List Scriptable Object** and now you can define your own values.
 
 <figure><img src="../../.gitbook/assets/Untitled (3).png" alt=""><figcaption></figcaption></figure>
 
 #### Viseme Bone Effector List
 
-This is where developer will tell the Convai SDK, how much each value coming from server will affect the rotation of the bone. To better explain its working lets understand it with a diagram.&#x20;
+This is where developer will tell the Convai SDK, how much each value coming from the server will affect the rotation of the bone. To better explain its working let's understand it with a diagram.&#x20;
 
 <figure><img src="../../.gitbook/assets/untiteld.png" alt=""><figcaption></figcaption></figure>
 
-Here, bone's rotation will be effect by the values coming from server multiplied by the values in effects. Example, for TH the value will affect bone's rotation by 0.2 multiplier and etc. The engine representation of this would look something like this.
+Here, bone's rotation will be affected by the values coming from the server multiplied by the values in effects. For example, for TH the value will affect the bone's rotation by a 0.2 multiplier and etc. The engine representation of this would look something like this.
 
 <figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-So, you can make you own Bone Effector list or use one of the many that we ship in the SDK.
+So, you can make your own Bone Effector list or use one of the many that we ship in the SDK.
 
-We use this formula to calucate the roatation
+We use this formula to calculate the rotation
 
 ```csharp
 UpdateJawBoneRotation(
@@ -61,9 +61,9 @@ new Vector3(
 );
 ```
 
-**How to Create your own Viseme Bone Effector List**
+**How to Create Your Own Viseme Bone Effector List**
 
-Right click inside project panel and head over to **`Create > Convai > Expression > Viseme Bone Effector`** which will create a **Viseme Bone Effector List Scriptable Object** and now you can define your own values.
+Right click inside the project panel and head over to **`Create > Convai > Expression > Viseme Bone Effector`** which will create a **Viseme Bone Effector List Scriptable Object** and now you can define your own values.
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-08-23 165836.png" alt=""><figcaption></figcaption></figure>
 
@@ -77,12 +77,12 @@ Let's learn what these learns are
 
 1. Facial Expression Data
    1. Head | Teeth | Tongue
-      1. Renderer: Skin Mesh Renderer which correspond to that specified part of the body
+      1. Renderer: Skin Mesh Renderer which corresponds to that specified part of the body
       2. Viseme Effectors List: How the SkinMeshRenderer's Blendshape will be affected by values coming from server.
    2. Jaw | Tongue Bone Effector
-      1. How much Bone's rotation will be affected by values coming from server.
+      1. How much of Bone's rotation will be affected by values coming from server?
    3. Jaw | Tongue Bone
-      1. Reference to the bone which control jaw and tongue respectively
+      1. Reference to the bone which controls jaw and tongue respectively
 2. Weight Blending Power
    1. Percentage to interpolate between two frames in late update.
 3. Character Emotions

@@ -7,7 +7,7 @@ description: >-
 # Get Started
 
 {% hint style="info" %}
-Note**:** In case, you are planning to extensively use our API for production, it's better to reach out to us at support@convai.com so that we can help you in increasing the efficiencies, tuned to your use case. We will provide complete support with everything.
+Not&#x65;**:** In case, you are planning to extensively use our API for production, it's better to reach out to us at support@convai.com so that we can help you in increasing the efficiencies, tuned to your use case. We will provide complete support with everything.
 {% endhint %}
 
 ## Get your unique API key

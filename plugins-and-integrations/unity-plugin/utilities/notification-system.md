@@ -16,7 +16,7 @@ The Convai plugin comes with default notifications, totaling four. Here they are
 
 Appears when you press the talk button but there is no active NPC nearby.
 
-<figure><img src="../../../.gitbook/assets/NotCloseEnoughToTheCharacterNotification.png" alt=""><figcaption></figcaption></figure>
+<div data-full-width="false"><figure><img src="../../../.gitbook/assets/NotCloseEnoughToTheCharacterNotification.png" alt=""><figcaption></figcaption></figure></div>
 
 ### Talk Button Released Early
 
@@ -34,11 +34,7 @@ Appears when the recorded audio input level is below the threshold.
 
 Appears when there is no internet connection upon launching the application.
 
-<div align="center" data-full-width="true">
-
-<figure><img src="../../../.gitbook/assets/ConnectionProblemNotification.png" alt=""><figcaption></figcaption></figure>
-
-</div>
+<div align="center" data-full-width="false"><figure><img src="../../../.gitbook/assets/ConnectionProblemNotification.png" alt=""><figcaption></figcaption></figure></div>
 
 
 
@@ -68,7 +64,7 @@ Let's go through the steps to add a " **CharacterStartedListening**" notificatio
 
 <figure><img src="../../../.gitbook/assets/NotificationRequest.png" alt=""><figcaption></figcaption></figure>
 
-{% code fullWidth="true" %}
+{% code fullWidth="false" %}
 ```csharp
 NotificationSystemHandler.Instance.NotificationRequest(NotificationType.CharacterStartedListening);
 ```

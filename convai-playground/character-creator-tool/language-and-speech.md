@@ -18,7 +18,7 @@ You can use the language field to set up-to four different languages that your c
 
 ### Custom Pronunciations
 
-Custom Pronunciations enhances the **pronunciation capabilities** of the character**.** It allows you to specify how certain words should be pronounced. This can be useful for words the character may struggle with or pronounce incorrectly.&#x20;
+Custom Pronunciations enhances the **pronunciation capabilities** of the characte&#x72;**.** It allows you to specify how certain words should be pronounced. This can be useful for words the character may struggle with or pronounce incorrectly.&#x20;
 
 To use this feature, add the word you want to specify in the "Word" column. Then, in the "Pronunciation" column, spell out how the word should sound using plain English letters and syllables.
 

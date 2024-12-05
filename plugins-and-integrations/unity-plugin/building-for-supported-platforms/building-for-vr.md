@@ -33,7 +33,7 @@ The following processes will be performed:
 {% endhint %}
 
 {% hint style="danger" %}
-**If the target build platform is not Android, it will be switched to **_**Android.**_
+**If the target build platform is not Android, it will be switched to&#x20;**_**Android.**_
 {% endhint %}
 
 {% hint style="warning" %}
