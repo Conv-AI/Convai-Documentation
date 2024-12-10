@@ -9,7 +9,7 @@ description: >-
 
 ## Overview
 
-Dynamic Environment Info is a powerful feature in our Convai plugin that allows users to pass additional environmental data to characters without direct interaction. This enables more immersive and creative gameplay scenarios by enhancing how characters perceive their surroundings.
+Dynamic Environment Info is a powerful feature in the Convai plugin that allows users to pass additional environmental data to characters without direct interaction. This enables more immersive and creative gameplay scenarios by enhancing how characters perceive their surroundings.
 
 For example:
 
@@ -21,32 +21,30 @@ For example:
 
 Follow the steps below to integrate Dynamic Environment Info into your project.
 
-**Step 1: Modify the Character Blueprint**
-
 1. Open the **Character Blueprint** in your project.
 2. In the **Begin Play** event, locate the `ConvaiChatbot` component.
 
 <figure><img src="../../../.gitbook/assets/image (415).png" alt=""><figcaption></figcaption></figure>
 
-1.  Set the `Dynamic Environment Info` variable with a string value of your choice.
+3. Set the `Dynamic Environment Info` variable with a string value of your choice.
 
-    *   Example 1 (Simple):
+*   Example 1 (Simple):
 
-        ```
-        time of day is night
-        ```
+    ```
+    time of day is night
+    ```
 
-    <div align="left"><figure><img src="../../../.gitbook/assets/image (416).png" alt=""><figcaption></figcaption></figure></div>
+<div align="left"><figure><img src="../../../.gitbook/assets/image (416).png" alt=""><figcaption></figcaption></figure></div>
 
-    *   Example 2 (Structured Format):
+*   Example 2 (Structured Format):
 
-        ```
-        inventory: {weapon: gun, tools: [flashlight, rope]}
-        ```
+    ```
+    inventory: {weapon: gun, tools: [flashlight, rope]}
+    ```
 
 <div align="left"><figure><img src="../../../.gitbook/assets/image (418).png" alt=""><figcaption></figcaption></figure></div>
 
-**Step 2: Save and Play**
+**Save and Play**
 
 1. Save your blueprint changes.
 2. Hit **Play** to test the interaction.
