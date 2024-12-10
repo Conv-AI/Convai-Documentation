@@ -1,15 +1,14 @@
 ---
 description: >-
-  Allows sending dynamic information about the current environment to the
-  character without having to receive a response from the character - Supported
-  in Plugin Version 3.5.1 or later.
+  Transmit real-time environmental data to characters without requiring a
+  response. Supported from Plugin Version 3.5.1.
 ---
 
 # Dynamic Environment Info
 
 ## Overview
 
-Dynamic Environment Info is a powerful feature in the Convai plugin that allows users to pass additional environmental data to characters without direct interaction. This enables more immersive and creative gameplay scenarios by enhancing how characters perceive their surroundings.
+Dynamic Environment Info is a powerful feature that allows users to pass additional environmental data to characters without direct interaction. This enables more immersive and creative gameplay scenarios by enhancing how characters perceive their surroundings.
 
 For example:
 
