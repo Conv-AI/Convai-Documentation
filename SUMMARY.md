@@ -80,6 +80,7 @@
   * [Supported Platforms](plugins-and-integrations/unreal-engine/supported-platforms.md)
   * [Installation](plugins-and-integrations/unreal-engine/installation.md)
   * [Guides](plugins-and-integrations/unreal-engine/guides/README.md)
+    * [Dynamic Environment Info](plugins-and-integrations/unreal-engine/guides/dynamic-environment-info.md)
     * [Change AI Character Movement Speed](plugins-and-integrations/unreal-engine/guides/change-ai-character-movement-speed.md)
     * [Integration with Pixel Streaming](plugins-and-integrations/unreal-engine/guides/integration-with-pixel-streaming.md)
     * [Adjust Interaction Radius](plugins-and-integrations/unreal-engine/guides/adjust-interaction-radius.md)
