@@ -118,6 +118,7 @@
     * [Speech To Text Transcription](plugins-and-integrations/unreal-engine/guides/speech-to-text-transcription.md)
     * [Enable Multiplayer Support](plugins-and-integrations/unreal-engine/guides/enable-multiplayer-support.md)
     * [3D Chat Widget](plugins-and-integrations/unreal-engine/guides/3d-chat-widget.md)
+    * [Long Term Memory](plugins-and-integrations/unreal-engine/guides/long-term-memory.md)
   * [Blueprints Reference](plugins-and-integrations/unreal-engine/blueprints-reference/README.md)
     * [Convai Player](plugins-and-integrations/unreal-engine/blueprints-reference/convai-player.md)
     * [Convai Chatbot](plugins-and-integrations/unreal-engine/blueprints-reference/convai-chatbot.md)
