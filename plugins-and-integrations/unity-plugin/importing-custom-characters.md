@@ -56,10 +56,4 @@ Copy your character's ID and name from [Convai Playground](broken-reference) and
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 201727.png" alt=""><figcaption><p>Screenshot showing filled-in character information.</p></figcaption></figure>
 
-### Step 4: Setup a: game object for Convai Character
-
-We will assign `Convai Character` layer to your Custom Character Game Object&#x20;
-
-<figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 202613.png" alt=""><figcaption><p>Screenshot showing selection of Convai Character</p></figcaption></figure>
-
-Now your Custom Character is all set to work with Convai Plugin
+Now your Custom Character is all set to work with Convai Plugin.
