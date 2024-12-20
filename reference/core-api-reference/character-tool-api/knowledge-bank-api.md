@@ -102,6 +102,86 @@ curl -X POST \
 {% endtab %}
 {% endtabs %}
 
+## Update Existing KB File
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/knowledge-bank/update`
+
+Users can update an existing KB file by uploading a new version. Once the file is successfully uploaded, they can connect it to a character. Upon calling the API, the file will only be uploaded for processing and will not be available for use until the processing is complete.
+
+#### Headers
+
+| Name                                             | Type   | Description                                                                                                |
+| ------------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------- |
+| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. Found under the Key icon when logged into your Convai account. |
+
+#### Request Body
+
+| Name         | Type   | Description                                         |
+| ------------ | ------ | --------------------------------------------------- |
+| document\_id | String | ID of the existing document that needs to be upated |
+| file         | Bytes  | Raw file bytes                                      |
+
+{% tabs %}
+{% tab title="200: OK The file is successfully uploaded" %}
+```json
+{
+   "id": "<uuid of the uploaded file>",
+   "file_name": "<file_name>",
+   "is_available": false,
+   "status": "inactive",
+   "timestamp": "2024-09-17 20:51:09.216522",
+   "file_size": "72374"
+}
+
+```
+{% endtab %}
+
+{% tab title="401 API Key validation has failed" %}
+```json
+{
+    "API_ERROR": "Invalid API key provided.
+}
+```
+{% endtab %}
+{% endtabs %}
+
+Here are some sample codes to demonstrate the request format for the endpoint -->
+
+{% tabs %}
+{% tab title="Python" %}
+{% code overflow="wrap" %}
+```python
+import requests
+import json
+
+url = "https://api.convai.com/character/knowledge-bank/update"
+
+
+headers = { 
+  'CONVAI-API-KEY': '<Your-API-Key>',
+}
+
+# Path to the file you want to upload
+file_path = "photosynthesis.txt"
+
+# Open the file in binary mode
+with open(file_path, "rb") as file:
+    # Create a dictionary for the form data
+    form_data = { 
+        "document_id": "<document_id>",
+        "file": file
+    }   
+
+    # Send the POST request with multipart/form-data
+    response = requests.post(url, headers=headers, files=form_data)
+
+
+print(response.text)
+```
+{% endcode %}
+{% endtab %}
+{% endtabs %}
+
 ## List KB File Status
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/knowledge-bank/list`
