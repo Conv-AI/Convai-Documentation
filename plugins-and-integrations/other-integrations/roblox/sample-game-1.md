@@ -14,7 +14,7 @@ Download the game file: [Download](https://storage.googleapis.com/convai-assets-
 Current Version: Ver 1.1 - Simple Character API Integration
 {% endhint %}
 
-<figure><img src="../../.gitbook/assets/ss1 (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/ss1 (1).png" alt=""><figcaption></figcaption></figure>
 
 This is a very simple game that you can access to try out some sample conversations with your character.&#x20;
 
@@ -36,11 +36,11 @@ To play the game follow the given steps:
 3.  Visit the link given above for the game.\
 
 
-    <figure><img src="../../.gitbook/assets/roblox-ss.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/roblox-ss.png" alt=""><figcaption></figcaption></figure>
 4. Click on the green Play button. That will open Roblox locally for you to play.
 5.  You are ready to converse with the character
 
-    <figure><img src="../../.gitbook/assets/landing-page.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/landing-page.png" alt=""><figcaption></figcaption></figure>
 
     Click on the **Understood** button, to close the notifications. Read it once though.\
     Enter the API Key and the Character ID in the bottom left section of the screen. Enter the value in each of the text boxes and press Enter.\
@@ -48,5 +48,5 @@ To play the game follow the given steps:
 6.  Now click on the Chatbox Icon or press the "/" icon on the keyboard to start a conversation. Start by saying "Hi!" and pressing **ENTER**.\
 
 
-    <figure><img src="../../.gitbook/assets/conv1.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/conv1.png" alt=""><figcaption></figcaption></figure>
 7. That's it. You can continue your conversation and keep testing your characters.

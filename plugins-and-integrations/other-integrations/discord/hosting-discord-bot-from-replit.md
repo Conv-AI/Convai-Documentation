@@ -15,17 +15,17 @@ Here are the steps listed to run the discord bot server from Replit successfully
 
     Click on **Fork Repl** again from the pop-up notification.
 
-    <figure><img src="../../.gitbook/assets/dbhr-ss-1.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/dbhr-ss-1.png" alt=""><figcaption></figcaption></figure>
 3.  This will create a fork of the code in your account. Once it has been forked successfully, it will open the code in the editor for you.
 
 
 
-    <figure><img src="../../.gitbook/assets/dbhr-ss-2.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/dbhr-ss-2.png" alt=""><figcaption></figcaption></figure>
 4.  Go over to **Secrets** in the bottom left corner of the screen.
 
 
 
-    <figure><img src="../../.gitbook/assets/dbhr-ss-3.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/dbhr-ss-3.png" alt=""><figcaption></figcaption></figure>
 5.  Now Add the following credentials. Copy the Keys directly from here to avoid any typos.
 
     1.  Convai API Key Details:&#x20;
@@ -60,5 +60,5 @@ Here are the steps listed to run the discord bot server from Replit successfully
 
 
 
-    <figure><img src="../../.gitbook/assets/dbhr-ss-5.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/dbhr-ss-5.png" alt=""><figcaption></figcaption></figure>
 7. Then click on the **Run** button at the top to start the bot. Once you have the log, saying the bot has started, you are all done.

@@ -8,7 +8,7 @@ description: Integrating Convai character chatbot services in Roblox game.
 
 Roblox is an online game platform and game creation system developed by Roblox Corporation that allows users to program games and play games created by other users. This provides a perfect platform to develop games with intelligent AI-based NPCs with which the player can interact and experience a new way of story progression or gameplay altogether.
 
-<figure><img src="../../.gitbook/assets/logo1.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/logo1.png" alt=""><figcaption></figcaption></figure>
 
 ## Constraints
 

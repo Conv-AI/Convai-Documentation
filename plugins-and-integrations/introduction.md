@@ -8,7 +8,7 @@ description: >-
 
 Convai provides a variety of plugins and integrations to help integrate conversational AI and avatars into your projects.&#x20;
 
-## Game Engines & Omniverse
+## Game Engines
 
 {% content-ref url="unity-plugin/" %}
 [unity-plugin](unity-plugin/)
@@ -18,15 +18,11 @@ Convai provides a variety of plugins and integrations to help integrate conversa
 [unreal-engine](unreal-engine/)
 {% endcontent-ref %}
 
-{% content-ref url="roblox/" %}
-[roblox](roblox/)
-{% endcontent-ref %}
+## &#x20;Web Plugin
 
-{% content-ref url="omniverse-extension.md" %}
-[omniverse-extension.md](omniverse-extension.md)
+{% content-ref url="web-plugin/playcanvas-plugin/" %}
+[playcanvas-plugin](web-plugin/playcanvas-plugin/)
 {% endcontent-ref %}
-
-## &#x20;Web and Chat SDK's
 
 {% content-ref url="web-plugin/convai-web-sdk/" %}
 [convai-web-sdk](web-plugin/convai-web-sdk/)
@@ -34,10 +30,6 @@ Convai provides a variety of plugins and integrations to help integrate conversa
 
 {% content-ref url="web-plugin/javascript-chat-ui-sdk/" %}
 [javascript-chat-ui-sdk](web-plugin/javascript-chat-ui-sdk/)
-{% endcontent-ref %}
-
-{% content-ref url="discord/" %}
-[discord](discord/)
 {% endcontent-ref %}
 
 ## Modding Framework
@@ -49,11 +41,3 @@ Convai provides a variety of plugins and integrations to help integrate conversa
 {% content-ref url="modding-framework/modding-cyberpunk-2077.md" %}
 [modding-cyberpunk-2077.md](modding-framework/modding-cyberpunk-2077.md)
 {% endcontent-ref %}
-
-## Additional API references:
-
-* ### [Character API](../reference/core-api-reference/character-api.md)
-* ### [Action API](../reference/core-api-reference/action-api.md)
-* ### [Speech To Text API](broken-reference)
-* ### [Text To Speech API](broken-reference)
-* ### [Voice Capture](broken-reference)

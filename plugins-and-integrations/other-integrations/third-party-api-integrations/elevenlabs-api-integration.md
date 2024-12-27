@@ -18,11 +18,11 @@ description: >-
 
 Step 1.  Go to [elevenlabs.io](https://elevenlabs.io/) and head to your Profile section
 
-<figure><img src="../.gitbook/assets/Untitled design (5) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Untitled design (5) (2).png" alt=""><figcaption></figcaption></figure>
 
 Step 2. On the Profile section, copy your API key
 
-<figure><img src="../.gitbook/assets/Untitled design (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Untitled design (4).png" alt=""><figcaption></figcaption></figure>
 
 Step 3. Next, login to convai.com and open your Profile page
 
@@ -30,7 +30,7 @@ Step 3. Next, login to convai.com and open your Profile page
 
 Step 4. On the bottom right corner "API Integration" click on "Add New Key" button
 
-<figure><img src="../.gitbook/assets/Untitled design (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Untitled design (2).png" alt=""><figcaption></figcaption></figure>
 
 Step 5. A pop up will appear then, select ElevenLabs, then paste your API key and click Add.
 

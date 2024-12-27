@@ -8,7 +8,7 @@ description: >-
 
 ### [Click here to play the game in Roblox](https://www.roblox.com/games/11390008146/Aquaponics-Game)
 
-<figure><img src="../../.gitbook/assets/aqua_ss1.png" alt=""><figcaption><p>InGame Scene</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/aqua_ss1.png" alt=""><figcaption><p>InGame Scene</p></figcaption></figure>
 
 This is another simple game that you can access, ask questions and get them answered by the assistant bot.
 
@@ -27,11 +27,11 @@ To play the game follow the given steps:
 2.  Visit the link given above for the game.\
 
 
-    <figure><img src="../../.gitbook/assets/aqua_ss2.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/aqua_ss2.png" alt=""><figcaption></figcaption></figure>
 3. Click on the green Play button. That will open Roblox locally for you to play.
 4.  You are ready to converse with the character
 
-    <figure><img src="../../.gitbook/assets/aqua_ss3.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/aqua_ss3.png" alt=""><figcaption></figcaption></figure>
 
     Click on the **Understood** button, to close the notifications. Read it once though.\
     Enter the API Key in the bottom left section of the screen.\
@@ -39,5 +39,5 @@ To play the game follow the given steps:
 5.  Now click on the Chatbox Icon or press the "/" icon on the keyboard to start a conversation. Type out the text and press **ENTER**.\
 
 
-    <figure><img src="../../.gitbook/assets/aqua_ss4.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/aqua_ss4.png" alt=""><figcaption></figcaption></figure>
 6. That's it. You can continue your conversation and keep exploring the environment.

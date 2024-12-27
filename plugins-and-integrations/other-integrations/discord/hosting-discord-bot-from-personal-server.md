@@ -10,7 +10,7 @@ Here we list out the steps to successfully host a discord bot server and update 
 The current version has support for only Python language. We are striving to include support for servers in other languages also. Please, reach out to us at support@convai.com if you have any queries on this.
 {% endhint %}
 
-Code Link: [Github](https://github.com/Conv-AI/Convai\_Discord\_Integration)
+Code Link: [Github](https://github.com/Conv-AI/Convai_Discord_Integration)
 
 Steps:
 
@@ -18,7 +18,7 @@ Steps:
 
 
 
-    <figure><img src="../../.gitbook/assets/dbh-ss-1.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/dbh-ss-1.png" alt=""><figcaption></figcaption></figure>
 2. Go to your system and open **Terminal**
 3.  Insert the following commands:
 
@@ -61,7 +61,7 @@ Steps:
 
 
 
-    <figure><img src="../../.gitbook/assets/dbh-ss-2.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/dbh-ss-2.png" alt=""><figcaption></figcaption></figure>
 
     Note: Here ConvaiBot is the name that we gave. The name of your bot will appear there in place of ConvaiBot.
 
