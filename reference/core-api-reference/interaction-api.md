@@ -4,8 +4,8 @@ description: This page details on how you can interact with Character.
 
 # Interaction API
 
-{% hint style="warning" %}
-API access requires an active Enterprise or Partner subscription.
+{% hint style="danger" %}
+This API is accessible only with the Professional plan and higher plans.
 {% endhint %}
 
 ## Interacting with a Character

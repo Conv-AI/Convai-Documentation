@@ -4,15 +4,15 @@ description: The page list all the APIs needed to interact Narrative Design
 
 # Narrative Design API
 
-{% hint style="warning" %}
-API access requires an active Enterprise or Partner subscription.
+{% hint style="danger" %}
+This API is accessible with all plans.
 {% endhint %}
 
 ## Toggle Narrative Design
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/toggle-is-narrative-driven`
 
-Enable/Disable Narrative Graph for your character.
+Enable/Disable the Narrative Graph for your character.
 
 #### Headers
 

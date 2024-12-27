@@ -1,7 +1,13 @@
+---
+description: >-
+  Learn how to use the Backstory API to create and manage character backstories,
+  adding depth and personality to your NPCs.
+---
+
 # Backstory API
 
-{% hint style="warning" %}
-API access requires an active Enterprise or Partner subscription.
+{% hint style="danger" %}
+This API is accessible only with the Professional plan and higher plans.
 {% endhint %}
 
 ## Generate Backstory for Character

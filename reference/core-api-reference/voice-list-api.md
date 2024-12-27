@@ -6,6 +6,10 @@ description: >-
 
 # Voice List API
 
+{% hint style="danger" %}
+This API is accessible only with the Professional plan and higher plans.
+{% endhint %}
+
 ## Convai's Voice List API endpoint
 
 <mark style="color:green;">`GET`</mark>  `https://api.convai.com/tts/get_available_voices`

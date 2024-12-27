@@ -6,8 +6,8 @@ description: >-
 
 # Chat History API
 
-{% hint style="warning" %}
-API access requires an active Enterprise or Partner subscription.
+{% hint style="danger" %}
+This API is accessible only with the Professional plan and higher plans.
 {% endhint %}
 
 ## List Sessions for a Character

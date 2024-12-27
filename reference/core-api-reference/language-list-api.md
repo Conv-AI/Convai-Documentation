@@ -6,6 +6,10 @@ description: >-
 
 # Language List API
 
+{% hint style="danger" %}
+This API is accessible only with the Professional plan and higher plans.
+{% endhint %}
+
 ## Convai's Language List API endpoint
 
 ```markup
@@ -76,10 +80,3 @@ On success, the API will return a nested JSON object in the following format :&#
 | Swedish                 | sv-SE         |
 | Kazakh (Kazakhstan)     | kk-KZ         |
 | Finnish                 | fi-FI         |
-
-
-
-
-
-
-

@@ -10,12 +10,8 @@ Access Convai endpoints for developing and interacting with an intelligent chara
 \
 Unveil the character to the end-user through your custom UI or through other services where Convai provides custom plugins/libraries, for users to have engaging conversations with your new characters.
 
-{% hint style="info" %}
-**Missing Something?** In case you are missing something that is essential for your application, please reach out to us through the **support@convai.com** email and we'll get to your inquiry shortly!
-{% endhint %}
-
-{% hint style="warning" %}
-API access requires an active Enterprise or Partner subscription.
+{% hint style="danger" %}
+This API is accessible only with the Professional plan and higher plans.
 {% endhint %}
 
 ## Create Character
@@ -459,4 +455,3 @@ curl -X POST "https://api.convai.com/character/delete" \
 ```
 {% endtab %}
 {% endtabs %}
-

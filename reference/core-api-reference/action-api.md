@@ -4,8 +4,8 @@ description: This page describes the Action API and how to use it.
 
 # Action API
 
-{% hint style="warning" %}
-API access requires an active Enterprise or Partner subscription.
+{% hint style="danger" %}
+This API is accessible only with the Professional plan and higher plans.
 {% endhint %}
 
 ### Introduction

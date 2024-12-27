@@ -6,8 +6,8 @@ description: >-
 
 # Knowledge Bank API
 
-{% hint style="warning" %}
-API access requires an active Enterprise or Partner subscription.
+{% hint style="danger" %}
+This API is accessible only with the Enterprise plan.
 {% endhint %}
 
 ## Upload a new KB File
