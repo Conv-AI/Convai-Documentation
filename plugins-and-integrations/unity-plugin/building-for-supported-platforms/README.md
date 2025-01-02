@@ -8,7 +8,8 @@ description: >-
 # Building For Supported Platforms
 
 1. [iOS/iPadOS](building-for-ios-ipados.md)
-2. [Virtual Reality](building-for-vr.md) (Occulus)
-3. [Augmented Reality ](convai-xr/building-for-ar.md)(Android/iOS)
-4. [WebGL](building-for-webgl.md)
-5. [Universal macOS applications](microphone-permission-issue-on-intel-macs-with-universal-builds.md)
+2. [Virtual Reality](convai-xr/building-for-vr/)
+3. [Mixed Reality](convai-xr/building-for-mr/)
+4. [Augmented Reality ](convai-xr/building-for-ar.md)(Android/iOS)
+5. [WebGL](building-for-webgl.md)
+6. [Universal macOS applications](microphone-permission-issue-on-intel-macs-with-universal-builds.md)

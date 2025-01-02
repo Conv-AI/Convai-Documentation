@@ -36,7 +36,7 @@ Users can either use the character creator tool to create their own characters o
 | actions                                     | String | A list of actions for the character to choose from, to be performed by the character based on the interactions with the user.                                             |
 
 {% tabs %}
-{% tab title="201: Created A new character has bee created with the necessary details" %}
+{% tab title="201:  A new character has been created with the necessary details" %}
 ```json
 {
     "charID": "<character id for new character>"
