@@ -23,11 +23,11 @@ To setup the Pixel Streaming server, we recommend taking a look over [this excel
 
 
     <figure><img src="../../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
-5.  On Begin Play in the event graph, add the following blueprint function to initialize Pixel Streaming with the Player Component.
+5. On Begin Play in the event graph, add the following blueprint function to initialize Pixel Streaming with the Player Component.
 
+<figure><img src="../../../.gitbook/assets/image (6) (1).png" alt=""><figcaption></figcaption></figure>
 
-
-    <figure><img src="../../../.gitbook/assets/image (6) (1).png" alt=""><figcaption></figcaption></figure>
+<div data-full-width="false"><figure><img src="../../../.gitbook/assets/SetPixelStreamingAudioComponent.png" alt=""><figcaption><p>To Get <em><strong>Set Pixel Streaming Audio Component</strong></em> Node</p></figcaption></figure></div>
 
 {% hint style="info" %}
 Now, pixel streaming mic input should be working. However, system microphone will no longer work. To change back and forth to and from system microphone, set Use Pixel Streaming Mic Input to true for enabling pixel streaming microphone and false to enable system microphone. This is found in the ConvaiPlayer component.
