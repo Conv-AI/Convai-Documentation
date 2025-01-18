@@ -88,7 +88,7 @@ Server Side Failure. Please reach out to support.
 
 ### Sample Code Snippet
 
-```
+```python
 import requests
 
 # URL of the API endpoint

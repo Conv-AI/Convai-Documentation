@@ -71,3 +71,7 @@ All APIs related to creating and deploying your first smart NPC or Digital Assis
 {% content-ref url="voice-list-api.md" %}
 [voice-list-api.md](voice-list-api.md)
 {% endcontent-ref %}
+
+{% content-ref url="evaluation-api.md" %}
+[evaluation-api.md](evaluation-api.md)
+{% endcontent-ref %}

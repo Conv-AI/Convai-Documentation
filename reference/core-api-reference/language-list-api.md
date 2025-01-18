@@ -32,7 +32,7 @@ The request body only require the following header field :&#x20;
 
 On success, the API will return a nested JSON object in the following format :&#x20;
 
-```
+```json
 [
 {
     "en-US": {
