@@ -14,9 +14,5 @@ Memory section allows you to view your previous conversations with the character
 
 For an even more immersive experience, you can enable the Long-Term Memory feature in the Memory Settings. This allows the character to remember details about you, the player, fostering deeper, personalized relationships over time. With Long-Term Memory enabled, characters can recall your preferences and choices, adapting their responses to your individual playstyle for a truly unique experience.
 
-{% hint style="info" %}
-This feature is only available to playground users and don't work with game engines or character sharing!
-{% endhint %}
-
 <figure><img src="../../.gitbook/assets/Screenshot 2024-03-16 at 11.09.22 PM.png" alt=""><figcaption></figcaption></figure>
 
