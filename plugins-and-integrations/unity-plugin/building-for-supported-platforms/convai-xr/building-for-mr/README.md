@@ -6,7 +6,7 @@ description: MR development with Convai
 
 ## Integrating Convai with MR: Quick and Flexible Setup Options
 
-{% embed url="https://youtu.be/JPs1rMqrQN4" %}
+{% embed url="https://youtu.be/rfd_OPiKLh8" %}
 Immersive AI Characters That Perceive & Engage in Mixed Reality Scenarios | Convai Unity Tutorial
 {% endembed %}
 
