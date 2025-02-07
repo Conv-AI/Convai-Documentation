@@ -43,7 +43,7 @@ You are all set to bring your character from Convai Playground to Unity, let's h
 
 #### Using <mark style="color:green;">Add Components</mark> Button in Convai NPC (Recommended Way)
 
-#### **1:** Select your Convai Character in the scene and look for [ConvaiNPC ](broken-reference)component in the inspector panel. Click on <mark style="color:green;">**Add Components**</mark> button
+#### **1:** Select your Convai Character in the scene and look for ConvaiNPC component in the inspector panel. Click on <mark style="color:green;">**Add Components**</mark> button
 
 <figure><img src="../../../.gitbook/assets/Screenshot 2024-05-22 122312.png" alt=""><figcaption><p>Screenshot showing location of <mark style="color:green;">Add Components</mark> button in the Convai NPC inspector panel </p></figcaption></figure>
 

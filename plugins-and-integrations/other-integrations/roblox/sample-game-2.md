@@ -13,10 +13,7 @@ description: >-
 This is another simple game that you can access, ask questions and get them answered by the assistant bot.
 
 {% hint style="warning" %}
-Points to Remember:
-
-1. For beginners, we provide 50 sample conversations that they can carry out with the characters they want, without setting up their API Key. To continue with more conversation, please get your API Key from our site and enter the value in the respective input box at the bottom left corner, and press ENTER.
-2. Please refer to [Broken link](broken-reference "mention") , for further steps.
+For beginners, we provide 50 sample conversations that they can carry out with the characters they want, without setting up their API Key. To continue with more conversation, please get your API Key from our site and enter the value in the respective input box at the bottom left corner, and press ENTER.
 {% endhint %}
 
 ### Play the Game:

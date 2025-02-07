@@ -23,7 +23,6 @@ Points to Remember:
 
 1. The game loads with a sample character by default. You can interact with this default character or you can choose to replace it with your own character that you created from our site or through our APIs. Just enter the corresponding Character ID in the respective input box at the bottom left corner of the screen, press ENTER and you are good to go.
 2. For beginners, we provide 50 sample conversations that they can carry out with the characters they want, without setting up their API Key. To continue with more conversation, please get your API Key from our site and enter the value in the respective input box at the bottom left corner, and press ENTER.
-3. Please refer to [Broken link](broken-reference "mention") , for further steps.
 {% endhint %}
 
 ### Play the Game:

@@ -6,7 +6,7 @@ description: >-
 
 # Convai Environment
 
-**Convai Environment** is used as input to the `StartTalking()` or `SendText()` functions in the [Convai Player ](broken-reference)component, and it allows the character to generate actions.
+**Convai Environment** is used as input to the `StartTalking()` or `SendText()` functions in the [Convai Player](convai-player.md) component, and it allows the character to generate actions.
 
 {% hint style="info" %}
 A **Convai Environment** object must have a **Main Character** set to be considered valid.

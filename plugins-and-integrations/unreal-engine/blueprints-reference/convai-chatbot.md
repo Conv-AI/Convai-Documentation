@@ -4,7 +4,7 @@ description: Actor component for the AI character
 
 # Convai Chatbot
 
-**Convai Chatbot** is an Actor component responsible for processing and getting a response for the voice audio coming from the [**Convai Player**](broken-reference) component. It plays the audio response and has a variety of useful events for transcription, actions, text response, and others.
+**Convai Chatbot** is an Actor component responsible for processing and getting a response for the voice audio coming from the [**Convai Player**](convai-player.md) component. It plays the audio response and has a variety of useful events for transcription, actions, text response, and others.
 
 ## Properties and Functions
 
