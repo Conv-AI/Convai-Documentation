@@ -143,6 +143,10 @@ response = requests.request("POST", url, headers=headers, data=payload, files=fi
 data = response.json()
 
 character_response = data["text"]
+sessionID = data["sessionID"]
+
+print("Session ID: ", sessionID)
+print("Response: ", character_response)
 
 decode_string = base64.b64decode(data["audio"])
 
