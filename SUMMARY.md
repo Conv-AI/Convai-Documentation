@@ -57,7 +57,7 @@
     * [Input Management](plugins-and-integrations/unity-plugin/utilities/input-management.md)
     * [Notification System](plugins-and-integrations/unity-plugin/utilities/notification-system.md)
     * [Settings Panel](plugins-and-integrations/unity-plugin/utilities/settings-panel.md)
-    * [Dynamic Config](plugins-and-integrations/unity-plugin/utilities/dynamic-config.md)
+    * [Dynamic Information Context](plugins-and-integrations/unity-plugin/utilities/dynamic-config.md)
   * [Building For Supported Platforms](plugins-and-integrations/unity-plugin/building-for-supported-platforms/README.md)
     * [Building for iOS/iPadOS](plugins-and-integrations/unity-plugin/building-for-supported-platforms/building-for-ios-ipados.md)
     * [Building for WebGL](plugins-and-integrations/unity-plugin/building-for-supported-platforms/building-for-webgl.md)
