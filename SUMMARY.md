@@ -196,4 +196,5 @@
   * [Action API](reference/core-api-reference/action-api.md)
   * [Language List API](reference/core-api-reference/language-list-api.md)
   * [Voice List API](reference/core-api-reference/voice-list-api.md)
+  * [Character List API](reference/core-api-reference/character-list-api.md)
   * [Evaluation API](reference/core-api-reference/evaluation-api.md)
