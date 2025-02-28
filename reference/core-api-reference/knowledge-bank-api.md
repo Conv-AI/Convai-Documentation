@@ -167,13 +167,11 @@ file_path = "photosynthesis.txt"
 # Open the file in binary mode
 with open(file_path, "rb") as file:
     # Create a dictionary for the form data
-    form_data = { 
-        "document_id": "<document_id>",
-        "file": file
-    }   
+    files = {"file": ("photosynthesis-filename.txt", file, "text/plain")}
+    form_data = {"document_id": "<document_id"}
 
     # Send the POST request with multipart/form-data
-    response = requests.post(url, headers=headers, files=form_data)
+    response = requests.post(url, headers=headers, files=files, data=form_data)
 
 
 print(response.text)
