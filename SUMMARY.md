@@ -8,7 +8,6 @@
 * [Get Started](convai-playground/get-started.md)
 * [Character Creator Tool](convai-playground/character-creator-tool/README.md)
   * [Create Character](convai-playground/character-creator-tool/create-character.md)
-  * [Connect a ReadyPlayerMe 3D Avatar](convai-playground/character-creator-tool/connect-a-readyplayerme-3d-avatar.md)
   * [Language and Speech](convai-playground/character-creator-tool/language-and-speech.md)
   * [Knowledge Bank](convai-playground/character-creator-tool/knowledge-bank.md)
   * [Personality and Style](convai-playground/character-creator-tool/personality-and-style.md)
