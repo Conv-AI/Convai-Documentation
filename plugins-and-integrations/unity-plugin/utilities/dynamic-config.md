@@ -1,8 +1,6 @@
-# Dynamic Config
+# Dynamic Information Context
 
-The **Dynamic Config** feature enables you to pass variables to NPCs in real time, allowing them to react dynamically to changes in the game environment. This can include the player’s current health, inventory items, or contextual world information, greatly enhancing interactivity and immersion.
-
-
+The **Dynamic Information** feature enables you to pass variables to NPCs in real time, allowing them to react dynamically to changes in the game environment. This can include the player’s current health, inventory items, or contextual world information, greatly enhancing interactivity and immersion.
 
 ## **Step-by-Step Guide to Setting Up Dynamic Config**
 
@@ -32,7 +30,7 @@ Below, we provide a sample conversation showcasing how the NPC can react based o
 
 Add the **Dynamic Info Controller** to your NPC. Use `SetDynamicInfo` to initialize the dynamic variable at the start, and call `SetDynamicInfo` again whenever updates are needed.
 
-This feature provides a powerful tool for creating NPC interactions that respond in real-time to the state of the game world, creating a more immersive experience for the player. :tada::sunglasses:
+This feature provides a powerful tool for creating NPC interactions that respond in real-time to the state of the game world, creating a more immersive experience for the player.
 
 <figure><img src="../../../.gitbook/assets/Unity_DynamicInfoConversation (1).png" alt=""><figcaption></figcaption></figure>
 

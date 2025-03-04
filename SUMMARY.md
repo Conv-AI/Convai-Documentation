@@ -38,7 +38,7 @@
     * [Jaw Bone in Avatar is not Free](plugins-and-integrations/unity-plugin/troubleshooting-guide/jaw-bone-in-avatar-is-not-free.md)
     * [macOS Permission Issues](plugins-and-integrations/unity-plugin/troubleshooting-guide/macos-permission-issues.md)
   * [Creating a Convai Powered Scene from Template](plugins-and-integrations/unity-plugin/creating-a-convai-powered-scene-from-template.md)
-  * [Importing RPM Characters](plugins-and-integrations/unity-plugin/importing-a-character-from-convai-playground.md)
+  * [Importing Ready Player Me (RPM) Characters](plugins-and-integrations/unity-plugin/importing-a-character-from-convai-playground.md)
   * [Importing Custom Characters](plugins-and-integrations/unity-plugin/importing-custom-characters.md)
   * [Adding Actions to your Character](plugins-and-integrations/unity-plugin/adding-actions-to-your-character.md)
   * [Adding Lip-Sync to your Character](plugins-and-integrations/unity-plugin/adding-lip-sync-to-your-character.md)
