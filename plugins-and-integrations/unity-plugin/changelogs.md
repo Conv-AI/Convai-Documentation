@@ -4,7 +4,52 @@ description: Convai Unity Plugin Changelogs - Stay updated with the latest chang
 
 # Changelogs
 
-## Version 3.2.0 (Current)
+## Version **3.2.4** (Current)
+
+Released: March 5, 2025
+
+### **Announcement:**
+
+* We are transitioning away from the Ready Player Me (RPM) - based character creator in the Convai Playground to a significantly higher-quality character creation system. As a result, the Character Importer, which previously allowed importing RPM-created characters from the Playground, will no longer be supported.
+
+***
+
+## Version **3.2.3**
+
+Released: January 30, 2025
+
+### **Bug Fix:**
+
+* Fixed version of the Ready Player Me package to ensure compatibility
+
+***
+
+## Version **3.2.2**
+
+Released: January 23, 2025
+
+### **Bug Fix:**
+
+* Fixed Character Importer Issue.
+
+***
+
+## Version **3.2.1**
+
+Released: January 20, 2025
+
+### **New Features:**
+
+* Core API Access Implementation
+
+### **Bug Fixes:**
+
+* Fixed Pause and Resume functionality
+* Fixed Ready Player Me package auto-update issue in Character Importer
+
+***
+
+## Version 3.2.0
 
 Released: October 31, 2024
 
@@ -28,7 +73,7 @@ Released: October 31, 2024
 
 * Minor Bug Fixes
 
-
+***
 
 ## Version 3.1.2
 
@@ -38,7 +83,7 @@ Released: September 16, 2024
 
 Minor Bug Fixes
 
-
+***
 
 ## Version 3.1.1
 
@@ -48,7 +93,7 @@ Released: September 12, 2024
 
 Fixed NPC2NPC response delay
 
-
+***
 
 ## Version 3.1.0
 
@@ -99,7 +144,7 @@ Released: Aug 28, 2024
   * Updated NPC positions and topics in demo scenes
   * Fixed Convai logo in Convai Setup window
 
-
+***
 
 ## Version 3.0.1
 
@@ -111,7 +156,7 @@ Released: Jun 21, 2024
 * Prefab missing animator
 * Updated ActiveNPC layer check logic
 
-
+***
 
 ## Version 3.0.0
 
@@ -174,7 +219,7 @@ Released: Jun 13, 2024
 1. **Transcript UI Bug Fixes:** Fixed bugs and improved system for Transcript UI character list
 2. **Microphone Permission:** Fixed Android and iOS microphone permission issues
 
-
+***
 
 ## Version 2.1.0
 
@@ -197,7 +242,7 @@ Released: Jun 13, 2024
 * Improvement: Added ability to interrupt Character Response with Voice Interruption.
 * Improvement: Improved mobile platform transcription UI.
 
-
+***
 
 ## Version 2.0.0
 
