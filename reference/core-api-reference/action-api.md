@@ -26,15 +26,6 @@ import base64
 import json
 import requests
 
-# This function will be useful for passing the request
-def convert(l):
-  """This little function will help us convert
-  the list of dictionaries to the required format"""
-  o = ""
-  for each in l:
-    o += json.dumps(each) + ";"
-  return o
-
 # Use your character id here
 CHAR_ID = "<your character id>"
 
@@ -180,8 +171,8 @@ payload={'userText': userText,
   'voiceResponse': 'false',
   'actions': actions,
   'classification':'multistep', 
-  'objects': convert(objects),
-  'characters': convert(characters),
+  'objects': json.dumps(objects),
+  'characters': json.dumps(characters),
   }
 
 files = []
