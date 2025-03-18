@@ -48,7 +48,7 @@ The imported files can be found under **Assets > Convai > ConvaiXR**.
 
 The final step is to import your character into the scene.&#x20;
 
-If you need guidance on this, please refer to the relevant documentation [here](../../../importing-a-character-from-convai-playground.md).
+If you need guidance on this, please refer to the relevant documentation [here](../../../unity-importing-ready-player-me-rpm-characters.md).
 
 
 

@@ -88,7 +88,7 @@ In the demo scene, select **\[BuildingBlock] Find Spawn Positions** in the hiera
 
 In the **Spawn Object** field, drag and drop the character you imported into the project.
 
-* If you’re unsure how to import your character, please refer to the relevant documentation [here](../../../importing-a-character-from-convai-playground.md).
+* If you’re unsure how to import your character, please refer to the relevant documentation [here](../../../unity-importing-ready-player-me-rpm-characters.md).
 
 <figure><img src="../../../../../.gitbook/assets/SpawnCharacterChange.png" alt=""><figcaption></figcaption></figure>
 

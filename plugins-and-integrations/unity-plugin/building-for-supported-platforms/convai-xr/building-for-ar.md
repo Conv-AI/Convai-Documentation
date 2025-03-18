@@ -138,7 +138,7 @@ If you've created a Ready Player Me character on convai.com playground and want 
 <figure><img src="../../../../.gitbook/assets/AddYourCharacter.png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
-Use the " [importing-a-character-from-convai-playground.md](../../importing-a-character-from-convai-playground.md "mention") " guide to add your character to your project.
+Use the " [unity-importing-ready-player-me-rpm-characters.md](../../unity-importing-ready-player-me-rpm-characters.md "mention") " guide to add your character to your project.
 {% endhint %}
 
 6. After adding your character, click on your character.

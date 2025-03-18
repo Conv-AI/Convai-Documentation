@@ -32,8 +32,8 @@ Give your scene a name and then click on <mark style="color:green;">Save Scene</
 
 Now you can import your Convai Character or your Custom Characters by following our complete guide on it
 
-{% content-ref url="importing-a-character-from-convai-playground.md" %}
-[importing-a-character-from-convai-playground.md](importing-a-character-from-convai-playground.md)
+{% content-ref url="unity-importing-ready-player-me-rpm-characters.md" %}
+[unity-importing-ready-player-me-rpm-characters.md](unity-importing-ready-player-me-rpm-characters.md)
 {% endcontent-ref %}
 
 {% content-ref url="importing-custom-characters.md" %}

@@ -3,6 +3,7 @@ description: >-
   Integrate Convai Vision into your Unreal Engine project, enabling characters
   to "see" the game world or process real-world information through a webcam.
 hidden: true
+noIndex: true
 ---
 
 # Convai Vision Integration
