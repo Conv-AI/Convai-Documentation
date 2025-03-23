@@ -33,9 +33,9 @@ Before getting started, ensure you have the following:
 
 3. Enter the following Git URL and click **Install**:
 
-`https://github.com/readyplayerme/rpm-unity-sdk-core.git`&#x20;
+`https://github.com/readyplayerme/rpm-unity-sdk core.git#f6ea3c4b0a8891b7c4c1d7b269cee545185549fb`
 
-<figure><img src="../../.gitbook/assets/Untitled (32).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2025-03-23 034148.png" alt=""><figcaption></figcaption></figure>
 
 4. Wait for the installation to complete.
 
