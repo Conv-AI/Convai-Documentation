@@ -51,9 +51,9 @@ Before getting started, ensure you have the following:
 
 3. This will generate an **Avatar Config** asset.
 4. Select the created asset and, under the **Inspector Panel**, locate the **Morph Targets** section.
-5. Click **Add**, select the required morph targets **(Oculus Visemes or ARKit)**, and save the asset.
+5. Click **Add**, select the required morph targets **(Oculus Visemes and ARKit)**, and save the asset.
 
-<figure><img src="../../.gitbook/assets/Untitled (35).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2025-03-24 160022.png" alt=""><figcaption></figcaption></figure>
 
 6. Locate **Assets > Ready Player Me > Resources > Settings > AvatarLoaderSettings** and assign the **Avatar Config** asset to the **Avatar Config** field.
 
