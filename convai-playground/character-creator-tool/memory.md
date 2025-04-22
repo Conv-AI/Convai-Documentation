@@ -6,7 +6,7 @@ description: >-
 
 # Memory
 
-Memory section allows you to view your previous conversations with the character, organized by date and time. Each chat session is assigned a unique ID for easy reference. You can download, copy, or delete individual chat logs from the character's memory as needed.
+Memory section allows you to view your previous conversations with the character, organized by date and time. Each chat session is assigned a unique ID for easy reference. You can download and copy individual chat logs from the character's memory as needed.
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-03-16 at 11.04.50 PM.png" alt=""><figcaption></figcaption></figure>
 
