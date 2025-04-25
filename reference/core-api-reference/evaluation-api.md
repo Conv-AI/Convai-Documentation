@@ -24,12 +24,12 @@ This API allows you to evaluate a conversation transcript based on user defined 
 
 ### Request Body
 
-| Name          | Type                   | Description                                                                                                     |
-| ------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------- |
-| session\_id   | String (required)      | The ID of the session you want to evaluate.                                                                     |
-| character\_id | String (required)      | The ID of the character performing the evaluation.                                                              |
-| prompt        | String (required)      | A predefined or custom prompt containing the transcript and specific instructions for evaluation.               |
-| variables     | JSON Object (optional) | A set of key-value pairs providing additional data required for evaluation (e.g., customer name, item details). |
+| Name          | Type                   | Description                                                                                                                                                |
+| ------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| session\_id   | String (required)      | The ID of the session you want to evaluate.                                                                                                                |
+| character\_id | String (required)      | The ID of the character performing the evaluation.                                                                                                         |
+| prompt        | String (required)      | A predefined or custom prompt containing the transcript and specific instructions for evaluation.                                                          |
+| variables     | JSON Object (optional) | A set of key-value pairs providing additional data required for evaluation (e.g., customer name, item details). This depends on the `prompt` being passed. |
 
 ### Example Payload
 
@@ -126,6 +126,16 @@ Please evaluate the above conversation based on the attributes listed and provid
 ```
 {% endcode %}
 
+{% hint style="info" %}
+If you focus on the prompt, there are certain text within `[[ ]]` . These are `expected-variables`. Now, `[[conversation_history]]` is a compulsory expected-variable, that has to be present in the prompt. The rest of them depends on your requirements, to be passed to the prompt as needed.
+
+So the `variables` key, in the body of the request, should be of length `expected-variables - 1`, i.e, there should be values for all the other keys mentioned in the `[[ ]]` brackets, except for `conversation_history` which is fetched from the `session_id` provided. The `variables` list can be empty if you are passing no other `expected-variables`  in the prompt.
+{% endhint %}
+
+{% hint style="danger" %}
+Not passing the `conversation_history` variable in the prompt will lead to 500 error response from the server.
+{% endhint %}
+
 ### Response
 
 {% tabs %}
@@ -191,9 +201,16 @@ On success, the API returns a structured evaluation of the conversation, coverin
 }
 ```
 {% endtab %}
+
+{% tab title="500: Internal Server Error" %}
+```json
+{
+    "ERROR": "Invalid variable list. Please recheck the variables being sent",
+    "Reference ID": "<REFERENCE-ID>"
+}
+```
+{% endtab %}
 {% endtabs %}
-
-
 
 ### Code Snippet&#x20;
 
