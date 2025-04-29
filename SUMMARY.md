@@ -182,6 +182,16 @@
   * [Third-Party API Integrations](plugins-and-integrations/other-integrations/third-party-api-integrations/README.md)
     * [ElevenLabs API Integration](plugins-and-integrations/other-integrations/third-party-api-integrations/elevenlabs-api-integration.md)
 
+***
+
+* [User Generated Content (UGC)](user-generated-content-ugc/README.md)
+  * [Modding Tool](user-generated-content-ugc/modding-tool.md)
+  * [Avatar Studio](user-generated-content-ugc/avatar-studio/README.md)
+    * [Uploading Avatars](user-generated-content-ugc/avatar-studio/uploading-avatars/README.md)
+      * [Metahuman Avatars](user-generated-content-ugc/avatar-studio/uploading-avatars/metahuman-avatars.md)
+      * [Reallusion Avatars](user-generated-content-ugc/avatar-studio/uploading-avatars/reallusion-avatars.md)
+    * [Uploading Scenes](user-generated-content-ugc/avatar-studio/uploading-scenes.md)
+
 ## Reference
 
 * [Core API Reference](reference/core-api-reference/README.md)
