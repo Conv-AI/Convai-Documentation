@@ -28,6 +28,12 @@ Currently, only Unreal Engine 5.3 is supported. Support for other versions is in
 
 ***
 
+{% embed url="https://youtu.be/LaoREaFoYx8" %}
+This is a video explaining the whole process.
+{% endembed %}
+
+***
+
 ## Getting Started
 
 ### 1. Download & Launch
