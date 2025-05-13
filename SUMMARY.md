@@ -20,6 +20,9 @@
 
 ## Plugins & Integrations
 
+* [Convai Pixel Streaming Embed](plugins-and-integrations/convai-pixel-streaming-embed/README.md)
+  * [Whitelisting & Publishing an Experience](plugins-and-integrations/convai-pixel-streaming-embed/whitelisting-and-publishing-an-experience.md)
+  * [Using the NPM Package](plugins-and-integrations/convai-pixel-streaming-embed/using-the-npm-package.md)
 * [Introduction](plugins-and-integrations/introduction.md)
 * [Unity Plugin](plugins-and-integrations/unity-plugin/README.md)
   * [Pre-Requisites](plugins-and-integrations/unity-plugin/pre-requisites.md)
