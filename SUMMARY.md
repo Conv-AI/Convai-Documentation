@@ -22,7 +22,12 @@
 
 * [Convai Pixel Streaming Embed](plugins-and-integrations/convai-pixel-streaming-embed/README.md)
   * [Whitelisting & Publishing an Experience](plugins-and-integrations/convai-pixel-streaming-embed/whitelisting-and-publishing-an-experience.md)
-  * [Using the NPM Package](plugins-and-integrations/convai-pixel-streaming-embed/using-the-npm-package.md)
+  * [React Typescript](plugins-and-integrations/convai-pixel-streaming-embed/react-typescript.md)
+  * [ReactJS (JavaScript)](plugins-and-integrations/convai-pixel-streaming-embed/reactjs-javascript.md)
+  * [Vanilla JavaScript (ES Modules)](plugins-and-integrations/convai-pixel-streaming-embed/vanilla-javascript-es-modules.md)
+  * [CDN (UMD Script)](plugins-and-integrations/convai-pixel-streaming-embed/cdn-umd-script.md)
+  * [On Premise Deployment](plugins-and-integrations/convai-pixel-streaming-embed/on-premise-deployment.md)
+  * [API Reference](plugins-and-integrations/convai-pixel-streaming-embed/api-reference.md)
 * [Introduction](plugins-and-integrations/introduction.md)
 * [Unity Plugin](plugins-and-integrations/unity-plugin/README.md)
   * [Pre-Requisites](plugins-and-integrations/unity-plugin/pre-requisites.md)
