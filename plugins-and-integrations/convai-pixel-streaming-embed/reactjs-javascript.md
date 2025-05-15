@@ -1,4 +1,7 @@
 ---
+description: >-
+  Integrate Convai's Pixel Streaming into your React JavaScript app using the
+  @convai/experience-embed component.
 icon: react
 ---
 

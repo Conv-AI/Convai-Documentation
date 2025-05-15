@@ -1,4 +1,7 @@
 ---
+description: >-
+  Use Convai's Pixel Streaming client directly in browser-based JavaScript apps
+  with native ES module support.
 icon: js
 ---
 

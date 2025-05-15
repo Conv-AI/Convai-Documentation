@@ -1,11 +1,15 @@
 ---
-description: https://www.npmjs.com/package/@convai/experience-embed
+description: >-
+  Set up and integrate Convai's Pixel Streaming component in your React
+  TypeScript app using @convai/experience-embed.
 icon: react
 ---
 
 # React Typescript
 
-### Installation Instructions
+{% embed url="https://www.npmjs.com/package/@convai/experience-embed" %}
+
+## Installation Instructions
 
 To install `@convai/experience-embed` using your preferred package manager, use one of the following commands:
 
@@ -27,9 +31,9 @@ yarn add @convai/experience-embed
 pnpm add @convai
 ```
 
-### ⚙️ Quick Start (React Ts)
+## Quick Start (React Ts)
 
-#### 1. Import the Component
+### 1. Import the Component
 
 ```tsx
 import { PixelStreamComponent } from '@convai/experience-embed';
@@ -37,7 +41,7 @@ import { PixelStreamComponent } from '@convai/experience-embed';
 
 ***
 
-#### 2. Set Up a Ref to Access Methods
+### 2. Set Up a Ref to Access Methods
 
 <pre class="language-tsx"><code class="lang-tsx"><strong>import { useRef } from 'react';
 </strong>import { PixelStreamComponentHandles } from '@convai/experience-embed';
@@ -45,7 +49,7 @@ import { PixelStreamComponent } from '@convai/experience-embed';
 const pixelStreamRef = useRef&#x3C;PixelStreamComponentHandles>(null);
 </code></pre>
 
-#### 3. Use the Component in JSX
+### 3. Use the Component in JSX
 
 ```tsx
 <PixelStreamComponent
@@ -55,31 +59,33 @@ const pixelStreamRef = useRef&#x3C;PixelStreamComponentHandles>(null);
 />
 ```
 
-> 🔧 `expId` is your unique experiment ID from Convai's dashboard.
+{% hint style="info" %}
+`expId` is your unique experiment ID from Convai's dashboard.
+{% endhint %}
 
-#### 4. Interact Using Available Methods
+### 4. Interact Using Available Methods
 
-**✅ Enable/Disable Camera**
+**Enable/Disable Camera**
 
 ```tsx
 await pixelStreamRef.current?.enableCamera();
 await pixelStreamRef.current?.disableCamera();
 ```
 
-**🔊 Enable/Disable Character Audio**
+**Enable/Disable Character Audio**
 
 ```tsx
 await pixelStreamRef.current?.enableCharacterAudio();
 await pixelStreamRef.current?.disableCharacterAudio();
 ```
 
-**🚀 Initialise the Experience**
+**Initialise the Experience**
 
 ```tsx
 await pixelStreamRef.current?.initializeExperience();
 ```
 
-#### 5. Customise the Loading Screen (Optional)
+### 5. Customise the Loading Screen (Optional)
 
 ```tsx
 const CustomLoadingScreen = () => (
@@ -107,7 +113,7 @@ Usage:
 />
 ```
 
-### 🧩 Full Example
+## Full Example
 
 ```tsx
 import React, { useRef } from 'react';

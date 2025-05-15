@@ -1,10 +1,11 @@
 ---
+description: >-
+  Integrate Convai's Pixel Streaming into your web app using the UMD build
+  directly from a CDN
 icon: js
 ---
 
 # CDN (UMD Script)
-
-use via CDN:
 
 ```html
 <script src="https://unpkg.com/@convai/experience-embed/dist/convai-embed.umd.js"></script>
