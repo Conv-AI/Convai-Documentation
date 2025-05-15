@@ -21,6 +21,8 @@ Before getting started, ensure you have the following:
 * **Unreal Engine 5.3**
 * **Convai API Key** – You can generate one from your [Convai Dashboard](https://convai.com/)
 * **.NET 6.0 Runtime (Console Applications)** – [Download it here](https://dotnet.microsoft.com/en-us/download/dotnet/6.0/runtime?cid=getdotnetcore\&os=windows\&arch=x64)
+* **Unreal Engine 5.3 Cross-Compile Toolchain -** [Download it here](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine?application_version=5.3)
+* **Download Linux Binaries for Unreal Engine 5.3 -** You can download it from Epic Games Launcher
 
 {% hint style="info" %}
 Currently, only Unreal Engine 5.3 is supported. Support for other versions is in progress.
@@ -34,7 +36,7 @@ Currently, only Unreal Engine 5.3 is supported. Support for other versions is in
 
 * Download `ConvaiModdingTool`from here.
 
-{% file src="../.gitbook/assets/ConvaiModdingTool.zip" %}
+{% file src="../.gitbook/assets/ConvaiModdingTool (2).zip" %}
 
 * Move the `.exe` file to the directory where you want your new Unreal project to be created.
 * Double-click to run it.
