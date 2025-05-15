@@ -1,9 +1,3 @@
----
-description: >-
-  Embed AI-powered 3D character experiences into your web app using Convai's
-  Pixel Streaming Integration.
----
-
 # Convai Pixel Streaming Embed
 
 {% hint style="danger" %}
