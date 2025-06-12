@@ -116,8 +116,8 @@ If you encounter an error related to the .NET Runtime:
 
 Continue to one of the following guides:
 
-* [Uploading Metahuman Avatars](avatar-studio/uploading-avatars/metahuman-avatars.md)
-* [Uploading Reallusion Avatars](avatar-studio/uploading-avatars/reallusion-avatars.md)
+* [Uploading Metahuman Avatars](avatar-studio/customizing-your-avatar/configure-avatar/uploading-avatars/metahuman-avatars.md)
+* [Uploading Reallusion Avatars](avatar-studio/customizing-your-avatar/configure-avatar/uploading-avatars/reallusion-avatars.md)
 
 {% hint style="info" %}
 Currently, only Metahuman and Reallusion avatars are supported for upload.

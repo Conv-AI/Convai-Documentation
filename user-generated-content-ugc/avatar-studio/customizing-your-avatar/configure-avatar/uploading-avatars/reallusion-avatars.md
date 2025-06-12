@@ -16,7 +16,7 @@ This guide explains how to prepare and upload **Reallusion-based avatars** using
 
 Make sure you have the following ready:
 
-* A project created with the [**Convai Modding Tool**](../../modding-tool.md), where you answered **`N`** to “Are you using a Metahuman?”
+* A project created with the [**Convai Modding Tool**](../../../../modding-tool.md), where you answered **`N`** to “Are you using a Metahuman?”
 * A custom Reallusion character exported and ready for import
 
 ***
@@ -84,7 +84,7 @@ Reallusion characters typically face the wrong direction by default. Fix this by
    * `Content/ConvaiReallusion/` (contains the animation blueprint)
    * The final structure should mirror what’s shown in the screenshot.
 
-<figure><img src="../../../.gitbook/assets/Screenshot 2025-04-19 143603.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/Screenshot 2025-04-19 143603.png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 This folder determines what gets packaged and uploaded. Make sure everything is placed correctly.

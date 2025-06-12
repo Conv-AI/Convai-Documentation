@@ -17,7 +17,7 @@ This guide explains how to upload **custom scenes (Levels)** from Unreal Engine 
 
 Make sure you have:
 
-* Created your project using the [**Convai Modding Tool**](../modding-tool.md)
+* Created your project using the [**Convai Modding Tool**](../../../modding-tool.md)
   * Selected **`1`** when asked whether you are uploading a Scene or Avatar
 * A fully prepared and tested Unreal Engine Level (with all necessary assets)
 
