@@ -14,20 +14,18 @@ Once you've placed your avatar into the scene, it's time to customize its model,
 
 ## **Customizing Your Avatar**
 
-\<ins>_\[GIF: Using move, rotate, and scale tools]_\</ins>
+<figure><img src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXeWj6TrGzuBGoDd6sbXLS42ksAR_A_pUeRQP-xjHovDLUIXcb8mWDtomJlr-7Q3Y9EtXjamjadrHG0my64T7mt-zuxSNmoNfqYJA5tBo6txK_IRuWXsx_GBiE6xsojCsLqSgccUHg?key=oE6QAXhDPkZ0WZirjFau9Q" alt=""><figcaption></figcaption></figure>
 
 Follow these steps to adjust your avatar visually using built-in tools:
 
 ### **1. Select and Open the Character Tools**
 
-\<ins>_\[GIF: Selecting avatar to open tools]_\</ins>
-
 * Click directly on your avatar in the scene.
-* This will open the **AI Character Elements** menu with transform tools.
+* This will open the transform tools.
 
 ### **2. Customize Position, Rotation, and Scale**
 
-\<ins>_\[GIF: Moving, rotating, scaling avatar and editing transform values]_\</ins>
+<figure><img src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXe0rpEuYTNjlqHm4QsiMOMdkEan_1ZMjBwJwurojp2NeATeQySPvgSbypzUfglKIbIIRnRVreugNZ33u5f4hZrJSXsbSgq1Sy1yltbguQrA8z-RaVh5pNzVpQdnMoyeS9dXu6qQ?key=oE6QAXhDPkZ0WZirjFau9Q" alt=""><figcaption></figcaption></figure>
 
 You can adjust your avatar’s placement and appearance using **either visual tools or precise numeric fields**:
 

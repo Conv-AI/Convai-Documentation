@@ -10,7 +10,7 @@ description: >-
 
 Now that you’ve created a Convai character, it’s time to place them into a 3D simulation. With Convai Sim, you can bring characters to life inside immersive environments—fully interactive and embodied in high-quality avatars.
 
-\<Embed Walkthrough link>
+<figure><img src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXcWzM_uXSixJxi8fOr8Un1Rz2eRavfCs6-DXY-ZPSkps6KIwXDmh1zZwFLMnkx51T7y8OuEsxKv7QbukN7PCbPp7mGk2o0K9M1OPPeCE2aQxXJBwn2tG6gFypmoSsNDgjX2nRhoLA?key=oE6QAXhDPkZ0WZirjFau9Q" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -28,7 +28,7 @@ Click on **“Create a new experience”** to begin setting up your simulation.
 
 ### **3. Choose an Environment**
 
-Select an environment that fits your use case (e.g., office, museum, sci-fi room). Then click **“Start Experience”** to enter the 3D simulation editor.
+Select an environment that fits your use case (e.g., office, museum, sci-fi room). Then click **“Start Experience”** to enter the Convai Sim.
 
 ### **4. Explore the Scene**
 
@@ -58,8 +58,6 @@ Click **“Deploy Character”** to spawn the avatar into the environment. The a
 ### **8. Add More Avatars (Optional)**
 
 Repeat the process to add **multiple characters** into the same scene and create more dynamic simulations.
-
-\<ins>_\[GIF: Creating and deploying avatars in a scene]_\</ins>
 
 ***
 

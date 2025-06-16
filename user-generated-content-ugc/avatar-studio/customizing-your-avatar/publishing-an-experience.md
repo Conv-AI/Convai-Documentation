@@ -1,3 +1,9 @@
+---
+description: >-
+  Learn how to publish and share your customized avatar experience for use
+  across web, kiosks, apps, and more.
+---
+
 # Publishing an Experience
 
 ## **Ready to Share Your Experience with the World?**
@@ -15,15 +21,37 @@ Make sure your avatar is **saved** and the character is **created** before navig
 
 ## **Publishing Steps**
 
-1. Go to the **Publish** tab inside your character’s dashboard.
-2. Fill out the publishing form:
-   * **Experience Name**
-   * **Description**
-   * **Thumbnail** (Optional)
-3. **Set Visibility:**
-   * **Public** – Listed on [x.convai.com](https://x.convai.com), accessible to everyone.
-   * **Unlisted** – Not publicly listed. Only accessible via a direct link.
-   * **Private** – Only visible to you and specific invited users.
+### 1. Go to the **Publish** tab inside your character’s dashboard.
+
+### **2. Finalizing Your Experience**
+
+Fill in the necessary details to define and present your simulation:
+
+* **Experience Name**\
+  e.g., _Virtual Tour of the Fire Station_
+* **Experience Description**\
+  e.g., _Get a deeper look and understanding of the inner workings of a fire station with your virtual tour guide Lina!_
+* **Thumbnail (Optional)**\
+  Upload an image to visually represent your experience.
+
+### 3. Choose Visibility Settings
+
+Select how and with whom the experience should be shared:
+
+* **Public**
+  * Visible to everyone
+  * Accessible on [**x.convai.com**](https://x.convai.com)
+* **Private**
+  * Only visible to you and invited users
+* **Unlisted**
+  * Not listed publicly, but can be accessed via a direct link
+* **Embed on Your Site** _(Enterprise-only)_
+  * Publish your experience directly to your own website
+
+{% hint style="danger" %}
+**Convai Pixel Streaming Embed** is currently accessible only with the **Enterprise plan**.\
+To learn how to embed an avatar into your own platform, check out the [Embedding Documentation](../../../plugins-and-integrations/convai-pixel-streaming-embed/).
+{% endhint %}
 
 ***
 
@@ -37,11 +65,6 @@ Once published, your experience is ready to be deployed on:
 * Any supported digital platform
 
 ***
-
-{% hint style="danger" %}
-**Convai Pixel Streaming Embed** is currently accessible only with the **Enterprise plan**.\
-To learn how to embed an avatar into your own platform, check out the [Embedding Documentation](../../../plugins-and-integrations/convai-pixel-streaming-embed/).
-{% endhint %}
 
 {% content-ref url="../../../plugins-and-integrations/convai-pixel-streaming-embed/" %}
 [convai-pixel-streaming-embed](../../../plugins-and-integrations/convai-pixel-streaming-embed/)

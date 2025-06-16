@@ -8,13 +8,15 @@ description: >-
 
 ## Introduction
 
-Convai’s Avatar Studio is a user-friendly platform that allows anyone to create intelligent, high-quality 3D conversational avatars — right from your web browser. No need for GPU-based computing or complex setup.
+Convai’s Avatar Studio is a user-friendly platform that allows anyone to create intelligent, high-quality 3D conversational avatars — right from your web browser.
+
+{% embed url="https://youtu.be/-08pVVY5yQo" %}
 
 ***
 
 ## **What You Can Do**
 
-With a simple drag-and-drop interface, users can design and deploy fully interactive avatars that:
+With a simple interface, you can design and deploy fully interactive avatars that:
 
 * Speak and respond via **voice and text**
 * Perform **intelligent animations**

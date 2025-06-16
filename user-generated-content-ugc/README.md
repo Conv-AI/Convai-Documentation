@@ -1,7 +1,3 @@
----
-hidden: true
----
-
 # User Generated Content (UGC)
 
 {% content-ref url="avatar-studio/" %}

@@ -23,7 +23,6 @@ With Convai Sim, you can:
 * Deploy avatars with **smart navigation** and context-aware behaviors
 * Easily position characters using **drag-and-drop scene editing**
 * Instantly publish your experience for testing or deployment
-* Integrate avatars created in **Convai Playground or Avatar Studio**
 * Run everything **directly in your browser.**
 
 ***
@@ -54,8 +53,6 @@ Whether you're designing a futuristic training program or a playful game level, 
   Launch scenes immediately and preview interactions with one click.
 * **Intelligent Navigation**\
   Characters move contextually, ideal for tour guide or training scenarios.
-* **Creator Dashboard Integration**\
-  Bring in existing characters from Convai Playground or create new ones.
 * **Interactive Scene Editing**\
   Easily arrange avatars and elements using drag-and-drop tools.
 * **Versatile Use Cases**\

@@ -16,9 +16,7 @@ Face Filter allows you to personalize your avatar’s appearance to look like a 
 
 <figure><img src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXdx4TEElrRxiSaJ4qiy6PfujUgoiYgNUJWdhH58mmOoPtM30xeoz1EBMranPR-Sslf9nf-nT59LUhM8S5P_jq_aYm71bxM2o4gid8GMV7-hCgLMB8-2THA3Y-y563gShsMysuoG?key=UBmSq8Y7gM25yDvVwPYY7g" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXcW_q6mGCwlCWoDJoEJGXEIHgvoPo-T93bNoB4Xcp_Ae7-H87Rv1gfA3DTD_nhtwO5rW3Gll4G-tODExoAmvjI03a7Gp_n7MbpeK8ihe5cDh3IpBDOd0LpFxPxK4CxFQKdoWPf-1Q?key=UBmSq8Y7gM25yDvVwPYY7g" alt=""><figcaption></figcaption></figure>
-
-## **How to Use It**
+## **How to Use It?**
 
 ### **1. Enable Face Filter**
 

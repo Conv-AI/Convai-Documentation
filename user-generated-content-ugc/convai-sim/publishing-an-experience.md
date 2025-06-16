@@ -10,9 +10,9 @@ description: >-
 
 Once you’ve finished building your AI simulation or virtual tour, Convai Sim makes it easy to publish and share your experience across platforms.
 
-\<ins>_\[GIF: Publishing the experience]_\</ins>
+<figure><img src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXcnUwJN22I2npTvx16Bv4tFBPax0edZIP6ryiD3lr8QZrE3tjsD7Z9nrWmQX6OUB8tdpexRllTezHXPh9FbGg17UeWHb2RDgjuLZZWQyM8JJdlXC68gwZWqyNHwGCJLjKbNz7zHHA?key=oE6QAXhDPkZ0WZirjFau9Q" alt=""><figcaption></figcaption></figure>
 
-## Step by Step Guide
+## Publishing Steps
 
 ### **1. Finalizing Your Experience**
 
@@ -38,11 +38,10 @@ Select how and with whom the experience should be shared:
   * Not listed publicly, but can be accessed via a direct link
 * **Embed on Your Site** _(Enterprise-only)_
   * Publish your experience directly to your own website
-  * Contact us to enable this feature
 
-{% hint style="success" %}
-Need custom publishing options or integration support?\
-Reach out at **support@convai.com**
+{% hint style="danger" %}
+**Convai Pixel Streaming Embed** is currently accessible only with the **Enterprise plan**.\
+To learn how to embed an avatar into your own platform, check out the [Embedding Documentation](../../plugins-and-integrations/convai-pixel-streaming-embed/).
 {% endhint %}
 
 ***

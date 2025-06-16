@@ -8,13 +8,13 @@ description: >-
 
 ## **Overview**
 
-Once your character is created, you can start customizing how they look, move, and interact using the **Avatar Studio configurator.**
+Once your character is created, you can start customizing how they look, move, and interact using the **Avatar Studio**.
 
 {% embed url="https://youtu.be/-08pVVY5yQo" %}
 
 ## What You Can Customize
 
-Here’s what you can do inside the avatar configurator:
+Here’s what you can do inside the Avatar Studio:
 
 *   **Choose a Sample Avatar,**
 
@@ -33,5 +33,3 @@ Here’s what you can do inside the avatar configurator:
   Customize how the avatar interface behaves across different devices and align it with your brand’s visual identity.
 
 After you finish customizing, simply **save and publish** your avatar to bring it into your character’s conversations.
-
-\

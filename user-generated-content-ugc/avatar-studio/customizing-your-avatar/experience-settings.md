@@ -58,7 +58,7 @@ Make the greeting more dynamic by enabling vision awareness:
 
 Select the input style that fits your use case:
 
-* **Hands-Free Mode**\
+* **Hands-Free Mode (WIP)**\
   Avatar listens continuously.
 * **Push-to-Talk Mode**\
   Activate microphone input only when the assigned key is pressed.
@@ -75,8 +75,6 @@ Control how often the avatar processes and reacts to input, allowing it to act m
 * Open the **dropdown menu** for processing frequency.
 * Choose a time interval for the avatar to periodically evaluate multimodal inputs (voice, text, vision).
 * This enables **agentic behavior** — where the avatar can initiate interaction based on user presence or signals.
-
-***
 
 {% hint style="danger" %}
 After making changes:

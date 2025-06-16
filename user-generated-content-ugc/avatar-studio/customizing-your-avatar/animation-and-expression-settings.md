@@ -61,8 +61,3 @@ Give your avatar intelligent behaviors during interactions — like waving hello
 4. Choose from available animations (e.g., **Wave Animation** for greeting).
 5. Name your action (e.g., **Waves Cheerfully**).
 6. Click **“Preview Animation”** to test how it looks.
-
-These actions can be:
-
-* **Triggered automatically** by the AI during conversation
-* **Triggered manually** by user input

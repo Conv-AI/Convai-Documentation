@@ -22,5 +22,5 @@ You can choose from a variety of **immersive 3D and Solid environments**, includ
 These environments serve as the **visual context** for your avatar’s interactions, making conversations feel more realistic and engaging for your audience.
 
 {% hint style="success" %}
-Match the environment with the personality or purpose of your character — for example, use a sci-fi room for a space-themed NPC, or a lounge for a friendly assistant.
+Match the environment with the personality or purpose of your character.
 {% endhint %}

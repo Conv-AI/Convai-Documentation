@@ -8,7 +8,7 @@ description: >-
 
 ## **Getting Started**
 
-Before building your simulation, you’ll first need to create your AI-powered character. This character will serve as the voice and personality inside your Convai Sim scene.
+Before building your simulation, you’ll first need to create your AI-powered character.
 
 ## **Step-by-Step Guide**
 
@@ -29,17 +29,6 @@ Before building your simulation, you’ll first need to create your AI-powered c
   * Core Description
 * You can also adjust:
   * Voice
-  * Spoken languages
+  * Languages
   * Speaking style
   * And other optional settings
-
-***
-
-## **Sample Character Setup**
-
-Need inspiration? Here’s an example to help you get started:
-
-* **Character Name**\
-  Lina
-* **Core Description:**\
-  Lina is a dynamic guide who brings virtual spaces to life. She’s curious, engaging, and great at sharing fun facts while making users feel welcomed and involved.

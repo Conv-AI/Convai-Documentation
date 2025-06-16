@@ -1,7 +1,7 @@
 ---
 description: >-
-  Learn how to create your first AI-powered character using Convai’s intuitive
-  character creation flow.
+  Learn how to create your first AI-powered character using Convai’s character
+  creation flow.
 ---
 
 # Creating a Convai Character
@@ -29,7 +29,7 @@ Creating your first Convai character is quick and easy. Just follow these steps 
   * Core Description
 * You can also adjust:
   * Voice
-  * Spoken languages
+  * Languages
   * Speaking style
   * And other optional settings
 
@@ -42,14 +42,3 @@ Creating your first Convai character is quick and easy. Just follow these steps 
 {% hint style="warning" %}
 If you skip this step and click **“Create Character”** without configuring the avatar, a random default avatar will be assigned. Don’t worry — you can always change it later by clicking on the **“Avatar”** tab in the character dashboard.
 {% endhint %}
-
-## **Sample Character Setup**
-
-Need inspiration? Here’s an example to help you get started:
-
-*   **Character Name**
-
-    Ava
-*   **Core Description**
-
-    Ava is a smart, friendly character who loves showing users around virtual environments. She’s knowledgeable, upbeat, and always ready to help.\

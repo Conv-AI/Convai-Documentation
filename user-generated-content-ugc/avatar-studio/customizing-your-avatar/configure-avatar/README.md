@@ -10,7 +10,7 @@ Once you enter the **Avatar Studio**, you can define exactly how your avatar loo
 
 <figure><img src="https://lh7-rt.googleusercontent.com/docsz/AD_4nXclKo7GFdgSfSG9bA5Aj9dDWyeTuZlnw6WKlECGzRIZATcN3xcahU89bB3OqaKh4ifzWuZrlnNgd7sqXXnAowO7IyqY4TpDdYETKiwYwPzFtkGEHAb1LYobYuIE1wT2FzNJJB8n?key=UBmSq8Y7gM25yDvVwPYY7g" alt=""><figcaption></figcaption></figure>
 
-You can start by selecting a high-quality **sample Metahuman avatar** from Convai’s library. These are designed to cover a wide range of character types and use cases.
+You can start by selecting a high-quality S**ample Avatar** from Convai’s library. These are designed to cover a wide range of character types and use cases.
 
 * Browse the available avatars by scrolling through the list.
 * Click on the one you want to use.
