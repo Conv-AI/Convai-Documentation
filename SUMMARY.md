@@ -18,6 +18,28 @@
   * [Character Versioning](convai-playground/character-creator-tool/character-versioning.md)
 * [F.A.Q](convai-playground/f.a.q.md)
 
+## No Code Experiences
+
+* [Avatar Studio Experiences](no-code-experiences/avatar-studio-experiences/README.md)
+  * [Customizing Your Avatar](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/README.md)
+    * [Configure Avatar](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/README.md)
+      * [Uploading Avatars](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/README.md)
+        * [Metahuman Avatars](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/metahuman-avatars.md)
+        * [Reallusion Avatars](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/reallusion-avatars.md)
+    * [Face Filter](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/face-filter.md)
+    * [Environment](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/environment/README.md)
+      * [Uploading Scenes](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/environment/uploading-scenes.md)
+    * [Lighting Adjustments](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/lighting-adjustments.md)
+    * [Animation & Expression Settings](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/animation-and-expression-settings.md)
+    * [Interface Configuration](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/interface-configuration.md)
+    * [Experience Settings](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/experience-settings.md)
+    * [Publishing an Experience](no-code-experiences/avatar-studio-experiences/customizing-your-avatar/publishing-an-experience.md)
+* [Convai Sim Experiences](no-code-experiences/convai-sim-experiences/README.md)
+  * [Creating Your AI Simulation with Convai Sim](no-code-experiences/convai-sim-experiences/creating-your-ai-simulation-with-convai-sim.md)
+  * [Avatar Customization](no-code-experiences/convai-sim-experiences/avatar-customization.md)
+  * [Tour Guide](no-code-experiences/convai-sim-experiences/tour-guide.md)
+  * [Publishing an Experience](no-code-experiences/convai-sim-experiences/publishing-an-experience.md)
+
 ## Plugins & Integrations
 
 * [Introduction](plugins-and-integrations/introduction.md)
@@ -192,29 +214,7 @@
 
 ***
 
-* [User Generated Content (UGC)](user-generated-content-ugc/README.md)
-  * [Avatar Studio](user-generated-content-ugc/avatar-studio/README.md)
-    * [Creating a Convai Character](user-generated-content-ugc/avatar-studio/creating-a-convai-character.md)
-    * [Customizing Your Avatar](user-generated-content-ugc/avatar-studio/customizing-your-avatar/README.md)
-      * [Configure Avatar](user-generated-content-ugc/avatar-studio/customizing-your-avatar/configure-avatar/README.md)
-        * [Uploading Avatars](user-generated-content-ugc/avatar-studio/customizing-your-avatar/configure-avatar/uploading-avatars/README.md)
-          * [Metahuman Avatars](user-generated-content-ugc/avatar-studio/customizing-your-avatar/configure-avatar/uploading-avatars/metahuman-avatars.md)
-          * [Reallusion Avatars](user-generated-content-ugc/avatar-studio/customizing-your-avatar/configure-avatar/uploading-avatars/reallusion-avatars.md)
-      * [Face Filter](user-generated-content-ugc/avatar-studio/customizing-your-avatar/face-filter.md)
-      * [Environment](user-generated-content-ugc/avatar-studio/customizing-your-avatar/environment/README.md)
-        * [Uploading Scenes](user-generated-content-ugc/avatar-studio/customizing-your-avatar/environment/uploading-scenes.md)
-      * [Lighting Adjustments](user-generated-content-ugc/avatar-studio/customizing-your-avatar/lighting-adjustments.md)
-      * [Animation & Expression Settings](user-generated-content-ugc/avatar-studio/customizing-your-avatar/animation-and-expression-settings.md)
-      * [Interface Configuration](user-generated-content-ugc/avatar-studio/customizing-your-avatar/interface-configuration.md)
-      * [Experience Settings](user-generated-content-ugc/avatar-studio/customizing-your-avatar/experience-settings.md)
-      * [Publishing an Experience](user-generated-content-ugc/avatar-studio/customizing-your-avatar/publishing-an-experience.md)
-  * [Convai Sim](user-generated-content-ugc/convai-sim/README.md)
-    * [Creating a Convai Character](user-generated-content-ugc/convai-sim/creating-a-convai-character.md)
-    * [Creating Your AI Simulation with Convai Sim](user-generated-content-ugc/convai-sim/creating-your-ai-simulation-with-convai-sim.md)
-    * [Avatar Customization](user-generated-content-ugc/convai-sim/avatar-customization.md)
-    * [Tour Guide](user-generated-content-ugc/convai-sim/tour-guide.md)
-    * [Publishing an Experience](user-generated-content-ugc/convai-sim/publishing-an-experience.md)
-  * [Modding Tool](user-generated-content-ugc/modding-tool.md)
+* [Asset Uploader](asset-uploader.md)
 
 ## Reference
 
