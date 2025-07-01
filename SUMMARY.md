@@ -39,6 +39,10 @@
   * [Avatar Customization](no-code-experiences/convai-sim-experiences/avatar-customization.md)
   * [Tour Guide](no-code-experiences/convai-sim-experiences/tour-guide.md)
   * [Publishing an Experience](no-code-experiences/convai-sim-experiences/publishing-an-experience.md)
+* [Convai XR Animation Capture App](no-code-experiences/convai-xr-animation-capture-app/README.md)
+  * [Convai XR Animation Capture App Setup](no-code-experiences/convai-xr-animation-capture-app/convai-xr-animation-capture-app-setup.md)
+  * [Creating Animations for AI Avatars](no-code-experiences/convai-xr-animation-capture-app/creating-animations-for-ai-avatars.md)
+  * [Adding Your Recorded Animations to AI Avatars Inside Unity](no-code-experiences/convai-xr-animation-capture-app/adding-your-recorded-animations-to-ai-avatars-inside-unity.md)
 
 ## Plugins & Integrations
 
