@@ -54,7 +54,7 @@ When you launch the app, you’ll see your **animation dashboard**. From here, y
 
 ### **Step 4: Name & Save**
 
-1. Enter a **clear and descriptive name** (e.g., _Wave Greeting_, &#x50;_&#x6F;ints Left_).
+1. Enter a **clear and descriptive name** (e.g., _Wave Greeting_, _Points Left_).
 2. Click **“Save & Upload”**.
 
 The animation is now uploaded to your **Convai dashboard**, ready to be:
