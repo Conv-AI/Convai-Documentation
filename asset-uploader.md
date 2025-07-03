@@ -8,7 +8,7 @@ description: >-
 
 ## Introduction
 
-The **Convai Asset Uploader** enables developers to upload their custom avatars and levels directly from **Unreal Engine 5.3** to **Avatar Studio** and **Convai Sim**. It automates project creation, plugin integration, and asset packaging through a command-line interface, making the entire process simple and reliable.
+The **Convai Asset Uploader** enables developers to upload their custom avatars and levels directly from **Unreal Engine 5.5** to **Avatar Studio** and **Convai Sim**. It automates project creation, plugin integration, and asset packaging through a command-line interface, making the entire process simple and reliable.
 
 Whether you're uploading a scene, a Metahuman, or a custom Reallusion character, this tool ensures your assets are packaged and transferred in a compatible and Convai-ready format.
 
@@ -20,29 +20,64 @@ Whether you're uploading a scene, a Metahuman, or a custom Reallusion character,
 
 Before getting started, ensure you have the following:
 
-* **Unreal Engine 5.3**
+* **Unreal Engine 5.5**
 * **Convai API Key** – You can generate one from your [Convai Dashboard](https://convai.com/)
 * **.NET 6.0 Runtime (Console Applications)** – [Download it here](https://dotnet.microsoft.com/en-us/download/dotnet/6.0/runtime?cid=getdotnetcore\&os=windows\&arch=x64)
-* **Unreal Engine 5.3 Cross-Compile Toolchain -** [Download it here](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine?application_version=5.3)
-* **Download Linux Binaries for Unreal Engine 5.3 -** You can download it from Epic Games Launcher
+* **Unreal Engine 5.5** [**Cross-Compile Toolchain**](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine?application_version=5.5) **-** [Download it here](https://cdn.unrealengine.com/CrossToolchain_Linux/v23_clang-18.1.0-rockylinux8.exe)
+* **Download Linux Binaries for Unreal Engine 5.5 -** You can download it from Epic Games Launcher
 
-{% hint style="info" %}
-Currently, only Unreal Engine 5.3 is supported. Support for other versions is in progress.
-{% endhint %}
+<figure><img src=".gitbook/assets/image (433).png" alt=""><figcaption><p><strong>Linux Binaries for Unreal Engine 5.5</strong></p></figcaption></figure>
 
 ***
 
 ## Getting Started
 
-### 1. Download & Launch
+### Step 1: Download Required Files
 
-* Download the `Asset Uploader` from here.
+To get started, you’ll need to download two files from our [GitHub repository](https://github.com/Conv-AI/Convai-UnrealEngine-ModdingTool/releases):
 
-{% file src=".gitbook/assets/AssetUploader.zip" %}
+* `UploaderTool.exe`
+* `dump_syms.exe`
 
-* Move the `.exe` file to the directory where you want your new Unreal project to be created.
-* Double-click to run it.
-* If you see a “Windows protected your PC” screen, click **More Info** > **Run Anyway**.
+{% hint style="info" %}
+These tools are essential for initializing and configuring your Convai Unreal project.
+{% endhint %}
+
+***
+
+### Step 2: Replace Existing `dump_syms.exe`
+
+
+
+Before launching the tool, you **must** replace Unreal Engine’s existing `dump_syms.exe` with the one you just downloaded.
+
+*   Navigate to your UE5.5 installation folder:
+
+    <pre><code><strong>&#x3C;UE5.5 Installation Path>/Engine/Binaries/Linux/dump_syms.exe
+    </strong></code></pre>
+
+{% hint style="danger" %}
+**Make a backup** of the original `dump_syms.exe` file before replacing it.
+{% endhint %}
+
+* Replace the existing `dump_syms.exe` file with the downloaded one.
+
+{% hint style="info" %}
+**What is `dump_syms.exe` and why replace it?**\
+This file is used to generate symbol files for debugging during the packaging process.\
+The version bundled with Unreal Engine 5.5 is incompatible with Convai’s toolchain, which will cause the tool to fail.\
+Replacing it with the version provided ensures stable behavior and successful packaging.
+{% endhint %}
+
+***
+
+### Step 3: Run the Uploader Tool
+
+Once `dump_syms.exe` has been replaced:
+
+1. Move the downloaded `UploaderTool.exe` file to the directory where you want your new Unreal project to be created.
+2. Double-click to run the `.exe`.
+3. If you see a “Windows protected your PC” screen, click **More Info** > **Run Anyway**.
 
 {% hint style="success" %}
 Don’t worry! The executable is safe to use. The warning appears because the tool is currently in beta and not digitally signed.
@@ -50,13 +85,13 @@ Don’t worry! The executable is safe to use. The warning appears because the to
 
 ***
 
-### 2. Follow the Prompts
+### Step 4: Follow the Prompts
 
 The Asset Uploader will open in a terminal window. You’ll go through the following steps:
 
 1. **Unreal Engine Path Detection**\
    You'll see a message like:\
-   `Found Valid Unreal Engine Path: C:/Program Files/Epic Games/UE_5.3`
+   `Found Valid Unreal Engine Path: C:/Program Files/Epic Games/UE_5.5`
    * Confirm with `Y` if correct
    * Enter `N` to provide a different path manually
 2. **Project Configuration**

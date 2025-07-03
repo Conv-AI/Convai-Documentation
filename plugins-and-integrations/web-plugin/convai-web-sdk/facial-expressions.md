@@ -3,17 +3,6 @@ description: >-
   This section provides comprehensive information on integrating and handling
   facial expressions and lipsync within your web applications using the
   convai-web-sdk.
-layout:
-  title:
-    visible: true
-  description:
-    visible: true
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
 ---
 
 # Facial Expressions
@@ -100,7 +89,7 @@ These code examples are specific to reallusion characters.
 
 ### Handling 100fps Animation
 
-Implement [throttling ](https://www.geeksforgeeks.org/lodash-\_-throttle-method/)using lodash to ensure smooth animations at 100fps. The provided example demonstrates how to maintain a consistent animation frame rate.
+Implement [throttling ](https://www.geeksforgeeks.org/lodash-_-throttle-method/)using lodash to ensure smooth animations at 100fps. The provided example demonstrates how to maintain a consistent animation frame rate.
 
 ```javascript
 const throttledUpdate = _.throttle(updateAnimation, 10);

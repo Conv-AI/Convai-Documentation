@@ -1,14 +1,14 @@
 ---
 description: >-
   Upload custom Reallusion characters from Unreal Engine 5.3 to Avatar Studio
-  using the Convai Modding Tool.
+  using the Convai Asset Uploader.
 ---
 
 # Reallusion Avatars
 
 ## Introduction
 
-This guide explains how to prepare and upload **Reallusion-based avatars** using the **Convai Modding Tool**. You’ll import your Reallusion character and animations, apply Convai’s animation and lipsync systems, and then upload your avatar to Avatar Studio using the built-in AssetUploader tool.
+This guide explains how to prepare and upload **Reallusion-based avatars** using the **Convai Asset Uploader**. You’ll import your Reallusion character and animations, apply Convai’s animation and lipsync systems, and then upload your avatar to Avatar Studio using the built-in AssetUploader tool.
 
 ***
 
@@ -16,7 +16,7 @@ This guide explains how to prepare and upload **Reallusion-based avatars** using
 
 Make sure you have the following ready:
 
-* A project created with the [**Convai Modding Tool**](../../../../../asset-uploader.md), where you answered **`N`** to “Are you using a Metahuman?”
+* A project created with the [**Convai Asset Uploader**](../../../../../asset-uploader.md), where you answered **`N`** to “Are you using a Metahuman?”
 * A custom Reallusion character exported and ready for import
 
 ***
@@ -159,4 +159,4 @@ To delete a previously uploaded asset, open AssetUploader and click **Delete**.
 
 ## Summary
 
-Using the Convai Modding Tool, uploading Reallusion avatars is quick and reliable. With proper setup and a few clicks, your characters are live in Avatar Studio and ready for real-time AI interaction.
+Using the Convai Asset Uploader, uploading Reallusion avatars is quick and reliable. With proper setup and a few clicks, your characters are live in Avatar Studio and ready for real-time AI interaction.

@@ -1,20 +1,20 @@
 ---
 description: >-
   Upload custom Metahuman characters from Unreal Engine 5.3 to Avatar Studio
-  using the Convai Modding Tool.
+  using the Convai Asset Uploader.
 ---
 
 # Metahuman Avatars
 
 ## Introduction
 
-This guide walks you through uploading **custom Metahuman avatars** to **Avatar Studio** using the **Convai Modding Tool**. You'll generate a new project tailored for Metahumans, import your Metahuman asset, configure it, and finally upload it using Convai’s built-in tools.
+This guide walks you through uploading **custom Metahuman avatars** to **Avatar Studio** using the **Convai Asset Uploader**. You'll generate a new project tailored for Metahumans, import your Metahuman asset, configure it, and finally upload it using Convai’s built-in tools.
 
 ## Prerequisites
 
 Before you begin:
 
-* Create your project using the [**Convai Modding Tool**](../../../../../asset-uploader.md), and answer **`Y`** when asked if you’re using a Metahuman.
+* Create your project using the [**Convai Asset Uploader**](../../../../../asset-uploader.md), and answer **`Y`** when asked if you’re using a Metahuman.
 * Ensure you have a downloadable Metahuman available via **Quixel Bridge**.
 
 ***
@@ -143,4 +143,4 @@ To delete a previously uploaded asset, open AssetUploader and click **Delete**.
 
 ## Summary
 
-Using the Convai Modding Tool, uploading custom Metahuman avatars is quick and reliable. With proper setup and a few clicks, your characters are live in Avatar Studio and ready for real-time AI interaction.
+Using the Convai Asset Uploader, uploading custom Metahuman avatars is quick and reliable. With proper setup and a few clicks, your characters are live in Avatar Studio and ready for real-time AI interaction.
