@@ -65,8 +65,8 @@ Before launching the tool, you **must** replace Unreal Engine’s existing `dump
 {% hint style="info" %}
 **What is `dump_syms.exe` and why replace it?**\
 This file is used to generate symbol files for debugging during the packaging process.\
-The version bundled with Unreal Engine 5.5 is incompatible with Convai’s toolchain, which will cause the tool to fail.\
-Replacing it with the version provided ensures stable behavior and successful packaging.
+The version bundled with Unreal Engine 5.5 has some issues that can cause packaging to fail.\
+Replacing it with the provided version ensures stable behavior and successful packaging.
 {% endhint %}
 
 ***
