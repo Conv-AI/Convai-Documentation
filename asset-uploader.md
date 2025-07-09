@@ -32,42 +32,48 @@ Before getting started, ensure you have the following:
 
 ## Getting Started
 
-### Step 1: Download Required Files
+### Step 1: Download the Asset Uploader
 
-To get started, you’ll need to download two files from our [GitHub repository](https://github.com/Conv-AI/Convai-UnrealEngine-ModdingTool/releases):
-
-* `UploaderTool.exe`
-* `dump_syms.exe`
+Download the latest version of `AssetUploaderTool.exe` from our [GitHub Releases](https://github.com/Conv-AI/Convai-UnrealEngine-ModdingTool/releases).
 
 {% hint style="info" %}
-These tools are essential for initializing and configuring your Convai Unreal project.
+Asset Uploader Tool will create and configure your Convai Unreal project automatically.
 {% endhint %}
 
 ***
 
-### Step 2: Replace Existing `dump_syms.exe`
+### Step 2: Update `BuildConfiguration.xml`
 
+Before running the tool, you must update your Unreal Engine Build Configuration settings.
 
+1.  Navigate to the following path:
 
-Before launching the tool, you **must** replace Unreal Engine’s existing `dump_syms.exe` with the one you just downloaded.
+    ```
+    <USER>/AppData/Roaming/Unreal Engine/UnrealBuildTool/BuildConfiguration.xml
+    ```
+2. Open the file in a text editor (e.g., Notepad).
+3.  Add the following block **inside the `<Configuration>` tag**:
 
-*   Navigate to your UE5.5 installation folder:
+    ```xml
+    <BuildConfiguration>
+        <bAllowUBALocalExecutor>false</bAllowUBALocalExecutor>
+    </BuildConfiguration>
+    ```
 
-    <pre><code><strong>&#x3C;UE5.5 Installation Path>/Engine/Binaries/Linux/dump_syms.exe
-    </strong></code></pre>
+{% hint style="success" %}
+After editing, it should look like:
 
-{% hint style="danger" %}
-**Make a backup** of the original `dump_syms.exe` file before replacing it.
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration xmlns="https://www.unrealengine.com/BuildConfiguration">
+    <BuildConfiguration>
+        <bAllowUBALocalExecutor>false</bAllowUBALocalExecutor>
+    </BuildConfiguration>
+</Configuration>
+```
 {% endhint %}
 
-* Replace the existing `dump_syms.exe` file with the downloaded one.
-
-{% hint style="info" %}
-**What is `dump_syms.exe` and why replace it?**\
-This file is used to generate symbol files for debugging during the packaging process.\
-The version bundled with Unreal Engine 5.5 has some issues that can cause packaging to fail.\
-Replacing it with the provided version ensures stable behavior and successful packaging.
-{% endhint %}
+This change is required to avoid errors during project compilation caused by Unreal’s parallel executor on some systems.
 
 ***
 
