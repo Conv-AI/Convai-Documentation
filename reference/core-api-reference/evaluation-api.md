@@ -7,7 +7,7 @@ description: >-
 # Evaluation API
 
 {% hint style="danger" %}
-This API is accessible only with the Scale and Enterprise plans.
+This API is accessible only with the Scale and above plans.
 {% endhint %}
 
 ## Convai's Evaluation API endpoint
