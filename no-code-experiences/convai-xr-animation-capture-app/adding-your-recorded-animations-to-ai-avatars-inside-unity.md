@@ -59,7 +59,7 @@ The files **must be placed inside the Unity project folder** for them to be dete
 
 ***
 
-#### **Done!** ✅
+#### **Done!**
 
 You’ve now successfully connected a custom VR-recorded animation to an AI-powered avatar in Unity.\
-Repeat the process to add more animations and create rich, expressive characters in your simulations or games. 😎
+Repeat the process to add more animations and create rich, expressive characters in your simulations or games.
