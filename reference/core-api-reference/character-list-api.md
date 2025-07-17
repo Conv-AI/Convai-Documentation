@@ -4,23 +4,23 @@ description: API to retrieve the list of characters, created by a user.
 
 # Character List API
 
-### Convai's Character List API endpoint
+## Convai's Character List API endpoint
 
 <mark style="color:green;">`POST`</mark> [`https://api.convai.com/character/list`](https://api.convai.com/character/list)
 
 This endpoint is called to get the list of characters for a user account. The character list includes information regarding all the characters.
 
-### Request
+## Request
 
 The request body only requires the following header field:
 
-#### Headers
+## Headers
 
 | Field Name       | Type   | Value / Description   |
 | ---------------- | ------ | --------------------- |
 | CONVAI-API-KEY\* | String | User's Convai API Key |
 
-### Response
+## Response
 
 {% tabs %}
 {% tab title="200 : OK" %}
@@ -235,7 +235,7 @@ Server Side Failure. Please reach out to support.
 {% endtab %}
 {% endtabs %}
 
-#### Response Field Descriptions&#x20;
+### Response Field Descriptions&#x20;
 
 * `character_name`: Name of the character.
 * `user_id`: User ID of the user / character owner.
@@ -249,7 +249,7 @@ Server Side Failure. Please reach out to support.
 * `language_codes`: List of languages supported by the character.
 * `pronunciation_metadata`: Information related to the custom pronunciations set for the character.
 
-### Sample Code Snippet
+## Sample Code Snippet
 
 ```python
 import requests
@@ -273,16 +273,3 @@ else:
     print(f"Failed to retrieve data. Status code: {response.status_code}")
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-

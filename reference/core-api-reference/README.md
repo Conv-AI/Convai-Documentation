@@ -15,7 +15,7 @@ Misuse of this API, for unethical or malicious activities is highly condemned an
 {% endhint %}
 
 {% hint style="danger" %}
-While using the API, if a response with "Status code 500" is received, the user can contact Convai at support@convai.com with the "Reference ID" returned in the response to help in debugging.
+While using the API, if a response with "Status code 500" is received, you can report the issue on the [Convai Developer Forum](https://forum.convai.com) with the "Reference ID" returned in the response to help in debugging.
 {% endhint %}
 
 {% hint style="info" %}

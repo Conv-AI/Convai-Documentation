@@ -5,7 +5,7 @@ description: The page list all the APIs needed to interact Narrative Design
 # Narrative Design API
 
 {% hint style="danger" %}
-This API is accessible with all plans.
+This API is available with all plans.
 {% endhint %}
 
 ## Toggle Narrative Design

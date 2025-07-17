@@ -7,7 +7,7 @@ description: >-
 # Knowledge Bank API
 
 {% hint style="danger" %}
-This API is accessible only with the Enterprise plan.
+This API is available only with the Enterprise Plan.
 {% endhint %}
 
 ## Upload a new KB File

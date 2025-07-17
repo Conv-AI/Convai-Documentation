@@ -5,7 +5,7 @@ description: This page describes the Action API and how to use it.
 # Action API
 
 {% hint style="danger" %}
-This API is accessible only with the Professional plan and higher plans.
+This API is available only with the Professional Plan and above.
 {% endhint %}
 
 ### Introduction

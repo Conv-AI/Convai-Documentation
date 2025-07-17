@@ -11,7 +11,7 @@ Access Convai endpoints for developing and interacting with an intelligent chara
 Unveil the character to the end-user through your custom UI or through other services where Convai provides custom plugins/libraries, for users to have engaging conversations with your new characters.
 
 {% hint style="danger" %}
-This API is accessible only with the Professional plan and higher plans.
+This API is available only with the Professional Plan and above.
 {% endhint %}
 
 ## Create Character

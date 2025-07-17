@@ -5,7 +5,7 @@ description: This page details on how you can interact with Character.
 # Interaction API
 
 {% hint style="danger" %}
-This API is accessible only with the Professional plan and higher plans.
+This API is available only with the Professional Plan and above.
 {% endhint %}
 
 ## Interacting with a Character
