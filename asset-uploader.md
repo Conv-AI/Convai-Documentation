@@ -58,20 +58,20 @@ Before running the tool, you must update your Unreal Engine Build Configuration 
     </BuildConfiguration>
     ```
 
-{% hint style="success" %}
-After editing, it should look like:
+{% hint style="warning" %}
+In most cases, your file might look like this initially:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <Configuration xmlns="https://www.unrealengine.com/BuildConfiguration">
-    <BuildConfiguration>
-        <bAllowUBALocalExecutor>false</bAllowUBALocalExecutor>
-    </BuildConfiguration>
 </Configuration>
 ```
+
+But in some cases, there may already be other settings inside the `<Configuration>` tag. That’s perfectly fine.\
+Just make sure to add the `<BuildConfiguration>` block anywhere inside the `<Configuration>` section.
 {% endhint %}
 
-This change is required to avoid errors during project compilation caused by Unreal’s parallel executor on some systems.
+This change is required to avoid errors during project compilation caused by Unreal’s parallel executor.
 
 ***
 
