@@ -77,8 +77,6 @@ This change is required to avoid errors during project compilation caused by Unr
 
 ### Step 3: Run the Uploader Tool
 
-Once `dump_syms.exe` has been replaced:
-
 1. Move the downloaded `UploaderTool.exe` file to the directory where you want your new Unreal project to be created.
 2. Double-click to run the `.exe`.
 3. If you see a “Windows protected your PC” screen, click **More Info** > **Run Anyway**.
