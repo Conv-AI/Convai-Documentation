@@ -7,7 +7,7 @@ description: >-
 # Face Filter
 
 {% hint style="danger" %}
-The Face Filter feature is available only with the Professional plan and higher.
+The Face Filter feature is available only with the Scale plan and above.
 {% endhint %}
 
 ## **What is Face Filter?**
