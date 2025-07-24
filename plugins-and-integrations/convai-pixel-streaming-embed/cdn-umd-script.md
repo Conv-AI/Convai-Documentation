@@ -20,7 +20,7 @@ icon: js
 
   const pixelStream = new window.PixelStreamClient({
     container: container,
-    expId: 'your-experiment-id',
+    expId: 'your-experience-id',
   });
 
   pixelStream.enableCamera();

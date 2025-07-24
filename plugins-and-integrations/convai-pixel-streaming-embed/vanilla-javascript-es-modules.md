@@ -14,7 +14,7 @@ icon: js
   import { PixelStreamClient } from '/path/to/node_modules/@convai/experience-embed/dist/index.js';
 
   const container = document.getElementById('pixel-stream-container');
-  const client = new PixelStreamClient({ container, expId: 'your-experiment-id' });
+  const client = new PixelStreamClient({ container, expId: 'your-experience-id' });
 
   client.initializeExperience();
 </script>

@@ -24,7 +24,7 @@ To support this, you can override the default service URLs using the `serviceUrl
 
 ```tsx
 <PixelStreamComponent
-  expId="your-experiment-id"
+  expId="your-experience-id"
   InitialScreen={<div>Loading...</div>}
   serviceUrls={{
     sessionFetch: 'https://your-backend.example.com/api/session',
@@ -38,7 +38,7 @@ To support this, you can override the default service URLs using the `serviceUrl
 ```ts
 const pixelStream = new PixelStreamClient({
   container: document.getElementById('pixel-stream-container'),
-  expId: 'your-experiment-id',
+  expId: 'your-experience-id',
   serviceUrls: {
     sessionFetch: 'https://your-backend.example.com/api/session',
     pixelStreamBase: 'https://your-streaming-server.example.com',

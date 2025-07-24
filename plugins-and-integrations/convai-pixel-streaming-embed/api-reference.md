@@ -11,7 +11,7 @@ icon: webhook
 
 | Prop                          | Type              | Required | Description                                                                  |
 | ----------------------------- | ----------------- | -------- | ---------------------------------------------------------------------------- |
-| `expId`                       | `string`          | ✅ Yes    | The unique experiment ID for the experience you want to load.                |
+| `expId`                       | `string`          | ✅ Yes    | The unique experience ID for the experience you want to load.                |
 | `InitialScreen`               | `React.ReactNode` | ❌ No     | Optional custom loading screen component shown before the stream loads.      |
 | `serviceUrls`                 | `object`          | ❌ No     | Override default service endpoints (useful for on-premise or custom setups). |
 | `serviceUrls.sessionFetch`    | `string`          | ❌ No     | Custom URL for fetching session data.                                        |
@@ -38,7 +38,7 @@ These methods are exposed via the `ref` to the component:
 | Option                        | Type          | Required | Description                                                                  |
 | ----------------------------- | ------------- | -------- | ---------------------------------------------------------------------------- |
 | `container`                   | `HTMLElement` | ✅ Yes    | DOM element where the pixel stream will be mounted.                          |
-| `expId`                       | `string`      | ✅ Yes    | The experiment ID to load the experience.                                    |
+| `expId`                       | `string`      | ✅ Yes    | The experience ID to load the experience.                                    |
 | `InitialScreen`               | `HTMLElement` | ❌ No     | Optional loading screen shown while the experience initializes.              |
 | `serviceUrls`                 | `object`      | ❌ No     | Object to override default endpoints (for on-premise or custom backend use). |
 | `serviceUrls.sessionFetch`    | `string`      | ❌ No     | Custom endpoint for session fetch API.                                       |

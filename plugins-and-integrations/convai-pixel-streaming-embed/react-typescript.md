@@ -54,13 +54,13 @@ const pixelStreamRef = useRef&#x3C;PixelStreamComponentHandles>(null);
 ```tsx
 <PixelStreamComponent
   ref={pixelStreamRef}
-  expId="your-experiment-id"
+  expId="your-experience-id"
   InitialScreen={<div>Loading your experience...</div>}
 />
 ```
 
 {% hint style="info" %}
-`expId` is your unique experiment ID from Convai's dashboard.
+`expId` is your unique experience ID from Convai's dashboard.
 {% endhint %}
 
 ### 4. Interact Using Available Methods
@@ -108,7 +108,7 @@ Usage:
 ```tsx
 <PixelStreamComponent
   ref={pixelStreamRef}
-  expId="your-experiment-id"
+  expId="your-experience-id"
   InitialScreen={<CustomLoadingScreen />}
 />
 ```
@@ -137,7 +137,7 @@ function App() {
     <div>
       <PixelStreamComponent
         ref={pixelStreamRef}
-        expId="your-experiment-id"
+        expId="your-experience-id"
         InitialScreen={<div>Loading your experience...</div>}
       />
       <button onClick={handleEnableCamera}>Enable Camera</button>
