@@ -22,7 +22,7 @@ function App() {
     <>
       <PixelStreamComponent
         ref={pixelStreamRef}
-        expId="your-experiment-id"
+        expId="your-experience-id"
         InitialScreen={<div>Loading...</div>}
       />
       <button onClick={handleStart}>Start Experience</button>
