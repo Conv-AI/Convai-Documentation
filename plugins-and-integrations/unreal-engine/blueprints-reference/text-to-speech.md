@@ -14,7 +14,7 @@
 * **Voice:** The voice name.
 
 {% hint style="info" %}
-For the list of supported voices, please refer to the [Voice List API](../../../reference/core-api-reference/voice-list-api.md).
+For the list of supported voices, please refer to the [Voice List API](../../../api-reference/core-api-reference/voice-list-api.md).
 {% endhint %}
 
 **Outputs:**

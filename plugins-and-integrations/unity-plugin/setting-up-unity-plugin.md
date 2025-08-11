@@ -32,7 +32,7 @@ Open the demo scene by going to Convai > Demo > Scenes > Full Features
 
 <figure><img src="../../.gitbook/assets/image (388).png" alt=""><figcaption></figcaption></figure>
 
-Click the Convai NPC Amelia and add the Character ID (or you can keep the default character ID). You can get the character ID for your custom character from this page [create-character.md](../../convai-playground/character-creator-tool/create-character.md "mention"). Now you can converse with the character. The script is set up so that you have to go near the character for them to hear you.
+Click the Convai NPC Amelia and add the Character ID (or you can keep the default character ID). You can get the character ID for your custom character from this page [Broken link](broken-reference "mention"). Now you can converse with the character. The script is set up so that you have to go near the character for them to hear you.
 
 <figure><img src="../../.gitbook/assets/image (296).png" alt=""><figcaption></figcaption></figure>
 

@@ -16,8 +16,8 @@ Feel free to join our [Discord Server](https://discord.gg/TG98s8FWKN) and be a p
 
 Before we move on with hosting a discord bot server, let us first create our own character, to connect the bot to. Please follow the steps in the given page to easily get started with creating a simple character.
 
-{% content-ref url="../../../convai-playground/character-creator-tool/create-character.md" %}
-[create-character.md](../../../convai-playground/character-creator-tool/create-character.md)
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
 {% endcontent-ref %}
 
 Now, that we have a character, let us move on to the next step

@@ -7,7 +7,7 @@ description: Character Conversation API - Code Example for Roblox integration wi
 The following piece of code is the most essential section to make a successful call to the Convai server to get a response in a conversation with a character.
 
 {% hint style="info" %}
-Refer to [Character API Doc](../../../../reference/core-api-reference/character-api.md) for more details on the endpoint.
+Refer to [Character API Doc](../../../../api-reference/core-api-reference/character-api.md) for more details on the endpoint.
 {% endhint %}
 
 {% hint style="info" %}
