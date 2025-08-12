@@ -10,7 +10,7 @@ description: >-
 
 The Convai Playground Dashboard is your central hub for managing AI-powered characters and immersive simulation experiences. From here, you can easily create new characters, set up experiences, and access sample characters created by the Convai team.&#x20;
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -25,7 +25,7 @@ When you log in, the **Dashboard** displays:
 * **Start a New Simulation** – Choose from available scene templates such as Airport, Healthcare, Fire Station, Hotel, Police Station, Restaurant, Fitness, Science Lab and more.
 * **Sample Characters** – Browse pre-made characters created by the Convai team for quick testing and inspiration.
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -36,7 +36,7 @@ In the **top-right corner**, you’ll find:
 * **Create a new experience** – Start building a new Convai Sim Experience from scratch.
 * **Create a new character** – Design and customize AI-powered characters for your projects.
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 ***
 

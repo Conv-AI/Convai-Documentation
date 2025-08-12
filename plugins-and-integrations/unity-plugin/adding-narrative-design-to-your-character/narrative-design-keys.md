@@ -22,7 +22,7 @@ In the Objective section of the new Section, add the following text:
 Notice that any string placed between curly brackets becomes a variable. In this case, we are adding the time of day as a variable. From Unity, we can pass either the word "Morning" or "Evening," and the character will respond accordingly.
 {% endhint %}
 
-<figure><img src="../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Step 3
 

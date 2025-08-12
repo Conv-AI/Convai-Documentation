@@ -18,7 +18,7 @@ The Convai Playground allows you to design AI-powered characters with unique per
 
 * From your **Dashboard**, click **Create a new character** in the top-right corner.
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 * A new character creation interface will open.
 * In the left menu, only **Character Description**, **Avatar**, and **Voice And Languages** are active initially. Other sections will unlock after the character is created.

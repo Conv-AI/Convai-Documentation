@@ -14,7 +14,7 @@ This guide walks you through uploading **custom Metahuman avatars** to **Avatar 
 
 Before you begin:
 
-* Create your project using the [**Convai Asset Uploader**](../../../../../asset-uploader.md), and answer **`Y`** when asked if you’re using a Metahuman.
+* Create your project using the [**Convai Asset Uploader**](../../../../../asset-uploader/), and answer **`Y`** when asked if you’re using a Metahuman.
 * Ensure you have a downloadable Metahuman available via **Quixel Bridge**.
 
 ***

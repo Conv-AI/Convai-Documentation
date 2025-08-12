@@ -16,7 +16,7 @@ This guide explains how to prepare and upload **Reallusion-based avatars** using
 
 Make sure you have the following ready:
 
-* A project created with the [**Convai Asset Uploader**](../../../../../asset-uploader.md), where you answered **`N`** to “Are you using a Metahuman?”
+* A project created with the [**Convai Asset Uploader**](../../../../../asset-uploader/), where you answered **`N`** to “Are you using a Metahuman?”
 * A custom Reallusion character exported and ready for import
 
 ***

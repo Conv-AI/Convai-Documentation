@@ -223,7 +223,8 @@
 
 ***
 
-* [Asset Uploader](asset-uploader.md)
+* [Asset Uploader](asset-uploader/README.md)
+  * [Migrate Your Unreal Engine 5.5 Convai Assets to 5.6](asset-uploader/migrate-your-unreal-engine-5.5-convai-assets-to-5.6.md)
 
 ## API Reference
 
