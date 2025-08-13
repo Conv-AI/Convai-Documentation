@@ -1,5 +1,6 @@
 ---
 description: Integrating Convai Character with Discord Bot
+hidden: true
 ---
 
 # Discord

@@ -2,6 +2,7 @@
 description: >-
   This guide will show you how to integrate the Convai and NVIDIA Omniverse
   using the Convai Extension plugin.
+hidden: true
 ---
 
 # Omniverse Extension

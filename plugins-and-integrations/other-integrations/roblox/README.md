@@ -1,5 +1,6 @@
 ---
 description: Integrating Convai character chatbot services in Roblox game.
+hidden: true
 ---
 
 # Roblox

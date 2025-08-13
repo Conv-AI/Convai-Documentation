@@ -40,7 +40,7 @@ Create interactive AI experiences without writing a single line of code.
 
 Extend your characters into your applications and games.
 
-* [Unity](plugins-and-integrations/unity-plugin/), [Unreal Engine](plugins-and-integrations/unreal-engine/), and [Web Plugins](plugins-and-integrations/web-plugin/).
+* [Unity](plugins-and-integrations/unity-plugin/), [Unreal Engine](plugins-and-integrations/unreal-engine/), and [Web Plugins](plugins-and-integrations/web-plugins/).
 * [Modding Frameworks](plugins-and-integrations/modding-framework/) and [Other Integration](plugins-and-integrations/other-integrations/) options.
 * [Convai Pixel Streaming Embed](plugins-and-integrations/convai-pixel-streaming-embed/) capabilities.
 

@@ -3,6 +3,7 @@ description: >-
   Learn how to seamlessly migrate your Convai character assets from Unreal
   Engine 5.5 to Unreal Engine 5.6, including plugin updates, project cleanup,
   and asset re-upload.
+hidden: true
 ---
 
 # Migrate Your Unreal Engine 5.5 Convai Assets to 5.6

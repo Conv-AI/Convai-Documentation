@@ -1,7 +1,7 @@
 ---
 description: >-
   Integrate external APIs like ElevenLabs to enhance your applications with
-  advanced features. Currently, only the ElevenLabs API is supported.
+  advanced features.
 ---
 
 # Third-Party API Integrations

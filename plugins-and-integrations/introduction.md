@@ -20,16 +20,16 @@ Convai provides a variety of plugins and integrations to help integrate conversa
 
 ## &#x20;Web Plugin
 
-{% content-ref url="web-plugin/playcanvas-plugin/" %}
-[playcanvas-plugin](web-plugin/playcanvas-plugin/)
+{% content-ref url="web-plugins/playcanvas-plugin/" %}
+[playcanvas-plugin](web-plugins/playcanvas-plugin/)
 {% endcontent-ref %}
 
-{% content-ref url="web-plugin/convai-web-sdk/" %}
-[convai-web-sdk](web-plugin/convai-web-sdk/)
+{% content-ref url="web-plugins/convai-web-sdk/" %}
+[convai-web-sdk](web-plugins/convai-web-sdk/)
 {% endcontent-ref %}
 
-{% content-ref url="web-plugin/javascript-chat-ui-sdk/" %}
-[javascript-chat-ui-sdk](web-plugin/javascript-chat-ui-sdk/)
+{% content-ref url="web-plugins/javascript-chat-ui-sdk/" %}
+[javascript-chat-ui-sdk](web-plugins/javascript-chat-ui-sdk/)
 {% endcontent-ref %}
 
 ## Modding Framework
