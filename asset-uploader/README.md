@@ -12,6 +12,10 @@ The **Convai Asset Uploader** enables developers to upload their custom avatars 
 
 Whether you're uploading a scene, a Metahuman, or a custom Reallusion character, this tool ensures your assets are packaged and transferred in a compatible and Convai-ready format.
 
+{% embed url="https://youtu.be/eFK9RFHDdco" %}
+Convai Asset Uploader Tool Walkthrough
+{% endembed %}
+
 ***
 
 ## Prerequisites
