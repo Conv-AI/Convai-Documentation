@@ -14,7 +14,7 @@ description: >-
 
 ## Prerequisites
 
-* A Convai account with access to the Playground.
+* A Convai account.
 
 ## Core Concepts
 
