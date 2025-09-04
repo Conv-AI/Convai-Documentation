@@ -1,7 +1,7 @@
 ---
 description: >-
-  Upload custom Metahuman characters from Unreal Engine 5.3 to Avatar Studio
-  using the Convai Asset Uploader.
+  Upload custom Metahuman characters from Unreal Engine to Avatar Studio using
+  the Convai Asset Uploader.
 ---
 
 # Metahuman Avatars

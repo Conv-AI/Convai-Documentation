@@ -1,7 +1,7 @@
 ---
 description: >-
-  Upload custom Reallusion characters from Unreal Engine 5.3 to Avatar Studio
-  using the Convai Asset Uploader.
+  Upload custom Reallusion characters from Unreal Engine to Avatar Studio using
+  the Convai Asset Uploader.
 ---
 
 # Reallusion Avatars
@@ -25,7 +25,7 @@ Make sure you have the following ready:
 
 ### 1. Open the Project
 
-Navigate to your project directory and open the `.uproject` file to launch it in Unreal Engine 5.3.
+Navigate to your project directory and open the `.uproject` file to launch it in Unreal Engine.
 
 ***
 

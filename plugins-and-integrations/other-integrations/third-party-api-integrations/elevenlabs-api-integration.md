@@ -20,9 +20,21 @@ Step 1.  Go to [elevenlabs.io](https://elevenlabs.io/) and head to your Profile 
 
 <figure><img src="../../../.gitbook/assets/Untitled design (5) (2).png" alt=""><figcaption></figcaption></figure>
 
-Step 2. On the Profile section, copy your API key
+Step 2. On the Profile section, create an API key with the following permissions :
 
-<figure><img src="../../../.gitbook/assets/Untitled design (4).png" alt=""><figcaption></figcaption></figure>
+`Text to Speech`  : `Access`&#x20;
+
+<figure><img src="../../../.gitbook/assets/Screenshot 2025-08-27 at 5.54.40 PM.png" alt=""><figcaption></figcaption></figure>
+
+`Voices` : `Read`&#x20;
+
+<figure><img src="../../../.gitbook/assets/Screenshot 2025-08-27 at 5.54.57 PM.png" alt=""><figcaption></figcaption></figure>
+
+`User` : `Read`&#x20;
+
+<figure><img src="../../../.gitbook/assets/Screenshot 2025-08-27 at 5.55.11 PM.png" alt=""><figcaption></figcaption></figure>
+
+And copy the API key for the next step.
 
 Step 3. Next, login to convai.com and open your Profile page
 
