@@ -44,42 +44,7 @@ Asset Uploader Tool will create and configure your Convai Unreal project automat
 
 ***
 
-### Step 2: Update `BuildConfiguration.xml`
-
-Before running the tool, you must update your Unreal Engine Build Configuration settings.
-
-1.  Navigate to the following path:
-
-    ```
-    <USER>/AppData/Roaming/Unreal Engine/UnrealBuildTool/BuildConfiguration.xml
-    ```
-2. Open the file in a text editor (e.g., Notepad).
-3.  Add the following block **inside the `<Configuration>` tag**:
-
-    ```xml
-    <BuildConfiguration>
-        <bAllowUBALocalExecutor>false</bAllowUBALocalExecutor>
-    </BuildConfiguration>
-    ```
-
-{% hint style="warning" %}
-In most cases, your file might look like this initially:
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<Configuration xmlns="https://www.unrealengine.com/BuildConfiguration">
-</Configuration>
-```
-
-But in some cases, there may already be other settings inside the `<Configuration>` tag. That’s perfectly fine.\
-Just make sure to add the `<BuildConfiguration>` block anywhere inside the `<Configuration>` section.
-{% endhint %}
-
-This change is required to avoid errors during project compilation caused by Unreal’s parallel executor.
-
-***
-
-### Step 3: Run the Uploader Tool
+### Step 2: Run the Uploader Tool
 
 1. Move the downloaded `AssetUploaderTool.exe` file to the directory where you want your new Unreal project to be created.
 2. Double-click to run the `.exe`.
@@ -91,7 +56,7 @@ Don’t worry! The executable is safe to use. The warning appears because the to
 
 ***
 
-### Step 4: Follow the Prompts
+### Step 3: Follow the Prompts
 
 The Asset Uploader will open in a terminal window. You’ll go through the following steps:
 

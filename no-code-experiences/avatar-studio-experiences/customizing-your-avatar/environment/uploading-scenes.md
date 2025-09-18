@@ -39,9 +39,9 @@ Make sure the Level is fully playable and doesn’t contain any broken reference
 
 ***
 
-### 3. Set Spawn Point for Avatar
+### 3. Editor (Player) Start Point
 
-To define where your AI avatar should appear in the Level:
+To set the spawn location of the editor (Player) in the Level
 
 1. Place an **Actor** in your Level
 2. Move it to the desired **spawn location**
@@ -52,7 +52,7 @@ EditorSpawn
 ```
 
 {% hint style="warning" %}
-This tag is essential. It helps the system know where to place the avatar once the scene is loaded in Avatar Studio.
+This tag is essential. It helps the system know where to place the editor (player) once the scene is loaded in Avatar Studio.
 {% endhint %}
 
 ***
