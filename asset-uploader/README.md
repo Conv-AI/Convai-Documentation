@@ -6,6 +6,10 @@ description: >-
 
 # Asset Uploader
 
+{% hint style="danger" %}
+The Asset Uploader is currently available only with the Professional Plan and above.
+{% endhint %}
+
 ## Introduction
 
 The **Convai Asset Uploader** enables developers to upload their custom avatars and levels directly from **Unreal Engine** to **Avatar Studio** and **Convai Sim**. It automates project creation, plugin integration, and asset packaging through a command-line interface, making the entire process simple and reliable.

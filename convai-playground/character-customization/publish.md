@@ -37,7 +37,7 @@ The **Details** tab contains all the essential settings for publishing your expe
 The "Embed Experience" tab allows you to embed Convai Experiences directly into your own website. This feature makes it easy to integrate interactive experiences into custom platforms or applications.
 
 {% hint style="danger" %}
-&#x20;This feature is currently available only for enterprise customers.
+Convai Pixel Streaming Embed is currently accessible only with the Professional Plan and above.
 {% endhint %}
 
 ***
