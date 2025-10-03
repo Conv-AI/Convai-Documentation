@@ -29,7 +29,7 @@ Before getting started, ensure you have the following:
 * **Unreal Engine 5.5**
 * **Convai API Key** – You can get it from the [Convai Dashboard](https://convai.com/)
 * **.NET 6.0 Runtime (Console Applications)** – [Download it here](https://dotnet.microsoft.com/en-us/download/dotnet/6.0/runtime?cid=getdotnetcore\&os=windows\&arch=x64)
-* **Unreal Engine 5.5** [**Cross-Compile Toolchain**](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine?application_version=5.5) **-** [Download it here](https://cdn.unrealengine.com/CrossToolchain_Linux/v23_clang-18.1.0-rockylinux8.exe)
+* **Unreal Engine 5.5** [**Cross-Compile Toolchain**](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine?application_version=5.5) **-** [Download it here](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine#version-history)
 * **Download Linux Binaries for Unreal Engine 5.5 -** You can download it from Epic Games Launcher
 
 <figure><img src="../.gitbook/assets/image (433).png" alt=""><figcaption><p><strong>Linux Binaries for Unreal Engine 5.5</strong></p></figcaption></figure>
