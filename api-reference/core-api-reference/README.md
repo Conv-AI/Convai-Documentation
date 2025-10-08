@@ -1,21 +1,35 @@
 ---
 description: >-
-  Access Convai's core API reference documentation to enhance your AI character
-  development.
+  Explore Convai’s Core APIs, divided into Character Crafting and Interaction
+  APIs, to create, customize, and interact with intelligent AI characters.
 ---
 
 # Core API Reference
 
-Dive into the specifics of each API endpoint by checking out our complete documentation. The section is divided into all the services provided by Convai to it's developers.
+This section provides a detailed overview of Convai’s **Core APIs**, which serve as the foundation for building intelligent and interactive virtual characters. The Core APIs are divided into two main categories: **Character Crafting APIs** and **Interaction APIs**, each serving a distinct purpose in your development workflow.
+
+{% embed url="https://youtu.be/vwBzaQP0Bl4?si=tQ5LGv-F9nxwxv1u" %}
+
+### Understanding the Core API
+
+Convai’s Core API empowers developers to **create, customize, and deploy AI-driven characters** across various use cases — from immersive games to virtual assistants.
+
+The Core API is structured into two segments:
+
+{% content-ref url="character-crafting-apis/" %}
+[character-crafting-apis](character-crafting-apis/)
+{% endcontent-ref %}
+
+{% content-ref url="interaction-apis/" %}
+[interaction-apis](interaction-apis/)
+{% endcontent-ref %}
+
+***
 
 {% hint style="danger" %}
 **Heads Up**
 
-Misuse of this API, for unethical or malicious activities is highly condemned and will trigger an automatic ban of the account, and the associated API key will be blacklisted from access.
-{% endhint %}
-
-{% hint style="danger" %}
-While using the API, if a response with "Status code 500" is received, you can report the issue on the [Convai Developer Forum](https://forum.convai.com) with the "Reference ID" returned in the response to help in debugging.
+Misuse of this API for unethical or malicious purposes will result in an automatic ban of the associated account and API key.
 {% endhint %}
 
 {% hint style="info" %}
@@ -24,54 +38,6 @@ For additional resources, you can also explore our [Python Notebook](https://col
 This notebook is a hands-on guide to using Convai’s Core APIs for creating responsive NPCs. It walks you through setting up a character, defining its narrative and backstory, and integrating voice capabilities effectively.
 {% endhint %}
 
-{% hint style="info" %}
+{% hint style="success" %}
 If you encounter any issues or have questions, please don’t hesitate to reach out to us through our [Convai Developer Forum](https://forum.convai.com).
 {% endhint %}
-
-## Core APIs
-
-All APIs related to creating and deploying your first smart NPC or Digital Assistant.
-
-{% content-ref url="character-api.md" %}
-[character-api.md](character-api.md)
-{% endcontent-ref %}
-
-{% content-ref url="interaction-api.md" %}
-[interaction-api.md](interaction-api.md)
-{% endcontent-ref %}
-
-{% content-ref url="core-ai-setting-api.md" %}
-[core-ai-setting-api.md](core-ai-setting-api.md)
-{% endcontent-ref %}
-
-{% content-ref url="backstory-api.md" %}
-[backstory-api.md](backstory-api.md)
-{% endcontent-ref %}
-
-{% content-ref url="chat-history-api.md" %}
-[chat-history-api.md](chat-history-api.md)
-{% endcontent-ref %}
-
-{% content-ref url="knowledge-bank-api.md" %}
-[knowledge-bank-api.md](knowledge-bank-api.md)
-{% endcontent-ref %}
-
-{% content-ref url="narrative-design-api.md" %}
-[narrative-design-api.md](narrative-design-api.md)
-{% endcontent-ref %}
-
-{% content-ref url="action-api.md" %}
-[action-api.md](action-api.md)
-{% endcontent-ref %}
-
-{% content-ref url="language-list-api.md" %}
-[language-list-api.md](language-list-api.md)
-{% endcontent-ref %}
-
-{% content-ref url="voice-list-api.md" %}
-[voice-list-api.md](voice-list-api.md)
-{% endcontent-ref %}
-
-{% content-ref url="evaluation-api.md" %}
-[evaluation-api.md](evaluation-api.md)
-{% endcontent-ref %}

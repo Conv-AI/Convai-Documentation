@@ -82,7 +82,7 @@ _Nothing is returned, check logs for details on why it failed._
 * **New Char Name:** Name of the character.
 
 {% hint style="info" %}
-For the list of supported voices, please refer to the [Voice List API](../../../api-reference/core-api-reference/voice-list-api.md).
+For the list of supported voices, please refer to the [Voice List API](../../../api-reference/core-api-reference/character-crafting-apis/voice-list-api.md).
 {% endhint %}
 
 {% hint style="info" %}
