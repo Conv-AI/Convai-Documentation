@@ -4,7 +4,7 @@ description: This page details on how you can interact with Character.
 
 # Interaction API
 
-{% hint style="danger" %}
+{% hint style="warning" %}
 This API is available only with the Professional Plan and above.
 {% endhint %}
 
