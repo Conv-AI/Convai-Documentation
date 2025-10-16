@@ -19,7 +19,7 @@ Once connected, the WebSocket channel streams audio in and transcriptions out, e
 
 ***
 
-## **Overview**
+## Overview
 
 **Base URL:**
 
@@ -37,17 +37,17 @@ English
 
 ***
 
-## **Authentication**
+## Authentication
 
 Provide your **Convai API key** during the initial WebSocket handshake.
 
-### **Headers**
+### Headers
 
 | Name             | Type   | Description                                        |
 | ---------------- | ------ | -------------------------------------------------- |
 | `CONVAI-API-KEY` | String | Your unique API key, found in your Convai account. |
 
-### **Alternative (Query Parameter)**
+### Alternative (Query Parameter)
 
 If header authentication is not possible:
 
@@ -57,18 +57,18 @@ If your API key is missing or invalid, the connection will close immediately wit
 
 ***
 
-## **Connect Session**
+## Connect Session
 
 `wss://beta-transcribe.convai.com/stream`
 
-### **Description**
+### Description
 
 Establishes a live WebSocket connection with Convai’s transcription service.\
 Once the session is active, you can send binary audio frames and receive incremental (`transcript.partial`) and finalized (`transcript.final`) transcripts.
 
 ***
 
-### **Session Start Example**
+### Session Start Example
 
 ```json
 {
@@ -80,7 +80,7 @@ Once the session is active, you can send binary audio frames and receive increme
 }
 ```
 
-### **Session Close Example**
+### Session Close Example
 
 ```json
 {
@@ -91,7 +91,7 @@ Once the session is active, you can send binary audio frames and receive increme
 
 ***
 
-### **Response (Server Event) Body**
+### Response (Server Event) Body
 
 Although WebSockets are used (not traditional JSON POSTs), message payloads follow this structure:
 
@@ -102,7 +102,7 @@ Although WebSockets are used (not traditional JSON POSTs), message payloads foll
 
 ***
 
-## **WebSocket Event Reference**
+## WebSocket Event Reference
 
 | Event Type         | Description                                                      | Example Payload                                                                                                            |
 | ------------------ | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -114,7 +114,7 @@ Although WebSockets are used (not traditional JSON POSTs), message payloads foll
 
 ***
 
-## **Common Data Fields**
+## Common Data Fields
 
 | Field           | Type          | Description                                                         |
 | --------------- | ------------- | ------------------------------------------------------------------- |
@@ -127,7 +127,7 @@ Although WebSockets are used (not traditional JSON POSTs), message payloads foll
 
 ***
 
-## **Streaming Audio Requirements**
+## Streaming Audio Requirements
 
 | Parameter                  | Specification             |
 | -------------------------- | ------------------------- |
@@ -143,7 +143,7 @@ Send audio data as **binary WebSocket messages**.
 
 ***
 
-## **Control Messages**
+## Control Messages
 
 Send text-based JSON messages to manage the stream:
 
@@ -159,11 +159,11 @@ Control messages must always be sent as **UTF-8 encoded text**.
 
 ***
 
-## **Error Handling**
+## Error Handling
 
 Errors are reported as structured JSON objects.
 
-### **Example Error Message**
+### Example Error Message
 
 ```json
 {
@@ -174,7 +174,9 @@ Errors are reported as structured JSON objects.
 }
 ```
 
-### **Status Codes**
+***
+
+### Status Codes
 
 | Code | Description                                     |
 | ---- | ----------------------------------------------- |
@@ -186,7 +188,7 @@ Errors are reported as structured JSON objects.
 
 ***
 
-## **Troubleshooting**
+## Troubleshooting
 
 | Issue                     | Possible Cause                 | Resolution                                                      |
 | ------------------------- | ------------------------------ | --------------------------------------------------------------- |
@@ -197,7 +199,7 @@ Errors are reported as structured JSON objects.
 
 ***
 
-## **Example Progression (Single Utterance)**
+## Example Progression (Single Utterance)
 
 ```
 "welcome"
@@ -218,7 +220,7 @@ Formatted transcripts (punctuation/case) are optional and may appear later.
 
 ***
 
-## **Example** (End-to-End Streaming Client)
+## Example (End-to-End Streaming Client)
 
 Below are sample implementations and commands demonstrating how to connect to the Streaming Transcription API and perform real time transcription.
 
@@ -231,7 +233,7 @@ This example creates a real time transcription client using Python, WebSockets, 
 > * Python 3.8+
 > * `pip install websockets sounddevice`
 
-#### File: `convai_stt_stream.py`
+**File:** `convai_stt_stream.py`
 
 {% tabs %}
 {% tab title="Python" %}
@@ -418,7 +420,9 @@ Expected response:
 {"status": "ok"}
 ```
 
-## **Conclusion**
+***
+
+## Conclusion
 
 The **Streaming Transcription API** delivers real-time, low-latency speech recognition through WebSockets, enabling fluid and natural AI interactions.\
 By integrating this API, you can power responsive voice-based experiences within games, assistants, or immersive Convai-enabled environments.
