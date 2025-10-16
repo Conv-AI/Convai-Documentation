@@ -66,46 +66,25 @@ Models marked as ✅ _Flagship_ are the providers’ top-tier, most capable mode
 
 ### OpenAI
 
-| Model        | Flagship |
-| ------------ | :------: |
-| GPT-4.1      |     ✅    |
-| GPT-4o       |     ✅    |
-| GPT-4.1-mini |     —    |
-| GPT-4.1-nano |     —    |
-| GPT-4o-mini  |     —    |
+<table><thead><tr><th>Model</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>GPT-4.1</td><td>true</td></tr><tr><td>GPT-4o</td><td>true</td></tr><tr><td>GPT-4.1-mini</td><td>false</td></tr><tr><td>GPT-4.1-nano</td><td>false</td></tr><tr><td>GPT-4o-mini</td><td>false</td></tr></tbody></table>
 
 ***
 
 ### Anthropic
 
-| Model             | Flagship |
-| ----------------- | :------: |
-| Claude-Opus-4.1   |     ✅    |
-| Claude-Opus-4     |     ✅    |
-| Claude-4-Sonnet   |     —    |
-| Claude-3.7-Sonnet |     —    |
+<table><thead><tr><th>Model</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Claude-Opus-4.1</td><td>true</td></tr><tr><td>Claude-Opus-4</td><td>true</td></tr><tr><td>Claude-4-Sonnet</td><td>false</td></tr><tr><td>Claude-3.7-Sonnet</td><td>false</td></tr></tbody></table>
 
 ***
 
 ### Google
 
-| Model                 | Flagship |
-| --------------------- | :------: |
-| Gemini-2.5-Flash      |     —    |
-| Gemini-2.5-Flash-Lite |     —    |
-| Gemini-2.0-Flash      |     —    |
-| Gemma-3n-e4b          |     —    |
-| Gemma-3n-e2b          |     —    |
+<table><thead><tr><th>Model</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini-2.5-Flash</td><td>false</td></tr><tr><td>Gemini-2.5-Flash-Lite</td><td>false</td></tr><tr><td>Gemini-2.0-Flash</td><td>false</td></tr><tr><td>Gemma-3n-e4b</td><td>false</td></tr><tr><td>Gemma-3n-e2b</td><td>false</td></tr></tbody></table>
 
 ***
 
 #### Llama
 
-| Model            | Flagship |
-| ---------------- | :------: |
-| Llama-4-Maverick |     ✅    |
-| Llama-4-Scout    |     —    |
-| Llama-3.3-70B    |     —    |
+<table><thead><tr><th>Model</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Llama-4-Maverick</td><td>true</td></tr><tr><td>Llama-4-Scout</td><td>false</td></tr><tr><td>Llama-3.3-70B</td><td>false</td></tr></tbody></table>
 
 ***
 
