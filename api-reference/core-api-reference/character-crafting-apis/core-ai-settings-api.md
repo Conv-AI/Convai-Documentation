@@ -4,7 +4,7 @@ description: >-
   Character.
 ---
 
-# Core AI Setting API
+# Core AI Settings API
 
 {% hint style="danger" %}
 This API is available only with the Professional Plan and above.
@@ -16,17 +16,21 @@ This API is available only with the Professional Plan and above.
 
 Update API can be used to change the LLM to be used for Character. Currently following models are supported.
 
-| Model                     | Model Code        | Uncensored |
-| ------------------------- | ----------------- | ---------- |
-| Claude-3-5-Sonnet         | claude-3-5-sonnet | No         |
-| Gemini-1.5-pro            | gemini-1.5-pro    | Yes        |
-| Gemini-1.5-Flash          | gemini-1.5-flash  | No         |
-| LLama3-70B                | llama3-70b        | Yes        |
-| LLama2-13B                | llama-2-13b       | No         |
-| FT-GPT-3.5-Turbo          | gpt-3.5-turbo     | No         |
-| GPT-4o                    | gpt-4o            | No         |
-| GPT-4o-mini               | gpt-4o-mini       | No         |
-| Fine Tuned - Mistral - 7B | uncensored-small  | Yes        |
+### **OpenAI**
+
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Uncensored</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>GPT-4.1</td><td>gpt-4.1</td><td>false</td><td>true</td></tr><tr><td>GPT-4.1-mini</td><td>gpt-4.1-mini</td><td>false</td><td>false</td></tr><tr><td>GPT-4.1-nano</td><td>gpt-4.1-nano</td><td>false</td><td>false</td></tr><tr><td>GPT-4o</td><td>gpt-4o</td><td>false</td><td>true</td></tr><tr><td>GPT-4o-mini</td><td>gpt-4o-mini</td><td>false</td><td>false</td></tr></tbody></table>
+
+### Anthropic
+
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Uncensored</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Claude-Opus-4.1</td><td>claude-opus-4.1</td><td>false</td><td>true</td></tr><tr><td>Claude-Opus-4</td><td>claude-opus-4</td><td>false</td><td>true</td></tr><tr><td>Claude-4-Sonnet</td><td>claude-4-sonnet</td><td>false</td><td>false</td></tr><tr><td>Claude-3-7-Sonnet</td><td>claude-3-7-sonnet</td><td>false</td><td>false</td></tr></tbody></table>
+
+### **Google**
+
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Uncensored</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini-2.5-Flash</td><td>gemini-2.5-flash</td><td>false</td><td>false</td></tr><tr><td>Gemini-2.5-Flash-Lite</td><td>gemini-2.5-flash-lite</td><td>false</td><td>false</td></tr><tr><td>Gemini-2.0-Flash</td><td>gemini-2.0-flash</td><td>false</td><td>false</td></tr><tr><td>Gemma-3n-e4b</td><td>gemma-3n-e4b</td><td>false</td><td>false</td></tr><tr><td>Gemma-3n-e2b</td><td>gemma-3n-e2b</td><td>false</td><td>false</td></tr></tbody></table>
+
+### **Llama**
+
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Uncensored</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>LLama-4-Maverick</td><td>llama-4-maverick</td><td>false</td><td>true</td></tr><tr><td>LLama-4-Scout</td><td>llama-4-scout</td><td>false</td><td>false</td></tr><tr><td>LLama-3.3-70B</td><td>llama-3-70B</td><td>true</td><td>false</td></tr></tbody></table>
 
 When calling update API to update Model for your Character, please ensure to pass the `Model Code` corresponding to the `Model` from the table above.
 

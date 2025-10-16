@@ -36,16 +36,76 @@ Features like **Narrative Design** and **Multilingual support** will not work wh
 
 Choose from a variety of **Large Language Models (LLMs)** from leading providers:
 
+* OpenAI
 * Anthropic
 * Google
-* LLaMA
-* OpenAI
+* Llama
 
 <figure><img src="../../.gitbook/assets/image (31).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 &#x20;Model availability depends on whether the Moderation Filter is enabled.
 {% endhint %}
+
+***
+
+### Supported LLMs
+
+Below is a list of Large Language Models (LLMs) available in the Convai Playground under **Core AI Settings**.\
+Models marked as ✅ _Flagship_ are the providers’ top-tier, most capable models — but usage of these is subject to the **Flagship Interaction Cap** based on your plan.
+
+> **Flagship LLMs**\
+> This is the limit on the number of interactions you can perform using Flagship LLMs.
+>
+> **Example:**\
+> In the _Indie Dev_ plan, you have a total monthly quota of **3000 Interactions**. However, the **Flagship LLM Interaction Cap** is **1500**.\
+> If you use GPT-4.1 after 1500 interactions, your Flagship LLM quota will be exhausted.\
+> You will then need to switch to a non-Flagship LLM for the remaining 1500 interactions.
+
+***
+
+### OpenAI
+
+| Model        | Flagship |
+| ------------ | :------: |
+| GPT-4.1      |     ✅    |
+| GPT-4o       |     ✅    |
+| GPT-4.1-mini |     —    |
+| GPT-4.1-nano |     —    |
+| GPT-4o-mini  |     —    |
+
+***
+
+### Anthropic
+
+| Model             | Flagship |
+| ----------------- | :------: |
+| Claude-Opus-4.1   |     ✅    |
+| Claude-Opus-4     |     ✅    |
+| Claude-4-Sonnet   |     —    |
+| Claude-3.7-Sonnet |     —    |
+
+***
+
+### Google
+
+| Model                 | Flagship |
+| --------------------- | :------: |
+| Gemini-2.5-Flash      |     —    |
+| Gemini-2.5-Flash-Lite |     —    |
+| Gemini-2.0-Flash      |     —    |
+| Gemma-3n-e4b          |     —    |
+| Gemma-3n-e2b          |     —    |
+
+***
+
+#### Llama
+
+| Model            | Flagship |
+| ---------------- | :------: |
+| Llama-4-Maverick |     ✅    |
+| Llama-4-Scout    |     —    |
+| Llama-3.3-70B    |     —    |
 
 ***
 
