@@ -12,7 +12,7 @@
   * [Character Versioning](convai-playground/get-started/character-versioning.md)
 * [Character Customization](convai-playground/character-customization/README.md)
   * [Character Description](convai-playground/character-customization/character-description.md)
-  * [Avatar Studio](convai-playground/character-customization/avatar-studio.md)
+  * [Avatar Studio](convai-playground/character-customization/avatar-section.md)
   * [Language And Speech](convai-playground/character-customization/language-and-speech.md)
   * [Knowledge Bank](convai-playground/character-customization/knowledge-bank.md)
   * [Personality Traits](convai-playground/character-customization/personality-traits.md)

@@ -4,7 +4,7 @@ description: >-
   using Avatar Studio.
 ---
 
-# Avatar Section
+# Avatar Studio
 
 ## Introduction
 

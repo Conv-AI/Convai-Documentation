@@ -12,6 +12,10 @@ hidden: true
 This API is available only on the Enterprise Plan.
 {% endhint %}
 
+{% hint style="danger" %}
+This API is still in development and is currently a beta feature.
+{% endhint %}
+
 All the relevant API details needed to stream real-time audio input and receive text transcription from Convai’s ASR (Automatic Speech Recognition) engine.
 
 Access this endpoint to enable live speech recognition within Convai-based applications, voice-enabled AI characters.\
@@ -23,11 +27,11 @@ Once connected, the WebSocket channel streams audio in and transcriptions out, e
 
 **Base URL:**
 
-`https://beta-transcribe.convai.com`
+`https://transcribe.convai.com`
 
 **WebSocket Endpoint:**
 
-`wss://beta-transcribe.convai.com/stream`
+`wss://transcribe.convai.com/stream`
 
 **Protocol:**\
 Bidirectional — stream 16-bit PCM audio in, receive transcript events out.
@@ -51,7 +55,7 @@ Provide your **Convai API key** during the initial WebSocket handshake.
 
 If header authentication is not possible:
 
-`wss://beta-transcribe.convai.com/stream?convai-api-key=<your-api-key>`
+`wss://transcribe.convai.com/stream?convai-api-key=<your-api-key>`
 
 If your API key is missing or invalid, the connection will close immediately with an error event.
 
@@ -59,7 +63,7 @@ If your API key is missing or invalid, the connection will close immediately wit
 
 ## Connect Session
 
-`wss://beta-transcribe.convai.com/stream`
+`wss://transcribe.convai.com/stream`
 
 ### Description
 
@@ -253,7 +257,7 @@ import sounddevice as sd
 import websockets
 
 API_KEY = os.getenv("CONVAI_API_KEY", "REPLACE_WITH_YOUR_KEY")
-WS_URL = "wss://beta-transcribe.convai.com/stream"
+WS_URL = "wss://transcribe.convai.com/stream"
 
 SAMPLE_RATE = 16000
 CHANNELS = 1
@@ -410,7 +414,7 @@ python convai_stt_stream.py
 
 ```bash
 # Expect HTTP 200 and a short ok payload
-curl -i https://beta-transcribe.convai.com/ \
+curl -i https://transcribe.convai.com/ \
   -H "CONVAI-API-KEY: <your-api-key>"
 ```
 
