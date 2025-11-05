@@ -242,6 +242,7 @@
     * [Language List API](api-reference/core-api-reference/character-crafting-apis/language-list-api.md)
     * [Voice List API](api-reference/core-api-reference/character-crafting-apis/voice-list-api.md)
     * [Character List API](api-reference/core-api-reference/character-crafting-apis/character-list-api.md)
+    * [Custom LLM API](api-reference/core-api-reference/character-crafting-apis/custom-llm-api.md)
     * [Text to Speech API](api-reference/core-api-reference/character-crafting-apis/text-to-speech-api.md)
     * [Streaming Transcription API](api-reference/core-api-reference/character-crafting-apis/streaming-transcription-api.md)
   * [Interaction APIs](api-reference/core-api-reference/interaction-apis/README.md)
