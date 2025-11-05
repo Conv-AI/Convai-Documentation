@@ -7,7 +7,7 @@ description: >-
 # Asset Uploader
 
 {% hint style="danger" %}
-The Asset Uploader is currently available only with the Professional Plan and above.
+The Asset Uploader is currently available only on the Professional Plan and above.
 {% endhint %}
 
 ## Introduction

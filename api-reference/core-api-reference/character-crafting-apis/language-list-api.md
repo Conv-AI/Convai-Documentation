@@ -7,7 +7,7 @@ description: >-
 # Language List API
 
 {% hint style="danger" %}
-This API is available only with the Professional Plan and above.
+This API is available only on the Professional Plan and above.
 {% endhint %}
 
 ## Convai's Language List API endpoint
@@ -20,7 +20,7 @@ This endpoint is called to get the list of available languages for a user. The v
 
 ## Request
 
-The request body only require the following header field :&#x20;
+The request body only require the following header field  :&#x20;
 
 ### Headers
 

@@ -19,7 +19,7 @@ The **Character Customization** section in Convai Playground is where you transf
    Continue to: [_Character Description_](character-description.md)
 2. **Avatar Section**\
    Open **Avatar Studio** to design your character’s visual appearance and configure its **Avatar Studio Experience**, including environment, animations, outfits, lighting, camera angles, and more.\
-   Continue to: [_Avatar Section_](avatar-section.md)
+   Continue to: [_Avatar Section_](avatar-studio.md)
 3. **Language And Speech**\
    Configure the language, voice, and tone your character uses for communication.\
    Continue to: [_Language And Speech_](language-and-speech.md)

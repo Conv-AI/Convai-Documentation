@@ -7,7 +7,7 @@ description: >-
 # Chat History API
 
 {% hint style="danger" %}
-This API is available only with the Scale Plan and above.
+This API is available only on the Scale Plan and above.
 {% endhint %}
 
 ## List Sessions for a Character

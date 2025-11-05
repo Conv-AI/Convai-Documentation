@@ -9,7 +9,7 @@ hidden: true
 # Streaming Transcription API
 
 {% hint style="danger" %}
-This API is available only with the Enterprise Plan.
+This API is available only on the Enterprise Plan.
 {% endhint %}
 
 All the relevant API details needed to stream real-time audio input and receive text transcription from Convai’s ASR (Automatic Speech Recognition) engine.

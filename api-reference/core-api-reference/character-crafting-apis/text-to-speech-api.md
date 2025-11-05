@@ -9,7 +9,7 @@ hidden: true
 # Text to Speech API
 
 {% hint style="danger" %}
-This API is available only with the Enterprise Plan.
+This API is available only on the Enterprise Plan.
 {% endhint %}
 
 ## Generate Audio from Text

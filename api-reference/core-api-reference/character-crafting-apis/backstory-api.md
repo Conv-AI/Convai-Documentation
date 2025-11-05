@@ -7,7 +7,7 @@ description: >-
 # Backstory API
 
 {% hint style="danger" %}
-This API is available only with the Professional Plan and above.
+This API is available only on the Professional Plan and above.
 {% endhint %}
 
 ## Generate Backstory for Character

@@ -4,10 +4,6 @@ description: The page list all the APIs needed to interact Narrative Design
 
 # Narrative Design API
 
-{% hint style="danger" %}
-This API is available with all plans.
-{% endhint %}
-
 ## Toggle Narrative Design
 
 <mark style="color:green;">`POST`</mark> `https://api.convai.com/character/toggle-is-narrative-driven`
