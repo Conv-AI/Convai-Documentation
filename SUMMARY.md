@@ -247,3 +247,8 @@
     * [Streaming Transcription API](api-reference/core-api-reference/character-crafting-apis/streaming-transcription-api.md)
   * [Interaction APIs](api-reference/core-api-reference/interaction-apis/README.md)
     * [Interaction API](api-reference/core-api-reference/interaction-apis/interaction-api.md)
+
+## Beta Plugins
+
+* [Unity Plugin (Beta) Overview](beta-plugins/unity-plugin-beta-overview/README.md)
+  * [Installation and Setup](beta-plugins/unity-plugin-beta-overview/installation-and-setup.md)
