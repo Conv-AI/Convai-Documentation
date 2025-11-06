@@ -9,7 +9,7 @@ description: >-
 
 ## Introduction
 
-The **Convai Unreal Plugin (Beta)** brings powerful, real-time conversational AI directly into **Unreal Engine**.\
+The **Convai Unreal Engine Plugin (Beta)** brings powerful, real-time conversational AI directly into **Unreal Engine**.\
 Rebuilt from the ground up, offering low-latency dialogue, environment-aware interactions, and hands-free communication.
 
 Whether you’re building immersive NPCs or AI companions inside player suits, the plugin enables natural, voice-driven experiences powered by Convai characters.
@@ -147,7 +147,7 @@ To allow your AI character to “see” and describe the environment, follow the
 
 ## Conclusion
 
-You’ve successfully set up the **Convai Unreal Plugin (Beta)** and connected your first Convai character.\
+You’ve successfully set up the **Convai Unreal Engine Plugin (Beta)** and connected your first Convai character.\
 With just a few steps, you’ve enabled voice-based conversation, environmental awareness, and real-time interaction within Unreal Engine.
 
 Continue exploring to customize your setup, integrate multiple characters, or connect advanced Convai features. For feedback and community discussions, visit the [Convai Developer Forum](https://forum.convai.com/).

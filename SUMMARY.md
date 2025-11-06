@@ -252,6 +252,5 @@
 
 * [Unity Plugin (Beta) Overview](beta-plugins/unity-plugin-beta-overview/README.md)
   * [Installation and Setup](beta-plugins/unity-plugin-beta-overview/installation-and-setup.md)
-* [Unreal Plugin (Beta) Overview](beta-plugins/unreal-plugin-beta-overview/README.md)
-  * [Installation and Setup](beta-plugins/unreal-plugin-beta-overview/installation-and-setup.md)
-  * [\[Backup\] Installation and Setup](beta-plugins/unreal-plugin-beta-overview/backup-installation-and-setup.md)
+* [Unreal Engine Plugin (Beta) Overview](beta-plugins/unreal-engine-plugin-beta-overview/README.md)
+  * [Installation and Setup](beta-plugins/unreal-engine-plugin-beta-overview/installation-and-setup.md)

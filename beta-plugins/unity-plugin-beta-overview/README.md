@@ -6,7 +6,7 @@ description: >-
 
 # Unity Plugin (Beta) Overview
 
-## **Introduction**
+## Introduction
 
 The **Convai Unity Plugin (Beta)** marks a major leap forward in how developers can bring conversational AI to life inside Unity.\
 Built entirely from the ground up with a new backend and plugin infrastructure, this release delivers a faster, lighter, and more powerful experience for real-time character interactions.
@@ -15,7 +15,7 @@ Every aspect of the plugin has been re-engineered based on extensive developer f
 
 ***
 
-## **What’s New**
+## What’s New
 
 This Beta introduces a wide range of improvements designed to make AI character integration smoother, faster, and more natural than ever before:
 
@@ -29,7 +29,7 @@ Together, these updates make building intelligent, interactive worlds with Conva
 
 ***
 
-## **Beta Release**
+## Beta Release
 
 This is the **Beta release** of the new Convai Unity Plugin.\
 We’ll be rolling out frequent updates to improve stability, performance, and feature coverage as we move toward the full release.
@@ -39,7 +39,7 @@ We encourage you to share your thoughts, experiences, and suggestions directly o
 
 ***
 
-## **Conclusion**
+## Conclusion
 
 The Convai Unity Plugin (Beta) represents the next evolution of AI-driven interactivity in Unity — blending natural voice, low-latency responses, and seamless integration into one unified framework.\
 Start exploring, experiment with new features, and help us shape the future of interactive AI experiences.

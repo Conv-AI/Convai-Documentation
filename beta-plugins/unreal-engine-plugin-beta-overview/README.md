@@ -5,21 +5,21 @@ description: >-
   in Unreal Engine.
 ---
 
-# Unreal Plugin (Beta) Overview
+# Unreal Engine Plugin (Beta) Overview
 
-## **Introduction**
+## Introduction
 
-The **Convai Unreal Plugin (Beta)** redefines how developers integrate conversational AI within **Unreal Engine**.\
+The **Convai Unreal Engine Plugin (Beta)** redefines how developers integrate conversational AI within **Unreal Engine**.\
 Built on the new Convai backend, this release delivers a faster, more natural, and fully immersive interaction experience — empowering creators to design truly intelligent game worlds.
 
 With features like hands-free conversation, real-time voice detection, and environment vision, Convai characters can now engage with players in lifelike, context-aware ways.\
-Whether you’re developing dynamic NPCs or AI companions, the Convai Unreal Plugin brings human-like dialogue and perception directly into your projects.
+Whether you’re developing dynamic NPCs or AI companions, the Convai Unreal Engine Plugin brings human-like dialogue and perception directly into your projects.
 
 ***
 
-## **Key Features**
+## What’s New
 
-The Convai Unreal Plugin Beta introduces powerful new capabilities to make AI-driven experiences more seamless, interactive, and developer-friendly:
+The Convai Unreal Engine Plugin Beta introduces powerful new capabilities to make AI-driven experiences more seamless, interactive, and developer-friendly:
 
 * **Hands-Free Conversations** — Communicate naturally without push-to-talk input for uninterrupted dialogue.
 * **Low Response Latency** — Get near-instant AI replies powered by the latest Convai backend for fluid, real-time interaction.
@@ -32,9 +32,9 @@ Together, these innovations create a streamlined workflow for developers while e
 
 ***
 
-## **Beta Release**
+## Beta Release
 
-This is the **Beta release** of the Convai Unreal Plugin.\
+This is the **Beta release** of the Convai Unreal Engine Plugin.\
 We’ll continue releasing updates that enhance performance, expand functionality, and bring new AI interaction capabilities to Unreal.
 
 Your feedback during this stage is invaluable — it helps us refine and improve every part of the experience.\
@@ -42,9 +42,9 @@ Join the community and share your insights on the [Convai Developer Forum](https
 
 ***
 
-## **Conclusion**
+## Conclusion
 
-The **Convai Unreal Plugin (Beta)** represents a significant leap in bringing conversational AI into Unreal Engine — combining speech, vision, and natural dialogue under one unified, developer-focused ecosystem.\
+The **Convai Unreal Engine Plugin (Beta)** represents a significant leap in bringing conversational AI into Unreal Engine — combining speech, vision, and natural dialogue under one unified, developer-focused ecosystem.\
 With the new **Convai Editor UI**, configuring and experimenting with Convai’s features has never been easier or more intuitive.
 
 Start building today and experience the future of interactive AI — faster, smarter, and seamlessly integrated within Unreal.

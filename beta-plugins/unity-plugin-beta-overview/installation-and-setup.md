@@ -6,25 +6,25 @@ description: >-
 
 # Installation and Setup
 
-## **Introduction**
+## Introduction
 
 The Convai Unity Plugin (Beta) allows you to seamlessly integrate Convai’s advanced conversational AI characters into your Unity projects. This plugin simplifies setup and provides a ready-to-run demo scene so you can start interacting with Convai-powered characters immediately.
 
 ***
 
-## **Installation Guide**
+## Installation Guide
 
 Follow these steps to install and configure the Convai Unity Plugin Beta.
 
-### **1. Download the Plugin**
+### 1. Download the Plugin
 
 Download the latest Convai Unity Beta Plugin package from the provided link.
 
-### **2. Extract the Package**
+### 2. Extract the Package
 
 Unzip the downloaded `.zip` file to your preferred location on your computer.
 
-### **3. Add the Project to Unity Hub**
+### 3. Add the Project to Unity Hub
 
 1. Open **Unity Hub**.
 2. Click **Add** next to the _New Project_ button.
@@ -40,7 +40,7 @@ Unity will now create a new project based on the plugin files.
 
 ***
 
-## **Initial Setup**
+## Initial Setup
 
 Once the project loads, Unity will automatically begin downloading additional files required for the plugin to function correctly.\
 This download process ensures that the initial plugin package remains lightweight.
@@ -53,7 +53,7 @@ After the setup completes:
 
 ***
 
-### **Running the Demo Scene**
+### Running the Demo Scene
 
 To verify that the plugin is correctly installed:
 
@@ -68,7 +68,7 @@ You can monitor the session initialization status through the **Console Window**
 
 ***
 
-### **Changing the Character ID**
+### Changing the Character ID
 
 To use your own Convai character instead of the default demo character:
 
@@ -80,7 +80,7 @@ Your new character will now load and respond in the same demo scene.
 
 ***
 
-### **Conclusion**
+## Conclusion
 
 You’ve successfully set up and run the Convai Unity Plugin (Beta).\
 From here, you can begin customizing the sample scene or integrate Convai characters directly into your own Unity environments.
