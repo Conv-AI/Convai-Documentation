@@ -238,6 +238,7 @@
     * [Knowledge Bank API](api-reference/core-api-reference/character-crafting-apis/knowledge-bank-api.md)
     * [Action API](api-reference/core-api-reference/character-crafting-apis/action-api.md)
     * [Chat History API](api-reference/core-api-reference/character-crafting-apis/chat-history-api.md)
+    * [Chat History Delete API](api-reference/core-api-reference/character-crafting-apis/chat-history-delete-api.md)
     * [Evaluation API](api-reference/core-api-reference/character-crafting-apis/evaluation-api.md)
     * [Language List API](api-reference/core-api-reference/character-crafting-apis/language-list-api.md)
     * [Voice List API](api-reference/core-api-reference/character-crafting-apis/voice-list-api.md)
