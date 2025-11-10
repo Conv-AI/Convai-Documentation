@@ -2,7 +2,6 @@
 description: >-
   Discover the all-new Convai Unity Plugin Beta — redesigned from the ground up
   for faster, more immersive, and hands-free AI character experiences in Unity.
-hidden: true
 ---
 
 # Unity Plugin (Beta) Overview

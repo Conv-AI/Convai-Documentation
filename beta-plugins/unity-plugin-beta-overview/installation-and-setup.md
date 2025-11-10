@@ -18,7 +18,7 @@ Follow these steps to install and configure the Convai Unity Plugin Beta.
 
 ### 1. Download the Plugin
 
-Download the latest Convai Unity Beta Plugin package from the provided link.
+Download the latest Convai Unity Beta Plugin package from here \[Link coming soon].
 
 ### 2. Extract the Package
 
