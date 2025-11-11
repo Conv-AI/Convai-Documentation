@@ -53,6 +53,8 @@
 ## Plugins & Integrations
 
 * [Introduction](plugins-and-integrations/introduction.md)
+* [Unity Plugin (Beta) Overview](plugins-and-integrations/unity-plugin-beta-overview/README.md)
+  * [Installation and Setup](plugins-and-integrations/unity-plugin-beta-overview/installation-and-setup.md)
 * [Unity Plugin](plugins-and-integrations/unity-plugin/README.md)
   * [Pre-Requisites](plugins-and-integrations/unity-plugin/pre-requisites.md)
   * [Compatibility](plugins-and-integrations/unity-plugin/compatibility.md)
@@ -107,6 +109,8 @@
   * [Tutorials](plugins-and-integrations/unity-plugin/tutorials/README.md)
     * [Narrative Design](plugins-and-integrations/unity-plugin/tutorials/narrative-design.md)
     * [NPC2NPC](plugins-and-integrations/unity-plugin/tutorials/npc2npc.md)
+* [Unreal Engine Plugin (Beta) Overview](plugins-and-integrations/unreal-engine-plugin-beta-overview/README.md)
+  * [Installation and Setup](plugins-and-integrations/unreal-engine-plugin-beta-overview/installation-and-setup.md)
 * [Unreal Engine](plugins-and-integrations/unreal-engine/README.md)
   * [Supported Platforms](plugins-and-integrations/unreal-engine/supported-platforms.md)
   * [Installation](plugins-and-integrations/unreal-engine/installation.md)
@@ -248,10 +252,3 @@
     * [Streaming Transcription API](api-reference/core-api-reference/character-crafting-apis/streaming-transcription-api.md)
   * [Interaction APIs](api-reference/core-api-reference/interaction-apis/README.md)
     * [Interaction API](api-reference/core-api-reference/interaction-apis/interaction-api.md)
-
-## Beta Plugins
-
-* [Unity Plugin (Beta) Overview](beta-plugins/unity-plugin-beta-overview/README.md)
-  * [Installation and Setup](beta-plugins/unity-plugin-beta-overview/installation-and-setup.md)
-* [Unreal Engine Plugin (Beta) Overview](beta-plugins/unreal-engine-plugin-beta-overview/README.md)
-  * [Installation and Setup](beta-plugins/unreal-engine-plugin-beta-overview/installation-and-setup.md)
