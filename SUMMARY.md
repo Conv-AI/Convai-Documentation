@@ -251,4 +251,5 @@
     * [Text to Speech API](api-reference/core-api-reference/character-crafting-apis/text-to-speech-api.md)
     * [Streaming Transcription API](api-reference/core-api-reference/character-crafting-apis/streaming-transcription-api.md)
   * [Interaction APIs](api-reference/core-api-reference/interaction-apis/README.md)
+    * [Interaction API (Beta)](api-reference/core-api-reference/interaction-apis/interaction-api-beta.md)
     * [Interaction API](api-reference/core-api-reference/interaction-apis/interaction-api.md)
