@@ -26,7 +26,7 @@ Download the ZIP file provided below.
 
 Unzip the downloaded `.zip` file to your preferred location on your computer.
 
-### **3. Create a New Unity Project**
+### 3. Create a New Unity Project
 
 1. Open **Unity Hub**.
 2. Click **New Project**.
@@ -40,7 +40,7 @@ Convai Unity Plugin supports **Unity 2022 and above**.
 
 Unity will now create and open your new project.
 
-### **4. Import the Convai Plugin Package**
+### 4. Import the Convai Plugin Package
 
 1. Once your project is open, navigate to the top menu and select **Assets → Import Package → Custom Package**.
 2. In the file dialog, locate and select the **Convai Unity Package** you extracted from the `.zip` file.
