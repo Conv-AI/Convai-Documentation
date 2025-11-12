@@ -38,7 +38,7 @@ Send a text query to an AI character and receive a streaming response.
 
 **Request Format:** `multipart/form-data`
 
-<table><thead><tr><th width="220">Parameter</th><th width="109.666748046875">Type</th><th>Description</th></tr></thead><tbody><tr><td>character_id<mark style="color:red;">*</mark></td><td>UUID</td><td>Unique identifier for the AI character</td></tr><tr><td>text_input<mark style="color:red;">*</mark></td><td>string</td><td>Your text query/message to the character</td></tr><tr><td>character_session_id</td><td>UUID</td><td>Session ID to continue an existing conversation</td></tr></tbody></table>
+<table><thead><tr><th width="220">Parameter</th><th width="109.666748046875">Type</th><th>Description</th></tr></thead><tbody><tr><td>character_id<mark style="color:red;">*</mark></td><td>UUID</td><td>Unique identifier for the AI character</td></tr><tr><td>text_input<mark style="color:red;">*</mark></td><td>string</td><td>Your text query/message to the character</td></tr><tr><td>character_session_id</td><td>string</td><td>Session ID to continue an existing conversation</td></tr></tbody></table>
 
 ### Example Requests
 
@@ -137,7 +137,7 @@ data: {"type": "connection-stoppped"}
 
 * The request body must be `multipart/form-data` format. Use `-F` flag in cURL (not `-d`).
 * Skip `character_session_id` to start a new conversation. Add it to continue an existing conversation.
-* Session IDs are UUIDs. Do not send `-1` or other placeholder values.
+* Character Session IDs are strings. Do not send `-1` or other placeholder values.
 * Responses are streamed via Server-Sent Events (SSE). Set timeout to 30+ seconds.
 * All interactions are subject to content moderation policies. Repeated violations may result in API key suspension.
 * Requests are rate-limited per API key. Implement exponential backoff for rate limit errors.
