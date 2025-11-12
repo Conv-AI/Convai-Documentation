@@ -1,6 +1,8 @@
 ---
-description: API reference for interacting with the character using Server-Sent Events.
-hidden: true
+description: >-
+  Enable real-time conversational AI with Convai’s Interaction API. Send text
+  messages to your AI character and receive natural, streaming responses using
+  Server-Sent Events (SSE).
 ---
 
 # Interaction API (Beta)
@@ -9,15 +11,16 @@ hidden: true
 This API is available only on the Professional Plan and above.
 {% endhint %}
 
-### Overview <a href="#overview" id="overview"></a>
+## Overview
 
-The Core Service API provides conversational AI capabilities through a simple REST API. Send text queries and receive streaming responses via Server-Sent Events (SSE).
+The **Interaction API** provides real-time conversational capabilities via a lightweight **REST + SSE** interface.\
+It allows your application to send user messages and receive streaming character responses with minimal latency.
 
-**Base URL:** `https://live.convai.com`
+This API supports continuous conversation context through session IDs and streams all outputs as **Server-Sent Events (SSE)** for smooth, live feedback.
 
 ***
 
-### Authentication <a href="#authentication" id="authentication"></a>
+## Authentication <a href="#authentication" id="authentication"></a>
 
 All API requests require authentication using an API key in the header:
 
@@ -27,23 +30,17 @@ X-API-Key: your_api_key_here
 
 ***
 
-### Endpoint <a href="#endpoint" id="endpoint"></a>
+## Endpoint <a href="#endpoint" id="endpoint"></a>
 
-#### <mark style="color:green;">`POST`</mark> `https://live.convai.com/connect/stream` &#x20;
+<mark style="color:green;">`POST`</mark> `https://live.convai.com/connect/stream` &#x20;
 
 Send a text query to an AI character and receive a streaming response.
 
 **Request Format:** `multipart/form-data`
 
-**Parameters:**
+<table><thead><tr><th width="220">Parameter</th><th width="109.666748046875">Type</th><th>Description</th></tr></thead><tbody><tr><td>character_id<mark style="color:red;">*</mark></td><td>UUID</td><td>Unique identifier for the AI character</td></tr><tr><td>text_input<mark style="color:red;">*</mark></td><td>string</td><td>Your text query/message to the character</td></tr><tr><td>character_session_id</td><td>UUID</td><td>Session ID to continue an existing conversation</td></tr></tbody></table>
 
-| Parameter              | Type   | Required | Description                                     |
-| ---------------------- | ------ | -------- | ----------------------------------------------- |
-| `character_id`         | UUID   | Yes      | Unique identifier for the AI character          |
-| `text_input`           | string | Yes      | Your text query/message to the character        |
-| `character_session_id` | UUID   | No       | Session ID to continue an existing conversation |
-
-**Example Request:**
+### Example Requests
 
 {% tabs %}
 {% tab title="cURL" %}
@@ -136,7 +133,7 @@ data: {"type": "connection-stoppped"}
 ***
 
 {% hint style="warning" %}
-Important Points
+**Important Points**
 
 * The request body must be `multipart/form-data` format. Use `-F` flag in cURL (not `-d`).
 * Skip `character_session_id` to start a new conversation. Add it to continue an existing conversation.
@@ -146,11 +143,11 @@ Important Points
 * Requests are rate-limited per API key. Implement exponential backoff for rate limit errors.
 {% endhint %}
 
-### Resume Conversation <a href="#conversation-continuity" id="conversation-continuity"></a>
+## Resume Conversation <a href="#conversation-continuity" id="conversation-continuity"></a>
 
 To maintain conversation context, save the `character_session_id` from the first response and include it in subsequent requests.
 
-#### Example Requests
+### Example Requests
 
 {% tabs %}
 {% tab title="cURL" %}
@@ -279,7 +276,7 @@ await chat('What is my name?');  // Bot remembers: "Your name is Alice"
 {% endtab %}
 {% endtabs %}
 
-### Response Message Types <a href="#response-message-types" id="response-message-types"></a>
+## Response Message Types <a href="#response-message-types" id="response-message-types"></a>
 
 #### connection-started <a href="#connection-started" id="connection-started"></a>
 
@@ -372,18 +369,11 @@ Sent when the response is complete and connection is closing.
 
 ***
 
-### Error Responses <a href="#error-responses" id="error-responses"></a>
+## Error Responses <a href="#error-responses" id="error-responses"></a>
 
 All endpoints return standard HTTP error codes:
 
-| Status Code | Description                               |
-| ----------- | ----------------------------------------- |
-| `400`       | Bad Request - Invalid parameters          |
-| `401`       | Unauthorized - Invalid or missing API key |
-| `404`       | Not Found - Character not found           |
-| `422`       | Unprocessable Entity - Validation error   |
-| `429`       | Too Many Requests - Rate limit exceeded   |
-| `500`       | Internal Server Error                     |
+<table><thead><tr><th width="174">Status Code</th><th>Description</th></tr></thead><tbody><tr><td><code>400</code></td><td>Bad Request - Invalid parameters</td></tr><tr><td><code>401</code></td><td>Unauthorized - Invalid or missing API key</td></tr><tr><td><code>404</code></td><td>Not Found - Character not found</td></tr><tr><td><code>422</code></td><td>Unprocessable Entity - Validation error</td></tr><tr><td><code>429</code></td><td>Too Many Requests - Rate limit exceeded</td></tr><tr><td><code>500</code></td><td>Internal Server Error</td></tr></tbody></table>
 
 **Error Response Format:**
 
@@ -400,3 +390,8 @@ All endpoints return standard HTTP error codes:
   "detail": "Invalid API key"
 }
 ```
+
+## Conclusion
+
+The **Interaction API (Beta)** enables dynamic, real-time communication with your Convai characters over text.\
+By combining streaming responses, context persistence, and SSE-based delivery, it provides a responsive and low-latency conversational experience suitable for chat, games, and interactive AI applications.
