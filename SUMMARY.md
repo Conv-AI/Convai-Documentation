@@ -10,6 +10,7 @@
   * [Testing a Character](convai-playground/get-started/testing-a-character.md)
   * [Global Character Controls](convai-playground/get-started/global-character-controls.md)
   * [Character Versioning](convai-playground/get-started/character-versioning.md)
+  * [Interact in Voice Mode (Beta)](convai-playground/get-started/interact-in-voice-mode-beta.md)
 * [Character Customization](convai-playground/character-customization/README.md)
   * [Character Description](convai-playground/character-customization/character-description.md)
   * [Avatar Studio](convai-playground/character-customization/avatar-section.md)
