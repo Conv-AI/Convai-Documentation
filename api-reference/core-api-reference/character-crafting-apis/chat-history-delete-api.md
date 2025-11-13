@@ -21,10 +21,10 @@ This API is available only to select customers.
 
 #### Request Body
 
-| Name                                         | Type   | Description                       |
-| -------------------------------------------- | ------ | --------------------------------- |
-| charID<mark style="color:red;">\*</mark>     | String | Id of your character.             |
-| sessionIDs<mark style="color:red;">\*</mark> | list   | list of session ids to be deleted |
+| Name                                         | Type   | Description                        |
+| -------------------------------------------- | ------ | ---------------------------------- |
+| charID<mark style="color:red;">\*</mark>     | String | Id of your character.              |
+| sessionIDs<mark style="color:red;">\*</mark> | list   | list of session ids to be deleted. |
 
 {% tabs %}
 {% tab title="200: OK" %}
@@ -53,7 +53,7 @@ Here are some sample codes to demonstrate the request format for the endpoint --
 import requests
 import json
 
-url = "https://api.convai.com/character/chatHistory/list"
+url = "https://api.convai.com/character/chatHistory/delete"
 
 headers = { 
     'CONVAI-API-KEY': '<Your-API-Key>',
@@ -63,7 +63,7 @@ headers = {
 # Create a dictionary for the JSON payload
 payload = { 
     "charID": "<Your-Character-Id>",
-    "sessionIDs": ["<your-session-id-1>",]
+    "sessionIDs": ["<your-session-id-1>",] 
 }
 
 # Convert the payload to JSON
@@ -78,7 +78,7 @@ print(response.json())
 
 {% tab title="cURL" %}
 ```sh
-curl -X POST "https://api.convai.com/character/chatHistory/list" \
+curl -X POST "https://api.convai.com/character/chatHistory/delete" \
      -H "CONVAI-API-KEY: <Your-API-Key>" \
      -H "Content-Type: application/json" \
      -d '{"charID": "<Your-Character-Id>", "sessionIDs": ["<your-session-id-1>"]}'
