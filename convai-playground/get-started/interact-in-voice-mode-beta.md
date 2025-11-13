@@ -6,21 +6,20 @@ description: >-
 
 # Interact in Voice Mode (Beta)
 
-### Introduction
+## Introduction
 
-**Voice Mode** allows you to have seamless, natural, and low-friction voice conversations with your character.\
-This guide explains how to set up Voice Mode, select the right interaction method, and maintain stable, real-time sessions for a smooth conversational experience.
+**Voice Mode** allows you to have seamless, natural, and low-friction voice conversations with your character. This guide explains how to set up Voice Mode, select the right interaction method, and maintain stable, real-time sessions for a smooth conversational experience.
 
-### Step-by-Step Guide
+## Step-by-Step Guide
 
-### **1. Open Your Character**
+### 1. Open Your Character
 
 * From your **Dashboard**, open the character you want to use with Voice Mode.
 * Navigate to **Core AI Settings** and ensure you’ve selected a **Live Model.**
 
 <figure><img src="../../.gitbook/assets/image (439).png" alt="" width="563"><figcaption></figcaption></figure>
 
-### **2. Configure Voice Settings**
+### 2. Configure Voice Settings
 
 * Go to **Language and Speech** and select a voice for your character.
 
@@ -30,7 +29,7 @@ Choose a voice **other than GCP**. GCP voices are **not compatible** with live m
 
 * Once configured, click **Update** to save your changes.
 
-### **3. Using Voice Mode**
+### 3. Using Voice Mode
 
 * After updating your character, a **microphone button** will appear next to the chat input field.
 
