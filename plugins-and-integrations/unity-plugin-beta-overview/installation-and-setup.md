@@ -10,6 +10,8 @@ description: >-
 
 The Convai Unity Plugin (Beta) allows you to seamlessly integrate Convai’s advanced conversational AI characters into your Unity projects. This plugin simplifies setup and provides a ready-to-run demo scene so you can start interacting with Convai-powered characters immediately.
 
+{% embed url="https://youtu.be/cEctYXc5Pe8" %}
+
 ***
 
 ## Installation Guide
@@ -21,6 +23,13 @@ Follow these steps to install and configure the Convai Unity Plugin Beta.
 Download the ZIP file provided below.
 
 {% file src="../../.gitbook/assets/ConvaiUnityBeta_MR.zip" %}
+
+## **Beta Notice**
+
+{% hint style="danger" %}
+This package is an introductory **Beta release** designed to provide a ready-to-use MR-compatible example, including the required Meta packages.\
+Please note that **LipSync is not supported in this version**. Additional features, including full LipSync support, will be introduced in upcoming releases.
+{% endhint %}
 
 ### 2. Extract the Package
 
@@ -45,17 +54,15 @@ Unity will now create and open your new project.
 1. Once your project is open, navigate to the top menu and select **Assets → Import Package → Custom Package**.
 2. In the file dialog, locate and select the **Convai Unity Package** you extracted from the `.zip` file.
 3. Click **Import** to add the Convai Plugin to your project.
-
-After the import completes, the Convai Plugin will be ready to configure within Unity.
+4. After the import completes, the Convai Plugin will be ready to configure within Unity.
+5. Next, open the **Project Setup Tool** that appears automatically.
+6. Select both **PC** and **Meta Quest** platforms, and click **Fix All** for each platform to ensure proper configuration.
 
 ***
 
-## Initial Setup
+## Project Setup
 
-Once the project loads, Unity will automatically begin downloading additional files required for the plugin to function correctly.\
-This download process ensures that the initial plugin package remains lightweight.
-
-After the setup completes:
+### Setting Up Your API Key
 
 1. Go to the **Top Menu** → **Convai**.
 2. Select **Account** from the dropdown.
@@ -63,34 +70,39 @@ After the setup completes:
 
 ***
 
-### Running the Demo Scene
+### Opening the Sample Scene
 
-To verify that the plugin is correctly installed:
+To explore the Convai sample setup:
 
 1. Navigate to:\
    `Assets/Convai/Demo/Scenes/Convai Sample Scene.unity`
 2. Open the scene.
-3. Press the **Play** button in Unity.
-
-You’ll see a default demo character appear in the scene.\
-After a few seconds, the character will initialize and be ready for conversation.\
-You can monitor the session initialization status through the **Console Window**.
+3. In the **Top Menu**, go to **Window → TextMeshPro → Import TMP Essential Resources** to enable text rendering.
+4. Once imported, add your **Character Name and ID**:
+   * In the **Hierarchy**, select the `ConvaiNPC` GameObject.
+   * In the **Inspector**, find the **ConvaiNPC** component.
+   * Enter your **Character Name** in the _Character Name_ field.
+   * Paste your **Character ID** in the _Character ID_ field.
 
 ***
 
-### Changing the Character ID
+### Preparing for Build
 
-To use your own Convai character instead of the default demo character:
-
-1. In the **Hierarchy**, select the `ConvaiNPC` GameObject.
-2. In the **Inspector**, locate the **ConvaiNPC** component.
-3. Replace the **Character ID** field with your own character’s ID.
-
-Your new character will now load and respond in the same demo scene.
+1. Go to **File → Build Profiles**.
+2. In the **Scene List**, right-click the default _Sample Scene_ and remove it.
+3. Click **Add Open Scenes** to include the _Convai Sample Scene_ instead.
+4. Under **Profiles**, select **Meta Quest** and click **Switch Platform** in the bottom-right corner.
+5. From the top menu, go to **Meta XR Tools → Project Setup Tool**.
+   * In the opened window, click **Fix All** for both **PC** and **Meta Quest**.
+6. Return to the **Build Profiles** window.
+   * If a device is selected under **Run Device**, click **Build and Run** to deploy directly to your headset.
+   * If no device is selected, click **Build** to generate the build manually.
 
 ***
 
 ## Conclusion
 
-You’ve successfully set up and run the Convai Unity Plugin (Beta).\
-From here, you can begin customizing the sample scene or integrate Convai characters directly into your own Unity environments.
+You have now completed the setup of the Convai Unity Plugin (Beta) and prepared your project for MR-ready development.\
+From this point forward, you can begin tailoring the sample scene, integrating your own Convai characters, and extending the plugin’s capabilities to fit your project’s interaction, gameplay, or AI-driven design needs.
+
+As new features, improvements, and LipSync support arrive in upcoming releases, you will be able to enhance your experience even further and build more immersive, intelligent, and voice-driven Unity applications.
