@@ -22,7 +22,21 @@ Whether you’re building immersive NPCs or AI companions inside player suits, t
 
 You can install the Convai Unreal Plugin using one of two methods, depending on whether you want a project-specific or engine-wide setup.
 
-### 1. Download the Plugin
+### 1. Pre-requisistes
+
+#### Installing Visual Studio for Windows
+
+* Download  [Visual Studio from here](https://visualstudio.microsoft.com/downloads/).
+* Ensure having the required C++ toolchains mentioned [<mark style="color:green;">**here**</mark>](https://docs.unrealengine.com/5.1/en-US/setting-up-visual-studio-development-environment-for-cplusplus-projects-in-unreal-engine/). If you already have Visual Studio installed, you may open the installer and select **'Modify'** to add the above mentioned toolchains.&#x20;
+
+#### Converting to a C++ Project
+
+1. Open the existing Unreal Engine project.
+2. Navigate to **File > New C++ Class** and choose any class to add (e.g., "None").
+3. Click **Next**, then **Create Class**.
+4. Allow the engine to recompile the project to C++. Upon completion, the project will convert to a C++ project setup.
+
+### 2. Download the Plugin
 
 1. Visit the official Convai Unreal SDK GitHub Releases page:\
    [https://github.com/Conv-AI/Convai-UnrealEngine-SDK-V4/releases](https://github.com/Conv-AI/Convai-UnrealEngine-SDK-V4/releases)
@@ -31,7 +45,7 @@ You can install the Convai Unreal Plugin using one of two methods, depending on 
 
 ***
 
-### 2. Install the Plugin
+### 3. Install the Plugin
 
 #### Method A — Engine-Level Installation (Recommended for Most Users)
 
@@ -69,7 +83,7 @@ Blueprint-only projects must use **Method A**.
 
 ***
 
-### 3. Enable the Plugin in Unreal
+### 4. Enable the Plugin in Unreal
 
 1. Launch your Unreal Engine project.
 2. Go to **Edit → Plugins**.
