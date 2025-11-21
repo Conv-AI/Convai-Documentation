@@ -40,4 +40,4 @@ Before you begin, make sure you have the following:
 
 #### You're Ready to Animate!
 
-After completing the steps above, your setup is complete. You can now begin recording animations directly in VR, which your AI avatars can intelligently perform in simulations, scenes, or guided experiences within Convai Sim.\
+After completing the steps above, your setup is complete. You can now begin recording animations directly in VR, which your AI avatars can intelligently perform in simulations, scenes, or guided experiences within Convai Sim.<br>

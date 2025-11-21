@@ -8,8 +8,7 @@ title: You are an human analyst de...
 >
 > \[\[conversation\_history]]
 >
-> \
->
+> <br>
 >
 > Here are some data that might be needed to evaluate the conversations:
 >
@@ -19,13 +18,11 @@ title: You are an human analyst de...
 >
 > Customer Age: \[\[customer\_age]]
 >
-> \
->
+> <br>
 >
 > Please evaluate the above conversation based on the attributes listed and provide a Rating and Feedback for each of them. If an attribute is not applicable or cannot be assessed, return null in the json output. Return the result in the following format:
 >
-> \
->
+> <br>
 >
 > {
 >
@@ -123,5 +120,4 @@ title: You are an human analyst de...
 >
 > }
 >
-> \
->
+> <br>

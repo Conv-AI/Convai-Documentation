@@ -34,17 +34,14 @@ We will go over the steps of creating and maintaining snapshots from scratch in 
 
 Let us start with a character that we already have saved. The data that we see when we open the details related to a character denotes the **Current Snapshot** of the character. When you interact with the character, you are essentially referring to all the date in this **Current Snapshot** of the character.
 
-1.  To create a new version, first open the **Character Versioning** section and click on the **+ Add Snapshot** sign at the top.\
-
+1.  To create a new version, first open the **Character Versioning** section and click on the **+ Add Snapshot** sign at the top.<br>
 
     <figure><img src="../../.gitbook/assets/cv-3.png" alt=""><figcaption><p>Let's create our very first snapshot.</p></figcaption></figure>
-2.  A pop-up appears asking you to give your snapshot a name and some description. Please note that a **Snapshot Name** is a required field to create a new version. Once you have filled the details, click on the **Submit** button.\
-
+2.  A pop-up appears asking you to give your snapshot a name and some description. Please note that a **Snapshot Name** is a required field to create a new version. Once you have filled the details, click on the **Submit** button.<br>
 
     <figure><img src="../../.gitbook/assets/cv-4.png" alt=""><figcaption><p>We provide a name and a small description.</p></figcaption></figure>
 3.  Now, you can see the new version in the list of snapshots. Now what does this version actually represent?\
-    This snapshot stores all the data related to the character at that point of time. Everything about the character ranging from character description, embodiment to knowledge bank files, narrative-design structure and other details.\
-
+    This snapshot stores all the data related to the character at that point of time. Everything about the character ranging from character description, embodiment to knowledge bank files, narrative-design structure and other details.<br>
 
     <figure><img src="../../.gitbook/assets/cv-5.png" alt=""><figcaption><p>The snapshot appears in the list</p></figcaption></figure>
 
@@ -54,12 +51,10 @@ Let us start with a character that we already have saved. The data that we see w
 
 Assuming you have gone ahead and worked on the character further, but you are unhappy with the results and want to go back and start from the previous version. This is where you have the ability to restore an old snapshot to the current state and work with them again. Here are the steps to follow:
 
-1.  To restore a version, open the **Character Versioning** section and select the snapshot you want to restore back. You will see the **Restore Version** button below come to life.\
-
+1.  To restore a version, open the **Character Versioning** section and select the snapshot you want to restore back. You will see the **Restore Version** button below come to life.<br>
 
     <figure><img src="../../.gitbook/assets/cv-6.png" alt=""><figcaption><p>We will be restoring the data from the very first snapshot.</p></figcaption></figure>
-2.  Once you click on the **Restore Version** button, a pop-up appears asking you if you want to save the current changes as a new snapshot or discard them. You have the option to store your current changes as some test version and refer back later on.\
-
+2.  Once you click on the **Restore Version** button, a pop-up appears asking you if you want to save the current changes as a new snapshot or discard them. You have the option to store your current changes as some test version and refer back later on.<br>
 
     <figure><img src="../../.gitbook/assets/cv-7.png" alt=""><figcaption><p>Let's directly restore the data in the snapshot to the Current Snapshot</p></figcaption></figure>
 3. For now, we are happy to discard the changes, so we will click on **Restore** button. This brings the data from the selected version to the **Current Snapshot** of the character.

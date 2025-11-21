@@ -15,8 +15,7 @@ Steps to add simple actions to your Convai character:-&#x20;
 <figure><img src="../../../../../.gitbook/assets/image (23) (1) (1).png" alt="" width="291"><figcaption><p>Custom Action</p></figcaption></figure>
 
 * Open the character blueprint to which you have just now added the action.&#x20;
-*   Add a new event with the same name. `Print` in this case and define the logic for the function you just named and run the function `Handle Actions Completion` with `Is Successful` set to true. \
-
+*   Add a new event with the same name. `Print` in this case and define the logic for the function you just named and run the function `Handle Actions Completion` with `Is Successful` set to true. <br>
 
     <figure><img src="../../../../../.gitbook/assets/image (7) (2).png" alt=""><figcaption><p>Print action implementation</p></figcaption></figure>
 * Hit compile and ask your Convai Character to perform the action.&#x20;

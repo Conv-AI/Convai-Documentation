@@ -14,7 +14,6 @@ When preparing your .glb file, ensure that the model has morph targets for lip s
 [glb-characters-for-convai.md](../glb-characters-for-convai.md)
 {% endcontent-ref %}
 
-Once glb file is created. Drag and drop it to PlayCanvas Editor.\
-
+Once glb file is created. Drag and drop it to PlayCanvas Editor.<br>
 
 <figure><img src="../../../.gitbook/assets/Screenshot (30).png" alt=""><figcaption><p>GLB charcter in PlayCanvas</p></figcaption></figure>

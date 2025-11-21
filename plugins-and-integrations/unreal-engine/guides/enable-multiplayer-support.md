@@ -4,15 +4,14 @@ description: >-
   multiplayer
 ---
 
-# Enable Multiplayer
+# Enable Multiplayer Support
 
 Please see the instructions below or check out our [_latest tutorial video_](https://www.youtube.com/watch?v=CjQEYw9Df8A) on YouTube.
 
 {% embed url="https://www.youtube.com/watch?v=CjQEYw9Df8A" %}
 
 1. Navigate to your player blueprint.
-2.  Under `My Blueprints` tab, click the gear icon and select `Show Inherited Variables`.\
-
+2.  Under `My Blueprints` tab, click the gear icon and select `Show Inherited Variables`.<br>
 
     <figure><img src="../../../.gitbook/assets/image (351).png" alt=""><figcaption></figcaption></figure>
 3.  Find and enable the two boolean variables:\

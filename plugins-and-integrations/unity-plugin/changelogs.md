@@ -123,8 +123,7 @@ Released: Aug 28, 2024
   * Added OVR effectors for RPM characters
   * Fixed animators for all characters
   * Provided Weight Multiplier for LipSync user preference
-  * RPM Characters will have Lipsync added when imported\
-
+  * RPM Characters will have Lipsync added when imported<br>
 
 ### **Bug Fixes and Improvements**
 
@@ -211,8 +210,7 @@ Released: Jun 13, 2024
   * Updated version and added various improvements to frame processing
 * **Input System**
   * Added new input system pragma checks and Convai Character Layer
-  * Simplified Input Manager and ensured future-proofing\
-
+  * Simplified Input Manager and ensured future-proofing<br>
 
 ### **Bug Fixes**
 

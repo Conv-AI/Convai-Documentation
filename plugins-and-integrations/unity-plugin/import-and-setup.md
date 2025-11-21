@@ -22,15 +22,13 @@ The file structure belongs to the nightly version of the plugin downloaded from 
 2. Start the Unity Hub.
 3. Verify that your project uses Unity 2022.3.0f1 LTS or later (check the Pre-Requisites section of the documentation).
 4. Open your project.
-5.  &#x20;Select **Assets > Import Package > Custom Package.**\
-
+5.  &#x20;Select **Assets > Import Package > Custom Package.**<br>
 
     <figure><img src="../../.gitbook/assets/image (99).png" alt="" width="375"><figcaption></figcaption></figure>
 6. In the file explorer, select the Convai Unity package. \
    The filename is similar to `ConvaiforUnity_vX.Y.Z.unitypackage`. X, Y, and Z are numbers containing the version information of the plugin.
 7. Click **Import.**&#x20;
-8.  When the Import begins, a prompt for using the new Unity Input System will appear. Press **Yes**.\
-
+8.  When the Import begins, a prompt for using the new Unity Input System will appear. Press **Yes**.<br>
 
     <figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="" width="295"><figcaption></figcaption></figure>
 9. The project will automatically restart. After the project is restarted, you need to import the package in the same way.

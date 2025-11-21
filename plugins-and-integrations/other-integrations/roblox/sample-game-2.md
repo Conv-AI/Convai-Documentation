@@ -21,8 +21,7 @@ For beginners, we provide 50 sample conversations that they can carry out with t
 To play the game follow the given steps:
 
 1. Get your API Key from our website. It is necessary to carry on any conversation in the game after the free quota has expired.
-2.  Visit the link given above for the game.\
-
+2.  Visit the link given above for the game.<br>
 
     <figure><img src="../../../.gitbook/assets/aqua_ss2.png" alt=""><figcaption></figcaption></figure>
 3. Click on the green Play button. That will open Roblox locally for you to play.
@@ -33,8 +32,7 @@ To play the game follow the given steps:
     Click on the **Understood** button, to close the notifications. Read it once though.\
     Enter the API Key in the bottom left section of the screen.\
     Remember to press **ENTER** after entering the value to register it in the backend.
-5.  Now click on the Chatbox Icon or press the "/" icon on the keyboard to start a conversation. Type out the text and press **ENTER**.\
-
+5.  Now click on the Chatbox Icon or press the "/" icon on the keyboard to start a conversation. Type out the text and press **ENTER**.<br>
 
     <figure><img src="../../../.gitbook/assets/aqua_ss4.png" alt=""><figcaption></figcaption></figure>
 6. That's it. You can continue your conversation and keep exploring the environment.

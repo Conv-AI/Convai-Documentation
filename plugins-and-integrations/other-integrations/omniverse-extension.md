@@ -20,12 +20,10 @@ To install the Convai Omniverse Extension, follow these steps:
 3. Open the Omniverse app of your choice (e.g Code) and from the `Window` menu click `Extensions`.
 4. In the `Extensions` tab, click the gear icon in the top right.\
    ![](<../../.gitbook/assets/image (102).png>)
-5.  Click the green plus icon in the Edit column and add the absolute path to the `exts` folder found in the repository directory.\
-
+5.  Click the green plus icon in the Edit column and add the absolute path to the `exts` folder found in the repository directory.<br>
 
     <figure><img src="../../.gitbook/assets/image (201).png" alt=""><figcaption></figcaption></figure>
-6.  Select the `Third Party` tab and search for `Convai` in the top left search bar, make sure to check Enabled.\
-
+6.  Select the `Third Party` tab and search for `Convai` in the top left search bar, make sure to check Enabled.<br>
 
     <figure><img src="../../.gitbook/assets/image (103).png" alt=""><figcaption></figcaption></figure>
 7. The Convai window should appear, drag it and dock it in any suitable area of the UI.&#x20;

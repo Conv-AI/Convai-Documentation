@@ -30,8 +30,7 @@ Steps to create a Reallusion Character using Character Creator 4: -&#x20;
     * Max Texture Size: - 4096 ( Choose the maximum available)&#x20;
     * Frame Rate: - 30&#x20;
 
-    Check the custom section. Click the Load Perform button.\
-
+    Check the custom section. Click the Load Perform button.<br>
 
     <figure><img src="https://lh3.googleusercontent.com/bRHLyGL7DX5FyR6C81V2zvSatP5vDxtXhT4QbaRINrPssg4nL0TcGXbmD5XtyQO3tEvcxJT_7Bkq4Bgui26GV3GKAgaY2oIzUaof6kj_NwBiP-RDXYl7q1Z0K_yc9mrNHktbSuHZuxdvgqRnDeicbaI" alt=""><figcaption><p>Load Perform Button</p></figcaption></figure>
 

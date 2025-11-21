@@ -54,7 +54,6 @@ description: >-
 <figure><img src="https://lh6.googleusercontent.com/jlBbvoU4jYLvmuGAUnzI1Sf1tKckWTWuRFUcAD_EBwHjT1b264smAD5Ba4PZNcWlnPn_c4RtSAl2Q8Eeh2hHBluiWKbx9S1C0PNB3YcMZeEBhKXGqcNjE0XPn_l6HIQlx5LD17oE4pJUIYsaziPuwZ0" alt="" width="188"><figcaption><p>Choose a Mesh </p></figcaption></figure>
 
 17. To change the parent class of the player refer to [this](../creating-metahuman-characters/change-the-parent-class-for-player..md) section.
-18. &#x20;Finally add the Character Id by selecting the Character (from Convai website) you just added and you can enjoy talking to your AI buddy.\
-
+18. &#x20;Finally add the Character Id by selecting the Character (from Convai website) you just added and you can enjoy talking to your AI buddy.<br>
 
 <figure><img src="https://lh6.googleusercontent.com/2qBxsfaY76JYx4Y_Ipm58ThbQv1cyZDQg7Kb3G9aWL9_YowEgxhrxX2ce_HlqXkgybndrdXP4w5pcOeIMEitjAUvDG5pbftlbmuRlpcd_VCRpVzgPDWQlAQc1zcE8tKCLM6cvXGnQloOee06JkJ5JaQ" alt=""><figcaption><p>Enter Character ID here</p></figcaption></figure>

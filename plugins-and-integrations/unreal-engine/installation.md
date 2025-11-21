@@ -29,8 +29,7 @@ There are two methods to install the plugin depending on your requirements
 
 1. From the top toolbar, go to **Edit > Plugins**.&#x20;
 2. Find the **Convai** plugin.
-3.  Click the checkbox to enable the plugin.\
-
+3.  Click the checkbox to enable the plugin.<br>
 
     <div align="left"><figure><img src="../../.gitbook/assets/image (130).png" alt=""><figcaption></figcaption></figure></div>
 4. Restart Unreal Engine.&#x20;
@@ -39,8 +38,7 @@ There are two methods to install the plugin depending on your requirements
 
 1. [Find your API key.](broken-reference)
 2. Go to **Edit > Project Settings**.
-3.  Choose **Convai** under the **Plugins** section on the left bar.\
-
+3.  Choose **Convai** under the **Plugins** section on the left bar.<br>
 
     <div align="left"><figure><img src="../../.gitbook/assets/image (196).png" alt=""><figcaption></figcaption></figure></div>
 4. Paste the API key into the **API Key** field.

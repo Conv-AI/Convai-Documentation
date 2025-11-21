@@ -28,8 +28,8 @@ Convai provides a variety of plugins and integrations to help integrate conversa
 [convai-web-sdk](web-plugins/convai-web-sdk/)
 {% endcontent-ref %}
 
-{% content-ref url="web-plugins/javascript-chat-ui-sdk/" %}
-[javascript-chat-ui-sdk](web-plugins/javascript-chat-ui-sdk/)
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
 {% endcontent-ref %}
 
 ## Modding Framework

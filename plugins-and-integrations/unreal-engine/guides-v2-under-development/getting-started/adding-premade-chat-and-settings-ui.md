@@ -19,8 +19,7 @@ It is recommended to remove the Convai Player component from the player blueprin
    2. Click the Window menu and make sure `World Settings` is enabled.\
       ![](<../../../../.gitbook/assets/image (329).png>)
    3. On the `World Settings` tab, Find `GameMode Override` and set it to `BP_FirstPersonGameMode` for first person or `BP_thirdPersonGameMode` if you imported third person content.\
-      ![](<../../../../.gitbook/assets/image (331).png>)\
-
+      ![](<../../../../.gitbook/assets/image (331).png>)<br>
 2. In the content browser, navigate to your player blueprint, which is by default at `FirstPerson/Blueprint/BP_FirstPersonCharacter` for First Person or `ThirdPerson/Blueprint/BP_ThirdPersonCharacter` which is the default for Third Person.
 3. Open the blueprint and click `Class Settings` then in the `Details` section Under `Class Options` change the parent class to `ConvaiBasePlayer`.
 
@@ -29,8 +28,7 @@ It is recommended to remove the Convai Player component from the player blueprin
 <figure><img src="https://lh4.googleusercontent.com/IIukEpo8niZHMAox4z4f-dkre2apO9DHZMKTGzCHfbYFSOZBSboGPnvhlKTDJdDvMTzuN7XND-3z52x42GlpiH1omXDrEeAq3crnK79_EFBobHAByuQtOP1QJbg04ZemJq0eojJb4DiRwyZoo4WNCuY" alt="" width="375"><figcaption><p>Set Parent Class</p></figcaption></figure>
 
 4.  Hit save, compile and hit play to test - use the T key to talk and Enter to text chat.\
-    \
-
+    <br>
 
     <figure><img src="../../../../.gitbook/assets/image (334).png" alt=""><figcaption></figcaption></figure>
 5.  Hit F10 to open the settings menu where you have various options, like testing your microphone and changing the chat widget layout.

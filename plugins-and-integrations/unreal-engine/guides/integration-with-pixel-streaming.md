@@ -11,16 +11,13 @@ To setup the Pixel Streaming server, we recommend taking a look over [this excel
 {% endhint %}
 
 1. Ensure you have the latest Convai 3.1.0 plugin or later.
-2.  Enable Unreal Engine's `Pixel Streaming` and the `Pixel Streaming Player` Plugins from the Plugins window.\
-
+2.  Enable Unreal Engine's `Pixel Streaming` and the `Pixel Streaming Player` Plugins from the Plugins window.<br>
 
     <figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-3.  In the player blueprint which has the Convai Player component, add the PixelStreamingAudio component to the list of components.\
-
+3.  In the player blueprint which has the Convai Player component, add the PixelStreamingAudio component to the list of components.<br>
 
     <figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-4.  Click on PixelStreamingAudio component, and in the details panel find Base Submix and choose AudioInput sound submix.\
-
+4.  Click on PixelStreamingAudio component, and in the details panel find Base Submix and choose AudioInput sound submix.<br>
 
     <figure><img src="../../../.gitbook/assets/image (5) (1) (1).png" alt=""><figcaption></figcaption></figure>
 5. On Begin Play in the event graph, add the following blueprint function to initialize Pixel Streaming with the Player Component.

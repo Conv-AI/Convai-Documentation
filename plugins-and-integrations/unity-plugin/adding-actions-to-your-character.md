@@ -48,8 +48,7 @@ Repeat these steps to add more actions like "Pickup" and "Drop" etc.
 
 <figure><img src="../../.gitbook/assets/image (391).png" alt=""><figcaption><p>Convai Interactables Setup</p></figcaption></figure>
 
-*   Add the "There" object in Objects list, so that we can use the Dynamic Move Target indicator.\
-
+*   Add the "There" object in Objects list, so that we can use the Dynamic Move Target indicator.<br>
 
     <figure><img src="../../.gitbook/assets/image (394).png" alt=""><figcaption></figcaption></figure>
 * Add the [Dynamic Move Target Indicator](adding-actions-to-your-character.md#adding-a-dynamic-move-target-indicator) and setup [NavMesh agent](adding-actions-to-your-character.md#setting-up-navmesh) to you NPC.

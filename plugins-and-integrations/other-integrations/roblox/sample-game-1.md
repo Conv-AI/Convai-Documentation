@@ -32,8 +32,7 @@ To play the game follow the given steps:
 1. Get your API Key from our website. It is necessary to carry on any conversation in the game after the free quota has expired.
 2. Get the character ID of the new character that you have created in the Character Creator Tool.\
    If you do not have one, there is no need to worry. The game comes loaded with a sample character to explore.
-3.  Visit the link given above for the game.\
-
+3.  Visit the link given above for the game.<br>
 
     <figure><img src="../../../.gitbook/assets/roblox-ss.png" alt=""><figcaption></figcaption></figure>
 4. Click on the green Play button. That will open Roblox locally for you to play.
@@ -44,8 +43,7 @@ To play the game follow the given steps:
     Click on the **Understood** button, to close the notifications. Read it once though.\
     Enter the API Key and the Character ID in the bottom left section of the screen. Enter the value in each of the text boxes and press Enter.\
     Remember to press **ENTER** after entering the value to register it in the backend.
-6.  Now click on the Chatbox Icon or press the "/" icon on the keyboard to start a conversation. Start by saying "Hi!" and pressing **ENTER**.\
-
+6.  Now click on the Chatbox Icon or press the "/" icon on the keyboard to start a conversation. Start by saying "Hi!" and pressing **ENTER**.<br>
 
     <figure><img src="../../../.gitbook/assets/conv1.png" alt=""><figcaption></figcaption></figure>
 7. That's it. You can continue your conversation and keep testing your characters.

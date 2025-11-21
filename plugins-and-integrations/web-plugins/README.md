@@ -4,7 +4,7 @@ description: >-
   seamless setup.
 ---
 
-# Web Plugin
+# Web Plugins
 
 {% content-ref url="playcanvas-plugin/" %}
 [playcanvas-plugin](playcanvas-plugin/)
@@ -14,8 +14,8 @@ description: >-
 [convai-web-sdk](convai-web-sdk/)
 {% endcontent-ref %}
 
-{% content-ref url="javascript-chat-ui-sdk/" %}
-[javascript-chat-ui-sdk](javascript-chat-ui-sdk/)
+{% content-ref url="broken-reference" %}
+[Broken link](broken-reference)
 {% endcontent-ref %}
 
 {% content-ref url="narrative-design-guide/" %}

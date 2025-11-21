@@ -40,14 +40,9 @@ Action descriptions offer contextual hints to the AI, helping determine when and
 
 ### Implementing Action Descriptions
 
-1.  **Navigate to Convai Info Section**: Select your Convai character in the editor and access the Convai Info section.\
+1.  **Navigate to Convai Info Section**: Select your Convai character in the editor and access the Convai Info section.<br>
 
-
-    <div data-full-width="false">
-
-    <figure><img src="../../../../../.gitbook/assets/image (1) (3).png" alt="" width="296"><figcaption></figcaption></figure>
-
-    </div>
+    <div data-full-width="false"><figure><img src="../../../../../.gitbook/assets/image (1) (3).png" alt="" width="296"><figcaption></figcaption></figure></div>
 2. **Adding Action with Description**: Click the Add Element (+) icon to input the action along with its description as previously formatted.
 
 <figure><img src="../../../../../.gitbook/assets/image (348).png" alt=""><figcaption></figcaption></figure>
