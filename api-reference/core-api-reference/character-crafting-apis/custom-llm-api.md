@@ -7,12 +7,18 @@ hidden: true
 
 # Custom LLM API
 
+{% hint style="danger" %}
+Custom LLM integrations are available only on the Enterprise Plan.
+{% endhint %}
+
 ## Introduction
 
 The **Convai Custom LLM Models API** allows developers and enterprises to register and manage their own **custom large language models (LLMs)** on the Convai platform.\
 With these endpoints, you can connect private, OpenAI-compatible LLMs, control access, and manage lifecycle events such as registration, updates, and removal.
 
 All endpoints are **POST** requests and both accept and return **JSON** objects.
+
+{% embed url="https://youtu.be/OKXXqby0bcs" %}
 
 ***
 
