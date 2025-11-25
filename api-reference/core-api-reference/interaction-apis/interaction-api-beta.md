@@ -3,6 +3,7 @@ description: >-
   Enable real-time conversational AI with Convai’s Interaction API. Send text
   messages to your AI character and receive natural, streaming responses using
   Server-Sent Events (SSE).
+hidden: true
 ---
 
 # Interaction API (Beta)

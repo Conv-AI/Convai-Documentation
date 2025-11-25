@@ -10,7 +10,7 @@ description: >-
 
 ## Welcome to Convai Playground!&#x20;
 
-**Y**our workspace for creating, customizing, and testing AI-powered characters. This page gives you a high-level overview of the core tools and workflows, helping you get productive quickly. Each section below links to a dedicated page where you can dive deeper.
+Your workspace for creating, customizing, and testing AI-powered characters. This page gives you a high-level overview of the core tools and workflows, helping you get productive quickly. Each section below links to a dedicated page where you can dive deeper.
 
 ## Prerequisites
 
