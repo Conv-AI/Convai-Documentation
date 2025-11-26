@@ -16,6 +16,8 @@ Whether you’re building immersive NPCs or AI companions inside player suits, t
 
 {% embed url="https://youtu.be/HCgVlCKpDvg" %}
 
+**Sample Project Link:** \[Coming Soon]
+
 ***
 
 ## Installation Guide
