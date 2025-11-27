@@ -1,0 +1,180 @@
+---
+description: >-
+  Follow these instructions to enable actions for your Convai-powered
+  characters.
+metaLinks:
+  alternates:
+    - >-
+      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/unity-plugin/adding-actions-to-your-character
+---
+
+# Adding Actions to your Character
+
+## Setting Up Action Configurations
+
+1. Select the Convai NPC character from the hierarchy.
+2. Scroll down to the ConvaiNPC script attached to your character.
+3. Click the "Add Component" button.
+
+<figure><img src="../../.gitbook/assets/image (78).png" alt="" width="438"><figcaption></figcaption></figure>
+
+4. Use the checkbox to add the action script to the NPC Actions.
+5. Click "Apply Changes" to confirm.
+
+<figure><img src="../../.gitbook/assets/image (79).png" alt="" width="563"><figcaption></figcaption></figure>
+
+## Pre-defined Actions
+
+Convai offers predefined actions for a quick start.
+
+1. Click the "+" button to add a new action.
+2. From the dropdown menu, select "Move To."
+
+<figure><img src="../../.gitbook/assets/image (80).png" alt=""><figcaption></figcaption></figure>
+
+3. Enter the action name as "Move To" (the name doesn't have to match the action choice name).
+4. Leave the Animation Name field empty for now.
+
+Repeat these steps to add more actions like "Pickup" and "Drop" etc.
+
+### Adding an Object in the Scene
+
+1. Add any object into the scene—a sphere, a cube, a rock, etc.—that can be interacted with
+2. Resize and place the object in your scene.
+
+<figure><img src="../../.gitbook/assets/image (83).png" alt=""><figcaption></figcaption></figure>
+
+### Adding the Convai Interactables Data Script
+
+* Create an empty GameObject and name it "Convai Interactables."
+* Attach the Convai Interactables Data script to this GameObject.
+* Add characters and objects to the script by clicking the "+" button and attaching the corresponding GameObjects.
+
+<figure><img src="../../.gitbook/assets/image (516).png" alt=""><figcaption><p>Convai Interactables Setup</p></figcaption></figure>
+
+*   Add the "There" object in Objects list, so that we can use the Dynamic Move Target indicator.<br>
+
+    <figure><img src="../../.gitbook/assets/image (519).png" alt=""><figcaption></figcaption></figure>
+* Add the [Dynamic Move Target Indicator](adding-actions-to-your-character.md#adding-a-dynamic-move-target-indicator) and setup [NavMesh agent](adding-actions-to-your-character.md#setting-up-navmesh) to you NPC.
+
+### Setting Up NavMesh
+
+To ensure your NPCs can navigate the scene:
+
+1. **Bake a NavMesh** for your scene if you haven't already:
+   * Go to **Window > AI > Navigation**.
+   * In the **Navigation** window, under the **Bake** tab, adjust the settings as needed.
+   * Click **"Bake"** to generate the NavMesh.
+2.  Ensure that the NPC character has a **NavMeshAgent** component:
+
+    * If not already attached, click **"Add Component"** and search for **NavMeshAgent**.
+    * Adjust the **Agent Radius, Speed,** and other parameters according to your NPC's requirements.
+
+    <figure><img src="../../.gitbook/assets/image (517).png" alt=""><figcaption></figcaption></figure>
+
+### Adding a Dynamic Move Target Indicator
+
+To visually indicate where your NPC will move:
+
+* Create a new empty GameObject in the scene and name it accordingly or use the pre-made prefab named **Dynamic Move Target Indicator.**
+* Link this **Move Target Indicator** to your NPC's action script so it updates dynamically when you point the cursor to the ground and ask the NPC to move to "There".
+
+<figure><img src="../../.gitbook/assets/image (518).png" alt=""><figcaption></figcaption></figure>
+
+### Test the Setup
+
+1. Click "Play" to start the scene.
+2. Ask the NPC, "Bring me the Box."&#x20;
+3. If setup properly, the NPC should walk upto the box and bring it to you
+
+{% hint style="warning" %}
+This feature is currently experimental and can misbehave. Feel free to try it out and leave us any feedback.
+{% endhint %}
+
+## Adding Custom Actions to Your Unity NPC in Convai
+
+### Introduction
+
+Make your NPC perform custom actions like dancing.
+
+### Action that Only Requires an Animation
+
+1.  Locate the dance animation file within our plugin.
+
+    <figure><img src="../../.gitbook/assets/image (87).png" alt=""><figcaption></figcaption></figure>
+2. Incorporate this animation into your NPC's actions.
+
+### Setting Up the Animator Controller
+
+1. Open the Animator Controller from the Inspector window.
+2.  Drag and drop the dance animation onto the controller, creating a new node named "Dancing."
+
+    <figure><img src="../../.gitbook/assets/image (89).png" alt=""><figcaption></figcaption></figure>
+
+### Adding custom Animation Action
+
+1. Go to the Action Handler Script attached to your Convai NPC.
+2. Add a new action named "Dancing."&#x20;
+3. In the Animation Name field, enter "Dancing" (it must exactly match the Animator Controller node name).
+4. Leave the enum as "None."
+
+<figure><img src="../../.gitbook/assets/image (90).png" alt=""><figcaption></figcaption></figure>
+
+### Testing the Custom Action
+
+1. Click "Play" to start the scene.
+2. Instruct the NPC, "Show me a dance move," and the NPC should start dancing.
+
+## Creating Complex Custom Actions in Unity with Convai: Throwing a Rock
+
+### Introduction
+
+Adding advanced custom actions, such as a throw action, to your NPC.
+
+### Animation Requirement
+
+1. Grab a [throw animation from Mixamo](https://www.mixamo.com/#/?page=1\&query=throw) or anywhere you like.
+2. Import it into Unity.
+
+### Setting Up the Animator Controller
+
+1. Drag and drop the throw animation onto the controller, creating a new node named "Throwing." (Follow steps in [#action-that-only-requires-an-animation](adding-actions-to-your-character.md#action-that-only-requires-an-animation "mention"))
+
+### Action Handler Script Setup
+
+1.  Add the "Throw" enum to the script.
+
+    <figure><img src="../../.gitbook/assets/image (91).png" alt=""><figcaption></figcaption></figure>
+2.  In the "Do Action" function, add a switch case for the throw action.&#x20;
+
+    <figure><img src="../../.gitbook/assets/image (96).png" alt=""><figcaption></figcaption></figure>
+3.  Define the "Throw()" function.&#x20;
+
+    <figure><img src="../../.gitbook/assets/image (97).png" alt=""><figcaption></figcaption></figure>
+
+### Adding the Throw Action
+
+1. Add a new action named "Throw" and select the "Throw" enum.&#x20;
+2.  Leave the animation name field empty.&#x20;
+
+    <figure><img src="../../.gitbook/assets/image (99).png" alt=""><figcaption></figcaption></figure>
+
+### Adding the Object (Rock) to the Convai Interactables Data script
+
+1. Add any rock prefab into the scene.
+2. Add the rock to the Convai Interactable Data script.
+
+### Adding a location to Convai Interactables Data script
+
+1. Add a stage/new location in the ground of the scene.
+2.  Add that new location game object in the Convai Interactable Data.
+
+    <figure><img src="../../.gitbook/assets/image (100).png" alt=""><figcaption></figcaption></figure>
+
+### Testing the Complex Action
+
+1. Click "Play" to start the scene.
+2. Instruct the NPC, "Pick up the rock and throw it from the stage."
+3. If everything is set up properly, the NPC should pick up the rock and throw it from the stage.&#x20;
+
+***
