@@ -31,6 +31,18 @@ You can install the Convai Unreal Plugin using one of two methods, depending on 
 2. Download the latest release `.zip` file.
 3. Extract the archive — you should see a folder named **Convai**.
 
+{% hint style="danger" %}
+## Beta Notice
+
+This package is currently in **beta**.
+
+* **LipSync is not supported** in this version.
+* Additional features, including **full LipSync support**, will be introduced in future releases.
+* You may encounter **unexpected issues or behavior**.
+
+If you experience any problems, please report them via the [**Convai Developer Forum**](https://forum.convai.com/).
+{% endhint %}
+
 ***
 
 ### 2. Install the Plugin
