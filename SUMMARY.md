@@ -189,6 +189,7 @@
       * [useConvaiClient Hook](plugins-and-integrations/web-plugins/convai-web-sdk-beta/react/useconvaiclient-hook.md)
       * [ConvaiWidget](plugins-and-integrations/web-plugins/convai-web-sdk-beta/react/convaiwidget.md)
       * [Custom UI & Advanced Usage](plugins-and-integrations/web-plugins/convai-web-sdk-beta/react/custom-ui-and-advanced-usage.md)
+      * [Audio Visualizer (Optional)](plugins-and-integrations/web-plugins/convai-web-sdk-beta/react/audio-visualizer-optional.md)
     * [Vanilla Typescript](plugins-and-integrations/web-plugins/convai-web-sdk-beta/vanilla-typescript/README.md)
       * [ConvaiClient (Core API)](plugins-and-integrations/web-plugins/convai-web-sdk-beta/vanilla-typescript/convaiclient-core-api.md)
       * [Events & Message Handling](plugins-and-integrations/web-plugins/convai-web-sdk-beta/vanilla-typescript/events-and-message-handling.md)

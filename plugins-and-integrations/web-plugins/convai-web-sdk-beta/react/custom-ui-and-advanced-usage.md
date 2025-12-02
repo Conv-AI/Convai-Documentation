@@ -68,16 +68,31 @@ function Controls({ convaiClient }) {
 
 ***
 
-## Message Types
+### Message Types
 
-The SDK produces:
+Common message types in `convaiClient.chatMessages`:
 
-* `user` — User messages
-* `user-transcription` — Live ASR
-* `bot-llm-text` — Character text
-* `bot-emotion` — Emotion signals
-* `action` — Action triggers
-* `behavior-tree` — Behavior responses
+```ts
+type ChatMessageType =
+  | "user"               // User's sent message (raw)
+  | "user-transcription" // Real-time speech-to-text from user
+  | "user-llm-text"      // Final user text processed by LLM
+  | "convai"             // Raw character message
+  | "bot-llm-text"       // Character’s LLM-generated text
+  | "bot-emotion"        // Character’s emotion state
+  | "emotion"            // Generic emotion message
+  | "behavior-tree"      // Behavior tree / decision output
+  | "action"             // Action execution
+  | "interrupt-bot";     // Interrupt message
+```
+
+For chat UIs, you usually show only:
+
+```ts
+const displayMessages = chatMessages.filter(
+  (msg) => msg.type === "user-llm-text" || msg.type === "bot-llm-text"
+);
+```
 
 ***
 

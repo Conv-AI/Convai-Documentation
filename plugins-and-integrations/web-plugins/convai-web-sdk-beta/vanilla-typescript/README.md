@@ -76,3 +76,35 @@ await client.connect({
 * Provide one to enable **memory**, **session continuity**, and **analytics**.
 * Omit if you want a stateless session.
 
+***
+
+#### Using the Vanilla Widget (Optional)
+
+If you want a ready-made UI in vanilla TypeScript/JavaScript, you can use the widget helper:
+
+```ts
+import {
+  ConvaiClient,
+  createConvaiWidget,
+} from "@convai/web-sdk/vanilla";
+
+const client = new ConvaiClient({
+  apiKey: "your-api-key",
+  characterId: "your-character-id",
+});
+
+const widget = createConvaiWidget(document.body, {
+  convaiClient: client,
+  showVideo: true,
+  showScreenShare: true,
+});
+
+// Later, when cleaning up:
+widget.destroy();
+```
+
+The vanilla widget behaves similarly to the React widget:
+
+* Auto-connects on first user interaction
+* Manages audio capture and playback
+* Can show video and screen-share controls if enabled

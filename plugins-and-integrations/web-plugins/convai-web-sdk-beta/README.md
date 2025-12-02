@@ -43,11 +43,75 @@ The Web SDK introduces a streamlined, high-performance interaction pipeline powe
 
 {% include "../../../.gitbook/includes/separation-line.md" %}
 
-## Conclusion
+### Core Concepts
 
-The **Convai Web SDK (`@convai/web-sdk`)** marks a major step forward in bringing real-time AI interaction to the browser. With speech, actions, emotions, and optional video all running on the latest Convai backend, you can build fast, responsive, and deeply interactive AI characters across any web experience.
+At a high level, the SDK is organised into a few core pieces:
 
-Start building today and bring the next generation of AI-powered interaction to the open web.
+1. **ConvaiClient**\
+   The brain. Manages connection, state, messages, and audio/video/screen-share control.
+2. **ConvaiWidget**\
+   A complete, prebuilt interface for text + voice + optional video/screen share.
+3. **AudioRenderer**\
+   **Critical for audio playback.** Attaches the bot’s audio tracks to the user’s speakers.
+   * Required for custom UIs
+   * Already built in to `ConvaiWidget`
+4. **Connection Type**\
+   Determines what’s possible:
+   * `"audio"` (default) – audio-only conversations
+   * `"video"` – audio + video + screen share
+
+***
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│  ConvaiWidget (UI Layer)                       │
+│  ├─ Chat Interface                             │
+│  ├─ Voice Mode                                 │
+│  └─ Video/Screen Share UI                      │
+└─────────────────────────────────────────────────┘
+                     ▼
+┌─────────────────────────────────────────────────┐
+│  ConvaiClient (Core Logic)                     │
+│  ├─ Connection Management                      │
+│  ├─ Message Handling                           │
+│  ├─ State Management                           │
+│  └─ Audio/Video Controls                       │
+└─────────────────────────────────────────────────┘
+                     ▼
+┌─────────────────────────────────────────────────┐
+│  WebRTC Room (Communication Layer)             │
+│  ├─ Real-time Audio/Video Streaming            │
+│  ├─ Track Management                           │
+│  └─ Network Communication                      │
+└─────────────────────────────────────────────────┘
+                     ▼
+┌─────────────────────────────────────────────────┐
+│  AudioRenderer (Critical for Playback)         │
+│  ├─ Attaches audio tracks to DOM               │
+│  ├─ Manages audio elements                     │
+│  └─ Enables bot voice playback                 │
+└─────────────────────────────────────────────────┘
+```
+
+***
+
+### What’s Included
+
+* **React SDK**
+  * `useConvaiClient` hook for easy client lifecycle
+  * `<ConvaiWidget />` for full UI
+  * `<AudioRenderer />` + `AudioContext` for custom UIs
+* **Vanilla SDK**
+  * `ConvaiClient` class for direct control
+  * `AudioRenderer` class for playback
+  * Optional `createConvaiWidget()` helper
+* **Video & Screen Share**
+  * Camera and screen share support when `enableVideo: true`
+  * Fine-grained video and screen share controls
+* **TypeScript-first**
+  * Full type definitions for configs, state, messages, and control APIs
 
 {% hint style="success" %}
 ## Performance Optimization&#x20;
@@ -56,3 +120,9 @@ To achieve the lowest possible latency, we recommend configuring your Core AI se
 {% endhint %}
 
 <figure><img src="../../../.gitbook/assets/Core AI.png" alt=""><figcaption></figcaption></figure>
+
+## Conclusion
+
+The **Convai Web SDK (`@convai/web-sdk`)** marks a major step forward in bringing real-time AI interaction to the browser. With speech, actions, emotions, and optional video all running on the latest Convai backend, you can build fast, responsive, and deeply interactive AI characters across any web experience.
+
+Start building today and bring the next generation of AI-powered interaction to the open web.
