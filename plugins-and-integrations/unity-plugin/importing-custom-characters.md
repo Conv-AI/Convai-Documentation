@@ -52,7 +52,7 @@ We assume that nothing other than pre-instructed components were added by you; y
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 201324.png" alt=""><figcaption><p>Screenshot showing newly added ConvaiNPC Component</p></figcaption></figure>
 
-Copy your character's ID and name from [Convai Playground](broken-reference) and paste them here.
+Copy your character's ID and name from [Convai Playground](/broken/pages/31tnQsuqz1OK69s2j3ft) and paste them here.
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 201727.png" alt=""><figcaption><p>Screenshot showing filled-in character information.</p></figcaption></figure>
 

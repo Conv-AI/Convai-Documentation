@@ -14,8 +14,8 @@ description: >-
 [convai-web-sdk](convai-web-sdk/)
 {% endcontent-ref %}
 
-{% content-ref url="broken-reference" %}
-[Broken link](broken-reference)
+{% content-ref url="/broken/pages/r0KD1Wfq9L9ZkIKU1qWm" %}
+[Broken link](/broken/pages/r0KD1Wfq9L9ZkIKU1qWm)
 {% endcontent-ref %}
 
 {% content-ref url="narrative-design-guide/" %}

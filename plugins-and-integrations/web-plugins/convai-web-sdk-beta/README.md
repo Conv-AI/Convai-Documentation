@@ -48,3 +48,11 @@ The Web SDK introduces a streamlined, high-performance interaction pipeline powe
 The **Convai Web SDK (`@convai/web-sdk`)** marks a major step forward in bringing real-time AI interaction to the browser. With speech, actions, emotions, and optional video all running on the latest Convai backend, you can build fast, responsive, and deeply interactive AI characters across any web experience.
 
 Start building today and bring the next generation of AI-powered interaction to the open web.
+
+{% hint style="success" %}
+## Performance Optimization&#x20;
+
+To achieve the lowest possible latency, we recommend configuring your Core AI settings to use the `gemini-flash-2.5-beta` model. This model is optimized for speed and is ideal for real-time applications where response time is critical.
+{% endhint %}
+
+<figure><img src="../../../.gitbook/assets/Core AI.png" alt=""><figcaption></figcaption></figure>

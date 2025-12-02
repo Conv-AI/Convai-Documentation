@@ -36,7 +36,7 @@ There are two methods to install the plugin depending on your requirements
 
 ## Set up the API key
 
-1. [Find your API key.](broken-reference)
+1. [Find your API key.](/broken/pages/CJVBwanK70esQhUqiKHl#get-your-unique-api-key)
 2. Go to **Edit > Project Settings**.
 3.  Choose **Convai** under the **Plugins** section on the left bar.<br>
 

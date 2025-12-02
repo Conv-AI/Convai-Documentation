@@ -18,7 +18,7 @@ description: >-
     Note: if you do not find the component then ensure that you have properly installed and enabled the plugin by following the [Installation guide](download-and-setup.md#installing-the-plugin).<br>
 
     <div align="left"><figure><img src="../../../../.gitbook/assets/image (312).png" alt="" width="563"><figcaption></figcaption></figure></div>
-5.  Select the created component and on the details panel, find the Character ID field and paste your character ID which you can get by creating a new character or using an existing one on the [Convai Playground](broken-reference).<br>
+5.  Select the created component and on the details panel, find the Character ID field and paste your character ID which you can get by creating a new character or using an existing one on the [Convai Playground](/broken/pages/Q5SplR81qembnni7lWul).<br>
 
     <div align="left"><figure><img src="../../../../.gitbook/assets/image (314).png" alt="" width="563"><figcaption></figcaption></figure></div>
 6.  Add a box component so that you can see the blueprint when placed in the scene.<br>
