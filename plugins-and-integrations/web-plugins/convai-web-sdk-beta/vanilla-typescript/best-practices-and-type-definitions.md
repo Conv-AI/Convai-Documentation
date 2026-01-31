@@ -49,41 +49,136 @@ client.on('stateChange', updateUI);
 
 ***
 
-## Key Types
+## **Core Types:**
 
-```ts
+```typescript
+import type {
+  ConvaiClient,
+  ConvaiConfig,
+  ConvaiClientState,
+  ChatMessage,
+  IConvaiClient,
+} from '@convai/web-sdk';
+```
+
+**Control Interfaces:**
+
+```typescript
+import type {
+  AudioControls,
+  VideoControls,
+  ScreenShareControls,
+} from '@convai/web-sdk';
+```
+
+**Lipsync Types:**
+
+```typescript
+import type {
+  BlendshapeQueue,
+  BlendshapeMapper,
+  BlendshapeFormat,
+  BlendshapeMappingConfig,
+  BlendshapeNameMapping,
+  OptimizedBlendshapeOutput,
+} from '@convai/web-sdk';
+```
+
+**Configuration Interface:**
+
+```typescript
 interface ConvaiConfig {
-  apiKey: string;
-  characterId: string;
-  endUserId?: string;
-  enableVideo?: boolean;
-  startWithVideoOn?: boolean;
-  ttsEnabled?: boolean;
-  actionConfig?: ActionConfig;
+  apiKey: string;                    // Required: Your API key
+  characterId: string;                // Required: Character ID
+  endUserId?: string;                 // Optional: For memory & analytics
+  url?: string;                       // Optional: Custom API endpoint
+  enableVideo?: boolean;              // Enable video/screenshare (default: false)
+  startWithVideoOn?: boolean;         // Start with camera on (default: false)
+  startWithAudioOn?: boolean;         // Start with mic on (default: false)
+  ttsEnabled?: boolean;               // Enable TTS (default: true)
+  enableLipsync?: boolean;            // Enable blendshapes (default: false)
+  blendshapeConfig?: {
+    format?: 'arkit' | 'mha';         // Blendshape format (default: 'mha')
+  };
+  actionConfig?: {                    // Optional: Character actions
+    actions: string[];
+    characters: Array<{ name: string; bio: string }>;
+    objects: Array<{ name: string; description: string }>;
+    currentAttentionObject?: string;
+  };
 }
 ```
 
-```ts
+***
+
+## Client State Management
+
+The `ConvaiClientState` interface provides complete visibility into the conversation state:
+
+```typescript
 interface ConvaiClientState {
-  isConnected: boolean;
-  isConnecting: boolean;
-  isListening: boolean;
-  isThinking: boolean;
-  isSpeaking: boolean;
-  agentState: 'disconnected' | 'listening' | 'thinking' | 'speaking';
+  isConnected: boolean;     // Connected to character
+  isConnecting: boolean;    // Connection in progress
+  isListening: boolean;     // Listening to user
+  isThinking: boolean;      // Processing response
+  isSpeaking: boolean;      // Character speaking
+  agentState: string;       // Combined state
 }
 ```
 
-```ts
-interface ChatMessage {
-  id: string;
-  type:
-    | 'user-transcription'
-    | 'bot-llm-text'
-    | 'bot-emotion'
-    | 'action'
-    | 'behavior-tree';
-  content: string;
-  timestamp: number;
+**Agent State Values:**
+
+* `'disconnected'` - Not connected
+* `'connected'` - Connected but idle
+* `'listening'` - Actively listening to user
+* `'thinking'` - Processing user input
+* `'speaking'` - Character is responding
+
+**Usage:**
+
+```typescript
+// React
+const { state } = convaiClient;
+if (state.isSpeaking) {
+  console.log('Character is speaking');
 }
+
+// Vanilla
+client.on('stateChange', (state) => {
+  console.log('State:', state.agentState);
+});
+```
+
+***
+
+## Event System
+
+The SDK uses an event-driven architecture for state changes and messages:
+
+**Available Events:**
+
+| Event                     | Parameters                   | Description                       |
+| ------------------------- | ---------------------------- | --------------------------------- |
+| `stateChange`             | `(state: ConvaiClientState)` | Connection/activity state changed |
+| `message`                 | `(message: ChatMessage)`     | New message received              |
+| `messagesChange`          | `(messages: ChatMessage[])`  | Message history updated           |
+| `connect`                 | `()`                         | Successfully connected            |
+| `disconnect`              | `()`                         | Disconnected from character       |
+| `error`                   | `(error: Error)`             | Error occurred                    |
+| `botReady`                | `()`                         | Bot is ready to receive messages  |
+| `userTranscriptionChange` | `(transcription: string)`    | User speech transcription updated |
+
+**Usage:**
+
+```typescript
+// Subscribe to events
+const unsubscribe = client.on('stateChange', (state) => {
+  console.log('State changed:', state);
+});
+
+// Unsubscribe
+unsubscribe();
+
+// Or manually
+client.off('stateChange', callback);
 ```

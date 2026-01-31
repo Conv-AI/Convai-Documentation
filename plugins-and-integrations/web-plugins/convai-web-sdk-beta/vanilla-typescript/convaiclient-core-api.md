@@ -18,19 +18,24 @@ You configure it when calling `connect()`.
 
 ```ts
 await client.connect({
-  apiKey: string,
-  characterId: string,
-  endUserId?: string,
-  url?: string,
-  enableVideo?: boolean,
-  startWithVideoOn?: boolean,
-  ttsEnabled?: boolean,
-  actionConfig?: {
+  apiKey: string;                    // Required: Your API key
+  characterId: string;                // Required: Character ID
+  endUserId?: string;                 // Optional: For memory & analytics
+  url?: string;                       // Optional: Custom API endpoint
+  enableVideo?: boolean;              // Enable video/screenshare (default: false)
+  startWithVideoOn?: boolean;         // Start with camera on (default: false)
+  startWithAudioOn?: boolean;         // Start with mic on (default: false)
+  ttsEnabled?: boolean;               // Enable TTS (default: true)
+  enableLipsync?: boolean;            // Enable blendshapes (default: false)
+  blendshapeConfig?: {
+    format?: 'arkit' | 'mha';         // Blendshape format (default: 'mha')
+  };
+  actionConfig?: {                    // Optional: Character actions
     actions: string[];
     characters: Array<{ name: string; bio: string }>;
     objects: Array<{ name: string; description: string }>;
     currentAttentionObject?: string;
-  }
+  };
 });
 ```
 

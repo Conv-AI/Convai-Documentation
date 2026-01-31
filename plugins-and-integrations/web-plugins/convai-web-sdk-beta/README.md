@@ -48,15 +48,20 @@ The Web SDK introduces a streamlined, high-performance interaction pipeline powe
 At a high level, the SDK is organised into a few core pieces:
 
 1. **ConvaiClient**\
-   The brain. Manages connection, state, messages, and audio/video/screen-share control.
+   The brain. Manages connection, state, messages, audio/video/screen-share control, and blendshape queue.
 2. **ConvaiWidget**\
    A complete, prebuilt interface for text + voice + optional video/screen share.
-3. **AudioRenderer**\
-   **Critical for audio playback.** Attaches the bot’s audio tracks to the user’s speakers.
+3. **AudioRenderer** **(Critical for audio playback)**\
+   Attaches the bot's audio tracks to the user's speakers.
    * Required for custom UIs
    * Already built in to `ConvaiWidget`
-4. **Connection Type**\
-   Determines what’s possible:
+4. **BlendshapeQueue** **(Essential for facial animation)**\
+   Manages buffering and time-based retrieval of facial blendshape data.
+   * Provides 60fps blendshape streams synchronized with speech
+   * Supports ARKit (61 elements) and MetaHuman (251 elements) formats
+   * Optional custom mapping for any character rig
+5. **Connection Type**\
+   Determines what's possible:
    * `"audio"` (default) – audio-only conversations
    * `"video"` – audio + video + screen share
 
@@ -66,25 +71,27 @@ At a high level, the SDK is organised into a few core pieces:
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  ConvaiWidget (UI Layer)                       │
-│  ├─ Chat Interface                             │
-│  ├─ Voice Mode                                 │
-│  └─ Video/Screen Share UI                      │
+│  ConvaiWidget (UI Layer)                        │
+│  ├─ Chat Interface                              │
+│  ├─ Voice Mode                                  │
+│  └─ Video/Screen Share UI                       │
 └─────────────────────────────────────────────────┘
                      ▼
 ┌─────────────────────────────────────────────────┐
-│  ConvaiClient (Core Logic)                     │
-│  ├─ Connection Management                      │
-│  ├─ Message Handling                           │
-│  ├─ State Management                           │
-│  └─ Audio/Video Controls                       │
+│  ConvaiClient (Core Logic)                      │
+│  ├─ Connection Management                       │
+│  ├─ Message Handling                            │
+│  ├─ State Management                            │
+│  └─ Audio/Video Controls                        │
+│  └─ Blendshape Queue Management                 │
 └─────────────────────────────────────────────────┘
                      ▼
 ┌─────────────────────────────────────────────────┐
-│  WebRTC Room (Communication Layer)             │
-│  ├─ Real-time Audio/Video Streaming            │
-│  ├─ Track Management                           │
-│  └─ Network Communication                      │
+│  WebRTC Room (Communication Layer)              │
+│  ├─ Real-time Audio/Video Streaming             │
+│  ├─ Blendshape Data Streaming (60fps)           │
+│  ├─ Track Management                            │
+│  └─ Network Communication                       │
 └─────────────────────────────────────────────────┘
                      ▼
 ┌─────────────────────────────────────────────────┐
@@ -97,21 +104,29 @@ At a high level, the SDK is organised into a few core pieces:
 
 ***
 
-### What’s Included
+#### What's Included
 
 * **React SDK**
   * `useConvaiClient` hook for easy client lifecycle
   * `<ConvaiWidget />` for full UI
   * `<AudioRenderer />` + `AudioContext` for custom UIs
+  * Access to `blendshapeQueue` for facial animation
 * **Vanilla SDK**
   * `ConvaiClient` class for direct control
   * `AudioRenderer` class for playback
   * Optional `createConvaiWidget()` helper
+  * `BlendshapeQueue` API for facial animation
+* **Lipsync & Facial Animation**
+  * Real-time blendshape streaming at 60fps
+  * Support for ARKit (61) and MetaHuman (251) formats
+  * Declarative name-based mapping system
+  * Helper functions and preset configurations
+  * Works with Three.js, Babylon.js, Unity WebGL, and custom engines
 * **Video & Screen Share**
   * Camera and screen share support when `enableVideo: true`
   * Fine-grained video and screen share controls
 * **TypeScript-first**
-  * Full type definitions for configs, state, messages, and control APIs
+  * Full type definitions for configs, state, messages, and control APIs<br>
 
 {% hint style="success" %}
 ## Performance Optimization&#x20;

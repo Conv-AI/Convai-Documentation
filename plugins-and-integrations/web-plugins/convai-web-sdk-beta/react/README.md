@@ -90,3 +90,16 @@ EndUserId
 * Long-term memory (context based replies from previous conversations).
 * Analytics (end user tracking).
 {% endhint %}
+
+**Peer Dependencies:**
+
+The SDK requires React 18+ for React usage:
+
+```json
+{
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}
+```
