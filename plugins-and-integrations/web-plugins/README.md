@@ -10,8 +10,8 @@ description: >-
 [playcanvas-plugin](playcanvas-plugin/)
 {% endcontent-ref %}
 
-{% content-ref url="convai-web-sdk/" %}
-[convai-web-sdk](convai-web-sdk/)
+{% content-ref url="convai-web-sdk-1/" %}
+[convai-web-sdk-1](convai-web-sdk-1/)
 {% endcontent-ref %}
 
 {% content-ref url="narrative-design-guide/" %}

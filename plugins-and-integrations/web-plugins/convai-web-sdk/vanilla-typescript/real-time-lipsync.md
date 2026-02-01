@@ -69,26 +69,30 @@ class LipsyncPlayer {
   private client: ConvaiClient;
   private isPlaying: boolean = false;
   private animationFrameId: number | null = null;
-  private lastFrameIndex: number = -1;
+  private startTime: number = 0;
   
   constructor(
     client: ConvaiClient, 
     private onFrame: (frame: Float32Array) => void
   ) {
     this.client = client;
+    
+    // Track when bot starts speaking to sync timing
+    client.on('speakingChange', (isSpeaking) => {
+      if (isSpeaking) {
+        this.startTime = performance.now();
+      }
+    });
   }
 
   start(): void {
     if (this.isPlaying) return;
-    
     this.isPlaying = true;
-    this.lastFrameIndex = -1;
     this.animate();
   }
 
   stop(): void {
     if (!this.isPlaying) return;
-    
     this.isPlaying = false;
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
@@ -99,59 +103,62 @@ class LipsyncPlayer {
   private animate = (): void => {
     if (!this.isPlaying) return;
 
-    // Get the blendshape queue from the client
     const queue = this.client.blendshapeQueue;
     
-    // Check if we have frames to play and conversation is active
-    // hasFrames() - Returns true if there are blendshape frames in the queue
-    // isConversationActive() - Returns true when bot is speaking
     if (queue.hasFrames() && queue.isConversationActive()) {
-      // Get the next frame from the queue (index 0 = first frame)
-      // This READS the frame but doesn't remove it yet
-      const frame = queue.getFrame(0);
+      // Calculate elapsed time since bot started speaking
+      const elapsedTime = (performance.now() - this.startTime) / 1000;
       
-      // frame is a Float32Array with blendshape values (0.0 to 1.0)
-      // Length depends on format: ARKit=52+, MetaHuman=251
-      if (frame) {
-        this.onFrame(frame);
-        
-        // Remove the frame from the queue after applying it
-        // consumeFrames(1) removes 1 frame from the front of the queue
-        // This is important! Without this, the same frame plays forever
-        queue.consumeFrames(1);
+      // Get frame based on elapsed time (synced with audio)
+      const result = queue.getFrameAtTime(elapsedTime);
+      
+      if (result) {
+        this.onFrame(result.frame);
       }
-    } else if (queue.isConversationEnded()) {
-      this.lastFrameIndex = -1;
     }
 
-    // Continue the animation loop at ~60fps (or your monitor's refresh rate)
     this.animationFrameId = requestAnimationFrame(this.animate);
   };
 }
 
 // Usage
 const lipsyncPlayer = new LipsyncPlayer(client, (blendshapes) => {
-  // IMPORTANT: Your character likely has MORE morph targets than the blendshape format!
-  // Example: Your character might have 300+ morphs (body, face, expressions)
-  // But ARKit only provides 52 facial blendshapes
-  // 
-  // RECOMMENDED: Create a mapping function that specifies which blendshape index
-  // should affect which morph target index on your character
   applyBlendshapesToCharacter(blendshapes, character.morphTargetInfluences);
 });
 
 lipsyncPlayer.start();
 
-// Helper function: Map blendshape indices to your character's morph target indices
+// Helper function: Map blendshapes to your character's morph targets
 function applyBlendshapesToCharacter(frame: Float32Array, influences: number[]) {
-  // Map each blendshape to the correct morph target on your character
-  // Example mappings (customize based on your character's morph target order):
-  influences[10] = frame[0];  // ARKit jawOpen -> your character's jaw morph at index 10
-  influences[15] = frame[1];  // ARKit mouthClose -> your character's mouth morph at index 15
-  influences[42] = frame[17]; // ARKit eyeBlinkLeft -> your character's left eye at index 42
-  // ... add mappings for all blendshapes you need
+  // Simple direct mapping (first N blendshapes to first N morph targets)
+  const maxIndex = Math.min(frame.length, influences.length);
+  for (let i = 0; i < maxIndex; i++) {
+    influences[i] = frame[i];
+  }
   
-  // Tip: Check your character's morphTargetDictionary to find the correct indices:
-  // console.log(character.morphTargetDictionary);
+  // OR custom mapping if your character's morphs are in different order:
+  // influences[10] = frame[17]; // Map jawOpen (ARKit index 17) to your jaw morph (index 10)
+  // influences[15] = frame[18]; // Map mouthClose (ARKit index 18) to your mouth morph (index 15)
 }
+```
+
+BlendQueue functions:
+
+```tsx
+// TIME-BASED ACCESS (Most important for real usage!)
+queue.getFrameAtTime(elapsedSeconds) // Returns { frame, frameIndex }
+
+// STATE CHECKS
+queue.isConversationActive() // Is bot speaking?
+queue.isConversationEnded()  // Did stats arrive?
+queue.isAllFramesConsumed()  // Playback complete?
+
+// STATISTICS
+queue.getTurnStats()         // TurnStats object
+queue.getTimeLeftMs()        // Remaining time in ms
+queue.getFramesConsumed()    // How many frames played
+queue.getDebugInfo()         // Complete state snapshot
+
+// INTERRUPTION
+queue.interrupt()     // Called automatically on sendInterruptMessage()
 ```

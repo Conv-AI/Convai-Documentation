@@ -24,8 +24,8 @@ Convai provides a variety of plugins and integrations to help integrate conversa
 [playcanvas-plugin](web-plugins/playcanvas-plugin/)
 {% endcontent-ref %}
 
-{% content-ref url="web-plugins/convai-web-sdk/" %}
-[convai-web-sdk](web-plugins/convai-web-sdk/)
+{% content-ref url="web-plugins/convai-web-sdk-1/" %}
+[convai-web-sdk-1](web-plugins/convai-web-sdk-1/)
 {% endcontent-ref %}
 
 {% content-ref url="/broken/pages/r0KD1Wfq9L9ZkIKU1qWm" %}
