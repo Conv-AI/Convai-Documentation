@@ -2,6 +2,7 @@
 description: >-
   Learn how to install, set up, and run the Convai Unity Plugin Beta to
   integrate conversational AI characters directly within your Unity projects.
+hidden: true
 ---
 
 # Installation and Setup
@@ -22,7 +23,7 @@ Follow these steps to install and configure the Convai Unity Plugin Beta.
 
 Download the ZIP file provided below.
 
-{% file src="../../.gitbook/assets/ConvaiUnityBeta_MR.zip" %}
+{% file src="../.gitbook/assets/ConvaiUnityBeta_MR.zip" %}
 
 ## **Beta Notice**
 

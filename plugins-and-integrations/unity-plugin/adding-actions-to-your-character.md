@@ -38,7 +38,7 @@ Repeat these steps to add more actions like "Pickup" and "Drop" etc.
 1. Add any object into the scene—a sphere, a cube, a rock, etc.—that can be interacted with
 2. Resize and place the object in your scene.
 
-<figure><img src="../../.gitbook/assets/image (5) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (5) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Adding the Convai Interactables Data Script
 
@@ -97,7 +97,7 @@ Make your NPC perform custom actions like dancing.
 
 1.  Locate the dance animation file within our plugin.
 
-    <figure><img src="../../.gitbook/assets/image (9) (1) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (9) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 2. Incorporate this animation into your NPC's actions.
 
 ### Setting Up the Animator Controller
@@ -105,7 +105,7 @@ Make your NPC perform custom actions like dancing.
 1. Open the Animator Controller from the Inspector window.
 2.  Drag and drop the dance animation onto the controller, creating a new node named "Dancing."
 
-    <figure><img src="../../.gitbook/assets/image (11) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (11) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Adding custom Animation Action
 
@@ -114,7 +114,7 @@ Make your NPC perform custom actions like dancing.
 3. In the Animation Name field, enter "Dancing" (it must exactly match the Animator Controller node name).
 4. Leave the enum as "None."
 
-<figure><img src="../../.gitbook/assets/image (12) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (12) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Testing the Custom Action
 
@@ -140,7 +140,7 @@ Adding advanced custom actions, such as a throw action, to your NPC.
 
 1.  Add the "Throw" enum to the script.
 
-    <figure><img src="../../.gitbook/assets/image (13) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (13) (1) (1).png" alt=""><figcaption></figcaption></figure>
 2.  In the "Do Action" function, add a switch case for the throw action.&#x20;
 
     <figure><img src="../../.gitbook/assets/image (18) (1).png" alt=""><figcaption></figcaption></figure>
