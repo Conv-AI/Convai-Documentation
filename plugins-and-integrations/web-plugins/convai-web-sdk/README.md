@@ -4,7 +4,7 @@ description: >-
   interaction for the browser
 ---
 
-# Convai Web SDK \[Beta]
+# Convai Web SDK
 
 ## Introduction
 
@@ -12,15 +12,6 @@ The **Convai Web SDK (`@convai/web-sdk`)** brings the new Convai backend to the 
 Built for production apps, immersive sites, and interactive worlds, the SDK handles real-time audio, text, optional video, character actions, and emotion signals — giving developers the tools to create responsive, intelligent AI characters directly on the web.
 
 With built-in voice capture, speech detection, a ready-to-use chat widget, and full custom UI support, Convai makes it simple to integrate lifelike assistants, companions, and NPCs into any web environment.
-
-{% hint style="warning" %}
-## Beta Release
-
-This is the **Beta** release of the Convai Web SDK.\
-We’re actively improving performance, expanding capabilities, and delivering new interaction features. Your feedback plays an important role — share insights and suggestions in the [Convai Developer Forum](https://forum.convai.com/).
-{% endhint %}
-
-{% include "../../../.gitbook/includes/separation-line.md" %}
 
 ## What’s New
 
