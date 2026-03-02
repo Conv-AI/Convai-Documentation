@@ -23,7 +23,7 @@ Look at the top right of any character screen. You will see:
 
 These controls behave the same way on every page.
 
-<figure><img src="../../.gitbook/assets/image (11) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (11) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -45,7 +45,7 @@ Use Versioning to save and switch between alternative definitions of your charac
 
 For more information, refer to the [Character Versioning](character-versioning.md) documentation.
 
-<figure><img src="../../.gitbook/assets/image (12) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (12) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### 2. Update button
 
@@ -59,7 +59,7 @@ Apply your unsaved changes to the character.
 
     * **Gray**: everything is already saved.
 
-    <figure><img src="../../.gitbook/assets/image (13) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (13) (1) (1).png" alt=""><figcaption></figcaption></figure>
 * **Important**
   * If you refresh or navigate away while the button is green, your unsaved changes will be lost.
   * Click **Update** after edits on any tab, then proceed to testing.
@@ -68,7 +68,7 @@ Apply your unsaved changes to the character.
 
 Open the three dots menu to access actions that affect the entire character.
 
-<figure><img src="../../.gitbook/assets/image (14) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (14) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 #### **Clone Character**
 

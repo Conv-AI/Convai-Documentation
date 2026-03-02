@@ -23,7 +23,7 @@ Follow these steps to install and configure the Convai Unity Plugin Beta.
 
 Download the ZIP file provided below.
 
-{% file src="../.gitbook/assets/ConvaiUnityBeta_MR.zip" %}
+{% file src="../../.gitbook/assets/ConvaiUnityBeta_MR.zip" %}
 
 ## **Beta Notice**
 

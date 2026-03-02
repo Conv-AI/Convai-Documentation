@@ -28,7 +28,7 @@ Before making any changes:
 1. Launch **ConvaiAssetUploader.exe**.
 2. In the opened CMD window, choose **Option 2: Update an existing Project**.
 
-<figure><img src="../.gitbook/assets/image (14).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (14) (1).png" alt=""><figcaption></figcaption></figure>
 
 3. Follow the prompts to complete the plugin and related component updates.
 
@@ -38,7 +38,7 @@ Before making any changes:
 2. Right-click on it, select **Show More Options**, then click **Switch Unreal Engine Version**.
 3. Choose **5.6** from the list.
 
-<figure><img src="../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### **4. Install Cross-Compile Toolchain (Linux Development)**
 

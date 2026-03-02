@@ -10,7 +10,7 @@ description: >-
 
 Narrative Design lets you guide a character with high‑level objectives while keeping conversations flexible. Instead of hard coding a tree of lines, you define goals and decision points, then allow the character to respond dynamically. This approach works for many domains such as games, learning and training simulations, tourism, retail assistants, and customer support kiosks. You can read more about the considerations behind Narrative Design [here.](https://convai.com/blog/convai-narrative-design)
 
-<figure><img src="../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (15) (1).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -79,7 +79,7 @@ A training simulation scenario set in a manufacturing facility.\
 This character uses location-based triggers (e.g., entering the conveyor belt area or assembly line) to guide users through the workspace, explain safety protocols, and progress the tour.\
 Ideal for **industrial training** and **onboarding simulations**.
 
-<figure><img src="../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (15) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Real Estate Home Tour Guide – [View Character](https://convai.com/pipeline/dashboard/character?id=4d31ce84-8c6a-11ef-bc7a-42010a7be011)
 
