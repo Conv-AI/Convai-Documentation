@@ -24,7 +24,7 @@ Optionally, scene descriptions or dynamic information can be included to tailor 
 
 ### Request Body
 
-<table><thead><tr><th width="203.6666259765625">Name</th><th width="104">Type</th><th>Description</th></tr></thead><tbody><tr><td>character_id<mark style="color:red;">*</mark></td><td>String</td><td>Unique ID of the character to connect with.</td></tr><tr><td>connection_type</td><td>String</td><td><p>Connection mode for the session. </p><p>Supported values: <code>"audio"</code> (default) or <code>"video"</code>.</p></td></tr><tr><td>character_session_id</td><td>String</td><td>Existing session ID for maintaining conversation continuity. If omitted, a new one is generated.</td></tr><tr><td>dynamic_info</td><td><a href="connect-api.md#dynamic-info">JSON</a></td><td>Real-time contextual data to influence the conversation flow.</td></tr><tr><td>scene_description</td><td><a href="connect-api.md#scene_description">JSON</a></td><td>Descriptions of the current scene or environment context.</td></tr><tr><td>speaker_id</td><td>String</td><td>Speaker id of the user</td></tr></tbody></table>
+<table><thead><tr><th width="203.6666259765625">Name</th><th width="104">Type</th><th>Description</th></tr></thead><tbody><tr><td>character_id<mark style="color:red;">*</mark></td><td>String</td><td>Unique ID of the character to connect with.</td></tr><tr><td>connection_type</td><td>String</td><td><p>Connection mode for the session. </p><p>Supported values: <code>"audio"</code> (default) or <code>"video"</code>.</p></td></tr><tr><td>character_session_id</td><td>String</td><td>Existing session ID for maintaining conversation continuity. If omitted, a new one is generated.</td></tr><tr><td>dynamic_info</td><td><a href="connect-api.md#dynamic-info">JSON</a></td><td>Real-time contextual data to influence the conversation flow.</td></tr><tr><td>scene_description</td><td><a href="connect-api.md#scene_description">JSON</a></td><td>Descriptions of the current scene or environment context.</td></tr><tr><td>end_user_id</td><td>String</td><td>User managed unique identifier to tag sessions and use Long Term Memory</td></tr><tr><td>debug</td><td>Bool</td><td>Enables RTVI metrics on data channel.</td></tr></tbody></table>
 
 {% tabs %}
 {% tab title="dynamic info" %}
@@ -60,7 +60,7 @@ Optionally, scene descriptions or dynamic information can be included to tailor 
   "room_url": "<url of the room your client needs to join>",
   "room_name": "<name of the room to join>",
   "token": "<token for the client to join the room>",
-  "speaker_id": "<speaker id of the user in the session, null if not sent in request>"
+  "end_user_id": "<end_user_id of the user in the session, null if not sent in request>"
 }
 ```
 {% endtab %}
