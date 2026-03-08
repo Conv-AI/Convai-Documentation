@@ -14,9 +14,7 @@ Rebuilt from the ground up, offering low-latency dialogue, environment-aware int
 
 Whether you’re building immersive NPCs or AI companions inside player suits, the plugin enables natural, voice-driven experiences powered by Convai characters.
 
-{% embed url="https://youtu.be/HCgVlCKpDvg" %}
-
-[**\[Sample Project Link\]**](https://drive.google.com/file/d/1h9vykPPBqTXEQEHpHXf8ZFQhr7FazLgl)
+{% embed url="https://www.youtube.com/watch?v=n-UG3nmMeZQ" %}
 
 ***
 
