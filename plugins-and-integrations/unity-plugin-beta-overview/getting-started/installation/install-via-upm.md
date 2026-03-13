@@ -31,7 +31,7 @@ In Unity, go to **Window → Package Manager**.
 * Copy the package name below and paste it into the Package Name field. Then click **Install**.
   * `com.convai.convai-sdk-for-unity`&#x20;
 
-<figure><img src="../../../../.gitbook/assets/image (13) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (13) (1) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}

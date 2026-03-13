@@ -34,7 +34,7 @@ If you want to test your character quickly without an avatar visual, you can use
 
 
 
-<figure><img src="../../.gitbook/assets/image (8) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (8) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -57,7 +57,7 @@ You have two ways to start a video call:
 * Click the character’s card to open its details.
 * In the top-right section, under the character’s thumbnail, click the **video call button**.
 
-<figure><img src="../../.gitbook/assets/image (9) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (9) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 This method allows you to experience both the character’s **visual appearance** and **voice** in real-time, offering a more immersive test environment.
 

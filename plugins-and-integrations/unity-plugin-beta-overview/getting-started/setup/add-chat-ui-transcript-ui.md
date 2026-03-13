@@ -25,7 +25,7 @@ Chat UI is optional, but it’s extremely useful for debugging, testing without 
   * `TranscriptUI_Chat`
 * Make sure your search scope includes **In Packages** or **All**.
 
-<figure><img src="../../../../.gitbook/assets/image (11) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (11) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 * Alternatively, you can use the package path:
   * `Packages/com.convai.convai-sdk-for-unity/Prefabs/TranscriptUI/TranscriptUI_Chat.prefab`
@@ -45,7 +45,7 @@ Chat UI is optional, but it’s extremely useful for debugging, testing without 
   * Right-click in Hierarchy → **UI → Event System**
 * **Expected result:** An EventSystem exists and UI input works in Play Mode.
 
-<figure><img src="../../../../.gitbook/assets/image (12) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (12) (1) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 

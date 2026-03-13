@@ -25,7 +25,7 @@ This guide integrates Convai into your own scene by adding the required core obj
 * In Unity top menu, go to **GameObject → Convai → Setup Required Components**\
   **or** Right-click in the **Hierarchy** → **Convai → Setup Required Components**
 
-<figure><img src="../../../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (4) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 * Confirm and proceed in the popup.
 * **Expected result:** These objects exist in your scene:
@@ -33,7 +33,7 @@ This guide integrates Convai into your own scene by adding the required core obj
   * **\[Convai Composition Root]**
   * **\[Convai Room Manager]**
 
-<figure><img src="../../../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (5) (1) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -44,7 +44,7 @@ This guide integrates Convai into your own scene by adding the required core obj
 * Set **Player Name**.
 * **Expected result:** The scene has exactly one configured Convai Player.
 
-<figure><img src="../../../../.gitbook/assets/image (6) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (6) (1) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -55,7 +55,7 @@ For each character GameObject you want to make conversational:
 * Add **Convai Character** component
 * Set **Character ID**
 
-<figure><img src="../../../../.gitbook/assets/image (8) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (8) (1) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -71,12 +71,12 @@ For each character GameObject you want to make conversational:
   * Top menu: **GameObject → Convai → Validate Scene Setup**
   * Hierarchy right-click: **Convai → Validate Scene Setup**
 
-<figure><img src="../../../../.gitbook/assets/image (9) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (9) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 * **Expected result:** A success message like:
   * “Scene setup is correct!” and the number of Convai Characters found.
 
-<figure><img src="../../../../.gitbook/assets/image (10) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (10) (1) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
