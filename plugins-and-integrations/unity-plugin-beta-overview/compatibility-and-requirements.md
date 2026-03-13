@@ -12,7 +12,6 @@ description: >-
 * **Recommended Unity Version:** Unity 6
 * **Render Pipelines:** Built-in / URP / HDRP (all supported)
 * **Samples:** URP Focused Sample Scenes
-* **WebGL:** In Progress
 
 ***
 
@@ -24,7 +23,7 @@ description: >-
 
 ***
 
-<table><thead><tr><th>Platform</th><th data-type="checkbox">Status</th><th>Notes</th></tr></thead><tbody><tr><td>Windows</td><td>true</td><td>Editor &#x26; Builds</td></tr><tr><td>macOS</td><td>true</td><td>Editor &#x26; Builds</td></tr><tr><td>Linux</td><td>true</td><td>Editor &#x26; Builds</td></tr><tr><td>Android</td><td>true</td><td>Phone/Tablet, Meta Quest Devices, Android AR/VR/MR Devices</td></tr><tr><td>iOS</td><td>true</td><td>iPhone / iPad</td></tr><tr><td>WebGL</td><td>false</td><td>Not production ready yet</td></tr></tbody></table>
+<table><thead><tr><th>Platform</th><th data-type="checkbox">Status</th><th>Notes</th></tr></thead><tbody><tr><td>Windows</td><td>true</td><td>Editor &#x26; Builds</td></tr><tr><td>macOS</td><td>true</td><td>Editor &#x26; Builds</td></tr><tr><td>Linux</td><td>true</td><td>Editor &#x26; Builds</td></tr><tr><td>Android</td><td>true</td><td>Phone/Tablet, Meta Quest Devices, Android AR/VR/MR Devices</td></tr><tr><td>iOS</td><td>true</td><td>iPhone / iPad</td></tr><tr><td>WebGL</td><td>true</td><td></td></tr></tbody></table>
 
 ***
 

@@ -34,13 +34,13 @@ Use these pages depending on where you are in the process:
 
 * **Installation**
   * **UPM (Recommended)** — easiest updates and dependency management
-  * **Unity Package** — manual install (useful for offline or pinned builds) <sup>**(Coming soon)**</sup>
   * **Unity Asset Store** — Asset Store based distribution workflow <sup>**(Coming soon)**</sup>
 * **Setup**
   * **Configure API Key**
   * **Import & Run Sample Scenes**
   * **Custom Scene Setup**
   * **Add Chat UI (Transcript UI)**
+  * **Add Lip Sync to Your Character**
 
 ## What’s next
 
@@ -50,6 +50,7 @@ If this is your first time installing Convai in Unity:
 2. Continue to **Configure API Key**
 3. Validate with **Sample Scenes** or **Custom Scene Setup**
 4. Optionally add **Chat UI**
+5. Optionally add **Lip Sync** for real-time facial animation
 
 ## Conclusion
 

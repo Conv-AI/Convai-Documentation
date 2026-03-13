@@ -17,8 +17,6 @@ This page helps you choose the right installation method for your workflow. If y
 [install-via-upm.md](install-via-upm.md)
 {% endcontent-ref %}
 
-* **Unity Package&#x20;**<sup>**(Coming soon)**</sup>\
-  Manual install workflow. Useful for offline work or fixed versions.
 * **Unity Asset Store&#x20;**<sup>**(Coming soon)**</sup>\
   Ideal for teams that prefer Asset Store distribution and “My Assets” installs.
 

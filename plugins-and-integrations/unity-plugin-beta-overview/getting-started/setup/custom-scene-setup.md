@@ -1,14 +1,12 @@
 ---
-description: >-
-  Add the required Convai objects, set up a player, and connect characters to
-  Convai.
+description: Add the Convai Manager, set up a player, and connect characters to Convai.
 ---
 
 # Custom Scene Setup
 
 ## Introduction
 
-This guide integrates Convai into your own scene by adding the required core objects, creating a Convai player, and configuring Convai characters.
+This guide shows how to integrate Convai into your own Unity scene by adding the **Convai Manager**, creating a Convai Player, and configuring Convai Characters.
 
 ## Prerequisites
 
@@ -20,7 +18,7 @@ This guide integrates Convai into your own scene by adding the required core obj
 
 {% stepper %}
 {% step %}
-### Add required Convai scene objects
+#### Add the Convai Manager
 
 * In Unity top menu, go to **GameObject → Convai → Setup Required Components**\
   **or** Right-click in the **Hierarchy** → **Convai → Setup Required Components**
@@ -28,12 +26,9 @@ This guide integrates Convai into your own scene by adding the required core obj
 <figure><img src="../../../../.gitbook/assets/image (4) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 * Confirm and proceed in the popup.
-* **Expected result:** These objects exist in your scene:
-  * **\[Convai Service Bootstrap]**
-  * **\[Convai Composition Root]**
-  * **\[Convai Room Manager]**
+* **Expected result:** A single **Convai Manager** object exists in your scene.
 
-<figure><img src="../../../../.gitbook/assets/image (5) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (450).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -44,7 +39,7 @@ This guide integrates Convai into your own scene by adding the required core obj
 * Set **Player Name**.
 * **Expected result:** The scene has exactly one configured Convai Player.
 
-<figure><img src="../../../../.gitbook/assets/image (6) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (451).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -55,7 +50,7 @@ For each character GameObject you want to make conversational:
 * Add **Convai Character** component
 * Set **Character ID**
 
-<figure><img src="../../../../.gitbook/assets/image (8) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (452).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -91,9 +86,9 @@ For each character GameObject you want to make conversational:
 ## Troubleshooting
 
 * **Validation fails**
-  * Confirm the required objects exist in the scene.
-  * Ensure you added Convai Player Component to a player object.
-  * Ensure each character has a valid Character ID.
+  * Confirm that a **Convai Manager** object exists in the scene.
+  * Ensure you added **Convai Player Component** to a player object.
+  * Ensure each character has a valid **Character ID**.
 * **Characters don’t respond**
   * Confirm API key is set.
   * Check Console for network/auth errors.

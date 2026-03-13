@@ -43,9 +43,9 @@ In Unity, go to **Window → Package Manager**.
 ### Open the sample scene
 
 * Navigate to:
-  * `Assets/Samples/Convai SDK for Unity/1.0.0/Convai Sample/Scenes`
+  * `Assets/Samples/Convai SDK for Unity/x.x.x/<SAMPLE_NAME>/Scenes`
 * Open the scene:
-  * `Convai Basic Scene`
+  * `<SCENE_NAME>`
 {% endstep %}
 
 {% step %}

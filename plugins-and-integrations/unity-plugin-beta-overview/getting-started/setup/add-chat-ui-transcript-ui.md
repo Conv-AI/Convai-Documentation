@@ -45,7 +45,7 @@ Chat UI is optional, but it’s extremely useful for debugging, testing without 
   * Right-click in Hierarchy → **UI → Event System**
 * **Expected result:** An EventSystem exists and UI input works in Play Mode.
 
-<figure><img src="../../../../.gitbook/assets/image (12) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (453).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 
