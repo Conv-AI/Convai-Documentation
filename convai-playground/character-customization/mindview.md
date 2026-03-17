@@ -2,6 +2,7 @@
 description: >-
   Learn how to use the Mindview feature to review the actual prompts to the LLM
   for your current or previous sessions and interactions.
+hidden: true
 metaLinks:
   alternates:
     - >-

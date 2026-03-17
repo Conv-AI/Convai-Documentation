@@ -2,6 +2,7 @@
 description: >-
   Learn how to access and customize your character’s avatar in Convai Playground
   using Avatar Studio.
+hidden: true
 metaLinks:
   alternates:
     - >-

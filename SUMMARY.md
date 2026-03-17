@@ -35,6 +35,7 @@
   * [WebRTC with Livekit](on-prem-deployment/deployment/webrtc-with-livekit.md)
   * [Neurosync](on-prem-deployment/deployment/neurosync.md)
   * [Pixelstreaming Servers](on-prem-deployment/deployment/pixelstreaming-servers.md)
+  * [Secret Management](on-prem-deployment/deployment/secret-management.md)
 * [GCP Deployment](on-prem-deployment/gcp-deployment.md)
 * [AWS Deployment](on-prem-deployment/aws-deployment.md)
 * [Kubernetes](on-prem-deployment/kubernetes.md)

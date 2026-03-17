@@ -8,6 +8,10 @@ Convai Playground provides an interactive UI to create, modify and test out your
 
 #### Image:
 
+{% hint style="info" %}
+The final image link may vary depending on the client environment and the services being used. Please note that the link shared here is private and can only be accessed by members within the organization.
+{% endhint %}
+
 ```
 convaitech/convai-playground-onprem-mp:v0.1.6
 ```
@@ -76,4 +80,50 @@ $ sudo docker run -d \
 -v "/var/secrets/playground-config.json:/app/config.json:ro"  \
 --env-file "/var/secrets/playground.env" \
 convaitech/convai-playground-onprem-mp:v0.1.6
+```
+
+#### Sample Helm Config
+
+Here we are attaching a sample helm chart to host the service.
+
+```
+# charts/playground/values.yaml
+replicaCount: 2
+image:
+  repository: <ECR_CLOUD>.dkr.ecr.us-west-1.amazonaws.com/convai-playground-onprem-mp
+  tag: v0.1.6
+service:
+  type: ClusterIP
+  port: 3000
+ingress:
+  enabled: true
+  ingressClassName: aws-alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws-us:acm:...
+  hosts:
+    - host: playground.internal.client
+      paths: [{ path: /, pathType: Prefix }]
+env:
+  IS_ON_PREM: "true"
+  API_URL: http://convai-rest-api.convai.svc.cluster.local:8000
+  BASE_URL: https://playground.internal.agency.gov
+  REALTIME_API_URL: http://convai-webrtc.convai.svc.cluster.local:8000
+  LOGIN_URL: https://auth.internal.client
+  DOMAIN_LINK: internal.client
+existingSecret: convai-playground-secrets
+configMap:
+  enabled: true
+  mountPath: /app/config.json
+  subPath: config.json
+  data: |
+    { "CHARACTER_DASHBOARD": { "CHATBOT": { "GET_RESPONSE_GRPC": true } } }
+resources:
+  requests: { cpu: 200m, memory: 256Mi }
+  limits:  { cpu: 500m, memory: 512Mi }
+podDisruptionBudget:
+  minAvailable: 1
+
 ```

@@ -420,3 +420,82 @@ $ sudo docker run --rm  \
 convaitech/onprem-webrtc-backend-service:latest  \
 bash -lc "ray start --head && serve start --http-host 0.0.0.0 --http-port 8000 && serve run --route-prefix / server:api_server"
 ```
+
+#### Sample Helm Config
+
+Here we are attaching a sample helm chart to host the service.
+
+```
+# charts/webrtc/values.yaml
+# --- LiveKit (deployed on a dedicated EC2 node group with host networking) ---
+livekit:
+  enabled: true
+  # LiveKit REQUIRES host networking for WebRTC UDP ports.
+  # On TKG, use a dedicated node group with taint: convai-webrtc=true:NoSchedule
+  hostNetwork: true
+  tolerations:
+    - key: convai-webrtc, operator: Exists, effect: NoSchedule
+  nodeSelector:
+    role: webrtc
+  config:
+    port: 7880
+    rtc:
+      tcp_port: 7881
+      port_range_start: 50000
+      port_range_end: 60000
+      use_external_ip: true
+    turn:
+      enabled: true
+      domain: turn.internal.client
+      tls_port: 5349
+      udp_port: 3478
+      external_tls: true
+    keys:
+      existingSecret: convai-livekit-keys
+
+# --- NLB for LiveKit (AWS) ---
+nlb:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+  ports:
+    - { name: https,    port: 443,  targetPort: 7880, protocol: TCP }
+    - { name: turn-tls, port: 5349, targetPort: 5349, protocol: TCP }
+    - { name: turn-udp, port: 3478, targetPort: 3478, protocol: UDP }
+    - { name: rtc-tcp,  port: 7881, targetPort: 7881, protocol: TCP }
+
+# --- WebRTC Backend Service (Ray Serve) ---
+backend:
+  replicaCount: 2
+  image:
+    repository: <ECR_CLOUD>.dkr.ecr.us-west-1.amazonaws.com/convai-webrtc-backend
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 8000
+  command:
+    - bash
+    - -lc
+    - "ray start --head && serve start --http-host 0.0.0.0 --http-port 8000 && serve run --route-prefix / server:api_server"
+  env:
+    LIVEKIT_URL: ws://livekit.convai.svc.cluster.local:7880
+    DATABASE_URL:
+      valueFrom:
+        secretKeyRef: { name: convai-webrtc-secrets, key: database-url }
+    LIVEKIT_API_KEY:
+      valueFrom:
+        secretKeyRef: { name: convai-livekit-keys, key: api-key }
+    LIVEKIT_API_SECRET:
+      valueFrom:
+        secretKeyRef: { name: convai-livekit-keys, key: api-secret }
+  resources:
+    requests: { cpu: 1, memory: 2Gi }
+    limits:  { cpu: 4, memory: 8Gi }
+  gpuNodeSelector:
+    # If GPU is needed for inference:
+    # nvidia.com/gpu: "1"
+    enabled: false
+
+```

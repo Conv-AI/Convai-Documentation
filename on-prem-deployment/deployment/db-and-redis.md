@@ -32,6 +32,56 @@ $ sudo docker run -d   --name convai_postgres \
 postgres:15
 ```
 
+#### Sample Helm Config for DB
+
+```
+# charts/postgresql/values.yaml  (Bitnami chart override)
+auth:
+  database: convai_db
+  username: convai_user
+  existingSecret: convai-postgres-secret
+  secretKeys:
+    adminPasswordKey: postgres-password
+    userPasswordKey: password
+primary:
+  persistence:
+    enabled: true
+    storageClass: ebs-gp3-encrypted   # FedRAMP: encrypted EBS
+    size: 50Gi
+  resources:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits:  { cpu: 2, memory: 4Gi }
+  podSecurityContext:
+    fsGroup: 1001
+    runAsUser: 1001
+  containerSecurityContext:
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+tls:
+  enabled: true                       # Encrypt in transit
+  certificatesSecret: postgres-tls-secret
+  certFilename: tls.crt
+  certKeyFilename: tls.key
+metrics:
+  enabled: true                       # Prometheus exporter
+networkPolicy:
+  enabled: true
+  allowExternal: false
+  ingressRules:
+    primaryAccessOnlyFrom:
+      namespaceSelector:
+        matchLabels: { name: convai }
+backup:
+  enabled: true
+  cronjob:
+    schedule: "0 2 * * *"
+    storage:
+      existingClaim: postgres-backup-pvc
+
+```
+
+
+
 #### Redis Docker Command \[Optional]
 
 Run the following docker command to bring up a redis cache server in case you do not already have one configured.
@@ -44,4 +94,39 @@ $ sudo docker run -d   --name convai_redis \
 --restart=unless-stopped   \
 redis:7-alpine   redis-server \
 --appendonly yes
+```
+
+#### Sample Helm Config for Redis
+
+```
+# charts/redis/values.yaml  (Bitnami chart override)
+architecture: replication
+auth:
+  enabled: true
+  existingSecret: convai-redis-secret
+  existingSecretPasswordKey: password
+master:
+  persistence:
+    enabled: true
+    storageClass: ebs-gp3-encrypted
+    size: 10Gi
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits:  { cpu: 500m, memory: 512Mi }
+replica:
+  replicaCount: 2
+  persistence:
+    enabled: true
+    storageClass: ebs-gp3-encrypted
+    size: 10Gi
+tls:
+  enabled: true
+  authClients: true
+  existingSecret: redis-tls-secret
+networkPolicy:
+  enabled: true
+  allowExternal: false
+metrics:
+  enabled: true
+
 ```

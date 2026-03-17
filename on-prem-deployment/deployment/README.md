@@ -10,6 +10,10 @@ This section goes over the steps to deploy the various Convai services in your l
 The images mentioned here are NOT publicly available to download and kept here only for reference to the most updated stable version of the service that can be downloaded. Please get in touch with the POC at Convai for further details.
 {% endhint %}
 
+{% hint style="info" %}
+The sample HELM Charts provided are modeled after deployment in AWS. Please check with the team for the support needed with respect to your cloud provider.
+{% endhint %}
+
 We will divide the task into multiple steps dealing with a few components at each step. This will include the basic requirements, configurations and commands to docker container.
 
 ### Basic Requirements
