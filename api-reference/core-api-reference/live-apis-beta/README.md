@@ -7,6 +7,10 @@ description: >-
 
 # Live APIs (Beta)
 
+{% hint style="danger" %}
+Live APIs are available only on the Enterprise Plan.
+{% endhint %}
+
 Convai’s **Live APIs** enable real-time, dynamic interaction between users and AI characters through **WebRTC**.\
 These APIs allow your applications to send and receive **audio**, **text**, and other contextual data, making conversations with AI characters seamless and responsive.
 
