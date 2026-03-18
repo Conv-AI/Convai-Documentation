@@ -71,6 +71,8 @@
           * [Creating a Profile](plugins-and-integrations/unity-plugin-beta-overview/getting-started/setup/add-lip-sync-to-your-character/lip-sync-profiles-and-mappings/creating-a-profile.md)
           * [Creating a Custom Map](plugins-and-integrations/unity-plugin-beta-overview/getting-started/setup/add-lip-sync-to-your-character/lip-sync-profiles-and-mappings/creating-a-custom-map.md)
   * [Installation and Setup](plugins-and-integrations/unity-plugin-beta-overview/installation-and-setup.md)
+  * [Migration Guide](plugins-and-integrations/unity-plugin-beta-overview/migration-guide/README.md)
+    * [Additional Feature Migration](plugins-and-integrations/unity-plugin-beta-overview/migration-guide/additional-feature-migration.md)
 * [Unity Plugin](plugins-and-integrations/unity-plugin/README.md)
   * [Pre-Requisites](plugins-and-integrations/unity-plugin/pre-requisites.md)
   * [Compatibility](plugins-and-integrations/unity-plugin/compatibility.md)
