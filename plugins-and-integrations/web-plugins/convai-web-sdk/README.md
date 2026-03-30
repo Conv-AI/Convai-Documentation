@@ -13,6 +13,10 @@ Built for production apps, immersive sites, and interactive worlds, the SDK hand
 
 With built-in voice capture, speech detection, a ready-to-use chat widget, and full custom UI support, Convai makes it simple to integrate lifelike assistants, companions, and NPCs into any web environment.
 
+{% embed url="https://youtu.be/fK8R0SzuvNI" %}
+Build Browser-Based Conversational AI Avatars with the Convai Web SDK, Three.JS, and React
+{% endembed %}
+
 ## What’s New
 
 The Web SDK introduces a streamlined, high-performance interaction pipeline powered by Convai’s newest backend:
