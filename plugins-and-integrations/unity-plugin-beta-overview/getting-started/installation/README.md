@@ -10,15 +10,19 @@ This page helps you choose the right installation method for your workflow. If y
 
 ## Installation methods
 
-* **UPM&#x20;**<sup>**(Recommended)**</sup>\
+* **UPM**\
   Best for most teams. Simple versioning and easy upgrades.
 
 {% content-ref url="install-via-upm.md" %}
 [install-via-upm.md](install-via-upm.md)
 {% endcontent-ref %}
 
-* **Unity Asset Store&#x20;**<sup>**(Coming soon)**</sup>\
+* **Unity Asset Store**\
   Ideal for teams that prefer Asset Store distribution and “My Assets” installs.
+
+{% content-ref url="install-via-unity-asset-store.md" %}
+[install-via-unity-asset-store.md](install-via-unity-asset-store.md)
+{% endcontent-ref %}
 
 ## Next step
 

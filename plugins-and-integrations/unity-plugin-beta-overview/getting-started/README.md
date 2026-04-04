@@ -37,8 +37,8 @@ Add Conversational AI and Facial Animations to AI Avatars Inside Unity&#x20;
 Use these pages depending on where you are in the process:
 
 * **Installation**
-  * **UPM (Recommended)** — easiest updates and dependency management
-  * **Unity Asset Store** — Asset Store based distribution workflow <sup>**(Coming soon)**</sup>
+  * **UPM** — easiest updates and dependency management
+  * **Unity Asset Store** — Asset Store based distribution workflow
 * **Setup**
   * **Configure API Key**
   * **Import & Run Sample Scenes**

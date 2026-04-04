@@ -1,19 +1,21 @@
 ---
 description: Install the Convai Unity SDK from the Unity Asset Store.
-hidden: true
 ---
 
 # Install via Unity Asset Store
 
-## \*
+## Introduction
 
 Asset Store installation is ideal if your team prefers Unity’s store distribution and the standard “My Assets” workflow.
 
 ## Prerequisites
 
 * A Unity ID signed in to the Asset Store
-* Convai package added to your account:
-  * `<CONVAI_ASSET_STORE_URL>`&#x20;
+* Convai Package added to your account
+
+## Convai Unity Asset Store Page
+
+[https://assetstore.unity.com/packages/tools/behavior-ai/npc-ai-engine-dialog-actions-voice-and-lipsync-convai-235621](https://assetstore.unity.com/packages/tools/behavior-ai/npc-ai-engine-dialog-actions-voice-and-lipsync-convai-235621)
 
 ## Step-by-step
 
@@ -23,6 +25,9 @@ Asset Store installation is ideal if your team prefers Unity’s store distribut
 
 * Open the Convai Asset Store page.
 * Click **Add to My Assets**.
+
+<figure><img src="../../../../.gitbook/assets/image (455).png" alt=""><figcaption></figcaption></figure>
+
 * If prompted, sign in to your Unity account.
 * **Expected result:** The asset is added to your “My Assets”.
 {% endstep %}
@@ -41,6 +46,8 @@ In Unity, go to **Window → Package Manager**.
 * If available on the Asset Store page, click **Open in Unity**.
 * Unity opens Package Manager to the asset page.
 
+<figure><img src="../../../../.gitbook/assets/image (456).png" alt=""><figcaption></figcaption></figure>
+
 **Option B — via “My Assets”**
 
 * In Package Manager, open **My Assets**.
@@ -52,6 +59,8 @@ In Unity, go to **Window → Package Manager**.
 
 * Click **Download**.
 * When finished, click **Import**.
+
+<figure><img src="../../../../.gitbook/assets/image (457).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
