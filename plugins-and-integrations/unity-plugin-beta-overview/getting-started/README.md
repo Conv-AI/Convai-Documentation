@@ -28,8 +28,8 @@ The Convai Unity SDK lets you bring real-time conversational AI into your Unity 
 
 This Getting Started section is designed to guide you from a fresh Unity project to a successful “first conversation” using either a sample scene or your own custom scene.
 
-{% embed url="https://youtu.be/i-FIyhGRdT8" %}
-Add Conversational AI and Facial Animations to AI Avatars Inside Unity&#x20;
+{% embed url="https://youtu.be/bxjGnOvNL4E" %}
+Create Conversational AI Avatars wth Real Time Lip Sync and HQ Facial Animations in Unity
 {% endembed %}
 
 ## Overview
