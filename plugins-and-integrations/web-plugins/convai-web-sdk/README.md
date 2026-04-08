@@ -17,6 +17,12 @@ With built-in voice capture, speech detection, a ready-to-use chat widget, and f
 Build Browser-Based Conversational AI Avatars with the Convai Web SDK, Three.JS, and React
 {% endembed %}
 
+## Convai WebSDK Tutorial
+
+{% embed url="https://youtu.be/fK8R0SzuvNI" %}
+Integrate Conversational AI, Real-time LipSync and Facial Animations For Browser Based 3D Avatars Using Convai WebSDK&#x20;
+{% endembed %}
+
 ## What’s New
 
 The Web SDK introduces a streamlined, high-performance interaction pipeline powered by Convai’s newest backend:
