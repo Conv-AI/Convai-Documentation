@@ -124,7 +124,7 @@ Once the plugin is enabled, you’ll need to add two main components to your **P
 1. Open your character Blueprint.
 2. Click **+ Add** again and select **BP\_ConvaiChatbotComponent**.
    * This is the AI "brain," managing conversation logic, speech, and vision capabilities.
-3. Open the [Convai Playground](https://convai.com/playground) and select or create a character.
+3. Open the [Convai Playground](https://convai.com/dashboard) and select or create a character.
 4. Copy the **Character ID**.
 5. Back in Unreal, select the **BP\_ConvaiChatbotComponent** and paste the ID into the **Character ID** field in the **Details** panel.
 6. **Compile** and **Save** your Blueprint.
