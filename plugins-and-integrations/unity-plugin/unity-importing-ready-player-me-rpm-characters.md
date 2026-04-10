@@ -3,6 +3,7 @@ description: >-
   This guide walks you through the process of importing Ready Player Me (RPM)
   characters into a Convai-powered Unity project, configuring them, and
   integrating Convai NPC components.
+hidden: true
 ---
 
 # Importing Ready Player Me (RPM) Characters

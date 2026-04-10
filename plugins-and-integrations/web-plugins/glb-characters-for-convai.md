@@ -2,6 +2,7 @@
 description: >-
   Discover how to use GLB characters with Convai's web plugin for immersive
   virtual experiences.
+hidden: true
 ---
 
 # GLB Characters for Convai
