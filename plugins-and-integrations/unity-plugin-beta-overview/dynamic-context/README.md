@@ -277,7 +277,7 @@ Controls how the new text is applied to the character's existing ephemeral conte
 
 ***
 
-### Quick Reference
+## Quick Reference
 
 ```csharp
 ConvaiRoomManager room = ConvaiRoomManager.Instance;
