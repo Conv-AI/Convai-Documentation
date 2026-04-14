@@ -55,6 +55,8 @@
 
 * [Introduction](plugins-and-integrations/introduction.md)
 * [Unity Plugin (Beta) Overview](plugins-and-integrations/unity-plugin-beta-overview/README.md)
+  * [Dynamic Context](plugins-and-integrations/unity-plugin-beta-overview/dynamic-context/README.md)
+    * [Use Cases](plugins-and-integrations/unity-plugin-beta-overview/dynamic-context/use-cases.md)
   * [Compatibility & Requirements](plugins-and-integrations/unity-plugin-beta-overview/compatibility-and-requirements.md)
   * [Getting Started with Unity Plugin](plugins-and-integrations/unity-plugin-beta-overview/getting-started/README.md)
     * [Installation](plugins-and-integrations/unity-plugin-beta-overview/getting-started/installation/README.md)
