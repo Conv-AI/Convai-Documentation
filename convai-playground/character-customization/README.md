@@ -34,7 +34,7 @@ The **Character Customization** section in Convai Playground is where you transf
    Continue to: [_Core AI Settings_](core-ai-settings.md)
 7. **Guardrails**\
    Restrict and guide a character's AI behavior, define the ethical and topical boundaries of the conversation.\
-   Continue to: [_Guardrails_](core-ai-settings.md)
+   Continue to: [_Guardrails_](guardrails.md)
 8. **State of Mind**\
    Define temporary or situational mindsets that influence how your character reacts in specific contexts.\
    Continue to: [_State of Mind_](state-of-mind.md)
