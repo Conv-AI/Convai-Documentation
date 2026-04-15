@@ -31,6 +31,10 @@ Together, these APIs let you shape a character’s **core intelligence, emotiona
 [backstory-api.md](backstory-api.md)
 {% endcontent-ref %}
 
+{% content-ref url="mindview-api.md" %}
+[mindview-api.md](mindview-api.md)
+{% endcontent-ref %}
+
 {% content-ref url="core-ai-settings-api.md" %}
 [core-ai-settings-api.md](core-ai-settings-api.md)
 {% endcontent-ref %}

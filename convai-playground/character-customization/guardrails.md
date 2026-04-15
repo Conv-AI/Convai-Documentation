@@ -7,6 +7,10 @@ description: >-
 
 # Guardrails
 
+{% hint style="danger" %}
+This API is available only on the Paid Plans.
+{% endhint %}
+
 ## Introduction
 
 The **Guardrails tab** provides a robust control interface to define your character’s ethical and topical boundaries, preventing off-topic or inappropriate responses. By entering specific constraints in the Instructions field and toggling custom guardrails on, you ensure your AI character responds in a safe and professional manner, and is strictly aligned with your intended brand voice.

@@ -272,6 +272,7 @@
   * [Character Crafting APIs](api-reference/core-api-reference/character-crafting-apis/README.md)
     * [Character Base API](api-reference/core-api-reference/character-crafting-apis/character-api.md)
     * [Backstory API](api-reference/core-api-reference/character-crafting-apis/backstory-api.md)
+    * [Mindview API](api-reference/core-api-reference/character-crafting-apis/mindview-api.md)
     * [Core AI Settings API](api-reference/core-api-reference/character-crafting-apis/core-ai-settings-api.md)
     * [Narrative Design API](api-reference/core-api-reference/character-crafting-apis/narrative-design-api.md)
     * [Knowledge Bank API](api-reference/core-api-reference/character-crafting-apis/knowledge-bank-api.md)

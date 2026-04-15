@@ -32,19 +32,22 @@ The **Character Customization** section in Convai Playground is where you transf
 6. **Core AI Settings**\
    Fine-tune advanced AI parameters to influence decision-making, creativity, and responsiveness.\
    Continue to: [_Core AI Settings_](core-ai-settings.md)
-7. **State of Mind**\
+7. **Guardrails**\
+   Restrict and guide a character's AI behavior, define the ethical and topical boundaries of the conversation.\
+   Continue to: [_Guardrails_](core-ai-settings.md)
+8. **State of Mind**\
    Define temporary or situational mindsets that influence how your character reacts in specific contexts.\
    Continue to: [_State of Mind_](state-of-mind.md)
-8. **Memory**\
+9. **Memory**\
    Review your character’s past conversations or enable Long Term Memory to allow recall across sessions.\
    Continue to: [_Memory_](memory.md)
-9. **Narrative Design**\
-   Create structured narratives or guided interaction flows for your character to follow.\
-   Continue to: [_Narrative Design_](narrative-design.md)
-10. **External API**\
+10. **Narrative Design**\
+    Create structured narratives or guided interaction flows for your character to follow.\
+    Continue to: [_Narrative Design_](narrative-design.md)
+11. **External API**\
     Connect your character to external systems or APIs to retrieve live data or perform actions.\
     Continue to: [_External API_](external-api.md)
-11. **Publish**\
+12. **Publish**\
     Share your character with others or embed it into your website.\
     Continue to: [_Publish_](publish.md)
 
