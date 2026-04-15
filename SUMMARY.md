@@ -18,6 +18,7 @@
   * [Knowledge Bank](convai-playground/character-customization/knowledge-bank.md)
   * [Personality Traits](convai-playground/character-customization/personality-traits.md)
   * [Core AI Settings](convai-playground/character-customization/core-ai-settings.md)
+  * [Guardrails](convai-playground/character-customization/guardrails.md)
   * [State Of Mind](convai-playground/character-customization/state-of-mind.md)
   * [Memory](convai-playground/character-customization/memory.md)
   * [Mindview](convai-playground/character-customization/mindview.md)
