@@ -12,7 +12,7 @@ This API is available only on the Professional Plan and above.
 
 ## Get Prompt For Mindview
 
-<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/generate-backstory`
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/chatHistory/get_prompt`
 
 Fetches prompt data for MindView in one of two ways:
 
