@@ -1,5 +1,6 @@
 ---
 description: Set up the Convai Unreal Engine plugin and add conversational AI to your apps.
+hidden: true
 ---
 
 # Unreal Engine
@@ -7,8 +8,8 @@ description: Set up the Convai Unreal Engine plugin and add conversational AI to
 {% hint style="info" %}
 Get started with sample projects for some of our popular tutorials:
 
-* [Actions sample project (UE5.3)](https://drive.google.com/drive/u/1/folders/1UWgQMHTTSq4O45PtKCyr8sjZbbkq-2\_o)
-* [NPC conversating with NPC sample project (UE5.3)](https://drive.google.com/drive/u/1/folders/1a\_rzPDfjTxDju3q2ykzeJuzIeKlolg4V)
+* [Actions sample project (UE5.3)](https://drive.google.com/drive/u/1/folders/1UWgQMHTTSq4O45PtKCyr8sjZbbkq-2_o)
+* [NPC conversating with NPC sample project (UE5.3)](https://drive.google.com/drive/u/1/folders/1a_rzPDfjTxDju3q2ykzeJuzIeKlolg4V)
 * [MetaHuman and ReadyPlayerMe sample project (UE5.0-5.2)](https://drive.google.com/drive/u/4/folders/1HNcghI9SG1NpCUaJWRX9Yh28HUF00-U0)
 {% endhint %}
 

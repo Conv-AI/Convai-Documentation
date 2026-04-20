@@ -2,6 +2,7 @@
 description: >-
   Integrate advanced conversational AI to create intelligent, interactive NPCs
   for your games.
+hidden: true
 ---
 
 # Unity Plugin
