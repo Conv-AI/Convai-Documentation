@@ -1,11 +1,24 @@
 ---
 description: Integrate Convai conversational services in your own web application
 hidden: true
+metaLinks:
+  canonical: >-
+    https://docs.convai.com/api-docs/plugins-and-integrations/web-plugins/convai-web-sdk
 ---
 
-# Convai Web SDK
+# Convai Web SDK (Legacy)
 
 ### Overview
+
+{% hint style="info" %}
+:no\_entry: This plugin has been deprecated and is no longer supported.
+
+\
+If you are still running the old plugin, we recommend switching to the new Convai Web SDK: [Link](https://docs.convai.com/api-docs/plugins-and-integrations/web-plugins/convai-web-sdk)
+
+\
+For historical reference only — these docs are no longer maintained.
+{% endhint %}
 
 The <mark style="color:green;">convai-web-sdk</mark> is a powerful npm package that empowers developers to seamlessly integrate lifelike characters into web applications. This SDK facilitates the capture of user audio streams and provides appropriate responses in the form of audio, actions, and facial expressions. Whether you're building an interactive website, a chatbot, or a game, this package adds a human touch to your user experience.
 

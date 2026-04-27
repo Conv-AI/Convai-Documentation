@@ -221,7 +221,7 @@
       * [Building a Custom UI (TypeScript)](plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/building-a-custom-ui-typescript.md)
       * [Best Practices & Type Definitions](plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/best-practices-and-type-definitions.md)
       * [Mappings Reference](plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/mappings-reference.md)
-  * [Convai Web SDK](plugins-and-integrations/web-plugins/convai-web-sdk-1/README.md)
+  * [Convai Web SDK (Legacy)](plugins-and-integrations/web-plugins/convai-web-sdk-1/README.md)
     * [Getting Started](plugins-and-integrations/web-plugins/convai-web-sdk-1/getting-started.md)
     * [Facial Expressions](plugins-and-integrations/web-plugins/convai-web-sdk-1/facial-expressions.md)
     * [Actions](plugins-and-integrations/web-plugins/convai-web-sdk-1/actions.md)

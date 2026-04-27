@@ -1,8 +1,21 @@
 ---
 description: Begin building applications with our quick start guide for the Web SDK
+metaLinks:
+  canonical: >-
+    https://docs.convai.com/api-docs/plugins-and-integrations/web-plugins/convai-web-sdk
 ---
 
 # Getting Started
+
+{% hint style="info" %}
+:no\_entry: This plugin has been deprecated and is no longer supported.
+
+\
+If you are still running the old plugin, we recommend switching to the new Convai Web SDK: [Link](https://docs.convai.com/api-docs/plugins-and-integrations/web-plugins/convai-web-sdk)
+
+\
+For historical reference only — these docs are no longer maintained.
+{% endhint %}
 
 At first import Convai client from convai-web-sdk.
 

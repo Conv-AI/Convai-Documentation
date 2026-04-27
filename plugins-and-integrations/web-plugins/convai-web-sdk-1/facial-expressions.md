@@ -3,9 +3,22 @@ description: >-
   This section provides comprehensive information on integrating and handling
   facial expressions and lipsync within your web applications using the
   convai-web-sdk.
+metaLinks:
+  canonical: >-
+    https://docs.convai.com/api-docs/plugins-and-integrations/web-plugins/convai-web-sdk
 ---
 
 # Facial Expressions
+
+{% hint style="info" %}
+:no\_entry: This plugin has been deprecated and is no longer supported.
+
+\
+If you are still running the old plugin, we recommend switching to the new Convai Web SDK: [Link](https://docs.convai.com/api-docs/plugins-and-integrations/web-plugins/convai-web-sdk)
+
+\
+For historical reference only — these docs are no longer maintained.
+{% endhint %}
 
 ### Initialization
 

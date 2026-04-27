@@ -1,8 +1,21 @@
 ---
 description: Ask your NPC to perform actions using our JavaScript SDK
+metaLinks:
+  canonical: >-
+    https://docs.convai.com/api-docs/plugins-and-integrations/web-plugins/convai-web-sdk
 ---
 
 # Actions
+
+{% hint style="info" %}
+:no\_entry: This plugin has been deprecated and is no longer supported.
+
+\
+If you are still running the old plugin, we recommend switching to the new Convai Web SDK: [Link](https://docs.convai.com/api-docs/plugins-and-integrations/web-plugins/convai-web-sdk)
+
+\
+For historical reference only — these docs are no longer maintained.
+{% endhint %}
 
 To set up the Actions you need to follow the following steps:
 
