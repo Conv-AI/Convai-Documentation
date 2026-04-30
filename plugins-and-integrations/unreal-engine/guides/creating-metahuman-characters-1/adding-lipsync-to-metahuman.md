@@ -4,10 +4,10 @@
 
 1.  Create a new blueprint and select `ConvaiRPM_Character` as the parent class which you can find under `All Classes` .
 
-    <figure><img src="../../../../.gitbook/assets/image (4) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 2.  Drag the blueprint to the scene and the default ReadyPlayerMe character should appear.
 
-    <figure><img src="../../../../.gitbook/assets/image (5) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (5) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 3.  Create a new character on [Convai Playground](https://convai.com/pipeline/dashboard) and copy the Character ID, you can also edit the avatar by clicking on the `Edit Avatar` icon on the top right of the avatar preview window.<br>
 
     <figure><img src="../../../../.gitbook/assets/image (8) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>

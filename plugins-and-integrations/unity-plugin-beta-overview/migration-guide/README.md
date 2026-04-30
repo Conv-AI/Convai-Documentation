@@ -48,7 +48,7 @@ Install the newest SDK using one of the following:
 
 In the Unity top menu, go to **Convai → Account**.
 
-<figure><img src="../../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 #### Copy your API Key from Convai
 
@@ -56,7 +56,7 @@ In the Unity top menu, go to **Convai → Account**.
 2. Locate your **API Key** in the dashboard/profile settings.
 3. Copy the API key.
 
-<figure><img src="../../../.gitbook/assets/image (2) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 
 #### Paste and update the key in Unity
 
@@ -64,7 +64,7 @@ In the Unity top menu, go to **Convai → Account**.
 * Click **Update API Key**.
 * **Expected result:** Account details and usage information refresh successfully.
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1).png" alt="" width="563"><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}

@@ -38,7 +38,7 @@ Before making any changes:
 2. Right-click on it, select **Show More Options**, then click **Switch Unreal Engine Version**.
 3. Choose **5.6** from the list.
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### **4. Install Cross-Compile Toolchain (Linux Development)**
 

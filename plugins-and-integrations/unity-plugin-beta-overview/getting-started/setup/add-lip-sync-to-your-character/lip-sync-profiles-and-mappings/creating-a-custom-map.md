@@ -51,7 +51,7 @@ The profile badge indicates which profile this map targets.
 
 This section defines the map identity and global behavior.
 
-<figure><img src="../../../../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 #### Target Profile
 
@@ -84,7 +84,7 @@ This can be useful during setup or testing, especially when your character alrea
 
 This section helps populate or import mappings more quickly.
 
-<figure><img src="../../../../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
 
 #### From Mesh: Auto Detect
 
@@ -135,7 +135,7 @@ This is useful for team workflows, backup, and migration.
 
 Bulk tools help you manage large maps quickly.
 
-<figure><img src="../../../../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
 
 | Action                | Result                                    |
 | --------------------- | ----------------------------------------- |
@@ -155,7 +155,7 @@ This is the main routing table of the map.
 
 Each row is a mapping entry that connects one source channel to one or more target blendshapes.
 
-<figure><img src="../../../../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
 | Column                | Description                         |
 | --------------------- | ----------------------------------- |

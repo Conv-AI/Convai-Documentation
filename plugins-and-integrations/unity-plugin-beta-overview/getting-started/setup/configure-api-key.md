@@ -21,7 +21,7 @@ The SDK needs your Convai API key to authenticate requests and enable character 
 
 In the Unity top menu, go to **Convai → Account**.
 
-<figure><img src="../../../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -31,7 +31,7 @@ In the Unity top menu, go to **Convai → Account**.
 * Locate your **API Key** in the dashboard/profile settings.
 * Copy the API key.
 
-<figure><img src="../../../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (2) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -41,7 +41,7 @@ In the Unity top menu, go to **Convai → Account**.
 * Click **Update API Key**.
 * **Expected result:** Account details and usage information refresh successfully.
 
-<figure><img src="../../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (3) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 

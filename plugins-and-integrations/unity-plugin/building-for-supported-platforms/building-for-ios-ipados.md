@@ -21,7 +21,7 @@ Before you begin, make sure you have the following:
 1. Open your Convai-powered Unity project.
 2. Ensure you have the latest version of the Convai Unity SDK [imported](../setting-up-unity-plugin.md)[ and setup](../setting-up-unity-plugin.md) into your project.
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption><p>Unity project with Convai SDK imported</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Unity project with Convai SDK imported</p></figcaption></figure>
 
 ### Step 2: Configure Build Settings
 
@@ -30,7 +30,7 @@ Before you begin, make sure you have the following:
 3. Click `Switch Platform` if it's not already selected.
 4. Check the `Development Build` option for testing purposes.
 
-<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Unity Build Settings window with iOS selected and Development Build checked</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Unity Build Settings window with iOS selected and Development Build checked</p></figcaption></figure>
 
 
 
@@ -55,7 +55,7 @@ If you wish to add a few required files manually, follow step 3. If you want it 
 </linker>
 ```
 
-<figure><img src="../../../.gitbook/assets/image (4) (1) (1) (1) (1).png" alt=""><figcaption><p>Unity project view showing the link.xml file in the Assets folder</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (4) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Unity project view showing the link.xml file in the Assets folder</p></figcaption></figure>
 
 This file prevents potential `FileNotFoundException` errors related to the `libgrpc_csharp_ext.x64.dylib` file.
 
@@ -99,7 +99,7 @@ public class iOSBuild : MonoBehaviour
 2. Click on `Install iOS Build Package`
 3. Attach the  script `iOSBuild.cs` to any GameObject in your scene.
 
-<figure><img src="../../../.gitbook/assets/image (5) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (5) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../../.gitbook/assets/image (10) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 

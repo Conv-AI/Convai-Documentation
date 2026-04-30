@@ -40,7 +40,7 @@ A custom profile cannot be used to introduce an entirely new transport value out
 
 When you select a `ConvaiLipSyncProfileAsset`, the Inspector is divided into three main areas.
 
-<figure><img src="../../../../../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
 ### Runtime Identity
 
@@ -153,7 +153,7 @@ Profiles are discovered through **Profile Registry** assets.
 
 A registry is a `ConvaiLipSyncProfileRegistryAsset` that contains one or more profile references and a priority value used during runtime merging.
 
-<figure><img src="../../../../../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 #### Registry fields
 

@@ -23,7 +23,7 @@ This guide shows how to integrate Convai into your own Unity scene by adding the
 * In Unity top menu, go to **GameObject → Convai → Setup Required Components**\
   **or** Right-click in the **Hierarchy** → **Convai → Setup Required Components**
 
-<figure><img src="../../../../.gitbook/assets/image (4) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (4) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 * Confirm and proceed in the popup.
 * **Expected result:** A single **Convai Manager** object exists in your scene.
