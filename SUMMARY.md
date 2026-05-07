@@ -79,6 +79,7 @@
     * [Dynamic Context](plugins-and-integrations/unity-plugin-beta-overview/features/dynamic-context/README.md)
       * [Use Cases](plugins-and-integrations/unity-plugin-beta-overview/features/dynamic-context/use-cases.md)
   * [Installation and Setup](plugins-and-integrations/unity-plugin-beta-overview/installation-and-setup.md)
+  * [Mixed Reality AI Characters with Vision (Meta Quest)](plugins-and-integrations/unity-plugin-beta-overview/mixed-reality-ai-characters-with-vision-meta-quest.md)
 * [Unity Plugin](plugins-and-integrations/unity-plugin/README.md)
   * [Pre-Requisites](plugins-and-integrations/unity-plugin/pre-requisites.md)
   * [Compatibility](plugins-and-integrations/unity-plugin/compatibility.md)
