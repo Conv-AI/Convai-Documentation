@@ -1,5 +1,9 @@
 # Phase 1: Default Actions
 
+{% embed url="https://youtu.be/yWqJQRttoEI" %}
+Watch the actions tutorial for the updated Convai Unreal Engine Plugin&#x20;
+{% endembed %}
+
 The chatbot ships with four action templates already registered. With a handful of editor steps and **zero Blueprint scripting**, you can have a Convai character walking to objects, following the player, and waiting on demand.
 
 By the end of this phase your character will respond to spoken instructions like _"Go to the blue cube,"_ _"Now come back,"_ _"Follow me,"_ and _"Stop."_
