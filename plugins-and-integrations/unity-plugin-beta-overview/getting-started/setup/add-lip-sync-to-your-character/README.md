@@ -5,7 +5,7 @@ description: >-
   and verify real-time facial animation in Unity.
 ---
 
-# Adding Lip Sync to Your Character
+# Add Lip Sync to Your Character
 
 ## Introduction
 
@@ -43,7 +43,7 @@ Once added, the component appears with four main sections in the Inspector:
 
 This is the main setup section. It defines which Lip Sync profile the character uses, which map is applied, and which meshes will be animated.
 
-<figure><img src="../../../../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (7) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Profile
 
@@ -85,7 +85,7 @@ If your character uses custom blendshape names, create and assign a custom map i
 
 The **Target Meshes** list defines which `SkinnedMeshRenderer` components will receive blendshape animation.
 
-<figure><img src="../../../../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (8) (1).png" alt=""><figcaption></figcaption></figure>
 
 You can populate this list in three ways:
 
@@ -109,7 +109,7 @@ For most characters, **Auto-Find** is the fastest way to build this list. After 
 
 This section controls how the facial animation feels during playback.
 
-<figure><img src="../../../../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (9) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Lip Smoothing
 
@@ -162,7 +162,7 @@ This section controls how incoming Lip Sync data is buffered and played back.
 
 For most users, the default setting is the right choice.
 
-<figure><img src="../../../../../.gitbook/assets/image (10).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (10) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Latency Mode
 
@@ -210,7 +210,7 @@ The **Live Status** section is read-only and updates during Play mode.
 
 It gives you a live view of what the Lip Sync component is doing internally, which makes it very useful for debugging.
 
-<figure><img src="../../../../../.gitbook/assets/image (13) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (13) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Status Indicator
 
@@ -255,7 +255,7 @@ Select your character's root GameObject, then add:
 Convai > Lip Sync > Convai Lip Sync
 ```
 
-<figure><img src="../../../../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (15) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -269,7 +269,7 @@ In **Core Setup > Profile**, choose the profile that matches your character:
 
 If you are unsure why this matters, review [**Lip Sync Profiles and Mappings**](lip-sync-profiles-and-mappings/).
 
-<figure><img src="../../../../../.gitbook/assets/image (8) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (8) (1) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -279,7 +279,7 @@ Under **Target Meshes**, click **Auto-Find**.
 
 Make sure the component reports a non-zero number of meshes and blendshapes. If some meshes should not receive Lip Sync animation, remove them manually.
 
-<figure><img src="../../../../../.gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (11) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -291,7 +291,7 @@ If your character uses different blendshape names, create a custom map and assig
 
 For that process, see [**Creating a Custom Map**](lip-sync-profiles-and-mappings/creating-a-custom-map.md).
 
-<figure><img src="../../../../../.gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (12) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -303,9 +303,9 @@ This checks how well the active map matches the assigned meshes and helps identi
 
 A high coverage result, especially on mouth-related channels, is a strong indicator that the setup is correct.
 
-<figure><img src="../../../../../.gitbook/assets/image (13).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (13) (1).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../../../../.gitbook/assets/image (14).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/image (14) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}

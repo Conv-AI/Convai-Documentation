@@ -8,9 +8,9 @@ description: >-
 
 ## Introduction
 
-The Convai Playground Dashboard is your central hub for managing AI-powered characters and immersive simulation experiences. From here, you can easily create new characters, set up experiences, and access sample characters created by the Convai team.&#x20;
+The Convai Dashboard is your central hub for managing AI-powered characters and immersive experiences. From here, you can create characters, launch experiences, and access sample characters built by the Convai team.
 
-<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2026-05-08 134911.png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -18,14 +18,15 @@ The Convai Playground Dashboard is your central hub for managing AI-powered char
 
 ### Main Dashboard View
 
-When you log in, the **Dashboard** displays:
+When you log in, you land on the **Dashboard** with a welcome header: _"Create, manage, and deploy AI characters for your spatial experiences."_
 
-* **Recent Characters** – Quickly access and edit your most recently used characters.
-* **Recent Simulations** – View and manage your latest Convai Sim Experiences.
-* **Start a New Simulation** – Choose from available scene templates such as Airport, Healthcare, Fire Station, Hotel, Police Station, Restaurant, Fitness, Science Lab and more.
-* **Sample Characters** – Browse pre-made characters created by the Convai team for quick testing and inspiration.
+The page is organized into three sections:
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+* **Recent Characters** – Your most recently updated characters, shown as cards with the character name, a short description, and a scene video indicator. A **See All** link opens the full characters list.
+* **Recent Experiences** – Your most recently launched experiences, each tagged with a publish status badge: **Draft**, **Public**, or **Unlisted**. A **See All** link opens the full experiences list.
+* **Sample Characters** – Pre-built characters from the Convai team for quick testing and inspiration, covering use cases such as retail, healthcare, hospitality, and gaming.
+
+<figure><img src="../../.gitbook/assets/Screenshot 2026-05-08 135010.png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -33,57 +34,71 @@ When you log in, the **Dashboard** displays:
 
 In the **top-right corner**, you’ll find:
 
-* **Create a new experience** – Start building a new Convai Sim Experience from scratch.
-* **Create a new character** – Design and customize AI-powered characters for your projects.
+Two primary action buttons sit at the top of the Dashboard content area:
 
-<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+* **Create Character** (primary button) – Opens the character creation flow.
+* **Start New Experience** (secondary button) – Opens the experience setup flow.
+
+<figure><img src="../../.gitbook/assets/Screenshot 2026-05-08 135026.png" alt=""><figcaption></figcaption></figure>
 
 ***
 
 ### Sidebar Navigation
 
-On the **left sidebar**, you can access:
+The left sidebar provides access to all core sections:
 
-* **Dashboard** – Return to the Dashboard
-* **My Characters** – Access your characters.
-* **Create Character** – Launch the character creation tool directly.
-* **My Experiences** – Access and edit your simulation experiences.
+| Item                 | Description                               |
+| -------------------- | ----------------------------------------- |
+| **Dashboard**        | Returns to the main Dashboard view        |
+| **My Characters**    | Browse and manage all your characters     |
+| **My Experiences**   | Access, edit, and manage your experiences |
+| **Project Settings** | Configure project-level settings          |
 
-<figure><img src="../../.gitbook/assets/image (3) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+At the bottom of the sidebar:
+
+* **Legacy Playground** – Access the previous Convai Playground interface.
+* **Beta Feedback** – Submit feedback directly to the Convai team.
+
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 ***
 
 ### Profile and Settings
 
-In the **top-right profile section**:
+Click your **profile avatar** in the top-right corner to open the account dropdown:
 
-* Click your profile name to open a **dropdown menu** with:
-  * **My Profile** – Manage personal account details.
-  * **Billing** – View usages and update payment information.
+| Option        | Description                                |
+| ------------- | ------------------------------------------ |
+| **Account**   | Manage your account details                |
+| **Pricing**   | View your current plan and billing options |
+| **Theme**     | Toggle between light and dark mode         |
+| **Follow Us** | Links to Convai's social channels          |
+| **Logout**    | Sign out of your account                   |
 
-<figure><img src="../../.gitbook/assets/image (5) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+Your current plan (e.g., **Professional**) is displayed at the top of the dropdown alongside your name and email.
 
-* To the **left of your profile name**, you will find the **API Key access button** to get your API Key.
-
-<figure><img src="../../.gitbook/assets/image (6) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2026-05-08 135123.png" alt=""><figcaption></figcaption></figure>
 
 ***
 
-### Top Navigation Bar
+### API Key Access
 
-From the top navigation menu, you can directly reach:
+Click the **shield icon** to the left of your profile avatar to open the **API Key** modal.
 
-* **Playground**
-* **Documentation**
-* **Videos**
-* **Plugins**
-* **Pricing**
-* **Contact**
+The modal displays:
 
-<figure><img src="../../.gitbook/assets/image (7) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+* **Your API Key** – Hidden by default. Use the eye icon to reveal it or the copy icon to copy it to your clipboard.
+* **API Base URL** – `https://api.convai.com`
+* **View Docs** – A direct link to the [API integration documentation](https://docs.convai.com/).
+
+<figure><img src="../../.gitbook/assets/Screenshot 2026-05-08 135150.png" alt=""><figcaption></figcaption></figure>
+
+{% hint style="info" %}
+**Keep your API key secure.** Never share it publicly or commit it to version control. Use environment variables for storage.
+{% endhint %}
 
 ***
 
 ## Conclusion
 
-The Convai Playground Dashboard is designed for efficiency, providing quick access to all tools and resources you need to create and manage AI-driven characters and immersive simulations. Whether you are customizing existing assets or building new experiences from scratch, the intuitive layout ensures a smooth workflow.
+The Convai Dashboard gives you fast access to everything needed to build and manage AI characters and interactive experiences. The sidebar handles navigation, the top content area handles creation, and the profile menu handles account and API settings.

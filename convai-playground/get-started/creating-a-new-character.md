@@ -18,27 +18,27 @@ The Convai Playground allows you to design AI-powered characters with unique per
 
 * From your **Dashboard**, click **Create a new character** in the top-right corner.
 
-<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2026-05-08 135026 (2).png" alt=""><figcaption></figcaption></figure>
 
 * A new character creation interface will open.
-* In the left menu, only **Character Description**, **Avatar**, and **Voice And Languages** are active initially. Other sections will unlock after the character is created.
+* In the left menu, only **Character Description**, **Avatar**, and **Language and Speech** are active initially. Other sections will unlock after the character is created.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2025-08-08 143514.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
 ### 2. Character Description
 
 * **Character’s Name** – Enter the name for your character (you can edit this later).
-* **Core Description** – Write a short background covering the character’s story, personality traits, and distinctive features.
-  * Alternatively, click **Generate Core Description** to create one automatically.
-* **Speaking Style** _(optional)_ – Define the way your character speaks, including tone and mannerisms.
+* **Core Description** – Write a short background covering the character’s story, personality details, and distinctive features.
+  * Alternatively, click the **Wand Icon** to **Generate Character Backstory with AI**.
+* **Speaking Style** _(optional)_ – Define the way your character speaks, including tone and mannerisms. Also, feel free to suggest some **Sample Dialogues** here for your AI character.
 * **Visibility Settings** – Choose who can interact with your character:
   * **Public** – Available to anyone on `x.convai.com`.
   * **Unlisted** _(default)_ – Only accessible via a direct link.
   * **Private** – Restricted to you and invited users.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2025-08-08 143532.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -46,8 +46,10 @@ The Convai Playground allows you to design AI-powered characters with unique per
 
 * Click the **Avatar** tab in the left menu.
 * Select **Configure Avatar** to customize your character’s visual appearance.
-* Follow the steps in the [**Avatar Studio Documentation**](../../no-code-experiences/avatar-studio-experiences/) to adjust facial features, clothing, and other design elements.
+* Follow the steps in the [**Avatar Studio Documentation**](../../no-code-experiences/avatar-studio-experiences/) to learn how to adjust facial features, clothing, and other design elements.
 * Click **Save Changes** when done.
+
+<figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -55,15 +57,15 @@ The Convai Playground allows you to design AI-powered characters with unique per
 
 * Click the **Voice And Languages** tab.
 * In **Language**, select one or more languages your character can speak.
-* In **Voice**, choose from the filtered voice options for your selected languages.
+* In **Voice**, choose from the filtered voice options for your selected languages
 
-<figure><img src="../../.gitbook/assets/Screenshot 2025-08-08 150724.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
 ### 5. Finalizing Character Creation
 
-* Once all desired settings are configured, click **Create Character** at the bottom right.
+* Once all desired settings are configured, click **Create Character** at the top right.
 * If you skip customization, a **random avatar** and **voice** will be assigned automatically.
 * If you don't choose any language, **English** will be selected by default.
 * You can update any attribute later, so there’s no need to finalize all decisions immediately.
@@ -72,23 +74,25 @@ The Convai Playground allows you to design AI-powered characters with unique per
 
 ## After Creation
 
-When the character is created, additional sections in the left menu become available for deeper customization:
+When the character is created, all the sections in the left menu become available for deeper customization:
 
-* Character Description
+* Character Description (with **Speaking Style** and **Personality Traits**)
 * Avatar
 * Language and Speech
 * Knowledge Bank
-* Personality Traits
 * Core AI Settings
+* Guardrails
 * State of Mind
-* Narrative Design
-* External API
+* Embodied Actions (_Coming Soon to the new Playground. Available on_ [_Legacy Playground_](https://playground.convai.com/pipeline/dashboard))
+* Narrative Design (_Coming Soon to the new Playground. Available on_ [_Legacy Playground_](https://playground.convai.com/pipeline/dashboard))
+* External API (_Coming Soon to the new Playground. Available on_ [_Legacy Playground_](https://playground.convai.com/pipeline/dashboard))
 * Publish
 * Memory
+* Mindview
 
 Each of these features allows you to enhance and refine your character for more natural, intelligent, and engaging interactions. These are covered in separate documentation.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2025-08-08 152224.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
 
 ***
 

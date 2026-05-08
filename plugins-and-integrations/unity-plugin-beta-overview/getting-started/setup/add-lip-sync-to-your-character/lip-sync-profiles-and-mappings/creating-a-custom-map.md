@@ -155,7 +155,7 @@ This is the main routing table of the map.
 
 Each row is a mapping entry that connects one source channel to one or more target blendshapes.
 
-<figure><img src="../../../../../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (5) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 | Column                | Description                         |
 | --------------------- | ----------------------------------- |

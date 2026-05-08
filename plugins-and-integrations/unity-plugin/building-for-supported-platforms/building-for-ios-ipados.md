@@ -99,9 +99,9 @@ public class iOSBuild : MonoBehaviour
 2. Click on `Install iOS Build Package`
 3. Attach the  script `iOSBuild.cs` to any GameObject in your scene.
 
-<figure><img src="../../../.gitbook/assets/image (5) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (5) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../../.gitbook/assets/image (10) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (10) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Step 5: Build the Xcode Project
 
@@ -119,7 +119,7 @@ public class iOSBuild : MonoBehaviour
 6. Select your Team from the dropdown (you need an Apple Developer account for this).
 7. If needed, change the Bundle Identifier to a unique string.
 
-<figure><img src="../../../.gitbook/assets/image (6) (1) (1) (1) (1).png" alt=""><figcaption><p>Xcode window showing the Signing &#x26; Capabilities tab with Team and Bundle Identifier fields highlighted</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (6) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Xcode window showing the Signing &#x26; Capabilities tab with Team and Bundle Identifier fields highlighted</p></figcaption></figure>
 
 ### Step 7: Build and Run
 
@@ -127,7 +127,7 @@ public class iOSBuild : MonoBehaviour
 2. In Xcode, select your connected device as the build target.
 3. Click the "Play" button or press `Cmd + R` to build and run the app on your device.
 
-<figure><img src="../../../.gitbook/assets/image (8) (1) (1) (1) (1).png" alt=""><figcaption><p>Xcode toolbar showing the connected device selected and the "Play" button highlighted</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (8) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Xcode toolbar showing the connected device selected and the "Play" button highlighted</p></figcaption></figure>
 
 ### Troubleshooting
 
@@ -135,4 +135,4 @@ public class iOSBuild : MonoBehaviour
 * Check that your Apple Developer account has the necessary provisioning profiles and certificates.
 * If you face any GRPC-related issues, verify that the `libgrpc_csharp_ext.a` and `libgrpc.a` files are correctly placed in the `Assets/Convai/Plugins/gRPC/Grpc.Core/runtime/ios` folder.
 
-<figure><img src="../../../.gitbook/assets/image (9) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (9) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>

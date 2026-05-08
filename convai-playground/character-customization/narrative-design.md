@@ -4,13 +4,13 @@ description: >-
   that move the story forward without rigid dialogue trees.
 ---
 
-# Narrative Design
+# Narrative Design | Playground
 
 ## Introduction
 
 Narrative Design lets you guide a character with high‑level objectives while keeping conversations flexible. Instead of hard coding a tree of lines, you define goals and decision points, then allow the character to respond dynamically. This approach works for many domains such as games, learning and training simulations, tourism, retail assistants, and customer support kiosks. You can read more about the considerations behind Narrative Design [here.](https://convai.com/blog/convai-narrative-design)
 
-<figure><img src="../../.gitbook/assets/image (15) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (15) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -48,7 +48,7 @@ Ensure decisions are clear and unambiguous; otherwise, the intended section may 
 
 Each Section has a **unique ID**.
 
-<figure><img src="../../.gitbook/assets/image (17).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (17) (1).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -64,7 +64,7 @@ Each Trigger has a **unique ID**.
 * **Time Based:** a timer in your app expires and fires the trigger.
 * **Event Based:** an in‑app event occurs such as “safety demo completed” and you fire the trigger.
 
-<figure><img src="../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (18) (1).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -79,7 +79,7 @@ A training simulation scenario set in a manufacturing facility.\
 This character uses location-based triggers (e.g., entering the conveyor belt area or assembly line) to guide users through the workspace, explain safety protocols, and progress the tour.\
 Ideal for **industrial training** and **onboarding simulations**.
 
-<figure><img src="../../.gitbook/assets/image (15) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (15) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Real Estate Home Tour Guide – [View Character](https://convai.com/pipeline/dashboard/character?id=4d31ce84-8c6a-11ef-bc7a-42010a7be011)
 
@@ -88,7 +88,7 @@ Similar to the factory example, it uses **location-based triggers** — for inst
 This allows the character to dynamically adapt its dialogue to the user’s movement through the property.\
 Useful for **virtual property tours**, **sales presentations**, and **customer onboarding**.
 
-<figure><img src="../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (16) (1).png" alt=""><figcaption></figcaption></figure>
 
 ***
 

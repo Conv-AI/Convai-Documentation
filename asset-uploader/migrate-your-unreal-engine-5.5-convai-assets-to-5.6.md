@@ -28,7 +28,7 @@ Before making any changes:
 1. Launch **ConvaiAssetUploader.exe**.
 2. In the opened CMD window, choose **Option 2: Update an existing Project**.
 
-<figure><img src="../.gitbook/assets/image (14) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (14) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 3. Follow the prompts to complete the plugin and related component updates.
 

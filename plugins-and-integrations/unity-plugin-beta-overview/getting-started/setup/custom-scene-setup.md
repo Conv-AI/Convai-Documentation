@@ -66,12 +66,12 @@ For each character GameObject you want to make conversational:
   * Top menu: **GameObject → Convai → Validate Scene Setup**
   * Hierarchy right-click: **Convai → Validate Scene Setup**
 
-<figure><img src="../../../../.gitbook/assets/image (9) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (9) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 * **Expected result:** A success message like:
   * “Scene setup is correct!” and the number of Convai Characters found.
 
-<figure><img src="../../../../.gitbook/assets/image (10) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (10) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}

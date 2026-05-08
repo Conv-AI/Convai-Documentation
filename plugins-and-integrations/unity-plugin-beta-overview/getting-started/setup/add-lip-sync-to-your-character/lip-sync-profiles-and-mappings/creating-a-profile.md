@@ -40,7 +40,7 @@ A custom profile cannot be used to introduce an entirely new transport value out
 
 When you select a `ConvaiLipSyncProfileAsset`, the Inspector is divided into three main areas.
 
-<figure><img src="../../../../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/image (5) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Runtime Identity
 

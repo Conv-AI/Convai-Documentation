@@ -24,7 +24,7 @@ By the end of this phase your character will respond to spoken instructions like
 This toggle controls whether the chatbot's `Environment` is serialized as `action_config` at `/connect` time. Without it, the server treats the bot as conversational-only.
 {% endhint %}
 
-<figure><img src="../../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (2) (7).png" alt=""><figcaption></figcaption></figure>
 
 ### Step 2 — Register an object
 
@@ -40,7 +40,7 @@ The bot can only target things you've told it about. Add the cube to the chatbot
 
 You can add as many objects as you like — repeat for each cube and any other prop the bot should know about.
 
-<figure><img src="../../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (3) (6).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 Tip: stable, distinct names matter. _"red cube"_ and _"blue cube"_ are easy for the LLM to pick between; _"cube"_ and _"cube2"_ aren't.
@@ -53,7 +53,7 @@ The default `Move To` and `Follow` actions need the character to actually be abl
 1. In the **Content Browser**, navigate to your character Blueprint.
 2. **Right-click the asset** → **Convai** → **Setup Convai Pawn Movement**.
 
-<figure><img src="../../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (4) (3).png" alt=""><figcaption></figcaption></figure>
 
 What this does, depending on the Blueprint's parent class:
 
