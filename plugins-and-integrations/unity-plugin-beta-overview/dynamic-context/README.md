@@ -30,7 +30,7 @@ The flow is:
 Your Game Code
       │
       ▼
-ConvaiRoomManager.UpdateDynamicContext(text, mode, runLlm)
+IConvaiRoomConnectionService.UpdateDynamicContext(text, mode, runLlm)
       │
       ▼
 Serialized context-update message dispatched over the session data channel
@@ -47,7 +47,7 @@ This is a **fire-and-forget, outbound-only** operation. There is no direct respo
 
 Before writing any code, understand these three parameters that control every `UpdateDynamicContext` call.
 
-#### `text`
+### `text`
 
 The content you want the character to be aware of. This is a plain string — it can be a sentence, a structured paragraph, or key-value data formatted however you prefer.
 
@@ -59,21 +59,21 @@ The content you want the character to be aware of. This is a plain string — it
 
 ***
 
-#### `mode`
+### `mode`
 
 Controls how the new text is applied to the character's existing ephemeral context.
 
-| Mode      | Behavior                                                                             | When to Use                                                              |
-| --------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| `append`  | Adds `text` to any existing ephemeral context. Prior entries remain.                 | Progressive information — adding facts as the session unfolds.           |
-| `replace` | Discards all current ephemeral context and replaces it entirely with the new `text`. | A clean state transition — entering a new scene, starting a new chapter. |
-| `reset`   | Clears all runtime ephemeral context. `text` is ignored.                             | Resetting all accumulated runtime context.                               |
+| Mode      | Behavior                                                                                                                                           | When to Use                                                                         |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `append`  | Adds `text` to any existing ephemeral context. Prior entries remain.                                                                               | Progressive information — adding facts as the session unfolds.                      |
+| `replace` | Discards all current ephemeral context and replaces it entirely with the new `text`.                                                               | A clean state transition — entering a new scene, starting a new chapter.            |
+| `reset`   | Clears all runtime ephemeral context. `text` is ignored. Initial Dynamic Info is not affected — it remains pinned for the duration of the session. | Resetting accumulated runtime context while preserving session-level fixed context. |
 
 **Default:** `"append"`
 
 ***
 
-#### `runLlm`
+### `runLlm`
 
 Whether to trigger an LLM inference pass after the context update.
 
@@ -89,140 +89,139 @@ Use `"false"` when you are batching multiple context updates and only want the L
 
 ***
 
+#### `mode`
+
+Controls how the new text is applied to the character's existing ephemeral context.
+
+| Mode      | Behavior                                                                                                                                                   | When to Use                                                                         |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `append`  | Adds `text` to any existing ephemeral context. Prior entries remain.                                                                                       | Progressive information — adding facts as the session unfolds.                      |
+| `replace` | Discards all current ephemeral context and replaces it entirely with the new `text`.                                                                       | A clean state transition — entering a new scene, starting a new chapter.            |
+| `reset`   | Clears all **runtime** ephemeral context. `text` is ignored. **Initial Dynamic Info is not affected** — it remains pinned for the duration of the session. | Resetting accumulated runtime context while preserving session-level fixed context. |
+
+Default: `"append"`
+
+***
+
+## Initial Dynamic Info
+
+`UpdateDynamicContext` is not the only way to provide session-level context to a character. The `ConvaiCharacter` component exposes a second layer that is fixed for the entire session: **Initial Dynamic Info**.
+
+This is configured in the Unity Inspector on the `ConvaiCharacter` component, under the **SESSION** section:
+
+1. Enable **Keep Initial Dynamic Info In Context** — this toggle controls whether the text below is included in the connection request and pinned by the server for the whole session.
+2. Once enabled, the **Dynamic Info (Connection Request)** field appears. Enter your initial context text in **Initial Dynamic Info Text**.
+
+<figure><img src="../../../.gitbook/assets/image (459).png" alt=""><figcaption></figcaption></figure>
+
+Unlike `UpdateDynamicContext`, this value is not sent over the data channel at runtime — it is embedded in the connection payload before the session starts.
+
+**Key distinction:** `reset` mode in `UpdateDynamicContext` does **not** clear Initial Dynamic Info. It only resets the runtime ephemeral layer. The pinned initial text remains active for the entire session regardless of any context updates you send.
+
+#### When to use each
+
+|                        | Initial Dynamic Info                                                             | Runtime Dynamic Context                        |
+| ---------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **Set via**            | Unity Inspector (`ConvaiCharacter`)                                              | Code (`UpdateDynamicContext`)                  |
+| **When sent**          | At room connection, before session starts                                        | Any time during an active session              |
+| **Mutable**            | No — fixed for the session                                                       | Yes — append, replace, or reset at will        |
+| **Cleared by `reset`** | No                                                                               | Yes                                            |
+| **Use for**            | Stable session configuration: character role, scenario rules, fixed instructions | Changing game state, player data, events, mood |
+
+{% hint style="info" %}
+Use Initial Dynamic Info for context that should never change during a session — role instructions, scenario setup, fixed rules. Use `UpdateDynamicContext` for everything that evolves as the session progresses.
+{% endhint %}
+
+***
+
 ## Accessing the API
 
-Dynamic Context is exposed through `ConvaiRoomManager`, the central session manager for the Convai Unity SDK. It is accessible as a persistent singleton via `ConvaiRoomManager.Instance`.
-
-Two distinct patterns exist depending on who owns the connection lifecycle.
+Dynamic Context is exposed through `IConvaiRoomConnectionService`, obtained via `ConvaiManager`. Two distinct patterns exist depending on who owns the connection lifecycle.
 
 ### Pattern A — Self-Contained
 
-Use when the component is responsible for its own initialization.
-
-The required readiness level depends on `runLlm`:
-
-* **`runLlm: "false"` or `"auto"`** — waiting for `IsConnectedToRoom` is sufficient. The context is injected silently and no immediate audio response is expected.
-* **`runLlm: "true"`** — the full audio pipeline must be ready before sending. See the note below.
+Use when the component is responsible for its own initialization. Typical for session-start scenarios where context must be sent as soon as the connection is ready.
 
 ```csharp
 using System.Collections;
-using Convai.Scripts;
+using Convai.Runtime.Components;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 public class ExampleSelfContained : MonoBehaviour
 {
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
 
     private IEnumerator Start()
     {
-        // Poll until ConvaiRoomManager singleton is available.
+        // Poll until ConvaiManager and the room service are available.
         // Resolves within one or two frames under normal conditions.
-        while (ConvaiRoomManager.Instance == null)
-            yield return null;
-
-        _roomManager = ConvaiRoomManager.Instance;
-
-        // Wait for the room connection to be established.
-        // Check IsConnectedToRoom first: if this component initializes after the session is
-        // already established, OnRoomConnectionSuccessful will never fire.
-        if (!_roomManager.IsConnectedToRoom)
+        while (true)
         {
-            bool connected = false;
-            _roomManager.OnRoomConnectionSuccessful.AddListener(() => connected = true);
-            yield return new WaitUntil(() => connected);
+            ConvaiManager manager = ConvaiManager.ActiveManager;
+            if (manager != null && manager.TryGetRoomConnectionService(out _connectionService))
+                break;
+            yield return null;
         }
 
+        // The service reference is available, but the room may not be connected yet.
+        // Check IsConnected first: if this component initializes after the session is
+        // already established, the Connected event will never fire.
+        if (_connectionService.IsConnected)
+            OnReady();
+        else
+            _connectionService.Connected += OnConnected;
+    }
+
+    private void OnConnected()
+    {
+        _connectionService.Connected -= OnConnected;
         OnReady();
     }
 
     private void OnReady()
     {
-        bool sent = _roomManager.UpdateDynamicContext("...", mode: "replace", runLlm: "false");
+        bool sent = _connectionService.UpdateDynamicContext("...", mode: "replace", runLlm: "false");
         if (!sent)
             Debug.LogWarning("[Example] UpdateDynamicContext returned false.");
     }
 
     private void OnDestroy()
     {
-        if (_roomManager != null)
-            _roomManager.OnRoomConnectionSuccessful.RemoveListener(OnConnected);
-    }
-
-    private void OnConnected() { }
-}
-```
-
-{% hint style="warning" %}
-**If you use `runLlm: "true"` to trigger an immediate character response**, waiting for `IsConnectedToRoom` is not enough. The character's audio pipeline goes through three asynchronous stages after the room connects: the bot participant joins, the audio track is subscribed, and the audio buffer is initialised. Sending before all three are complete causes the server's TTS response to be silently dropped.
-
-Use the pattern below instead:
-
-```csharp
-using System.Collections;
-using System.Linq;
-using Convai.Scripts;
-using UnityEngine;
-
-public class ExampleImmediateGreeting : MonoBehaviour
-{
-    private ConvaiRoomManager _roomManager;
-
-    private IEnumerator Start()
-    {
-        while (ConvaiRoomManager.Instance == null)
-            yield return null;
-
-        _roomManager = ConvaiRoomManager.Instance;
-
-        while (!_roomManager.IsConnectedToRoom)
-            yield return null;
-
-        // Wait until the bot's audio pipeline is fully ready:
-        //   1. Bot participant has joined the room      (ParticipantConnected)
-        //   2. Bot audio track has been published       (TrackPublished)
-        //   3. Audio track has been subscribed          (TrackSubscribed)
-        //   4. AudioSource.Play() has been called       (AudioStream constructor)
-        while (_roomManager.NpcToParticipantMap == null ||
-               !_roomManager.NpcToParticipantMap.Values.Any(d => d.AudioStream != null))
-        {
-            yield return null;
-        }
-
-        bool sent = _roomManager.UpdateDynamicContext("...", mode: "replace", runLlm: "true");
-        if (!sent)
-            Debug.LogWarning("[Example] UpdateDynamicContext returned false.");
+        // Prevent a dangling subscription if this object is destroyed before connection.
+        if (_connectionService != null)
+            _connectionService.Connected -= OnConnected;
     }
 }
 ```
-{% endhint %}
 
 ***
 
 ### Pattern B — Inject
 
-Use when a session coordinator or parent system is responsible for providing the room manager. The component assumes the manager is valid when its public methods are called.
+Use when a session coordinator or parent system is responsible for providing a connected service. The component assumes the service is valid when its public methods are called.
 
 ```csharp
-using Convai.Scripts;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 public class ExampleInjected : MonoBehaviour
 {
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
 
     /// <summary>
-    /// Initializes this component with the active room manager.
+    /// Initializes this component with an active room connection service.
     /// Must be called by the session owner after the Convai session is established.
     /// </summary>
-    public void Initialize(ConvaiRoomManager roomManager)
+    public void Initialize(IConvaiRoomConnectionService connectionService)
     {
-        _roomManager = roomManager;
+        _connectionService = connectionService;
     }
 
     public void DoSomething()
     {
         // ?. guards against Initialize not having been called yet.
-        bool sent = _roomManager?.UpdateDynamicContext("...", mode: "append", runLlm: "false") ?? false;
+        bool sent = _connectionService?.UpdateDynamicContext("...", mode: "append", runLlm: "false") ?? false;
         if (!sent)
             Debug.LogWarning("[Example] UpdateDynamicContext returned false.");
     }
@@ -241,35 +240,39 @@ public class ExampleInjected : MonoBehaviour
 bool UpdateDynamicContext(string text, string mode = "append", string runLlm = "auto");
 ```
 
-Available on `ConvaiRoomManager`. Also callable via `ConvaiNPC.UpdateDynamicContext(...)`, which delegates to `ConvaiRoomManager.Instance` internally.
-
 | Parameter | Type     | Required           | Default    | Description                                                        |
 | --------- | -------- | ------------------ | ---------- | ------------------------------------------------------------------ |
 | `text`    | `string` | Yes (unless reset) | —          | The context text to inject.                                        |
 | `mode`    | `string` | No                 | `"append"` | How to apply the text: `"append"`, `"replace"`, or `"reset"`.      |
 | `runLlm`  | `string` | No                 | `"auto"`   | Whether to trigger an LLM response: `"true"`, `"false"`, `"auto"`. |
 
-**Returns:** `true` if the message was dispatched to the transport layer; `false` if the session is not connected (RTVIHandler not initialized) or if `text` is empty and `mode` is not `"reset"`.
+**Returns:** `true` if the message was dispatched to the transport layer; `false` if the session is not connected.
 
 ***
 
-#### **`mode`**
+#### `mode`
 
 Controls how the new text is applied to the character's existing ephemeral context.
 
-| Mode      | Behavior                                                                             | When to Use                                                              |
-| --------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| `append`  | Adds `text` to any existing ephemeral context. Prior entries remain.                 | Progressive information — adding facts as the session unfolds.           |
-| `replace` | Discards all current ephemeral context and replaces it entirely with the new `text`. | A clean state transition — entering a new scene, starting a new chapter. |
-| `reset`   | Clears all runtime ephemeral context. `text` is ignored.                             | Resetting all accumulated runtime context.                               |
+| Mode      | Behavior                                                                                                                                                   | When to Use                                                                         |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `append`  | Adds `text` to any existing ephemeral context. Prior entries remain.                                                                                       | Progressive information — adding facts as the session unfolds.                      |
+| `replace` | Discards all current ephemeral context and replaces it entirely with the new `text`.                                                                       | A clean state transition — entering a new scene, starting a new chapter.            |
+| `reset`   | Clears all **runtime** ephemeral context. `text` is ignored. **Initial Dynamic Info is not affected** — it remains pinned for the duration of the session. | Resetting accumulated runtime context while preserving session-level fixed context. |
 
 **Default:** `"append"`
 
 ***
 
+## Dynamic Context vs. Related Features
+
+<table><thead><tr><th>Feature</th><th width="216.407470703125">Method</th><th width="127.9259033203125">Scope</th><th width="107.370361328125">Persists Across Sessions</th><th>Use For</th></tr></thead><tbody><tr><td><strong>Dynamic Context</strong></td><td><code>UpdateDynamicContext</code></td><td>Ephemeral (runtime)</td><td>No</td><td>Runtime facts: player state, game events, situational awareness.</td></tr><tr><td><strong>Initial Dynamic Info</strong></td><td><code>ConvaiCharacter</code> Inspector</td><td>Ephemeral (session-start, pinned)</td><td>No</td><td>Fixed session instructions: scenario rules, character role, stable setup. Not affected by <code>reset</code>.</td></tr><tr><td><strong>Dynamic Info</strong></td><td><code>SendDynamicInfo</code></td><td>Per-message</td><td>No</td><td>Inline context attached to a specific user utterance.</td></tr><tr><td><strong>Template Keys</strong></td><td><code>UpdateTemplateKeys</code></td><td>Session</td><td>No</td><td>Resolving named placeholders (<code>{PlayerName}</code>) in narrative design text.</td></tr><tr><td><strong>Scene Metadata</strong></td><td><code>UpdateSceneMetadata</code></td><td>Session</td><td>No</td><td>Structural scene data for the backend's contextual grounding pipeline.</td></tr><tr><td><strong>Dashboard Backstory</strong></td><td>Convai dashboard</td><td>Permanent</td><td>Yes</td><td>Character personality, lore, fixed behavioral rules.</td></tr></tbody></table>
+
+***
+
 ## Common Pitfalls
 
-* **Calling before the session is connected** `UpdateDynamicContext` returns `false` and silently drops the update. Use a coroutine or subscribe to `ConvaiRoomManager.OnRoomConnectionSuccessful` (a `UnityEvent`) to delay context injection until the session is live.
+* **Calling before the session is connected** `UpdateDynamicContext` returns `false` and silently drops the update. Use a coroutine or subscribe to `IConvaiRoomConnectionService.Connected` to delay context injection until the session is live.
 * **Using `append` indefinitely** Every `append` expands the context window. In long sessions this degrades response coherence and increases latency. Use `replace` periodically, or adopt the `DynamicContextManager` pattern.
 * **Sending `text` with `reset` mode** `text` is ignored when `mode` is `"reset"`. Pass `null` explicitly to make the intent clear.
 * **Expecting a synchronous effect** Dynamic Context is asynchronous end-to-end. The character will not know about the update until the next LLM inference pass. Do not design logic that assumes an instant effect.
@@ -280,25 +283,23 @@ Controls how the new text is applied to the character's existing ephemeral conte
 ## Quick Reference
 
 ```csharp
-ConvaiRoomManager room = ConvaiRoomManager.Instance;
-
 // Append new information to existing ephemeral context (default)
-room.UpdateDynamicContext("Player just entered the dungeon.");
+connectionService.UpdateDynamicContext("Player just entered the dungeon.");
 
 // Replace all ephemeral context with new content
-room.UpdateDynamicContext("Player is now in Act 2.", mode: "replace");
+connectionService.UpdateDynamicContext("Player is now in Act 2.", mode: "replace");
 
 // Clear all ephemeral context
-room.UpdateDynamicContext(null, mode: "reset");
+connectionService.UpdateDynamicContext(null, mode: "reset");
 
 // Accumulate silently (no LLM response)
-room.UpdateDynamicContext("Player picked up the golden key.", runLlm: "false");
+connectionService.UpdateDynamicContext("Player picked up the golden key.", runLlm: "false");
 
 // Update and trigger an immediate character response
-room.UpdateDynamicContext("The village is on fire!", runLlm: "true");
+connectionService.UpdateDynamicContext("The village is on fire!", runLlm: "true");
 
 // Inject emotional state
-room.UpdateDynamicContext("Speak with urgency. A threat is approaching.", mode: "replace", runLlm: "false");
+connectionService.UpdateDynamicContext("Speak with urgency. A threat is approaching.", mode: "replace", runLlm: "false");
 ```
 
 ***
@@ -315,6 +316,4 @@ A few principles to carry forward:
 * **Treat the context window as a resource.** Unbounded `append` degrades quality over time. Use `replace` at natural boundaries — scene transitions, module changes, session resets.
 * **Your application owns the state. The character receives it.** Dynamic Context is the mechanism that enforces that separation cleanly.
 
-{% hint style="info" %}
-**Need help?** For questions, please visit the [**Convai Developer Forum**](https://forum.convai.com/).
-{% endhint %}
+{% include "../../../.gitbook/includes/need-help-for-questions-p....md" %}

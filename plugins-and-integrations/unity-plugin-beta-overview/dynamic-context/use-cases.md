@@ -17,8 +17,8 @@ The most common use: telling the character who it is speaking with before any di
 
 ```csharp
 using System.Collections;
-using System.Linq;
-using Convai.Scripts;
+using Convai.Runtime.Components;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -31,30 +31,27 @@ public class PlayerGreeting : MonoBehaviour
     [SerializeField] private string _playerName = "Aria";
     [SerializeField] private string _playerClass = "Ranger";
 
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
 
     private IEnumerator Start()
     {
-        while (ConvaiRoomManager.Instance == null)
-            yield return null;
-
-        _roomManager = ConvaiRoomManager.Instance;
-
-        while (!_roomManager.IsConnectedToRoom)
-            yield return null;
-
-        // runLlm: "true" triggers an immediate character response.
-        // The full audio pipeline must be ready before sending — waiting for
-        // IsConnectedToRoom alone is not sufficient. The bot participant joins,
-        // publishes its audio track, and the AudioStream is initialised
-        // asynchronously after the room connects. Sending before all three
-        // stages complete causes the TTS response to be silently dropped.
-        while (_roomManager.NpcToParticipantMap == null ||
-               !_roomManager.NpcToParticipantMap.Values.Any(d => d.AudioStream != null))
+        while (true)
         {
+            ConvaiManager manager = ConvaiManager.ActiveManager;
+            if (manager != null && manager.TryGetRoomConnectionService(out _connectionService))
+                break;
             yield return null;
         }
 
+        if (_connectionService.IsConnected)
+            SendGreeting();
+        else
+            _connectionService.Connected += OnConnected;
+    }
+
+    private void OnConnected()
+    {
+        _connectionService.Connected -= OnConnected;
         SendGreeting();
     }
 
@@ -66,9 +63,15 @@ public class PlayerGreeting : MonoBehaviour
 
         // replace — ensures no stale context from a previous session carries over.
         // runLlm: true — triggers an immediate greeting response.
-        bool sent = _roomManager.UpdateDynamicContext(context, mode: "replace", runLlm: "true");
+        bool sent = _connectionService.UpdateDynamicContext(context, mode: "replace", runLlm: "true");
         if (!sent)
             Debug.LogWarning("[PlayerGreeting] UpdateDynamicContext returned false.");
+    }
+
+    private void OnDestroy()
+    {
+        if (_connectionService != null)
+            _connectionService.Connected -= OnConnected;
     }
 }
 ```
@@ -83,7 +86,8 @@ At session start, push the learner's name, role, and current course. Every chara
 
 ```csharp
 using System.Collections;
-using Convai.Scripts;
+using Convai.Runtime.Components;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -92,22 +96,27 @@ using UnityEngine;
 /// </summary>
 public class LearnerProfileInjector : MonoBehaviour
 {
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
 
     private IEnumerator Start()
     {
-        while (ConvaiRoomManager.Instance == null)
-            yield return null;
-
-        _roomManager = ConvaiRoomManager.Instance;
-
-        if (!_roomManager.IsConnectedToRoom)
+        while (true)
         {
-            bool connected = false;
-            _roomManager.OnRoomConnectionSuccessful.AddListener(() => connected = true);
-            yield return new WaitUntil(() => connected);
+            ConvaiManager manager = ConvaiManager.ActiveManager;
+            if (manager != null && manager.TryGetRoomConnectionService(out _connectionService))
+                break;
+            yield return null;
         }
 
+        if (_connectionService.IsConnected)
+            InjectProfile();
+        else
+            _connectionService.Connected += OnConnected;
+    }
+
+    private void OnConnected()
+    {
+        _connectionService.Connected -= OnConnected;
         InjectProfile();
     }
 
@@ -130,9 +139,15 @@ public class LearnerProfileInjector : MonoBehaviour
 
         // replace — establishes a clean session baseline.
         // runLlm: false — profile is background context, not a prompt for an immediate response.
-        bool sent = _roomManager.UpdateDynamicContext(context, mode: "replace", runLlm: "false");
+        bool sent = _connectionService.UpdateDynamicContext(context, mode: "replace", runLlm: "false");
         if (!sent)
             Debug.LogWarning("[LearnerProfileInjector] UpdateDynamicContext returned false.");
+    }
+
+    private void OnDestroy()
+    {
+        if (_connectionService != null)
+            _connectionService.Connected -= OnConnected;
     }
 }
 ```
@@ -144,7 +159,7 @@ public class LearnerProfileInjector : MonoBehaviour
 As the trainee advances to a new module, replace the context with the module's objectives. The character immediately knows what to focus on — no reconfiguration required.
 
 ```csharp
-using Convai.Scripts;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -153,15 +168,15 @@ using UnityEngine;
 /// </summary>
 public class TrainingModuleController : MonoBehaviour
 {
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
 
     /// <summary>
-    /// Initializes this component with the active room manager.
+    /// Initializes this component with an active room connection service.
     /// Must be called by the session owner after the Convai session is established.
     /// </summary>
-    public void Initialize(ConvaiRoomManager roomManager)
+    public void Initialize(IConvaiRoomConnectionService connectionService)
     {
-        _roomManager = roomManager;
+        _connectionService = connectionService;
     }
 
     /// <summary>
@@ -177,7 +192,7 @@ public class TrainingModuleController : MonoBehaviour
             "Focus all guidance and questions on this module's content only.";
 
         // replace — prior module context is no longer relevant.
-        bool sent = _roomManager?.UpdateDynamicContext(context, mode: "replace", runLlm: "false") ?? false;
+        bool sent = _connectionService?.UpdateDynamicContext(context, mode: "replace", runLlm: "false") ?? false;
         if (!sent)
             Debug.LogWarning($"[TrainingModuleController] Failed to advance to module '{module.Title}'.");
     }
@@ -191,7 +206,7 @@ public class TrainingModuleController : MonoBehaviour
 A language learning tutor adjusts its vocabulary, sentence complexity, and correction style based on the learner's current proficiency level. A single call at session start — or whenever the level changes.
 
 ```csharp
-using Convai.Scripts;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -200,15 +215,15 @@ using UnityEngine;
 /// </summary>
 public class LanguageTutorLevelManager : MonoBehaviour
 {
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
 
     /// <summary>
-    /// Initializes this component with the active room manager.
+    /// Initializes this component with an active room connection service.
     /// Must be called by the session owner after the Convai session is established.
     /// </summary>
-    public void Initialize(ConvaiRoomManager roomManager)
+    public void Initialize(IConvaiRoomConnectionService connectionService)
     {
-        _roomManager = roomManager;
+        _connectionService = connectionService;
     }
 
     /// <param name="cefrLevel">CEFR proficiency level: A1, A2, B1, B2, C1, or C2.</param>
@@ -221,7 +236,7 @@ public class LanguageTutorLevelManager : MonoBehaviour
             $"They are learning {targetLanguage} at CEFR level {cefrLevel}. " +
             GetLevelInstructions(cefrLevel);
 
-        bool sent = _roomManager?.UpdateDynamicContext(context, mode: "replace", runLlm: "false") ?? false;
+        bool sent = _connectionService?.UpdateDynamicContext(context, mode: "replace", runLlm: "false") ?? false;
         if (!sent)
             Debug.LogWarning($"[LanguageTutorLevelManager] Failed to set proficiency level '{cefrLevel}'.");
     }
@@ -249,10 +264,10 @@ public class LanguageTutorLevelManager : MonoBehaviour
 
 Dynamic Context is not limited to facts. Plain-language instructions work equally well for shaping character tone and behavior on the fly.
 
-Scenario: A companion NPC's mood should shift based on what is happening in the scene — calm before a battle, tense during it, relieved after.
+**Scenario:** A companion NPC's mood should shift based on what is happening in the scene — calm before a battle, tense during it, relieved after.
 
 ```csharp
-using Convai.Scripts;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -262,15 +277,15 @@ using UnityEngine;
 /// </summary>
 public class CompanionMoodController : MonoBehaviour
 {
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
 
     /// <summary>
-    /// Initializes this component with the active room manager.
+    /// Initializes this component with an active room connection service.
     /// Must be called by the session owner after the Convai session is established.
     /// </summary>
-    public void Initialize(ConvaiRoomManager roomManager)
+    public void Initialize(IConvaiRoomConnectionService connectionService)
     {
-        _roomManager = roomManager;
+        _connectionService = connectionService;
     }
 
     /// <summary>
@@ -284,7 +299,7 @@ public class CompanionMoodController : MonoBehaviour
     {
         // replace — the current mood replaces the previous one; states do not accumulate.
         // runLlm: false — mood is background context; the character should not react unprompted.
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             moodInstruction,
             mode: "replace",
             runLlm: "false") ?? false;
@@ -309,10 +324,10 @@ public class CompanionMoodController : MonoBehaviour
 
 As the player progresses, the world changes. Dynamic Context lets those changes reach the character in real time.
 
-Scenario: A shopkeeper NPC should always be aware of the player's current gold, recent events, and completed quests.
+**Scenario:** A shopkeeper NPC should always be aware of the player's current gold, recent events, and completed quests.
 
 ```csharp
-using Convai.Scripts;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -322,7 +337,7 @@ using UnityEngine;
 /// </summary>
 public class ShopkeeperContextUpdater : MonoBehaviour
 {
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
 
     private void Awake()
     {
@@ -342,15 +357,15 @@ public class ShopkeeperContextUpdater : MonoBehaviour
     /// Initializes this component and pushes an initial state snapshot.
     /// Must be called by the session owner after the Convai session is established.
     /// </summary>
-    public void Initialize(ConvaiRoomManager roomManager)
+    public void Initialize(IConvaiRoomConnectionService connectionService)
     {
-        if (roomManager == null)
+        if (connectionService == null)
         {
-            Debug.LogError("[ShopkeeperContextUpdater] roomManager must not be null.");
+            Debug.LogError("[ShopkeeperContextUpdater] connectionService must not be null.");
             return;
         }
 
-        _roomManager = roomManager;
+        _connectionService = connectionService;
 
         // Push initial snapshot — replace any context from a previous session.
         string snapshot =
@@ -358,7 +373,7 @@ public class ShopkeeperContextUpdater : MonoBehaviour
             $"Completed quests: {string.Join(", ", QuestManager.CompletedQuestNames)}. " +
             $"Merchant Guild reputation: {PlayerStats.MerchantReputation}/100.";
 
-        bool sent = _roomManager.UpdateDynamicContext(snapshot, mode: "replace", runLlm: "false");
+        bool sent = _connectionService.UpdateDynamicContext(snapshot, mode: "replace", runLlm: "false");
         if (!sent)
             Debug.LogWarning("[ShopkeeperContextUpdater] Failed to send initial snapshot.");
     }
@@ -366,7 +381,7 @@ public class ShopkeeperContextUpdater : MonoBehaviour
     private void OnGoldChanged(int newGold)
     {
         // Silent append — gold amount colors future replies without prompting an unsolicited remark.
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             $"Player gold updated: {newGold}g.",
             mode: "append",
             runLlm: "false") ?? false;
@@ -378,7 +393,7 @@ public class ShopkeeperContextUpdater : MonoBehaviour
     private void OnQuestCompleted(string questName)
     {
         // runLlm: true — the player returning with a completed quest warrants a reaction.
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             $"The player just completed '{questName}' and is returning to collect their reward.",
             mode: "append",
             runLlm: "true") ?? false;
@@ -390,7 +405,7 @@ public class ShopkeeperContextUpdater : MonoBehaviour
     private void OnWorldEvent(string eventDescription)
     {
         // Silent append — world news enriches future conversation without interrupting the current flow.
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             $"World event: {eventDescription}",
             mode: "append",
             runLlm: "false") ?? false;
@@ -409,10 +424,10 @@ Passive state (gold, world news) uses `runLlm: "false"` — it colors future rep
 
 In high-frequency event scenarios — rapid loot drops, kill streaks, bonus triggers — reacting to every event creates noise. The correct pattern is to accumulate silently and respond only when something meaningful happens, or when the user initiates conversation.
 
-Scenario: A combat commentator tracks kill events throughout a fight. The character stays quiet during the action but has full awareness of everything that happened when the player finally speaks.
+**Scenario:** A combat commentator tracks kill events throughout a fight. The character stays quiet during the action but has full awareness of everything that happened when the player finally speaks.
 
 ```csharp
-using Convai.Scripts;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -427,21 +442,21 @@ public class CombatEventAccumulator : MonoBehaviour
     [Tooltip("Number of events to accumulate before triggering a character response.")]
     private int _responseThreshold = 5;
 
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
     private int _pendingEventCount;
 
     /// <summary>
-    /// Initializes this component with the active room manager.
+    /// Initializes this component with an active room connection service.
     /// Must be called by the session owner after the Convai session is established.
     /// </summary>
-    public void Initialize(ConvaiRoomManager roomManager)
+    public void Initialize(IConvaiRoomConnectionService connectionService)
     {
-        if (roomManager == null)
+        if (connectionService == null)
         {
-            Debug.LogError("[CombatEventAccumulator] roomManager must not be null.");
+            Debug.LogError("[CombatEventAccumulator] connectionService must not be null.");
             return;
         }
-        _roomManager = roomManager;
+        _connectionService = connectionService;
     }
 
     /// <summary>
@@ -452,7 +467,7 @@ public class CombatEventAccumulator : MonoBehaviour
         _pendingEventCount++;
 
         // Accumulate silently — the character is aware but does not interrupt the action.
-        _roomManager?.UpdateDynamicContext(
+        _connectionService?.UpdateDynamicContext(
             $"Player defeated {enemyName} using {weaponUsed}.",
             mode: "append",
             runLlm: "false");
@@ -461,7 +476,7 @@ public class CombatEventAccumulator : MonoBehaviour
             return;
 
         // Threshold crossed — a meaningful cluster of events warrants acknowledgment.
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             "The player has been on a significant kill streak. Acknowledge their performance briefly.",
             mode: "append",
             runLlm: "true") ?? false;
@@ -479,7 +494,7 @@ public class CombatEventAccumulator : MonoBehaviour
     {
         if (_pendingEventCount == 0) return;
 
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             "Combat phase ended. Summarize what just happened and offer a brief assessment.",
             mode: "append",
             runLlm: "true") ?? false;
@@ -501,7 +516,7 @@ This keeps the character's intervention meaningful. It has full awareness of the
 A sales training simulator tracks the trainee's real-time performance score. When the score shifts enough to cross a difficulty tier, the character's coaching strategy updates mid-session — no restart needed.
 
 ```csharp
-using Convai.Scripts;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -514,21 +529,21 @@ public class SalesTrainerPerformanceAdapter : MonoBehaviour
     [SerializeField] private float _easyThreshold = 75f;
     [SerializeField] private float _hardThreshold = 40f;
 
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
     private string _currentDifficultyTier = "normal";
 
     /// <summary>
-    /// Initializes this component with the active room manager.
+    /// Initializes this component with an active room connection service.
     /// Must be called by the session owner after the Convai session is established.
     /// </summary>
-    public void Initialize(ConvaiRoomManager roomManager)
+    public void Initialize(IConvaiRoomConnectionService connectionService)
     {
-        if (roomManager == null)
+        if (connectionService == null)
         {
-            Debug.LogError("[SalesTrainerPerformanceAdapter] roomManager must not be null.");
+            Debug.LogError("[SalesTrainerPerformanceAdapter] connectionService must not be null.");
             return;
         }
-        _roomManager = roomManager;
+        _connectionService = connectionService;
     }
 
     /// <summary>
@@ -565,7 +580,7 @@ public class SalesTrainerPerformanceAdapter : MonoBehaviour
             context += $" The trainee has been missing: {lastMissedSkill}. Subtly probe that area.";
 
         // replace — the new difficulty state supersedes the previous one entirely.
-        bool sent = _roomManager?.UpdateDynamicContext(context, mode: "replace", runLlm: "false") ?? false;
+        bool sent = _connectionService?.UpdateDynamicContext(context, mode: "replace", runLlm: "false") ?? false;
         if (!sent)
             Debug.LogWarning("[SalesTrainerPerformanceAdapter] Failed to update coaching context.");
     }
@@ -580,7 +595,7 @@ A compliance training simulation where each trainee decision advances a scenario
 
 ```csharp
 using System.Collections.Generic;
-using Convai.Scripts;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -591,23 +606,23 @@ using UnityEngine;
 /// </summary>
 public class ComplianceScenarioTracker : MonoBehaviour
 {
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
     private readonly List<string> _decisionLog = new();
     private string _currentBranch;
     private int _complianceScore = 100;
 
     /// <summary>
-    /// Initializes this component with the active room manager.
+    /// Initializes this component with an active room connection service.
     /// Must be called by the session owner after the Convai session is established.
     /// </summary>
-    public void Initialize(ConvaiRoomManager roomManager)
+    public void Initialize(IConvaiRoomConnectionService connectionService)
     {
-        if (roomManager == null)
+        if (connectionService == null)
         {
-            Debug.LogError("[ComplianceScenarioTracker] roomManager must not be null.");
+            Debug.LogError("[ComplianceScenarioTracker] connectionService must not be null.");
             return;
         }
-        _roomManager = roomManager;
+        _connectionService = connectionService;
     }
 
     /// <summary>
@@ -634,7 +649,7 @@ public class ComplianceScenarioTracker : MonoBehaviour
                 : "The trainee made the correct compliance decision. Acknowledge their judgment.");
 
         // replace — the full scenario state replaces the previous snapshot on every decision.
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             context,
             mode: "replace",
             runLlm: isCriticalError ? "true" : "false") ?? false;
@@ -654,7 +669,7 @@ public class ComplianceScenarioTracker : MonoBehaviour
             $"and give one actionable recommendation. " +
             $"Decision log: {string.Join("; ", _decisionLog)}.";
 
-        bool sent = _roomManager?.UpdateDynamicContext(debrief, mode: "append", runLlm: "true") ?? false;
+        bool sent = _connectionService?.UpdateDynamicContext(debrief, mode: "append", runLlm: "true") ?? false;
         if (!sent)
             Debug.LogWarning("[ComplianceScenarioTracker] Failed to send scenario debrief.");
     }
@@ -669,7 +684,7 @@ A clinical training simulation where a patient NPC's vitals change in real time.
 
 ```csharp
 using System.Collections.Generic;
-using Convai.Scripts;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -684,21 +699,21 @@ public class PatientVitalsSimulator : MonoBehaviour
     private const int BradycardiaThreshold = 50;
     private const float HypoxiaThreshold = 90f;
 
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
     private bool _criticalStateActive;
 
     /// <summary>
-    /// Initializes this component with the active room manager.
+    /// Initializes this component with an active room connection service.
     /// Must be called by the session owner after the Convai session is established.
     /// </summary>
-    public void Initialize(ConvaiRoomManager roomManager)
+    public void Initialize(IConvaiRoomConnectionService connectionService)
     {
-        if (roomManager == null)
+        if (connectionService == null)
         {
-            Debug.LogError("[PatientVitalsSimulator] roomManager must not be null.");
+            Debug.LogError("[PatientVitalsSimulator] connectionService must not be null.");
             return;
         }
-        _roomManager = roomManager;
+        _connectionService = connectionService;
     }
 
     /// <summary>
@@ -716,7 +731,7 @@ public class PatientVitalsSimulator : MonoBehaviour
             $"Temp: {vitals.Temperature:F1}°C, " +
             $"RR: {vitals.RespiratoryRate}/min.";
 
-        _roomManager?.UpdateDynamicContext(vitalsContext, mode: "replace", runLlm: "false");
+        _connectionService?.UpdateDynamicContext(vitalsContext, mode: "replace", runLlm: "false");
 
         bool isCritical =
             vitals.SystolicBP < HypotensionThreshold ||
@@ -727,7 +742,7 @@ public class PatientVitalsSimulator : MonoBehaviour
         {
             _criticalStateActive = true;
 
-            bool sent = _roomManager?.UpdateDynamicContext(
+            bool sent = _connectionService?.UpdateDynamicContext(
                 $"CLINICAL ALERT: {BuildCriticalFindings(vitals)}. " +
                 "React as a deteriorating patient. Express distress appropriate to severity. " +
                 "Do not tell the trainee what to do — let them diagnose and act.",
@@ -741,7 +756,7 @@ public class PatientVitalsSimulator : MonoBehaviour
         {
             _criticalStateActive = false;
 
-            bool sent = _roomManager?.UpdateDynamicContext(
+            bool sent = _connectionService?.UpdateDynamicContext(
                 "Patient vitals have stabilized. Express relief. Let the trainee assess next steps.",
                 mode: "append",
                 runLlm: "true") ?? false;
@@ -778,7 +793,7 @@ A multi-scenario training platform tracks which competencies the learner has dem
 ```csharp
 using System.Collections.Generic;
 using System.Linq;
-using Convai.Scripts;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -791,7 +806,7 @@ public sealed class CompetencyGapTracker : MonoBehaviour
 {
     public static CompetencyGapTracker Instance { get; private set; }
 
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
     private readonly Dictionary<string, CompetencyRecord> _competencies = new();
 
     private void Awake()
@@ -806,17 +821,17 @@ public sealed class CompetencyGapTracker : MonoBehaviour
     }
 
     /// <summary>
-    /// Initializes this tracker with the active room manager.
+    /// Initializes this tracker with an active room connection service.
     /// Must be called by the session owner after the Convai session is established.
     /// </summary>
-    public void Initialize(ConvaiRoomManager roomManager)
+    public void Initialize(IConvaiRoomConnectionService connectionService)
     {
-        if (roomManager == null)
+        if (connectionService == null)
         {
-            Debug.LogError("[CompetencyGapTracker] roomManager must not be null.");
+            Debug.LogError("[CompetencyGapTracker] connectionService must not be null.");
             return;
         }
-        _roomManager = roomManager;
+        _connectionService = connectionService;
     }
 
     /// <summary>
@@ -851,7 +866,7 @@ public sealed class CompetencyGapTracker : MonoBehaviour
             "Do not make it obvious you are targeting weaknesses.";
 
         // replace — each scenario starts with a fresh, scenario-specific context.
-        bool sent = _roomManager?.UpdateDynamicContext(context, mode: "replace", runLlm: "false") ?? false;
+        bool sent = _connectionService?.UpdateDynamicContext(context, mode: "replace", runLlm: "false") ?? false;
         if (!sent)
             Debug.LogWarning($"[CompetencyGapTracker] Failed to inject context for scenario '{scenarioName}'.");
     }
@@ -866,7 +881,7 @@ public sealed class CompetencyGapTracker : MonoBehaviour
             .OrderBy(r => r.SuccessRate)
             .Select(r => $"{r.Name}: {r.SuccessRate:P0} ({r.TotalObservations} observations)"));
 
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             "Training session complete. Deliver a structured debrief: overall performance summary, " +
             "two key strengths, two priority development areas, one concrete next step. " +
             $"Competency data: {report}",
@@ -918,7 +933,7 @@ public sealed class CompetencyGapTracker : MonoBehaviour
 }
 ```
 
-#### Usage across scenarios:
+**Usage across scenarios:**
 
 ```csharp
 // During a scenario — record what you observe
@@ -946,7 +961,7 @@ A high-fidelity procedural trainer (flight simulator, surgical trainer, industri
 ```csharp
 using System.Collections.Generic;
 using System.Linq;
-using Convai.Scripts;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -965,24 +980,24 @@ public class ProceduralAssessmentInstructor : MonoBehaviour
     [Tooltip("Minimum seconds between coaching interventions. Prevents rapid-fire interruptions.")]
     private float _interventionCooldownSeconds = 30f;
 
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
     private readonly Dictionary<string, int> _stepErrorCounts = new();
     private readonly List<string> _completedSteps = new();
     private float _lastInterventionTime = float.MinValue;
     private string _currentProcedureName;
 
     /// <summary>
-    /// Initializes this component with the active room manager.
+    /// Initializes this component with an active room connection service.
     /// Must be called by the session owner after the Convai session is established.
     /// </summary>
-    public void Initialize(ConvaiRoomManager roomManager)
+    public void Initialize(IConvaiRoomConnectionService connectionService)
     {
-        if (roomManager == null)
+        if (connectionService == null)
         {
-            Debug.LogError("[ProceduralAssessmentInstructor] roomManager must not be null.");
+            Debug.LogError("[ProceduralAssessmentInstructor] connectionService must not be null.");
             return;
         }
-        _roomManager = roomManager;
+        _connectionService = connectionService;
     }
 
     /// <summary>
@@ -996,7 +1011,7 @@ public class ProceduralAssessmentInstructor : MonoBehaviour
         _completedSteps.Clear();
         _lastInterventionTime = float.MinValue;
 
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             $"The trainee is beginning the '{procedureName}' procedure. " +
             "Observe silently unless asked for help or a critical error occurs. " +
             "Do not volunteer the next step — the trainee must demonstrate independent recall.",
@@ -1012,6 +1027,10 @@ public class ProceduralAssessmentInstructor : MonoBehaviour
     /// Repeated failures on the same step trigger a Socratic intervention
     /// once the error threshold is met and the cooldown has elapsed.
     /// </summary>
+    /// <param name="stepId">Stable identifier for this step.</param>
+    /// <param name="stepDescription">Human-readable description passed to the character.</param>
+    /// <param name="wasCorrect">Whether the step was performed correctly.</param>
+    /// <param name="wasInSequence">Whether the step was performed in the correct order.</param>
     public void OnStepAttempted(string stepId, string stepDescription, bool wasCorrect, bool wasInSequence)
     {
         if (wasCorrect && wasInSequence)
@@ -1019,7 +1038,7 @@ public class ProceduralAssessmentInstructor : MonoBehaviour
             _completedSteps.Add(stepDescription);
 
             // Silently acknowledge correct progress — no character response needed.
-            _roomManager?.UpdateDynamicContext(
+            _connectionService?.UpdateDynamicContext(
                 $"Step completed correctly: {stepDescription}. " +
                 $"Progress: {_completedSteps.Count} steps done.",
                 mode: "append",
@@ -1032,7 +1051,7 @@ public class ProceduralAssessmentInstructor : MonoBehaviour
         _stepErrorCounts[stepId] = ++errorCount;
 
         // Accumulate the error silently for context grounding.
-        _roomManager?.UpdateDynamicContext(
+        _connectionService?.UpdateDynamicContext(
             $"Error on step '{stepDescription}' " +
             $"(error count: {errorCount}, in-sequence: {wasInSequence}).",
             mode: "append",
@@ -1047,7 +1066,7 @@ public class ProceduralAssessmentInstructor : MonoBehaviour
         _lastInterventionTime = Time.realtimeSinceStartup;
 
         // Intervene with a Socratic question — guide thinking without revealing the answer.
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             $"The trainee has failed '{stepDescription}' {errorCount} times. " +
             "Intervene with one Socratic question that guides their thinking without revealing the answer. " +
             "Be calm and constructive.",
@@ -1069,7 +1088,7 @@ public class ProceduralAssessmentInstructor : MonoBehaviour
             : "none";
 
         // replace — the debrief context supersedes all accumulated step-level context.
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             $"Procedure '{_currentProcedureName}' complete. Result: {(passed ? "PASS" : "FAIL")}. " +
             $"Time: {elapsedSeconds:F0}s. Total errors: {totalErrors}. " +
             $"Most problematic step: '{worstStep}' ({_stepErrorCounts.GetValueOrDefault(worstStep, 0)} errors). " +
@@ -1096,10 +1115,10 @@ public class ProceduralAssessmentInstructor : MonoBehaviour
 
 The most sophisticated pattern: the character monitors a continuous stream of game state updates and decides autonomously when to speak — without waiting for the user to initiate. This is a reactive architecture. The character is always listening, but only surfaces when something crosses a meaningful threshold.
 
-Scenario: A companion NPC tracks the player's health passively throughout the session, warns at a moderate drop, and urgently intervenes at a critical level — all without any input from the player.
+**Scenario:** A companion NPC tracks the player's health passively throughout the session, warns at a moderate drop, and urgently intervenes at a critical level — all without any input from the player.
 
 ```csharp
-using Convai.Scripts;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 /// <summary>
@@ -1118,7 +1137,7 @@ public class ReactiveCompanion : MonoBehaviour
     [Tooltip("Health percentage at which the companion intervenes urgently.")]
     private float _criticalThreshold = 20f;
 
-    private ConvaiRoomManager _roomManager;
+    private IConvaiRoomConnectionService _connectionService;
     private float _lastHealth = 100f;
 
     // Flags prevent repeated interventions for the same threshold crossing.
@@ -1126,17 +1145,17 @@ public class ReactiveCompanion : MonoBehaviour
     private bool _criticalIssued;
 
     /// <summary>
-    /// Initializes this component with the active room manager.
+    /// Initializes this component with an active room connection service.
     /// Must be called by the session owner after the Convai session is established.
     /// </summary>
-    public void Initialize(ConvaiRoomManager roomManager)
+    public void Initialize(IConvaiRoomConnectionService connectionService)
     {
-        if (roomManager == null)
+        if (connectionService == null)
         {
-            Debug.LogError("[ReactiveCompanion] roomManager must not be null.");
+            Debug.LogError("[ReactiveCompanion] connectionService must not be null.");
             return;
         }
-        _roomManager = roomManager;
+        _connectionService = connectionService;
     }
 
     /// <summary>
@@ -1145,7 +1164,7 @@ public class ReactiveCompanion : MonoBehaviour
     public void OnPlayerHealthChanged(float newHealth)
     {
         // Keep the character silently informed — replace, not append (current state, not a log).
-        _roomManager?.UpdateDynamicContext(
+        _connectionService?.UpdateDynamicContext(
             $"Player health: {newHealth:F0}%.",
             mode: "replace",
             runLlm: "false");
@@ -1155,7 +1174,7 @@ public class ReactiveCompanion : MonoBehaviour
         {
             _warningIssued = true;
 
-            bool sent = _roomManager?.UpdateDynamicContext(
+            bool sent = _connectionService?.UpdateDynamicContext(
                 "Player health has dropped below 50%. Express concern and suggest they find cover or heal.",
                 mode: "append",
                 runLlm: "true") ?? false;
@@ -1169,7 +1188,7 @@ public class ReactiveCompanion : MonoBehaviour
         {
             _criticalIssued = true;
 
-            bool sent = _roomManager?.UpdateDynamicContext(
+            bool sent = _connectionService?.UpdateDynamicContext(
                 "CRITICAL: Player health is dangerously low. React with urgency — tell them to heal immediately.",
                 mode: "append",
                 runLlm: "true") ?? false;
@@ -1193,7 +1212,7 @@ public class ReactiveCompanion : MonoBehaviour
     /// </summary>
     public void OnPlayerEnteredDangerZone(string zoneName)
     {
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             $"The player has entered {zoneName}, a known danger zone. Proactively warn them.",
             mode: "append",
             runLlm: "true") ?? false;
@@ -1208,7 +1227,7 @@ public class ReactiveCompanion : MonoBehaviour
     /// </summary>
     public void OnPlayerIdleTooLong()
     {
-        bool sent = _roomManager?.UpdateDynamicContext(
+        bool sent = _connectionService?.UpdateDynamicContext(
             "The player has been idle for an unusually long time. Check in with them naturally.",
             mode: "append",
             runLlm: "true") ?? false;
