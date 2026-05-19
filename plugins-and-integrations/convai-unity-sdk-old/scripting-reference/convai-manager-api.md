@@ -1,2 +1,0 @@
-# convai manager api
-

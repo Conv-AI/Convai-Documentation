@@ -1,2 +1,0 @@
-# platform support matrix
-

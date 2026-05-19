@@ -1,2 +1,0 @@
-# operation and stream types
-

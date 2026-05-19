@@ -1,2 +1,0 @@
-# network and api requirements
-

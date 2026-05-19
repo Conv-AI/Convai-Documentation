@@ -6,8 +6,6 @@ description: >-
 
 # Convai Unity SDK
 
-
-
 ### Build AI Characters That Understand, Respond, and Remember
 
 The Convai Unity SDK connects Unity projects to Convai, bringing conversational AI into training simulations, interactive experiences, and games. Characters process speech in real time, respond with natural language, and synchronize lip movement, facial emotion, and body animation — all configurable per project. Each feature is a self-contained module: add only what your project needs, in the order that fits your workflow.
@@ -47,3 +45,4 @@ Install the Convai Unity SDK and connect your first AI character using the Getti
 {% content-ref url="/broken/pages/a0492e2cac32d898c26e9c87839129d9dbb18b59" %}
 [Broken link](/broken/pages/a0492e2cac32d898c26e9c87839129d9dbb18b59)
 {% endcontent-ref %}
+

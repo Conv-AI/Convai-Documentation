@@ -1,2 +1,0 @@
-# animator setup
-

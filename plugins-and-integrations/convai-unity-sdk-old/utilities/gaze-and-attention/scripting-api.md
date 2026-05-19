@@ -1,2 +1,0 @@
-# scripting api
-

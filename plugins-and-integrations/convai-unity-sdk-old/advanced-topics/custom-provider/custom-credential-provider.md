@@ -1,2 +1,0 @@
-# custom credential provider
-

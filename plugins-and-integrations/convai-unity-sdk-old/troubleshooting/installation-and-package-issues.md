@@ -1,2 +1,0 @@
-# installation and package issues
-

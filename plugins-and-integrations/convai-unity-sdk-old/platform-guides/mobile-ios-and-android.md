@@ -1,2 +1,0 @@
-# mobile ios and android
-

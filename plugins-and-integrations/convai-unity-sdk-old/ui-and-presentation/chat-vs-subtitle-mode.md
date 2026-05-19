@@ -1,2 +1,0 @@
-# chat vs subtitle mode
-
