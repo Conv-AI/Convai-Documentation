@@ -1,0 +1,5 @@
+# compatibility
+
+This section covers everything you need to verify before integrating the Convai Unity SDK: supported Unity versions, render pipelines, platforms, and network configuration.
+
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Unity Versions and Render Pipelines</strong><br>Minimum Unity version, required packages, and render pipeline support.</td><td><a href="/broken/pages/23bee723acb26a527caf34b7669237bbb388570e">Broken link</a></td></tr><tr><td><strong>Platform Support Matrix</strong><br>Feature availability across Windows, macOS, Android, iOS, Meta Quest, and WebGL.</td><td><a href="/broken/pages/7c964cf584cc090f748889c68f6d7b99c8eb22df">Broken link</a></td></tr><tr><td><strong>Network and API Requirements</strong><br>Domains, ports, and firewall rules needed for real-time SDK operation.</td><td><a href="/broken/pages/114df960001c171d8fb1a96ed91be5d043dc1d44">Broken link</a></td></tr></tbody></table>
