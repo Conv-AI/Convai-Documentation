@@ -56,6 +56,7 @@
 
 * [Introduction](plugins-and-integrations/introduction.md)
 * [Unity Plugin (Beta) Overview](plugins-and-integrations/unity-plugin-beta-overview/README.md)
+  * [Staging Sync Test](plugins-and-integrations/unity-plugin-beta-overview/staging-sync-test.md)
   * [Compatibility & Requirements](plugins-and-integrations/unity-plugin-beta-overview/compatibility-and-requirements.md)
   * [Getting Started with Unity Plugin](plugins-and-integrations/unity-plugin-beta-overview/getting-started/README.md)
     * [Installation](plugins-and-integrations/unity-plugin-beta-overview/getting-started/installation/README.md)
