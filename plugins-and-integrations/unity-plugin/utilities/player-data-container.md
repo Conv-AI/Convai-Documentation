@@ -6,7 +6,7 @@ description: All the information that Convai SDK needs from the player to work p
 
 This is a scriptable object which is made automatically after you hit play in the editor with Convai SDK installed and in a Scene where Convai Base Scene Essentials Prefab is present
 
-<figure><img src="../../../.gitbook/assets/image (397).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (396).png" alt=""><figcaption></figcaption></figure>
 
 **Default Player Name**
 
@@ -14,13 +14,13 @@ You can provide a default name of your players.
 
 **Player Name**
 
-Current name of your player, out of the box if you use our settings panel, we keep it updated automatically, if you are using some custom logic, it will be your responsibility to keep it updated, as our transcript UI use this name to show it in UI&#x20;
+Current name of your player, out of the box if you use our settings panel, we keep it updated automatically, if you are using some custom logic, it will be your responsibility to keep it updated, as our transcript UI use this name to show it in UI
 
 **Speaker ID**
 
 Speaker ID for the player. **Please note that Speaker ID is directly linked with your API key, so for each API key there should be a unique speaker ID associated with it.** We handle the creation of the Speaker ID when it's not found in the Player Prefs if the Boolean is set to true.
 
-**Create Speaker ID If Not Found**&#x20;
+**Create Speaker ID If Not Found**
 
 This Boolean lets the SDK if it should create a unique Speaker ID for that Player Name if it is not found in the Player Prefs.
 

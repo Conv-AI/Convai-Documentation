@@ -19,7 +19,7 @@ Chat UI is optional, but it’s extremely useful for debugging, testing without 
 
 {% stepper %}
 {% step %}
-### Locate the Transcript UI prefab
+#### Locate the Transcript UI prefab
 
 * In the Project window search bar, search:
   * `TranscriptUI_Chat`
@@ -32,14 +32,14 @@ Chat UI is optional, but it’s extremely useful for debugging, testing without 
 {% endstep %}
 
 {% step %}
-### Add the prefab to your scene
+#### Add the prefab to your scene
 
 * Drag and drop **TranscriptUI\_Chat.prefab** into the scene.
 * **Expected result:** The UI appears in the Hierarchy and is visible in Game view (Play Mode).
 {% endstep %}
 
 {% step %}
-### Ensure an Event System exists
+#### Ensure an Event System exists
 
 * If your scene does not have an EventSystem:
   * Right-click in Hierarchy → **UI → Event System**

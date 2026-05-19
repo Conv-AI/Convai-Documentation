@@ -60,7 +60,7 @@ Check the [Convai Plugin Setup Guide](../guides-v2-under-development/getting-sta
 ### **3. Add the Convai Vision Plugin**
 
 1. Navigate to your project folder (e.g., `C:\Unreal Projects\ConvaiVision`).
-2. Create a new folder named **Plugins** (case-sensitive).&#x20;
+2. Create a new folder named **Plugins** (case-sensitive).
 
 <figure><img src="../../../.gitbook/assets/jgwoPARB4s.png" alt=""><figcaption></figcaption></figure>
 
@@ -115,7 +115,7 @@ Check the [Convai Plugin Setup Guide](../guides-v2-under-development/getting-sta
 2. Drag the **EnvironmentWebcam Component** into the Event Graph.
 3. From this component, call the **Start** function and connect it to the **Begin Play** node.
 
-<figure><img src="../../../.gitbook/assets/UnrealEditor_k8b17mVAWF (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/UnrealEditor_k8b17mVAWF.png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -127,7 +127,7 @@ For optimal results, we recommend setting the **Foundation Model** to **Claude**
 
 ## Conclusion
 
-Congratulations! :tada::sunglasses:&#x20;
+Congratulations! :tada::sunglasses:
 
 You’ve successfully integrated the Convai Vision Plugin into your Unreal Engine project. Your character can now perceive the game world and provide information about it. Additionally, by connecting a webcam, the character can process real-world visual data.
 

@@ -197,7 +197,7 @@ If **Ignore Global Modifiers** is enabled, the last two steps are skipped for th
 
 {% stepper %}
 {% step %}
-### Create the map asset
+#### Create the map asset
 
 In the Project window, create a new map asset:
 
@@ -213,13 +213,13 @@ LipSyncMap_MyCharacter
 {% endstep %}
 
 {% step %}
-### Select the target profile
+#### Select the target profile
 
 In the **Configuration** section, set the **Target Profile** to the profile your character uses.
 {% endstep %}
 
 {% step %}
-### Populate the entries
+#### Populate the entries
 
 You can choose one of two common workflows.
 
@@ -239,7 +239,7 @@ You can choose one of two common workflows.
 {% endstep %}
 
 {% step %}
-### Tune the motion
+#### Tune the motion
 
 Adjust the map until the character behaves naturally.
 
@@ -252,7 +252,7 @@ Common adjustments include:
 {% endstep %}
 
 {% step %}
-### Assign the map
+#### Assign the map
 
 Once the map is ready, assign it to the **Lip Sync Map** field on your character's Lip Sync component.
 

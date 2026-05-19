@@ -89,7 +89,7 @@ For example, a profile with ID `my_metahuman_variant` can still use the `mha` tr
 
 {% stepper %}
 {% step %}
-### Create the profile asset
+#### Create the profile asset
 
 In the Unity Project window, create a new profile asset:
 
@@ -105,7 +105,7 @@ ConvaiLipSyncProfile_MyCharacter
 {% endstep %}
 
 {% step %}
-### Set the Profile ID
+#### Set the Profile ID
 
 In the **Runtime Identity** section, enter a unique ID.
 
@@ -119,7 +119,7 @@ Use lowercase letters, numbers, and underscores. Avoid spaces.
 {% endstep %}
 
 {% step %}
-### Set the Display Name
+#### Set the Display Name
 
 In the **Editor Label** section, enter the display name that should appear in the Inspector.
 
@@ -131,7 +131,7 @@ My Character
 {% endstep %}
 
 {% step %}
-### Set the transport format
+#### Set the transport format
 
 Choose which supported Lip Sync schema this profile should use.
 
@@ -168,7 +168,7 @@ The built-in registry uses priority `0`. Your own custom registry should use a h
 
 {% stepper %}
 {% step %}
-### Create a Profile Registry
+#### Create a Profile Registry
 
 Create a registry asset in the Project window:
 
@@ -184,7 +184,7 @@ MyProjectProfileRegistry
 {% endstep %}
 
 {% step %}
-### Set the registry priority
+#### Set the registry priority
 
 Set **Priority** to a value higher than the built-in registry.
 
@@ -196,13 +196,13 @@ Recommended starting value:
 {% endstep %}
 
 {% step %}
-### Add the profile to the registry
+#### Add the profile to the registry
 
 Add your new `ConvaiLipSyncProfileAsset` to the **Profiles** list.
 {% endstep %}
 
 {% step %}
-### Place the registry in the correct Resources path
+#### Place the registry in the correct Resources path
 
 For the SDK to discover it automatically, the registry must be placed under:
 

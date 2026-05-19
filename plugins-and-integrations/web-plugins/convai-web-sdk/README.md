@@ -20,7 +20,7 @@ Build Browser-Based Conversational AI Avatars with the Convai Web SDK, Three.JS,
 ## Convai WebSDK Tutorial
 
 {% embed url="https://youtu.be/fK8R0SzuvNI" %}
-Integrate Conversational AI, Real-time LipSync and Facial Animations For Browser Based 3D Avatars Using Convai WebSDK&#x20;
+Integrate Conversational AI, Real-time LipSync and Facial Animations For Browser Based 3D Avatars Using Convai WebSDK
 {% endembed %}
 
 ## What’s New
@@ -130,7 +130,7 @@ At a high level, the SDK is organised into a few core pieces:
   * Full type definitions for configs, state, messages, and control APIs<br>
 
 {% hint style="success" %}
-## Performance Optimization&#x20;
+### Performance Optimization
 
 To achieve the lowest possible latency, we recommend configuring your Core AI settings to use the `gemini-flash-2.5-beta` model. This model is optimized for speed and is ideal for real-time applications where response time is critical.
 {% endhint %}

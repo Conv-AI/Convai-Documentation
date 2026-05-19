@@ -36,7 +36,7 @@ In the next window, carefully read the setup instructions, warnings, and details
 
 When ready to proceed, click **Yes, proceed**.
 
-<figure><img src="../../../../../.gitbook/assets/MRAutomaticInstallation_2 (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/MRAutomaticInstallation_2.png" alt=""><figcaption></figcaption></figure>
 
 ### Step 6
 
@@ -68,15 +68,13 @@ If you don’t have the **TextMeshPro** package installed, you’ll need it to d
 
 * In the **Unity Package Import** window that appears, click **Import**.
 
-<figure><img src="../../../../../.gitbook/assets/TextMeshProInstallation_2 (2).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/TextMeshProInstallation_2.png" alt="" width="375"><figcaption></figcaption></figure>
 
 ### **Step 10**
 
-Everything is now set up! :tada::sunglasses:&#x20;
+Everything is now set up! :tada::sunglasses:
 
 You can build your project by going to **File > Build Settings**.
-
-
 
 ## Replacing the Spawned Character
 

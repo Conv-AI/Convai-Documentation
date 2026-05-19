@@ -21,7 +21,7 @@ Asset Store installation is ideal if your team prefers Unity’s store distribut
 
 {% stepper %}
 {% step %}
-### Add the package to your Unity account
+#### Add the package to your Unity account
 
 * Open the Convai Asset Store page.
 * Click **Add to My Assets**.
@@ -33,13 +33,13 @@ Asset Store installation is ideal if your team prefers Unity’s store distribut
 {% endstep %}
 
 {% step %}
-### Open Package Manager
+#### Open Package Manager
 
 In Unity, go to **Window → Package Manager**.
 {% endstep %}
 
 {% step %}
-### Download & Import (two options)
+#### Download & Import (two options)
 
 **Option A — “Open in Unity”**
 
@@ -55,7 +55,7 @@ In Unity, go to **Window → Package Manager**.
 {% endstep %}
 
 {% step %}
-### Download then Import
+#### Download then Import
 
 * Click **Download**.
 * When finished, click **Import**.
@@ -64,7 +64,7 @@ In Unity, go to **Window → Package Manager**.
 {% endstep %}
 
 {% step %}
-### Verify the installation
+#### Verify the installation
 
 * Check **Console** for errors.
 * **Expected result:** No errors in Console, and a **Convai** menu appears in the top toolbar.

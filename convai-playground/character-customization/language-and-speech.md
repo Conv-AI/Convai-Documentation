@@ -10,7 +10,7 @@ description: >-
 
 The **Language and Speech** section allows you to define the spoken languages, select a voice, and improve pronunciation and recognition for your AI character. With support for multiple languages and voice providers, you can ensure that your character communicates naturally and effectively with your audience.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2025-08-10 152548.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (42).png" alt=""><figcaption></figcaption></figure>
 
 ***
 

@@ -1,0 +1,2 @@
+# configure conversation input mode
+

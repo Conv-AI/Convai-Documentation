@@ -25,7 +25,7 @@ To test your character via text or voice, open the character's chat interface:
 
 Each message shows a timestamp. A small **eye icon** appears below each message — click it to open **Mindview** for that specific exchange.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2026-05-08 144333.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -44,7 +44,7 @@ Mindview displays:
   * **Output Format** – the response style instruction given to the model.
 * **Dynamic Prompt** — the context injected at runtime for that specific exchange, including **Context Setting** and other dynamic elements.
 
-Mindview is useful for debugging unexpected responses, verifying that your character description and knowledge bank are being applied correctly, and understanding exactly what the model receives for any given turn. Read the detailed [Mindview Docs](https://docs.convai.com/api-docs/convai-playground/character-customization/mindview) to learn more.&#x20;
+Mindview is useful for debugging unexpected responses, verifying that your character description and knowledge bank are being applied correctly, and understanding exactly what the model receives for any given turn. Read the detailed [Mindview Docs](https://docs.convai.com/api-docs/convai-playground/character-customization/mindview) to learn more.
 
 <figure><img src="../../.gitbook/assets/Screenshot 2026-05-08 144842.png" alt=""><figcaption></figcaption></figure>
 

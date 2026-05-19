@@ -45,6 +45,6 @@ description: >-
    * Bring the NPCs close together
    *   Play the to make sure everything is working as intended.<br>
 
-       <figure><img src="../../.gitbook/assets/Screenshot 2024-05-27 185141 (1).png" alt=""><figcaption></figcaption></figure>
+       <figure><img src="../../.gitbook/assets/Screenshot 2024-05-27 185141.png" alt=""><figcaption></figcaption></figure>
 
 By following these steps you can set up and manage NPC to NPC conversations in your Convai-powered application. For further customization and integration, refer to the complete implementation code and adjust it as needed for your specific use case.

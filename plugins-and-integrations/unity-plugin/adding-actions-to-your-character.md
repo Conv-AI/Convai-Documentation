@@ -38,7 +38,7 @@ Repeat these steps to add more actions like "Pickup" and "Drop" etc.
 1. Add any object into the scene—a sphere, a cube, a rock, etc.—that can be interacted with
 2. Resize and place the object in your scene.
 
-<figure><img src="../../.gitbook/assets/image (5) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (4) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Adding the Convai Interactables Data Script
 
@@ -80,7 +80,7 @@ To visually indicate where your NPC will move:
 ### Test the Setup
 
 1. Click "Play" to start the scene.
-2. Ask the NPC, "Bring me the Box."&#x20;
+2. Ask the NPC, "Bring me the Box."
 3. If setup properly, the NPC should walk upto the box and bring it to you
 
 {% hint style="warning" %}
@@ -110,7 +110,7 @@ Make your NPC perform custom actions like dancing.
 ### Adding custom Animation Action
 
 1. Go to the Action Handler Script attached to your Convai NPC.
-2. Add a new action named "Dancing."&#x20;
+2. Add a new action named "Dancing."
 3. In the Animation Name field, enter "Dancing" (it must exactly match the Animator Controller node name).
 4. Leave the enum as "None."
 
@@ -141,17 +141,17 @@ Adding advanced custom actions, such as a throw action, to your NPC.
 1.  Add the "Throw" enum to the script.
 
     <figure><img src="../../.gitbook/assets/image (13) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-2.  In the "Do Action" function, add a switch case for the throw action.&#x20;
+2.  In the "Do Action" function, add a switch case for the throw action.
 
-    <figure><img src="../../.gitbook/assets/image (18) (1) (1).png" alt=""><figcaption></figcaption></figure>
-3.  Define the "Throw()" function.&#x20;
+    <figure><img src="../../.gitbook/assets/image (17) (1) (1).png" alt=""><figcaption></figcaption></figure>
+3.  Define the "Throw()" function.
 
     <figure><img src="../../.gitbook/assets/image (19) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Adding the Throw Action
 
-1. Add a new action named "Throw" and select the "Throw" enum.&#x20;
-2.  Leave the animation name field empty.&#x20;
+1. Add a new action named "Throw" and select the "Throw" enum.
+2.  Leave the animation name field empty.
 
     <figure><img src="../../.gitbook/assets/image (21) (1).png" alt=""><figcaption></figcaption></figure>
 
@@ -171,6 +171,6 @@ Adding advanced custom actions, such as a throw action, to your NPC.
 
 1. Click "Play" to start the scene.
 2. Instruct the NPC, "Pick up the rock and throw it from the stage."
-3. If everything is set up properly, the NPC should pick up the rock and throw it from the stage.&#x20;
+3. If everything is set up properly, the NPC should pick up the rock and throw it from the stage.
 
 ***

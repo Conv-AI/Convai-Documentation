@@ -32,8 +32,6 @@ Before you begin, make sure you have the following:
 
 <figure><img src="../../../.gitbook/assets/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Unity Build Settings window with iOS selected and Development Build checked</p></figcaption></figure>
 
-
-
 {% hint style="info" %}
 If you wish to add a few required files manually, follow step 3. If you want it to be done automatically, jump to step 4
 {% endhint %}
@@ -97,11 +95,11 @@ public class iOSBuild : MonoBehaviour
 
 1. Go to Convai -> Custom Package Installer
 2. Click on `Install iOS Build Package`
-3. Attach the  script `iOSBuild.cs` to any GameObject in your scene.
+3. Attach the script `iOSBuild.cs` to any GameObject in your scene.
 
 <figure><img src="../../../.gitbook/assets/image (5) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../../.gitbook/assets/image (10) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (9) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Step 5: Build the Xcode Project
 
@@ -127,7 +125,7 @@ public class iOSBuild : MonoBehaviour
 2. In Xcode, select your connected device as the build target.
 3. Click the "Play" button or press `Cmd + R` to build and run the app on your device.
 
-<figure><img src="../../../.gitbook/assets/image (8) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Xcode toolbar showing the connected device selected and the "Play" button highlighted</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (7) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Xcode toolbar showing the connected device selected and the "Play" button highlighted</p></figcaption></figure>
 
 ### Troubleshooting
 

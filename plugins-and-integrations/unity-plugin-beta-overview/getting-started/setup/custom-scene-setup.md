@@ -18,7 +18,7 @@ This guide shows how to integrate Convai into your own Unity scene by adding the
 
 {% stepper %}
 {% step %}
-#### Add the Convai Manager
+**Add the Convai Manager**
 
 * In Unity top menu, go to **GameObject → Convai → Setup Required Components**\
   **or** Right-click in the **Hierarchy** → **Convai → Setup Required Components**
@@ -32,7 +32,7 @@ This guide shows how to integrate Convai into your own Unity scene by adding the
 {% endstep %}
 
 {% step %}
-### Create or select your Player object
+#### Create or select your Player object
 
 * Select your existing player GameObject, or create an empty one.
 * Add **Convai Player Component**.
@@ -43,7 +43,7 @@ This guide shows how to integrate Convai into your own Unity scene by adding the
 {% endstep %}
 
 {% step %}
-### Add Convai Character components
+#### Add Convai Character components
 
 For each character GameObject you want to make conversational:
 
@@ -54,13 +54,13 @@ For each character GameObject you want to make conversational:
 {% endstep %}
 
 {% step %}
-### Get your Character ID from Convai
+#### Get your Character ID from Convai
 
 * [In Convai dashboard](https://docs.convai.com/api-docs/convai-playground/character-customization/character-description#id-1.-character-name-and-id), open your character and copy its ID.
 {% endstep %}
 
 {% step %}
-### Validate your scene setup
+#### Validate your scene setup
 
 * Use one of the validation options:
   * Top menu: **GameObject → Convai → Validate Scene Setup**
@@ -75,7 +75,7 @@ For each character GameObject you want to make conversational:
 {% endstep %}
 
 {% step %}
-### Run a conversation test
+#### Run a conversation test
 
 * Press **Play**
 * Speak using microphone or use Chat UI if present

@@ -5,7 +5,7 @@ description: >-
   projects.
 ---
 
-# Installation and Setup
+# Installation and Setup | Unreal Engine
 
 ## Introduction
 
@@ -26,7 +26,7 @@ There are **two ways to install the Convai Unreal Plugin**:
 2. **Manual Installation (Advanced)** – use if you need the latest version from GitHub
 
 {% hint style="danger" %}
-## Beta Notice
+### Beta Notice
 
 This package is currently in **beta, y**ou may encounter **unexpected issues or behavior**.
 
@@ -130,7 +130,7 @@ Once the plugin is enabled, you’ll need to add two main components to your **P
 6. **Compile** and **Save** your Blueprint.
 
 {% hint style="info" %}
-**Note:** This is a bare minimum setup with no animations, lipsync or facial expressions — There are dedicated tutorials that shows how to integrate with different kinds of Avatars (i.e.  Metahumans, Reallusion, etc..)
+**Note:** This is a bare minimum setup with no animations, lipsync or facial expressions — There are dedicated tutorials that shows how to integrate with different kinds of Avatars (i.e. Metahumans, Reallusion, etc..)
 {% endhint %}
 
 ***
