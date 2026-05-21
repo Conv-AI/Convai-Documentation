@@ -42,17 +42,15 @@ Optional helpers that run entirely in Unity without Convai communication:
 
 Project Settings API key configuration, scene setup menu, Scene Validator, and custom Inspectors for every SDK component.
 
-## Voice → Convai → character flow
+## Voice → Convai → Character flow
 
 ```mermaid
 graph LR
     MIC[Microphone] --> RM[ConvaiRoomManager]
-    RM --> |Voice stream| CLOUD[Convai\nSTT · LLM · TTS]
+    RM --> |Voice stream| CLOUD[Convai]
     CLOUD --> |Audio + metadata| CHAR[ConvaiCharacter]
     CHAR --> AUD[Audio playback]
-    CHAR --> LS[Lip sync]
-    CHAR --> ACT[Actions]
-    CHAR --> EMO[Emotion]
+    CHAR --> MOD[Feature modules]
 ```
 
 `ConvaiRoomManager` handles the streaming connection to Convai. `ConvaiCharacter` receives the response — audio, transcript, emotion signals, and action commands — and routes each to the appropriate module or output.
