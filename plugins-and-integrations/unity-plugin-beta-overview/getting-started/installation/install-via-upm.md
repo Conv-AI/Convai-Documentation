@@ -18,13 +18,13 @@ UPM installation is the recommended approach because it’s easy to maintain, up
 
 {% stepper %}
 {% step %}
-#### Open Package Manager
+**Open Package Manager**
 
 In Unity, go to **Window → Package Manager**.
 {% endstep %}
 
 {% step %}
-#### Add the package from Git URL
+**Add the package from Git URL**
 
 * Click the **+** button (top-left).
 * Select **Install package by name**
@@ -35,7 +35,7 @@ In Unity, go to **Window → Package Manager**.
 {% endstep %}
 
 {% step %}
-#### Verify the installation
+**Verify the installation**
 
 * Wait for Unity to finish importing and compiling.
 * Open **Console** (if needed): **Ctrl + Shift + C** (Windows) / **Cmd + Shift + C** (macOS)

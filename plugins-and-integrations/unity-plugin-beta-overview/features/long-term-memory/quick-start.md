@@ -21,7 +21,7 @@ Long-Term Memory requires two things to work: memory must be enabled for the cha
 
 {% stepper %}
 {% step %}
-#### Enable memory on your character
+**Enable memory on your character**
 
 Open the [Convai dashboard](https://convai.com) and select your character. Navigate to **Memory → Memory Settings** and enable the **Long-Term Memory** toggle.
 
@@ -31,11 +31,11 @@ This is an opt-in setting — memory is **off by default**. The character will n
 Enabling memory affects all sessions for that character across all deployments — not just your Unity project. If the character is shared with other team members or projects, coordinate before enabling.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (470).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (54).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
-#### Enter Play Mode and start a conversation
+**Enter Play Mode and start a conversation**
 
 Press **Play** in the Unity Editor. Start a conversation with the character and share a few facts it can remember — your name, your role, or a preference. For example:
 
@@ -45,7 +45,7 @@ Let the character respond, then **stop Play Mode**.
 {% endstep %}
 
 {% step %}
-#### Re-enter Play Mode and verify recall
+**Re-enter Play Mode and verify recall**
 
 Press **Play** again and start a new conversation with the same character. Ask it to recall what it knows:
 

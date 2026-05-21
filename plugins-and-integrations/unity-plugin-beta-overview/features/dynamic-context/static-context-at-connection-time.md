@@ -30,7 +30,7 @@ Use initial context for facts that are true before the conversation begins and w
 
 The initial context fields are on the `ConvaiCharacter` component, under the **Dynamic Info (Connection Request)** header.
 
-<figure><img src="../../../../.gitbook/assets/image (507).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
 ### Initial Dynamic Info Text
 

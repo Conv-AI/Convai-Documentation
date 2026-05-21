@@ -26,7 +26,7 @@ There are **two ways to install the Convai Unreal Plugin**:
 2. **Manual Installation (Advanced)** – use if you need the latest version from GitHub
 
 {% hint style="danger" %}
-### Beta Notice
+#### Beta Notice
 
 This package is currently in **beta, y**ou may encounter **unexpected issues or behavior**.
 

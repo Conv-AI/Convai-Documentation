@@ -16,7 +16,7 @@ In the Project window, navigate to the folder where you want to store the map. R
 
 Select the new asset to open it in the Inspector.
 
-### Top-Level Fields
+#### Top-Level Fields
 
 | Field                          | Default   | Description                                                                             |
 | ------------------------------ | --------- | --------------------------------------------------------------------------------------- |
@@ -26,7 +26,7 @@ Select the new asset to open it in the Inspector.
 | **Global Offset**              | `0.0`     | Offset added to all output weights (-1–1)                                               |
 | **Allow Unmapped Passthrough** | `true`    | Channels with no explicit mapping entry are written using their source name directly    |
 
-### Mapping Entries
+#### Mapping Entries
 
 Click **+** in the **Mappings** list to add a new entry. Each entry maps one source channel to one or more target blendshape names.
 

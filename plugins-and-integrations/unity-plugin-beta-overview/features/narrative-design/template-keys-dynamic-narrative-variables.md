@@ -15,7 +15,7 @@ This lets a single narrative graph serve many sessions with different participan
 
 ## Defining Keys in the Inspector
 
-Open `ConvaiNarrativeDesignManager` in the Inspector and expand the **Template Keys** foldout.&#x20;
+Open `ConvaiNarrativeDesignManager` in the Inspector and expand the **Template Keys** foldout.
 
 Click **+** to add an entry. Each entry has two fields:
 
@@ -24,7 +24,7 @@ Click **+** to add an entry. Each entry has two fields:
 | **Key**   | The placeholder name, exactly as written in the narrative design section objective (case-sensitive, without the double braces). |
 | **Value** | The initial value. You can override this at runtime from code.                                                                  |
 
-<figure><img src="../../../../.gitbook/assets/image (504).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (49).png" alt=""><figcaption></figcaption></figure>
 
 Keys defined in the Inspector are synced to the internal controller on `Awake` and sent to the Convai backend automatically when the session opens.
 

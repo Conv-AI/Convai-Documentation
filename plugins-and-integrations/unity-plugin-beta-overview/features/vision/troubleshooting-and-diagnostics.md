@@ -38,7 +38,7 @@ Work through this checklist in order when something is not working. Most issues 
 
 {% stepper %}
 {% step %}
-#### Verify Connection Type
+**Verify Connection Type**
 
 Select `ConvaiRoomManager` in the Hierarchy. Confirm **Connection Type** is set to **Video**.
 
@@ -46,7 +46,7 @@ Select `ConvaiRoomManager` in the Hierarchy. Confirm **Connection Type** is set 
 {% endstep %}
 
 {% step %}
-#### Check the Frame Source State
+**Check the Frame Source State**
 
 Add `VisionDebugPreview` to any scene GameObject and press Play. The statistics overlay shows the current `VisionSourceState`.
 
@@ -58,7 +58,7 @@ Add `VisionDebugPreview` to any scene GameObject and press Play. The statistics 
 {% endstep %}
 
 {% step %}
-#### Check IsPublishing on the Publisher
+**Check IsPublishing on the Publisher**
 
 Add a temporary script or check in Play Mode whether `ConvaiVisionPublisher.IsPublishing` is `true`. If the frame source is `Ready` but `IsPublishing` is still `false`:
 
@@ -68,7 +68,7 @@ Add a temporary script or check in Play Mode whether `ConvaiVisionPublisher.IsPu
 {% endstep %}
 
 {% step %}
-#### Check the Console for Errors
+**Check the Console for Errors**
 
 Look for messages tagged with `[Vision]`, `[ConvaiVisionPublisher]`, or `[CameraVisionFrameSource]` in the Unity Console. Vision logs errors with the source component name, making it straightforward to identify the failing component.
 {% endstep %}

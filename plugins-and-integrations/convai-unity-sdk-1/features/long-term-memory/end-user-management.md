@@ -21,7 +21,7 @@ The Convai Unity SDK tracks every user who connects with a memory-enabled charac
 
 {% tabs %}
 {% tab title="Editor Tool" %}
-### Long-Term Memory Panel
+#### Long-Term Memory Panel
 
 Access the panel from the Unity menu bar: **Convai → Long Term Memory**.
 
@@ -42,7 +42,7 @@ Deleting an end-user record from the editor removes **the record and all memory 
 {% endtab %}
 
 {% tab title="Scripting" %}
-### `EndUsersService` Scripting API
+#### `EndUsersService` Scripting API
 
 Access end-user operations through `client.EndUsers` on a `ConvaiRestClient` instance.
 

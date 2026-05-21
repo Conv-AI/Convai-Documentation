@@ -16,7 +16,7 @@ Add it by selecting your NPC's GameObject and clicking **Add Component → Conva
 `ConvaiActionDispatcher` requires a `ConvaiCharacter` component on the same GameObject. It subscribes to `ConvaiCharacter.OnActionsReceived` automatically on enable.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (514).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -65,7 +65,7 @@ Configure it in the **Dispatch** section of the `ConvaiActionDispatcher` Inspect
 **Replace Current** makes the NPC feel more responsive and reactive in real-time scenarios. Use it when player commands should always take immediate effect.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (510).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (20).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -86,7 +86,7 @@ If `Move To Crate` fails (e.g., NavMesh path not found), `Pick Up Crate` is skip
 
 If `Move To Crate` fails, the dispatcher still executes `Nod`. Useful when actions are independent of each other.
 
-<figure><img src="../../../../.gitbook/assets/image (511).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (47).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -115,7 +115,7 @@ If `Move To Crate` fails, the dispatcher still executes `Nod`. Useful when actio
 Step events receive a `ConvaiActionInvocation` parameter. This gives you access to the action command, the definition, the resolved target, and which step in the batch this is. Use it to build context-aware UI, logging, or gameplay reactions.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (513).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 
 ### Example: Wiring Events
 

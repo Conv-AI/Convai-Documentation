@@ -16,7 +16,7 @@ Work through this checklist before diving into specific symptoms. The majority o
 
 {% stepper %}
 {% step %}
-#### Confirm memory is enabled on the character
+**Confirm memory is enabled on the character**
 
 Open the [Convai dashboard](https://convai.com), select the character, and navigate to **Memory → Memory Settings**. Verify the **Long-Term Memory** toggle is on.
 
@@ -24,7 +24,7 @@ Memory is **off by default**. Nothing is stored or recalled unless you explicitl
 {% endstep %}
 
 {% step %}
-#### Verify the end\_user\_id is stable between sessions
+**Verify the end\_user\_id is stable between sessions**
 
 Add a temporary `Debug.Log` to confirm the same `end_user_id` is sent on every session:
 
@@ -46,7 +46,7 @@ Run Play Mode twice and compare the logged ID. If the ID changes between session
 {% endstep %}
 
 {% step %}
-#### Check that the session is connecting successfully
+**Check that the session is connecting successfully**
 
 Long-Term Memory requires an active Convai session. If `ConvaiManager` fails to connect — wrong API key, no internet, server unreachable — the character cannot receive memory context regardless of what is stored on the backend.
 

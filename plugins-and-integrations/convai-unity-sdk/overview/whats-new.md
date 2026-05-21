@@ -6,7 +6,7 @@ The current release is **v4.2.0** (2026-05-08). For the full commit-level change
 {% update date="2026-05-08" tags="v4.2.0,Current" %}
 ## v4.2.0
 
-## Actions System
+### Actions System
 
 The SDK now ships with a complete structured Actions runtime. Characters can execute in-scene commands in response to decisions made by Convai.
 
@@ -19,19 +19,19 @@ The SDK now ships with a complete structured Actions runtime. Characters can exe
 
 See [Actions](/broken/pages/46d20373036c3c1a8d7d4088901c20f1baa78a4c) for setup and usage.
 
-#### Meta Quest Passthrough Vision
+**Meta Quest Passthrough Vision**
 
 `QuestVisionFrameSource` enables the Vision module on Meta Quest devices using the headset's passthrough cameras. No external camera component required.
 
 See [Vision — Frame Sources](/broken/pages/02718710a9ff584e645825102e7340e88310b8de) for setup.
 
-#### Runtime Turn-Taking Mode Switching
+**Runtime Turn-Taking Mode Switching**
 
 You can now switch between hands-free, push-to-talk, and smart turn-taking modes on a live session without disconnecting and reconnecting. Use `ConvaiManager.SetConversationInputModeAsync()` or the Settings Panel at runtime.
 
 See [Turn-Taking Modes](/broken/pages/43d2a627f3db81eba35c332edf2ffbb98a923065) and [Configure Conversation Input Mode](/broken/pages/ca110b3413d787ae6ac298e2b8400531a54d4961).
 
-#### Dynamic Context Expansion
+**Dynamic Context Expansion**
 
 * Tracker APIs for monitoring context state at runtime
 * Inspector tooling for authoring context commands in the Editor
@@ -39,14 +39,14 @@ See [Turn-Taking Modes](/broken/pages/43d2a627f3db81eba35c332edf2ffbb98a923065) 
 
 See [Dynamic Context](/broken/pages/ff229409c9d35525aedff2c5f5d53a1d4a34c251).
 
-#### Scene Setup API and Wizard Validation
+**Scene Setup API and Wizard Validation**
 
 * `GameObject > Convai > Setup Required Components` menu item creates and validates all required scene components
 * Setup wizard reports missing or misconfigured components before you enter Play mode
 
 See [Custom Scene Setup](/broken/pages/477f3e0fbffc248414da1eaa9b83f8ca3a186c06).
 
-#### Settings Panel Input Mode Control
+**Settings Panel Input Mode Control**
 
 The runtime Settings Panel now includes hands-free / push-to-talk switching, giving players control over input mode without any additional scripting.
 

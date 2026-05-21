@@ -16,7 +16,7 @@ Work through these steps in order when context updates are not producing the exp
 
 {% stepper %}
 {% step %}
-#### Check the Unity Console for warnings
+**Check the Unity Console for warnings**
 
 `ConvaiDynamicContextCommand` logs a warning with the full validation message every time `Execute()` is skipped. Open the Console (**Window > General > Console**) and look for messages tagged `[ConvaiDynamicContextCommand]`.
 
@@ -24,7 +24,7 @@ If you see a warning, find the exact message in the Console Log Reference table 
 {% endstep %}
 
 {% step %}
-#### Use the Sample UI to isolate the issue
+**Use the Sample UI to isolate the issue**
 
 Before debugging your own integration, verify that the Dynamic Context system itself is working by using the SDK's built-in test UI:
 
@@ -34,7 +34,7 @@ Drop it into your scene, assign the `ConvaiCharacter`, enter Play Mode, and use 
 {% endstep %}
 
 {% step %}
-#### Verify the character reference is resolved
+**Verify the character reference is resolved**
 
 Select the `ConvaiDynamicContextCommand` component in the Inspector. If the **Target** section shows a yellow warning box, the component cannot find a `ConvaiCharacter`.
 
@@ -43,13 +43,13 @@ Select the `ConvaiDynamicContextCommand` component in the Inspector. If the **Ta
 {% endstep %}
 
 {% step %}
-#### Check whether the character was in conversation
+**Check whether the character was in conversation**
 
 Context updates sent via `Apply()` are silently discarded if the character is not in an active conversation — there is no warning in the Console. If you are calling `Apply()` in `Awake()`, `Start()`, or before the session connects, switch to `SetState` or `AddEvent` instead. These methods queue automatically and are sent when the conversation begins.
 {% endstep %}
 
 {% step %}
-#### Check reaction mode
+**Check reaction mode**
 
 If a context update reached the character but it did not respond immediately, verify the **Reaction** setting.
 

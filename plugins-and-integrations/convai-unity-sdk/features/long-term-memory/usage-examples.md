@@ -21,19 +21,19 @@ Long-Term Memory works out of the box for the majority of projects. No scripting
 
 {% stepper %}
 {% step %}
-#### Enable memory on the character
+**Enable memory on the character**
 
 In the Convai dashboard, navigate to your character → **Memory → Memory Settings** → enable **Long-Term Memory**. See [Enabling Memory on Characters](../../../unity-plugin-beta-overview/features/long-term-memory/enabling-memory-on-characters.md) for the full walkthrough.
 {% endstep %}
 
 {% step %}
-#### Set up your scene as normal
+**Set up your scene as normal**
 
 Add `ConvaiManager` and `ConvaiCharacter` to your scene with a valid character ID. No additional components or configuration are required for Long-Term Memory.
 {% endstep %}
 
 {% step %}
-#### Run the simulation
+**Run the simulation**
 
 Enter Play Mode. The `DeviceEndUserIdProvider` sends a stable device identifier automatically on every session connect. After the first conversation, the backend stores whatever facts it extracted. On every subsequent session, those memories are injected before the first response.
 {% endstep %}

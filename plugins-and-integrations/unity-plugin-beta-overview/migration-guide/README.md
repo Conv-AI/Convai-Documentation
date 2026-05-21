@@ -14,7 +14,7 @@ Before you begin, create a full backup of your Unity project to avoid accidental
 
 {% stepper %}
 {% step %}
-#### Remove the old Convai SDK
+**Remove the old Convai SDK**
 
 1. Open your Unity project.
 2. In the Project window, go to `Assets`.
@@ -25,7 +25,7 @@ After removal, Unity may show compile errors until all references are migrated.
 {% endstep %}
 
 {% step %}
-#### Install the latest Convai SDK
+**Install the latest Convai SDK**
 
 Install the newest SDK using one of the following:
 
@@ -42,9 +42,9 @@ Install the newest SDK using one of the following:
 {% endstep %}
 
 {% step %}
-#### Set up API key
+**Set up API key**
 
-#### Open the Convai Account window in Unity
+**Open the Convai Account window in Unity**
 
 In the Unity top menu, go to **Convai → Account**.
 
@@ -68,7 +68,7 @@ In the Unity top menu, go to **Convai → Account**.
 {% endstep %}
 
 {% step %}
-#### Update scene setup
+**Update scene setup**
 
 Update these key objects in your scene:
 
@@ -99,7 +99,7 @@ You can add it by either:
 {% endstep %}
 
 {% step %}
-#### Lip Sync setup (optional)
+**Lip Sync setup (optional)**
 
 If your character is humanoid and uses facial lip movement:
 

@@ -22,17 +22,17 @@ This guide walks you through a complete, working example: a character that moves
 
 {% stepper %}
 {% step %}
-### Add ConvaiActionConfigSource
+#### Add ConvaiActionConfigSource
 
 Select your NPC's GameObject in the **Hierarchy**. In the **Inspector**, click **Add Component** and search for `Convai Action Config Source`.
 
 This component is where you define available actions and register scene objects as targets.
 
-<figure><img src="../../../../.gitbook/assets/image (473).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (10).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
-### Add ConvaiActionDispatcher
+#### Add ConvaiActionDispatcher
 
 With the same NPC GameObject selected, click **Add Component** again and search for `Convai Action Dispatcher`.
 
@@ -42,11 +42,11 @@ This component receives action commands from the Convai backend and runs the mat
 Both components must be on the **same GameObject** as `ConvaiCharacter`. The dispatcher will not work otherwise.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (474).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (14).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
-### Add TransformMoveToActionExecutor
+#### Add TransformMoveToActionExecutor
 
 Still on the same NPC GameObject, click **Add Component** and search for `Transform Move To Action Executor`.
 
@@ -56,11 +56,11 @@ This executor moves the character to a target by instantly snapping its position
 `Transform Move To Action Executor` teleports the character instantly with no animation or pathfinding. It is intended for **prototyping only**. For production use, replace it with `NavMesh Move To Action Executor` or a custom executor that uses your game's movement system.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (475).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
-### Define the "Move To" Action
+#### Define the "Move To" Action
 
 In the `Convai Action Config Source` component in the Inspector:
 
@@ -80,11 +80,11 @@ Your definition should look like this:
 | Executor           | `TransformMoveToActionExecutor` (drag from Inspector) |
 | Timeout Seconds    | `0`                                                   |
 
-<figure><img src="../../../../.gitbook/assets/image (476).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
-### Register the Crate as an Object Target
+#### Register the Crate as an Object Target
 
 Still in `Convai Action Config Source`:
 
@@ -97,11 +97,11 @@ Still in `Convai Action Config Source`:
 The **Description** tells the Convai backend what this object is and helps the AI resolve vague references like "it" or "that thing." Write it like a short sentence describing the object in context. See [Attention & Reference Grounding](../../../unity-plugin-beta-overview/features/actions/attention-and-reference-grounding.md) for tips.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (477).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (17).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
-### Test in Play Mode
+#### Test in Play Mode
 
 Press **Play**. Talk to your character (or use the Convai text input):
 

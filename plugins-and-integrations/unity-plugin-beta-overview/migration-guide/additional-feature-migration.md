@@ -57,37 +57,37 @@ Legacy setup reference: [Adding Narrative Design to your Character](https://docs
 
 {% stepper %}
 {% step %}
-#### Replace legacy NPC component references
+**Replace legacy NPC component references**
 
 Replace legacy NPC component references with `ConvaiCharacter`.
 {% endstep %}
 
 {% step %}
-#### Add Convai Narrative Design Manager to character
+**Add Convai Narrative Design Manager to character**
 
 Add `Convai Narrative Design Manager` to the character object (or assign the character in the manager).
 {% endstep %}
 
 {% step %}
-#### Sync with backend
+**Sync with backend**
 
 Click **Sync with Backend** in the manager inspector to fetch sections for that character.
 {% endstep %}
 
 {% step %}
-#### Re-bind section events
+**Re-bind section events**
 
 Re-bind section events (`On Section Start`, `On Section End`) in the manager.
 {% endstep %}
 
 {% step %}
-#### Add Narrative Design Trigger to trigger objects
+**Add Narrative Design Trigger to trigger objects**
 
 Add `Convai Narrative Design Trigger` to trigger objects and assign the same `ConvaiCharacter`.
 {% endstep %}
 
 {% step %}
-#### Fetch triggers and configure activation
+**Fetch triggers and configure activation**
 
 Click **Fetch** in the trigger inspector, select a trigger, and configure activation mode (Collision/Proximity/Manual/TimeBased).
 {% endstep %}
@@ -143,25 +143,25 @@ The transcript UI architecture changed from a direct push model to a view-model 
 
 {% stepper %}
 {% step %}
-#### Create a new script
+**Create a new script**
 
 Create a new script (for example, `MyGameTranscriptUI.cs`).
 {% endstep %}
 
 {% step %}
-#### Use reference implementation
+**Use reference implementation**
 
 Use `SDK/Runtime/Presentation/Views/Transcript/Chat/ChatTranscriptUI.cs` as reference.
 {% endstep %}
 
 {% step %}
-#### Implement interfaces
+**Implement interfaces**
 
 Implement `MonoBehaviour` + `ITranscriptUI` (and `IInjectable` if service injection is needed).
 {% endstep %}
 
 {% step %}
-#### Keep required members
+**Keep required members**
 
 Keep required members:
 
@@ -175,7 +175,7 @@ Keep required members:
 {% endstep %}
 
 {% step %}
-#### Inject services if needed
+**Inject services if needed**
 
 If needed, inject services via `InjectServices(IServiceContainer container)`:
 
@@ -184,7 +184,7 @@ If needed, inject services via `InjectServices(IServiceContainer container)`:
 {% endstep %}
 
 {% step %}
-#### Rewire prefab references
+**Rewire prefab references**
 
 Rewire prefab references (bubble prefab, container, input field, fade components) and assign the new component where transcript UIs are registered.
 {% endstep %}

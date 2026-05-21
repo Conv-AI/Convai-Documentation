@@ -57,7 +57,7 @@ Work through this checklist in order when an action is not working as expected.
 
 {% stepper %}
 {% step %}
-#### Check Received Batch Count
+**Check Received Batch Count**
 
 Add `ConvaiActionDebugProbe` to your NPC and speak to the character. Does **Received Batch Count** increase?
 
@@ -66,7 +66,7 @@ Add `ConvaiActionDebugProbe` to your NPC and speak to the character. Does **Rece
 {% endstep %}
 
 {% step %}
-#### Check Started Step Count
+**Check Started Step Count**
 
 Does **Started Step Count** increase?
 
@@ -75,7 +75,7 @@ Does **Started Step Count** increase?
 {% endstep %}
 
 {% step %}
-#### Check Failed vs Succeeded
+**Check Failed vs Succeeded**
 
 Does **Failed Step Count** increase instead of **Succeeded Step Count**?
 
@@ -89,7 +89,7 @@ Open the Unity Console. Look for messages tagged `[ConvaiActionDebugProbe]`. The
 {% endstep %}
 
 {% step %}
-#### Verify Action Name Spelling
+**Verify Action Name Spelling**
 
 Compare the action name in `ConvaiActionConfigSource` with what appears in **Last Received Batch** in the debug probe.
 
@@ -97,7 +97,7 @@ Names are matched **case-insensitively**, but spelling must be exact. `Move To` 
 {% endstep %}
 
 {% step %}
-#### Verify Target Name Spelling
+**Verify Target Name Spelling**
 
 If the step fails with a target resolution error, compare the target name in **Last Received Batch** with the **Name** field in your **Actionable Objects** or **Actionable Characters** list.
 
@@ -105,7 +105,7 @@ The match is case-insensitive, but the spelling must be the same. `Fire Extingui
 {% endstep %}
 
 {% step %}
-#### Check Component Assignment
+**Check Component Assignment**
 
 Confirm all required components are assigned:
 
@@ -117,7 +117,7 @@ Confirm all required components are assigned:
 {% endstep %}
 
 {% step %}
-#### Verify NavMesh (if using NavMesh executor)
+**Verify NavMesh (if using NavMesh executor)**
 
 If you are using `NavMesh Move To Action Executor` and the action always fails:
 

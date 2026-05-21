@@ -19,37 +19,37 @@ A "narrative trigger" is not the same as a Unity Physics trigger, even though on
 
 {% stepper %}
 {% step %}
-#### Create or select a GameObject
+**Create or select a GameObject**
 
 For zone-based activation (Collision, Proximity, TimeBased), create an empty GameObject and position it in the scene where you want the trigger zone. For Manual activation, you can place the component anywhere.
 {% endstep %}
 
 {% step %}
-#### Add the component
+**Add the component**
 
 Click **Add Component** and navigate to **Convai > Convai Narrative Design Trigger**.
 
-<figure><img src="../../../../.gitbook/assets/image (489).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (60).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
-#### Assign the character
+**Assign the character**
 
 Drag your `ConvaiCharacter` into the **Character** field. If you leave it blank, **Auto Find Character** searches the parent hierarchy and then the `ConvaiManager`'s character list automatically. If more than one character is in the scene, assign the target explicitly.
 {% endstep %}
 
 {% step %}
-#### Fetch and select a trigger
+**Fetch and select a trigger**
 
 Click **Fetch** in the **Trigger Selection** section. The SDK calls `NarrativeDesignFetcher.FetchTriggersAsync` and populates the dropdown with all triggers defined for this character on the dashboard.
 
 Select the trigger you want this component to send. The **Trigger Name**, **Trigger ID**, and **Destination Section** fields populate automatically.
 
-<figure><img src="../../../../.gitbook/assets/image (483).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (61).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
-#### Choose an activation mode
+**Choose an activation mode**
 
 Select one of the four activation modes (described below) and configure its settings.
 {% endstep %}
@@ -57,7 +57,7 @@ Select one of the four activation modes (described below) and configure its sett
 
 ## Activation Modes
 
-<figure><img src="../../../../.gitbook/assets/image (490).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (62).png" alt=""><figcaption></figcaption></figure>
 
 ### Collision
 
@@ -122,7 +122,7 @@ narrativeTrigger.TryInvokeTrigger();
 
 These settings make the trigger resilient to common runtime conditions where the character or player may not be ready immediately.
 
-<figure><img src="../../../../.gitbook/assets/image (509).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (63).png" alt=""><figcaption></figcaption></figure>
 
 | Field                   | Default | Description                                                                                                                                                          |
 | ----------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

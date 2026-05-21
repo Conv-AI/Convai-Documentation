@@ -130,7 +130,7 @@ At a high level, the SDK is organised into a few core pieces:
   * Full type definitions for configs, state, messages, and control APIs<br>
 
 {% hint style="success" %}
-### Performance Optimization
+#### Performance Optimization
 
 To achieve the lowest possible latency, we recommend configuring your Core AI settings to use the `gemini-flash-2.5-beta` model. This model is optimized for speed and is ideal for real-time applications where response time is critical.
 {% endhint %}

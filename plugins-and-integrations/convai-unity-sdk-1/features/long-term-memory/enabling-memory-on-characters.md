@@ -21,7 +21,7 @@ Long-Term Memory is disabled by default (`MemorySettings.IsEnabled = false`). No
 
 {% tabs %}
 {% tab title="Dashboard" %}
-### Enable on the Convai Dashboard
+#### Enable on the Convai Dashboard
 
 This is the recommended approach for most teams. Changes take effect immediately without requiring a code update or redeployment.
 
@@ -35,11 +35,11 @@ To disable, repeat the same steps and toggle **Long-Term Memory** to **Off**.
 {% endtab %}
 
 {% tab title="Scripting" %}
-### Enable via Scripting API
+#### Enable via Scripting API
 
 Use `client.Characters` when you need programmatic control — for example, in automated test setups, build pipelines, or runtime admin panels.
 
-#### Check Current State
+**Check Current State**
 
 ```csharp
 using Convai.RestAPI;
@@ -57,7 +57,7 @@ public class MemoryAdmin : MonoBehaviour
 }
 ```
 
-#### Enable Memory
+**Enable Memory**
 
 ```csharp
 using Convai.RestAPI;
@@ -75,7 +75,7 @@ public class MemoryAdmin : MonoBehaviour
 }
 ```
 
-#### Disable Memory
+**Disable Memory**
 
 ```csharp
 await client.Characters.SetMemoryEnabledAsync("your-character-id", false);

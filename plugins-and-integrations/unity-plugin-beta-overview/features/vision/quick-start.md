@@ -19,7 +19,7 @@ This guide walks you through the minimum steps needed to get a Convai character 
 
 {% stepper %}
 {% step %}
-#### Set the Connection Type to Video
+**Set the Connection Type to Video**
 
 Select the `ConvaiRoomManager` GameObject in the Hierarchy. In the Inspector, set **Connection Type** to **Video**.
 
@@ -41,7 +41,7 @@ If you clicked **Later** and need to add the components manually, see Manual Com
 {% endstep %}
 
 {% step %}
-#### Assign a Camera (if not using Camera.main)
+**Assign a Camera (if not using Camera.main)**
 
 Select the **ConvaiVisionRoot** GameObject (under `ConvaiRoomManager`). On the `CameraVisionFrameSource` component, locate the **Target Camera** field.
 
@@ -54,7 +54,7 @@ The default **Capture Preset** is **Balanced** (1280 × 720 at 15 fps), which su
 {% endstep %}
 
 {% step %}
-#### Add Vision Debug Preview and Verify
+**Add Vision Debug Preview and Verify**
 
 On any scene GameObject, click **Add Component** → **Convai/Vision/Vision Debug Preview (Editor Only)**.
 
@@ -62,7 +62,7 @@ On any scene GameObject, click **Add Component** → **Convai/Vision/Vision Debu
 
 Press **Play**. An overlay appears in the Game view showing the live camera feed and a statistics panel. Once the room connects, the FPS counter increments and the frame count begins increasing — the character is now receiving visual context.
 
-<figure><img src="../../../../.gitbook/assets/image (491).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (70).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 
@@ -88,7 +88,7 @@ If you clicked **Later** on the dialog, or want to place the components on a spe
 4. Assign the **Target Camera** if not using `Camera.main`.
 5. Leave the **Frame Source Component** field on `ConvaiVisionPublisher` blank — the publisher discovers `CameraVisionFrameSource` on the same GameObject at runtime. Assign it explicitly only if you have multiple frame sources in the scene.
 
-<figure><img src="../../../../.gitbook/assets/image (492).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (79).png" alt=""><figcaption></figcaption></figure>
 
 ***
 

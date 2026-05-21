@@ -22,11 +22,11 @@ The Configuration Window includes a **Long-Term Memory** tab that lets you brows
 
 Go to **Convai** and select the **Long-Term Memory** tab.
 
-<figure><img src="../../../../.gitbook/assets/image (472).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (58).png" alt=""><figcaption></figcaption></figure>
 
 ### Interface Overview
 
-<figure><img src="../../../../.gitbook/assets/image (471).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (59).png" alt=""><figcaption></figcaption></figure>
 
 | Control            | Function                                                                                                                                                   |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |

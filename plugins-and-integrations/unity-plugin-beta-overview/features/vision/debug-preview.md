@@ -18,25 +18,25 @@ description: >-
 
 {% stepper %}
 {% step %}
-#### Add the Component
+**Add the Component**
 
 Select any GameObject in the scene — the same one as your frame source, or a dedicated debug object. Click **Add Component** → **Convai/Vision/Vision Debug Preview (Editor Only)**.
 
-<figure><img src="../../../../.gitbook/assets/image (503).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (69).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
-#### Assign a Frame Source (Optional)
+**Assign a Frame Source (Optional)**
 
 In the **Frame Source Component** field, drag in the `IVisionFrameSource` component you want to preview. If you leave this blank and **Fallback to Active Frame Source** is enabled, the component automatically selects the first capturing source in the scene.
 {% endstep %}
 
 {% step %}
-#### Enter Play Mode
+**Enter Play Mode**
 
 Press **Play**. An overlay appears in the Game view showing the live texture and a statistics panel. Adjust position and size using the Inspector fields described below.
 
-<figure><img src="../../../../.gitbook/assets/image (491).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (70).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 

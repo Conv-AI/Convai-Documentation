@@ -24,19 +24,19 @@ The recommended approach for most projects is to enable memory through the chara
 
 {% stepper %}
 {% step %}
-#### Open your character in the Convai dashboard
+**Open your character in the Convai dashboard**
 
 Sign in at [convai.com](https://convai.com) and select the character you want to configure.
 {% endstep %}
 
 {% step %}
-#### Navigate to Memory Settings
+**Navigate to Memory Settings**
 
 In the character editor, select the **Memory** section from the left panel, then open the **Memory Settings** tab.
 {% endstep %}
 
 {% step %}
-#### Enable Long-Term Memory
+**Enable Long-Term Memory**
 
 Toggle **Long-Term Memory** on. The change is applied server-side immediately — no SDK update or recompile required.
 {% endstep %}
