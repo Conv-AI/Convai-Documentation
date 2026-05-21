@@ -35,7 +35,7 @@ Helper modules that run entirely within Unity — no Convai communication requir
 
 ## Latest release
 
-**v{{ unity_sdk_version }}** introduces Structured Actions for precise in-scene command dispatch, Meta Quest passthrough vision for AR character awareness, runtime turn-taking mode switching, and expanded dynamic context for richer NPC knowledge.
+**v<code class="expression">space.vars.unity_sdk_version</code>** introduces Structured Actions for precise in-scene command dispatch, Meta Quest passthrough vision for AR character awareness, runtime turn-taking mode switching, and expanded dynamic context for richer NPC knowledge.
 
 ## Next steps
 

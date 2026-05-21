@@ -61,7 +61,7 @@ graph LR
 
 | Requirement     | Minimum                                                |
 | --------------- | ------------------------------------------------------ |
-| Unity version   | {{ unity_min_version }}                                |
+| Unity version   | <code class="expression">space.vars.unity_min_version</code> |
 | Render pipeline | Built-in, URP, or HDRP                                 |
 | Platform        | Windows, macOS, Linux, Android, iOS, Meta Quest, WebGL |
 | Network         | Internet connection to Convai                          |
@@ -71,7 +71,7 @@ graph LR
 The sample scenes use URP. If your project uses the Built-in render pipeline, the samples require minor material reassignment. The SDK itself works with all three pipelines.
 {% endhint %}
 
-The Convai Unity SDK is available on the [Unity Asset Store]({{ unity_asset_store_url }}).
+The Convai Unity SDK is available on the [Unity Asset Store](https://assetstore.unity.com/packages/tools/behavior-ai/npc-ai-engine-dialog-actions-voice-and-lipsync-convai-235621).
 
 ## Next steps
 
