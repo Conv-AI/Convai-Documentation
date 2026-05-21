@@ -1,12 +1,13 @@
 ---
+title: What's new
 description: >-
-  Release notes for the Convai Unity SDK — current version highlights, new
-  features, and migration notes.
+  Release notes for the Convai Unity SDK — current version highlights,
+  previous release notes, bug fixes, and migration guidance for each release.
 ---
 
-# What's New
+Track changes to the Convai Unity SDK across releases, including new features, bug fixes, and configuration changes.
 
-### Release Notes
+## Release notes
 
 {% updates format="full" %}
 {% update date="2026-05-08" tags="v4.2.0,Current" %}
@@ -28,7 +29,7 @@ Characters can execute in-scene commands through a structured runtime. New in th
 
 **Runtime Turn-Taking Mode Switching**
 
-Switch between hands-free, push-to-talk, and smart turn-taking modes during live sessions using `ConvaiManager.SetConversationInputModeAsync()` or the runtime Settings Panel — no scene reload required.
+Switch between hands-free and push-to-talk modes during live sessions using `ConvaiManager.SetConversationInputModeAsync()` or the runtime Settings Panel — no scene reload required.
 
 **Dynamic Context Expansion**
 
@@ -65,7 +66,7 @@ Initial public release of the Convai Unity SDK.
 
 **Conversation pipeline:** Speech-to-text, language understanding and generation, text-to-speech — fully streamed in real time
 
-**Modules:** LipSync, Emotion, Vision, Narrative Design, Dynamic Context, Long-Term Memory, Scene Metadata, Dialogue Animation, Gaze & Attention
+**Modules:** LipSync, Emotion, Vision, Narrative Design, Dynamic Context, Long-Term Memory, Scene Metadata, Dialogue Animation, Gaze and Attention
 
 **Platform support:** Windows, macOS, Linux, Android, iOS, WebGL
 
@@ -73,6 +74,10 @@ Initial public release of the Convai Unity SDK.
 {% endupdate %}
 {% endupdates %}
 
-### Next Steps
+## Next steps
 
-For full commit-level details, see the [changelog](https://docs.convai.com/unity/changelog). To start using the SDK, follow [Getting Started](/broken/pages/0967634742fecc28d7a3c429a75d845f8c059838).
+To start using the SDK, follow Getting Started.
+
+{% content-ref url="../getting-started/README.md" %}
+[Getting Started](../getting-started/README.md)
+{% endcontent-ref %}

@@ -1,18 +1,13 @@
 ---
+title: Architecture overview
 description: >-
   The four-tier Convai Unity SDK architecture — Runtime, Room, Agent, and Module
   — and the responsibilities of each layer.
 ---
 
-# Architecture Overview
+The SDK is organized into four tiers: Runtime, Room, Agent, and Module. As a developer, you interact primarily with the Agent tier (character and player components) and the Module layer (opt-in feature modules). The Runtime and Room tiers handle connection and service bootstrapping with minimal configuration required.
 
-### How the SDK Layers Fit Together
-
-The SDK is organized into four tiers: Runtime, Room, Agent, and Module. Each tier has a clear owner and a defined set of responsibilities. As a developer, you interact primarily with the Agent tier (character and player components) and the Module layer (opt-in feature modules). The Runtime and Room tiers handle connection and service bootstrapping with minimal configuration required.
-
-***
-
-### System Diagram
+## System diagram
 
 ```mermaid
 graph TD
@@ -52,9 +47,7 @@ graph TD
 
 The dashed line from `ConvaiCharacter` to the Module Layer means modules are optional components you add to the same GameObject as the character — not required for basic conversation.
 
-***
-
-### Runtime Tier
+## Runtime tier
 
 The Runtime tier boots when your scene loads and provides services to everything below it.
 
@@ -71,9 +64,7 @@ The Runtime tier boots when your scene loads and provides services to everything
 Most integration code only needs `ConvaiManager.ActiveManager` and the character's own events. The `TryGet` service accessors are for advanced use cases where you replace or extend internal services.
 {% endhint %}
 
-***
-
-### Room Tier
+## Room tier
 
 `ConvaiRoomManager` owns the live connection to Convai. One `ConvaiRoomManager` per scene, managed by `ConvaiManager`.
 
@@ -81,19 +72,17 @@ It is responsible for:
 
 * **Room connection lifecycle** — connecting, disconnecting, reconnecting with exponential backoff
 * **Microphone capture** — starting and stopping audio input, mute control
-* **Turn-taking mode** — hands-free (LocalAudio), push-to-talk (PushToTalk), or smart turn detection (SmartTurn)
+* **Turn-taking mode** — hands-free (`ConversationInputMode.HandsFree`) or push-to-talk (`ConversationInputMode.PushToTalk`)
 * **Dynamic context transport** — sending state updates and events to Convai at runtime
 * **Audio playback coordination** — enabling remote character audio, WebGL user-gesture handling
 
 `ConvaiRoomManager` exposes coordinators for diagnostics, audio, ownership, and connection management. These are accessible via `ConvaiManager.ActiveManager.TryGetRoomConnectionService()` for advanced scripting.
 
-***
-
-### Agent Tier
+## Agent tier
 
 The Agent tier contains the components you place on scene GameObjects.
 
-#### ConvaiCharacter
+### ConvaiCharacter
 
 Add `ConvaiCharacter` to each NPC or agent GameObject. One component per character. It owns:
 
@@ -105,7 +94,7 @@ Add `ConvaiCharacter` to each NPC or agent GameObject. One component per charact
 
 `ConvaiCharacter` can be configured inline in the Inspector or via a reusable `ConvaiCharacterProfile` ScriptableObject asset.
 
-#### ConvaiPlayer
+### ConvaiPlayer
 
 Add `ConvaiPlayer` to your player GameObject. Exactly one `ConvaiPlayer` per scene. It owns:
 
@@ -117,30 +106,26 @@ Add `ConvaiPlayer` to your player GameObject. Exactly one `ConvaiPlayer` per sce
 `ConvaiPlayer.PlayerId` is a local display identifier for transcript UI attribution. It is not the server-generated speaker ID used for Long-Term Memory tracking.
 {% endhint %}
 
-***
-
-### Module Layer
+## Module layer
 
 Modules are optional Unity components you add to the same GameObject as `ConvaiCharacter` (or `ConvaiRoomManager` for Vision). Each module is independent — add only what your project needs.
 
 | Module              | What it does                                                                                                     |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `LipSync`           | Real-time blend shape mouth animation driven by audio playback; supports ARKit, MetaHuman, and CC4 Extended maps |
-| `Emotion`           | Receives Convai emotion signals, smooths them, and dispatches to blend shape or Animator parameter bindings      |
-| `Vision`            | Publishes camera, webcam, or Meta Quest passthrough frames to Convai for multimodal awareness                    |
-| `Narrative`         | Manages story section progression through trigger-based events tied to conversation flow                         |
-| `DialogueAnimation` | Drives a four-layer animator stack (base idle, masked overlays, body talk, head talk) during dialogue            |
-| `FacialAnimation`   | Plays facial animation clips at runtime, composited against lip sync and emotion outputs                         |
-| `Gaze`              | Blends eye and head actuators toward conversation partners and attention targets                                 |
-| `Attention`         | Resolves weighted focus targets, providing gaze direction to the Gaze module                                     |
-| `ConversationFlow`  | Bridges the conversation event stream to per-frame dialogue state (Idle, Speaking, Reacting, etc.)               |
-| `Embodiment`        | Foundational behavior profile and lifecycle management for physical presence and behavioral modules              |
+| LipSync             | Real-time blend shape mouth animation driven by audio playback; supports ARKit, MetaHuman, and CC4 Extended maps |
+| Emotion             | Receives Convai emotion signals, smooths them, and dispatches to blend shape or Animator parameter bindings      |
+| Vision              | Publishes camera, webcam, or Meta Quest passthrough frames to Convai for multimodal awareness                    |
+| Narrative           | Manages story section progression through trigger-based events tied to conversation flow                         |
+| DialogueAnimation   | Drives a four-layer animator stack (base idle, masked overlays, body talk, head talk) during dialogue            |
+| FacialAnimation     | Plays facial animation clips at runtime, composited against lip sync and emotion outputs                         |
+| Gaze                | Blends eye and head actuators toward conversation partners and attention targets                                  |
+| Attention           | Resolves weighted focus targets, providing gaze direction to the Gaze module                                     |
+| ConversationFlow    | Bridges the conversation event stream to per-frame dialogue state (Idle, Speaking, Reacting, etc.)               |
+| Embodiment          | Foundational behavior profile and lifecycle management for physical presence and behavioral modules              |
 
 `ConversationFlow` and `Embodiment` are automatically added when you use **GameObject > Convai > Setup Required Components**. `LipSync`, `Emotion`, `Vision`, `Narrative`, `DialogueAnimation`, `Gaze`, and `Attention` are opt-in.
 
-***
-
-### Configuration Model
+## Configuration model
 
 Every major component supports two configuration modes, selectable in the Inspector.
 
@@ -154,14 +139,12 @@ Values come from a reusable `ConvaiCharacterProfile` or `ConvaiRoomManagerProfil
 {% endtab %}
 {% endtabs %}
 
-***
+## Next steps
 
-### Next Steps
-
-{% content-ref url="/broken/pages/ce1ddd3ea3b42aac33bf504bcdba7d18634e05d6" %}
-[Broken link](/broken/pages/ce1ddd3ea3b42aac33bf504bcdba7d18634e05d6)
+{% content-ref url="feature-map.md" %}
+[Feature map](feature-map.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/0967634742fecc28d7a3c429a75d845f8c059838" %}
-[Broken link](/broken/pages/0967634742fecc28d7a3c429a75d845f8c059838)
+{% content-ref url="../getting-started/README.md" %}
+[Getting Started](../getting-started/README.md)
 {% endcontent-ref %}
