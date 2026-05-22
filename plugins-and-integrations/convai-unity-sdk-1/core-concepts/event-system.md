@@ -1,19 +1,14 @@
 ---
-description: >-
-  Wire session, character, and transcript events in Unity using relay
-  MonoBehaviours — configure in the Inspector or subscribe in C# with typed
-  payload structs.
+title: Event system
+description: Reference for Convai event relay components — available events, payload fields, subscription patterns, and the ConvaiNotificationEventBridge service.
+last_reviewed: "4.2.0"
 ---
-
-# Event System
-
-## React to Session and Character Events with Relay Components
 
 The Convai SDK communicates what happens during a session — connections, character speech, transcripts, emotions — through a set of relay components. Add one of these MonoBehaviours to a GameObject in your scene, wire up UnityEvents in the Inspector or subscribe in code, and your scene logic responds to whatever the SDK broadcasts.
 
 ***
 
-## Two Wiring Approaches
+## Two wiring approaches
 
 {% tabs %}
 {% tab title="Inspector (UnityEvents)" %}
@@ -55,7 +50,7 @@ Best for: conditional logic, multi-event coordination, data routing across multi
 
 ***
 
-## Relay Component Quick-Reference
+## Relay component quick-reference
 
 | Component                    | Inspector Menu Path                         | Use When                                                                    |
 | ---------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
@@ -84,7 +79,7 @@ If `ConvaiManager` initializes after the relay's `OnEnable` (for example, due to
 
 | Event                   | Payload                        | When It Fires                                                             |
 | ----------------------- | ------------------------------ | ------------------------------------------------------------------------- |
-| `OnConnected`           | —                              | Session enters `Connected` state.                                         |
+| `OnConnected`           | —                              | Initial connection established (`Connecting` → `Connected`). Does not fire on reconnection — see `OnReconnected`. |
 | `OnDisconnected`        | —                              | Session enters `Disconnected` state.                                      |
 | `OnReconnecting`        | —                              | A reconnect attempt begins (session was `Connected`, connection dropped). |
 | `OnReconnected`         | —                              | A reconnect attempt succeeded. Session is `Connected` again.              |
@@ -130,17 +125,21 @@ public class ConnectionIndicator : MonoBehaviour
 
     private void OnEnable()
     {
-        _relay.OnConnected.AddListener(() => _connectingOverlay.SetActive(false));
-        _relay.OnDisconnected.AddListener(() => _connectingOverlay.SetActive(true));
-        _relay.OnReconnecting.AddListener(() => _connectingOverlay.SetActive(true));
+        _relay.OnConnected.AddListener(OnConnected);
+        _relay.OnDisconnected.AddListener(OnDisconnected);
+        _relay.OnReconnecting.AddListener(OnReconnecting);
     }
 
     private void OnDisable()
     {
-        _relay.OnConnected.RemoveAllListeners();
-        _relay.OnDisconnected.RemoveAllListeners();
-        _relay.OnReconnecting.RemoveAllListeners();
+        _relay.OnConnected.RemoveListener(OnConnected);
+        _relay.OnDisconnected.RemoveListener(OnDisconnected);
+        _relay.OnReconnecting.RemoveListener(OnReconnecting);
     }
+
+    private void OnConnected()    => _connectingOverlay.SetActive(false);
+    private void OnDisconnected() => _connectingOverlay.SetActive(true);
+    private void OnReconnecting() => _connectingOverlay.SetActive(true);
 }
 ```
 
@@ -292,7 +291,7 @@ public class TrainingTranscriptLog : MonoBehaviour
 
 ***
 
-## Subscription Lifecycle
+## Subscription lifecycle
 
 Relay MonoBehaviour components manage their own subscriptions automatically. They subscribe when `OnEnable` runs and unsubscribe when `OnDisable` runs.
 
@@ -325,9 +324,9 @@ Most projects never interact with this class directly. It is instantiated and ma
 
 ***
 
-## Usage Examples
+## Usage examples
 
-### Example 1: Training Simulation — Connection Overlay
+### Example 1: Training simulation — connection overlay
 
 Show a "Connecting…" overlay while the session is not yet established.
 
@@ -337,17 +336,28 @@ Show a "Connecting…" overlay while the session is not yet established.
 
 private void OnEnable()
 {
-    _sessionRelay.OnConnected.AddListener(() => _loadingOverlay.alpha = 0f);
-    _sessionRelay.OnDisconnected.AddListener(() => _loadingOverlay.alpha = 1f);
-    _sessionRelay.OnReconnecting.AddListener(() => _loadingOverlay.alpha = 0.5f);
+    _sessionRelay.OnConnected.AddListener(OnConnected);
+    _sessionRelay.OnDisconnected.AddListener(OnDisconnected);
+    _sessionRelay.OnReconnecting.AddListener(OnReconnecting);
 }
+
+private void OnDisable()
+{
+    _sessionRelay.OnConnected.RemoveListener(OnConnected);
+    _sessionRelay.OnDisconnected.RemoveListener(OnDisconnected);
+    _sessionRelay.OnReconnecting.RemoveListener(OnReconnecting);
+}
+
+private void OnConnected()    => _loadingOverlay.alpha = 0f;
+private void OnDisconnected() => _loadingOverlay.alpha = 1f;
+private void OnReconnecting() => _loadingOverlay.alpha = 0.5f;
 ```
 
 **Expected outcome:** The overlay fades in when the session is not connected and fades out when the connection is established.
 
 ***
 
-### Example 2: Medical Trainer — Emotion-Triggered Character Response
+### Example 2: Medical trainer — emotion-triggered character response
 
 A patient character's facial expression and posture change based on the emotion detected by Convai.
 
@@ -368,7 +378,7 @@ private void ApplyEmotion(CharacterEmotionRelayData data)
 
 ***
 
-### Example 3: Shared Transcript Feed Filtered to One Character
+### Example 3: Shared transcript feed filtered to one character
 
 A corporate onboarding simulation has multiple NPC characters but only the main instructor's lines appear in the subtitle panel.
 
@@ -394,14 +404,14 @@ On the `ConvaiTranscriptEventRelay` component in the Inspector:
 
 ***
 
-## Next Steps
+## Next steps
 
-You now have the full reference for all relay components, event payloads, and subscription patterns. To continue, read Turn-Taking Modes if you need to configure how the SDK detects speech input, or proceed to the Features section to explore individual SDK capabilities.
+You now have the full reference for all relay components, event payloads, and subscription patterns. Read Turn-Taking Modes if you need to configure how the SDK detects speech input, or proceed to the Features section to explore individual SDK capabilities.
 
-{% content-ref url="/broken/pages/8b1afbace15d7e07ac728ee4e66812ca4a512d83" %}
-[Broken link](/broken/pages/8b1afbace15d7e07ac728ee4e66812ca4a512d83)
+{% content-ref url="turn-taking-modes.md" %}
+[Turn-taking modes](turn-taking-modes.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/4ced5bfd7a250b5ce2d34393dcd451347845f55a" %}
-[Broken link](/broken/pages/4ced5bfd7a250b5ce2d34393dcd451347845f55a)
+{% content-ref url="../features/README.md" %}
+[Features](../features/README.md)
 {% endcontent-ref %}

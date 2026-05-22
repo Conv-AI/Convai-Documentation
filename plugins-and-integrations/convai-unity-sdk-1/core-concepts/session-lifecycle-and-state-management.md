@@ -1,19 +1,14 @@
 ---
-description: >-
-  Understand how each ConvaiCharacter session transitions through states, where
-  session IDs are stored, and how to configure reconnection and
-  conversation-resume behavior.
+title: Session lifecycle and state management
+description: Understand how ConvaiCharacter sessions transition through states, where session IDs are stored, and how to configure reconnection and conversation-resume behavior.
+last_reviewed: "4.2.0"
 ---
-
-# Session Lifecycle & State Management
-
-## How Character Sessions Connect, Persist, and Recover
 
 Every `ConvaiCharacter` in your scene maintains an independent session with Convai. That session tracks whether the character is connected, what its current state is, and — when persistence is enabled — what conversation it was in the last time you connected. Understanding how sessions are created, persisted, and recovered lets you build reliable, resumable character interactions across training simulations, interactive experiences, and games.
 
 ***
 
-## Session State Machine
+## Session state machine
 
 Each character session moves through the following states.
 
@@ -42,11 +37,11 @@ stateDiagram-v2
 | `Disconnecting` | 4     | Graceful shutdown in progress. Transitioning from Connected to Disconnected.  |
 | `Error`         | 5     | Unrecoverable error. Manual intervention required to reconnect.               |
 
-You receive state transitions as `SessionStateChangedRelayData` events via `ConvaiSessionEventRelay`. See [Event System](/broken/pages/4b304c9ef8664069cf0b3671091346b49e7ac8ec) for how to subscribe.
+You receive state transitions as `SessionStateChangedRelayData` events via `ConvaiSessionEventRelay`. See [Event system](event-system.md) for how to subscribe.
 
 ***
 
-## Per-Character Sessions
+## Per-character sessions
 
 Each `ConvaiCharacter` has its own independent session. Sessions are not shared between characters, even in multi-character scenes.
 
@@ -66,11 +61,11 @@ Each `ConvaiCharacter` has its own independent session. Sessions are not shared 
 
 ***
 
-## Session Persistence
+## Session persistence
 
 When a session ID is persisted, the SDK can resume a previous conversation on the next connect — the character remembers context from prior interactions.
 
-### What Persists vs. What Resets
+### What persists vs. what resets
 
 | On Reconnect                 | Behavior                                            |
 | ---------------------------- | --------------------------------------------------- |
@@ -80,7 +75,7 @@ When a session ID is persisted, the SDK can resume a previous conversation on th
 | Active turn state            | Reset — the turn restarts clean                     |
 | Module state (e.g., emotion) | Reset — modules reinitialize on reconnect           |
 
-### Default Persistence Stack
+### Default persistence stack
 
 The SDK exposes a pluggable persistence layer via `ISessionPersistence` for projects that need a custom backing store (encrypted storage, cloud saves, a database). The default stack is:
 
@@ -93,9 +88,9 @@ ISessionPersistence
 
 Session IDs are stored under keys formatted as `convai.session.<characterId>`.
 
-### Replacing the Persistence Store
+### Replacing the persistence store
 
-Implement `IKeyValueStore` to use any backing store — a database, encrypted storage, a cloud save system.
+Implement `IKeyValueStore` to use any backing store — a database, encrypted storage, a cloud save system. `PlayerPrefsKeyValueStore` marshals all reads and writes to the Unity main thread internally; apply the same thread-safety pattern if your backing store has thread restrictions.
 
 ```csharp
 public sealed class SecureKeyValueStore : IKeyValueStore
@@ -126,13 +121,9 @@ var runtime = new ConvaiRuntimeBuilder()
     .Build();
 ```
 
-{% hint style="info" %}
-`PlayerPrefsKeyValueStore` marshals all reads and writes to the Unity main thread internally. If you implement a custom store, apply the same thread-safety pattern if your backing store has thread restrictions.
-{% endhint %}
-
 ***
 
-## Reconnect Policy
+## Reconnect policy
 
 `ReconnectPolicy` controls what the SDK does when a connection drops unexpectedly.
 
@@ -145,7 +136,7 @@ var runtime = new ConvaiRuntimeBuilder()
 | `StartWaitTimeoutMs`       | `int`          | `5000`             | Timeout in milliseconds for the connection `Start()` phase before the attempt is considered failed.                                |
 | `AutoMicStartDelaySeconds` | `float`        | `0.5`              | Seconds to wait after connection before starting the microphone. Prevents audio capture before the session is fully ready.         |
 
-### `ResumePolicy` Options
+### `ResumePolicy` options
 
 | Value              | Behavior                                                                                                               |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
@@ -153,7 +144,7 @@ var runtime = new ConvaiRuntimeBuilder()
 | `ResumeIfPossible` | Attempt to resume the previous conversation. If the session has expired or resume fails, fall back to a fresh session. |
 | `AlwaysResume`     | Always resume. If resume fails, the connection fails — no fallback to a fresh session.                                 |
 
-### Preset Policies
+### Preset policies
 
 | Preset                            | Description                                                     |
 | --------------------------------- | --------------------------------------------------------------- |
@@ -175,7 +166,7 @@ var policy = new ReconnectPolicy(
 
 ***
 
-## Multi-Character Sessions
+## Multi-character sessions
 
 In scenes with multiple `ConvaiCharacter` components, each character has a completely independent session. There is no shared state between characters at the session level.
 
@@ -184,13 +175,11 @@ In scenes with multiple `ConvaiCharacter` components, each character has a compl
 * Reconnect policy applies independently per character.
 * A session error on one character does not affect others.
 
-For scenarios where characters share a room (multi-participant conversations), see the Multi-Character Scenarios page in the Advanced Topics section.
-
 ***
 
-## Usage Examples
+## Usage examples
 
-### Example 1: Medical Training Simulation — Resume After Network Drop
+### Example 1: Medical training simulation — resume after network drop
 
 A learner is mid-assessment when the network drops. When connection is restored, the patient character resumes the same conversation — no context is lost.
 
@@ -207,7 +196,7 @@ var policy = new ReconnectPolicy(
 
 ***
 
-### Example 2: Corporate Onboarding Kiosk — Always-Fresh Conversations
+### Example 2: Corporate onboarding kiosk — always-fresh conversations
 
 Each new employee who approaches the kiosk should start from the beginning with no memory of previous users. `AlwaysFresh` and `AlwaysCreateNew` ensure a clean slate every time.
 
@@ -235,7 +224,7 @@ public class KioskSessionReset : MonoBehaviour
 
 ***
 
-### Example 3: Handling the `Error` State in a Training Simulation
+### Example 3: Handling the error state in a training simulation
 
 When all reconnect attempts are exhausted, the session enters `Error` state. Surface this to the facilitator and allow manual retry rather than silently hanging.
 
@@ -258,7 +247,7 @@ public class SessionErrorHandler : MonoBehaviour
     public async void RetryConnection()
     {
         _errorPanel.SetActive(false);
-        await _manager.Room.Connection.ConnectAsync();
+        await _manager.ConnectAsync();
     }
 }
 ```
@@ -279,14 +268,14 @@ public class SessionErrorHandler : MonoBehaviour
 
 ***
 
-## Next Steps
+## Next steps
 
 You now know how character sessions are created, how state transitions work, how session IDs are persisted across restarts, and how to configure reconnection behavior. Read Event System to learn how to subscribe to session state changes and character events from your scene scripts. Read Architecture Deep Dive to understand where sessions fit in the overall runtime hierarchy.
 
-{% content-ref url="/broken/pages/4b304c9ef8664069cf0b3671091346b49e7ac8ec" %}
-[Broken link](/broken/pages/4b304c9ef8664069cf0b3671091346b49e7ac8ec)
+{% content-ref url="event-system.md" %}
+[Event system](event-system.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/4ced5bfd7a250b5ce2d34393dcd451347845f55a" %}
-[Broken link](/broken/pages/4ced5bfd7a250b5ce2d34393dcd451347845f55a)
+{% content-ref url="architecture-deep-dive.md" %}
+[Architecture deep dive](architecture-deep-dive.md)
 {% endcontent-ref %}

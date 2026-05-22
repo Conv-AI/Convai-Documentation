@@ -1,19 +1,14 @@
 ---
-description: >-
-  Explore the four-layer runtime model of the Convai Unity SDK — what each layer
-  owns, which components are replaceable, and how RuntimeState transitions are
-  managed.
+title: Architecture deep dive
+description: Understand the four-layer Convai Unity SDK runtime — what each layer owns, which components are replaceable, and how RuntimeState transitions are managed.
+last_reviewed: "4.2.0"
 ---
-
-# Architecture Deep Dive
-
-## The Four-Layer Runtime Model and What You Can Replace
 
 The Convai Unity SDK is built in layers. Each layer has a defined responsibility and communicates inward — outer layers depend on inner ones, never the reverse. Understanding this structure tells you which parts of the SDK are developer-facing, which are replaceable, and which are internal implementation details you do not need to touch.
 
 ***
 
-## System Layers
+## System layers
 
 The diagram below shows the four main layers and how they relate. `ConvaiRuntime` holds four direct sub-systems at the second tier — `IRoomRuntime`, `IEventHub`, `IAgentRegistry`, and the module list. Characters and players surface beneath `IRoomRuntime` and `IAgentRegistry`, and all modules share a common context layer.
 
@@ -42,7 +37,7 @@ graph TD
 
 ***
 
-## Runtime Interface Inventory
+## Runtime interface inventory
 
 `IConvaiRuntime` exposes the following sub-systems as properties. Each property is the entry point for a specific domain of functionality.
 
@@ -65,7 +60,7 @@ Developers interact with `Room`, `Agents`, and `Events` most frequently. `Transp
 
 ***
 
-## What You Can Replace
+## What you can replace
 
 `ConvaiRuntimeBuilder` is the fluent API for composing the runtime before it starts. Every method returns `this`, so calls chain.
 
@@ -101,7 +96,7 @@ The table below lists what is replaceable vs. internal-only.
 
 ***
 
-## `IRoomRuntime` Sub-Structure
+## `IRoomRuntime` sub-structure
 
 The room layer is itself composed of four coordinators, all accessible via `IConvaiRuntime.Room`.
 
@@ -116,7 +111,7 @@ Connection and audio are the coordinators you are most likely to call from scrip
 
 ***
 
-## Module Layer
+## Module layer
 
 Modules are feature extensions that run inside the runtime lifecycle. They receive a shared `IModuleContext` and can register services that other modules or the presentation layer consume.
 
@@ -129,7 +124,7 @@ new ConvaiRuntimeBuilder()
     .Build();
 ```
 
-Modules are started, paused, resumed, and stopped alongside the runtime. The `IConvaiModule` interface defines these lifecycle hooks. See [Extending the SDK](/broken/pages/9ed21798e80768906982bc364dddf80fa1382bad) for the full module authoring reference.
+Modules are started, paused, resumed, and stopped alongside the runtime. The `IConvaiModule` interface defines these lifecycle hooks. See [Extending the SDK](../advanced-topics/extending-the-sdk.md) for the full module authoring reference.
 
 {% hint style="warning" %}
 Modules cannot depend on each other directly. If two modules need to share data, use the `IEventHub` or a shared service registered via `IModuleContext`.
@@ -137,7 +132,7 @@ Modules cannot depend on each other directly. If two modules need to share data,
 
 ***
 
-## `RuntimeState` Lifecycle
+## `RuntimeState` lifecycle
 
 The runtime moves through the following states from creation to disposal.
 
@@ -175,14 +170,14 @@ All state transitions are async operations wrapped in `IConvaiOperation<Unit>`. 
 
 ***
 
-## Next Steps
+## Next steps
 
 You now understand how the Convai runtime is composed and which parts are replaceable at each layer. Read Turn-Taking Modes next to configure how the SDK handles speech input, then Event System to learn how to wire runtime events into your scene logic.
 
-{% content-ref url="/broken/pages/8b1afbace15d7e07ac728ee4e66812ca4a512d83" %}
-[Broken link](/broken/pages/8b1afbace15d7e07ac728ee4e66812ca4a512d83)
+{% content-ref url="turn-taking-modes.md" %}
+[Turn-taking modes](turn-taking-modes.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/4b304c9ef8664069cf0b3671091346b49e7ac8ec" %}
-[Broken link](/broken/pages/4b304c9ef8664069cf0b3671091346b49e7ac8ec)
+{% content-ref url="event-system.md" %}
+[Event system](event-system.md)
 {% endcontent-ref %}
