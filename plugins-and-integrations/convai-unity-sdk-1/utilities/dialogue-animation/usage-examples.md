@@ -1,19 +1,14 @@
 ---
-description: >-
-  Four progressive examples — from Inspector-only setup to runtime library
-  swapping — covering training, medical, corporate, and adaptive assessment
-  scenarios.
+title: Dialogue Animation usage examples
+description: Four progressive examples — from Inspector-only setup to runtime library swapping — covering training, medical, corporate, and adaptive assessment scenarios.
+last_reviewed: "4.2.0"
 ---
-
-# Usage Examples
-
-## Gesture Animation in Training Simulations
 
 These examples progress from a pure Inspector setup to C# scripting for runtime behavior changes. Start with Example 1 to understand the baseline configuration pattern, then read later examples to understand when and how to use scripting.
 
 ***
 
-## Example 1 — Industrial Safety Instructor
+## Example 1 — Industrial safety instructor
 
 **Scenario:** A factory floor training simulation features an NPC safety instructor who delivers procedural briefings. The character needs authoritative, measured gestures that project confidence without being distracting.
 
@@ -29,7 +24,7 @@ The Balanced library contains clips with lower `EmotionBiasStrength` affinity sp
 
 ***
 
-## Example 2 — Medical Patient Actor
+## Example 2 — Medical patient actor
 
 **Scenario:** A medical simulation features a patient character who begins a consultation with restrained movement (lying in a hospital bed) and becomes more expressive as anxiety rises. The gesture library must change at runtime in response to a narrative trigger.
 
@@ -64,15 +59,15 @@ public class PatientAnimationController : MonoBehaviour
 
 ***
 
-## Example 3 — Multi-Character Corporate Onboarding
+## Example 3 — Multi-character corporate onboarding
 
-**Scenario:** A corporate onboarding simulation features two instructor characters side-by-side: one senior, one junior. They share a single `DialogueAnimationRuntimeConfig` for consistent timing, but use different libraries and gender settings to create distinct visual personalities.
+**Scenario:** A corporate onboarding simulation features two instructor characters side-by-side: one senior, one junior. They share a `DialogueAnimationRuntimeConfig` for consistent timing, but use different libraries and gender settings to create distinct visual personalities.
+
+**About clip selection diversity:** To prevent two characters from selecting the same clip at the same frame, set a different `DeterministicSeed` value on each character's config asset in the Inspector. `DeterministicSeed` is configured per asset at authoring time — it is not settable via the scripting API.
 
 **Setup:**
 
-Both characters share the same config asset. Assign it to each `ConvaiDialogueAnimationController`.
-
-To prevent the two characters from selecting the same clip at the same frame (which looks unnatural when both speak simultaneously), patch their `DeterministicSeed` values at startup:
+Create two `DialogueAnimationRuntimeConfig` assets (or duplicate one). In the Inspector, set a different `DeterministicSeed` value on each. Then assign them per character:
 
 ```csharp
 using Convai.Modules.DialogueAnimation.Components;
@@ -83,19 +78,15 @@ public class MultiCharacterAnimationSetup : MonoBehaviour
 {
     [SerializeField] private ConvaiDialogueAnimationController _seniorInstructor;
     [SerializeField] private ConvaiDialogueAnimationController _juniorInstructor;
-    [SerializeField] private DialogueAnimationRuntimeConfig _sharedConfig;
+    // Assign two separate config assets in the Inspector —
+    // each has a different DeterministicSeed value set at authoring time.
+    [SerializeField] private DialogueAnimationRuntimeConfig _seniorConfig;
+    [SerializeField] private DialogueAnimationRuntimeConfig _juniorConfig;
 
     private void Start()
     {
-        // Clone the config so we can patch seeds independently
-        var seniorConfig = Instantiate(_sharedConfig);
-        var juniorConfig = Instantiate(_sharedConfig);
-
-        // Patch seed — ensures different clip selections even with the same library
-        // (DeterministicSeed is a uint field on DialogueAnimationRuntimeConfig)
-
-        _seniorInstructor.SetConfig(seniorConfig);
-        _juniorInstructor.SetConfig(juniorConfig);
+        _seniorInstructor.SetConfig(_seniorConfig);
+        _juniorInstructor.SetConfig(_juniorConfig);
     }
 }
 ```
@@ -103,13 +94,13 @@ public class MultiCharacterAnimationSetup : MonoBehaviour
 Set distinct libraries per character:
 
 * Senior: `ConvaiSamplesShared_DialogAnimationLib_Balanced`, Gender = Female
-* Junior: `ConvaiSamplesShared_DialogAnimationLib_Expressive`, Gender = Male
+* Junior: `ConvaiSamplesShared_DialogAnimationLib_Expresive`, Gender = Male
 
-**Expected outcome:** Both characters animate with the same crossfade timing and energy response (shared config), but use different clip pools and gender-filtered selections, so they look distinct even when speaking simultaneously.
+**Expected outcome:** Both characters animate with the same crossfade timing and energy response (shared timing config), but use different clip pools and gender-filtered selections, so they look distinct even when speaking simultaneously.
 
 ***
 
-## Example 4 — Adaptive Assessment Mode
+## Example 4 — Adaptive assessment mode
 
 **Scenario:** A military training simulation has two phases: a relaxed learning phase and a formal assessment phase. During assessment, the NPC evaluator's animation style must shift to convey evaluation severity — shorter idle holds, faster transitions, more formal gestures.
 
@@ -149,14 +140,14 @@ public class AssessmentPhaseController : MonoBehaviour
 
 ***
 
-## Next Steps
+## Next steps
 
 For a complete property and method reference, see the Scripting API page. For help with common failures like silent talk layers or missing animations, see Troubleshooting.
 
-{% content-ref url="/broken/pages/c25e38631dff26f65c879e747e9bba7d13afcc91" %}
-[Broken link](/broken/pages/c25e38631dff26f65c879e747e9bba7d13afcc91)
+{% content-ref url="scripting-api.md" %}
+[Scripting API](scripting-api.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/cab0742e87c46fc0f784b2478a4450bd93a38c81" %}
-[Broken link](/broken/pages/cab0742e87c46fc0f784b2478a4450bd93a38c81)
+{% content-ref url="troubleshooting.md" %}
+[Troubleshooting](troubleshooting.md)
 {% endcontent-ref %}

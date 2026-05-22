@@ -1,19 +1,14 @@
 ---
-description: >-
-  Four progressive examples of Gaze & Attention configuration — from basic
-  Inspector setup to custom IFocusTargetProvider implementations and attention
-  profile tuning.
+title: Gaze and Attention usage examples
+description: Four progressive examples of Gaze & Attention configuration — from basic Inspector setup to custom IFocusTargetProvider implementations and attention profile tuning.
+last_reviewed: "4.2.0"
 ---
-
-# Usage Examples
-
-## Gaze Behavior in Training and Simulation Scenarios
 
 These examples progress from Inspector-only profile tuning to C# scripting for custom focus providers and multi-character setups. Start with Example 1 for a baseline configuration, then continue for more advanced patterns.
 
 ***
 
-## Example 1 — Safety Instructor with Authoritative Eye Contact
+## Example 1 — Safety instructor with authoritative eye contact
 
 **Scenario:** A factory safety training simulation features an NPC instructor who delivers procedural briefings. The character needs confident, sustained eye contact to project authority — but must break focus naturally to avoid a robotic stare.
 
@@ -40,7 +35,7 @@ Assign both profiles to the character's components.
 
 ***
 
-## Example 2 — Medical Equipment Attention Priority
+## Example 2 — Medical equipment attention priority
 
 **Scenario:** A nurse character in a clinical training scenario must alternate between making eye contact with the patient (the player) and glancing at medical equipment in the scene. Equipment gets attention priority over the default camera provider.
 
@@ -109,7 +104,7 @@ public class NurseSimulationController : MonoBehaviour
 
 ***
 
-## Example 3 — Multi-Character Dialogue with Cross-Character Gaze
+## Example 3 — Multi-character dialogue with cross-character gaze
 
 **Scenario:** A negotiation training simulation features two NPC characters who converse with each other in front of the player. Each character should track the other when that character is speaking, and glance at the player during pauses.
 
@@ -162,7 +157,7 @@ Tune the attention profile for faster gaze-breaking to enable natural dialogue p
 
 ***
 
-## Example 4 — Examiner with High-Stakes Evaluative Gaze
+## Example 4 — Examiner with high-stakes evaluative gaze
 
 **Scenario:** A military simulation features an officer examiner whose gaze becomes more intense and evaluative during formal assessments. Saccade range should narrow, idle exploration should stop, and head-dominant tracking should increase.
 
@@ -180,42 +175,42 @@ Author two `ConvaiGazeEyeProfile` assets:
 * `EnableIdleExploration`: `false`
 * `TrackingSharpness`: `25.0` (snappier eye tracking)
 
-Switch profiles by assigning to the component's `[SerializeField]` field via script, or swap via Inspector during development:
+{% hint style="info" %}
+The gaze actuators do not expose a runtime `SetProfile()` method. For runtime profile changes, use separate character GameObjects per phase and activate/deactivate them, or expose a public wrapper field on a subclass that reassigns the profile reference.
+{% endhint %}
+
+To switch profiles by activating a different character GameObject at the start of each phase:
 
 ```csharp
-using Convai.Modules.Gaze.Components;
-using Convai.Modules.Gaze.Profiles;
 using UnityEngine;
 
-public class ExaminerStateController : MonoBehaviour
+public class ExaminerPhaseController : MonoBehaviour
 {
-    [SerializeField] private ConvaiEyeGazeActuator _eyeActuator;
-    [SerializeField] private ConvaiGazeEyeProfile _normalProfile;
-    [SerializeField] private ConvaiGazeEyeProfile _assessmentProfile;
+    [SerializeField] private GameObject _normalExaminer;
+    [SerializeField] private GameObject _assessmentExaminer;
 
-    // Note: Profile reassignment takes effect on the next actuator tick.
-    // Access the serialized field directly — no SetProfile() method exists.
     public void BeginAssessment()
     {
-        // Assign via reflection or expose a public setter on a subclass
-        // if runtime profile swap is required. For most uses, swap in Inspector
-        // or use separate GameObjects per phase.
+        _normalExaminer.SetActive(false);
+        _assessmentExaminer.SetActive(true);
+    }
+
+    public void EndAssessment()
+    {
+        _assessmentExaminer.SetActive(false);
+        _normalExaminer.SetActive(true);
     }
 }
 ```
-
-{% hint style="info" %}
-The gaze actuators do not expose a runtime `SetProfile()` method. For runtime profile changes, either reassign the `[SerializeField]` field via a public wrapper method on a subclass, or use separate character GameObjects for each phase and activate/deactivate them.
-{% endhint %}
 
 **Expected outcome:** During the assessment phase, the examiner's eyes move minimally, maintaining tight focus on the player with almost no exploration, projecting sustained evaluative attention.
 
 ***
 
-## Next Steps
+## Next steps
 
 For a complete API reference, including custom `IFocusTargetProvider` contracts and all readable attention state, see the Scripting API page.
 
-{% content-ref url="/broken/pages/18b9465568697a7183b06b7b629bb865bc83e2b2" %}
-[Broken link](/broken/pages/18b9465568697a7183b06b7b629bb865bc83e2b2)
+{% content-ref url="scripting-api.md" %}
+[Scripting API](scripting-api.md)
 {% endcontent-ref %}

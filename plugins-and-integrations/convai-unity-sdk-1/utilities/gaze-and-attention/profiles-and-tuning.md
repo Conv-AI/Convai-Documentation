@@ -1,12 +1,8 @@
 ---
-description: >-
-  Complete field reference for all four gaze profile ScriptableObjects —
-  attention timing, gaze coordination, eye behavior, and head rotation.
+title: Gaze and Attention profiles and tuning
+description: Complete field reference for all four gaze profile ScriptableObjects — attention timing, gaze coordination, eye behavior, and head rotation.
+last_reviewed: "4.2.0"
 ---
-
-# Profiles & Tuning
-
-## Configure Attention, Gaze, and Eye Behavior with Profiles
 
 Four ScriptableObject profiles control the Gaze & Attention system. Each profile addresses a separate domain of behavior. Assign them to the corresponding components via the Inspector, or leave slots empty to use built-in defaults.
 
@@ -19,7 +15,7 @@ Controls target selection: which candidate wins focus, how quickly the character
 **Create via:** Create → Convai → Embodiment → Attention Profile\
 **Assign to:** `ConvaiAttentionController` → Attention Profile field
 
-### Commitment Timing
+### Commitment timing
 
 | Field                      | Default | Range  | Description                                                                     |
 | -------------------------- | ------- | ------ | ------------------------------------------------------------------------------- |
@@ -27,7 +23,7 @@ Controls target selection: which candidate wins focus, how quickly the character
 | `CommitmentReleaseSeconds` | `0.5`   | 0.1–10 | Time in seconds for commitment to decay from 1 → 0 when a target is lost        |
 | `FocusLossHoldSeconds`     | `0.25`  | 0–3    | Grace period after losing sight of a target before commitment begins decaying   |
 
-### Interest Budget
+### Interest budget
 
 The interest budget prevents the character from fixating on a single target indefinitely. Each frame, the current focus loses interest at `InterestDecayPerSecond`. When interest drops below `InterestBreakThreshold`, the attention system releases the target and evaluates alternatives.
 
@@ -38,14 +34,14 @@ The interest budget prevents the character from fixating on a single target inde
 | `InterestDecayPerSecond`    | `0.15`  | 0.05–5 | How fast interest falls per second while looking at the current target            |
 | `InterestRecoveryPerSecond` | `0.25`  | 0.05–5 | How fast interest recovers per second in neglected candidates                     |
 
-### Smoothing & Offset
+### Smoothing and offset
 
 | Field                    | Default        | Range  | Description                                                                   |
 | ------------------------ | -------------- | ------ | ----------------------------------------------------------------------------- |
 | `FocusPositionLerpSpeed` | `10.0`         | 0.1–30 | Lerp speed for smoothing the focus point in world space                       |
 | `FocusOffset`            | `(0, 0.05, 0)` | —      | World-space offset added to the focus point, useful for targeting face height |
 
-### Default Focus Provider
+### Default focus provider
 
 These fields tune the built-in camera-targeting provider that activates when **Auto Create Default Focus Provider** is enabled on `ConvaiAttentionController`.
 
@@ -65,14 +61,14 @@ Controls how attention output is weighted differently across each dialogue state
 **Create via:** Create → Convai → Embodiment → Gaze Coordination Profile\
 **Assign to:** `ConvaiGazeCoordinator` (auto-created by `ConvaiEyeGazeActuator`)
 
-### Per-State Weights
+### Per-state weights
 
 Each dialogue state has an `OverallWeight` and an `EyeShare`.
 
 * **OverallWeight** — how strongly the character looks at the attention target (0 = fully relaxed, 1 = locked-on)
 * **EyeShare** — fraction of the tracking handled by eyes alone. The head handles `1 − EyeShare`.
 
-| Dialogue State | OverallWeight | EyeShare | Notes                                                   |
+| Dialogue state | OverallWeight | EyeShare | Notes                                                   |
 | -------------- | ------------- | -------- | ------------------------------------------------------- |
 | `Idle`         | `0.45`        | `0.85`   | Attention target suppressed; eyes wander freely         |
 | `Listening`    | `0.93`        | `0.52`   | Strong engagement, balanced eye/head split              |
@@ -87,7 +83,7 @@ Each dialogue state has an `OverallWeight` and an `EyeShare`.
 The `Idle` state sets `SuppressAttentionTarget = true`, which disables the attention input entirely and lets the eye and head actuators run their idle exploration behavior without tracking a target.
 {% endhint %}
 
-### Blend Smoothing
+### Blend smoothing
 
 | Field                | Default | Range | Description                                                             |
 | -------------------- | ------- | ----- | ----------------------------------------------------------------------- |
@@ -123,7 +119,7 @@ Saccades are small involuntary eye movements that make the gaze feel alive.
 | `SaccadeMaxDegrees`     | `2.5`   | 0–5       | Maximum displacement per saccade in degrees  |
 | `SaccadeDuration`       | `0.07`  | 0.01–0.25 | Duration of each saccade movement in seconds |
 
-### Micro-Tremor
+### Micro-tremor
 
 High-frequency noise that simulates physiological eye tremor.
 
@@ -133,7 +129,7 @@ High-frequency noise that simulates physiological eye tremor.
 | `MicroTremorAmplitude` | `0.18`  | 0–1   | Amplitude of the tremor displacement |
 | `MicroTremorFrequency` | `11.0`  | 1–30  | Frequency in Hz                      |
 
-### Idle Exploration
+### Idle exploration
 
 When the attention target is suppressed (idle dialogue state), eyes wander within a configurable range.
 
@@ -153,7 +149,7 @@ When the attention target is suppressed (idle dialogue state), eyes wander withi
 
 | Field         | Default | Description                                                                                                                                                                       |
 | ------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `EnableBlink` | `true`  | Enable procedural blink scheduling. Blink timing is driven by a `EyeBlinkScheduler` POCO — blink rate is not directly configurable via this profile but can be disabled entirely. |
+| `EnableBlink` | `true`  | Enable procedural blink scheduling. Blink timing is driven by an `EyeBlinkScheduler` — blink rate is not directly configurable via this profile but can be disabled entirely. |
 
 ***
 
@@ -184,7 +180,7 @@ Controls neck and head rotation: range limits, smoothing, idle head wandering, a
 | `MaxPitchSpeedDegrees` | `120.0` | 0–720  | Maximum pitch rotation speed in degrees per second                    |
 | `DeadzoneDegrees`      | `1.5`   | 0–10   | Angle below which head rotation is suppressed — prevents micro-jitter |
 
-### Idle Exploration
+### Idle exploration
 
 | Field                        | Default | Range  | Description                                             |
 | ---------------------------- | ------- | ------ | ------------------------------------------------------- |
@@ -206,14 +202,14 @@ Controls neck and head rotation: range limits, smoothing, idle head wandering, a
 
 ***
 
-## Next Steps
+## Next steps
 
 See Usage Examples for scenario-specific profile configurations, or Scripting API if you need to read attention state or implement a custom focus provider.
 
-{% content-ref url="/broken/pages/8da9e06f5e9ce918e0daa6d4bbf7cdedbaaa8fa9" %}
-[Broken link](/broken/pages/8da9e06f5e9ce918e0daa6d4bbf7cdedbaaa8fa9)
+{% content-ref url="usage-examples.md" %}
+[Usage Examples](usage-examples.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/18b9465568697a7183b06b7b629bb865bc83e2b2" %}
-[Broken link](/broken/pages/18b9465568697a7183b06b7b629bb865bc83e2b2)
+{% content-ref url="scripting-api.md" %}
+[Scripting API](scripting-api.md)
 {% endcontent-ref %}

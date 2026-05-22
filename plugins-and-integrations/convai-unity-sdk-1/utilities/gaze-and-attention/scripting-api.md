@@ -1,18 +1,14 @@
 ---
-description: >-
-  Runtime scripting reference for ConvaiAttentionController, AttentionReading,
-  IFocusTargetProvider, ConvaiGazeCoordinator, and GazeIntent.
+title: Gaze and Attention scripting API
+description: Runtime scripting reference for ConvaiAttentionController, AttentionReading, IFocusTargetProvider, ConvaiGazeCoordinator, and GazeIntent.
+last_reviewed: "4.2.0"
 ---
-
-# Scripting API
-
-## Attention and Gaze Runtime Reference
 
 The Gaze & Attention system exposes two separate API surfaces: the **Attention system** (what the character looks at) and the **Gaze system** (how it looks). Both are read-only at runtime except where noted.
 
 ***
 
-## Attention System
+## Attention system
 
 ### ConvaiAttentionController
 
@@ -142,7 +138,7 @@ public class ObjectOfInterestProvider : MonoBehaviour, IFocusTargetProvider
 
 ***
 
-## Gaze System
+## Gaze system
 
 ### ConvaiGazeCoordinator
 
@@ -197,9 +193,9 @@ The eye actuator has no runtime-readable state properties beyond standard Unity 
 
 ***
 
-## Scripting Examples
+## Scripting examples
 
-### Read Commitment for a UI Indicator
+### Read commitment for a UI indicator
 
 ```csharp
 using Convai.Modules.Attention.Components;
@@ -220,7 +216,7 @@ public class CommitmentBar : MonoBehaviour
 
 ***
 
-### Register a Runtime Provider After Scene Load
+### Register a runtime provider after scene load
 
 If you add an `IFocusTargetProvider` component at runtime (e.g. instantiating a prop), call `RefreshProviders()` so the attention controller picks it up:
 
@@ -245,7 +241,7 @@ public class RuntimePropSpawner : MonoBehaviour
 
 ***
 
-### Bifurcate Attention vs. Gaze Diagnostics
+### Bifurcate attention vs. gaze diagnostics
 
 Use `AttentionReading.IsValid` to determine which system to investigate when gaze looks wrong:
 
@@ -278,10 +274,10 @@ public class GazeDiagnostics : MonoBehaviour
 
 ***
 
-## Next Steps
+## Next steps
 
 For help with common failures — static eyes, frozen head, or missing attention targets — see the Troubleshooting page.
 
-{% content-ref url="/broken/pages/7e4fcb63d594fecd7962f4b2a22265f6a774325b" %}
-[Broken link](/broken/pages/7e4fcb63d594fecd7962f4b2a22265f6a774325b)
+{% content-ref url="troubleshooting.md" %}
+[Troubleshooting](troubleshooting.md)
 {% endcontent-ref %}

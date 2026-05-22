@@ -1,13 +1,8 @@
 ---
-description: >-
-  Runtime scripting reference for ConvaiDialogueAnimationController — swap
-  libraries and configs at runtime, and read current layer weights and clip
-  selection state.
+title: Dialogue Animation scripting API
+description: Runtime scripting reference for ConvaiDialogueAnimationController — swap libraries and configs at runtime, and read current layer weights and clip selection state.
+last_reviewed: "4.2.0"
 ---
-
-# Scripting API
-
-## ConvaiDialogueAnimationController Runtime Reference
 
 `ConvaiDialogueAnimationController` exposes a read-only state surface and two runtime swap methods. All properties are safe to query every frame from any script.
 
@@ -25,7 +20,7 @@ description: >-
 | `SetLibrary(library)` | `DialogueAnimationLibrary library`      | Swaps the active clip pool immediately. Takes effect on the next clip selection cycle. |
 | `SetConfig(config)`   | `DialogueAnimationRuntimeConfig config` | Replaces the active runtime config. Timing and weight changes apply on the next tick.  |
 
-### Assigned Asset Properties
+### Assigned asset properties
 
 | Property          | Type                             | Description                                              |
 | ----------------- | -------------------------------- | -------------------------------------------------------- |
@@ -40,7 +35,7 @@ description: >-
 | --------------------- | ------ | ----------------------------------------------------------------------------------------------------------------- |
 | `HasValidIdleLibrary` | `bool` | `true` when the assigned library has at least one valid idle clip. Use this at startup to catch misconfiguration. |
 
-### Current Clip Properties
+### Current clip properties
 
 | Property                    | Type            | Description                                      |
 | --------------------------- | --------------- | ------------------------------------------------ |
@@ -49,7 +44,7 @@ description: >-
 | `CurrentBodyTalkClip`       | `AnimationClip` | Clip currently playing in the Body Talk layer    |
 | `CurrentTalkClip`           | `AnimationClip` | Clip currently playing in the Head Talk layer    |
 
-### Layer Weight Properties
+### Layer weight properties
 
 | Property                        | Type    | Description                                                                                                                                                                                |
 | ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -59,7 +54,7 @@ description: >-
 | `CurrentHeadTalkLayerWeight`    | `float` | Current weight of the Head Talk layer (Layer 3)                                                                                                                                            |
 | `CurrentTalkLayerWeight`        | `float` | Strongest active talk-layer contribution — `max(CurrentBodyTalkLayerWeight, CurrentHeadTalkLayerWeight)`. Use this to drive UI or external systems that need a single "is talking" signal. |
 
-### Runtime Layer Index Properties
+### Runtime layer index properties
 
 | Property                       | Type  | Description                                               |
 | ------------------------------ | ----- | --------------------------------------------------------- |
@@ -68,7 +63,7 @@ description: >-
 | `RuntimeBodyTalkLayerIndex`    | `int` | Resolved Animator layer index for Body Talk at runtime    |
 | `RuntimeHeadTalkLayerIndex`    | `int` | Resolved Animator layer index for Head Talk at runtime    |
 
-### Selection Diagnostic Properties
+### Selection diagnostic properties
 
 | Property        | Type  | Description                                                                           |
 | --------------- | ----- | ------------------------------------------------------------------------------------- |
@@ -77,9 +72,9 @@ description: >-
 
 ***
 
-## Scripting Examples
+## Scripting examples
 
-### Validate Configuration at Startup
+### Validate configuration at startup
 
 Check `HasValidIdleLibrary` before your session starts to catch missing library assignments early:
 
@@ -106,7 +101,7 @@ public class AnimationValidator : MonoBehaviour
 
 ***
 
-### Drive a UI Engagement Indicator from Talk Layer Weight
+### Drive a UI engagement indicator from talk layer weight
 
 `CurrentTalkLayerWeight` updates every frame from the Animator's internal cache:
 
@@ -129,7 +124,7 @@ public class TalkLayerIndicator : MonoBehaviour
 
 ***
 
-### Swap Libraries Based on a Simulation Event
+### Swap libraries based on a simulation event
 
 ```csharp
 using Convai.Modules.DialogueAnimation.Components;
@@ -156,9 +151,9 @@ public class ContextualAnimationSwap : MonoBehaviour
 
 ***
 
-### Clone and Patch Configs for Independent Multi-Character Seeds
+### Use separate config assets for independent multi-character clip selection
 
-Sharing a single config across multiple characters causes them to select the same clips in sync. Clone and patch `DeterministicSeed` to keep them independent:
+To prevent two characters from selecting the same clips in sync, author separate `DialogueAnimationRuntimeConfig` assets and set a different `DeterministicSeed` value on each in the Inspector. Then assign each config at runtime:
 
 ```csharp
 using Convai.Modules.DialogueAnimation.Components;
@@ -168,16 +163,15 @@ using UnityEngine;
 public class MultiCharacterSetup : MonoBehaviour
 {
     [SerializeField] private ConvaiDialogueAnimationController[] _characters;
-    [SerializeField] private DialogueAnimationRuntimeConfig _sharedConfig;
+    // Assign one config asset per character in the Inspector.
+    // Set a different DeterministicSeed on each config asset to diverge their RNG streams.
+    [SerializeField] private DialogueAnimationRuntimeConfig[] _perCharacterConfigs;
 
     private void Awake()
     {
         for (int i = 0; i < _characters.Length; i++)
         {
-            var patched = Instantiate(_sharedConfig);
-            // Stagger seeds so each character draws from a different RNG sequence
-            // DeterministicSeed is a uint — cast from int safely for small arrays
-            _characters[i].SetConfig(patched);
+            _characters[i].SetConfig(_perCharacterConfigs[i]);
         }
     }
 }
@@ -185,7 +179,7 @@ public class MultiCharacterSetup : MonoBehaviour
 
 ***
 
-### Monitor Layer Weights for an Engagement Dashboard
+### Monitor layer weights for an engagement dashboard
 
 Read all four layer weights simultaneously to drive a per-layer visualization:
 
@@ -212,10 +206,10 @@ public class LayerWeightDashboard : MonoBehaviour
 
 ***
 
-## Next Steps
+## Next steps
 
 For help diagnosing animation issues at runtime, see the Troubleshooting page.
 
-{% content-ref url="/broken/pages/cab0742e87c46fc0f784b2478a4450bd93a38c81" %}
-[Broken link](/broken/pages/cab0742e87c46fc0f784b2478a4450bd93a38c81)
+{% content-ref url="troubleshooting.md" %}
+[Troubleshooting](troubleshooting.md)
 {% endcontent-ref %}
