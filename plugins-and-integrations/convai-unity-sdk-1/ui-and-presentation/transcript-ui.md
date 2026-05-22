@@ -1,21 +1,14 @@
 ---
+title: Transcript UI
 description: >-
-  Add character and player transcript display to your scene using the built-in
-  chat prefab, ITranscriptListener for lightweight callbacks, or ITranscriptUI
-  for full custom control.
+  Display character and player transcripts using the built-in chat prefab,
+  ITranscriptListener callbacks, or a custom ITranscriptUI implementation.
+last_reviewed: "4.2.0"
 ---
 
-# Transcript UI
+The transcript system delivers character and player speech to your scene UI, handling partial recognition, turn assembly, and lifecycle management in the runtime layer. Add `ITranscriptListener` for lightweight callbacks or `ITranscriptUI` for complete display control, or drop in the built-in `TranscriptUI_Chat.prefab` for zero-configuration chat.
 
-### Displaying Character and Player Speech
-
-The transcript system routes every character and player speech segment from the Convai runtime to your UI layer. It handles partial text as speech is recognized, assembles final turns, and drives your UI through a well-defined pipeline — so your display code never touches network or audio state directly.
-
-There are two integration paths. `ITranscriptListener` is a lightweight callback interface suited for scoring, analytics, or driving any custom component from transcript data. `ITranscriptUI` is the full display interface — use it to build a replacement chat panel, a world-space display, or any custom UI that needs complete control over message lifecycle. For querying the full turn history and timeline, see [Transcript History and Queries](/broken/pages/6586bc23ded8d5c72d9a82077d383f6f2099f9a3).
-
-***
-
-### How the Transcript System Works
+## How the transcript system works
 
 The following diagram shows how transcript data flows from the runtime through the controller to your scene UI.
 
@@ -33,11 +26,9 @@ graph TD
 
 `ConvaiManager` auto-discovers all `ITranscriptUI` and `ITranscriptListener` implementations in your scene. You do not need to register them manually for the common case.
 
-***
+## Integration paths
 
-### Choosing an Integration Path
-
-#### ITranscriptListener — Lightweight Callbacks
+### ITranscriptListener — lightweight callbacks
 
 Use `ITranscriptListener` when you need to react to transcript text without building a full custom UI. Examples: feeding transcripts into a scoring system, writing to a log, driving a custom text component, or triggering scenario events based on what the player says.
 
@@ -73,7 +64,7 @@ public interface IMultiUserTranscriptListener : ITranscriptListener
 }
 ```
 
-#### ITranscriptUI — Full Display Control
+### ITranscriptUI — full display control
 
 Use `ITranscriptUI` to build a complete replacement for the built-in chat or subtitle UI — a custom scroll list, a 3D world-space panel, an HTML overlay in WebGL, or any layout the built-in prefabs cannot provide.
 
@@ -110,34 +101,32 @@ public interface ITranscriptUI
 
 **Registration:** Add your implementation as a `MonoBehaviour` to the scene. `ConvaiManager` discovers it automatically. For manual control:
 
-| Method                                                                 | Description                                        |
-| ---------------------------------------------------------------------- | -------------------------------------------------- |
-| `ConvaiManager.ActiveManager.RegisterTranscriptUI(ITranscriptUI ui)`   | Manually register a transcript UI implementation   |
+| Method | Description |
+| --- | --- |
+| `ConvaiManager.ActiveManager.RegisterTranscriptUI(ITranscriptUI ui)` | Manually register a transcript UI implementation |
 | `ConvaiManager.ActiveManager.UnregisterTranscriptUI(ITranscriptUI ui)` | Manually unregister a transcript UI implementation |
 
-***
-
-### Adding the Built-In Chat UI
+## Add the built-in chat UI
 
 The SDK ships `TranscriptUI_Chat.prefab` — a ready-made scrollable chat panel with auto-scroll and sender-colored message bubbles.
 
 {% stepper %}
 {% step %}
-**Add the Prefab to Your Scene**
+### Add the prefab to your scene
 
-Drag `Packages/com.convai.convai-sdk-for-unity/Prefabs/TranscriptUI/TranscriptUI_Chat.prefab` into your scene's Canvas hierarchy.
+Drag `TranscriptUI_Chat.prefab` into your scene's Canvas hierarchy. Find it at `Prefabs/TranscriptUI/TranscriptUI_Chat.prefab` in the <code class="expression">space.vars.sdk_package_id</code> package.
 
 The prefab contains a `ChatTranscriptUI` component that registers itself with `ConvaiManager` on `Awake`.
 {% endstep %}
 
 {% step %}
-**Ensure an EventSystem Exists**
+### Ensure an EventSystem exists
 
 The chat input field requires an `EventSystem` in the scene. If your scene does not have one, add it via **GameObject → UI → Event System**.
 {% endstep %}
 
 {% step %}
-**Run Your Scene**
+### Run your scene
 
 Connect to a character and speak. Character speech appears in one bubble column; your speech appears in the other. The panel auto-scrolls to the latest message as the conversation progresses.
 {% endstep %}
@@ -147,31 +136,25 @@ Connect to a character and speak. Character speech appears in one bubble column;
 The chat UI activates automatically when `ConvaiTranscriptMode.Chat` is the current mode, which is the default. No additional configuration is required for basic setup.
 {% endhint %}
 
-***
-
-### ConvaiTranscriptDisplay — Character-Local Display
+## ConvaiTranscriptDisplay — character-local display
 
 `ConvaiTranscriptDisplay` is a lightweight component for displaying a single character's transcript directly on that character's `GameObject`. It does not participate in the room transcript pipeline and has no awareness of other characters or the player.
 
 **Inspector fields:**
 
-| Field                     | Default | Description                                                      |
-| ------------------------- | ------- | ---------------------------------------------------------------- |
-| `_transcriptText`         | —       | `TMP_Text` reference to render into                              |
-| `_showPartialTranscripts` | `true`  | Update text during partial recognition                           |
-| `_appendMode`             | `false` | Append new transcripts instead of replacing                      |
-| `_clearOnNewFinal`        | `true`  | Clear the buffer before each final transcript (append mode only) |
-| `_maxCharacters`          | `1000`  | Maximum characters kept in append mode. `0` = unlimited          |
+| Field | Default | Description |
+| --- | --- | --- |
+| `_transcriptText` | — | `TMP_Text` reference to render into |
+| `_showPartialTranscripts` | `true` | Update text during partial recognition |
+| `_appendMode` | `false` | Append new transcripts instead of replacing |
+| `_clearOnNewFinal` | `true` | Clear the buffer before each final transcript (append mode only) |
+| `_maxCharacters` | `1000` | Maximum characters kept in append mode. `0` = unlimited |
 
 **Requirement:** Must be on the same `GameObject` as `ConvaiCharacter`. Auto-subscribes to that character's transcript events on `Awake`.
 
-{% hint style="info" %}
-Use `ConvaiTranscriptDisplay` for per-character labels — a floating name tag above a training station, a panel beside a character model. For full conversation history or player transcripts, use the chat prefab or `ITranscriptListener`.
-{% endhint %}
+For per-character labels — a floating name tag above a training station or a panel beside a character model — `ConvaiTranscriptDisplay` is the right choice. For full conversation history or player transcripts, use the chat prefab or `ITranscriptListener`.
 
-***
-
-### Switching the Active Transcript Mode
+## Switch the active transcript mode
 
 Switch transcript modes through the runtime settings service. The change applies immediately — the matching `ITranscriptUI` activates and any previous UI deactivates.
 
@@ -191,11 +174,9 @@ if (ConvaiManager.ActiveManager.TryGetRuntimeSettingsService(out var settings))
 }
 ```
 
-Users can also switch modes through the built-in Settings Panel. See [Settings Panel](/broken/pages/370b1c4aa1c4466f3f070e13b5fd640823500165) for details on what modes the panel exposes at runtime.
+Users can also switch modes through the built-in Settings Panel. See [Settings Panel](settings-panel.md) for details on what modes the panel exposes at runtime.
 
-***
-
-### Clearing the Transcript Display
+## Clear the transcript display
 
 Call `ClearAll()` on any `ITranscriptUI` component to destroy all displayed message bubbles and reset the panel. This clears the **visual display only** — the underlying room turn history in `ConvaiManager.Transcripts` is read-only and is not affected.
 
@@ -226,11 +207,9 @@ FindObjectOfType<ChatTranscriptUI>()?.ClearAll();
 * Post-debrief reset — trainee has reviewed the chat; wipe before the next session begins
 * Scene transition — clear before loading new content so stale messages do not flash in
 
-***
+## Usage examples
 
-### Usage Examples
-
-#### Safety Training — Compliance Scoring with `ITranscriptListener`
+### Safety training — compliance scoring with `ITranscriptListener`
 
 A workplace safety training simulation scores trainee responses by reading final transcripts from the AI instructor:
 
@@ -261,7 +240,7 @@ public class ComplianceScorer : MonoBehaviour, ITranscriptListener
 
 Place on any `GameObject` in the scene. `ConvaiManager` discovers and registers it automatically. At runtime, the scorer evaluates each final player response and records whether the trainee identified the hazard correctly.
 
-#### Museum Kiosk — Per-Character Panel with `ConvaiTranscriptDisplay`
+### Museum kiosk — per-character panel with `ConvaiTranscriptDisplay`
 
 A natural history museum kiosk shows each exhibit character's speech on the physical panel beside their display case:
 
@@ -271,7 +250,7 @@ A natural history museum kiosk shows each exhibit character's speech on the phys
 
 At runtime, each character's speech appears on its dedicated panel as the visitor interacts with it, with no UI overhead from the full chat pipeline.
 
-#### Multi-User Fire Drill — Speaker Attribution with `IMultiUserTranscriptListener`
+### Multi-user fire drill — speaker attribution with `IMultiUserTranscriptListener`
 
 A multi-user fire safety drill tracks which specific trainee spoke and what they said for the post-session report:
 
@@ -308,20 +287,18 @@ public class DrillTranscriptLogger : MonoBehaviour, IMultiUserTranscriptListener
 
 At runtime, every finalized trainee utterance is attributed to the specific trainee by name, producing a per-participant drill transcript for post-session review.
 
-***
-
-### Next Steps
+## Next steps
 
 You have covered the transcript pipeline architecture, both integration paths, the built-in chat prefab, per-character display, mode switching, and display clearing. The next step is configuring which mode renders by default and how each mode looks and behaves.
 
-{% content-ref url="/broken/pages/6586bc23ded8d5c72d9a82077d383f6f2099f9a3" %}
-[Broken link](/broken/pages/6586bc23ded8d5c72d9a82077d383f6f2099f9a3)
+{% content-ref url="transcript-history-and-queries.md" %}
+[Transcript History and Queries](transcript-history-and-queries.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/e7083caf90ffa367ea213594f028e67c244ea8da" %}
-[Broken link](/broken/pages/e7083caf90ffa367ea213594f028e67c244ea8da)
+{% content-ref url="chat-and-subtitle-modes.md" %}
+[Chat and Subtitle Modes](chat-and-subtitle-modes.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/370b1c4aa1c4466f3f070e13b5fd640823500165" %}
-[Broken link](/broken/pages/370b1c4aa1c4466f3f070e13b5fd640823500165)
+{% content-ref url="settings-panel.md" %}
+[Settings Panel](settings-panel.md)
 {% endcontent-ref %}
