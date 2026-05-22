@@ -1,13 +1,11 @@
 ---
+title: Create a lip sync profile
 description: >-
   Create a ConvaiLipSyncProfile asset to define a custom transport format
   identifier when your rig uses a blendshape format not covered by the bundled
   ARKit, MetaHuman, or CC4 Extended profiles.
+last_reviewed: "4.2.0"
 ---
-
-# Creating a Profile
-
-### Define a Custom Transport Format Identifier
 
 A lip sync profile defines the transport format identifier — it tells the SDK which blendshape channel names to expect from Convai. Create a custom profile only when your character uses a blendshape format that Convai streams under a custom ID not covered by the three bundled profiles (`arkit`, `metahuman`, `cc4extended`).
 
@@ -17,13 +15,13 @@ If your character uses standard ARKit, MetaHuman, or CC4 Extended naming, use th
 
 {% stepper %}
 {% step %}
-**Create the Asset**
+### Create the asset
 
 In the Project window, navigate to the folder where you want to store the profile. Right-click and select **Create > Convai > Lip Sync Profile**. Name the asset descriptively — for example, `ConvaiLipSyncProfile_MyRig`.
 {% endstep %}
 
 {% step %}
-**Configure the Fields**
+### Configure the fields
 
 Select the new asset to open it in the Inspector.
 
@@ -39,17 +37,15 @@ Select the new asset to open it in the Inspector.
 {% endstep %}
 
 {% step %}
-**Assign the Profile ID to the Component**
+### Assign the profile ID to the component
 
 Set `ConvaiLipSyncComponent._lockedProfileId` to the **Profile ID** string you defined. The SDK looks up this profile from the registry at runtime.
 {% endstep %}
 {% endstepper %}
 
-You will also need a matching map asset that routes the custom channels to your rig's blendshape names. See [Creating a Custom Map](/broken/pages/dc919bcfc88a4ee7fe5bca42092d28d97ef55b23).
+You will also need a matching map asset that routes the custom channels to your rig's blendshape names.
 
-***
-
-### Usage Example
+## Usage example
 
 **Scenario:** A military training simulation uses a proprietary soldier character rigged with a custom set of 30 facial blendshapes. Convai streams these under the format ID `"militaryrig-v1"`.
 
@@ -63,12 +59,10 @@ You will also need a matching map asset that routes the custom channels to your 
 
 **Expected outcome:** The SDK streams and buffers the correct blendshape channels for this character. Pair with a custom map that routes those channels to the rig's blendshape names.
 
-***
-
-### Next Steps
+## Next steps
 
 After creating the profile, create a map to route its channels to your rig's blendshape names.
 
-{% content-ref url="/broken/pages/dc919bcfc88a4ee7fe5bca42092d28d97ef55b23" %}
-[Broken link](/broken/pages/dc919bcfc88a4ee7fe5bca42092d28d97ef55b23)
+{% content-ref url="creating-a-custom-map.md" %}
+[Create a custom map](creating-a-custom-map.md)
 {% endcontent-ref %}

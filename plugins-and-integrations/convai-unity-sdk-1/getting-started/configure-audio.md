@@ -1,16 +1,14 @@
 ---
+title: Configure audio
 description: >-
   Set the default microphone device and configure ConvaiAudioOutput for
   character voice playback in your scene.
+last_reviewed: "4.2.0"
 ---
-
-# Configure Audio
-
-### Set Up Microphone Input and Character Voice Output
 
 The Convai SDK for Unity manages two audio paths: microphone input from the player, and voice output from the character. This page covers how to configure both, and how to handle platform-specific microphone permissions.
 
-### Character Audio Output
+## Character audio output
 
 `ConvaiAudioOutput` controls how a character's voice plays back in the scene. Add it to the same GameObject as `ConvaiCharacter`. An `AudioSource` on the same GameObject is required.
 
@@ -24,17 +22,13 @@ The Convai SDK for Unity manages two audio paths: microphone input from the play
 | `_minDistance` | `1`     | Distance at which audio is at full volume |
 | `_maxDistance` | `50`    | Distance at which audio falls to zero     |
 
-{% hint style="info" %}
 Disable `_use3DAudio` for non-positional scenarios — for example, a kiosk interface where the character always sounds "present" regardless of where the player stands.
-{% endhint %}
 
-***
-
-### Audio Facade
+## Audio facade
 
 For scripted audio control, use the `ConvaiAudio` facade accessed through `ConvaiManager.Audio`. This is the recommended API for runtime audio management.
 
-#### Microphone Control
+### Microphone control
 
 ```csharp
 // Mute/unmute the local microphone
@@ -47,7 +41,7 @@ bool isMuted = ConvaiManager.ActiveManager.Audio.ToggleMicMuted();
 await ConvaiManager.ActiveManager.Audio.StartListeningAsync();
 ```
 
-#### Per-Character Playback Control
+### Per-character playback control
 
 ```csharp
 string characterId = character.CharacterId;
@@ -65,7 +59,7 @@ bool muted = ConvaiManager.ActiveManager.Audio.IsCharacterMuted(characterId);
 ConvaiManager.ActiveManager.Audio.SetRemoteAudioEnabled(characterId, false);
 ```
 
-#### Audio Events
+### Audio events
 
 ```csharp
 void OnEnable()
@@ -84,39 +78,36 @@ void HandleMicMuteChanged(bool isMuted)
 }
 ```
 
-***
-
-### Microphone Device Selection
+## Microphone device selection
 
 To list available microphone devices and let the player choose one:
 
 ```csharp
-using Convai.SDK.Runtime.Settings;
+using Convai.Runtime.Settings;
 
-// Get the service from the SDK
-var micService = ConvaiManager.ActiveManager.GetService<IMicrophoneDeviceService>();
-
-// List all available devices
-IReadOnlyList<ConvaiMicrophoneDevice> devices = micService.GetAvailableDevices();
-
-foreach (var device in devices)
+// Get the microphone device service from the SDK
+if (ConvaiManager.ActiveManager.TryGetMicrophoneDeviceService(out IMicrophoneDeviceService micService))
 {
-    Debug.Log($"{device.Name} (ID: {device.Id}, Index: {device.Index})");
-}
+    // List all available devices
+    IReadOnlyList<ConvaiMicrophoneDevice> devices = micService.GetAvailableDevices();
 
-// Start listening with a specific device index
-await ConvaiManager.ActiveManager.Audio.StartListeningAsync(microphoneIndex: device.Index);
+    foreach (var device in devices)
+    {
+        Debug.Log($"{device.Name} (ID: {device.Id}, Index: {device.Index})");
+    }
+
+    // Start listening with a specific device index
+    await ConvaiManager.ActiveManager.Audio.StartListeningAsync(microphoneIndex: device.Index);
+}
 ```
 
 {% hint style="warning" %}
 On WebGL, `GetAvailableDevices()` returns an empty list outside the Editor. Microphone access on WebGL goes through the browser's Web Audio API and does not support Unity's native device enumeration.
 {% endhint %}
 
-***
+## Platform-specific setup
 
-### Platform-Specific Setup
-
-#### Android
+### Android
 
 The SDK requests microphone permission at runtime automatically when a recording starts. You must declare the permission in your `AndroidManifest.xml`:
 
@@ -126,11 +117,9 @@ The SDK requests microphone permission at runtime automatically when a recording
 
 If your project does not have a custom manifest, create one or enable **Override Default Manifest** in **Player Settings > Publishing Settings**.
 
-{% hint style="success" %}
 When the SDK requests the permission, Android shows its standard permission dialog. If the player grants it, recording starts automatically. If denied, the SDK logs a warning and the microphone remains inactive.
-{% endhint %}
 
-#### iOS
+### iOS
 
 Add a microphone usage description to your `Info.plist`. In Unity, set this via **Player Settings > iOS > Other Settings > Microphone Usage Description**:
 
@@ -144,7 +133,7 @@ The SDK requests authorization automatically using Unity's `Application.RequestU
 Submitting to the App Store without a microphone usage description will cause App Store review rejection. Set this value before building for iOS distribution.
 {% endhint %}
 
-#### WebGL
+### WebGL
 
 Browsers block audio playback and microphone access until the user has interacted with the page. The SDK provides two methods depending on your use case:
 
@@ -166,15 +155,11 @@ public void OnStartButtonClicked()
 }
 ```
 
-{% hint style="warning" %}
 If you skip this step on WebGL, the character's voice will not play even though Convai sends audio data. `RequiresUserGesture` returns `true` only on WebGL.
-{% endhint %}
 
-***
+## Usage examples
 
-### Usage Examples
-
-#### Example 1: Mute Toggle UI Button
+### Example 1: Mute toggle UI button
 
 **Scenario:** A corporate onboarding simulation includes a mic mute button in the corner of the screen.
 
@@ -205,9 +190,7 @@ public class MuteButtonController : MonoBehaviour
 
 **Expected outcome:** The toggle stays in sync with the actual microphone state. Pressing it mutes or unmutes the mic. External changes (for example, from push-to-talk logic) also update the toggle automatically.
 
-***
-
-#### Example 2: Per-Character Volume in a Multi-Instructor Scene
+### Example 2: Per-character volume in a multi-instructor scene
 
 **Scenario:** A language learning simulation has two AI instructors — a main teacher and a conversation partner. Players can independently adjust their volumes.
 
@@ -228,12 +211,10 @@ public class CharacterVolumeController : MonoBehaviour
 
 **Expected outcome:** Each character's volume slider controls only that character's `AudioSource` volume. The two characters can be heard at different levels independently.
 
-***
-
-### Next Steps
+## Next steps
 
 With audio configured, add a transcript UI to display conversation text.
 
-{% content-ref url="/broken/pages/7731df7250f79752c3d9e2e6c048ad321259739a" %}
-[Broken link](/broken/pages/7731df7250f79752c3d9e2e6c048ad321259739a)
+{% content-ref url="add-chat-ui.md" %}
+[Add chat UI](add-chat-ui.md)
 {% endcontent-ref %}

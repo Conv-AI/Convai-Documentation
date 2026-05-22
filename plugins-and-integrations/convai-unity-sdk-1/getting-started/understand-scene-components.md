@@ -1,16 +1,14 @@
 ---
+title: Scene components reference
 description: >-
   Learn the role of ConvaiManager, ConvaiRoomManager, ConvaiCharacter, and
   ConvaiPlayer, and how they depend on each other.
+last_reviewed: "4.2.0"
 ---
-
-# Understand Scene Components
-
-### How ConvaiManager, ConvaiCharacter, and ConvaiPlayer Work Together
 
 Every Convai-powered scene is built from four core components. Understanding what each one does and how they relate to each other makes building and debugging your setup straightforward.
 
-### Component Overview
+## Component overview
 
 The diagram below shows how the components depend on each other at runtime.
 
@@ -25,9 +23,7 @@ graph TD
 
 `ConvaiManager` is the root. It bootstraps the SDK, manages the room connection through `ConvaiRoomManager`, and owns references to all `ConvaiCharacter` and `ConvaiPlayer` instances in the scene.
 
-***
-
-### ConvaiManager
+## ConvaiManager
 
 `ConvaiManager` is the SDK's entry point. It must be present in every scene that uses Convai. It initializes all internal services and injects dependencies into the other components automatically.
 
@@ -51,9 +47,7 @@ graph TD
 | `Player`                      | `ConvaiPlayer`                   | The player component in this scene     |
 | `ActiveConversationCharacter` | `ConvaiCharacter`                | Currently active conversation target   |
 
-***
-
-### ConvaiRoomManager
+## ConvaiRoomManager
 
 `ConvaiRoomManager` manages the connection lifecycle between your scene and Convai. It handles connecting, disconnecting, and reconnecting the audio session. It lives on the same GameObject as `ConvaiManager`.
 
@@ -74,15 +68,13 @@ graph TD
 | `_autoMicStartDelaySeconds` | `0.5`       | Seconds to wait after connection before opening the microphone   |
 | `_roomRejoinTtlSeconds`     | `60`        | Seconds after disconnect during which the session can be resumed |
 
-Turn-taking settings are also configured here. See [Configure Conversation Input Mode](/broken/pages/fcf661e5bcce0c12c6a2c096cef774a8a26e8e4a).
+Turn-taking settings are also configured here. See [Configure conversation input mode](configure-conversation-input-mode.md).
 
-***
-
-### ConvaiCharacter
+## ConvaiCharacter
 
 `ConvaiCharacter` represents one AI character in your scene. Each NPC or virtual instructor that talks to players needs its own `ConvaiCharacter` component. Multiple characters are fully supported — each maintains an independent session.
 
-**The Character ID field is required.** Get this value from your character's profile on the [Convai dashboard](https://convai.com/).
+**The Character ID field is required.** Get this value from your character's profile on the [Convai dashboard](<code class="expression">space.vars.dashboard_url</code>).
 
 **Inspector fields:**
 
@@ -108,9 +100,7 @@ Turn-taking settings are also configured here. See [Configure Conversation Input
 
 **Component dependencies:** `ConvaiAudioOutput` (handles audio playback for this character) must be on the same GameObject. `ConvaiAudioOutput` requires an `AudioSource` on the same GameObject.
 
-***
-
-### ConvaiPlayer
+## ConvaiPlayer
 
 `ConvaiPlayer` identifies the user in the conversation. It provides the player's display name and color to the transcript UI and lets Convai attribute player speech to the correct participant.
 
@@ -138,9 +128,7 @@ GetComponent<ConvaiPlayer>().SetRuntimeDisplayName("Dr. Reyes");
 GetComponent<ConvaiPlayer>().Configure("Dr. Reyes", "user-123");
 ```
 
-***
-
-### Optional Components
+## Optional components
 
 ### ConvaiAudioOutput
 
@@ -158,12 +146,10 @@ Handles audio playback for a single character. Add it to the same GameObject as 
 
 An optional ScriptableObject (**Assets > Create > Convai > Scene Config**) that lets you define character IDs, prefabs, and auto-connect behavior in a reusable asset rather than inline in the Inspector. Useful for managing multiple characters across scenes. See Advanced Topics for full details.
 
-***
-
-### Next Steps
+## Next steps
 
 Now that you understand the components, build your own scene from scratch.
 
-{% content-ref url="/broken/pages/8d7b0e98edc05d35cfef8d4bbb586a14fae7cedf" %}
-[Broken link](/broken/pages/8d7b0e98edc05d35cfef8d4bbb586a14fae7cedf)
+{% content-ref url="build-a-custom-scene.md" %}
+[Build a custom scene](build-a-custom-scene.md)
 {% endcontent-ref %}

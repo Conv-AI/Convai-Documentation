@@ -1,28 +1,26 @@
 ---
+title: Prerequisites
 description: >-
   System requirements, Unity version, required packages, and account
   prerequisites for the Convai Unity SDK.
+last_reviewed: "4.2.0"
 ---
-
-# Prerequisites
-
-### What You Need Before Installing
 
 Before installing the Convai Unity SDK, confirm that your environment meets the requirements below. Missing any of these will cause installation errors or runtime failures that are harder to diagnose after the fact.
 
-### System Requirements
+## System requirements
 
 | Requirement         | Minimum                             |
 | ------------------- | ----------------------------------- |
-| Unity version       | **2023.1** or later                 |
+| Unity version       | **<code class="expression">space.vars.unity_min_version</code>** |
 | Scripting backend   | Mono or IL2CPP                      |
 | Internet connection | Required at editor time and runtime |
 
 {% hint style="warning" %}
-The Convai Unity SDK does not support Unity versions earlier than 2023.1. If your project is on an older LTS release, upgrade to Unity 2023.1 before proceeding.
+The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code>. If your project is on an older LTS release, upgrade before proceeding.
 {% endhint %}
 
-### Required Unity Packages
+## Required Unity packages
 
 The SDK depends on three Unity packages. Both installation methods (Package Manager and Asset Store) install these automatically — you do not need to add them manually unless you encounter a version conflict.
 
@@ -32,11 +30,9 @@ The SDK depends on three Unity packages. Both installation methods (Package Mana
 | `com.unity.ugui`                  | 2.0.0           |
 | `com.unity.inputsystem`           | 1.18.0          |
 
-{% hint style="warning" %}
 If your project already pins `com.unity.inputsystem` or `com.unity.ugui` to an older version in `Packages/manifest.json`, the automatic install will fail silently or produce a version conflict. Remove or update the existing version pins before installing the SDK.
-{% endhint %}
 
-### Supported Render Pipelines
+## Supported render pipelines
 
 | Render Pipeline                        | Supported |
 | -------------------------------------- | --------- |
@@ -44,13 +40,13 @@ If your project already pins `com.unity.inputsystem` or `com.unity.ugui` to an o
 | Universal Render Pipeline (URP)        | ✓         |
 | High Definition Render Pipeline (HDRP) | ✓         |
 
-For detailed platform and render pipeline compatibility, see [Compatibility & Requirements](/broken/pages/4ec2ea91bc76eb06a741b5611ee104a81d987f97).
+For detailed platform and render pipeline compatibility, see [Compatibility & Requirements](../compatibility-and-requirements/README.md).
 
-### Account Requirements
+## Account requirements
 
 You need an active Convai account and an API key to connect your project to Convai.
 
-1. Create an account at [convai.com](https://convai.com/) if you do not have one.
+1. Create an account at [convai.com](<code class="expression">space.vars.dashboard_url</code>) if you do not have one.
 2. Retrieve your API key from the **API Keys** section of the Convai dashboard.
 3. Create at least one character in the Convai dashboard and note its **Character ID** — you will need it during scene setup.
 
@@ -58,10 +54,10 @@ You need an active Convai account and an API key to connect your project to Conv
 Your API key is a project-level credential stored in `Assets/Resources/ConvaiSettings.asset`. Do not commit this file to a public repository.
 {% endhint %}
 
-### Next Steps
+## Next steps
 
 Once your environment meets all requirements above, install the SDK.
 
-{% content-ref url="/broken/pages/104ad3d06ff27dd6b6e7d900bb2a575c7434422c" %}
-[Broken link](/broken/pages/104ad3d06ff27dd6b6e7d900bb2a575c7434422c)
+{% content-ref url="installation.md" %}
+[Installation](installation.md)
 {% endcontent-ref %}

@@ -1,25 +1,21 @@
 ---
+title: Profiles and mappings
 description: >-
   Reference for the two ScriptableObject types — profiles and maps — that
   control how Convai blendshape data reaches your character's
   SkinnedMeshRenderer.
+last_reviewed: "4.2.0"
 ---
-
-# Profile & Mappings
-
-### How Profiles and Maps Control Blendshape Data Flow
 
 The lip sync system uses two ScriptableObject types to describe how blendshape data flows from Convai to your character's mesh: **profiles** and **maps**. Most setups work with the bundled assets — create custom ones only when your rig uses non-standard blendshape names or a transport format not covered by the built-in profiles.
 
-***
-
-### What Is a Profile?
+## What is a profile?
 
 A **profile** defines the transport format — it tells the SDK which blendshape channel names to expect in the data stream from Convai. The profile's ID (e.g., `arkit`, `metahuman`, `cc4extended`) is what you enter in `ConvaiLipSyncComponent._lockedProfileId`.
 
 **Three profiles are bundled:**
 
-| Profile Asset                      | ID            | Format                            |
+| Profile asset                      | ID            | Format                            |
 | ---------------------------------- | ------------- | --------------------------------- |
 | `ConvaiLipSyncProfile_ARKit`       | `arkit`       | 61 standard ARKit channels        |
 | `ConvaiLipSyncProfile_MetaHuman`   | `metahuman`   | 275+ MetaHuman CTRL expressions   |
@@ -27,15 +23,13 @@ A **profile** defines the transport format — it tells the SDK which blendshape
 
 Create a custom profile only if your character uses a proprietary blendshape format that Convai streams under a custom ID. In practice, this is rare — most pipelines use one of the three bundled formats.
 
-***
-
-### What Is a Map?
+## What is a map?
 
 A **map** routes the source blendshape channels (from the profile) to the actual blendshape names on your character's `SkinnedMeshRenderer`. It also lets you apply per-channel multipliers, offsets, and clamps.
 
-**Five maps are bundled:**
+**Four maps are bundled:**
 
-| Map Asset                                    | Routes                                  |
+| Map asset                                    | Routes                                  |
 | -------------------------------------------- | --------------------------------------- |
 | `ConvaiLipSyncDefaultMap_ARKit`              | ARKit → ARKit (passthrough)             |
 | `ConvaiLipSyncDefaultMap_MetaHuman`          | MetaHuman → MetaHuman (passthrough)     |
@@ -46,9 +40,7 @@ When `ConvaiLipSyncComponent._mapping` is left empty, the SDK selects the matchi
 
 Create a custom map when your character's blendshape names differ from the expected names, or when you need to adjust weight multipliers to match your rig's calibration.
 
-***
-
-### When to Create Custom Assets
+## When to create custom assets
 
 | Situation                                               | Create                                                 |
 | ------------------------------------------------------- | ------------------------------------------------------ |
@@ -57,4 +49,4 @@ Create a custom map when your character's blendshape names differ from the expec
 | You receive an ARKit stream but your rig uses CC4 names | Use the bundled `ARKitToCC4Extended` map               |
 | Your character uses a completely custom blendshape set  | Custom **profile** + custom **map**                    |
 
-<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Creating a Profile</strong><br>Define a new transport format identifier for proprietary blendshape sets.</td><td><a href="/broken/pages/f040fa847ce67f5f5579bdc0cd5d8dd807d3642e">Broken link</a></td></tr><tr><td><strong>Creating a Custom Map</strong><br>Route stream channels to your rig's actual blendshape names with per-channel tuning.</td><td><a href="/broken/pages/92b390dcb7a1b99dd749315821ed830652400bc4">Broken link</a></td></tr></tbody></table>
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Creating a profile</strong><br>Define a new transport format identifier for proprietary blendshape sets.</td><td><a href="creating-a-profile.md">creating-a-profile.md</a></td></tr><tr><td><strong>Creating a custom map</strong><br>Route stream channels to your rig's actual blendshape names with per-channel tuning.</td><td><a href="creating-a-custom-map.md">creating-a-custom-map.md</a></td></tr></tbody></table>

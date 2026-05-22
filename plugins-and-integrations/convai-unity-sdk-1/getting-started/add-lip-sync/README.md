@@ -1,16 +1,14 @@
 ---
+title: Add lip sync
 description: >-
   Connect Convai audio output to your character's facial blendshapes to
   synchronize mouth movement with speech.
+last_reviewed: "4.2.0"
 ---
-
-# Add Lip Sync
-
-### Synchronize Your Character's Mouth to Convai Audio
 
 The Convai SDK for Unity includes a real-time lip sync system that drives `SkinnedMeshRenderer` blendshapes in sync with the character's voice audio. It supports three industry-standard blendshape formats and handles playback buffering, smoothing, and fade-out automatically.
 
-### How It Works
+## How it works
 
 When Convai sends voice audio, it also streams a sequence of blendshape frames in the character's transport format (ARKit, MetaHuman, or CC4 Extended). The SDK buffers and interpolates these frames, applies optional smoothing, and writes the result to your character's `SkinnedMeshRenderer` every frame.
 
@@ -22,19 +20,17 @@ graph LR
     D --> E[SkinnedMeshRenderer blendshapes]
 ```
 
-***
-
-### Quick Setup
+## Quick setup
 
 {% stepper %}
 {% step %}
-**Add the Component**
+### Add the component
 
 Add `ConvaiLipSyncComponent` to the same GameObject as your `ConvaiCharacter` (or to any child GameObject).
 {% endstep %}
 
 {% step %}
-**Set the Profile ID**
+### Set the profile ID
 
 In the Inspector, set **Locked Profile ID** to the transport format your character uses:
 
@@ -44,45 +40,43 @@ In the Inspector, set **Locked Profile ID** to the transport format your charact
 {% endstep %}
 
 {% step %}
-**Assign Target Meshes**
+### Assign target meshes
 
 In the **Target Meshes** list, add all `SkinnedMeshRenderer` components that have facial blendshapes.
 {% endstep %}
 
 {% step %}
-**Enter Play Mode**
+### Enter Play Mode
 
 Leave **Mapping** empty — the SDK auto-selects a matching bundled map for the chosen profile. Enter Play Mode and speak to the character.
 
 The character's mouth moves in sync with its voice output.
 
 {% hint style="warning" %}
-If the mouth does not move, confirm that your `SkinnedMeshRenderer` blendshape names match the expected naming convention for the chosen profile. ARKit uses camelCase names (e.g., `jawOpen`, `mouthSmileLeft`). MetaHuman uses the `CTRL_expressions_` prefix. Use a custom map if your rig uses different names — see [Profiles and Mappings](/broken/pages/a11cf9562beb5ec94dc413e6691640d8fbcc0bab).
+If the mouth does not move, confirm that your `SkinnedMeshRenderer` blendshape names match the expected naming convention for the chosen profile. ARKit uses camelCase names (e.g., `jawOpen`, `mouthSmileLeft`). MetaHuman uses the `CTRL_expressions_` prefix. Use a custom map if your rig uses different names — see [Profiles and mappings](profile-and-mappings/README.md).
 {% endhint %}
 {% endstep %}
 {% endstepper %}
 
-***
-
-### Bundled Profiles
+## Bundled profiles
 
 Choose the profile that matches the blendshape format your character was rigged with.
 
-| Profile      | Locked Profile ID | Blendshapes | Typical Character Source                  |
+| Profile      | Locked Profile ID | Blendshapes | Typical character source                  |
 | ------------ | ----------------- | ----------- | ----------------------------------------- |
 | ARKit        | `arkit`           | 61          | Apple-rigged characters, some custom rigs |
 | MetaHuman    | `metahuman`       | 275+        | Unreal MetaHuman exported to Unity        |
 | CC4 Extended | `cc4extended`     | 240+        | Reallusion Character Creator 4 characters |
 
-{% hint style="info" %}
-If your character was rigged with non-standard blendshape names, create a custom map to route the SDK's output channels to your rig's actual names. See [Profiles and Mappings](/broken/pages/a11cf9562beb5ec94dc413e6691640d8fbcc0bab).
-{% endhint %}
+If your character was rigged with non-standard blendshape names, create a custom map to route the SDK's output channels to your rig's actual names.
 
-***
+{% content-ref url="profile-and-mappings/README.md" %}
+[Profiles and mappings](profile-and-mappings/README.md)
+{% endcontent-ref %}
 
-### Playback Settings
+## Playback settings
 
-**Core Setup:**
+**Core setup:**
 
 | Field              | Default        | Description                                                            |
 | ------------------ | -------------- | ---------------------------------------------------------------------- |
@@ -90,7 +84,7 @@ If your character was rigged with non-standard blendshape names, create a custom
 | `_mapping`         | _(none)_       | Optional custom mapping asset (leave empty to use bundled auto-map)    |
 | `_targetMeshes`    | _(empty list)_ | `SkinnedMeshRenderer` components to write blendshapes to               |
 
-**Playback & Behavior:**
+**Playback & behavior:**
 
 | Field              | Default | Range    | Description                                                    |
 | ------------------ | ------- | -------- | -------------------------------------------------------------- |
@@ -98,7 +92,7 @@ If your character was rigged with non-standard blendshape names, create a custom
 | `_fadeOutDuration` | `0.2`   | 0.05–2.0 | Seconds to fade all blendshapes to 0 after audio ends          |
 | `_timeOffset`      | `0.0`   | -0.5–0.5 | Shift playback timing relative to audio (negative = earlier)   |
 
-**Streaming & Latency:**
+**Streaming & latency:**
 
 | Field                       | Default    | Range    | Description                                          |
 | --------------------------- | ---------- | -------- | ---------------------------------------------------- |
@@ -106,20 +100,18 @@ If your character was rigged with non-standard blendshape names, create a custom
 | `_maxBufferedSeconds`       | `3.0`      | 1–10     | Ring buffer capacity in seconds                      |
 | `_minResumeHeadroomSeconds` | `0.12`     | 0.05–0.3 | Buffer refill threshold after starvation             |
 
-**Latency Mode Options:**
+**Latency mode options:**
 
-| Mode              | Use Case                                                         |
+| Mode              | Use case                                                         |
 | ----------------- | ---------------------------------------------------------------- |
 | `Balanced`        | Default. Recommended for most deployments                        |
 | `UltraLowLatency` | Minimal delay; susceptible to starvation on unstable connections |
 | `NetworkSafe`     | High buffering; best for unreliable or high-latency networks     |
 | `Custom`          | Unlocks manual control over buffer fields above                  |
 
-***
+## Usage examples
 
-### Usage Examples
-
-#### Example 1: ARKit Character
+### Example 1: ARKit character
 
 **Scenario:** A corporate training simulation uses a character rigged with Apple ARKit blendshapes.
 
@@ -132,9 +124,7 @@ If your character was rigged with non-standard blendshape names, create a custom
 
 **Expected outcome:** The avatar's mouth, lips, and jaw animate in sync with the character's voice during conversation. Blendshapes return to neutral smoothly after each response ends (`_fadeOutDuration` = 0.2s default).
 
-***
-
-#### Example 2: MetaHuman Character
+### Example 2: MetaHuman character
 
 **Scenario:** A high-fidelity medical simulation uses an Unreal MetaHuman character exported to Unity.
 
@@ -148,22 +138,10 @@ If your character was rigged with non-standard blendshape names, create a custom
 
 **Expected outcome:** All facial regions animate together — lips, jaw, cheeks, and tongue shapes — producing highly realistic mouth movement. Smoothing reduces per-frame jitter visible on high-resolution meshes.
 
-***
-
-### Profiles and Mappings
-
-For cases where bundled profiles and auto-maps do not cover your rig, create custom assets.
-
-{% content-ref url="/broken/pages/a11cf9562beb5ec94dc413e6691640d8fbcc0bab" %}
-[Broken link](/broken/pages/a11cf9562beb5ec94dc413e6691640d8fbcc0bab)
-{% endcontent-ref %}
-
-***
-
-### Next Steps
+## Next steps
 
 After lip sync is configured, validate your complete setup.
 
-{% content-ref url="/broken/pages/67514c0f1b44e879dcc78060744e45eae64b6522" %}
-[Broken link](/broken/pages/67514c0f1b44e879dcc78060744e45eae64b6522)
+{% content-ref url="../validate-your-setup.md" %}
+[Validate your setup](../validate-your-setup.md)
 {% endcontent-ref %}

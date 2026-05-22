@@ -1,16 +1,14 @@
 ---
+title: Build a custom scene
 description: >-
   Add required Convai components to a new Unity scene using the Setup Required
   Components command and configure your first character.
+last_reviewed: "4.2.0"
 ---
-
-# Build a Custom Scene
-
-### Set Up a Convai Scene from Scratch
 
 This page walks you through setting up a new scene with a Convai AI character from scratch. By the end, your scene will have the minimum required components for a character to receive voice input and respond.
 
-### Minimum Required Hierarchy
+## Minimum required hierarchy
 
 Every working Convai scene needs these three things:
 
@@ -22,29 +20,25 @@ Every working Convai scene needs these three things:
 
 The setup wizard creates the first and third automatically. You add the NPC components yourself.
 
-***
-
 {% stepper %}
 {% step %}
-**Add the Required Manager Components**
+### Add the required manager components
 
 In the Unity Editor menu bar, select **GameObject > Convai > Setup Required Components**.
 
 Unity creates a **ConvaiManager** GameObject with `ConvaiManager` and `ConvaiRoomManager` attached, and a **ConvaiPlayer** GameObject with `ConvaiPlayer` attached. Both appear in the Hierarchy.
 
-{% hint style="info" %}
 `ConvaiRoomManager` always lives on the same GameObject as `ConvaiManager`. Do not move it to a separate GameObject.
-{% endhint %}
 {% endstep %}
 
 {% step %}
-**Add ConvaiCharacter to Your NPC**
+### Add ConvaiCharacter to your NPC
 
 In the Hierarchy, select the NPC GameObject you want to make conversational. In the Inspector, click **Add Component** and add `ConvaiCharacter`.
 {% endstep %}
 
 {% step %}
-**Add AudioSource and ConvaiAudioOutput**
+### Add AudioSource and ConvaiAudioOutput
 
 On the same NPC GameObject, add `AudioSource`, then add `ConvaiAudioOutput`.
 
@@ -52,9 +46,9 @@ All three components — `ConvaiCharacter`, `ConvaiAudioOutput`, and `AudioSourc
 {% endstep %}
 
 {% step %}
-**Set the Character ID**
+### Set the Character ID
 
-In the `ConvaiCharacter` component, set the **Character ID** field to the ID of your character from the [Convai dashboard](https://convai.com/).
+In the `ConvaiCharacter` component, set the **Character ID** field to the ID of your character from the [Convai dashboard](<code class="expression">space.vars.dashboard_url</code>).
 
 {% hint style="warning" %}
 The Character ID field is required. If it is empty, the character cannot connect to Convai and the Scene Validator will report an error.
@@ -62,7 +56,7 @@ The Character ID field is required. If it is empty, the character cannot connect
 {% endstep %}
 
 {% step %}
-**Validate the Scene**
+### Validate the scene
 
 In the menu bar, select **GameObject > Convai > Validate Scene Setup**.
 
@@ -87,22 +81,26 @@ When the validator reports no errors, the scene is ready for Play Mode.
 {% endstep %}
 
 {% step %}
-**Enter Play Mode**
+### Enter Play Mode
 
 Press **Play**. The Unity Console logs:
 
 * `[ConvaiRuntime] Started successfully` — SDK initialized
-* `[ConvaiRoomManager] session-connected` — room connection active
+* `[RoomConnectionRuntimeAdapter] Character <character-id> connected successfully (mode=create).` — character connected to Convai
 
 Speak into your microphone. The character responds within a few seconds.
 {% endstep %}
 {% endstepper %}
 
-***
+{% hint style="warning" %}
+**Screenshot required before publishing:** Capture the Scene Hierarchy after running **GameObject > Convai > Setup Required Components**. The image must show both the `ConvaiManager` GameObject (with `ConvaiManager` and `ConvaiRoomManager` components) and the `ConvaiPlayer` GameObject. SDK <code class="expression">space.vars.unity_sdk_version</code>.
+{% endhint %}
 
-### Usage Examples
+<figure><img src="../../../.gitbook/assets/TODO-build-scene-hierarchy-after-setup.png" alt="Unity Hierarchy showing ConvaiManager and ConvaiPlayer GameObjects created by the Setup Required Components command"><figcaption><p>TODO: Replace with screenshot of the Hierarchy after running Setup Required Components.</p></figcaption></figure>
 
-### Example 1: Safety Training Simulation
+## Usage examples
+
+### Example 1: Safety training simulation
 
 **Scenario:** An industrial safety trainer NPC responds to trainee questions about equipment procedures.
 
@@ -115,9 +113,7 @@ Speak into your microphone. The character responds within a few seconds.
 
 **Expected outcome:** Trainees speak to the NPC and receive voice responses about safety procedures. The character name appears in the transcript UI.
 
-***
-
-### Example 2: Multiple Characters in One Scene
+### Example 2: Multiple characters in one scene
 
 **Scenario:** A medical training simulation with two characters — a supervising doctor and a nurse.
 
@@ -129,16 +125,12 @@ Speak into your microphone. The character responds within a few seconds.
 
 **Expected outcome:** Both characters are discovered and registered automatically. Conversation switches between them based on which character the player addresses.
 
-{% hint style="info" %}
 Each character maintains an independent session. Character A and Character B do not share context unless your Convai character configuration explicitly links them.
-{% endhint %}
 
-***
-
-### Next Steps
+## Next steps
 
 With your scene set up and validated, configure how the player speaks to the character.
 
-{% content-ref url="/broken/pages/fcf661e5bcce0c12c6a2c096cef774a8a26e8e4a" %}
-[Broken link](/broken/pages/fcf661e5bcce0c12c6a2c096cef774a8a26e8e4a)
+{% content-ref url="configure-conversation-input-mode.md" %}
+[Configure conversation input mode](configure-conversation-input-mode.md)
 {% endcontent-ref %}

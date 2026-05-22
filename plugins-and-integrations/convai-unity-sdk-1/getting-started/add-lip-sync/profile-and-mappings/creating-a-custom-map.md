@@ -1,29 +1,27 @@
 ---
+title: Create a custom lip sync map
 description: >-
   Create a ConvaiLipSyncMapAsset to route stream blendshape channels to your
   character's actual SkinnedMeshRenderer blendshape names, with per-channel
   multiplier and clamp tuning.
+last_reviewed: "4.2.0"
 ---
-
-# Creating a Custom Map
-
-### Route Stream Channels to Your Rig's Blendshapes
 
 A lip sync map routes source blendshape channels (from the transport stream) to the actual blendshape names on your character's `SkinnedMeshRenderer`. Create a custom map when your rig uses different blendshape names than the bundled passthrough maps expect, or when you need to tune weights for your specific character.
 
 {% stepper %}
 {% step %}
-**Create the Asset**
+### Create the asset
 
 In the Project window, navigate to the folder where you want to store the map. Right-click and select **Create > Convai > Lip Sync Map**. Name the asset descriptively — for example, `ConvaiLipSyncMap_MyRig_FromARKit`.
 {% endstep %}
 
 {% step %}
-**Configure Top-Level Fields**
+### Configure top-level fields
 
 Select the new asset to open it in the Inspector.
 
-**Top-Level Fields:**
+**Top-level fields:**
 
 | Field                          | Default   | Description                                                                             |
 | ------------------------------ | --------- | --------------------------------------------------------------------------------------- |
@@ -33,11 +31,11 @@ Select the new asset to open it in the Inspector.
 | **Global Offset**              | `0.0`     | Offset added to all output weights (-1–1)                                               |
 | **Allow Unmapped Passthrough** | `true`    | Channels with no explicit mapping entry are written using their source name directly    |
 
-**Mapping Entries:**
+**Mapping entries:**
 
 Click **+** in the **Mappings** list to add a new entry. Each entry maps one source channel to one or more target blendshape names.
 
-| Entry Field                 | Default        | Description                                                               |
+| Entry field                 | Default        | Description                                                               |
 | --------------------------- | -------------- | ------------------------------------------------------------------------- |
 | **Source Blendshape**       | _(empty)_      | Name of the channel as it arrives from Convai (e.g., `jawOpen`)           |
 | **Target Names**            | _(empty list)_ | Names of the blendshapes on your `SkinnedMeshRenderer` to drive           |
@@ -56,7 +54,7 @@ Click **+** in the **Mappings** list to add a new entry. Each entry maps one sou
 {% endstep %}
 
 {% step %}
-**Assign the Map to the Component**
+### Assign the map to the component
 
 In the `ConvaiLipSyncComponent` Inspector, drag your new map asset into the **Mapping** field.
 
@@ -64,11 +62,9 @@ Enter Play Mode and speak to the character. All mapped blendshapes animate. Chec
 {% endstep %}
 {% endstepper %}
 
-***
+## Usage examples
 
-### Usage Examples
-
-#### Example 1: ARKit Stream to a Custom Rig
+### Example 1: ARKit stream to a custom rig
 
 **Scenario:** A simulation character was rigged by an artist who used snake\_case names (`jaw_open`, `mouth_smile_left`) instead of the ARKit standard camelCase names (`jawOpen`, `mouthSmileLeft`).
 
@@ -79,7 +75,7 @@ Enter Play Mode and speak to the character. All mapped blendshapes animate. Chec
 * Allow Unmapped Passthrough: `false` (all names differ)
 * Add entries for each blendshape:
 
-| Source Blendshape                    | Target Names        |
+| Source blendshape                    | Target names        |
 | ------------------------------------ | ------------------- |
 | `jawOpen`                            | `jaw_open`          |
 | `mouthSmileLeft`                     | `mouth_smile_left`  |
@@ -88,9 +84,7 @@ Enter Play Mode and speak to the character. All mapped blendshapes animate. Chec
 
 **Expected outcome:** The character's mouth animates correctly despite using different naming conventions than the ARKit standard.
 
-***
-
-#### Example 2: Reducing Jaw Movement Intensity
+### Example 2: Reducing jaw movement intensity
 
 **Scenario:** An AI receptionist character's jaw opens too wide during speech, which looks unnatural.
 
@@ -102,12 +96,10 @@ Enter Play Mode and speak to the character. All mapped blendshapes animate. Chec
 
 **Expected outcome:** The character's jaw opens only 60–70% as much as the raw stream value, resulting in more restrained, naturalistic mouth movement.
 
-***
-
-### Next Steps
+## Next steps
 
 With lip sync configured, validate your complete scene setup.
 
-{% content-ref url="/broken/pages/aa73f8fe7b06d68723814824592577bd33583185" %}
-[Broken link](/broken/pages/aa73f8fe7b06d68723814824592577bd33583185)
+{% content-ref url="../../validate-your-setup.md" %}
+[Validate your setup](../../validate-your-setup.md)
 {% endcontent-ref %}

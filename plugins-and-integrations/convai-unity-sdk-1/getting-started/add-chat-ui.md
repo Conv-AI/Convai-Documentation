@@ -1,16 +1,14 @@
 ---
+title: Add chat UI
 description: >-
   Add a transcript UI component to display conversation text on screen during
   character interactions.
+last_reviewed: "4.2.0"
 ---
-
-# Add Chat UI
-
-### Display Conversation Transcripts in Your Scene
 
 The Convai SDK for Unity includes a ready-made transcript UI prefab that displays conversation text in real time. Drop the prefab into a Canvas, assign your references, and the UI connects to the SDK automatically.
 
-### Transcript Display Modes
+## Transcript display modes
 
 The SDK supports three presentation modes for conversation text.
 
@@ -20,13 +18,11 @@ The SDK supports three presentation modes for conversation text.
 | **Subtitle**       | `"Subtitle"`       | Single text line at the bottom of the screen, replaced each turn            |
 | **QuestionAnswer** | `"QuestionAnswer"` | Split display — question above, answer below                                |
 
-***
-
-### Add the Chat UI Prefab
+## Add the chat UI prefab
 
 {% stepper %}
 {% step %}
-**Locate the Prefab**
+### Locate the prefab
 
 In the Project window, navigate to:
 
@@ -36,13 +32,13 @@ Packages/Convai SDK for Unity/Prefabs/TranscriptUI/TranscriptUI_Chat.prefab
 {% endstep %}
 
 {% step %}
-**Add a Canvas**
+### Add a Canvas
 
 If your scene does not have a Canvas, create one via **GameObject > UI > Canvas**. Unity also adds an **EventSystem** automatically — verify it exists, as the chat input field requires it.
 {% endstep %}
 
 {% step %}
-**Drag the Prefab into the Canvas**
+### Drag the prefab into the Canvas
 
 Drag `TranscriptUI_Chat.prefab` onto the **Canvas** in the Hierarchy.
 
@@ -54,9 +50,7 @@ If no `ConvaiManager` is found at startup, the Console logs: `[ChatTranscriptUI]
 {% endstep %}
 {% endstepper %}
 
-***
-
-### ChatTranscriptUI Inspector Fields
+## ChatTranscriptUI Inspector fields
 
 If you need to customize the layout, select the prefab instance and inspect the `ChatTranscriptUI` component.
 
@@ -80,9 +74,7 @@ If you need to customize the layout, select the prefab instance and inspect the 
 If `chatContainer` is not assigned, messages will not appear and the Console logs: `[ChatTranscriptUI] chatContainer is not assigned - messages will not display`. The bundled prefab has all references pre-wired.
 {% endhint %}
 
-***
-
-### Per-Character Subtitle Display
+## Per-character subtitle display
 
 For per-character subtitle text (not scrolling chat), use `ConvaiTranscriptDisplay` instead. Add it to any GameObject with a `TextMeshPro` component and assign the character whose speech it should show.
 
@@ -96,11 +88,9 @@ For per-character subtitle text (not scrolling chat), use `ConvaiTranscriptDispl
 | `_clearOnNewFinal`        | `true`       | Clear buffered text when a new final transcript arrives  |
 | `_maxCharacters`          | `1000`       | Maximum characters stored in append mode (0 = unlimited) |
 
-***
+## Usage examples
 
-### Usage Examples
-
-#### Example 1: Full-Screen Chat Overlay in a Corporate Training Simulation
+### Example 1: Full-screen chat overlay in a corporate training simulation
 
 **Scenario:** A corporate onboarding experience displays a full-screen chat history so trainees can review everything the AI mentor said.
 
@@ -111,9 +101,7 @@ For per-character subtitle text (not scrolling chat), use `ConvaiTranscriptDispl
 
 **Expected outcome:** Each turn appears as a new bubble — player text on the right, character text on the left. The list scrolls automatically as the conversation grows.
 
-***
-
-#### Example 2: Subtitle Bar in a Medical Simulation
+### Example 2: Subtitle bar in a medical simulation
 
 **Scenario:** A medical simulation uses a narrow subtitle bar at the bottom of the screen — minimizing screen real estate while still showing what the AI doctor says.
 
@@ -125,12 +113,10 @@ For per-character subtitle text (not scrolling chat), use `ConvaiTranscriptDispl
 
 **Expected outcome:** A single line of text at the bottom updates in real time during character speech. When a new turn starts, the previous text clears automatically.
 
-***
-
-### Next Steps
+## Next steps
 
 With the transcript UI in place, add lip sync to drive character blendshapes from audio.
 
-{% content-ref url="/broken/pages/a074db78cb7c337162855b5851a894f43c5145f9" %}
-[Broken link](/broken/pages/a074db78cb7c337162855b5851a894f43c5145f9)
+{% content-ref url="add-lip-sync/README.md" %}
+[Add lip sync](add-lip-sync/README.md)
 {% endcontent-ref %}
