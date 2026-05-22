@@ -14,7 +14,7 @@ The Convai Unity SDK requires internet connectivity during runtime. Speech proce
 | `api.convai.com`            | HTTPS      | Character metadata and REST API       |
 | LiveKit TURN / STUN servers | UDP / TCP  | WebRTC audio and video transport      |
 
-The default server URL (`live.convai.com`) is configurable in **Edit > Project Settings > Convai SDK** via the **Server URL** field.
+The default server URL (`live.convai.com`) is configurable in **Edit > Project Settings > Convai SDK** via the **Core Server Base URL** field.
 
 ## Protocol stack
 
@@ -25,7 +25,7 @@ The default server URL (`live.convai.com`) is configurable in **Edit > Project S
 | WebRTC (UDP)           | Variable | Real-time audio, video, and data transport               |
 
 {% hint style="info" %}
-If UDP is blocked by your network, the SDK automatically falls back to TURN relay using TCP on port 443. All traffic uses TLS encryption.
+If UDP is blocked by your network, the connection automatically falls back to TURN relay using TCP on port 443. All traffic uses TLS encryption.
 {% endhint %}
 
 ## Authentication
@@ -34,7 +34,7 @@ Every request to Convai is authenticated using your API key, sent as an `X-API-K
 
 ## Connection timeout
 
-The default connection timeout is **30 seconds**, configurable in `ConvaiSettings` between 5 and 120 seconds. When a connection attempt exceeds the timeout, the SDK raises `ConvaiManager.OnError` and `ConvaiRoomManager.OnSessionError`.
+The default connection timeout is **30 seconds**, configurable between 5 and 120 seconds in **Edit > Project Settings > Convai SDK > Advanced** via the **Connection Timeout (s)** slider. When a connection attempt exceeds the timeout, the SDK raises `ConvaiManager.OnError` and `ConvaiRoomManager.OnSessionError`.
 
 ## Enterprise and firewall configuration
 
