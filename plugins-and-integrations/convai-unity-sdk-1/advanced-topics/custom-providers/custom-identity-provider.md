@@ -2,29 +2,25 @@
 description: >-
   Implement a custom end-user identity provider to tie Convai's memory and MAU
   tracking to your own auth system, learner records, or kiosk login flow.
+title: Custom identity provider
+last_reviewed: "4.2.0"
 ---
 
-# Custom Identity Provider
+Convai's long-term memory, MAU (Monthly Active User) tracking, and end-user management features depend on a stable, consistent identifier for each user. For most training simulations and interactive experiences, you will want to replace the default device-based ID with one that is meaningful to your application — a user ID from your auth system, a learner record number, or any stable string that uniquely identifies one person across sessions and devices.
 
-### Replacing the Default End-User Identity
+## Prerequisites
 
-{% hint style="info" %}
-**What this page is for:** Convai can remember details about each user across sessions (their progress, preferences, past mistakes). For that memory to follow the _person_ rather than the _device_, Convai needs a stable ID that belongs to the user — not the hardware. This page shows how to supply that ID from your own login system.
+* A working Convai scene with a `ConvaiManager` component
+* The [Long-Term Memory](../../features/long-term-memory/README.md) feature enabled on your characters for per-user memory to be visible
+* Your own user login or identity system to provide the stable user ID
 
-**Prerequisites:** A working Convai scene with a `ConvaiManager` component. The [Long-Term Memory](/broken/pages/a75be2f3c5d4f4270e1961b295fc2f7f0818690a) feature must be enabled on your characters for per-user memory to be visible. If you do not have a user login system yet, the default device-based ID is sufficient — return here once auth is in place.
-{% endhint %}
+If you do not have a user login system yet, the default device-based ID is sufficient — return here once auth is in place.
 
-Convai's long-term memory, MAU (Monthly Active User) tracking, and end-user management features depend on a stable, consistent identifier for each user. The SDK ships with `DeviceEndUserIdProvider`, which generates an ID from the device hardware identifier in builds and from a persisted GUID in the Unity Editor.
-
-For most training simulations and interactive experiences, you will want to replace this with an identity that is meaningful to your application — a user ID from your auth system, a learner record number, or any stable string that uniquely identifies one person across sessions and devices.
-
-***
-
-### The Identity Provider Interfaces
+## Identity provider interfaces
 
 Two interfaces control how the SDK identifies the current user.
 
-#### `IEndUserIdentityProvider`
+### IEndUserIdentityProvider
 
 The primary interface. The SDK calls `GetEndUserId()` once per `ConnectAsync()` and sends the result to Convai as the end-user identifier.
 
@@ -35,7 +31,7 @@ public interface IEndUserIdentityProvider
 }
 ```
 
-**Requirements for the returned string:**
+Requirements for the returned string:
 
 * Must be non-null and non-empty. An empty string causes a failed connect.
 * Must be stable: the same user on the same device (or across devices) must return the same ID across sessions.
@@ -45,7 +41,7 @@ public interface IEndUserIdentityProvider
 If two distinct users resolve to the same ID, their long-term memory entries merge silently. There is no error — the data is simply wrong. Ensure your ID source is globally unique across your entire user base.
 {% endhint %}
 
-#### `IEndUserMetadataProvider`
+### IEndUserMetadataProvider
 
 Optional. Supply additional key-value metadata sent to Convai with the connect request. Use it to pass display names, role codes, department IDs, or any context that should accompany the user record.
 
@@ -58,31 +54,23 @@ public interface IEndUserMetadataProvider
 
 The dictionary can be empty but must not be `null`. Values must be JSON-serializable primitives (`string`, `int`, `float`, `bool`). Non-serializable values are silently dropped.
 
-#### `IEndUserIdProvider`
-
-A lower-level interface used internally by the SDK. You do not implement this directly — implement `IEndUserIdentityProvider` instead. Both interfaces live in the `Convai.Domain.Identity` namespace.
-
-***
-
-### Default Behavior
+## Default behavior
 
 `DeviceEndUserIdProvider` is the SDK's default. Its behavior differs by context:
 
-| Context                               | Source                                                           | Stability                                                      |
+| Context | Source | Stability |
 | ------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------- |
-| Player build (Android, iOS, PC, etc.) | `SystemInfo.deviceUniqueIdentifier` with persisted GUID fallback | Stable per device; resets on OS reinstall or device wipe       |
-| Unity Editor                          | GUID stored in `PlayerPrefs` under key `convai.end_user_id`      | Stable per Editor install; resets if `PlayerPrefs` are cleared |
+| Player build (Android, iOS, PC, etc.) | `SystemInfo.deviceUniqueIdentifier` with persisted GUID fallback | Stable per device; resets on OS reinstall or device wipe |
+| Unity Editor | GUID stored in `PlayerPrefs` under key `convai.end_user_id` | Stable per Editor install; resets if `PlayerPrefs` are cleared |
 
-The default is sufficient for single-device training simulations with no user accounts. Replace it when:
+Replace the default when:
 
 * Your application has its own login system and sessions must follow the user, not the device.
 * Multiple learners share a single device (kiosk mode, shared lab machines).
 * You need cross-device continuity (mobile + desktop).
 * Compliance requires user IDs to match your own system of record.
 
-***
-
-### Implementation: Auth-Backed Identity Provider
+## Implement an identity provider
 
 ```csharp
 // AuthIdentityProvider.cs
@@ -123,15 +111,13 @@ public class AuthIdentityProvider : IEndUserIdentityProvider, IEndUserMetadataPr
 }
 ```
 
-***
-
-### Registration
+## Register the provider
 
 Identity providers can be registered in two ways depending on whether you also need to override other builder settings.
 
-#### Direct Setters (Simpler)
+### Direct setters (simpler)
 
-Call `SetEndUserIdentityProvider()` and `SetEndUserMetadataProvider()` on `ConvaiManager.ActiveManager` **before the first `ConnectAsync()` call**. These setters work at any point in the scene lifecycle as long as a connection has not yet been established.
+Call `SetEndUserIdentityProvider()` and `SetEndUserMetadataProvider()` on `ConvaiManager.ActiveManager` before the first `ConnectAsync()` call. These setters work at any point in the scene lifecycle as long as a connection has not yet been established.
 
 ```csharp
 // AuthSceneInitializer.cs
@@ -168,7 +154,7 @@ public class AuthSceneInitializer : MonoBehaviour
 Do not call `ConnectAsync()` before your identity provider is set. If `ConvaiManager` is configured to connect automatically on Start (`ConnectOnStart = true`), disable that option and trigger the connect manually after login completes. Connecting before the provider is set causes the default device-based ID to be used, silently associating the session with the wrong identity.
 {% endhint %}
 
-#### `CreateRuntimeBuilder` Override
+### CreateRuntimeBuilder override
 
 Use this approach when you are also customizing other builder settings (credentials, persistence, modules) and want all customization in one place.
 
@@ -200,11 +186,9 @@ public class AuthConvaiManager : ConvaiManager
 }
 ```
 
-***
+## Usage examples
 
-### Usage Examples
-
-#### Example 1: Training Platform With Learner Records
+### Example 1: Training platform with learner records
 
 A corporate safety training platform identifies each employee by their LMS learner ID. Memory of past sessions (topics covered, mistakes made) persists across simulation runs.
 
@@ -231,7 +215,7 @@ public class LmsIdentityProvider : IEndUserIdentityProvider, IEndUserMetadataPro
 
 Register via `manager.SetEndUserIdentityProvider(new LmsIdentityProvider(lmsSession))` before connecting.
 
-#### Example 2: Shared Kiosk With PIN Login
+### Example 2: Shared kiosk with PIN login
 
 A hospital training kiosk is shared by multiple residents. Each resident logs in with a PIN, interacts with a simulated patient, then logs out. The next resident gets a clean session tied to their own identity.
 
@@ -255,7 +239,7 @@ public class KioskIdentityProvider : IEndUserIdentityProvider
 
 On logout: disconnect from Convai, update `ActiveResidentId`, then reconnect for the next resident.
 
-#### Example 3: Cross-Device Continuity for Mobile + Desktop
+### Example 3: Cross-device continuity for mobile + desktop
 
 A learner starts a compliance training session on their phone and continues on a desktop workstation. Both devices resolve to the same stable user ID from your backend auth system, so Convai's memory follows the user regardless of which device they connect from.
 
@@ -279,20 +263,22 @@ public class BackendAuthIdentityProvider : IEndUserIdentityProvider
 
 Register after token validation: `manager.SetEndUserIdentityProvider(new BackendAuthIdentityProvider(jwtSubClaim));`
 
-***
+## Troubleshooting
 
-### Troubleshooting
-
-| Symptom                                                   | Likely Cause                                                                   | Fix                                                                                 |
+| Symptom | Likely cause | Fix |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| Long-term memory does not persist across sessions         | Identity changes between sessions                                              | Log the resolved ID before connecting to confirm it is stable across runs.          |
-| Two users share the same memory                           | Two different users resolve to the same ID                                     | Ensure your ID source is globally unique across your entire user base.              |
-| Connect fails immediately after setting identity provider | `GetEndUserId()` threw an exception or returned an empty string                | Wrap `GetEndUserId()` in a try-catch during development; log the exception message. |
-| `NullReferenceException` in `SetEndUserIdentityProvider`  | `ConvaiManager.ActiveManager` is null — manager `Awake` has not run yet        | Call the setter in `Start()` or later, never in `Awake()`.                          |
-| Memory accumulates from a previous tester/device          | `DeviceEndUserIdProvider` was active before the custom provider was registered | Clear the `convai.end_user_id` `PlayerPrefs` key in the Editor and reconnect.       |
+| Long-term memory does not persist across sessions | Identity changes between sessions | Log the resolved ID before connecting to confirm it is stable across runs. |
+| Two users share the same memory | Two different users resolve to the same ID | Ensure your ID source is globally unique across your entire user base. |
+| Connect fails immediately after setting identity provider | `GetEndUserId()` threw an exception or returned an empty string | Wrap `GetEndUserId()` in a try-catch during development; log the exception message. |
+| `NullReferenceException` in `SetEndUserIdentityProvider` | `ConvaiManager.ActiveManager` is null — manager `Awake` has not run yet | Call the setter in `Start()` or later, never in `Awake()`. |
+| Memory accumulates from a previous tester/device | `DeviceEndUserIdProvider` was active before the custom provider was registered | Clear the `convai.end_user_id` `PlayerPrefs` key in the Editor and reconnect. |
 
-***
+## Next steps
 
-### Next Steps
+{% content-ref url="../../features/long-term-memory/README.md" %}
+[Long-Term Memory](../../features/long-term-memory/README.md)
+{% endcontent-ref %}
 
-With identity in place, consider enabling [Long-Term Memory](/broken/pages/a75be2f3c5d4f4270e1961b295fc2f7f0818690a) on your characters to make the per-user data actionable. If you also need to pull credentials from a secrets vault or environment variable, continue to [Custom Credential Provider](/broken/pages/b9af6d563f61bd2075e25dd91e024559a785db7a).
+{% content-ref url="custom-credential-provider.md" %}
+[Custom credential provider](custom-credential-provider.md)
+{% endcontent-ref %}

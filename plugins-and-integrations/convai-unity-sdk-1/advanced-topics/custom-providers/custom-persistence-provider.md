@@ -3,40 +3,25 @@ description: >-
   Replace PlayerPrefs session storage with a cloud backend, encrypted file
   store, or in-memory implementation by implementing IKeyValueStore or
   IPersistenceProvider.
+title: Custom persistence provider
+last_reviewed: "4.2.0"
 ---
 
-# Custom Persistence Provider
+The Convai Unity SDK stores session data — connection state, session IDs, resume tokens, and the editor end-user GUID — in `PlayerPrefs` by default via `PlayerPrefsKeyValueStore`. If `PlayerPrefs` works for your deployment, you do not need this page. Replace the persistence provider when you need cloud save, encrypted storage, server-side session management, or isolated storage for automated testing and CI.
 
-### Replacing the Default Session Storage
+## What the SDK writes to storage
 
-{% hint style="info" %}
-**What this page is for:** The Convai SDK saves a small amount of state between app launches — session resume tokens, the device's end-user GUID, and connection preferences. By default it uses Unity's `PlayerPrefs`. This page shows how to replace that with your own storage (encrypted files, cloud sync, or in-memory for testing).
-
-If `PlayerPrefs` works for your deployment, you do not need this page.
-{% endhint %}
-
-The Convai Unity SDK stores session data — connection state, session IDs, resume tokens, and the editor end-user GUID — in `PlayerPrefs` by default via `PlayerPrefsKeyValueStore`. This works for most single-device deployments, but some scenarios require a different storage backend:
-
-* **Cloud save** — session state must sync across devices so a learner can resume on a different machine.
-* **Encrypted storage** — compliance or security requirements prohibit plain `PlayerPrefs` for any SDK data.
-* **Server-side session management** — session tokens are managed server-side and fetched on demand.
-* **Testing / CI** — in-memory storage prevents test pollution between runs.
-
-#### What the SDK Writes to Storage
-
-| Key prefix           | Contents                             | Why it matters                                                                        |
+| Key prefix | Contents | Why it matters |
 | -------------------- | ------------------------------------ | ------------------------------------------------------------------------------------- |
-| `convai.session.*`   | Session ID and resume token          | Allows the SDK to resume a disconnected session without restarting the AI turn        |
-| `convai.end_user_id` | Editor-only device GUID (fallback)   | Used by `DeviceEndUserIdProvider` in the Unity Editor when hardware ID is unavailable |
-| `convai.prefs.*`     | User preferences (e.g., muted state) | Persists SDK-level settings across app launches                                       |
+| `convai.session.*` | Session ID and resume token | Allows the SDK to resume a disconnected session without restarting the AI turn |
+| `convai.end_user_id` | Editor-only device GUID (fallback) | Used by `DeviceEndUserIdProvider` in the Unity Editor when hardware ID is unavailable |
+| `convai.prefs.*` | User preferences (e.g., muted state) | Persists SDK-level settings across app launches |
 
-Replacing the persistence provider replaces where **all** of these are written and read. Your implementation must handle every key the SDK touches — the adapter pattern below ensures nothing is missed.
+Replacing the persistence provider replaces where all of these are written and read. Your implementation must handle every key the SDK touches — the adapter pattern below ensures nothing is missed.
 
-***
+## Persistence interfaces
 
-### Two Persistence Interfaces
-
-#### `IKeyValueStore` — Simple Storage
+### IKeyValueStore — simple storage
 
 ```csharp
 namespace Convai.Domain.Abstractions
@@ -54,7 +39,7 @@ namespace Convai.Domain.Abstractions
 
 `Save()` is called after write operations. For in-memory stores it is a no-op; for file-backed stores it flushes to disk. Implement this interface for local storage scenarios where async operations are not needed.
 
-#### `IPersistenceProvider` — Full-Featured Storage
+### IPersistenceProvider — full-featured storage
 
 ```csharp
 namespace Convai.Runtime.Core.Providers
@@ -89,57 +74,42 @@ namespace Convai.Runtime.Core.Providers
 }
 ```
 
+`builder.UsePersistence()` accepts `IPersistenceProvider`. If your implementation is `IKeyValueStore`, wrap it in an adapter (see [Adapter pattern](#adapter-pattern-for-ikeyvaluestore-implementations) below). Async operations (`SyncAsync`, `SaveVersionedAsync`) can return stub results if your backend is synchronous.
+
 **Which interface to implement:**
 
-| Scenario                                               | Implement                                              |
+| Scenario | Implement |
 | ------------------------------------------------------ | ------------------------------------------------------ |
-| Local file, encrypted SQLite, in-memory                | `IKeyValueStore`                                       |
-| Cloud save, server-side storage, multi-device sync     | `IPersistenceProvider`                                 |
+| Local file, encrypted SQLite, in-memory | `IKeyValueStore` |
+| Cloud save, server-side storage, multi-device sync | `IPersistenceProvider` |
 | Existing `IKeyValueStore` with cloud sync added on top | Both — delegate sync/versioned ops to the cloud client |
 
-{% hint style="info" %}
-`builder.UsePersistence()` accepts `IPersistenceProvider`. If your implementation is `IKeyValueStore`, wrap it in an adapter (see [Adapter Pattern](custom-persistence-provider.md#adapter-pattern-for-ikeyvaluestore-implementations) below). Async operations (`SyncAsync`, `SaveVersionedAsync`) can return stub results if your backend is synchronous.
-{% endhint %}
+## Supporting types
 
-***
+### PersistenceResult
 
-### Supporting Types
-
-#### `PersistenceResult`
-
-| Member                                 | Type       | Description                                             |
+| Member | Type | Description |
 | -------------------------------------- | ---------- | ------------------------------------------------------- |
-| `Success`                              | `bool`     | Whether the operation succeeded.                        |
-| `ErrorMessage`                         | `string`   | Error description if `Success` is `false`.              |
-| `Timestamp`                            | `DateTime` | When the operation completed.                           |
-| `Version`                              | `long`     | Version number after the operation (for versioned ops). |
-| `PersistenceResult.Succeeded(version)` | static     | Creates a successful result.                            |
-| `PersistenceResult.Failed(error)`      | static     | Creates a failed result.                                |
+| `Success` | `bool` | Whether the operation succeeded. |
+| `ErrorMessage` | `string` | Error description if `Success` is `false`. |
+| `Timestamp` | `DateTime` | When the operation completed. |
+| `Version` | `long` | Version number after the operation (for versioned ops). |
+| `PersistenceResult.Succeeded(version)` | static | Creates a successful result. |
+| `PersistenceResult.Failed(error)` | static | Creates a failed result. |
 
-#### `ConflictResolutionStrategy`
+### ConflictResolutionStrategy
 
 Used by `SaveVersionedAsync` to resolve write conflicts in async/cloud scenarios.
 
-| Value                | Behavior                                                     |
+| Value | Behavior |
 | -------------------- | ------------------------------------------------------------ |
-| `LastWriteWins`      | The most recently written value wins based on timestamp.     |
-| `HighestVersionWins` | The value with the higher version number wins.               |
-| `LocalWins`          | Local data always overwrites remote.                         |
-| `RemoteWins`         | Remote data always overwrites local.                         |
-| `Manual`             | Returns conflict info to the caller for explicit resolution. |
+| `LastWriteWins` | The most recently written value wins based on timestamp. |
+| `HighestVersionWins` | The value with the higher version number wins. |
+| `LocalWins` | Local data always overwrites remote. |
+| `RemoteWins` | Remote data always overwrites local. |
+| `Manual` | Returns conflict info to the caller for explicit resolution. |
 
-#### `ConflictResolutionPolicy`
-
-Used by `PersistenceOptions` on synchronous write operations.
-
-| Value            | Behavior                                        |
-| ---------------- | ----------------------------------------------- |
-| `LastWriteWins`  | Most recently modified data wins.               |
-| `LocalWins`      | Local data overwrites remote.                   |
-| `RemoteWins`     | Remote data overwrites local.                   |
-| `FailOnConflict` | Fails the operation and lets the caller decide. |
-
-#### `PersistenceOptions`
+### PersistenceOptions
 
 ```csharp
 var options = new PersistenceOptions(
@@ -149,11 +119,9 @@ var options = new PersistenceOptions(
 );
 ```
 
-***
+## Implementation examples
 
-### Implementation Examples
-
-#### In-Memory Store (Testing / CI)
+### In-memory store (testing / CI)
 
 Useful for automated tests and CI runs where persistent state between runs would corrupt results.
 
@@ -182,7 +150,7 @@ public class InMemoryKeyValueStore : IKeyValueStore
 }
 ```
 
-#### Encrypted File Store
+### Encrypted file store
 
 Satisfies compliance requirements that prohibit plain `PlayerPrefs` for session data.
 
@@ -232,13 +200,9 @@ public class EncryptedFileKeyValueStore : IKeyValueStore
 }
 ```
 
-{% hint style="warning" %}
 Call `Save()` after every write, or flush periodically. Writes are buffered in memory — data written since the last `Save()` is lost on crash.
-{% endhint %}
 
-***
-
-### Adapter Pattern for `IKeyValueStore` Implementations
+## Adapter pattern for IKeyValueStore implementations
 
 `builder.UsePersistence()` requires `IPersistenceProvider`. Use this adapter to wrap any `IKeyValueStore`:
 
@@ -315,13 +279,9 @@ public class KeyValueStorePersistenceAdapter : IPersistenceProvider
 }
 ```
 
-{% hint style="info" %}
 `DeleteAll(string prefix)` returns a failed result in this adapter. The SDK calls `DeleteAll` during session reset operations. If your deployment requires full session resets, implement `DeleteAll` by iterating your store's keys and removing those that match the prefix.
-{% endhint %}
 
-***
-
-### Registration
+## Register the provider
 
 ```csharp
 // CustomPersistenceManager.cs
@@ -348,19 +308,25 @@ public class CustomPersistenceManager : ConvaiManager
 }
 ```
 
-***
+## Troubleshooting
 
-### Troubleshooting
-
-| Symptom                                                               | Likely Cause                                                         | Fix                                                                                                                  |
+| Symptom | Likely cause | Fix |
 | --------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Session does not resume after restart                                 | `GetString` returns `null` for session keys on reload                | Ensure `Save()` is called synchronously before the application quits. Subscribe to `Application.quitting` if needed. |
-| `NullReferenceException` inside `IPersistenceProvider` implementation | Async methods are called before the store is initialized             | Initialize the backing store in the provider's constructor, before `UsePersistence()` is called.                     |
-| Data loss on crash                                                    | `SetString` writes are buffered in memory and `Save()` is not called | Call `Save()` after every write, or flush on a periodic timer.                                                       |
-| Session reset does not clear all SDK data                             | `DeleteAll(prefix)` returns a failed result in the adapter           | Implement `DeleteAll` by iterating your store's key collection and removing prefix-matching entries.                 |
+| Session does not resume after restart | `GetString` returns `null` for session keys on reload | Ensure `Save()` is called synchronously before the application quits. Subscribe to `Application.quitting` if needed. |
+| `NullReferenceException` inside `IPersistenceProvider` implementation | Async methods are called before the store is initialized | Initialize the backing store in the provider's constructor, before `UsePersistence()` is called. |
+| Data loss on crash | `SetString` writes are buffered in memory and `Save()` is not called | Call `Save()` after every write, or flush on a periodic timer. |
+| Session reset does not clear all SDK data | `DeleteAll(prefix)` returns a failed result in the adapter | Implement `DeleteAll` by iterating your store's key collection and removing prefix-matching entries. |
 
-***
+## Next steps
 
-### Next Steps
+{% content-ref url="README.md" %}
+[Credentials, identity, and storage](README.md)
+{% endcontent-ref %}
 
-With persistence configured, your SDK deployment now stores session data in your chosen backend. Return to [Custom Providers](/broken/pages/67e0cda30561f04cf5db7261ecb0205a773eecc0) if you still need to configure credentials or identity, or continue to [Extending the SDK](/broken/pages/59db131293671e35392d1dfaaad82375c18e2d78) to add custom modules that participate in the runtime lifecycle.
+{% content-ref url="../extending-the-sdk.md" %}
+[Runtime module system](../extending-the-sdk.md)
+{% endcontent-ref %}
+
+{% content-ref url="../implement-a-custom-module.md" %}
+[Implement a custom module](../implement-a-custom-module.md)
+{% endcontent-ref %}

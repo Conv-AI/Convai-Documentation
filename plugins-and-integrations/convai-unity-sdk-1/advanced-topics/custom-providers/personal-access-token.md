@@ -1,23 +1,15 @@
 ---
 description: >-
-  Generate short-lived personal access tokens from your backend so the real API
-  key never ships inside your Unity build, eliminating credential exposure from
-  client applications.
+  Generate short-lived tokens from your backend so the real API key never ships
+  inside your Unity build, eliminating credential exposure from client
+  applications.
+title: Personal access token
+last_reviewed: "4.2.0"
 ---
 
-# Personal Access Token
+By default, the Convai Unity SDK reads your API key from `ConvaiSettings.asset`, which is compiled into your build. Anyone who extracts the build can retrieve the key and use it against your Convai account. Personal Access Tokens (PATs) eliminate that exposure entirely. Your real API key lives on your **backend** — a server-side application you control (Node.js, Python, .NET, etc.) that your users never interact with directly. The backend generates a short-lived token — valid for one hour — and hands it to the Unity app. The app connects to Convai using that token. If the token is intercepted, it expires within the hour and cannot be used to access your account settings, characters, or billing. PATs require a server that holds the real API key and calls Convai's token endpoint on behalf of your users. A lightweight function (AWS Lambda, Azure Function, Cloudflare Worker, etc.) is sufficient — it only needs to make one HTTP request per session.
 
-### Keeping Your API Key Out of the Build
-
-By default, the Convai Unity SDK reads your API key from `ConvaiSettings.asset`, which is compiled into your build. Anyone who extracts the build can retrieve the key and use it against your Convai account.
-
-Personal Access Tokens (PATs) eliminate that exposure entirely. Your real API key lives on your **backend** — a server-side application you control (Node.js, Python, .NET, etc.) that your users never interact with directly. The backend generates a short-lived token — valid for one hour — and hands it to the Unity app. The app connects to Convai using that token. If the token is intercepted, it expires within the hour and cannot be used to access your account settings, characters, or billing.
-
-{% hint style="info" %}
-**Do I need a backend?** Yes. PATs require a server that holds the real API key and calls Convai's token endpoint on behalf of your users. If you do not have a backend today, a lightweight function (AWS Lambda, Azure Function, Cloudflare Worker, etc.) is enough — it only needs to make one HTTP request per session.
-{% endhint %}
-
-```
+```text
 Your Backend  ──holds──►  Real API Key
       │
       │  POST /user/connect  (server-side, never from client)
@@ -30,17 +22,13 @@ Unity App  ──uses──►  apiAuthToken  as credential
                       (real API key never in build)
 ```
 
-{% hint style="info" %}
-Once a Convai session starts, the token is no longer checked for the duration of that session. A token that expires mid-session does not disconnect the user — the PAT is only consumed at connect time.
-{% endhint %}
-
 ***
 
-### Token Endpoints
+## Token endpoints
 
 All three endpoints target `https://api.convai.com` and require your real API key in the `CONVAI-API-KEY` header. **These calls are made from your backend, not from the Unity app.**
 
-#### Generate a Token
+### Generate a token
 
 ```
 POST https://api.convai.com/user/connect
@@ -69,7 +57,7 @@ POST https://api.convai.com/user/connect
 
 You can generate a new token while the current one is still active. Generating a new token does not invalidate the previous one.
 
-#### Extend a Token
+### Extend a token
 
 ```
 POST https://api.convai.com/user/extend-token
@@ -85,7 +73,7 @@ Headers: same as Generate.
 
 Resets the expiry clock on an existing token without invalidating it.
 
-#### Revoke a Token
+### Revoke a token
 
 ```
 POST https://api.convai.com/user/revoke-token
@@ -103,7 +91,7 @@ Immediately invalidates the token. Call this on logout or whenever the token is 
 
 ***
 
-### Integration With the Unity SDK
+## Integration with the Unity SDK
 
 Pass the `apiAuthToken` value as the `apiKey` parameter in `ConvaiBootstrapConfigSnapshot`. The SDK sends it as the `CONVAI-API-KEY` credential header — the same slot the API key would occupy.
 
@@ -190,7 +178,9 @@ Do not persist `apiAuthToken` to disk (e.g., `PlayerPrefs`). A cached token is a
 
 ***
 
-### Token Expiry and Session Length
+## Token expiry and session length
+
+Once a Convai session starts, the token is no longer checked for the duration of that session — a token that expires mid-session does not disconnect the user. The PAT is only consumed at connect time.
 
 | Scenario                                        | Behavior                                                                                              |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -200,9 +190,9 @@ Do not persist `apiAuthToken` to disk (e.g., `PlayerPrefs`). A cached token is a
 
 ***
 
-### Usage Examples
+## Usage examples
 
-#### Example 1: LMS Platform With Per-Session Tokens
+### Example 1: LMS platform with per-session tokens
 
 A corporate safety training platform issues a Convai PAT as part of the LMS login response. The token is generated server-side when the learner authenticates and is delivered alongside the LMS session data.
 
@@ -228,7 +218,7 @@ public class LmsSessionBootstrapper : MonoBehaviour
 }
 ```
 
-#### Example 2: Shared Kiosk With Per-Resident Token Rotation
+### Example 2: Shared kiosk with per-resident token rotation
 
 Each resident logs into a shared training kiosk, receives a fresh PAT from the backend, interacts with the simulation, then logs out. On logout, the token is explicitly revoked so it cannot be reused.
 
@@ -308,7 +298,7 @@ public class KioskSessionManager : MonoBehaviour
 }
 ```
 
-#### Example 3: On-Demand Token Refresh for Long-Running Applications
+### Example 3: On-demand token refresh for long-running applications
 
 Industrial training simulations can run for multiple hours. While an active session is unaffected by token expiry, a new session started after expiry needs a fresh token. Use your backend's extend or re-generate endpoint before reconnecting.
 
@@ -335,18 +325,24 @@ public class LongRunningSessionManager : MonoBehaviour
 
 ***
 
-### Troubleshooting
+## Troubleshooting
 
-| Symptom                                                  | Likely Cause                                                                  | Fix                                                                                                          |
+| Symptom                                                  | Likely cause                                                                  | Fix                                                                                                          |
 | -------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | Connect fails immediately                                | `apiAuthToken` is null — backend fetch failed                                 | Check Console for the `Token fetch failed` log; verify your backend endpoint URL and auth headers.           |
 | `401` auth error from Convai on connect                  | Token was already expired or revoked before `ConnectAsync()`                  | Always fetch a fresh token immediately before connecting — never reuse a cached token across sessions.       |
-| Session disconnects instantly after connecting           | `serverUrl` is wrong in `ConvaiBootstrapConfigSnapshot`                       | Set `serverUrl` to `https://live.convai.com` — the PAT is scoped to this endpoint.                           |
+| Session disconnects instantly after connecting           | `serverUrl` is wrong in `ConvaiBootstrapConfigSnapshot`                       | Set `serverUrl` to <code class="expression">space.vars.live_server_url</code> — the PAT is scoped to this endpoint. |
 | `apiAuthToken` is null in the backend response           | Malformed request body or missing `CONVAI-API-KEY` header on the backend call | Ensure the body is `{}` and the header is present. Log the raw response on the backend to inspect the error. |
 | Token works in development but fails in production build | `ConvaiSettings.asset` API key field is empty and no PAT is fetched           | Confirm `PatConvaiManager.Awake()` runs and completes the backend fetch before `base.Awake()` is called.     |
 
 ***
 
-### Next Steps
+## Next steps
 
-For maximum security, combine PATs with [Custom Identity Provider](/broken/pages/5d199da2a4fffa0f71bc7588d483990e83db12d3) — your backend generates both the PAT and the stable user ID in a single authenticated call, so Convai's long-term memory is tied to a real identity at the same moment the session credential is secured. For the full picture of credential customization, see [Custom Credential Provider](/broken/pages/b9af6d563f61bd2075e25dd91e024559a785db7a).
+{% content-ref url="custom-identity-provider.md" %}
+[Custom identity provider](custom-identity-provider.md)
+{% endcontent-ref %}
+
+{% content-ref url="custom-credential-provider.md" %}
+[Custom credential provider](custom-credential-provider.md)
+{% endcontent-ref %}

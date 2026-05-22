@@ -1,30 +1,27 @@
 ---
 description: >-
   Configure SDK log verbosity per subsystem, route logs to custom sinks, read
-  RTVI server-side latency metrics, and tune the connection retry policy for
-  your deployment.
+  RTVI pipeline latency metrics, and tune the connection retry policy.
+title: Logging, metrics, and retry policy
+last_reviewed: "4.2.0"
 ---
-
-# Performance and Optimization
-
-### Tuning the SDK for Production
 
 The Convai Unity SDK ships with defaults that work across training simulations, interactive experiences, and games. When you need to diagnose latency, reduce log noise in production, understand the AI pipeline's timing, or tune reconnection behavior — this page covers the available controls.
 
-**This page covers four independent topics — jump to the one you need:**
+**Jump to the topic you need:**
 
-* [Log Level Configuration](performance-and-optimization.md#log-level-configuration) — reduce console noise in production builds
-* [Custom Log Sinks](performance-and-optimization.md#custom-log-sinks) — route logs to a file or remote service
-* [RTVI Server-Side Debug Metrics](performance-and-optimization.md#rtvi-server-side-debug-metrics) — measure AI pipeline latency per turn
-* [Retry Policy](performance-and-optimization.md#retry-policy) — tune reconnection behavior for flaky networks
+* [Log level configuration](performance-and-optimization.md#log-level-configuration) — reduce console noise in production builds
+* [Custom log sinks](performance-and-optimization.md#custom-log-sinks) — route logs to a file or remote service
+* [RTVI server-side debug metrics](performance-and-optimization.md#rtvi-server-side-debug-metrics) — measure AI pipeline latency per turn
+* [Retry policy](performance-and-optimization.md#retry-policy) — tune reconnection behavior for flaky networks
 
 ***
 
-### Log Level Configuration
+## Log level configuration
 
-#### Log Levels
+### Log levels
 
-| Level     | Enum Value | When To Use                                     |
+| Level     | Enum Value | When to use                                     |
 | --------- | ---------- | ----------------------------------------------- |
 | `Off`     | `0`        | Disable all SDK logging.                        |
 | `Error`   | `1`        | Production builds — errors only.                |
@@ -36,10 +33,10 @@ The Convai Unity SDK ships with defaults that work across training simulations, 
 These values correspond to the `Convai.Domain.Logging.LogLevel` enum.
 
 {% hint style="warning" %}
-`Trace` and `Debug` levels generate significant output volume. In builds, SDK debug logs are stripped by the compiler unless the `CONVAI_DEBUG_LOGGING` scripting define is present. Do not ship with `Trace` enabled.
+`Trace` and `Debug` levels generate significant output volume. SDK debug logs are active in the Unity Editor and in Development Builds. In release builds they are stripped by the compiler unless `CONVAI_DEBUG_LOGGING` is added to Scripting Define Symbols. Do not ship with `Trace` enabled.
 {% endhint %}
 
-#### Configuring in the Inspector
+### Configuring in the Inspector
 
 Open **Project Settings → Convai** (or select the `ConvaiSettings` asset at `Assets/Resources/ConvaiSettings.asset`). Under the **Logging** section:
 
@@ -50,7 +47,7 @@ Open **Project Settings → Convai** (or select the `ConvaiSettings` asset at `A
 | `Colored Output`       | Color-code log messages in the Unity Console.                                                     |
 | `Category Overrides`   | Per-subsystem level overrides — add entries to set a finer-grained level for specific categories. |
 
-#### Log Categories
+### Log categories
 
 | Category     | Subsystem                                   |
 | ------------ | ------------------------------------------- |
@@ -71,7 +68,7 @@ Open **Project Settings → Convai** (or select the `ConvaiSettings` asset at `A
 
 These values correspond to the `Convai.Domain.Logging.LogCategory` enum.
 
-#### Configuring at Runtime
+### Configuring at runtime
 
 ```csharp
 using Convai.Runtime;
@@ -90,15 +87,15 @@ ConvaiSettings.Instance.SetCategoryOverrides(new[]
 
 `LogLevelOverride` is a struct with two fields: `LogCategory Category` and `LogLevel Level`.
 
-#### `CONVAI_DEBUG_LOGGING` Scripting Define
+### `CONVAI_DEBUG_LOGGING` scripting define
 
-Debug-level logs inside the SDK source are guarded by `[Conditional("CONVAI_DEBUG_LOGGING")]`. Without this define, the compiler strips all `ConvaiLogger.Debug(...)` calls at build time — zero overhead in production regardless of the `GlobalLogLevel` setting.
+`ConvaiLogger.Debug(...)` calls are guarded by three `[Conditional]` attributes: `UNITY_EDITOR`, `DEVELOPMENT_BUILD`, and `CONVAI_DEBUG_LOGGING`. The compiler strips them from any build where none of these symbols is defined — zero overhead in production release builds.
 
-To enable verbose SDK debug logs in a build: add `CONVAI_DEBUG_LOGGING` to **Project Settings → Player → Scripting Define Symbols**.
+To enable debug logs in a release build: add `CONVAI_DEBUG_LOGGING` to **Project Settings → Player → Scripting Define Symbols**. Development Builds enable them automatically without this define.
 
 ***
 
-### Custom Log Sinks
+## Custom log sinks
 
 Route SDK log output to a file, a remote logging service, or any destination by implementing `ILogSink` and registering it with `ConvaiLogger`.
 
@@ -108,7 +105,7 @@ using System;
 using System.IO;
 using Convai.Domain.Logging;
 
-public class FileSink : ILogSink, IDisposable
+public class FileSink : ILogSink
 {
     private readonly StreamWriter _writer;
 
@@ -143,17 +140,17 @@ ConvaiLogger.OnInitializationCompleted += _ =>
 
 **Sink lifecycle:**
 
+* `ILogSink` extends `IDisposable` — implementing classes must provide a `Dispose()` method.
 * Call `ConvaiLogger.UnregisterSink(sink)` before disposing the sink.
 * Call `ConvaiLogger.FlushAllSinks()` on application quit to ensure buffered entries are written.
-* `ILogSink` does not extend `IDisposable` — if your sink holds resources, implement `IDisposable` yourself and dispose it after unregistering.
 
 ***
 
-### RTVI Server-Side Debug Metrics
+## RTVI server-side debug metrics
 
 RTVI (Real-Time Voice Interaction) is Convai's session protocol. When `ConvaiRoomManager.Debug` is `true`, the server streams pipeline metrics to the client after each AI turn, showing how long each stage (speech-to-text, LLM, text-to-speech, etc.) took. Use this when you need to identify which pipeline stage is the bottleneck — e.g., is the AI slow to respond because of transcription latency or LLM generation time?
 
-#### Enabling Debug Metrics
+### Enabling debug metrics
 
 `ConvaiRoomManager.Debug` is a read-only runtime property. Enable it by checking the **Debug** checkbox on the `ConvaiRoomManager` component in the Inspector before entering Play Mode.
 
@@ -161,12 +158,12 @@ RTVI (Real-Time Voice Interaction) is Convai's session protocol. When `ConvaiRoo
 Debug metrics add a small overhead to each turn. Check this option for profiling sessions only — do not ship with it enabled.
 {% endhint %}
 
-#### Reading the Metrics
+### Reading the metrics
 
 ```csharp
 // MetricsLogger.cs
 using Convai.Runtime.Adapters.Networking;
-using Convai.Runtime.Infrastructure.Protocol.Messages.Inbound;
+using Convai.Infrastructure.Protocol.Messages;
 using UnityEngine;
 
 public class MetricsLogger : MonoBehaviour
@@ -188,7 +185,7 @@ public class MetricsLogger : MonoBehaviour
 }
 ```
 
-#### Metrics Fields
+### Metrics fields
 
 | Field        | Type      | Description                                                                                                         |
 | ------------ | --------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -196,17 +193,15 @@ public class MetricsLogger : MonoBehaviour
 | `Processing` | `JToken?` | Total processing duration per processor for this turn (seconds).                                                    |
 | `Custom`     | `JToken?` | Provider-specific metrics — format varies by processor (e.g., `output_fps`, `blendshapes_received` from NeuroSync). |
 
-{% hint style="info" %}
 `Ttfb` and `Processing` are raw `JToken` values (from `Newtonsoft.Json.Linq`, included in Unity via the `com.unity.nuget.newtonsoft-json` package). Deserialize them as `payload.Ttfb.ToObject<List<MetricEntry>>()` where `MetricEntry` is a struct matching the `{processor, value}` shape. Not every turn includes every metric type — always null-check before accessing.
-{% endhint %}
 
 ***
 
-### Retry Policy
+## Retry policy
 
 The SDK uses `ExponentialBackoffPolicy` to handle transient connection failures. Default behavior:
 
-| Attempt     | Delay Before Retry |
+| Attempt     | Delay before retry |
 | ----------- | ------------------ |
 | 1 (initial) | 0 s                |
 | 2           | 1 s                |
@@ -215,7 +210,7 @@ The SDK uses `ExponentialBackoffPolicy` to handle transient connection failures.
 
 After 4 total attempts (1 initial + 3 retries), the operation fails. The policy retries only transient errors: timeouts, network interruptions, and `OperationCanceledException`. Non-transient errors (auth failures, invalid configuration) fail immediately.
 
-#### When to Customize the Retry Policy
+### When to customize the retry policy
 
 The default policy (4 attempts, exponential back-off up to 4 s) covers most consumer network conditions. Consider a custom policy when:
 
@@ -225,7 +220,7 @@ The default policy (4 attempts, exponential back-off up to 4 s) covers most cons
 
 If you only need more attempts without changing the delay curve, increase `maxRetryAttempts` in `ConvaiBootstrapConfigSnapshot` — no custom policy needed.
 
-#### Custom Retry Policy
+### Custom retry policy
 
 Implement `IRetryPolicy` and use `RetryExecutor` to wrap any async operation:
 
@@ -273,7 +268,7 @@ await executor.ExecuteAsync(async (attempt, ct) =>
 
 ***
 
-### Production Optimization Checklist
+## Production checklist
 
 * [ ] `Global Log Level` set to `Warning` or `Error` in the production `ConvaiSettings` asset.
 * [ ] `CONVAI_DEBUG_LOGGING` **not** present in release build Scripting Define Symbols.
@@ -285,9 +280,9 @@ await executor.ExecuteAsync(async (attempt, ct) =>
 
 ***
 
-### Troubleshooting
+## Troubleshooting
 
-| Symptom                                                      | Likely Cause                                                                           | Fix                                                                                                           |
+| Symptom                                                      | Likely cause                                                                           | Fix                                                                                                           |
 | ------------------------------------------------------------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | Console flooded with SDK messages in a release build         | `CONVAI_DEBUG_LOGGING` define is present, or `GlobalLogLevel` is `Debug` or `Trace`    | Remove the scripting define and set the global level to `Warning` or `Error`.                                 |
 | `OnRtvMetricsReceived` never fires                           | `ConvaiRoomManager.Debug` is unchecked, or the character has not completed a full turn | Enable the Debug checkbox and verify a full AI turn completes (user speaks, character responds).              |
@@ -297,6 +292,16 @@ await executor.ExecuteAsync(async (attempt, ct) =>
 
 ***
 
-### Next Steps
+## Next steps
 
-You have now covered the full Advanced Topics section. For production issues beyond SDK configuration, see the top-level [Troubleshooting](/broken/pages/8b6f656640962b6a6920707775d2ba220a72afa7) section for connection, audio, and installation error reference tables. To add custom runtime behaviors on top of the configuration covered here, see [Extending the SDK](/broken/pages/ffe2d892f3253db4617b5b7823c6532a9c822ac8).
+{% content-ref url="../troubleshooting/README.md" %}
+[Troubleshooting](../troubleshooting/README.md)
+{% endcontent-ref %}
+
+{% content-ref url="extending-the-sdk.md" %}
+[Runtime module system](extending-the-sdk.md)
+{% endcontent-ref %}
+
+{% content-ref url="implement-a-custom-module.md" %}
+[Implement a custom module](implement-a-custom-module.md)
+{% endcontent-ref %}
