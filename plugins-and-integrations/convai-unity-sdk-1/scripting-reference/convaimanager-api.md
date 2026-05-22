@@ -1,12 +1,8 @@
 ---
-description: >-
-  Scripting reference for ConvaiManager — the SDK entry point for connection
-  control, facade access, conversation ownership, and service discovery.
+title: ConvaiManager API
+description: Scripting reference for ConvaiManager — the SDK entry point for connection control, facade access, conversation ownership, and service discovery.
+last_reviewed: "4.2.0"
 ---
-
-# ConvaiManager API
-
-## Access and Control the SDK Entry Point
 
 `ConvaiManager` is the primary scripting entry point for the Convai Unity SDK. It initializes the runtime, manages room connections, owns the `Events`, `Audio`, and `Transcripts` facades, and grants access to lower-level services through typed accessors. Every scripted interaction begins here.
 
@@ -27,7 +23,7 @@ if (manager == null)
 
 ***
 
-## State Properties
+## State properties
 
 | Property         | Type   | Description                                                                             |
 | ---------------- | ------ | --------------------------------------------------------------------------------------- |
@@ -37,17 +33,17 @@ if (manager == null)
 
 ***
 
-## Facade Accessors
+## Facade accessors
 
-| Property      | Type                | Reference                                                                                                                                            |
-| ------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Events`      | `ConvaiEvents`      | [Session Events](/broken/pages/a6b0206a52213191603932322e62ebe03e43da27), [Character Events](/broken/pages/441e0a9c27e1e102f3b91a7c1a16c119a5e26148) |
-| `Audio`       | `ConvaiAudio`       | [Audio API](/broken/pages/89fa03048e4088d00ddf10766758dba4f318f4f7)                                                                                  |
-| `Transcripts` | `ConvaiTranscripts` | [Transcript API](/broken/pages/5f65493b6f399e5b1bdfa116186b264e0525e312)                                                                             |
+| Property      | Type                | Reference                                                                    |
+| ------------- | ------------------- | ---------------------------------------------------------------------------- |
+| `Events`      | `ConvaiEvents`      | [Session Events](session-events.md), [Character Events](character-events.md) |
+| `Audio`       | `ConvaiAudio`       | [Audio API](audio-api.md)                                                    |
+| `Transcripts` | `ConvaiTranscripts` | [Transcript API](transcript-api.md)                                          |
 
 ***
 
-## Ownership Properties
+## Ownership properties
 
 | Property                      | Type                             | Description                                                           |
 | ----------------------------- | -------------------------------- | --------------------------------------------------------------------- |
@@ -58,7 +54,7 @@ if (manager == null)
 | `ActiveConversationInputMode` | `ConversationInputMode`          | The runtime conversation input mode currently in effect               |
 | `PushToTalkKey`               | `KeyCode`                        | The key code used for push-to-talk, when mode is `PushToTalk`         |
 
-### `ConvaiManagerConversationMode` Enum
+### `ConvaiManagerConversationMode` enum
 
 | Value                 | Description                                                                       |
 | --------------------- | --------------------------------------------------------------------------------- |
@@ -68,7 +64,7 @@ if (manager == null)
 
 ***
 
-## Room Operations
+## Room operations
 
 ### `ConnectAsync`
 
@@ -80,9 +76,9 @@ IConvaiOperation<RoomSession> ConnectAsync(CancellationToken ct = default)
 IConvaiOperation<RoomSession> ConnectAsync(RoomSessionConnectOptions options, CancellationToken ct = default)
 ```
 
-Returns a `RoomSession` on success. See [Operation & Stream Types](/broken/pages/e98d8a7b41d32352a016655cdb337adda7888037) and [Async Patterns](/broken/pages/2e57a11946a9763769f91e3ce902bc9e7873be46) for consumption patterns.
+Returns a `RoomSession` on success. See [Operation & Stream Types](operation-and-stream-types.md) and [Async Patterns](async-patterns.md) for consumption patterns.
 
-#### `RoomSessionConnectOptions` Fields
+#### `RoomSessionConnectOptions` fields
 
 Pass this to the second overload to override runtime behavior at connect time.
 
@@ -120,7 +116,7 @@ Gracefully disconnects the room session. Resolves when the session reaches `Disc
 
 ***
 
-## Conversation Control
+## Conversation control
 
 | Method                                                                                      | Returns                  | Description                                                                                                |
 | ------------------------------------------------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
@@ -131,7 +127,7 @@ Gracefully disconnects the room session. Resolves when the session reaches `Disc
 
 ***
 
-## Direct C# Events
+## Direct C# events
 
 `ConvaiManager` exposes three direct C# events in addition to the typed hub accessible via `Events`. Subscribe to these when you need lightweight session state notification without the full hub or relay setup.
 
@@ -147,7 +143,7 @@ For richer session state data (transition context, participant changes, idle war
 
 ***
 
-## Ownership Management
+## Ownership management
 
 Use these methods to control which characters and player the manager owns, and which character is the active conversation target.
 
@@ -160,7 +156,7 @@ Use these methods to control which characters and player the manager owns, and w
 
 ***
 
-## Service Accessor Pattern
+## Service accessor pattern
 
 For advanced scenarios that require direct access to internal services, `ConvaiManager` exposes 12 typed `TryGet*` accessors. Each returns `true` and sets the `out` parameter on success, or returns `false` if the service is unavailable.
 
@@ -193,7 +189,7 @@ if (manager.TryGetMicrophoneDeviceService(out var micService))
 
 ***
 
-## SDK Version
+## SDK version
 
 The `ConvaiSDK` static class exposes the SDK version for conditional feature checks.
 
@@ -210,9 +206,9 @@ if (ConvaiSDK.Version >= new System.Version(4, 2, 0))
 
 ***
 
-## Usage Examples
+## Usage examples
 
-### Example 1 — Connect On Scene Load With Cancellation
+### Example 1 — Connect on scene load with cancellation
 
 An industrial safety simulation connects to Convai when the scene loads, tied to the component's lifetime via `destroyCancellationToken` so the connect operation cancels cleanly if the scene unloads mid-attempt.
 
@@ -244,7 +240,7 @@ public class SceneConnector : MonoBehaviour
 ```
 {% endcode %}
 
-### Example 2 — Swap Conversation Target On Trigger Zone Entry
+### Example 2 — Swap conversation target on trigger zone entry
 
 A corporate onboarding simulation has multiple AI advisors in a room. When a learner walks into an advisor's zone, that advisor becomes the active conversation target.
 
@@ -273,7 +269,7 @@ public class AdvisorZone : MonoBehaviour
 ```
 {% endcode %}
 
-### Example 3 — Microphone Device Picker UI
+### Example 3 — Microphone device picker UI
 
 An interactive experience lets users choose their preferred microphone before a session starts, using `IMicrophoneDeviceService` to enumerate available devices.
 
@@ -304,6 +300,6 @@ public class MicrophonePicker : MonoBehaviour
 
 ***
 
-## Next Steps
+## Next steps
 
-For audio and microphone scripting, see [Audio API](/broken/pages/89fa03048e4088d00ddf10766758dba4f318f4f7). For connection state and error events in C#, see [Session Events](/broken/pages/a6b0206a52213191603932322e62ebe03e43da27). For async operation consumption patterns, see [Async Patterns](/broken/pages/2e57a11946a9763769f91e3ce902bc9e7873be46).
+For audio and microphone scripting, see [Audio API](audio-api.md). For connection state and error events in C#, see [Session Events](session-events.md). For async operation consumption patterns, see [Async Patterns](async-patterns.md).

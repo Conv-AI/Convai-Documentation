@@ -1,20 +1,14 @@
 ---
-description: >-
-  Type reference for IConvaiOperation<T>, IConvaiStream<T>, ConvaiError, and
-  Unit — the async primitives used across all Convai SDK scripting APIs.
+title: Operation and stream types
+description: Type reference for IConvaiOperation<T>, IConvaiStream<T>, ConvaiError, and Unit — the async primitives used across all Convai SDK scripting APIs.
+last_reviewed: "4.2.0"
 ---
 
-# Operation & Stream Types
-
-## Async Primitives: IConvaiOperation and IConvaiStream
-
-Most SDK methods that perform async work return `IConvaiOperation<T>` instead of `Task<T>`. Methods that produce a continuous sequence of values return `IConvaiStream<T>`. These types are designed to work across Unity's coroutine system, C# async/await, and progress-driven flows — without forcing a dependency on `Task` throughout your codebase.
-
-For usage patterns and code examples, see [Async Patterns](/broken/pages/2e57a11946a9763769f91e3ce902bc9e7873be46).
+Most SDK methods that perform async work return `IConvaiOperation<T>` instead of `Task<T>`. Methods that produce a continuous sequence of values return `IConvaiStream<T>`. These types are designed to work across Unity's coroutine system, C# async/await, and progress-driven flows — without forcing a dependency on `Task` throughout your codebase. For usage patterns and code examples, see [Async Patterns](async-patterns.md).
 
 ***
 
-## Why Custom Async Types?
+## Why custom async types?
 
 | Requirement                   | `Task<T>`               | `IConvaiOperation<T>`                |
 | ----------------------------- | ----------------------- | ------------------------------------ |
@@ -30,7 +24,7 @@ For usage patterns and code examples, see [Async Patterns](/broken/pages/2e57a11
 
 The result handle for any SDK async operation. Returned by `ConnectAsync`, `DisconnectAsync`, `StartListeningAsync`, `WaitForCharacterReadyAsync`, and other methods.
 
-### Status Properties
+### Status properties
 
 | Property       | Type              | Description                                                                                                                       |
 | -------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,7 +36,7 @@ The result handle for any SDK async operation. Returned by `ConnectAsync`, `Disc
 | `Error`        | `ConvaiError`     | Populated when `HasError` is true; default when successful or pending                                                             |
 | `Progress`     | `float`           | Completion estimate in the range 0.0–1.0. Not all operations report granular progress — check `Status` for definitive completion. |
 
-### Async/Await
+### Async/await
 
 | Member         | Description                                                                                                   |
 | -------------- | ------------------------------------------------------------------------------------------------------------- |
@@ -72,7 +66,7 @@ The result handle for any SDK async operation. Returned by `ConnectAsync`, `Disc
 
 ***
 
-## `OperationStatus` Enum
+## `OperationStatus` enum
 
 | Value           | Description                                            |
 | --------------- | ------------------------------------------------------ |
@@ -86,7 +80,7 @@ The result handle for any SDK async operation. Returned by `ConnectAsync`, `Disc
 
 ***
 
-## `ConvaiError` Struct
+## `ConvaiError` struct
 
 Carries structured error information without requiring exception handling. Populated in `IConvaiOperation<T>.Error` when `HasError` is true.
 
@@ -97,7 +91,7 @@ Carries structured error information without requiring exception handling. Popul
 | `Exception` | `Exception` | Underlying exception, if the error originated from one. May be `null`. |
 | `IsEmpty`   | `bool`      | True when this is a default (no-error) value                           |
 
-### Static Factory
+### Static factory
 
 ```csharp
 ConvaiError.FromException(Exception exception, string code = "exception")
@@ -167,7 +161,7 @@ await foreach (var item in stream.ReadAllAsync(destroyCancellationToken))
 
 ***
 
-## `StreamStatus` Enum
+## `StreamStatus` enum
 
 | Value           | Description                                          |
 | --------------- | ---------------------------------------------------- |
@@ -181,7 +175,7 @@ await foreach (var item in stream.ReadAllAsync(destroyCancellationToken))
 
 ***
 
-## `Unit` Struct
+## `Unit` struct
 
 ```csharp
 Unit.Value // the only instance
@@ -193,6 +187,6 @@ A void-equivalent used as the type parameter when an operation has no meaningful
 
 ***
 
-## Next Steps
+## Next steps
 
-For practical consumption patterns using these types, see [Async Patterns](/broken/pages/2e57a11946a9763769f91e3ce902bc9e7873be46). For all methods that return `IConvaiOperation<T>`, see [ConvaiManager API](/broken/pages/564f314eec17c428b3dab299640bba82bd89e9e7) and [Character & Player API](/broken/pages/1b8229339946b8477da1ddb8b66d90c9a7a90f53).
+For practical consumption patterns using these types, see [Async Patterns](async-patterns.md). For all methods that return `IConvaiOperation<T>`, see [ConvaiManager API](convaimanager-api.md) and [Character & Player API](character-and-player-api.md).

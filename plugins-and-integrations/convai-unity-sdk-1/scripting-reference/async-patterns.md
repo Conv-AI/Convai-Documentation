@@ -1,19 +1,14 @@
 ---
-description: >-
-  Six patterns for consuming Convai SDK async operations — async/await,
-  coroutines, ContinueWith chaining, progress tracking, cancellation, and stream
-  consumption — with full code examples.
+title: Async patterns
+description: Reference for Convai SDK async operation patterns, including async/await, coroutines, chaining, progress tracking, cancellation, and streams.
+last_reviewed: "4.2.0"
 ---
 
-# Async Patterns
-
-## Consuming SDK Async Operations
-
-`IConvaiOperation<T>` and `IConvaiStream<T>` support multiple consumption patterns so you can use the style that fits your codebase — pure async/await, Unity coroutines, or a mix of both. For type definitions and member references, see [Operation & Stream Types](/broken/pages/e98d8a7b41d32352a016655cdb337adda7888037).
+`IConvaiOperation<T>` and `IConvaiStream<T>` support multiple consumption patterns so you can use the style that fits your codebase — pure async/await, Unity coroutines, or a mix of both. For type definitions and member references, see [Operation & Stream Types](operation-and-stream-types.md).
 
 ***
 
-## Async/Await
+## Async/await
 
 The most direct pattern. Works in any `async` method. Faulted operations throw `ConvaiOperationException`.
 
@@ -105,7 +100,7 @@ yield return op.ToCoroutine(
 
 ***
 
-## ContinueWith Chaining
+## ContinueWith chaining
 
 Transform the result of one operation into another without nesting `await` calls.
 
@@ -131,7 +126,7 @@ IConvaiOperation<string> nameOp = manager
 
 ***
 
-## Progress Tracking
+## Progress tracking
 
 Poll `operation.Progress` to drive a UI progress indicator. The value advances from `0.0` to `1.0` as the operation completes. Not all operations report granular progress — check `Status` for definitive completion.
 
@@ -266,7 +261,7 @@ await foreach (var item in stream.ReadAllAsync()) { ... }
 
 ***
 
-## Error Handling Decision Table
+## Error handling decision table
 
 | Scenario                              | Pattern                           | Reason                                                |
 | ------------------------------------- | --------------------------------- | ----------------------------------------------------- |
@@ -280,9 +275,9 @@ await foreach (var item in stream.ReadAllAsync()) { ... }
 
 ***
 
-## Usage Examples
+## Usage examples
 
-### Example 1 — Loading Overlay With Progress Bar and Cancel Button
+### Example 1 — Loading overlay with progress bar and cancel button
 
 A medical training simulation shows a loading overlay while the session connects, with a visual progress bar and a cancel button for learners who want to exit before the session starts.
 
@@ -336,7 +331,7 @@ public class SessionLoadingOverlay : MonoBehaviour
 ```
 {% endcode %}
 
-### Example 2 — Streaming Transcript Tokens to a Custom Log Widget
+### Example 2 — Streaming transcript tokens to a custom log widget
 
 A corporate onboarding simulation streams individual transcript tokens from Convai and appends them to a custom log widget one token at a time, producing a typewriter-style effect.
 
@@ -387,6 +382,6 @@ public class StreamingTranscriptLog : MonoBehaviour
 
 ***
 
-## Next Steps
+## Next steps
 
-For the full type reference behind these patterns, see [Operation & Stream Types](/broken/pages/e98d8a7b41d32352a016655cdb337adda7888037). For SDK methods that return `IConvaiOperation<T>`, see [ConvaiManager API](/broken/pages/564f314eec17c428b3dab299640bba82bd89e9e7) and [Character & Player API](/broken/pages/1b8229339946b8477da1ddb8b66d90c9a7a90f53).
+For the full type reference behind these patterns, see [Operation & Stream Types](operation-and-stream-types.md). For SDK methods that return `IConvaiOperation<T>`, see [ConvaiManager API](convaimanager-api.md) and [Character & Player API](character-and-player-api.md).

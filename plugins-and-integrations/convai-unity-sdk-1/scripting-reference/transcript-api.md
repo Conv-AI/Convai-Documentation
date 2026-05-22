@@ -1,20 +1,14 @@
 ---
-description: >-
-  Pull-based API reference for ConvaiTranscripts — query, filter, and subscribe
-  to the live in-memory transcript timeline from C# scripts.
+title: Transcript API
+description: Pull-based API reference for ConvaiTranscripts — query, filter, and subscribe to the live in-memory transcript timeline from C# scripts.
+last_reviewed: "4.2.0"
 ---
 
-# Transcript API
-
-## Query and Subscribe to the Transcript Timeline
-
-`ConvaiTranscripts` gives you pull-based, snapshot access to the room's full transcript timeline. Unlike event relay components, which push individual updates as they arrive, the `ConvaiTranscripts` facade maintains a live in-memory timeline that you query on demand. This makes it the right tool for transcript history replay, custom chat UI construction, post-session export, and any feature that needs to read multiple turns at once.
-
-Access the facade via `ConvaiManager.ActiveManager.Transcripts`.
+`ConvaiTranscripts` gives you pull-based, snapshot access to the room's full transcript timeline. Unlike event relay components, which push individual updates as they arrive, the `ConvaiTranscripts` facade maintains a live in-memory timeline that you query on demand. This makes it the right tool for transcript history replay, custom chat UI construction, post-session export, and any feature that needs to read multiple turns at once. Access the facade via `ConvaiManager.ActiveManager.Transcripts`.
 
 ***
 
-## Push vs. Pull
+## Push vs. pull
 
 |               | Event Relays / `ConvaiEvents`                    | `ConvaiTranscripts`                                      |
 | ------------- | ------------------------------------------------ | -------------------------------------------------------- |
@@ -25,7 +19,7 @@ Access the facade via `ConvaiManager.ActiveManager.Transcripts`.
 
 ***
 
-## `ConvaiTranscripts` Facade
+## `ConvaiTranscripts` facade
 
 ### Properties
 
@@ -64,7 +58,7 @@ private void OnTranscriptChanged(TranscriptUpdateBatch batch)
 
 ***
 
-## `TranscriptQuery` — Filtering Turns
+## `TranscriptQuery` — filtering turns
 
 | Field                   | Type                         | Default      | Description                                          |
 | ----------------------- | ---------------------------- | ------------ | ---------------------------------------------------- |
@@ -115,7 +109,7 @@ Use `DisplayText` for real-time subtitle or chat rendering. It combines `Committ
 
 ***
 
-## `TranscriptLifecycle` Enum
+## `TranscriptLifecycle` enum
 
 | Value           | Description                                                                  |
 | --------------- | ---------------------------------------------------------------------------- |
@@ -154,7 +148,7 @@ Use `DisplayText` for real-time subtitle or chat rendering. It combines `Committ
 
 ***
 
-## `TranscriptParticipantRef` Struct
+## `TranscriptParticipantRef` struct
 
 | Property              | Type                        | Description                                                    |
 | --------------------- | --------------------------- | -------------------------------------------------------------- |
@@ -166,7 +160,7 @@ Use `DisplayText` for real-time subtitle or chat rendering. It combines `Committ
 
 Equality comparison and `==`/`!=` operators are supported.
 
-### `TranscriptParticipantKind` Enum
+### `TranscriptParticipantKind` enum
 
 | Value           | Description                 |
 | --------------- | --------------------------- |
@@ -175,9 +169,9 @@ Equality comparison and `==`/`!=` operators are supported.
 
 ***
 
-## Usage Examples
+## Usage examples
 
-### Example 1 — Post-Session Transcript Export
+### Example 1 — Post-session transcript export
 
 A medical training simulation exports the full session transcript to JSON after the session ends, for supervisor review.
 
@@ -218,7 +212,7 @@ public class TranscriptExporter : MonoBehaviour
 ```
 {% endcode %}
 
-### Example 2 — Reactive Chat Log That Appends On Completion
+### Example 2 — Reactive chat log that appends on completion
 
 A corporate onboarding simulation builds a scrollable chat history that appends messages only when turns are committed — avoiding flicker from interim updates.
 
@@ -260,7 +254,7 @@ public class CompletedTurnChatLog : MonoBehaviour
 ```
 {% endcode %}
 
-### Example 3 — Custom Live Chat UI With History Replay
+### Example 3 — Custom live chat UI with history replay
 
 An industrial safety drill builds a full chat UI that replays all committed transcript history on enable — so late-joining viewers see the full conversation — then listens for live changes.
 
@@ -327,6 +321,6 @@ public class LiveChatUI : MonoBehaviour
 
 ***
 
-## Next Steps
+## Next steps
 
-For event-driven transcript reactions without querying the timeline, use `ConvaiCharacterEventRelay` or `ConvaiTranscriptEventRelay` — see [Character Events](/broken/pages/441e0a9c27e1e102f3b91a7c1a16c119a5e26148). For full character scripting API, see [Character & Player API](/broken/pages/1b8229339946b8477da1ddb8b66d90c9a7a90f53).
+For event-driven transcript reactions without querying the timeline, use `ConvaiCharacterEventRelay` or `ConvaiTranscriptEventRelay` — see [Character Events](character-events.md). For full character scripting API, see [Character & Player API](character-and-player-api.md).

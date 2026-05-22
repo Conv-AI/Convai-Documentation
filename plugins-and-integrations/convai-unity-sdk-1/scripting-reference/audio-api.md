@@ -1,12 +1,8 @@
 ---
-description: >-
-  Scripting reference for ConvaiAudio — microphone muting, per-character audio
-  control, audio playback unlock, and listening state management.
+title: Audio API
+description: Scripting reference for ConvaiAudio — microphone muting, per-character audio control, audio playback unlock, and listening state management.
+last_reviewed: "4.2.0"
 ---
-
-# Audio API
-
-## ConvaiAudio Scripting Reference
 
 `ConvaiAudio` is the audio facade on `ConvaiManager`, providing scripted control over microphone capture, per-character remote audio output, and audio playback unlock. It separates concerns cleanly: microphone input (what you send to Convai), character audio output (what you hear from characters), and the WebGL audio playback gate.
 
@@ -19,7 +15,7 @@ if (audio == null) return; // manager not yet bootstrapped
 
 ***
 
-## Microphone Control
+## Microphone control
 
 ### Properties
 
@@ -78,7 +74,7 @@ public class MicMuteIndicator : MonoBehaviour
 
 ***
 
-## Per-Character Audio Control
+## Per-character audio control
 
 These methods control whether a specific character's audio output plays locally. Use character IDs from `ConvaiCharacter.CharacterId` or `ConvaiManager.ActiveManager.Characters`.
 
@@ -103,7 +99,7 @@ These methods control whether a specific character's audio output plays locally.
 
 ***
 
-## Audio Playback — WebGL
+## Audio playback — WebGL
 
 On WebGL, browsers block audio playback until the user has interacted with the page. The SDK gates audio output behind this requirement.
 
@@ -150,9 +146,9 @@ public class WebGLStartButton : MonoBehaviour
 
 ***
 
-## Usage Examples
+## Usage examples
 
-### Example 1 — Mute Button in a Training Simulation HUD
+### Example 1 — Mute button in a training simulation HUD
 
 A military training simulation provides a push-button microphone mute in the HUD so trainees can mute themselves before speaking to the observer, without disconnecting.
 
@@ -193,7 +189,7 @@ public class MuteButton : MonoBehaviour
 }
 ```
 
-### Example 2 — Per-Character Audio Toggle in a Multi-NPC Assessment Scene
+### Example 2 — Per-character audio toggle in a multi-NPC assessment scene
 
 A corporate onboarding simulation has two AI instructors. An assessment manager script mutes the secondary instructor during the primary instructor's evaluation segment, then restores both.
 
@@ -229,7 +225,7 @@ public class AssessmentAudioManager : MonoBehaviour
 }
 ```
 
-### Example 3 — Microphone Device Selection Before Connect
+### Example 3 — Microphone device selection before connect
 
 An interactive experience lets users pick their preferred microphone from a dropdown before the session starts, then starts listening on the selected device.
 
@@ -288,6 +284,6 @@ public class MicrophoneSelector : MonoBehaviour
 
 ***
 
-## Next Steps
+## Next steps
 
-For per-character audio events and session control, see [Character & Player API](/broken/pages/1b8229339946b8477da1ddb8b66d90c9a7a90f53). For WebGL-specific audio requirements and limitations, see the [WebGL Platform Guide](/broken/pages/ca027ff31381750002b395b7f48786dc4ee2f584). For connection and session control, see [ConvaiManager API](/broken/pages/564f314eec17c428b3dab299640bba82bd89e9e7).
+For per-character audio events and session control, see [Character & Player API](character-and-player-api.md). For WebGL-specific audio requirements and limitations, see the [WebGL Platform Guide](../platform-guides/webgl.md). For connection and session control, see [ConvaiManager API](convaimanager-api.md).
