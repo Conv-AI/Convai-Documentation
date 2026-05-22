@@ -1,2 +1,6 @@
-unity_sdk_version: 4.2.0
-unity_min_version: 2023.1 or later
+unity_sdk_version: "4.2.0"
+unity_min_version: "2023.1 or later"
+unity_recommended_version: "Unity 6 (6000.x)"
+dep_newtonsoft_json_version: "3.2.2"
+dep_ugui_version: "2.0.0"
+dep_inputsystem_version: "1.18.0"

@@ -1,16 +1,12 @@
 ---
-description: >-
-  Feature availability across Windows, macOS, Android, iOS, Meta Quest, and
-  WebGL for the Convai Unity SDK.
+title: Platform support matrix
+description: Reference for Convai Unity SDK platform support, including feature availability across Windows, macOS, Android, iOS, Meta Quest, and WebGL.
+last_reviewed: "4.2.0"
 ---
 
-# Platform Support Matrix
+The Convai Unity SDK runs on all major Unity deployment targets. Feature availability varies by platform — use the matrix below to confirm support before building for a specific target.
 
-### Feature Availability by Platform
-
-The Convai Unity SDK runs on all major Unity deployment targets. Feature availability varies by platform. Use this matrix to confirm support before building for a specific target.
-
-### Feature × Platform Matrix
+## Feature × platform matrix
 
 | Feature                    | Windows / macOS / Linux | Android                        | iOS                                    | Meta Quest            | WebGL                                  |
 | -------------------------- | ----------------------- | ------------------------------ | -------------------------------------- | --------------------- | -------------------------------------- |
@@ -28,7 +24,7 @@ The Convai Unity SDK runs on all major Unity deployment targets. Feature availab
 | Vision — Webcam            | ✅ Full                  | ⚠️ Runtime permission required | ⚠️ `NSCameraUsageDescription` required | ❌ Not applicable      | ❌ Not supported                        |
 | Vision — Quest passthrough | ❌ Not supported         | ❌ Not supported                | ❌ Not supported                        | ✅ Full                | ❌ Not supported                        |
 
-### Platform Notes
+## Platform-specific requirements
 
 {% tabs %}
 {% tab title="WebGL" %}
@@ -67,9 +63,8 @@ Quest passthrough vision (`QuestVisionFrameSource`) is supported on **Quest 3 an
 
 * Meta XR SDK imported into your project
 * `PassthroughCameraAccess` component present in the scene
-* Two Android permissions declared in your manifest:
-  * `horizonos.permission.HEADSET_CAMERA`
-  * `android.permission.CAMERA`
+
+The required passthrough camera permissions are declared automatically when Meta XR SDK is imported.
 
 On other Quest hardware or non-Quest platforms, `QuestVisionFrameSource` produces no frames. Use `CameraVisionFrameSource` or `WebcamVisionFrameSource` instead.
 
@@ -77,10 +72,10 @@ On other Quest hardware or non-Quest platforms, `QuestVisionFrameSource` produce
 {% endtab %}
 {% endtabs %}
 
-### Next Steps
+## Next steps
 
 With platform constraints confirmed, review the network requirements for real-time SDK operation.
 
-{% content-ref url="/broken/pages/9b1dbe26e63038852e8beeda5c8ba2f29725a170" %}
-[Broken link](/broken/pages/9b1dbe26e63038852e8beeda5c8ba2f29725a170)
+{% content-ref url="network-and-api-requirements.md" %}
+[Network and API requirements](network-and-api-requirements.md)
 {% endcontent-ref %}
