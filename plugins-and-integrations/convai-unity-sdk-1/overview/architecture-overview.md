@@ -22,7 +22,7 @@ graph TD
 
     subgraph AG["Agent Tier"]
         CC["ConvaiCharacter × N\n(session · transcripts · events)"]
-        CP["ConvaiPlayer × 1\n(identity · text input)"]
+        CP["ConvaiPlayer\n(identity · text input)"]
     end
 
     subgraph ML["Module Layer (opt-in per character)"]
@@ -70,7 +70,7 @@ Most integration code only needs `ConvaiManager.ActiveManager` and the character
 
 It is responsible for:
 
-* **Room connection lifecycle** — connecting, disconnecting, reconnecting with exponential backoff
+* **Room connection lifecycle** — connecting, disconnecting, reconnecting
 * **Microphone capture** — starting and stopping audio input, mute control
 * **Turn-taking mode** — hands-free (`ConversationInputMode.HandsFree`) or push-to-talk (`ConversationInputMode.PushToTalk`)
 * **Dynamic context transport** — sending state updates and events to Convai at runtime
@@ -87,7 +87,7 @@ The Agent tier contains the components you place on scene GameObjects.
 Add `ConvaiCharacter` to each NPC or agent GameObject. One component per character. It owns:
 
 * Character ID — the unique ID from your Convai dashboard
-* Session state — `Connected`, `Disconnecting`, `Reconnecting`, etc.
+* Session state — `Disconnected`, `Connecting`, `Connected`, `Reconnecting`, `Disconnecting`, `Error`
 * Conversation lifecycle — `StartConversationAsync()`, `StopConversationAsync()`, `ToggleSpeech()`
 * Transcript and event callbacks — `OnTranscriptReceived`, `OnEmotionChanged`, `OnActionsReceived`, `OnSpeechStarted`, `OnSpeechStopped`, `OnCharacterReady`
 * Action configuration — via `ConvaiActionConfigSource` component
@@ -96,7 +96,7 @@ Add `ConvaiCharacter` to each NPC or agent GameObject. One component per charact
 
 ### ConvaiPlayer
 
-Add `ConvaiPlayer` to your player GameObject. Exactly one `ConvaiPlayer` per scene. It owns:
+Add `ConvaiPlayer` to your player GameObject. One per scene is standard. It owns:
 
 * Player display name and name tag color for transcript attribution
 * Text message sending — `SendTextMessage(string message)`
@@ -123,7 +123,7 @@ Modules are optional Unity components you add to the same GameObject as `ConvaiC
 | ConversationFlow    | Bridges the conversation event stream to per-frame dialogue state (Idle, Speaking, Reacting, etc.)               |
 | Embodiment          | Foundational behavior profile and lifecycle management for physical presence and behavioral modules              |
 
-`ConversationFlow` and `Embodiment` are automatically added when you use **GameObject > Convai > Setup Required Components**. `LipSync`, `Emotion`, `Vision`, `Narrative`, `DialogueAnimation`, `Gaze`, and `Attention` are opt-in.
+`ConversationFlow` is provisioned automatically at runtime when a `ConvaiCharacter` initializes. All other modules — `LipSync`, `Emotion`, `Vision`, `Narrative`, `DialogueAnimation`, `FacialAnimation`, `Gaze`, `Attention`, and `Embodiment` — are opt-in.
 
 ## Configuration model
 
