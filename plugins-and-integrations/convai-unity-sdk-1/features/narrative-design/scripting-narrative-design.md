@@ -1,19 +1,13 @@
 ---
-description: >-
-  The complete C# surface of Narrative Design — IConvaiNarrativeDesign events,
-  InvokeTrigger, InvokeSpeech with speak tags, async section fetching, and
-  runtime trigger reconfiguration.
+title: Narrative Design scripting reference
+description: Reference for IConvaiNarrativeDesign, including section events, trigger invocation, speech injection, template keys, and async fetch methods.
 ---
-
-# Scripting Narrative Design
-
-## Controlling Narrative Design Programmatically
 
 The Inspector workflow covers the majority of use cases. This page documents the full C# surface for situations where you need programmatic control — dynamic character switching, async data fetching at runtime, runtime-generated narrative flows, or deep integration with your own game systems.
 
-All of the capabilities described here are available through `IConvaiNarrativeDesign`, which is exposed on every `ConvaiCharacter` via the `NarrativeDesign` property. `ConvaiNarrativeDesignManager` and `ConvaiNarrativeDesignTrigger` both delegate to this interface internally, so everything you configure in the Inspector is also reachable from code.
+All capabilities described here are available through `IConvaiNarrativeDesign`, exposed on every `ConvaiCharacter` via the `NarrativeDesign` property. `ConvaiNarrativeDesignManager` and `ConvaiNarrativeDesignTrigger` both delegate to this interface internally, so everything you configure in the Inspector is also reachable from code.
 
-## Accessing the Character API
+## Access the character API
 
 Every `ConvaiCharacter` exposes a `NarrativeDesign` property that returns an `IConvaiNarrativeDesign` implementation:
 
@@ -24,13 +18,13 @@ IConvaiNarrativeDesign narrative = character.NarrativeDesign;
 
 ### Properties
 
-| Property             | Type                                  | Description                                                                                                                                     |
-| -------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TemplateKeys`       | `IReadOnlyDictionary<string, string>` | Snapshot of all template keys currently tracked for this character.                                                                             |
-| `CurrentSectionId`   | `string`                              | The section ID most recently received from the backend. Empty string if no section has been received yet.                                       |
-| `CurrentSectionData` | `NarrativeSectionData`                | Full section payload. Contains `SectionId`, `BehaviorTreeCode`, and `BehaviorTreeConstants`. `null` until the first section change is received. |
+| Property | Type | Description |
+|---|---|---|
+| `TemplateKeys` | `IReadOnlyDictionary<string, string>` | Snapshot of all template keys currently tracked for this character. |
+| `CurrentSectionId` | `string` | The section ID most recently received from the backend. Empty string if no section has been received yet. |
+| `CurrentSectionData` | `NarrativeSectionData` | Full section payload. Contains `SectionId`, `BehaviorTreeCode`, and `BehaviorTreeConstants`. `null` until the first section change is received. |
 
-## Listening to Section Changes
+## Listen to section changes
 
 Subscribe to these events in `OnEnable` and unsubscribe in `OnDisable` to avoid stale listeners after a component is disabled or destroyed.
 
@@ -59,19 +53,17 @@ private void HandleSectionData(NarrativeSectionData data)
 }
 ```
 
+These events are delivered via the SDK's internal `EventHub`. If your handler touches Unity API (e.g., `GameObject.SetActive`), use `ConvaiNarrativeDesignManager` in the scene — it performs main-thread delivery automatically. Raw subscriptions to `IConvaiNarrativeDesign` events may arrive on a background thread depending on configuration.
+
 ### Events
 
-| Event                   | Signature                                  | Description                                                                                |
-| ----------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| `OnSectionChanged`      | `Action<string, string>`                   | Fires on every section transition. Parameters: `previousId`, `newId`.                      |
-| `OnSectionDataReceived` | `Action<NarrativeSectionData>`             | Fires on every section transition with the full payload.                                   |
-| `OnTriggerInvoked`      | `Action<ConvaiNarrativeTriggerInvocation>` | Fires after a trigger or speech request is accepted locally (before backend confirmation). |
+| Event | Signature | Description |
+|---|---|---|
+| `OnSectionChanged` | `Action<string, string>` | Fires on every section transition. Parameters: `previousId`, `newId`. |
+| `OnSectionDataReceived` | `Action<NarrativeSectionData>` | Fires on every section transition with the full payload. |
+| `OnTriggerInvoked` | `Action<ConvaiNarrativeTriggerInvocation>` | Fires after a trigger or speech request is accepted locally (before backend confirmation). |
 
-{% hint style="warning" %}
-`OnSectionChanged` and `OnSectionDataReceived` are delivered via the SDK's internal `EventHub`. If your subscription runs code that touches Unity API (e.g., `GameObject.SetActive`), ensure the `ConvaiNarrativeDesignManager` is in the scene — it uses main-thread delivery automatically. Raw subscriptions to `IConvaiNarrativeDesign` events may arrive on a background thread depending on configuration.
-{% endhint %}
-
-## Invoking Triggers from Code
+## Invoke triggers from code
 
 ```csharp
 // Named trigger — advances the graph along a specific edge
@@ -83,44 +75,34 @@ character.NarrativeDesign.InvokeTrigger("ItemInspected", "The fire extinguisher 
 
 `InvokeTrigger` returns `false` if both `triggerName` and `triggerMessage` are empty, or if the trigger is rejected internally. Otherwise it returns `true` and queues the trigger if the session is not yet open.
 
-## Controlling What the Character Says
+## Control character speech
 
-`InvokeSpeech` gives you direct control over the character's next utterance without advancing the narrative graph. It has two distinct modes depending on whether you wrap the message in `<speak>` tags.
+`InvokeSpeech` gives you direct control over the character's next utterance without advancing the narrative graph. It has two modes depending on whether you wrap the message in `<speak>` tags.
 
-### Context Injection (plain text)
-
-Pass a plain string to make the character _aware_ of a piece of information. The character absorbs the context and responds in its own words — the exact phrasing is up to the AI.
+**Context injection (plain text):** pass a plain string to make the character aware of a piece of information. The character absorbs the context and responds in its own words.
 
 ```csharp
 // Character becomes aware of this fact and responds naturally
 character.NarrativeDesign.InvokeSpeech("The trainee just completed the evacuation drill.");
 ```
 
-Use this when you want the character to react to a game event in a natural, conversational way rather than reading from a script.
-
-### Verbatim Speech (speak tags)
-
-Wrap the message in `<speak>` tags to make the character say that exact text word for word.
+**Verbatim speech (`<speak>` tags):** wrap the message in `<speak>` tags to make the character say that exact text word for word.
 
 ```csharp
 // Character says this sentence verbatim
 character.NarrativeDesign.InvokeSpeech("<speak>Attention: the fire exit on level two is now unlocked.</speak>");
 ```
 
-Use this for announcements, scripted lines, safety alerts, or any moment where the exact wording matters.
-
-### Comparison
-
-| Pattern                               | What the character does                                 |
-| ------------------------------------- | ------------------------------------------------------- |
-| `InvokeSpeech("text")`                | Becomes aware of the context, responds in its own words |
-| `InvokeSpeech("<speak>text</speak>")` | Says that exact text verbatim                           |
+| Pattern | What the character does |
+|---|---|
+| `InvokeSpeech("text")` | Becomes aware of the context, responds in its own words |
+| `InvokeSpeech("<speak>text</speak>")` | Says that exact text verbatim |
 
 {% hint style="info" %}
 `InvokeSpeech` does not advance the narrative graph regardless of which mode you use. To advance the graph at the same time as sending a message, use `InvokeTrigger` with a named trigger.
 {% endhint %}
 
-### Listening to Trigger Invocations
+### Listen to trigger invocations
 
 ```csharp
 character.NarrativeDesign.OnTriggerInvoked += invocation =>
@@ -131,13 +113,13 @@ character.NarrativeDesign.OnTriggerInvoked += invocation =>
 
 `ConvaiNarrativeTriggerInvocation` fields:
 
-| Field            | Type     | Description                                                              |
-| ---------------- | -------- | ------------------------------------------------------------------------ |
-| `TriggerName`    | `string` | The trigger name that was sent (empty for speech).                       |
-| `TriggerMessage` | `string` | The optional message payload.                                            |
-| `Queued`         | `bool`   | `true` if the trigger was deferred because the session was not yet open. |
+| Field | Type | Description |
+|---|---|---|
+| `TriggerName` | `string` | The trigger name that was sent (empty for speech). |
+| `TriggerMessage` | `string` | The optional message payload. |
+| `Queued` | `bool` | `true` if the trigger was deferred because the session was not yet open. |
 
-## Template Keys via Code
+## Template keys via code
 
 ```csharp
 // Set a single key
@@ -155,9 +137,9 @@ Both methods send immediately if the session is open, or queue for the next conn
 
 The character-level API and `ConvaiNarrativeDesignManager`'s methods converge on the same transport internally. Use the Manager's methods when you want the keys visible and editable in the Inspector; use the character API for purely code-driven flows where Inspector visibility is not needed.
 
-## Fetching Sections and Triggers Programmatically
+## Fetch sections and triggers
 
-### Via the Character API
+### Via the character API
 
 ```csharp
 NarrativeFetchResult<List<NarrativeSectionInfo>> result =
@@ -186,7 +168,7 @@ foreach (NarrativeTriggerInfo trigger in result.Data)
 
 `NarrativeTriggerInfo` fields: `TriggerId`, `TriggerName`, `TriggerMessage`, `DestinationSection`.
 
-### Via the Static Fetcher
+### Via the static fetcher
 
 `NarrativeDesignFetcher` provides the same data without needing a character component reference — useful in Editor tooling or loading screens:
 
@@ -206,29 +188,23 @@ var (sectionsResult, triggersResult) =
 
 `FetchResult<T>` fields:
 
-| Field     | Type     | Description                                          |
-| --------- | -------- | ---------------------------------------------------- |
-| `Success` | `bool`   | `true` if the request succeeded.                     |
-| `Data`    | `T`      | The fetched data. `default` if `Success` is `false`. |
-| `Error`   | `string` | Error message. `null` if `Success` is `true`.        |
+| Field | Type | Description |
+|---|---|---|
+| `Success` | `bool` | `true` if the request succeeded. |
+| `Data` | `T` | The fetched data. `default` if `Success` is `false`. |
+| `Error` | `string` | Error message. `null` if `Success` is `true`. |
 
-## Resetting State
+## Advanced runtime control
+
+### Reset controller state
 
 ```csharp
 // Reset controller state only (clears CurrentSectionID and CurrentSectionData)
 // Does NOT touch the section configs list or Unity Event wiring
 narrativeManager.ResetController();
-
-// Clear all section configs permanently (removes all UnitySectionEventConfig entries)
-// Use only when switching to a completely different character
-narrativeManager.ClearAllSectionConfigs();
 ```
 
-{% hint style="warning" %}
-`ClearAllSectionConfigs()` removes all `UnitySectionEventConfig` entries and all Unity Event wiring. This cannot be undone at runtime. Call it only when you have confirmed you are switching to a different character and no longer need the existing section event bindings.
-{% endhint %}
-
-## Reconfiguring ConvaiNarrativeDesignTrigger from Code
+### Reconfigure ConvaiNarrativeDesignTrigger from code
 
 All Inspector-configurable settings have corresponding setter methods:
 
@@ -256,7 +232,17 @@ if (!trigger.ValidateConfiguration())
 }
 ```
 
-## Architecture Overview
+{% hint style="warning" %}
+`ClearAllSectionConfigs()` removes all `UnitySectionEventConfig` entries and all Unity Event wiring. This cannot be undone at runtime. Call it only when you have confirmed you are switching to a different character and no longer need the existing section event bindings.
+{% endhint %}
+
+```csharp
+// Clear all section configs permanently (removes all UnitySectionEventConfig entries)
+// Use only when switching to a completely different character
+narrativeManager.ClearAllSectionConfigs();
+```
+
+## Component relationships
 
 ```mermaid
 classDiagram
@@ -293,6 +279,14 @@ classDiagram
     CharacterNarrativeDesignFacade --> ConnectionService : sends via RTVI
 ```
 
-## Conclusion
+`ConvaiNarrativeDesignManager` and `ConvaiNarrativeDesignTrigger` both delegate to `IConvaiNarrativeDesign`. The `CharacterNarrativeDesignFacade` implements the interface and manages the pending queue; `ConnectionService` handles the actual RTVI transport.
 
-`IConvaiNarrativeDesign` exposes the full Narrative Design surface in code — trigger invocation, speech injection, template key control, async data fetching, and real-time section change events — so you can integrate it into any architecture without being tied to the Inspector components. For complete worked examples composing these APIs into real scenarios, see [Usage Examples](../../../unity-plugin-beta-overview/features/narrative-design/usage-examples.md). For diagnosing problems, see Troubleshooting & Diagnostics.
+## Next steps
+
+{% content-ref url="usage-examples.md" %}
+[Narrative Design usage examples](usage-examples.md)
+{% endcontent-ref %}
+
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Troubleshoot narrative design](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}
