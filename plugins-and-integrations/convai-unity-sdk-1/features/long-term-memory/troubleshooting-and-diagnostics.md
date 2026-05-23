@@ -1,24 +1,22 @@
 ---
+title: Troubleshoot long-term memory
 description: >-
-  Diagnose why Long-Term Memory isn't persisting, verify end-user identity
+  Diagnose why long-term memory isn't persisting, verify end-user identity
   stability across sessions, and resolve Memory Management API HTTP errors.
+last_reviewed: "4.2.0"
 ---
-
-# Troubleshooting & Diagnostics
-
-## Diagnosing Long-Term Memory Problems
 
 Most LTM issues fall into three categories: memories not persisting between sessions, the wrong user receiving memories, and API calls failing with HTTP errors. Work through the diagnostic flow below before consulting the reference tables.
 
 ***
 
-## First-Line Investigation
+## First-line investigation
 
 Before checking anything else, run through these three steps in order:
 
 **1. Confirm memory is enabled for the character**
 
-Sign in at [convai.com](https://convai.com/), open the character, and verify the **Memory** tab shows **Long-Term Memory: On**. Memory is disabled by default — this is the single most common reason LTM appears not to work.
+Sign in at [convai.com](<code class="expression">space.vars.dashboard_url</code>), open the character, and verify the **Memory** tab shows **Long-Term Memory: On**. Memory is disabled by default — this is the single most common reason LTM appears not to work.
 
 **2. Verify the end-user ID is stable across sessions**
 
@@ -47,56 +45,41 @@ Check the Console for Convai startup messages. A failed connection (invalid API 
 
 ***
 
-## Decision Flow
+## Decision flow
 
 Use this flow when memory isn't persisting:
 
-```
-Is LTM enabled on the character dashboard?
-│
-├─ NO → Enable it at convai.com → retry
-│
-└─ YES
-   │
-   Is the same end_user_id logged across sessions?
-   │
-   ├─ NO → Identity source is changing (see "Wrong User Getting Memories" below)
-   │
-   └─ YES
-      │
-      Did the session connect successfully?
-      │
-      ├─ NO → Fix connection issue first (API key, network)
-      │
-      └─ YES
-         │
-         Did the conversation contain facts worth remembering?
-         (names, roles, preferences, history — not short yes/no exchanges)
-         │
-         ├─ NO → Have a more substantive conversation and retry
-         │
-         └─ YES → Contact Convai support with your character ID and session timestamp
+```mermaid
+graph TD
+    A[LTM enabled on character dashboard?] -->|No| B[Enable it at convai.com and retry]
+    A -->|Yes| C[Same end_user_id logged across sessions?]
+    C -->|No| D[Identity source is changing — see Common issues]
+    C -->|Yes| E[Session connected successfully?]
+    E -->|No| F[Fix connection issue first — API key or network]
+    E -->|Yes| G[Conversation contained facts worth remembering?]
+    G -->|No| H[Have a more substantive conversation and retry]
+    G -->|Yes| I[Contact Convai support with character ID and session timestamp]
 ```
 
 ***
 
-## Common Issues and Fixes
+## Common issues
 
-| Symptom                                           | Likely Cause                                                           | Fix                                                                                                                                                                                             |
-| ------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Character never references previous sessions      | LTM not enabled on character                                           | Enable it in the character's Memory tab at convai.com                                                                                                                                           |
-| Memory works in editor, not in build              | `DeviceEndUserIdProvider` returns different values in editor vs. build | Expected behavior — editor uses `PlayerPrefs` GUID; build uses device ID. Ensure the build's device ID is stable. For cross-context consistency, implement a custom `IEndUserIdentityProvider`. |
-| Memory lost after reinstall                       | `PlayerPrefs` cleared on reinstall                                     | Use a server-assigned account ID via a custom provider. Device-based and GUID-based IDs do not survive reinstalls.                                                                              |
-| Different users on the same device share memories | Multiple users sharing one device                                      | Each user must receive a unique `end_user_id`. If `DeviceEndUserIdProvider` is in use, the device-scoped GUID is shared. Implement a custom provider that returns a per-user account ID.        |
-| Custom provider not taking effect                 | Provider registered after `ConnectAsync`                               | Register in `Awake()`, before `ConvaiRoomManager.Start()` completes. If `ConvaiCharacter` has **Auto Connect** enabled, `Start()` may be too late.                                              |
-| Memory facts look wrong or outdated               | Stale records from testing                                             | Use `client.Memory.DeleteAllAsync` to clear test data before starting a fresh evaluation.                                                                                                       |
-| `GetEndUserId()` returns empty string             | Custom provider returning null or whitespace                           | The SDK normalizes null/whitespace to `null` before sending, resulting in anonymous sessions. Ensure your provider always returns a non-empty value.                                            |
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| Character never references previous sessions | LTM not enabled on character | Enable it in the character's Memory tab at [convai.com](<code class="expression">space.vars.dashboard_url</code>) |
+| Memory works in editor, not in build | `DeviceEndUserIdProvider` returns different values in editor vs. build | Expected behavior — editor uses `PlayerPrefs` GUID; build uses device ID. Ensure the build's device ID is stable. For cross-context consistency, implement a custom `IEndUserIdentityProvider`. |
+| Memory lost after reinstall | `PlayerPrefs` cleared on reinstall | Use a server-assigned account ID via a custom provider. Device-based and GUID-based IDs do not survive reinstalls. |
+| Different users on the same device share memories | Multiple users sharing one device | Each user must receive a unique `end_user_id`. If `DeviceEndUserIdProvider` is in use, the device-scoped GUID is shared. Implement a custom provider that returns a per-user account ID. |
+| Custom provider not taking effect | Provider registered after `ConnectAsync` | Register in `Awake()`, before `ConvaiRoomManager.Start()` completes. If `ConvaiCharacter` has **Auto Connect** enabled, `Start()` may be too late. |
+| Memory facts look wrong or outdated | Stale records from testing | Use `client.Memory.DeleteAllAsync` to clear test data before starting a fresh evaluation. |
+| `GetEndUserId()` returns empty string | Custom provider returning null or whitespace | The SDK normalizes null/whitespace to `null` before sending, resulting in anonymous sessions. Ensure your provider always returns a non-empty value. |
 
 ***
 
-## Runtime Diagnostics
+## Runtime diagnostics
 
-### List All Memories for a User
+### List all memories for a user
 
 Use this script to confirm what the server has stored. Run it from the Inspector via right-click → **List Memories**.
 
@@ -142,7 +125,7 @@ public class MemoryDiagnostic : MonoBehaviour
 }
 ```
 
-### Check Memory Enable State
+### Check memory enable state
 
 Confirm programmatically whether LTM is currently enabled for a character.
 
@@ -159,20 +142,20 @@ private async void CheckMemoryEnabled()
 
 ***
 
-## API Error Reference
+## API error codes
 
 All Memory Management API errors throw `ConvaiRestException`. The `StatusCode` property maps to the causes below.
 
-| HTTP Status                 | Cause                                                                     | Fix                                                                                                                                              |
-| --------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `400 Bad Request`           | Missing required parameter (`character_id`, `end_user_id`, or `memories`) | Verify all required arguments are non-null and non-empty before calling                                                                          |
-| `401 Unauthorized`          | Invalid or missing API key                                                | Reconfigure your API key at `Convai → Account` or `Edit → Project Settings → Convai SDK`                                                         |
-| `403 Forbidden`             | The character does not belong to the account that owns the API key        | Verify the character ID belongs to the account associated with your API key                                                                      |
-| `404 Not Found`             | Invalid character ID, end-user ID, or memory ID                           | Double-check IDs against the Convai dashboard. If querying by `memoryId`, verify it from a prior `ListAsync` call.                               |
-| `429 Too Many Requests`     | Rate limit exceeded                                                       | Implement exponential backoff. Example: retry after `2^attempt` seconds with a `CancellationToken` to abort after a maximum number of retries.   |
-| `500 Internal Server Error` | Transient server error                                                    | Retry the request after a short delay. If errors persist, check the Convai status page and contact support with your character ID and timestamp. |
+| HTTP status | Cause | Fix |
+| --- | --- | --- |
+| `400 Bad Request` | Missing required parameter (`character_id`, `end_user_id`, or `memories`) | Verify all required arguments are non-null and non-empty before calling |
+| `401 Unauthorized` | Invalid or missing API key | Reconfigure your API key at **Convai → Account** or **Edit → Project Settings → Convai SDK** |
+| `403 Forbidden` | The character does not belong to the account that owns the API key | Verify the character ID belongs to the account associated with your API key |
+| `404 Not Found` | Invalid character ID, end-user ID, or memory ID | Double-check IDs against the Convai dashboard. If querying by `memoryId`, verify it from a prior `ListAsync` call. |
+| `429 Too Many Requests` | Rate limit exceeded | Implement exponential backoff. Example: retry after `2^attempt` seconds with a `CancellationToken` to abort after a maximum number of retries. |
+| `500 Internal Server Error` | Transient server error | Retry the request after a short delay. If errors persist, check the Convai status page and contact support with your character ID and timestamp. |
 
-### Exponential Backoff Pattern
+### Exponential backoff pattern
 
 ```csharp
 using System;
@@ -209,12 +192,12 @@ public static class MemoryRetryHelper
 
 ***
 
-## Next Steps
+## Next steps
 
-{% content-ref url="/broken/pages/ca167fcb90a43c4d26d66c7db19f470ab5d32123" %}
-[Broken link](/broken/pages/ca167fcb90a43c4d26d66c7db19f470ab5d32123)
+{% content-ref url="long-term-memory-scripting-reference.md" %}
+[Long-term memory scripting reference](long-term-memory-scripting-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/d8870541630845243553282afe5f5d53ed036fbe" %}
-[Broken link](/broken/pages/d8870541630845243553282afe5f5d53ed036fbe)
+{% content-ref url="configure-memory-for-a-character.md" %}
+[Configure memory for a character](configure-memory-for-a-character.md)
 {% endcontent-ref %}
