@@ -41,19 +41,14 @@ The Convai backend selects the action name and optional target from the affordan
 `ConvaiActionDispatcher` is optional. If you want to handle action batches in your own gameplay code, subscribe to `ConvaiCharacter.OnActionsReceived` directly and skip the dispatcher entirely.
 {% endhint %}
 
-## Built-in and sample executors
+## Executors
 
-Two executors ship with the core SDK runtime and are always available:
+Six executor components ship with the Convai SDK:
 
 | Executor | Behavior |
 | --- | --- |
 | `LookAtTargetActionExecutor` | Smoothly rotates the NPC to face a target over a configurable duration |
 | `UnityEventActionExecutor` | Fires a `UnityEvent` — connects any action to Inspector-wired callbacks without scripting |
-
-Four additional executors ship as samples and **require importing the sample pack** via Package Manager:
-
-| Executor | Behavior |
-| --- | --- |
 | `TransformMoveToActionExecutor` | Instantly snaps the NPC to the target position — prototype use only |
 | `NavMeshMoveToActionExecutor` | Drives a `NavMeshAgent` to the target using pathfinding |
 | `AnimatorTriggerActionExecutor` | Maps action names to Animator triggers via a configurable binding list |

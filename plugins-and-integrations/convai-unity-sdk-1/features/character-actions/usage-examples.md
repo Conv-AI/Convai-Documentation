@@ -9,7 +9,7 @@ These four examples progress from the simplest possible configuration to full sc
 
 **Scenario:** A fire safety training simulation. The instructor NPC retrieves a fire extinguisher when the trainee asks. No scripting required.
 
-**Prerequisites:** Sample pack imported (for `NavMeshMoveToActionExecutor`). NavMesh baked in the scene.
+**Prerequisites:** NavMesh baked in the scene.
 
 ### Inspector configuration
 

@@ -1,6 +1,6 @@
 ---
 title: Character actions quick start
-description: Add a working Move To action to your NPC using ConvaiActionConfigSource, ConvaiActionDispatcher, and a sample executor without writing any scripts.
+description: Add a working Move To action to your NPC using ConvaiActionConfigSource, ConvaiActionDispatcher, and TransformMoveToActionExecutor without writing any scripts.
 ---
 
 This guide walks you through connecting a "Move To" action so your NPC navigates to a scene object when the player asks. By the end, your character responds to natural language requests like "go to the crate" by physically moving to it in the scene — no code required.
@@ -10,10 +10,7 @@ This guide walks you through connecting a "Move To" action so your NPC navigates
 Before starting, verify:
 
 * [ ] A `ConvaiCharacter` component is already on your NPC's `GameObject`
-* [ ] The Convai SDK sample pack is imported (required for `TransformMoveToActionExecutor`)
 * [ ] Your scene has at least one target object the NPC should be able to reach
-
-To import samples: open **Window → Package Manager**, select the **Convai SDK for Unity** package, expand the **Samples** section, and click **Import** next to the sample pack.
 
 ## Configure the action pipeline
 

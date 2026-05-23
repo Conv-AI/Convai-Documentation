@@ -1,13 +1,9 @@
 ---
 title: Action executors
-description: Reference for all six action executor components — core look-at and event executors, plus sample NavMesh, animation, and pickup executors.
+description: Reference for all six action executor components — look-at, event, NavMesh movement, animation trigger, and compound pickup executors.
 ---
 
-Executors are the components that perform in-scene behavior when the dispatcher runs an action step. The Convai SDK ships two executors in the core runtime (always available) and four additional executors in the sample pack (require import). This page documents every Inspector field and explains when to use each executor.
-
-## Core runtime executors
-
-These two executors are part of the core SDK runtime. No sample import is required.
+Executors are the components that perform in-scene behavior when the dispatcher runs an action step. Six executor components ship with the Convai SDK. This page documents every Inspector field and explains when to use each executor.
 
 ### LookAtTargetActionExecutor
 
@@ -43,10 +39,6 @@ Fires a `UnityEvent` and immediately returns `Succeeded`. No target resolution i
 | Field | Type | Description |
 | --- | --- | --- |
 | `_onExecute` | `UnityEvent` | Invoked each time the action step runs. Wire any number of callbacks in the Inspector. |
-
-## Sample executors
-
-These four executors are included in the Convai SDK sample pack. Import them via **Window → Package Manager → Convai SDK for Unity → Samples → Import**.
 
 {% hint style="danger" %}
 **`TransformMoveToActionExecutor` is for prototyping only.** It teleports the character instantly with no animation or pathfinding. Replace it with `NavMeshMoveToActionExecutor` or a custom executor before shipping to users.
@@ -170,7 +162,7 @@ Compound executor that chains three behaviors: navigate to the target → fire a
 
 ## Usage examples
 
-### Example 1 — Safety instructor with gesture and movement (core executors only)
+### Example 1 — Safety instructor with gesture and movement
 
 **Scenario:** A workplace safety training simulation. The instructor NPC uses two always-available executors to point at hazards and demonstrate equipment locations.
 
@@ -188,11 +180,11 @@ Compound executor that chains three behaviors: navigate to the target → fire a
 
 **Expected outcome:** "Point at the gas valve" → the NPC rotates to face the gas valve over 0.8 seconds. "Flag the hazard" → the `UnityEvent` fires and highlights the active hazard in the UI.
 
-### Example 2 — Equipment retrieval with animation (sample executors)
+### Example 2 — Equipment retrieval with animation
 
 **Scenario:** A medical training scenario. The instructor retrieves a defibrillator and hands it off.
 
-**Inspector setup (requires sample import):**
+**Inspector setup:**
 
 * `NavMeshMoveToActionExecutor` — `_stoppingDistance = 0.6`
 * `PickUpActionExecutor` — `_mover = NavMeshMoveToActionExecutor`, `_pickUpTrigger = "GrabItem"`, `_attachPoint = RightHandBone`, `_animationDuration = 1.2`

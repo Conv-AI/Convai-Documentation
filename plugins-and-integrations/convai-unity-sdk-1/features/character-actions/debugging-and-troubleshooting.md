@@ -150,7 +150,7 @@ Click **Reset Probe State** between test runs to keep counters readable.
 | NPC starts moving then freezes | `NavMeshMoveToActionExecutor` agent is stuck or path is blocked | Bake NavMesh (**Window → AI → Navigation → Bake**); verify the NPC and target are both on NavMesh surface; set `TimeoutSeconds` on the action definition to prevent indefinite blocking |
 | NPC navigates but object is not picked up | `PickUpActionExecutor._mover` is null | Assign a `NavMeshMoveToActionExecutor` reference to `_mover` in the `PickUpActionExecutor` Inspector |
 | Actions configured in Inspector but not working after scene change | Configuration sent at connect time is now stale | End the session and reconnect; action configuration is only sent once at connect time |
-| Action works in editor but not in build | Sample executor components not included in build | Verify sample scripts are in the project's compile scope; check for `[assembly: ...]` exclusions |
+| Action works in editor but not in build | Executor components not included in build | Verify executor scripts are in the project's compile scope; check for `[assembly: ...]` exclusions |
 | `SetCurrentAttentionObject` call has no effect | Not in an active conversation, or object name not in active config | Call only after `ConnectAsync` completes; object name must match a registered entry in `ConvaiActionConfigSource.Objects` |
 
 ## Next steps
