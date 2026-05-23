@@ -53,7 +53,7 @@ Leave **Mapping** empty — the SDK auto-selects a matching bundled map for the 
 The character's mouth moves in sync with its voice output.
 
 {% hint style="warning" %}
-If the mouth does not move, confirm that your `SkinnedMeshRenderer` blendshape names match the expected naming convention for the chosen profile. ARKit uses camelCase names (e.g., `jawOpen`, `mouthSmileLeft`). MetaHuman uses the `CTRL_expressions_` prefix. Use a custom map if your rig uses different names — see [Profiles and mappings](profile-and-mappings/README.md).
+If the mouth does not move, confirm that your `SkinnedMeshRenderer` blendshape names match the expected naming convention for the chosen profile. ARKit uses camelCase names (e.g., `jawOpen`, `mouthSmileLeft`). MetaHuman uses the `CTRL_expressions_` prefix. Use a custom map if your rig uses different names — see [Profiles and mappings](profiles-and-mappings.md).
 {% endhint %}
 {% endstep %}
 {% endstepper %}
@@ -70,8 +70,8 @@ Choose the profile that matches the blendshape format your character was rigged 
 
 If your character was rigged with non-standard blendshape names, create a custom map to route the SDK's output channels to your rig's actual names.
 
-{% content-ref url="profile-and-mappings/README.md" %}
-[Profiles and mappings](profile-and-mappings/README.md)
+{% content-ref url="profiles-and-mappings.md" %}
+[Profiles and mappings](profiles-and-mappings.md)
 {% endcontent-ref %}
 
 ## Playback settings

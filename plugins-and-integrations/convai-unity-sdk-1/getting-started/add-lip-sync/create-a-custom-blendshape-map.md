@@ -100,6 +100,6 @@ Enter Play Mode and speak to the character. All mapped blendshapes animate. Chec
 
 With lip sync configured, validate your complete scene setup.
 
-{% content-ref url="../../validate-your-setup.md" %}
-[Validate your setup](../../validate-your-setup.md)
+{% content-ref url="../validate-your-setup.md" %}
+[Validate your setup](../validate-your-setup.md)
 {% endcontent-ref %}

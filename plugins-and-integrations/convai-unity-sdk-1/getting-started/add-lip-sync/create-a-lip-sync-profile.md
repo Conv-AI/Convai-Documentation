@@ -63,6 +63,6 @@ You will also need a matching map asset that routes the custom channels to your 
 
 After creating the profile, create a map to route its channels to your rig's blendshape names.
 
-{% content-ref url="creating-a-custom-map.md" %}
-[Create a custom map](creating-a-custom-map.md)
+{% content-ref url="create-a-custom-blendshape-map.md" %}
+[Create a custom blendshape map](create-a-custom-blendshape-map.md)
 {% endcontent-ref %}

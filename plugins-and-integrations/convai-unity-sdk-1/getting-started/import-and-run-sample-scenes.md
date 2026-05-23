@@ -61,6 +61,6 @@ Sample scenes are built with the Universal Render Pipeline (URP). If your projec
 
 Now that you have confirmed the SDK is working, learn what each scene component does before building your own setup.
 
-{% content-ref url="understand-scene-components.md" %}
-[Understand scene components](understand-scene-components.md)
+{% content-ref url="scene-components.md" %}
+[Scene components reference](scene-components.md)
 {% endcontent-ref %}

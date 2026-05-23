@@ -174,8 +174,8 @@ public async void OnCinematicEnd()
 
 ## Next steps
 
-With input mode configured, tune the microphone and audio playback settings.
+With input mode configured, tune character voice volume and audio playback settings.
 
-{% content-ref url="configure-audio.md" %}
-[Configure audio](configure-audio.md)
+{% content-ref url="configure-character-audio.md" %}
+[Configure character audio](configure-character-audio.md)
 {% endcontent-ref %}

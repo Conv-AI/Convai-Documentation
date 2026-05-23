@@ -15,9 +15,10 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Configure my Convai API key                         | API key setup       | [Configure API key](../getting-started/configure-api-key.md)                                         |
 | Add my first conversational character to a scene    | Scene setup         | [Build a custom scene](../getting-started/build-a-custom-scene.md)                                   |
 | Run a working example without building from scratch | Sample scenes       | [Import and run sample scenes](../getting-started/import-and-run-sample-scenes.md)                   |
-| Understand what each component in the scene does    | Component reference | [Understand scene components](../getting-started/understand-scene-components.md)                     |
+| Understand what each component in the scene does    | Component reference | [Scene components reference](../getting-started/scene-components.md)                                 |
 | Choose between push-to-talk and hands-free input    | Input mode          | [Configure conversation input mode](../getting-started/configure-conversation-input-mode.md)         |
-| Configure microphone and audio output               | Audio setup         | [Configure audio](../getting-started/configure-audio.md)                                             |
+| Configure character audio output                    | Audio setup         | [Configure character audio](../getting-started/configure-character-audio.md)                         |
+| Configure microphone device and platform permissions | Audio setup         | [Configure microphone](../getting-started/configure-microphone.md)                                             |
 | Add a chat or subtitle transcript display           | Transcript UI       | [Add chat UI](../getting-started/add-chat-ui.md)                                                     |
 | Add real-time lip sync to my character              | Lip sync            | [Add lip sync](../getting-started/add-lip-sync/README.md)                                            |
 | Verify my scene is set up correctly before shipping | Scene Validator     | [Validate your setup](../getting-started/validate-your-setup.md)                                     |

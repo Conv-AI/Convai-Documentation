@@ -88,7 +88,13 @@ Your scene now has:
 
 ## Next steps
 
-Explore the Features section to add Actions, Emotion, Long-Term Memory, or Vision to your characters.
+Continue the getting started path to configure input mode, audio, and UI.
+
+{% content-ref url="configure-conversation-input-mode.md" %}
+[Configure conversation input mode](configure-conversation-input-mode.md)
+{% endcontent-ref %}
+
+Or explore the Features section to add Actions, Emotion, Long-Term Memory, or Vision to your characters.
 
 {% content-ref url="../features/README.md" %}
 [Features](../features/README.md)

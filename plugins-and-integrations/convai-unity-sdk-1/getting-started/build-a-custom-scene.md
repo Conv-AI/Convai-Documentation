@@ -129,8 +129,8 @@ Each character maintains an independent session. Character A and Character B do 
 
 ## Next steps
 
-With your scene set up and validated, configure how the player speaks to the character.
+With the scene built, run the validator to confirm everything is wired correctly before adding features.
 
-{% content-ref url="configure-conversation-input-mode.md" %}
-[Configure conversation input mode](configure-conversation-input-mode.md)
+{% content-ref url="validate-your-setup.md" %}
+[Validate your setup](validate-your-setup.md)
 {% endcontent-ref %}
