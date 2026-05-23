@@ -42,7 +42,7 @@ The SDK runtime contains no pipeline-specific conditionals. All three Unity rend
 | High Definition Render Pipeline (HDRP) | ✅ Full    |
 
 {% hint style="info" %}
-The included sample scenes use URP materials. If your project uses the Built-in or HDRP pipeline, sample scene materials require reassignment. Optional depth-of-field camera scripts in `SamplesShared/Camera/` include pipeline-specific adapters (URP and HDRP) and are not required for SDK functionality.
+The included sample scenes use URP materials. If your project uses the Built-in or HDRP pipeline, sample scene materials require reassignment. Optional depth-of-field camera scripts in `SamplesShared/Camera/` are also URP-specific and are not required for SDK functionality.
 {% endhint %}
 
 ## Next steps

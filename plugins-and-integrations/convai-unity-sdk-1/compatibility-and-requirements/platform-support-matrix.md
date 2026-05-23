@@ -43,17 +43,35 @@ WebGL has a known audio/lip-sync timing drift defect — audio and lip-sync data
 {% hint style="info" %}
 Always validate WebGL builds in the actual hosting environment, especially if the build is embedded in an iframe. Add `allow="microphone"` to the iframe tag if you embed the build in a page you control.
 {% endhint %}
+
+For detailed WebGL setup, browser compatibility, and deployment steps, see the WebGL platform guide.
+
+{% content-ref url="../platform-guides/webgl.md" %}
+[WebGL deployment guide](../platform-guides/webgl.md)
+{% endcontent-ref %}
 {% endtab %}
 
 {% tab title="Android" %}
 * **Microphone:** The SDK requests `RECORD_AUDIO` permission at runtime via `ConvaiPermissionService`. Declare the permission in your `AndroidManifest.xml` and handle both grant and denial cases in your app flow.
 * **Vision — Webcam:** `android.permission.CAMERA` is requested at runtime by `WebcamVisionFrameSource`. Handle permission grant and denial in your app flow.
+
+For Android build configuration, permission handling, and microphone setup, see the iOS and Android platform guide.
+
+{% content-ref url="../platform-guides/ios-and-android.md" %}
+[iOS and Android platform guide](../platform-guides/ios-and-android.md)
+{% endcontent-ref %}
 {% endtab %}
 
 {% tab title="iOS" %}
 * **Microphone:** `NSMicrophoneUsageDescription` must be set in **Player Settings → Other Settings → iOS → Microphone Usage Description**. Omitting this causes a crash on first microphone access.
 * **Vision — Webcam:** `NSCameraUsageDescription` must be set in **Player Settings → Other Settings → iOS → Camera Usage Description** if you use `WebcamVisionFrameSource`. On iOS, `WebcamVisionFrameSource` accesses the device camera via Unity's `WebCamTexture` API.
 * Define your app's behavior when the user denies microphone or camera permission, and when the app is interrupted or backgrounded during a conversation.
+
+For iOS build configuration, permission setup, and Info.plist requirements, see the iOS and Android platform guide.
+
+{% content-ref url="../platform-guides/ios-and-android.md" %}
+[iOS and Android platform guide](../platform-guides/ios-and-android.md)
+{% endcontent-ref %}
 {% endtab %}
 
 {% tab title="Meta Quest" %}
@@ -69,6 +87,12 @@ The required passthrough camera permissions are declared automatically when Meta
 On other Quest hardware or non-Quest platforms, `QuestVisionFrameSource` produces no frames. Use `CameraVisionFrameSource` or `WebcamVisionFrameSource` instead.
 
 `WebcamVisionFrameSource` is not applicable on Meta Quest because Quest does not expose a standard `WebCamTexture` device.
+
+For Meta Quest project setup, XR SDK configuration, and passthrough Vision integration, see the XR headsets platform guide.
+
+{% content-ref url="../platform-guides/xr-headsets.md" %}
+[XR headsets platform guide](../platform-guides/xr-headsets.md)
+{% endcontent-ref %}
 {% endtab %}
 {% endtabs %}
 
