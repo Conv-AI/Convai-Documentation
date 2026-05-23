@@ -1,18 +1,19 @@
-# Troubleshooting & Diagnostics
+---
+title: Troubleshoot the emotion system
+description: Fix common emotion pipeline failures in the Convai Unity SDK — from missing output and silent neutral fallback to LipSync conflicts and locked expressions.
+---
 
-### Diagnosing and Resolving Emotion Problems
+Most emotion problems fall into one of three categories: no visual output at all, scores updating but no face movement, or event and scripting callbacks not firing. Start by watching `Current.DominantScore` in Play Mode — this one signal identifies whether the issue is in the signal path or the output bindings.
 
-Most Emotion problems fall into one of three categories: no visual output at all, scores updating but no face movement, or event and scripting callbacks not firing. This page starts with the built-in Inspector inspection surface, then walks through a structured first-line checklist, a quick-reference table, detailed per-issue sections, a console log reference, and a decision tree for the most common failure path.
-
-### Inspecting Live State
+## Inspecting live state
 
 `ConvaiEmotionController` exposes the full pipeline state in the Inspector during Play Mode without any additional tooling.
 
-| What to watch                | Where to find it                                 | What it tells you                                                                                                                    |
-| ---------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Current → Dominant Label** | `ConvaiEmotionController` Inspector in Play Mode | Which canonical emotion is currently dominant. `"neutral"` means no active signal.                                                   |
+| What to watch | Where to find it | What it tells you |
+| --- | --- | --- |
+| **Current → Dominant Label** | `ConvaiEmotionController` Inspector in Play Mode | Which canonical emotion is currently dominant. `"neutral"` means no active signal. |
 | **Current → Dominant Score** | `ConvaiEmotionController` Inspector in Play Mode | Smoothed intensity \[0–1] of the dominant emotion. A value above 0 confirms the pipeline is receiving and processing server signals. |
-| **Lock Emotion** checkbox    | `ConvaiEmotionController` Inspector (any mode)   | When ticked, server signals are ignored. The character holds the locked expression.                                                  |
+| **Lock Emotion** checkbox | `ConvaiEmotionController` Inspector (any mode) | When ticked, server signals are ignored. The character holds the locked expression. |
 
 To preview blendshape slot mappings without entering Play Mode, enable **Lock Emotion**, set **Locked Emotion Label** to a canonical label, and set **Locked Intensity** to `1.0`. Because `ConvaiEmotionController` inherits `[ExecuteAlways]` from its base class, blendshapes update immediately in the Scene view — no Play Mode required.
 
@@ -20,31 +21,31 @@ To preview blendshape slot mappings without entering Play Mode, enable **Lock Em
 **Lock Emotion** is a serialised field. Its value is saved with the scene or prefab. Always disable it before building for production — a serialised `true` silently disables all live emotion response in the shipped build.
 {% endhint %}
 
-### First-Line Investigation
+## First-line investigation
 
 Work through this checklist in order when emotion is not behaving as expected. Most issues resolve at step 1 or 2.
 
 {% stepper %}
 {% step %}
-**Check the Profile Field**
+### Check the Profile field
 
 Select your NPC's root GameObject. On the `ConvaiEmotionController` component, confirm the **Profile** field is not empty.
 
-* **Empty** → Drag in a `ConvaiEmotionProfile` asset. For a quick test, use the bundled `ConvaiSamplesShared_EmotionProfile` from `Packages / Convai SDK for Unity / SamplesShared / Resources / Embodiment / Modules / Emotion`. The pipeline will not run without a profile.
-* **Assigned** → Continue to the next step.
+- **Empty** → Drag in a `ConvaiEmotionProfile` asset. For a quick test, use the bundled `ConvaiSamplesShared_EmotionProfile` from `Packages / Convai SDK for Unity / SamplesShared / Resources / Embodiment / Modules / Emotion`. The pipeline will not run without a profile.
+- **Assigned** → Continue to the next step.
 {% endstep %}
 
 {% step %}
-**Watch DominantScore in Play Mode**
+### Watch DominantScore in Play Mode
 
 Press **Play**, speak to the character, and observe **Current → Dominant Score** on the `ConvaiEmotionController` Inspector.
 
-* **Score rises above 0** → The pipeline is receiving server signals. The problem is in the output bindings. Skip to step 4.
-* **Score stays at 0** → The controller is not receiving emotion signals. Continue to step 3.
+- **Score rises above 0** → The pipeline is receiving server signals. The problem is in the output bindings. Skip to step 4.
+- **Score stays at 0** → The controller is not receiving emotion signals. Continue to step 3.
 {% endstep %}
 
 {% step %}
-**Check Lock Emotion and Component Placement**
+### Check Lock Emotion and component placement
 
 Two quick causes prevent signals from reaching the accumulator:
 
@@ -55,15 +56,15 @@ If neither applies, verify the character is actively connected — it should res
 {% endstep %}
 
 {% step %}
-**Check Output Slot Population**
+### Check output slot population
 
 Open the `ConvaiEmotionProfile` asset. If both the **Blendshape Binding** and **Animator Binding** lists are empty, the pipeline runs internally but writes nowhere — `DominantScore` updates, but no face movement occurs.
 
-Add at least one `EmotionSlotBinding` with a valid `emotionLabel` and a blendshape name or Animator parameter that exists on your character. See [Output Bindings](/broken/pages/1e2b2eb9321a550a8ea8a49276a5aaad36013bb2).
+Add at least one `EmotionSlotBinding` with a valid `emotionLabel` and a blendshape name or Animator parameter that exists on your character. See [Emotion output bindings](output-bindings.md).
 {% endstep %}
 
 {% step %}
-**Verify Blendshape Names and Slot Labels**
+### Verify blendshape names and slot labels
 
 If `DominantScore` updates but the face still does not move:
 
@@ -77,26 +78,26 @@ If `DominantScore` updates but the face still does not move:
 After completing the checklist, if **Current → Dominant Score** rises above 0 during conversation and blendshapes move, the pipeline is healthy.
 {% endhint %}
 
-### Common Issues Quick Reference
+## Common issues quick reference
 
-| Symptom                                                           | Likely Cause                                                      | Fix                                                                                             |
-| ----------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **Face does not move; DominantScore stays at 0**                  | No profile assigned                                               | Assign a `ConvaiEmotionProfile` to the **Profile** field                                        |
-| **Face does not move; DominantScore stays at 0**                  | Lock Emotion is enabled                                           | Disable **Lock Emotion** on `ConvaiEmotionController`                                           |
-| **Face does not move; DominantScore stays at 0**                  | Component on wrong GameObject                                     | Move `ConvaiEmotionController` to the NPC's root GameObject, alongside the Embodiment component |
-| **DominantScore updates but face unchanged**                      | Output slots are empty                                            | Add at least one slot with a valid emotion label and blendshape name to the profile             |
-| **DominantScore updates but face unchanged**                      | Blendshape name mismatch                                          | Copy the exact name from **Skinned Mesh Renderer → BlendShapes**; names are case-sensitive      |
-| **DominantScore updates but face unchanged**                      | Slot `emotionLabel` uses server alias                             | Use the canonical label (`"joy"`, not `"happy"`) in the slot's **Emotion Label** field          |
-| **DominantScore updates but face unchanged**                      | `weightMultiplier` or `fullBlendshapeWeight` is 0                 | Set both to non-zero values in the slot                                                         |
-| **Specific emotion never appears; character stays neutral**       | Server label not in taxonomy; silent fallback to neutral          | Add the server label as an alias to the nearest canonical entry in a custom taxonomy            |
-| **LipSync stops working during speech**                           | Non-mouth blendshapes marked `isMouthShape = true`                | Set `isMouthShape = false` for brow, eye, cheek, and upper-face shapes                          |
-| **Character holds one expression throughout the session**         | `lockEmotion` serialised as `true` in scene or prefab             | Disable **Lock Emotion**; save the scene (**Ctrl+S** / **Cmd+S**)                               |
-| **No emotion response in production build**                       | `lockEmotion` left enabled before building                        | Disable **Lock Emotion** before building; verify per-prefab-instance in the Inspector           |
-| **Profile changes revert after reopening the project**            | Editing the bundled read-only package asset                       | Duplicate the asset (**Ctrl+D** / **Cmd+D**), move the copy to `Assets/`, assign the copy       |
-| **`OnEmotionChanged` on `ConvaiCharacterEventRelay` never fires** | Character reference not resolved                                  | Enable **Auto Resolve Character**, or assign `ConvaiCharacter` in the **Character** field       |
-| **`[EmotionTaxonomyAsset]` warning in Console**                   | Custom taxonomy has no neutral entry, or multiple neutral entries | Set `IsNeutral = true` on exactly one taxonomy entry                                            |
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| **Face does not move; DominantScore stays at 0** | No profile assigned | Assign a `ConvaiEmotionProfile` to the **Profile** field |
+| **Face does not move; DominantScore stays at 0** | Lock Emotion is enabled | Disable **Lock Emotion** on `ConvaiEmotionController` |
+| **Face does not move; DominantScore stays at 0** | Component on wrong GameObject | Move `ConvaiEmotionController` to the NPC's root GameObject, alongside the Embodiment component |
+| **DominantScore updates but face unchanged** | Output slots are empty | Add at least one slot with a valid emotion label and blendshape name to the profile |
+| **DominantScore updates but face unchanged** | Blendshape name mismatch | Copy the exact name from **Skinned Mesh Renderer → BlendShapes**; names are case-sensitive |
+| **DominantScore updates but face unchanged** | Slot `emotionLabel` uses server alias | Use the canonical label (`"joy"`, not `"happy"`) in the slot's **Emotion Label** field |
+| **DominantScore updates but face unchanged** | `weightMultiplier` or `fullBlendshapeWeight` is 0 | Set both to non-zero values in the slot |
+| **Specific emotion never appears; character stays neutral** | Server label not in taxonomy; silent fallback to neutral | Add the server label as an alias to the nearest canonical entry in a custom taxonomy |
+| **LipSync stops working during speech** | Non-mouth blendshapes marked `isMouthShape = true` | Set `isMouthShape = false` for brow, eye, cheek, and upper-face shapes |
+| **Character holds one expression throughout the session** | `lockEmotion` serialised as `true` in scene or prefab | Disable **Lock Emotion**; save the scene (**Ctrl+S** / **Cmd+S**) |
+| **No emotion response in production build** | `lockEmotion` left enabled before building | Disable **Lock Emotion** before building; verify per-prefab-instance in the Inspector |
+| **Profile changes revert after reopening the project** | Editing the bundled read-only package asset | Duplicate the asset (**Ctrl+D** / **Cmd+D**), move the copy to `Assets/`, assign the copy |
+| **`OnEmotionChanged` on `ConvaiCharacterEventRelay` never fires** | Character reference not resolved | Enable **Auto Resolve Character**, or assign `ConvaiCharacter` in the **Character** field |
+| **`[EmotionTaxonomyAsset]` warning in Console** | Custom taxonomy has no neutral entry, or multiple neutral entries | Set `IsNeutral = true` on exactly one taxonomy entry |
 
-### Unknown Server Labels — Silent Neutral Fallback
+## Unknown server labels — silent neutral fallback
 
 **Symptom:** An emotion the server sends never appears on the character. The face returns to neutral as if no signal arrived.
 
@@ -107,9 +108,11 @@ After completing the checklist, if **Current → Dominant Score** rises above 0 
 1. In Play Mode, expand **Current → All Scores** on the `ConvaiEmotionController` Inspector. If an emotion you expect to see has a score of exactly 0.0 while the conversation clearly calls for it, the server label is likely not resolving.
 2. Enable `lockEmotion` in the Inspector, set **Locked Emotion Label** to the canonical label you expect (e.g. `"anticipation"`), and confirm the blendshape slot activates. If it does, the output binding is correct — the signal simply never arrives from the server under that label.
 
-**Fix:** Open your custom taxonomy asset (or create one if using the built-in default), and add the server label as an alias to the nearest semantic match. For example, if the server sends `"excited"` and it should map to the visual slot for `"anticipation"`, add `"excited"` to the **Aliases** list of the `anticipation` entry. See [Emotion Taxonomy](/broken/pages/d16937e3d6537821e2c4af08d397101d0111d1ee) for how to create and assign a custom taxonomy.
+**Fix:** Open your custom taxonomy asset (or create one if using the built-in default), and add the server label as an alias to the nearest semantic match. For example, if the server sends `"excited"` and it should map to the visual slot for `"anticipation"`, add `"excited"` to the **Aliases** list of the `anticipation` entry. See [Emotion taxonomy](emotion-taxonomy.md) for how to create and assign a custom taxonomy.
 
-### Blendshape Names Do Not Match
+**Verify:** In Play Mode, watch **Current → Dominant Label** and **Current → All Scores** — the expected emotion should now score above 0 when the server sends the previously unresolved label.
+
+## Blendshape names do not match
 
 **Symptom:** `Current.DominantScore` updates correctly in Play Mode, but the character's face does not visually change.
 
@@ -122,11 +125,13 @@ After completing the checklist, if **Current → Dominant Score** rises above 0 
 3. Expand the **BlendShapes** section.
 4. Copy the exact name from there into your slot's **Blendshape Names** field. Names are case-sensitive and must match exactly — including underscores, spaces, and capitalisation.
 
+**Verify:** In Play Mode, watch the blendshape value in the Inspector on the `SkinnedMeshRenderer`. It should change when `DominantScore` rises.
+
 {% hint style="info" %}
 If the character has multiple `SkinnedMeshRenderer` components (body, head, and teeth as separate meshes), the blendshape binding targets the mesh registered with the Embodiment compositor. Confirm which mesh your Embodiment component's rig binding references before copying names.
 {% endhint %}
 
-### LipSync Breaks When Emotion Is Active
+## LipSync breaks when emotion is active
 
 **Symptom:** While the character is speaking, LipSync-driven mouth shapes stop working, or emotion shapes suppress phoneme shapes unexpectedly.
 
@@ -134,7 +139,9 @@ If the character has multiple `SkinnedMeshRenderer` components (body, head, and 
 
 **Fix:** Open the `ConvaiEmotionProfile` asset. In every **Blendshape Binding** slot, set `isMouthShape = true` **only** for shapes that deform the lips, jaw, or chin. Brow raises, eye squints, cheek puffs, and upper-face shapes should have `isMouthShape = false`.
 
-### Expressions Frozen — Character Ignores Conversation
+**Verify:** In Play Mode, speak to the character — mouth shapes should animate correctly during speech while emotion-driven brow and eye shapes continue to update simultaneously.
+
+## Expressions frozen — character ignores conversation
 
 **Symptom:** The NPC holds a single expression throughout the session and never reacts to AI emotion signals.
 
@@ -148,11 +155,13 @@ If the character has multiple `SkinnedMeshRenderer` components (body, head, and 
 
 If you have multiple NPC prefabs, check each one individually — the field persists per-prefab-instance unless explicitly overridden.
 
+**Verify:** In Play Mode, **Current → Dominant Label** should change as the conversation develops.
+
 {% hint style="danger" %}
 Always verify **Lock Emotion** is `false` before building for production. A serialised `true` value will silently disable all live emotion response in the shipped build with no runtime error.
 {% endhint %}
 
-### Profile Changes Are Not Saving
+## Profile changes are not saving
 
 **Symptom:** You edit settings on the Emotion Profile asset, but the changes revert on reopening the project or returning to the Inspector.
 
@@ -165,7 +174,9 @@ Always verify **Lock Emotion** is `false` before building for production. A seri
 3. Move the copy into your own `Assets/` folder.
 4. On the `ConvaiEmotionController`, assign the copy instead of the original.
 
-### ConvaiCharacterEventRelay OnEmotionChanged Does Not Fire
+**Verify:** Edit a value on the copy and reopen the Inspector — the change should persist.
+
+## ConvaiCharacterEventRelay OnEmotionChanged does not fire
 
 **Symptom:** You wired a Unity Event to **On Emotion Changed** on `ConvaiCharacterEventRelay`, but it never fires in Play Mode.
 
@@ -174,9 +185,11 @@ Always verify **Lock Emotion** is `false` before building for production. A seri
 1. **Character reference:** Either **Auto Resolve Character** is enabled and a `ConvaiCharacter` is on the same GameObject, or you have manually assigned a `ConvaiCharacter` in the **Character** field. If neither is true, the relay logs a configuration warning and stays inactive.
 2. **Component enabled:** Confirm the `ConvaiCharacterEventRelay` component is enabled (the checkbox in the Inspector header is ticked).
 3. **Subscription timing:** The relay fires only after the Convai session is established. Subscribe in `OnEnable` and unsubscribe in `OnDisable` to catch all events from the moment the component activates.
-4. **Session active:** `ConvaiCharacterEventRelay` fires when the character's `ConvaiCharacter` callbacks fire. If no signals arrive at all, confirm the character responds to speech normally before testing emotion callbacks.
+4. **Session active:** Confirm the character responds to speech normally before testing emotion callbacks.
 
-### Emotion Scores Visible but No Output Binding Written
+**Verify:** Speak to the character in Play Mode — the UI or callback target should update as each new emotion signal arrives.
+
+## Emotion scores visible but no output binding written
 
 **Symptom:** `ConvaiEmotionController.Current.DominantScore` updates correctly in Play Mode, but neither blendshapes nor Animator parameters change.
 
@@ -187,22 +200,24 @@ Always verify **Lock Emotion** is `false` before building for production. A seri
 3. For Animator bindings, confirm the parameter name exists as a **Float** in the Animator Controller and that the Animator component is on the same GameObject as `ConvaiEmotionController`.
 4. Confirm `weightMultiplier` is greater than 0 and `fullBlendshapeWeight` is greater than 0 in each slot.
 
-### Console Log Reference
+**Verify:** Lock the emotion to a canonical label in the Inspector and confirm the blendshape or Animator parameter responds — this isolates the issue to the binding configuration rather than the signal path.
+
+## Console log reference
 
 The following messages appear in the Unity Console from the Emotion system.
 
-| Log message                                                                                                                                                                         | Component                 | Meaning                                                                                                                                                                                                                                   |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Log message | Component | Meaning |
+| --- | --- | --- |
 | `[ConvaiEmotionController] Ignored an emotion event without a character id. Character-scoped emotion events must include a character id to avoid cross-character expression bleed.` | `ConvaiEmotionController` | An emotion event arrived with no character ID. Common in multi-NPC scenes where events are broadcast globally. Ensure each NPC has a unique **Character ID** set on its `ConvaiCharacter` component. Logged once per controller lifetime. |
-| `[EmotionTaxonomyAsset] No entry marked neutral; synthesized 'neutral' fallback. Mark exactly one entry as the neutral baseline to suppress this warning.`                          | `EmotionTaxonomyAsset`    | A custom taxonomy asset has no entry with **IsNeutral** = true. The system synthesizes a fallback neutral so the pipeline runs. Set `IsNeutral = true` on exactly one entry to suppress the warning.                                      |
-| `[EmotionTaxonomyAsset] No entry has IsNeutral set. A synthetic 'neutral' will be used at runtime; mark one entry as the neutral baseline.`                                         | `EmotionTaxonomyAsset`    | Same as above — fired in the Inspector (`OnValidate`) when you save the taxonomy asset in Edit Mode. Fix by marking one entry as the neutral baseline.                                                                                    |
-| `[EmotionTaxonomyAsset] N entries are marked IsNeutral; only the first will be used. Mark exactly one neutral baseline.`                                                            | `EmotionTaxonomyAsset`    | Multiple taxonomy entries have **IsNeutral** = true. Only the first is used. Remove the `IsNeutral` flag from all but one entry.                                                                                                          |
+| `[EmotionTaxonomyAsset] No entry marked neutral; synthesized 'neutral' fallback. Mark exactly one entry as the neutral baseline to suppress this warning.` | `EmotionTaxonomyAsset` | A custom taxonomy asset has no entry with **IsNeutral** = true. The system synthesizes a fallback neutral so the pipeline runs. Set `IsNeutral = true` on exactly one entry to suppress the warning. |
+| `[EmotionTaxonomyAsset] No entry has IsNeutral set. A synthetic 'neutral' will be used at runtime; mark one entry as the neutral baseline.` | `EmotionTaxonomyAsset` | Same as above — fired in the Inspector (`OnValidate`) when you save the taxonomy asset in Edit Mode. Fix by marking one entry as the neutral baseline. |
+| `[EmotionTaxonomyAsset] N entries are marked IsNeutral; only the first will be used. Mark exactly one neutral baseline.` | `EmotionTaxonomyAsset` | Multiple taxonomy entries have **IsNeutral** = true. Only the first is used. Remove the `IsNeutral` flag from all but one entry. |
 
 {% hint style="info" %}
-There is **no console warning** when the server sends an unrecognised emotion label. `TryResolve` silently falls back to the neutral descriptor. If an expected emotion never appears on the character, see [Unknown Server Labels — Silent Neutral Fallback](troubleshooting-and-diagnostics.md#unknown-server-labels-silent-neutral-fallback) above.
+There is **no console warning** when the server sends an unrecognised emotion label. `TryResolve` silently falls back to the neutral descriptor. If an expected emotion never appears on the character, see [Unknown server labels — silent neutral fallback](#unknown-server-labels-silent-neutral-fallback) above.
 {% endhint %}
 
-### Expressions Not Responding — Decision Tree
+## Expressions not responding — decision tree
 
 ```mermaid
 flowchart TD
@@ -225,14 +240,10 @@ flowchart TD
     P -- Yes --> R[Check isMouthShape flags\nand LipSync compositor layer]
 ```
 
-### Conclusion
-
-Most Emotion problems reduce to one of four root causes: a missing profile, empty or misconfigured output slots, an accidentally serialised `lockEmotion`, or a blendshape name mismatch. Start by watching `Current.DominantScore` in Play Mode — if it updates, the pipeline is healthy and the issue is in the output bindings; if it stays at zero, work backward to the profile, lock state, and component placement. Use the Common Issues Quick Reference table for a fast lookup, the Console Log Reference to interpret warning messages, and the decision tree when the cause is not immediately clear.
-
-{% content-ref url="/broken/pages/1e2b2eb9321a550a8ea8a49276a5aaad36013bb2" %}
-[Broken link](/broken/pages/1e2b2eb9321a550a8ea8a49276a5aaad36013bb2)
+{% content-ref url="output-bindings.md" %}
+[Emotion output bindings](output-bindings.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/d16937e3d6537821e2c4af08d397101d0111d1ee" %}
-[Broken link](/broken/pages/d16937e3d6537821e2c4af08d397101d0111d1ee)
+{% content-ref url="emotion-taxonomy.md" %}
+[Emotion taxonomy](emotion-taxonomy.md)
 {% endcontent-ref %}

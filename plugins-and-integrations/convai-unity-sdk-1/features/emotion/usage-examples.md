@@ -1,32 +1,31 @@
-# Usage Examples
+---
+title: Emotion examples
+description: Six complete scenarios covering hazard overrides, locked expressions, distress branching, analytics logging, no-code UI wiring, and Editor authoring.
+---
 
-### Emotion in Practice: Example Scenarios
+These scenarios show how the Emotion system's configuration and scripting API combine to serve realistic application requirements. Each scenario is self-contained: Inspector setup is described first, followed by any runtime code needed to complete the behavior. Profile and binding field references are in [Emotion profile](emotion-profile.md) and [Emotion output bindings](output-bindings.md); the full scripting surface is in [Emotion scripting API](scripting-api.md).
 
-The examples below show how the Emotion system's configuration and scripting API combine to serve realistic application requirements. Each scenario is self-contained: Inspector setup is described first, followed by any runtime code needed to complete the behaviour. Profile and binding field references are in [Emotion Profile](/broken/pages/156047f7c23715c9cee58ca6189511fd29081b10) and [Output Bindings](/broken/pages/1e2b2eb9321a550a8ea8a49276a5aaad36013bb2); the full scripting surface is in [Scripting API](/broken/pages/f0c2d9761c4ab0f268935974d43719702616404e).
-
-***
-
-### Scenario 1 — Safety Training: Dynamic Hazard Response
+## Scenario 1: Dynamic hazard response
 
 **Situation:** An instructor NPC guides trainees through a fire evacuation simulation. When a trainee enters a marked danger zone, the instructor's expression should shift sharply toward fear or urgency to reinforce the seriousness of the situation. When the trainee exits the zone, the expression returns to the server-driven state.
 
-#### Profile Settings
+### Profile settings
 
 Open the `ConvaiEmotionProfile` assigned to the instructor NPC and adjust:
 
-* **`lerpSpeed`** → `12` — fast rise so the fear expression arrives without delay.
-* **`microBurstOvershoot`** → `1.6` — a pronounced burst makes the transition visually impactful.
-* **`microBurstDuration`** → `0.2 s` — short burst before the expression settles.
+- **`lerpSpeed`** → `12` — fast rise so the fear expression arrives without delay.
+- **`microBurstOvershoot`** → `1.6` — a pronounced burst makes the transition visually impactful.
+- **`microBurstDuration`** → `0.2 s` — short burst before the expression settles.
 
-#### Output Binding
+### Output binding
 
 Add a slot to the **Blendshape Binding**:
 
-| `emotionLabel` | `blendshapeNames`                                                | `weightMultiplier` | `fullBlendshapeWeight` |
-| -------------- | ---------------------------------------------------------------- | ------------------ | ---------------------- |
-| `fear`         | `Brow_Raise_Inner_L, Brow_Raise_Inner_R, Eye_Wide_L, Eye_Wide_R` | `1.0`              | `85`                   |
+| `emotionLabel` | `blendshapeNames` | `weightMultiplier` | `fullBlendshapeWeight` |
+| --- | --- | --- | --- |
+| `fear` | `Brow_Raise_Inner_L, Brow_Raise_Inner_R, Eye_Wide_L, Eye_Wide_R` | `1.0` | `85` |
 
-#### Runtime Script
+### Runtime script
 
 ```csharp
 using Convai.Modules.Emotion.Components;
@@ -54,11 +53,11 @@ public sealed class HazardZoneTrigger : MonoBehaviour
 
 ***
 
-### Scenario 2 — Employee Onboarding: Locked Welcome Expression
+## Scenario 2: Locked welcome expression
 
 **Situation:** A greeter NPC stands at the entrance of an onboarding simulation. During the welcome sequence — before the trainee has started talking — the character should always appear warm and approachable, regardless of any emotion signals the backend might send during the connection handshake.
 
-#### Runtime Script
+### Runtime script
 
 ```csharp
 using Convai.Modules.Emotion.Components;
@@ -86,11 +85,11 @@ A locked intensity of `0.65` produces a visible but not exaggerated smile — ap
 
 ***
 
-### Scenario 3 — Adaptive Assessment: Emotion-Aware Branch Logic
+## Scenario 3: Emotion-aware branch logic
 
 **Situation:** A virtual patient NPC in a medical communication assessment grows distressed when the trainee's responses are perceived as dismissive. A director script monitors the NPC's emotion state and, if sustained distress is detected, branches the scenario to a de-escalation path.
 
-#### Runtime Script
+### Runtime script
 
 ```csharp
 using Convai.Domain.Embodiment.Readings;
@@ -129,11 +128,11 @@ public sealed class EmotionBranchDirector : MonoBehaviour
 
 ***
 
-### Scenario 4 — Session Analytics: Logging the Emotional Arc
+## Scenario 4: Session analytics logging
 
 **Situation:** A training platform needs to record every emotional shift the AI character experiences during a session, including the raw server label and intensity, so instructors can review the emotional arc of the conversation in a post-session report.
 
-#### Runtime Script
+### Runtime script
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
@@ -172,15 +171,13 @@ public sealed class EmotionSessionLogger : MonoBehaviour
 
 ***
 
-### Scenario 5 — No-Code UI: Inspector-Driven Emotion Display
+## Scenario 5: No-code UI display
 
 **Situation:** A non-programmer wants to update a UI label showing the character's current emotion whenever it changes, without writing any code.
 
-#### Setup
-
 {% stepper %}
 {% step %}
-**Add the Event Relay**
+### Add the Event Relay
 
 Select the NPC's root GameObject. Click **Add Component** and navigate to **Convai → Events → Convai Character Event Relay**.
 
@@ -188,19 +185,19 @@ The relay auto-resolves the `ConvaiCharacter` on the same GameObject via the **A
 {% endstep %}
 
 {% step %}
-**Wire the On Emotion Changed Event**
+### Wire the On Emotion Changed event
 
 In the **On Emotion Changed** Unity Event list on `ConvaiCharacterEventRelay`, click **+**.
 {% endstep %}
 
 {% step %}
-**Assign the UI Text Component**
+### Assign the UI Text component
 
 Drag your UI `Text` (or `TMP_Text`) component into the object field of the new event entry.
 {% endstep %}
 
 {% step %}
-**Select the Target Property**
+### Select the target property
 
 From the function dropdown, select **Text → string text** (or **TMP\_Text → string text**).
 
@@ -218,11 +215,9 @@ Enter Play Mode and speak to the character. The UI label updates automatically a
 
 ***
 
-### Scenario 6 — Authoring: Previewing Expressions in the Editor
+## Scenario 6: Previewing expressions in the Editor
 
 **Situation:** You have added blendshape slots for a new character and want to confirm that each emotion drives the correct shapes to the correct weight before entering Play Mode.
-
-#### Steps
 
 1. Select the NPC's root GameObject.
 2. On the `ConvaiEmotionController` component, enable **Lock Emotion**.
@@ -235,20 +230,18 @@ The Scene view updates immediately — blendshapes are applied in Edit Mode beca
 Set **Lock Emotion** back to `false` before building for production. The field is serialised — if it remains enabled, the character will ignore all backend emotion signals in the shipped build with no runtime error or warning.
 {% endhint %}
 
-***
+## Next steps
 
-### Conclusion
+For the complete parameter reference used in the profile settings above, see [Emotion profile](emotion-profile.md). For the full scripting surface, see [Emotion scripting API](scripting-api.md). If any scenario does not produce the expected result, see [Troubleshoot the emotion system](troubleshooting-and-diagnostics.md).
 
-These six scenarios cover the most common emotion integration patterns — from hazard triggers and scripted locks to no-code Unity Event wiring and Editor authoring workflows. For the complete parameter reference used in the profile settings above, see [Emotion Profile](/broken/pages/156047f7c23715c9cee58ca6189511fd29081b10). For the full scripting surface, see [Scripting API](/broken/pages/f0c2d9761c4ab0f268935974d43719702616404e). If any scenario does not produce the expected result, see [Troubleshooting & Diagnostics](/broken/pages/4b098f84798d0ee0505ec21ec2c0b631206339d3).
-
-{% content-ref url="/broken/pages/156047f7c23715c9cee58ca6189511fd29081b10" %}
-[Broken link](/broken/pages/156047f7c23715c9cee58ca6189511fd29081b10)
+{% content-ref url="emotion-profile.md" %}
+[Emotion profile](emotion-profile.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/f0c2d9761c4ab0f268935974d43719702616404e" %}
-[Broken link](/broken/pages/f0c2d9761c4ab0f268935974d43719702616404e)
+{% content-ref url="scripting-api.md" %}
+[Emotion scripting API](scripting-api.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/4b098f84798d0ee0505ec21ec2c0b631206339d3" %}
-[Broken link](/broken/pages/4b098f84798d0ee0505ec21ec2c0b631206339d3)
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Troubleshoot the emotion system](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}
