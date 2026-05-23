@@ -1,17 +1,13 @@
-# Custom Frame Sources
+---
+title: Custom frame sources
+description: Implement IVisionFrameSource to publish a custom video pipeline to Convai, including the Y-flip requirement, lifecycle state pattern, and auto-discovery rules.
+---
 
-### Custom Frame Sources
+Implement `IVisionFrameSource` to publish any custom video pipeline — a video file, a custom render texture, or a screen capture utility — without modifying the publishing layer. Once your component is on the scene, `ConvaiVisionPublisher` discovers and streams it automatically.
 
-The SDK's three built-in frame sources cover Unity scene cameras, physical webcams, and Meta Quest passthrough. When your project requires a different input — a video file, a custom render pipeline, a screen capture utility, or any other `RenderTexture` producer — implement `IVisionFrameSource` to plug it in with no changes to the publishing layer.
+## Interface contract
 
-***
-
-### Interface Contract
-
-`IVisionFrameSource` is the minimal contract required for:
-
-* Video streaming via `ConvaiVisionPublisher`
-* Live feed display via `VisionDebugPreview`
+`IVisionFrameSource` is the minimal contract required for video streaming via `ConvaiVisionPublisher` and live feed display via `VisionDebugPreview`.
 
 ```csharp
 public interface IVisionFrameSource
@@ -31,9 +27,7 @@ public interface IVisionFrameSource
 
 Your implementation must be a `MonoBehaviour`. `ConvaiVisionPublisher` discovers frame sources using `GetComponent` and `GetComponentsInChildren`, which only work on Unity components.
 
-***
-
-### Y-Flip Requirement
+## Y-flip requirement
 
 `CurrentRenderTexture` must be in **top-down orientation** (Y-axis flipped from Unity's default bottom-up). LiveKit and standard video formats expect Y=0 at the top of the image. Skipping this step produces an upside-down feed at the receiving end.
 
@@ -47,9 +41,7 @@ Graphics.Blit(sourceTexture, _outputRt, new Vector2(1f, -1f), new Vector2(0f, 1f
 
 The `scale.y = -1` and `offset.y = 1` arguments together flip the vertical axis. Assign `_outputRt` to `CurrentRenderTexture`.
 
-***
-
-### Minimal Implementation
+## Minimal implementation
 
 The following skeleton implements every required member and handles `FrameReady` correctly. Fill in the `CaptureFrame` method with your actual capture logic.
 
@@ -145,15 +137,11 @@ public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource
 }
 ```
 
-#### FrameReady thread safety
-
 `FrameReady` must be raised on the **Unity main thread**. `ConvaiVisionPublisher` and `VisionDebugPreview` both assume all `IVisionFrameSource` callbacks execute on the main thread. If your capture logic runs on a background thread, marshal the event raise back using a flag checked in `Update`, as shown in the skeleton above.
 
-***
+## Expose lifecycle state
 
-### Optional: IVisionFrameSourceStatusProvider
-
-Implement `IVisionFrameSourceStatusProvider` alongside `IVisionFrameSource` to expose richer lifecycle state — permission flow, delayed initialisation, or structured error information. The publisher can then react to readiness changes without polling.
+Implement `IVisionFrameSourceStatusProvider` alongside `IVisionFrameSource` to expose richer lifecycle state — permission flow, delayed initialization, or structured error information. The publisher can then react to readiness changes without polling.
 
 ```csharp
 public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource, IVisionFrameSourceStatusProvider
@@ -191,20 +179,22 @@ public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource, IVisionFra
 }
 ```
 
-***
-
-### Auto-Discovery
+## Auto-discovery
 
 Once your component is on the scene, `ConvaiVisionPublisher` discovers it automatically in this order:
 
-1. The **Frame Source Component** field in the Inspector (explicit assignment).
+1. The **Source** field in the Inspector (explicit assignment).
 2. `GetComponent<CameraVisionFrameSource>()` on the same GameObject (built-in preference).
 3. `GetComponentsInChildren<MonoBehaviour>(true)` — first `IVisionFrameSource` found on the same GameObject or children.
 
-If more than one frame source is found under step 3, the publisher logs a warning and selects the first. Assign the **Frame Source Component** field explicitly to avoid ambiguity.
+If more than one frame source is found under step 3, the publisher logs a warning and selects the first. Assign the **Source** field explicitly to avoid ambiguity.
 
-***
+## Next steps
 
-### Next Steps
+{% content-ref url="debug-preview.md" %}
+[Vision debug preview](debug-preview.md)
+{% endcontent-ref %}
 
-With your custom source in place, verify it with [Debug Preview](/broken/pages/4e429711446d44660df42fc75a9c4e132a861ea9) and monitor lifecycle events via [Scripting API](/broken/pages/66ae09f082490e6e22eeabcf09762855075b37c0).
+{% content-ref url="scripting-api.md" %}
+[Vision scripting API](scripting-api.md)
+{% endcontent-ref %}

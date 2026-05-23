@@ -1,12 +1,11 @@
-# Usage Examples
+---
+title: Vision usage examples
+description: Find code patterns for common Vision setups, including safety training, webcam selection, overhead cameras, look-at activation, and WebGL deployment.
+---
 
-### Usage Examples
+These examples cover the most common Vision integration patterns. Each example is self-contained — copy the relevant script, attach it to the appropriate GameObject, and configure the serialized fields in the Inspector.
 
-These examples cover the most common Vision integration patterns. Each example is self-contained — copy the relevant script, attach it to the appropriate GameObject, and configure the serialised fields in the Inspector.
-
-***
-
-### Example 1: Safety Training — Monitor Object Placement
+## Monitor object placement in safety training
 
 A safety training application where a Convai character monitors whether the user places equipment in the correct zone and gives spoken feedback. The character uses the live scene camera feed to observe placement in real time.
 
@@ -45,9 +44,7 @@ public class SafetyTrainingVisionController : MonoBehaviour
 }
 ```
 
-***
-
-### Example 2: Equipment Onboarding — Webcam Selector
+## Select webcam device at runtime
 
 A desktop onboarding application where the user selects which physical camera to use before a session starts. Useful when the user's workstation has multiple cameras (built-in webcam, USB camera, etc.).
 
@@ -76,12 +73,6 @@ public class WebcamSelectorUI : MonoBehaviour
         _deviceDropdown.ClearOptions();
         _deviceDropdown.AddOptions(_deviceNames);
 
-        // Select the currently active device if already capturing
-        string active = _webcamSource.WebcamDeviceName;
-        int activeIndex = _deviceNames.IndexOf(active);
-        if (activeIndex >= 0)
-            _deviceDropdown.value = activeIndex;
-
         _deviceDropdown.onValueChanged.AddListener(async index =>
         {
             if (index >= 0 && index < _deviceNames.Count)
@@ -92,12 +83,10 @@ public class WebcamSelectorUI : MonoBehaviour
 ```
 
 {% hint style="info" %}
-`TMP_Dropdown` requires the TextMeshPro package. If your project uses the legacy `UnityEngine.UI.Dropdown`, replace `TMP_Dropdown` with `Dropdown` and `AddOptions(List<string>)` works identically.
+`TMP_Dropdown` requires the TextMeshPro package. If your project uses the legacy `UnityEngine.UI.Dropdown`, replace `TMP_Dropdown` with `Dropdown` — `AddOptions(List<string>)` works identically.
 {% endhint %}
 
-***
-
-### Example 3: VR Walkthrough — Overhead Security Camera
+## Stream an overhead security camera
 
 An architectural walkthrough where an overhead security camera monitors the entire floor plan. The publisher uses `LowOverhead` policy because the scene changes slowly and bandwidth must be reserved for audio.
 
@@ -129,9 +118,7 @@ public class SecurityCameraVisionSetup : MonoBehaviour
 }
 ```
 
-***
-
-### Example 4: Manual-Trigger Session — Look-at Activation
+## Activate publishing on player look-at
 
 Vision is expensive to stream continuously. This pattern activates publishing only while the player is looking at a specific object (e.g., a piece of machinery), and pauses it otherwise.
 
@@ -171,9 +158,7 @@ public class LookAtVisionTrigger : MonoBehaviour
 }
 ```
 
-***
-
-### Example 5: WebGL Deployment
+## Configure Vision for WebGL
 
 On WebGL, no frame source component is required. `ConvaiVisionPublisher` captures the browser canvas automatically via `canvas.captureStream()`. Set **Connection Type** to **Video** and the publish policy as needed — everything else is automatic.
 
@@ -205,8 +190,12 @@ public class WebGLVisionSetup : MonoBehaviour
 **HTTPS required on WebGL.** The `canvas.captureStream()` API is blocked by browsers on non-HTTPS origins. Deploy your WebGL build to an HTTPS host before testing Vision in production. `http://localhost` is the only exception.
 {% endhint %}
 
-***
+## Next steps
 
-### Next Steps
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Vision troubleshooting](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}
 
-These patterns cover the most common setups. For diagnosing unexpected behaviour — black feeds, zero FPS, permission errors — see [Troubleshooting & Diagnostics](/broken/pages/ce72ed1f95d78e73f4af5a61fbeaeb221e86e25d). To build a custom capture source that does not fit any built-in frame source, see [Custom Frame Sources](/broken/pages/8b043e020fbbc0e70868e2e3994e8e6b2a7d4f3a).
+{% content-ref url="custom-frame-sources.md" %}
+[Custom frame sources](custom-frame-sources.md)
+{% endcontent-ref %}

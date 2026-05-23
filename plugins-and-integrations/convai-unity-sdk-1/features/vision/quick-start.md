@@ -1,19 +1,18 @@
-# Quick Start
+---
+title: Vision quick start
+description: Add Vision to an existing Convai scene so a character can see and respond to live camera input, using the SDK's automatic component setup.
+---
 
-### Your First Vision Setup
+Add Vision to an existing Convai scene in three steps. The SDK adds and wires the required components automatically when you set `ConvaiRoomManager` to Video mode.
 
-This guide walks you through the minimum steps needed to get a Convai character receiving a live camera feed from your Unity scene. The SDK can add the required components automatically — follow the primary path below, or use the manual path if you dismissed the prompt or need custom component placement.
+## Prerequisites
 
-{% hint style="info" %}
-**Prerequisites**
-
-* A Unity scene with a `ConvaiCharacter` component already set up and working (the character responds to speech).
-* Your Convai API key is configured in **Tools → Convai → Configuration**.
-{% endhint %}
+- A Unity scene with a `ConvaiCharacter` component already set up and working (the character responds to speech).
+- Your Convai API key configured in **Tools → Convai → Configuration**.
 
 {% stepper %}
 {% step %}
-**Set the Connection Type to Video**
+### Set Connection Type to Video
 
 Select the `ConvaiRoomManager` GameObject in the Hierarchy. In the Inspector, set **Connection Type** to **Video**.
 
@@ -24,29 +23,23 @@ A dialog appears immediately:
 Click **Add Components**.
 
 The SDK creates a child GameObject named **ConvaiVisionRoot** under `ConvaiRoomManager` and adds both `ConvaiVisionPublisher` and `CameraVisionFrameSource` to it.
-
-{% hint style="info" %}
-If you clicked **Later** and need to add the components manually, see [Manual Component Setup](quick-start.md#manual-component-setup) below.
-{% endhint %}
 {% endstep %}
 
 {% step %}
-**Assign a Camera (If Not Using Camera.main)**
+### Assign a camera
 
 Select the **ConvaiVisionRoot** GameObject (child of `ConvaiRoomManager`). On the `CameraVisionFrameSource` component, locate the **Target Camera** field.
 
-* If your scene has a `Camera` tagged **MainCamera**, leave the field blank — the component resolves it automatically at runtime.
-* To capture a specific camera (an overhead view, a security camera), drag that camera into the **Target Camera** field.
+- If your scene has a `Camera` tagged **MainCamera**, leave the field blank — the component resolves it automatically at runtime.
+- To capture a specific camera (an overhead view, a security camera), drag that camera into the **Target Camera** field.
 
 The default **Capture Preset** is **Balanced** (1280 × 720 at 15 fps), which suits most scenarios.
 
-{% hint style="warning" %}
 If **Target Camera** is blank and no camera in the scene is tagged **MainCamera**, the frame source enters `Failed` state at runtime. Always assign a camera explicitly or ensure one camera has the **MainCamera** tag.
-{% endhint %}
 {% endstep %}
 
 {% step %}
-**Add Vision Debug Preview and Verify**
+### Verify with Debug Preview
 
 On any scene GameObject, click **Add Component** → **Convai/Vision/Vision Debug Preview (Editor Only)**.
 
@@ -59,12 +52,10 @@ Press **Play**. An overlay appears in the Game view showing the live camera feed
 {% endhint %}
 
 {% hint style="warning" %}
-If the overlay stays blank or the FPS counter reads zero, verify that `ConvaiRoomManager.Connection Type` is set to **Video** and that the room has fully connected. See [Troubleshooting & Diagnostics](/broken/pages/ce72ed1f95d78e73f4af5a61fbeaeb221e86e25d) for a step-by-step diagnosis.
+If the overlay stays blank or the FPS counter reads zero, verify that `ConvaiRoomManager.Connection Type` is set to **Video** and that the room has fully connected. See [Vision troubleshooting](troubleshooting-and-diagnostics.md) for a step-by-step diagnosis.
 {% endhint %}
 
-***
-
-### Manual Component Setup
+## Manual component setup
 
 If you clicked **Later** on the dialog, or want to place the components on a specific GameObject, add them manually:
 
@@ -72,25 +63,22 @@ If you clicked **Later** on the dialog, or want to place the components on a spe
 2. **Add Component** → search for **Convai Vision Publisher**.
 3. On the same GameObject (or a child), **Add Component** → **Convai/Vision/Camera Vision Frame Source**.
 4. Assign the **Target Camera** if not using `Camera.main`.
-5. Leave the **Frame Source Component** field on `ConvaiVisionPublisher` blank — the publisher auto-discovers `CameraVisionFrameSource` on the same GameObject at runtime. Assign it explicitly only if you have multiple frame sources in the scene.
+5. Leave the **Source** field on `ConvaiVisionPublisher` blank — the publisher auto-discovers `CameraVisionFrameSource` on the same GameObject at runtime. Assign it explicitly only if you have multiple frame sources in the scene.
 
-***
+## Next steps
 
-### What Just Happened
+{% content-ref url="how-vision-works.md" %}
+[How Vision works](how-vision-works.md)
+{% endcontent-ref %}
 
-When you clicked **Add Components** and pressed Play, the following occurred:
+{% content-ref url="frame-sources.md" %}
+[Vision frame sources](frame-sources.md)
+{% endcontent-ref %}
 
-1. The SDK created a **ConvaiVisionRoot** child GameObject under `ConvaiRoomManager` and added `ConvaiVisionPublisher` and `CameraVisionFrameSource` to it.
-2. `ConvaiRoomManager` established a **Video** connection to Convai.
-3. `ConvaiVisionPublisher` detected the active room and waited for the frame source to become ready.
-4. `CameraVisionFrameSource` rendered the assigned camera (or `Camera.main`) into a `RenderTexture` and signalled that frames were available.
-5. `VisionPublishCoordinator` applied the `AutoCompatible` publish policy (10 fps, 750 kbps) and passed the texture to the video pipeline.
-6. A video track named `"unity-scene"` was published to Convai. `IsPublishing` became `true`.
+{% content-ref url="publishing-and-policies.md" %}
+[Publish policies](publishing-and-policies.md)
+{% endcontent-ref %}
 
-From this point the character receives the live scene camera feed alongside the audio conversation, processed together.
-
-***
-
-### Next Steps
-
-You now have a working Vision setup. The SDK handles component placement and runtime wiring automatically. Continue to [Frame Sources](/broken/pages/44c584bfd55c71a11de36936d6fd56b8168e8858) to configure the right capture method for your platform, or jump to [Publishing & Policies](/broken/pages/1538f07b55ab5c719a79be190e1c775c62b5bd3c) to control frame rate and bandwidth. If anything is not working, start with [Troubleshooting & Diagnostics](/broken/pages/ce72ed1f95d78e73f4af5a61fbeaeb221e86e25d).
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Vision troubleshooting](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}
