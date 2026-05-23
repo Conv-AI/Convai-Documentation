@@ -56,7 +56,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | I want to...                                             | Concept           | Documentation                                                                                         |
 | -------------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------- |
 | Understand the system architecture end-to-end            | Architecture      | [Convai Unity SDK architecture](architecture-overview.md)                                             |
-| Understand session states, reconnection, and persistence | Session lifecycle | [Session lifecycle and state management](../core-concepts/session-lifecycle-and-state-management.md)  |
+| Understand session states, reconnection, and persistence | Session lifecycle | [Session lifecycle](../core-concepts/session-lifecycle.md)  |
 | Compare hands-free, push-to-talk turn-taking             | Turn-taking modes | [Turn-taking modes](../core-concepts/turn-taking-modes.md)                                            |
 | Subscribe to conversation events from C# or Inspector    | Event system      | [Event System](../core-concepts/event-system.md)                                                      |
 

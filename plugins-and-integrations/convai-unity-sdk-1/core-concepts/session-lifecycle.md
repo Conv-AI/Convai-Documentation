@@ -1,5 +1,5 @@
 ---
-title: Session lifecycle and state management
+title: Session lifecycle
 description: Understand how ConvaiCharacter sessions transition through states, where session IDs are stored, and how to configure reconnection and conversation-resume behavior.
 last_reviewed: "4.2.0"
 ---
@@ -43,7 +43,7 @@ You receive state transitions as `SessionStateChangedRelayData` events via `Conv
 
 ## Per-character sessions
 
-Each `ConvaiCharacter` has its own independent session. Sessions are not shared between characters, even in multi-character scenes.
+Each `ConvaiCharacter` has its own independent session. Sessions are not shared between characters. In multi-character scenes, each character connects and disconnects independently — session IDs are keyed to the character's ID string set in the Inspector (not the scene or object name), reconnect policy applies per character, and a session error on one character does not affect others.
 
 `ConvaiSessionData` is the persistent session store that maps each character to its current session identifier. It loads from disk automatically at startup and writes to `{Application.persistentDataPath}/Convai/sessions.json` on every change — session IDs survive application restarts without any additional setup.
 
@@ -166,17 +166,6 @@ var policy = new ReconnectPolicy(
 
 ***
 
-## Multi-character sessions
-
-In scenes with multiple `ConvaiCharacter` components, each character has a completely independent session. There is no shared state between characters at the session level.
-
-* Each character connects and disconnects independently.
-* Session IDs are stored per `characterId` — the key is the character's ID string set in the Inspector, not the scene name or object name.
-* Reconnect policy applies independently per character.
-* A session error on one character does not affect others.
-
-***
-
 ## Usage examples
 
 ### Example 1: Medical training simulation — resume after network drop
@@ -276,6 +265,6 @@ You now know how character sessions are created, how state transitions work, how
 [Event system](event-system.md)
 {% endcontent-ref %}
 
-{% content-ref url="architecture-deep-dive.md" %}
-[Architecture deep dive](architecture-deep-dive.md)
+{% content-ref url="runtime-architecture.md" %}
+[Runtime architecture](runtime-architecture.md)
 {% endcontent-ref %}

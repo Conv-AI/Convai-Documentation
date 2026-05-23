@@ -1,5 +1,5 @@
 ---
-title: Architecture deep dive
+title: Runtime architecture
 description: Understand the four-layer Convai Unity SDK runtime — what each layer owns, which components are replaceable, and how RuntimeState transitions are managed.
 last_reviewed: "4.2.0"
 ---
