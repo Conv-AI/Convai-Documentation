@@ -1,19 +1,15 @@
 ---
+title: Windows, macOS, and Linux
 description: >-
   Windows, macOS, and Linux builds require no extra SDK configuration — all
   features including Vision, spatial audio, and screen share work after standard
   setup.
+last_reviewed: "4.2.0"
 ---
-
-# Windows, macOS, and Linux
-
-### Desktop Platform Support
 
 Desktop builds have no platform-specific configuration requirements. All SDK features work without additional setup — no permission declarations, no manifest changes, no gesture handling. Microphone access, audio playback, spatial audio, Vision, and screen share all function immediately after the standard SDK setup.
 
-***
-
-### What Works on Desktop
+## Feature support
 
 | Feature                      | Windows | macOS  | Linux  |
 | ---------------------------- | ------- | ------ | ------ |
@@ -31,13 +27,11 @@ Desktop builds have no platform-specific configuration requirements. All SDK fea
 
 Screen share is a desktop-exclusive capability — it is not available on WebGL, iOS, Android, or Android-based XR headsets.
 
-***
-
-### Platform and Architecture Support
+## Platform and architecture support
 
 The SDK ships pre-built native libraries for the following desktop configurations:
 
-| Platform | Supported Architectures                           |
+| Platform | Supported architectures                           |
 | -------- | ------------------------------------------------- |
 | Windows  | x86\_64, arm64                                    |
 | macOS    | arm64 (Apple Silicon), x86\_64 (Intel), Universal |
@@ -47,9 +41,7 @@ The SDK ships pre-built native libraries for the following desktop configuration
 **Linux arm64 is not supported.** If your deployment target includes Linux arm64 machines, the native transport library will fail to load and voice conversation will not work. Only x86\_64 is available on Linux.
 {% endhint %}
 
-***
-
-### Microphone and Audio
+## Microphone and audio
 
 No permission declarations are required on desktop platforms. The operating system grants microphone access at the application level:
 
@@ -57,9 +49,7 @@ No permission declarations are required on desktop platforms. The operating syst
 * **macOS:** The OS presents a one-time system permission dialog when the application first accesses the microphone. Unity adds `NSMicrophoneUsageDescription` to the app's `Info.plist` automatically for macOS builds. No manual configuration is needed.
 * **Linux:** Microphone access is handled by the system audio stack (PulseAudio, PipeWire, ALSA). No application-level permission handling is required.
 
-***
-
-### Vision on Desktop
+## Vision on desktop
 
 `CameraVisionFrameSource` works on all desktop platforms without additional configuration — add the component to a `Camera` GameObject, assign a `ConvaiVisionPublisher`, and Vision is active.
 
@@ -67,11 +57,9 @@ No permission declarations are required on desktop platforms. The operating syst
 Camera capture applies a vertical pixel flip internally to ensure correct frame orientation. This is handled automatically on all desktop platforms — no configuration is required.
 {% endhint %}
 
-***
+## Usage examples
 
-### Usage Examples
-
-#### Military Mission Rehearsal on Windows
+### Military mission rehearsal on Windows
 
 A defense contractor runs mission rehearsal software on Windows workstations. Convai characters play opposing forces, local commanders, and civilian actors in a branching scenario. Trainees speak with characters using standard desktop microphones.
 
@@ -79,9 +67,7 @@ A defense contractor runs mission rehearsal software on Windows workstations. Co
 
 **Outcome:** Trainees interact verbally with multiple characters across a mission simulation. The session records responses and branching decisions for after-action review.
 
-***
-
-#### Medical Consultation Training on macOS
+### Medical consultation training on macOS
 
 A medical school deploys a patient consultation trainer on faculty MacBook Pros. Residents practice taking patient histories with a Convai character that responds with realistic symptoms and adapts based on the resident's questions.
 
@@ -89,9 +75,7 @@ A medical school deploys a patient consultation trainer on faculty MacBook Pros.
 
 **Outcome:** The resident speaks with the character naturally. The macOS microphone permission dialog appears on first launch only. Vision enables the character to acknowledge and respond to what the resident is holding in-scene.
 
-***
-
-#### Compliance Training Kiosk on Linux
+### Compliance training kiosk on Linux
 
 A manufacturing company runs safety compliance training on Linux workstations in a secure facility. The same Unity build used on Windows deploys to Ubuntu x86\_64 machines with no modification.
 
@@ -99,20 +83,18 @@ A manufacturing company runs safety compliance training on Linux workstations in
 
 **Outcome:** Operators complete verbal compliance assessments with Convai characters at the kiosk. The experience is identical to the Windows deployment.
 
-***
-
-### Next Steps
+## Next steps
 
 Desktop builds need no platform-specific work. Once your scene is validated, your build is ready to ship. If you are also targeting WebGL, iOS, Android, or XR headsets, review the relevant platform guide before building.
 
-{% content-ref url="/broken/pages/78fe0e353e3f4aef3b9b55038877dd98da20d25a" %}
-[Broken link](/broken/pages/78fe0e353e3f4aef3b9b55038877dd98da20d25a)
+{% content-ref url="webgl.md" %}
+[WebGL](webgl.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/d7cab15c72c25569429349891965eaf09c98fc72" %}
-[Broken link](/broken/pages/d7cab15c72c25569429349891965eaf09c98fc72)
+{% content-ref url="ios-and-android.md" %}
+[iOS and Android](ios-and-android.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/5a8d70bb1abe82b0a71b11c201ca0e03fe774511" %}
-[Broken link](/broken/pages/5a8d70bb1abe82b0a71b11c201ca0e03fe774511)
+{% content-ref url="xr-headsets.md" %}
+[XR headsets](xr-headsets.md)
 {% endcontent-ref %}
