@@ -1,13 +1,11 @@
 ---
+title: Dynamic Context usage examples
 description: >-
   Four Dynamic Context examples covering a safety drill, an onboarding
   walkthrough, a guided tour with timeline events, and a multi-state emergency
   transition.
+last_reviewed: "4.2.0"
 ---
-
-# Usage Examples
-
-## Dynamic Context in Practice
 
 The following examples progress from a single-state Inspector setup to multi-state scripting scenarios. Each example includes the scenario context, concrete setup, and the expected runtime outcome.
 
@@ -15,9 +13,7 @@ The following examples progress from a single-state Inspector setup to multi-sta
 All examples assume `ConvaiManager` is in the scene with a valid API key configured, and the target NPC has a `ConvaiCharacter` component with a Character ID assigned and is able to hold a conversation.
 {% endhint %}
 
-***
-
-## Scenario A — Safety Drill: Station Tracking
+## Safety drill: station tracking
 
 **Context:** A fire suppression certification drill. A trainer NPC guides operators through suppression stations. The character must always know the operator's current station to give station-specific instructions and hazard warnings.
 
@@ -32,7 +28,7 @@ All examples assume `ConvaiManager` is in the scene with a valid API key configu
 
 Repeat with a separate child-GameObject command for each additional station, each with the appropriate **State Value**. In each child command's **Target** section, disable **Auto Resolve Character** and assign the NPC's `ConvaiCharacter` explicitly — auto-resolve only searches the same GameObject.
 
-### Expected Outcome
+### Expected outcome
 
 When the operator enters the Fire Suppression Bay, `Execute()` fires. The character receives the updated `Station` state and immediately responds:
 
@@ -40,9 +36,7 @@ When the operator enters the Fire Suppression Bay, `Execute()` fires. The charac
 
 The `Station` state persists in the tracker. If the operator asks "Where am I?" at any point, the character answers with the current station value.
 
-***
-
-## Scenario B — Onboarding Walkthrough: Batch State Update
+## Onboarding walkthrough: batch state update
 
 **Context:** A corporate onboarding simulation. An HR representative NPC adapts its guidance based on which items a new employee has collected and which checkpoints they have cleared. Two conditions are met simultaneously — they should be sent in one atomic update.
 
@@ -85,7 +79,7 @@ public class OnboardingProgressTracker : MonoBehaviour
 }
 ```
 
-### Expected Outcome
+### Expected outcome
 
 `OnAccessCardAndBriefingComplete()` sends one atomic update. The HR character responds immediately:
 
@@ -93,13 +87,11 @@ public class OnboardingProgressTracker : MonoBehaviour
 
 `TryGetStateValue` reads from the local tracker with no network round-trip. It returns the current value if the state was set, or `false` if it was never set or has been removed.
 
-***
-
-## Scenario C — Guided Tour: Multiple Commands and Timeline Events
+## Guided tour: multiple commands and timeline events
 
 **Context:** A museum guided tour. A docent NPC tracks which exhibit is currently active and records visitor interactions as chronological events. The docent uses that history to give personalized recommendations.
 
-### Setup (Inspector — Multiple Child Commands)
+### Setup (Inspector — multiple child commands)
 
 Because `ConvaiDynamicContextCommand` allows only one instance per GameObject, each command lives on a child GameObject of the NPC.
 
@@ -125,11 +117,9 @@ Because `ConvaiDynamicContextCommand` allows only one instance per GameObject, e
 * Reaction Mode: `Auto`
 * Target → Auto Resolve Character: disabled; Character field: NPC's `ConvaiCharacter`
 
-Wire each child command's `Execute()` to timeline markers, interaction zones, or UI buttons.
+Wire each child command's `Execute()` to timeline markers, interaction zones, or UI buttons. Wire the **On Executed** event on each child to drive UI feedback — highlight exhibit cards, update tour progress — without additional scripting.
 
-Wire the **On Executed** event on each child to drive UI feedback — highlight exhibit cards, update tour progress — without additional scripting.
-
-### Expected Outcome
+### Expected outcome
 
 As the visitor progresses, the docent's canonical context accumulates:
 
@@ -143,9 +133,7 @@ The docent references both the current exhibit and the visitor's specific intera
 
 > _"Since you photographed the gladiator exhibit, you might enjoy the additional display on Roman military equipment in the next room."_
 
-***
-
-## Scenario D — Emergency Response: Multi-State Transition
+## Emergency response: multi-state transition
 
 **Context:** An industrial safety simulation. A supervisor NPC must respond to a simultaneous shift from routine inspection to emergency mode — three conditions change at once, and the character must acknowledge all of them immediately.
 
@@ -183,7 +171,7 @@ public class EmergencyResponseController : MonoBehaviour
 }
 ```
 
-### Expected Outcome
+### Expected outcome
 
 The supervisor character receives three state updates and one event. The `ReactImmediately` mode on `SetStates` triggers an immediate response acknowledging all simultaneous changes:
 
@@ -191,6 +179,12 @@ The supervisor character receives three state updates and one event. The `ReactI
 
 Using `SetStates` for three simultaneous transitions produces one canonical rebuild rather than three sequential ones, ensuring the character receives a coherent picture rather than three partial updates.
 
-## Next Steps
+## Next steps
 
-See [Scripting API Reference](/broken/pages/92e033e69c53e803f7296bede3511ff924549b4d) for method signatures, parameter types, and full queueing behavior. For details on the network messages sent for each operation type, see [Sync Behavior and Timing](/broken/pages/fd07c33dbde4c8f46f1472ab841d25ba0bc5951e).
+{% content-ref url="dynamic-context-scripting-api.md" %}
+[Dynamic Context scripting API](dynamic-context-scripting-api.md)
+{% endcontent-ref %}
+
+{% content-ref url="sync-behavior-and-timing.md" %}
+[Sync behavior and timing](sync-behavior-and-timing.md)
+{% endcontent-ref %}
