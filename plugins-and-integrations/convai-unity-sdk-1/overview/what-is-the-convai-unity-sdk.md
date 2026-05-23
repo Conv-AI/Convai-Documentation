@@ -1,8 +1,9 @@
 ---
 title: What is the Convai Unity SDK
 description: >-
-  Real-time conversational AI characters for Unity — voice pipeline, feature
-  modules, requirements, and supported platforms.
+  Real-time conversational AI characters for Unity — voice pipeline, opt-in
+  feature modules, supported platforms, and minimum requirements.
+last_reviewed: "4.2.0"
 ---
 
 The Convai Unity SDK connects Unity characters to Convai so they can speak, listen, reason, and act in real time. A player speaks into a microphone; the SDK captures audio, streams it to Convai for speech recognition and language understanding, generates a response with text-to-speech, and plays it back on the character with synchronized lip sync, facial emotion, and optional in-scene actions. The SDK targets Unity developers building training simulations, interactive experiences, and games.
@@ -71,6 +72,12 @@ The sample scenes use URP. If your project uses the Built-in render pipeline, th
 
 The Convai Unity SDK is available on the [Unity Asset Store](https://assetstore.unity.com/packages/tools/behavior-ai/npc-ai-engine-dialog-actions-voice-and-lipsync-convai-235621).
 
+For the full platform and Unity version support matrix, see Compatibility and requirements.
+
+{% content-ref url="../compatibility-and-requirements/README.md" %}
+[Compatibility and requirements](../compatibility-and-requirements/README.md)
+{% endcontent-ref %}
+
 ## Next steps
 
 Install the SDK and add your first character.
@@ -82,5 +89,5 @@ Install the SDK and add your first character.
 If you want to understand the system architecture before setting up, read the architecture overview next.
 
 {% content-ref url="architecture-overview.md" %}
-[Architecture overview](architecture-overview.md)
+[Convai Unity SDK architecture](architecture-overview.md)
 {% endcontent-ref %}

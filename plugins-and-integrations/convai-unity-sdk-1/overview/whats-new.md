@@ -1,13 +1,11 @@
 ---
-title: What's new
+title: Release notes
 description: >-
   Release notes for the Convai Unity SDK — current version highlights,
   previous release notes, bug fixes, and migration guidance for each release.
 ---
 
 Track changes to the Convai Unity SDK across releases, including new features, bug fixes, and configuration changes.
-
-## Release notes
 
 {% updates format="full" %}
 {% update date="2026-05-08" tags="v4.2.0,Current" %}
