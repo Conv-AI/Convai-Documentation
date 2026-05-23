@@ -1,25 +1,17 @@
 ---
-description: >-
-  Four progressive examples showing the Convai Actions system in training
-  simulation and onboarding contexts — from zero-code Inspector setup to
-  scripted batch injection and error recovery.
+title: Character actions examples
+description: Progressive examples for the Convai character actions system — Inspector setup, event subscriptions, scripted batch injection, and navigation error recovery.
 ---
-
-# Usage Examples
-
-## Actions Usage Examples
 
 These four examples progress from the simplest possible configuration to full scripting control. Each example is self-contained — you can follow any one of them without reading the others first.
 
-***
-
-## Example 1 — Fire Safety Retrieval (Inspector Setup, No Code)
+## Example 1 — Fire safety retrieval (Inspector setup, no code)
 
 **Scenario:** A fire safety training simulation. The instructor NPC retrieves a fire extinguisher when the trainee asks. No scripting required.
 
 **Prerequisites:** Sample pack imported (for `NavMeshMoveToActionExecutor`). NavMesh baked in the scene.
 
-### Inspector Configuration
+### Inspector configuration
 
 On the instructor NPC's `GameObject`, add these components:
 
@@ -30,19 +22,19 @@ On the instructor NPC's `GameObject`, add these components:
 
 In `ConvaiActionConfigSource`:
 
-**Action Definitions:**
+**Action definitions:**
 
-| Action Name | Target Requirement | Executor                      |
-| ----------- | ------------------ | ----------------------------- |
-| `Retrieve`  | `Object`           | `NavMeshMoveToActionExecutor` |
-| `Point At`  | `Either`           | `LookAtTargetActionExecutor`  |
+| Action name | Target requirement | Executor |
+| --- | --- | --- |
+| `Retrieve` | `Object` | `NavMeshMoveToActionExecutor` |
+| `Point At` | `Either` | `LookAtTargetActionExecutor` |
 
-**Actionable Objects:**
+**Actionable objects:**
 
-| Name           | Description                                                                               |
-| -------------- | ----------------------------------------------------------------------------------------- |
+| Name | Description |
+| --- | --- |
 | `Extinguisher` | Red portable CO2 fire extinguisher on the wall bracket beside the main pump control panel |
-| `Alarm Panel`  | Emergency alarm panel with a red pull handle mounted near the site entrance               |
+| `Alarm Panel` | Emergency alarm panel with a red pull handle mounted near the site entrance |
 
 **Expected outcome:**
 
@@ -58,13 +50,11 @@ Open the Console and filter by `ConvaiActionDebugProbe` (if the probe is added).
 ```
 {% endhint %}
 
-***
-
-## Example 2 — Onboarding Checklist Integration (Event Subscription)
+## Example 2 — Onboarding checklist integration (event subscription)
 
 **Scenario:** A corporate onboarding simulation. As the NPC demonstrates each workstation, a checklist UI advances. Completing the full equipment tour advances the training stage.
 
-### C# Setup
+### C# setup
 
 Wire `OnBatchCompleted` to the checklist manager. No additional code on the dispatcher side is required if you wire it in the Inspector. For code-driven wiring:
 
@@ -104,22 +94,20 @@ public sealed class OnboardingTourController : MonoBehaviour
 
 **ConvaiActionConfigSource definitions:**
 
-| Action Name   | Target Requirement | Executor                      |
-| ------------- | ------------------ | ----------------------------- |
-| `Walk To`     | `Object`           | `NavMeshMoveToActionExecutor` |
-| `Demonstrate` | `Object`           | `LookAtTargetActionExecutor`  |
+| Action name | Target requirement | Executor |
+| --- | --- | --- |
+| `Walk To` | `Object` | `NavMeshMoveToActionExecutor` |
+| `Demonstrate` | `Object` | `LookAtTargetActionExecutor` |
 
 **Actionable objects:** Each workstation registered with its name and location description.
 
 **Expected outcome:** The trainee says "show me the filing system." The NPC walks to the filing cabinet, faces it, and `OnBatchCompleted` fires — the checklist advances to the next step automatically.
 
-***
-
-## Example 3 — Navigation Failure with Fallback Dialogue (Error Recovery)
+## Example 3 — Navigation failure with fallback dialogue (error recovery)
 
 **Scenario:** A construction site safety simulation. When the NPC cannot reach a hazard zone (path blocked), it acknowledges the obstacle rather than silently stopping.
 
-### C# Setup
+### C# setup
 
 Subscribe to `OnStepFailed` and inject a dynamic context event so the NPC speaks a natural fallback:
 
@@ -153,19 +141,17 @@ public sealed class ActionFailureHandler : MonoBehaviour
 }
 ```
 
-**Expected outcome:** The NPC navigates toward the hazard zone, the NavMeshAgent fails to complete the path, the executor returns `Failed`, and `OnStepFailed` fires. The fallback event is injected, and the NPC says something like "I can't get to the chemical storage area — the path is blocked by the scaffolding."
+**Expected outcome:** The NPC navigates toward the hazard zone, the `NavMeshAgent` fails to complete the path, the executor returns `Failed`, and `OnStepFailed` fires. The fallback event is injected, and the NPC says something like "I can't get to the chemical storage area — the path is blocked by the scaffolding."
 
 {% hint style="info" %}
 Set `FailurePolicy` to `StopBatch` (default) so subsequent steps in the same batch (e.g., "Demonstrate hazard") don't run when the navigation step failed.
 {% endhint %}
 
-***
-
-## Example 4 — Scripted Demonstration Sequence (Programmatic Injection)
+## Example 4 — Scripted demonstration sequence (programmatic injection)
 
 **Scenario:** A medical procedure training simulation. At a defined moment in the training script (triggered by a timeline event), the NPC automatically walks through an equipment demonstration without waiting for the trainee to ask.
 
-### C# Setup
+### C# setup
 
 Use `ConvaiActionDispatcher.EnqueueActions` to inject a multi-step sequence from a timeline trigger or UI button:
 
@@ -201,8 +187,12 @@ Wire `RunDefibrillatorDemo` to a `UnityEngine.Timeline` signal, a UI button `OnC
 `BatchPolicy = Queue` ensures this scripted sequence waits politely if the trainee is mid-conversation with an active action batch. Switch to `BatchPolicy = ReplaceCurrent` if the demonstration should interrupt any ongoing action.
 {% endhint %}
 
-***
+## Next steps
 
-## Next Steps
+{% content-ref url="debugging-and-troubleshooting.md" %}
+[Debug character actions](debugging-and-troubleshooting.md)
+{% endcontent-ref %}
 
-These examples cover the most common integration patterns. For diagnosing issues when actions don't execute as expected, see [Debugging & Troubleshooting](/broken/pages/df087fe0ba6d2bfabc74b7b6da3d12e911f48d82). For the complete public API, see [Scripting Reference](/broken/pages/2ef79348f99f367e8425911bab3e6313a100c8bc).
+{% content-ref url="actions-scripting-reference.md" %}
+[Character actions scripting reference](actions-scripting-reference.md)
+{% endcontent-ref %}

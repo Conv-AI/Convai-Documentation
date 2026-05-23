@@ -1,82 +1,66 @@
 ---
-description: >-
-  Configure ConvaiActionDispatcher's batch and failure policies, subscribe to
-  its seven lifecycle events, and inject action batches programmatically for
-  testing or scripted sequences.
+title: Dispatcher and batch policies
+description: Configure ConvaiActionDispatcher's batch policy, failure policy, and lifecycle events, and inject action batches programmatically for testing or scripted sequences.
 ---
-
-# Dispatcher & Batch Policies
-
-## Dispatcher, Batch Policies, and Lifecycle Events
 
 `ConvaiActionDispatcher` is the runtime execution layer of the action system. It listens for command batches from Convai, resolves each action and target against the current session's configuration, and calls the bound executor components one step at a time. Two policies control what happens when new batches arrive during execution and when a step fails.
 
-***
+## Component overview
 
-## Component Overview
-
-| Attribute       | Value                                                            |
-| --------------- | ---------------------------------------------------------------- |
-| **Menu path**   | `Add Component → Convai → Convai Action Dispatcher`              |
-| **Namespace**   | `Convai.Runtime.Actions`                                         |
+| Attribute | Value |
+| --- | --- |
+| **Menu path** | `Add Component → Convai → Convai Action Dispatcher` |
+| **Namespace** | `Convai.Runtime.Actions` |
 | **Constraints** | `DisallowMultipleComponent`, `RequireComponent(ConvaiCharacter)` |
 
 The dispatcher must be on the same `GameObject` as `ConvaiCharacter`. Only one dispatcher is allowed per character.
 
-***
+## Inspector fields
 
-## Inspector Fields
-
-| Field               | Type                               | Default     | Description                                                                |
-| ------------------- | ---------------------------------- | ----------- | -------------------------------------------------------------------------- |
-| `_batchPolicy`      | `ConvaiActionBatchPolicy`          | `Queue`     | How incoming batches behave while another batch is executing               |
-| `_failurePolicy`    | `ConvaiActionBatchFailurePolicy`   | `StopBatch` | Whether a step failure aborts the remaining batch or allows it to continue |
-| `_onBatchStarted`   | `UnityEvent`                       | —           | Fires when a batch begins executing                                        |
-| `_onStepStarted`    | `ConvaiActionInvocationUnityEvent` | —           | Fires at the start of each step                                            |
-| `_onStepSucceeded`  | `ConvaiActionInvocationUnityEvent` | —           | Fires when a step executor returns `Succeeded`                             |
-| `_onStepFailed`     | `ConvaiActionInvocationUnityEvent` | —           | Fires when a step fails for any reason                                     |
-| `_onStepUnhandled`  | `ConvaiActionInvocationUnityEvent` | —           | Fires when an executor returns `Unhandled`                                 |
-| `_onBatchCompleted` | `UnityEvent`                       | —           | Fires when all steps finish without being aborted                          |
-| `_onBatchAborted`   | `UnityEvent`                       | —           | Fires when the batch is cut short by the failure policy                    |
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `_batchPolicy` | `ConvaiActionBatchPolicy` | `Queue` | How incoming batches behave while another batch is executing |
+| `_failurePolicy` | `ConvaiActionBatchFailurePolicy` | `StopBatch` | Whether a step failure aborts the remaining batch or allows it to continue |
+| `_onBatchStarted` | `UnityEvent` | — | Fires when a batch begins executing |
+| `_onStepStarted` | `ConvaiActionInvocationUnityEvent` | — | Fires at the start of each step |
+| `_onStepSucceeded` | `ConvaiActionInvocationUnityEvent` | — | Fires when a step executor returns `Succeeded` |
+| `_onStepFailed` | `ConvaiActionInvocationUnityEvent` | — | Fires when a step fails for any reason |
+| `_onStepUnhandled` | `ConvaiActionInvocationUnityEvent` | — | Fires when an executor returns `Unhandled` |
+| `_onBatchCompleted` | `UnityEvent` | — | Fires when all steps finish without being aborted |
+| `_onBatchAborted` | `UnityEvent` | — | Fires when the batch is cut short by the failure policy |
 
 `ConvaiActionInvocationUnityEvent` is a serializable `UnityEvent<ConvaiActionInvocation>`. Wire it in the Inspector exactly like a standard `UnityEvent` — the event parameter carries the full invocation context (action name, target, character, batch and step index).
 
-***
-
-## Batch Policy
+## Batch policy
 
 Batch policy controls what happens when Convai returns a new action batch while the dispatcher is still executing a previous one.
 
-| Policy           | Enum Value | Behavior                                                                                                                                                                                |
-| ---------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Queue`          | `0`        | New batches wait in a queue. The current batch finishes before the next starts. Suitable for most scenarios.                                                                            |
-| `ReplaceCurrent` | `1`        | Cancels the currently executing step and clears any queued batches. The new batch starts immediately. Use for interrupt-driven scenarios (e.g., "Stop, come here instead").             |
-| `DropIncoming`   | `2`        | Discards new batches until the current batch and all queued batches finish. Use when an in-progress sequence must not be interrupted (e.g., a safety demonstration that must complete). |
+| Policy | Enum value | Behavior |
+| --- | --- | --- |
+| `Queue` | `0` | New batches wait in a queue. The current batch finishes before the next starts. Suitable for most scenarios. |
+| `ReplaceCurrent` | `1` | Cancels the currently executing step and clears any queued batches. The new batch starts immediately. Use for interrupt-driven scenarios (e.g., "Stop, come here instead"). |
+| `DropIncoming` | `2` | Discards new batches until the current batch and all queued batches finish. Use when an in-progress sequence must not be interrupted (e.g., a safety demonstration that must complete). |
 
 {% hint style="info" %}
-`ReplaceCurrent` cancels the **currently running executor step** via the `CancellationToken` and clears all pending batches before starting the new one. Executors must respect the cancellation token for this to be instant — see [Writing Custom Executors](/broken/pages/9fb9167254041c15a14195ea4df90bcf9f92a05c).
+`ReplaceCurrent` cancels the **currently running executor step** via the `CancellationToken` and clears all pending batches before starting the new one. Executors must respect the cancellation token for this to be instant — see [Write a custom action executor](writing-custom-executors.md).
 {% endhint %}
 
-***
-
-## Failure Policy
+## Failure policy
 
 Failure policy controls what happens when an executor returns a non-success result (`Failed`, `Unhandled`, `Canceled`, or `TimedOut`).
 
-| Policy          | Enum Value | Behavior                                                                                           |
-| --------------- | ---------- | -------------------------------------------------------------------------------------------------- |
-| `StopBatch`     | `0`        | Remaining steps in the batch are skipped. `OnBatchAborted` fires.                                  |
-| `ContinueBatch` | `1`        | Execution continues with the next step regardless of failure. `OnBatchCompleted` fires at the end. |
+| Policy | Enum value | Behavior |
+| --- | --- | --- |
+| `StopBatch` | `0` | Remaining steps in the batch are skipped. `OnBatchAborted` fires. |
+| `ContinueBatch` | `1` | Execution continues with the next step regardless of failure. `OnBatchCompleted` fires at the end. |
 
 Use `ContinueBatch` when actions are independent — a failed "Point At" should not prevent a following "Wave." Use `StopBatch` (the default) for dependent sequences — a failed "Move To" should prevent a following "Pick Up" that would fail anyway.
 
-***
-
-## Lifecycle Events
+## Lifecycle events
 
 The dispatcher fires events at every meaningful stage of batch and step execution. Subscribe in the Inspector via UnityEvent fields, or subscribe in C# via the properties.
 
-### Event Firing Order
+### Event firing order
 
 ```
 OnBatchStarted
@@ -91,7 +75,7 @@ OnBatchCompleted  (all steps finished, or ContinueBatch allowed failures through
 OnBatchAborted    (StopBatch policy cut the batch short after a failure)
 ```
 
-### Subscribing in C\#
+### Subscribing in C#
 
 ```csharp
 using Convai.Runtime.Actions;
@@ -129,9 +113,7 @@ public sealed class ActionFeedback : MonoBehaviour
 }
 ```
 
-***
-
-## Manual Batch Injection
+## Manual batch injection
 
 `EnqueueActions(IReadOnlyList<ConvaiActionCommand> actions)` submits a batch to the dispatcher programmatically, respecting the active batch and failure policies. Use this for scripted demonstration sequences, automated test runs, or NPC behaviors triggered by game events rather than player speech.
 
@@ -159,9 +141,7 @@ public sealed class DemoTrigger : MonoBehaviour
 
 The dispatcher executes these steps sequentially. If the `BatchPolicy` is `Queue`, this batch waits behind any batch already in progress.
 
-***
-
-## Bypassing the Dispatcher
+## Bypassing the dispatcher
 
 If you want to react to raw action commands without the dispatcher's target resolution and execution pipeline, subscribe to `ConvaiCharacter.OnActionsReceived` directly:
 
@@ -193,25 +173,21 @@ public sealed class ManualActionHandler : MonoBehaviour
 Bypassing the dispatcher means no automatic target resolution, no batch/failure policies, and no lifecycle events. This is appropriate for read-only observation or custom dispatch pipelines, but not for typical gameplay where the SDK should drive the behavior.
 {% endhint %}
 
-***
+## Dispatcher lifecycle behavior
 
-## Dispatcher Lifecycle Behavior
+| Situation | Dispatcher behavior |
+| --- | --- |
+| Dispatcher disabled | Active work is canceled; queue is cleared |
+| Dispatcher destroyed | Same as disabled |
+| Empty batch received | Silently ignored — no events fire |
+| Action name not in local definitions | Step fails: `OnStepFailed` fires; `StopBatch` aborts the batch |
+| Executor field not assigned | Step fails: `OnStepFailed` fires |
+| Target requirement not met | Step fails: `OnStepFailed` fires |
+| Executor returns `Unhandled` | `OnStepUnhandled` fires; treated as failure for `StopBatch` policy |
 
-| Situation                            | Dispatcher Behavior                                                |
-| ------------------------------------ | ------------------------------------------------------------------ |
-| Dispatcher disabled                  | Active work is canceled; queue is cleared                          |
-| Dispatcher destroyed                 | Same as disabled                                                   |
-| Empty batch received                 | Silently ignored — no events fire                                  |
-| Action name not in local definitions | Step fails: `OnStepFailed` fires; `StopBatch` aborts the batch     |
-| Executor field not assigned          | Step fails: `OnStepFailed` fires                                   |
-| Target requirement not met           | Step fails: `OnStepFailed` fires                                   |
-| Executor returns `Unhandled`         | `OnStepUnhandled` fires; treated as failure for `StopBatch` policy |
+## Usage examples
 
-***
-
-## Usage Examples
-
-### Example 1 — Training Checklist Integration
+### Example 1 — Training checklist integration
 
 **Scenario:** A corporate onboarding simulation. A checklist UI advances when the NPC completes each equipment demonstration.
 
@@ -228,9 +204,7 @@ public void AdvanceStep()
 
 No additional code is required on the dispatcher side — wire the `OnBatchCompleted` UnityEvent in the Inspector.
 
-***
-
-### Example 2 — Fallback Dialogue on Navigation Failure
+### Example 2 — Fallback dialogue on navigation failure
 
 **Scenario:** When the NPC cannot reach a target (NavMesh path blocked), it should speak a fallback line rather than silently stopping.
 
@@ -248,8 +222,12 @@ private void HandleStepFailed(ConvaiActionInvocation invocation)
 }
 ```
 
-***
+## Next steps
 
-## Next Steps
+{% content-ref url="writing-custom-executors.md" %}
+[Write a custom action executor](writing-custom-executors.md)
+{% endcontent-ref %}
 
-To create executors for your project's specific behaviors, see [Writing Custom Executors](/broken/pages/9fb9167254041c15a14195ea4df90bcf9f92a05c). For the complete public API for all dispatcher types and events, see [Scripting Reference](/broken/pages/2ef79348f99f367e8425911bab3e6313a100c8bc).
+{% content-ref url="actions-scripting-reference.md" %}
+[Character actions scripting reference](actions-scripting-reference.md)
+{% endcontent-ref %}
