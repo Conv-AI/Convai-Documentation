@@ -1,6 +1,6 @@
 ---
 title: Async patterns
-description: Reference for Convai SDK async operation patterns, including async/await, coroutines, chaining, progress tracking, cancellation, and streams.
+description: Consume IConvaiOperation<T> and IConvaiStream<T> using async/await, coroutines, chaining, progress tracking, cancellation, and streams.
 last_reviewed: "4.2.0"
 ---
 

@@ -84,7 +84,7 @@ Pass this to the second overload to override runtime behavior at connect time.
 
 | Field                       | Type                                  | Description                                                          |
 | --------------------------- | ------------------------------------- | -------------------------------------------------------------------- |
-| `TurnTaking`                | `TurnTakingOptions`                   | Override the turn-taking configuration for this session              |
+| `TurnTaking`                | `TurnTakingOptions`                   | Override the turn-taking configuration for this session. See [Turn-taking modes](../core-concepts/turn-taking-modes.md) for the full field reference. |
 | `EndUserId`                 | `string`                              | Override the end-user ID for this session (used by Long-Term Memory) |
 | `EndUserMetadata`           | `IReadOnlyDictionary<string, object>` | Additional metadata for the end user                                 |
 | `ActionConfigOverride`      | `ConvaiActionConfig`                  | Override the action configuration for this session                   |
@@ -297,6 +297,17 @@ public class MicrophonePicker : MonoBehaviour
 }
 ```
 {% endcode %}
+
+***
+
+## Troubleshooting
+
+| Symptom | Likely Cause | Fix |
+| ------- | ------------ | --- |
+| `ActiveManager` returns `null` at runtime | `ConvaiManager` not in scene, or accessed before bootstrap completes | Add via **Convai → Create Manager**; null-check before use; subscribe to `OnConnected` instead of reading state in `Awake` or `OnEnable` |
+| `TryGet*` returns `false` | Service unavailable or manager not fully bootstrapped | Check `IsBootstrapped` before calling; call after `OnConnected` fires |
+| `ConnectAsync` stays `Running` indefinitely | Invalid API key, network unreachable, or `ConvaiSettings` asset missing | Verify API key in **Convai → Settings**; use a timeout `CancellationToken` to surface the failure |
+| `RefreshReferences` does not find a dynamically spawned character | Characters instantiated after scene load are not auto-discovered | Call `RefreshReferences()` after instantiation, or use `SetExplicitCharacters()` to register them directly |
 
 ***
 

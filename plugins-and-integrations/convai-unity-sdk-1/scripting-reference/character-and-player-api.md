@@ -58,6 +58,13 @@ var player = ConvaiManager.ActiveManager?.Player;
 | `NarrativeDesign`                 | `IConvaiNarrativeDesign` | Read       | Narrative design interface                                          |
 | `IsInjected`                      | `bool`                   | Read       | True when dependencies have been injected by the SDK                |
 
+### `ConvaiConfigSourceMode` enum
+
+| Value    | Description                                                  |
+| -------- | ------------------------------------------------------------ |
+| `Inline` | Configuration set directly on the component in the Inspector |
+| `Asset`  | Configuration loaded from a `ConvaiCharacterProfile` asset   |
+
 ### Session control
 
 | Method                                                                                     | Returns                  | Description                                                                                                       |

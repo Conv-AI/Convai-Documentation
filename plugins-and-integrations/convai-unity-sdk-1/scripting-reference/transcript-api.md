@@ -321,6 +321,17 @@ public class LiveChatUI : MonoBehaviour
 
 ***
 
+## Troubleshooting
+
+| Symptom | Likely Cause | Fix |
+| ------- | ------------ | --- |
+| `GetTurns()` returns empty list | No turns exist yet, or `IncludeActiveTurns = false` and all current turns are still streaming | Omit the `TranscriptQuery` to get all turns, or set `IncludeActiveTurns = true` to include in-progress turns |
+| `Changed` fires but `batch.CompletedTurnIds` is empty | Turns are still active — the batch reflects an update to a streaming turn, not a completion | Check `batch.ChangedTurns` for active-turn updates; `CompletedTurnIds` only populates when a turn finishes |
+| `TranscriptTurnSnapshot.CommittedText` is empty | Turn is still `Streaming` — text is not committed until the turn completes | Use `DisplayText` for in-progress text, or wait for the turn to appear in `batch.CompletedTurnIds` |
+| `Changed` never fires after connect | Subscribed too late or `Dispose()` called before connect | Subscribe to `Changed` before or immediately after `ConnectAsync`; do not call `Dispose()` until the component is destroyed |
+
+***
+
 ## Next steps
 
 For event-driven transcript reactions without querying the timeline, use `ConvaiCharacterEventRelay` or `ConvaiTranscriptEventRelay` — see [Character Events](character-events.md). For full character scripting API, see [Character & Player API](character-and-player-api.md).
