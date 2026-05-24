@@ -1,117 +1,12 @@
 ---
 title: Customizing UI components
-description: >-
-  Extend or replace the built-in transcript, notification, and settings UI
-  using ITranscriptListener, ITranscriptUI, character visibility filters, or
-  prefab swapping.
+description: Restyle or replace the built-in transcript, notification, and settings UI using character visibility filters or prefab swapping.
 last_reviewed: "4.2.0"
 ---
 
-The Convai Unity SDK's UI layer is designed for replacement. Four extension paths let you customize to any depth — from lightweight transcript callbacks to fully bespoke UI implementations.
+Two extension paths let you customize the SDK's scene-level UI without replacing its data pipeline. Character visibility filtering controls which characters' transcripts reach the active display. Visual customization swaps the prefabs that render those transcripts, notifications, and settings controls.
 
-1. **`ITranscriptListener`** — Lightweight callbacks for transcript delivery without building new visual UI
-2. **`ITranscriptUI`** — Full custom transcript display replacing the built-in chat or subtitle panel
-3. **Character Visibility Filtering** — Control which characters' transcripts route to the active UI
-4. **Visual Customization** — Restyle existing components by swapping prefabs
-
-## `ITranscriptListener` — simple custom integration
-
-Use `ITranscriptListener` when you need transcript data routed to your code without building new visual UI. Examples: a compliance scoring system, a conversation logger, a custom text component fed by transcript data.
-
-**Interface members:**
-
-| Member | Description |
-| --- | --- |
-| `string FilterCharacterId { get; }` | Optional character filter — set to a character ID to receive only that character's transcripts. Return `null` for no filtering |
-| `void OnCharacterTranscript(string characterId, string characterName, string text, bool isFinal)` | Called for each character transcript update |
-| `void OnPlayerTranscript(string text, bool isFinal)` | Called for each player transcript update |
-
-The `isFinal` boolean is `false` during streaming and `true` on turn completion. Auto-discovery registers all `ITranscriptListener` implementations in the scene automatically.
-
-**Multi-user variant:** Implement `IMultiUserTranscriptListener` to receive per-player attribution via `OnPlayerTranscriptWithSpeaker()`, which includes `speakerId`, `speakerName`, `participantId`, and session context.
-
-**Example — compliance scoring in safety training:**
-
-```csharp
-using Convai.Runtime.Presentation.Services;
-using UnityEngine;
-
-public class ComplianceScorer : MonoBehaviour, ITranscriptListener
-{
-    [SerializeField] private string _instructorCharacterId;
-
-    public string FilterCharacterId => _instructorCharacterId;
-
-    public void OnCharacterTranscript(string characterId, string characterName, string text, bool isFinal) { }
-
-    public void OnPlayerTranscript(string text, bool isFinal)
-    {
-        if (!isFinal) return;
-        bool passed = text.Contains("hazard identified", System.StringComparison.OrdinalIgnoreCase);
-        Debug.Log($"Response evaluated. Passed: {passed}");
-    }
-}
-```
-
-Place on any `GameObject` in the scene. `ConvaiManager` discovers and registers it automatically.
-
-## `ITranscriptUI` — full custom transcript UI
-
-Use `ITranscriptUI` to replace the entire transcript display — for world-space 3D panels, custom WebGL overlays, or specialized layouts the built-in prefabs cannot provide.
-
-**Key differences from `ITranscriptListener`:**
-
-* Full control over prefab and component layout
-* Partial transcripts managed via `DisplayMessage()` / `CompleteMessage()`
-* Activates only when its `Identifier` matches the current `ConvaiTranscriptMode`
-* More complex (5 methods + 2 properties)
-
-**Interface contract:**
-
-```csharp
-public interface ITranscriptUI
-{
-    string Identifier { get; }  // "Chat" or "Subtitle"
-    bool IsActive { get; }
-    void DisplayMessage(TranscriptViewModel viewModel);
-    void CompleteMessage(string messageId);
-    void CompletePlayerTurn();
-    void ClearAll();
-    void SetActive(bool active);
-}
-```
-
-**Implementation steps:**
-
-{% stepper %}
-{% step %}
-### Create a MonoBehaviour implementing `ITranscriptUI`
-
-Set `Identifier` to `"Chat"` to replace the chat UI or `"Subtitle"` to replace the subtitle UI. Implement `DisplayMessage` to handle both partial (`viewModel.IsFinal == false`) and final (`viewModel.IsFinal == true`) transcripts.
-{% endstep %}
-
-{% step %}
-### Add it to your scene
-
-`ConvaiManager` discovers it automatically on startup. For manual control, use `ConvaiManager.ActiveManager.RegisterTranscriptUI(myUI)`.
-{% endstep %}
-
-{% step %}
-### Activate via transcript mode
-
-Switch to your custom UI by setting the matching `ConvaiTranscriptMode` through `IConvaiRuntimeSettingsService.Apply()`.
-{% endstep %}
-
-{% step %}
-### Remove conflicting built-in prefabs
-
-If both your custom UI and the built-in UI share the same `Identifier`, both activate simultaneously. Remove the built-in prefab from your scene for exclusive control.
-{% endstep %}
-{% endstepper %}
-
-{% hint style="danger" %}
-If both your custom UI and a built-in UI share the same `Identifier`, both activate simultaneously when that mode is set. Remove the built-in prefab (`TranscriptUI_Chat.prefab` or `SubtitleTranscriptUI`) from your scene if you want exclusive control.
-{% endhint %}
+For lightweight transcript callbacks without a custom UI, use `ITranscriptListener`. For a complete custom transcript display replacing the built-in chat or subtitle panel, use `ITranscriptUI`. Both interfaces are documented in [Transcript UI](transcript-ui.md).
 
 ## Character visibility filtering
 
@@ -219,10 +114,6 @@ settingsPanelPresenter.Unbind();
 
 ## Usage examples
 
-### Clinical notes — custom `ITranscriptUI`
-
-A medical simulation renders character speech as timestamped clinical notes in a scrollable side panel rather than chat bubbles. Implement `ITranscriptUI` with `Identifier = "Chat"`, remove the built-in `TranscriptUI_Chat.prefab` from the scene, and in `DisplayMessage()` instantiate a note entry prefab with the turn's `DisplayName`, `Text`, and `Timestamp`. At runtime, each AI patient response appears as a dated note entry, matching the clinical context of the simulation.
-
 ### Multi-character subtitle focus
 
 A medical simulation with multiple AI characters (doctor, nurse, patient) uses `SingleCharacterFilter` on the trainee so subtitle display automatically switches to the AI character they face. Add the component to the player `GameObject`, verify a `Rigidbody` is present, and leave the default 90° vision cone. At runtime, as the trainee turns between characters, the active subtitle switches to the character in front of them without manual intervention.
@@ -231,15 +122,10 @@ A medical simulation with multiple AI characters (doctor, nurse, patient) uses `
 
 A military training simulation replaces the default notification prefab with a HUD-style alert that matches the simulation's UI language. Duplicate the default notification prefab, restyle it as a top-right status indicator, and assign it to `UINotificationController.uiNotificationPrefab`. At runtime, all system and session error alerts appear in the project's visual style without changing any notification logic.
 
-### Multi-user drill attribution
-
-A fire safety drill with four trainees uses `IMultiUserTranscriptListener` to log each participant's speech with a stable `speakerId` for the post-drill compliance report. Implement the interface, register it as a `MonoBehaviour` in the scene, and in `OnPlayerTranscriptWithSpeaker()` append each final turn to a keyed log. At runtime, every trainee response is attributed by name and session participant ID, producing an auditable per-trainee transcript.
-
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Custom `ITranscriptUI` activates alongside built-in UI | Both have the same `Identifier` | Remove the built-in prefab (`TranscriptUI_Chat.prefab` or `SubtitleTranscriptUI`) from the scene |
 | `TranscriptFilterBase` not tracking characters | No `Rigidbody` on player or characters | Add a `Rigidbody` to at least one side of each character–player pair |
 | `SingleCharacterFilter` tracks wrong character | Player `GameObject` not found via `GetComponentInParent<ConvaiPlayer>()` | Place the filter on the player `GameObject` or inject the `IPlayerInputService` via `Inject()` |
 | Custom `ISettingsPanelView` not receiving save callbacks | View not bound to the presenter | Call `settingsPanelPresenter.Bind(myCustomView)` after the presenter is available |
@@ -248,12 +134,10 @@ A fire safety drill with four trainees uses `IMultiUserTranscriptListener` to lo
 
 ## Next steps
 
-You have covered all four extension paths for customizing the SDK's UI layer. For the underlying scripting APIs driving these components, see the Scripting Reference. For display mode configuration, see Chat and Subtitle Modes.
+{% content-ref url="transcript-ui.md" %}
+[Transcript UI](transcript-ui.md)
+{% endcontent-ref %}
 
 {% content-ref url="chat-and-subtitle-modes.md" %}
 [Chat and Subtitle Modes](chat-and-subtitle-modes.md)
-{% endcontent-ref %}
-
-{% content-ref url="transcript-ui.md" %}
-[Transcript UI](transcript-ui.md)
 {% endcontent-ref %}

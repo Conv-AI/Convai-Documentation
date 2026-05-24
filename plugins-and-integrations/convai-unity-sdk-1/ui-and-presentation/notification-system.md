@@ -11,6 +11,8 @@ The notification system displays transient, toast-style popups in your scene. It
 
 Up to three notifications appear on screen simultaneously. Additional notifications queue internally and display as space becomes available.
 
+For field-level reference on `SONotification`, `SONotificationGroup`, `UINotificationController`, and `SONotificationErrorMap`, see [Notification system reference](notification-system-reference.md).
+
 ## How the notification system works
 
 The following diagram shows the system's data flow:
@@ -26,55 +28,6 @@ graph TD
 ```
 
 `IConvaiNotificationService` is the single entry point for all notification requests. `NotificationHandler` resolves the notification asset by ID using `SONotificationGroup`, then passes it to `UINotificationController`, which manages a pool of reusable `UINotification` elements. Session errors route through `SONotificationErrorMap` to map error codes to notification assets automatically.
-
-## `SONotification` — notification asset
-
-Each notification is a ScriptableObject asset containing the content to display.
-
-**Create:** Right-click in the Project window → **Create → Convai → Notification System → Notification**
-
-| Field | Description |
-| --- | --- |
-| `icon` | `Sprite` shown in the notification icon slot. Optional — leave empty for no icon |
-| `notificationTitle` | Title text shown in bold |
-| `notificationMessage` | Body text. Supports multi-line content |
-| `Id` | Stable string identifier used for error mapping and deduplication cooldowns. Defaults to the asset name if empty |
-
-**Fluent setters for runtime creation:**
-
-```csharp
-var notification = ScriptableObject.CreateInstance<SONotification>();
-notification
-    .SetTitle("Scenario Complete")
-    .SetMessage("All required steps have been completed. Proceed to debrief.")
-    .SetIcon(successIcon);
-```
-
-## `SONotificationGroup` — notification registry
-
-`SONotificationGroup` groups all notification assets your scene recognizes. `NotificationHandler` loads one group from `Resources/SONotificationGroup` automatically.
-
-**Create:** Right-click → **Create → Convai → Notification System → Notification Group**
-
-| Field | Description |
-| --- | --- |
-| `soNotifications` | Array of all `SONotification` assets to register |
-
-**Lookup methods:**
-
-```csharp
-if (SONotificationGroup.GetGroup(out SONotificationGroup group))
-{
-    if (group.TryGetById("scenario-complete", out SONotification notification))
-    {
-        // use notification
-    }
-}
-```
-
-{% hint style="danger" %}
-The group asset must be saved to `Assets/Resources/SONotificationGroup.asset`. The path string used at runtime is `"SONotificationGroup"` — no file extension, no subdirectory. If the asset is missing, `NotificationHandler` logs `"[NotificationHandler] SONotificationGroup asset could not be resolved."` and no notifications display.
-{% endhint %}
 
 ## Add the notification system to your scene
 
@@ -113,23 +66,6 @@ Adjust `UINotificationController` Inspector fields to match your project's visua
 When setup is correct, triggering a notification causes the panel to slide in from `activeNotificationPos`. The slide-in animation runs for `slipDuration` seconds (default `0.3`s).
 {% endstep %}
 {% endstepper %}
-
-## `UINotificationController` inspector reference
-
-| Field | Default | Description |
-| --- | --- | --- |
-| `uiNotificationPrefab` | — | `UINotification` prefab to pool |
-| `spacing` | `100` | Vertical pixel spacing between stacked notifications |
-| `activeNotificationPos` | — | Anchored position where visible notifications appear |
-| `deactivatedNotificationPos` | — | Anchored position where hidden notifications wait off-screen |
-| `activeDuration` | `4.0` | Seconds a notification remains visible before sliding out |
-| `slipDuration` | `0.3` | Seconds for slide-in and slide-out animations |
-| `delay` | `0.3` | Delay seconds before the slide animation begins |
-| `slipAnimationCurve` | — | Easing curve for the slide animation |
-
-**Concurrency and queuing:** Up to 3 notifications display simultaneously. When a 4th notification is requested while 3 are active, it queues and displays as soon as one of the active notifications dismisses.
-
-**Animation sequence per notification:** slide in (`slipDuration`) → visible for `activeDuration` → delay (`delay`) → slide out (`slipDuration`) → next queued notification starts.
 
 ## Trigger notifications from code
 
@@ -179,15 +115,9 @@ Session errors automatically trigger notifications via `SONotificationErrorMap`.
 
 Save to `Assets/Resources/SONotificationErrorMap.asset` for automatic loading.
 
-### `SessionErrorNotificationRule` fields
+For the complete `SessionErrorNotificationRule` field reference, see [Notification system reference](notification-system-reference.md).
 
-| Field | Default | Description |
-| --- | --- | --- |
-| `ErrorPattern` | — | The error code string to match against the session error |
-| `MatchType` | `Exact` | `Exact` — full string equality. `Prefix` — error code starts with this pattern |
-| `Notification` | — | `SONotification` to display when this rule matches |
-
-**Example rule table:**
+**Example rule configuration:**
 
 | ErrorPattern | MatchType | Notification |
 | --- | --- | --- |
@@ -275,5 +205,9 @@ With the notification system in place, you can surface connection errors, scenar
 {% endcontent-ref %}
 
 {% content-ref url="customizing-ui-components.md" %}
-[Customizing UI Components](customizing-ui-components.md)
+[Customizing UI components](customizing-ui-components.md)
+{% endcontent-ref %}
+
+{% content-ref url="notification-system-reference.md" %}
+[Notification system reference](notification-system-reference.md)
 {% endcontent-ref %}

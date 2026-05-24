@@ -6,7 +6,7 @@ description: >-
 last_reviewed: "4.2.0"
 ---
 
-The settings panel is an optional scene-level UI that lets users adjust key conversation preferences at runtime. The underlying settings service, `IConvaiRuntimeSettingsService`, is also a standalone scripting API — you can read current settings, apply patches, and subscribe to changes from code without the panel being present.
+The settings panel is an optional scene-level UI that lets users adjust key conversation preferences at runtime. To read current settings, apply patches, or subscribe to changes from code, see [Runtime settings API](runtime-settings-api.md).
 
 ## Controllable settings
 
@@ -105,142 +105,6 @@ ConvaiManager.ActiveManager.TryGetSettingsPanelController(out var controller);
 | `void Toggle()` | Open if closed, close if open |
 | `event Action<bool> VisibilityChanged` | Fires when visibility changes. `bool` parameter is the new `IsOpen` value |
 
-## Runtime settings API — `IConvaiRuntimeSettingsService`
-
-The settings panel is a UI view over the runtime settings service. You can access the same API directly from any script — reading current values, applying changes, and reacting to changes without opening the panel.
-
-### Read current settings
-
-`IConvaiRuntimeSettingsService.Current` returns a `ConvaiRuntimeSettingsSnapshot` — an immutable struct with all current values.
-
-```csharp
-if (ConvaiManager.ActiveManager.TryGetRuntimeSettingsService(out var settings))
-{
-    ConvaiRuntimeSettingsSnapshot current = settings.Current;
-    Debug.Log($"Player name: {current.PlayerDisplayName}");
-    Debug.Log($"Transcript on: {current.TranscriptEnabled}");
-    Debug.Log($"Mode: {current.TranscriptMode}");
-}
-```
-
-**`ConvaiRuntimeSettingsSnapshot` fields:**
-
-| Field | Type | Description |
-| --- | --- | --- |
-| `PlayerDisplayName` | `string` | Current player display name |
-| `TranscriptEnabled` | `bool` | Whether transcript UI is enabled |
-| `NotificationsEnabled` | `bool` | Whether notifications are enabled |
-| `PreferredMicrophoneDeviceId` | `string` | ID of the preferred microphone device |
-| `TranscriptMode` | `ConvaiTranscriptMode` | Current transcript display mode |
-
-### Apply changes
-
-`Apply(ConvaiRuntimeSettingsPatch)` applies changes atomically. Any field left `null` in the patch remains unchanged.
-
-```csharp
-var result = settings.Apply(new ConvaiRuntimeSettingsPatch
-{
-    PlayerDisplayName = "Dr. Kaan",
-    TranscriptEnabled = true,
-    TranscriptMode = ConvaiTranscriptMode.Subtitle
-});
-
-if (!result.Success)
-    Debug.LogWarning($"Settings apply failed: {result.ValidationMessage}");
-```
-
-**`ConvaiRuntimeSettingsApplyResult` fields:**
-
-| Field | Type | Description |
-| --- | --- | --- |
-| `Success` | `bool` | Whether the apply operation succeeded |
-| `Snapshot` | `ConvaiRuntimeSettingsSnapshot` | Resulting settings state after apply |
-| `AppliedMask` | `ConvaiRuntimeSettingsChangeMask` | Bitmask of which settings actually changed |
-| `ValidationMessage` | `string` | Reason for failure when `Success == false`. Empty on success |
-
-**`ResetToDefaults()`** resets all settings to project defaults:
-
-```csharp
-settings.ResetToDefaults();
-```
-
-### React to settings changes
-
-Subscribe to `Changed` to react when any setting changes. Use `ConvaiRuntimeSettingsChangeMask` to check which specific setting changed before doing work.
-
-```csharp
-using Convai.Runtime.Components;
-using Convai.Shared.Abstractions;
-using Convai.Shared.Types;
-using UnityEngine;
-
-public class SettingsChangeReactor : MonoBehaviour
-{
-    private IConvaiRuntimeSettingsService _settings;
-
-    private void OnEnable()
-    {
-        if (ConvaiManager.ActiveManager.TryGetRuntimeSettingsService(out _settings))
-            _settings.Changed += OnSettingsChanged;
-    }
-
-    private void OnDisable()
-    {
-        if (_settings != null)
-            _settings.Changed -= OnSettingsChanged;
-    }
-
-    private void OnSettingsChanged(ConvaiRuntimeSettingsChanged changed)
-    {
-        if ((changed.Mask & ConvaiRuntimeSettingsChangeMask.PreferredMicrophoneDeviceId) != 0)
-        {
-            Debug.Log($"Microphone changed to: {changed.Current.PreferredMicrophoneDeviceId}");
-            ApplyMicrophoneChange(changed.Current.PreferredMicrophoneDeviceId);
-        }
-
-        if ((changed.Mask & ConvaiRuntimeSettingsChangeMask.PlayerDisplayName) != 0)
-        {
-            UpdatePlayerNameDisplay(changed.Current.PlayerDisplayName);
-        }
-    }
-}
-```
-
-**`ConvaiRuntimeSettingsChanged` fields:**
-
-| Field | Type | Description |
-| --- | --- | --- |
-| `Previous` | `ConvaiRuntimeSettingsSnapshot` | Settings before the change |
-| `Current` | `ConvaiRuntimeSettingsSnapshot` | Settings after the change |
-| `Mask` | `ConvaiRuntimeSettingsChangeMask` | Bitmask indicating which fields changed |
-
-**`ConvaiRuntimeSettingsChangeMask` values:**
-
-| Value | Description |
-| --- | --- |
-| `None` | No fields changed |
-| `PlayerDisplayName` | Player display name changed |
-| `TranscriptEnabled` | Transcript enabled state changed |
-| `NotificationsEnabled` | Notifications enabled state changed |
-| `PreferredMicrophoneDeviceId` | Microphone selection changed |
-| `TranscriptMode` | Transcript mode changed |
-| `All` | All fields |
-
-### Transcript mode limitation in the panel
-
-The **Transcript Style** dropdown in the settings panel exposes **only Chat mode** at runtime. This is by design — `SettingsPanelPresenter.ExposedTranscriptModes` is hardcoded to `{ ConvaiTranscriptMode.Chat }`.
-
-To switch to Subtitle mode, use `Apply()` directly:
-
-```csharp
-settings.Apply(new ConvaiRuntimeSettingsPatch
-{
-    TranscriptMode = ConvaiTranscriptMode.Subtitle
-});
-```
-
-See [Chat and Subtitle Modes](chat-and-subtitle-modes.md) for full mode-switching details.
-
 ## Usage examples
 
 ### Safety training — pause menu integration
@@ -310,24 +174,6 @@ public void ApplyAuthenticatedProfile(string userName, bool showTranscripts)
 
 At runtime, the trainee's real name appears in transcript bubbles immediately, and transcript display is pre-configured to match the organization's preference.
 
-### Analytics — track settings changes
-
-A training platform logs when trainees change their microphone device for session quality analysis:
-
-```csharp
-private void OnSettingsChanged(ConvaiRuntimeSettingsChanged changed)
-{
-    if ((changed.Mask & ConvaiRuntimeSettingsChangeMask.PreferredMicrophoneDeviceId) != 0)
-    {
-        AnalyticsTracker.LogEvent("microphone_changed", new Dictionary<string, object>
-        {
-            { "previous", changed.Previous.PreferredMicrophoneDeviceId },
-            { "current", changed.Current.PreferredMicrophoneDeviceId }
-        });
-    }
-}
-```
-
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
@@ -336,9 +182,6 @@ private void OnSettingsChanged(ConvaiRuntimeSettingsChanged changed)
 | Microphone dropdown is empty | No microphone devices detected or permission denied | Verify device is connected; check Player Settings for microphone permissions on mobile platforms |
 | Conversation mode dropdown hidden | No room connection active | Expected — the dropdown only appears while `IConvaiRoomConnectionService` is available |
 | Settings not persisted after save | Settings service unavailable at save time | Ensure `ConvaiManager` is initialized before the panel opens; check `ConvaiManager.IsBootstrapped` |
-| `Apply()` returns `Success == false` | Validation failure | Check `result.ValidationMessage` for the reason |
-| `Changed` event not firing | Not subscribed or subscribed after settings changed | Subscribe in `OnEnable` before the session starts |
-
 ## Next steps
 
 With the settings panel in place, your users can adjust their session preferences at runtime. For customizing the visual style of the panel itself, see Customizing UI Components. For controlling transcript display that the panel manages, see Chat and Subtitle Modes.
@@ -347,6 +190,10 @@ With the settings panel in place, your users can adjust their session preference
 [Customizing UI Components](customizing-ui-components.md)
 {% endcontent-ref %}
 
+{% content-ref url="runtime-settings-api.md" %}
+[Runtime settings API](runtime-settings-api.md)
+{% endcontent-ref %}
+
 {% content-ref url="chat-and-subtitle-modes.md" %}
-[Chat and Subtitle Modes](chat-and-subtitle-modes.md)
+[Chat and subtitle modes](chat-and-subtitle-modes.md)
 {% endcontent-ref %}
