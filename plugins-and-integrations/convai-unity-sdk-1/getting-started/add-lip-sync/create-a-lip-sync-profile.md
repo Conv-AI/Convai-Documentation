@@ -2,16 +2,17 @@
 title: Create a lip sync profile
 description: >-
   Create a ConvaiLipSyncProfile asset to define a custom transport format
-  identifier when your rig uses a blendshape format not covered by the bundled
-  ARKit, MetaHuman, or CC4 Extended profiles.
+  identifier for blendshape formats beyond the three bundled profiles.
 last_reviewed: "4.2.0"
 ---
 
-A lip sync profile defines the transport format identifier — it tells the SDK which blendshape channel names to expect from Convai. Create a custom profile only when your character uses a blendshape format that Convai streams under a custom ID not covered by the three bundled profiles (`arkit`, `metahuman`, `cc4extended`).
+A lip sync profile defines the transport format identifier — it tells the SDK which blendshape channel names to expect from Convai.
 
-{% hint style="info" %}
-If your character uses standard ARKit, MetaHuman, or CC4 Extended naming, use the bundled profiles. A custom profile is only needed for proprietary or non-standard transport formats.
+{% hint style="warning" %}
+Convai currently streams blendshape data in three formats only: `arkit`, `metahuman`, and `cc4extended`. A custom profile is only useful if Convai explicitly supports a custom format for your deployment. Creating a profile with an unsupported format ID will result in no blendshape data being received.
 {% endhint %}
+
+For all standard setups, use one of the three bundled profiles and leave this page for advanced or future use.
 
 {% stepper %}
 {% step %}
@@ -27,7 +28,7 @@ Select the new asset to open it in the Inspector.
 
 | Field                | Description                                                                              |
 | -------------------- | ---------------------------------------------------------------------------------------- |
-| **Profile ID**       | Transport format identifier. Must match the format ID Convai streams for this character. |
+| **Profile ID**       | Transport format identifier. Must exactly match the format ID Convai streams for this character. |
 | **Display Name**     | Human-readable name shown in the Inspector. Does not affect runtime behavior.            |
 | **Transport Format** | Network transport format string — typically the same as Profile ID.                      |
 
@@ -44,20 +45,6 @@ Set `ConvaiLipSyncComponent._lockedProfileId` to the **Profile ID** string you d
 {% endstepper %}
 
 You will also need a matching map asset that routes the custom channels to your rig's blendshape names.
-
-## Usage example
-
-**Scenario:** A military training simulation uses a proprietary soldier character rigged with a custom set of 30 facial blendshapes. Convai streams these under the format ID `"militaryrig-v1"`.
-
-**Setup:**
-
-* Create `ConvaiLipSyncProfile_MilitaryRig.asset`
-* Profile ID: `militaryrig-v1`
-* Display Name: `Military Rig V1`
-* Transport Format: `militaryrig-v1`
-* Set `_lockedProfileId` on the character's `ConvaiLipSyncComponent` to `militaryrig-v1`
-
-**Expected outcome:** The SDK streams and buffers the correct blendshape channels for this character. Pair with a custom map that routes those channels to the rig's blendshape names.
 
 ## Next steps
 
