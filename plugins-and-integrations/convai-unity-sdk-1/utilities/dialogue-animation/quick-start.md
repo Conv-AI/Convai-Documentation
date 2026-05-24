@@ -28,7 +28,7 @@ Packages/com.convai.convai-sdk-for-unity/SamplesShared/Art/Animations/Dialogue/C
 
 Duplicate `ConvaiSample_Animator Controller` and move it into your project's `Assets/` folder. Assign it to the `Animator` component on your character's root GameObject.
 
-The sample controller already has the required four-layer structure and placeholder clips. See [Animator Controller Setup](animator-controller-setup.md) if you need to build your own.
+The sample controller already has the required four-layer structure and placeholder clips. See [Animator Controller requirements](animator-controller-requirements.md) for the full layer and clip contract, or [Build a compatible Animator Controller](animator-controller-setup.md) if you need to build your own.
 {% endstep %}
 
 {% step %}
@@ -120,12 +120,12 @@ Assign `ConvaiDialogueAnimationProfile_Balanced`, `_Expressive`, or `_Subtle` to
 
 ## Next steps
 
-Your character now plays gesture animation driven by dialogue state and emotion. Read Animation Libraries & Profiles to learn how to author custom clip libraries, or Animator Controller Setup to build your own four-layer controller from scratch.
+Your character now plays gesture animation driven by dialogue state and emotion. Read Animation Libraries & Profiles to learn how to author custom clip libraries, or Animator Controller requirements for the full four-layer contract reference.
 
 {% content-ref url="animation-libraries-and-profiles.md" %}
-[Animation Libraries & Profiles](animation-libraries-and-profiles.md)
+[Animation libraries and profiles](animation-libraries-and-profiles.md)
 {% endcontent-ref %}
 
-{% content-ref url="animator-controller-setup.md" %}
-[Animator Controller Setup](animator-controller-setup.md)
+{% content-ref url="animator-controller-requirements.md" %}
+[Animator Controller requirements](animator-controller-requirements.md)
 {% endcontent-ref %}

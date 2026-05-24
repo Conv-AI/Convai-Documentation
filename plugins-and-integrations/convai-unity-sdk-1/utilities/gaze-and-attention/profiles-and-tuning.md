@@ -1,5 +1,5 @@
 ---
-title: Gaze and Attention profiles and tuning
+title: Attention and gaze profiles
 description: Complete field reference for all four gaze profile ScriptableObjects — attention timing, gaze coordination, eye behavior, and head rotation.
 last_reviewed: "4.2.0"
 ---

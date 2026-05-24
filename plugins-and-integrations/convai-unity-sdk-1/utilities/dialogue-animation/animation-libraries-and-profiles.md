@@ -186,12 +186,12 @@ Fields on `ConvaiDialogueAnimationController` take precedence over a profile. If
 
 ## Next steps
 
-Now that you understand the configuration assets, set up your Animator Controller to meet the four-layer contract, or go straight to Usage Examples to see full configuration patterns in context.
+Now that you understand the configuration assets, review the Animator Controller requirements for the four-layer contract, or go straight to Usage Examples to see full configuration patterns in context.
 
-{% content-ref url="animator-controller-setup.md" %}
-[Animator Controller Setup](animator-controller-setup.md)
+{% content-ref url="animator-controller-requirements.md" %}
+[Animator Controller requirements](animator-controller-requirements.md)
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage Examples](usage-examples.md)
+[Dialogue Animation usage examples](usage-examples.md)
 {% endcontent-ref %}
