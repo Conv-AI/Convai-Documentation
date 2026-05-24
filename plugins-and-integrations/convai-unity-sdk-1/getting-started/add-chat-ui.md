@@ -72,20 +72,6 @@ If you need to customize the layout, select the prefab instance and inspect the 
 If `chatContainer` is not assigned, messages will not appear and the Console logs: `[ChatTranscriptUI] chatContainer is not assigned - messages will not display`. The bundled prefab has all references pre-wired.
 {% endhint %}
 
-## Per-character subtitle display
-
-For per-character subtitle text (not scrolling chat), use `ConvaiTranscriptDisplay` instead. Add it to any GameObject with a `TextMeshPro` component and assign the character whose speech it should show.
-
-**Inspector fields:**
-
-| Field                     | Default      | Description                                              |
-| ------------------------- | ------------ | -------------------------------------------------------- |
-| `_transcriptText`         | _(required)_ | The `TMP_Text` component to write to                     |
-| `_showPartialTranscripts` | `true`       | Display interim (non-final) speech results               |
-| `_appendMode`             | `false`      | Append text instead of replacing each turn               |
-| `_clearOnNewFinal`        | `true`       | Clear buffered text when a new final transcript arrives  |
-| `_maxCharacters`          | `1000`       | Maximum characters stored in append mode (0 = unlimited) |
-
 ## Usage examples
 
 ### Example 1: Full-screen chat overlay in a corporate training simulation
@@ -98,18 +84,6 @@ For per-character subtitle text (not scrolling chat), use `ConvaiTranscriptDispl
 * Leave all references at prefab defaults
 
 **Expected outcome:** Each turn appears as a new bubble — player text on the right, character text on the left. The list scrolls automatically as the conversation grows.
-
-### Example 2: Subtitle bar in a medical simulation
-
-**Scenario:** A medical simulation uses a narrow subtitle bar at the bottom of the screen — minimizing screen real estate while still showing what the AI doctor says.
-
-**Setup:**
-
-* Create a small `RectTransform` anchored to the bottom of the Canvas
-* Add `ConvaiTranscriptDisplay` to a `TextMeshPro` child inside it
-* Set `_showPartialTranscripts`: `true` so the subtitle updates continuously as the character speaks
-
-**Expected outcome:** A single line of text at the bottom updates in real time during character speech. When a new turn starts, the previous text clears automatically.
 
 ## Next steps
 
