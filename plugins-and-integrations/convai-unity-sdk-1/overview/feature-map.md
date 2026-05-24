@@ -46,11 +46,13 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 
 | I want to...                                          | Component           | Documentation                                                                             |
 | ----------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------- |
-| Display a live conversation transcript in my UI       | Transcript UI       | [Transcript UI](../ui-and-presentation/transcript-ui.md)                                  |
-| Switch between chat, subtitle, and Q\&A display modes | Presentation modes  | [Chat and subtitle modes](../ui-and-presentation/chat-and-subtitle-modes.md)              |
-| Show in-world notification popups                     | Notification System | [Notification System](../ui-and-presentation/notification-system.md)                     |
-| Add a runtime settings panel (mic, audio, input mode) | Settings Panel      | [Settings Panel](../ui-and-presentation/settings-panel.md)                               |
-| Customize the look and layout of UI components        | UI customization    | [Customizing UI components](../ui-and-presentation/customizing-ui-components.md)          |
+| Display a live conversation transcript in my UI                       | Transcript UI       | [Transcript UI](../ui-and-presentation/transcript-ui.md)                                              |
+| Switch between chat and subtitle display modes                        | Presentation modes  | [Chat and subtitle modes](../ui-and-presentation/chat-and-subtitle-modes.md)                          |
+| Query transcript history or react to transcript changes from code     | Transcript history  | [Transcript history and queries](../ui-and-presentation/transcript-history-and-queries.md)            |
+| Show in-world notification popups                                     | Notification system | [Notification system](../ui-and-presentation/notification-system.md)                                 |
+| Add a runtime settings panel (mic, transcript, notifications, input)  | Settings panel      | [Settings panel](../ui-and-presentation/settings-panel.md)                                           |
+| Read or apply runtime settings from code                              | Runtime settings    | [Runtime settings API](../ui-and-presentation/runtime-settings-api.md)                               |
+| Customize the look and layout of UI components                        | UI customization    | [Customizing UI components](../ui-and-presentation/customizing-ui-components.md)                     |
 
 ## Core concepts
 
