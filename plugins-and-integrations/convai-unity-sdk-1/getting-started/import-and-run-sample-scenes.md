@@ -6,29 +6,28 @@ description: >-
 last_reviewed: "4.2.0"
 ---
 
-The Convai SDK for Unity ships with sample scenes that demonstrate core features. Importing and running a sample is the fastest way to confirm that your installation, API key, and audio setup are all working before you build your own scene.
-
-{% stepper %}
-{% step %}
-### Open Package Manager
-
-In the Unity Editor, open **Window > Package Manager**.
-
-* **Installed via Package Manager (UPM):** Select **In Project** from the package source dropdown, then select **Convai SDK for Unity**.
-* **Installed via Asset Store:** Switch to **My Assets** in the package source dropdown, then select **Convai SDK for Unity**.
-{% endstep %}
-
-{% step %}
-### Import a sample
-
-In the detail panel on the right, click the **Samples** tab. Two samples are available:
+The Convai SDK for Unity ships with two sample scenes. Running one is the fastest way to confirm your installation, API key, and audio setup are working before you build your own scene.
 
 | Sample | Description |
 | --- | --- |
 | **Basic Sample** | Core SDK setup and conversation flow with a non-humanoid character |
 | **LipSync Sample** | High-quality character with real-time lip sync |
 
-Click **Import** next to the sample you want to try.
+The steps for locating the samples differ depending on how you installed the SDK.
+
+{% tabs %}
+{% tab title="Package Manager" %}
+{% stepper %}
+{% step %}
+### Open Package Manager
+
+In the Unity Editor, open **Window > Package Manager**. In the top-left dropdown, select **In Project**, then select **Convai SDK for Unity** from the list.
+{% endstep %}
+
+{% step %}
+### Import a sample
+
+In the detail panel on the right, click the **Samples** tab. Click **Import** next to the sample you want to run.
 
 Unity copies the sample assets into `Assets/Samples/Convai SDK for Unity/<version>/`. A new folder appears under `Assets/Samples/` in the Project window.
 {% endstep %}
@@ -36,16 +35,44 @@ Unity copies the sample assets into `Assets/Samples/Convai SDK for Unity/<versio
 {% step %}
 ### Open the scene
 
-In the Project window, navigate to the imported sample folder and open its scene file (`.unity`).
+In the Project window, navigate to the imported sample folder and open its `.unity` scene file.
+{% endstep %}
+{% endstepper %}
+{% endtab %}
+
+{% tab title="Asset Store" %}
+{% stepper %}
+{% step %}
+### Locate the samples
+
+When installed via the Asset Store, all sample scenes are imported into your project automatically. In the Project window, navigate to:
+
+```
+Assets/Convai SDK For Unity/Samples/
+```
+
+Two folders are present: `BasicSample` and `LipSyncSample`.
 {% endstep %}
 
+{% step %}
+### Open the scene
+
+Open the `.unity` scene file inside the sample folder you want to run.
+{% endstep %}
+{% endstepper %}
+{% endtab %}
+{% endtabs %}
+
+Once the scene is open, complete the following steps regardless of which installation method you used.
+
+{% stepper %}
 {% step %}
 ### Set the Character ID
 
 Select the NPC GameObject in the Hierarchy. In the Inspector, find the `ConvaiCharacter` component and set the **Character ID** field to a valid ID from your [Convai dashboard](https://convai.com).
 
 {% hint style="warning" %}
-Sample scenes ship without a Character ID — the scene will not connect to Convai until you set one. Each character on your Convai dashboard has a unique ID shown on its profile page.
+Sample scenes ship without a Character ID — the scene will not connect to Convai until you set one. Each character on your Convai dashboard has a unique ID shown on its character page.
 {% endhint %}
 {% endstep %}
 
