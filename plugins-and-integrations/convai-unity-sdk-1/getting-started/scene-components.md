@@ -72,9 +72,9 @@ Turn-taking settings are also configured here. See [Configure conversation input
 
 ## ConvaiCharacter
 
-`ConvaiCharacter` represents one AI character in your scene. Each NPC or virtual instructor that talks to players needs its own `ConvaiCharacter` component. Multiple characters are fully supported — each maintains an independent session.
+`ConvaiCharacter` represents one AI character in your scene. Each NPC or virtual instructor that talks to players needs its own `ConvaiCharacter` component. Multiple characters are fully supported. The SDK connects to one character at a time — when the player addresses a different character, the session switches to that character automatically.
 
-**The Character ID field is required.** Get this value from your character's profile on the [Convai dashboard](<code class="expression">space.vars.dashboard_url</code>).
+**The Character ID field is required.** Get this value from your character's profile on the [Convai dashboard](https://convai.com).
 
 **Inspector fields:**
 

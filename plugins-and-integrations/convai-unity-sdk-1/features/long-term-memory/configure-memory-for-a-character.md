@@ -18,7 +18,7 @@ Long-term memory is disabled by default (`MemorySettings.IsEnabled = false`). No
 {% tab title="Dashboard" %}
 This is the recommended approach for most teams. Changes take effect immediately without requiring a code update or redeployment.
 
-1. Sign in at [convai.com](<code class="expression">space.vars.dashboard_url</code>).
+1. Sign in at [convai.com](https://convai.com).
 2. Open the character you want to configure.
 3. Select the **Memory** tab in the character's settings sidebar.
 4. Toggle **Long-Term Memory** to **On**.

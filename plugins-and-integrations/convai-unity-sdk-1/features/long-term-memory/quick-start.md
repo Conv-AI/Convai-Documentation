@@ -10,7 +10,7 @@ Long-term memory works automatically once two conditions are met: memory is enab
 
 Before you begin:
 
-- A Convai account with at least one character created at [convai.com](<code class="expression">space.vars.dashboard_url</code>)
+- A Convai account with at least one character created at [convai.com](https://convai.com)
 - The Convai Unity SDK installed and configured with a valid API key
 - A scene with `ConvaiManager` and `ConvaiCharacter` components configured
 - The character's ID set in the `ConvaiCharacter` Inspector
@@ -25,7 +25,7 @@ You do not need to write any code for the default LTM experience. The SDK's `Dev
 {% step %}
 ### Enable memory on the dashboard
 
-1. Sign in to [convai.com](<code class="expression">space.vars.dashboard_url</code>) and open the character you want to use.
+1. Sign in to [convai.com](https://convai.com) and open the character you want to use.
 2. Select the **Memory** tab in the character's settings sidebar.
 3. Toggle **Long-Term Memory** to **On**.
 4. Save the character.

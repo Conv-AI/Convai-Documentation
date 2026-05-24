@@ -16,7 +16,7 @@ Before checking anything else, run through these three steps in order:
 
 **1. Confirm memory is enabled for the character**
 
-Sign in at [convai.com](<code class="expression">space.vars.dashboard_url</code>), open the character, and verify the **Memory** tab shows **Long-Term Memory: On**. Memory is disabled by default — this is the single most common reason LTM appears not to work.
+Sign in at [convai.com](https://convai.com), open the character, and verify the **Memory** tab shows **Long-Term Memory: On**. Memory is disabled by default — this is the single most common reason LTM appears not to work.
 
 **2. Verify the end-user ID is stable across sessions**
 
@@ -67,7 +67,7 @@ graph TD
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| Character never references previous sessions | LTM not enabled on character | Enable it in the character's Memory tab at [convai.com](<code class="expression">space.vars.dashboard_url</code>) |
+| Character never references previous sessions | LTM not enabled on character | Enable it in the character's Memory tab at [convai.com](https://convai.com) |
 | Memory works in editor, not in build | `DeviceEndUserIdProvider` returns different values in editor vs. build | Expected behavior — editor uses `PlayerPrefs` GUID; build uses device ID. Ensure the build's device ID is stable. For cross-context consistency, implement a custom `IEndUserIdentityProvider`. |
 | Memory lost after reinstall | `PlayerPrefs` cleared on reinstall | Use a server-assigned account ID via a custom provider. Device-based and GUID-based IDs do not survive reinstalls. |
 | Different users on the same device share memories | Multiple users sharing one device | Each user must receive a unique `end_user_id`. If `DeviceEndUserIdProvider` is in use, the device-scoped GUID is shared. Implement a custom provider that returns a per-user account ID. |

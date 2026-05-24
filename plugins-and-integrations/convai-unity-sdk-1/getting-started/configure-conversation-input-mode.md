@@ -66,7 +66,7 @@ Controls what happens when the player presses and releases the push-to-talk key.
 | Setting                                      | Default | Description                                                                        |
 | -------------------------------------------- | ------- | ---------------------------------------------------------------------------------- |
 | `InterruptBotOnPress`                        | `true`  | Pressing the key while the character is speaking interrupts it immediately         |
-| `EnableServerSttToggle`                      | `true`  | Mute server-side speech recognition between turns (reduces cost)                   |
+| `EnableServerSttToggle`                      | `true`  | Pauses Convai's speech-to-text on the server while the player is not holding the key. Reduces server processing cost; disable if you observe recognition delays on key press. |
 | `RequireTurnCompletionBeforeNextPress`        | `true`  | Player must wait for the character to finish before speaking again                 |
 | `TurnCompletionTimeoutMs`                    | `5000`  | Fallback timeout (ms) to unlock push-to-talk if the completion event never arrives |
 | `AllowSpeechStoppedFallbackAfterSpeechStart` | `false` | Allow a speech-stopped event to clear the waiting state after speech has started   |

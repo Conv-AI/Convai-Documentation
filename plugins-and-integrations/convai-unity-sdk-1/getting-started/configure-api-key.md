@@ -12,7 +12,7 @@ The Convai SDK for Unity authenticates every session using an API key tied to yo
 {% step %}
 ### Copy your API key
 
-Log in to your Convai dashboard at [convai.com](<code class="expression">space.vars.dashboard_url</code>), navigate to **Account Settings**, and copy your API key.
+Log in to your Convai dashboard at [convai.com](https://convai.com), navigate to **Account Settings**, and copy your API key.
 {% endstep %}
 
 {% step %}

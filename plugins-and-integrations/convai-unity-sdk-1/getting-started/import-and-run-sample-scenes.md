@@ -12,13 +12,23 @@ The Convai SDK for Unity ships with sample scenes that demonstrate core features
 {% step %}
 ### Open Package Manager
 
-In the Unity Editor, open **Window > Package Manager** and select **Convai SDK for Unity** from the list.
+In the Unity Editor, open **Window > Package Manager**.
+
+* **Installed via Package Manager (UPM):** Select **In Project** from the package source dropdown, then select **Convai SDK for Unity**.
+* **Installed via Asset Store:** Switch to **My Assets** in the package source dropdown, then select **Convai SDK for Unity**.
 {% endstep %}
 
 {% step %}
 ### Import a sample
 
-In the detail panel on the right, click the **Samples** tab. Find the sample you want to try and click **Import**.
+In the detail panel on the right, click the **Samples** tab. Two samples are available:
+
+| Sample | Description |
+| --- | --- |
+| **Basic Sample** | Core SDK setup and conversation flow with a non-humanoid character |
+| **LipSync Sample** | High-quality character with real-time lip sync |
+
+Click **Import** next to the sample you want to try.
 
 Unity copies the sample assets into `Assets/Samples/Convai SDK for Unity/<version>/`. A new folder appears under `Assets/Samples/` in the Project window.
 {% endstep %}
@@ -32,7 +42,7 @@ In the Project window, navigate to the imported sample folder and open its scene
 {% step %}
 ### Set the Character ID
 
-Select the NPC GameObject in the Hierarchy. In the Inspector, find the `ConvaiCharacter` component and set the **Character ID** field to a valid ID from your [Convai dashboard](<code class="expression">space.vars.dashboard_url</code>).
+Select the NPC GameObject in the Hierarchy. In the Inspector, find the `ConvaiCharacter` component and set the **Character ID** field to a valid ID from your [Convai dashboard](https://convai.com).
 
 {% hint style="warning" %}
 Sample scenes ship without a Character ID — the scene will not connect to Convai until you set one. Each character on your Convai dashboard has a unique ID shown on its profile page.
@@ -49,7 +59,7 @@ Press **Play**. The Unity Console logs the following lines as the SDK initialize
 
 Speak into your microphone. The character responds with voice and text output.
 
-If no response appears and the Console shows warnings, check [Validate Your Setup](validate-your-setup.md) for a diagnostic checklist.
+If no response appears and the Console shows warnings, check [Validate your setup](validate-your-setup.md) for a diagnostic checklist.
 {% endstep %}
 {% endstepper %}
 

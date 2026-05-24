@@ -16,7 +16,7 @@ Use `DeviceEndUserIdProvider` (the SDK default) when you do not need per-account
 
 **Setup:**
 
-1. Sign in at [convai.com](<code class="expression">space.vars.dashboard_url</code>), open the character, and toggle **Long-Term Memory** to **On** in the **Memory** tab.
+1. Sign in at [convai.com](https://convai.com), open the character, and toggle **Long-Term Memory** to **On** in the **Memory** tab.
 2. Add `ConvaiManager` and `ConvaiCharacter` to your scene with the character ID configured.
 3. Enter Play Mode and have a conversation. Stop Play Mode to trigger memory extraction.
 4. Re-enter Play Mode and verify the character recalls what was shared.

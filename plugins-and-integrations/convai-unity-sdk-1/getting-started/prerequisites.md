@@ -46,13 +46,11 @@ For detailed platform and render pipeline compatibility, see [Compatibility & Re
 
 You need an active Convai account and an API key to connect your project to Convai.
 
-1. Create an account at [convai.com](<code class="expression">space.vars.dashboard_url</code>) if you do not have one.
+1. Create an account at [convai.com](https://convai.com) if you do not have one.
 2. Retrieve your API key from the **API Keys** section of the Convai dashboard.
 3. Create at least one character in the Convai dashboard and note its **Character ID** — you will need it during scene setup.
 
-{% hint style="info" %}
-Your API key is a project-level credential stored in `Assets/Resources/ConvaiSettings.asset`. Do not commit this file to a public repository.
-{% endhint %}
+Your API key is stored in `Assets/Resources/ConvaiSettings.asset`. If your project uses source control, decide whether to commit this file based on your team's security policy. See [Configure the API key](configure-api-key.md) for full setup steps and secure-deployment options.
 
 ## Next steps
 

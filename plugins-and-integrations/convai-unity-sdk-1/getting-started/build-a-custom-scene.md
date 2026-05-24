@@ -48,7 +48,7 @@ All three components — `ConvaiCharacter`, `ConvaiAudioOutput`, and `AudioSourc
 {% step %}
 ### Set the Character ID
 
-In the `ConvaiCharacter` component, set the **Character ID** field to the ID of your character from the [Convai dashboard](<code class="expression">space.vars.dashboard_url</code>).
+In the `ConvaiCharacter` component, set the **Character ID** field to the ID of your character from the [Convai dashboard](https://convai.com).
 
 {% hint style="warning" %}
 The Character ID field is required. If it is empty, the character cannot connect to Convai and the Scene Validator will report an error.
@@ -125,7 +125,7 @@ Speak into your microphone. The character responds within a few seconds.
 
 **Expected outcome:** Both characters are discovered and registered automatically. Conversation switches between them based on which character the player addresses.
 
-Each character maintains an independent session. Character A and Character B do not share context unless your Convai character configuration explicitly links them.
+Character A and Character B do not share conversation context unless your Convai character configuration explicitly links them.
 
 ## Next steps
 
