@@ -88,6 +88,6 @@ Install the SDK and add your first character.
 
 If you want to understand the system architecture before setting up, read the architecture overview next.
 
-{% content-ref url="architecture-overview.md" %}
-[Convai Unity SDK architecture](architecture-overview.md)
+{% content-ref url="convai-unity-sdk-architecture.md" %}
+[Convai Unity SDK architecture](convai-unity-sdk-architecture.md)
 {% endcontent-ref %}
