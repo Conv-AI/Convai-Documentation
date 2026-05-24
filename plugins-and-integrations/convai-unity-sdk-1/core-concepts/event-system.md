@@ -406,11 +406,7 @@ On the `ConvaiTranscriptEventRelay` component in the Inspector:
 
 ## Next steps
 
-You now have the full reference for all relay components, event payloads, and subscription patterns. Read Turn-Taking Modes if you need to configure how the SDK detects speech input, or proceed to the Features section to explore individual SDK capabilities.
-
-{% content-ref url="turn-taking-modes.md" %}
-[Turn-taking modes](turn-taking-modes.md)
-{% endcontent-ref %}
+You now have the full reference for all relay components, event payloads, and subscription patterns. Proceed to the Features section to explore individual SDK capabilities.
 
 {% content-ref url="../features/README.md" %}
 [Features](../features/README.md)

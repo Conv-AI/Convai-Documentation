@@ -259,12 +259,12 @@ public class SessionErrorHandler : MonoBehaviour
 
 ## Next steps
 
-You now know how character sessions are created, how state transitions work, how session IDs are persisted across restarts, and how to configure reconnection behavior. Read Event system to learn how to subscribe to session state changes and character events from your scene scripts. Read Runtime architecture to understand where sessions fit in the overall runtime hierarchy.
+You now know how character sessions are created, how state transitions work, how session IDs are persisted across restarts, and how to configure reconnection behavior. Read Turn-taking modes next to configure how the SDK detects speech input, then Event system to learn how to subscribe to session and character events from your scene scripts.
+
+{% content-ref url="turn-taking-modes.md" %}
+[Turn-taking modes](turn-taking-modes.md)
+{% endcontent-ref %}
 
 {% content-ref url="event-system.md" %}
 [Event system](event-system.md)
-{% endcontent-ref %}
-
-{% content-ref url="runtime-architecture.md" %}
-[Runtime architecture](runtime-architecture.md)
 {% endcontent-ref %}

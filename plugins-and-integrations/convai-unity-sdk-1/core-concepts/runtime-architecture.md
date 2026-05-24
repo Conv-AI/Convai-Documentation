@@ -172,12 +172,12 @@ All state transitions are async operations wrapped in `IConvaiOperation<Unit>`. 
 
 ## Next steps
 
-You now understand how the Convai runtime is composed and which parts are replaceable at each layer. Read Turn-Taking Modes next to configure how the SDK handles speech input, then Event System to learn how to wire runtime events into your scene logic.
+You now understand how the Convai runtime is composed and which parts are replaceable at each layer. Read Session lifecycle next to understand how each character's session is created, persisted, and recovered, then continue through Turn-taking modes and Event system.
+
+{% content-ref url="session-lifecycle.md" %}
+[Session lifecycle](session-lifecycle.md)
+{% endcontent-ref %}
 
 {% content-ref url="turn-taking-modes.md" %}
 [Turn-taking modes](turn-taking-modes.md)
-{% endcontent-ref %}
-
-{% content-ref url="event-system.md" %}
-[Event system](event-system.md)
 {% endcontent-ref %}
