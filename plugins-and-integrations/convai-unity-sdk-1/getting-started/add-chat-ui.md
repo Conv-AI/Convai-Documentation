@@ -6,7 +6,7 @@ description: >-
 last_reviewed: "4.2.0"
 ---
 
-The Convai SDK for Unity includes a ready-made transcript UI prefab that displays conversation text in real time. Drop the prefab into a Canvas, assign your references, and the UI connects to the SDK automatically.
+The Convai SDK for Unity includes a ready-made transcript UI prefab that displays conversation text in real time. The prefab includes its own Canvas — drag it into the scene, and the UI connects to the SDK automatically.
 
 ## Transcript display modes
 
@@ -32,17 +32,15 @@ Packages/Convai SDK for Unity/Prefabs/TranscriptUI/TranscriptUI_Chat.prefab
 {% endstep %}
 
 {% step %}
-### Add a Canvas
+### Drag the prefab into the scene
 
-If your scene does not have a Canvas, create one via **GameObject > UI > Canvas**. Unity also adds an **EventSystem** automatically — verify it exists, as the chat input field requires it.
-{% endstep %}
-
-{% step %}
-### Drag the prefab into the Canvas
-
-Drag `TranscriptUI_Chat.prefab` onto the **Canvas** in the Hierarchy.
+Drag `TranscriptUI_Chat.prefab` into the Hierarchy. The prefab includes its own Canvas — no separate Canvas setup is required.
 
 The chat UI overlay appears in the Game view. The component finds `ConvaiManager` automatically when the scene starts — no manual wiring is needed.
+
+{% hint style="warning" %}
+The chat input field requires an **EventSystem** in the scene. If your scene does not already have one, add it via **GameObject > UI > Event System**.
+{% endhint %}
 
 {% hint style="warning" %}
 If no `ConvaiManager` is found at startup, the Console logs: `[ChatTranscriptUI] Dependencies not injected - ensure ConvaiManager is present in scene`. Check that `ConvaiManager` is in the scene.
@@ -96,7 +94,7 @@ For per-character subtitle text (not scrolling chat), use `ConvaiTranscriptDispl
 
 **Setup:**
 
-* Add `TranscriptUI_Chat.prefab` to a full-screen Canvas set to **Screen Space - Overlay**
+* Drag `TranscriptUI_Chat.prefab` into the Hierarchy
 * Leave all references at prefab defaults
 
 **Expected outcome:** Each turn appears as a new bubble — player text on the right, character text on the left. The list scrolls automatically as the conversation grows.
