@@ -87,6 +87,8 @@ If the SDK connects before a gesture, mic publishing is aborted with:
 
 **Fix:** Select the NPC in the Hierarchy. Confirm `ConvaiAudioOutput`, `ConvaiCharacter`, and `AudioSource` are all on the same GameObject. Move `ConvaiAudioOutput` if needed.
 
+**Verify:** Re-enter Play Mode. The `[ConvaiAudioOutput] ConvaiCharacter component not found` error no longer appears in the Console.
+
 ## Platform permissions
 
 {% tabs %}
@@ -157,23 +159,23 @@ public void OnStartButtonClicked()
 {% endtab %}
 {% endtabs %}
 
-## Common issues
+## Troubleshoot audio failures
 
-| Symptom | Likely cause | Fix |
-| --- | --- | --- |
-| `audio.mic_permission_denied` on Android | `RECORD_AUDIO` missing in `AndroidManifest.xml` | Add the permission; rebuild |
-| `audio.mic_permission_denied` on iOS | `NSMicrophoneUsageDescription` missing in Player Settings | Set the description; rebuild |
-| `audio.mic_permission_denied` on WebGL | No user gesture before connect | Trigger connect from a UI button click |
-| `audio.mic_unavailable` | No microphone connected to the machine | Connect a microphone; check OS audio devices |
-| `audio.mic_unavailable` on WebGL | Platform always returns empty device list | Expected — SDK uses browser default device |
-| `[ConvaiAudioOutput] ConvaiCharacter component not found on X` | `ConvaiAudioOutput` on wrong GameObject | Move it to the same GameObject as `ConvaiCharacter` |
-| Character transcript appears but no audio plays | `AudioSource` muted, volume 0, or mixer at −80 dB | Inspect the `AudioSource` component on the NPC |
-| Character audio plays on one ear only in 3D | `AudioSource.spatialBlend` set to 1 with camera too far | Reduce Max Distance on AudioSource or bring camera closer |
-| `[RoomAudioRuntimeAdapter] Microphone publish aborted because the room audio path is not initialized.` | `ConnectAsync` not yet complete when mic publish was called | Wait for `OnSessionStateChanged` with `Connected` before publishing mic |
-| `[AudioTrackManager] PublishMicrophoneAsync aborted: LocalParticipant is null` | Room not connected when publish was attempted | Ensure full Connected state before any audio publish |
-| `[AudioTrackManager] PublishMicrophoneAsync failed: track is null` | Track creation failed internally | Check SDK version; reinstall package |
-| `[RoomAudioRuntimeAdapter] Microphone publish failed: IMicrophoneSourceFactory not registered.` | Internal SDK wiring failure | Reinstall the SDK; verify package version is <code class="expression">space.vars.unity_sdk_version</code> |
-| Microphone works in Editor but not in a build | Missing build permissions | Check platform permission setup above |
+| Symptom | Likely cause | Fix | Verify |
+| --- | --- | --- | --- |
+| `audio.mic_permission_denied` on Android | `RECORD_AUDIO` missing in `AndroidManifest.xml` | Add the permission; rebuild | App requests mic permission on launch; voice reaches character |
+| `audio.mic_permission_denied` on iOS | `NSMicrophoneUsageDescription` missing in Player Settings | Set the description; rebuild | App requests mic permission on first launch; voice reaches character |
+| `audio.mic_permission_denied` on WebGL | No user gesture before connect | Trigger connect from a UI button click | `audio.mic_permission_denied` no longer fires; mic input active |
+| `audio.mic_unavailable` | No microphone connected to the machine | Connect a microphone; check OS audio devices | `audio.mic_unavailable` no longer fires on connect |
+| `audio.mic_unavailable` on WebGL | Platform always returns empty device list | Expected — SDK uses browser default device | No action needed; mic publishes via browser default |
+| `[ConvaiAudioOutput] ConvaiCharacter component not found on X` | `ConvaiAudioOutput` on wrong GameObject | Move it to the same GameObject as `ConvaiCharacter` | Error no longer appears in Console on Play |
+| Character transcript appears but no audio plays | `AudioSource` muted, volume 0, or mixer at −80 dB | Inspect the `AudioSource` component on the NPC | Character voice plays through NPC `AudioSource` |
+| Character audio plays on one ear only in 3D | `AudioSource.spatialBlend` set to 1 with camera too far | Reduce Max Distance on AudioSource or bring camera closer | Audio plays in both ears at appropriate distance |
+| `[RoomAudioRuntimeAdapter] Microphone publish aborted because the room audio path is not initialized.` | `ConnectAsync` not yet complete when mic publish was called | Wait for `OnSessionStateChanged` with `Connected` before publishing mic | Mic publishes without error after `Connected` state |
+| `[AudioTrackManager] PublishMicrophoneAsync aborted: LocalParticipant is null` | Room not connected when publish was attempted | Ensure full Connected state before any audio publish | Mic publishes without error |
+| `[AudioTrackManager] PublishMicrophoneAsync failed: track is null` | Track creation failed internally | Check SDK version; reinstall package | Mic publishes without error after reinstall |
+| `[RoomAudioRuntimeAdapter] Microphone publish failed: IMicrophoneSourceFactory not registered.` | Internal SDK wiring failure | Reinstall the SDK; verify package version is <code class="expression">space.vars.unity_sdk_version</code> | Mic publishes without error after reinstall |
+| Microphone works in Editor but not in a build | Missing build permissions | Check platform permission setup above | Mic activates in device build |
 
 ## Console log reference
 

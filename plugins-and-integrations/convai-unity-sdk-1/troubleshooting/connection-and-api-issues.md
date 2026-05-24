@@ -157,110 +157,26 @@ The following error codes trigger automatic retries:
 
 ## Runtime diagnostics
 
-### ConvaiRoomManager state properties
+Read `ConvaiRoomManager` state properties to narrow down a connection failure. The properties update in real time — no event subscription required. For the full property reference, diagnostic snapshot API, and code samples, see the Debug Tools Reference.
 
-These properties are readable at any time in Play Mode — from a script, an Editor tool, or the Inspector via a debug MonoBehaviour:
-
-| Property | Type | Description |
-| --- | --- | --- |
-| `CurrentState` | `SessionState` | Current session state: `Disconnected`, `Connecting`, `Connected`, `Disconnecting`, `Reconnecting`, `Error` |
-| `IsConnected` | `bool` | `true` when the room is actively connected |
-| `ConnectAttemptCount` | `int` | Total connection attempts since scene load |
-| `ReconnectCount` | `int` | Total reconnection attempts |
-| `LastSessionErrorCode` | `string` | Error code from the most recent failure |
-| `LastSessionErrorMessage` | `string` | Human-readable message for the last failure |
-
-{% hint style="warning" %}
-`SessionState.Error` indicates an unrecoverable session failure. The room does not reconnect automatically from this state. Your application must call `DisconnectAsync()` followed by `ConnectAsync()` to reset the session.
-{% endhint %}
-
-### RoomDiagnosticsSnapshot
-
-For more detail, read a full diagnostic snapshot. This is useful when building an in-game debug overlay or logging a support report:
-
-```csharp
-using Convai.Runtime.Adapters.Networking;
-using Convai.Runtime.Core.Coordinators;
-using UnityEngine;
-
-public class DiagnosticsLogger : MonoBehaviour
-{
-    [ContextMenu("Dump Diagnostics")]
-    private void DumpDiagnostics()
-    {
-        var room = FindFirstObjectByType<ConvaiRoomManager>();
-        if (room == null)
-        {
-            Debug.LogWarning("ConvaiRoomManager not found in scene.");
-            return;
-        }
-
-        // Quick state
-        Debug.Log($"State:            {room.CurrentState}");
-        Debug.Log($"Connected:        {room.IsConnected}");
-        Debug.Log($"Connect attempts: {room.ConnectAttemptCount}");
-        Debug.Log($"Reconnects:       {room.ReconnectCount}");
-        Debug.Log($"Last error code:  {room.LastSessionErrorCode}");
-        Debug.Log($"Last error msg:   {room.LastSessionErrorMessage}");
-
-        // Full snapshot
-        if (room.DiagnosticsCoordinator == null)
-        {
-            Debug.Log("DiagnosticsCoordinator not yet initialized (room has not connected).");
-            return;
-        }
-
-        RoomDiagnosticsSnapshot snap = room.DiagnosticsCoordinator.GetDiagnostics();
-        Debug.Log($"--- Room Diagnostics Snapshot ---");
-        Debug.Log($"Current state:        {snap.CurrentState}");
-        Debug.Log($"Total attempts:       {snap.TotalConnectionAttempts}");
-        Debug.Log($"Successful:           {snap.SuccessfulConnections}");
-        Debug.Log($"Failed:               {snap.FailedConnections}");
-        Debug.Log($"Total errors:         {snap.TotalErrors}");
-        Debug.Log($"Last connected at:    {snap.LastConnectedAt}");
-        Debug.Log($"Last error at:        {snap.LastErrorAt}");
-        Debug.Log($"Last error code:      {snap.LastErrorCode}");
-        Debug.Log($"Last error message:   {snap.LastErrorMessage}");
-        Debug.Log($"Session uptime:       {snap.SessionUptime}");
-        Debug.Log($"Characters:           {snap.RegisteredCharacterCount}");
-        Debug.Log($"Players:              {snap.RegisteredPlayerCount}");
-    }
-}
-```
-
-| Field | Type | Description |
-| --- | --- | --- |
-| `CurrentState` | `string` | State name at the time of the snapshot |
-| `TotalConnectionAttempts` | `int` | All connection attempts since the diagnostics instance was created |
-| `SuccessfulConnections` | `int` | Attempts that reached the Connected state |
-| `FailedConnections` | `int` | Attempts that ended in failure |
-| `TotalErrors` | `int` | Errors recorded since diagnostics reset |
-| `LastConnectedAt` | `DateTime?` | UTC timestamp of the last successful connection |
-| `LastErrorAt` | `DateTime?` | UTC timestamp of the last recorded error |
-| `LastErrorCode` | `string` | Error code from the last recorded error |
-| `LastErrorMessage` | `string` | Human-readable message from the last error |
-| `SessionUptime` | `TimeSpan?` | Elapsed time since the current session connected; `null` if disconnected |
-| `RegisteredCharacterCount` | `int` | Number of `ConvaiCharacter` instances currently registered |
-| `RegisteredPlayerCount` | `int` | Number of `ConvaiPlayer` instances currently registered |
-
-{% hint style="info" %}
-`DiagnosticsCoordinator` is `null` until the room has initialized its internal assembly — typically after the first connect attempt. Always null-check before calling `GetDiagnostics()`.
-{% endhint %}
+{% content-ref url="debug-tools-reference.md" %}
+[Debug tools reference](debug-tools-reference.md)
+{% endcontent-ref %}
 
 ## Quick reference: common failure patterns
 
-| Symptom | Likely cause | Fix |
-| --- | --- | --- |
-| `config.api_key_missing` on every connect | API key never entered | Edit → Project Settings → Convai SDK → paste key |
-| `connection.connect_invalid_api_key` | Wrong or revoked API key | Copy a fresh key from the Convai dashboard |
-| `connection.connect_character_not_found` | Character ID typo or wrong account | Verify in Convai dashboard; check for copy-paste whitespace |
-| `connection.connect_realtime_not_allowed` | Realtime not enabled on account | Upgrade plan |
-| `connection.timeout` every time | Firewall blocking connections | Whitelist Convai domains; try on a different network |
-| `transport.ice_failed` repeatedly | Strict firewall blocking UDP | Allow UDP; request TURN relay from network admin |
-| `server.usage_limit_reached` | Quota exceeded | Check Convai dashboard usage page |
-| Character connects once then never reconnects | `ReconnectPolicy` maxed out | SDK stops after 3 reconnect attempts (default `MaxReconnectAttempts`); application must call `ConnectAsync` again if user wants to retry |
-| `connection.rate_limited` | Too many connects in short time | Add a minimum delay between connect calls in your application logic |
-| `CurrentState` stuck at `Error` | Unrecoverable session failure | Call `DisconnectAsync()` then `ConnectAsync()` to reset |
+| Symptom | Likely cause | Fix | Verify |
+| --- | --- | --- | --- |
+| `config.api_key_missing` on every connect | API key never entered | Edit → Project Settings → Convai SDK → paste key | Re-enter Play Mode — error no longer fires |
+| `connection.connect_invalid_api_key` | Wrong or revoked API key | Copy a fresh key from the Convai dashboard | Session reaches `Connected` state |
+| `connection.connect_character_not_found` | Character ID typo or wrong account | Verify in Convai dashboard; check for copy-paste whitespace | Session reaches `Connected` state |
+| `connection.connect_realtime_not_allowed` | Realtime not enabled on account | Upgrade plan | Session reaches `Connected` state |
+| `connection.timeout` every time | Firewall blocking connections | Whitelist Convai domains; try on a different network | Session connects within the timeout window |
+| `transport.ice_failed` repeatedly | Strict firewall blocking UDP | Allow UDP; request TURN relay from network admin | Session connects; WebRTC negotiation completes |
+| `server.usage_limit_reached` | Quota exceeded | Check Convai dashboard usage page | Session connects after usage resets or plan upgrades |
+| Character connects once then never reconnects | `ReconnectPolicy` maxed out | SDK stops after 3 reconnect attempts (default `MaxReconnectAttempts`); call `ConnectAsync` again to retry | `ConnectAsync` call succeeds; character connects |
+| `connection.rate_limited` | Too many connects in short time | Add a minimum delay between connect calls in your application logic | `connection.rate_limited` no longer fires |
+| `CurrentState` stuck at `Error` | Unrecoverable session failure | Call `DisconnectAsync()` then `ConnectAsync()` to reset | Session transitions to `Connected` |
 
 ## Next steps
 

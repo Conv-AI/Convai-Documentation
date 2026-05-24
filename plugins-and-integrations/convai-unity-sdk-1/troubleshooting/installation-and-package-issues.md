@@ -76,11 +76,15 @@ Assembly definition errors prevent the project from entering Play Mode. The Cons
 
 **Fix:** Open **Window → Package Manager**. Click **+** → **Add package by name**. Enter `com.unity.nuget.newtonsoft-json` and confirm. Unity installs version <code class="expression">space.vars.dep_newtonsoft_json_version</code> or higher automatically.
 
+**Verify:** Open the Console. Newtonsoft namespace errors are gone and the project compiles cleanly.
+
 ### Input System missing
 
 **Error:** `The type or namespace name 'InputSystem' could not be found`
 
 **Fix:** Install `com.unity.inputsystem` version <code class="expression">space.vars.dep_inputsystem_version</code> or higher via Package Manager. After installation, Unity prompts you to switch to the new Input System backend — accept this prompt.
+
+**Verify:** Open the Console. InputSystem namespace errors are gone. Accept the backend switch prompt if Unity shows it.
 
 ### Assembly recompile loop
 
@@ -90,20 +94,22 @@ If Unity enters an infinite recompile loop after installing the package, close U
 Deleting the `Library/` folder forces Unity to reimport the entire project from scratch. This process can take 5–30 minutes depending on project size. Close Unity completely before deleting the folder. Only do this if all other fixes have failed.
 {% endhint %}
 
-## Common issues
+**Verify:** Unity completes asset import without entering another recompile loop.
 
-| Symptom | Likely cause | Fix |
-| --- | --- | --- |
-| `Convai Bootstrapper: ConvaiSettings not found!` in Console | `ConvaiSettings.asset` missing or deleted | Open Edit → Project Settings → Convai SDK to recreate it automatically |
-| `API key not configured` warning on Play | API key field is empty | Paste key from Convai dashboard into Edit → Project Settings → Convai SDK |
-| `The type or namespace 'Newtonsoft' could not be found` | Newtonsoft.Json package missing | Install `com.unity.nuget.newtonsoft-json` via Package Manager |
-| `The type or namespace 'InputSystem' could not be found` | Input System package missing or old version | Install `com.unity.inputsystem` <code class="expression">space.vars.dep_inputsystem_version</code>+ |
-| Package not found when adding via UPM name | Scoped registry not configured | Follow the UPM installation guide to add the Convai scoped registry to `manifest.json` |
-| Asset Store import fails with conflict errors | Files from a previous SDK version still present | Remove the old `Assets/Convai/` folder before reimporting |
-| Project Settings → Convai SDK window is blank | Script compilation errors exist | Fix all CS errors in the Console; the settings UI only renders when editor scripts compile cleanly |
-| Settings asset exists but window shows no key | Asset is in wrong path | `ConvaiSettings.asset` must be at exactly `Assets/Resources/ConvaiSettings.asset` — no subfolders |
-| Errors about `UGUI` or `UI/Default` shader | `com.unity.ugui` missing or wrong version | Install `com.unity.ugui` <code class="expression">space.vars.dep_ugui_version</code>+ via Package Manager |
-| Sample scene imports correctly but does not run | URP package missing | Sample scenes require URP; install `com.unity.render-pipelines.universal` and assign the URP asset in Project Settings → Graphics |
+## Troubleshoot installation failures
+
+| Symptom | Likely cause | Fix | Verify |
+| --- | --- | --- | --- |
+| `Convai Bootstrapper: ConvaiSettings not found!` in Console | `ConvaiSettings.asset` missing or deleted | Open Edit → Project Settings → Convai SDK to recreate it automatically | Re-enter Play Mode — `Convai Bootstrapper: Initialization complete.` appears |
+| `API key not configured` warning on Play | API key field is empty | Paste key from Convai dashboard into Edit → Project Settings → Convai SDK | Re-enter Play Mode — the `API key not configured` warning is gone |
+| `The type or namespace 'Newtonsoft' could not be found` | Newtonsoft.Json package missing | Install `com.unity.nuget.newtonsoft-json` via Package Manager | Project compiles without Newtonsoft namespace errors |
+| `The type or namespace 'InputSystem' could not be found` | Input System package missing or old version | Install `com.unity.inputsystem` <code class="expression">space.vars.dep_inputsystem_version</code>+ | Project compiles without InputSystem namespace errors |
+| Package not found when adding via UPM name | Scoped registry not configured | Follow the UPM installation guide to add the Convai scoped registry to `manifest.json` | SDK package appears in Package Manager |
+| Asset Store import fails with conflict errors | Files from a previous SDK version still present | Remove the old `Assets/Convai/` folder before reimporting | Package imports without conflict errors |
+| Project Settings → Convai SDK window is blank | Script compilation errors exist | Fix all CS errors in the Console; the settings UI only renders when editor scripts compile cleanly | Edit → Project Settings → Convai SDK displays all fields |
+| Settings asset exists but window shows no key | Asset is in wrong path | `ConvaiSettings.asset` must be at exactly `Assets/Resources/ConvaiSettings.asset` — no subfolders | Edit → Project Settings → Convai SDK shows the API Key field |
+| Errors about `UGUI` or `UI/Default` shader | `com.unity.ugui` missing or wrong version | Install `com.unity.ugui` <code class="expression">space.vars.dep_ugui_version</code>+ via Package Manager | Project compiles without UGUI shader errors |
+| Sample scene imports correctly but does not run | URP package missing | Sample scenes require URP; install `com.unity.render-pipelines.universal` and assign the URP asset in Project Settings → Graphics | Sample scene enters Play Mode without errors |
 
 ## Console log reference
 
