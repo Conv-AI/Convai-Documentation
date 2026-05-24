@@ -6,7 +6,7 @@ description: >-
 last_reviewed: "4.2.0"
 ---
 
-The Convai SDK for Unity ships with two sample scenes. Running one is the fastest way to confirm your installation, API key, and audio setup are working before you build your own scene.
+The Convai SDK for Unity ships with two sample scenes. Each sample comes pre-configured with a Convai sample character — no Character ID setup required. Running one is the fastest way to confirm your installation, API key, and audio setup are working before you build your own scene.
 
 | Sample | Description |
 | --- | --- |
@@ -63,19 +63,9 @@ Open the `.unity` scene file inside the sample folder you want to run.
 {% endtab %}
 {% endtabs %}
 
-Once the scene is open, complete the following steps regardless of which installation method you used.
+Once the scene is open:
 
 {% stepper %}
-{% step %}
-### Set the Character ID
-
-Select the NPC GameObject in the Hierarchy. In the Inspector, find the `ConvaiCharacter` component and set the **Character ID** field to a valid ID from your [Convai dashboard](https://convai.com).
-
-{% hint style="warning" %}
-Sample scenes ship without a Character ID — the scene will not connect to Convai until you set one. Each character on your Convai dashboard has a unique ID shown on its character page.
-{% endhint %}
-{% endstep %}
-
 {% step %}
 ### Enter Play Mode
 
