@@ -259,7 +259,7 @@ public class SessionErrorHandler : MonoBehaviour
 
 ## Next steps
 
-You now know how character sessions are created, how state transitions work, how session IDs are persisted across restarts, and how to configure reconnection behavior. Read Event System to learn how to subscribe to session state changes and character events from your scene scripts. Read Architecture Deep Dive to understand where sessions fit in the overall runtime hierarchy.
+You now know how character sessions are created, how state transitions work, how session IDs are persisted across restarts, and how to configure reconnection behavior. Read Event system to learn how to subscribe to session state changes and character events from your scene scripts. Read Runtime architecture to understand where sessions fit in the overall runtime hierarchy.
 
 {% content-ref url="event-system.md" %}
 [Event system](event-system.md)
