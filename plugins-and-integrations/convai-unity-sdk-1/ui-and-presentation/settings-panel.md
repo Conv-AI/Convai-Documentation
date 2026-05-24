@@ -26,15 +26,15 @@ Changes apply when the user clicks **Save**. The panel closes automatically on s
 {% step %}
 ### Add the prefab to your Canvas
 
-Drag `SettingsPanel_Landscape.prefab` into your scene's Canvas hierarchy. Find it at `Prefabs/SettingsPanel/SettingsPanel_Landscape.prefab` in the <code class="expression">space.vars.sdk_package_id</code> package.
+Drag `SettingsPanel_Landscape.prefab` into your scene. Find it at `Prefabs/SettingsPanel/SettingsPanel_Landscape.prefab` in the <code class="expression">space.vars.sdk_package_id</code> package. The prefab includes its own `Canvas` — do not nest it inside an existing Canvas.
 
 `SettingsPanel` auto-resolves all required services from `ConvaiManager` on `OnEnable`. No additional Inspector wiring is required for the basic setup.
 
 {% hint style="warning" %}
-**Screenshot required before publishing:** Capture the Unity scene hierarchy with the Canvas GameObject expanded. The image must show `SettingsPanel_Landscape` as a child of the Canvas.
+**Screenshot required before publishing:** Capture the Unity scene hierarchy with the `SettingsPanel_Landscape` GameObject visible at the scene root (not nested inside another Canvas).
 {% endhint %}
 
-<figure><img src="../../../.gitbook/assets/TODO-settings-panel-hierarchy.png" alt="Unity scene hierarchy showing SettingsPanel_Landscape as a child of a Canvas GameObject"><figcaption><p>TODO: Replace with screenshot showing SettingsPanel_Landscape inside the scene Canvas hierarchy.</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/TODO-settings-panel-hierarchy.png" alt="Unity scene hierarchy showing SettingsPanel_Landscape as a root GameObject in the scene"><figcaption><p>TODO: Replace with screenshot showing SettingsPanel_Landscape at the scene root.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}

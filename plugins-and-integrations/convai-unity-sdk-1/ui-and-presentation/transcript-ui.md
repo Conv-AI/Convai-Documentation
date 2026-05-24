@@ -114,7 +114,7 @@ The SDK ships `TranscriptUI_Chat.prefab` — a ready-made scrollable chat panel 
 {% step %}
 ### Add the prefab to your scene
 
-Drag `TranscriptUI_Chat.prefab` into your scene's Canvas hierarchy. Find it at `Prefabs/TranscriptUI/TranscriptUI_Chat.prefab` in the <code class="expression">space.vars.sdk_package_id</code> package.
+Drag `TranscriptUI_Chat.prefab` into your scene. Find it at `Prefabs/TranscriptUI/TranscriptUI_Chat.prefab` in the <code class="expression">space.vars.sdk_package_id</code> package. The prefab includes its own `Canvas` — do not nest it inside an existing Canvas.
 
 The prefab contains a `ChatTranscriptUI` component that registers itself with `ConvaiManager` on `Awake`.
 {% endstep %}
