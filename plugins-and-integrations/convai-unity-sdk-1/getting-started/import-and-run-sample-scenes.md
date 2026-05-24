@@ -6,11 +6,11 @@ description: >-
 last_reviewed: "4.2.0"
 ---
 
-The Convai SDK for Unity ships with two sample scenes. Each sample comes pre-configured with a Convai sample character — no Character ID setup required. Running one is the fastest way to confirm your installation, API key, and audio setup are working before you build your own scene.
+The Convai SDK for Unity ships with two sample scenes. Running one is the fastest way to confirm your installation, API key, and audio setup are working before you build your own scene.
 
 | Sample | Description |
 | --- | --- |
-| **Basic Sample** | Core SDK setup and conversation flow with a non-humanoid character |
+| **Basic Sample** | Basic conversation with a robot character |
 | **LipSync Sample** | High-quality character with real-time lip sync |
 
 The steps for locating the samples differ depending on how you installed the SDK.
@@ -82,7 +82,7 @@ If no response appears and the Console shows warnings, check [Validate your setu
 
 ## Sample render pipeline notes
 
-Sample scenes are built with the Universal Render Pipeline (URP). If your project uses the Built-in Render Pipeline or HDRP, materials may appear pink after import. Reassign the materials using your active render pipeline's shaders, or run **Edit > Rendering > Materials > Convert All Built-in Materials to URP** if switching to URP.
+Sample scenes are built with the Universal Render Pipeline (URP). If your project uses a different render pipeline, materials may appear pink after import. Convert the materials to match your active render pipeline using **Edit > Rendering > Materials**, then select the appropriate conversion option for your pipeline.
 
 ## Next steps
 
