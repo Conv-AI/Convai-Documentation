@@ -40,7 +40,7 @@ Scene Metadata describes the static world — what exists. Dynamic Context descr
 ## Next steps
 
 {% content-ref url="quick-start.md" %}
-[Set up scene metadata](quick-start.md)
+[Scene metadata quick start](quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}

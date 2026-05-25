@@ -534,7 +534,7 @@
       * [Troubleshoot narrative design](plugins-and-integrations/convai-unity-sdk-1/features/narrative-design/troubleshooting-and-diagnostics.md)
     * [Scene metadata](plugins-and-integrations/convai-unity-sdk-1/features/scene-metadata/README.md)
       * [How scene metadata works](plugins-and-integrations/convai-unity-sdk-1/features/scene-metadata/how-scene-metadata-works.md)
-      * [Set up scene metadata](plugins-and-integrations/convai-unity-sdk-1/features/scene-metadata/quick-start.md)
+      * [Scene metadata quick start](plugins-and-integrations/convai-unity-sdk-1/features/scene-metadata/quick-start.md)
       * [Scene metadata component reference](plugins-and-integrations/convai-unity-sdk-1/features/scene-metadata/component-reference.md)
       * [Scene metadata scripting API](plugins-and-integrations/convai-unity-sdk-1/features/scene-metadata/scripting-api-reference.md)
       * [Scene metadata usage examples](plugins-and-integrations/convai-unity-sdk-1/features/scene-metadata/usage-examples.md)

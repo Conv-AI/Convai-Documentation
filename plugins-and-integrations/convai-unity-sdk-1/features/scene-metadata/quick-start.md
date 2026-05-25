@@ -1,5 +1,5 @@
 ---
-title: Set up scene metadata
+title: Scene metadata quick start
 description: Add ConvaiObjectMetadata to scene objects and configure ConvaiSceneMetadataCollector so a Convai character receives object awareness at session start.
 last_reviewed: "4.2.0"
 ---
