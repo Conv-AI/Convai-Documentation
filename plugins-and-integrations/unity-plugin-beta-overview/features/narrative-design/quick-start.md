@@ -29,7 +29,7 @@ Select the GameObject that has your `ConvaiCharacter` component. In the Inspecto
 
 The Manager auto-detects the `ConvaiCharacter` on the same GameObject. If your character is on a different GameObject, drag it into the **Character** field.
 
-<figure><img src="../../../../.gitbook/assets/convai-narrative-design-manager-added-inspector.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (478).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -43,7 +43,7 @@ Each entry shows the section's name from the dashboard. You will wire events to 
 If the list stays empty, check that your character ID is set on `ConvaiCharacter` and your API key is valid under **Project Settings > Convai SDK**. The **Last Fetch Error** field shows the specific error if something went wrong.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/convai-narrative-design-manager-sections-list.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (480).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -81,7 +81,7 @@ public class NarrativeDesignDebugLogger : MonoBehaviour
 
 </details>
 
-<figure><img src="../../../../.gitbook/assets/convai-narrative-design-section-start-event-wired.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (481).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -91,7 +91,7 @@ Create a new empty GameObject in your scene (position it where the player will w
 
 Drag your `ConvaiCharacter` into the **Character** field, or leave it blank to let **Auto Find Character** locate it automatically.
 
-<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-component-inspector.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (482).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -99,7 +99,7 @@ Drag your `ConvaiCharacter` into the **Character** field, or leave it blank to l
 
 In the Trigger component's Inspector, click **Fetch** to load the named triggers from the dashboard. A dropdown appears — select the trigger that should advance the graph to your first section.
 
-<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-selected-dropdown.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (483).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -109,7 +109,7 @@ The default activation mode is **Collision**, which uses Unity's `OnTriggerEnter
 
 Size the collider to cover the zone where you want the trigger to fire. In the Scene view, the green wireframe box shows the detection area.
 
-<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-collider-zone.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (485).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}

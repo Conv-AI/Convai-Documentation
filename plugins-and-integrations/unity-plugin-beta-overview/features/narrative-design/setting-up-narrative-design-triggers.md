@@ -29,7 +29,7 @@ For zone-based activation (Collision, Proximity, TimeBased), create an empty Gam
 
 Click **Add Component** and navigate to **Convai > Convai Narrative Design Trigger**.
 
-<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-added-inspector.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (489).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -45,7 +45,7 @@ Click **Fetch** in the **Trigger Selection** section. The SDK calls `NarrativeDe
 
 Select the trigger you want this component to send. The **Trigger Name**, **Trigger ID**, and **Destination Section** fields populate automatically.
 
-<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-selected-dropdown.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (483).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -57,7 +57,7 @@ Select one of the four activation modes (described below) and configure its sett
 
 ## Activation Modes
 
-<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-activation-modes.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (490).png" alt=""><figcaption></figcaption></figure>
 
 ### Collision
 
@@ -122,7 +122,7 @@ narrativeTrigger.TryInvokeTrigger();
 
 These settings make the trigger resilient to common runtime conditions where the character or player may not be ready immediately.
 
-<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-auto-recovery.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (509).png" alt=""><figcaption></figcaption></figure>
 
 | Field                   | Default | Description                                                                                                                                                          |
 | ----------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -1,5 +1,18 @@
-# overview
+---
+title: Convai Unity SDK overview
+description: >-
+  Find explanations of what the Convai Unity SDK is, how its four-tier
+  architecture is organized, and what feature modules ship with the package.
+---
 
-The Convai Unity SDK turns Unity characters into real-time conversational AI — complete with voice, emotion, lip sync, structured actions, and long-term memory. This section maps what the SDK is, how it is layered, what each feature does, and what has changed in recent releases.
+The Convai Unity SDK layers voice, emotion, structured actions, and long-term memory onto Unity characters. The pages in this section explain the SDK fundamentals, system architecture, available features, and current release notes.
 
-<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>What Is the Convai Unity SDK</strong><br>What the SDK does, who it is for, and the end-to-end voice pipeline.</td><td><a href="/broken/pages/7e0e600d63d93072bd2da16216da16782e1798d4">Broken link</a></td></tr><tr><td><strong>Architecture Overview</strong><br>The four-tier system — Runtime, Room, Agent, and Module — and how they relate.</td><td><a href="/broken/pages/8f203cee1e21763492f21b620d3cf2765bb478ff">Broken link</a></td></tr><tr><td><strong>Feature Map</strong><br>Find the right feature or guide for what you want to build.</td><td><a href="/broken/pages/605ee0806f79e94eaa40583808c53def4648fb42">Broken link</a></td></tr><tr><td><strong>What's New</strong><br>Current version, key changes, and migration notes.</td><td><a href="/broken/pages/2a171b480512ff659aa801e90873f01178660035">Broken link</a></td></tr></tbody></table>
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>What is the Convai Unity SDK</strong><br>End-to-end voice pipeline, target audience, and what the SDK ships with.</td><td><a href="what-is-the-convai-unity-sdk.md">what-is-the-convai-unity-sdk.md</a></td></tr><tr><td><strong>Convai Unity SDK architecture</strong><br>Four-tier framework: Runtime, Room, Agent, and Module layers.</td><td><a href="convai-unity-sdk-architecture.md">convai-unity-sdk-architecture.md</a></td></tr><tr><td><strong>Feature map</strong><br>Find the right feature, tool, or guide for any development goal.</td><td><a href="feature-map.md">feature-map.md</a></td></tr><tr><td><strong>Release notes</strong><br>Release notes for v<code class="expression">space.vars.unity_sdk_version</code> and previous releases.</td><td><a href="release-notes.md">release-notes.md</a></td></tr></tbody></table>
+
+## Next steps
+
+If you are ready to install the SDK, go directly to Getting Started.
+
+{% content-ref url="../getting-started/README.md" %}
+[Getting Started](../getting-started/README.md)
+{% endcontent-ref %}

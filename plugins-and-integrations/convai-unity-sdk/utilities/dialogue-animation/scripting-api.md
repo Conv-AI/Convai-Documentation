@@ -1,222 +1,215 @@
-# scripting api
+---
+title: Dialogue Animation scripting API
+description: Runtime scripting reference for ConvaiDialogueAnimationController — swap libraries and configs at runtime, and read current layer weights and clip selection state.
+last_reviewed: "4.2.0"
+---
 
-`ConvaiDialogueAnimationController` exposes a small runtime API for swapping content and inspecting active state. All properties are safe to read every frame; all methods take effect immediately and reconfigure the orchestrator in place.
-
-***
-
-## Runtime Configuration
-
-### SetLibrary
-
-```csharp
-public void SetLibrary(DialogueAnimationLibrary library)
-```
-
-Replaces the active clip pool. The change takes effect immediately — the orchestrator adopts the new library for all future clip selections. The clip currently playing finishes its crossfade naturally.
-
-Use this to give a character context-sensitive animation variety: a calm library in routine conversations, a tense library during high-stakes assessments.
-
-### SetConfig
-
-```csharp
-public void SetConfig(DialogueAnimationRuntimeConfig config)
-```
-
-Replaces the active runtime config. Fade durations, idle cadence, and energy modulation settings update on the next tick.
+`ConvaiDialogueAnimationController` exposes a read-only state surface and two runtime swap methods. All properties are safe to query every frame from any script.
 
 ***
 
-## Runtime State Properties
+## ConvaiDialogueAnimationController
 
-### Assigned Assets
+**Namespace:** `Convai.Modules.DialogueAnimation.Components`\
+**Component menu:** Convai → Embodiment → Dialogue Animation
 
-| Property              | Type                             | Description                                                                       |
-| --------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
-| `Library`             | `DialogueAnimationLibrary`       | Currently assigned library                                                        |
-| `Config`              | `DialogueAnimationRuntimeConfig` | Currently assigned runtime config                                                 |
-| `HasValidIdleLibrary` | `bool`                           | True if the current library is non-null and contains at least one valid idle clip |
+### Methods
 
-### Active Clips
+| Method                | Parameters                              | Description                                                                            |
+| --------------------- | --------------------------------------- | -------------------------------------------------------------------------------------- |
+| `SetLibrary(library)` | `DialogueAnimationLibrary library`      | Swaps the active clip pool immediately. Takes effect on the next clip selection cycle. |
+| `SetConfig(config)`   | `DialogueAnimationRuntimeConfig config` | Replaces the active runtime config. Timing and weight changes apply on the next tick.  |
 
-| Property                    | Type            | Description                                                                        |
-| --------------------------- | --------------- | ---------------------------------------------------------------------------------- |
-| `CurrentFoundationIdleClip` | `AnimationClip` | Clip loaded into the base idle slot (layer 0)                                      |
-| `CurrentIdleOverlayClip`    | `AnimationClip` | Clip currently active in the idle overlay ping-pong (layer 1)                      |
-| `CurrentBodyTalkClip`       | `AnimationClip` | Clip currently active in the body talk ping-pong (layer 2)                         |
-| `CurrentTalkClip`           | `AnimationClip` | Clip active in the current talk session (head or body talk, depending on coverage) |
+### Assigned asset properties
 
-### Layer Weights
+| Property          | Type                             | Description                                              |
+| ----------------- | -------------------------------- | -------------------------------------------------------- |
+| `Library`         | `DialogueAnimationLibrary`       | Currently assigned library                               |
+| `Config`          | `DialogueAnimationRuntimeConfig` | Currently assigned config                                |
+| `Contract`        | `DialogueAnimatorContract`       | Active animator contract (may be null if using defaults) |
+| `CharacterGender` | `CharacterGender`                | Active gender filter for clip selection                  |
 
-| Property                        | Type    | Description                                                      |
-| ------------------------------- | ------- | ---------------------------------------------------------------- |
-| `CurrentBaseIdleLayerWeight`    | `float` | Current weight of the foundation idle layer                      |
-| `CurrentIdleOverlayLayerWeight` | `float` | Current weight of the idle overlay layer                         |
-| `CurrentHeadTalkLayerWeight`    | `float` | Current weight of the head talk layer                            |
-| `CurrentBodyTalkLayerWeight`    | `float` | Current weight of the body talk layer                            |
-| `CurrentTalkLayerWeight`        | `float` | Max of head and body talk weights — the effective talk intensity |
+### Validation
 
-### Layer Indices
+| Property              | Type   | Description                                                                                                       |
+| --------------------- | ------ | ----------------------------------------------------------------------------------------------------------------- |
+| `HasValidIdleLibrary` | `bool` | `true` when the assigned library has at least one valid idle clip. Use this at startup to catch misconfiguration. |
 
-| Property                       | Type  | Description                                                        |
-| ------------------------------ | ----- | ------------------------------------------------------------------ |
-| `RuntimeBaseIdleLayerIndex`    | `int` | Resolved layer index for the foundation idle layer (from contract) |
-| `RuntimeIdleOverlayLayerIndex` | `int` | Resolved layer index for the idle overlay layer                    |
-| `RuntimeBodyTalkLayerIndex`    | `int` | Resolved layer index for the body talk layer                       |
-| `RuntimeHeadTalkLayerIndex`    | `int` | Resolved layer index for the head talk layer                       |
+### Current clip properties
 
-### Selection Diagnostics
+| Property                    | Type            | Description                                      |
+| --------------------------- | --------------- | ------------------------------------------------ |
+| `CurrentFoundationIdleClip` | `AnimationClip` | Clip currently assigned to the Base Idle slot    |
+| `CurrentIdleOverlayClip`    | `AnimationClip` | Clip currently playing in the Idle Overlay layer |
+| `CurrentBodyTalkClip`       | `AnimationClip` | Clip currently playing in the Body Talk layer    |
+| `CurrentTalkClip`           | `AnimationClip` | Clip currently playing in the Head Talk layer    |
 
-| Property        | Type  | Description                                                                                 |
-| --------------- | ----- | ------------------------------------------------------------------------------------------- |
-| `LastIdleIndex` | `int` | Index of the last selected clip in the idle pool. Returns `-1` if no selection has occurred |
-| `LastTalkIndex` | `int` | Index of the last selected clip in the talk pool. Returns `-1` if no session is active      |
+### Layer weight properties
+
+| Property                        | Type    | Description                                                                                                                                                                                |
+| ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CurrentBaseIdleLayerWeight`    | `float` | Current weight of the Base Idle layer (Layer 0)                                                                                                                                            |
+| `CurrentIdleOverlayLayerWeight` | `float` | Current weight of the Idle Overlay layer (Layer 1)                                                                                                                                         |
+| `CurrentBodyTalkLayerWeight`    | `float` | Current weight of the Body Talk layer (Layer 2)                                                                                                                                            |
+| `CurrentHeadTalkLayerWeight`    | `float` | Current weight of the Head Talk layer (Layer 3)                                                                                                                                            |
+| `CurrentTalkLayerWeight`        | `float` | Strongest active talk-layer contribution — `max(CurrentBodyTalkLayerWeight, CurrentHeadTalkLayerWeight)`. Use this to drive UI or external systems that need a single "is talking" signal. |
+
+### Runtime layer index properties
+
+| Property                       | Type  | Description                                               |
+| ------------------------------ | ----- | --------------------------------------------------------- |
+| `RuntimeBaseIdleLayerIndex`    | `int` | Resolved Animator layer index for Base Idle at runtime    |
+| `RuntimeIdleOverlayLayerIndex` | `int` | Resolved Animator layer index for Idle Overlay at runtime |
+| `RuntimeBodyTalkLayerIndex`    | `int` | Resolved Animator layer index for Body Talk at runtime    |
+| `RuntimeHeadTalkLayerIndex`    | `int` | Resolved Animator layer index for Head Talk at runtime    |
+
+### Selection diagnostic properties
+
+| Property        | Type  | Description                                                                           |
+| --------------- | ----- | ------------------------------------------------------------------------------------- |
+| `LastIdleIndex` | `int` | Index into the library's `IdleEntries` array for the most recently selected idle clip |
+| `LastTalkIndex` | `int` | Index into the library's `TalkEntries` array for the most recently selected talk clip |
 
 ***
 
-## Usage Examples
+## Scripting examples
 
-### Example 1 — Context-Sensitive Library Swap
+### Validate configuration at startup
 
-A corporate safety training simulation: the instructor character uses a calm library during orientation and switches to an authoritative library when a safety violation occurs.
+Check `HasValidIdleLibrary` before your session starts to catch missing library assignments early:
 
-{% code title="SafetyInstructorController.cs" %}
 ```csharp
-using Convai.SDK;
+using Convai.Modules.DialogueAnimation.Components;
 using UnityEngine;
 
-public class SafetyInstructorController : MonoBehaviour
+public class AnimationValidator : MonoBehaviour
 {
-    [SerializeField] private ConvaiDialogueAnimationController _animationController;
-    [SerializeField] private DialogueAnimationLibrary _calmLibrary;
-    [SerializeField] private DialogueAnimationLibrary _authoritativeLibrary;
-
-    public void OnSafetyViolationDetected()
-    {
-        _animationController.SetLibrary(_authoritativeLibrary);
-    }
-
-    public void OnViolationResolved()
-    {
-        _animationController.SetLibrary(_calmLibrary);
-    }
-}
-```
-{% endcode %}
-
-### Example 2 — Monitoring Talk Layer Weight
-
-Read `CurrentTalkLayerWeight` each frame to drive a secondary system — for example, enabling a "speaking" indicator in a multi-character training panel only when the layer is active.
-
-{% code title="SpeakingIndicator.cs" %}
-```csharp
-using Convai.SDK;
-using UnityEngine;
-
-public class SpeakingIndicator : MonoBehaviour
-{
-    [SerializeField] private ConvaiDialogueAnimationController _animationController;
-    [SerializeField] private GameObject _indicator;
-
-    private const float _threshold = 0.1f;
-
-    private void Update()
-    {
-        _indicator.SetActive(_animationController.CurrentTalkLayerWeight > _threshold);
-    }
-}
-```
-{% endcode %}
-
-### Example 3 — Validating Setup Before Scene Starts
-
-Check `HasValidIdleLibrary` before beginning a training session to surface configuration errors early.
-
-{% code title="SceneValidator.cs" %}
-```csharp
-using Convai.SDK;
-using UnityEngine;
-
-public class SceneValidator : MonoBehaviour
-{
-    [SerializeField] private ConvaiDialogueAnimationController _animationController;
+    [SerializeField] private ConvaiDialogueAnimationController _animController;
 
     private void Start()
     {
-        if (!_animationController.HasValidIdleLibrary)
+        if (!_animController.HasValidIdleLibrary)
         {
             Debug.LogError(
-                "[Validator] Dialogue animation library is missing or contains no valid idle clips. " +
-                "Assign a library before starting the session.");
+                $"[{name}] No valid idle clips in the assigned library. " +
+                "Assign a DialogueAnimationLibrary with at least one idle entry.",
+                this);
         }
     }
 }
 ```
-{% endcode %}
 
-### Example 4 — Multi-Character Config Sharing with Independent Seeds
+***
 
-Two characters in a corporate training simulation share a `DialogueAnimationRuntimeConfig` for consistent timing, but each needs a different `DeterministicSeed` to avoid synchronized clip selection. Clone the shared config at startup and patch the seed rather than duplicating the asset.
+### Drive a UI engagement indicator from talk layer weight
 
-{% code title="CharacterAnimationSeeder.cs" %}
-```csharp
-using Convai.Modules.DialogueAnimation.Components;
-using Convai.Modules.DialogueAnimation.Runtime;
-using UnityEngine;
+`CurrentTalkLayerWeight` updates every frame from the Animator's internal cache:
 
-public class CharacterAnimationSeeder : MonoBehaviour
-{
-    [SerializeField] private ConvaiDialogueAnimationController _animationController;
-    [SerializeField] private DialogueAnimationRuntimeConfig _sharedConfig;
-    [SerializeField] private uint _uniqueSeed;
-
-    private void Awake()
-    {
-        // Clone shared config so changes don't propagate to other characters
-        DialogueAnimationRuntimeConfig localConfig =
-            Instantiate(_sharedConfig);
-        localConfig.DeterministicSeed = _uniqueSeed;
-        _animationController.SetConfig(localConfig);
-    }
-}
-```
-{% endcode %}
-
-Assign `CharacterAnimationSeeder` to each character root, point both at the same shared config asset, and give each a distinct `UniqueSeed` value in the Inspector. The cloned instances are local to each character and are garbage-collected with the scene.
-
-### Example 5 — Engagement Indicator Driven by Layer Weights
-
-A training scenario UI shows a real-time "character engagement" bar that lights up when the character is actively gesturing (talk layer active) and dims during silence.
-
-{% code title="EngagementIndicator.cs" %}
 ```csharp
 using Convai.Modules.DialogueAnimation.Components;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EngagementIndicator : MonoBehaviour
+public class TalkLayerIndicator : MonoBehaviour
 {
-    [SerializeField] private ConvaiDialogueAnimationController _animationController;
-    [SerializeField] private Image _talkBar;
-    [SerializeField] private Image _idleBar;
+    [SerializeField] private ConvaiDialogueAnimationController _animController;
+    [SerializeField] private Slider _engagementSlider;
 
     private void Update()
     {
-        // CurrentTalkLayerWeight = max(head talk, body talk) — 0 during silence, up to 1 during speech
-        _talkBar.fillAmount = _animationController.CurrentTalkLayerWeight;
-
-        // CurrentIdleOverlayLayerWeight reflects the ambient gesture layer
-        _idleBar.fillAmount = _animationController.CurrentIdleOverlayLayerWeight;
+        _engagementSlider.value = _animController.CurrentTalkLayerWeight;
     }
 }
 ```
-{% endcode %}
-
-Both properties update every frame with no additional overhead — they read directly from the Animator's internal layer weight cache.
 
 ***
 
-## Next Steps
+### Swap libraries based on a simulation event
 
-{% content-ref url="/broken/pages/545d1c22c3875084443972768b3ae695756b3628" %}
-[Broken link](/broken/pages/545d1c22c3875084443972768b3ae695756b3628)
+```csharp
+using Convai.Modules.DialogueAnimation.Components;
+using Convai.Modules.DialogueAnimation.Core;
+using UnityEngine;
+
+public class ContextualAnimationSwap : MonoBehaviour
+{
+    [SerializeField] private ConvaiDialogueAnimationController _animController;
+    [SerializeField] private DialogueAnimationLibrary _calmLibrary;
+    [SerializeField] private DialogueAnimationLibrary _urgentLibrary;
+
+    public void OnEmergencyAlert()
+    {
+        _animController.SetLibrary(_urgentLibrary);
+    }
+
+    public void OnStandDown()
+    {
+        _animController.SetLibrary(_calmLibrary);
+    }
+}
+```
+
+***
+
+### Use separate config assets for independent multi-character clip selection
+
+To prevent two characters from selecting the same clips in sync, author separate `DialogueAnimationRuntimeConfig` assets and set a different `DeterministicSeed` value on each in the Inspector. Then assign each config at runtime:
+
+```csharp
+using Convai.Modules.DialogueAnimation.Components;
+using Convai.Modules.DialogueAnimation.Runtime;
+using UnityEngine;
+
+public class MultiCharacterSetup : MonoBehaviour
+{
+    [SerializeField] private ConvaiDialogueAnimationController[] _characters;
+    // Assign one config asset per character in the Inspector.
+    // Set a different DeterministicSeed on each config asset to diverge their RNG streams.
+    [SerializeField] private DialogueAnimationRuntimeConfig[] _perCharacterConfigs;
+
+    private void Awake()
+    {
+        for (int i = 0; i < _characters.Length; i++)
+        {
+            _characters[i].SetConfig(_perCharacterConfigs[i]);
+        }
+    }
+}
+```
+
+***
+
+### Monitor layer weights for an engagement dashboard
+
+Read all four layer weights simultaneously to drive a per-layer visualization:
+
+```csharp
+using Convai.Modules.DialogueAnimation.Components;
+using UnityEngine;
+
+public class LayerWeightDashboard : MonoBehaviour
+{
+    [SerializeField] private ConvaiDialogueAnimationController _ctrl;
+
+    private void Update()
+    {
+        float idle     = _ctrl.CurrentBaseIdleLayerWeight;
+        float overlay  = _ctrl.CurrentIdleOverlayLayerWeight;
+        float bodyTalk = _ctrl.CurrentBodyTalkLayerWeight;
+        float headTalk = _ctrl.CurrentHeadTalkLayerWeight;
+
+        // All four values are live Animator cache reads — no heap allocation
+        Debug.Log($"Idle:{idle:F2} Overlay:{overlay:F2} Body:{bodyTalk:F2} Head:{headTalk:F2}");
+    }
+}
+```
+
+***
+
+## Next steps
+
+For help diagnosing animation issues at runtime, see the Troubleshooting page.
+
+{% content-ref url="troubleshooting.md" %}
+[Troubleshooting](troubleshooting.md)
 {% endcontent-ref %}

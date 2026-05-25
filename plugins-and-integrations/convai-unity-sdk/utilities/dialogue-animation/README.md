@@ -1,30 +1,17 @@
-# Dialogue Animation
+---
+title: Dialogue Animation
+description: Drive body and head gesture animation from dialogue state and emotion using a pooled clip library and an AnimatorOverrideController — no per-clip animator states required.
+last_reviewed: "4.2.0"
+---
 
-The Dialogue Animation module connects an AI character's conversation state to Unity's Animator. When the character is idle, it crossfades through a pool of ambient gestures. When the character speaks or reacts, it fades in talk-layer clips selected by the detected emotion. All selection logic runs locally — no Convai communication is involved.
+The Dialogue Animation module drives body and head gesture animations on AI characters using dialogue state and detected emotion as inputs. It runs entirely inside Unity — no animation data is sent to Convai.
 
-The module uses an `AnimatorOverrideController` to inject clips at runtime. Your Animator Controller defines the layer structure; the module fills the clip slots and manages layer weights automatically.
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>How Dialogue Animation works</strong><br>Understand the four-layer animator stack, clip injection mechanism, and how dialogue state and emotion drive animation.</td><td><a href="how-dialogue-animation-works.md">how-dialogue-animation-works.md</a></td></tr><tr><td><strong>Dialogue Animation quick start</strong><br>Add the controller, assign a library and config, and see gesture animation in Play Mode.</td><td><a href="quick-start.md">quick-start.md</a></td></tr><tr><td><strong>Animation libraries and profiles</strong><br>Author and configure DialogueAnimationLibrary, RuntimeConfig, and bundled Profile assets.</td><td><a href="animation-libraries-and-profiles.md">animation-libraries-and-profiles.md</a></td></tr><tr><td><strong>Animator Controller requirements</strong><br>Layer indices, required state names, placeholder clip names, and DialogueAnimatorContract field reference.</td><td><a href="animator-controller-requirements.md">animator-controller-requirements.md</a></td></tr><tr><td><strong>Build a compatible Animator Controller</strong><br>Step-by-step guide to creating a four-layer Animator Controller from scratch.</td><td><a href="animator-controller-setup.md">animator-controller-setup.md</a></td></tr><tr><td><strong>Dialogue Animation usage examples</strong><br>Inspector-only and scripted examples across training, medical, and corporate simulation scenarios.</td><td><a href="usage-examples.md">usage-examples.md</a></td></tr><tr><td><strong>Dialogue Animation scripting API</strong><br>Complete reference for ConvaiDialogueAnimationController properties and runtime swap methods.</td><td><a href="scripting-api.md">scripting-api.md</a></td></tr><tr><td><strong>Troubleshoot Dialogue Animation</strong><br>Symptom-driven fixes for silent talk layers, missing animation, and layer index errors.</td><td><a href="troubleshooting.md">troubleshooting.md</a></td></tr></tbody></table>
 
-## How It Works
+## Next steps
 
-```mermaid
-graph LR
-    A[Dialogue State\nIdle / Speaking / Reacting] --> C[Orchestrator]
-    B[Emotion Reading\nHappy / Angry / Curious…] --> C
-    C --> D[Emotion-Weighted\nRandom Selector]
-    D --> E[Animation Library\nIdle + Talk clip pools]
-    E --> F[Animator Override\nController]
-    F --> G[4-Layer Animator\nBase · Idle Overlay · Body Talk · Head Talk]
-```
+Follow the Quick Start to get the module running on your first character, then read Animation Libraries & Profiles to understand how to customize clip selection for your scenario.
 
-The orchestrator reads dialogue state and the current emotion each frame. The selector picks clips from the library, weighting candidates that match the current emotion affinity. Clips are injected into the Animator via runtime override — no per-clip Animator states are needed.
-
-## Key Concepts
-
-* **DialogueAnimationLibrary** — ScriptableObject holding two clip pools: idle clips and talk clips. Each clip entry carries emotion affinity tags, a gender tag, and a selection weight.
-* **DialogueAnimationRuntimeConfig** — ScriptableObject controlling all timing and blending behavior: fade durations, idle rotation cadence, speech energy modulation, and clip selection bias.
-* **DialogueAnimatorContract** — ScriptableObject mapping layer indices and state names between the SDK and your Animator Controller.
-* **ConvaiDialogueAnimationProfile** — ScriptableObject that bundles all three assets above into a single per-character preset.
-
-## In This Section
-
-<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Quick Start</strong><br>Add dialogue animations to a character in minutes using bundled assets.</td><td><a href="/broken/pages/175a97cf891c519d92138c47238e54f5e70227b7">Broken link</a></td></tr><tr><td><strong>Animation Libraries &#x26; Profiles</strong><br>Complete reference for all ScriptableObject types and their fields.</td><td><a href="/broken/pages/a313ce2201628c94622ae8596ae14d4429d9ecaa">Broken link</a></td></tr><tr><td><strong>Animator Controller Setup</strong><br>Configure the four-layer Animator Controller structure — sample fast path and from-scratch guide.</td><td><a href="/broken/pages/5dbea01cb3512a0f6ae94dda842f95aa384fe0aa">Broken link</a></td></tr><tr><td><strong>Usage Examples</strong><br>Complete Inspector and scripted examples for training simulations and interactive experiences.</td><td><a href="/broken/pages/b688f4e0fc42f15e4c00410471b27f7266115add">Broken link</a></td></tr><tr><td><strong>Scripting API</strong><br>Hot-swap libraries and configs at runtime; read active clip and layer weight state.</td><td><a href="/broken/pages/0506a1630550e50910297f49af73121090cf985f">Broken link</a></td></tr><tr><td><strong>Troubleshooting</strong><br>Fix common setup issues: missing assets, wrong gender clips, layer conflicts.</td><td><a href="/broken/pages/2dd3530469e0e4328823e20f4e26ef38c84bc076">Broken link</a></td></tr></tbody></table>
+{% content-ref url="quick-start.md" %}
+[Dialogue Animation quick start](quick-start.md)
+{% endcontent-ref %}

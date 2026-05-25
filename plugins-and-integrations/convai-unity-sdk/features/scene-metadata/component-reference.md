@@ -1,16 +1,23 @@
-# component reference
+---
+title: Scene metadata component reference
+last_reviewed: 4.2.0
+description: >-
+  Reference for ConvaiObjectMetadata and ConvaiSceneMetadataCollector, including
+  Inspector fields, lifecycle events, validation rules, and dependency injection
+  behavior.
+---
+
+# Scene metadata component reference
 
 Two components make up the Scene Metadata system. `ConvaiObjectMetadata` goes on each object the AI should know about. `ConvaiSceneMetadataCollector` goes on the `ConvaiManager` GameObject and handles collection and transmission.
 
-***
+### ConvaiObjectMetadata
 
-## ConvaiObjectMetadata
-
-**Add Component path:** `Convai → Scene Metadata → Convai Object Metadata`
+**Add Component path:** `Convai → Object Metadata`
 
 `ConvaiObjectMetadata` is a `MonoBehaviour` that describes a single GameObject to Convai. When enabled, it registers itself with `ConvaiMetadataRegistry`. When disabled or destroyed, it unregisters automatically — no manual cleanup is needed.
 
-### Inspector Fields
+#### Inspector fields
 
 | Field                           | Type     | Default             | Constraint                    | Description                                                                                                                                                                                  |
 | ------------------------------- | -------- | ------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -19,7 +26,7 @@ Two components make up the Scene Metadata system. `ConvaiObjectMetadata` goes on
 | **Include In Metadata**         | `bool`   | `true`              | —                             | When unchecked, this object is excluded from the next metadata collection without removing or disabling the component. Use this to manage runtime inclusion.                                 |
 | **Is Registered** _(read-only)_ | `bool`   | —                   | Read-only                     | Debug indicator. Shows `true` when the component is currently registered in `ConvaiMetadataRegistry`. Visible in Play Mode.                                                                  |
 
-### Lifecycle
+#### Lifecycle
 
 `ConvaiObjectMetadata` manages its own registration:
 
@@ -32,28 +39,21 @@ Two components make up the Scene Metadata system. `ConvaiObjectMetadata` goes on
 
 GameObjects that are deactivated at runtime will not appear in the next metadata collection, even if **Include In Metadata** is still checked.
 
-### Validation Rules
+#### Validation rules
 
-`ConvaiObjectMetadata.IsValid` returns `true` when:
+`ConvaiObjectMetadata.IsValid` returns `true` when **Object Name** is non-empty and non-whitespace. The 50-character limit is enforced only as an editor warning via `GetValidationErrors()` — objects with names over 50 characters still pass `IsValid` and are included in the payload.
 
-* **Object Name** is non-empty and non-whitespace
-* **Object Name** is 50 characters or fewer
-
-Objects that fail validation are registered in the registry but excluded from `GetValidMetadata()` and therefore from the payload sent to Convai.
+Objects with an empty **Object Name** fail `IsValid` and are excluded from `GetValidMetadata()` and from the payload sent to Convai. Objects with names over 50 characters are included in the payload but generate a validation warning in the Editor.
 
 {% hint style="warning" %}
 `OnValidate` logs a warning in the Editor when validation fails, but it does not prevent the component from being added. Check the Console after adding components to catch configuration errors before entering Play Mode.
 {% endhint %}
 
-***
+### ConvaiSceneMetadataCollector
 
-## ConvaiSceneMetadataCollector
+`ConvaiSceneMetadataCollector` is the orchestrator. It watches for room connection events, reads all valid metadata from `ConvaiMetadataRegistry`, and sends the payload to Convai. In the Inspector, click **Add Component** and search for `Convai Scene Metadata Collector`. Place it on any GameObject in the same scene as `ConvaiManager` — its required dependencies are resolved automatically at startup via `ConvaiManager.ActiveManager`.
 
-**Add Component path:** `Convai → Scene Metadata → Convai Scene Metadata Collector`
-
-`ConvaiSceneMetadataCollector` is the orchestrator. It watches for room connection events, reads all valid metadata from `ConvaiMetadataRegistry`, and sends the payload to Convai. Place it on the same GameObject as `ConvaiManager` — its required dependencies are injected at startup automatically.
-
-### Inspector Fields
+#### Inspector fields
 
 | Field                                  | Type    | Default | Description                                                                                                                                                                                                 |
 | -------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -62,17 +62,17 @@ Objects that fail validation are registered in the registry but excluded from `G
 | **Last Collected Count** _(read-only)_ | `int`   | —       | Shows the number of objects included in the most recent collection. Visible in Play Mode.                                                                                                                   |
 | **Last Collection Time** _(read-only)_ | `float` | —       | Shows the duration in seconds of the most recent collection operation. Visible in Play Mode.                                                                                                                |
 
-### Dependencies and Injection
+#### Dependencies and injection
 
 `ConvaiSceneMetadataCollector` requires two injected dependencies — `IEventHub` and `IConvaiRoomConnectionService` — provided by `ConvaiManager` automatically at startup. No manual wiring is needed.
 
 If the dependencies are not injected (for example, if `ConvaiManager` is missing from the scene), the collector logs a warning and all collection calls become no-ops.
 
 {% hint style="danger" %}
-Do not place `ConvaiSceneMetadataCollector` in a scene without `ConvaiManager`. The component initializes but cannot send metadata, and you will see a `"Dependencies not injected"` warning in the Console.
+Do not add `ConvaiSceneMetadataCollector` to a scene without `ConvaiManager`. When `ConvaiManager` is missing, the component logs `"[ConvaiSceneMetadataCollector] Dependencies not injected. Add ConvaiManager to scene."` as an **error** in the Console and disables itself.
 {% endhint %}
 
-### Manual Trigger
+#### Manual trigger
 
 When **Collect On Start** is disabled, call `CollectAndSendSceneMetadata()` from a script to trigger collection at the moment your application needs it. The method is a no-op if the room is not connected — use `IsReadyToSendMetadata()` to check readiness first.
 
@@ -81,8 +81,14 @@ if (_collector.IsReadyToSendMetadata())
     _collector.CollectAndSendSceneMetadata();
 ```
 
-See [Scripting API Reference](/broken/pages/bb1dcba815ace020a7604fa43378b952550870e6) for the full public method list.
+For the full public method list, see [Scene metadata scripting API](scripting-api-reference.md).
 
-## Conclusion
+### Next steps
 
-Both components follow an automatic lifecycle — `ConvaiObjectMetadata` self-registers on enable and unregisters on disable or destroy, and `ConvaiSceneMetadataCollector` sends the payload automatically at connection. For scripting against the registry and triggering manual collections, see [Scripting API Reference](/broken/pages/bb1dcba815ace020a7604fa43378b952550870e6). For complete implementation examples, see [Usage Examples](/broken/pages/82e39ab72390400284167049f158273b48465fe5).
+{% content-ref url="scripting-api-reference.md" %}
+[scripting-api-reference.md](scripting-api-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="usage-examples.md" %}
+[usage-examples.md](usage-examples.md)
+{% endcontent-ref %}

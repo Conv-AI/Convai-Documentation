@@ -1,172 +1,201 @@
 ---
-description: >-
-  Four end-to-end Vision configurations covering scene cameras, physical
-  webcams, Meta Quest passthrough, and manual-trigger publishing workflows.
+title: Vision usage examples
+description: Find code patterns for common Vision setups, including safety training, webcam selection, overhead cameras, look-at activation, and WebGL deployment.
 ---
 
-# Usage Examples
+These examples cover the most common Vision integration patterns. Each example is self-contained — copy the relevant script, attach it to the appropriate GameObject, and configure the serialized fields in the Inspector.
 
-## Vision in Practice — Implementation Examples
+## Monitor object placement in safety training
 
-The examples on this page demonstrate end-to-end Vision setups for realistic interactive simulation scenarios. Each example describes the context, lists the components to add, shows the Inspector configuration, and includes any scripting required. All examples assume `ConvaiRoomManager.Connection Type` is set to **Video**.
+A safety training application where a Convai character monitors whether the user places equipment in the correct zone and gives spoken feedback. The character uses the live scene camera feed to observe placement in real time.
 
-***
-
-### Example 1: Safety Compliance Training — Live Plant Camera Feed
-
-**Scenario:** A virtual safety officer NPC monitors a live camera feed of a simulated industrial plant floor. Trainees must identify and report hazards; the NPC observes the same camera and provides corrective feedback based on what it sees.
-
-#### Component setup
-
-1. Add `ConvaiVisionPublisher` to the NPC's root GameObject.
-2. Add `CameraVisionFrameSource` to the same GameObject.
-3. Assign the overhead plant-floor camera to **Target Camera**.
-4. Set **Capture Preset** to `HighDetail` (1920 × 1080 @ 30 fps) so the NPC can identify equipment labels and colour-coded safety markers.
-5. On `ConvaiVisionPublisher`, set **Publish Policy** to `HighResponsiveness` (15 fps, 1 Mbps) so the NPC reacts promptly to changes on the floor.
-6. Leave **Frame Source Component** blank — the publisher auto-discovers the source on the same GameObject.
-
-#### Inspector summary
-
-| Component                 | Field          | Value                  |
-| ------------------------- | -------------- | ---------------------- |
-| `CameraVisionFrameSource` | Capture Preset | `HighDetail`           |
-| `CameraVisionFrameSource` | Target Camera  | _(plant floor camera)_ |
-| `ConvaiVisionPublisher`   | Publish Policy | `HighResponsiveness`   |
-
-No scripting required for this scenario.
-
-***
-
-### Example 2: Industrial Equipment Onboarding — Webcam Identification
-
-**Scenario:** A technician in a desktop-based onboarding simulation holds up a physical component to their webcam. A Convai NPC identifies the component, confirms its part number, and guides the technician through the installation procedure.
-
-#### Component setup
-
-1. Add `ConvaiVisionPublisher` and `WebcamVisionFrameSource` to the same scene GameObject.
-2. Leave **Webcam Device Name** blank to select the default webcam.
-3. Set **Requested Width** / **Height** to `1280` / `720` and **Requested Fps** to `15`.
-4. Set **Max Output Width** to `1280` and **Max Output Height** to `720`.
-5. Set `ConvaiVisionPublisher`'s **Publish Policy** to `AutoCompatible` — 10 fps is sufficient for static or slow-moving objects.
-
-#### Inspector summary
-
-| Component                 | Field              | Value                              |
-| ------------------------- | ------------------ | ---------------------------------- |
-| `WebcamVisionFrameSource` | Webcam Device Name | _(blank — first available device)_ |
-| `WebcamVisionFrameSource` | Requested Width    | `1280`                             |
-| `WebcamVisionFrameSource` | Requested Height   | `720`                              |
-| `WebcamVisionFrameSource` | Requested Fps      | `15`                               |
-| `ConvaiVisionPublisher`   | Publish Policy     | `AutoCompatible`                   |
-
-#### Scripting: show available devices in a dropdown UI
+**Expected outcome:** When the player moves an object, the character describes its position and confirms whether placement is correct or flags a safety issue.
 
 ```csharp
+using Convai.Modules.Vision;
+using Convai.Runtime.Vision.Publishing;
 using UnityEngine;
-using UnityEngine.UI;
-using Convai.Runtime.Vision.Sources;
 
-public class WebcamSelector : MonoBehaviour
+/// <summary>
+/// Enables vision when the training sequence starts and disables it when complete.
+/// Attach to the same GameObject as ConvaiVisionPublisher.
+/// </summary>
+public class SafetyTrainingVisionController : MonoBehaviour
 {
-    [SerializeField] Dropdown _dropdown;
-    [SerializeField] WebcamVisionFrameSource _source;
+    [SerializeField] private ConvaiVisionPublisher _publisher;
 
-    void Start()
+    void Awake()
     {
-        string[] devices = WebcamVisionFrameSource.GetAvailableDeviceNames();
-        _dropdown.AddOptions(new System.Collections.Generic.List<string>(devices));
-        _dropdown.onValueChanged.AddListener(OnDeviceSelected);
+        // Start in Manual mode so vision only captures during active training
+        _publisher.SetPublishPolicy(VisionPublishPolicy.Manual);
     }
 
-    void OnDeviceSelected(int index)
+    public void BeginTrainingSequence()
     {
-        string[] devices = WebcamVisionFrameSource.GetAvailableDeviceNames();
-        _source.SwitchWebcamAsync(devices[index]);
+        _publisher.SetPublishPolicy(VisionPublishPolicy.HighResponsiveness);
+        _publisher.EnablePublishing(true);
+    }
+
+    public void EndTrainingSequence()
+    {
+        _publisher.EnablePublishing(false);
+        _publisher.SetPublishPolicy(VisionPublishPolicy.Manual);
     }
 }
 ```
 
-***
+## Select webcam device at runtime
 
-### Example 3: VR Facility Walkthrough on Meta Quest
+A desktop onboarding application where the user selects which physical camera to use before a session starts. Useful when the user's workstation has multiple cameras (built-in webcam, USB camera, etc.).
 
-**Scenario:** A Convai guide NPC accompanies a new employee through a virtual and physical hybrid facility tour on a Meta Quest headset. The NPC observes the real environment through the passthrough feed and points out safety exits, equipment stations, and procedural checkpoints.
-
-#### Component setup
-
-1. Add `ConvaiVisionPublisher` and `QuestVisionFrameSource` to a persistent scene GameObject.
-2. Leave **Passthrough Camera Access** blank — the source auto-discovers `PassthroughCameraAccess` in the scene.
-3. Leave **Flip Y** enabled (default `true`).
-4. Set **Target Frame Rate** to `15` (default).
-5. Set `ConvaiVisionPublisher`'s **Publish Policy** to `AutoCompatible`.
-6. Ensure the Meta XR SDK is installed and the `PassthroughCameraAccess` component is present and active.
-
-{% hint style="warning" %}
-`QuestVisionFrameSource` is only functional on Meta Quest hardware. In the Editor or on other platforms the source enters `Failed` state with `ErrorKind = UnsupportedPlatform`. Use `CameraVisionFrameSource` for Editor testing of this scenario.
-{% endhint %}
-
-#### Inspector summary
-
-| Component                | Field             | Value            |
-| ------------------------ | ----------------- | ---------------- |
-| `QuestVisionFrameSource` | Flip Y            | `true`           |
-| `QuestVisionFrameSource` | Target Frame Rate | `15`             |
-| `ConvaiVisionPublisher`  | Publish Policy    | `AutoCompatible` |
-
-***
-
-### Example 4: Manual-Trigger Snapshot Session
-
-**Scenario:** A procedural assessment presents trainees with a series of safety inspection tasks. After each task the trainee clicks a **Submit** button, triggering a single burst of Vision publishing so the NPC can evaluate the scene state. Publishing is paused between tasks to reduce bandwidth cost.
-
-#### Component setup
-
-1. Add `ConvaiVisionPublisher` and `CameraVisionFrameSource` as normal.
-2. Set `ConvaiVisionPublisher`'s **Publish Policy** to `Manual`. The publisher will not auto-start when the room connects.
-
-#### Inspector summary
-
-| Component                 | Field          | Value      |
-| ------------------------- | -------------- | ---------- |
-| `CameraVisionFrameSource` | Capture Preset | `Balanced` |
-| `ConvaiVisionPublisher`   | Publish Policy | `Manual`   |
-
-#### Scripting: trigger publishing from a UI button
+**Expected outcome:** The dropdown populates on Start with all detected camera names. Selecting a camera name and clicking **Switch** swaps the capture device without stopping the session.
 
 ```csharp
+using System.Collections.Generic;
+using Convai.Runtime.Vision.Sources;
+using TMPro;
 using UnityEngine;
-using Convai.Modules.Vision;
 
-public class InspectionSubmitButton : MonoBehaviour
+/// <summary>
+/// Populates a TMP_Dropdown with available webcam names and switches devices on demand.
+/// Requires WebcamVisionFrameSource on the scene.
+/// </summary>
+public class WebcamSelectorUI : MonoBehaviour
 {
-    [SerializeField] ConvaiVisionPublisher _visionPublisher;
-    [SerializeField] float _publishDurationSeconds = 3f;
+    [SerializeField] private WebcamVisionFrameSource _webcamSource;
+    [SerializeField] private TMP_Dropdown _deviceDropdown;
 
-    public void OnSubmitClicked()
-    {
-        StartCoroutine(PublishBurst());
-    }
+    private List<string> _deviceNames = new();
 
-    System.Collections.IEnumerator PublishBurst()
+    async void Start()
     {
-        _visionPublisher.EnablePublishing(true);
-        yield return new WaitForSeconds(_publishDurationSeconds);
-        _visionPublisher.EnablePublishing(false);
+        _deviceNames = new List<string>(WebcamVisionFrameSource.GetAvailableDeviceNames());
+        _deviceDropdown.ClearOptions();
+        _deviceDropdown.AddOptions(_deviceNames);
+
+        _deviceDropdown.onValueChanged.AddListener(async index =>
+        {
+            if (index >= 0 && index < _deviceNames.Count)
+                await _webcamSource.SwitchWebcamAsync(_deviceNames[index]);
+        });
     }
 }
 ```
 
 {% hint style="info" %}
-With `Manual` policy, `EnablePublishing(true)` uses `AutoCompatible` rates (10 fps, 750 000 bps) unless you call `SetPublishPolicy` to another value before enabling. To use different rates, call `SetPublishPolicy` first:
-
-```csharp
-_visionPublisher.SetPublishPolicy(VisionPublishPolicy.HighResponsiveness);
-_visionPublisher.EnablePublishing(true);
-```
+`TMP_Dropdown` requires the TextMeshPro package. If your project uses the legacy `UnityEngine.UI.Dropdown`, replace `TMP_Dropdown` with `Dropdown` — `AddOptions(List<string>)` works identically.
 {% endhint %}
 
-***
+## Stream an overhead security camera
 
-## Conclusion
+An architectural walkthrough where an overhead security camera monitors the entire floor plan. The publisher uses `LowOverhead` policy because the scene changes slowly and bandwidth must be reserved for audio.
 
-These examples cover the four most common Vision configurations: a scene camera feed for simulation monitoring, a physical webcam for object identification, Meta Quest passthrough for mixed-reality guidance, and manual-policy publishing for assessment workflows. Each builds on the same two-component foundation — a frame source and a publisher — with only the source type and publish policy varying by scenario. If something is not behaving as expected, see [Troubleshooting & Diagnostics](troubleshooting-and-diagnostics.md) for a structured diagnosis guide.
+**Expected outcome:** The character describes what is visible in the top-down view — furniture layout, occupancy, or hazards — when asked.
+
+```csharp
+using Convai.Modules.Vision;
+using Convai.Runtime.Vision.Publishing;
+using UnityEngine;
+
+/// <summary>
+/// Configures vision with a specific overhead camera and low-overhead transport policy.
+/// Attach to the ConvaiVisionRoot GameObject.
+/// </summary>
+public class SecurityCameraVisionSetup : MonoBehaviour
+{
+    [SerializeField] private ConvaiVisionPublisher _publisher;
+    [SerializeField] private CameraVisionFrameSource _frameSource;
+    [SerializeField] private Camera _overheadCamera;
+
+    void Awake()
+    {
+        // Point the frame source at the overhead security camera
+        _frameSource.TargetCamera = _overheadCamera;
+
+        // Low-overhead policy: 5 fps, 350 kbps — suitable for slow-moving scene
+        _publisher.SetPublishPolicy(VisionPublishPolicy.LowOverhead);
+    }
+}
+```
+
+## Activate publishing on player look-at
+
+Vision is expensive to stream continuously. This pattern activates publishing only while the player is looking at a specific object (e.g., a piece of machinery), and pauses it otherwise.
+
+**Expected outcome:** The character responds to the object's state only when the player is looking at it. Network and GPU overhead are zero when the player looks away.
+
+```csharp
+using Convai.Modules.Vision;
+using Convai.Runtime.Vision.Publishing;
+using UnityEngine;
+
+/// <summary>
+/// Activates vision publishing while the player looks at a designated object.
+/// Attach to the target object. ConvaiVisionPublisher must be set to Manual policy.
+/// </summary>
+public class LookAtVisionTrigger : MonoBehaviour
+{
+    [SerializeField] private ConvaiVisionPublisher _publisher;
+    [SerializeField] private Camera _playerCamera;
+    [SerializeField] private float _maxViewAngle = 15f;
+
+    void Awake()
+    {
+        _publisher.SetPublishPolicy(VisionPublishPolicy.Manual);
+    }
+
+    void Update()
+    {
+        Vector3 directionToObject = (transform.position - _playerCamera.transform.position).normalized;
+        float angle = Vector3.Angle(_playerCamera.transform.forward, directionToObject);
+        bool isLooking = angle < _maxViewAngle;
+
+        if (isLooking && !_publisher.IsPublishing)
+            _publisher.EnablePublishing(true);
+        else if (!isLooking && _publisher.IsPublishing)
+            _publisher.EnablePublishing(false);
+    }
+}
+```
+
+## Configure Vision for WebGL
+
+On WebGL, no frame source component is required. `ConvaiVisionPublisher` captures the browser canvas automatically via `canvas.captureStream()`. Set **Connection Type** to **Video** and the publish policy as needed — everything else is automatic.
+
+**Expected outcome:** The character receives a live feed of the browser canvas. No frame source component is on the scene.
+
+```csharp
+using Convai.Modules.Vision;
+using Convai.Runtime.Vision.Publishing;
+using UnityEngine;
+
+/// <summary>
+/// WebGL-specific setup. No frame source needed — publisher uses canvas.captureStream().
+/// Attach to the same GameObject as ConvaiVisionPublisher.
+/// Set ConvaiRoomManager.ConnectionType = Video before Play.
+/// </summary>
+public class WebGLVisionSetup : MonoBehaviour
+{
+    [SerializeField] private ConvaiVisionPublisher _publisher;
+
+    void Awake()
+    {
+        // LowOverhead is appropriate for WebGL — canvas capture is capped at 15 fps
+        _publisher.SetPublishPolicy(VisionPublishPolicy.LowOverhead);
+    }
+}
+```
+
+{% hint style="danger" %}
+**HTTPS required on WebGL.** The `canvas.captureStream()` API is blocked by browsers on non-HTTPS origins. Deploy your WebGL build to an HTTPS host before testing Vision in production. `http://localhost` is the only exception.
+{% endhint %}
+
+## Next steps
+
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Troubleshoot vision](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}
+
+{% content-ref url="custom-frame-sources.md" %}
+[Custom frame sources](custom-frame-sources.md)
+{% endcontent-ref %}

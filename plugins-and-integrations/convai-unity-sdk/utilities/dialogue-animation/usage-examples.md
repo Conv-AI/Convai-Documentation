@@ -1,49 +1,43 @@
-# usage examples
+---
+title: Dialogue Animation usage examples
+description: Four progressive examples — from Inspector-only setup to runtime library swapping — covering training, medical, corporate, and adaptive assessment scenarios.
+last_reviewed: "4.2.0"
+---
 
-These examples progress from Inspector-only setups to C# scripting, covering the most common deployment patterns for AI characters in training simulations, interactive experiences, and games. Each example includes full configuration values and expected runtime behavior.
-
-***
-
-## Example 1 — Industrial Safety Drill Instructor
-
-**Context:** A factory safety training simulation where an instructor NPC guides learners through equipment procedures. The character needs to feel grounded and authoritative — measured gestures, no fidgeting, clear motion during explanations.
-
-### Setup (Inspector Only)
-
-| Field               | Value                                                | Reason                                                                     |
-| ------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------- |
-| Library             | `ConvaiSamplesShared_DialogAnimationLib_Balanced`    | Neutral energy; avoids exaggerated gestures that would undermine authority |
-| Config              | `ConvaiSamplesShared_DialogueAnimationRuntimeConfig` | Default timing is appropriate for this character                           |
-| Character Gender    | `Neutral`                                            | Accept all clips; instructor's rig may be used across gender variants      |
-| EmotionBiasStrength | `1.5` (default)                                      | Allow mild emotion variation without forcing strong emotional clips        |
-
-No scripting required. The default configuration handles the full conversation lifecycle.
-
-### Expected Behavior
-
-* During listening phases, the instructor holds calm ambient poses with a slow 8–20 s rotation cadence
-* When explaining a procedure step, body talk and head talk layers fade in with professional gestures
-* Emotional responses — concern when a learner selects a wrong answer — produce slightly different clip choices via emotion affinity without requiring explicit scripting
+These examples progress from a pure Inspector setup to C# scripting for runtime behavior changes. Start with Example 1 to understand the baseline configuration pattern, then read later examples to understand when and how to use scripting.
 
 ***
 
-## Example 2 — Medical Training Patient Actor
+## Example 1 — Industrial safety instructor
 
-**Context:** A medical simulation where a patient actor responds to treatment decisions. The patient should start restrained (lying in bed, minimal movement) and become visibly more animated as the scenario's emotional intensity rises — fear when treatment is delayed, relief when correctly treated.
+**Scenario:** A factory floor training simulation features an NPC safety instructor who delivers procedural briefings. The character needs authoritative, measured gestures that project confidence without being distracting.
 
-### Setup
+**Setup (Inspector only):**
 
-**Initial Inspector configuration:**
+1. Assign `ConvaiSamplesShared_DialogAnimationLib_Balanced` to **Library**
+2. Assign the Balanced `DialogueAnimationRuntimeConfig` to **Config**
+3. Set **Character Gender** to **Male**
 
-* Library: `ConvaiSamplesShared_DialogAnimationLib_Subtle` — restrained clips suitable for a patient at rest
-* Config: custom `PatientRuntimeConfig` with:
-  * `EmotionBiasStrength: 3.0` — strong emotion-clip affinity; the patient's animation should clearly shift with detected emotion
-  * `RotateIdleOverlayWhileSpeaking: true` — patient keeps shifting position even while speaking (restlessness)
-  * `IdleMinHoldSeconds: 4`, `IdleMaxHoldSeconds: 10` — faster idle rotation, conveying agitation
+The Balanced library contains clips with lower `EmotionBiasStrength` affinity spread, producing consistent gesture style regardless of detected emotion. This suits instructional content where predictability matters more than expressiveness.
 
-**At runtime — on high-stress outcome:** swap to Expressive library.
+**Expected outcome:** The instructor plays steady idle cycles and shifts into measured gesture clips when speaking. Clip transitions are gradual (0.95s default crossfade). The talk layer fades out smoothly after each speech turn.
 
-{% code title="PatientAnimationController.cs" %}
+***
+
+## Example 2 — Medical patient actor
+
+**Scenario:** A medical simulation features a patient character who begins a consultation with restrained movement (lying in a hospital bed) and becomes more expressive as anxiety rises. The gesture library must change at runtime in response to a narrative trigger.
+
+**Setup:**
+
+Start with Inspector configuration using the Subtle library:
+
+1. Assign `ConvaiSamplesShared_DialogAnimationLib_Subtle` to **Library**
+2. Assign the Subtle config to **Config**
+3. Set **Character Gender** to **Female**
+
+Then swap to the Expressive library via C# when the anxiety event fires:
+
 ```csharp
 using Convai.Modules.DialogueAnimation.Components;
 using Convai.Modules.DialogueAnimation.Core;
@@ -51,131 +45,109 @@ using UnityEngine;
 
 public class PatientAnimationController : MonoBehaviour
 {
-    [SerializeField] private ConvaiDialogueAnimationController _animationController;
-    [SerializeField] private DialogueAnimationLibrary _subtleLibrary;
-    [SerializeField] private DialogueAnimationLibrary _expressiveLibrary;
+    [SerializeField] private ConvaiDialogueAnimationController _animController;
+    [SerializeField] private DialogueAnimationLibrary _anxiousLibrary;
 
-    // Called when a critical medical decision is delayed or incorrect
-    public void OnHighStressEvent()
+    public void OnAnxietyEventTriggered()
     {
-        _animationController.SetLibrary(_expressiveLibrary);
-    }
-
-    // Called when treatment is administered correctly
-    public void OnReliefEvent()
-    {
-        _animationController.SetLibrary(_subtleLibrary);
+        _animController.SetLibrary(_anxiousLibrary);
     }
 }
 ```
-{% endcode %}
 
-### Expected Behavior
-
-* At scenario start, patient idles with subtle, restrained gestures — appropriate for a resting position
-* As stress events fire, animation transitions to wider, more visible gestures
-* Emotional state detected from patient's dialogue (fear, relief) further biases clip selection via `EmotionBiasStrength: 3.0`
-* `RotateIdleOverlayWhileSpeaking` ensures the patient appears uncomfortable even mid-sentence
+**Expected outcome:** The character uses restrained idle and talk clips during the calm consultation phase. After `OnAnxietyEventTriggered()` fires, gestures immediately shift to the expressive pool on the next clip selection cycle. There is no restart or interruption — the crossfade handles the transition.
 
 ***
 
-## Example 3 — Multi-Character Corporate Onboarding
+## Example 3 — Multi-character corporate onboarding
 
-**Context:** A virtual onboarding experience with two AI characters: a mentor NPC (warm, expressive, encouraging) and an HR representative (formal, measured). Both characters share a single runtime config for consistent timing but use different libraries and gender settings.
+**Scenario:** A corporate onboarding simulation features two instructor characters side-by-side: one senior, one junior. They share a `DialogueAnimationRuntimeConfig` for consistent timing, but use different libraries and gender settings to create distinct visual personalities.
 
-### Setup
+**About clip selection diversity:** To prevent two characters from selecting the same clip at the same frame, set a different `DeterministicSeed` value on each character's config asset in the Inspector. `DeterministicSeed` is configured per asset at authoring time — it is not settable via the scripting API.
 
-Configure each character's `ConvaiDialogueAnimationController` separately:
+**Setup:**
 
-| Field              | Mentor NPC                                         | HR Representative                                 |
-| ------------------ | -------------------------------------------------- | ------------------------------------------------- |
-| Library            | `ConvaiSamplesShared_DialogAnimationLib_Expresive` | `ConvaiSamplesShared_DialogAnimationLib_Balanced` |
-| Config             | `SharedOnboardingConfig` (same asset)              | `SharedOnboardingConfig` (same asset)             |
-| Character Gender   | `Female`                                           | `Neutral`                                         |
-| Deterministic Seed | `0xA1B2C3` (set in profile)                        | `0xD4E5F6` (set in profile)                       |
+Create two `DialogueAnimationRuntimeConfig` assets (or duplicate one). In the Inspector, set a different `DeterministicSeed` value on each. Then assign them per character:
 
-**SharedOnboardingConfig** settings:
-
-* `TalkCrossFadeDuration: 0.6` — slightly snappier talk transitions for a professional environment
-* `EmotionBiasStrength: 2.0` — emotion affinity present but not dominant
-* `IdleMinHoldSeconds: 10`, `IdleMaxHoldSeconds: 25` — slower idle rotation for a composed office feel
-
-### Expected Behavior
-
-* Both characters have consistent crossfade timing (same config) but visually distinct energy — mentor uses wider gesture clips, HR representative stays measured
-* Different `DeterministicSeed` values ensure the two characters don't make synchronized clip selections, which would look unnatural in a split-screen or side-by-side layout
-* Gender filtering ensures Female-tagged clips appear only on the mentor
-
-{% hint style="info" %}
-`DeterministicSeed` is set inside `ConvaiDialogueAnimationProfile` — create separate profile assets for each character and set a unique seed on each, even when using a shared library and config.
-{% endhint %}
-
-***
-
-## Example 4 — Adaptive Assessment Mode
-
-**Context:** A safety training simulation with two modes: a learning phase (natural, relaxed animation) and an assessment phase (formal, restrained). When assessment begins, all character animation should shift to a more deliberate, controlled style.
-
-### Setup
-
-Create two `DialogueAnimationRuntimeConfig` assets:
-
-**`LearningPhaseConfig`:**
-
-* `EmotionBiasStrength: 2.0`
-* `RotateIdleOverlayWhileSpeaking: true`
-* `IdleMinHoldSeconds: 6`, `IdleMaxHoldSeconds: 18`
-* `BodyTalkLayerPeakWeight: 1.0`
-
-**`AssessmentPhaseConfig`:**
-
-* `EmotionBiasStrength: 0.5` — minimal emotion variation; examiner stays consistent
-* `RotateIdleOverlayWhileSpeaking: false` — no idle rotation during speech; more controlled
-* `IdleMinHoldSeconds: 12`, `IdleMaxHoldSeconds: 30` — very slow idle rotation
-* `BodyTalkLayerPeakWeight: 0.8` — slightly reduced gesture intensity
-* `TalkCrossFadeDuration: 0.4` — crisper transitions
-
-{% code title="AssessmentModeManager.cs" %}
 ```csharp
 using Convai.Modules.DialogueAnimation.Components;
 using Convai.Modules.DialogueAnimation.Runtime;
 using UnityEngine;
 
-public class AssessmentModeManager : MonoBehaviour
+public class MultiCharacterAnimationSetup : MonoBehaviour
 {
-    [SerializeField] private ConvaiDialogueAnimationController[] _characters;
-    [SerializeField] private DialogueAnimationRuntimeConfig _learningConfig;
-    [SerializeField] private DialogueAnimationRuntimeConfig _assessmentConfig;
+    [SerializeField] private ConvaiDialogueAnimationController _seniorInstructor;
+    [SerializeField] private ConvaiDialogueAnimationController _juniorInstructor;
+    // Assign two separate config assets in the Inspector —
+    // each has a different DeterministicSeed value set at authoring time.
+    [SerializeField] private DialogueAnimationRuntimeConfig _seniorConfig;
+    [SerializeField] private DialogueAnimationRuntimeConfig _juniorConfig;
 
-    public void BeginAssessment()
+    private void Start()
     {
-        foreach (var character in _characters)
-            character.SetConfig(_assessmentConfig);
-    }
-
-    public void EndAssessment()
-    {
-        foreach (var character in _characters)
-            character.SetConfig(_learningConfig);
+        _seniorInstructor.SetConfig(_seniorConfig);
+        _juniorInstructor.SetConfig(_juniorConfig);
     }
 }
 ```
-{% endcode %}
 
-### Expected Behavior
+Set distinct libraries per character:
 
-* During the learning phase, characters animate naturally with emotional variation and regular idle rotation
-* When `BeginAssessment()` fires, all characters transition to the formal config — idles hold longer, gestures reduce in intensity, emotion affinity is suppressed
-* The config swap takes effect on the next orchestrator tick — the current clip finishes its crossfade naturally before the new behavior kicks in
+* Senior: `ConvaiSamplesShared_DialogAnimationLib_Balanced`, Gender = Female
+* Junior: `ConvaiSamplesShared_DialogAnimationLib_Expresive`, Gender = Male
 
-{% hint style="success" %}
-Config swaps take effect immediately at runtime — no restart required. Test by triggering `BeginAssessment()` mid-conversation and watching idle hold times increase visibly in the Animator window.
-{% endhint %}
+**Expected outcome:** Both characters animate with the same crossfade timing and energy response (shared timing config), but use different clip pools and gender-filtered selections, so they look distinct even when speaking simultaneously.
 
 ***
 
-## Next Steps
+## Example 4 — Adaptive assessment mode
 
-{% content-ref url="/broken/pages/9fadf2c50f4dce5924c71dce2d45176cc0a36153" %}
-[Broken link](/broken/pages/9fadf2c50f4dce5924c71dce2d45176cc0a36153)
+**Scenario:** A military training simulation has two phases: a relaxed learning phase and a formal assessment phase. During assessment, the NPC evaluator's animation style must shift to convey evaluation severity — shorter idle holds, faster transitions, more formal gestures.
+
+**Setup:**
+
+Author two configs:
+
+* `RelaxedConfig` — `IdleMinHoldSeconds: 8`, `IdleMaxHoldSeconds: 20`, `TalkCrossFadeDuration: 0.75`
+* `AssessmentConfig` — `IdleMinHoldSeconds: 3`, `IdleMaxHoldSeconds: 8`, `TalkCrossFadeDuration: 0.4`
+
+Swap via C# when the phase changes:
+
+```csharp
+using Convai.Modules.DialogueAnimation.Components;
+using Convai.Modules.DialogueAnimation.Runtime;
+using UnityEngine;
+
+public class AssessmentPhaseController : MonoBehaviour
+{
+    [SerializeField] private ConvaiDialogueAnimationController _evaluator;
+    [SerializeField] private DialogueAnimationRuntimeConfig _relaxedConfig;
+    [SerializeField] private DialogueAnimationRuntimeConfig _assessmentConfig;
+
+    public void BeginAssessmentPhase()
+    {
+        _evaluator.SetConfig(_assessmentConfig);
+    }
+
+    public void BeginLearningPhase()
+    {
+        _evaluator.SetConfig(_relaxedConfig);
+    }
+}
+```
+
+**Expected outcome:** During learning, the evaluator's idle animation changes at a relaxed pace with long holds. When `BeginAssessmentPhase()` is called, idle rotation becomes more frequent, transitions snap faster, and the character's gestural rhythm communicates increased scrutiny — without any code changes to dialogue or session logic.
+
+***
+
+## Next steps
+
+For a complete property and method reference, see the Scripting API page. For help with common failures like silent talk layers or missing animations, see Troubleshooting.
+
+{% content-ref url="scripting-api.md" %}
+[Scripting API](scripting-api.md)
+{% endcontent-ref %}
+
+{% content-ref url="troubleshooting.md" %}
+[Troubleshooting](troubleshooting.md)
 {% endcontent-ref %}

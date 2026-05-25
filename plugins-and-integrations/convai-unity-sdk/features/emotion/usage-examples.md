@@ -1,34 +1,31 @@
 ---
-description: >-
-  Worked scenarios that show the Emotion system in action: hazard responses,
-  scripted greetings, adaptive branching, analytics, and authoring workflows.
+title: Emotion examples
+description: Six complete scenarios covering hazard overrides, locked expressions, distress branching, analytics logging, no-code UI wiring, and Editor authoring.
 ---
 
-# Usage Examples
+These scenarios show how the Emotion system's configuration and scripting API combine to serve realistic application requirements. Each scenario is self-contained: Inspector setup is described first, followed by any runtime code needed to complete the behavior. Profile and binding field references are in [Emotion profile](emotion-profile.md) and [Emotion output bindings](output-bindings.md); the full scripting surface is in [Emotion scripting API](scripting-api.md).
 
-## Emotion in Practice: Example Scenarios
-
-The examples below show how the Emotion system's configuration and scripting API combine to serve realistic application requirements. Each scenario is self-contained: Inspector setup is described first, followed by any runtime code needed to complete the behaviour. Profile and binding field references are in Emotion Profile and Output Bindings; the full scripting surface is in Scripting API.
-
-## Scenario 1 — Safety Training: Dynamic Hazard Response
+## Scenario 1: Dynamic hazard response
 
 **Situation:** An instructor NPC guides trainees through a fire evacuation simulation. When a trainee enters a marked danger zone, the instructor's expression should shift sharply toward fear or urgency to reinforce the seriousness of the situation. When the trainee exits the zone, the expression returns to the server-driven state.
 
-### Profile Settings
+### Profile settings
 
 Open the `ConvaiEmotionProfile` assigned to the instructor NPC and adjust:
 
-* **`lerpSpeed`** → `12` — fast rise so the fear expression arrives without delay.
-* **`microBurstOvershoot`** → `1.6` — a pronounced burst makes the transition visually impactful.
-* **`microBurstDuration`** → `0.2 s` — short burst before the expression settles.
+- **`lerpSpeed`** → `12` — fast rise so the fear expression arrives without delay.
+- **`microBurstOvershoot`** → `1.6` — a pronounced burst makes the transition visually impactful.
+- **`microBurstDuration`** → `0.2 s` — short burst before the expression settles.
 
-### Output Binding
+### Output binding
 
 Add a slot to the **Blendshape Binding**:
 
-<table><thead><tr><th>emotionLabel</th><th>blendshapeNames</th><th width="156">weightMultiplier</th><th>fullBlendshapeWeight</th></tr></thead><tbody><tr><td><code>fear</code></td><td><code>Brow_Raise_Inner_L, Brow_Raise_Inner_R, Eye_Wide_L, Eye_Wide_R</code></td><td><code>1.0</code></td><td><code>85</code></td></tr></tbody></table>
+| `emotionLabel` | `blendshapeNames` | `weightMultiplier` | `fullBlendshapeWeight` |
+| --- | --- | --- | --- |
+| `fear` | `Brow_Raise_Inner_L, Brow_Raise_Inner_R, Eye_Wide_L, Eye_Wide_R` | `1.0` | `85` |
 
-### Runtime Script
+### Runtime script
 
 ```csharp
 using Convai.Modules.Emotion.Components;
@@ -56,11 +53,11 @@ public sealed class HazardZoneTrigger : MonoBehaviour
 
 ***
 
-## Scenario 2 — Employee Onboarding: Locked Welcome Expression
+## Scenario 2: Locked welcome expression
 
 **Situation:** A greeter NPC stands at the entrance of an onboarding simulation. During the welcome sequence — before the trainee has started talking — the character should always appear warm and approachable, regardless of any emotion signals the backend might send during the connection handshake.
 
-### Runtime Script
+### Runtime script
 
 ```csharp
 using Convai.Modules.Emotion.Components;
@@ -88,11 +85,11 @@ A locked intensity of `0.65` produces a visible but not exaggerated smile — ap
 
 ***
 
-## Scenario 3 — Adaptive Assessment: Emotion-Aware Branch Logic
+## Scenario 3: Emotion-aware branch logic
 
 **Situation:** A virtual patient NPC in a medical communication assessment grows distressed when the trainee's responses are perceived as dismissive. A director script monitors the NPC's emotion state and, if sustained distress is detected, branches the scenario to a de-escalation path.
 
-### Runtime Script
+### Runtime script
 
 ```csharp
 using Convai.Domain.Embodiment.Readings;
@@ -131,11 +128,11 @@ public sealed class EmotionBranchDirector : MonoBehaviour
 
 ***
 
-## Scenario 4 — Session Analytics: Logging the Emotional Arc
+## Scenario 4: Session analytics logging
 
 **Situation:** A training platform needs to record every emotional shift the AI character experiences during a session, including the raw server label and intensity, so instructors can review the emotional arc of the conversation in a post-session report.
 
-### Runtime Script
+### Runtime script
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
@@ -174,42 +171,77 @@ public sealed class EmotionSessionLogger : MonoBehaviour
 
 ***
 
-## Scenario 5 — No-Code UI: Inspector-Driven Emotion Display
+## Scenario 5: No-code UI display
 
 **Situation:** A non-programmer wants to update a UI label showing the character's current emotion whenever it changes, without writing any code.
 
-### Setup
+{% stepper %}
+{% step %}
+### Add the Event Relay
 
-1. Add `ConvaiCharacterEventRelay` to the NPC's root GameObject (**Convai → Events → Convai Character Event Relay**). It auto-resolves the `ConvaiCharacter` on the same object.
-2. In the **On Emotion Changed** Unity Event list, click **+**.
-3. Drag your UI `Text` (or `TMP_Text`) component into the object field.
-4. From the function dropdown, select **Text → string text** (or **TMP\_Text → string text**).
+Select the NPC's root GameObject. Click **Add Component** and navigate to **Convai → Events → Convai Character Event Relay**.
 
-Now, every time the character's emotion changes, the `Emotion` property from `CharacterEmotionRelayData` is written directly to the label — no code required.
+The relay auto-resolves the `ConvaiCharacter` on the same GameObject via the **Auto Resolve Character** toggle, which is enabled by default.
+{% endstep %}
+
+{% step %}
+### Wire the On Emotion Changed event
+
+In the **On Emotion Changed** Unity Event list on `ConvaiCharacterEventRelay`, click **+**.
+{% endstep %}
+
+{% step %}
+### Assign the UI Text component
+
+Drag your UI `Text` (or `TMP_Text`) component into the object field of the new event entry.
+{% endstep %}
+
+{% step %}
+### Select the target property
+
+From the function dropdown, select **Text → string text** (or **TMP\_Text → string text**).
+
+Now every time the character's emotion changes, the `Emotion` property from `CharacterEmotionRelayData` is written directly to the label — no code required.
+{% endstep %}
+{% endstepper %}
+
+{% hint style="success" %}
+Enter Play Mode and speak to the character. The UI label updates automatically as the backend sends new emotion signals.
+{% endhint %}
 
 {% hint style="info" %}
-`ConvaiCharacterEventRelay` delivers the raw server label (e.g. `"happy"`). If you need the display name to be friendlier (e.g. `"Joy"` rather than `"happy"`), add a small formatting script that maps raw labels to display strings, or post-process the string in a UnityEvent target method.
+`ConvaiCharacterEventRelay` delivers the raw server label (e.g. `"happy"`). If you need a friendlier display name (e.g. `"Joy"` rather than `"happy"`), add a small formatting script that maps raw labels to display strings, or post-process the string in a UnityEvent target method.
 {% endhint %}
 
 ***
 
-## Scenario 6 — Authoring: Previewing Expressions in the Editor
+## Scenario 6: Previewing expressions in the Editor
 
 **Situation:** You have added blendshape slots for a new character and want to confirm that each emotion drives the correct shapes to the correct weight before entering Play Mode.
-
-### Steps
 
 1. Select the NPC's root GameObject.
 2. On the `ConvaiEmotionController` component, enable **Lock Emotion**.
 3. Set **Locked Emotion Label** to the canonical label you want to preview (e.g. `"anger"`).
 4. Set **Locked Intensity** to `1.0`.
 
-The Scene view updates immediately — blendshapes are applied in Edit Mode because `ConvaiEmotionController` is `[ExecuteAlways]`. Cycle through the labels in your taxonomy to verify each slot mapping visually.
+The Scene view updates immediately — blendshapes are applied in Edit Mode because `ConvaiEmotionController` inherits `[ExecuteAlways]` from its base class. Cycle through the labels in your taxonomy to verify each slot mapping visually.
 
 {% hint style="danger" %}
-Set **Lock Emotion** back to `false` before shipping your build. The field is serialised — if it remains enabled, the character will ignore all backend emotion signals in production.
+Set **Lock Emotion** back to `false` before building for production. The field is serialised — if it remains enabled, the character will ignore all backend emotion signals in the shipped build with no runtime error or warning.
 {% endhint %}
 
-## Conclusion
+## Next steps
 
-These six scenarios cover the most common emotion integration patterns — from hazard triggers and scripted locks to no-code Unity Event wiring and Editor authoring workflows. For the complete parameter reference used in the profile settings above, see [Emotion Profile](../../../unity-plugin-beta-overview/features/emotion/emotion-profile.md). For the full scripting surface, see [Scripting API](../../../unity-plugin-beta-overview/features/emotion/scripting-api-reference.md). If any scenario does not produce the expected result, see [Troubleshooting](../../../unity-plugin-beta-overview/features/emotion/troubleshooting-and-diagnostics.md).
+For the complete parameter reference used in the profile settings above, see [Emotion profile](emotion-profile.md). For the full scripting surface, see [Emotion scripting API](scripting-api.md). If any scenario does not produce the expected result, see [Troubleshoot emotion](troubleshooting-and-diagnostics.md).
+
+{% content-ref url="emotion-profile.md" %}
+[Emotion profile](emotion-profile.md)
+{% endcontent-ref %}
+
+{% content-ref url="scripting-api.md" %}
+[Emotion scripting API](scripting-api.md)
+{% endcontent-ref %}
+
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Troubleshoot emotion](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}

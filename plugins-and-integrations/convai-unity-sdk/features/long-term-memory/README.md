@@ -1,56 +1,13 @@
 ---
-description: >-
-  Give your Convai characters persistent memory of individual users across
-  sessions. Understand how the feature works and navigate the full reference
-  documentation.
+title: Long-term memory
+description: Find all long-term memory guides — enable memory on characters, manage user identity, use the memory API, and access the scripting reference.
+last_reviewed: "4.2.0"
 ---
 
-# Long-Term Memory
+Long-term memory (LTM) lets Convai characters retain facts about individual users across separate conversation sessions. This section covers how the system works, how to enable it, how to manage user identity and records, and the complete scripting API.
 
-## Persistent Character Memory Across Sessions
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>How long-term memory works</strong><br>Understand the session lifecycle, memory scoping, deduplication, and how facts are extracted and injected.</td><td><a href="how-long-term-memory-works.md">how-long-term-memory-works.md</a></td></tr><tr><td><strong>Long-term memory quick start</strong><br>Enable LTM for a character and verify cross-session recall in the Unity Editor in three steps.</td><td><a href="quick-start.md">quick-start.md</a></td></tr><tr><td><strong>Configure memory for a character</strong><br>Toggle LTM on or off per character via the Convai dashboard or the CharacterService scripting API.</td><td><a href="configure-memory-for-a-character.md">configure-memory-for-a-character.md</a></td></tr><tr><td><strong>End-user identity</strong><br>Understand how the SDK identifies users and how to supply your own authentication-backed ID.</td><td><a href="end-user-identity.md">end-user-identity.md</a></td></tr><tr><td><strong>Manage end-user records</strong><br>Browse and delete end-user records from the editor or via the EndUsersService scripting API.</td><td><a href="end-user-management.md">end-user-management.md</a></td></tr><tr><td><strong>Memory management API</strong><br>Programmatically list, add, retrieve, and delete memory records for a user–character pair.</td><td><a href="memory-management-api.md">memory-management-api.md</a></td></tr><tr><td><strong>Long-term memory scripting reference</strong><br>Complete method signatures, parameters, return types, and data models for all LTM APIs.</td><td><a href="long-term-memory-scripting-reference.md">long-term-memory-scripting-reference.md</a></td></tr><tr><td><strong>Long-term memory usage examples</strong><br>Four complete patterns: zero-config persistence, authenticated identity, memory seeding, and reset.</td><td><a href="usage-examples.md">usage-examples.md</a></td></tr><tr><td><strong>Troubleshoot long-term memory</strong><br>Diagnose why memories aren't persisting and resolve Memory Management API HTTP errors.</td><td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td></tr></tbody></table>
 
-Long-Term Memory (LTM) gives Convai characters the ability to remember facts about individual users between separate play sessions. Rather than starting every conversation from scratch, a character with LTM enabled can recall previous exchanges, adapt its behaviour over time, and build a relationship with each player.
+## Next steps
 
-Memory is stored on the Convai backend, partitioned per user and per character, and automatically injected into the AI's context at the start of each new session. The SDK's role is to send a stable user identifier on every connection, then surface a scripting API for applications that need programmatic control over what is remembered.
-
-## How It Works
-
-When a session starts, the SDK sends an `end_user_id` to the Convai server alongside the normal connect request. The server resolves that identifier to an internal speaker record, then looks up any memories stored under the key `speaker_id:character_id`. If memory is enabled for the character, those memories are injected into the AI context before the first response is generated.
-
-At the end of the conversation, the backend extracts new facts from the exchange and appends them to the memory store. This cycle repeats every session, growing the character's knowledge of each individual user organically.
-
-```mermaid
-flowchart TD
-    A([Application Start]) --> B[SDK reads end_user_id\nfrom identity provider]
-    B --> C[Session connect request\nend_user_id attached]
-    C --> D{Memory enabled\non character?}
-    D -- No --> E[Normal session,\nno memory context]
-    D -- Yes --> F[Backend resolves\nend_user_id → speaker_id]
-    F --> G[Load memories\nspeaker_id : character_id]
-    G --> H[Inject memory context\ninto AI prompt]
-    H --> I[Conversation runs]
-    I --> J[Backend extracts\nnew facts]
-    J --> K[Append to memory store]
-    K --> L([Session ends])
-    E --> L
-```
-
-## Key Concepts
-
-| Concept                     | Description                                                                                                                                                                     |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **end\_user\_id**           | A stable string identifier that your application supplies for each end user. Sent to the Convai server on every connect. Defaults to the device identifier or a persisted GUID. |
-| **Memory partition**        | The server-side storage bucket for a specific user–character pair, keyed internally as `speaker_id:character_id`. All memories for that pair live here.                         |
-| **MemoryRecord**            | A single fact stored in the partition. Has an `Id`, a `Memory` string (the natural-language fact text), timestamps, and an optional metadata dictionary.                        |
-| **End-user metadata**       | Arbitrary key–value data your application can attach to a user at connect time (name, role, locale, etc.). Stored on the server and available via the scripting API.            |
-| **DeviceEndUserIdProvider** | The default identity provider. Uses the device's unique identifier in player builds and a persisted GUID in the Unity Editor. Requires no configuration.                        |
-| **MemoryService**           | The REST API service exposed on `ConvaiRestClient.Memory`. Provides add, list, get, and delete operations on memory records.                                                    |
-| **EndUsersService**         | The REST API service exposed on `ConvaiRestClient.EndUsers`. Provides list, get, update metadata, and delete operations on end-user records.                                    |
-
-## In This Section
-
-<table data-view="cards"><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>Quick Start</strong></td><td>Enable memory on a character and verify cross-session recall without writing any code.</td></tr><tr><td><strong>End-User Identity</strong></td><td>How end users are identified across sessions and how to supply your own identifier.</td></tr><tr><td><strong>Enabling Memory on Characters</strong></td><td>Turn Long-Term Memory on or off via the Convai dashboard or the scripting API.</td></tr><tr><td><strong>Memory Management API</strong></td><td>Add, list, retrieve, and delete individual memory records programmatically.</td></tr><tr><td><strong>End-User Management</strong></td><td>Browse and manage end-user records using the editor tool or the scripting API.</td></tr><tr><td><strong>Usage Examples</strong></td><td>Complete code examples for common Long-Term Memory scenarios.</td></tr><tr><td><strong>Troubleshooting &#x26; Diagnostics</strong></td><td>Diagnose why memories are not persisting, resolve identity problems, and fix API errors.</td></tr></tbody></table>
-
-## Conclusion
-
-Long-Term Memory connects natural conversation to persistent user history — the character accumulates knowledge automatically, and the SDK gives you programmatic control when you need it. Start with Quick Start to enable memory on a character and see it working end to end.
+Start with [How long-term memory works](how-long-term-memory-works.md) for a conceptual overview, then follow [Long-term memory quick start](quick-start.md) to get memory running in your scene.

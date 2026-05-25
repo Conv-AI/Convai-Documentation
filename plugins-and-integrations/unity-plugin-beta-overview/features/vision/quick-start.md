@@ -23,7 +23,7 @@ This guide walks you through the minimum steps needed to get a Convai character 
 
 Select the `ConvaiRoomManager` GameObject in the Hierarchy. In the Inspector, set **Connection Type** to **Video**.
 
-<figure><img src="../../../../.gitbook/assets/convai-room-manager-video-connection-type.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/Screenshot 2026-05-13 225029 (1).png" alt=""><figcaption></figcaption></figure>
 
 A dialog appears immediately:
 
@@ -31,7 +31,7 @@ A dialog appears immediately:
 
 Click **Add Components**.
 
-<figure><img src="../../../../.gitbook/assets/convai-vision-setup-dialog-add-components.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/Screenshot 2026-05-13 225326 (1).png" alt=""><figcaption></figcaption></figure>
 
 The SDK creates a child GameObject named **ConvaiVisionRoot** under `ConvaiRoomManager` and adds both `ConvaiVisionPublisher` and `CameraVisionFrameSource` to it. No further component setup is required.
 
@@ -48,7 +48,7 @@ Select the **ConvaiVisionRoot** GameObject (under `ConvaiRoomManager`). On the `
 * If your scene has a `Camera` tagged **MainCamera**, leave the field blank — the component resolves it automatically at runtime.
 * If you want to capture a specific camera (an overhead view, a security camera, etc.), drag that camera into the **Target Camera** field now.
 
-<figure><img src="../../../../.gitbook/assets/convai-camera-vision-target-camera-assigned.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/Screenshot 2026-05-13 230410 (1).png" alt=""><figcaption></figcaption></figure>
 
 The default **Capture Preset** is **Balanced** (1280 × 720 at 15 fps), which suits most use cases.
 {% endstep %}
@@ -58,11 +58,11 @@ The default **Capture Preset** is **Balanced** (1280 × 720 at 15 fps), which su
 
 On any scene GameObject, click **Add Component** → **Convai/Vision/Vision Debug Preview (Editor Only)**.
 
-<figure><img src="../../../../.gitbook/assets/convai-vision-debug-preview-added-inspector.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/Screenshot 2026-05-13 230509 (1).png" alt=""><figcaption></figcaption></figure>
 
 Press **Play**. An overlay appears in the Game view showing the live camera feed and a statistics panel. Once the room connects, the FPS counter increments and the frame count begins increasing — the character is now receiving visual context.
 
-<figure><img src="../../../../.gitbook/assets/convai-vision-debug-preview-stats-overlay.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (491).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 
@@ -88,7 +88,7 @@ If you clicked **Later** on the dialog, or want to place the components on a spe
 4. Assign the **Target Camera** if not using `Camera.main`.
 5. Leave the **Frame Source Component** field on `ConvaiVisionPublisher` blank — the publisher discovers `CameraVisionFrameSource` on the same GameObject at runtime. Assign it explicitly only if you have multiple frame sources in the scene.
 
-<figure><img src="../../../../.gitbook/assets/convai-vision-publisher-frame-source-manual.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (492).png" alt=""><figcaption></figcaption></figure>
 
 ***
 

@@ -1,42 +1,78 @@
-# troubleshooting
+---
+title: Gaze and Attention troubleshooting
+description: Fixes for the 13 most common Gaze & Attention issues — static eyes, frozen head, eyelid clipping, attention not targeting, and focus provider conflicts.
+last_reviewed: "4.2.0"
+---
 
-## Common Issues
+Use the diagnostic split below first to determine which system is at fault, then find your symptom in the table.
 
-| Symptom                                                                          | Likely Cause                                                                                            | Fix                                                                                                                                                                                                        |
-| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Eyes don't move at all                                                           | Humanoid eye bones are not configured in the character's Avatar                                         | Open the Avatar configuration and verify that Left Eye and Right Eye are mapped. If the rig has no eye bones, use `ConvaiHeadLookActuator` alone                                                           |
-| Head never moves; only eyes track                                                | `ConvaiHeadLookActuator` is not on the character                                                        | Add `ConvaiHeadLookActuator` to the character root and optionally assign a head profile                                                                                                                    |
-| Eyes track but clip through the eyelids                                          | Eyelid Follow is disabled, or the downward limit degrees are too low                                    | Enable **Eyelid Follow** in `ConvaiGazeEyeProfile` and increase `DownwardLidStartDegrees` / `DownwardUpperLidMaxWeight`                                                                                    |
-| Character stares without blinking                                                | `EnableBlink` is false in the eye profile                                                               | Enable **Blink** in `ConvaiGazeEyeProfile`. Assign the bundled eye profile as a starting point if you have not done so                                                                                     |
-| Eyes jitter or oscillate rapidly on a CC4 or iClone character                    | Eye bone forward axis detection failing or bind-pose unusual                                            | The actuator auto-detects the look axis at startup. If jitter persists, verify that eye bones have a stable rest pose in the Avatar and that the rig is not animated in a non-standard bind pose           |
-| Character looks straight ahead and never tracks                                  | No `IFocusTargetProvider` found and `autoCreateDefaultFocusProvider` is false                           | Enable **Auto Create Default Focus Provider** on `ConvaiAttentionController`, or manually add `DefaultFocusTargetProvider` to the character hierarchy                                                      |
-| Character stares at the wrong object                                             | Multiple `IFocusTargetProvider` components with overlapping or equal priority                           | Adjust **Priority** on each provider. Higher integer value wins. Verify that unintended providers are not present in the hierarchy                                                                         |
-| Character locks onto the camera and never looks away                             | `MaxContinuousHoldSeconds` in the attention profile is very large, or no profile is assigned            | Assign a `ConvaiAttentionProfile` and reduce `MaxContinuousHoldSeconds` (default is \~5 s). The character should naturally break gaze after this duration                                                  |
-| Attention commitment fades in too slowly when a new target appears               | `CommitmentAcquireSeconds` is too high                                                                  | Reduce `CommitmentAcquireSeconds` in `ConvaiAttentionProfile`. Default is \~0.3 s                                                                                                                          |
-| `ConvaiGazeCoordinator` is not found when called in `Awake` or `Start`           | Auto-provisioning runs in `OnEnable` of the actuator, not before                                        | Do not reference `ConvaiGazeCoordinator` before Play Mode's first `OnEnable`. Use `GetComponent<ConvaiGazeCoordinator>()` in `Update` or after a frame delay                                               |
-| Head rotation overshoots on fast camera movement                                 | `MaxYawSpeedDegrees` or `MaxPitchSpeedDegrees` in the head profile is too high, or smoothing is too low | Reduce rotation speed limits or increase `SmoothingSharpness` in `ConvaiGazeHeadProfile`                                                                                                                   |
-| `AnimationRiggingGazeBridge` has no effect; constraint weights stay at zero      | `CONVAI_ANIMATION_RIGGING` scripting define is not active                                               | Verify `com.unity.animation.rigging` is installed. Open **Edit** → **Project Settings** → **Player** → **Other Settings** → **Scripting Define Symbols** and confirm `CONVAI_ANIMATION_RIGGING` is present |
-| `AnimationRiggingGazeBridge` is present but both constraints stay at zero weight | `GazeTargetPivot` is not assigned, or constraints are not referencing it                                | Assign the pivot transform to the **Gaze Target Pivot** field, and verify both `MultiAimConstraint` source objects list that pivot                                                                         |
-| `AnimationRiggingGazeBridge` and procedural actuators are both active            | Conflicting bone writes between bridge and actuators                                                    | Do not use `ConvaiEyeGazeActuator` or `ConvaiHeadLookActuator` alongside the bridge. The bridge replaces both                                                                                              |
+{% hint style="info" %}
+**First diagnostic step:** In Play Mode, read `ConvaiAttentionController.Current.IsValid` via a debug script or the Inspector.
 
-## Diagnosing Missing Eye Bones
+* `IsValid = false` → issue is in the **Attention system** (no provider returning a candidate, or all relevance scores are zero)
+* `IsValid = true` but eyes/head are stationary → issue is in the **Gaze system** (Avatar configuration, profile, or component setup)
+{% endhint %}
 
-If eye bones are present in the rig but the actuator does not find them, check the Avatar:
+***
 
-1. Select the character's `Animator` component → click **Configure Avatar** in the Inspector
-2. In the **Body** or **Head** section, verify **Left Eye** and **Right Eye** are assigned
-3. If they show "None", drag the eye bones from the Hierarchy into the slots, then click **Apply**
+## Symptom table
 
-After fixing the Avatar, disable and re-enable `ConvaiEyeGazeActuator` to trigger bone resolution again.
+| Symptom                                                | Likely cause                                                                                         | Fix                                                                                                                                                                                                      |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Eyes do not move at all                                | No eye bones assigned in the Avatar                                                                  | Open the character's Avatar configuration (**Avatar Inspector → Configure Avatar**) and assign Left Eye and Right Eye bones                                                                               |
+| Eyes do not move — Avatar has eye bones                | `ConvaiEyeGazeActuator` is missing                                                                   | Add the Eye Gaze component (**Convai → Embodiment → Eye Gaze**) to the character's root GameObject                                                                                                       |
+| Head does not rotate                                   | `ConvaiHeadLookActuator` is missing                                                                  | Add the Head Look component (**Convai → Embodiment → Head Look**) to the character's root GameObject                                                                                                     |
+| Head does not rotate — component is present            | Neck/head bones not in the Avatar's humanoid mapping                                                 | Open Avatar configuration and verify the Neck and Head bones are assigned                                                                                                                                |
+| Character never looks at the player / camera           | Default focus provider not created                                                                   | Enable **Auto Create Default Focus Provider** on `ConvaiAttentionController`, or implement a custom `IFocusTargetProvider` targeting the camera                                                          |
+| `AttentionReading.IsValid` is always `false`           | All providers return `false` from `TryGetCandidate()`, or all return relevance `0`                   | Log each provider's return value in `TryGetCandidate()`. Check distance — if the player is beyond `DefaultFocusMaxDistance` (default: 8m), the built-in provider returns zero relevance.                 |
+| Custom `IFocusTargetProvider` is ignored               | **Discover Providers In Hierarchy** is disabled, or provider is not on the character or its children | Enable **Discover Providers In Hierarchy**, or call `RefreshProviders()` after adding the component at runtime                                                                                           |
+| Two providers conflict — eyes jitter between targets   | Providers have equal priority and oscillating relevance scores                                       | Assign distinct `Priority` values. The default camera provider is priority `0`; use `10`+ for custom providers that should dominate.                                                                      |
+| Eyelids clip through the mesh during large gaze angles | Eyelid blendshape follow is not configured, or blendshape indices are wrong                          | Verify the eyelid blendshape driver is set up in the `ConvaiEyeGazeActuator` Inspector. Eyelid follow requires named blendshapes on the mesh.                                                            |
+| Eyes jitter or shake continuously                      | `TrackingSharpness` too high for the rig's bone resolution                                           | Reduce `TrackingSharpness` in `ConvaiGazeEyeProfile` (default: 18 — try 10–14 for low-poly rigs)                                                                                                         |
+| Gaze feels robotic — no natural variation              | Saccades or micro-tremor disabled                                                                    | Enable `EnableSaccades` and `EnableMicroTremor` in `ConvaiGazeEyeProfile`                                                                                                                                |
+| Character stares indefinitely without breaking gaze    | `MaxContinuousHoldSeconds` set too high, or `InterestDecayPerSecond` is near zero                    | Reduce `MaxContinuousHoldSeconds` (default: 5s) or raise `InterestDecayPerSecond` in `ConvaiAttentionProfile`                                                                                            |
+| Eyes track but head stays completely still             | `MinimumHeadContribution` is `0` in `ConvaiGazeHeadProfile`, or head actuator is missing             | Add `ConvaiHeadLookActuator` if absent. Raise `MinimumHeadContribution` (default: 0.45) so the head always contributes some rotation.                                                                    |
+| `ConvaiGazeCoordinator` is null in `Awake()`           | Coordinator is created during `ConvaiEyeGazeActuator` initialization, after `Awake()`                | Move your coordinator access to `Start()` or a later lifecycle event                                                                                                                                     |
+| `AnimationRiggingGazeBridge` has no effect             | `CONVAI_ANIMATION_RIGGING` define symbol not set                                                     | Add `CONVAI_ANIMATION_RIGGING` to **Player Settings → Scripting Define Symbols**. The bridge component compiles only when this symbol is present.                                                        |
 
-## Verifying the Attention Pipeline
+***
 
-Use the following checklist when attention is not behaving as expected:
+## Diagnostic procedures
 
-* [ ] `ConvaiAttentionController` is on the character root
-* [ ] At least one `IFocusTargetProvider` is present — either the auto-created `DefaultFocusTargetProvider` or a custom one
-* [ ] The provider's `Relevance` is non-zero this frame (check by reading `attentionController.Current.IsValid` in `Update`)
-* [ ] `ConvaiGazeCoordinator` is present in the hierarchy after Play Mode starts (check via `GetComponent<ConvaiGazeCoordinator>()`)
-* [ ] `ConvaiEyeGazeActuator` and/or `ConvaiHeadLookActuator` are on the character root
+<details>
 
-If `attentionController.Current.IsValid` returns false, the issue is in the Attention system. If it returns true but eyes and head are stationary, the issue is in the Gaze system — check that the coordinator's dialogue state policy is not suppressing the target (Idle state suppresses attention by default; this is expected behavior during silence).
+<summary>Verify Avatar eye bone configuration</summary>
+
+1. Select the character's model asset in the Project window
+2. In the Inspector, switch to the **Rig** tab → click **Configure Avatar**
+3. In the Avatar Inspector, expand the **Head** section
+4. Confirm **Left Eye** and **Right Eye** are assigned to the correct bones
+5. Click **Done** and re-enter Play Mode
+
+If eye bones are not exposed by the rig, `ConvaiEyeGazeActuator` will fall back to blendshape-only eye movement if blendshapes are configured, or do nothing if neither is available.
+
+</details>
+
+<details>
+
+<summary>Attention pipeline checklist</summary>
+
+Run these checks in order when `AttentionReading.IsValid` remains `false`:
+
+1. **Component presence** — confirm `ConvaiAttentionController` is on the character root
+2. **Provider present** — either **Auto Create Default Focus Provider** is enabled, or at least one `IFocusTargetProvider` component exists on the character or its children
+3. **Relevance non-zero** — add a temporary log inside your provider's `TryGetCandidate()` to confirm it returns `true` and a candidate with `Relevance > 0`
+4. **Distance check** — if using the default provider, confirm the player / camera is within `DefaultFocusMaxDistance` (default: 8m)
+5. **Coordinator state** — confirm `ConvaiGazeCoordinator` exists on the character (auto-created by the eye actuator). If it is null, `ConvaiEyeGazeActuator` was not initialized correctly — check for missing bones or initialization errors in the Console.
+
+</details>
+
+***
+
+## Next steps
+
+For a full API reference including `IFocusTargetProvider` implementation contracts and readable attention state properties, see the Scripting API page.
+
+{% content-ref url="scripting-api.md" %}
+[Scripting API](scripting-api.md)
+{% endcontent-ref %}

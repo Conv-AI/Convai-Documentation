@@ -1,10 +1,14 @@
-# event system
+---
+title: Event system
+description: Reference for Convai event relay components — available events, payload fields, subscription patterns, and the ConvaiNotificationEventBridge service.
+last_reviewed: "4.2.0"
+---
 
 The Convai SDK communicates what happens during a session — connections, character speech, transcripts, emotions — through a set of relay components. Add one of these MonoBehaviours to a GameObject in your scene, wire up UnityEvents in the Inspector or subscribe in code, and your scene logic responds to whatever the SDK broadcasts.
 
 ***
 
-## Two Wiring Approaches
+## Two wiring approaches
 
 {% tabs %}
 {% tab title="Inspector (UnityEvents)" %}
@@ -46,7 +50,7 @@ Best for: conditional logic, multi-event coordination, data routing across multi
 
 ***
 
-## Relay Component Quick-Reference
+## Relay component quick-reference
 
 | Component                    | Inspector Menu Path                         | Use When                                                                    |
 | ---------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
@@ -60,6 +64,10 @@ Best for: conditional logic, multi-event coordination, data routing across multi
 
 Tracks the session lifecycle for the entire scene. Add one per scene — it monitors the session managed by `ConvaiManager`.
 
+{% hint style="info" %}
+If `ConvaiManager` initializes after the relay's `OnEnable` (for example, due to script execution order), the relay retries its subscription automatically in `LateUpdate()` while enabled. No manual retry logic is needed.
+{% endhint %}
+
 **Inspector fields:**
 
 | Field                | Description                                                                                                                                 |
@@ -71,7 +79,7 @@ Tracks the session lifecycle for the entire scene. Add one per scene — it moni
 
 | Event                   | Payload                        | When It Fires                                                             |
 | ----------------------- | ------------------------------ | ------------------------------------------------------------------------- |
-| `OnConnected`           | —                              | Session enters `Connected` state.                                         |
+| `OnConnected`           | —                              | Initial connection established (`Connecting` → `Connected`). Does not fire on reconnection — see `OnReconnected`. |
 | `OnDisconnected`        | —                              | Session enters `Disconnected` state.                                      |
 | `OnReconnecting`        | —                              | A reconnect attempt begins (session was `Connected`, connection dropped). |
 | `OnReconnected`         | —                              | A reconnect attempt succeeded. Session is `Connected` again.              |
@@ -117,17 +125,21 @@ public class ConnectionIndicator : MonoBehaviour
 
     private void OnEnable()
     {
-        _relay.OnConnected.AddListener(() => _connectingOverlay.SetActive(false));
-        _relay.OnDisconnected.AddListener(() => _connectingOverlay.SetActive(true));
-        _relay.OnReconnecting.AddListener(() => _connectingOverlay.SetActive(true));
+        _relay.OnConnected.AddListener(OnConnected);
+        _relay.OnDisconnected.AddListener(OnDisconnected);
+        _relay.OnReconnecting.AddListener(OnReconnecting);
     }
 
     private void OnDisable()
     {
-        _relay.OnConnected.RemoveAllListeners();
-        _relay.OnDisconnected.RemoveAllListeners();
-        _relay.OnReconnecting.RemoveAllListeners();
+        _relay.OnConnected.RemoveListener(OnConnected);
+        _relay.OnDisconnected.RemoveListener(OnDisconnected);
+        _relay.OnReconnecting.RemoveListener(OnReconnecting);
     }
+
+    private void OnConnected()    => _connectingOverlay.SetActive(false);
+    private void OnDisconnected() => _connectingOverlay.SetActive(true);
+    private void OnReconnecting() => _connectingOverlay.SetActive(true);
 }
 ```
 
@@ -139,10 +151,10 @@ Tracks events for a single `ConvaiCharacter`. Add one per character that needs t
 
 **Inspector fields:**
 
-| Field                  | Description                                                                                       |
-| ---------------------- | ------------------------------------------------------------------------------------------------- |
-| `Character`            | Reference to the `ConvaiCharacter` this relay monitors.                                           |
-| `AutoResolveCharacter` | When enabled, the component searches for `ConvaiCharacter` on the same GameObject or its parents. |
+| Field                  | Description                                                                                     |
+| ---------------------- | ----------------------------------------------------------------------------------------------- |
+| `Character`            | Reference to the `ConvaiCharacter` this relay monitors.                                         |
+| `AutoResolveCharacter` | When enabled, the component searches for `ConvaiCharacter` on the same GameObject as the relay. |
 
 **Events:**
 
@@ -174,12 +186,12 @@ Tracks events for a single `ConvaiCharacter`. Add one per character that needs t
 
 ### `CharacterEmotionRelayData`
 
-| Property        | Type     | Description                                                                                                                              |
-| --------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `CharacterId`   | `string` | The character's ID.                                                                                                                      |
-| `CharacterName` | `string` | The character's display name.                                                                                                            |
-| `Emotion`       | `string` | The emotion name (e.g., `"joy"`, `"fear"`, `"sadness"`). See [Emotion Taxonomy](/broken/pages/081e7c3d3edab626dd6577df3e9635553ba22ed0). |
-| `Intensity`     | `int`    | Emotion intensity (0–100).                                                                                                               |
+| Property        | Type     | Description                                                                                 |
+| --------------- | -------- | ------------------------------------------------------------------------------------------- |
+| `CharacterId`   | `string` | The character's ID.                                                                         |
+| `CharacterName` | `string` | The character's display name.                                                               |
+| `Emotion`       | `string` | The emotion name (e.g., `"joy"`, `"fear"`, `"sadness"`). See the Emotion feature reference. |
+| `Intensity`     | `int`    | Emotion intensity (0–100).                                                                  |
 
 **Code example — trigger an animation on emotion change:**
 
@@ -210,13 +222,13 @@ Provides a scene-wide transcript feed. Unlike `ConvaiCharacterEventRelay`, this 
 
 **Inspector fields:**
 
-| Field                  | Type            | Default | Description                                                                                                                           |
-| ---------------------- | --------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `Manager`              | `ConvaiManager` | —       | The `ConvaiManager` to monitor.                                                                                                       |
-| `AutoResolveManager`   | `bool`          | —       | Find `ActiveManager` automatically.                                                                                                   |
-| `FinalOnly`            | `bool`          | `false` | When enabled, only final (committed) transcripts raise events. Interim partial transcripts are suppressed.                            |
-| `IgnoreInterimUpdates` | `bool`          | `false` | Suppress interim transcript updates. Similar to `FinalOnly` but keeps the event structure; useful if your UI handles finality itself. |
-| `CharacterIdFilter`    | `string`        | `""`    | If set, only transcripts from the character with this ID raise events. Leave empty for all characters.                                |
+| Field                  | Type            | Default | Description                                                                                                                                                 |
+| ---------------------- | --------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Manager`              | `ConvaiManager` | —       | The `ConvaiManager` to monitor.                                                                                                                             |
+| `AutoResolveManager`   | `bool`          | —       | Find `ActiveManager` automatically.                                                                                                                         |
+| `FinalOnly`            | `bool`          | `false` | When enabled, only final (committed) transcripts raise events. Interim partial transcripts are suppressed.                                                  |
+| `IgnoreInterimUpdates` | `bool`          | `true`  | Suppress interim transcript updates. Final updates still pass through. Disable this field if your UI needs to display partial text as the character speaks. |
+| `CharacterIdFilter`    | `string`        | `""`    | If set, only transcripts from the character with this ID raise events. Leave empty for all characters.                                                      |
 
 **Events:**
 
@@ -279,7 +291,7 @@ public class TrainingTranscriptLog : MonoBehaviour
 
 ***
 
-## Subscription Lifecycle
+## Subscription lifecycle
 
 Relay MonoBehaviour components manage their own subscriptions automatically. They subscribe when `OnEnable` runs and unsubscribe when `OnDisable` runs.
 
@@ -312,9 +324,9 @@ Most projects never interact with this class directly. It is instantiated and ma
 
 ***
 
-## Usage Examples
+## Usage examples
 
-### Example 1: Training Simulation — Connection Overlay
+### Example 1: Training simulation — connection overlay
 
 Show a "Connecting…" overlay while the session is not yet established.
 
@@ -324,17 +336,28 @@ Show a "Connecting…" overlay while the session is not yet established.
 
 private void OnEnable()
 {
-    _sessionRelay.OnConnected.AddListener(() => _loadingOverlay.alpha = 0f);
-    _sessionRelay.OnDisconnected.AddListener(() => _loadingOverlay.alpha = 1f);
-    _sessionRelay.OnReconnecting.AddListener(() => _loadingOverlay.alpha = 0.5f);
+    _sessionRelay.OnConnected.AddListener(OnConnected);
+    _sessionRelay.OnDisconnected.AddListener(OnDisconnected);
+    _sessionRelay.OnReconnecting.AddListener(OnReconnecting);
 }
+
+private void OnDisable()
+{
+    _sessionRelay.OnConnected.RemoveListener(OnConnected);
+    _sessionRelay.OnDisconnected.RemoveListener(OnDisconnected);
+    _sessionRelay.OnReconnecting.RemoveListener(OnReconnecting);
+}
+
+private void OnConnected()    => _loadingOverlay.alpha = 0f;
+private void OnDisconnected() => _loadingOverlay.alpha = 1f;
+private void OnReconnecting() => _loadingOverlay.alpha = 0.5f;
 ```
 
 **Expected outcome:** The overlay fades in when the session is not connected and fades out when the connection is established.
 
 ***
 
-### Example 2: Medical Trainer — Emotion-Triggered Character Response
+### Example 2: Medical trainer — emotion-triggered character response
 
 A patient character's facial expression and posture change based on the emotion detected by Convai.
 
@@ -355,7 +378,7 @@ private void ApplyEmotion(CharacterEmotionRelayData data)
 
 ***
 
-### Example 3: Shared Transcript Feed Filtered to One Character
+### Example 3: Shared transcript feed filtered to one character
 
 A corporate onboarding simulation has multiple NPC characters but only the main instructor's lines appear in the subtitle panel.
 
@@ -369,12 +392,22 @@ On the `ConvaiTranscriptEventRelay` component in the Inspector:
 
 ***
 
-## Next Steps
+## Troubleshooting
 
-{% content-ref url="/broken/pages/bcabab554f8cb726a0caba36d1ea1f57f12aa682" %}
-[Broken link](/broken/pages/bcabab554f8cb726a0caba36d1ea1f57f12aa682)
-{% endcontent-ref %}
+| Symptom                                                              | Likely Cause                                                                       | Fix                                                                                                                                                                              |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Relay fires no events after the scene starts                         | `ConvaiManager` was not initialized before the relay's `OnEnable` ran              | No action needed — the relay retries in `LateUpdate()` while enabled. Verify `ConvaiManager` is present and active in the scene.                                                 |
+| `ConvaiCharacterEventRelay` fires no events                          | `ConvaiCharacter` not found on the assigned GameObject                             | Verify `ConvaiCharacter` is on the **same** GameObject as the relay, or assign the reference explicitly. `AutoResolveCharacter` searches the same GameObject only — not parents. |
+| Interim transcript updates not arriving                              | `IgnoreInterimUpdates` is `true` by default                                        | Set `IgnoreInterimUpdates = false` on `ConvaiTranscriptEventRelay` to receive partial transcript updates.                                                                        |
+| Event handler fires multiple times for a single event                | Handler subscribed in `Start()` without cleanup; relay was disabled and re-enabled | Move subscription to `OnEnable()` and unsubscribe in `OnDisable()`.                                                                                                              |
+| `OnCharacterTranscriptReceived` not firing for an expected character | `CharacterIdFilter` is set to a different character ID                             | Clear `CharacterIdFilter` or set it to the correct character ID.                                                                                                                 |
 
-{% content-ref url="/broken/pages/82de164a9d1d165bdfcf26455e65a0879dec0195" %}
-[Broken link](/broken/pages/82de164a9d1d165bdfcf26455e65a0879dec0195)
+***
+
+## Next steps
+
+You now have the full reference for all relay components, event payloads, and subscription patterns. Proceed to the Features section to explore individual SDK capabilities.
+
+{% content-ref url="../features/README.md" %}
+[Features](../features/README.md)
 {% endcontent-ref %}

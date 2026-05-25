@@ -1,98 +1,119 @@
 ---
-description: >-
-  Map each emotion to the specific facial shapes or Animator parameters on your
-  character's rig, with per-slot weight and LipSync coordination.
+title: Emotion output bindings
+description: Reference for EmotionSlotBinding and the two binding types — field ranges, weight calculation, isMouthShape routing, and the pre-built slot factory.
 ---
 
-# Output Bindings
+Output bindings are the final stage of the Emotion pipeline. They receive the smoothed, burst-adjusted scores from the accumulator each frame and write them to your character's face. Two binding types are available: `BlendshapeEmotionBinding` for direct mesh deformation and `AnimatorParameterEmotionBinding` for Mecanim-driven rigs. Both can run simultaneously on the same character.
 
-## Driving Faces and Animators from Emotion Scores
+Both binding types are configured inside the `ConvaiEmotionProfile` asset — `BlendshapeEmotionBinding` in the **Blendshape Binding** section and `AnimatorParameterEmotionBinding` in the **Animator Binding** section. Each binding holds a list of `EmotionSlotBinding` entries, where each slot maps one canonical emotion label to one or more output targets.
 
-Output bindings are the bridge between the Emotion system's smoothed score table and your character's visual representation. The SDK provides two binding types — `BlendshapeEmotionBinding` for direct mesh control and `AnimatorParameterEmotionBinding` for Mecanim-based rigs — and both can be active at the same time. Each binding is a list of `EmotionSlotBinding` entries, one per emotion per output channel, all authored inside the `ConvaiEmotionProfile` asset.
+## EmotionSlotBinding fields
 
-## EmotionSlotBinding Fields
+Each slot in either binding type uses the same set of fields.
 
-Every slot in both binding types shares the same set of fields:
+| Field | Type | Range | Default | Description |
+| --- | --- | --- | --- | --- |
+| `emotionLabel` | `string` | Canonical taxonomy label | — | The canonical label from the active taxonomy that this slot responds to (e.g. `"joy"`, `"anger"`). Must match a canonical label exactly — aliases do not resolve here. |
+| `blendshapeNames` | `string` | Comma- or newline-separated | — | Names of blendshapes on the character's `SkinnedMeshRenderer` to drive. Leave empty to skip blendshape output for this slot. |
+| `animatorParameterName` | `string` | Animator float parameter name | — | Name of a float parameter in the Animator Controller to write. Leave empty to skip Animator output for this slot. |
+| `weightMultiplier` | `float` | 0 – 2 | **1** | Per-slot multiplier applied on top of the smoothed score. Use values above 1 to amplify subtle emotions, below 1 to restrain intense ones. |
+| `fullBlendshapeWeight` | `float` | 0 – 100 | **100** | The blendshape value (in Unity's 0–100 mesh units) written when the smoothed score is exactly 1.0. |
+| `isMouthShape` | `bool` | — | **false** | Routes this slot through the LipSync compositor's mouth layer. See [isMouthShape and LipSync routing](#ismouthshape-and-lipsync-routing) below. |
 
-<table><thead><tr><th width="208">Field</th><th width="86.49993896484375">Type</th><th width="148.5">Range / Format</th><th width="96.5">Default</th><th>Description</th></tr></thead><tbody><tr><td><code>emotionLabel</code></td><td><code>string</code></td><td>Canonical taxonomy label</td><td>—</td><td>The emotion this slot drives. Must match a label defined in the active taxonomy (e.g. <code>"joy"</code>, <code>"anger"</code>, <code>"neutral"</code>).</td></tr><tr><td><code>blendshapeNames</code></td><td><code>string</code></td><td>Comma- or newline-separated</td><td>—</td><td>One or more blendshape names on the character's <code>SkinnedMeshRenderer</code>. All listed shapes receive the same computed weight simultaneously. Used by <code>BlendshapeEmotionBinding</code> only.</td></tr><tr><td><code>animatorParameterName</code></td><td><code>string</code></td><td>Animator float parameter name</td><td>—</td><td>The name of a <code>float</code> parameter in the Animator Controller. Leave empty to skip Animator output for this slot. Used by <code>AnimatorParameterEmotionBinding</code> only.</td></tr><tr><td><code>weightMultiplier</code></td><td><code>float</code></td><td>0 – 2</td><td><strong>1</strong></td><td>Per-slot scaling factor applied to the score before it is written to the output. Values above 1 amplify the emotion's visual impact; values below 1 reduce it.</td></tr><tr><td><code>fullBlendshapeWeight</code></td><td><code>float</code></td><td>0 – 100</td><td><strong>100</strong></td><td>The blendshape value written when the emotion score reaches 1.0. Maps the SDK's normalised 0–1 range to Unity's 0–100 mesh units.</td></tr><tr><td><code>isMouthShape</code></td><td><code>bool</code></td><td>—</td><td><code>false</code></td><td>When true, this blendshape is treated as a mouth-region shape and routed through a separate compositor layer that LipSync can modulate.</td></tr></tbody></table>
+## Blendshape binding
 
-## Blendshape Binding
+`BlendshapeEmotionBinding` writes directly to one or more blendshapes on the character's `SkinnedMeshRenderer` each frame, without requiring an Animator Controller.
 
-`BlendshapeEmotionBinding` writes directly to a `SkinnedMeshRenderer`'s blendshapes each frame. It is the most direct path and requires no Animator Controller.
+**Weight calculation:**
 
-### Blendshape Name Format
-
-The `blendshapeNames` field accepts a comma-separated or newline-separated list. All names in the list receive the same weight simultaneously, which is useful when a single emotional pose requires more than one blendshape — for example, a smile that activates both a lip-corner raise and a cheek puff:
-
+```text
+finalBlendshapeWeight = score × weightMultiplier × fullBlendshapeWeight
 ```
-Facial_LipCornerPull_L, Facial_LipCornerPull_R, Facial_CheekPuff
+
+Where `score` is the smoothed, burst-adjusted value in the range \[0, 1].
+
+Multiple blendshape names can be listed in a single slot, separated by commas or newlines. All listed shapes receive the same computed weight:
+
+```text
+Brow_Raise_Inner_L, Brow_Raise_Inner_R
+Eye_Wide_L, Eye_Wide_R
 ```
 
-To find the correct names for your character: select the character's mesh in the Hierarchy, look at the **Skinned Mesh Renderer** component in the Inspector, and expand the **BlendShapes** section at the bottom. The names listed there are exactly what you enter in the slot.
+This is useful when an emotion symmetrically drives paired left/right shapes.
 
-### Weight Calculation
+## Animator parameter binding
 
-At each frame, the final blendshape value is calculated as:
+`AnimatorParameterEmotionBinding` writes the smoothed emotion score as a float parameter into the Animator Controller each frame. This is the right choice when your facial animation is driven by blend trees or state machines rather than direct blendshape control.
 
-`finalWeight = score × weightMultiplier × fullBlendshapeWeight`
+Requirements:
 
-Where `score` is the smoothed, burst-adjusted value from the accumulator (0–1). At default settings, a fully active emotion drives the blendshape to 100 (Unity mesh units).
+- The Animator Controller must define the parameter as a **Float** type.
+- Parameter names are **case-sensitive**. The name in the slot must match the Animator Controller exactly.
+- The Animator component must be on the **same GameObject** as `ConvaiEmotionController`.
 
-### The `isMouthShape` Flag
+The recommended naming convention for Animator parameters is `Emotion_<Label>` (e.g. `Emotion_Joy`, `Emotion_Anger`). This convention is used automatically by `RealisticEmotionSlots` when generating preset slot lists from code.
 
-{% hint style="warning" %}
-Only set `isMouthShape = true` for blendshapes that deform the lips, jaw, or immediate mouth area. The Emotion system routes mouth-flagged shapes through the facial blendshape compositor, where the LipSync system can blend over them during speech. Flagging non-mouth shapes (brow raises, eye squints) as mouth shapes will cause those shapes to be incorrectly suppressed or modulated during speech playback.
+## isMouthShape and LipSync routing
+
+The `isMouthShape` field controls whether a slot's output is routed through the mouth compositor layer — the same layer that LipSync writes phoneme shapes to during speech.
+
+{% hint style="danger" %}
+Set `isMouthShape = true` **only** for shapes that deform the lips, jaw, or chin. Brow raises, eye squints, cheek puffs, and all upper-face shapes must have `isMouthShape = false`.
+
+Marking a non-mouth shape as `isMouthShape = true` routes it through the LipSync compositor, which suppresses or blends those shapes during speech. The result is upper-face animations (raised brows, wide eyes) that stop working while the character talks — a silent but clearly wrong visual that produces no console warning.
 {% endhint %}
 
-## Animator Parameter Binding
+**When to use `isMouthShape = true`:**
 
-`AnimatorParameterEmotionBinding` writes smoothed emotion scores as `float` parameters into an `Animator` component on the same GameObject. This is the right choice when your character uses a Mecanim rig where emotion-driven poses are authored as animation states or blend trees.
+| Shape category | `isMouthShape` |
+| --- | --- |
+| Lip corners, lip stretch, smile, frown | `true` |
+| Jaw open, lip press, mouth dimple | `true` |
+| Brow raise, brow drop, eye squint | `false` |
+| Eye wide, eye blink | `false` |
+| Cheek raise, cheek puff, nose sneer | `false` |
 
-### Requirements
+## Pre-built slot factory
 
-* The parameter name in each slot must match a **Float** parameter defined in the Animator Controller exactly (case-sensitive).
-* The Animator component must be on the same GameObject as the `ConvaiEmotionController`, or reachable via the rig binding.
+For supported rigs, `RealisticEmotionSlots.Build(RigConvention rig)` generates a complete, FACS-inspired slot list covering all nine Plutchik emotions. This eliminates manual slot authoring for the supported character types.
 
-### Recommended Naming Convention
+**Supported rig conventions:**
 
-Using a consistent prefix makes parameters easy to identify in the Animator window and avoids collisions with other systems:
+| `RigConvention` | Description |
+| --- | --- |
+| `ReallusionCC4Extended` | Reallusion CC4 with the Extended facial profile. Richest slot set — uses per-side press, stretch, and upper-up shapes. |
+| `ReallusionCC3` | Reallusion CC3 base profile. Same semantic coverage as CC4 Extended, using shapes available in the base profile. |
+| `ARKit` | Apple's 52-blendshape convention. Uses camelCase naming (e.g. `mouthSmileLeft`, `browInnerUp`). |
 
-```
-Emotion_Joy
-Emotion_Anger
-Emotion_Sadness
-Emotion_Fear
-Emotion_Surprise
-```
+Only `ReallusionCC4Extended`, `ReallusionCC3`, and `ARKit` are explicitly supported by the factory. For any other rig, author slots manually using the field table above.
 
 {% hint style="info" %}
-Both `BlendshapeEmotionBinding` and `AnimatorParameterEmotionBinding` can be populated at the same time. The system writes to both channels every frame, which is useful for rigs that combine direct blendshape control with Animator-driven secondary motion (cloth, hair, body lean).
+`RealisticEmotionSlots.Build()` is intended for programmatic profile creation and editor tooling. For Inspector-based authoring, fill slot entries directly in the profile asset. The bundled `ConvaiSamplesShared_EmotionProfile` was generated using the CC3 preset and can serve as a reference for custom slot configurations.
 {% endhint %}
 
-## Pre-built Slots via RealisticEmotionSlots
-
-If your character uses a Reallusion CC3, CC4, or ARKit-compatible rig, the SDK includes a factory that generates FACS-inspired slot lists covering all eight non-neutral emotions. These slots use multi-shape combinations (Duchenne smile, oblique frown, brow raises, etc.) that produce more believable expressions than single-blendshape mappings.
-
-The factory is invoked from code — for example, from an Editor utility or a setup script:
+The factory is called on a profile in code as:
 
 ```csharp
 using Convai.Modules.Emotion.Authoring;
-using Convai.Modules.Emotion.Outputs;
-using Convai.Domain.Embodiment;
+using Convai.Domain.Embodiment.Semantics;
 
-// Build a slot list for a CC4 Extended rig
-IReadOnlyList<EmotionSlotBinding> slots = RealisticEmotionSlots.Build(RigConvention.ReallusionCC4Extended);
-
-// Assign to the profile's blendshape binding at authoring time
-myProfile.BlendshapeBinding.SetSlots(slots);
+// Build an ARKit slot list
+var slots = RealisticEmotionSlots.Build(RigConvention.ARKit);
+blendshapeBinding.SetSlots(slots);
 ```
 
-Supported `RigConvention` values:
+## Using both bindings together
 
-<table><thead><tr><th width="246.5">Value</th><th>Description</th></tr></thead><tbody><tr><td><code>ReallusionCC4Extended</code></td><td>Reallusion Character Creator 4 Extended facial profile</td></tr><tr><td><code>ReallusionCC3</code></td><td>Reallusion Character Creator 3 base profile</td></tr><tr><td><code>ARKit</code></td><td>Apple's 52-blendshape ARKit convention</td></tr></tbody></table>
+Blendshape and Animator bindings can run simultaneously on the same character. A common pattern is to use blendshape binding for direct facial deformation and Animator binding to drive secondary motion (head tilt, shoulder shrug, body lean) via blend trees. Both bindings read from the same smoothed score table each frame, so they stay in sync.
 
-For any other rig, author your slots manually using the field reference above as a guide, referring to your rig's blendshape documentation for the correct shape names.
+Leave either binding's slot list empty to disable it — the controller skips any binding with no populated slots.
 
-## Conclusion
+## Next steps
 
-Configured bindings close the loop between the AI's emotional signal and your character's face. Continue to Emotion Taxonomy to understand how server emotion labels are resolved to the canonical labels used in your slots, or jump to Scripting API if you need to read or override the current emotion state from code.
+{% content-ref url="emotion-profile.md" %}
+[Emotion profile](emotion-profile.md)
+{% endcontent-ref %}
+
+{% content-ref url="emotion-taxonomy.md" %}
+[Emotion taxonomy](emotion-taxonomy.md)
+{% endcontent-ref %}

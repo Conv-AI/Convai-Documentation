@@ -1,193 +1,190 @@
 ---
+title: Sync behavior and timing
 description: >-
-  A precise explanation of when context updates reach the character, what
-  happens before a conversation starts, and how the SDK decides what to send.
+  Understand how the SDK transmits Replace, Append, and Reset messages for each
+  Dynamic Context operation, including queueing and Apply() behavior.
+last_reviewed: "4.2.0"
 ---
 
-# Sync Behavior and Timing
+Every tracked Dynamic Context operation produces one or two RTVI `context-update` messages sent to Convai. This page documents the exact message sequence for each scenario, the pre-conversation queuing behavior, and how the SDK flushes pending context when a conversation starts.
 
-## How Dynamic Context Updates Are Transmitted and When
+## Canonical context format
 
-Understanding when Dynamic Context updates are transmitted — and in what form — prevents the most common integration surprises. The SDK does not send every update as a single Append message. Depending on what state already exists in the tracker, it may send two messages, or it may queue the update until a conversation starts. This page specifies all four sync scenarios, the pre-conversation queue, and the canonical context format in detail.
-
-{% hint style="info" %}
-This page is intended for developers who are debugging integration behavior, optimizing update frequency, or integrating Dynamic Context with external systems. Beginners can skip it until they encounter unexpected character behavior.
-{% endhint %}
-
-## The Four Sync Scenarios
-
-The sync behavior depends on whether the states being updated already exist in the tracker. These scenarios apply during an active conversation. Pre-conversation behavior is covered in the next section.
-
-### Scenario 1 — New State Added
-
-When `SetState("Name", "Value")` is called and `"Name"` does not yet exist in the tracker:
-
-```mermaid
-sequenceDiagram
-    participant Game
-    participant Tracker
-    participant Transport
-    participant Character
-
-    Game->>Tracker: SetState("Hazard Level", "High")
-    Note over Tracker: "Hazard Level" not found → new state
-    Tracker->>Transport: Append — "Hazard Level is High"
-    Transport->>Character: context-update { mode: "append", text: "Hazard Level is High" }
-```
-
-A single Append message is sent. The character receives the new fact and adds it to its awareness.
-
-### Scenario 2 — Existing State Changed
-
-When `SetState("Name", "NewValue")` is called and `"Name"` already exists with a **different** value:
-
-```mermaid
-sequenceDiagram
-    participant Game
-    participant Tracker
-    participant Transport
-    participant Character
-
-    Game->>Tracker: SetState("Hazard Level", "Extreme")
-    Note over Tracker: "Hazard Level" exists with "High" → value changed
-    Tracker->>Transport: Replace — full canonical context (with new value)
-    Transport->>Character: context-update { mode: "replace", text: "Hazard Level is Extreme\n..." }
-    Tracker->>Transport: Append — "Hazard Level changed from High to Extreme"
-    Transport->>Character: context-update { mode: "append", text: "Hazard Level changed from High to Extreme" }
-```
-
-**Two messages are sent:** a Replace carrying the full canonical context (with the updated value in place), followed by an Append carrying a human-readable delta. The Replace gives the character an authoritative, complete picture; the Append gives it a legible description of what specifically changed so it can reference the transition naturally in dialogue.
-
-{% hint style="warning" %}
-This two-message pattern is intentional and non-configurable. If you are monitoring network traffic during debugging, expect two `context-update` messages whenever an existing state is modified.
-{% endhint %}
-
-### Scenario 3 — State Removed
-
-When `RemoveState("Name")` is called:
-
-```mermaid
-sequenceDiagram
-    participant Game
-    participant Tracker
-    participant Transport
-    participant Character
-
-    Game->>Tracker: RemoveState("Hazard Level")
-    Note over Tracker: Remove "Hazard Level" → rebuild canonical
-    Tracker->>Transport: Replace — canonical context without "Hazard Level"
-    Transport->>Character: context-update { mode: "replace", text: "Active Station is Control Room B\n..." }
-```
-
-A single Replace message is sent carrying the full canonical context with the removed state excluded. There is no delta Append — the absence of the state is self-evident from the Replace payload.
-
-### Scenario 4 — Batch SetStates with Mixed New and Existing States
-
-When `SetStates(dict)` is called and the dictionary contains at least one state that already exists in the tracker (with any value):
-
-```mermaid
-sequenceDiagram
-    participant Game
-    participant Tracker
-    participant Transport
-    participant Character
-
-    Game->>Tracker: SetStates({"Phase": "Emergency", "Alert": "Red", "Time": "4 min"})
-    Note over Tracker: "Phase" exists → mixed batch
-    Tracker->>Transport: Replace — full canonical context (all states updated)
-    Transport->>Character: context-update { mode: "replace", text: "Phase is Emergency\nAlert is Red\nTime is 4 min\n..." }
-    Tracker->>Transport: Append — all change lines joined
-    Transport->>Character: context-update { mode: "append", text: "Phase changed from Inspection to Emergency\nAlert is Red\nTime is 4 min" }
-```
-
-Replace + Append, identical in structure to Scenario 2, but the Append summarises all changes from the batch in a single message. If all states in the dictionary are new (none exist in the tracker yet), only a single Append is sent.
-
-## Pre-Conversation Queue
-
-All tracked methods — `SetState`, `SetStates`, `AddEvent`, `RemoveState`, and `Reset` — queue their effects automatically when the character is not in an active conversation. The queue is flushed when the conversation starts.
-
-### Queue Mechanics
-
-Whenever a tracked state or event update is made before a conversation starts, the SDK records a pending sync. On conversation start, a single Replace message is sent with the full canonical context as it stands at that moment — not a series of individual updates.
-
-When `Reset()` is called before a conversation starts, a pending reset is recorded instead, which overrides any pending sync. On conversation start, the character receives a Reset message rather than a Replace.
-
-**Priority rules:**
-
-* Calling `Reset()` cancels any pending sync. A subsequent `SetState()` after `Reset()` reverts the queue back to pending sync.
-* Only the final state of the tracker at conversation-start time is sent. Multiple `SetState` calls before conversation start result in a single Replace containing the final values — not a series of incremental messages.
-
-**`Apply()` does not queue.** If `Apply()` is called before a conversation starts, the update is silently discarded. Use the tracked methods if you need pre-conversation setup to survive until the session begins.
-
-## The Canonical Context Format
-
-The canonical context string is the complete, authoritative text representation of all tracked states and events at a given point in time. It is used for Replace messages and for the pre-conversation flush.
-
-**Format:**
+Before describing sync scenarios, it helps to understand what the SDK sends. The canonical context is a newline-separated string assembled from all tracked states and events:
 
 ```
-{State1Name} is {State1Value}
-{State2Name} is {State2Value}
-...
-{Event1 text}
-{Event2 text}
-...
+{StateName} is {Value}
+{AnotherState} is {Value}
+Event text line one
+Event text line two
 ```
 
-**Rules:**
+States appear first, in the order they were **first set** — not the order of the most recent update. Updating a state's value does not change its position in the output. Events follow in chronological order (call order).
 
-* States appear first, in **insertion order** — the order in which each state name was first introduced. Updating an existing state in-place preserves its position.
-* Events appear after all states, in **chronological order** — the order in which `AddEvent` was called.
-* Each state is formatted as `"{Name} is {Value}"`, one per line.
-* Each event is its own line, with no prefix.
-
-**Worked example:**
-
-After the following sequence of calls:
+**Example — state insertion order is preserved across updates:**
 
 ```csharp
-context.SetState("Station", "Fire Suppression Bay");
-context.SetState("Hazard Level", "Extreme");
-context.AddEvent("Trainee bypassed manual lockout");
-context.SetState("Hazard Level", "High");  // existing state — value changes
-context.AddEvent("Trainee activated correct suppressor");
+context.SetState("Station", "Bay 3");       // position 1
+context.SetState("HazardLevel", "High");    // position 2
+context.AddEvent("Operator bypassed interlock");
+context.SetState("Station", "Bay 7");       // updates value; position stays at 1
 ```
 
-The canonical context is:
+Canonical output after all four calls:
 
 ```
-Station is Fire Suppression Bay
-Hazard Level is High
-Trainee bypassed manual lockout
-Trainee activated correct suppressor
+Station is Bay 7
+HazardLevel is High
+Operator bypassed interlock
 ```
 
-`"Station"` retains its insertion position even though `"Hazard Level"` was updated after it. Events remain in the order they were added.
+## Sync scenarios during active conversations
 
-## Apply() and the Tracker Boundary
+### Adding a new state
 
-`Apply(ConvaiDynamicContextUpdate update)` is the one method that bypasses the tracker entirely. It sends whatever is in the update directly to transport with no canonical rebuild and no local state record.
+**SDK call:** `SetState("Station", "Bay 3")` — `Station` has never been set.
 
-Consequences:
+**Messages sent:** One Append.
 
-* `TryGetStateValue` is never updated by `Apply()` calls. If you send `Apply(new ConvaiDynamicContextUpdate("Score is 95", ConvaiContextUpdateMode.Append))`, querying `TryGetStateValue("Score", out _)` returns `false`.
-* The canonical sync triggered by subsequent `SetState` calls does not include anything sent via `Apply()`.
-* `Apply()` is a silent no-op if the character is not in conversation — it does not queue.
+```
+mode:  Append
+text:  "Station is Bay 3"
+```
 
-Use `Apply()` only when you have a specific need to bypass the tracker, such as sending a backend-formatted text block from an external scoring system or forcing a mode-`Reset` update independently of the tracked state.
+The server appends this line to its existing context view.
 
-## Transport Layer Reference
+### Updating an existing state
 
-Dynamic Context updates are transmitted as RTVI messages over the WebRTC data channel.
+**SDK call:** `SetState("Station", "Bay 7")` — `Station` was previously `"Bay 3"`.
 
-<table><thead><tr><th width="149.99993896484375">JSON field</th><th width="263">Values</th><th>Description</th></tr></thead><tbody><tr><td><code>type</code></td><td><code>"context-update"</code></td><td>Fixed message type identifier.</td></tr><tr><td><code>data.text</code></td><td>Any string, or omitted</td><td>Context text payload. Omitted when mode is <code>reset</code>.</td></tr><tr><td><code>data.mode</code></td><td><code>"append"</code>, <code>"replace"</code>, <code>"reset"</code></td><td>Corresponds to <code>ConvaiContextUpdateMode</code>.</td></tr><tr><td><code>data.run_llm</code></td><td><code>"auto"</code>, <code>"true"</code>, <code>"false"</code></td><td>Corresponds to <code>ConvaiContextReactionMode</code>. <code>Auto</code> → <code>"auto"</code>, <code>ReactImmediately</code> → <code>"true"</code>, <code>SyncOnly</code> → <code>"false"</code>.</td></tr></tbody></table>
+**Messages sent:** Two messages in sequence.
 
-This information is provided for developers inspecting network traffic or building custom transport integrations. No action is required in normal SDK usage — the mapping from typed C# values to JSON is handled automatically by the SDK.
+**Message 1 — Replace (full canonical context with updated value):**
 
-## What's Next
+```
+mode:  Replace
+text:  "Station is Bay 7\nHazardLevel is High\nOperator bypassed interlock"
+```
 
-* [Troubleshooting & Diagnostics](../../../unity-plugin-beta-overview/features/dynamic-context/troubleshooting-and-diagnostics.md) — diagnose unexpected behavior when updates do not produce the expected character response.
+**Message 2 — Append (delta for natural dialogue reference):**
 
-## Conclusion
+```
+mode:  Append
+text:  "Station changed from Bay 3 to Bay 7"
+```
 
-The SDK's sync logic — Append for new states, Replace-then-Append for changed states, Replace for removals — ensures the character always receives an authoritative picture of the world. Understanding these patterns makes integration behavior predictable and debugging straightforward. If you encounter unexpected behavior, see [Troubleshooting & Diagnostics](../../../unity-plugin-beta-overview/features/dynamic-context/troubleshooting-and-diagnostics.md).
+The Replace gives the character an authoritative complete picture of the current state. The Append gives it a natural way to reference the transition in dialogue: _"I see you've moved from Bay 3 to Bay 7."_
+
+{% hint style="info" %}
+Two messages for one `SetState` call on an existing state is expected behavior. If you are monitoring network traffic during debugging, expect this pattern for every existing-state modification.
+{% endhint %}
+
+### Removing a state
+
+**SDK call:** `RemoveState("Station")`.
+
+**Messages sent:** One Replace containing the canonical context without the removed state.
+
+```
+mode:  Replace
+text:  "HazardLevel is High\nOperator bypassed interlock"
+```
+
+### Batch update with `SetStates`
+
+**SDK call:** `SetStates({ "Station": "Bay 7", "HazardLevel": "Extreme" })` — `Station` existed (`"Bay 3"`), `HazardLevel` is new.
+
+Because at least one existing state was modified, two messages are sent:
+
+**Message 1 — Replace (full canonical context, all values updated):**
+
+```
+mode:  Replace
+text:  "Station is Bay 7\nHazardLevel is Extreme\n..."
+```
+
+**Message 2 — Append (all changes summarized):**
+
+```
+mode:  Append
+text:  "Station changed from Bay 3 to Bay 7\nHazardLevel is Extreme"
+```
+
+**All-new states only:** If every state in `SetStates` is new (none existed before), only one Append is sent — no Replace. The Append contains all new state lines joined by newline.
+
+### Adding an event
+
+**SDK call:** `AddEvent("Operator bypassed interlock")`.
+
+**Messages sent:** One Append.
+
+```
+mode:  Append
+text:  "Operator bypassed interlock"
+```
+
+Events never trigger a Replace. The server appends the event text to its context view.
+
+### Resetting all context
+
+**SDK call:** `Reset()`.
+
+**Messages sent:** One Reset-mode message.
+
+```
+mode:  Reset
+text:  null
+```
+
+The server clears its Dynamic Context view. The local tracker is also cleared — all states and events are removed.
+
+## Pre-conversation queuing
+
+All tracked methods — `SetState`, `SetStates`, `AddEvent`, `RemoveState`, `Reset` — queue automatically when no conversation is active.
+
+When the session connects, the SDK flushes the pending queue in one of two ways:
+
+* **Pending sync (states or events queued):** A single Replace message containing the full canonical context at the moment of connection. All incremental changes are collapsed into one authoritative snapshot — they are not replayed as individual Append and Replace messages.
+* **Pending reset (Reset was called while offline):** A Reset message. If both a reset and subsequent changes are pending, the reset takes priority and clears the queue.
+
+**Example — all three calls queue safely before `ConnectAsync`:**
+
+```csharp
+void Start()
+{
+    // Safe to call before ConnectAsync — all three queue and flush at connection
+    _character.DynamicContext.SetState("Facility", "Offshore Platform Alpha");
+    _character.DynamicContext.SetState("Scenario", "Fire Drill");
+    _character.DynamicContext.AddEvent("Session initialized");
+}
+```
+
+The character receives one Replace at connection time:
+
+```
+Facility is Offshore Platform Alpha
+Scenario is Fire Drill
+Session initialized
+```
+
+## `Apply()` exception
+
+`Apply()` bypasses the tracker entirely and does **not** queue pre-conversation.
+
+* If the character is **not** in an active conversation: the update is discarded and a warning is emitted through the Convai logger. Enable Convai debug logging to see it in the Unity Console. No queue is built — the update is lost.
+* If the character **is** in an active conversation: the message is sent directly to transport using the `ConvaiContextUpdateMode` you specify.
+* The local state tracker is not updated. `TryGetStateValue` returns `false` for keys sent via `Apply()`.
+
+{% hint style="danger" %}
+Do not use `Apply()` for context that must be delivered before a conversation starts. Use `SetState`, `AddEvent`, or other tracked methods instead — they queue automatically and flush on connection.
+{% endhint %}
+
+## Next steps
+
+{% content-ref url="dynamic-context-scripting-api.md" %}
+[Dynamic context scripting API](dynamic-context-scripting-api.md)
+{% endcontent-ref %}
+
+{% content-ref url="troubleshoot-dynamic-context.md" %}
+[Troubleshoot dynamic context](troubleshoot-dynamic-context.md)
+{% endcontent-ref %}

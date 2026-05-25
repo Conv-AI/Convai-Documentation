@@ -1,12 +1,14 @@
-# transcript api
+---
+title: Transcript API
+description: Pull-based API reference for ConvaiTranscripts — query, filter, and subscribe to the live in-memory transcript timeline from C# scripts.
+last_reviewed: "4.2.0"
+---
 
-`ConvaiTranscripts` gives you pull-based, snapshot access to the room's full transcript timeline. Unlike event relay components, which push individual updates as they arrive, the `ConvaiTranscripts` facade maintains a live in-memory timeline that you query on demand. This makes it the right tool for transcript history replay, custom chat UI construction, post-session export, and any feature that needs to read multiple turns at once.
-
-Access the facade via `ConvaiManager.ActiveManager.Transcripts`.
+`ConvaiTranscripts` gives you pull-based, snapshot access to the room's full transcript timeline. Unlike event relay components, which push individual updates as they arrive, the `ConvaiTranscripts` facade maintains a live in-memory timeline that you query on demand. This makes it the right tool for transcript history replay, custom chat UI construction, post-session export, and any feature that needs to read multiple turns at once. Access the facade via `ConvaiManager.ActiveManager.Transcripts`.
 
 ***
 
-## Push vs. Pull
+## Push vs. pull
 
 |               | Event Relays / `ConvaiEvents`                    | `ConvaiTranscripts`                                      |
 | ------------- | ------------------------------------------------ | -------------------------------------------------------- |
@@ -17,7 +19,7 @@ Access the facade via `ConvaiManager.ActiveManager.Transcripts`.
 
 ***
 
-## `ConvaiTranscripts` Facade
+## `ConvaiTranscripts` facade
 
 ### Properties
 
@@ -41,13 +43,11 @@ Access the facade via `ConvaiManager.ActiveManager.Transcripts`.
 | `Changed` | `TranscriptUpdateBatch` | The timeline changes — a turn is added, updated, completed, interrupted, or removed |
 
 ```csharp
-// Subscribe to transcript changes
 var transcripts = ConvaiManager.ActiveManager.Transcripts;
 transcripts.Changed += OnTranscriptChanged;
 
 private void OnTranscriptChanged(TranscriptUpdateBatch batch)
 {
-    // Process only newly completed turns
     foreach (var turnId in batch.CompletedTurnIds)
     {
         var turn = batch.Timeline.TurnsById[turnId];
@@ -58,9 +58,7 @@ private void OnTranscriptChanged(TranscriptUpdateBatch batch)
 
 ***
 
-## `TranscriptQuery` — Filtering Turns
-
-Pass a `TranscriptQuery` to `GetTurns()` to filter the results. All fields are optional; leave unset fields at their defaults to include all values for that dimension.
+## `TranscriptQuery` — filtering turns
 
 | Field                   | Type                         | Default      | Description                                          |
 | ----------------------- | ---------------------------- | ------------ | ---------------------------------------------------- |
@@ -71,13 +69,12 @@ Pass a `TranscriptQuery` to `GetTurns()` to filter the results. All fields are o
 | `IncludeCommittedTurns` | `bool`                       | `true`       | Include turns that have been finalized and committed |
 
 ```csharp
-// Get all finalized character turns for a specific character
 var query = new TranscriptQuery
 {
-    ParticipantKind        = TranscriptParticipantKind.Character,
-    PlayerOrCharacterId    = "char_instructor_01",
-    IncludeActiveTurns     = false,
-    IncludeCommittedTurns  = true
+    ParticipantKind       = TranscriptParticipantKind.Character,
+    PlayerOrCharacterId   = "char_instructor_01",
+    IncludeActiveTurns    = false,
+    IncludeCommittedTurns = true
 };
 
 IReadOnlyList<TranscriptTurnSnapshot> turns =
@@ -88,14 +85,12 @@ IReadOnlyList<TranscriptTurnSnapshot> turns =
 
 ## `TranscriptTurnSnapshot`
 
-A snapshot of a single conversational turn. Turns transition from `Streaming` → `Stable` → `Completed` as transcript data arrives and is confirmed.
-
 | Property                        | Type                                       | Description                                               |
 | ------------------------------- | ------------------------------------------ | --------------------------------------------------------- |
 | `TurnId`                        | `string`                                   | Unique identifier for this turn (same as `MessageId`)     |
 | `MessageId`                     | `string`                                   | Alias for `TurnId`                                        |
 | `RoomSequence`                  | `long`                                     | Monotonically increasing sequence number within the room  |
-| `Participant`                   | `TranscriptParticipantRef`                 | Who produced this turn — see below                        |
+| `Participant`                   | `TranscriptParticipantRef`                 | Who produced this turn                                    |
 | `StartedAtUtc`                  | `DateTime`                                 | UTC time the turn began                                   |
 | `LastUpdatedAtUtc`              | `DateTime`                                 | UTC time of the most recent update                        |
 | `CompletedAtUtc`                | `DateTime?`                                | UTC time the turn was committed; `null` while active      |
@@ -114,7 +109,7 @@ Use `DisplayText` for real-time subtitle or chat rendering. It combines `Committ
 
 ***
 
-## `TranscriptLifecycle` Enum
+## `TranscriptLifecycle` enum
 
 | Value           | Description                                                                  |
 | --------------- | ---------------------------------------------------------------------------- |
@@ -125,8 +120,6 @@ Use `DisplayText` for real-time subtitle or chat rendering. It combines `Committ
 ***
 
 ## `TranscriptTimelineSnapshot`
-
-A point-in-time snapshot of all turns in the room. Returned by `CurrentTimeline` and included in every `TranscriptUpdateBatch`.
 
 | Property                  | Type                                                  | Description                                                               |
 | ------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------- |
@@ -142,8 +135,6 @@ A point-in-time snapshot of all turns in the room. Returned by `CurrentTimeline`
 
 ## `TranscriptUpdateBatch`
 
-Passed to `Changed` subscribers on every timeline mutation. Contains both a full snapshot of the current state and delta lists that describe exactly what changed.
-
 | Property             | Type                                    | Description                                                 |
 | -------------------- | --------------------------------------- | ----------------------------------------------------------- |
 | `Timeline`           | `TranscriptTimelineSnapshot`            | Full snapshot of the timeline after this batch of changes   |
@@ -157,9 +148,7 @@ Passed to `Changed` subscribers on every timeline mutation. Contains both a full
 
 ***
 
-## `TranscriptParticipantRef` Struct
-
-Identifies who produced a turn — embedded in every `TranscriptTurnSnapshot`.
+## `TranscriptParticipantRef` struct
 
 | Property              | Type                        | Description                                                    |
 | --------------------- | --------------------------- | -------------------------------------------------------------- |
@@ -171,7 +160,7 @@ Identifies who produced a turn — embedded in every `TranscriptTurnSnapshot`.
 
 Equality comparison and `==`/`!=` operators are supported.
 
-### `TranscriptParticipantKind` Enum
+### `TranscriptParticipantKind` enum
 
 | Value           | Description                 |
 | --------------- | --------------------------- |
@@ -180,9 +169,9 @@ Equality comparison and `==`/`!=` operators are supported.
 
 ***
 
-## Usage Examples
+## Usage examples
 
-### Example 1 — Post-Session Transcript Export
+### Example 1 — Post-session transcript export
 
 A medical training simulation exports the full session transcript to JSON after the session ends, for supervisor review.
 
@@ -202,7 +191,6 @@ public class TranscriptExporter : MonoBehaviour
         var transcripts = ConvaiManager.ActiveManager?.Transcripts;
         if (transcripts == null) return;
 
-        // Fetch only committed (finalized) turns, sorted by room sequence
         var turns = transcripts.GetTurns()
             .Where(t => t.Lifecycle == TranscriptLifecycle.Completed)
             .OrderBy(t => t.RoomSequence)
@@ -224,7 +212,7 @@ public class TranscriptExporter : MonoBehaviour
 ```
 {% endcode %}
 
-### Example 2 — Reactive Chat Log That Appends On Completion
+### Example 2 — Reactive chat log that appends on completion
 
 A corporate onboarding simulation builds a scrollable chat history that appends messages only when turns are committed — avoiding flicker from interim updates.
 
@@ -266,9 +254,9 @@ public class CompletedTurnChatLog : MonoBehaviour
 ```
 {% endcode %}
 
-### Example 3 — Custom Live Chat UI With History Replay
+### Example 3 — Custom live chat UI with history replay
 
-An industrial safety drill builds a full chat UI that replays all committed transcript history on enable (so late-joining viewers see the full conversation) and then listens for live changes.
+An industrial safety drill builds a full chat UI that replays all committed transcript history on enable — so late-joining viewers see the full conversation — then listens for live changes.
 
 {% code title="LiveChatUI.cs" %}
 ```csharp
@@ -289,7 +277,6 @@ public class LiveChatUI : MonoBehaviour
         _transcripts = ConvaiManager.ActiveManager?.Transcripts;
         if (_transcripts == null) return;
 
-        // Replay committed history
         var history = _transcripts.GetTurns(new TranscriptQuery
         {
             IncludeActiveTurns    = false,
@@ -310,14 +297,12 @@ public class LiveChatUI : MonoBehaviour
 
     private void OnChanged(TranscriptUpdateBatch batch)
     {
-        // Update active turn display text live
         foreach (var turn in batch.ChangedTurns)
         {
             if (turn.Lifecycle == TranscriptLifecycle.Streaming)
                 UpdateLiveLine(turn.Participant.DisplayName, turn.DisplayText);
         }
 
-        // Commit completed turns to permanent log
         foreach (var turnId in batch.CompletedTurnIds)
         {
             if (batch.Timeline.TurnsById.TryGetValue(turnId, out var turn))
@@ -336,8 +321,17 @@ public class LiveChatUI : MonoBehaviour
 
 ***
 
-## Next Steps
+## Troubleshooting
 
-{% content-ref url="/broken/pages/3d6e53b8b9114745cd083eebe2f062d5d0719292" %}
-[Broken link](/broken/pages/3d6e53b8b9114745cd083eebe2f062d5d0719292)
-{% endcontent-ref %}
+| Symptom | Likely Cause | Fix |
+| ------- | ------------ | --- |
+| `GetTurns()` returns empty list | No turns exist yet, or `IncludeActiveTurns = false` and all current turns are still streaming | Omit the `TranscriptQuery` to get all turns, or set `IncludeActiveTurns = true` to include in-progress turns |
+| `Changed` fires but `batch.CompletedTurnIds` is empty | Turns are still active — the batch reflects an update to a streaming turn, not a completion | Check `batch.ChangedTurns` for active-turn updates; `CompletedTurnIds` only populates when a turn finishes |
+| `TranscriptTurnSnapshot.CommittedText` is empty | Turn is still `Streaming` — text is not committed until the turn completes | Use `DisplayText` for in-progress text, or wait for the turn to appear in `batch.CompletedTurnIds` |
+| `Changed` never fires after connect | Subscribed too late or `Dispose()` called before connect | Subscribe to `Changed` before or immediately after `ConnectAsync`; do not call `Dispose()` until the component is destroyed |
+
+***
+
+## Next steps
+
+For event-driven transcript reactions without querying the timeline, use `ConvaiCharacterEventRelay` or `ConvaiTranscriptEventRelay` — see [Character Events](character-events.md). For full character scripting API, see [Character & Player API](character-and-player-api.md).

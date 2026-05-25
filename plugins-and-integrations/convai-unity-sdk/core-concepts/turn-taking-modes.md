@@ -1,14 +1,16 @@
-# turn taking modes
+---
+title: Turn-taking modes
+description: Reference for TurnTakingOptions, SmartTurnSettings, and PushToTalkPolicy — field reference for hands-free voice detection and push-to-talk modes.
+last_reviewed: "4.2.0"
+---
 
-Turn-taking determines who speaks, when a turn ends, and how the SDK handles the transition between the user speaking and the character responding. The SDK supports two modes: hands-free automatic detection and explicit push-to-talk. Choosing the right mode — and tuning it correctly — directly affects how natural and reliable the conversation feels in your training simulation or interactive experience.
+Turn-taking determines who speaks, when a turn ends, and how the SDK handles the transition between the user speaking and the character responding. The SDK supports two modes: hands-free automatic detection and explicit push-to-talk. Choosing the right mode — and tuning it correctly — directly affects how natural and reliable the conversation feels in your training simulation, interactive experience, or game.
 
-{% hint style="info" %}
-If you are looking for the setup steps to configure turn-taking in the Inspector, see [Configure Conversation Input Mode](/broken/pages/013312f6c9c364eda062b35b85b10ea13d1c0221). This page is the full reference for all fields and behavior details.
-{% endhint %}
+For the Inspector-based setup steps, see [Configure conversation input mode](../getting-started/configure-conversation-input-mode.md). This page is the full field reference.
 
 ***
 
-## Mode Comparison
+## Mode comparison
 
 | Mode             | `ConversationInputMode` Value | Best For                                                                                           |
 | ---------------- | ----------------------------- | -------------------------------------------------------------------------------------------------- |
@@ -17,9 +19,9 @@ If you are looking for the setup steps to configure turn-taking in the Inspector
 
 ***
 
-## `TurnTakingOptions` — Root Fields
+## `TurnTakingOptions` — root fields
 
-`TurnTakingOptions` is the top-level configuration object. It is set on `ConvaiManager` in the Inspector or passed to `RoomSessionConnectOptions` for per-connection overrides.
+`TurnTakingOptions` is the top-level configuration object. Set it on `ConvaiRoomManager` in the Inspector (inline) or via a `ConvaiRoomManagerProfile` asset, or pass it to `RoomSessionConnectOptions` for per-connection overrides.
 
 | Field                 | Type                    | Default      | Description                                                                     |
 | --------------------- | ----------------------- | ------------ | ------------------------------------------------------------------------------- |
@@ -32,7 +34,7 @@ If you are looking for the setup steps to configure turn-taking in the Inspector
 
 ***
 
-## Hands-Free Mode
+## Hands-free mode
 
 In hands-free mode, the SDK continuously captures microphone audio and detects when the user has finished speaking. No button press is required.
 
@@ -76,13 +78,13 @@ Setting `StopSecs` too low causes premature turn endings when the user pauses mi
 
 ***
 
-## Push-to-Talk Mode
+## Push-to-talk mode
 
 In push-to-talk mode, the user explicitly starts and ends their turn by pressing and releasing a control (button, key, or UI element). The SDK does not use voice activity detection to end turns.
 
 ### `PushToTalkPolicy`
 
-Controls all push-to-talk interaction rules.
+Controls all push-to-talk interaction rules. Set `RequireTurnCompletionBeforeNextPress = true` for most training simulations — it enforces a natural dialogue rhythm where the character finishes before the learner responds.
 
 | Field                                        | Type   | Default | Description                                                                                                                                                                                                             |
 | -------------------------------------------- | ------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -105,13 +107,9 @@ var options = new TurnTakingOptions
 };
 ```
 
-{% hint style="info" %}
-`RequireTurnCompletionBeforeNextPress = true` is the right default for most training simulations — it enforces a natural dialogue rhythm where the character finishes before the learner responds.
-{% endhint %}
-
 ***
 
-## Local Audio Policy
+## Local audio policy
 
 `LocalAudioPolicy` controls microphone behavior on the local device. It applies to both Hands-Free and Push-to-Talk modes.
 
@@ -126,7 +124,7 @@ var options = new TurnTakingOptions
 | Value              | Behavior                                                                                                    | Trade-Off                                                                                           |
 | ------------------ | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `PrewarmMuted`     | The microphone is opened and warmed up at session start, but kept muted until the user presses the control. | Eliminates the delay on the first press; uses a small amount of background resources.               |
-| `OpenOnFirstPress` | The microphone is not opened until the user presses push-to-talk for the first time.                        | Saves resources; introduces a brief delay (\~100–300 ms) on the first press as the mic initializes. |
+| `OpenOnFirstPress` | The microphone is not opened until the user presses push-to-talk for the first time.                        | Saves resources; introduces a brief delay (~100–300 ms) on the first press as the mic initializes. |
 
 ```csharp
 var options = new TurnTakingOptions
@@ -146,27 +144,24 @@ var options = new TurnTakingOptions
 
 Controls whether Convai's speech-to-text is enabled at the moment the session starts.
 
-| Value        | Behavior                                                                                                                |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `UseDefault` | Server-side default: STT enabled for Hands-Free, disabled for Push-to-Talk.                                             |
-| `Enabled`    | STT starts enabled regardless of mode.                                                                                  |
-| `Disabled`   | STT starts disabled regardless of mode. You control when to enable it via `IConvaiRoomConnectionService.SetSttMuted()`. |
+| Value        | Behavior                                                                                                                          |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `UseDefault` | Server-side default: STT enabled for Hands-Free, disabled for Push-to-Talk.                                                       |
+| `Enabled`    | STT starts enabled regardless of mode.                                                                                            |
+| `Disabled`   | STT starts disabled regardless of mode. This is an advanced option — manual STT control is not exposed in the current public API. |
 
 ***
 
-## Runtime Mode Switching
+## Runtime mode switching
 
 Switch between Hands-Free and Push-to-Talk without disconnecting the session:
 
 ```csharp
-// Get the connection service from the room runtime
-var connection = convaiRuntime.Room.Connection;
-
 // Switch to push-to-talk mid-session
-await connection.SetConversationInputModeAsync(ConversationInputMode.PushToTalk);
+await _manager.SetConversationInputModeAsync(ConversationInputMode.PushToTalk);
 ```
 
-`SetConversationInputModeAsync` returns an `IConvaiOperation<Unit>`. The active mode after the switch is available via `connection.ActiveConversationInputMode`.
+`SetConversationInputModeAsync` returns an `IConvaiOperation<Unit>`. The active mode after the switch is available via `_manager.ActiveConversationInputMode`.
 
 {% hint style="warning" %}
 Runtime mode switching applies the new `LocalAudioPolicy` defaults for the new mode. If you switch to Push-to-Talk, the microphone will be muted according to `StartMutedInPushToTalk`. The session does not reconnect.
@@ -174,9 +169,9 @@ Runtime mode switching applies the new `LocalAudioPolicy` defaults for the new m
 
 ***
 
-## Usage Examples
+## Usage examples
 
-### Example 1: Medical Training Simulator — Hands-Free With Tight Turn Detection
+### Example 1: Medical training simulator — hands-free with tight turn detection
 
 A learner performs a patient assessment. The AI character responds as the patient. Shorter silence threshold keeps the conversation moving.
 
@@ -198,7 +193,7 @@ var options = new TurnTakingOptions
 
 ***
 
-### Example 2: Factory Safety Drill — Push-to-Talk With Echo Cancellation
+### Example 2: Factory safety drill — push-to-talk with echo cancellation
 
 A safety trainer interacts with an AI safety officer in a noisy plant simulation. Push-to-talk prevents ambient noise from triggering unintended turns. Speakers are used, so AEC is enabled.
 
@@ -224,7 +219,7 @@ var options = new TurnTakingOptions
 
 ***
 
-### Example 3: Runtime Toggle Between Modes via UI Button
+### Example 3: Runtime toggle between modes via UI button
 
 A scenario that starts hands-free but lets facilitators switch to push-to-talk during a live session.
 
@@ -241,22 +236,35 @@ public class InputModeToggle : MonoBehaviour
             ? ConversationInputMode.PushToTalk
             : ConversationInputMode.HandsFree;
 
-        var connection = _manager.Runtime.Room.Connection;
-        await connection.SetConversationInputModeAsync(mode);
+        await _manager.SetConversationInputModeAsync(mode);
     }
 }
 ```
 
-**Expected outcome:** Mode switches mid-session without interrupting the connection. The active mode updates immediately.
+**Expected outcome:** Mode switches mid-session without interrupting the connection. Check `_manager.ActiveConversationInputMode` to confirm the active mode after the switch.
 
 ***
 
-## Next Steps
+## Troubleshooting
 
-{% content-ref url="/broken/pages/5cb0d97ef0cdd738767c98bede6b17082229d3a9" %}
-[Broken link](/broken/pages/5cb0d97ef0cdd738767c98bede6b17082229d3a9)
+| Symptom                                                           | Likely Cause                                                                      | Fix                                                                                                                                    |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Character responds mid-sentence before the user finishes speaking | `StopSecs` too low for the pacing of this scenario                                | Increase `StopSecs` to 2.5–3.0 in `SmartTurnSettings`                                                                                  |
+| First word of the user's turn is clipped                          | Speech onset is captured too late                                                 | Increase `PreSpeechMs` to 80–150 ms in `SmartTurnSettings`                                                                             |
+| Push-to-talk button stays locked after the character finishes     | Turn-complete event was not received (network hiccup)                             | `TurnCompletionTimeoutMs` releases the lock after timeout; lower the value, or set `AllowSpeechStoppedFallbackAfterSpeechStart = true` |
+| Background noise triggers responses in Hands-Free mode            | Environment too noisy for automatic voice detection                               | Switch to Push-to-Talk mode, or increase `StopSecs`                                                                                    |
+| Brief delay on first push-to-talk press                           | `PushToTalkMicStartupMode` is `OpenOnFirstPress` — mic initializes on first press | Switch to `PrewarmMuted`                                                                                                               |
+
+***
+
+## Next steps
+
+You now have the full field reference for turn-taking configuration. Read Event System next to learn how to react to speech, transcript, and emotion events at runtime.
+
+{% content-ref url="event-system.md" %}
+[Event system](event-system.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/bcabab554f8cb726a0caba36d1ea1f57f12aa682" %}
-[Broken link](/broken/pages/bcabab554f8cb726a0caba36d1ea1f57f12aa682)
+{% content-ref url="../features/README.md" %}
+[Features](../features/README.md)
 {% endcontent-ref %}

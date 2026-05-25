@@ -1,7 +1,11 @@
-# Core Concepts
+---
+title: Core concepts
+description: Find explanations for how the Convai Unity SDK works at runtime — connection management, session state, turn-taking, and event-driven scene responses.
+last_reviewed: "4.2.0"
+---
 
-These pages explain how the Convai Unity SDK works under the hood — the runtime layers that manage connections, the session state machine that governs each character's lifecycle, the turn-taking system that controls who speaks and when, and the event components that let your scene react to what happens at runtime.
+The Core Concepts section explains the systems that run beneath every Convai character in your scene — the runtime layers that manage connections, the session state machine that governs each character's lifecycle, the turn-taking system that controls who speaks and when, and the event components that let your scene react to what happens at runtime.
 
-Read these pages when you need to understand why the system behaves a certain way, configure advanced options, or build custom integrations on top of the SDK.
+Start with **Runtime architecture** if you are new to the SDK internals. Read the other pages when you need to configure a specific system or understand why the SDK behaves a certain way.
 
-<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Architecture Deep Dive</strong><br>Runtime layers, interface inventory, and what you can replace.</td><td><a href="/broken/pages/199c88211c0092bc07f1c86ff4c58717ac3da1a1">Broken link</a></td></tr><tr><td><strong>Session Lifecycle &#x26; State</strong><br>State machine, per-character sessions, persistence, and reconnection.</td><td><a href="/broken/pages/7fa6a18f3cfe5f56a3823d1264c4ddacec99df6c">Broken link</a></td></tr><tr><td><strong>Turn-Taking Modes</strong><br>Hands-free vs. push-to-talk — every field and policy explained.</td><td><a href="/broken/pages/986f9bf692caa50f43c7ba616d709ea5cf32502b">Broken link</a></td></tr><tr><td><strong>Event System</strong><br>Relay components, payload types, and subscription patterns.</td><td><a href="/broken/pages/6b8954faa5b6efbb501404cefeb29d07ed725864">Broken link</a></td></tr></tbody></table>
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Runtime architecture</strong><br>Runtime layers, interface inventory, and what you can replace.</td><td><a href="runtime-architecture.md">runtime-architecture.md</a></td></tr><tr><td><strong>Session lifecycle</strong><br>State machine, per-character sessions, persistence, and reconnection.</td><td><a href="session-lifecycle.md">session-lifecycle.md</a></td></tr><tr><td><strong>Turn-taking modes</strong><br>Hands-free vs. push-to-talk — every field and policy explained.</td><td><a href="turn-taking-modes.md">turn-taking-modes.md</a></td></tr><tr><td><strong>Event system</strong><br>Relay components, payload types, and subscription patterns.</td><td><a href="event-system.md">event-system.md</a></td></tr></tbody></table>
