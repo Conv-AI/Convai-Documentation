@@ -24,7 +24,9 @@ Optionally, scene descriptions or dynamic information can be included to tailor 
 
 ### Request Body
 
-<table><thead><tr><th width="203.6666259765625">Name</th><th width="104">Type</th><th>Description</th></tr></thead><tbody><tr><td>character_id<mark style="color:red;">*</mark></td><td>String</td><td>Unique ID of the character to connect with.</td></tr><tr><td>connection_type</td><td>String</td><td><p>Connection mode for the session. </p><p>Supported values: <code>"audio"</code> (default) or <code>"video"</code>.</p></td></tr><tr><td>character_session_id</td><td>String</td><td>Existing session ID for maintaining conversation continuity. If omitted, a new one is generated.</td></tr><tr><td>dynamic_info</td><td><a href="connect-api.md#dynamic-info">JSON</a></td><td>Real-time contextual data to influence the conversation flow.</td></tr><tr><td>scene_description</td><td><a href="connect-api.md#scene_description">JSON</a></td><td>Descriptions of the current scene or environment context.</td></tr><tr><td>end_user_id</td><td>String</td><td>User managed unique identifier to tag sessions and use Long Term Memory</td></tr><tr><td>debug</td><td>Bool</td><td>Enables RTVI metrics on data channel.</td></tr></tbody></table>
+<table><thead><tr><th width="203.6666259765625">Name</th><th width="104">Type</th><th>Description</th></tr></thead><tbody><tr><td>character_id<mark style="color:red;">*</mark></td><td>String</td><td>Unique ID of the character to connect with.</td></tr><tr><td>connection_type</td><td>String</td><td><p>Connection mode for the session. </p><p>Supported values: <code>"audio"</code> (default) or <code>"video"</code>.</p></td></tr><tr><td>character_session_id</td><td>String</td><td>Existing session ID for maintaining conversation continuity. If omitted, a new one is generated.</td></tr><tr><td>dynamic_info</td><td><a href="connect-api.md#dynamic-info">JSON</a></td><td>Real-time contextual data to influence the conversation flow.</td></tr><tr><td>scene_description</td><td><a href="connect-api.md#scene_description">JSON</a></td><td>Descriptions of the current scene or environment context.</td></tr><tr><td>end_user_id</td><td>String</td><td>User managed unique identifier to tag sessions and use Long Term Memory</td></tr><tr><td>debug</td><td>Bool</td><td>Enables RTVI metrics on data channel.</td></tr><tr><td>audio_config</td><td><a href="connect-api.md#audio_config">JSON</a></td><td>Configuration for audio output behaviour. Only supported with LiveKit transport (default).</td></tr></tbody></table>
+
+
 
 {% tabs %}
 {% tab title="dynamic info" %}
@@ -44,6 +46,36 @@ Optionally, scene descriptions or dynamic information can be included to tailor 
   }
 ]
 ```
+{% endtab %}
+
+{% tab title="audio_config" %}
+```json
+{
+  "output": {
+    "audio_routing": "audio_only", // Default: "audio_only" | "data_only" | "both"
+    "max_chunk_duration_ms": 100, // Default: 100, Range: 10-1000ms
+    "add_wav_header": false // Default: false
+  }
+}
+```
+
+#### Fields <a href="#fields-24" id="fields-24"></a>
+
+**`audio_routing`** - Controls audio delivery method:
+
+* `"audio_only"` (default) - Standard WebRTC audio track (recommended)
+* `"data_only"` - Receive `audio-data` messages via data channel for custom processing
+* `"both"` - Receive via both audio track and data channel
+
+**`max_chunk_duration_ms`** - Audio chunk size (10-1000ms, default: 100ms)
+
+* Lower values = lower latency, more overhead
+* Higher values = better for unstable networks
+* Rounds up to nearest 10ms: `95ms → 100ms`, `45ms → 50ms`
+
+**`add_wav_header`** - Include WAV header in data channel chunks (default: false)
+
+* Only applies when using `data_only` or `both` routing
 {% endtab %}
 {% endtabs %}
 

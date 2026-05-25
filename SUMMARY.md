@@ -633,6 +633,7 @@
   * [Live APIs (Beta)](api-reference/core-api-reference/live-apis-beta/README.md)
     * [Connect API](api-reference/core-api-reference/live-apis-beta/connect-api.md)
     * [Metrics](api-reference/core-api-reference/live-apis-beta/metrics.md)
+    * [Audio Data (via data channel)](api-reference/core-api-reference/live-apis-beta/audio-data-via-data-channel.md)
   * [Interaction APIs](api-reference/core-api-reference/interaction-apis/README.md)
     * [Interaction API (Beta)](api-reference/core-api-reference/interaction-apis/interaction-api-beta.md)
     * [Interaction API](api-reference/core-api-reference/interaction-apis/interaction-api.md)
