@@ -66,6 +66,8 @@ Go back to the **Action Definitions** entry you created in the previous step. Dr
 
 <figure><img src="../../../../.gitbook/assets/convai-transform-move-to-executor-assigned.png" alt="Unity Inspector showing TransformMoveToActionExecutor added to the NPC and its component reference assigned to the Executor field in the Move To action definition"><figcaption><p>TransformMoveToActionExecutor assigned as the Move To executor — this completes the action-to-behavior binding that the dispatcher uses when Convai selects the Move To action.</p></figcaption></figure>
 
+<figure><img src="../../../../.gitbook/assets/convai-action-definition-executor-assigned.png" alt="Executor field on the Move To action definition with TransformMoveToActionExecutor dragged in"><figcaption><p>Drag TransformMoveToActionExecutor into the Executor field on the Move To action definition.</p></figcaption></figure>
+
 {% hint style="warning" %}
 `TransformMoveToActionExecutor` is for prototyping only. It teleports the character instantly with no animation or pathfinding. Replace it with `NavMeshMoveToActionExecutor` or a custom executor before shipping to players.
 {% endhint %}
