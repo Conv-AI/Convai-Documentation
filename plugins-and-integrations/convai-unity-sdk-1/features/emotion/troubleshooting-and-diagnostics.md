@@ -1,5 +1,5 @@
 ---
-title: Troubleshoot the emotion system
+title: Troubleshoot emotion
 description: Fix common emotion pipeline failures in the Convai Unity SDK — from missing output and silent neutral fallback to LipSync conflicts and locked expressions.
 ---
 

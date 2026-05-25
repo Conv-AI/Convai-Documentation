@@ -306,7 +306,7 @@ Menu path: `Add Component → Convai → Debug → Convai Action Debug Probe`
 
 Constraints: `DisallowMultipleComponent`, `RequireComponent(ConvaiCharacter)`
 
-See [Debug character actions](debugging-and-troubleshooting.md) for the full Inspector field reference and usage guide.
+See [Troubleshoot character actions](debugging-and-troubleshooting.md) for the full Inspector field reference and usage guide.
 
 ### Context menu actions
 
@@ -322,5 +322,5 @@ See [Debug character actions](debugging-and-troubleshooting.md) for the full Ins
 {% endcontent-ref %}
 
 {% content-ref url="debugging-and-troubleshooting.md" %}
-[Debug character actions](debugging-and-troubleshooting.md)
+[Troubleshoot character actions](debugging-and-troubleshooting.md)
 {% endcontent-ref %}

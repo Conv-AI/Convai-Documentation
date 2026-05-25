@@ -33,7 +33,7 @@ Every time the backend emits an emotion, the controller calls `IEmotionTaxonomy.
 **Example:** The backend sends `"happy"` → `TryResolve` finds `"happy"` in the aliases list of the `joy` entry → the accumulator sets the target score for `"joy"`.
 
 {% hint style="warning" %}
-When the server sends a label that is not in the taxonomy, the failure is silent — no console warning appears and no error is logged. The character simply returns to neutral as if no emotion signal arrived. If a specific emotion never appears on your character, it is likely that the server label is not covered by the active taxonomy. See [Troubleshoot the emotion system](troubleshooting-and-diagnostics.md#unknown-server-labels-silent-neutral-fallback) for how to detect and fix this.
+When the server sends a label that is not in the taxonomy, the failure is silent — no console warning appears and no error is logged. The character simply returns to neutral as if no emotion signal arrived. If a specific emotion never appears on your character, it is likely that the server label is not covered by the active taxonomy. See [Troubleshoot emotion](troubleshooting-and-diagnostics.md#unknown-server-labels-silent-neutral-fallback) for how to detect and fix this.
 {% endhint %}
 
 ## Creating a custom taxonomy asset
@@ -83,5 +83,5 @@ The built-in Plutchik set covers all emotions the Convai backend currently sends
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot the emotion system](troubleshooting-and-diagnostics.md)
+[Troubleshoot emotion](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

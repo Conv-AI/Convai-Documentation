@@ -190,7 +190,7 @@ Wire `RunDefibrillatorDemo` to a `UnityEngine.Timeline` signal, a UI button `OnC
 ## Next steps
 
 {% content-ref url="debugging-and-troubleshooting.md" %}
-[Debug character actions](debugging-and-troubleshooting.md)
+[Troubleshoot character actions](debugging-and-troubleshooting.md)
 {% endcontent-ref %}
 
 {% content-ref url="actions-scripting-reference.md" %}

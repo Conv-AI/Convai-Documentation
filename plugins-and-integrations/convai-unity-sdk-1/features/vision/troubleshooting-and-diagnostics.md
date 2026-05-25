@@ -1,5 +1,5 @@
 ---
-title: Vision troubleshooting
+title: Troubleshoot vision
 description: Fix Vision publishing failures, blank feeds, permission errors, and platform-specific issues in Unity using a structured checklist and decision tree.
 ---
 

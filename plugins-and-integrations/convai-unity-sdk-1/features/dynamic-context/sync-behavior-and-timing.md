@@ -186,5 +186,5 @@ Do not use `Apply()` for context that must be delivered before a conversation st
 {% endcontent-ref %}
 
 {% content-ref url="troubleshoot-dynamic-context.md" %}
-[Troubleshoot Dynamic Context](troubleshoot-dynamic-context.md)
+[Troubleshoot dynamic context](troubleshoot-dynamic-context.md)
 {% endcontent-ref %}

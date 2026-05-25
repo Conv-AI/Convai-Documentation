@@ -31,7 +31,7 @@ Vision requires `ConvaiRoomManager.Connection Type` set to **Video**. If it is s
 <tr><td><strong>Custom frame sources</strong><br>Implement IVisionFrameSource to publish any custom video pipeline — interface contract, Y-flip requirement, and minimal implementation.</td><td><a href="custom-frame-sources.md">custom-frame-sources.md</a></td></tr>
 <tr><td><strong>Vision scripting API</strong><br>ConvaiVisionPublisher properties and methods, runtime state monitoring, and domain events for analytics integration.</td><td><a href="scripting-api.md">scripting-api.md</a></td></tr>
 <tr><td><strong>Vision usage examples</strong><br>End-to-end examples for safety training, equipment onboarding, VR walkthroughs, and manual-trigger sessions.</td><td><a href="usage-examples.md">usage-examples.md</a></td></tr>
-<tr><td><strong>Vision troubleshooting</strong><br>Diagnose publishing failures, blank feeds, permission errors, and platform-specific issues with a structured checklist and decision tree.</td><td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td></tr>
+<tr><td><strong>Troubleshoot vision</strong><br>Diagnose publishing failures, blank feeds, permission errors, and platform-specific issues with a structured checklist and decision tree.</td><td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td></tr>
 </tbody></table>
 
 ## Next steps

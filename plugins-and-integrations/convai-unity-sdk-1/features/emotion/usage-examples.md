@@ -232,7 +232,7 @@ Set **Lock Emotion** back to `false` before building for production. The field i
 
 ## Next steps
 
-For the complete parameter reference used in the profile settings above, see [Emotion profile](emotion-profile.md). For the full scripting surface, see [Emotion scripting API](scripting-api.md). If any scenario does not produce the expected result, see [Troubleshoot the emotion system](troubleshooting-and-diagnostics.md).
+For the complete parameter reference used in the profile settings above, see [Emotion profile](emotion-profile.md). For the full scripting surface, see [Emotion scripting API](scripting-api.md). If any scenario does not produce the expected result, see [Troubleshoot emotion](troubleshooting-and-diagnostics.md).
 
 {% content-ref url="emotion-profile.md" %}
 [Emotion profile](emotion-profile.md)
@@ -243,5 +243,5 @@ For the complete parameter reference used in the profile settings above, see [Em
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot the emotion system](troubleshooting-and-diagnostics.md)
+[Troubleshoot emotion](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

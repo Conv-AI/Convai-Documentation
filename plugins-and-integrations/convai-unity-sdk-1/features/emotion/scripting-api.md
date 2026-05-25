@@ -249,12 +249,12 @@ public sealed class EmotionDrivenUI : MonoBehaviour
 
 ## Next steps
 
-For complete worked examples that combine profile configuration with these API calls, see [Emotion examples](usage-examples.md). If something is not behaving as expected at runtime, see [Troubleshoot the emotion system](troubleshooting-and-diagnostics.md).
+For complete worked examples that combine profile configuration with these API calls, see [Emotion examples](usage-examples.md). If something is not behaving as expected at runtime, see [Troubleshoot emotion](troubleshooting-and-diagnostics.md).
 
 {% content-ref url="usage-examples.md" %}
 [Emotion examples](usage-examples.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot the emotion system](troubleshooting-and-diagnostics.md)
+[Troubleshoot emotion](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

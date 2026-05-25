@@ -60,7 +60,7 @@ Press **Play**. An overlay appears in the Game view showing the live camera feed
 {% endhint %}
 
 {% hint style="warning" %}
-If the overlay stays blank or the FPS counter reads zero, verify that `ConvaiRoomManager.Connection Type` is set to **Video** and that the room has fully connected. See [Vision troubleshooting](troubleshooting-and-diagnostics.md) for a step-by-step diagnosis.
+If the overlay stays blank or the FPS counter reads zero, verify that `ConvaiRoomManager.Connection Type` is set to **Video** and that the room has fully connected. See [Troubleshoot vision](troubleshooting-and-diagnostics.md) for a step-by-step diagnosis.
 {% endhint %}
 
 ## Manual component setup
@@ -90,5 +90,5 @@ If you clicked **Later** on the dialog, or want to place the components on a spe
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Vision troubleshooting](troubleshooting-and-diagnostics.md)
+[Troubleshoot vision](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

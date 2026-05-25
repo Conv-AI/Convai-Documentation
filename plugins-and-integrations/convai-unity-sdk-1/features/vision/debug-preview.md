@@ -102,5 +102,5 @@ These properties can be read from other scripts:
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Vision troubleshooting](troubleshooting-and-diagnostics.md)
+[Troubleshoot vision](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

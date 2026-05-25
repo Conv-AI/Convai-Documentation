@@ -193,7 +193,7 @@ public class WebGLVisionSetup : MonoBehaviour
 ## Next steps
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Vision troubleshooting](troubleshooting-and-diagnostics.md)
+[Troubleshoot vision](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}
 
 {% content-ref url="custom-frame-sources.md" %}

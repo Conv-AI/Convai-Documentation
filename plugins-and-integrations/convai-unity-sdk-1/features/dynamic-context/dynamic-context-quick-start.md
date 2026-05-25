@@ -63,7 +63,7 @@ Enter Play Mode and start a conversation with the character. Click the button yo
 
 The character should reference the location — for example: _"You're at the Fire Exit Corridor. Make sure you know the evacuation procedure before proceeding."_
 
-If the character does not respond with location awareness, open the Unity Console and check for a `[ConvaiDynamicContextCommand]` warning. See [Troubleshoot Dynamic Context](troubleshoot-dynamic-context.md) for a full diagnosis checklist.
+If the character does not respond with location awareness, open the Unity Console and check for a `[ConvaiDynamicContextCommand]` warning. See [Troubleshoot dynamic context](troubleshoot-dynamic-context.md) for a full diagnosis checklist.
 {% endstep %}
 {% endstepper %}
 

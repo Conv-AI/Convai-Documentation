@@ -97,13 +97,13 @@ TransformMoveToActionExecutor  ← performs the move behavior
 
 Enter Play Mode and say "go to the crate" or "move to the crate." Your NPC should teleport to the crate's position.
 
-If you added `ConvaiActionDebugProbe` (optional — see [Debug character actions](debugging-and-troubleshooting.md)), you should also see this in the Console:
+If you added `ConvaiActionDebugProbe` (optional — see [Troubleshoot character actions](debugging-and-troubleshooting.md)), you should also see this in the Console:
 
 ```
 [ConvaiActionDebugProbe] Step succeeded #1: cmd='Move To crate', def='Move To', target=Object:Crate
 ```
 
-If the NPC does not move, check [Debug character actions](debugging-and-troubleshooting.md) for the diagnostic checklist.
+If the NPC does not move, check [Troubleshoot character actions](debugging-and-troubleshooting.md) for the diagnostic checklist.
 
 ## Runtime behavior
 

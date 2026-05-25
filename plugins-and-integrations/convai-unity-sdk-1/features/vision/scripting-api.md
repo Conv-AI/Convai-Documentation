@@ -278,5 +278,5 @@ Raised when the WebRTC video track is removed.
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Vision troubleshooting](troubleshooting-and-diagnostics.md)
+[Troubleshoot vision](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}
