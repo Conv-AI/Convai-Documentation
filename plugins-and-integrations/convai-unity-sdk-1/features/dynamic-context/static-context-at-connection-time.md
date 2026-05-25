@@ -15,6 +15,8 @@ Use this mechanism for facts that are true before the conversation begins and wi
 
 Both fields are on the `ConvaiCharacter` component under the **Dynamic Info (Connection Request)** header.
 
+<figure><img src="../../../../.gitbook/assets/convai-character-dynamic-info-inspector.png" alt="Unity Inspector showing the Dynamic Info (Connection Request) section on ConvaiCharacter with Initial Dynamic Info Text and Initial Dynamic Info Keep In Context fields"><figcaption><p>Dynamic Info fields on ConvaiCharacter — Initial Dynamic Info Text is delivered once at session start; enable Keep In Context to retain these facts across all LLM turns for the duration of the session.</p></figcaption></figure>
+
 | Field | Type | Default | Description |
 |---|---|---|---|
 | Initial Dynamic Info Text | `string` | _(empty)_ | Free-text block sent as part of the session connection request. No format constraints — write plain sentences or key-value lines. |

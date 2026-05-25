@@ -63,9 +63,9 @@ Press **Play**. Talk to the character using your configured microphone. As the A
 **Expected result:** The NPC's facial expression changes as the conversation develops. The **Current → Dominant Label** field shows the active emotion and **Current → Dominant Score** shows its smoothed intensity. If you are using a Reallusion character with the default rig, blendshapes activate on the character's face immediately.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/TODO-emotion-controller-profile-field.png" alt="Unity Inspector showing the ConvaiEmotionController component with the Profile field empty"><figcaption><p>TODO: Replace with screenshot showing the ConvaiEmotionController Inspector — Profile field empty before assignment, then populated after step 3.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-emotion-controller-empty-profile-inspector.png" alt="Unity Inspector showing ConvaiEmotionController added to the NPC root GameObject with the Profile field empty, ready for a profile asset to be assigned"><figcaption><p>ConvaiEmotionController added to the NPC root — the Profile field is empty until an EmotionProfile asset is assigned in step 3. No blendshape mapping is active yet.</p></figcaption></figure>
 
-<figure><img src="../../../../.gitbook/assets/TODO-emotion-sample-assets-project-window.png" alt="Unity Project window showing the bundled emotion sample assets inside the Convai SDK package"><figcaption><p>TODO: Replace with screenshot showing the bundled profile and taxonomy assets in the Project window.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-emotion-controller-profile-assigned-inspector.png" alt="Unity Inspector showing ConvaiEmotionController with ConvaiSamplesShared_EmotionProfile assigned to the Profile field"><figcaption><p>ConvaiSamplesShared_EmotionProfile assigned — the controller is now configured with pre-tuned expression slots for Reallusion characters and will begin driving blendshapes as soon as Play Mode starts.</p></figcaption></figure>
 
 ## How it works
 

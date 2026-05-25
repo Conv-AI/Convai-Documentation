@@ -33,6 +33,8 @@ You do not need to write any code for the default LTM experience. The SDK's `Dev
 {% hint style="warning" %}
 This setting applies globally to the character. Every application, SDK version, and deployment that connects to this character ID will send and receive memories. Coordinate with your team before enabling on a shared character.
 {% endhint %}
+
+<figure><img src="../../../../.gitbook/assets/convai-dashboard-long-term-memory-enabled.png" alt="Long-Term Memory toggle enabled in the Convai dashboard"><figcaption><p>Long-Term Memory toggle enabled in the Convai dashboard.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}

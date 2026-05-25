@@ -27,7 +27,11 @@ The panel shows all end-user records associated with your API key. It loads reco
 | Select or deselect all | Click **Select All** / **Unselect All** |
 | Delete selected records | Click **Delete** |
 
+<figure><img src="../../../../.gitbook/assets/convai-end-user-management-editor-panel.png" alt="End-user management panel listing user records"><figcaption><p>End-user management panel listing user records.</p></figcaption></figure>
+
 Deleting an end-user record from the editor removes **the record and all memory records for that user across every character**. This cannot be undone. A confirmation dialog appears before deletion proceeds.
+
+<figure><img src="../../../../.gitbook/assets/convai-end-user-records-list.png" alt="End-user records with name and session count"><figcaption><p>End-user records with name and session count.</p></figcaption></figure>
 {% endtab %}
 
 {% tab title="Scripting" %}

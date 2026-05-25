@@ -28,7 +28,7 @@ Select your NPC's GameObject in the **Hierarchy**. In the **Inspector**, click *
 
 This component is where you define available actions and register scene objects as targets.
 
-<figure><img src="../../../../.gitbook/assets/image (10).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-action-config-source-inspector.png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -42,7 +42,7 @@ This component receives action commands from the Convai backend and runs the mat
 Both components must be on the **same GameObject** as `ConvaiCharacter`. The dispatcher will not work otherwise.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (14).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-action-dispatcher-added-inspector.png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -56,7 +56,7 @@ This executor moves the character to a target by instantly snapping its position
 `Transform Move To Action Executor` teleports the character instantly with no animation or pathfinding. It is intended for **prototyping only**. For production use, replace it with `NavMesh Move To Action Executor` or a custom executor that uses your game's movement system.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-transform-move-to-executor-assigned.png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -80,7 +80,7 @@ Your definition should look like this:
 | Executor           | `TransformMoveToActionExecutor` (drag from Inspector) |
 | Timeout Seconds    | `0`                                                   |
 
-<figure><img src="../../../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-action-definition-move-to-inspector.png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -97,7 +97,7 @@ Still in `Convai Action Config Source`:
 The **Description** tells the Convai backend what this object is and helps the AI resolve vague references like "it" or "that thing." Write it like a short sentence describing the object in context. See [Attention & Reference Grounding](../../../unity-plugin-beta-overview/features/actions/attention-and-reference-grounding.md) for tips.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (17).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-actionable-object-crate-registered.png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}

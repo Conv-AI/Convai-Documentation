@@ -27,7 +27,7 @@ In the Inspector, click **Add Component** and navigate to **Convai > Narrative D
 
 The **Character** field is populated automatically if a `ConvaiCharacter` is on the same GameObject. If not, drag your character into the field manually.
 
-<figure><img src="../../../../.gitbook/assets/image (64).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-manager-added-inspector.png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -37,7 +37,7 @@ Click the **Sync with Backend** button in the Inspector. The Manager calls `Fetc
 
 You only need to do this when your section list changes on the dashboard. The section IDs and Unity Event wiring persist between sessions in your scene file.
 
-<figure><img src="../../../../.gitbook/assets/image (65).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-manager-sections-synced.png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 
@@ -94,7 +94,7 @@ Click the **+** button on **On Section Start** or **On Section End** to add a li
 
 **Example:** To enable a locked door when the character enters an "Access Granted" section, drag the door's `DoorController` component into the listener field and select `DoorController.Unlock`.
 
-<figure><img src="../../../../.gitbook/assets/image (66).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-manager-section-event-wired.png" alt=""><figcaption></figcaption></figure>
 
 ### Orphaned Sections
 
@@ -104,7 +104,7 @@ A section becomes orphaned when it is deleted from the dashboard but still exist
 Orphaned sections will never fire their `OnSectionStart` or `OnSectionEnd` events at runtime. If you restore the section on the dashboard, click **Sync with Backend** again to reactivate it.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (67).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-manager-orphaned-section.png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="danger" %}
 Clicking **Clear All Sections** (available via `ClearAllSectionConfigs()` at runtime, and exposed in the Inspector when switching characters) permanently removes all `UnitySectionEventConfig` entries, including all `OnSectionStart` / `OnSectionEnd` wiring. This action cannot be undone. Use it only when you are intentionally switching to a different character and no longer need the existing wiring.
@@ -155,7 +155,7 @@ The **Events** foldout exposes three global Unity Events that fire regardless of
 | **Last Synced Character ID** | Empty   | Read-only. Character ID used in last sync.       |
 | **Last Fetch Error**         | Empty   | Read-only. Last error message; empty on success. |
 
-<figure><img src="../../../../.gitbook/assets/image (68).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-manager-inspector-full.png" alt=""><figcaption></figcaption></figure>
 
 ## Conclusion
 

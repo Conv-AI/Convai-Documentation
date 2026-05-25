@@ -11,6 +11,8 @@ last_reviewed: "4.2.0"
 
 Add the component via **Convai → Dynamic Context → Convai Dynamic Context Command**.
 
+<figure><img src="../../../../.gitbook/assets/convai-dynamic-context-command-inspector.png" alt="Unity Inspector showing the ConvaiDynamicContextCommand component with Target, Command, and Events sections collapsed on an NPC GameObject"><figcaption><p>ConvaiDynamicContextCommand Inspector — the Target section resolves which character receives the command, Command defines the operation type and its parameters, and Events exposes On Executed and On Execution Skipped callbacks.</p></figcaption></figure>
+
 ## Target section
 
 Controls which `ConvaiCharacter` the command operates on.

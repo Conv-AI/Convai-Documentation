@@ -16,11 +16,15 @@ Add Vision to an existing Convai scene in three steps. The SDK adds and wires th
 
 Select the `ConvaiRoomManager` GameObject in the Hierarchy. In the Inspector, set **Connection Type** to **Video**.
 
+<figure><img src="../../../../.gitbook/assets/convai-room-manager-video-connection-type.png" alt="Connection Type set to Video on ConvaiRoomManager in the Inspector"><figcaption><p>Connection Type set to Video on ConvaiRoomManager.</p></figcaption></figure>
+
 A dialog appears immediately:
 
 > **Convai Vision Setup** — Connection Type is set to Video, but required vision components are missing. Add `ConvaiVisionPublisher` and `CameraVisionFrameSource` under this ConvaiRoomManager?
 
 Click **Add Components**.
+
+<figure><img src="../../../../.gitbook/assets/convai-vision-setup-dialog-add-components.png" alt="Convai Vision Setup dialog prompt"><figcaption><p>Convai Vision Setup dialog prompt.</p></figcaption></figure>
 
 The SDK creates a child GameObject named **ConvaiVisionRoot** under `ConvaiRoomManager` and adds both `ConvaiVisionPublisher` and `CameraVisionFrameSource` to it.
 {% endstep %}
@@ -36,6 +40,8 @@ Select the **ConvaiVisionRoot** GameObject (child of `ConvaiRoomManager`). On th
 The default **Capture Preset** is **Balanced** (1280 × 720 at 15 fps), which suits most scenarios.
 
 If **Target Camera** is blank and no camera in the scene is tagged **MainCamera**, the frame source enters `Failed` state at runtime. Always assign a camera explicitly or ensure one camera has the **MainCamera** tag.
+
+<figure><img src="../../../../.gitbook/assets/convai-camera-vision-target-camera-assigned.png" alt="Target Camera assigned on CameraVisionFrameSource in the Inspector"><figcaption><p>Target Camera assigned on CameraVisionFrameSource.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -44,6 +50,8 @@ If **Target Camera** is blank and no camera in the scene is tagged **MainCamera*
 On any scene GameObject, click **Add Component** → **Convai/Vision/Vision Debug Preview (Editor Only)**.
 
 Press **Play**. An overlay appears in the Game view showing the live camera feed and a statistics panel. Once the room connects, the FPS counter increments and the frame count increases.
+
+<figure><img src="../../../../.gitbook/assets/convai-vision-debug-preview-added-inspector.png" alt="Vision Debug Preview component added to a scene GameObject"><figcaption><p>Vision Debug Preview component added.</p></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 
@@ -64,6 +72,8 @@ If you clicked **Later** on the dialog, or want to place the components on a spe
 3. On the same GameObject (or a child), **Add Component** → **Convai/Vision/Camera Vision Frame Source**.
 4. Assign the **Target Camera** if not using `Camera.main`.
 5. Leave the **Source** field on `ConvaiVisionPublisher` blank — the publisher auto-discovers `CameraVisionFrameSource` on the same GameObject at runtime. Assign it explicitly only if you have multiple frame sources in the scene.
+
+<figure><img src="../../../../.gitbook/assets/convai-vision-publisher-frame-source-manual.png" alt="Manual vision setup showing ConvaiVisionPublisher and CameraVisionFrameSource components"><figcaption><p>Manual vision setup — publisher and frame source components.</p></figcaption></figure>
 
 ## Next steps
 

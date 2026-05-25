@@ -15,6 +15,8 @@ description: Configure ConvaiActionDispatcher's batch policy, failure policy, an
 
 The dispatcher must be on the same `GameObject` as `ConvaiCharacter`. Only one dispatcher is allowed per character.
 
+<figure><img src="../../../../.gitbook/assets/convai-action-dispatcher-inspector.png" alt="Unity Inspector showing the ConvaiActionDispatcher component with Batch Policy, Failure Policy, and lifecycle UnityEvent fields visible"><figcaption><p>ConvaiActionDispatcher in the Inspector — two policy dropdowns control queue and failure behavior; seven lifecycle UnityEvent fields expose the full batch and step execution pipeline.</p></figcaption></figure>
+
 ## Inspector fields
 
 | Field | Type | Default | Description |
@@ -45,6 +47,8 @@ Batch policy controls what happens when Convai returns a new action batch while 
 `ReplaceCurrent` cancels the **currently running executor step** via the `CancellationToken` and clears all pending batches before starting the new one. Executors must respect the cancellation token for this to be instant — see [Write a custom action executor](writing-custom-executors.md).
 {% endhint %}
 
+<figure><img src="../../../../.gitbook/assets/convai-action-dispatcher-batch-policy-dropdown.png" alt="Unity Inspector showing the Batch Policy dropdown on ConvaiActionDispatcher expanded with Queue, ReplaceCurrent, and DropIncoming options"><figcaption><p>Batch Policy dropdown — Queue is the default and suits most scenarios; ReplaceCurrent handles interrupt-driven NPC behavior; DropIncoming protects sequences that must run to completion.</p></figcaption></figure>
+
 ## Failure policy
 
 Failure policy controls what happens when an executor returns a non-success result (`Failed`, `Unhandled`, `Canceled`, or `TimedOut`).
@@ -56,9 +60,13 @@ Failure policy controls what happens when an executor returns a non-success resu
 
 Use `ContinueBatch` when actions are independent — a failed "Point At" should not prevent a following "Wave." Use `StopBatch` (the default) for dependent sequences — a failed "Move To" should prevent a following "Pick Up" that would fail anyway.
 
+<figure><img src="../../../../.gitbook/assets/convai-action-dispatcher-failure-policy-dropdown.png" alt="Unity Inspector showing the Failure Policy dropdown on ConvaiActionDispatcher expanded with StopBatch and ContinueBatch options"><figcaption><p>Failure Policy dropdown — StopBatch (default) aborts the remaining steps and fires OnBatchAborted; ContinueBatch continues through failures and fires OnBatchCompleted at the end.</p></figcaption></figure>
+
 ## Lifecycle events
 
 The dispatcher fires events at every meaningful stage of batch and step execution. Subscribe in the Inspector via UnityEvent fields, or subscribe in C# via the properties.
+
+<figure><img src="../../../../.gitbook/assets/convai-action-dispatcher-lifecycle-events.png" alt="Unity Inspector showing the ConvaiActionDispatcher lifecycle UnityEvent fields: OnBatchStarted, OnStepStarted, OnStepSucceeded, OnStepFailed, OnStepUnhandled, OnBatchCompleted, and OnBatchAborted"><figcaption><p>Dispatcher lifecycle UnityEvent fields — wire these in the Inspector to respond to batch and step transitions without writing dispatcher-side C# code.</p></figcaption></figure>
 
 ### Event firing order
 

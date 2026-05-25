@@ -25,7 +25,7 @@ In the Unity Inspector, click **Add Component** and navigate to:
 
 The component is organized into three Inspector sections: **Target**, **Command**, and **Events**.
 
-<figure><img src="../../../../.gitbook/assets/image (52).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-dynamic-context-command-inspector.png" alt=""><figcaption></figcaption></figure>
 
 ## Target Section
 

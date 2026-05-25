@@ -16,7 +16,7 @@ Click **+** to add an entry. Each entry has two fields:
 | **Key** | The placeholder name, exactly as written in the narrative design section objective (case-sensitive, without the curly braces). |
 | **Value** | The initial value. You can override this at runtime from code. |
 
-<figure><img src="../../../../.gitbook/assets/image (49).png" alt="Template Keys foldout in the ConvaiNarrativeDesignManager Inspector with two key-value entries"><figcaption><p>Template Keys foldout in ConvaiNarrativeDesignManager.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-template-keys-inspector.png" alt="Template Keys foldout in the ConvaiNarrativeDesignManager Inspector with two key-value entries"><figcaption><p>Template Keys foldout in ConvaiNarrativeDesignManager.</p></figcaption></figure>
 
 Keys defined in the Inspector are synced to the internal controller on `Awake` and sent to Convai automatically when the session opens. You do not need to call anything manually to ensure delivery.
 

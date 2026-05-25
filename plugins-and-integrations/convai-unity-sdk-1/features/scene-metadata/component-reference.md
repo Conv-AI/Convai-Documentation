@@ -14,10 +14,6 @@ Two components make up the Scene Metadata system. `ConvaiObjectMetadata` goes on
 
 ### Inspector fields
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the Unity Inspector with a `ConvaiObjectMetadata` component selected. The image must show all four fields — Object Name, Object Description, Include In Metadata, and Is Registered (read-only) — with example values filled in, for SDK version 4.2.0.
-{% endhint %}
-
 <figure><img src="../../../../.gitbook/assets/TODO-convai-object-metadata-inspector.png" alt="Unity Inspector showing ConvaiObjectMetadata with Object Name, Object Description, Include In Metadata, and Is Registered fields"><figcaption><p>TODO: Replace with screenshot of ConvaiObjectMetadata Inspector showing all four fields.</p></figcaption></figure>
 
 | Field                           | Type     | Default             | Constraint                    | Description                                                                                                                                                                                  |

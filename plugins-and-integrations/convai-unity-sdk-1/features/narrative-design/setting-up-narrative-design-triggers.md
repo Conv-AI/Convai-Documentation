@@ -19,7 +19,7 @@ For zone-based activation (Collision, Proximity, TimeBased), create an empty Gam
 
 Click **Add Component** and navigate to **Convai > Convai Narrative Design Trigger**.
 
-<figure><img src="../../../../.gitbook/assets/image (60).png" alt="ConvaiNarrativeDesignTrigger added via Add Component in the Unity Inspector"><figcaption><p>Adding ConvaiNarrativeDesignTrigger to a GameObject.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-added-inspector.png" alt="ConvaiNarrativeDesignTrigger added via Add Component in the Unity Inspector"><figcaption><p>Adding ConvaiNarrativeDesignTrigger to a GameObject.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -35,7 +35,7 @@ Click **Fetch** in the **Trigger Selection** section. The SDK calls `NarrativeDe
 
 Select the trigger you want this component to send. The **Trigger Name**, **Trigger ID**, and **Destination Section** fields populate automatically.
 
-<figure><img src="../../../../.gitbook/assets/image (61).png" alt="Trigger Selection dropdown showing fetched triggers from the Convai dashboard"><figcaption><p>Trigger dropdown populated from the Convai dashboard.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-selected-dropdown.png" alt="Trigger Selection dropdown showing fetched triggers from the Convai dashboard"><figcaption><p>Trigger dropdown populated from the Convai dashboard.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -47,7 +47,7 @@ Select one of the four activation modes described below and configure its settin
 
 ## Activation modes
 
-<figure><img src="../../../../.gitbook/assets/image (62).png" alt="Activation Settings header in the Inspector showing all four activation mode options"><figcaption><p>Activation Settings header with mode selector.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-activation-modes.png" alt="Activation Settings header in the Inspector showing all four activation mode options"><figcaption><p>Activation Settings header with mode selector.</p></figcaption></figure>
 
 ### Collision
 
@@ -108,7 +108,7 @@ narrativeTrigger.TryInvokeTrigger();
 
 These settings make the trigger resilient to common runtime conditions where the character or player may not be ready immediately.
 
-<figure><img src="../../../../.gitbook/assets/image (63).png" alt="Auto-Recovery Settings header in the Inspector"><figcaption><p>Auto-Recovery Settings header.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-auto-recovery.png" alt="Auto-Recovery Settings header in the Inspector"><figcaption><p>Auto-Recovery Settings header.</p></figcaption></figure>
 
 | Field | Default | Description |
 |---|---|---|

@@ -31,7 +31,7 @@ This is an opt-in setting — memory is **off by default**. The character will n
 Enabling memory affects all sessions for that character across all deployments — not just your Unity project. If the character is shared with other team members or projects, coordinate before enabling.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/image (54).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-dashboard-long-term-memory-enabled.png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}

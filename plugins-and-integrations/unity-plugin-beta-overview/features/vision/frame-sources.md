@@ -21,7 +21,7 @@ A frame source is the component responsible for capturing images and making them
 
 Add a frame source via **Add Component** and type the class name, or navigate the component menu under **Convai → Vision**.
 
-<figure><img src="../../../../.gitbook/assets/image (498).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-camera-vision-frame-source-inspector.png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -31,7 +31,7 @@ Add a frame source via **Add Component** and type the class name, or navigate th
 
 **Component menu path:** `Convai/Vision/Camera Vision Frame Source`&#x20;
 
-<figure><img src="../../../../.gitbook/assets/image (500).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-camera-vision-capture-preset-dropdown.png" alt=""><figcaption></figcaption></figure>
 
 ### Inspector Reference
 
@@ -73,7 +73,7 @@ Leave **Camera Capture Mode** at `Auto` unless you have a specific reason to ove
 
 **Component menu path:** `Convai/Vision/Webcam Vision Frame Source`&#x20;
 
-<figure><img src="../../../../.gitbook/assets/image (501).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-webcam-vision-frame-source-inspector.png" alt=""><figcaption></figcaption></figure>
 
 ### Inspector Reference
 
@@ -125,7 +125,7 @@ On Android and iOS the system camera permission dialog appears the first time `S
 
 **Component menu path:** `Convai/Vision/Quest Vision Frame Source`&#x20;
 
-<figure><img src="../../../../.gitbook/assets/image (502).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-quest-vision-frame-source-inspector.png" alt=""><figcaption></figcaption></figure>
 
 ### Inspector Reference
 

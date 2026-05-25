@@ -19,7 +19,7 @@ Select the GameObject that has your `ConvaiCharacter` component. In the Inspecto
 
 The Manager auto-detects the `ConvaiCharacter` on the same GameObject. If your character is on a different GameObject, drag it into the **Character** field.
 
-<figure><img src="../../../../.gitbook/assets/image (64).png" alt="ConvaiNarrativeDesignManager added to the character GameObject in the Unity Inspector"><figcaption><p>ConvaiNarrativeDesignManager on the character's GameObject.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-manager-added-inspector.png" alt="ConvaiNarrativeDesignManager added to the character GameObject in the Unity Inspector"><figcaption><p>ConvaiNarrativeDesignManager on the character's GameObject.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -29,7 +29,7 @@ In the Manager's Inspector, click **Sync with Backend**. The SDK fetches your na
 
 If the list stays empty, confirm that the character ID is set on `ConvaiCharacter` and that your API key is valid under **Edit > Project Settings > Convai SDK**. The **Last Fetch Error** field shows the specific error if something went wrong.
 
-<figure><img src="../../../../.gitbook/assets/image (71).png" alt="Narrative Sections list populated after clicking Sync with Backend"><figcaption><p>Narrative Sections list after a successful sync.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-manager-sections-list.png" alt="Narrative Sections list populated after clicking Sync with Backend"><figcaption><p>Narrative Sections list after a successful sync.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -67,7 +67,7 @@ public class NarrativeDesignDebugLogger : MonoBehaviour
 
 </details>
 
-<figure><img src="../../../../.gitbook/assets/image (72).png" alt="On Section Start Unity Event wired to a debug logger component"><figcaption><p>On Section Start wired to NarrativeDesignDebugLogger.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-section-start-event-wired.png" alt="On Section Start Unity Event wired to a debug logger component"><figcaption><p>On Section Start wired to NarrativeDesignDebugLogger.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -77,7 +77,7 @@ Create a new empty GameObject in your scene and position it where the player wil
 
 Drag your `ConvaiCharacter` into the **Character** field, or leave it blank to let **Auto Find Character** locate it automatically.
 
-<figure><img src="../../../../.gitbook/assets/image (74).png" alt="ConvaiNarrativeDesignTrigger added to an empty GameObject in the scene"><figcaption><p>ConvaiNarrativeDesignTrigger on a world-space trigger GameObject.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-component-inspector.png" alt="ConvaiNarrativeDesignTrigger added to an empty GameObject in the scene"><figcaption><p>ConvaiNarrativeDesignTrigger on a world-space trigger GameObject.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -85,7 +85,7 @@ Drag your `ConvaiCharacter` into the **Character** field, or leave it blank to l
 
 In the Trigger component's Inspector, click **Fetch** to load the named triggers from the dashboard. A dropdown appears — select the trigger that should advance the graph to your first section.
 
-<figure><img src="../../../../.gitbook/assets/image (61).png" alt="Trigger Selection dropdown populated after clicking Fetch"><figcaption><p>Trigger dropdown populated from the Convai dashboard.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-selected-dropdown.png" alt="Trigger Selection dropdown populated after clicking Fetch"><figcaption><p>Trigger dropdown populated from the Convai dashboard.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -95,7 +95,7 @@ The default activation mode is **Collision**, which uses Unity's `OnTriggerEnter
 
 Size the collider to cover the zone where you want the trigger to fire. In the Scene view, the green wireframe box shows the detection area.
 
-<figure><img src="../../../../.gitbook/assets/image (75).png" alt="Box Collider with Is Trigger enabled on the trigger zone GameObject"><figcaption><p>Box Collider with Is Trigger enabled.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-narrative-design-trigger-collider-zone.png" alt="Box Collider with Is Trigger enabled on the trigger zone GameObject"><figcaption><p>Box Collider with Is Trigger enabled.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}

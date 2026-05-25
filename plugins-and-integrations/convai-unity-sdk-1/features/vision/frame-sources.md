@@ -19,6 +19,8 @@ Add a frame source via **Add Component** and type the class name, or navigate th
 
 **Component menu path:** `Convai/Vision/Camera Vision Frame Source`
 
+<figure><img src="../../../../.gitbook/assets/convai-camera-vision-frame-source-inspector.png" alt="CameraVisionFrameSource Inspector"><figcaption><p>CameraVisionFrameSource Inspector.</p></figcaption></figure>
+
 #### Capture Settings
 
 | Field | Type | Default | Description |
@@ -55,6 +57,8 @@ If **Target Camera** is blank and no camera in the scene is tagged **MainCamera*
 | `HighDetail` | 1920 | 1080 | 30 | Scenes where fine visual detail is critical to AI comprehension |
 | `Custom` | _(set manually)_ | _(set manually)_ | _(set manually)_ | Full control over dimensions and frame rate |
 
+<figure><img src="../../../../.gitbook/assets/convai-camera-vision-capture-preset-dropdown.png" alt="Capture preset options in the Inspector dropdown"><figcaption><p>Capture preset options in the Inspector dropdown.</p></figcaption></figure>
+
 #### Camera capture mode values
 
 | Mode | When to use |
@@ -73,6 +77,8 @@ If **Target Camera** is blank and no camera in the scene is tagged **MainCamera*
 `WebcamVisionFrameSource` captures a physical camera device using Unity's `WebCamTexture` API and converts the output to a `RenderTexture`. It handles device selection, permission requests (on Android and iOS), automatic rotation correction, and resolution clamping.
 
 **Component menu path:** `Convai/Vision/Webcam Vision Frame Source`
+
+<figure><img src="../../../../.gitbook/assets/convai-webcam-vision-frame-source-inspector.png" alt="WebcamVisionFrameSource Inspector"><figcaption><p>WebcamVisionFrameSource Inspector.</p></figcaption></figure>
 
 #### Webcam Settings
 
@@ -127,6 +133,8 @@ On Android and iOS the system camera permission dialog appears the first time `S
 `QuestVisionFrameSource` streams the real-world passthrough feed from a Meta Quest 3 or 3S headset, giving Convai characters a live view of the physical environment. The component binds to Meta's `PassthroughCameraAccess` API via reflection so the SDK does not take a hard compile-time dependency on the Meta XR package.
 
 **Component menu path:** `Convai/Vision/Quest Vision Frame Source`
+
+<figure><img src="../../../../.gitbook/assets/convai-quest-vision-frame-source-inspector.png" alt="QuestVisionFrameSource Inspector"><figcaption><p>QuestVisionFrameSource Inspector.</p></figcaption></figure>
 
 {% hint style="warning" %}
 `QuestVisionFrameSource` requires **Meta Quest 3 or 3S** running Horizon OS with the Passthrough Camera API. Quest 2 and Quest Pro do not support `PassthroughCameraAccess`. In the Editor or on other platforms, the component enters `Failed` state with `ErrorKind = UnsupportedPlatform` and produces no frames.

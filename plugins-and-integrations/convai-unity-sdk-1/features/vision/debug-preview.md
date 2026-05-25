@@ -40,6 +40,8 @@ The component auto-discovers the active frame source in the scene. No explicit a
 | **Offset X** | `int` (0–200) | `10` | Horizontal inset from the selected corner in pixels. |
 | **Offset Y** | `int` (0–200) | `10` | Vertical inset from the selected corner in pixels. |
 
+<figure><img src="../../../../.gitbook/assets/convai-vision-debug-preview-overlay-layout.png" alt="Debug preview overlay positioning controls in the Inspector"><figcaption><p>Debug preview overlay positioning controls.</p></figcaption></figure>
+
 #### Aspect Ratio
 
 | Field | Type | Default | Description |
@@ -67,6 +69,8 @@ Frames: 447
 | `Resolution: WxH` | `FrameDimensions` | `(0, 0)` before capture starts. |
 | `FPS: X.X (target: Y)` | Measured over 0.5 s intervals + `TargetFrameRate` | Measured FPS updates every 0.5 seconds. |
 | `Frames: N` | `FrameCount` | Cumulative total since capture started. |
+
+<figure><img src="../../../../.gitbook/assets/convai-vision-debug-preview-stats-overlay.png" alt="Statistics panel showing FPS and frame metrics in the Vision Debug Preview overlay"><figcaption><p>Statistics panel showing FPS and frame metrics.</p></figcaption></figure>
 
 {% hint style="warning" %}
 **`IsCapturing` vs `IsPublishing`:** The statistics panel shows `IsCapturing` — whether the frame source is producing frames. This is distinct from `ConvaiVisionPublisher.IsPublishing`, which indicates whether a WebRTC video track is actively being sent to Convai. Both can be checked independently; a source may be capturing while publishing is paused or not yet started.

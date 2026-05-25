@@ -21,6 +21,8 @@ This guide walks you through the minimum setup to verify that your Convai charac
 Select the NPC's GameObject in the Hierarchy. In the Inspector, click **Add Component** and search for **Convai Dynamic Context Command**, or navigate to **Convai → Dynamic Context → Convai Dynamic Context Command**.
 
 The component appears with three sections: **Target**, **Command**, and **Events**.
+
+<figure><img src="../../../../.gitbook/assets/convai-dynamic-context-command-inspector.png" alt="Unity Inspector showing ConvaiDynamicContextCommand added to the NPC GameObject, with Target, Command, and Events sections visible"><figcaption><p>ConvaiDynamicContextCommand added to the NPC — three sections appear: Target resolves the character, Command defines the context operation, and Events exposes execution callbacks.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -50,6 +52,8 @@ The component is now configured to set a tracked state named `Location` to `Fire
 In the **Events** section of a UI Button in your scene (create a temporary one if needed), locate **On Click ()**.
 
 Click **+** to add a listener, drag the NPC's GameObject into the object field, and select **ConvaiDynamicContextCommand → Execute ()** from the function dropdown.
+
+<figure><img src="../../../../.gitbook/assets/convai-dynamic-context-command-execute-wired.png" alt="Unity Inspector showing a UI Button's On Click event wired to ConvaiDynamicContextCommand.Execute() on the NPC GameObject"><figcaption><p>Execute() wired to the button's On Click event — pressing the button at runtime delivers the configured context update to Convai and triggers the character's reaction according to the configured Reaction Mode.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}

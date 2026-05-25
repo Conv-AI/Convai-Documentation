@@ -33,10 +33,6 @@ The probe auto-resolves `ConvaiCharacter` and `ConvaiActionDispatcher` from the 
 | `_lastStepSucceeded` | `string` (TextArea) | Summary of the most recently succeeded step. |
 | `_lastUnhandledStep` | `string` (TextArea) | Summary of the most recently unhandled step. |
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the `ConvaiActionDebugProbe` component in the Unity Inspector with counter fields populated after a test batch run (e.g., `_receivedBatchCount = 1`, `_startedStepCount = 1`, `_succeededStepCount = 1`). Use the SDK version documented on this page.
-{% endhint %}
-
 <figure><img src="../../.gitbook/assets/TODO-convai-action-debug-probe-inspector.png" alt="Unity Inspector showing ConvaiActionDebugProbe with populated batch and step counters after a test run"><figcaption><p>TODO: Replace with screenshot showing ConvaiActionDebugProbe counters after a successful test batch injection.</p></figcaption></figure>
 
 ### Context menu actions
