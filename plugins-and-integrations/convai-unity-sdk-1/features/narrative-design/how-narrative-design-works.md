@@ -1,5 +1,5 @@
 ---
-title: How Narrative Design works
+title: How narrative design works
 description: Understand the Narrative Design pipeline — how sections, triggers, and template keys connect at runtime to advance a story graph.
 ---
 
@@ -69,11 +69,11 @@ Understanding which component belongs on which GameObject avoids the most common
 ## Next steps
 
 {% content-ref url="quick-start.md" %}
-[Narrative Design quick start](quick-start.md)
+[Narrative design quick start](quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="setting-up-the-narrative-design-manager.md" %}
-[Configure the Narrative Design Manager](setting-up-the-narrative-design-manager.md)
+[Configure the narrative design manager](setting-up-the-narrative-design-manager.md)
 {% endcontent-ref %}
 
 {% content-ref url="setting-up-narrative-design-triggers.md" %}

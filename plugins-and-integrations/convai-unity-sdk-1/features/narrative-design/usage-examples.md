@@ -1,5 +1,5 @@
 ---
-title: Narrative Design usage examples
+title: Narrative design usage examples
 description: Four worked Narrative Design examples from a single-trigger welcome sequence to an adaptive multi-section scenario with dynamic feedback.
 ---
 
@@ -280,7 +280,7 @@ public class ScenarioController : MonoBehaviour
 ## Next steps
 
 {% content-ref url="scripting-narrative-design.md" %}
-[Narrative Design scripting reference](scripting-narrative-design.md)
+[Narrative design scripting reference](scripting-narrative-design.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}

@@ -182,7 +182,7 @@ Do not use `Apply()` for context that must be delivered before a conversation st
 ## Next steps
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[Dynamic Context scripting API](dynamic-context-scripting-api.md)
+[Dynamic context scripting API](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshoot-dynamic-context.md" %}

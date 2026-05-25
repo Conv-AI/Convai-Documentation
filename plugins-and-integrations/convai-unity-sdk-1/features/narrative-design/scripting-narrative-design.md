@@ -1,5 +1,5 @@
 ---
-title: Narrative Design scripting reference
+title: Narrative design scripting reference
 description: Reference for IConvaiNarrativeDesign, including section events, trigger invocation, speech injection, template keys, and async fetch methods.
 ---
 
@@ -284,7 +284,7 @@ classDiagram
 ## Next steps
 
 {% content-ref url="usage-examples.md" %}
-[Narrative Design usage examples](usage-examples.md)
+[Narrative design usage examples](usage-examples.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}

@@ -1,5 +1,5 @@
 ---
-title: Narrative Design quick start
+title: Narrative design quick start
 description: Add a Narrative Design Manager and a collision trigger to a Convai character and confirm a section change in Play Mode — no code required.
 ---
 
@@ -126,12 +126,12 @@ Walking through the collider zone activated the full Narrative Design pipeline:
 
 The `ConvaiNarrativeDesignTrigger` detected the player via `OnTriggerEnter` and called `InvokeTrigger()` with the trigger name you selected. The SDK queued the trigger until the character's real-time session was open, then sent a `trigger-message` over the RTVI connection to Convai. Convai advanced the narrative graph along the matching edge and responded with a `behavior-tree-response` containing the new section ID. `ConvaiNarrativeDesignManager` matched that section ID against its local list and fired `OnSectionStart` on the matching entry.
 
-For a full explanation of this pipeline, see [How Narrative Design works](how-narrative-design-works.md).
+For a full explanation of this pipeline, see [How narrative design works](how-narrative-design-works.md).
 
 ## Next steps
 
 {% content-ref url="setting-up-the-narrative-design-manager.md" %}
-[Configure the Narrative Design Manager](setting-up-the-narrative-design-manager.md)
+[Configure the narrative design manager](setting-up-the-narrative-design-manager.md)
 {% endcontent-ref %}
 
 {% content-ref url="setting-up-narrative-design-triggers.md" %}

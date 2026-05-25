@@ -23,7 +23,7 @@ Vision requires `ConvaiRoomManager.Connection Type` set to **Video**. If it is s
 {% endhint %}
 
 <table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody>
-<tr><td><strong>How Vision works</strong><br>Understand the pipeline architecture, key concepts, component placement, and the startup sequence.</td><td><a href="how-vision-works.md">how-vision-works.md</a></td></tr>
+<tr><td><strong>How vision works</strong><br>Understand the pipeline architecture, key concepts, component placement, and the startup sequence.</td><td><a href="how-vision-works.md">how-vision-works.md</a></td></tr>
 <tr><td><strong>Vision quick start</strong><br>Get a character receiving a live camera feed with a step-by-step Inspector walkthrough — no code required.</td><td><a href="quick-start.md">quick-start.md</a></td></tr>
 <tr><td><strong>Vision frame sources</strong><br>Configure CameraVisionFrameSource, WebcamVisionFrameSource, and QuestVisionFrameSource for every platform and use case.</td><td><a href="frame-sources.md">frame-sources.md</a></td></tr>
 <tr><td><strong>Publish policies</strong><br>Choose a publish policy, tune frame rate and bitrate, and understand platform-specific behavior including WebGL.</td><td><a href="publishing-and-policies.md">publishing-and-policies.md</a></td></tr>
@@ -36,4 +36,4 @@ Vision requires `ConvaiRoomManager.Connection Type` set to **Video**. If it is s
 
 ## Next steps
 
-Start with [Vision quick start](quick-start.md) to get a working stream from a scene camera, then use [Vision frame sources](frame-sources.md) to select the right capture method for your platform. For pipeline details, see [How Vision works](how-vision-works.md).
+Start with [Vision quick start](quick-start.md) to get a working stream from a scene camera, then use [Vision frame sources](frame-sources.md) to select the right capture method for your platform. For pipeline details, see [How vision works](how-vision-works.md).

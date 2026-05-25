@@ -136,5 +136,5 @@ Scene Metadata and Dynamic Context are complementary. Use Scene Metadata to tell
 {% endcontent-ref %}
 
 {% content-ref url="../dynamic-context/README.md" %}
-[Dynamic Context](../dynamic-context/README.md)
+[Dynamic context](../dynamic-context/README.md)
 {% endcontent-ref %}

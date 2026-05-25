@@ -138,11 +138,11 @@ When `Execute()` is skipped due to a configuration or validation failure, the co
 ## Next steps
 
 {% content-ref url="dynamic-context-usage-examples.md" %}
-[Dynamic Context usage examples](dynamic-context-usage-examples.md)
+[Dynamic context usage examples](dynamic-context-usage-examples.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[Dynamic Context scripting API](dynamic-context-scripting-api.md)
+[Dynamic context scripting API](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="sync-behavior-and-timing.md" %}

@@ -1,5 +1,5 @@
 ---
-title: How Dynamic Context works
+title: How dynamic context works
 description: Understand the states and events model, canonical context format, and how updates queue and flush before and during conversations.
 last_reviewed: "4.2.0"
 ---
@@ -98,7 +98,7 @@ void Start()
 The reason this collapses into one Replace rather than replaying individual messages is efficiency: the character receives one authoritative snapshot rather than a stream of incremental updates that could arrive out of order or create redundant LLM turns.
 
 {% hint style="warning" %}
-`Apply()` is the one exception: it does not queue. If called before a conversation starts, the update is discarded. Use `SetState`, `AddEvent`, or other tracked methods for pre-conversation context. See [Dynamic Context scripting API](dynamic-context-scripting-api.md) for details.
+`Apply()` is the one exception: it does not queue. If called before a conversation starts, the update is discarded. Use `SetState`, `AddEvent`, or other tracked methods for pre-conversation context. See [Dynamic context scripting API](dynamic-context-scripting-api.md) for details.
 {% endhint %}
 
 ## When to use which command type
@@ -115,7 +115,7 @@ The reason this collapses into one Replace rather than replaying individual mess
 ## Next steps
 
 {% content-ref url="dynamic-context-quick-start.md" %}
-[Dynamic Context quick start](dynamic-context-quick-start.md)
+[Dynamic context quick start](dynamic-context-quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="command-component-reference.md" %}

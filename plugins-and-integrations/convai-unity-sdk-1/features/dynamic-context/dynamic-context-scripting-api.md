@@ -1,5 +1,5 @@
 ---
-title: Dynamic Context scripting API
+title: Dynamic context scripting API
 description: >-
   API reference for IConvaiDynamicContext — all seven method signatures, default
   parameters, pre-conversation queueing behavior, and Apply() caveats.

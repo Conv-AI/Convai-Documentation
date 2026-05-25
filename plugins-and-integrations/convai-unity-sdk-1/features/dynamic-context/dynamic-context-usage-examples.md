@@ -1,5 +1,5 @@
 ---
-title: Dynamic Context usage examples
+title: Dynamic context usage examples
 description: >-
   Four Dynamic Context examples covering a safety drill, an onboarding
   walkthrough, a guided tour with timeline events, and a multi-state emergency
@@ -182,7 +182,7 @@ Using `SetStates` for three simultaneous transitions produces one canonical rebu
 ## Next steps
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[Dynamic Context scripting API](dynamic-context-scripting-api.md)
+[Dynamic context scripting API](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="sync-behavior-and-timing.md" %}

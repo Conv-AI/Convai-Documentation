@@ -79,7 +79,7 @@ If you clicked **Later** on the dialog, or want to place the components on a spe
 ## Next steps
 
 {% content-ref url="how-vision-works.md" %}
-[How Vision works](how-vision-works.md)
+[How vision works](how-vision-works.md)
 {% endcontent-ref %}
 
 {% content-ref url="frame-sources.md" %}

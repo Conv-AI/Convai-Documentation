@@ -90,7 +90,7 @@ These properties are read-only at runtime. Set the values in the Inspector befor
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[Dynamic Context scripting API](dynamic-context-scripting-api.md)
+[Dynamic context scripting API](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="sync-behavior-and-timing.md" %}

@@ -1,5 +1,5 @@
 ---
-title: Dynamic Context quick start
+title: Dynamic context quick start
 description: Add ConvaiDynamicContextCommand to an NPC, configure a SetState command, and confirm the character acknowledges live scene conditions.
 last_reviewed: "4.2.0"
 ---
@@ -84,9 +84,9 @@ Drop it into your scene, assign your `ConvaiCharacter`, enter Play Mode, and use
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[Dynamic Context scripting API](dynamic-context-scripting-api.md)
+[Dynamic context scripting API](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-usage-examples.md" %}
-[Dynamic Context usage examples](dynamic-context-usage-examples.md)
+[Dynamic context usage examples](dynamic-context-usage-examples.md)
 {% endcontent-ref %}

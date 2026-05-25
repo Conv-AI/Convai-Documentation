@@ -1,5 +1,5 @@
 ---
-title: Configure the Narrative Design Manager
+title: Configure the narrative design manager
 description: Add and configure ConvaiNarrativeDesignManager on a character, sync sections from Convai, and wire per-section Unity Events in the Inspector.
 ---
 

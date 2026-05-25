@@ -1,5 +1,5 @@
 ---
-title: How Vision works
+title: How vision works
 description: Understand the Vision pipeline architecture, including frame sources, the publish coordinator, the WebRTC track to Convai, and the startup sequence.
 ---
 

@@ -217,5 +217,5 @@ See [Troubleshoot narrative design](troubleshooting-and-diagnostics.md) for a fu
 {% endcontent-ref %}
 
 {% content-ref url="scripting-narrative-design.md" %}
-[Narrative Design scripting reference](scripting-narrative-design.md)
+[Narrative design scripting reference](scripting-narrative-design.md)
 {% endcontent-ref %}

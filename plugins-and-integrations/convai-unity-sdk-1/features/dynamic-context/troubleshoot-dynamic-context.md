@@ -164,5 +164,5 @@ The following messages appear in the Unity Console during Dynamic Context operat
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[Dynamic Context scripting API](dynamic-context-scripting-api.md)
+[Dynamic context scripting API](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
