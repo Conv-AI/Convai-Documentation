@@ -27,7 +27,7 @@ All files uploaded to your Knowledge Bank are linked to your Convai account and 
   * **Status** – Indicates if the file is available.
 *
 
-    <figure><img src="../../.gitbook/assets/image (20).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/convai-action-dispatcher-batch-policy-dropdown.png" alt=""><figcaption></figcaption></figure>
 * Actions available:
   * **Connect** – Attach the file to a character.
   * **Disconnect** – Remove the file from a character.

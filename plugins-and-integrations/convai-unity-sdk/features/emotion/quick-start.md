@@ -1,23 +1,22 @@
 ---
+title: Emotion quick start
 description: >-
-  A step-by-step setup walkthrough that ends with a Convai character reacting
-  emotionally to live conversation.
+  Build a working emotion pipeline on a Convai NPC — attach the Emotion
+  Controller, assign the bundled sample profile, and verify expressions in Play
+  Mode.
 ---
 
-# Quick Start
+# Emotion quick start
 
-## Get Your First Emotionally Reactive NPC Working
+We will attach the Emotion Controller to an NPC, assign the bundled sample profile, and see the character's face react to live AI emotion signals in Play Mode. No custom assets are required for the initial setup.
 
-This guide walks you through the fastest path to a working emotion setup. You will attach the controller, assign the bundled sample profile, and see your character's face respond to live AI emotion signals in Play Mode — with no configuration required upfront.
+### Prerequisites
 
-{% hint style="info" %}
-**Prerequisites**
+Before starting, verify:
 
-* A Unity scene with a `ConvaiCharacter` component already set up and working (the character should respond to speech).
-* Your Convai API key is configured in **Tools → Convai → Configuration**.
-{% endhint %}
+* [ ] A `ConvaiCharacter` is in the scene and responds to speech in Play Mode
 
-## Step-by-Step Setup
+### Set up the Emotion Controller
 
 {% stepper %}
 {% step %}
@@ -27,11 +26,11 @@ Select your NPC's root GameObject in the Hierarchy. In the Inspector, click **Ad
 
 The component appears with a **Profile** field that is currently empty.
 
-<figure><img src="../../../../.gitbook/assets/image (497).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (497).png" alt="Unity Inspector showing ConvaiEmotionController added to the NPC root GameObject with the Profile field empty, ready for a profile asset to be assigned"><figcaption><p>ConvaiEmotionController added to the NPC root — the Profile field is empty until an EmotionProfile asset is assigned in step 3. No blendshape mapping is active yet.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
-#### Locate the Bundled Sample Profile
+#### Locate the bundled sample profile
 
 In the Project window, navigate to:
 
@@ -46,19 +45,15 @@ You will find two assets:
 | Asset                                 | Purpose                                                                                                                        |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `ConvaiSamplesShared_EmotionProfile`  | Pre-configured expression slots for Reallusion characters, with smoothing, micro-burst, and neutral alternation already tuned. |
-| `ConvaiSamplesShared_EmotionTaxonomy` | The default emotion vocabulary (already referenced by the profile above).                                                      |
-
-{% hint style="info" %}
-The bundled profile is configured for **Reallusion** characters out of the box. If your character uses a different rig, the pipeline will still run — but you will need to update the blendshape names in the profile slots to match your character. See Emotion Profile for how to do this.
-{% endhint %}
+| `ConvaiSamplesShared_EmotionTaxonomy` | The default emotion vocabulary, already referenced by the profile above.                                                       |
 {% endstep %}
 
 {% step %}
-#### Assign the Profile
+#### Assign the profile
 
 Drag `ConvaiSamplesShared_EmotionProfile` from the Project window into the **Profile** field on the `ConvaiEmotionController` component.
 
-<figure><img src="../../../../.gitbook/assets/image (508).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (508).png" alt="Unity Inspector showing ConvaiEmotionController with ConvaiSamplesShared_EmotionProfile assigned to the Profile field"><figcaption><p>ConvaiSamplesShared_EmotionProfile assigned — the controller is now configured with pre-tuned expression slots for Reallusion characters and will begin driving blendshapes as soon as Play Mode starts.</p></figcaption></figure>
 
 {% hint style="warning" %}
 The bundled asset is **read-only** — it lives inside the package. To adjust any settings, duplicate it first (**Ctrl+D** on Windows / **Cmd+D** on macOS), move the copy into your own `Assets/` folder, and assign the copy instead.
@@ -66,46 +61,38 @@ The bundled asset is **read-only** — it lives inside the package. To adjust an
 {% endstep %}
 
 {% step %}
-#### Enter Play Mode and Speak
+#### Enter Play Mode and speak
 
 Press **Play**. Talk to the character using your configured microphone. As the AI responds, watch the `ConvaiEmotionController` in the Inspector — the **Current** reading updates live.
-
-{% hint style="success" %}
-**Expected result:** The NPC's facial expression changes as the conversation develops — a subtle smile during warm exchanges, a more serious expression during difficult topics. If you are using a Reallusion character with the default rig, you will see the shapes activate on the character's face immediately.
-{% endhint %}
 {% endstep %}
 {% endstepper %}
 
-## What Just Happened
-
-When you spoke to the character, the following occurred automatically:
-
-1. The Convai backend processed your speech and decided on an emotional state for the character.
-2. It sent a short message containing a label such as `"happy"` and an intensity value from 1 to 3.
-3. `ConvaiEmotionController` received this, resolved `"happy"` to the canonical label `"joy"` via the taxonomy, and smoothed the intensity score over time.
-4. The profile's pre-configured blendshape slots wrote the smoothed score to the character's facial blendshapes every frame.
-5. `EmotionReading.Current` on the controller reflected the live state throughout.
-
-All of this runs automatically for the lifetime of the session.
-
-## Using a Non-Reallusion Character
-
-If your character has different blendshape names, open the duplicated profile and update the **Blendshape Names** field in each slot to match your character's shapes. The slot structure and all other settings remain valid — only the shape names need to change.
-
-For a walkthrough of how slots work and how to configure them for any rig, see Emotion Profile and Output Bindings.
-
-{% hint style="info" %}
-Mapping blendshapes for a new character can be done quickly with the help of an AI coding assistant. Share your character's blendshape list and ask it to generate the slot configuration — the slot format is straightforward and maps directly to the Inspector fields.
+{% hint style="success" %}
+**Expected result:** The NPC's facial expression changes as the conversation develops. The **Current → Dominant Label** field shows the active emotion and **Current → Dominant Score** shows its smoothed intensity. If you are using a Reallusion character with the default rig, blendshapes activate on the character's face immediately.
 {% endhint %}
 
-## Next Steps
+### How it works
 
-* **Adapt the profile to your own rig** → [Emotion Profile](../../../unity-plugin-beta-overview/features/emotion/emotion-profile.md)
-* **Understand how slot mappings work** → [Output Bindings](../../../unity-plugin-beta-overview/features/emotion/output-bindings.md)
-* **Customise the emotion vocabulary** → [Emotion Taxonomy](../../../unity-plugin-beta-overview/features/emotion/emotion-taxonomy.md)
-* **Read emotion state or trigger overrides from script** → [Scripting API](../../../unity-plugin-beta-overview/features/emotion/scripting-api-reference.md)
-* **Something not working?** → [Troubleshooting & Diagnostics](../../../unity-plugin-beta-overview/features/emotion/troubleshooting-and-diagnostics.md)
+When you spoke to the character, `ConvaiEmotionController` received the backend's emotion signal, resolved it through the taxonomy (mapping `"happy"` to `"joy"`), smoothed the intensity score over time, and wrote the score to the character's facial blendshapes every frame. For a full explanation of every stage, see [How the emotion system works](how-the-emotion-system-works.md).
 
-## Conclusion
+The bundled profile is configured for Reallusion characters. For other rigs, duplicate the profile and update the blendshape names in each slot to match your character's shapes. See [Emotion profile](emotion-profile.md) and [Emotion output bindings](output-bindings.md) for how to configure slots for any rig.
 
-You now have a complete emotion pipeline running on your character — server-driven, smoothed, and reacting to live AI decisions. If your character is Reallusion-based, expressions are already active. If not, update the blendshape names in the profile and the rest of the configuration carries over unchanged.
+### Next steps
+
+The quick start runs end-to-end with the bundled profile. These pages cover tuning and extending the setup.
+
+{% content-ref url="how-the-emotion-system-works.md" %}
+[how-the-emotion-system-works.md](how-the-emotion-system-works.md)
+{% endcontent-ref %}
+
+{% content-ref url="emotion-profile.md" %}
+[emotion-profile.md](emotion-profile.md)
+{% endcontent-ref %}
+
+{% content-ref url="output-bindings.md" %}
+[output-bindings.md](output-bindings.md)
+{% endcontent-ref %}
+
+{% content-ref url="scripting-api.md" %}
+[scripting-api.md](scripting-api.md)
+{% endcontent-ref %}

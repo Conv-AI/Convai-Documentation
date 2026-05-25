@@ -1,117 +1,141 @@
-# publishing and policies
+---
+title: Publish policies
+description: Reference for Vision publish policies, including FPS and bitrate budgets, runtime control methods, auto-publish behavior, and WebGL-specific behavior.
+---
 
-### Controlling How Vision Frames Are Published
+`ConvaiVisionPublisher` manages the WebRTC video track that carries the camera feed from Unity to Convai. A publish policy controls the client-side frame rate and bitrate budget; it does not configure any AI model or backend vision provider.
 
-`ConvaiVisionPublisher` is the component that bridges the frame source and the Convai backend. It manages the WebRTC video track lifecycle — starting, maintaining, and stopping the stream in response to room connection events — and exposes a set of policies and overrides for tuning the transport characteristics. This page explains every Inspector field, describes each publish policy, and shows how to take manual control of publishing via script.
+## Inspector reference
 
-#### ConvaiVisionPublisher Inspector Reference
+The Inspector is divided into two collapsible sections: **FRAME SOURCE** and **PUBLISH POLICY**.
 
-**Frame Source**
+#### FRAME SOURCE
 
-<table><thead><tr><th width="142.5">Field</th><th width="138.50006103515625">Type</th><th width="142">Default</th><th>Description</th></tr></thead><tbody><tr><td><strong>Frame Source Component</strong></td><td><code>MonoBehaviour</code></td><td><em>(auto-resolved)</em></td><td>The <code>IVisionFrameSource</code> implementation to publish. Leave blank to auto-discover the first available frame source in the scene. If multiple frame sources exist, assign this explicitly.</td></tr></tbody></table>
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| **Source** | `MonoBehaviour` | _(auto-discovered)_ | The `IVisionFrameSource` to publish. Leave blank to auto-discover from the same GameObject, children, or scene. Assign explicitly when multiple frame sources are present. |
+| **Track Name** | `string` | `"unity-scene"` | The name of the WebRTC track as it appears in the LiveKit room. Change only if your backend routing requires a specific name. |
 
-**Publish Policy**
+#### PUBLISH POLICY
 
-<table><thead><tr><th width="139.5">Field</th><th width="189.00006103515625">Type</th><th width="147">Default</th><th>Description</th></tr></thead><tbody><tr><td><strong>Publish Policy</strong></td><td><code>VisionPublishPolicy</code></td><td><code>AutoCompatible</code></td><td>Controls the client-side frame rate and bitrate. See the policy table below.</td></tr></tbody></table>
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| **Mode** | `VisionPublishPolicy` | `AutoCompatible` | Controls the client-side frame rate and bitrate budget. See [Publish policies](#publish-policies) below. |
+| **Max Publish FPS** | `int` (0–30) | `0` | Per-instance frame rate ceiling in fps. `0` uses the selected policy default. |
+| **Max Bitrate (bps)** | `int` | `0` | Per-instance maximum bitrate in bits per second. `0` uses the selected policy default. |
 
-**Video Settings**
+## Publish policies
 
-<table><thead><tr><th width="245.99993896484375">Field</th><th width="108.50006103515625">Type</th><th width="145">Default</th><th>Description</th></tr></thead><tbody><tr><td><strong>Video Track Name</strong></td><td><code>string</code></td><td><code>"unity-scene"</code></td><td>The name of the WebRTC video track published to the room. The Convai backend uses this name to associate the video stream with the session. Change it only if you have a specific multi-track configuration.</td></tr><tr><td><strong>Publish Frame Rate Override</strong></td><td><code>int</code> (0–30)</td><td><code>0</code></td><td>Overrides the frame rate specified by the publish policy. <code>0</code> means "use the policy default".</td></tr><tr><td><strong>Publish Bitrate Override</strong></td><td><code>int</code></td><td><code>0</code></td><td>Overrides the maximum bitrate (bits per second) specified by the publish policy. <code>0</code> means "use the policy default".</td></tr></tbody></table>
+A publish policy is a client-side transport budget. It controls how many frames per second are sent and the maximum bitrate allocated to the video track.
 
-***
+| Policy | FPS | Max bitrate | When to use |
+| --- | --- | --- | --- |
+| `AutoCompatible` | 10 | 750 kbps | Default. Balanced budget compatible with the current backend processing rate. Use this unless you have a specific reason to change it. |
+| `HighResponsiveness` | 15 | 1 000 kbps | Scenes where faster visual updates improve AI response quality (fast-moving objects, gesture recognition). Higher network cost. |
+| `LowOverhead` | 5 | 350 kbps | High-volume deployments, mobile devices with limited bandwidth, or scenes where the visual context changes slowly. |
+| `Manual` | _(none)_ | _(none)_ | Publishing does not start automatically on room connect. Call `EnablePublishing(true)` from a script to start. Use for session-gated or trigger-based capture. |
 
-#### Publish Policy Comparison
-
-`VisionPublishPolicy` is a client-side transport setting. It controls how aggressively frames are sampled and how much bandwidth is allocated. It does **not** determine which AI model or vision provider processes the stream on the backend.
-
-<table><thead><tr><th width="182.5">Policy</th><th width="84.99993896484375">Value</th><th width="90.00006103515625">Frame rate</th><th width="134.5">Max bitrate</th><th>Recommended for</th></tr></thead><tbody><tr><td><code>AutoCompatible</code></td><td><code>0</code></td><td>10 fps</td><td>750 000 bps</td><td>General use — a balanced default that works across most backend configurations</td></tr><tr><td><code>HighResponsiveness</code></td><td><code>1</code></td><td>15 fps</td><td>1 000 000 bps</td><td>Live multimodal interactions where the character must react quickly to visual changes</td></tr><tr><td><code>LowOverhead</code></td><td><code>2</code></td><td>5 fps</td><td>350 000 bps</td><td>High-volume deployments, cost-sensitive sessions, or scenarios where snapshots are more important than motion</td></tr><tr><td><code>Manual</code></td><td><code>3</code></td><td>—</td><td>—</td><td>Explicit control over when publishing starts and stops; uses <code>AutoCompatible</code> rates when enabled</td></tr></tbody></table>
-
-{% hint style="warning" %}
-`VisionPublishPolicy` describes only the **client-side transport** — frame rate and bitrate sent over the network. It does not expose or control the backend AI model, vision provider, or processing latency. Do not use it as a proxy for backend behaviour.
-{% endhint %}
-
-***
-
-#### Frame Rate and Bitrate Overrides
-
-When you need a specific value that falls between policies, use the override fields:
-
-* **Publish Frame Rate Override** accepts values from `1` to `30`. Setting `0` restores the policy default.
-* **Publish Bitrate Override** accepts any positive integer in bits per second. Setting `0` restores the policy default.
-
-Example: `AutoCompatible` policy with a 12 fps override produces 12 fps at 750 000 bps.
-
-{% hint style="info" %}
-On WebGL, the frame rate is clamped to a maximum of **15 fps** regardless of policy or override. This is a platform constraint imposed by `canvas.captureStream()`.
-{% endhint %}
-
-***
-
-#### Auto-Publish Lifecycle
-
-By default (any policy except `Manual`) publishing follows the room connection:
-
-1. Room connects with `Connection Type = Video` → publishing starts automatically.
-2. Room disconnects or the module stops → publishing stops and the video track is unpublished.
-3. The component is disabled → publishing stops.
-4. The component is re-enabled while the room is connected → publishing resumes.
-
-You do not need to call any method to trigger this behaviour.
-
-***
-
-#### Manual Policy
-
-Set **Publish Policy** to `Manual` when you want explicit control — for example, to start publishing only when a user action occurs, or to pause the stream between training modules.
-
-**Starting and stopping manually**
+To override the policy defaults for a specific instance without changing the policy, set **Max Publish FPS** or **Max Bitrate (bps)** in the Inspector. A value of `0` means "use the policy default".
 
 ```csharp
-using Convai.Modules.Vision;
+// Runtime override via script
+ConvaiVisionPublisher publisher = GetComponent<ConvaiVisionPublisher>();
+publisher.publishFrameRateOverride = 12;
+publisher.publishBitrateOverride = 600_000;
+```
 
+## Control publishing from scripts
+
+**Switch policy at runtime**
+
+Call `SetPublishPolicy` to change the transport budget while a session is running. The change takes effect on the next published frame.
+
+```csharp
 ConvaiVisionPublisher publisher = GetComponent<ConvaiVisionPublisher>();
 
-// Begin publishing (uses AutoCompatible rates)
-publisher.EnablePublishing(true);
+// Switch to low overhead for a bandwidth-constrained user
+publisher.SetPublishPolicy(VisionPublishPolicy.LowOverhead);
 
-// Stop publishing without disconnecting the room
-publisher.EnablePublishing(false);
+// Switch back to balanced
+publisher.SetPublishPolicy(VisionPublishPolicy.AutoCompatible);
 ```
 
-**Switching policies at runtime**
+**Pause and resume with Manual policy**
 
-```csharp
-// Switch to HighResponsiveness mid-session
-publisher.SetPublishPolicy(VisionPublishPolicy.HighResponsiveness);
-```
-
-`SetPublishPolicy` takes effect immediately. If publishing is active, the current track is unpublished and a new one is started with the updated profile.
-
-***
-
-### WebGL Platform Behaviour
-
-On WebGL, `ConvaiVisionPublisher` bypasses `IVisionFrameSource` entirely. Instead it captures the visible Unity browser canvas using the browser's `canvas.captureStream()` API and publishes the resulting `MediaStream` directly through the WebRTC layer. No frame source component is required or used on WebGL builds.
-
-| Aspect                 | Native (PC / Mac / Mobile / Quest)        | WebGL                           |
-| ---------------------- | ----------------------------------------- | ------------------------------- |
-| Frame source component | Required                                  | Not used                        |
-| Capture resolution     | Set by `CapturePreset` or `Custom` fields | Matches the browser canvas size |
-| Max frame rate         | Up to 30 fps                              | Capped at 15 fps                |
-| `VisionDebugPreview`   | Shows live `RenderTexture`                | Blank — no `RenderTexture` path |
-| `IsPublishing`         | `true` when track is live                 | `true` when track is live       |
-| Publish policy         | All values supported                      | Frame rate clamped to 15 fps    |
+`Manual` policy is useful when visual context is only relevant during specific moments — for example, when the player is looking at a particular object.
 
 {% hint style="warning" %}
-WebGL browser policy requires a user gesture (click, key press) before audio playback is permitted, even when video is already publishing. If your session uses both Vision and voice, ensure the user has interacted with the page before the room connects.
+`EnablePublishing` only has an effect when **Mode** is `Manual`. For other policies, publishing starts and stops with the room connection. Call `SetPublishPolicy(VisionPublishPolicy.Manual)` before calling `EnablePublishing` if you need on-demand control.
 {% endhint %}
 
-{% hint style="info" %}
-Publish policy selection still applies on WebGL — use `LowOverhead` for performance-sensitive deployments. The frame rate override field is respected, but the result is clamped to 15 fps by the platform regardless of the value you set.
+```csharp
+ConvaiVisionPublisher publisher = GetComponent<ConvaiVisionPublisher>();
+
+// Start publishing when the player focuses on an object
+void OnPlayerLookAt(GameObject target)
+{
+    publisher.EnablePublishing(true);
+}
+
+// Stop publishing when focus is lost
+void OnPlayerLookAway()
+{
+    publisher.EnablePublishing(false);
+}
+```
+
+**Check publish state**
+
+Read `IsPublishing` to confirm a video track is actively being sent.
+
+```csharp
+ConvaiVisionPublisher publisher = GetComponent<ConvaiVisionPublisher>();
+
+if (publisher.IsPublishing)
+    Debug.Log($"Publishing on track '{publisher.VideoTrackName}'");
+else
+    Debug.Log("Not publishing — check Connection Type and frame source state.");
+```
+
+`IsPublishing` becomes `true` after `ConvaiRoomManager` connects with **Connection Type** set to **Video**, the frame source reaches the `Ready` state, and the coordinator successfully opens the WebRTC video track.
+
+## Auto-publish behavior
+
+For `AutoCompatible`, `HighResponsiveness`, and `LowOverhead`, publishing begins automatically when the room connects. The publisher waits for the frame source to signal readiness before opening the track — no script is required.
+
+The sequence on room connect:
+
+1. `ConvaiRoomManager` establishes a Video connection.
+2. `ConvaiVisionPublisher` starts and resolves the frame source.
+3. The frame source starts capture and signals `Ready`.
+4. The coordinator opens a WebRTC video track named `videoTrackName`.
+5. `IsPublishing` becomes `true` and the `VideoTrackPublished` domain event fires.
+
+## WebGL
+
+On WebGL, no frame source component is required or used. `ConvaiVisionPublisher` captures the visible browser canvas automatically via `canvas.captureStream()` as soon as the room connects. The assigned **Source** field is ignored.
+
+{% hint style="danger" %}
+**WebGL: HTTPS required.** Browsers block `canvas.captureStream()` on non-HTTPS origins. The only exception is `http://localhost`. Deploy your WebGL build to an HTTPS host before testing Vision in production.
 {% endhint %}
 
-***
+| Behavior | Detail |
+| --- | --- |
+| Frame source | None required. Assigned frame source is ignored on WebGL. |
+| Frame rate | Clamped to 15 fps regardless of selected policy. |
+| Bitrate | Policy bitrate applies (no additional clamping). |
+| HTTPS | Required in production. `http://localhost` is the only exception. |
 
-### Conclusion
+## Next steps
 
-`ConvaiVisionPublisher` manages the full video track lifecycle — it starts publishing when the room connects, stops when it disconnects, and exposes a policy system for controlling frame rate and bandwidth. With publishing configured, add [Debug Preview](/broken/pages/30307daa7e13baa84251920763e0cca98771c80e) to verify the stream visually before deploying. For the full scripting API — properties, methods, and domain events — see [Scripting API](/broken/pages/d53469078b102e89385eafed659a478a5cb46694).
+{% content-ref url="scripting-api.md" %}
+[Vision scripting API](scripting-api.md)
+{% endcontent-ref %}
+
+{% content-ref url="debug-preview.md" %}
+[Vision debug preview](debug-preview.md)
+{% endcontent-ref %}
+
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Troubleshoot vision](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}

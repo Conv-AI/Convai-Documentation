@@ -32,13 +32,13 @@ Right click inside project panel and head over to **`Create > Convai > Expressio
 
 #### Viseme Bone Effector List
 
-This is where developer will tell the Convai SDK, how much each value coming from the server will affect the rotation of the bone. To better explain its working let's understand it with a diagram.&#x20;
+This is where developer will tell the Convai SDK, how much each value coming from the server will affect the rotation of the bone. To better explain its working let's understand it with a diagram.
 
 <figure><img src="../../.gitbook/assets/untiteld.png" alt=""><figcaption></figcaption></figure>
 
 Here, bone's rotation will be affected by the values coming from the server multiplied by the values in effects. For example, for TH the value will affect the bone's rotation by a 0.2 multiplier and etc. The engine representation of this would look something like this.
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 So, you can make your own Bone Effector list or use one of the many that we ship in the SDK.
 
@@ -69,7 +69,7 @@ Right click inside the project panel and head over to **`Create > Convai > Expre
 
 #### Convai Lipsync Component
 
-When you attach this component to your Convai Character, you will see something like this. &#x20;
+When you attach this component to your Convai Character, you will see something like this.
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-08-23 170102.png" alt=""><figcaption></figcaption></figure>
 

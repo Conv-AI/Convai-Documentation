@@ -54,7 +54,7 @@ If you see compile errors:
 
 * In the bottom-right, click **Enable Missing** under any **Missing Plugins** or **Missing Project Settings** notices.
 
-<figure><img src="../../../../../.gitbook/assets/Screenshot 2025-04-18 224336 (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/Screenshot 2025-04-18 224336.png" alt=""><figcaption></figcaption></figure>
 
 * Click **Restart Now** when prompted.
 * Reopen the Blueprint and ensure it compiles successfully.

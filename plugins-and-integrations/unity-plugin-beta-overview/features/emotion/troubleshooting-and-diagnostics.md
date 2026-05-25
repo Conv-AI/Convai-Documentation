@@ -33,7 +33,7 @@ Work through this checklist in order when emotion is not behaving as expected. M
 
 {% stepper %}
 {% step %}
-#### Check the Profile field
+**Check the Profile field**
 
 Select your NPC's root GameObject. On the `ConvaiEmotionController` component, confirm the **Profile** field is not empty.
 
@@ -42,7 +42,7 @@ Select your NPC's root GameObject. On the `ConvaiEmotionController` component, c
 {% endstep %}
 
 {% step %}
-#### Watch DominantScore in Play Mode
+**Watch DominantScore in Play Mode**
 
 Press **Play**, speak to the character, and observe **Current → Dominant Score** on the `ConvaiEmotionController` Inspector.
 
@@ -51,7 +51,7 @@ Press **Play**, speak to the character, and observe **Current → Dominant Score
 {% endstep %}
 
 {% step %}
-#### Check Lock Emotion and component placement
+**Check Lock Emotion and component placement**
 
 Two quick causes prevent signals from reaching the accumulator:
 
@@ -62,7 +62,7 @@ If neither applies, verify the character is actively connected — it should res
 {% endstep %}
 
 {% step %}
-#### Check output slot population
+**Check output slot population**
 
 Open the `ConvaiEmotionProfile` asset. If both the **Blendshape Binding** and **Animator Binding** lists are empty, the pipeline runs internally but writes nowhere — `DominantScore` updates, but no face movement occurs.
 
@@ -70,7 +70,7 @@ Add at least one `EmotionSlotBinding` with a valid `emotionLabel` and a blendsha
 {% endstep %}
 
 {% step %}
-#### Verify blendshape names and slot labels
+**Verify blendshape names and slot labels**
 
 If `DominantScore` updates but the face still does not move:
 

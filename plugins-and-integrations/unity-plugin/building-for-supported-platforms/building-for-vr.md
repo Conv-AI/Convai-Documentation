@@ -42,9 +42,9 @@ Make sure to download the Android platform support from Unity Hub for your proje
 
 1. Click on " _Convai / Convai Custom Package Installer / Install VR Package_ "
 
-<figure><img src="../../../.gitbook/assets/ConvaiCustomPackageInstaller (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/ConvaiCustomPackageInstaller.png" alt=""><figcaption></figcaption></figure>
 
-2. Confirm the changes and processes to be made. If you agree, the process will start.                     Click " **Yes, Proceed** " and the process will begin. You'll see logs in the console.
+2. Confirm the changes and processes to be made. If you agree, the process will start. Click " **Yes, Proceed** " and the process will begin. You'll see logs in the console.
 
 <figure><img src="../../../.gitbook/assets/ConvaiCustomPackageInstallerConfirmWindow.png" alt=""><figcaption></figcaption></figure>
 
@@ -68,7 +68,7 @@ Now everything is ready for testing. 🙂✅
 Ensure you've set up your API Key. ( Convai / Convai Setup )
 {% endhint %}
 
-### Method 2 : Manual Setup&#x20;
+### Method 2 : Manual Setup
 
 {% hint style="danger" %}
 Ensure you have the following packages installed in your project:
@@ -84,7 +84,7 @@ Ensure you have the following packages installed in your project:
 
 2. You'll see a warning that the settings will overwrite your project settings. You can either allow it by clicking " **Import** " or create a temporary project by clicking " **Switch Project** "
 
-<figure><img src="../../../.gitbook/assets/VRUpgraderWarning (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/UpgraderWarning.png" alt=""><figcaption></figcaption></figure>
 
 3. In the Import Unity Package window, review the assets to be imported and click " **Next** "
 
@@ -111,8 +111,6 @@ Now everything is ready for testing. 🙂✅
 {% hint style="warning" %}
 Ensure you've set up your API Key (Convai/Convai Setup).
 {% endhint %}
-
-
 
 ### Convai Default VR Controller Scheme
 

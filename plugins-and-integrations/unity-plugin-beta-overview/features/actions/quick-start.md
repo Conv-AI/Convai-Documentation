@@ -22,7 +22,7 @@ This guide walks you through a complete, working example: a character that moves
 
 {% stepper %}
 {% step %}
-### Add ConvaiActionConfigSource
+**Add ConvaiActionConfigSource**
 
 Select your NPC's GameObject in the **Hierarchy**. In the **Inspector**, click **Add Component** and search for `Convai Action Config Source`.
 
@@ -32,7 +32,7 @@ This component is where you define available actions and register scene objects 
 {% endstep %}
 
 {% step %}
-### Add ConvaiActionDispatcher
+**Add ConvaiActionDispatcher**
 
 With the same NPC GameObject selected, click **Add Component** again and search for `Convai Action Dispatcher`.
 
@@ -46,7 +46,7 @@ Both components must be on the **same GameObject** as `ConvaiCharacter`. The dis
 {% endstep %}
 
 {% step %}
-### Add TransformMoveToActionExecutor
+**Add TransformMoveToActionExecutor**
 
 Still on the same NPC GameObject, click **Add Component** and search for `Transform Move To Action Executor`.
 
@@ -60,7 +60,7 @@ This executor moves the character to a target by instantly snapping its position
 {% endstep %}
 
 {% step %}
-### Define the "Move To" Action
+**Define the "Move To" Action**
 
 In the `Convai Action Config Source` component in the Inspector:
 
@@ -80,11 +80,11 @@ Your definition should look like this:
 | Executor           | `TransformMoveToActionExecutor` (drag from Inspector) |
 | Timeout Seconds    | `0`                                                   |
 
-<figure><img src="../../../../.gitbook/assets/image (476).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/convai-action-definition-move-to-inspector.png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
-### Register the Crate as an Object Target
+**Register the Crate as an Object Target**
 
 Still in `Convai Action Config Source`:
 
@@ -101,7 +101,7 @@ The **Description** tells the Convai backend what this object is and helps the A
 {% endstep %}
 
 {% step %}
-### Test in Play Mode
+**Test in Play Mode**
 
 Press **Play**. Talk to your character (or use the Convai text input):
 

@@ -21,7 +21,7 @@ This guide walks you through the fastest path to a working emotion setup. You wi
 
 {% stepper %}
 {% step %}
-#### Add the Emotion Controller
+**Add the Emotion Controller**
 
 Select your NPC's root GameObject in the Hierarchy. In the Inspector, click **Add Component** and search for **Emotion Controller**, or navigate to **Convai → Embodiment → Emotion Controller**.
 
@@ -31,7 +31,7 @@ The component appears with a **Profile** field that is currently empty.
 {% endstep %}
 
 {% step %}
-#### Locate the Bundled Sample Profile
+**Locate the Bundled Sample Profile**
 
 In the Project window, navigate to:
 
@@ -54,7 +54,7 @@ The bundled profile is configured for **Reallusion** characters out of the box. 
 {% endstep %}
 
 {% step %}
-#### Assign the Profile
+**Assign the Profile**
 
 Drag `ConvaiSamplesShared_EmotionProfile` from the Project window into the **Profile** field on the `ConvaiEmotionController` component.
 
@@ -66,7 +66,7 @@ The bundled asset is **read-only** — it lives inside the package. To adjust an
 {% endstep %}
 
 {% step %}
-#### Enter Play Mode and Speak
+**Enter Play Mode and Speak**
 
 Press **Play**. Talk to the character using your configured microphone. As the AI responds, watch the `ConvaiEmotionController` in the Inspector — the **Current** reading updates live.
 

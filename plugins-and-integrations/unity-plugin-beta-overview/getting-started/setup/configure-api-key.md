@@ -17,7 +17,7 @@ The SDK needs your Convai API key to authenticate requests and enable character 
 
 {% stepper %}
 {% step %}
-### Open the Convai Account window in Unity
+**Open the Convai Account window in Unity**
 
 In the Unity top menu, go to **Convai → Account**.
 
@@ -25,7 +25,7 @@ In the Unity top menu, go to **Convai → Account**.
 {% endstep %}
 
 {% step %}
-### Copy your API Key from Convai
+**Copy your API Key from Convai**
 
 * Open Convai in your browser and sign in.
 * Locate your **API Key** in the dashboard/profile settings.
@@ -35,7 +35,7 @@ In the Unity top menu, go to **Convai → Account**.
 {% endstep %}
 
 {% step %}
-### Paste and update the key in Unity
+**Paste and update the key in Unity**
 
 * Paste the key into the **API Key** field.
 * Click **Update API Key**.

@@ -22,7 +22,7 @@ This guide walks you through a complete, working example: a character that knows
 
 {% stepper %}
 {% step %}
-#### Add the Dynamic Context Command component
+**Add the Dynamic Context Command component**
 
 With the NPC GameObject selected, click **Add Component** and navigate to:
 
@@ -30,11 +30,11 @@ With the NPC GameObject selected, click **Add Component** and navigate to:
 
 The component appears in the Inspector with three sections: **Target**, **Command**, and **Events**.
 
-<figure><img src="../../../../.gitbook/assets/image (506).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (57).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
-#### Verify Auto Resolve Character
+**Verify Auto Resolve Character**
 
 In the **Target** section, confirm that **Auto Resolve Character** is enabled (it is on by default). This tells the component to find the `ConvaiCharacter` on the same GameObject automatically — you do not need to assign it manually.
 
@@ -44,7 +44,7 @@ If the Inspector shows a warning such as _"No ConvaiCharacter found on this Game
 {% endstep %}
 
 {% step %}
-#### Configure a SetState command
+**Configure a SetState command**
 
 In the **Command** section:
 
@@ -57,7 +57,7 @@ This command will tell the character that the current location is the fire exit 
 {% endstep %}
 
 {% step %}
-#### Wire Execute() to a trigger
+**Wire Execute() to a trigger**
 
 Choose any event source that should fire the context update. For a quick test, use a UI **Button**:
 
@@ -72,7 +72,7 @@ You can also wire `Execute()` to `OnTriggerEnter`, an animation timeline signal,
 {% endstep %}
 
 {% step %}
-#### Enter Play Mode and test
+**Enter Play Mode and test**
 
 Press **Play**. Start a conversation with the character, then click the button (or trigger the event). Ask the character _"Where am I?"_ or _"What's at this location?"_ and confirm it responds with awareness of the fire exit corridor.
 {% endstep %}

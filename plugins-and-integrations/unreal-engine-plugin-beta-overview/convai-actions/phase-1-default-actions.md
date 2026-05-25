@@ -1,7 +1,7 @@
 # Phase 1: Default Actions
 
 {% embed url="https://youtu.be/yWqJQRttoEI" %}
-Watch the actions tutorial for the updated Convai Unreal Engine Plugin&#x20;
+Watch the actions tutorial for the updated Convai Unreal Engine Plugin
 {% endembed %}
 
 The chatbot ships with four action templates already registered. With a handful of editor steps and **zero Blueprint scripting**, you can have a Convai character walking to objects, following the player, and waiting on demand.
@@ -24,7 +24,7 @@ By the end of this phase your character will respond to spoken instructions like
 This toggle controls whether the chatbot's `Environment` is serialized as `action_config` at `/connect` time. Without it, the server treats the bot as conversational-only.
 {% endhint %}
 
-<figure><img src="../../../.gitbook/assets/image (2) (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (465).png" alt=""><figcaption></figcaption></figure>
 
 ### Step 2 — Register an object
 

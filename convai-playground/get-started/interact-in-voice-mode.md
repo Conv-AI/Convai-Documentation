@@ -29,7 +29,7 @@ description: >-
 
 Click the microphone button to enter **Voice Mode** and start talking to your character hands-free in real time.
 
-<figure><img src="../../.gitbook/assets/image (442).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (441).png" alt="" width="375"><figcaption></figcaption></figure>
 
 * When you exit Voice Mode, the **conversation transcript** will appear in the chat area for review.
 

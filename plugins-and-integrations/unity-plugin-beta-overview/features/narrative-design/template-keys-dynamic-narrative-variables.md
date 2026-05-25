@@ -15,7 +15,7 @@ This lets a single narrative graph serve many sessions with different participan
 
 ## Defining Keys in the Inspector
 
-Open `ConvaiNarrativeDesignManager` in the Inspector and expand the **Template Keys** foldout.&#x20;
+Open `ConvaiNarrativeDesignManager` in the Inspector and expand the **Template Keys** foldout.
 
 Click **+** to add an entry. Each entry has two fields:
 

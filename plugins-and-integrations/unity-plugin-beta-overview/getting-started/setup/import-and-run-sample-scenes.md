@@ -19,20 +19,20 @@ Sample scenes are the fastest way to verify your installation and API setup end-
 
 {% stepper %}
 {% step %}
-### Open Package Manager
+**Open Package Manager**
 
 In Unity, go to **Window → Package Manager**.
 {% endstep %}
 
 {% step %}
-### Find the Convai package
+**Find the Convai package**
 
 * Select **In Project** (left panel).
 * Click **Convai SDK** (or the installed Convai package).
 {% endstep %}
 
 {% step %}
-### Import Samples
+**Import Samples**
 
 * Open the **Samples** section in the package details.
 * Click **Import** next to a sample (example: `<SAMPLE_NAME>`).
@@ -40,7 +40,7 @@ In Unity, go to **Window → Package Manager**.
 {% endstep %}
 
 {% step %}
-### Open the sample scene
+**Open the sample scene**
 
 * Navigate to:
   * `Assets/Samples/Convai SDK for Unity/x.x.x/<SAMPLE_NAME>/Scenes`
@@ -49,7 +49,7 @@ In Unity, go to **Window → Package Manager**.
 {% endstep %}
 
 {% step %}
-### Run the conversation test
+**Run the conversation test**
 
 * Click **Play**.
 * Speak using your microphone **or** type into the Chat UI input field.

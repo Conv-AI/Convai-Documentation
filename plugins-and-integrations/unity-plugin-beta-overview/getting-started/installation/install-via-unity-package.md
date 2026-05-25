@@ -19,7 +19,7 @@ Unity Package installation is a good fallback for offline workflows, quick evalu
 
 {% stepper %}
 {% step %}
-### Download a release package
+**Download a release package**
 
 From the Convai GitHub Releases page, download either:
 
@@ -28,21 +28,21 @@ From the Convai GitHub Releases page, download either:
 {% endstep %}
 
 {% step %}
-### Import into your Unity project
+**Import into your Unity project**
 
 * Double-click the downloaded `.unitypackage`, **or**
 * Drag and drop it into your project’s **Assets** folder area.
 {% endstep %}
 
 {% step %}
-### Import everything
+**Import everything**
 
 * In the Unity import window, ensure **all items are selected**.
 * Click **Import**.
 {% endstep %}
 
 {% step %}
-### Verify the installation
+**Verify the installation**
 
 * After import, check **Console** for errors.
 * **Expected result:** No errors in Console, and a **Convai** menu appears in the top toolbar.

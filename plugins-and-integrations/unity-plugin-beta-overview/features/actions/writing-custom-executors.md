@@ -108,7 +108,7 @@ This example builds a `HighlightObjectExecutor` that enables an outline/highligh
 
 {% stepper %}
 {% step %}
-### Create the Script
+**Create the Script**
 
 Create a new C# file named `HighlightObjectExecutor.cs` in your project:
 
@@ -162,7 +162,7 @@ public sealed class HighlightObjectExecutor : MonoBehaviour, IConvaiActionExecut
 {% endstep %}
 
 {% step %}
-### Add the Component to Your NPC
+**Add the Component to Your NPC**
 
 Select your NPC's GameObject and click **Add Component → My Game → Highlight Object Executor**.
 
@@ -170,7 +170,7 @@ Set **Highlight Duration** to your desired value (default: 3 seconds).
 {% endstep %}
 
 {% step %}
-### Wire It to an Action Definition
+**Wire It to an Action Definition**
 
 In `ConvaiActionConfigSource` on the same NPC GameObject:
 
@@ -181,7 +181,7 @@ In `ConvaiActionConfigSource` on the same NPC GameObject:
 {% endstep %}
 
 {% step %}
-### Test It
+**Test It**
 
 Press **Play** and say to the character:
 

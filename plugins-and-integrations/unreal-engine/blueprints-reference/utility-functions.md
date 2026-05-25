@@ -8,7 +8,7 @@ description: Utility Functions - Blueprint Reference for Convai Unreal Engine in
 
 * **Description:** Create a new character and get the character ID for it.
 
-<figure><img src="../../../.gitbook/assets/image (145).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (73).png" alt=""><figcaption></figcaption></figure>
 
 **Inputs:**
 
@@ -22,11 +22,9 @@ description: Utility Functions - Blueprint Reference for Convai Unreal Engine in
 
 * **Char ID:** character id for the new character.
 
-#### ⛔ \[On Failure]&#x20;
+#### ⛔ \[On Failure]
 
 _Nothing is returned, check logs for details on why it failed._
-
-
 
 ### Get All Character IDs
 
@@ -40,7 +38,7 @@ _Nothing is returned, check logs for details on why it failed._
 
 * C**har IDs**: list of characters.
 
-#### ⛔ \[On Failure]&#x20;
+#### ⛔ \[On Failure]
 
 _Nothing is returned, check logs for details on why it failed._
 
@@ -58,17 +56,17 @@ _Nothing is returned, check logs for details on why it failed._
 
 #### ✅ \[On Success]
 
-* **Character Name:** Name of your character.&#x20;
-* **Voice Type:** Voice name.&#x20;
+* **Character Name:** Name of your character.
+* **Voice Type:** Voice name.
 * **Backstory:** Character backstory.
 * **Has Ready Player Me Link:** True if the avatar is configured on the website.
 * **Ready Player Me Link:** The avatar link to be used to download.
 
-#### ⛔ \[On Failure]&#x20;
+#### ⛔ \[On Failure]
 
 _Nothing is returned, check logs for details on why it failed._
 
-### Update Character&#x20;
+### Update Character
 
 * **Description:** Update a particular character.
 
@@ -95,6 +93,6 @@ To update a subset of properties, such as Voice and Name only, leave the other f
 
 _Nothing is returned._
 
-⛔ \[On Failure]&#x20;
+⛔ \[On Failure]
 
 _Nothing is returned, check logs for details on why it failed._

@@ -1,43 +1,41 @@
 ---
+title: Configure the narrative design manager
 description: >-
-  Everything ConvaiNarrativeDesignManager controls — section syncing,
-  per-section Unity Events, global transition callbacks, and the sync status
-  fields that confirm what the dashboard returned.
+  Add and configure ConvaiNarrativeDesignManager on a character, sync sections
+  from Convai, and wire per-section Unity Events in the Inspector.
 ---
 
-# Setting Up the Narrative Design Manager
+# Configure the narrative design manager
 
-## The ConvaiNarrativeDesignManager Component
+`ConvaiNarrativeDesignManager` is the permanent listening post on your character. It subscribes to section-change signals from Convai and forwards them to the Unity Events you configure in the Inspector. One Manager per character is the standard setup; it lives on the character GameObject for the lifetime of the scene.
 
-`ConvaiNarrativeDesignManager` is the permanent listening post on your character. It subscribes to section-change signals from the Convai backend and forwards them to the Unity Events you configure in the Inspector. One Manager per character is the standard setup; it lives on the character GameObject for the lifetime of the scene.
-
-## Adding the Component
+### Add the component
 
 {% stepper %}
 {% step %}
-### Select the character GameObject
+#### Select the character GameObject
 
 Choose the GameObject that has your `ConvaiCharacter` component. The Manager auto-detects the character if both components are on the same GameObject.
 {% endstep %}
 
 {% step %}
-### Add the component
+#### Add the component
 
 In the Inspector, click **Add Component** and navigate to **Convai > Narrative Design Manager**.
 
 The **Character** field is populated automatically if a `ConvaiCharacter` is on the same GameObject. If not, drag your character into the field manually.
 
-<figure><img src="../../../../.gitbook/assets/image (478).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (478).png" alt="ConvaiNarrativeDesignManager added to the character GameObject with Character field auto-populated"><figcaption><p>ConvaiNarrativeDesignManager on the character's GameObject.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
-### Sync with the backend
+#### Sync with the backend
 
 Click the **Sync with Backend** button in the Inspector. The Manager calls `FetchAndSyncFromBackend()`, which fetches your character's sections from the Convai dashboard and populates the **Narrative Sections** list.
 
 You only need to do this when your section list changes on the dashboard. The section IDs and Unity Event wiring persist between sessions in your scene file.
 
-<figure><img src="../../../../.gitbook/assets/image (479).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (479).png" alt="Narrative Sections list populated after Sync with Backend"><figcaption><p>Narrative Sections list after a successful sync.</p></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 
@@ -52,7 +50,7 @@ flowchart TD
     G --> H[Error displayed in Inspector]
 ```
 
-## Sync Status Panel
+### Sync status
 
 The **Sync Status** header in the Inspector shows the current state of the last fetch operation. All fields are read-only.
 
@@ -63,7 +61,11 @@ The **Sync Status** header in the Inspector shows the current state of the last 
 | **Last Synced Character ID** | The character ID used in the last successful sync. Useful for verifying the correct character is configured. |
 | **Last Fetch Error**         | The error message from the most recent failed fetch, if any. Empty when the last fetch succeeded.            |
 
-The sync result is also reported via the `OnSectionsSynced` event (see Global Events below). The `SectionSyncResult` it carries tells you exactly what changed:
+{% hint style="warning" %}
+If **Last Fetch Error** is not empty, the most common causes are a missing or invalid API key — see [Configure the API key](../../getting-started/configure-api-key.md) or a blank character ID on the `ConvaiCharacter` component.
+{% endhint %}
+
+The sync result is also reported via the `OnSectionsSynced` event (see Global events below). The `SectionSyncResult` it carries tells you exactly what changed:
 
 | Field                 | Description                                                          |
 | --------------------- | -------------------------------------------------------------------- |
@@ -72,11 +74,7 @@ The sync result is also reported via the `OnSectionsSynced` event (see Global Ev
 | `SectionsOrphaned`    | Sections removed from the dashboard since the last sync.             |
 | `SectionsReactivated` | Sections that were orphaned but have been restored on the dashboard. |
 
-{% hint style="warning" %}
-If **Last Fetch Error** is not empty, the most common causes are a missing or invalid API key (**Edit > Project Settings > Convai SDK**) or a blank character ID on the `ConvaiCharacter` component.
-{% endhint %}
-
-## Narrative Sections
+### Narrative sections
 
 After syncing, each dashboard section appears as an entry in the **Narrative Sections** list. Every entry is a `UnitySectionEventConfig` with the following fields:
 
@@ -88,29 +86,25 @@ After syncing, each dashboard section appears as an entry in the **Narrative Sec
 | **On Section Start** | `UnityEvent`         | Invoked when the character transitions **into** this section.                                                                    |
 | **On Section End**   | `UnityEvent`         | Invoked when the character transitions **out of** this section.                                                                  |
 
-### Wiring Section Events
+#### Wire section events
 
 Click the **+** button on **On Section Start** or **On Section End** to add a listener. You can call any public method on any GameObject in the scene — Animator parameters, AudioSource playback, UI panel activation, and so on.
 
-**Example:** To enable a locked door when the character enters an "Access Granted" section, drag the door's `DoorController` component into the listener field and select `DoorController.Unlock`.
+**Example:** To unlock a door when the character enters an "Access Granted" section, drag the door's `DoorController` component into the listener field and select `DoorController.Unlock`.
 
-<figure><img src="../../../../.gitbook/assets/image (487).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (487).png" alt="On Section Start Unity Event wired to a DoorController Unlock method"><figcaption><p>On Section Start wired to a DoorController component.</p></figcaption></figure>
 
-### Orphaned Sections
+#### Orphaned sections
 
-A section becomes orphaned when it is deleted from the dashboard but still exists in your local list. Orphaned entries are preserved so you do not lose your Unity Event wiring.
+A section becomes orphaned when it is deleted from the dashboard but still exists in your local list. Orphaned entries are preserved so you do not lose your Unity Event wiring. Their `OnSectionStart` and `OnSectionEnd` events will never fire at runtime. If you restore the section on the dashboard, click **Sync with Backend** again to reactivate it.
 
-{% hint style="warning" %}
-Orphaned sections will never fire their `OnSectionStart` or `OnSectionEnd` events at runtime. If you restore the section on the dashboard, click **Sync with Backend** again to reactivate it.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/image (486).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (486).png" alt="Inspector showing an orphaned section entry with a warning badge"><figcaption><p>An orphaned section entry in the Narrative Sections list.</p></figcaption></figure>
 
 {% hint style="danger" %}
-Clicking **Clear All Sections** (available via `ClearAllSectionConfigs()` at runtime, and exposed in the Inspector when switching characters) permanently removes all `UnitySectionEventConfig` entries, including all `OnSectionStart` / `OnSectionEnd` wiring. This action cannot be undone. Use it only when you are intentionally switching to a different character and no longer need the existing wiring.
+**Clear All Sections** permanently removes all `UnitySectionEventConfig` entries, including all `OnSectionStart` / `OnSectionEnd` wiring. This action cannot be undone. Use it only when switching to a different character and no longer need the existing wiring. The equivalent runtime call is `ClearAllSectionConfigs()`.
 {% endhint %}
 
-## Global Events
+### Global events
 
 The **Events** foldout exposes three global Unity Events that fire regardless of which specific section is active.
 
@@ -124,15 +118,15 @@ The **Events** foldout exposes three global Unity Events that fire regardless of
 
 `OnSectionDataReceived` provides the raw behavior-tree payload. Most projects do not need this directly; it is intended for advanced integrations that interpret `BehaviorTreeCode` or `BehaviorTreeConstants`.
 
-## Inspector Reference
+### Inspector reference
 
-### Character Reference Header
+#### Character Reference header
 
 | Field         | Default       | Description                                                                                                           |
 | ------------- | ------------- | --------------------------------------------------------------------------------------------------------------------- |
 | **Character** | Auto-detected | The `ConvaiCharacter` (or any `IConvaiCharacterAgent`) to listen to. Auto-found on the same GameObject if left blank. |
 
-### Narrative Sections Header
+#### Narrative Sections header
 
 | Field                      | Default  | Description                                                                    |
 | -------------------------- | -------- | ------------------------------------------------------------------------------ |
@@ -140,13 +134,13 @@ The **Events** foldout exposes three global Unity Events that fire regardless of
 | **Active Section Count**   | Computed | Number of non-orphaned entries (read-only, shown in Inspector header).         |
 | **Orphaned Section Count** | Computed | Number of orphaned entries (read-only, shown in Inspector header).             |
 
-### Template Keys Header
+#### Template Keys header
 
-| Field             | Default | Description                                                                                             |
-| ----------------- | ------- | ------------------------------------------------------------------------------------------------------- |
-| **Template Keys** | Empty   | List of `UnityTemplateKeyConfig` entries (Key / Value pairs). See Template Keys for full documentation. |
+| Field             | Default | Description                                                                                                                                                                 |
+| ----------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Template Keys** | Empty   | List of `UnityTemplateKeyConfig` entries (Key / Value pairs). See [Configure narrative template keys](template-keys-dynamic-narrative-variables.md) for full documentation. |
 
-### Sync Status Header
+#### Sync Status header
 
 | Field                        | Default | Description                                      |
 | ---------------------------- | ------- | ------------------------------------------------ |
@@ -155,8 +149,14 @@ The **Events** foldout exposes three global Unity Events that fire regardless of
 | **Last Synced Character ID** | Empty   | Read-only. Character ID used in last sync.       |
 | **Last Fetch Error**         | Empty   | Read-only. Last error message; empty on success. |
 
-<figure><img src="../../../../.gitbook/assets/image (488).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (488).png" alt="ConvaiNarrativeDesignManager Inspector showing all header sections"><figcaption><p>Full Inspector view of ConvaiNarrativeDesignManager.</p></figcaption></figure>
 
-## Conclusion
+### Next steps
 
-`ConvaiNarrativeDesignManager` is the permanent listener that bridges the Convai backend's section transitions to Unity Events in your scene. Once synced, every section change automatically reaches the correct `OnSectionStart` or `OnSectionEnd` handler without any polling or manual state tracking. Continue to [Setting Up Narrative Design Triggers](../../../unity-plugin-beta-overview/features/narrative-design/setting-up-narrative-design-triggers.md) to place the world-space components that actually advance the story graph.
+{% content-ref url="setting-up-narrative-design-triggers.md" %}
+[setting-up-narrative-design-triggers.md](setting-up-narrative-design-triggers.md)
+{% endcontent-ref %}
+
+{% content-ref url="template-keys-dynamic-narrative-variables.md" %}
+[template-keys-dynamic-narrative-variables.md](template-keys-dynamic-narrative-variables.md)
+{% endcontent-ref %}

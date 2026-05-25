@@ -16,7 +16,7 @@ In the top menu, click on **Convai**. Then, select **Custom Package Installer**.
 
 In the Convai Panel that appears, click on **Package Management** and then select **Install VR Package**.
 
-<figure><img src="../../../../../.gitbook/assets/InstallVRPackage (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/InstallVRPackage (1).png" alt=""><figcaption></figcaption></figure>
 
 ### Step 3
 
@@ -58,10 +58,10 @@ If you don’t have the **TextMeshPro** package installed, you’ll need it to d
 
 * In the **Unity Package Import** window that appears, click **Import**.
 
-<figure><img src="../../../../../.gitbook/assets/TextMeshProInstallation_2 (2).png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../../../../../.gitbook/assets/TextMeshProInstallation_2.png" alt="" width="375"><figcaption></figcaption></figure>
 
 ### **Step 9**
 
-Everything is now set up! :tada::sunglasses:&#x20;
+Everything is now set up! :tada::sunglasses:
 
 You can build your project by going to **File > Build Settings**.

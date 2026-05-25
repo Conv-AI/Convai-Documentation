@@ -1,10 +1,14 @@
-# async patterns
+---
+title: Async patterns
+description: Consume IConvaiOperation<T> and IConvaiStream<T> using async/await, coroutines, chaining, progress tracking, cancellation, and streams.
+last_reviewed: "4.2.0"
+---
 
-`IConvaiOperation<T>` and `IConvaiStream<T>` support multiple consumption patterns so you can use the style that fits your codebase — pure async/await, Unity coroutines, or a mix of both. This page shows every pattern with complete, working examples. For the full type reference, see [Operation & Stream Types](/broken/pages/899573c6355c9e81274dd551dab24ec910d8459b).
+`IConvaiOperation<T>` and `IConvaiStream<T>` support multiple consumption patterns so you can use the style that fits your codebase — pure async/await, Unity coroutines, or a mix of both. For type definitions and member references, see [Operation & Stream Types](operation-and-stream-types.md).
 
 ***
 
-## Pattern 1 — Async/Await
+## Async/await
 
 The most direct pattern. Works in any `async` method. Faulted operations throw `ConvaiOperationException`.
 
@@ -40,7 +44,7 @@ public class AsyncConnectExample : MonoBehaviour
 
 ### `await operation` vs. `await operation.AsTask()`
 
-Both produce the same result. Prefer `await operation` (direct) — it uses `GetAwaiter()` and avoids an extra allocation. Use `AsTask()` only when you need to pass the operation to a method that requires `Task<T>`, such as `Task.WhenAll`.
+Both produce the same result. Prefer `await operation` directly — it uses `GetAwaiter()` and avoids an extra allocation. Use `AsTask()` only when you need to pass the operation to a method that requires `Task<T>`, such as `Task.WhenAll`.
 
 ```csharp
 // Direct await — preferred
@@ -55,7 +59,7 @@ await Task.WhenAll(
 
 ***
 
-## Pattern 2 — Coroutines
+## Coroutines
 
 Use coroutines when your script cannot use `async` (e.g., on Unity event callbacks that do not support async), or when you prefer a callback-based flow.
 
@@ -78,11 +82,25 @@ public class CoroutineConnectExample : MonoBehaviour
 }
 ```
 
-`ToCoroutine` yields until the operation completes. `onSuccess` and `onError` are both optional — pass `null` for either if you do not need the callback.
+`ToCoroutine` yields until the operation completes. Both `onSuccess` and `onError` are optional — pass `null` for either if you do not need the callback.
+
+{% hint style="warning" %}
+In coroutines, faulted operations do **not** throw. If you omit the `onError` callback, failures are silent.
+
+```csharp
+// WRONG — silent failure
+yield return op.ToCoroutine(onSuccess: result => Use(result));
+
+// CORRECT
+yield return op.ToCoroutine(
+    onSuccess: result => Use(result),
+    onError:   err    => Debug.LogError(err.Message));
+```
+{% endhint %}
 
 ***
 
-## Pattern 3 — ContinueWith Chaining
+## ContinueWith chaining
 
 Transform the result of one operation into another without nesting `await` calls.
 
@@ -108,7 +126,7 @@ IConvaiOperation<string> nameOp = manager
 
 ***
 
-## Pattern 4 — Progress Tracking
+## Progress tracking
 
 Poll `operation.Progress` to drive a UI progress indicator. The value advances from `0.0` to `1.0` as the operation completes. Not all operations report granular progress — check `Status` for definitive completion.
 
@@ -142,7 +160,7 @@ public class ConnectProgressBar : MonoBehaviour
 
 ***
 
-## Pattern 5 — Cancellation
+## Cancellation
 
 ### Using `CancellationToken`
 
@@ -191,17 +209,17 @@ var op = manager.ConnectAsync();
 op.Cancel();
 ```
 
-### `CancellationToken` vs. `Cancel()`
+### `CancellationToken` vs. `operation.Cancel()`
 
-|                      | `CancellationToken`                              | `operation.Cancel()`                           |
-| -------------------- | ------------------------------------------------ | ---------------------------------------------- |
-| Source               | External (`CancellationTokenSource`)             | The operation handle                           |
-| Use case             | Component lifetime, timeout, linked cancellation | Single operation cancel from a button or event |
-| Coroutine compatible | Pass at operation creation                       | Call on the handle at any time                 |
+|                          | `CancellationToken`                              | `operation.Cancel()`                           |
+| ------------------------ | ------------------------------------------------ | ---------------------------------------------- |
+| **Source**               | External (`CancellationTokenSource`)             | The operation handle                           |
+| **Use case**             | Component lifetime, timeout, linked cancellation | Single operation cancel from a button or event |
+| **Coroutine compatible** | Pass at operation creation                       | Call on the handle at any time                 |
 
 ***
 
-## Pattern 6 — Streams
+## Streams
 
 Use `IConvaiStream<T>` with `await foreach` and `await using` for resource cleanup.
 
@@ -216,9 +234,34 @@ await foreach (var token in stream.ReadAllAsync(destroyCancellationToken))
 
 `ReadAllAsync` returns `IAsyncEnumerable<T>`. The loop exits when the stream reaches `Completed`, `Faulted`, or `Canceled`. Always wrap in `await using` so `DisposeAsync()` is called even if the loop exits early.
 
+{% hint style="danger" %}
+Never block the Unity main thread with `.Result` — it deadlocks.
+
+```csharp
+// WRONG — deadlocks on the main thread
+var session = manager.ConnectAsync().AsTask().Result;
+```
+
+Use `await` or `ToCoroutine()` instead.
+{% endhint %}
+
+{% hint style="warning" %}
+Always dispose streams. Failing to `await using` a stream leaks the underlying resources.
+
+```csharp
+// WRONG — no disposal
+var stream = GetTokenStream();
+await foreach (var item in stream.ReadAllAsync()) { ... }
+
+// CORRECT
+await using var stream = GetTokenStream();
+await foreach (var item in stream.ReadAllAsync()) { ... }
+```
+{% endhint %}
+
 ***
 
-## Error Handling Decision Table
+## Error handling decision table
 
 | Scenario                              | Pattern                           | Reason                                                |
 | ------------------------------------- | --------------------------------- | ----------------------------------------------------- |
@@ -232,56 +275,9 @@ await foreach (var token in stream.ReadAllAsync(destroyCancellationToken))
 
 ***
 
-## Anti-Patterns
+## Usage examples
 
-{% hint style="danger" %}
-**Never block the Unity main thread with `.Result`.**
-
-```csharp
-// WRONG — deadlocks on the main thread
-var session = manager.ConnectAsync().AsTask().Result;
-```
-
-Use `await` or `ToCoroutine()` instead.
-{% endhint %}
-
-{% hint style="warning" %}
-**Always dispose streams.**
-
-Failing to `await using` a stream leaks the underlying resources.
-
-```csharp
-// WRONG — no disposal
-var stream = GetTokenStream();
-await foreach (var item in stream.ReadAllAsync()) { ... }
-
-// CORRECT
-await using var stream = GetTokenStream();
-await foreach (var item in stream.ReadAllAsync()) { ... }
-```
-{% endhint %}
-
-{% hint style="warning" %}
-**Check `HasError` in coroutine paths.**
-
-In coroutines, faulted operations do not throw. If you omit the `onError` callback, failures are silent.
-
-```csharp
-// WRONG — silent failure
-yield return op.ToCoroutine(onSuccess: result => Use(result));
-
-// CORRECT
-yield return op.ToCoroutine(
-    onSuccess: result => Use(result),
-    onError:   err    => Debug.LogError(err.Message));
-```
-{% endhint %}
-
-***
-
-## Usage Examples
-
-### Example 1 — Loading Overlay With Progress Bar And Cancel Button
+### Example 1 — Loading overlay with progress bar and cancel button
 
 A medical training simulation shows a loading overlay while the session connects, with a visual progress bar and a cancel button for learners who want to exit before the session starts.
 
@@ -290,7 +286,6 @@ A medical training simulation shows a loading overlay while the session connects
 using Convai.Runtime.Core.Async;
 using Convai.Runtime.Facades;
 using System.Collections;
-using System.Threading;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -336,7 +331,7 @@ public class SessionLoadingOverlay : MonoBehaviour
 ```
 {% endcode %}
 
-### Example 2 — Streaming Transcript Tokens To A Custom Log Widget
+### Example 2 — Streaming transcript tokens to a custom log widget
 
 A corporate onboarding simulation streams individual transcript tokens from Convai and appends them to a custom log widget one token at a time, producing a typewriter-style effect.
 
@@ -376,18 +371,17 @@ public class StreamingTranscriptLog : MonoBehaviour
 
 ## Troubleshooting
 
-| Symptom                                                           | Likely Cause                                                                      | Fix                                                                                                     |
-| ----------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Operation stays in `Running` indefinitely                         | SDK method awaiting a response that never arrives (network timeout)               | Set a `CancellationToken` with a timeout: `new CancellationTokenSource(TimeSpan.FromSeconds(15)).Token` |
-| `HasError` is `true` but `ConvaiOperationException` is not thrown | Using coroutine path — exceptions are delivered to `onError` callback, not thrown | Add an `onError` callback to `ToCoroutine()`                                                            |
-| Cancellation has no effect after `operation.Cancel()`             | Operation already completed before cancel was called                              | Check `IsCompleted` before calling `Cancel()`                                                           |
-| Stream hangs on scene unload                                      | Stream `ReadAllAsync` loop is not passing a `CancellationToken`                   | Pass `destroyCancellationToken` to `ReadAllAsync`                                                       |
-| `ContinueWith` selector never runs                                | Source operation faulted; error is propagated, selector is skipped                | Check the chained operation's `HasError` or catch `ConvaiOperationException` at the await site          |
+| Symptom                                                            | Likely Cause                                                                     | Fix                                                                                                     |
+| ------------------------------------------------------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Operation stays in `Running` indefinitely                          | SDK method awaiting a response that never arrives (network timeout)              | Set a `CancellationToken` with a timeout: `new CancellationTokenSource(TimeSpan.FromSeconds(15)).Token` |
+| `HasError` is `true` but `ConvaiOperationException` is not thrown  | Using coroutine path — errors are delivered to `onError` callback, not thrown    | Add an `onError` callback to `ToCoroutine()`                                                            |
+| `catch (ConvaiOperationException)` block never hit on cancellation | Cancellation throws `OperationCanceledException`, not `ConvaiOperationException` | Add a separate `catch (OperationCanceledException)` block                                               |
+| Cancellation has no effect after `operation.Cancel()`              | Operation already completed before cancel was called                             | Check `IsCompleted` before calling `Cancel()`                                                           |
+| Stream hangs on scene unload                                       | `ReadAllAsync` loop not passing a `CancellationToken`                            | Pass `destroyCancellationToken` to `ReadAllAsync`                                                       |
+| `ContinueWith` selector never runs                                 | Source operation faulted; error is propagated, selector is skipped               | Check the chained operation's `HasError` or catch `ConvaiOperationException` at the await site          |
 
 ***
 
-## Next Steps
+## Next steps
 
-{% content-ref url="/broken/pages/899573c6355c9e81274dd551dab24ec910d8459b" %}
-[Broken link](/broken/pages/899573c6355c9e81274dd551dab24ec910d8459b)
-{% endcontent-ref %}
+For the full type reference behind these patterns, see [Operation & Stream Types](operation-and-stream-types.md). For SDK methods that return `IConvaiOperation<T>`, see [ConvaiManager API](convaimanager-api.md) and [Character & Player API](character-and-player-api.md).

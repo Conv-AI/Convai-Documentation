@@ -1,304 +1,199 @@
 ---
-description: >-
-  Add, list, retrieve, and delete individual memory records for any
-  user–character pair programmatically using the MemoryService scripting API.
+title: Memory management API
+description: Use ConvaiRestClient.Memory to list, add, retrieve, and delete memory records for a user–character pair — includes setup, all five methods, response types, and error handling.
+last_reviewed: "4.2.0"
 ---
 
-# Memory Management API
+The Memory Management API lets you read and write memory records directly — without waiting for a conversation to generate them. Use it to audit what a character knows about a user, seed facts before a first session, or remove specific memories that are no longer accurate.
 
-## Programmatic Memory Record Management
-
-The Memory Management API lets your application read, add, and delete individual memory records for a specific user–character pair. Under normal use, memories are accumulated automatically by the Convai backend during conversations — no code required. This API exists for cases where you need deliberate control: seeding facts before a first session, auditing what the character knows, or resetting specific memories without wiping the user's entire history.
-
-All memory operations go through `ConvaiRestClient.Memory`, which exposes the `MemoryService`.
-
-{% hint style="info" %}
-**Beta API notice:** All Long-Term Memory endpoints use a beta API flag on the Convai backend. Method signatures and response shapes are stable as of this writing, but may change in future SDK or backend updates. Pin your SDK version when shipping to production.
+{% hint style="warning" %}
+**Beta API.** Method signatures are stable but may change in future SDK updates. Pin your SDK version in production environments and review the changelog before upgrading.
 {% endhint %}
 
-## What Is a Memory Record?
+All memory operations are available on `ConvaiRestClient.Memory`. The `ConvaiRestClient` is a separate REST client from the real-time session — you can call it at any time, including outside Play Mode from editor scripts.
 
-Every fact the character knows about a user is stored as a `MemoryRecord`. The `Memory` field contains a natural-language string — not structured data. The backend writes these automatically from conversation, and they read like notes:
+***
 
-> `"The user's name is Alex and they work as a night-shift safety officer."` `"Alex struggled with fire extinguisher classification and prefers step-by-step explanations."`
+## Initialize the client
 
-When a session starts, the character receives these strings as context and can reference them naturally in replies. You can also write your own strings via `AddAsync` — any factual sentence the character should know will work.
-
-| Field       | Type                         | Description                                                                    |
-| ----------- | ---------------------------- | ------------------------------------------------------------------------------ |
-| `Id`        | `string`                     | Unique identifier for this memory record.                                      |
-| `Memory`    | `string`                     | The fact text — a natural-language sentence the character will use as context. |
-| `CreatedAt` | `string`                     | ISO 8601 timestamp when the record was first stored.                           |
-| `UpdatedAt` | `string`                     | ISO 8601 timestamp of the most recent update.                                  |
-| `Metadata`  | `Dictionary<string, object>` | Arbitrary key–value data attached to the record. May be `null`.                |
-
-## Setting Up ConvaiRestClient
-
-Memory operations require a `ConvaiRestClient` authenticated with your API key.
+Initialize `ConvaiRestClient` with your API key. The client is `IDisposable` — always use a `using` statement or call `Dispose()` when finished.
 
 ```csharp
-using System;
+using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
+```
+
+Every memory operation requires two identifiers:
+
+- **`characterId`** — the character ID from the `ConvaiCharacter` Inspector
+- **`endUserId`** — the identifier returned by your `IEndUserIdentityProvider` (or the GUID from `PlayerPrefs` if using the default `DeviceEndUserIdProvider`)
+
+***
+
+## `MemoryRecord` data model
+
+Each stored fact is a `MemoryRecord`:
+
+| Property | Type | Description |
+|---|---|---|
+| `Id` | `string` | Unique identifier for this memory record |
+| `Memory` | `string` | The stored fact as a natural-language sentence |
+| `CreatedAt` | `string` | ISO 8601 timestamp when the fact was first stored |
+| `UpdatedAt` | `string` | ISO 8601 timestamp of the last update |
+| `Metadata` | `Dictionary<string, object>` | Optional key–value data attached to this record |
+
+Example `Memory` values: `"The user's name is Alex."`, `"Alex completed the confined-space safety module on 2025-03-12."`, `"Alex prefers step-by-step explanations over summaries."`
+
+For the full type reference including response models, see [Long-term memory scripting reference](long-term-memory-scripting-reference.md).
+
+***
+
+## Memory CRUD operations
+
+### List memories
+
+Retrieve all stored memory records for a user–character pair. Results are paginated — use `page` and `pageSize` to walk through large sets.
+
+```csharp
 using Convai.RestAPI;
-using UnityEngine;
-
-public class MemoryManager : MonoBehaviour
-{
-    private ConvaiRestClient _client;
-
-    private void Awake()
-    {
-        _client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
-    }
-
-    private void OnDestroy()
-    {
-        _client?.Dispose();
-    }
-}
-```
-
-{% hint style="info" %}
-`ConvaiSettings` is the ScriptableObject that stores your API key, configured under **Tools → Convai → Configuration**. `ConvaiRestClient` implements `IDisposable` — always dispose it when finished, or manage it as a long-lived singleton.
-{% endhint %}
-
-{% hint style="info" %}
-**Finding your Character ID and end\_user\_id:** The character ID is in the **Character ID** field on your `ConvaiCharacter` Inspector. The `end_user_id` is the value your identity provider returns — if you are using the default `DeviceEndUserIdProvider`, you can read it by calling `new DeviceEndUserIdProvider().GetEndUserId()` on the main thread.
-{% endhint %}
-
-{% hint style="info" %}
-All examples on this page use `async void` for Unity compatibility. Always wrap async calls in `try/catch` as shown — `async void` does not propagate unhandled exceptions to the caller.
-{% endhint %}
-
-## Listing Memories
-
-Retrieve all memories the character has for a given user. Results are paginated — iterate until `HasMore` is `false`.
-
-```csharp
-using System;
-using System.Threading;
 using Convai.RestAPI.Internal;
-using UnityEngine;
-
-public async void ListAllMemories(
-    string characterId,
-    string endUserId,
-    CancellationToken cancellationToken = default)
-{
-    try
-    {
-        int page = 1;
-        const int pageSize = 50;
-
-        do
-        {
-            MemoryListResponse response = await _client.Memory.ListAsync(
-                characterId,
-                endUserId,
-                page,
-                pageSize,
-                cancellationToken);
-
-            foreach (MemoryRecord record in response.Memories)
-            {
-                Debug.Log($"[{record.Id}] {record.Memory}");
-            }
-
-            if (!response.HasMore) break;
-            page++;
-
-        } while (true);
-    }
-    catch (Exception e)
-    {
-        Debug.LogError($"[LTM] Failed to list memories: {e.Message}");
-    }
-}
-```
-
-### ListAsync Parameters
-
-| Parameter           | Type                | Default   | Description                                  |
-| ------------------- | ------------------- | --------- | -------------------------------------------- |
-| `characterId`       | `string`            | required  | The character whose memories to list.        |
-| `endUserId`         | `string`            | required  | The end-user whose memory partition to read. |
-| `page`              | `int`               | `1`       | One-based page number.                       |
-| `pageSize`          | `int`               | `50`      | Records per page.                            |
-| `cancellationToken` | `CancellationToken` | `default` | Optional cancellation support.               |
-
-### MemoryListResponse Fields
-
-| Field        | Type                 | Description                               |
-| ------------ | -------------------- | ----------------------------------------- |
-| `Memories`   | `List<MemoryRecord>` | Records on the current page.              |
-| `TotalCount` | `int`                | Total number of records across all pages. |
-| `Page`       | `int`                | Current page number.                      |
-| `PageSize`   | `int`                | Page size used for this response.         |
-| `HasMore`    | `bool`               | Whether additional pages exist.           |
-
-## Getting a Single Memory
-
-Retrieve one specific record by its ID. Use this when you already know the ID from a previous `ListAsync` call.
-
-```csharp
-public async void GetMemory(
-    string characterId,
-    string endUserId,
-    string memoryId,
-    CancellationToken cancellationToken = default)
-{
-    try
-    {
-        MemoryRecord record = await _client.Memory.GetAsync(
-            characterId,
-            endUserId,
-            memoryId,
-            cancellationToken);
-
-        Debug.Log($"Memory: {record.Memory} (created {record.CreatedAt})");
-    }
-    catch (Exception e)
-    {
-        Debug.LogError($"[LTM] Failed to get memory: {e.Message}");
-    }
-}
-```
-
-## Adding Memories
-
-Inject one or more facts programmatically. Pass a list of natural-language strings — the server stores each one as a separate `MemoryRecord`.
-
-```csharp
-using System;
 using System.Collections.Generic;
-using System.Threading;
-using Convai.RestAPI.Internal;
 using UnityEngine;
 
-public async void AddMemories(
-    string characterId,
-    string endUserId,
-    CancellationToken cancellationToken = default)
+public class MemoryInspector : MonoBehaviour
 {
-    try
+    [ContextMenu("List All Memories")]
+    private async void ListAllMemories()
     {
-        var facts = new List<string>
-        {
-            "The trainee completed Module 1 with a score of 88%.",
-            "The trainee struggled with fire extinguisher classification in Module 1.",
-            "The trainee prefers step-by-step explanations over summaries."
-        };
+        string characterId = "your-character-id";
+        string endUserId = "target-end-user-id";
 
-        AddMemoriesResponse response = await _client.Memory.AddAsync(
-            characterId,
-            endUserId,
-            facts,
-            metadata: null,
-            cancellationToken);
+        using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
 
-        foreach (MemoryAddResult result in response.Memories)
+        int page = 1;
+        bool hasMore = true;
+        var allMemories = new List<MemoryRecord>();
+
+        while (hasMore)
         {
-            Debug.Log($"[{result.Event}] {result.Memory}");
+            var response = await client.Memory.ListAsync(characterId, endUserId, page, pageSize: 50);
+            allMemories.AddRange(response.Memories);
+            hasMore = response.HasMore;
+            page++;
+        }
+
+        foreach (var record in allMemories)
+        {
+            Debug.Log($"[{record.Id}] {record.Memory}");
         }
     }
-    catch (Exception e)
-    {
-        Debug.LogError($"[LTM] Failed to add memories: {e.Message}");
-    }
 }
 ```
 
-### AddAsync Parameters
+**`MemoryListResponse` fields:**
 
-| Parameter           | Type                                   | Default   | Description                                     |
-| ------------------- | -------------------------------------- | --------- | ----------------------------------------------- |
-| `characterId`       | `string`                               | required  | The character to add memories to.               |
-| `endUserId`         | `string`                               | required  | The end-user whose partition to write.          |
-| `memories`          | `IReadOnlyList<string>`                | required  | One or more natural-language fact strings.      |
-| `metadata`          | `IReadOnlyDictionary<string, object>?` | `null`    | Optional metadata applied to all added records. |
-| `cancellationToken` | `CancellationToken`                    | `default` | Optional cancellation support.                  |
+| Property | Type | Description |
+|---|---|---|
+| `Memories` | `List<MemoryRecord>` | Records on this page |
+| `TotalCount` | `int` | Total number of stored records |
+| `Page` | `int` | Current page number |
+| `PageSize` | `int` | Records per page |
+| `HasMore` | `bool` | Whether additional pages exist |
 
-### MemoryAddResult Fields
+***
 
-| Field    | Description                                                               |
-| -------- | ------------------------------------------------------------------------- |
-| `Id`     | ID of the newly created or updated record.                                |
-| `Event`  | The operation the server performed: `"ADD"`, `"UPDATE"`, or `"NONE"`.     |
-| `Memory` | The final stored text. The server may rephrase the input for consistency. |
+### Get a single memory
 
-{% hint style="info" %}
-The server deduplicates and merges facts that overlap with existing records. When this happens, `Event` is `"UPDATE"` or `"NONE"` rather than `"ADD"`, and `Id` refers to the existing record. The final stored text may differ slightly from what you passed in.
-{% endhint %}
-
-## Deleting a Single Memory
-
-Remove one specific record by ID. Use this to correct a wrong fact without clearing everything.
+Retrieve one specific record by its ID.
 
 ```csharp
-public async void DeleteMemory(
-    string characterId,
-    string endUserId,
-    string memoryId,
-    CancellationToken cancellationToken = default)
-{
-    try
-    {
-        MemoryDeleteResponse response = await _client.Memory.DeleteAsync(
-            characterId,
-            endUserId,
-            memoryId,
-            cancellationToken);
-
-        Debug.Log($"Deleted: {response.Deleted} — Memory ID: {response.MemoryId}");
-    }
-    catch (Exception e)
-    {
-        Debug.LogError($"[LTM] Failed to delete memory: {e.Message}");
-    }
-}
+var record = await client.Memory.GetAsync(characterId, endUserId, memoryId);
+Debug.Log($"Memory: {record.Memory}");
 ```
 
-## Deleting All Memories for a User
+***
 
-Remove every memory record in a user–character partition at once. The end-user record itself is preserved.
+### Add memories
+
+Inject one or more facts as natural-language strings. Convai deduplicates overlapping facts — adding a fact that is semantically equivalent to an existing one updates the existing record rather than creating a duplicate.
 
 ```csharp
-public async void DeleteAllMemories(
-    string characterId,
-    string endUserId,
-    CancellationToken cancellationToken = default)
+var facts = new List<string>
 {
-    try
-    {
-        MemoryDeleteAllResponse response = await _client.Memory.DeleteAllAsync(
-            characterId,
-            endUserId,
-            cancellationToken);
+    "Jordan is a night-shift safety officer at the Northfield facility.",
+    "Jordan has completed confined-space entry certification.",
+    "Jordan prefers practical examples over theory-heavy explanations."
+};
 
-        Debug.Log($"All memories cleared for user {response.EndUserId} on character {response.CharacterId}.");
-    }
-    catch (Exception e)
-    {
-        Debug.LogError($"[LTM] Failed to delete all memories: {e.Message}");
-    }
+var response = await client.Memory.AddAsync(characterId, endUserId, facts);
+
+foreach (var result in response.Memories)
+{
+    Debug.Log($"[{result.Event}] {result.Memory} (id: {result.Id})");
 }
 ```
+
+**`AddMemoriesResponse` and `MemoryAddResult` fields:**
+
+`AddAsync` returns `AddMemoriesResponse`, which contains a `List<MemoryAddResult>`. Each result corresponds to one submitted fact:
+
+| Property | Type | Description |
+|---|---|---|
+| `Id` | `string` | ID of the created or updated record |
+| `Event` | `string` | `"add"` for new records, `"update"` for deduplicated updates |
+| `Memory` | `string` | The normalized fact text stored by Convai |
+
+***
+
+### Delete a single memory
+
+Remove one specific record by its ID.
+
+```csharp
+var result = await client.Memory.DeleteAsync(characterId, endUserId, memoryId);
+Debug.Log($"Deleted: {result.Deleted}");
+```
+
+***
+
+### Delete all memories
 
 {% hint style="danger" %}
-`DeleteAllAsync` is **irreversible**. All memory records for the specified user–character pair are permanently removed. The character will have no recollection of that user in future sessions. There is no confirmation dialog in the API — implement confirmation in your application before calling this method.
+`DeleteAllAsync` permanently removes **all** memory records for the specified user–character pair. This cannot be undone. Always implement a confirmation step before calling this in any user-facing flow.
 {% endhint %}
 
-## Full API Reference
+```csharp
+var result = await client.Memory.DeleteAllAsync(characterId, endUserId);
+Debug.Log($"All memories deleted for user {result.EndUserId} on character {result.CharacterId}.");
+```
 
-All methods are on `ConvaiRestClient.Memory` (`MemoryService`). All `CancellationToken` parameters are optional and default to `default`.
+***
 
-| Method           | Signature                                                                                                                                     | Returns                         |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| `AddAsync`       | `(string characterId, string endUserId, IReadOnlyList<string> memories, IReadOnlyDictionary<string, object>? metadata, CancellationToken ct)` | `Task<AddMemoriesResponse>`     |
-| `ListAsync`      | `(string characterId, string endUserId, int page, int pageSize, CancellationToken ct)`                                                        | `Task<MemoryListResponse>`      |
-| `GetAsync`       | `(string characterId, string endUserId, string memoryId, CancellationToken ct)`                                                               | `Task<MemoryRecord>`            |
-| `DeleteAsync`    | `(string characterId, string endUserId, string memoryId, CancellationToken ct)`                                                               | `Task<MemoryDeleteResponse>`    |
-| `DeleteAllAsync` | `(string characterId, string endUserId, CancellationToken ct)`                                                                                | `Task<MemoryDeleteAllResponse>` |
+## Handle API errors
 
-## Conclusion
+Wrap all async memory calls in `try/catch`. Failed operations throw `ConvaiRestException` with an HTTP status code.
 
-The Memory Management API gives you complete programmatic control over what a character knows about each user — you can inspect, seed, correct, and clear memory records without touching the Convai dashboard. For managing the users themselves (listing who has memories, updating metadata, or deleting user records entirely), see the next page: End-User Management.
+```csharp
+try
+{
+    var response = await client.Memory.ListAsync(characterId, endUserId);
+    // process response
+}
+catch (ConvaiRestException ex)
+{
+    Debug.LogError($"Memory API error {ex.StatusCode}: {ex.Message}");
+}
+```
+
+See [Troubleshoot long-term memory](troubleshooting-and-diagnostics.md) for a full HTTP status code reference.
+
+***
+
+## Next steps
+
+{% content-ref url="usage-examples.md" %}
+[Long-term memory usage examples](usage-examples.md)
+{% endcontent-ref %}
+
+{% content-ref url="end-user-management.md" %}
+[Manage end-user records](end-user-management.md)
+{% endcontent-ref %}

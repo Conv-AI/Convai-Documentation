@@ -4,7 +4,7 @@ description: Convai UI Prefabs - Utilize ready-to-use UI elements for Convai int
 
 # Pre-built UI Prefabs
 
-We provide several UI options to display character and user's transcript out of the box that players can use with the Convai Plugin. You can use and customize these prefabs.&#x20;
+We provide several UI options to display character and user's transcript out of the box that players can use with the Convai Plugin. You can use and customize these prefabs.
 
 The ConvaiNPC and ConvaiGRPCAPI scripts look for GameObjects with Convai Chat UI Handler as a component, and send any transcripts to the script so that it can be displayed on screen.
 
@@ -34,7 +34,7 @@ The user and character transcripts are displayed in the bottom like subtitles.
 
 The user's transcript is displayed in the top where as the character's transcript is displayed in the bottom.
 
-<figure><img src="../../../.gitbook/assets/image (287).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (285).png" alt=""><figcaption></figcaption></figure>
 
 ### Mobile Optimised UI Styles
 
@@ -58,5 +58,4 @@ Identical to [#subtitle](convai-ui-prefabs.md#subtitle "mention") UI. Includes a
 
 ### Functions to Know
 
-<table><thead><tr><th width="265"></th><th></th></tr></thead><tbody><tr><td>SendCharacterText</td><td>A public function that sends a string of text to be displayed  as character transcript along with the name of the character who said it. </td></tr><tr><td>SendUserText</td><td>A public function that sends a string of text to be displayed  as user transcript.</td></tr></tbody></table>
-
+<table><thead><tr><th width="265"></th><th></th></tr></thead><tbody><tr><td>SendCharacterText</td><td>A public function that sends a string of text to be displayed as character transcript along with the name of the character who said it.</td></tr><tr><td>SendUserText</td><td>A public function that sends a string of text to be displayed as user transcript.</td></tr></tbody></table>

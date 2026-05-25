@@ -10,23 +10,19 @@ We will create a simple scenario where the character welcomes the player and ask
 
 1. In the playground, enable Narrative Design on your character and change the starting section name to `Welcome`.<br>
 2.  Add the following to the Objective field of the Welcome section:\
-    `The time of day currently is {TimeOfDay}. Welcome the player and ask him how his {TimeOfDay} is going.` \
+    `The time of day currently is {TimeOfDay}. Welcome the player and ask him how his {TimeOfDay} is going.`\
     \
     Notice that by adding any string between curly brackets it becomes a variable, and what we did here is adding the time of day as a variable, then from Unreal we can pass either the word "Morning" or "Evening" and the character will respond accordingly.
 
-    <figure><img src="../../../../.gitbook/assets/image (372).png" alt=""><figcaption><p><br></p></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (371).png" alt=""><figcaption><p><br></p></figcaption></figure>
 3. Back in Unreal, open the character's blueprint.<br>
 4.  Set the `Narrative Template Keys` variable with a map containing the same variable name `TimeOfDay` and for demonstration purposes we will hard code the value to "Morning".<br>
 
-    <figure><img src="../../../../.gitbook/assets/image (369).png" alt=""><figcaption><p><br></p></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (366).png" alt=""><figcaption><p><br></p></figcaption></figure>
 5.  Start the play mode and try it out.<br>
 
     <figure><img src="../../../../.gitbook/assets/image (370).png" alt=""><figcaption></figcaption></figure>
-
-
 6. Feel free to try other scenarios and settings to align better with your usecase.
-
-
 
 {% hint style="info" %}
 * You can use the narrative design keys feature in both sections and triggers.

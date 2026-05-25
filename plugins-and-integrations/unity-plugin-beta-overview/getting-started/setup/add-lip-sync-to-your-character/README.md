@@ -247,7 +247,7 @@ Follow this flow to set up Lip Sync on a character from scratch.
 
 {% stepper %}
 {% step %}
-### Add the Convai Lip Sync component
+**Add the Convai Lip Sync component**
 
 Select your character's root GameObject, then add:
 
@@ -259,7 +259,7 @@ Convai > Lip Sync > Convai Lip Sync
 {% endstep %}
 
 {% step %}
-### Select the correct profile
+**Select the correct profile**
 
 In **Core Setup > Profile**, choose the profile that matches your character:
 
@@ -273,7 +273,7 @@ If you are unsure why this matters, review [**Lip Sync Profiles and Mappings**](
 {% endstep %}
 
 {% step %}
-### Assign target meshes
+**Assign target meshes**
 
 Under **Target Meshes**, click **Auto-Find**.
 
@@ -283,7 +283,7 @@ Make sure the component reports a non-zero number of meshes and blendshapes. If 
 {% endstep %}
 
 {% step %}
-### Check or assign a map
+**Check or assign a map**
 
 If your character already uses standard blendshape names for the selected profile, you can leave **Mapping** empty and use the built-in default map or you can choose a map from **provided maps.**
 
@@ -295,7 +295,7 @@ For that process, see [**Creating a Custom Map**](lip-sync-profiles-and-mappings
 {% endstep %}
 
 {% step %}
-### Run the Validator
+**Run the Validator**
 
 Click **Validator** next to the Mapping field.
 
@@ -309,13 +309,13 @@ A high coverage result, especially on mouth-related channels, is a strong indica
 {% endstep %}
 
 {% step %}
-### Choose a latency mode
+**Choose a latency mode**
 
 Under **Streaming & Latency**, keep **Latency Mode** on **Balanced** unless you already know you need a lower-latency or more network-safe configuration.
 {% endstep %}
 
 {% step %}
-### Enter Play Mode and test
+**Enter Play Mode and test**
 
 Start Play Mode and trigger a speech event from your Convai character.
 

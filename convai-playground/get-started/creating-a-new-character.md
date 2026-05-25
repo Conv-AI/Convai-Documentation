@@ -10,15 +10,13 @@ description: >-
 
 The Convai Playground allows you to design AI-powered characters with unique personalities, voices, and visual appearances. This guide will walk you through creating a new character, from initial setup to customization of avatar, voice, and languages.
 
-
-
 ## Step-by-Step Guide
 
 ### 1. Access the Creation Tool
 
 * From your **Dashboard**, click **Create a new character** in the top-right corner.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2026-05-08 135026 (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2026-05-08 135026.png" alt=""><figcaption></figcaption></figure>
 
 * A new character creation interface will open.
 * In the left menu, only **Character Description**, **Avatar**, and **Language and Speech** are active initially. Other sections will unlock after the character is created.
@@ -59,7 +57,7 @@ The Convai Playground allows you to design AI-powered characters with unique per
 * In **Language**, select one or more languages your character can speak.
 * In **Voice**, choose from the filtered voice options for your selected languages
 
-<figure><img src="../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -92,7 +90,7 @@ When the character is created, all the sections in the left menu become availabl
 
 Each of these features allows you to enhance and refine your character for more natural, intelligent, and engaging interactions. These are covered in separate documentation.
 
-<figure><img src="../../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
 
 ***
 

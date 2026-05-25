@@ -37,17 +37,17 @@ Make sure to download the Android platform support from Unity Hub for your proje
 
 1. Click on " _Convai / Convai Custom Package Installer / Install AR Package_ "
 
-<figure><img src="../../../../.gitbook/assets/ConvaiCustomPackageInstaller (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/ConvaiCustomPackageInstaller.png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../../../.gitbook/assets/ConvaiCustomPackageInstallerWindowAR (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/ConvaiCustomPackageInstallerWindowAR.png" alt=""><figcaption></figcaption></figure>
 
-2. Confirm the changes and processes to be made. If you agree, the process will start.                     Click " **Yes, Proceed** " and the process will begin. You'll see logs in the console.
+2. Confirm the changes and processes to be made. If you agree, the process will start. Click " **Yes, Proceed** " and the process will begin. You'll see logs in the console.
 
-<figure><img src="../../../../.gitbook/assets/ConvaiCustomPackageInstallerConfirmWindowAR (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/ConvaiCustomPackageInstallerConfirmWindowAR.png" alt=""><figcaption></figcaption></figure>
 
 3. If you encounter an error like "Failed to Resolve Packages," don't worry. The process will continue, and the error will be resolved automatically after the package installations are complete.
 
-<figure><img src="../../../../.gitbook/assets/ARLogs (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/ARLogs.png" alt=""><figcaption></figcaption></figure>
 
 4. Open the " _Convai / Scenes / Convai Demo - AR_ " demo scene. If the TMP Importer window appears ( It will appear if TMP Essentials is not installed in your project ), click " **Import TMP Essentials** " to install TextMeshPro Essentials for UI text objects.
 
@@ -63,7 +63,7 @@ Alternatively, you can use the " _Window / TextMeshPro / Import TMP Essential Re
 
 6. Build your project by going to " _File / Build Settings / Build_ " Ensure that the " **Convai Demo - AR** " scene is included in the Scenes in Build section.
 
-<figure><img src="../../../../.gitbook/assets/ARBuildSettings (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/ARBuildSettings.png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="warning" %}
 Ensure you've set up your API Key. ( Convai / Convai Setup )
@@ -71,7 +71,7 @@ Ensure you've set up your API Key. ( Convai / Convai Setup )
 
 Now everything is ready for testing. 🙂✅
 
-### Method 2 : Manual Setup&#x20;
+### Method 2 : Manual Setup
 
 {% hint style="danger" %}
 Ensure you have the following packages installed in your project:
@@ -82,19 +82,19 @@ Ensure you have the following packages installed in your project:
 
 1. Double-click on " Convai / Convai Custom Unity Packages / ConvaiVRUpgrader.unitypackage "
 
-<figure><img src="../../../../.gitbook/assets/ConvaiARUpgrader (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/ConvaiARUpgrader.png" alt=""><figcaption></figcaption></figure>
 
 2. You'll see a warning that the settings will overwrite your project settings. You can either allow it by clicking " **Import** " or create a temporary project by clicking " **Switch Project** "
 
-<figure><img src="../../../../.gitbook/assets/VRUpgraderWarning (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/UpgraderWarning.png" alt=""><figcaption></figcaption></figure>
 
 3. In the Import Unity Package window, review the assets to be imported and click " **Next** "
 
-<figure><img src="../../../../.gitbook/assets/ConvaiARUpgraderimport_1 (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/ConvaiARUpgraderimport_1.png" alt=""><figcaption></figcaption></figure>
 
-4. Select all settings to be changed in the Project Settings and complete the installation by clicking    " **Import** "
+4. Select all settings to be changed in the Project Settings and complete the installation by clicking " **Import** "
 
-<figure><img src="../../../../.gitbook/assets/ConvaiARUpgraderimport_2 (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/ConvaiARUpgraderimport_2.png" alt=""><figcaption></figcaption></figure>
 
 5. Open the " _Convai / Scenes / Convai Demo - AR_ " demo scene. If the TMP Importer window appears ( It will appear if TMP Essentials is not installed in your project ), click " **Import TMP Essentials** " to install TextMeshPro Essentials for UI text objects.
 
@@ -115,7 +115,7 @@ Alternatively, you can use the " _Window / TextMeshPro / Import TMP Essential Re
 8. Ensure you've set up your API Key ( Convai / Convai Setup ).
 9. Build your project by going to " _File / Build Settings / Build_ " Ensure that the " **Convai Demo - AR** " scene is included in the Scenes in **Build** section.
 
-<figure><img src="../../../../.gitbook/assets/ARBuildSettings (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/ARBuildSettings.png" alt=""><figcaption></figcaption></figure>
 
 Now everything is ready for testing. 🙂✅
 
@@ -142,7 +142,7 @@ Use the " [unity-importing-ready-player-me-rpm-characters.md](../../unity-import
 {% endhint %}
 
 6. After adding your character, click on your character.
-7. In the Inspector, adjust the Scale settings as needed. To prevent your character from moving with animation while talking, disable the " **Apply Root Motion** " option in the Animator.            &#x20;
+7. In the Inspector, adjust the Scale settings as needed. To prevent your character from moving with animation while talking, disable the " **Apply Root Motion** " option in the Animator.
 
 <figure><img src="../../../../.gitbook/assets/SetScaleOfYourCharacterandDisableRootMotion.png" alt=""><figcaption></figcaption></figure>
 
@@ -159,7 +159,7 @@ Use the " [unity-importing-ready-player-me-rpm-characters.md](../../unity-import
 Now, everything is ready to test your character in the AR environment!🙂✅
 
 {% hint style="success" %}
-Creating this prefab variant is to prevent automatic scaling ( 1,1,1 ) of your prefab when instantiated in the AR environment.&#x20;
+Creating this prefab variant is to prevent automatic scaling ( 1,1,1 ) of your prefab when instantiated in the AR environment.
 
 To avoid issues with scale adjustments, we added our character as a child to an empty parent object. For convenience, we created an empty prefab variant.
 {% endhint %}

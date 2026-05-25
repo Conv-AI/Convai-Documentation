@@ -1,140 +1,152 @@
 ---
+title: Command component reference
+last_reviewed: 4.2.0
 description: >-
-  Every field, command type, and event on the Dynamic Context Command component
-  — the complete reference for driving character awareness from the Unity
-  Inspector.
+  Complete field-by-field reference for ConvaiDynamicContextCommand — all six
+  command types, reaction modes, validation warnings, and multi-command child
+  GameObject patterns.
 ---
 
-# Command Component Reference
+# Command component reference
 
-## Convai Dynamic Context Command: Complete Inspector Reference
+`ConvaiDynamicContextCommand` is the no-code entry point for Dynamic Context. It is a `MonoBehaviour` that encapsulates one context operation and exposes its entire configuration through the Unity Inspector. The component is marked `[DisallowMultipleComponent]` — Unity prevents adding a second instance to the same GameObject. To drive multiple commands from one NPC, place each additional command on a **child GameObject** (see [Multiple commands per NPC](command-component-reference.md#multiple-commands-per-npc)).
 
-`ConvaiDynamicContextCommand` is the no-code entry point for Dynamic Context. It is a `MonoBehaviour` that encapsulates one context operation — choosing a command type, filling in its parameters, and calling `Execute()` from any `UnityEvent` source. The component is designed for designers and technical artists who need to drive character awareness from buttons, cutscenes, trigger volumes, or animation events without modifying C# scripts.
+Add the component via **Convai → Dynamic Context → Convai Dynamic Context Command**.
 
-This page documents every section, field, command type, validation warning, and event exposed by the component.
+<figure><img src="../../../../.gitbook/assets/image (57).png" alt="Unity Inspector showing the ConvaiDynamicContextCommand component with Target, Command, and Events sections collapsed on an NPC GameObject"><figcaption><p>ConvaiDynamicContextCommand Inspector — the Target section resolves which character receives the command, Command defines the operation type and its parameters, and Events exposes On Executed and On Execution Skipped callbacks.</p></figcaption></figure>
 
-{% hint style="info" %}
-`ConvaiDynamicContextCommand` is marked `[DisallowMultipleComponent]`, so only one instance can exist per GameObject. If you need multiple independent context commands on the same NPC, place additional commands on child GameObjects.
-{% endhint %}
+### Target section
 
-## Adding the Component
+Controls which `ConvaiCharacter` the command operates on.
 
-In the Unity Inspector, click **Add Component** and navigate to:
+| Field                  | Type              | Default | Description                                                                                                                                     |
+| ---------------------- | ----------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Character              | `ConvaiCharacter` | None    | Explicit character reference. Takes precedence over auto-resolve when assigned. Use when the command is on a different GameObject than the NPC. |
+| Auto Resolve Character | `bool`            | `true`  | When enabled, the component calls `GetComponent<ConvaiCharacter>()` on the **same GameObject** at execution time.                               |
 
-**Convai → Dynamic Context → Convai Dynamic Context Command**
+**Resolution order:** If **Character** is assigned, it is used regardless of the **Auto Resolve Character** setting. If **Character** is empty and **Auto Resolve Character** is enabled, the component searches the same GameObject. If neither resolves a character, `Execute()` is skipped and **On Execution Skipped** fires.
 
-The component is organized into three Inspector sections: **Target**, **Command**, and **Events**.
+### Command section
 
-<figure><img src="../../../../.gitbook/assets/image (506).png" alt=""><figcaption></figcaption></figure>
+#### Command type
 
-## Target Section
+The **Command Type** field controls what operation `Execute()` performs. One component = one command type.
 
-The Target section controls which `ConvaiCharacter` the command operates on.
+**Set State**
 
-<table><thead><tr><th width="213">Field</th><th width="158.5">Type</th><th width="118.5">Default</th><th>Description</th></tr></thead><tbody><tr><td><strong>Character</strong></td><td><code>ConvaiCharacter</code></td><td>None</td><td>Optional explicit character reference. Assign this when the command GameObject is not the NPC itself — for example, a separate trigger volume or UI element in the scene.</td></tr><tr><td><strong>Auto Resolve Character</strong></td><td><code>bool</code></td><td><code>true</code></td><td>When enabled, the component finds a <code>ConvaiCharacter</code> on the same GameObject via <code>GetComponent&#x3C;ConvaiCharacter>()</code>. Disable this and assign <strong>Character</strong> explicitly when the command is on a different GameObject.</td></tr></tbody></table>
+Updates a single tracked state. If the state does not exist, it is created. If the value is identical to the current value, no update is sent (idempotent).
 
-**Character resolution order:** If **Character** is assigned, it is always used regardless of the **Auto Resolve Character** setting. If **Character** is not assigned and **Auto Resolve Character** is enabled, the component searches the same GameObject.
+| Field       | Description                                                                 |
+| ----------- | --------------------------------------------------------------------------- |
+| State Name  | The state identifier. Must be non-empty and non-whitespace. Case-sensitive. |
+| State Value | The value to assign. May be empty string.                                   |
 
-## Command Section
+**Set States**
 
-The **Command Type** dropdown selects which operation `Execute()` performs. The fields shown below the dropdown change depending on the selected type.
+Updates multiple tracked states atomically in one call. Preferred over multiple sequential `SetState` commands when several values change simultaneously — produces one canonical rebuild rather than multiple.
 
-### SetState
+| Field         | Description                                                                                                       |
+| ------------- | ----------------------------------------------------------------------------------------------------------------- |
+| State Entries | List of Name / Value pairs. Must have at least one entry. All names must be non-empty and unique within the list. |
 
-Updates a single tracked state on the character. If the state does not exist, it is created. If it already exists with the same value, no update is sent — the operation is idempotent.
+**Add Event**
 
-<table><thead><tr><th width="215.49993896484375">Field</th><th width="165">Default</th><th>Description</th></tr></thead><tbody><tr><td><strong>State Name</strong></td><td><code>""</code></td><td>The name of the state to set. Must be non-empty and non-whitespace.</td></tr><tr><td><strong>State Value</strong></td><td><code>""</code></td><td>The value to assign. An empty string is a valid value.</td></tr><tr><td><strong>Reaction</strong></td><td><code>Auto</code></td><td>Controls whether the character immediately generates a new response. See Reaction Mode below.</td></tr></tbody></table>
+Appends a chronological event entry. Events are never replaced or deduplicated — each call adds a new line in call order, after all states in the canonical context.
 
-### SetStates
+| Field      | Description                                              |
+| ---------- | -------------------------------------------------------- |
+| Event Text | The event description sent to Convai. Must be non-empty. |
 
-Updates multiple tracked states in a single atomic operation. Use this when several values change simultaneously — it avoids redundant canonical rebuilds and sends a cleaner, batched update to the character.
+**Remove State**
 
-<table><thead><tr><th width="166.5">Field</th><th width="138.5">Default</th><th>Description</th></tr></thead><tbody><tr><td><strong>State Entries</strong></td><td>Empty list</td><td>A reorderable list of Name/Value pairs. Each entry has a <strong>Name</strong> and <strong>Value</strong> field. Drag entries to reorder them; the order affects insertion order in the canonical context for any new states.</td></tr><tr><td><strong>Reaction</strong></td><td><code>Auto</code></td><td>Applied to the entire batch.</td></tr></tbody></table>
+Removes a tracked state by name and sends an updated canonical context to Convai. If the state is not tracked, `Execute()` completes without sending any update.
 
-{% hint style="warning" %}
-The list must contain at least one entry with a non-empty, non-whitespace name. Duplicate names within the list will block `Execute()` and show a validation warning in the Inspector.
-{% endhint %}
+| Field      | Description                                         |
+| ---------- | --------------------------------------------------- |
+| State Name | The name of the state to remove. Must be non-empty. |
 
-### AddEvent
+**Reset**
 
-Appends a chronological event to the character's context. Events are never replaced or deduplicated — they accumulate in order after all tracked states.
-
-<table><thead><tr><th width="182">Field</th><th width="190.00006103515625">Default</th><th>Description</th></tr></thead><tbody><tr><td><strong>Event Text</strong></td><td><code>""</code></td><td>The text of the event to append. Must be non-empty and non-whitespace.</td></tr><tr><td><strong>Reaction</strong></td><td><code>Auto</code></td><td>With <code>Auto</code>, the server decides whether the event warrants an immediate character response. Use <code>ReactImmediately</code> when the event is significant enough to require the character to acknowledge it right away.</td></tr></tbody></table>
-
-### RemoveState
-
-Removes a tracked state by name. After removal, the canonical context is rebuilt and sent to the character as a Replace operation.
-
-<table><thead><tr><th width="166.49993896484375">Field</th><th width="136">Default</th><th>Description</th></tr></thead><tbody><tr><td><strong>State Name</strong></td><td><code>""</code></td><td>The name of the state to remove. Must match an existing state name exactly (case-sensitive).</td></tr></tbody></table>
-
-{% hint style="info" %}
-**Remove State** does not expose a Reaction field in the Inspector. Removal always triggers a canonical Replace sync internally, and the Inspector note reads: _"Remove State rebuilds tracked canonical context and does not use reaction mode."_
-{% endhint %}
-
-### Reset
-
-Clears all tracked states and events from the character's dynamic context. This is a hard reset of the runtime context layer for the current session.
-
-This command type has no configurable fields. After clearing the local tracker, a Reset message is sent to the character.
-
-{% hint style="info" %}
-**Reset** ignores Reaction Mode. The Inspector note reads: _"Reset clears all tracked character context and ignores reaction mode."_ Reset does not re-send the initial dynamic info text configured on `ConvaiCharacter` — only the runtime-tracked states and events are erased.
-{% endhint %}
-
-### RawUpdate
-
-Sends a typed update directly to the transport layer, bypassing the local tracked state entirely. Use this only for advanced cases where you need precise control over the mode and text sent to the backend.
-
-<table><thead><tr><th width="133.5">Field</th><th width="142">Default</th><th>Description</th></tr></thead><tbody><tr><td><strong>Raw Mode</strong></td><td><code>Append</code></td><td>How the text is applied on the backend. <code>Append</code> adds to existing context; <code>Replace</code> overwrites it entirely; <code>Reset</code> clears it (text ignored when mode is <code>Reset</code>).</td></tr><tr><td><strong>Raw Text</strong></td><td><code>""</code></td><td>The context text to send. Required unless <strong>Raw Mode</strong> is <code>Reset</code>.</td></tr><tr><td><strong>Reaction</strong></td><td><code>Auto</code></td><td>Controls the LLM re-prompt behavior.</td></tr></tbody></table>
+Clears all tracked states and events from the character's Dynamic Context and sends a Reset message to Convai. Takes no additional fields.
 
 {% hint style="warning" %}
-**Raw Update bypasses the local tracked state.** Updates sent via Raw Update are not reflected in `TryGetStateValue()` results, and the canonical rebuild does not include them. The Inspector note reads: _"Raw Update bypasses local tracked state. Use it only for advanced transport cases."_ Prefer `SetState`, `SetStates`, `AddEvent`, and `RemoveState` for all standard context management.
+**Reset** clears the runtime Dynamic Context layer only. Initial Dynamic Info Text (set on `ConvaiCharacter`) is not re-injected, and system prompt facts on the Convai dashboard are not affected. The character's in-session LLM memory is also not cleared. See [Static context at connection time](static-context-at-connection-time.md) for a full explanation of what Reset does and does not clear.
 {% endhint %}
 
-## Reaction Mode
+**Raw Update**
 
-The **Reaction** field appears on `SetState`, `SetStates`, `AddEvent`, and `RawUpdate`. It controls whether the character immediately generates a new conversational response after the context update is applied.
+Sends a typed context update directly to the transport layer, bypassing the local tracker. For advanced use cases that construct context text externally.
 
-<table><thead><tr><th width="213.5">Value</th><th>Description</th></tr></thead><tbody><tr><td><code>Auto</code></td><td>The server decides whether the update warrants an immediate LLM turn. Recommended for most cases — it lets the character react when the update is significant without forcing a response every time.</td></tr><tr><td><code>ReactImmediately</code></td><td>Always triggers an LLM turn immediately after the update. The character generates a response reacting to the new context, even mid-conversation. Use this for high-impact events that require immediate character acknowledgement.</td></tr><tr><td><code>SyncOnly</code></td><td>Updates the context without prompting the LLM. The character remains silent and incorporates the new information naturally into its next response. Use this for background state updates that do not require acknowledgement.</td></tr></tbody></table>
+| Field    | Description                                                                                                                  |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Raw Text | The context text to send. Required unless Raw Mode is `Reset`.                                                               |
+| Raw Mode | `Append` — adds to existing context. `Replace` — replaces entire context. `Reset` — clears all context; Raw Text is ignored. |
 
-{% hint style="info" %}
-The **Reaction** field defaults to `Auto` in the Inspector for all command types. The scripting API (`IConvaiDynamicContext`) has different per-method defaults: `SetState` and `SetStates` default to `SyncOnly`; `AddEvent` defaults to `Auto`. When using the command component, set the Reaction field explicitly if `Auto` is not the intended behavior.
+{% hint style="danger" %}
+**Raw Update does not queue pre-conversation updates.** If `Execute()` is called before a conversation is active, the update is discarded. Additionally, values sent via Raw Update are not readable via `TryGetStateValue` on the scripting API. For context that must be delivered regardless of conversation state, use **Set State** or **Add Event** instead.
 {% endhint %}
 
-## Events Section
+### Reaction mode
 
-The Events section exposes two `UnityEvent` callbacks.
+The **Reaction Mode** field controls whether the character generates an immediate response after the context update is delivered.
 
-| Event                    | When it fires                                                                                                                                                                 |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **On Executed**          | After `Execute()` completes successfully — the character reference was resolved, configuration was valid, and the command was dispatched to the character.                    |
-| **On Execution Skipped** | When `Execute()` was called but could not proceed — configuration validation failed or no `ConvaiCharacter` could be resolved. A warning is also logged to the Unity Console. |
+| Value              | Behavior                                                                                                                                 |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `Auto`             | Convai decides whether the update warrants an immediate response. **Default for `ConvaiDynamicContextCommand`.**                         |
+| `ReactImmediately` | Always triggers an immediate LLM turn after the update. Use for updates that require the character to acknowledge the change.            |
+| `SyncOnly`         | Updates context silently. The character incorporates the new information into its next natural turn. No immediate response is generated. |
 
-{% hint style="info" %}
-During development, wire **On Execution Skipped** to a UI toast or a `Debug.Log` call so silent validation failures are visible in Play Mode rather than silently discarded.
+{% hint style="warning" %}
+**Component default differs from scripting API defaults.** `ConvaiDynamicContextCommand` defaults **Reaction Mode** to `Auto` for all command types — including Set State and Set States. The scripting API methods `SetState` and `SetStates` default to `SyncOnly`. If you switch between Inspector and scripting control, verify the reaction mode is what you expect.
 {% endhint %}
 
-## Validation Warnings
+### Events section
 
-The Inspector displays a warning box when the component's configuration is invalid. The same check runs at execution time, causing `Execute()` to invoke `OnExecutionSkipped` instead of the command.
+| Event                | When it fires                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| On Executed          | After `Execute()` completes successfully — the command ran and the context update was dispatched.                        |
+| On Execution Skipped | When `Execute()` is called but validation fails or character resolution fails. The Unity Console shows the exact reason. |
 
-| Condition                                                         | Warning message                                                                              |
-| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Auto Resolve enabled, no `ConvaiCharacter` on same GameObject     | `No ConvaiCharacter found on this GameObject. Assign one or disable Auto Resolve Character.` |
-| Auto Resolve disabled, no explicit **Character** assigned         | `Assign a ConvaiCharacter or enable Auto Resolve Character.`                                 |
-| SetState — **State Name** is empty or whitespace                  | `Set State requires a non-empty state name.`                                                 |
-| SetStates — **State Entries** list is null or empty               | `Set States requires at least one state entry.`                                              |
-| SetStates — an entry has an empty or whitespace **Name**          | `Each state entry requires a non-empty name.`                                                |
-| SetStates — duplicate state name in the list                      | `State entries contain duplicate name '{name}'.`                                             |
-| AddEvent — **Event Text** is empty or whitespace                  | `Add Event requires non-empty event text.`                                                   |
-| RemoveState — **State Name** is empty or whitespace               | `Remove State requires a non-empty state name.`                                              |
-| RawUpdate — **Raw Mode** is not `Reset` and **Raw Text** is empty | `Raw Update requires text unless mode is Reset.`                                             |
+Wire **On Execution Skipped** to a temporary `Debug.Log` during development to catch misconfiguration without having to poll the Console manually.
 
-## What's Next
+### Multiple commands per NPC
 
-* [Scripting API Reference ](../../../unity-plugin-beta-overview/features/dynamic-context/scripting-api-reference.md)— the C# equivalent of every command type on this page, with exact method signatures and parameter defaults.
-* [Usage Examples](../../../unity-plugin-beta-overview/features/dynamic-context/usage-examples.md) — realistic examples of how to wire these commands in simulation scenarios.
+`[DisallowMultipleComponent]` prevents more than one `ConvaiDynamicContextCommand` on the same GameObject. To send multiple independent commands from one NPC:
 
-## Conclusion
+1. Create a child GameObject under the NPC.
+2. Add `ConvaiDynamicContextCommand` to the child.
+3. In the **Target** section, **disable Auto Resolve Character** — auto-resolve only searches the same GameObject.
+4. Drag the NPC's `ConvaiCharacter` into the **Character** field explicitly.
+5. Repeat for each additional command.
 
-`ConvaiDynamicContextCommand` gives designers and technical artists full control over character context from the Inspector — from single-state updates to full resets — without touching C#. For the scripting equivalent of every command type documented here, see [Scripting API Reference](../../../unity-plugin-beta-overview/features/dynamic-context/scripting-api-reference.md).
+Each child command is independent — configure its command type, fields, and reaction mode separately.
+
+### Validation warnings
+
+When `Execute()` is skipped due to a configuration or validation failure, the component logs a warning to the Unity Console prefixed with `[ConvaiDynamicContextCommand]`. The **On Execution Skipped** event also fires.
+
+| Console message                                                                              | Cause                                                                                                             | Fix                                                                                                        |
+| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `No ConvaiCharacter found on this GameObject. Assign one or disable Auto Resolve Character.` | **Auto Resolve Character** is enabled but no `ConvaiCharacter` is on the same GameObject.                         | Move the command to the NPC's GameObject, or disable **Auto Resolve** and assign **Character** explicitly. |
+| `Assign a ConvaiCharacter or enable Auto Resolve Character.`                                 | **Auto Resolve Character** is disabled and **Character** is not assigned.                                         | Assign the `ConvaiCharacter` reference, or enable **Auto Resolve Character**.                              |
+| `Set State requires a non-empty state name.`                                                 | **State Name** is blank or whitespace.                                                                            | Enter a non-empty state name.                                                                              |
+| `Set States requires at least one state entry.`                                              | **State Entries** list is empty.                                                                                  | Add at least one Name / Value entry.                                                                       |
+| `Each state entry requires a non-empty name.`                                                | One or more **State Entries** have a blank name.                                                                  | Fill in all entry names.                                                                                   |
+| `State entries contain duplicate name '{name}'.`                                             | Two or more entries share the same state name. The actual duplicate name replaces `{name}` in the Console output. | Remove or rename the duplicate entry.                                                                      |
+| `Add Event requires non-empty event text.`                                                   | **Event Text** is blank or whitespace.                                                                            | Enter the event description.                                                                               |
+| `Remove State requires a non-empty state name.`                                              | **State Name** is blank or whitespace.                                                                            | Enter the name of the state to remove.                                                                     |
+| `Raw Update requires text unless mode is Reset.`                                             | **Raw Text** is empty and **Raw Mode** is not `Reset`.                                                            | Enter context text, or set **Raw Mode** to `Reset`.                                                        |
+
+### Next steps
+
+{% content-ref url="dynamic-context-usage-examples.md" %}
+[dynamic-context-usage-examples.md](dynamic-context-usage-examples.md)
+{% endcontent-ref %}
+
+{% content-ref url="dynamic-context-scripting-api.md" %}
+[dynamic-context-scripting-api.md](dynamic-context-scripting-api.md)
+{% endcontent-ref %}
+
+{% content-ref url="sync-behavior-and-timing.md" %}
+[sync-behavior-and-timing.md](sync-behavior-and-timing.md)
+{% endcontent-ref %}

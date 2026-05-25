@@ -23,7 +23,7 @@ This guide walks you through the fastest path to a working Narrative Design setu
 
 {% stepper %}
 {% step %}
-### Add the Narrative Design Manager
+**Add the Narrative Design Manager**
 
 Select the GameObject that has your `ConvaiCharacter` component. In the Inspector, click **Add Component** and search for **Narrative Design Manager** (path: **Convai > Narrative Design Manager**).
 
@@ -33,7 +33,7 @@ The Manager auto-detects the `ConvaiCharacter` on the same GameObject. If your c
 {% endstep %}
 
 {% step %}
-### Sync Sections from the Dashboard
+**Sync Sections from the Dashboard**
 
 In the Manager's Inspector, click **Sync with Backend**. The SDK fetches your narrative sections and populates the **Narrative Sections** list.
 
@@ -47,7 +47,7 @@ If the list stays empty, check that your character ID is set on `ConvaiCharacter
 {% endstep %}
 
 {% step %}
-### Wire a Section Event
+**Wire a Section Event**
 
 Expand the first section entry in the **Narrative Sections** list. You will see two Unity Events: **On Section Start** and **On Section End**.
 
@@ -85,7 +85,7 @@ public class NarrativeDesignDebugLogger : MonoBehaviour
 {% endstep %}
 
 {% step %}
-### Add the Narrative Design Trigger
+**Add the Narrative Design Trigger**
 
 Create a new empty GameObject in your scene (position it where the player will walk). Click **Add Component** and search for **Convai Narrative Design Trigger** (path: **Convai > Convai Narrative Design Trigger**).
 
@@ -95,7 +95,7 @@ Drag your `ConvaiCharacter` into the **Character** field, or leave it blank to l
 {% endstep %}
 
 {% step %}
-### Fetch and Select a Trigger
+**Fetch and Select a Trigger**
 
 In the Trigger component's Inspector, click **Fetch** to load the named triggers from the dashboard. A dropdown appears — select the trigger that should advance the graph to your first section.
 
@@ -103,7 +103,7 @@ In the Trigger component's Inspector, click **Fetch** to load the named triggers
 {% endstep %}
 
 {% step %}
-### Add a Collider
+**Add a Collider**
 
 The default activation mode is **Collision**, which uses Unity's `OnTriggerEnter`. On the same trigger GameObject, click **Add Component > Box Collider**. In the Box Collider's settings, enable **Is Trigger**.
 
@@ -113,7 +113,7 @@ Size the collider to cover the zone where you want the trigger to fire. In the S
 {% endstep %}
 
 {% step %}
-### Press Play and Walk Through
+**Press Play and Walk Through**
 
 {% hint style="warning" %}
 **Player setup checklist — verify all three before pressing Play:**

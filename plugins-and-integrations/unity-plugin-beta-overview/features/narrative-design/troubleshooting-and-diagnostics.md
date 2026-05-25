@@ -31,13 +31,13 @@ When something is not working, run through this checklist before diving into spe
 
 {% stepper %}
 {% step %}
-#### Check CurrentStatus on the trigger
+**Check CurrentStatus on the trigger**
 
 Select the `ConvaiNarrativeDesignTrigger` GameObject in the Inspector. **Current Status** is visible at the top of the component. Any value other than `Ready` tells you immediately what the trigger is waiting for — see the TriggerStatus Reference table for the resolution.
 {% endstep %}
 
 {% step %}
-#### Enable diagnostics and reproduce the problem
+**Enable diagnostics and reproduce the problem**
 
 In the Trigger component, enable **Enable Diagnostics**. Press Play and repeat the action that should fire the trigger. Every state transition — zone enter/exit, queue start, character-ready detection, trigger send — is logged to the Console. Read the log sequence from top to bottom to identify where the chain breaks.
 
@@ -48,13 +48,13 @@ trigger.SetDiagnosticsEnabled(true);
 {% endstep %}
 
 {% step %}
-#### Verify character ID and API key
+**Verify character ID and API key**
 
 Open **Edit > Project Settings > Convai SDK** and confirm the API key is present. Select your character's GameObject and confirm the **Character ID** field on `ConvaiCharacter` is not empty. If either is missing, fetch operations and session connections will fail silently from the trigger's perspective.
 {% endstep %}
 
 {% step %}
-#### Dump full trigger state
+**Dump full trigger state**
 
 Call `PrintDiagnostics()` from a test script, or press the **Invoke** / **Reset** buttons visible on the component in Play Mode. The dump shows every field at once, making it easy to spot mismatches:
 
@@ -64,7 +64,7 @@ trigger.PrintDiagnostics();
 {% endstep %}
 
 {% step %}
-#### Run ValidateConfiguration
+**Run ValidateConfiguration**
 
 ```csharp
 if (!trigger.ValidateConfiguration())

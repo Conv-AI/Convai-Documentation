@@ -19,13 +19,13 @@ A "narrative trigger" is not the same as a Unity Physics trigger, even though on
 
 {% stepper %}
 {% step %}
-#### Create or select a GameObject
+**Create or select a GameObject**
 
 For zone-based activation (Collision, Proximity, TimeBased), create an empty GameObject and position it in the scene where you want the trigger zone. For Manual activation, you can place the component anywhere.
 {% endstep %}
 
 {% step %}
-#### Add the component
+**Add the component**
 
 Click **Add Component** and navigate to **Convai > Convai Narrative Design Trigger**.
 
@@ -33,13 +33,13 @@ Click **Add Component** and navigate to **Convai > Convai Narrative Design Trigg
 {% endstep %}
 
 {% step %}
-#### Assign the character
+**Assign the character**
 
 Drag your `ConvaiCharacter` into the **Character** field. If you leave it blank, **Auto Find Character** searches the parent hierarchy and then the `ConvaiManager`'s character list automatically. If more than one character is in the scene, assign the target explicitly.
 {% endstep %}
 
 {% step %}
-#### Fetch and select a trigger
+**Fetch and select a trigger**
 
 Click **Fetch** in the **Trigger Selection** section. The SDK calls `NarrativeDesignFetcher.FetchTriggersAsync` and populates the dropdown with all triggers defined for this character on the dashboard.
 
@@ -49,7 +49,7 @@ Select the trigger you want this component to send. The **Trigger Name**, **Trig
 {% endstep %}
 
 {% step %}
-#### Choose an activation mode
+**Choose an activation mode**
 
 Select one of the four activation modes (described below) and configure its settings.
 {% endstep %}

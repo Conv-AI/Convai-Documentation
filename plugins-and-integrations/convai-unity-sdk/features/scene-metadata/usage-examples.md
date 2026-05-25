@@ -1,10 +1,12 @@
-# usage examples
+---
+title: Scene metadata usage examples
+description: Complete Scene Metadata setups for medical training, phase-based industrial drills, museum guides, and runtime object inclusion and exclusion.
+last_reviewed: "4.2.0"
+---
 
 The examples below cover realistic setups for training simulations and interactive experiences. Each is self-contained: Inspector configuration is described first, followed by any scripting needed to complete the behavior. Start with whichever matches your current complexity level.
 
-***
-
-## Example 1: Medical Training Simulation — Anatomy Lab
+## Example 1: Medical training simulation — anatomy lab
 
 **Scenario:** A surgical training simulation where a medical instructor NPC guides trainees through an anatomy lab. The character must recognize and describe physical models and equipment in the room — trainees ask questions like "What is this organ?" or "Where is the aorta?"
 
@@ -27,9 +29,7 @@ No scripting required. The instructor character receives all descriptions at ses
 The trainee asks: "What models are available for study?" The instructor responds: "On the center table you have a life-size heart model showing all four chambers, and to your left on the display rack is an adult liver model with color-coded hepatic veins."
 {% endhint %}
 
-***
-
-## Example 2: Industrial Safety Drill — Phase-Based Metadata
+## Example 2: Industrial safety drill — phase-based metadata
 
 **Scenario:** A safety training module with multiple drill phases. Each phase introduces different hazards and equipment. The AI instructor should only know about the props relevant to the current phase.
 
@@ -74,9 +74,7 @@ public class SafetyDrillController : MonoBehaviour
 
 Each phase sends only its relevant props to Convai. The instructor adapts its knowledge to the current drill context without knowing about props from other phases.
 
-***
-
-## Example 3: Interactive Museum — Exhibit Guide
+## Example 3: Interactive museum — exhibit guide
 
 **Scenario:** A virtual museum guide character answers visitor questions about exhibits across multiple rooms. The guide should know what each exhibit is, where it is, and what is significant about it.
 
@@ -92,17 +90,13 @@ Add `ConvaiObjectMetadata` to each exhibit's root GameObject. Write descriptions
 
 Enable **Collect On Start**. When a visitor asks "What is in Room 2?", the guide responds with accurate, description-grounded information.
 
-{% hint style="info" %}
 Write descriptions from the perspective of what a knowledgeable guide would say. Include room location, visual identifiers, and relevant context. The AI uses the `Object Description` field verbatim as grounding for its responses.
-{% endhint %}
 
-***
-
-## Example 4: Runtime Context Update — Combining Scene Metadata and Dynamic Context
+## Example 4: Runtime context update — combining Scene Metadata and Dynamic Context
 
 **Scenario:** A warehouse training scenario where items can be moved or removed. When a hazard is cleared, the AI should stop referencing it. When a new tool arrives, the AI should immediately know about it.
 
-### Excluding a Cleared Object
+### Excluding a cleared object
 
 ```csharp
 public void OnHazardCleared(ConvaiObjectMetadata hazardMetadata)
@@ -115,7 +109,7 @@ public void OnHazardCleared(ConvaiObjectMetadata hazardMetadata)
 }
 ```
 
-### Adding a New Object at Runtime
+### Adding a new object at runtime
 
 ```csharp
 public void OnToolDelivered(GameObject toolObject, string toolName, string toolDescription)
@@ -135,6 +129,12 @@ public void OnToolDelivered(GameObject toolObject, string toolName, string toolD
 Scene Metadata and Dynamic Context are complementary. Use Scene Metadata to tell the AI what exists in the scene. Use Dynamic Context to tell the AI what is happening at runtime. Pairing `CollectAndSendSceneMetadata()` with `SetState` calls on `IConvaiDynamicContext` gives the character both object awareness and event awareness simultaneously.
 {% endhint %}
 
-## Conclusion
+## Next steps
 
-These four examples cover the core Scene Metadata patterns — auto-collection at session start, phase-based manual sends, location-grounded exhibit descriptions, and runtime object inclusion and exclusion. If objects are not appearing in AI responses as expected, see [Troubleshooting & Diagnostics](/broken/pages/c5502e81d1d79529b573b2bb964f0388253dbe84) for a structured diagnosis. To layer runtime event awareness on top of object awareness, pair Scene Metadata with [Dynamic Context](/broken/pages/339851945bae512794c707436682ac4248776e96).
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Troubleshoot scene metadata](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}
+
+{% content-ref url="../dynamic-context/README.md" %}
+[Dynamic context](../dynamic-context/README.md)
+{% endcontent-ref %}

@@ -15,13 +15,13 @@ description: >-
 
 {% stepper %}
 {% step %}
-### Select the character GameObject
+**Select the character GameObject**
 
 Choose the GameObject that has your `ConvaiCharacter` component. The Manager auto-detects the character if both components are on the same GameObject.
 {% endstep %}
 
 {% step %}
-### Add the component
+**Add the component**
 
 In the Inspector, click **Add Component** and navigate to **Convai > Narrative Design Manager**.
 
@@ -31,7 +31,7 @@ The **Character** field is populated automatically if a `ConvaiCharacter` is on 
 {% endstep %}
 
 {% step %}
-### Sync with the backend
+**Sync with the backend**
 
 Click the **Sync with Backend** button in the Inspector. The Manager calls `FetchAndSyncFromBackend()`, which fetches your character's sections from the Convai dashboard and populates the **Narrative Sections** list.
 

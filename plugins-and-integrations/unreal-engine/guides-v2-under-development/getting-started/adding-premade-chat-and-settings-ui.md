@@ -30,10 +30,8 @@ It is recommended to remove the Convai Player component from the player blueprin
 4.  Hit save, compile and hit play to test - use the T key to talk and Enter to text chat.\
     <br>
 
-    <figure><img src="../../../../.gitbook/assets/image (334).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../../.gitbook/assets/image (332).png" alt=""><figcaption></figcaption></figure>
 5.  Hit F10 to open the settings menu where you have various options, like testing your microphone and changing the chat widget layout.
-
-
 
     <figure><img src="../../../../.gitbook/assets/image (335).png" alt=""><figcaption></figcaption></figure>
 

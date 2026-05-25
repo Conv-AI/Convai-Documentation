@@ -20,7 +20,7 @@ The idea of **Snapshot** and **Version** has been used interchangeably in the te
 
 The character versioning option is available at the top right-hand side in the character editor section beside the **Update** button
 
-<figure><img src="../../.gitbook/assets/cv-1 (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/cv-1.png" alt=""><figcaption></figcaption></figure>
 
 Once you click on it, you get to see the list of all your previous saved revisions ordered by date.
 
@@ -66,8 +66,6 @@ Assuming you have gone ahead and worked on the character further, but you are un
 
 You can also go ahead and delete a snapshot that you no longer require. To that you can click on the 3-dots by the corresponding snapshot in the list of Character Version and select **Delete Version**
 
-
-
 <figure><img src="../../.gitbook/assets/8.png" alt=""><figcaption><p>Click on the 3-dots beside the snapshot to see all the options.</p></figcaption></figure>
 
 ### Some important points to remember
@@ -77,4 +75,3 @@ At any given point you can interact with the **Current Snapshot** of the charact
 {% hint style="info" %}
 We are currently working on a feature to help developers have separate deployed version than the **Current Snapshot**.
 {% endhint %}
-

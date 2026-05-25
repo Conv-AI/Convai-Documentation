@@ -9,7 +9,7 @@ description: >-
 
 ## Description
 
-Convai's Unity WebGL SDK is designed to complement the standalone application capabilities of our Unity Asset Store version. With this specialized SDK, you can build and deploy interactive WebGL applications that leverage Convai's advanced conversation pipeline. Please see the instructions below or check out our [_latest tutorial video_](https://youtu.be/2F2\_tjtu-lY?feature=shared) on YouTube.
+Convai's Unity WebGL SDK is designed to complement the standalone application capabilities of our Unity Asset Store version. With this specialized SDK, you can build and deploy interactive WebGL applications that leverage Convai's advanced conversation pipeline. Please see the instructions below or check out our [_latest tutorial video_](https://youtu.be/2F2_tjtu-lY?feature=shared) on YouTube.
 
 {% embed url="https://youtu.be/2F2_tjtu-lY?feature=shared" %}
 
@@ -22,7 +22,7 @@ Convai's Unity WebGL SDK is designed to complement the standalone application ca
 {% endhint %}
 
 {% hint style="info" %}
-[**Download the Complete  WebGL Demo here.**](https://github.com/Conv-AI/Unity-WebGL-Demo-Game)
+[**Download the Complete WebGL Demo here.**](https://github.com/Conv-AI/Unity-WebGL-Demo-Game)
 {% endhint %}
 
 {% hint style="info" %}
@@ -38,7 +38,7 @@ Please ensure that Git is installed on your computer prior to proceeding.\
 
 ### Import and Setup Instructions
 
-Follow the Import and Setup Instructions from [import-and-setup.md](../import-and-setup.md "mention") and [setting-up-unity-plugin.md](../setting-up-unity-plugin.md "mention").&#x20;
+Follow the Import and Setup Instructions from [import-and-setup.md](../import-and-setup.md "mention") and [setting-up-unity-plugin.md](../setting-up-unity-plugin.md "mention").
 
 ### WebGL Incompatibility with Unity Editor
 
@@ -76,7 +76,7 @@ Once the platform conversion is complete,
 2. Navigate to the page`WebGL settings`.
 3. Under the`Resolution and Presentation` tab, select the`Convai PWA Template`.
 
-<figure><img src="../../../.gitbook/assets/image (299).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (298).png" alt=""><figcaption></figcaption></figure>
 
 ## Importing Characters and Building the Scene
 
@@ -118,4 +118,3 @@ Feeling accomplished? You should! You now have a successfully working WebGL buil
 {% hint style="info" %}
 When you are ready with your production build, just uncheck the Development Build field in the Build Settings before publishing
 {% endhint %}
-

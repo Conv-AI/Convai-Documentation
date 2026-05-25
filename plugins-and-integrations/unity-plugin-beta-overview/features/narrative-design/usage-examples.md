@@ -25,13 +25,13 @@ Each example is self-contained. Start from whichever matches your current comple
 
 {% stepper %}
 {% step %}
-#### Prepare the scene
+**Prepare the scene**
 
 Add `ConvaiNarrativeDesignManager` to the character GameObject and sync sections from the dashboard. You need at least two sections: an idle section (where the character waits) and a welcome section (where the character begins the experience).
 {% endstep %}
 
 {% step %}
-#### Set the visitor's name before the session
+**Set the visitor's name before the session**
 
 Before starting the session, send a template key so the character can reference the visitor by name:
 
@@ -50,19 +50,19 @@ public class ReceptionController : MonoBehaviour
 {% endstep %}
 
 {% step %}
-#### Add a Manual trigger
+**Add a Manual trigger**
 
 Add `ConvaiNarrativeDesignTrigger` to any GameObject (it won't be in the world — it's driven by UI). Set **Activation Mode** to **Manual** and fetch/select the welcome trigger from the dashboard.
 {% endstep %}
 
 {% step %}
-#### Wire the UI button
+**Wire the UI button**
 
 In the Button component's **On Click ()** event, assign the `ConvaiNarrativeDesignTrigger` and select `ConvaiNarrativeDesignTrigger.InvokeTrigger`.
 {% endstep %}
 
 {% step %}
-#### Wire the section event
+**Wire the section event**
 
 In the Manager's **Narrative Sections** list, find the welcome section entry and add an `OnSectionStart` listener. Point it to whatever should change in the scene when the welcome begins — for example, enabling a name badge UI or starting an ambient animation.
 {% endstep %}

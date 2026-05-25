@@ -8,12 +8,12 @@ description: >-
 
 1.  Create a new first person project.<br>
 
-    <div align="left"><figure><img src="../../../../.gitbook/assets/image (306).png" alt="" width="563"><figcaption></figcaption></figure></div>
+    <div align="left"><figure><img src="../../../../.gitbook/assets/image (305).png" alt="" width="563"><figcaption></figcaption></figure></div>
 2. Enable the Convai plugin and add the API key as [mentioned here](download-and-setup.md#set-up-your-project).<br>
 3. Create a new Actor blueprint that we will be using as the AI character.\
    \
    ![](<../../../../.gitbook/assets/image (307).png>)![](<../../../../.gitbook/assets/image (311).png>)
-4.  Open the created blueprint then search for and add the `Convai Chatbot` component in the components list. \
+4.  Open the created blueprint then search for and add the `Convai Chatbot` component in the components list.\
     \
     Note: if you do not find the component then ensure that you have properly installed and enabled the plugin by following the [Installation guide](download-and-setup.md#installing-the-plugin).<br>
 
@@ -26,13 +26,13 @@ description: >-
     <div align="left" data-full-width="false"><figure><img src="../../../../.gitbook/assets/image (313).png" alt="" width="563"><figcaption></figcaption></figure></div>
 7.  Place the blueprint in the scene.<br>
 
-    <div align="left"><figure><img src="../../../../.gitbook/assets/image (316).png" alt="" width="563"><figcaption></figcaption></figure></div>
+    <div align="left"><figure><img src="../../../../.gitbook/assets/image (315).png" alt="" width="563"><figcaption></figcaption></figure></div>
 8.  Open the player blueprint which by default in `First Person/Blueprints/BP_FirstPersonCharacter` for the first person template.<br>
 
-    <div align="left"><figure><img src="../../../../.gitbook/assets/image (319).png" alt="" width="563"><figcaption></figcaption></figure></div>
+    <div align="left"><figure><img src="../../../../.gitbook/assets/image (317).png" alt="" width="563"><figcaption></figcaption></figure></div>
 9.  Search and add the `Convai Player` component in the components list.<br>
 
-    <div align="left"><figure><img src="../../../../.gitbook/assets/image (321).png" alt="" width="563"><figcaption></figcaption></figure></div>
+    <div align="left"><figure><img src="../../../../.gitbook/assets/image (320).png" alt="" width="563"><figcaption></figcaption></figure></div>
 10. Add the following blueprint schematic to allow the player to talk to the AI character via the V key:
 
     1. Add a keyboard key event to be used as a push to talk button (i.e. the \`V\` key in this example).
@@ -42,7 +42,7 @@ description: >-
     5. Use the `Start Talking` node from the `Convai Player` component initiates the talking session with the character, ensure you have enabled `Voice Response` to get the character to respond vocally.
     6. On the `Released` event, use the `Finish Talking` node on the `Convai Player` component to let the AI character know that we have finished talking and are now waiting for a response.<br>
 
-    <div align="left"><figure><img src="../../../../.gitbook/assets/image (328).png" alt="" width="563"><figcaption></figcaption></figure></div>
+    <div align="left"><figure><img src="../../../../.gitbook/assets/image (324).png" alt="" width="563"><figcaption></figcaption></figure></div>
 11. Hit play, approach the AI character and push T to talk through the microphone, the character should then respond after releasing the T key.<br>
 
     <div align="left"><figure><img src="../../../../.gitbook/assets/image (323).png" alt="" width="563"><figcaption></figcaption></figure></div>
@@ -53,8 +53,8 @@ If the character does not respond then make sure your microphone is set properly
 
 ## Sending Text instead of Voice
 
-Use the following `Send Text`  node instead if you want to text chat with the character instead of voice.&#x20;
+Use the following `Send Text` node instead if you want to text chat with the character instead of voice.
 
 Note, over here we use a hard coded string as input to the character, you will need to create the required UI to get the text input from the user and send it to the AI character.
 
-<figure><img src="../../../../.gitbook/assets/image (327).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (326).png" alt=""><figcaption></figcaption></figure>
