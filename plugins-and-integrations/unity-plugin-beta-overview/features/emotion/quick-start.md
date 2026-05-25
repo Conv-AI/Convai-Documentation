@@ -27,7 +27,7 @@ Select your NPC's root GameObject in the Hierarchy. In the Inspector, click **Ad
 
 The component appears with a **Profile** field that is currently empty.
 
-<figure><img src="../../../../.gitbook/assets/convai-emotion-controller-empty-profile-inspector.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (497).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -58,7 +58,7 @@ The bundled profile is configured for **Reallusion** characters out of the box. 
 
 Drag `ConvaiSamplesShared_EmotionProfile` from the Project window into the **Profile** field on the `ConvaiEmotionController` component.
 
-<figure><img src="../../../../.gitbook/assets/convai-emotion-controller-profile-assigned-inspector.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (508).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="warning" %}
 The bundled asset is **read-only** — it lives inside the package. To adjust any settings, duplicate it first (**Ctrl+D** on Windows / **Cmd+D** on macOS), move the copy into your own `Assets/` folder, and assign the copy instead.

@@ -25,7 +25,7 @@ The component has four sections:
 | **Actionable Characters** | Other characters in the scene the AI can target               |
 | **Initial Attention**     | The object the AI focuses on by default when a session starts |
 
-<figure><img src="../../../../.gitbook/assets/convai-action-config-source-inspector.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (473).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -90,7 +90,7 @@ Set to `0` to disable the timeout (the executor runs until it returns on its own
 Timeouts are useful for actions that involve movement or animations. If an NPC gets stuck navigating to a target, a timeout prevents the entire conversation from hanging.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/convai-action-definition-timeout-configured.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (493).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -133,7 +133,7 @@ A fire safety training simulation might register the following objects:
 | `Emergency Exit`    | The emergency exit door at the far end of the corridor.       | `ExitDoor` GameObject         |
 | `Fire Panel`        | The wall-mounted fire alarm control panel.                    | `AlarmPanel` GameObject       |
 
-<figure><img src="../../../../.gitbook/assets/convai-actionable-objects-list-inspector.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (495).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -160,7 +160,7 @@ In a learning simulation with two instructors:
 | `Senior Instructor` | The lead safety instructor standing by the main console. | `SeniorInstructor` GameObject |
 | `Assistant`         | The junior assistant near the equipment storage area.    | `Assistant` GameObject        |
 
-<figure><img src="../../../../.gitbook/assets/convai-actionable-characters-list-inspector.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (496).png" alt=""><figcaption></figcaption></figure>
 
 ***
 

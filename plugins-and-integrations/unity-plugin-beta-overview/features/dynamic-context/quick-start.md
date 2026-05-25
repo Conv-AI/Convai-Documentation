@@ -30,7 +30,7 @@ With the NPC GameObject selected, click **Add Component** and navigate to:
 
 The component appears in the Inspector with three sections: **Target**, **Command**, and **Events**.
 
-<figure><img src="../../../../.gitbook/assets/convai-dynamic-context-command-inspector.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (57).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -66,7 +66,7 @@ Choose any event source that should fire the context update. For a quick test, u
 3. Drag the NPC GameObject into the object slot.
 4. From the function dropdown, choose **ConvaiDynamicContextCommand → Execute**.
 
-<figure><img src="../../../../.gitbook/assets/convai-dynamic-context-command-execute-wired.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (505).png" alt=""><figcaption></figcaption></figure>
 
 You can also wire `Execute()` to `OnTriggerEnter`, an animation timeline signal, or any other `UnityEvent`.
 {% endstep %}

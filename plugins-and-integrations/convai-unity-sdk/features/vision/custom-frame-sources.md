@@ -1,181 +1,160 @@
-# custom frame sources
+---
+title: Custom frame sources
+description: Implement IVisionFrameSource to publish a custom video pipeline to Convai, including the Y-flip requirement, lifecycle state pattern, and auto-discovery rules.
+---
 
-## Implementing a Custom Frame Source
+Implement `IVisionFrameSource` to publish any custom video pipeline — a video file, a custom render texture, or a screen capture utility — without modifying the publishing layer. Once your component is on the scene, `ConvaiVisionPublisher` discovers and streams it automatically.
 
-The three built-in frame sources cover Unity scene cameras, physical webcams, and Meta Quest passthrough. If your project uses a different video pipeline — a custom post-processing stack, a third-party capture SDK, or a procedurally generated texture — you can integrate it with Vision by implementing `IVisionFrameSource`. Any `MonoBehaviour` that implements the interface can be assigned to `ConvaiVisionPublisher` and will participate in the full Vision pipeline.
+## Interface contract
 
-{% hint style="info" %}
-Before writing a custom implementation, check whether `CameraVisionFrameSource` with a `Custom` capture preset or a `RenderTexture` assigned to a secondary camera covers your use case. The built-in sources handle edge cases around render pipeline compatibility and permission flow that a custom source will need to replicate.
-{% endhint %}
+`IVisionFrameSource` is the minimal contract required for video streaming via `ConvaiVisionPublisher` and live feed display via `VisionDebugPreview`.
 
-## IVisionFrameSource Interface
-
-`IVisionFrameSource` is the contract the publisher uses to read frames. Implement all members — the publisher checks them every capture cycle.
-
-{% code title="IVisionFrameSource.cs" overflow="wrap" lineNumbers="true" %}
 ```csharp
-namespace Convai.Runtime.Vision.Sources
+public interface IVisionFrameSource
 {
-    public interface IVisionFrameSource
-    {
-        bool IsCapturing { get; }
-        long FrameCount { get; }
-        (int Width, int Height) FrameDimensions { get; }
-        float TargetFrameRate { get; }
-        string SourceId { get; }
-
-        // Must be a Y-flipped (top-down) RenderTexture
-        RenderTexture CurrentRenderTexture { get; }
-
-        bool IsFrameReady { get; }
-        event Action FrameReady;
-
-        void StartCapture();
-        void StopCapture();
-    }
+    bool IsCapturing { get; }
+    long FrameCount { get; }
+    (int Width, int Height) FrameDimensions { get; }
+    float TargetFrameRate { get; }
+    string SourceId { get; }
+    RenderTexture CurrentRenderTexture { get; }
+    bool IsFrameReady { get; }
+    event Action FrameReady;
+    void StartCapture();
+    void StopCapture();
 }
 ```
-{% endcode %}
 
-### Member Reference
+Your implementation must be a `MonoBehaviour`. `ConvaiVisionPublisher` discovers frame sources using `GetComponent` and `GetComponentsInChildren`, which only work on Unity components.
 
-| Member                 | Type                      | Description                                                              |
-| ---------------------- | ------------------------- | ------------------------------------------------------------------------ |
-| `IsCapturing`          | `bool`                    | `true` while the source is actively capturing frames                     |
-| `FrameCount`           | `long`                    | Total frames produced since `StartCapture()` was last called             |
-| `FrameDimensions`      | `(int Width, int Height)` | Current output resolution of `CurrentRenderTexture`                      |
-| `TargetFrameRate`      | `float`                   | The frame rate the source targets; used by the coordinator for telemetry |
-| `SourceId`             | `string`                  | Identifier string used in domain events and multi-source scenarios       |
-| `CurrentRenderTexture` | `RenderTexture`           | The current output frame — **must be Y-flipped** (see below)             |
-| `IsFrameReady`         | `bool`                    | `true` when `CurrentRenderTexture` contains a valid, non-stale frame     |
-| `FrameReady`           | `event Action`            | Fire this after each new frame is written to `CurrentRenderTexture`      |
-| `StartCapture()`       | `void`                    | Called by the publisher when it is ready to begin receiving frames       |
-| `StopCapture()`        | `void`                    | Called when the publisher stops or the room disconnects                  |
+## Y-flip requirement
 
-## Y-Flip Requirement
+`CurrentRenderTexture` must be in **top-down orientation** (Y-axis flipped from Unity's default bottom-up). LiveKit and standard video formats expect Y=0 at the top of the image. Skipping this step produces an upside-down feed at the receiving end.
 
-{% hint style="danger" %}
-`CurrentRenderTexture` **must** be oriented top-down (Y-flipped relative to Unity's default bottom-up convention). Returning a texture without flipping produces an upside-down video stream on the Convai backend.
-{% endhint %}
+Apply the flip with a `Graphics.Blit` call when writing from your source texture into the output `RenderTexture`:
 
-Use `Graphics.Blit` with a flipped scale vector to convert any source texture to the correct orientation:
-
-{% code title="YFlip.cs" overflow="wrap" lineNumbers="true" %}
 ```csharp
-// Flip sourceTexture into outputTexture (top-down orientation required by Vision)
-Graphics.Blit(sourceTexture, outputTexture, new Vector2(1f, -1f), new Vector2(0f, 1f));
+// sourceTexture: your raw Unity RenderTexture (bottom-up)
+// _outputRt: the RenderTexture you expose via CurrentRenderTexture (top-down)
+Graphics.Blit(sourceTexture, _outputRt, new Vector2(1f, -1f), new Vector2(0f, 1f));
 ```
-{% endcode %}
 
-## Minimal Custom Implementation
+The `scale.y = -1` and `offset.y = 1` arguments together flip the vertical axis. Assign `_outputRt` to `CurrentRenderTexture`.
 
-The following example captures a `RenderTexture` you supply and publishes it through Vision. Extend this to connect any upstream pipeline.
+## Minimal implementation
 
-{% code title="MyCustomFrameSource.cs" overflow="wrap" lineNumbers="true" %}
+The following skeleton implements every required member and handles `FrameReady` correctly. Fill in the `CaptureFrame` method with your actual capture logic.
+
 ```csharp
 using System;
 using Convai.Runtime.Vision.Sources;
 using UnityEngine;
 
-[AddComponentMenu("Convai/Vision/My Custom Frame Source")]
 public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource
 {
-    [SerializeField] private RenderTexture _sourceTexture;
+    [SerializeField] private int _width = 1280;
+    [SerializeField] private int _height = 720;
+    [SerializeField] private float _targetFps = 15f;
+    [SerializeField] private string _sourceId = "custom";
 
-    private RenderTexture _outputTexture;
-    private bool _isCapturing;
+    private RenderTexture _outputRt;
     private long _frameCount;
+    private float _captureInterval;
+    private float _nextCaptureTime;
 
-    public bool IsCapturing => _isCapturing;
+    // IVisionFrameSource
+
+    public bool IsCapturing { get; private set; }
     public long FrameCount => _frameCount;
-    public (int Width, int Height) FrameDimensions =>
-        _outputTexture != null ? (_outputTexture.width, _outputTexture.height) : (0, 0);
-    public float TargetFrameRate => 15f;
-    public string SourceId => "custom";
-    public RenderTexture CurrentRenderTexture => _outputTexture;
-    public bool IsFrameReady => _outputTexture != null && _frameCount > 0;
-
+    public (int Width, int Height) FrameDimensions => IsCapturing ? (_width, _height) : (0, 0);
+    public float TargetFrameRate => _targetFps;
+    public string SourceId => _sourceId;
+    public RenderTexture CurrentRenderTexture => _outputRt;
+    public bool IsFrameReady => _frameCount > 0;
     public event Action FrameReady;
 
     public void StartCapture()
     {
-        if (_sourceTexture == null)
-        {
-            Debug.LogError("[MyCustomFrameSource] Source texture is not assigned.");
-            return;
-        }
+        if (IsCapturing) return;
 
-        _outputTexture = new RenderTexture(
-            _sourceTexture.width, _sourceTexture.height, 24, RenderTextureFormat.ARGB32);
-        _isCapturing = true;
+        _outputRt = new RenderTexture(_width, _height, 24, RenderTextureFormat.ARGB32)
+        {
+            name = $"CustomFrameSource_{_sourceId}"
+        };
+        _outputRt.Create();
+
+        _frameCount = 0;
+        _captureInterval = _targetFps > 0f ? 1f / _targetFps : 1f / 15f;
+        _nextCaptureTime = Time.realtimeSinceStartup;
+        IsCapturing = true;
     }
 
     public void StopCapture()
     {
-        _isCapturing = false;
-        if (_outputTexture != null)
+        if (!IsCapturing) return;
+
+        IsCapturing = false;
+
+        if (_outputRt != null)
         {
-            _outputTexture.Release();
-            _outputTexture = null;
+            _outputRt.Release();
+            Destroy(_outputRt);
+            _outputRt = null;
         }
     }
 
     private void Update()
     {
-        if (!_isCapturing || _sourceTexture == null || _outputTexture == null) return;
+        if (!IsCapturing) return;
 
-        // Y-flip the source into the output texture
-        Graphics.Blit(_sourceTexture, _outputTexture, new Vector2(1f, -1f), new Vector2(0f, 1f));
+        float now = Time.realtimeSinceStartup;
+        if (now < _nextCaptureTime) return;
+
+        _nextCaptureTime = now + _captureInterval;
+        CaptureFrame();
+    }
+
+    private void OnDestroy() => StopCapture();
+
+    private void CaptureFrame()
+    {
+        // Replace with your actual source texture
+        RenderTexture sourceTexture = GetYourSourceTexture();
+        if (sourceTexture == null) return;
+
+        // Y-flip into the output RenderTexture
+        Graphics.Blit(sourceTexture, _outputRt, new Vector2(1f, -1f), new Vector2(0f, 1f));
+
         _frameCount++;
         FrameReady?.Invoke();
     }
 
-    private void OnDestroy()
+    private RenderTexture GetYourSourceTexture()
     {
-        StopCapture();
+        // Return the RenderTexture from your custom pipeline
+        return null;
     }
 }
 ```
-{% endcode %}
 
-## Optional: IVisionFrameSourceStatusProvider
+`FrameReady` must be raised on the **Unity main thread**. `ConvaiVisionPublisher` and `VisionDebugPreview` both assume all `IVisionFrameSource` callbacks execute on the main thread. If your capture logic runs on a background thread, marshal the event raise back using a flag checked in `Update`, as shown in the skeleton above.
 
-Implementing `IVisionFrameSourceStatusProvider` is optional but recommended. It exposes detailed state to `VisionDebugPreview`, the coordinator's health checks, and the [Scripting API](/broken/pages/fb9b9afe2392c4722c3730b2d10e53fd8265b854) state monitor pattern. Without it, the debug overlay cannot show your source's state or error kind.
+## Expose lifecycle state
 
-{% code title="IVisionFrameSourceStatusProvider.cs" overflow="wrap" lineNumbers="true" %}
+Implement `IVisionFrameSourceStatusProvider` alongside `IVisionFrameSource` to expose richer lifecycle state — permission flow, delayed initialization, or structured error information. The publisher can then react to readiness changes without polling.
+
 ```csharp
-namespace Convai.Runtime.Vision.Sources
-{
-    public interface IVisionFrameSourceStatusProvider
-    {
-        VisionSourceState State { get; }
-        VisionSourceErrorKind ErrorKind { get; }
-        string StatusMessage { get; }
-        bool HasUsableFrame { get; }
-        event Action StatusChanged;
-    }
-}
-```
-{% endcode %}
-
-Add the interface to your class declaration and update `State` as your capture lifecycle progresses:
-
-{% code title="MyCustomFrameSource.cs (with status)" overflow="wrap" lineNumbers="true" %}
-```csharp
-using System;
-using Convai.Runtime.Vision.Sources;
-using UnityEngine;
-
 public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource, IVisionFrameSourceStatusProvider
 {
-    // IVisionFrameSourceStatusProvider
+    // --- IVisionFrameSourceStatusProvider ---
+
     public VisionSourceState State { get; private set; } = VisionSourceState.Idle;
     public VisionSourceErrorKind ErrorKind { get; private set; } = VisionSourceErrorKind.None;
-    public string StatusMessage { get; private set; }
-    public bool HasUsableFrame { get; private set; }
+    public string StatusMessage { get; private set; } = string.Empty;
+    public bool HasUsableFrame => FrameCount > 0;
     public event Action StatusChanged;
 
-    private void SetState(VisionSourceState state, VisionSourceErrorKind error = VisionSourceErrorKind.None, string message = null)
+    private void SetState(VisionSourceState state, VisionSourceErrorKind error = VisionSourceErrorKind.None, string message = "")
     {
         State = state;
         ErrorKind = error;
@@ -186,7 +165,7 @@ public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource, IVisionFra
     public void StartCapture()
     {
         SetState(VisionSourceState.Starting);
-        // ... initialise RenderTexture ...
+        // ... initialise capture ...
         SetState(VisionSourceState.Ready);
     }
 
@@ -199,30 +178,23 @@ public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource, IVisionFra
     // ... rest of IVisionFrameSource implementation
 }
 ```
-{% endcode %}
 
-## Assigning a Custom Source to the Publisher
+## Auto-discovery
 
-Once your component is on a `GameObject` in the scene, assign it to `ConvaiVisionPublisher`:
+Once your component is on the scene, `ConvaiVisionPublisher` discovers it automatically in this order:
 
-{% stepper %}
-{% step %}
-**Assign in the Inspector**
+1. The **Source** field in the Inspector (explicit assignment).
+2. `GetComponent<CameraVisionFrameSource>()` on the same GameObject (built-in preference).
+3. `GetComponentsInChildren<MonoBehaviour>(true)` — first `IVisionFrameSource` found on the same GameObject or children.
 
-Select the `GameObject` that holds `ConvaiVisionPublisher`. In the **Frame Source Component** field, drag your custom frame source component. The publisher accepts any `MonoBehaviour` that implements `IVisionFrameSource`.
-{% endstep %}
+If more than one frame source is found under step 3, the publisher logs a warning and selects the first. Assign the **Source** field explicitly to avoid ambiguity.
 
-{% step %}
-**Verify with Debug Preview**
+## Next steps
 
-Add `VisionDebugPreview` to any scene `GameObject`. Enter Play mode. If `IVisionFrameSourceStatusProvider` is implemented, the overlay shows your source's `State`. If the frame is Y-flipped correctly, the live image appears right-side up.
-{% endstep %}
-{% endstepper %}
+{% content-ref url="debug-preview.md" %}
+[Vision debug preview](debug-preview.md)
+{% endcontent-ref %}
 
-{% hint style="warning" %}
-If multiple `IVisionFrameSource` components exist in the scene and **Frame Source Component** is left blank, the publisher auto-discovers the first one it finds — which may not be your custom source. Always assign explicitly when using a custom implementation alongside built-in sources.
-{% endhint %}
-
-## Conclusion
-
-`IVisionFrameSource` gives you a clean integration point for any video pipeline — supply a Y-flipped `RenderTexture`, implement the state contract, and `ConvaiVisionPublisher` handles the rest. Continue to Usage Examples for end-to-end implementation scenarios, or see [Scripting API](scripting-api.md) for the full publisher API and domain events. For diagnosing frame source issues, see [Troubleshooting & Diagnostics](troubleshooting-and-diagnostics.md).
+{% content-ref url="scripting-api.md" %}
+[Vision scripting API](scripting-api.md)
+{% endcontent-ref %}

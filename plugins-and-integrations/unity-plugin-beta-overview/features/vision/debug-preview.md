@@ -22,7 +22,7 @@ description: >-
 
 Select any GameObject in the scene — the same one as your frame source, or a dedicated debug object. Click **Add Component** → **Convai/Vision/Vision Debug Preview (Editor Only)**.
 
-<figure><img src="../../../../.gitbook/assets/convai-vision-debug-preview-overlay-layout.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (503).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -36,7 +36,7 @@ In the **Frame Source Component** field, drag in the `IVisionFrameSource` compon
 
 Press **Play**. An overlay appears in the Game view showing the live texture and a statistics panel. Adjust position and size using the Inspector fields described below.
 
-<figure><img src="../../../../.gitbook/assets/convai-vision-debug-preview-stats-overlay.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (491).png" alt=""><figcaption></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 

@@ -1,18 +1,20 @@
-# session events
+---
+title: Session events
+description: Reference for session events — connection state, errors, idle warnings, and participant changes — via relay component or the `ConvaiEvents` C# hub.
+last_reviewed: "4.2.0"
+---
 
-The SDK exposes session-level events through two wiring approaches that you can use independently or together. `ConvaiSessionEventRelay` is a MonoBehaviour that wires events to Inspector-assigned `UnityEvent` callbacks with no code required. `ConvaiEvents` is a C# typed event hub accessible from script via `ConvaiManager.ActiveManager.Events`.
-
-Both approaches fire on the same underlying SDK events — choose based on what your code needs.
+The SDK exposes session-level events through two wiring approaches that you can use independently or together. `ConvaiSessionEventRelay` is a MonoBehaviour that wires events to Inspector-assigned `UnityEvent` callbacks with no code required. `ConvaiEvents` is a C# typed event hub accessible from any script via `ConvaiManager.ActiveManager.Events`. Both approaches fire on the same underlying SDK events — choose based on what your code needs. For a conceptual overview of relay components and when to choose each approach, see [Event System](../core-concepts/event-system.md).
 
 ***
 
-## Inspector Wiring — `ConvaiSessionEventRelay`
+## Inspector wiring — `ConvaiSessionEventRelay`
 
 {% tabs %}
 {% tab title="Inspector" %}
 **Setup:**
 
-1. Add `ConvaiSessionEventRelay` to any GameObject in your scene (via **Add Component → Convai → Events → Convai Session Event Relay**).
+1. Add `ConvaiSessionEventRelay` to any GameObject in your scene via **Add Component → Convai → Events → Convai Session Event Relay**.
 2. Assign a `ConvaiManager` reference in the **Manager** field, or leave it empty and enable **Auto Resolve Manager** to use `ConvaiManager.ActiveManager` at runtime.
 3. Wire your callbacks in the Inspector under each event.
 
@@ -48,9 +50,9 @@ public class SessionStatusMonitor : MonoBehaviour
         manager.Events.OnSessionError -= HandleError;
     }
 
-    private void HandleConnected()               => Debug.Log("Session connected.");
-    private void HandleDisconnected()            => Debug.Log("Session disconnected.");
-    private void HandleError(SessionError err)   => Debug.LogError($"[{err.ErrorCode}] {err.Message}");
+    private void HandleConnected()             => Debug.Log("Session connected.");
+    private void HandleDisconnected()          => Debug.Log("Session disconnected.");
+    private void HandleError(SessionError err) => Debug.LogError($"[{err.ErrorCode}] {err.Message}");
 }
 ```
 {% endtab %}
@@ -58,7 +60,7 @@ public class SessionStatusMonitor : MonoBehaviour
 
 ***
 
-## `ConvaiSessionEventRelay` — All Events
+## `ConvaiSessionEventRelay` events
 
 | Event                   | Argument                       | Fires When                                                             |
 | ----------------------- | ------------------------------ | ---------------------------------------------------------------------- |
@@ -70,7 +72,7 @@ public class SessionStatusMonitor : MonoBehaviour
 | `OnSessionStateChanged` | `SessionStateChangedRelayData` | Any `SessionState` transition                                          |
 | `OnSessionError`        | `SessionErrorRelayData`        | Session encounters an error                                            |
 
-### `SessionStateChangedRelayData` Fields
+### `SessionStateChangedRelayData` fields
 
 | Field                      | Type           | Description                                                |
 | -------------------------- | -------------- | ---------------------------------------------------------- |
@@ -84,7 +86,7 @@ public class SessionStatusMonitor : MonoBehaviour
 | `IsReconnectionSuccessful` | `bool`         | True when transitioning from `Reconnecting` to `Connected` |
 | `IsDisconnected`           | `bool`         | True when `NewState == Disconnected`                       |
 
-### `SessionErrorRelayData` Fields
+### `SessionErrorRelayData` fields
 
 | Field               | Type                | Description                                                           |
 | ------------------- | ------------------- | --------------------------------------------------------------------- |
@@ -98,11 +100,11 @@ public class SessionStatusMonitor : MonoBehaviour
 
 ***
 
-## C# Event Hub — `ConvaiEvents`
+## C# event hub — `ConvaiEvents`
 
 Access via `ConvaiManager.ActiveManager.Events`. Subscribe in `OnEnable`, unsubscribe in `OnDisable`.
 
-### Session-Scoped Events
+### Session-scoped events
 
 | Event                               | Argument Type                     | Fires When                                                                   |
 | ----------------------------------- | --------------------------------- | ---------------------------------------------------------------------------- |
@@ -117,7 +119,7 @@ Access via `ConvaiManager.ActiveManager.Events`. Subscribe in `OnEnable`, unsubs
 | `OnParticipantLeft`                 | `ParticipantInfo`                 | A participant leaves the room                                                |
 | `OnRoomOwnershipRebindStateChanged` | `RoomOwnershipRebindStateChanged` | Active character ownership rebinding changes state                           |
 
-### Domain Event Payload Types
+### Domain event payload types
 
 #### `SessionStateChanged`
 
@@ -171,9 +173,9 @@ Access via `ConvaiManager.ActiveManager.Events`. Subscribe in `OnEnable`, unsubs
 
 ***
 
-## Supporting Types
+## Supporting types
 
-### `SessionState` Enum
+### `SessionState` enum
 
 | Value               | Description                                                                |
 | ------------------- | -------------------------------------------------------------------------- |
@@ -193,7 +195,7 @@ Access via `ConvaiManager.ActiveManager.Events`. Subscribe in `OnEnable`, unsubs
 | `IsStable()`        | State is `Disconnected`, `Connected`, or `Error`          |
 | `CanAcceptInput()`  | State is `Connected` only                                 |
 
-### `SessionErrorStage` Enum
+### `SessionErrorStage` enum
 
 | Value                 | Description                                                |
 | --------------------- | ---------------------------------------------------------- |
@@ -204,7 +206,7 @@ Access via `ConvaiManager.ActiveManager.Events`. Subscribe in `OnEnable`, unsubs
 | `SessionRecovery` (4) | Error during reconnection attempt                          |
 | `Runtime` (5)         | Error during an active session                             |
 
-### `ParticipantType` Enum
+### `ParticipantType` enum
 
 | Value              | Description                              |
 | ------------------ | ---------------------------------------- |
@@ -213,7 +215,7 @@ Access via `ConvaiManager.ActiveManager.Events`. Subscribe in `OnEnable`, unsubs
 | `RemotePlayer` (2) | A remote player in a multiplayer session |
 | `Character` (3)    | An AI character                          |
 
-### `RoomOwnershipRebindStatus` Enum
+### `RoomOwnershipRebindStatus` enum
 
 | Value                          | Description                                                   |
 | ------------------------------ | ------------------------------------------------------------- |
@@ -223,9 +225,9 @@ Access via `ConvaiManager.ActiveManager.Events`. Subscribe in `OnEnable`, unsubs
 | `RejectedTransitionState` (3)  | Rejected because the session is currently transitioning       |
 | `RejectedInvalidOwnership` (4) | Rejected because the requested character is not a valid owner |
 
-### `SessionError` Struct
+### `SessionError` struct
 
-The full error detail type, used as the argument to `OnSessionError` and `OnPipelineError` in the C# hub, and exposed via `SessionErrorRelayData.Stage` in the relay.
+The full error detail type, used as the argument to `OnSessionError` and `OnPipelineError` in the C# hub, and exposed via `SessionErrorRelayData` in the relay.
 
 | Member              | Type                | Description                                                                    |
 | ------------------- | ------------------- | ------------------------------------------------------------------------------ |
@@ -246,26 +248,13 @@ The full error detail type, used as the argument to `OnSessionError` and `OnPipe
 
 ***
 
-## `ConvaiNotificationEventBridge` — Internal Bridge
+## Advanced — `ConvaiEvents.Raw` event hub
 
-`ConvaiNotificationEventBridge` is not a MonoBehaviour and is not for direct use. It is wired automatically by the SDK bootstrap layer to translate domain errors into notification requests.
-
-If you are building a custom notification system or need to control cooldown behavior, two members are accessible:
-
-| Member             | Description                                                                    |
-| ------------------ | ------------------------------------------------------------------------------ |
-| `CooldownSeconds`  | Seconds before the same notification can fire again. Default: `10f`.           |
-| `ClearCooldowns()` | Resets all cooldown state — useful after a scene reload or test fixture setup. |
-
-***
-
-## Advanced — `ConvaiEvents.Raw` Event Hub
+{% hint style="warning" %}
+This is an advanced pattern. Use the typed properties on `ConvaiEvents` for all common scenarios.
+{% endhint %}
 
 `ConvaiEvents.Raw` exposes the underlying `IEventHub`, which lets you subscribe to any domain event type that has no corresponding typed property on `ConvaiEvents`.
-
-<details>
-
-<summary>IEventHub subscription pattern</summary>
 
 The raw hub uses a token-based subscription model. **Losing the token causes a memory leak** — the hub holds a reference to the adapter until explicitly unsubscribed.
 
@@ -283,7 +272,6 @@ public class RawHubExample : MonoBehaviour
         var hub = ConvaiManager.ActiveManager?.Events?.Raw;
         if (hub == null) return;
 
-        // Subscribe with a lambda; store the token
         _token = hub.Subscribe<SessionStateChanged>(
             e => Debug.Log($"Raw hub: {e.OldState} → {e.NewState}"),
             EventDeliveryPolicy.MainThread);
@@ -299,23 +287,20 @@ public class RawHubExample : MonoBehaviour
 
 **`EventDeliveryPolicy` options:**
 
-* `MainThread` (default) — delivered on the next Unity `Update` tick
-* `Background` — delivered on a thread pool thread
-* `Immediate` — delivered synchronously on the publishing thread
-
-Prefer `MainThread` for all Unity API access. Use `Immediate` or `Background` only for non-Unity thread-safe logging or metrics collection.
-
-</details>
+| Value                  | When to Use                                                      |
+| ---------------------- | ---------------------------------------------------------------- |
+| `MainThread` (default) | All Unity API access — delivered on the next Unity `Update` tick |
+| `Background`           | Non-Unity thread-safe logging or metrics                         |
+| `Immediate`            | Synchronous delivery on the publishing thread (use with caution) |
 
 ***
 
-## Usage Examples
+## Usage examples
 
-### Example 1 — Proctor HUD That Dims On Disconnect
+### Example 1 — Proctor HUD that dims on disconnect
 
 A training simulation shows a proctor overlay that dims when the session drops, giving learners a clear visual signal that the AI character is unavailable.
 
-{% code title="ProctorHUD.cs" %}
 ```csharp
 using Convai.Domain.DomainEvents.Session;
 using Convai.Runtime.Facades;
@@ -329,8 +314,8 @@ public class ProctorHUD : MonoBehaviour
     {
         var mgr = ConvaiManager.ActiveManager;
         if (mgr == null) return;
-        mgr.Events.OnConnected          += OnConnected;
-        mgr.Events.OnDisconnected       += OnDisconnected;
+        mgr.Events.OnConnected           += OnConnected;
+        mgr.Events.OnDisconnected        += OnDisconnected;
         mgr.Events.OnSessionStateChanged += OnSessionStateChanged;
     }
 
@@ -338,8 +323,8 @@ public class ProctorHUD : MonoBehaviour
     {
         var mgr = ConvaiManager.ActiveManager;
         if (mgr == null) return;
-        mgr.Events.OnConnected          -= OnConnected;
-        mgr.Events.OnDisconnected       -= OnDisconnected;
+        mgr.Events.OnConnected           -= OnConnected;
+        mgr.Events.OnDisconnected        -= OnDisconnected;
         mgr.Events.OnSessionStateChanged -= OnSessionStateChanged;
     }
 
@@ -355,13 +340,11 @@ public class ProctorHUD : MonoBehaviour
     private void SetAlpha(float a) => _overlay.alpha = a;
 }
 ```
-{% endcode %}
 
-### Example 2 — Session Error Banner With Recoverability Branch
+### Example 2 — Session error banner with recoverability branch
 
 A corporate onboarding simulation displays a dismissible error banner. Recoverable errors show a "reconnecting…" message; unrecoverable errors prompt the trainee to reload the module.
 
-{% code title="ErrorBanner.cs" %}
 ```csharp
 using Convai.Domain.DomainEvents.Session;
 using Convai.Runtime.Facades;
@@ -383,18 +366,15 @@ public class ErrorBanner : MonoBehaviour
         _messageLabel.text = err.IsRecoverable
             ? "Connection interrupted. Reconnecting…"
             : $"Session error: {err.Message}. Please reload the module.";
-
         _reloadButton.SetActive(!err.IsRecoverable);
     }
 }
 ```
-{% endcode %}
 
-### Example 3 — Idle Warning Countdown Timer
+### Example 3 — Idle warning countdown timer
 
 A medical training simulation shows a countdown when Convai warns the session will close, giving learners time to resume before the AI character disconnects.
 
-{% code title="IdleCountdown.cs" %}
 ```csharp
 using Convai.Domain.DomainEvents.Session;
 using Convai.Runtime.Facades;
@@ -429,7 +409,6 @@ public class IdleCountdown : MonoBehaviour
     }
 }
 ```
-{% endcode %}
 
 ***
 
@@ -444,8 +423,6 @@ public class IdleCountdown : MonoBehaviour
 
 ***
 
-## Next Steps
+## Next steps
 
-{% content-ref url="/broken/pages/a9404d9d31173368658d5c855f56adc153ddc00c" %}
-[Broken link](/broken/pages/a9404d9d31173368658d5c855f56adc153ddc00c)
-{% endcontent-ref %}
+With session events wired, move to [Character Events](character-events.md) to respond to speech, emotion, and turn lifecycle. For connection control from script, see [ConvaiManager API](convaimanager-api.md).

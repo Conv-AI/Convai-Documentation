@@ -1,127 +1,133 @@
-# quick start
+---
+title: Dialogue Animation quick start
+last_reviewed: 4.2.0
+description: >-
+  Add ConvaiDialogueAnimationController to a character, assign a library and
+  runtime config, and verify gesture animation in Play Mode.
+---
 
-The Dialogue Animation module requires three things: an Animator Controller with the correct four-layer structure, a clip library, and a runtime config. The SDK ships all of these as bundled assets — you can be up and running without authoring a single animation.
+# Dialogue Animation quick start
 
-{% hint style="info" %}
-**Prerequisites**
+Add gesture animation to an AI character using the bundled sample assets. The Dialogue Animation module needs three things: a four-layer Animator Controller with named placeholder clips, a `DialogueAnimationLibrary` with idle and talk clips, and a `DialogueAnimationRuntimeConfig` that controls timing. This guide walks through the quickest path using the bundled sample assets.
 
-* A scene with `ConvaiRoomManager` and at least one `ConvaiCharacter`
-* The character's root GameObject has an `Animator` component pointing to a controller (you will replace this below)
-* The Unity Animation Rigging package is **not** required — it is optional for the advanced gaze bridge
-{% endhint %}
+### Prerequisites
+
+* `ConvaiRoomManager` and at least one `ConvaiCharacter` are already in your scene
+* The character GameObject has an `Animator` component with a humanoid Avatar configured
+* You know the path to the SDK's sample assets: `Packages/`<code class="expression">space.vars.sdk_package_id</code>`/SamplesShared/`
 
 ***
 
-## Setup Steps
+### Setup
 
 {% stepper %}
 {% step %}
-**Duplicate the Sample Animator Controller**
+#### Duplicate the sample Animator Controller
 
-The SDK includes a sample controller with the required four-layer structure. Duplicate it into your project so you can customize it without modifying the package.
+In the Project window, navigate to:
 
-1. In the Project window, navigate to:\
-   `Packages/Convai SDK for Unity/SamplesShared/Art/Animations/Dialogue/Controllers/`
-2. Right-click **ConvaiSample\_Animator Controller** → **Create** → **Copy Asset** (or Ctrl+D to duplicate in place, then drag to your Assets folder)
-3. Assign the duplicated controller to your character's `Animator` component
+```
+Packages/com.convai.convai-sdk-for-unity/SamplesShared/Art/Animations/Dialogue/Controllers/
+```
 
-The controller has four layers:
+Duplicate `ConvaiSample_Animator Controller` and move it into your project's `Assets/` folder. Assign it to the `Animator` component on your character's root GameObject.
 
-| Index | Layer Name   | Purpose                                          |
-| ----- | ------------ | ------------------------------------------------ |
-| 0     | Base Idle    | Full-body foundation idle, always playing        |
-| 1     | Idle Overlay | Rotating ambient gesture clips                   |
-| 2     | Body Talk    | Upper-body talk clips, fades in during speech    |
-| 3     | Head Talk    | Head and neck talk clips, fades in during speech |
+The sample controller already has the required four-layer structure and placeholder clips. See [Animator Controller requirements](animator-controller-requirements.md) for the full layer and clip contract, or [Build a compatible Animator Controller](animator-controller-setup.md) if you need to build your own.
 {% endstep %}
 
 {% step %}
-**Add ConvaiDialogueAnimationController**
+#### Add ConvaiDialogueAnimationController
 
-Add the `ConvaiDialogueAnimationController` component to the character's root GameObject.
+Select your character's root GameObject. In the Inspector, click **Add Component** and search for **Dialogue Animation** (or navigate via **Convai → Embodiment → Dialogue Animation**).
 
-The component appears with three main Inspector sections: **Content** (library and config assets), **Animator Wiring** (target Animator and contract), and **Character Gender**.
-
-Leave **Animator** blank — the component auto-discovers the first `Animator` in the hierarchy. Set it explicitly if your hierarchy has multiple animators.
+The component appears with empty `Library` and `Config` fields and a default `Character Gender` of **Neutral**.
 {% endstep %}
 
 {% step %}
-**Assign a Library**
+#### Assign a library
 
-Drag one of the bundled libraries from\
-`Packages/Convai SDK for Unity/SamplesShared/Resources/Embodiment/DialogueAnimation/Libraries/`\
-into the **Library** field:
+In the Project window, navigate to:
 
-| Asset                                                    | Best For                                     |
-| -------------------------------------------------------- | -------------------------------------------- |
-| `ConvaiSamplesShared_DialogAnimationLib_Balanced.asset`  | General use — a mix of gesture scales        |
-| `ConvaiSamplesShared_DialogAnimationLib_Expresive.asset` | Characters with wide, animated personalities |
-| `ConvaiSamplesShared_DialogAnimationLib_Subtle.asset`    | Characters in formal or restrained contexts  |
+```
+Packages/com.convai.convai-sdk-for-unity/SamplesShared/Resources/Embodiment/DialogueAnimation/Libraries/
+```
 
-The library contains both idle clips (played during silence) and talk clips (played during speech and reactions).
+Three bundled libraries are available:
+
+| Library                                            | Character style                                               |
+| -------------------------------------------------- | ------------------------------------------------------------- |
+| `ConvaiSamplesShared_DialogAnimationLib_Balanced`  | Professional, measured gestures — suitable for most scenarios |
+| `ConvaiSamplesShared_DialogAnimationLib_Subtle`    | Restrained, low-energy movement                               |
+| `ConvaiSamplesShared_DialogAnimationLib_Expresive` | High-energy, expressive gestures                              |
+
+Drag your chosen library into the **Library** field on the component.
 {% endstep %}
 
 {% step %}
-**Assign a Runtime Config**
+#### Assign a runtime config
 
-Drag `ConvaiSamplesShared_DialogueAnimationRuntimeConfig.asset` (same folder as the libraries, one level up at `…/DialogueAnimation/`) into the **Config** field.
+Navigate to:
 
-The runtime config controls fade durations, idle rotation cadence, speech energy modulation, and clip selection bias. You can share one config across multiple characters.
+```
+Packages/com.convai.convai-sdk-for-unity/SamplesShared/Resources/Embodiment/DialogueAnimation/
+```
 
-{% hint style="warning" %}
-If **Config** is left empty, `ConvaiDialogueAnimationController` logs a warning and skips building the runtime. The component will not animate until a config is assigned.
+Drag one of the bundled `ConvaiDialogueAnimationProfile_*` assets into the **Config** field — or assign a `DialogueAnimationRuntimeConfig` asset directly.
+
+{% hint style="danger" %}
+Leaving **Config** empty disables all animation. The component will not animate until a config is assigned.
 {% endhint %}
 {% endstep %}
 
 {% step %}
-**Set Character Gender**
+#### Set character gender
 
-Set the **Character Gender** field to match your rig's animation authorship:
+Set **Character Gender** to match your character rig:
 
-* **Neutral** — accepts all clips regardless of their gender tag. Use this when you are unsure or when your library mixes clip styles freely.
-* **Male** — only selects clips tagged `Male` or `Neutral`
-* **Female** — only selects clips tagged `Female` or `Neutral`
+* **Neutral** — clips with no gender tag are eligible (default; safe for most rigs)
+* **Male** — adds Male-tagged clips to the eligible pool
+* **Female** — adds Female-tagged clips to the eligible pool
 
-Mismatched gender settings result in visually incorrect clips (masculine gestures on a feminine rig, or vice versa). See [Animation Libraries & Profiles](/broken/pages/cc256e6610756212db3fdf852998767014ffb0ff) for how gender tags are set on individual clips.
+A Neutral character only receives Neutral-tagged clips. Male and Female characters receive both gender-specific and Neutral clips.
 {% endstep %}
 
 {% step %}
-**Enter Play Mode**
+#### Enter Play Mode
 
-Press Play. Talk to the character.
+Press Play. Your character should begin playing idle animation immediately. When a conversation starts and the character speaks, the talk layers fade in with gesture animation matching the detected emotion.
 
-* During silence, the idle overlay layer crossfades to a new ambient gesture every 8–20 seconds
-* When the character speaks or reacts, the body and head talk layers fade in
-* Open the Animator window and watch layer weights change in real time
+**Expected result:** Idle clips cycle with natural crossfades at rest. When the character speaks, the body talk and head talk layers fade in. The `CurrentTalkLayerWeight` property on the controller rises above `0` during speech.
 {% endstep %}
 {% endstepper %}
 
-{% hint style="success" %}
-You should see the idle overlay layer weight change as ambient clips crossfade, and the talk layers fade in when the character speaks. If the character's emotion module is also active, clip selection will bias toward animation clips that match the current emotion.
+{% hint style="warning" %}
+Inspector screenshot required before publishing: capture `ConvaiDialogueAnimationController` on the character root with the Library, Config, and Character Gender fields assigned as described in steps 3–5.
 {% endhint %}
 
 ***
 
-## Using a Profile Instead
+### Alternative: use a bundled profile
 
-If you configure multiple characters, a `ConvaiDialogueAnimationProfile` bundles all assets (library, config, contract, foundation idle clip, and gender) into a single ScriptableObject. Three bundled profiles are available:
+Rather than assigning Library and Config separately, you can assign a `ConvaiDialogueAnimationProfile` to the **Profile** slot. A profile bundles Library, RuntimeConfig, AnimatorContract, CharacterGender, and FoundationIdleClip into a single asset.
 
-| Asset                                                           | Contents                           |
-| --------------------------------------------------------------- | ---------------------------------- |
-| `ConvaiSamplesShared_DialogueAnimationProfile_Balanced.asset`   | Balanced library + shared config   |
-| `ConvaiSamplesShared_DialogueAnimationProfile_Expressive.asset` | Expressive library + shared config |
-| `ConvaiSamplesShared_DialogueAnimationProfile_Subtle.asset`     | Subtle library + shared config     |
+Three bundled profiles are available at:
 
-Assign a profile in the **Profile** slot at the top of the component Inspector. Individual field overrides in the Content section take priority over the profile when both are set.
+```
+Packages/com.convai.convai-sdk-for-unity/SamplesShared/Resources/Embodiment/DialogueAnimation/
+```
+
+Assign `ConvaiDialogueAnimationProfile_Balanced`, `_Expressive`, or `_Subtle` to the profile slot. Individual Library and Config fields on the component take precedence over a profile if both are assigned.
 
 ***
 
-## Next Steps
+### Next steps
 
-{% content-ref url="/broken/pages/cc256e6610756212db3fdf852998767014ffb0ff" %}
-[Broken link](/broken/pages/cc256e6610756212db3fdf852998767014ffb0ff)
+Your character now plays gesture animation driven by dialogue state and emotion. Read Animation Libraries & Profiles to learn how to author custom clip libraries, or Animator Controller requirements for the full four-layer contract reference.
+
+{% content-ref url="animation-libraries-and-profiles.md" %}
+[animation-libraries-and-profiles.md](animation-libraries-and-profiles.md)
 {% endcontent-ref %}
 
-{% content-ref url="/broken/pages/da72fb4f3f9be0c09f3781e47f8daffe0675c679" %}
-[Broken link](/broken/pages/da72fb4f3f9be0c09f3781e47f8daffe0675c679)
+{% content-ref url="animator-controller-requirements.md" %}
+[animator-controller-requirements.md](animator-controller-requirements.md)
 {% endcontent-ref %}

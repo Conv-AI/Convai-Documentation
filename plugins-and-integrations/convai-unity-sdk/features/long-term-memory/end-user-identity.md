@@ -1,122 +1,65 @@
 ---
-description: >-
-  Learn how the SDK identifies users across sessions and how to replace the
-  default device-based provider with your own account-scoped identity system.
+title: End-user identity
+description: Understand how the SDK identifies users for long-term memory scoping and how to implement a custom authentication-backed identity provider.
+last_reviewed: "4.2.0"
 ---
 
-# End-User Identity
+Every long-term memory session requires a stable `end_user_id` — a string the SDK sends to Convai on every connection. Convai uses it to scope stored memories: facts extracted from a conversation are stored under the combination of `end_user_id` and `character_id`. If the identifier changes between sessions, the server treats the user as a new person and no memories carry over.
 
-## How the SDK Identifies Users Across Sessions
+The SDK provides `DeviceEndUserIdProvider` as a zero-config default. For applications with user authentication, you can replace it with a custom provider that returns your account IDs.
 
-Long-Term Memory is only useful if the Convai backend can reliably associate a user with their history. The identifier that creates that association is the `end_user_id` — a string sent to the server on every session connect. This page explains how the SDK generates that identifier by default, what guarantees it provides on each platform, and how to replace the default with your own application-managed identity.
+***
 
-## Why Stable Identity Matters
+## Default identity: `DeviceEndUserIdProvider`
 
-If the `end_user_id` changes between sessions, the backend treats the user as a new person and no memories carry over. Conversely, if two different users share the same identifier, they share a memory partition and the character will confuse them. Getting identity right is the single most important prerequisite for reliable Long-Term Memory.
+`DeviceEndUserIdProvider` implements both `IEndUserIdProvider` and `IEndUserIdentityProvider`. It is registered automatically — no configuration required.
 
-The SDK sends `end_user_id` as part of the session connect request. The backend resolves it to an internal `speaker_id`, then uses `speaker_id:character_id` as the storage key for that user's memories with that character. Your application only ever works with `end_user_id` — the internal key is a backend implementation detail.
+**In the Unity Editor:** Always reads or creates a GUID stored in `PlayerPrefs` under the key `"convai.end_user_id"`. Every Play Mode session on the same machine shares this GUID, so memories accumulate as expected during development and testing.
 
-{% hint style="warning" %}
-If `end_user_id` is empty or whitespace, the SDK normalises it to `null` before sending. A `null` identifier is treated by the server as an anonymous session — no memories are stored or retrieved. Always ensure your identity provider returns a non-empty string.
-{% endhint %}
+**In player builds:** First attempts `SystemInfo.deviceUniqueIdentifier`. If that value is unavailable, empty, equals `SystemInfo.unsupportedIdentifier`, or consists entirely of zeros, it falls back to a `PlayerPrefs` GUID — generated once and reused across all subsequent sessions on that device.
 
-## Default Provider: DeviceEndUserIdProvider
+The GUID is formatted as a 32-character hex string without hyphens (e.g., `a1b2c3d4e5f6789012345678abcdef01`). You will see this format in console logs and when inspecting `EndUserDetails.EndUserId`.
 
-Out of the box, the SDK registers `DeviceEndUserIdProvider` as the identity source. It generates a stable, device-scoped identifier using the following logic:
+`PlayerPrefs` does not survive reinstalls. Clearing `PlayerPrefs` or reinstalling the application generates a new GUID. Convai treats the new GUID as a new user — all previously stored memories become inaccessible under the new ID (though they remain on the server under the old ID). For applications where data continuity across reinstalls matters, use a server-assigned account ID via a custom provider. See [Implement a custom identity provider](#implement-a-custom-identity-provider) below.
 
-### Player Builds
+***
 
-1. Read `SystemInfo.deviceUniqueIdentifier`.
-2. If the value is valid (non-null, non-empty, not `SystemInfo.unsupportedIdentifier`, not all zeroes), use it directly.
-3. Otherwise, generate a new `Guid` (format `"N"`, no hyphens), store it in `PlayerPrefs` under the key `"convai.end_user_id"`, and return it. The same GUID is returned on every subsequent run.
+## Player ID is not end-user ID
 
-### Unity Editor
+**Setting Player ID on the `ConvaiPlayer` component does not change the `end_user_id` used for memory scoping.** Player ID controls only how the local player's name appears in transcripts and debug logs. Memory scoping is always determined by `IEndUserIdentityProvider`, not by `ConvaiPlayer`.
 
-The device identifier path is skipped entirely. The editor always reads from `PlayerPrefs` using the same `"convai.end_user_id"` key, generating a new GUID on first run and reusing it thereafter. This gives every Play Mode session on the same project a consistent identity, which is useful for testing memory continuity without signing in.
+***
 
-### Platform Behaviour Summary
+## Implement a custom identity provider
 
-| Environment                          | Identity source                     | Persistence                                                     |
-| ------------------------------------ | ----------------------------------- | --------------------------------------------------------------- |
-| Player build — device ID available   | `SystemInfo.deviceUniqueIdentifier` | OS-managed; survives reinstall on some platforms                |
-| Player build — device ID unavailable | GUID in `PlayerPrefs`               | Survives app update; cleared on reinstall or `PlayerPrefs` wipe |
-| Unity Editor                         | GUID in `PlayerPrefs`               | Survives editor restart; one ID per Unity project               |
+If your application authenticates users, implement `IEndUserIdentityProvider` to return a stable, server-assigned account identifier. This ensures memories follow a user across devices and reinstalls.
 
-{% hint style="warning" %}
-**PlayerPrefs is not a secure store.** On platforms where the device ID is unavailable, the fallback GUID is stored in `PlayerPrefs` and can be read or cleared by the user or by other code in the project. For applications with strict identity requirements, replace the default provider with one backed by your authentication system.
-{% endhint %}
-
-## The PlayerId Field Is Not the end\_user\_id
-
-`ConvaiPlayer` exposes a **Player ID** field in the Inspector. This is a **local display identifier** used only for transcript UI attribution — the name shown next to the player's lines in the conversation feed. It is never sent to the server and has no effect on Long-Term Memory.
-
-{% hint style="warning" %}
-Setting **Player ID** on `ConvaiPlayer` — either in the Inspector or via `ConvaiPlayer.Configure(...)` — does **not** change the `end_user_id` used for memory. To control the identifier the server uses for memory scoping, implement a custom identity provider as described below.
-{% endhint %}
-
-## Custom Identity Provider
-
-Replace the default provider when your application manages user accounts — for example, when users sign in and you want memories tied to their account rather than their physical device.
-
-### The Two Identity Interfaces
-
-The SDK separates identity into two interfaces. For most custom implementations, you only need one:
-
-| Interface                  | Method                | Purpose                                                                                                                                   |
-| -------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `IEndUserIdentityProvider` | `GetEndUserId()`      | **Use this.** Resolves the current user's identifier at connect time. Register with `ConvaiManager.SetEndUserIdentityProvider(provider)`. |
-| `IEndUserIdProvider`       | `GenerateEndUserId()` | Lower-level generation interface. Implemented by `DeviceEndUserIdProvider`. Most custom providers do not need it.                         |
-
-`DeviceEndUserIdProvider` implements both. Custom providers typically implement only `IEndUserIdentityProvider`.
-
-### Step 1: Implement IEndUserIdentityProvider
+### Implement the interface
 
 ```csharp
 using Convai.Domain.Identity;
 
-public class AccountEndUserIdProvider : IEndUserIdentityProvider
+public class AccountIdentityProvider : IEndUserIdentityProvider
 {
     private readonly string _accountId;
 
-    public AccountEndUserIdProvider(string accountId)
+    public AccountIdentityProvider(string accountId)
     {
         _accountId = accountId;
     }
 
-    public string GetEndUserId() => _accountId;
-}
-```
-
-The returned string must be stable for the same human user across sessions. A server-assigned account ID, a hashed email, or any opaque identifier from your authentication system all work well. Avoid values that change on re-login or device change.
-
-### Step 2: Register Before Connecting
-
-```csharp
-using Convai.Runtime.Components;
-using UnityEngine;
-
-public class SessionSetup : MonoBehaviour
-{
-    [SerializeField] private ConvaiManager _convaiManager;
-
-    // Call this after your authentication flow resolves the account ID.
-    public void OnUserSignedIn(string accountId)
+    public string GetEndUserId()
     {
-        var provider = new AccountEndUserIdProvider(accountId);
-        _convaiManager.SetEndUserIdentityProvider(provider);
+        return _accountId;
     }
 }
 ```
 
-`ConvaiManager.SetEndUserIdentityProvider` accepts any `IEndUserIdentityProvider`. The provider is read once when a session connects — changing it after a session is already active has no effect until the next connect.
+Use your backend-assigned account ID as the identifier. Do not use email addresses or display names — they can change, which would cause the server to treat the user as a new person.
 
-{% hint style="warning" %}
-Register the provider **before** the first session connect. If you call `SetEndUserIdentityProvider` after `ConvaiManager` has already opened a session, the new identity will not be used until the session is restarted.
-{% endhint %}
+### Optionally attach metadata
 
-### Step 3 (Optional): Attach User Metadata
-
-You can send arbitrary metadata alongside the `end_user_id` at connect time. The server stores it on the end-user record, where it is visible in the End-User Management editor tool and retrievable via `EndUsersService`. The `"name"` key receives special treatment — it is used as the display name in the editor's end-user list.
+Implement `IEndUserMetadataProvider` to send display information alongside the identity. Convai stores this metadata in `EndUserDetails.Metadata` and uses the `"name"` key to populate the display name in the editor's Long-Term Memory panel.
 
 ```csharp
 using System.Collections.Generic;
@@ -125,12 +68,12 @@ using Convai.Domain.Identity;
 public class AccountMetadataProvider : IEndUserMetadataProvider
 {
     private readonly string _displayName;
-    private readonly string _role;
+    private readonly string _department;
 
-    public AccountMetadataProvider(string displayName, string role)
+    public AccountMetadataProvider(string displayName, string department)
     {
         _displayName = displayName;
-        _role = role;
+        _department = department;
     }
 
     public IReadOnlyDictionary<string, object> GetEndUserMetadata()
@@ -138,31 +81,68 @@ public class AccountMetadataProvider : IEndUserMetadataProvider
         return new Dictionary<string, object>
         {
             { "name", _displayName },
-            { "role", _role }
+            { "department", _department }
         };
     }
 }
 ```
 
-Register it alongside the identity provider:
+### Register before the first connection
+
+Call `SetEndUserIdentityProvider` and `SetEndUserMetadataProvider` on `ConvaiManager` **before the first session connects**. If `ConvaiCharacter` has **Auto Connect** enabled, the connection starts immediately after `ConvaiRoomManager.Start()` completes — register your provider in `Awake()`, not `Start()`, to guarantee correct ordering.
 
 ```csharp
-_convaiManager.SetEndUserIdentityProvider(new AccountEndUserIdProvider(accountId));
-_convaiManager.SetEndUserMetadataProvider(new AccountMetadataProvider(displayName, role));
+using Convai.Runtime.Components;
+using UnityEngine;
+
+public class IdentityRegistrar : MonoBehaviour
+{
+    [SerializeField] private ConvaiManager _convaiManager;
+
+    private void Awake()
+    {
+        // Called before ConvaiRoomManager.Start() — safe for Auto Connect characters
+        string accountId = AuthService.CurrentUser.AccountId;
+        string displayName = AuthService.CurrentUser.DisplayName;
+        string department = AuthService.CurrentUser.Department;
+
+        _convaiManager.SetEndUserIdentityProvider(new AccountIdentityProvider(accountId));
+        _convaiManager.SetEndUserMetadataProvider(new AccountMetadataProvider(displayName, department));
+    }
+}
 ```
 
-## Identity Resolution Summary
+{% hint style="danger" %}
+If you call `SetEndUserIdentityProvider` after `ConnectAsync` has already been called for the current session, the provider change has no effect on the active connection. The new provider is used starting with the next `ConnectAsync` call. Always register before connecting.
+{% endhint %}
 
-```mermaid
-flowchart LR
-    A[Your App] -->|implements| B[IEndUserIdentityProvider]
-    B -->|GetEndUserId| C[end_user_id string]
-    C -->|sent on connect| D[Convai Server]
-    D -->|resolves| E[Internal speaker_id]
-    E -->|storage key| F["speaker_id : character_id"]
-    F --> G[(Memory Partition)]
-```
+***
 
-## Conclusion
+## Empty or whitespace end-user ID
 
-The `end_user_id` is the foundation of everything Long-Term Memory does — if it is not stable, memories will not carry over. The default `DeviceEndUserIdProvider` handles most device-based deployments automatically. For applications with user accounts, implement `IEndUserIdentityProvider` and register it before the first session connect. The next page, [Enabling Memory on Characters](../../../unity-plugin-beta-overview/features/long-term-memory/enabling-memory-on-characters.md), covers how to turn the memory feature on or off for individual characters.
+{% hint style="danger" %}
+If `GetEndUserId()` returns an empty string, a whitespace-only string, or `null`, the SDK normalizes it to `null` before sending. Convai treats `null` as an anonymous session — **no memories are stored or retrieved**. Always ensure your identity source returns a non-empty, non-whitespace value.
+{% endhint %}
+
+***
+
+## Identity source comparison
+
+| Scenario | Recommended source | Survives reinstall | Survives device switch |
+|---|---|---|---|
+| Development / testing | `DeviceEndUserIdProvider` (default) | No | No |
+| Consumer app, no accounts | `DeviceEndUserIdProvider` (default) | No | No |
+| Consumer app with accounts | Custom provider → server account ID | Yes | Yes |
+| Enterprise / training platform | Custom provider → server account ID | Yes | Yes |
+
+***
+
+## Next steps
+
+{% content-ref url="end-user-management.md" %}
+[Manage end-user records](end-user-management.md)
+{% endcontent-ref %}
+
+{% content-ref url="memory-management-api.md" %}
+[Memory management API](memory-management-api.md)
+{% endcontent-ref %}

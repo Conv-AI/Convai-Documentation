@@ -1,12 +1,14 @@
-# operation and stream types
+---
+title: Operation and stream types
+description: Type reference for IConvaiOperation<T>, IConvaiStream<T>, ConvaiError, and Unit — the async primitives used across all Convai SDK scripting APIs.
+last_reviewed: "4.2.0"
+---
 
-Most SDK methods that perform async work return `IConvaiOperation<T>` instead of `Task<T>`. Methods that produce a continuous sequence of values return `IConvaiStream<T>`. These types are designed to work across Unity's coroutine system, C# async/await, and progress-driven flows — without forcing a dependency on `Task` throughout your codebase.
-
-For usage patterns and code examples, see [Async Patterns](/broken/pages/a2541cd5b9d0e9324142e7f69a7468f9a2c2697b).
+Most SDK methods that perform async work return `IConvaiOperation<T>` instead of `Task<T>`. Methods that produce a continuous sequence of values return `IConvaiStream<T>`. These types are designed to work across Unity's coroutine system, C# async/await, and progress-driven flows — without forcing a dependency on `Task` throughout your codebase. For usage patterns and code examples, see [Async Patterns](async-patterns.md).
 
 ***
 
-## Why Custom Async Types?
+## Why custom async types?
 
 | Requirement                   | `Task<T>`               | `IConvaiOperation<T>`                |
 | ----------------------------- | ----------------------- | ------------------------------------ |
@@ -22,37 +24,39 @@ For usage patterns and code examples, see [Async Patterns](/broken/pages/a2541cd
 
 The result handle for any SDK async operation. Returned by `ConnectAsync`, `DisconnectAsync`, `StartListeningAsync`, `WaitForCharacterReadyAsync`, and other methods.
 
-### Status Properties
+### Status properties
 
-| Property       | Type              | Description                                                                                                   |
-| -------------- | ----------------- | ------------------------------------------------------------------------------------------------------------- |
-| `Status`       | `OperationStatus` | Current lifecycle state of the operation                                                                      |
-| `IsCompleted`  | `bool`            | True when status is `Succeeded`, `Faulted`, or `Canceled`                                                     |
-| `IsSuccessful` | `bool`            | True when status is `Succeeded`                                                                               |
-| `IsCanceled`   | `bool`            | True when status is `Canceled`                                                                                |
-| `HasError`     | `bool`            | True when status is `Faulted`                                                                                 |
-| `Error`        | `ConvaiError`     | Populated when `HasError` is true; default when successful or pending                                         |
-| `Progress`     | `float`           | Completion estimate in the range 0.0–1.0. Not all operations report progress — check `Status` for completion. |
+| Property       | Type              | Description                                                                                                                       |
+| -------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `Status`       | `OperationStatus` | Current lifecycle state of the operation                                                                                          |
+| `IsCompleted`  | `bool`            | True when status is `Succeeded`, `Faulted`, or `Canceled`                                                                         |
+| `IsSuccessful` | `bool`            | True when status is `Succeeded`                                                                                                   |
+| `IsCanceled`   | `bool`            | True when status is `Canceled`                                                                                                    |
+| `HasError`     | `bool`            | True when status is `Faulted`                                                                                                     |
+| `Error`        | `ConvaiError`     | Populated when `HasError` is true; default when successful or pending                                                             |
+| `Progress`     | `float`           | Completion estimate in the range 0.0–1.0. Not all operations report granular progress — check `Status` for definitive completion. |
 
-### Async/Await
+### Async/await
 
 | Member         | Description                                                                                                   |
 | -------------- | ------------------------------------------------------------------------------------------------------------- |
 | `GetAwaiter()` | Returns a `TaskAwaiter<T>`. Enables `await operation` directly. Throws `ConvaiOperationException` on failure. |
-| `AsTask()`     | Returns the underlying `Task<T>`. Use when you need to pass to Task-based APIs.                               |
+| `AsTask()`     | Returns the underlying `Task<T>`. Use when you need to pass to Task-based APIs such as `Task.WhenAll`.        |
 
-### Coroutine
+### Coroutines
 
-| Member                                                                        | Description                                                                                                                                   |
-| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ToCoroutine(Action<T> onSuccess = null, Action<ConvaiError> onError = null)` | Returns an `IEnumerator`. Pass to `StartCoroutine()`. `onSuccess` receives the result; `onError` receives the error if the operation faulted. |
+| Member                                                                        | Description                                                                                                                                                                |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ToCoroutine(Action<T> onSuccess = null, Action<ConvaiError> onError = null)` | Returns an `IEnumerator`. Pass to `StartCoroutine()`. `onSuccess` receives the result; `onError` receives the error if the operation faulted. Both callbacks are optional. |
 
 ### Chaining
 
-| Member                                               | Description                                                                                              |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `ContinueWith<TNext>(Func<T, TNext> selector)`       | Transforms the result when the operation succeeds. Returns a new `IConvaiOperation<TNext>`.              |
-| `ContinueWith<TNext>(Func<T, Task<TNext>> selector)` | Async transform. Returns a new `IConvaiOperation<TNext>` that resolves when the selector task completes. |
+| Member                                               | Description                                                                                                    |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `ContinueWith<TNext>(Func<T, TNext> selector)`       | Synchronous transform. Returns a new `IConvaiOperation<TNext>` that resolves with the selector's return value. |
+| `ContinueWith<TNext>(Func<T, Task<TNext>> selector)` | Async transform. Returns a new `IConvaiOperation<TNext>` that resolves when the selector task completes.       |
+
+`ContinueWith` propagates errors — if the source operation faults, the chained operation also faults with the same error without invoking the selector.
 
 ### Cancellation
 
@@ -62,7 +66,7 @@ The result handle for any SDK async operation. Returned by `ConnectAsync`, `Disc
 
 ***
 
-## `OperationStatus` Enum
+## `OperationStatus` enum
 
 | Value           | Description                                            |
 | --------------- | ------------------------------------------------------ |
@@ -76,7 +80,7 @@ The result handle for any SDK async operation. Returned by `ConnectAsync`, `Disc
 
 ***
 
-## `ConvaiError` Struct
+## `ConvaiError` struct
 
 Carries structured error information without requiring exception handling. Populated in `IConvaiOperation<T>.Error` when `HasError` is true.
 
@@ -87,15 +91,13 @@ Carries structured error information without requiring exception handling. Popul
 | `Exception` | `Exception` | Underlying exception, if the error originated from one. May be `null`. |
 | `IsEmpty`   | `bool`      | True when this is a default (no-error) value                           |
 
-### Static Factory
+### Static factory
 
 ```csharp
 ConvaiError.FromException(Exception exception, string code = "exception")
 ```
 
-Creates a `ConvaiError` from an exception. Useful in custom error paths.
-
-### Equality
+Creates a `ConvaiError` from an exception. Use in custom error paths when constructing errors from caught exceptions.
 
 `ConvaiError` is a struct and supports `Equals`, `GetHashCode`, and `ToString()`.
 
@@ -103,18 +105,31 @@ Creates a `ConvaiError` from an exception. Useful in custom error paths.
 
 ## `ConvaiOperationException`
 
-Thrown when you `await` an `IConvaiOperation<T>` and the operation faulted. Extends `Exception`.
+Thrown when you `await` an `IConvaiOperation<T>` that faulted. Extends `Exception`.
 
-| Property  | Type     | Description                                      |
-| --------- | -------- | ------------------------------------------------ |
-| `Code`    | `string` | The error code from the underlying `ConvaiError` |
-| `Message` | `string` | Inherited — human-readable description           |
+| Property  | Type     | Description                                                                   |
+| --------- | -------- | ----------------------------------------------------------------------------- |
+| `Code`    | `string` | The error code from the underlying `ConvaiError` — matches `ConvaiError.Code` |
+| `Message` | `string` | Inherited — human-readable description                                        |
 
 **`HasError` vs. thrown exception:**
 
-* When using **coroutines** (`ToCoroutine`), errors are delivered to the `onError` callback. No exception is thrown.
-* When using **async/await**, a faulted operation throws `ConvaiOperationException`. Catch it with `try/catch`.
+* **Coroutines** (`ToCoroutine`): errors are delivered to the `onError` callback. No exception is thrown.
+* **Async/await**: a faulted operation throws `ConvaiOperationException`. Catch it with `try/catch`.
 * `HasError` is `true` in both cases — you can poll it at any time regardless of consumption pattern.
+
+{% hint style="warning" %}
+When using async/await, **cancellation throws `OperationCanceledException`**, not `ConvaiOperationException`. Always catch both:
+
+```csharp
+try
+{
+    await manager.ConnectAsync(destroyCancellationToken);
+}
+catch (ConvaiOperationException ex) { /* SDK error */ }
+catch (OperationCanceledException)  { /* canceled   */ }
+```
+{% endhint %}
 
 ***
 
@@ -134,7 +149,7 @@ Returned by methods that produce a continuous sequence of values over time, such
 | Method                                         | Returns               | Description                                                                         |
 | ---------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------- |
 | `ReadAllAsync(CancellationToken ct = default)` | `IAsyncEnumerable<T>` | Yields items as they arrive. Completes when the stream ends. Respects cancellation. |
-| `DisposeAsync()`                               | `ValueTask`           | Disposes the stream and releases resources. Always call in an `await using` block.  |
+| `DisposeAsync()`                               | `ValueTask`           | Disposes the stream and releases resources. Always call via `await using`.          |
 
 ```csharp
 await using var stream = GetSomeStream();
@@ -146,7 +161,7 @@ await foreach (var item in stream.ReadAllAsync(destroyCancellationToken))
 
 ***
 
-## `StreamStatus` Enum
+## `StreamStatus` enum
 
 | Value           | Description                                          |
 | --------------- | ---------------------------------------------------- |
@@ -160,20 +175,18 @@ await foreach (var item in stream.ReadAllAsync(destroyCancellationToken))
 
 ***
 
-## `Unit` Struct
+## `Unit` struct
 
 ```csharp
 Unit.Value // the only instance
 ```
 
-A void-equivalent used as the type parameter when an operation has no meaningful return value. Operations like `DisconnectAsync()` and `StopListeningAsync()` return `IConvaiOperation<Unit>` — you `await` them for the side effect, not the result.
+A void-equivalent used as the type parameter when an operation has no meaningful return value. Operations like `DisconnectAsync()` and `StopListeningAsync()` return `IConvaiOperation<Unit>` — `await` them for the side effect, not the result.
 
 `Unit` supports equality (`==`, `!=`, `Equals`) and `ToString()` returns `"()"`.
 
 ***
 
-## Next Steps
+## Next steps
 
-{% content-ref url="/broken/pages/a2541cd5b9d0e9324142e7f69a7468f9a2c2697b" %}
-[Broken link](/broken/pages/a2541cd5b9d0e9324142e7f69a7468f9a2c2697b)
-{% endcontent-ref %}
+For practical consumption patterns using these types, see [Async Patterns](async-patterns.md). For all methods that return `IConvaiOperation<T>`, see [ConvaiManager API](convaimanager-api.md) and [Character & Player API](character-and-player-api.md).
