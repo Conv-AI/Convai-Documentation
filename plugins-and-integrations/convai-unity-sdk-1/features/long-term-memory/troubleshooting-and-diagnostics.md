@@ -149,7 +149,7 @@ All Memory Management API errors throw `ConvaiRestException`. The `StatusCode` p
 | HTTP status | Cause | Fix |
 | --- | --- | --- |
 | `400 Bad Request` | Missing required parameter (`character_id`, `end_user_id`, or `memories`) | Verify all required arguments are non-null and non-empty before calling |
-| `401 Unauthorized` | Invalid or missing API key | Reconfigure your API key at **Convai → Account** or **Edit → Project Settings → Convai SDK** |
+| `401 Unauthorized` | Invalid or missing API key | Reconfigure your API key — see [Configure the API key](../../getting-started/configure-api-key.md) |
 | `403 Forbidden` | The character does not belong to the account that owns the API key | Verify the character ID belongs to the account associated with your API key |
 | `404 Not Found` | Invalid character ID, end-user ID, or memory ID | Double-check IDs against the Convai dashboard. If querying by `memoryId`, verify it from a prior `ListAsync` call. |
 | `429 Too Many Requests` | Rate limit exceeded | Implement exponential backoff. Example: retry after `2^attempt` seconds with a `CancellationToken` to abort after a maximum number of retries. |

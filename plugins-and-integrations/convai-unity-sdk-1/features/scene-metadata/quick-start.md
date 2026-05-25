@@ -8,9 +8,9 @@ Set up Scene Metadata to give a Convai character awareness of named objects in y
 
 ## Prerequisites
 
-- Unity <code class="expression">space.vars.unity_min_version</code>
-- A Unity scene with `ConvaiManager` and at least one `ConvaiCharacter` component set up and responding to speech
-- Convai API key configured under **Edit → Project Settings → Convai SDK**
+Before starting, verify:
+
+* [ ] A `ConvaiCharacter` is in the scene and responds to speech in Play Mode
 
 {% stepper %}
 {% step %}

@@ -8,12 +8,10 @@ Long-term memory works automatically once two conditions are met: memory is enab
 
 ## Prerequisites
 
-Before you begin:
+Before starting, verify:
 
-- A Convai account with at least one character created at [convai.com](https://convai.com)
-- The Convai Unity SDK installed and configured with a valid API key
-- A scene with `ConvaiManager` and `ConvaiCharacter` components configured
-- The character's ID set in the `ConvaiCharacter` Inspector
+* [ ] A `ConvaiCharacter` is in the scene with its Character ID set in the Inspector
+* [ ] Long-term memory is enabled for your character on the [Convai dashboard](https://convai.com)
 
 You do not need to write any code for the default LTM experience. The SDK's `DeviceEndUserIdProvider` generates a stable identifier automatically. See [End-user identity](end-user-identity.md) if you have an authentication system and need to supply your own user IDs.
 

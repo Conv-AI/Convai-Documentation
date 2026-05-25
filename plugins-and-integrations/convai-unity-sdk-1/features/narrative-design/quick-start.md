@@ -5,11 +5,12 @@ description: Add a Narrative Design Manager and a collision trigger to a Convai 
 
 This guide walks you through the fastest path to a working Narrative Design setup. By the end, a character reacts to a section change when the player walks through a trigger zone — entirely through the Inspector, no code required.
 
-**Prerequisites:**
+## Prerequisites
 
-- A `ConvaiCharacter` component in the scene with a valid character ID
-- At least one section and one trigger defined for that character in the [Convai dashboard](https://convai.com)
-- Convai API key configured in **Edit > Project Settings > Convai SDK**
+Before starting, verify:
+
+* [ ] A `ConvaiCharacter` is in the scene with its Character ID set in the Inspector
+* [ ] At least one section and one trigger are defined for that character on the [Convai dashboard](https://convai.com)
 
 {% stepper %}
 {% step %}
@@ -27,7 +28,7 @@ The Manager auto-detects the `ConvaiCharacter` on the same GameObject. If your c
 
 In the Manager's Inspector, click **Sync with Backend**. The SDK fetches your narrative sections and populates the **Narrative Sections** list. Each entry shows the section's name from the dashboard.
 
-If the list stays empty, confirm that the character ID is set on `ConvaiCharacter` and that your API key is valid under **Edit > Project Settings > Convai SDK**. The **Last Fetch Error** field shows the specific error if something went wrong.
+If the list stays empty, confirm that the character ID is set on `ConvaiCharacter` and that your API key is valid — see [Configure the API key](../../getting-started/configure-api-key.md). The **Last Fetch Error** field shows the specific error if something went wrong.
 
 <figure><img src="../../../../.gitbook/assets/convai-narrative-design-manager-sections-list.png" alt="Narrative Sections list populated after clicking Sync with Backend"><figcaption><p>Narrative Sections list after a successful sync.</p></figcaption></figure>
 {% endstep %}

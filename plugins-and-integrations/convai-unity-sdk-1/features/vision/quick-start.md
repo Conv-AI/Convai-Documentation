@@ -7,8 +7,9 @@ Add Vision to an existing Convai scene in three steps. The SDK adds and wires th
 
 ## Prerequisites
 
-- A Unity scene with a `ConvaiCharacter` component already set up and working (the character responds to speech).
-- Your Convai API key configured in **Tools → Convai → Configuration**.
+Before starting, verify:
+
+* [ ] A `ConvaiCharacter` is in the scene and responds to speech in Play Mode
 
 {% stepper %}
 {% step %}

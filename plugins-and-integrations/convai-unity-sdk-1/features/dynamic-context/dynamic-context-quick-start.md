@@ -6,13 +6,11 @@ last_reviewed: "4.2.0"
 
 This guide walks you through the minimum setup to verify that your Convai character acknowledges live in-scene conditions. You will add the `ConvaiDynamicContextCommand` component, configure a `SetState` command, wire it to a UI button, and confirm the character references the state you sent.
 
-{% hint style="info" %}
-**Prerequisites**
+## Prerequisites
 
-* `ConvaiManager` is in your scene with a valid API key configured
-* Your NPC has a `ConvaiCharacter` component with a Character ID assigned
-* The character can hold a conversation — verify with a voice or text input before continuing
-{% endhint %}
+Before starting, verify:
+
+* [ ] A `ConvaiCharacter` is in the scene and responds to speech in Play Mode
 
 {% stepper %}
 {% step %}

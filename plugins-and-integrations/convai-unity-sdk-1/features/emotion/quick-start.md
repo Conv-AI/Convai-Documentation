@@ -7,10 +7,9 @@ We will attach the Emotion Controller to an NPC, assign the bundled sample profi
 
 ## Prerequisites
 
-- <code class="expression">space.vars.unity_min_version</code>
-- Convai SDK for Unity installed and up to date
-- A scene with a `ConvaiCharacter` component already set up and responding to speech
-- Convai API key configured in **Tools → Convai → Configuration**
+Before starting, verify:
+
+* [ ] A `ConvaiCharacter` is in the scene and responds to speech in Play Mode
 
 ## Set up the Emotion Controller
 

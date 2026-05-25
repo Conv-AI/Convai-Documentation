@@ -58,7 +58,7 @@ The **Sync Status** header in the Inspector shows the current state of the last 
 | **Last Fetch Error** | The error message from the most recent failed fetch, if any. Empty when the last fetch succeeded. |
 
 {% hint style="warning" %}
-If **Last Fetch Error** is not empty, the most common causes are a missing or invalid API key (**Edit > Project Settings > Convai SDK**) or a blank character ID on the `ConvaiCharacter` component.
+If **Last Fetch Error** is not empty, the most common causes are a missing or invalid API key — see [Configure the API key](../../getting-started/configure-api-key.md) or a blank character ID on the `ConvaiCharacter` component.
 {% endhint %}
 
 The sync result is also reported via the `OnSectionsSynced` event (see Global events below). The `SectionSyncResult` it carries tells you exactly what changed:

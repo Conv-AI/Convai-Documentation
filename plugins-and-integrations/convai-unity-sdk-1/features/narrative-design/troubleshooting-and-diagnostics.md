@@ -74,7 +74,7 @@ Or enable **Validate On Start** in the Inspector so this runs automatically at t
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| Sections list empty after **Sync with Backend** | API key missing or invalid | **Edit > Project Settings > Convai SDK** — verify the key; check **Last Fetch Error** on the Manager |
+| Sections list empty after **Sync with Backend** | API key missing or invalid | Verify your API key — see [Configure the API key](../../getting-started/configure-api-key.md); check **Last Fetch Error** on the Manager |
 | Sections list empty after **Sync with Backend** | Character ID not set | Set **Character ID** on the `ConvaiCharacter` component |
 | `OnTriggerActivated` fires but section never changes | Trigger name does not exactly match the dashboard edge (case-sensitive) | Click **Fetch** on the Trigger, re-select the correct trigger from the dropdown |
 | `OnSectionStart` never fires despite section changing | Local section ID out of sync with dashboard | Click **Sync with Backend** on the Manager; if still broken, call `ClearAllSectionConfigs()` and re-sync |
@@ -162,7 +162,7 @@ Common causes:
 
 | Error | Cause |
 |---|---|
-| `"API key is not configured. Please set it in Project Settings > Convai SDK."` | API key missing in **Edit > Project Settings > Convai SDK** |
+| `"API key is not configured. Please set it in Project Settings > Convai SDK."` | API key not set — see [Configure the API key](../../getting-started/configure-api-key.md) |
 | `"Character ID is required."` | Character ID field is empty on `ConvaiCharacter` |
 | `"Exception: ..."` | Network error or Convai backend is unreachable |
 | `"No character assigned or character has no ID."` | Manager has no character reference and auto-detect failed |
