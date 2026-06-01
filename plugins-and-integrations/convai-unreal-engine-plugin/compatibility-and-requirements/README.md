@@ -1,6 +1,6 @@
 ---
 title: Compatibility and requirements
-description: What you need before installing the Convai Unreal Engine plugin: UE 5.x, a Convai account with an API key, and the AudioCapture dependency.
+description: "What you need before installing the Convai Unreal Engine plugin: UE 5.x, a Convai account with an API key, and the AudioCapture dependency."
 last_reviewed: "4.0.0-beta.21"
 ---
 
