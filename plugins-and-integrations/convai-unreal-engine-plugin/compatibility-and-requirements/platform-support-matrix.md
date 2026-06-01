@@ -1,10 +1,10 @@
----
+﻿---
 title: Platform support matrix
 description: Win64 and Android build targets for the Convai Unreal Engine plugin, including required engine plugin dependencies and Android microphone permission handling.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin {{ unreal_plugin_version }} supports two build targets: Win64 and Android. The runtime modules restrict their compiled output to these two platforms via the `PlatformAllowList` in the plugin manifest.
+The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugin_version</code> supports two build targets: Win64 and Android. The runtime modules restrict their compiled output to these two platforms via the `PlatformAllowList` in the plugin manifest.
 
 ## Supported platforms
 

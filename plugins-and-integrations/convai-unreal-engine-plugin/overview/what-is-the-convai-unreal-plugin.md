@@ -1,4 +1,4 @@
----
+﻿---
 title: What is the Convai Unreal Engine plugin
 description: Understand the Convai Unreal Engine plugin's purpose, its relationship to the Convai backend, and what it adds to a UE 5.x project.
 last_reviewed: "4.0.0-beta.21"
@@ -29,7 +29,7 @@ Every feature in the plugin is accessible from Blueprint graphs. C++ access is a
 
 ## Supported platforms and engine versions
 
-The plugin supports Unreal Engine {{ unreal_min_version }} and later across the full UE 5.x range. Supported build targets are Win64 and Android. The current release is version {{ unreal_plugin_version }}.
+The plugin supports Unreal Engine <code class="expression">space.vars.unreal_min_version</code> and later across the full UE 5.x range. Supported build targets are Win64 and Android. The current release is version <code class="expression">space.vars.unreal_plugin_version</code>.
 
 {% hint style="info" %}
 Android requires microphone permission handling. The plugin bundles the `AndroidPermission` engine plugin as a dependency and calls the permission request automatically on startup.

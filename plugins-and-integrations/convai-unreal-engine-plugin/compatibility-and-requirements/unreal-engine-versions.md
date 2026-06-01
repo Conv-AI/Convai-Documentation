@@ -1,10 +1,10 @@
----
+﻿---
 title: Unreal Engine versions
 description: Supported UE 5.x versions for the Convai Unreal Engine plugin, with module availability notes and known per-version caveats.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin {{ unreal_plugin_version }} supports Unreal Engine {{ unreal_min_version }} and all later UE 5.x releases. There is no declared upper-bound version limit in the plugin manifest.
+The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugin_version</code> supports Unreal Engine <code class="expression">space.vars.unreal_min_version</code> and all later UE 5.x releases. There is no declared upper-bound version limit in the plugin manifest.
 
 ## Supported versions
 
@@ -43,7 +43,7 @@ The `ConvaiEditor` module is disabled on these versions. All Blueprint-based con
 
 ### UE 5.4, 5.5, and 5.7
 
-Compilation and compatibility fixes targeting these specific engine versions were included in release {{ unreal_plugin_version }}. No additional steps are required.
+Compilation and compatibility fixes targeting these specific engine versions were included in release <code class="expression">space.vars.unreal_plugin_version</code>. No additional steps are required.
 
 ## Related reference
 

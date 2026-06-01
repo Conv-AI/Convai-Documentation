@@ -1,10 +1,10 @@
----
+﻿---
 title: Compatibility and requirements
 description: "What you need before installing the Convai Unreal Engine plugin: UE 5.x, a Convai account with an API key, and the AudioCapture dependency."
 last_reviewed: "4.0.0-beta.21"
 ---
 
-This section covers every requirement for running the Convai Unreal Engine plugin {{ unreal_plugin_version }} in a UE 5.x project, including engine version support, platform targets, and character rig compatibility.
+This section covers every requirement for running the Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugin_version</code> in a UE 5.x project, including engine version support, platform targets, and character rig compatibility.
 
 ## In this section
 
@@ -35,8 +35,8 @@ This section covers every requirement for running the Convai Unreal Engine plugi
 
 | Requirement | Minimum |
 |---|---|
-| Unreal Engine | {{ unreal_min_version }} (any UE 5.x release) |
-| Convai account | Required — create one at {{ dashboard_url }} |
+| Unreal Engine | <code class="expression">space.vars.unreal_min_version</code> (any UE 5.x release) |
+| Convai account | Required — create one at <code class="expression">space.vars.dashboard_url</code> |
 | API key | Required — generated in the Convai dashboard |
 | AudioCapture plugin | Bundled engine plugin; enabled automatically as a dependency |
 | AndroidPermission plugin | Bundled engine plugin; required for Android builds only |
