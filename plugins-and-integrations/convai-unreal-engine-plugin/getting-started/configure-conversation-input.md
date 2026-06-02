@@ -36,13 +36,13 @@ You can also toggle mute programmatically without changing the VAD mode. Set the
 
 Use `SendText()` to send a text message to a chatbot without any microphone input. This is useful for text-chat interfaces, accessibility features, or testing character responses without audio hardware.
 
-```
+```text
 SendText(ChatbotComponent, Text)
 ```
 
 | Parameter | Type | Description |
 |---|---|---|
-| `ChatbotComponent` | `UConvaiConversationComponent` | Reference to the target `UConvaiChatbotComponent` |
+| `ChatbotComponent` | `UConvaiChatbotComponent` | Reference to the chatbot the text message is sent to |
 | `Text` | `FString` | The text message to send |
 
 Connect a text input widget to this function and call it on submit.
@@ -66,8 +66,8 @@ You can then process or play back the `USoundWave`, or pass it to other Blueprin
 
 | Function | Returns | Description |
 |---|---|---|
-| `GetIsStreaming()` ("Is Streaming") | `bool` | `true` while audio is being streamed to a chatbot |
-| `GetIsRecording()` ("Is Recording") | `bool` | `true` while manual recording is in progress |
+| `GetIsStreaming()` | `bool` | `true` while audio is being streamed to a chatbot |
+| `GetIsRecording()` | `bool` | `true` while manual recording is in progress |
 
 ## Next steps
 

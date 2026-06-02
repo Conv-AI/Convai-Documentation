@@ -67,7 +67,7 @@ The default value is `BS_MHA` (MetaHuman Blendshapes).
 
 ## How the components connect
 
-```
+```text
 Player pawn
 └── UConvaiPlayerComponent   ← captures microphone audio
          │

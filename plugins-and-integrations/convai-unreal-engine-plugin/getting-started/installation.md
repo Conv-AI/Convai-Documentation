@@ -1,13 +1,13 @@
 ---
 title: Install the Convai plugin
-description: Install the Convai Unreal Engine plugin from Fab or GitHub Releases, enable it in your project, and restart the editor.
+description: Install the Convai Unreal Engine plugin from Fab or GitHub Releases, enable it in your project, and restart the Unreal Editor.
 last_reviewed: "4.0.0-beta.21"
 ---
 
 The Convai Unreal Engine plugin is available through two channels. Choose the one that fits your workflow, then enable the plugin in your project.
 
 {% hint style="info" %}
-The quick-setup video at [https://youtu.be/n-UG3nmMeZQ](https://youtu.be/n-UG3nmMeZQ) shows the full install and first-character flow end to end.
+The quick-setup video at [Watch the installation walkthrough video](https://youtu.be/n-UG3nmMeZQ) shows the full install and first-character flow end to end.
 {% endhint %}
 
 ## Install from Fab
@@ -20,7 +20,7 @@ Fab updates lag slightly behind GitHub Releases but provide the most stable buil
 
 Open the Epic Games Launcher and navigate to the Fab store, or go directly to the plugin listing:
 
-[https://www.fab.com/listings/ba3145af-d2ef-434a-8bc3-f3fa1dfe7d5c](https://www.fab.com/listings/ba3145af-d2ef-434a-8bc3-f3fa1dfe7d5c)
+[Convai plugin on Fab](https://www.fab.com/listings/ba3145af-d2ef-434a-8bc3-f3fa1dfe7d5c)
 {% endstep %}
 
 {% step %}
@@ -44,7 +44,7 @@ GitHub Releases ships new features and fixes sooner than Fab. Use this method wh
 {% step %}
 ### Download the release zip
 
-Go to [https://github.com/Conv-AI/Convai-UnrealEngine-SDK/releases](https://github.com/Conv-AI/Convai-UnrealEngine-SDK/releases) and find the release that matches the version you want. Download the zip file for your Unreal Engine version.
+Go to [Convai Unreal Engine SDK releases on GitHub](https://github.com/Conv-AI/Convai-UnrealEngine-SDK/releases) and find the release that matches the version you want. Download the zip file for your Unreal Engine version.
 {% endstep %}
 
 {% step %}
@@ -64,7 +64,7 @@ In your project's root directory (the folder that contains your `.uproject` file
 
 Copy or move the `Convai` folder into `Plugins/`. The final path should be:
 
-```
+```text
 YourProject/
   Plugins/
     Convai/

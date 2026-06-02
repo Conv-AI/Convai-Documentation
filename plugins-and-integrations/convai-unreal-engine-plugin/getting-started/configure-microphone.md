@@ -46,7 +46,7 @@ Both functions return `bool` — `true` if the switch succeeded. Call them befor
 
 ## Adjust the microphone volume
 
-```
+```text
 SetMicrophoneVolumeMultiplier(InVolumeMultiplier, Success)
 GetMicrophoneVolumeMultiplier(OutVolumeMultiplier, Success)
 ```
@@ -68,6 +68,28 @@ The standard pattern:
 1. Call **Check Android Permission** with `android.permission.RECORD_AUDIO`.
 2. If the result is `false`, call **Request Android Permission** for that permission.
 3. Bind to the **On Permission Request Complete** delegate and proceed to start the conversation only when the grant is confirmed.
+
+## Troubleshooting
+
+### No microphone input on Android
+
+**Symptom:** The character never receives speech; conversation does not start after the player speaks.
+
+**Cause:** The `android.permission.RECORD_AUDIO` runtime permission was not granted before audio capture was initialized. Without it, `UConvaiAudioCaptureComponent` initializes silently but captures nothing.
+
+**Fix:** Request the permission at runtime using the `AndroidPermission` engine plugin nodes (see [Android microphone permission](#android-microphone-permission) above). Call **Check Android Permission** → if `false`, call **Request Android Permission** → bind **On Permission Request Complete** and start the conversation only on a granted result.
+
+**Verify:** After granting the permission, enter Play mode and speak. The character should receive and respond to voice input.
+
+### Device selection returns false
+
+**Symptom:** `SetCaptureDeviceByIndex()` or `SetCaptureDeviceByName()` returns `false`.
+
+**Cause:** The requested device index is out of range, or the device name does not match any entry in `GetAvailableCaptureDeviceNames()`.
+
+**Fix:** Call `GetAvailableCaptureDeviceNames()` first and use only the names and indices from that list. Indices can change between sessions if devices are added or removed.
+
+**Verify:** Call `GetActiveCaptureDevice(OutInfo)` after selection and confirm `OutInfo.DeviceName` matches the intended device.
 
 ## Next steps
 
