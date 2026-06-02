@@ -1,6 +1,6 @@
 ---
 title: Set up a Reallusion (CC) character
-description: Export a Reallusion Character Creator 5 avatar, import it into Unreal Engine, configure Convai components, and add the Reallusion animation Blueprint for lip sync.
+description: Export a Reallusion CC5 avatar, import it into Unreal Engine, configure Convai components, and add the Reallusion animation Blueprint for lip sync.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -38,7 +38,7 @@ Go to **Motion > Perform > Perform List Editor**. Click **Add**, paste the path,
 {% step %}
 ### Add a talking animation (optional)
 
-Optionally, add a standing-and-talking animation that does not include lip sync (the plugin handles lip sync separately). Repeat the Find File and Perform List steps for the talking animation. Choose animations where the first and last frames are identical so looping is seamless.
+Optionally, add a standing-and-talking animation that does not include lip sync (the plugin handles lip sync separately). Repeat the Find File and Perform List steps for the talking animation. Choose animations where the first and last frames are identical so looping plays without a visible cut.
 {% endstep %}
 {% endstepper %}
 
@@ -141,7 +141,7 @@ If you have not already enabled the plugin, go to **Edit > Plugins**, search for
 {% step %}
 ### Create a character Blueprint
 
-In the character's **Content Browser** folder, right-click and select **Blueprint Class > Actor**. Name the Blueprint (for example, `BP_MyReالlusionCharacter`).
+In the character's **Content Browser** folder, right-click and select **Blueprint Class > Actor**. Name the Blueprint (for example, `BP_MyReallusionCharacter`).
 {% endstep %}
 
 {% step %}
@@ -181,9 +181,13 @@ The Reallusion character needs a dedicated animation Blueprint to connect the Co
 {% step %}
 ### Download the animation Blueprint
 
-Download the Reallusion animation Blueprint from the Google Drive folder:
+Download the Reallusion animation Blueprint from the Convai Google Drive folder:
 
-[https://drive.google.com/drive/folders/1k3072DH3zJXk2xTg-CJ_najnm0pyvZJS](https://drive.google.com/drive/folders/1k3072DH3zJXk2xTg-CJ_najnm0pyvZJS)
+[Convai Reallusion animation Blueprint (Google Drive)](https://drive.google.com/drive/folders/1k3072DH3zJXk2xTg-CJ_najnm0pyvZJS)
+
+{% hint style="warning" %}
+This asset is hosted on an external Google Drive folder. If the link is unavailable, contact [Convai support](https://forum.convai.com) to request the file.
+{% endhint %}
 
 Download the zip, extract it, and locate the animation Blueprint asset file.
 {% endstep %}
@@ -191,7 +195,7 @@ Download the zip, extract it, and locate the animation Blueprint asset file.
 {% step %}
 ### Copy the asset into your project
 
-Copy the animation Blueprint asset into the `Content` folder inside your Unreal project's directory on disk (not just inside the editor — copy it to the file system). Then restart the Unreal Editor so it detects the new asset.
+Copy the animation Blueprint asset into the `Content` folder inside your Unreal project's directory on disk (not through the editor — copy it directly to the file system). Then restart the Unreal Editor so it detects the new asset.
 {% endstep %}
 
 {% step %}
@@ -213,7 +217,7 @@ Click **Compile** and **Save**.
 {% step %}
 ### Assign the animation Blueprint to the character
 
-Open the character Blueprint. Select the **Skeletal Mesh** component. In the **Details** panel, under **Animation**, set **Anim Class** to the Reallusion animation Blueprint you just configured (the one named **Convai Reallusion Animation Blueprint** or similar depending on the downloaded asset).
+Open the character Blueprint. Select the **Skeletal Mesh** component. In the **Details** panel, under **Animation**, set **Anim Class** to the Reallusion animation Blueprint you configured (the one named **Convai Reallusion Animation Blueprint** or similar depending on the downloaded asset).
 
 Compile and save the Blueprint.
 {% endstep %}
@@ -234,7 +238,7 @@ Open the character Blueprint. In the **Components** panel, click **Add** and sea
 Select the **Convai Face Sync** component. In the **Details** panel, set **Lip Sync Mode**:
 
 - **MetaHuman Blendshapes** — for CC5 characters (which use a MetaHuman-compatible rig).
-- **ARKit Blendshapes** — for CC4 characters.
+- **CC4 Extended Blendshapes** — for CC4 characters.
 {% endstep %}
 
 {% step %}
@@ -253,7 +257,7 @@ When the setup is complete, the Reallusion character's lips and facial expressio
 ### No facial animation
 
 - Confirm that the **Convai Face Sync** component is present on the character Blueprint.
-- Confirm that **Lip Sync Mode** is correct for your rig (MetaHuman Blendshapes for CC5, ARKit Blendshapes for CC4).
+- Confirm that **Lip Sync Mode** is correct for your rig (MetaHuman Blendshapes for CC5, CC4 Extended Blendshapes for CC4).
 - Confirm that **Import Morph Targets** was checked when importing the FBX.
 
 ### Body animation does not play

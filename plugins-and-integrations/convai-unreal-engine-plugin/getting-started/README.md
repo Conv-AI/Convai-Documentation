@@ -1,6 +1,6 @@
 ---
 title: Getting started
-description: Find installation, configuration, and first-character guides for the Convai Unreal Engine plugin.
+description: Find installation, configuration, first-character, and validation guides for the Convai Unreal Engine plugin getting-started journey.
 last_reviewed: "4.0.0-beta.21"
 ---
 
