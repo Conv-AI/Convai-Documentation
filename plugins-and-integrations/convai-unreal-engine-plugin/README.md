@@ -1,4 +1,4 @@
-﻿---
+---
 title: Convai Unreal Engine plugin
 description: "Add real-time AI characters to Unreal Engine 5 projects — Blueprint-first, with speech, emotion, actions, lip sync, and persistent memory."
 ---

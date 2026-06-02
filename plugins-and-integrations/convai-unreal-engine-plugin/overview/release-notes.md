@@ -1,4 +1,4 @@
-﻿---
+---
 title: Release notes
 description: Version history and notable changes for the Convai Unreal Engine plugin, covering all 4.x beta releases and the full 3.x history.
 last_reviewed: "4.0.0-beta.21"

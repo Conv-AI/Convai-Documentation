@@ -1,6 +1,6 @@
-﻿---
+---
 title: What is the Convai Unreal Engine plugin
-description: Understand the Convai Unreal Engine plugin's purpose, its relationship to the Convai backend, and what it adds to a UE 5.x project.
+description: Understand the Convai Unreal Engine plugin's purpose, its relationship to Convai, and what it adds to any UE 5.x project.
 last_reviewed: "4.0.0-beta.21"
 ---
 
