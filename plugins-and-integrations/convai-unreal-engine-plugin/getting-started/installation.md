@@ -7,12 +7,14 @@ last_reviewed: "4.0.0-beta.21"
 The Convai Unreal Engine plugin is available through two channels. Choose the one that fits your workflow, then enable the plugin in your project.
 
 {% hint style="info" %}
-The quick-setup video at [Watch the installation walkthrough video](https://youtu.be/n-UG3nmMeZQ) shows the full install and first-character flow end to end.
+[Watch the installation walkthrough video](https://youtu.be/n-UG3nmMeZQ) for a full end-to-end visual guide covering install and first-character setup.
 {% endhint %}
 
-## Install from Fab
+## Install the plugin
 
-Fab updates lag slightly behind GitHub Releases but provide the most stable builds.
+{% tabs %}
+{% tab title="Fab (recommended)" %}
+Fab provides stable, launcher-managed builds. Updates arrive less frequently than GitHub but require no manual file management.
 
 {% stepper %}
 {% step %}
@@ -35,10 +37,10 @@ On the listing page, click **Install Plugin**. Select the Unreal Engine version 
 Open your project in Unreal Engine. The plugin will be available for enabling in the next step.
 {% endstep %}
 {% endstepper %}
+{% endtab %}
 
-## Install from GitHub Releases
-
-GitHub Releases ships new features and fixes sooner than Fab. Use this method when you need the latest build or a specific version.
+{% tab title="GitHub Releases" %}
+GitHub Releases ships new features and fixes sooner than Fab. Use this method when you need the latest build or a specific plugin version.
 
 {% stepper %}
 {% step %}
@@ -78,6 +80,8 @@ YourProject/
 Launch the Unreal Editor with your project. If prompted to rebuild modules, click **Yes**.
 {% endstep %}
 {% endstepper %}
+{% endtab %}
+{% endtabs %}
 
 ## Enable the plugin
 

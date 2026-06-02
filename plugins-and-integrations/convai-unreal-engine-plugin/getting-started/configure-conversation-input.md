@@ -4,10 +4,10 @@ description: Switch between push-to-talk and hands-free voice capture on UConvai
 last_reviewed: "4.0.0-beta.21"
 ---
 
-`UConvaiPlayerComponent` supports two voice capture modes and a text input path. Choose the mode that fits your interaction design before entering Play mode.
+`UConvaiPlayerComponent` supports three input modes. Choose the one that fits your interaction design and wire it up before entering Play mode.
 
-## Push-to-talk (default)
-
+{% tabs %}
+{% tab title="Push-to-talk" %}
 In push-to-talk mode the player holds a key to transmit voice input. This is the default behavior when `UConvaiPlayerComponent` is added to a pawn.
 
 The built-in chat widget provided by `BP_ConvaiPlayerComponent` and `BP_ConvaiSamplePlayer` binds push-to-talk to a default key. You can replace this with any input action in your Blueprint by calling:
@@ -17,10 +17,12 @@ The built-in chat widget provided by `BP_ConvaiPlayerComponent` and `BP_ConvaiSa
 | `UnmuteStreamingAudio()` | Begin streaming microphone audio to the active chatbot. Call on key press. |
 | `MuteStreamingAudio()` | Stop streaming audio. Call on key release. |
 
-`UnmuteStreamingAudio()` returns `bool` — `true` if streaming started successfully. `MuteStreamingAudio()` returns `void`. Connect them to your input actions in your player pawn's Blueprint event graph.
+Both functions return `bool`. `UnmuteStreamingAudio()` returns `true` if streaming started successfully. Connect them to your input actions in your player pawn's Blueprint event graph.
 
-## Hands-free mode (voice activity detection)
+You can also toggle mute programmatically without changing the mode. Set the `bMute` property on `UConvaiPlayerComponent` to `true` to silence input and `false` to restore it.
+{% endtab %}
 
+{% tab title="Hands-free" %}
 In hands-free mode the character listens continuously and responds whenever the player speaks, without requiring a key press.
 
 To enable hands-free mode:
@@ -30,10 +32,10 @@ To enable hands-free mode:
 
 Alternatively, call `UpdateVadBP(true)` from Blueprint to enable voice activity detection at runtime.
 
-You can also toggle mute programmatically without changing the VAD mode. Set the `bMute` property to `true` to silence input and `false` to restore it.
+You can still mute the input programmatically. Set the `bMute` property on `UConvaiPlayerComponent` to `true` to silence input and `false` to restore it.
+{% endtab %}
 
-## Send text without a microphone
-
+{% tab title="Send text" %}
 Use `SendText()` to send a text message to a chatbot without any microphone input. This is useful for text-chat interfaces, accessibility features, or testing character responses without audio hardware.
 
 ```text
@@ -46,6 +48,8 @@ SendText(ChatbotComponent, Text)
 | `Text` | `FString` | The text message to send |
 
 Connect a text input widget to this function and call it on submit.
+{% endtab %}
+{% endtabs %}
 
 ## Chat UI styles
 

@@ -15,8 +15,10 @@ The Convai Unreal Engine plugin adds four components to Unreal Engine. Each has 
 | Convai Object | `UConvaiObjectComponent` | (no display name override) | Any in-scene Actor the AI should know about |
 | Convai Face Sync | `UConvaiFaceSyncComponent` | "Convai Face Sync" | NPC character Blueprint |
 
-## Convai Chatbot component
+## Component details
 
+{% tabs %}
+{% tab title="Convai Chatbot" %}
 `UConvaiChatbotComponent` is the AI brain for a non-player character. It holds the `CharacterID` that links the component to a character you created on the Convai dashboard. At runtime it:
 
 - Connects to Convai when `bAutoInitializeSession` is `true` (default) or when `StartSession()` is called.
@@ -25,9 +27,9 @@ The Convai Unreal Engine plugin adds four components to Unreal Engine. Each has 
 - Fires Blueprint events: **On Actions Received**, **On Emotion State Changed**, **On Character Data Loaded**, **On Narrative Section Received**, **On Interaction ID Received**, **On Interrupted**, and **On Failure**.
 
 The `CharacterID` property is the only required field. All other properties have usable defaults.
+{% endtab %}
 
-## Convai Player component
-
+{% tab title="Convai Player" %}
 `UConvaiPlayerComponent` represents the human participant in the conversation. It:
 
 - Captures microphone audio from the system's default capture device using `UConvaiAudioCaptureComponent`.
@@ -38,18 +40,18 @@ The `CharacterID` property is the only required field. All other properties have
 - Enumerates and selects capture devices: `GetAvailableCaptureDeviceNames()`, `SetCaptureDeviceByIndex()`, `SetCaptureDeviceByName()`.
 
 One `UConvaiPlayerComponent` on the player pawn can talk to any `UConvaiChatbotComponent` in the level.
+{% endtab %}
 
-## Convai Object component
-
+{% tab title="Convai Object" %}
 `UConvaiObjectComponent` marks an in-scene Actor so every Convai chatbot in the level can reference it by name. Attach it to doors, switches, items, rooms, or any object that your AI characters should be able to name, describe, or interact with.
 
 The component gives each object:
 
 - **Identity** — a name and description that appear in the character's context.
 - **Live state** — `TrackedProperties` entries that monitor UPROPERTY values on the Actor and push updates to chatbots when they change.
+{% endtab %}
 
-## Convai Face Sync component
-
+{% tab title="Convai Face Sync" %}
 `UConvaiFaceSyncComponent` drives blendshape-based lip sync and facial animation on an NPC. It receives pre-computed face animation data from the `UConvaiChatbotComponent` and applies it frame by frame in sync with the character's speech audio.
 
 The key property is `LipSyncMode`, which selects the blendshape target:
@@ -60,10 +62,12 @@ The key property is `LipSyncMode`, which selects the blendshape target:
 | Auto | `EC_LipSyncMode::Auto` | Let the plugin decide |
 | Viseme Based | `EC_LipSyncMode::VisemeBased` | Custom rigs using OVR visemes (15 shapes) |
 | MetaHuman Blendshapes | `EC_LipSyncMode::BS_MHA` | MetaHuman and Reallusion CC5 characters |
-| ARKit Blendshapes | `EC_LipSyncMode::BS_ARKit` | Reallusion CC4 characters |
-| CC4 Extended Blendshapes | `EC_LipSyncMode::BS_CC4_Extended` | CC4 characters with extended blendshapes |
+| ARKit Blendshapes | `EC_LipSyncMode::BS_ARKit` | Generic ARKit-compatible rigs |
+| CC4 Extended Blendshapes | `EC_LipSyncMode::BS_CC4_Extended` | Reallusion CC4 characters |
 
 The default value is `BS_MHA` (MetaHuman Blendshapes).
+{% endtab %}
+{% endtabs %}
 
 ## How the components connect
 

@@ -7,7 +7,7 @@ last_reviewed: "4.0.0-beta.21"
 We will add a Convai character to an existing Unreal Engine project and have a live voice conversation with it. By the end, you will have a character that listens, generates a response, and speaks back using your microphone.
 
 {% hint style="info" %}
-This tutorial follows the same flow shown in the quick-setup video at [https://youtu.be/n-UG3nmMeZQ](https://youtu.be/n-UG3nmMeZQ). Watch the video for a visual walkthrough alongside these steps.
+This tutorial follows the same flow shown in the [quick-setup walkthrough video](https://youtu.be/n-UG3nmMeZQ). Watch the video for a visual walkthrough alongside these steps.
 {% endhint %}
 
 ## Before you start
@@ -66,7 +66,7 @@ Select the **Convai Chatbot** component in the **Components** panel. In the **De
 If your character has a facial rig and you want lip sync, click **Add** again, search for `Convai Face Sync`, and add it. Select the component and set **Lip Sync Mode** to match your rig:
 
 - **MetaHuman Blendshapes** — for MetaHuman and Reallusion CC5 characters.
-- **ARKit Blendshapes** — for Reallusion CC4 characters.
+- **CC4 Extended Blendshapes** — for Reallusion CC4 characters.
 - **Viseme Based** — for custom rigs using OVR visemes.
 
 Skip this step if your character has no facial rig.

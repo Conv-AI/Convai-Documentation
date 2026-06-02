@@ -52,12 +52,23 @@ When the demo is working, the `Companion` character responds to voice or text in
 
 ## Browsing the demo Blueprints
 
-To understand how the demo is wired together:
+The demo is wired using the same components you will use in your own scenes. Inspect it to understand the setup before building from scratch.
 
-1. In the **Content Browser**, open `Content/Demo/Companion.uasset` to view the character Blueprint. The `UConvaiChatbotComponent` is attached and has a `CharacterID` set.
-2. Open the player pawn Blueprint linked from `ConvaiDemoGM` to see the `UConvaiPlayerComponent` attached to the pawn.
+{% stepper %}
+{% step %}
+### Open the character Blueprint
 
-The demo uses the same components and approach you will use in your own scenes. Once the demo works, proceed to [Add your first Convai character](add-your-first-character.md) to build your own setup from scratch.
+In the **Content Browser**, open `Content/Demo/Companion.uasset`. The `UConvaiChatbotComponent` is attached and has a `CharacterID` already set.
+{% endstep %}
+
+{% step %}
+### Open the player pawn Blueprint
+
+Open the player pawn Blueprint linked from `ConvaiDemoGM`. Confirm that `UConvaiPlayerComponent` is attached to the pawn.
+{% endstep %}
+{% endstepper %}
+
+Once the demo works, proceed to [Add your first Convai character](add-your-first-character.md) to build your own setup from scratch.
 
 ## Next steps
 

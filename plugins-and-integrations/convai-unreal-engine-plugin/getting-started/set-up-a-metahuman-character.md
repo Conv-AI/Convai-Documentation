@@ -4,7 +4,7 @@ description: Add Convai Chatbot and Face Sync components to a MetaHuman, assign 
 last_reviewed: "4.0.0-beta.21"
 ---
 
-This guide walks through connecting a MetaHuman to the Convai Unreal Engine plugin so it speaks with real-time lip sync and facial animation. The MetaHuman setup video is at [https://youtu.be/4fMCKkrfyaA](https://youtu.be/4fMCKkrfyaA).
+This guide walks through connecting a MetaHuman to the Convai Unreal Engine plugin so it speaks with real-time lip sync and facial animation. The [MetaHuman setup walkthrough video](https://youtu.be/4fMCKkrfyaA) shows the full flow visually.
 
 ## Prerequisites
 
