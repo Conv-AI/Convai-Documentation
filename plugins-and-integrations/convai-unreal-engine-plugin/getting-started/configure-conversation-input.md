@@ -17,7 +17,7 @@ The built-in chat widget provided by `BP_ConvaiPlayerComponent` and `BP_ConvaiSa
 | `UnmuteStreamingAudio()` | Begin streaming microphone audio to the active chatbot. Call on key press. |
 | `MuteStreamingAudio()` | Stop streaming audio. Call on key release. |
 
-Both functions return `bool`. `UnmuteStreamingAudio()` returns `true` if streaming started successfully. Connect them to your input actions in your player pawn's Blueprint event graph.
+`UnmuteStreamingAudio()` returns `bool` — `true` if streaming started successfully. `MuteStreamingAudio()` returns `void`. Connect them to your input actions in your player pawn's Blueprint event graph.
 
 ## Hands-free mode (voice activity detection)
 

@@ -42,7 +42,7 @@ The API key is stored as a read-only `Config` property on `UConvaiSettings`. It 
 
 ## Verify the key is active
 
-After signing in, place any character with a `UConvaiChatbotComponent` (or use the bundled demo) and enter Play mode. If the character responds to input, authentication is working. If requests fail, see [Connection and API key issues](../troubleshooting/connection-and-api-key-issues.md).
+After signing in, place any character with a `UConvaiChatbotComponent` (or use the bundled demo) and enter Play mode. If the character responds to input, authentication is working. If requests fail, confirm the API key is stored (check **Edit > Project Settings > Convai** and verify the key is not blank) and that your account is active on the Convai dashboard.
 
 ## Next steps
 

@@ -104,15 +104,29 @@ To remove the push-to-talk requirement, open the player pawn Blueprint, select t
 
 ### No lip sync animation
 
-- Confirm that **Lip Sync Mode** on the **Convai Face Sync** component is **MetaHuman Blendshapes**.
-- Confirm that **Anim Class** on the **Face** skeletal mesh is `Convai_MetaHuman_FaceAnim`.
-- Confirm that **Anim Class** on the **Body** skeletal mesh is `Convai_MetaHuman_BodyAnim`.
+**Symptom:** The MetaHuman's mouth does not move during character speech, even though audio plays correctly.
+
+**Cause:** The lip sync mode is set to the wrong blendshape target, or the face and body animation classes are not the Convai MetaHuman variants.
+
+**Fix:**
+- Confirm **Lip Sync Mode** on the **Convai Face Sync** component is set to **MetaHuman Blendshapes**.
+- Confirm **Anim Class** on the **Face** skeletal mesh is `Convai_MetaHuman_FaceAnim`.
+- Confirm **Anim Class** on the **Body** skeletal mesh is `Convai_MetaHuman_BodyAnim`.
+
+**Verify:** Enter Play mode and speak to the character. The MetaHuman's lips should animate in sync with the audio response.
 
 ### Character does not respond
 
-- Verify the **Character ID** on the **Convai Chatbot** component matches a character in your dashboard.
-- Check that your API key is set (see [Configure your API key](configure-api-key.md)).
-- See [Validate your setup](validate-your-setup.md).
+**Symptom:** The character is present in the level but does not react to voice or text input.
+
+**Cause:** The Character ID is missing or incorrect, the API key is not configured, or the Convai Player component is not present on the player pawn.
+
+**Fix:**
+- Verify the **Character ID** on the **Convai Chatbot** component matches a character in your Convai dashboard.
+- Confirm your API key is set (see [Configure your API key](configure-api-key.md)).
+- Confirm the player pawn has a **Convai Player** component added.
+
+**Verify:** Run through the full checklist at [Validate your setup](validate-your-setup.md).
 
 ## Next steps
 
