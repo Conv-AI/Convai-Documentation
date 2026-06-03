@@ -40,7 +40,7 @@ In the **Content Browser**, open the `MetaHumans` folder, find your MetaHuman, a
 {% step %}
 ### Add the Convai Chatbot component
 
-In the Blueprint editor for your MetaHuman, click **Add** in the **Components** panel. Search for `Convai Chatbot` and add `UConvaiChatbotComponent`.
+In the Blueprint editor for your MetaHuman, click **Add** in the **Components** panel. Search for `BP Convai ChatBot Component` and select it.
 
 In the **Details** panel for the component, paste your **Character ID** from the Convai dashboard into the **Character ID** field under the **Convai** category.
 {% endstep %}
@@ -52,7 +52,7 @@ Click **Add** again in the **Components** panel. Search for `Convai Face Sync` a
 
 In the **Details** panel, confirm that **Lip Sync Mode** is set to **MetaHuman Blendshapes** (`EC_LipSyncMode::BS_MHA`). This is the default value and the correct setting for MetaHuman characters.
 
-Also confirm that **Lip Sync** is enabled (the enable toggle is on).
+Also confirm that **Lip Sync Mode** is not set to **Off** (the default `BS_MHA` is correct).
 {% endstep %}
 {% endstepper %}
 
@@ -98,7 +98,7 @@ When the setup is working, the MetaHuman's mouth moves in sync with the characte
 
 ## Enable hands-free mode
 
-To remove the push-to-talk requirement, open the player pawn Blueprint, select the **Convai Player** component, and in the **Details** panel disable **Push to Talk** under the **Convai** category. The character will then listen whenever the player speaks.
+To remove the push-to-talk requirement, open the player pawn Blueprint, select the **Convai Player** component, and call `UpdateVadBP(true)` from the Event Graph (for example in **BeginPlay**). The character will then listen continuously using voice activity detection.
 
 ## Troubleshooting
 

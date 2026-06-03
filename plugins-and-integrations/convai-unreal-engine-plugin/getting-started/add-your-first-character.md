@@ -51,7 +51,7 @@ In the **Outliner**, click on your NPC Actor. In the **Details** panel, click **
 {% step %}
 ### Add the Convai Chatbot component
 
-In the **Components** panel inside the Blueprint editor, click **Add**. Search for `Convai Chatbot` and select it to add `UConvaiChatbotComponent` to the character.
+In the **Components** panel inside the Blueprint editor, click **Add**. Search for `BP Convai ChatBot Component` and select it. This adds the Blueprint-wrapped chatbot component, which comes pre-wired with push-to-talk input and the chat UI widget.
 {% endstep %}
 
 {% step %}
@@ -91,7 +91,7 @@ The fastest way to find it is through **Window > World Settings**. Expand **Game
 {% step %}
 ### Add the Convai Player component
 
-In the Blueprint editor for the player pawn, click **Add** in the **Components** panel. Search for `Convai Player` and add `UConvaiPlayerComponent`.
+In the Blueprint editor for the player pawn, click **Add** in the **Components** panel. Search for `BP Convai Player Component` and select it. This adds the Blueprint-wrapped player component, which includes push-to-talk input and the chat UI widget pre-configured.
 {% endstep %}
 
 {% step %}
@@ -115,7 +115,7 @@ Press **Play** in the Unreal Editor toolbar. A chat widget appears in the viewpo
 
 Hold the push-to-talk key (default: **V**), speak into your microphone, then release the key. The character processes your speech, generates a response, and speaks back.
 
-If you prefer hands-free mode, select the **Convai Player** component on the player pawn in the **Details** panel and disable **Push to Talk** under the **Convai** category. In hands-free mode the character listens whenever you speak without needing to hold a key.
+If you prefer hands-free mode, select the **Convai Player** component on the player pawn, open the **Event Graph**, and call `UpdateVadBP(true)` in **BeginPlay**. In hands-free mode the character listens continuously using voice activity detection.
 {% endstep %}
 {% endstepper %}
 
@@ -123,15 +123,14 @@ If you prefer hands-free mode, select the **Convai Player** component on the pla
 When the setup is working, the character speaks an audible response and the chat widget shows a transcript of the exchange. If the character does not respond, see [Validate your setup](validate-your-setup.md) for a checklist of common failure points.
 {% endhint %}
 
-## Using the convenience Blueprint pack
+## Using the sample player pawn
 
-Instead of adding components manually, you can use the pre-built Blueprint assets the plugin ships in its `Content/` folder:
+If you do not have an existing player pawn, the plugin ships a ready-made one in its `Content/` folder:
 
-- Drop **`BP_ConvaiSamplePlayer`** into the level as the player pawn. It already has `UConvaiPlayerComponent` attached and a chat widget wired.
-- Create a character Blueprint that derives from **`ConvaiBaseCharacter`**. This base class already has `UConvaiChatbotComponent` and `UConvaiFaceSyncComponent` pre-attached.
+- Drop **`BP_ConvaiSamplePlayer`** into the level as the player pawn. It already has `BP_ConvaiPlayerComponent` attached and a chat widget wired up.
 - Set `BP_SampleGameMode` as the game mode for the level to pair the sample player pawn automatically.
 
-These convenience assets are suitable for prototyping. For production, derive from the base classes or add the components to your own Blueprint hierarchy.
+This asset is suitable for prototyping. For production, add `BP Convai Player Component` directly to your own player pawn Blueprint as described above.
 
 ## Customizing the initial emotion
 

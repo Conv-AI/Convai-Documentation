@@ -43,7 +43,7 @@ This section guides you from installing the Convai Unreal Engine plugin through 
 <td><a href="set-up-a-metahuman-character.md">set-up-a-metahuman-character.md</a></td>
 </tr>
 <tr>
-<td><strong>Set up a Reallusion (CC) character</strong><br>Export a Reallusion CC5 avatar, import it into Unreal, and connect Convai.</td>
+<td><strong>Set up a Reallusion (CC) character</strong><br>Export a Reallusion CC4 or CC5 avatar, import it into Unreal, and connect Convai.</td>
 <td><a href="set-up-a-reallusion-character.md">set-up-a-reallusion-character.md</a></td>
 </tr>
 <tr>

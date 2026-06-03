@@ -8,12 +8,16 @@ The Convai Unreal Engine plugin adds four components to Unreal Engine. Each has 
 
 ## Component roles
 
-| Component | Class | Display name | Attach to |
+| Component | Class | Search name in Add menu | Attach to |
 |---|---|---|---|
-| Convai Chatbot | `UConvaiChatbotComponent` | "Convai Chatbot" | NPC character Blueprint |
-| Convai Player | `UConvaiPlayerComponent` | "Convai Player" | Player pawn Blueprint |
-| Convai Object | `UConvaiObjectComponent` | (no display name override) | Any in-scene Actor the AI should know about |
-| Convai Face Sync | `UConvaiFaceSyncComponent` | "Convai Face Sync" | NPC character Blueprint |
+| Convai Chatbot | `UConvaiChatbotComponent` | `BP Convai ChatBot Component` | NPC character Blueprint |
+| Convai Player | `UConvaiPlayerComponent` | `BP Convai Player Component` | Player pawn Blueprint |
+| Convai Object | `UConvaiObjectComponent` | `Convai Object` | Any in-scene Actor the AI should know about |
+| Convai Face Sync | `UConvaiFaceSyncComponent` | `Convai Face Sync` | NPC character Blueprint |
+
+{% hint style="info" %}
+**BP vs bare component:** Searching `BP Convai ChatBot Component` or `BP Convai Player Component` adds the Blueprint-wrapped version, which comes pre-wired with push-to-talk input and the chat UI widget. Searching `Convai Chatbot` or `Convai Player` adds the bare C++ component — this works but requires you to wire push-to-talk, chat widget, and audio capture yourself.
+{% endhint %}
 
 ## Component details
 
@@ -61,7 +65,7 @@ The key property is `LipSyncMode`, which selects the blendshape target:
 | Off | `EC_LipSyncMode::Off` | Disables face sync |
 | Auto | `EC_LipSyncMode::Auto` | Let the plugin decide |
 | Viseme Based | `EC_LipSyncMode::VisemeBased` | Custom rigs using OVR visemes (15 shapes) |
-| MetaHuman Blendshapes | `EC_LipSyncMode::BS_MHA` | MetaHuman and Reallusion CC5 characters |
+| MetaHuman Blendshapes | `EC_LipSyncMode::BS_MHA` | MetaHuman characters |
 | ARKit Blendshapes | `EC_LipSyncMode::BS_ARKit` | Generic ARKit-compatible rigs |
 | CC4 Extended Blendshapes | `EC_LipSyncMode::BS_CC4_Extended` | Reallusion CC4 characters |
 
@@ -86,27 +90,17 @@ Any scene Actor
 
 The `UConvaiPlayerComponent` and `UConvaiChatbotComponent` connect through the session managed by `UConvaiSubsystem` (the engine subsystem that the plugin registers automatically). You do not need to reference the subsystem directly in most Blueprint setups.
 
-## Convenience Blueprint wrappers
+## Blueprint wrappers
 
-The plugin ships pre-configured Blueprint wrappers in its `Content/` folder. These are ready to drop into a scene:
+The plugin ships Blueprint-wrapped versions of each component in its `Content/` folder. Use these instead of the bare C++ components — they include push-to-talk input binding, chat widget integration, and audio capture out of the box.
 
-| Asset | Wraps |
+| Asset | What it includes |
 |---|---|
-| `BP_ConvaiChatbotComponent` | `UConvaiChatbotComponent` with sensible defaults |
-| `BP_ConvaiPlayerComponent` | `UConvaiPlayerComponent` with defaults |
-| `BP_ConvaiSamplePlayer` | A full player pawn with `UConvaiPlayerComponent` attached |
+| `BP_ConvaiChatbotComponent` (`BP Convai ChatBot Component`) | `UConvaiChatbotComponent` pre-wired with push-to-talk and chat UI |
+| `BP_ConvaiPlayerComponent` (`BP Convai Player Component`) | `UConvaiPlayerComponent` pre-wired with push-to-talk and chat UI |
+| `BP_ConvaiSamplePlayer` | A full player pawn with `BP_ConvaiPlayerComponent` attached |
 | `BP_SampleGameMode` | A game mode that pairs with `BP_ConvaiSamplePlayer` |
 | `BP_Convai3DWidgetComponent` / `WBP_3DChatWidget` | In-world chat UI |
-
-## Base classes
-
-For custom character Blueprints, the plugin provides base classes you can derive from:
-
-| Class | Purpose |
-|---|---|
-| `ConvaiBaseCharacter` | NPC base — includes `UConvaiChatbotComponent` and `UConvaiFaceSyncComponent` pre-attached |
-| `ConvaiBasePlayer` | Player base — includes `UConvaiPlayerComponent` pre-attached |
-| `ConvaiPlayerWithVoiceActivation` | Player base with voice activity detection (hands-free) pre-configured |
 
 ## Next steps
 

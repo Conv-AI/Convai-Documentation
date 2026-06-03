@@ -17,7 +17,7 @@ The built-in chat widget provided by `BP_ConvaiPlayerComponent` and `BP_ConvaiSa
 | `UnmuteStreamingAudio()` | Begin streaming microphone audio to the active chatbot. Call on key press. |
 | `MuteStreamingAudio()` | Stop streaming audio. Call on key release. |
 
-Both functions return `bool`. `UnmuteStreamingAudio()` returns `true` if streaming started successfully. Connect them to your input actions in your player pawn's Blueprint event graph.
+`UnmuteStreamingAudio()` returns `bool` — `true` if streaming started successfully. `MuteStreamingAudio()` returns `void`. Connect them to your input actions in your player pawn's Blueprint event graph.
 
 You can also toggle mute programmatically without changing the mode. Set the `bMute` property on `UConvaiPlayerComponent` to `true` to silence input and `false` to restore it.
 {% endtab %}
@@ -25,12 +25,7 @@ You can also toggle mute programmatically without changing the mode. Set the `bM
 {% tab title="Hands-free" %}
 In hands-free mode the character listens continuously and responds whenever the player speaks, without requiring a key press.
 
-To enable hands-free mode:
-
-1. Select the **Convai Player** component on your player pawn.
-2. In the **Details** panel, locate **Push to Talk** under the **Convai** category and disable it.
-
-Alternatively, call `UpdateVadBP(true)` from Blueprint to enable voice activity detection at runtime.
+To enable hands-free mode, call `UpdateVadBP(true)` on the `UConvaiPlayerComponent` from Blueprint — for example in the player pawn's **BeginPlay** event. This enables voice activity detection so the character listens continuously without requiring a key press.
 
 You can still mute the input programmatically. Set the `bMute` property on `UConvaiPlayerComponent` to `true` to silence input and `false` to restore it.
 {% endtab %}
@@ -44,7 +39,7 @@ SendText(ChatbotComponent, Text)
 
 | Parameter | Type | Description |
 |---|---|---|
-| `ChatbotComponent` | `UConvaiChatbotComponent` | Reference to the chatbot the text message is sent to |
+| `ChatbotComponent` | `UConvaiConversationComponent` | Reference to the target chatbot (`UConvaiChatbotComponent` derives from this) |
 | `Text` | `FString` | The text message to send |
 
 Connect a text input widget to this function and call it on submit.

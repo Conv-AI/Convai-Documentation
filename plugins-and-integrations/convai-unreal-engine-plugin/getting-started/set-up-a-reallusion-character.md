@@ -153,7 +153,7 @@ Open the Blueprint. In the **Components** panel, click **Add** and add a **Skele
 {% step %}
 ### Add the Convai Chatbot component
 
-Click **Add** in the **Components** panel. Search for `Convai Chatbot` and add `UConvaiChatbotComponent`. In the **Details** panel, paste your **Character ID** from the Convai dashboard into the **Character ID** field.
+Click **Add** in the **Components** panel. Search for `BP Convai ChatBot Component` and select it. In the **Details** panel, paste your **Character ID** from the Convai dashboard into the **Character ID** field.
 {% endstep %}
 
 {% step %}
