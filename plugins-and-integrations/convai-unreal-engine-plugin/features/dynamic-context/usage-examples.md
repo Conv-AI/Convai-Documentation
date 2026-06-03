@@ -1,0 +1,133 @@
+---
+title: Usage examples
+description: Practical Blueprint recipes for pushing health, zone, inventory, and narrative state into a Convai character's live context during a session.
+last_reviewed: "4.0.0-beta.21"
+---
+
+These examples show how to use `SetContextState`, `SetContextStates`, `AddContextEvent`, and `RemoveContextState` in real gameplay scenarios. All examples assume an Actor with a `Convai Chatbot` component that is connected in an active session.
+
+## Track player health
+
+**Scenario:** A medical training simulation where a character (an instructor) comments on the trainee's vitals.
+
+Bind to a custom event that fires whenever the health value changes. Call `Set Context State` with `ShouldRespond = Never` — the character should know the health value silently and use it when asked, not interrupt speech to announce every point of damage.
+
+```text
+// Blueprint pseudocode
+Event HealthChanged (NewHealth: float)
+  → ConvaiBotComponent → Set Context State
+      Name:          "PlayerHealth"
+      Value:         ToString(NewHealth)
+      ShouldRespond: Never
+```
+
+To verify the character received the state: speak "What is my current health?" The character should reply with the value.
+
+## Announce a narrative event
+
+**Scenario:** An industrial safety drill where triggering a fire alarm should prompt the instructor character to react immediately.
+
+Call `Add Context Event` with `ShouldRespond = Always` so the character responds the moment the event lands.
+
+```text
+// Blueprint pseudocode
+Event AlarmActivated
+  → ConvaiBotComponent → Add Context Event
+      Text:          "Fire alarm activated in Bay 3"
+      ShouldRespond: Always
+```
+
+The character reacts verbally within the debounce window (default `0.5 s`). If the reaction must be instantaneous, set `bFlushImmediately = true` on the `Add Context Event` node.
+
+## Update multiple states at once after a scene transition
+
+**Scenario:** A corporate onboarding simulation that changes room, available equipment, and time of day when a trainee moves to a new zone.
+
+Use `Set Context States` to push all changed values in a single batched call so only one update reaches Convai.
+
+```text
+// Blueprint pseudocode
+Event EnteredConferenceRoom
+  → ConvaiBotComponent → Set Context States
+      States: {
+        "CurrentZone": "Conference Room B",
+        "AvailableEquipment": "Projector, Whiteboard",
+        "TimeOfDay": "14:30"
+      }
+      ShouldRespond: Auto
+```
+
+With `ShouldRespond = Auto`, the character may acknowledge the zone change if contextually appropriate, or remain silent if the LLM determines no reaction is needed.
+
+## Remove a state when a condition ends
+
+**Scenario:** A quest item is used and should no longer be part of the character's awareness.
+
+```text
+// Blueprint pseudocode
+Event ItemUsed (ItemName: FString)
+  → ConvaiBotComponent → Remove Context State
+      Name: ItemName
+```
+
+After the debounce flush, Convai no longer sees the item in the state block. The character will not reference it in future responses.
+
+## Combine state and event for a critical moment
+
+**Scenario:** A military simulation where a soldier NPC needs to know their commander is down and respond dramatically.
+
+Push the state change and the event together. Because they are both scheduled in the same burst, they coalesce into a single flush.
+
+```text
+// Blueprint pseudocode
+Event CommanderDown
+  → ConvaiBotComponent → Set Context State
+      Name:          "CommanderStatus"
+      Value:         "KIA"
+      ShouldRespond: Never
+  → ConvaiBotComponent → Add Context Event
+      Text:          "Commander has been eliminated — assume command"
+      ShouldRespond: Always
+```
+
+The state update is silent; the event triggers an immediate spoken response. Both updates arrive in the same debounce batch.
+
+## Reset context on level restart
+
+**Scenario:** The player restarts a simulation and all prior runtime state should be discarded.
+
+```text
+// Blueprint pseudocode
+Event OnLevelRestart
+  → ConvaiBotComponent → Reset Dynamic Context
+  → ConvaiBotComponent → Stop Session
+  → ConvaiBotComponent → Start Session
+```
+
+`Reset Dynamic Context` clears the local tracker and sends an empty context to Convai before the session disconnects. Starting a new session then begins with a clean dynamic layer.
+
+## Read a state value in a Blueprint condition
+
+**Scenario:** A Blueprint condition checks whether the character already knows about an active alert before sending a redundant event.
+
+```text
+// Blueprint pseudocode
+→ Get Context State Value
+    Name:     "AlertActive"
+    OutValue: → branch on whether OutValue == "true"
+If false:
+  → Set Context State
+      Name:          "AlertActive"
+      Value:         "true"
+      ShouldRespond: Auto
+  → Add Context Event
+      Text:          "Security alert activated"
+      ShouldRespond: Auto
+```
+
+`Get Context State Value` returns the client-side value immediately — no network round-trip is required.
+
+## Next steps
+
+- [Dynamic context Blueprint reference](dynamic-context-blueprint-reference.md) — full parameter and enum reference.
+- [Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md) — fix updates that are ignored or arrive too late.
