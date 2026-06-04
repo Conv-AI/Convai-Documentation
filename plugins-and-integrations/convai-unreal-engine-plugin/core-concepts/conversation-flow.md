@@ -59,6 +59,21 @@ The reason transcription fires on the chatbot rather than only on the player is 
 
 A player can also send text instead of audio. `UConvaiPlayerComponent::SendText` takes a target `UConvaiConversationComponent` (the chatbot) and an `FString`. The chatbot processes the text as if the player had spoken it, producing the same action, emotion, and audio response pipeline. This is useful for push-to-talk text UI, automated testing, and accessibility scenarios.
 
+## Action queue execution
+
+When Convai returns a response that includes character actions, `OnActionReceivedEvent_V2` fires and the full action sequence is appended to `ActionsQueue`. The character's audio response begins playing in parallel — action execution does not wait for speech to finish unless the action template's `bWaitForBotSpeech` flag is set.
+
+The standard queue-driven execution pattern in Blueprint:
+
+1. Bind to `OnActionReceivedEvent_V2` in `BeginPlay`.
+2. When the event fires, call `FetchFirstAction` to pop the first `FConvaiResultAction` from the queue.
+3. Execute the action in your game logic (move to a location, play an animation, open a door).
+4. Call `HandleActionCompletion(true)` on success. The plugin reports the outcome to Convai and the next queued action (if any) is ready to fetch.
+5. Call `HandleActionCompletion(false)` on failure. Convai is notified and may generate a recovery response.
+6. If an action fails unrecoverably — for example, the target actor no longer exists — call `AbortActionSequence` to discard all remaining actions in the queue.
+
+The `bWaitForBotSpeech` flag on an action template causes the **first** action in a newly-arrived sequence to wait until the character finishes its current audio before `FetchFirstAction` returns a result. Subsequent actions in the same sequence fire immediately after the prior `HandleActionCompletion`. This flag is set per template in the **Details** panel — not per response.
+
 ## Interruption
 
 `InterruptSpeech` on `UConvaiChatbotComponent` stops the character's current playback by fading out the audio over `InVoiceFadeOutDuration` seconds. The fade duration is also configurable as a default through the `InterruptVoiceFadeOutDuration` property on the component.
@@ -75,6 +90,10 @@ Two `BlueprintCallable` functions let Blueprint drive the character's speech wit
 
 - `ExecuteNarrativeTrigger` (Blueprint display name **Invoke Speech**) — sends a free-form trigger message that causes the character to speak. Used for scripted moments, cutscenes, or timed NPC dialogue. The Blueprint node is labelled **Invoke Speech**; the C++ name `ExecuteNarrativeTrigger` is only visible in code.
 - `InvokeNarrativeDesignTrigger` (Blueprint display name **Invoke Narrative Design Trigger**) — fires a named trigger defined in the Convai dashboard's Narrative Design tool. The dashboard maps trigger names to specific sections of a narrative graph.
+
+{% hint style="info" %}
+Use `ExecuteNarrativeTrigger` for one-off, freeform prompts where the exact wording can vary at runtime. Use `InvokeNarrativeDesignTrigger` when the trigger name is a stable contract with the dashboard — this ensures predictable branching in the narrative graph and makes the flow testable.
+{% endhint %}
 
 Both functions accept `InGenerateActions` (whether the response should include character actions) and `InReplicateOnNetwork` (whether the trigger should be broadcast to other session attendees). If the session is not yet connected when either function is called, the trigger is queued and fires automatically once the connection is established.
 

@@ -6,6 +6,8 @@ last_reviewed: "4.0.0-beta.21"
 
 The Convai Unreal Engine plugin is built around a small set of components that each own a single responsibility. Understanding what each component does — and how they relate — makes it easier to configure characters, handle events, and extend the plugin for your project.
 
+Start with **Runtime architecture** if you are new to the plugin internals. Read the remaining pages when you need to understand a specific system — session management, conversation state, or Blueprint events.
+
 ## The component model
 
 Every Convai interaction in a level involves at least two participants: a character (an NPC or an AI-driven `Actor`) and a player. The plugin models each participant as a distinct Unreal `Component` derived from the shared abstract base `UConvaiConversationComponent`.

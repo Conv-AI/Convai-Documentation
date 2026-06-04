@@ -8,13 +8,18 @@ The Convai Unreal Engine plugin partitions responsibility across five distinct t
 
 ## Component hierarchy
 
-All conversation-capable components share a common base: `UConvaiConversationComponent`, which itself extends `UConvaiAudioStreamer`. This base provides the two properties that every participant exposes to the rest of the system: whether it is a player (`IsPlayer`) and what its conversational name is (`GetConversationalName`). The delegate for transcription events (`OnTranscriptionReceivedDelegate`) and the attendee connection state event (`OnAttendeeConnectionStateChangedEvent`) also live here so both chatbot and player inherit them automatically.
+All conversation-capable components share a two-level base:
+
+- `UConvaiAudioStreamer` — the lowest layer. It manages audio playback from a procedural sound wave, delivers per-frame blendshape face data to any attached `IConvaiLipSyncInterface`, and hosts the vision interface (`IConvaiVisionInterface`) for webcam or render-target input. Both chatbot and player inherit audio and face capabilities from this class.
+- `UConvaiConversationComponent` — extends `UConvaiAudioStreamer`. It adds the two properties every participant exposes to the system — whether it is a player (`IsPlayer`) and its conversational name (`GetConversationalName`) — plus the two delegates inherited by both chatbot and player: `OnTranscriptionReceivedDelegate` and `OnAttendeeConnectionStateChangedEvent`.
 
 ```mermaid
 graph TD
-    Base["UConvaiConversationComponent\n(abstract base — transcription delegate,\nattendee state event)"]
+    Streamer["UConvaiAudioStreamer\n(audio playback, face data,\nlip sync, vision interface)"]
+    Base["UConvaiConversationComponent\n(abstract base — transcription delegate,\nattendee state event, conversational name)"]
     Chatbot["UConvaiChatbotComponent\n(Convai Chatbot)\ncharacter ID, session, emotion, actions, voice"]
     Player["UConvaiPlayerComponent\n(Convai Player)\nmicrophone, streaming, gaze"]
+    Streamer --> Base
     Base --> Chatbot
     Base --> Player
 ```
@@ -26,9 +31,9 @@ graph TD
 - **Identity.** `CharacterID` (replicated), `CharacterName`, `VoiceType`, `Backstory`, `LanguageCode`, `ReadyPlayerMeLink`, and `AvatarImageLink` are loaded from the Convai dashboard when `LoadCharacter` is called or when the component starts a session.
 - **Session.** The `bAutoInitializeSession` flag and the `StartSession` / `StopSession` functions manage the WebRTC channel through the subsystem. See [Session lifecycle](session-lifecycle.md) for detail.
 - **Conversation state.** Three read-only state functions — `IsListening`, `IsProcessing`, and `GetIsTalking` — describe where the character is in the turn cycle. See [Conversation flow](conversation-flow.md).
-- **Action queue.** When Convai sends a sequence of actions, they land in `ActionsQueue` as `FConvaiResultAction` items. Blueprint reads and advances the queue with `FetchFirstAction` and `HandleActionCompletion`.
+- **Action queue.** When Convai sends a sequence of actions, they land in `ActionsQueue` as `FConvaiResultAction` items. Blueprint advances the queue by calling `FetchFirstAction` (which pops the first item), executing the action, then calling `HandleActionCompletion`. The `bWaitForBotSpeech` flag on an action template defers the first action in a sequence until the character finishes speaking. Call `AbortActionSequence` to clear the queue when an action fails unrecoverably.
 - **Emotion state.** `EmotionState` (type `FConvaiEmotionState`) is replicated. `LockEmotionState` prevents incoming updates from overwriting a manually set emotion.
-- **Environment.** `EnvironmentData` (type `FConvaiEnvironmentData`) holds the actions, objects, and characters the AI can reference. Mutate it at runtime through the granular methods `AddObject`, `RemoveObject`, `AddCharacter`, and `SetObjectInAttention` — not by writing the property directly.
+- **Environment.** `EnvironmentData` (type `FConvaiEnvironmentData`) holds the action templates, objects, and characters the AI can reference. Mutate it at runtime through the granular methods `AddObject`, `RemoveObject`, `AddCharacter`, and `SetObjectInAttention` — not by writing the property directly. Action templates in `EnvironmentData.Actions` are fixed at `/connect` time; only objects and characters can be updated mid-session.
 - **Dynamic context.** `UpdateContext`, `SetContextState`, `SetContextStates`, `AddContextEvent`, and `ResetDynamicContext` push real-time world state to the AI during a live session. Updates are batched using a debounce window controlled by `ContextDebounceWindow` and `ContextMaxDebounceWindow`.
 - **Session memory.** `SessionID` (default `"-1"`) links conversations across sessions for long-term memory. Call `ResetConversation` to clear it.
 - **Attention targeting.** `ConversationPartner`, `LookAtTarget`, and `PointAtTarget` are replicated properties that track which player the character is speaking with and what it is looking at or pointing to.
@@ -45,13 +50,13 @@ The chatbot component also implements `IConvaiConnectionInterface`, which is how
 - **Gaze attention.** When `bEnableGazeAttention` is true, the component traces from the player camera each tick. Sustained gaze on a `UConvaiObjectComponent` promotes it to "object in attention" on the active chatbot. This is entirely client-side — the chatbot only learns about it through `SetObjectInAttention` calls that the player component makes on its behalf.
 - **Push-to-talk and VAD.** `bMute` silences microphone submission. `UpdateVadBP` toggles voice activity detection.
 
-The player component also implements `IConvaiConnectionInterface` and `IConvaiProcessedAudioReceiver`, allowing audio processing components (for noise reduction or acoustic echo cancellation) to intercept the capture pipeline.
+The player component implements two interfaces: `IConvaiConnectionInterface` (same as the chatbot — used by the subsystem for session routing and event dispatch) and `IConvaiProcessedAudioReceiver`. The second interface is the extension point for audio-processing middleware: noise-reduction and acoustic echo cancellation (AEC) plugins implement `IConvaiProcessedAudioReceiver` to intercept raw microphone frames before they are forwarded to the subsystem.
 
 ## Convai Object component
 
 `UConvaiObjectComponent` registers any `Actor` in the level as a named object that all chatbots can reference. Drop it on a door, lever, room, or prop and fill in `ObjectEntry` (name and description). The component registers itself with the subsystem at `BeginPlay`. Every chatbot that starts a session after that automatically receives the object in its environment; chatbots already connected receive the object via `AddOrUpdateObjectFromComponent`.
 
-Optionally, `TrackedProperties` lets designers bind `UPROPERTY` fields on the owning actor to the AI context. Whenever the value changes, the subsystem pushes a `SetContextState` update to all active chatbots. With `bAutoGenerateProximityState` enabled (the default), the component also synthesises a per-chatbot proximity description — for example "close by, in front and to the right" — as a tracked state key.
+Optionally, `TrackedProperties` lets designers bind `UPROPERTY` fields on the owning actor to the AI context. All object components share a polling clock (approximately every 0.25 seconds). On each poll, the subsystem evaluates every tracked property and pushes a `SetContextState` update to active chatbots only when the value has changed — not on every tick. With `bAutoGenerateProximityState` enabled (the default), the component also synthesises a per-chatbot proximity description — for example, "close by, in front and to the right" — and maintains it as a state key that updates as the player moves.
 
 The component exposes four gaze events (`OnGazedIn`, `OnGazedOut`, `OnAttentionGained`, `OnAttentionLost`) so Blueprint can react to player focus independently of the chatbot.
 
@@ -80,6 +85,7 @@ The subsystem is responsible for:
 
 - **Connection management.** `ConnectSession` and `DisconnectSession` are called by the component session proxies; no Blueprint interaction is needed.
 - **Component registry.** The subsystem keeps lists of all registered chatbot, player, and object components so that incoming data packets, action sequences, and emotion events can be dispatched to the right component by attendee ID.
+- **Tracked-property polling.** The subsystem runs a shared polling clock (approximately every 0.25 seconds) that evaluates all registered `UConvaiObjectComponent` tracked properties in lockstep. Values are pushed to active chatbots only when they change, preventing unnecessary context traffic.
 - **Global connection state.** `GetServerConnectionState` returns the current `EC_ConnectionState` value (`Disconnected`, `Connecting`, `Connected`, or `Reconnecting`). `OnServerConnectionStateChangedEvent` fires whenever this changes.
 - **Idle management.** `ResetIdleTimer` and `InvalidateOrphanedConnection` let Blueprint intervene when the subsystem detects an idle or stale connection. `OnUserIdleWarning` fires before the idle timeout elapses to give the game a chance to prevent a disconnection.
 

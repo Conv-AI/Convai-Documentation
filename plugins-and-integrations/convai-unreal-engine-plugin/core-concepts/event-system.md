@@ -112,7 +112,7 @@ Fires after `InterruptSpeech` is applied and the audio fade-out begins. Use this
 
 **`OnFailureEvent`** — display name **On Failure** — category `Convai`
 
-Fires when the chatbot's session encounters an unrecoverable error — for example, a network failure, an authentication problem, or an invalid character ID. No parameters are passed. Use this to display an error indicator, attempt a session restart, or log a diagnostic event.
+Fires when the chatbot's session encounters an unrecoverable error — for example, a network failure, an authentication problem, or an invalid character ID. No parameters are passed. When this event fires, call `GetChatbotConnectionState` immediately to inspect the `EC_ConnectionState` and decide on a recovery strategy: display an error indicator, attempt a `StartSession` retry, or log a diagnostic event.
 
 ## Player component delegates
 
@@ -138,9 +138,15 @@ All four gaze delegates carry the same signature: the player component and the o
 
 Gaze events only fire when `bEnableGazeAttention` is `true` on the player component. When `bEnableGazeAttention` is `false`, none of these delegates are broadcast.
 
+The promotion and release thresholds are configurable on `UConvaiPlayerComponent`: `OnAttentionGained` fires after the object has been held in continuous gaze for `GazeAttentionDelay` seconds (default 1.0 s). `OnAttentionLost` fires after gaze has been absent for `GazeAttentionLossDelay` seconds (default 5.0 s). Both values can be tuned in the **Details** panel to match the intended interaction speed of the experience.
+
 ## Event binding patterns
 
 Bind delegates in Blueprint using the **Assign** node on the component reference. For the chatbot's events, bind inside the owning character Blueprint's `BeginPlay` (or `Event On Character Data Loaded` if the character setup depends on data first loading). For the subsystem events (`OnServerConnectionStateChangedEvent`, `OnUserIdleWarning`), bind after getting the subsystem from the game instance.
+
+{% hint style="warning" %}
+Bind each delegate exactly once — typically in `BeginPlay`. Avoid binding inside a delegate callback or inside any function that may be called more than once per actor lifetime. Each call to **Assign** adds a new binding; duplicate bindings cause the same handler to fire multiple times per event.
+{% endhint %}
 
 The gaze delegates on `UConvaiPlayerComponent` can also be mirrored on the `UConvaiObjectComponent` side — `UConvaiObjectComponent` exposes its own `OnGazedIn`, `OnGazedOut`, `OnAttentionGained`, and `OnAttentionLost` events from the object's perspective, with a complementary signature (`ObjectComponent` and `PlayerComponent`).
 

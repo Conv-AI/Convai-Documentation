@@ -18,7 +18,7 @@ Set `bAutoInitializeSession` to `false` when you need precise control over when 
 
 `StartSession` and `StopSession` are `BlueprintCallable` functions on both components.
 
-**Chatbot session:** `UConvaiChatbotComponent::StartSession` opens the character-side channel. Before connecting, it invokes `GatherEnvironmentExtras` — a `BlueprintNativeEvent` you can override in Blueprint to append dynamic action, object, and character entries to the environment that is sent at `/connect` time. The override receives three output arrays — `OutExtraActions`, `OutExtraObjects`, and `OutExtraCharacters` — which you populate with any entries to merge into the environment. Once connected, the chatbot receives audio, actions, emotion data, and face data from Convai.
+**Chatbot session:** `UConvaiChatbotComponent::StartSession` opens the character-side channel. Before connecting, it invokes `GatherEnvironmentExtras` — a `BlueprintNativeEvent` you can override in Blueprint to append dynamic action, object, and character entries to the environment that is sent at `/connect` time. The override receives three output arrays — `OutExtraActions`, `OutExtraObjects`, and `OutExtraCharacters` — which you populate with any entries to merge into the environment. This is the recommended pattern for injecting actions that depend on runtime state, such as inventory items or abilities that are only available after certain conditions are met — rather than hard-coding them in the component's `EnvironmentData` at edit time. Once connected, the chatbot receives audio, actions, emotion data, and face data from Convai.
 
 **Player session:** `UConvaiPlayerComponent::StartSession` opens the player-side channel and returns `true` if the session initialized successfully. Once connected, the player component begins forwarding microphone audio to the subsystem.
 
@@ -43,15 +43,23 @@ On `UConvaiChatbotComponent`, call `GetChatbotConnectionState` (`BlueprintPure`)
 
 The `OnAttendeeConnectionStateChangedEvent` delegate on the base `UConvaiConversationComponent` fires whenever an attendee transitions between states. Both chatbot and player components inherit this delegate. It carries the component reference, the attendee ID, and the new `EC_ConnectionState` value.
 
+## Narrative template keys
+
+`NarrativeTemplateKeys` on `UConvaiChatbotComponent` is a `TMap<FString, FString>` of key-value pairs injected into the Narrative Design graph at session start. Set these before calling `StartSession` — they are included in the `/connect` payload and are not updated mid-session. Use them to pass dynamic values that the narrative graph references by name, such as a player's name, an active quest identifier, or a scenario-specific parameter.
+
 ## Session memory and conversation reset
 
 `SessionID` on `UConvaiChatbotComponent` links conversations across multiple sessions for long-term memory. Its default value is `"-1"`, which means no previous conversation. When Convai returns a session ID at the start of a conversation, the component stores it in `SessionID`. To resume a previous conversation, persist this value between play sessions and restore it before calling `StartSession`. To start fresh, call `ResetConversation`, which resets `SessionID` to `"-1"`.
 
-`EndUserID` and `EndUserMetadata` on both the chatbot and player components are passed to Convai at connect time and used to associate long-term memory with a specific user identity.
+`EndUserID` on `UConvaiPlayerComponent` is the primary long-term memory identifier — Convai uses it to associate conversation history with a specific user across sessions. `EndUserMetadata` carries supplementary user attributes. Both are passed to Convai at connect time and are replicated so clients can set their own identity through the `SetEndUserID` and `SetEndUserMetadata` Server RPC counterparts. The corresponding fields on `UConvaiChatbotComponent` are also passed at connect but the player component's values are the authoritative user identity signal.
 
 ## Multiplayer replication considerations
 
 The Convai Unreal Engine plugin is designed for a server-authoritative multiplayer model where the chatbot components run on the server (or on a listen server host).
+
+{% hint style="info" %}
+Call `StartSession` and `StopSession` on the **server** (or listen-server host). The WebRTC transport runs server-side. Client machines receive replicated property updates and RPC broadcasts — they do not manage sessions independently.
+{% endhint %}
 
 **Replicated properties.** `CharacterID`, `CharacterName`, `VoiceType`, `Backstory`, `LanguageCode`, `ReadyPlayerMeLink`, `AvatarImageLink`, `SessionID`, `EmotionState`, `LockEmotionState`, `EnvironmentData`, `ConversationPartner`, `LookAtTarget`, and `PointAtTarget` on `UConvaiChatbotComponent` are all `Replicated`. `PlayerName`, `EndUserID`, and `EndUserMetadata` on `UConvaiPlayerComponent` are also `Replicated`.
 
