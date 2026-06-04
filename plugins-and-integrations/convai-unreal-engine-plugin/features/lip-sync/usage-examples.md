@@ -1,6 +1,6 @@
 ---
 title: Usage examples
-description: Configure lip sync for common scenarios: Add vs Override blending, tuning smoothing, mixing with body animation, and remapping blendshapes to a custom rig.
+description: "Configure lip sync for common scenarios: Add vs Override blending, tuning smoothing, mixing with body animation, and remapping blendshapes to a custom rig."
 last_reviewed: 2026-06-03
 ---
 
