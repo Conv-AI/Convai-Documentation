@@ -1,6 +1,6 @@
 ---
 title: Conversation flow
-description: Understand the listening, processing, and talking states of a Convai chatbot, how transcription works, and how interruption is handled.
+description: Understand the turn states, transcription, action queue execution, narrative triggers, and interruption handling of a Convai chatbot.
 last_reviewed: "4.0.0-beta.21"
 ---
 

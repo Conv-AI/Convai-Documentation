@@ -116,7 +116,7 @@ Fires when the chatbot's session encounters an unrecoverable error — for examp
 
 ## Player component delegates
 
-These delegates are on `UConvaiPlayerComponent` and relate to the player's microphone input and gaze behavior.
+These delegates are on `UConvaiPlayerComponent` and cover gaze attention transitions. The microphone API on the player component is function-based (`GetIsStreaming`, `GetIsRecording`, `UnmuteStreamingAudio`, etc.) rather than event-based — there are no microphone-specific `BlueprintAssignable` delegates.
 
 ### Gaze and attention
 
@@ -140,6 +140,26 @@ Gaze events only fire when `bEnableGazeAttention` is `true` on the player compon
 
 The promotion and release thresholds are configurable on `UConvaiPlayerComponent`: `OnAttentionGained` fires after the object has been held in continuous gaze for `GazeAttentionDelay` seconds (default 1.0 s). `OnAttentionLost` fires after gaze has been absent for `GazeAttentionLossDelay` seconds (default 5.0 s). Both values can be tuned in the **Details** panel to match the intended interaction speed of the experience.
 
+## Object component events
+
+`UConvaiObjectComponent` exposes four gaze events that mirror the player component's gaze delegates from the object's perspective. Use these to react to player focus directly on the object's Blueprint without polling the player component.
+
+| Delegate | Category | Fires when |
+|---|---|---|
+| `OnGazedIn` | `Convai\|Object\|Gaze` | The player's gaze cursor enters this object. Fires before any attention threshold. |
+| `OnGazedOut` | `Convai\|Object\|Gaze` | The player's gaze leaves this object, regardless of attention state. |
+| `OnAttentionGained` | `Convai\|Object\|Gaze` | This object is promoted to the active chatbot's "in attention" target after the sustained-gaze threshold. |
+| `OnAttentionLost` | `Convai\|Object\|Gaze` | This object is released from the in-attention slot — loss timer elapsed, gaze swapped to another object, or target destroyed. |
+
+**Object gaze event signature:**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `ObjectComponent` | `UConvaiObjectComponent*` | The object whose gaze state changed. |
+| `PlayerComponent` | `UConvaiPlayerComponent*` | The player whose gaze triggered the transition. May be `null` in destroyed-target paths — always null-check before use. |
+
+These events only fire when `bGazeable` is `true` on the object component (the default). Set `bGazeable` to `false` on objects that should exist in the chatbot's environment for action or context purposes but should not be reachable via player gaze.
+
 ## Event binding patterns
 
 Bind delegates in Blueprint using the **Assign** node on the component reference. For the chatbot's events, bind inside the owning character Blueprint's `BeginPlay` (or `Event On Character Data Loaded` if the character setup depends on data first loading). For the subsystem events (`OnServerConnectionStateChangedEvent`, `OnUserIdleWarning`), bind after getting the subsystem from the game instance.
@@ -147,8 +167,6 @@ Bind delegates in Blueprint using the **Assign** node on the component reference
 {% hint style="warning" %}
 Bind each delegate exactly once — typically in `BeginPlay`. Avoid binding inside a delegate callback or inside any function that may be called more than once per actor lifetime. Each call to **Assign** adds a new binding; duplicate bindings cause the same handler to fire multiple times per event.
 {% endhint %}
-
-The gaze delegates on `UConvaiPlayerComponent` can also be mirrored on the `UConvaiObjectComponent` side — `UConvaiObjectComponent` exposes its own `OnGazedIn`, `OnGazedOut`, `OnAttentionGained`, and `OnAttentionLost` events from the object's perspective, with a complementary signature (`ObjectComponent` and `PlayerComponent`).
 
 ## Related concepts
 

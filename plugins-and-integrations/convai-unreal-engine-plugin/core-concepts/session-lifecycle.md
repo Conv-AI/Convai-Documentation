@@ -63,8 +63,6 @@ Call `StartSession` and `StopSession` on the **server** (or listen-server host).
 
 **Replicated properties.** `CharacterID`, `CharacterName`, `VoiceType`, `Backstory`, `LanguageCode`, `ReadyPlayerMeLink`, `AvatarImageLink`, `SessionID`, `EmotionState`, `LockEmotionState`, `EnvironmentData`, `ConversationPartner`, `LookAtTarget`, and `PointAtTarget` on `UConvaiChatbotComponent` are all `Replicated`. `PlayerName`, `EndUserID`, and `EndUserMetadata` on `UConvaiPlayerComponent` are also `Replicated`.
 
-**Session ownership.** `StartSession` and `StopSession` should be called on the server. The WebRTC transport runs on the server process; client machines receive replicated property updates and event broadcasts rather than managing their own sessions.
-
 **Interruption.** `InterruptSpeech` on the chatbot uses a `NetMulticast Reliable` RPC (`Broadcast_InterruptSpeech`) so all clients apply the audio fade-out simultaneously.
 
 **Player names.** `SetPlayerName`, `SetEndUserID`, and `SetEndUserMetadata` on `UConvaiPlayerComponent` each have a `Server Reliable` RPC counterpart (`SetPlayerNameServer`, etc.) so clients can update their own identity from a locally owned pawn and have the change propagate to the server.
