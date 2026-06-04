@@ -97,6 +97,15 @@ Use `ExecuteNarrativeTrigger` for one-off, freeform prompts where the exact word
 
 Both functions accept `InGenerateActions` (whether the response should include character actions) and `InReplicateOnNetwork` (whether the trigger should be broadcast to other session attendees). If the session is not yet connected when either function is called, the trigger is queued and fires automatically once the connection is established.
 
+## Troubleshooting
+
+| Symptom | Likely cause | Fix | Verify |
+|---|---|---|---|
+| Character stays in `IsProcessing` indefinitely | Network interruption after the player's utterance was forwarded | Call `GetChatbotConnectionState`. If the state is `Reconnecting`, wait for automatic reconnection. If the state is stuck, call `StopSession` then `StartSession` to reopen the channel. | `IsProcessing` returns `false` and `GetIsTalking` returns `true` when the first audio response arrives. |
+| `IsListening` is `true` but the character never enters `IsProcessing` | The audio stream was not closed — `MuteStreamingAudio` was never called and VAD did not detect a natural endpoint | Call **Mute Streaming Audio** explicitly after the player finishes speaking, or ensure voice activity detection is enabled via `UpdateVadBP` and the player has stopped speaking for the detection window. | `IsProcessing` becomes `true` immediately after the stream closes. |
+| Actions arrive in `OnActionReceivedEvent_V2` but nothing executes | `FetchFirstAction` was not called inside the event handler, or `HandleActionCompletion` was not called after each action executed | Call **Fetch First Action** inside the **On Actions Received** handler. After executing the action, always call **Handle Action Completion** with `true` on success or `false` on failure. | A **Print String** on the dequeued action name confirms receipt. The next action in the sequence becomes available after each completion call. |
+| `InterruptSpeech` has no visible effect | Called while `GetIsTalking` is `false` — no audio is playing | Guard the call with a **Get Is Talking** check. Call `InterruptSpeech` only when the character is in the talking state. | `OnInterruptedEvent` fires and `GetIsTalking` returns `false` after the fade-out completes. |
+
 ## Related concepts
 
 {% content-ref url="session-lifecycle.md" %}

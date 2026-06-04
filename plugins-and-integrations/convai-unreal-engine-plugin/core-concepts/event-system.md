@@ -168,6 +168,56 @@ Bind delegates in Blueprint using the **Assign** node on the component reference
 Bind each delegate exactly once — typically in `BeginPlay`. Avoid binding inside a delegate callback or inside any function that may be called more than once per actor lifetime. Each call to **Assign** adds a new binding; duplicate bindings cause the same handler to fire multiple times per event.
 {% endhint %}
 
+## Usage examples
+
+### Emotion-driven animation
+
+A character that updates its facial expression each time Convai returns a new emotion state.
+
+In Blueprint, **Assign** to **On Emotion State Changed** in the character's `BeginPlay` event. The handler node receives the chatbot component reference — call **Get Emotion State** on it to read the current emotion values and forward them to your animation system or Anim Blueprint.
+
+In C++, bind with `AddDynamic` in `BeginPlay`:
+
+```cpp
+// BeginPlay
+ChatbotComponent->OnEmotionStateChangedEvent.AddDynamic(
+    this, &AMyCharacter::HandleEmotionChanged);
+
+// Handler — EmotionState is already updated when this fires
+void AMyCharacter::HandleEmotionChanged(UConvaiChatbotComponent* ChatbotComp,
+                                         UConvaiPlayerComponent* PlayerComp)
+{
+    // Use GetEmotionScore() or GetEmotionBlendshapes() to drive your Anim Blueprint
+}
+```
+
+Expected result: The character's facial expression updates within the same audio response that carries the emotion data.
+
+### Connection state UI overlay
+
+A HUD that shows a "Connecting…" overlay while the Convai session is not yet ready.
+
+In Blueprint, get the **Convai Subsystem** from the game instance in the HUD's `BeginPlay`, then **Assign** to **On Server Connection State Changed**. In the handler, show or hide the overlay widget based on whether the incoming state is `Connected`.
+
+Expected result: The overlay is visible during `Connecting` and `Reconnecting` states and hides automatically when the session reaches `Connected` — without polling on `Tick`.
+
+### Action dispatch system
+
+A character that executes a sequence of physical actions — move, interact, speak — in order.
+
+In Blueprint, **Assign** to **On Actions Received** in `BeginPlay`. In the handler, call **Fetch First Action** to pop the first action from the queue, execute the corresponding game logic (move the character, trigger an animation, open a prop), then call **Handle Action Completion** with `true`. The next action in the sequence is then ready to fetch.
+
+Expected result: Actions execute in order as each prior action reports completion, and the character's speech plays in parallel.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix | Verify |
+|---|---|---|---|
+| Delegate never fires | Binding was never established, or was created after the event already fired | Bind in the character Blueprint's `BeginPlay` using the **Assign** node, or use `AddDynamic` in C++. For events that depend on character data, bind from inside an `OnCharacterDataLoadEvent_V2` handler instead of in `BeginPlay`. | Add a **Print String** to the handler; it should output when the expected condition occurs. |
+| Handler fires multiple times per event | The delegate was bound more than once — for example, **Assign** is inside a function called on every `StartSession` | Ensure each **Assign** call is reached exactly once per actor lifetime. If re-binding is intentional, call **Remove** (Blueprint) or `RemoveDynamic` (C++) before re-assigning. | Log a counter inside the handler; it should increment by exactly 1 per event. |
+| `OnFailureEvent` fires immediately at session start | Invalid character ID or expired API key | Verify that `CharacterID` in the chatbot component matches a character in your Convai dashboard. Confirm the API key in **Project Settings → Convai**. | `OnCharacterDataLoadEvent_V2` fires with `Success = true` after a valid session start. |
+| Gaze events never fire | `bEnableGazeAttention` is `false` on the player component, or the target actor has no `UConvaiObjectComponent` | Set **Enable Gaze Attention** to `true` on the player component. Confirm the target actor has a **Convai Object** component with **Gazeable** enabled. | `OnGazeBegin` fires on both the player component and the object component when the player looks at the target. |
+
 ## Related concepts
 
 {% content-ref url="conversation-flow.md" %}

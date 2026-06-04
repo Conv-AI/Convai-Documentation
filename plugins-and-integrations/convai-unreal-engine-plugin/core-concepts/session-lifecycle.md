@@ -39,6 +39,20 @@ Both components and the subsystem track connection state using the `EC_Connectio
 | `Connected` | Channel is open and ready. |
 | `Reconnecting` | Connection was lost; the subsystem is attempting to restore it. |
 
+```mermaid
+stateDiagram-v2
+    [*] --> Disconnected
+    Disconnected --> Connecting : StartSession
+    Connecting --> Connected : handshake complete
+    Connected --> Reconnecting : connection lost
+    Reconnecting --> Connecting : retry attempt
+    Reconnecting --> Disconnected : max retries exceeded\nor InvalidateOrphanedConnection
+    Connected --> Disconnected : StopSession
+    Connecting --> Disconnected : StopSession
+```
+
+The `Reconnecting` state is transparent to Blueprint — the subsystem retries automatically without requiring another `StartSession` call. Use `InvalidateOrphanedConnection` on the subsystem only when the session appears stuck and automatic retries are not recovering.
+
 On `UConvaiChatbotComponent`, call `GetChatbotConnectionState` (`BlueprintPure`) to read the current state. On `UConvaiPlayerComponent`, call `IsPlayerConnected` (`BlueprintPure`) to check whether its channel is in the `Connected` state. For the global view — which aggregates across all sessions — use `UConvaiSubsystem::GetServerConnectionState` (see [Connection subsystem Blueprint surface](#connection-subsystem-blueprint-surface) below).
 
 The `OnAttendeeConnectionStateChangedEvent` delegate on the base `UConvaiConversationComponent` fires whenever an attendee transitions between states. Both chatbot and player components inherit this delegate. It carries the component reference, the attendee ID, and the new `EC_ConnectionState` value.
@@ -85,6 +99,48 @@ Call `StartSession` and `StopSession` on the **server** (or listen-server host).
 |---|---|---|
 | `OnServerConnectionStateChangedEvent` | `Convai\|Connection` | Fires on the game thread whenever the global `EC_ConnectionState` changes. Carries the new `EC_ConnectionState` value. |
 | `OnUserIdleWarning` | `Convai\|Event` | Fires when the server detects that the user has been idle. Carries `RemainingSeconds` — the number of seconds before the connection is automatically closed. Call `ResetIdleTimer` to prevent the disconnection. |
+
+## Usage examples
+
+### Single-player: auto-start at level load
+
+A training simulation where an AI instructor should be ready to talk as soon as the level loads.
+
+1. On the chatbot component in the **Details** panel, set **Auto Initialize Session** to `true`.
+2. On the player component, set **Auto Initialize Session** to `true`.
+3. Enter Play Mode.
+
+Expected result: Both components call `StartSession` in their own `BeginPlay`. The subsystem connects both channels automatically. `GetChatbotConnectionState` returns `Connected` within the first few frames and the player can speak immediately without any additional Blueprint logic.
+
+### Multiplayer: server-authoritative session
+
+A multiplayer experience where an AI character runs on a dedicated server and multiple clients can approach and speak to it.
+
+1. Set **Auto Initialize Session** to `false` on the chatbot component to prevent clients from calling `StartSession` independently.
+2. In the character Blueprint's `Event BeginPlay`, add a **Switch Has Authority** node.
+3. Connect the **Authority** output pin to **Start Session** on the chatbot component.
+
+Expected result: `StartSession` runs only on the server. Replicated properties — `CharacterID`, `EmotionState`, `ConversationPartner` — are pushed to all clients automatically. Client machines observe the character's state through replication without managing a session channel.
+
+### Resuming a conversation across sessions
+
+A kiosk experience where returning users pick up where they left off.
+
+1. When a conversation ends (on `StopSession` or when the game closes), save the chatbot component's `SessionID` to a persistent store such as `USaveGame`.
+2. At the start of the next session, restore the saved `SessionID` to the chatbot component before calling `StartSession`.
+3. To start fresh instead, call `ResetConversation` before `StartSession` — this resets `SessionID` to `"-1"`.
+
+Expected result: The character references prior conversation context in its first response.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix | Verify |
+|---|---|---|---|
+| Character does not respond at level start | `bAutoInitializeSession` is `false` and `StartSession` was never called | Set **Auto Initialize Session** to `true` on the chatbot component, or call **Start Session** explicitly in the character's `BeginPlay`. | `GetChatbotConnectionState` returns `Connected` within the first few frames. |
+| `GetChatbotConnectionState` returns `Connecting` indefinitely | Invalid API key or network cannot reach Convai | Confirm the API key in **Project Settings → Convai**. Test connectivity to `convai.com`. | State transitions to `Connected` after a valid handshake. |
+| State cycles between `Reconnecting` and `Connecting` without recovering | A stale session is registered on Convai — the subsystem cannot complete the handshake | Call `InvalidateOrphanedConnection` on the subsystem to force-close the stale channel, then call `StartSession` again. | `GetServerConnectionState` returns `Connected` after a clean reconnect. |
+| Actions defined in Blueprint are not available during the session | `EnvironmentData.Actions` was modified after `StartSession` — action templates are fixed at `/connect` time | Move dynamic action setup into the `GatherEnvironmentExtras` override, or ensure all `AddAction` calls complete before `StartSession`. | The first `OnActionReceivedEvent_V2` response includes the expected actions. |
+| Conversation history does not resume between sessions | `SessionID` was not persisted before the previous session ended | Save `SessionID` to a `USaveGame` or similar store when the session ends. Restore it to the chatbot component before the next `StartSession`. | The character references prior conversation context in its first response. |
 
 ## Related concepts
 
