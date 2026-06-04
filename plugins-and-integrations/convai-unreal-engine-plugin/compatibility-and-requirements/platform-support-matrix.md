@@ -32,7 +32,7 @@ The Convai plugin declares the following engine plugin dependencies in `ConvAI.u
 
 ## Android platform notes
 
-Android builds require microphone access. The plugin bundles `AndroidPermission` as an enabled dependency and uses it to request the `RECORD_AUDIO` permission at runtime. In standard setups the Convai Player component handles the permission prompt; you do not need to add a separate permission call in Blueprint.
+Android builds require microphone access. The plugin bundles `AndroidPermission` as an enabled dependency and uses it to request the `RECORD_AUDIO` permission at runtime. In standard setups `UConvaiPlayerComponent` handles the permission prompt; you do not need to add a separate permission call in Blueprint.
 
 {% hint style="warning" %}
 Packaging for Android requires the Android SDK and NDK configured in **Project Settings > Platforms > Android SDK**. This is a standard Unreal Engine packaging requirement and is not specific to the Convai plugin.
@@ -48,6 +48,8 @@ The `PlatformAllowList` in the plugin manifest applies at the module level. The 
 The `ConvaiEditor` module has no `PlatformAllowList` because it only loads in the Unreal Editor, which always runs on Win64. `ConvaiAnimGraph` is declared as `UncookedOnly` and also has no `PlatformAllowList`; the editor includes it, but packaging excludes it from the compiled output.
 
 ## Next steps
+
+With platform dependencies confirmed, check which character rigs are compatible with the plugin.
 
 {% content-ref url="character-rig-support.md" %}
 [Character rig support](character-rig-support.md)

@@ -1,6 +1,6 @@
 ---
 title: Network and API requirements
-description: Required domains, protocols, ports, and minimum firewall rules for the Convai Unreal Engine plugin to connect to Convai services at runtime.
+description: Reference for Convai Unreal Engine plugin connectivity requirements, including required domains, protocols, ports, and firewall rules for runtime operation.
 last_reviewed: "4.0.0-beta.21"
 ---
 
