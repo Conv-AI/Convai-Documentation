@@ -1,6 +1,6 @@
 ---
 title: Convai Unreal Engine plugin
-description: "Add real-time AI characters to Unreal Engine 5 projects — Blueprint-first, with speech, emotion, actions, lip sync, and persistent memory."
+description: "Find installation guides, feature documentation, Blueprint reference, and troubleshooting pages for the Convai Unreal Engine plugin."
 ---
 
 The Convai Unreal Engine plugin connects Unreal Engine 5 projects to Convai, enabling actors in a scene to hold real-time voice and text conversations, express emotions, animate their faces in sync with speech, and respond to player actions. It is Blueprint-first: every feature is accessible from Blueprint graphs without writing C++. The current release is <code class="expression">space.vars.unreal_plugin_version</code>, supporting Unreal Engine <code class="expression">space.vars.unreal_min_version</code> and later on Win64 and Android.
@@ -25,7 +25,7 @@ Each feature is opt-in and builds on the core components.
 
 ### Latest release
 
-See [Release notes](overview/release-notes.md) for the full changelog. The current release is <code class="expression">space.vars.unreal_plugin_version</code>.
+<code class="expression">space.vars.unreal_plugin_version</code> introduces gesture and pointing animations triggered automatically by LLM-issued character actions, `UConvaiObjectComponent` for tagging level actors with live scene properties, gaze-driven attention with silhouette highlight and on-screen cursor, and fuzzy enum matching so minor AI spelling variations no longer drop action parameters. See [Release notes](overview/release-notes.md) for the full changelog.
 
 ### Next steps
 

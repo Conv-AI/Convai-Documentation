@@ -4,178 +4,233 @@ description: Version history and notable changes for the Convai Unreal Engine pl
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Release notes for the Convai Unreal Engine plugin. The current release is <code class="expression">space.vars.unreal_plugin_version</code>. The plugin supports Unreal Engine <code class="expression">space.vars.unreal_min_version</code> and later.
+Track changes to the Convai Unreal Engine plugin across releases. The current release is <code class="expression">space.vars.unreal_plugin_version</code>, supporting Unreal Engine <code class="expression">space.vars.unreal_min_version</code> and later.
 
 {% hint style="info" %}
 This plugin is in beta. Beta releases may include breaking changes between minor versions. Review the notes for each release before upgrading.
 {% endhint %}
 
+{% updates format="full" %}
+{% update date="2026-05-25" tags="4.0.0-beta.21,Current" %}
 ## 4.0.0-beta.21
 
-- Overhauled the bundled MetaHuman animations.
-- Added gesture and pointing animations that are triggered automatically from LLM-issued actions.
-- Added Convai Object Component for tagging actors and exposing their properties as live context to the chatbot.
-- Added gaze-driven attention: the actor under the player's gaze becomes the object in attention, with a silhouette highlight and an on-screen cursor.
-- Added proximity-driven state: object components report when they are reachable from a chatbot's pawn so the bot can react.
-- Added replicated `PointAtTarget` alongside `LookAtTarget` on the chatbot component.
-- Added "Create Convai Action Handler" right-click entry in Blueprint graphs for scaffolding typed action handlers.
-- Added "Setup Convai Pawn Movement" content-browser action that seeds navigation defaults on any pawn Blueprint.
-- Added component and socket targeting plus per-entry movement overrides for actions.
-- Improved action completion: handlers can wait for bot speech to finish before the next action, post a dynamic-context event in the same call, and abort an unrecoverable sequence cleanly.
-- Added fuzzy matching for enum and choice action parameters so minor LLM spelling drift no longer drops the action.
-- Added VAD (voice activity detection) parameters in project settings and the connect request.
-- Added Convai auth caching so subsequent connects don't re-authenticate from scratch.
-- Added `GetBodyAndFaceSkeletalMeshComponents` helper for resolving MetaHuman and CC5 rigs.
-- Improved tail-of-utterance audio handling to reduce clipping on soft trailing consonants.
-- Improved lip-sync stability with a starvation fallback when frames briefly stop arriving.
-- Enabled actions on by default in the chatbot environment.
-- Switched the action wire format to `{name}` braces with more reliable response parsing.
-- Fixed microphone hot-swap so switching device mid-session no longer requires restarting the stream.
-- Fixed Android crash on app shutdown.
-- Fixed several UE 5.0 / 5.4 / 5.5 / 5.7 compilation and compatibility issues so the plugin builds clean across all supported engine versions.
-- Disabled the `ConvaiEditor` module on UE 5.1 and earlier (the property-binding editor feature it relies on isn't available there).
-- Regenerated the gaze-highlight material under UE 5.0 so the asset loads across all supported engine versions.
+**Animation and gestures**
 
+* Overhauled the bundled MetaHuman animations.
+* Added gesture and pointing animations triggered automatically from LLM-issued character actions.
+* Added replicated `PointAtTarget` alongside `LookAtTarget` on the chatbot component.
+
+**Object awareness and gaze**
+
+* Added `UConvaiObjectComponent` for tagging actors and exposing their live properties as context to the chatbot.
+* Added gaze-driven attention: the actor under the player's gaze becomes the object in attention, with a silhouette highlight and an on-screen cursor.
+* Added proximity-driven state: object components report when they are reachable from a chatbot's pawn so the bot can react.
+
+**Actions**
+
+* Added "Create Convai Action Handler" right-click entry in Blueprint graphs for scaffolding typed action handlers.
+* Added "Setup Convai Pawn Movement" content-browser action that seeds navigation defaults on any pawn Blueprint.
+* Added component and socket targeting plus per-entry movement overrides for actions.
+* Improved action completion: handlers can wait for bot speech to finish before the next action, post a dynamic-context event in the same call, and abort an unrecoverable sequence cleanly.
+* Added fuzzy matching for enum and choice action parameters so minor LLM spelling drift no longer drops the action.
+* Switched the action wire format to `{name}` braces with more reliable response parsing.
+* Enabled actions on by default in the chatbot environment.
+
+**Audio and lip sync**
+
+* Added VAD (voice activity detection) parameters in project settings and the connect request.
+* Improved tail-of-utterance audio handling to reduce clipping on soft trailing consonants.
+* Improved lip-sync stability with a starvation fallback when frames briefly stop arriving.
+* Fixed microphone hot-swap so switching device mid-session no longer requires restarting the stream.
+
+**Other improvements**
+
+* Added Convai auth caching so subsequent connects don't re-authenticate from scratch.
+* Added `GetBodyAndFaceSkeletalMeshComponents` helper for resolving MetaHuman and CC5 rigs.
+
+**Bug fixes and compatibility**
+
+* Fixed Android crash on app shutdown.
+* Fixed several UE 5.0 / 5.4 / 5.5 / 5.7 compilation and compatibility issues so the plugin builds clean across all supported engine versions.
+* Disabled the `ConvaiEditor` module on UE 5.1 and earlier (the property-binding editor feature it relies on isn't available there).
+* Regenerated the gaze-highlight material under UE 5.0 so the asset loads across all supported engine versions.
+{% endupdate %}
+
+{% update date="2026-05-01" tags="4.0.0-beta.19" %}
 ## 4.0.0-beta.19
 
-- Actions integration with WebRTC: chatbot now sends `action_config` at `/connect` when `bEnableActions` is on, and parses structured `action-response` payloads (`{name, target?}`) into typed action sequences.
-- Refactored `Environment` from `UConvaiEnvironment` UObject to `FConvaiEnvironmentData` USTRUCT. Granular Add/Remove/Clear methods on the chatbot for Objects, Characters, Actions; debounced `update-scene-metadata` flush; `bFlushImmediately` advanced opt-in for time-critical updates.
-- Split legacy `MainCharacter` into `ConversationPartner` (replicated, scene-aware) and `LookAtTarget` (animation-only). New `bAutoFillConversationPartnerFromPlayer` toggle (defaults on) populates the partner from the first registered Convai Player Component or pawn 0.
-- New `SetObjectInAttention(Entry, Text, ShouldRespond, bFlushImmediately)` rides the dynamic-context flush; auto-registers the entry in `Environment.Objects` if missing.
-- Added `bEnableActions` chatbot toggle. `Environment.Actions` defaults seeded with Move To, Follow, Stop Moving, Wait For.
-- Backward compat: legacy `UConvaiEnvironment` and `UConvaiActionContext` resurrected as deprecated shims so older Blueprint graphs keep compiling with deprecation warnings.
-- **Actions V2 — typed action templates:** `FConvaiAction` with structured `Parameters` (typed via `EConvaiActionParamType`: Auto / Reference / String / Number / Bool / Enum). Optional `Connector` for compound actions, `Choices` for fixed-list constraints, or `EnumType` to draw choices from a `UENUM`.
-- Live two-way editable wire-format preview on `FConvaiAction.RenderedString`.
-- Unified action-result shape: `FConvaiResultAction.Parameters: TMap<FString, FConvaiResultParam>`. Legacy `RelatedObjectOrCharacter` and `ConvaiExtraParams` kept as deprecated mirrors.
-- New Blueprint-pure accessors: `Get First Param`, `Get Param`, `Get Param Type`, `Get Param As String/Number/Bool/Ref/Byte`, `Has Param`.
-- `HandleActionCompletion` gains optional `EventText` and `ShouldRespond`. New `AbortActionSequence(EventText, ShouldRespond)` clears the queue without retrying.
-- Removed the `EnableNewActionSystem` global toggle — the action queue path is now always on.
-- New "Setup Convai Pawn Movement" content-browser action: reparents and tunes movement components on any Actor-derived Blueprint asset.
+* Actions integration with WebRTC: chatbot now sends `action_config` at connect when `bEnableActions` is on, and parses structured action-response payloads into typed action sequences.
+* Refactored `Environment` from `UConvaiEnvironment` UObject to `FConvaiEnvironmentData` USTRUCT. Granular Add/Remove/Clear methods on the chatbot for Objects, Characters, and Actions; debounced scene-metadata flush; `bFlushImmediately` advanced opt-in for time-critical updates.
+* Split legacy `MainCharacter` into `ConversationPartner` (replicated, scene-aware) and `LookAtTarget` (animation-only). New `bAutoFillConversationPartnerFromPlayer` toggle populates the partner from the first registered Convai Player component automatically.
+* New `SetObjectInAttention` rides the dynamic-context flush and auto-registers the entry in `Environment.Objects` if missing.
+* Added `bEnableActions` chatbot toggle. `Environment.Actions` seeded by default with Move To, Follow, Stop Moving, and Wait For.
+* Actions V2 — typed action templates: `FConvaiAction` with structured `Parameters` typed via `EConvaiActionParamType`. Optional `Connector` for compound actions, `Choices` for fixed-list constraints, or `EnumType` to draw choices from a `UENUM`.
+* Unified action-result shape: `FConvaiResultAction.Parameters` as `TMap<FString, FConvaiResultParam>`. Legacy `RelatedObjectOrCharacter` and `ConvaiExtraParams` kept as deprecated mirrors.
+* New Blueprint-pure accessors: `Get First Param`, `Get Param`, `Get Param Type`, `Get Param As String/Number/Bool/Ref/Byte`, `Has Param`.
+* `HandleActionCompletion` gains optional `EventText` and `ShouldRespond`. New `AbortActionSequence` clears the queue without retrying.
+* Removed the `EnableNewActionSystem` global toggle — the action queue path is now always on.
+* Backward compatibility: legacy `UConvaiEnvironment` and `UConvaiActionContext` resurrected as deprecated shims so older Blueprint graphs keep compiling with deprecation warnings.
+{% endupdate %}
 
+{% update date="2026-04-24" tags="4.0.0-beta.18" %}
 ## 4.0.0-beta.18
 
-- Added Android packaging support.
-- Added dynamic context batching and logging for chatbot interactions to reduce redundant updates.
-- Added starvation blending and playable frame checks for improved lip sync stability.
-- Added command-line overrides for lip sync animation parameters and simulation freeze functionality.
-- Added custom parameter handling and client version retrieval to `ConvaiUtils`.
-- Added reset idle timer and user idle warning support.
-- Enhanced component resolution in FaceSync Animation Node to include parent actor when searching for `UConvaiChatbotComponent`.
-- Renamed `RunLLM` parameter to `ShouldRespond` for improved API clarity in context update methods.
-- Updated `LipSyncTimeOffset` to 200 ms for better audio/animation alignment.
-- Updated `ContextAggregationDelay` from 0.3 s to 0.5 s for improved dynamic context handling.
-- Refactored narrative trigger handling to streamline context processing.
+* Added Android packaging support.
+* Added dynamic context batching and logging for chatbot interactions to reduce redundant updates.
+* Added starvation blending and playable frame checks for improved lip sync stability.
+* Added command-line overrides for lip sync animation parameters and simulation freeze functionality.
+* Added custom parameter handling and client version retrieval to `ConvaiUtils`.
+* Added reset idle timer and user idle warning support.
+* Enhanced component resolution in the FaceSync Animation Node to include the parent actor when searching for `UConvaiChatbotComponent`.
+* Renamed `RunLLM` parameter to `ShouldRespond` for improved API clarity in context update methods.
+* Updated `LipSyncTimeOffset` to 200 ms for better audio/animation alignment.
+* Updated `ContextAggregationDelay` from 0.3 s to 0.5 s for improved dynamic context handling.
+* Refactored narrative trigger handling to streamline context processing.
+{% endupdate %}
 
+{% update date="2026-04-13" tags="4.0.0-beta.17" %}
 ## 4.0.0-beta.17
 
-- Optimized lip sync computational performance in MetaHuman Face Animation Blueprint.
-- Improved audio playback time estimation and removed deprecated `FSoundSource` caching.
-- Enhanced audio finish detection with tolerance to avoid floating-point rounding edge cases.
-- Added performance timing statistics for audio streamer and face sync components in debug mode.
-- Added detailed audio playback debug logging.
-- Improved audio capture cleanup to ensure safe resource release during component destruction and end play.
-- Fixed potential dangling references in async tasks by switching to weak pointers.
-- Fixed re-entrant callbacks during Convai client disconnection.
-- Fixed crash caused by cross-object delegate cleanup in `BeginDestroy` for chatbot and player components.
-- Fixed player transcriptions not being appended properly.
-- Added emotions provider plumbing.
-- Fixed `ConvaiConnectionConfig` struct layout mismatch with DLLs.
+* Optimized lip sync computational performance in MetaHuman Face Animation Blueprint.
+* Improved audio playback time estimation and removed deprecated `FSoundSource` caching.
+* Enhanced audio finish detection with tolerance to avoid floating-point rounding edge cases.
+* Added performance timing statistics for audio streamer and face sync components in debug mode.
+* Added detailed audio playback debug logging.
+* Improved audio capture cleanup to ensure safe resource release during component destruction and end play.
+* Fixed potential dangling references in async tasks by switching to weak pointers.
+* Fixed re-entrant callbacks during Convai client disconnection.
+* Fixed crash caused by cross-object delegate cleanup in `BeginDestroy` for chatbot and player components.
+* Fixed player transcriptions not being appended properly.
+* Added emotions provider plumbing.
+* Fixed `ConvaiConnectionConfig` struct layout mismatch with DLLs.
+{% endupdate %}
 
+{% update date="2026-04-09" tags="4.0.0-beta.16" %}
 ## 4.0.0-beta.16
 
-- Support Android.
+* Added Android support.
+{% endupdate %}
 
+{% update date="2026-04-05" tags="4.0.0-beta.15" %}
 ## 4.0.0-beta.15
 
-- Fixed lip sync slow receival.
+* Fixed lip sync slow receival.
+{% endupdate %}
 
+{% update date="2026-03-31" tags="4.0.0-beta.14" %}
 ## 4.0.0-beta.14
 
-- Added Update Context functionality.
-- Updated `OutputFPS` to 60 for improved lip sync output.
-- Improved lip sync audio handling and cleaned up unused variables.
-- Improved audio playback time calculation accuracy and simplified play voice data flow.
+* Added Update Context functionality.
+* Updated `OutputFPS` to 60 for improved lip sync output.
+* Improved lip sync audio handling and cleaned up unused variables.
+* Improved audio playback time calculation accuracy and simplified play voice data flow.
+{% endupdate %}
 
+{% update date="2026-03-16" tags="4.0.0-beta.13" %}
 ## 4.0.0-beta.13
 
-- Added connection indicator UI widget.
-- Fixed attendee disconnect state notification handling.
-- Fixed editor UI to show changelog only for installed plugin version.
-- Improved connection manager reliability and state handling.
-- Fixed audio not being sent when connection is in orphan state.
-- Improved server event dispatching.
-- Enhanced logging for better debugging.
+* Added connection indicator UI widget.
+* Fixed attendee disconnect state notification handling.
+* Fixed editor UI to show changelog only for installed plugin version.
+* Improved connection manager reliability and state handling.
+* Fixed audio not being sent when connection is in orphan state.
+* Improved server event dispatching.
+* Enhanced logging for better debugging.
+{% endupdate %}
 
+{% update date="2026-03-09" tags="4.0.0-beta.12" %}
 ## 4.0.0-beta.12
 
-- Deprecated old `ConvaiBaseCharacter` and `ConvaiBasePlayer` Blueprint classes.
-- Added connection indicator widget to show the connection state.
-- Added LLM start/stop events (`OnLLMStarted`, `OnLLMStopped`) to `ConvaiChatbotComponent`.
-- Added emotions support.
-- Added toggle STT functionality.
-- Improved lip sync at the end of response.
-- Fixed lip sync desync corner case due to taking frames from previous response.
-- Fixed PIE crash when recording audio at the same time as starting a new connection.
-- Fixed minimum buffer duration updated to 0.2 seconds.
+* Deprecated old `ConvaiBaseCharacter` and `ConvaiBasePlayer` Blueprint classes.
+* Added connection indicator widget to show the connection state.
+* Added LLM start/stop events (`OnLLMStarted`, `OnLLMStopped`) to `ConvaiChatbotComponent`.
+* Added emotions support.
+* Added toggle STT functionality.
+* Improved lip sync at the end of response.
+* Fixed lip sync desync corner case due to taking frames from previous response.
+* Fixed PIE crash when recording audio at the same time as starting a new connection.
+* Fixed minimum buffer duration updated to 0.2 seconds.
+{% endupdate %}
 
+{% update date="2026-02-19" tags="4.0.0-beta.11" %}
 ## 4.0.0-beta.11
 
-- Improved compatibility with CC5 Reallusion characters.
+* Improved compatibility with CC5 Reallusion characters.
+{% endupdate %}
 
+{% update date="2026-02-11" tags="4.0.0-beta.10" %}
 ## 4.0.0-beta.10
 
-- Fixed DLL loading issue.
-- Fixed crash in the Convai Dashboard.
-- Added support for Blueprint-only projects.
+* Fixed DLL loading issue.
+* Fixed crash in the Convai Dashboard.
+* Added support for Blueprint-only projects.
+{% endupdate %}
 
+{% update date="2026-02-10" tags="4.0.0-beta.9" %}
 ## 4.0.0-beta.9
 
-- Improved character interrupt handling.
-- Improved lip sync accuracy.
-- Added connection state functions to `ConvaiSubsystem` and `ConvaiChatbotComponent`.
+* Improved character interrupt handling.
+* Improved lip sync accuracy.
+* Added connection state functions to `ConvaiSubsystem` and `ConvaiChatbotComponent`.
+{% endupdate %}
 
+{% update date="2026-01-15" tags="4.0.0-beta.7" %}
 ## 4.0.0-beta.7
 
-- Fixed corruption of some transcription characters.
+* Fixed corruption of some transcription characters.
+{% endupdate %}
 
+{% update date="2026-01-05" tags="4.0.0-beta.6" %}
 ## 4.0.0-beta.6
 
-- Added ARKit blendshapes lip sync support.
-- Updated default `LipSyncMode` to `BS_MHA` (MetaHuman) in `ConvaiFaceSyncComponent`.
-- Added `RequiresPrecomputedFaceData` method to `ConvaiConnectionInterface`.
-- Fixed blendshape selection logic to use ARKit names conditionally.
+* Added ARKit blendshapes lip sync support.
+* Updated default `LipSyncMode` to `BS_MHA` (MetaHuman) in `ConvaiFaceSyncComponent`.
+* Added `RequiresPrecomputedFaceData` method to `ConvaiConnectionInterface`.
+* Fixed blendshape selection logic to use ARKit names conditionally.
+{% endupdate %}
 
+{% update date="2025-12-20" tags="4.0.0-beta.5" %}
 ## 4.0.0-beta.5
 
-- Updated `BlendShapesNames` to new naming convention for ARKit.
+* Updated `BlendShapesNames` to new naming convention for ARKit.
+{% endupdate %}
 
+{% update date="2025-12-05" tags="4.0.0-beta.4" %}
 ## 4.0.0-beta.4
 
-- Implemented bulk neurosync blendshape handling with stats logging.
-- Added audio frame tracking and improved voice handling in `ConvaiAudioStreamer` and `ConvaiChatbotComponent`.
-- Added end user ID functionality and device unique ID support.
-- Fixed voice playback overlap by stopping voice when audio starts.
-- Added MetaHuman control names support.
-- Fixed editor freezing issues.
-- Fixed Linux library linking issues.
-- Vision optimization improvements.
+* Implemented bulk neurosync blendshape handling with stats logging.
+* Added audio frame tracking and improved voice handling in `ConvaiAudioStreamer` and `ConvaiChatbotComponent`.
+* Added end user ID functionality and device unique ID support.
+* Fixed voice playback overlap by stopping voice when audio starts.
+* Added MetaHuman control names support.
+* Fixed editor freezing issues.
+* Fixed Linux library linking issues.
+* Vision optimization improvements.
+{% endupdate %}
 
+{% update date="2025-11-20" tags="4.0.0-beta.3" %}
 ## 4.0.0-beta.3
 
-- Added UE 5.7 support.
-- Added Blueprint-only project support.
+* Added UE 5.7 support.
+* Added Blueprint-only project support.
+{% endupdate %}
 
+{% update date="2025-11-05" tags="4.0.0-beta.2" %}
 ## 4.0.0-beta.2
 
-- Added editor login screen and dashboard.
-- Added better echo and noise cancellation.
-- Added initial viseme-based lip sync support using the FaceSync component.
-- Added gamma correction to vision.
-- Fixed the F10 Settings menu.
+* Added editor login screen and dashboard.
+* Added better echo and noise cancellation.
+* Added initial viseme-based lip sync support using the FaceSync component.
+* Added gamma correction to vision.
+* Fixed the F10 Settings menu.
+{% endupdate %}
 
+{% update date="2025-10-20" tags="4.0.0-beta.1" %}
 ## 4.0.0-beta.1
 
-- Initial WebRTC integration.
+* Initial WebRTC integration.
+{% endupdate %}
+{% endupdates %}
 
 ---
 
@@ -346,6 +401,6 @@ Deprecated:
 
 ## Next steps
 
-{% content-ref url="README.md" %}
-[Convai Unreal Engine plugin](README.md)
+{% content-ref url="../getting-started/" %}
+[Getting started](../getting-started/)
 {% endcontent-ref %}

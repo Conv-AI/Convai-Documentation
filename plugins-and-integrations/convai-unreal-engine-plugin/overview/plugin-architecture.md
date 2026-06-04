@@ -1,6 +1,6 @@
 ---
 title: Plugin architecture
-description: Understand the Convai Unreal Engine plugin's four modules and how its runtime components—Chatbot, Player, Object, Face Sync, and Subsystem—relate to each other.
+description: Understand the Convai Unreal Engine plugin's four modules and five runtime components, and how they interact during a conversation.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -23,11 +23,11 @@ The `Convai` module loads at `PreDefault` phase so it is available before gamepl
 
 Five components form the Blueprint-facing surface of the plugin's runtime. They attach to Actors like any native Unreal component.
 
-### `UConvaiChatbotComponent` (display name: Convai Chatbot)
-
 {% hint style="info" %}
-"Display name" is the label shown in the **Add Component** panel inside the Unreal Editor. Use it to find each component by name when adding components to a Blueprint.
+Each component's **display name** is the label shown in the **Add Component** panel inside the Unreal Editor. Use the display name to find each component when adding it to a Blueprint Actor.
 {% endhint %}
+
+### `UConvaiChatbotComponent` (display name: Convai Chatbot)
 
 The central component for an AI character. It holds the character ID, session state, environment contract (actions, objects, scene characters), dynamic context, emotion state, and the action queue. One instance per AI character Actor.
 
@@ -87,12 +87,16 @@ The plugin declares the following engine plugin dependencies in `ConvAI.uplugin`
 | `EditorScriptingUtilities` | Yes | Editor automation helpers used by `ConvaiEditor` (editor only) |
 | `PropertyAccessEditor` | Yes | Property-binding editor feature used by `ConvaiEditor` (editor only) |
 
-## Related pages
+## Next steps
 
-{% content-ref url="what-is-the-convai-unreal-plugin.md" %}
-[What is the Convai Unreal Engine plugin](what-is-the-convai-unreal-plugin.md)
+{% content-ref url="../getting-started/" %}
+[Getting started](../getting-started/)
 {% endcontent-ref %}
 
 {% content-ref url="feature-map.md" %}
 [Feature map](feature-map.md)
+{% endcontent-ref %}
+
+{% content-ref url="what-is-the-convai-unreal-plugin.md" %}
+[What is the Convai Unreal Engine plugin](what-is-the-convai-unreal-plugin.md)
 {% endcontent-ref %}

@@ -3,7 +3,7 @@ title: Convai Unreal Engine plugin overview
 description: Understand what the Convai Unreal Engine plugin is, how its modules are structured, and what changed in each beta release.
 ---
 
-The Convai Unreal Engine plugin adds AI-driven character conversation, animation, and scene-awareness to Unreal Engine 5 projects. It is Blueprint-first and targets game, simulation, and interactive experience teams who want to integrate Convai characters without writing C++.
+The pages in this section cover what the Convai Unreal Engine plugin is, how its four modules and five runtime components are structured, and what changed in each release.
 
 ## In this section
 

@@ -1,104 +1,67 @@
 ---
 title: Feature map
-description: One-screen overview of every major feature in the Convai Unreal Engine plugin, with links to each feature's documentation.
+description: Find the right Convai Unreal Engine plugin feature, guide, or reference page for any development goal, indexed by use case.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The table below lists every major feature in the Convai Unreal Engine plugin, the primary component or module it lives in, and a link to its feature documentation. Use this page to find the right starting point before diving into guides or reference material.
+Use this page to find the right Convai Unreal Engine plugin feature, getting started guide, or reference page for any development goal.
 
-## Feature index
+## Getting started
 
-| Feature | Primary component | Description |
+| I want to... | Guide | Documentation |
 |---|---|---|
-| [Lip sync](#lip-sync) | `UConvaiFaceSyncComponent` | Drives mouth and facial blendshapes from the character's response audio in real time. |
-| [Emotions](#emotions) | `UConvaiChatbotComponent` | Convai infers emotion state from the conversation and drives blendshape expressions on the character. |
-| [Actions](#actions) | `UConvaiChatbotComponent` | The character issues typed action commands (Move To, Follow, custom) that Blueprint handlers execute. |
-| [Scene objects](#scene-objects) | `UConvaiObjectComponent` | Tags level actors so the character is aware of them and can reference or act on them. |
-| [Gaze attention](#gaze-attention) | `UConvaiPlayerComponent` | Tracks which object the player is looking at and routes that context to the active chatbot. |
-| [Dynamic context](#dynamic-context) | `UConvaiChatbotComponent` | Pushes live world state (key/value pairs, freeform events) to the character's context window at runtime. |
-| [Narrative design](#narrative-design) | `UConvaiChatbotComponent` | Triggers scripted conversation branches and Behavior Tree sections by name, with optional template keys. |
-| [Long-term memory](#long-term-memory) | `UConvaiChatbotComponent` | Persists conversation history across sessions using an end-user ID so the character remembers past interactions. |
-| [Vision](#vision) | `ConvaiVisionBase` module | Streams camera frames to Convai so the character can describe or react to what the player sees. |
-| [Multiplayer](#multiplayer) | `UConvaiSubsystem` | Replicates conversation events, voice, and animation across networked clients. |
+| Check what I need before installing the plugin | Prerequisites | [Prerequisites](../getting-started/prerequisites.md) |
+| Install the plugin into my Unreal project | Installation | [Installation](../getting-started/installation.md) |
+| Configure my Convai API key | API key setup | [Configure API key](../getting-started/configure-api-key.md) |
+| Add my first AI character to a scene | Scene setup | [Add your first character](../getting-started/add-your-first-character.md) |
+| Run a sample project to see the plugin working | Sample scenes | [Import and run sample scenes](../getting-started/import-and-run-sample-scenes.md) |
+| Understand what each component in the scene does | Component reference | [Scene components](../getting-started/scene-components.md) |
+| Configure microphone input and platform permissions | Microphone | [Configure microphone](../getting-started/configure-microphone.md) |
+| Choose between push-to-talk and hands-free input | Input mode | [Configure conversation input](../getting-started/configure-conversation-input.md) |
+| Set up a MetaHuman character with the plugin | MetaHuman | [Set up a MetaHuman character](../getting-started/set-up-a-metahuman-character.md) |
+| Set up a Reallusion character with the plugin | Reallusion | [Set up a Reallusion character](../getting-started/set-up-a-reallusion-character.md) |
+| Verify my scene is configured correctly before shipping | Validation | [Validate your setup](../getting-started/validate-your-setup.md) |
 
-## Lip sync
+## Features
 
-`UConvaiFaceSyncComponent` receives precomputed `FAnimationSequence` data from the chatbot component, interpolates blendshape frames against the character's skeletal mesh, and exposes the result to an Animation Blueprint through the `ConvaiAnimGraph` node. ARKit blendshape naming is supported for MetaHuman and compatible CC5 rigs.
+| I want to... | Feature | Documentation |
+|---|---|---|
+| Add real-time lip sync driven by character speech | Lip sync | [Lip sync](../features/lip-sync/) |
+| Show facial emotion on my character driven by the AI response | Emotion | [Emotion](../features/emotion/) |
+| Let my character execute in-scene commands (Move To, Follow, custom) | Character actions | [Character actions](../features/character-actions/) |
+| Tag level actors so characters are aware of and can act on them | Scene metadata | [Scene metadata](../features/scene-metadata/) |
+| Route the object under the player's gaze as context to the active character | Gaze attention | [Gaze attention](../features/gaze-attention/) |
+| Push live world state and events into character knowledge at runtime | Dynamic context | [Dynamic context](../features/dynamic-context/) |
+| Trigger scripted conversation branches and sections by name from Blueprint | Narrative design | [Narrative design](../features/narrative-design/) |
+| Make characters remember each player across sessions | Long-term memory | [Long-term memory](../features/long-term-memory/) |
+| Stream camera frames so characters can see and describe the scene | Vision | [Vision](../features/vision/) |
 
-{% content-ref url="../features/lip-sync.md" %}
-[Lip sync](../features/lip-sync.md)
-{% endcontent-ref %}
+## Reference
 
-## Emotions
+| I want to... | Reference | Documentation |
+|---|---|---|
+| Browse all Blueprint properties, functions, and events for the plugin | Blueprint reference | [Blueprint reference](../blueprint-reference/) |
+| Look up the Chatbot component Blueprint surface | Chatbot component | [Convai Chatbot component](../blueprint-reference/convai-chatbot-component.md) |
+| Look up the Player component Blueprint surface | Player component | [Convai Player component](../blueprint-reference/convai-player-component.md) |
+| Look up microphone and audio capture functions | Audio functions | [Microphone and audio capture](../blueprint-reference/microphone-and-audio-capture.md) |
+| Look up utility Blueprint functions | Utility functions | [Utility functions](../blueprint-reference/utility-functions.md) |
+| Sign in, browse sample content, or export logs from the editor | Editor window | [The Convai editor window](../editor-window/) |
+| Check which Unreal Engine versions are supported | Engine versions | [Unreal Engine versions](../compatibility-and-requirements/unreal-engine-versions.md) |
+| Check which platforms are supported for packaging | Platform support | [Platform support matrix](../compatibility-and-requirements/platform-support-matrix.md) |
+| Check which character rigs are compatible (MetaHuman, Reallusion) | Rig support | [Character rig support](../compatibility-and-requirements/character-rig-support.md) |
 
-When a character responds, Convai infers an emotion state and returns blendshape weights alongside the audio. `UConvaiChatbotComponent` stores the current `FConvaiEmotionState` and fires `OnEmotionStateChangedEvent` when it changes. Blueprint can also call `ForceSetEmotion` to drive expressions programmatically, and `GetEmotionScore` to read per-emotion weights.
+## Troubleshooting
 
-{% content-ref url="../features/emotions.md" %}
-[Emotions](../features/emotions.md)
-{% endcontent-ref %}
+| I want to... | Topic | Documentation |
+|---|---|---|
+| Fix connection or API key errors | Connection issues | [Connection and API key issues](../troubleshooting/connection-and-api-key-issues.md) |
+| Fix audio or microphone problems | Audio issues | [Audio and microphone issues](../troubleshooting/audio-and-microphone-issues.md) |
+| Fix lip sync or facial animation problems | Animation issues | [Lip sync and animation issues](../troubleshooting/lip-sync-and-animation-issues.md) |
+| Fix plugin installation or build errors | Installation issues | [Installation and plugin issues](../troubleshooting/installation-and-plugin-issues.md) |
+| Export diagnostic logs or configure logging | Diagnostics | [Diagnostics and log export](../troubleshooting/diagnostics-and-log-export.md) |
 
-## Actions
+## Next steps
 
-`UConvaiChatbotComponent` carries an `EnvironmentData` (`FConvaiEnvironmentData`) struct that defines the set of actions the character can issue, the objects it can act on, and the characters in the scene. When the character decides to act, Convai returns a typed action sequence. The component routes each action to the matching Blueprint function on the owning Actor by name, queues remaining actions, and expects the handler to call `HandleActionCompletion` when done.
-
-Default actions (Move To, Follow, Stop Moving, Wait For) are seeded automatically. Custom actions with typed parameters — `string`, `number`, `bool`, `enum`, or object reference — are declared as `FConvaiAction` entries on the component.
-
-{% content-ref url="../features/actions.md" %}
-[Actions](../features/actions.md)
-{% endcontent-ref %}
-
-## Scene objects
-
-`UConvaiObjectComponent` tags an Actor as a named scene object. The subsystem polls tracked properties on a shared clock and coalesces changes into batched `update-scene-metadata` messages sent to the active chatbot. A chatbot's `EnvironmentData.Objects` list determines which objects are part of the action contract at connect time.
-
-{% content-ref url="../features/scene-objects.md" %}
-[Scene objects](../features/scene-objects.md)
-{% endcontent-ref %}
-
-## Gaze attention
-
-`UConvaiPlayerComponent` continuously evaluates which `UConvaiObjectComponent` actor the player's camera is aimed at. When the gaze dwells past a configurable threshold, it calls `TrySetObjectInAttentionFromGaze` on the active chatbot, which folds the attention object into the next context update. A silhouette highlight and on-screen cursor provide visual feedback.
-
-{% content-ref url="../features/gaze-attention.md" %}
-[Gaze attention](../features/gaze-attention.md)
-{% endcontent-ref %}
-
-## Dynamic context
-
-`UConvaiChatbotComponent` exposes a structured dynamic context API: `SetContextState` and `SetContextStates` manage key/value world-state pairs; `AddContextEvent` appends freeform chronological events. Changes are batched within a debounce window (default 0.5 s, capped at 3 s) before being flushed to Convai as a single `context-update` message. `DynamicEnvironmentInfo` is a simpler string property for less structured use cases.
-
-{% content-ref url="../features/dynamic-context.md" %}
-[Dynamic context](../features/dynamic-context.md)
-{% endcontent-ref %}
-
-## Narrative design
-
-`InvokeNarrativeDesignTrigger` fires a named narrative section defined in the Convai dashboard, optionally generating actions at the same time. `NarrativeTemplateKeys` (a `TMap<FString, FString>` on the chatbot component) substitutes variables into the narrative section text at runtime. `OnNarrativeSectionReceivedEvent` fires when a section completes.
-
-{% content-ref url="../features/narrative-design.md" %}
-[Narrative design](../features/narrative-design.md)
-{% endcontent-ref %}
-
-## Long-term memory
-
-Set `EndUserID` on `UConvaiChatbotComponent` to a stable identifier for the human player. Convai uses this ID to retrieve and store conversation history across sessions, so the character can reference past interactions. `EndUserMetadata` accepts a JSON string for additional player context.
-
-{% content-ref url="../features/long-term-memory.md" %}
-[Long-term memory](../features/long-term-memory.md)
-{% endcontent-ref %}
-
-## Vision
-
-The `ConvaiVisionBase` module captures frames from the player's camera and streams them to Convai over the WebRTC session. The character can describe the scene, identify objects, or react to what is visible. Vision is enabled per-chatbot by setting the appropriate flag on `UConvaiChatbotComponent`.
-
-{% content-ref url="../features/vision.md" %}
-[Vision](../features/vision.md)
-{% endcontent-ref %}
-
-## Multiplayer
-
-The plugin supports networked multiplayer through Unreal's replication system. `UConvaiChatbotComponent` replicates `CharacterID`, `CharacterName`, `EmotionState`, `LookAtTarget`, `PointAtTarget`, and environment data. Voice and animation events broadcast over `NetMulticast`. `UConvaiSubsystem` maintains per-session state so multiple clients can hold simultaneous conversations with different characters.
-
-{% content-ref url="../features/multiplayer.md" %}
-[Multiplayer](../features/multiplayer.md)
+{% content-ref url="../getting-started/" %}
+[Getting started](../getting-started/)
 {% endcontent-ref %}
