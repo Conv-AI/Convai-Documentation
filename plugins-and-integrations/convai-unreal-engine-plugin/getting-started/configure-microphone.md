@@ -4,64 +4,64 @@ description: Select a capture device, adjust volume, and handle Android micropho
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The `UConvaiPlayerComponent` captures microphone audio through `UConvaiAudioCaptureComponent`. By default it uses the system's default capture device. Use the Blueprint functions on `UConvaiPlayerComponent` to enumerate, select, and adjust the capture device at runtime.
+`UConvaiPlayerComponent` captures microphone audio through `UConvaiAudioCaptureComponent`. By default it opens the system's default capture device at initialization. Use the Blueprint functions on `UConvaiPlayerComponent` to enumerate, select, and adjust the capture device at runtime.
 
 ## Default behavior
 
-When `UConvaiPlayerComponent` initializes, it opens the system's default microphone. No configuration is required for this path. If the default device works for your project, no additional steps are needed.
+When `UConvaiPlayerComponent` initializes, it opens the system's default microphone automatically. No additional configuration is required for this path. If the default device works for your project, skip to [Configure conversation input](configure-conversation-input.md).
 
 ## Enumerate available devices
 
-Call these Blueprint functions on a `UConvaiPlayerComponent` reference to list what is available:
+Call these Blueprint functions on a `UConvaiPlayerComponent` reference to list available input devices:
 
 | Function | Returns | Notes |
 |---|---|---|
-| `GetAvailableCaptureDeviceNames()` | `TArray<FString>` | Names of all available input devices |
-| `GetAvailableCaptureDeviceDetails()` | `TArray<FCaptureDeviceInfoBP>` | Full details: name, device index, long ID, channel count, sample rate, AEC support |
-| `GetDefaultCaptureDeviceInfo(OutInfo)` | `bool` | Fills `OutInfo` with the default device details |
-| `GetCaptureDeviceInfo(OutInfo, DeviceIndex)` | `bool` | Fills `OutInfo` for the device at `DeviceIndex` |
-| `GetActiveCaptureDevice(OutInfo)` | void | Fills `OutInfo` with the currently active device |
+| `GetAvailableCaptureDeviceNames()` | `TArray<FString>` | Names of all available input devices. |
+| `GetAvailableCaptureDeviceDetails()` | `TArray<FCaptureDeviceInfoBP>` | Full details: name, index, long ID, channel count, sample rate, AEC support. |
+| `GetDefaultCaptureDeviceInfo(OutInfo)` | `bool` | Fills `OutInfo` with the default device details. |
+| `GetCaptureDeviceInfo(OutInfo, DeviceIndex)` | `bool` | Fills `OutInfo` for the device at `DeviceIndex`. |
+| `GetActiveCaptureDevice(OutInfo)` | `void` | Fills `OutInfo` with the currently active device. |
 
 The `FCaptureDeviceInfoBP` struct exposes these fields:
 
 | Field | Type | Description |
 |---|---|---|
-| `DeviceName` | `FString` | Human-readable device name |
-| `DeviceIndex` | `int` | Index used for selection |
-| `LongDeviceId` | `FString` | Platform-specific device identifier |
-| `InputChannels` | `int` | Number of input channels |
-| `PreferredSampleRate` | `int` | Device's preferred sample rate |
-| `bSupportsHardwareAEC` | `bool` | Whether the device supports hardware echo cancellation |
+| `DeviceName` | `FString` | Human-readable device name. |
+| `DeviceIndex` | `int` | Index used for selection. |
+| `LongDeviceId` | `FString` | Platform-specific device identifier. |
+| `InputChannels` | `int` | Number of input channels. |
+| `PreferredSampleRate` | `int` | Device's preferred sample rate. |
+| `bSupportsHardwareAEC` | `bool` | Whether the device supports hardware echo cancellation. |
 
 ## Select a capture device
 
 To switch from the default device, call one of these functions on `UConvaiPlayerComponent`:
 
-| Function | Selects by |
-|---|---|
-| `SetCaptureDeviceByIndex(DeviceIndex)` | Device index from the enumeration list |
-| `SetCaptureDeviceByName(DeviceName)` | Device name string |
+| Function | Selects by | Returns |
+|---|---|---|
+| `SetCaptureDeviceByIndex(DeviceIndex)` | Device index from the enumeration list. | `bool` — `true` if the switch succeeded. |
+| `SetCaptureDeviceByName(DeviceName)` | Device name string. | `bool` — `true` if the switch succeeded. |
 
-Both functions return `bool` — `true` if the switch succeeded. Call them before or during gameplay. A common pattern is to build a settings menu that lists `GetAvailableCaptureDeviceNames()` and calls `SetCaptureDeviceByIndex()` when the player picks a device.
+Call either function before or during gameplay. A common pattern is to build a settings menu that lists `GetAvailableCaptureDeviceNames()` and calls `SetCaptureDeviceByIndex()` when the player picks a device.
 
 ## Adjust the microphone volume
 
-```text
-SetMicrophoneVolumeMultiplier(InVolumeMultiplier, Success)
-GetMicrophoneVolumeMultiplier(OutVolumeMultiplier, Success)
-```
+| Function | Parameters | Returns | Description |
+|---|---|---|---|
+| `SetMicrophoneVolumeMultiplier` | `InVolumeMultiplier` (`float`), `Success` (`bool&`) | `void` | Scales the captured audio signal. `1.0` is the default (no change); values above `1.0` amplify, values below attenuate. |
+| `GetMicrophoneVolumeMultiplier` | `OutVolumeMultiplier` (`float&`), `Success` (`bool&`) | `void` | Returns the current volume multiplier. |
 
-`InVolumeMultiplier` scales the captured audio signal. A value of `1.0` is the default (no change). Values above `1.0` amplify the input; values below `1.0` attenuate it. Use this if the character consistently mishears quiet speakers or if your microphone has low gain.
+Use `SetMicrophoneVolumeMultiplier` if the character consistently mishears quiet speakers or if your microphone has low gain.
 
 ## Android microphone permission
 
-On Android, the operating system requires an explicit runtime permission grant before audio capture can start. The Convai plugin depends on the `AndroidPermission` engine plugin (bundled and enabled automatically) to request this permission.
+On Android, the operating system requires an explicit runtime permission grant before audio capture can start. The Convai plugin depends on the `AndroidPermission` engine plugin — bundled and enabled automatically — to request this permission.
 
 {% hint style="warning" %}
-Without the microphone permission on Android, `UConvaiPlayerComponent` will initialize but audio capture will silently fail — the character will not receive any speech input.
+Without the microphone permission on Android, `UConvaiPlayerComponent` will initialize but audio capture will silently fail. The character will not receive any speech input.
 {% endhint %}
 
-To request the permission at runtime from Blueprint, use the **Android Permission** nodes provided by the engine's `AndroidPermission` plugin. Request `android.permission.RECORD_AUDIO` at the point in your application flow where the player is about to start a conversation (for example, when the player character enters a conversation zone).
+To request the permission from Blueprint, use the **Android Permission** nodes provided by the `AndroidPermission` engine plugin. Request `android.permission.RECORD_AUDIO` at the point in your application where the player is about to start a conversation — for example, when the player character enters a conversation zone.
 
 The standard pattern:
 
@@ -93,5 +93,10 @@ The standard pattern:
 
 ## Next steps
 
-- [Configure conversation input](configure-conversation-input.md) — set push-to-talk or hands-free mode.
-- [Validate your setup](validate-your-setup.md) — verify the full pipeline is working.
+{% content-ref url="configure-character-audio.md" %}
+[Configure character audio](configure-character-audio.md)
+{% endcontent-ref %}
+
+{% content-ref url="configure-conversation-input.md" %}
+[Configure conversation input](configure-conversation-input.md)
+{% endcontent-ref %}

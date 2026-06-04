@@ -1,6 +1,6 @@
 ---
 title: Set up a MetaHuman character
-description: Add Convai Chatbot and Face Sync components to a MetaHuman, assign the Convai animation classes, and configure lip sync mode for MetaHuman blendshapes.
+description: Add Convai Chatbot and Face Sync components to a MetaHuman, assign the Convai animation classes, and configure lip sync for MetaHuman blendshapes.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -8,7 +8,7 @@ This guide walks through connecting a MetaHuman to the Convai Unreal Engine plug
 
 ## Prerequisites
 
-- The Convai plugin is installed and your API key is configured (see [Install the Convai plugin](installation.md) and [Configure your API key](configure-api-key.md)).
+- The Convai plugin is installed and your API key is configured — see [Install the Convai plugin](installation.md) and [Configure your API key](configure-api-key.md).
 - Unreal Engine and the **MetaHuman** plugin are available in your project.
 - You have a Convai character ID from the dashboard.
 
@@ -16,19 +16,19 @@ This guide walks through connecting a MetaHuman to the Convai Unreal Engine plug
 
 {% stepper %}
 {% step %}
-### Open Quixel Bridge
+#### Open Quixel Bridge
 
 In the Unreal Editor menu bar, select **Window > Quixel Bridge**. In the bridge panel, navigate to the **MetaHuman** section.
 {% endstep %}
 
 {% step %}
-### Export a MetaHuman to your project
+#### Export a MetaHuman to your project
 
 Select the MetaHuman you want to use and click to export it to your project. The first export may take a few minutes while textures and assets download. When the export completes, a `MetaHumans` folder appears in the **Content Browser**.
 {% endstep %}
 
 {% step %}
-### Open the MetaHuman Blueprint
+#### Open the MetaHuman Blueprint
 
 In the **Content Browser**, open the `MetaHumans` folder, find your MetaHuman, and double-click the Blueprint (`.uasset`) file. If Unreal Engine prompts you to enable missing plugins required by the MetaHuman, click **Yes** and restart the editor. After restart, reopen the MetaHuman Blueprint.
 {% endstep %}
@@ -38,7 +38,7 @@ In the **Content Browser**, open the `MetaHumans` folder, find your MetaHuman, a
 
 {% stepper %}
 {% step %}
-### Add the Convai Chatbot component
+#### Add the Convai Chatbot component
 
 In the Blueprint editor for your MetaHuman, click **Add** in the **Components** panel. Search for `BP Convai ChatBot Component` and select it.
 
@@ -46,13 +46,11 @@ In the **Details** panel for the component, paste your **Character ID** from the
 {% endstep %}
 
 {% step %}
-### Add the Convai Face Sync component
+#### Add the Convai Face Sync component
 
 Click **Add** again in the **Components** panel. Search for `Convai Face Sync` and add `UConvaiFaceSyncComponent`.
 
 In the **Details** panel, confirm that **Lip Sync Mode** is set to **MetaHuman Blendshapes** (`EC_LipSyncMode::BS_MHA`). This is the default value and the correct setting for MetaHuman characters.
-
-Also confirm that **Lip Sync Mode** is not set to **Off** (the default `BS_MHA` is correct).
 {% endstep %}
 {% endstepper %}
 
@@ -62,19 +60,19 @@ MetaHuman characters use separate animation blueprints for body and face. The Co
 
 {% stepper %}
 {% step %}
-### Set the body animation class
+#### Set the body animation class
 
 In the Blueprint editor, select the **Body** skeletal mesh component. In the **Details** panel, find the **Anim Class** field under **Animation**. Set it to `Convai_MetaHuman_BodyAnim`.
 {% endstep %}
 
 {% step %}
-### Set the face animation class
+#### Set the face animation class
 
 Select the **Face** skeletal mesh component. In the **Details** panel, find the **Anim Class** field. Set it to `Convai_MetaHuman_FaceAnim`.
 {% endstep %}
 
 {% step %}
-### Compile and save
+#### Compile and save
 
 Click **Compile** and then **Save** in the Blueprint editor toolbar.
 {% endstep %}
@@ -82,7 +80,7 @@ Click **Compile** and then **Save** in the Blueprint editor toolbar.
 
 ## Add the MetaHuman to the level
 
-Drag the MetaHuman Blueprint from the **Content Browser** into the level viewport. Position the character where you want it.
+Drag the MetaHuman Blueprint from the **Content Browser** into the level viewport and position it where you want.
 
 ## Add the Convai Player component to the player pawn
 
@@ -90,10 +88,10 @@ If you have not already done this, open your player pawn Blueprint and add `UCon
 
 ## Test the setup
 
-Enter Play mode. The MetaHuman should be in an idle state. Use push-to-talk (default: **V**) or the chat widget to start a conversation. The character responds with voice audio, and the MetaHuman's lips and face animate in sync with the speech.
+Enter Play mode. Use push-to-talk (default: **V**) or the chat widget to start a conversation.
 
 {% hint style="success" %}
-When the setup is working, the MetaHuman's mouth moves in sync with the character's spoken response and the facial expression changes dynamically during the conversation.
+When the setup is working, the MetaHuman's mouth moves in sync with the character's spoken response and facial expressions change dynamically during the conversation. If the character does not respond, see [Validate your setup](validate-your-setup.md).
 {% endhint %}
 
 ## Enable hands-free mode
@@ -130,6 +128,14 @@ To remove the push-to-talk requirement, open the player pawn Blueprint, select t
 
 ## Next steps
 
-- [Set up a Reallusion (CC) character](set-up-a-reallusion-character.md) — alternative rig path for Reallusion CC characters.
-- [Configure conversation input](configure-conversation-input.md) — switch input modes.
-- [Validate your setup](validate-your-setup.md) — run the full setup checklist.
+{% content-ref url="set-up-a-reallusion-character.md" %}
+[Set up a Reallusion (CC) character](set-up-a-reallusion-character.md)
+{% endcontent-ref %}
+
+{% content-ref url="configure-conversation-input.md" %}
+[Configure conversation input](configure-conversation-input.md)
+{% endcontent-ref %}
+
+{% content-ref url="validate-your-setup.md" %}
+[Validate your setup](validate-your-setup.md)
+{% endcontent-ref %}

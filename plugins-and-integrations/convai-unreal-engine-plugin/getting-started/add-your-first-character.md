@@ -21,19 +21,19 @@ This tutorial follows the same flow shown in the [quick-setup walkthrough video]
 
 {% stepper %}
 {% step %}
-### Open the Convai dashboard
+#### Open the Convai dashboard
 
 In a browser, go to <code class="expression">space.vars.dashboard_url</code> and sign in.
 {% endstep %}
 
 {% step %}
-### Choose or create a character
+#### Choose or create a character
 
 Select an existing character from your character list, or create a new one. You can set the character's name, backstory, language, voice, and personality in the dashboard. You can update these settings at any time without changing anything in Unreal Engine.
 {% endstep %}
 
 {% step %}
-### Copy the character ID
+#### Copy the character ID
 
 On the character's detail page, copy the **Character ID** string. You will paste this into the editor in the next section.
 {% endstep %}
@@ -43,25 +43,25 @@ On the character's detail page, copy the **Character ID** string. You will paste
 
 {% stepper %}
 {% step %}
-### Open the character Blueprint
+#### Open the character Blueprint
 
 In the **Outliner**, click on your NPC Actor. In the **Details** panel, click **Edit Blueprint** to open the Blueprint editor. You can also open the Blueprint asset directly from the **Content Browser**.
 {% endstep %}
 
 {% step %}
-### Add the Convai Chatbot component
+#### Add the Convai Chatbot component
 
 In the **Components** panel inside the Blueprint editor, click **Add**. Search for `BP Convai ChatBot Component` and select it. This adds the Blueprint-wrapped chatbot component, which comes pre-wired with push-to-talk input and the chat UI widget.
 {% endstep %}
 
 {% step %}
-### Set the character ID
+#### Set the character ID
 
 Select the **Convai Chatbot** component in the **Components** panel. In the **Details** panel, find the **Character ID** field under the **Convai** category and paste your character ID into it.
 {% endstep %}
 
 {% step %}
-### Add the Convai Face Sync component (optional)
+#### Add the Convai Face Sync component (optional)
 
 If your character has a facial rig and you want lip sync, click **Add** again, search for `Convai Face Sync`, and add it. Select the component and set **Lip Sync Mode** to match your rig:
 
@@ -73,49 +73,57 @@ Skip this step if your character has no facial rig.
 {% endstep %}
 
 {% step %}
-### Compile and save the Blueprint
+#### Compile and save the Blueprint
 
 Click **Compile** and then **Save** in the Blueprint editor toolbar.
 {% endstep %}
 {% endstepper %}
 
+{% hint style="info" %}
+To start the character with a specific expression, select the **Convai Chatbot** component in the **Details** panel, expand the **Default** section, and set an **Initial Emotion** (for example, **Happy** at **Basic** intensity). Emotions update dynamically as the conversation evolves.
+{% endhint %}
+
 ## Add the Convai Player component to the player pawn
 
 {% stepper %}
 {% step %}
-### Find the player pawn Blueprint
+#### Find the player pawn Blueprint
 
 The fastest way to find it is through **Window > World Settings**. Expand **Game Mode > Selected Game Mode** and note the **Default Pawn Class**. Click the Browse icon next to it to locate the Blueprint in the **Content Browser**, then open it.
 {% endstep %}
 
 {% step %}
-### Add the Convai Player component
+#### Add the Convai Player component
 
 In the Blueprint editor for the player pawn, click **Add** in the **Components** panel. Search for `BP Convai Player Component` and select it. This adds the Blueprint-wrapped player component, which includes push-to-talk input and the chat UI widget pre-configured.
 {% endstep %}
 
 {% step %}
-### Compile and save
+#### Compile and save
 
 Click **Compile** and then **Save**.
 {% endstep %}
 {% endstepper %}
 
+{% hint style="info" %}
+If you do not have an existing player pawn, the plugin ships a ready-made one: drop **`BP_ConvaiSamplePlayer`** from the plugin's `Content/` folder into the level and set **`BP_SampleGameMode`** as the game mode. It already has `BP_ConvaiPlayerComponent` and a chat widget wired up. This asset is suitable for prototyping — for production, add `BP Convai Player Component` directly to your own player pawn Blueprint as described above.
+{% endhint %}
+
 ## Test the conversation
 
 {% stepper %}
 {% step %}
-### Enter Play mode
+#### Enter Play mode
 
-Press **Play** in the Unreal Editor toolbar. A chat widget appears in the viewport (provided the player pawn has a chat UI; the `BP_ConvaiSamplePlayer` base includes one).
+Press **Play** in the Unreal Editor toolbar. A chat widget appears in the viewport.
 {% endstep %}
 
 {% step %}
-### Talk to the character
+#### Talk to the character
 
 Hold the push-to-talk key (default: **V**), speak into your microphone, then release the key. The character processes your speech, generates a response, and speaks back.
 
-If you prefer hands-free mode, select the **Convai Player** component on the player pawn, open the **Event Graph**, and call `UpdateVadBP(true)` in **BeginPlay**. In hands-free mode the character listens continuously using voice activity detection.
+To use hands-free mode instead, open the player pawn's **Event Graph**, select the **Convai Player** component, and call `UpdateVadBP(true)` in **BeginPlay**. In hands-free mode the character listens continuously using voice activity detection.
 {% endstep %}
 {% endstepper %}
 
@@ -123,23 +131,24 @@ If you prefer hands-free mode, select the **Convai Player** component on the pla
 When the setup is working, the character speaks an audible response and the chat widget shows a transcript of the exchange. If the character does not respond, see [Validate your setup](validate-your-setup.md) for a checklist of common failure points.
 {% endhint %}
 
-## Using the sample player pawn
-
-If you do not have an existing player pawn, the plugin ships a ready-made one in its `Content/` folder:
-
-- Drop **`BP_ConvaiSamplePlayer`** into the level as the player pawn. It already has `BP_ConvaiPlayerComponent` attached and a chat widget wired up.
-- Set `BP_SampleGameMode` as the game mode for the level to pair the sample player pawn automatically.
-
-This asset is suitable for prototyping. For production, add `BP Convai Player Component` directly to your own player pawn Blueprint as described above.
-
-## Customizing the initial emotion
-
-To start the character with a specific expression, select the character in the viewport, go to the **Details** panel, select the **Convai Chatbot** component, expand the **Default** section, and set an **Initial Emotion** (for example, **Happy** at **Basic** intensity). Emotions update dynamically as the conversation evolves.
-
 ## Next steps
 
-- [Scene components](scene-components.md) — detailed reference for each component and its properties.
-- [Set up a MetaHuman character](set-up-a-metahuman-character.md) — rig-specific wiring for MetaHuman lip sync.
-- [Set up a Reallusion (CC) character](set-up-a-reallusion-character.md) — full Reallusion CC5 export and import flow.
-- [Configure conversation input](configure-conversation-input.md) — switch between push-to-talk and hands-free mode.
-- [Validate your setup](validate-your-setup.md) — confirm everything is wired correctly.
+{% content-ref url="scene-components.md" %}
+[Scene components](scene-components.md)
+{% endcontent-ref %}
+
+{% content-ref url="set-up-a-metahuman-character.md" %}
+[Set up a MetaHuman character](set-up-a-metahuman-character.md)
+{% endcontent-ref %}
+
+{% content-ref url="set-up-a-reallusion-character.md" %}
+[Set up a Reallusion (CC) character](set-up-a-reallusion-character.md)
+{% endcontent-ref %}
+
+{% content-ref url="configure-conversation-input.md" %}
+[Configure conversation input](configure-conversation-input.md)
+{% endcontent-ref %}
+
+{% content-ref url="validate-your-setup.md" %}
+[Validate your setup](validate-your-setup.md)
+{% endcontent-ref %}

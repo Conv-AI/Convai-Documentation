@@ -1,6 +1,6 @@
 ---
 title: Prerequisites
-description: Reference for what you need before installing the Convai Unreal Engine plugin, including engine version, account, and dependencies.
+description: Verify engine version, account, platform, and network requirements before installing the Convai Unreal Engine plugin.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -19,14 +19,14 @@ You need a Convai account to authenticate the plugin and to create or manage cha
 
 ## Engine plugins (bundled dependencies)
 
-The Convai Unreal Engine plugin depends on two engine plugins that are bundled with Unreal Engine. Both are enabled automatically when you enable the Convai plugin:
+The Convai Unreal Engine plugin depends on two engine plugins that ship with Unreal Engine. Both are enabled automatically when you enable the Convai plugin:
 
 | Dependency | Purpose |
 |---|---|
 | `AudioCapture` | Provides microphone input on Win64 and Android. |
 | `AndroidPermission` | Handles runtime microphone permission requests on Android. |
 
-You do not need to enable these manually. If your project has previously disabled them, re-enable them under **Edit > Plugins** before enabling the Convai plugin.
+You do not need to enable these manually. If your project has previously disabled either plugin, re-enable it under **Edit > Plugins** before enabling the Convai plugin.
 
 ## Supported platforms
 
@@ -36,12 +36,18 @@ You do not need to enable these manually. If your project has previously disable
 | Android | Yes |
 | Other | No |
 
-Mac, iOS, Linux, and console targets are not in the `PlatformAllowList` in `ConvAI.uplugin` and are not supported by this plugin version.
+Mac, iOS, Linux, and console targets are not in the `PlatformAllowList` in `ConvAI.uplugin` and are not supported in this plugin version.
 
 ## Network access
 
 The plugin connects to Convai at runtime over WebRTC. Ensure the device running your project can reach Convai's endpoints on HTTPS and WebRTC ports. Firewalls or proxies that block WebRTC will prevent conversations from starting.
 
+{% hint style="success" %}
+When all requirements are met, you are ready to install the plugin.
+{% endhint %}
+
 ## Next steps
 
-Once you have verified all requirements, proceed to [Install the Convai plugin](installation.md).
+{% content-ref url="installation.md" %}
+[Install the Convai plugin](installation.md)
+{% endcontent-ref %}

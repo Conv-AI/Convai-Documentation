@@ -14,31 +14,35 @@ The Convai Unreal Engine plugin ships a demo level inside its `Content/` folder.
 | Demo character | `Content/Demo/Companion.uasset` | The `Companion` character Blueprint |
 | Game mode | `ConvaiDemoGM` | Game mode set on the demo level |
 
-The `Companion` character already has a `UConvaiChatbotComponent` configured with a sample character ID and a `UConvaiPlayerComponent` on the player pawn. No additional setup is required.
+The `Companion` character already has a `UConvaiChatbotComponent` configured with a Character ID and a `UConvaiPlayerComponent` on the player pawn. No additional setup is required.
+
+{% hint style="info" %}
+The demo uses a Convai-provided sample character, not a character from your dashboard. This is expected — it lets you verify the full pipeline works before you create your own character.
+{% endhint %}
 
 ## Open and run the demo
 
 {% stepper %}
 {% step %}
-### Locate the demo level
+#### Locate the demo level
 
 In the **Content Browser**, navigate to the plugin's content folder. Look for the `Demo` subfolder and open `Convai_Demo.umap` by double-clicking it.
 {% endstep %}
 
 {% step %}
-### Verify the game mode
+#### Verify the game mode
 
 In the Unreal Editor menu bar, select **Window > World Settings**. Under **Game Mode**, confirm that the **GameMode Override** is set to `ConvaiDemoGM`. If it is not, set it manually.
 {% endstep %}
 
 {% step %}
-### Press Play
+#### Press Play
 
 Click the **Play** button in the toolbar (or press **Alt+P**). The demo level loads with the `Companion` character in the scene. A chat UI widget appears in the viewport.
 {% endstep %}
 
 {% step %}
-### Talk to the character
+#### Talk to the character
 
 Hold the push-to-talk key (default: **V**) and speak into your microphone, then release the key. The character processes your speech and responds with voice audio and lip-sync animation.
 
@@ -56,21 +60,24 @@ The demo is wired using the same components you will use in your own scenes. Ins
 
 {% stepper %}
 {% step %}
-### Open the character Blueprint
+#### Open the character Blueprint
 
 In the **Content Browser**, open `Content/Demo/Companion.uasset`. The `UConvaiChatbotComponent` is attached and has a `CharacterID` already set.
 {% endstep %}
 
 {% step %}
-### Open the player pawn Blueprint
+#### Open the player pawn Blueprint
 
 Open the player pawn Blueprint linked from `ConvaiDemoGM`. Confirm that `UConvaiPlayerComponent` is attached to the pawn.
 {% endstep %}
 {% endstepper %}
 
-Once the demo works, proceed to [Add your first Convai character](add-your-first-character.md) to build your own setup from scratch.
-
 ## Next steps
 
-- [Scene components](scene-components.md) — reference for every Convai component in the plugin.
-- [Add your first Convai character](add-your-first-character.md) — build your own character from scratch.
+{% content-ref url="scene-components.md" %}
+[Scene components](scene-components.md)
+{% endcontent-ref %}
+
+{% content-ref url="add-your-first-character.md" %}
+[Add your first Convai character](add-your-first-character.md)
+{% endcontent-ref %}

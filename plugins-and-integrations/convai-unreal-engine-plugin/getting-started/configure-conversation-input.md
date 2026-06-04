@@ -4,71 +4,138 @@ description: Switch between push-to-talk and hands-free voice capture on UConvai
 last_reviewed: "4.0.0-beta.21"
 ---
 
-`UConvaiPlayerComponent` supports three input modes. Choose the one that fits your interaction design and wire it up before entering Play mode.
+`UConvaiPlayerComponent` supports three input modes. Review the comparison below to choose the mode that fits your interaction design, then follow the tab for that mode.
+
+## Input mode comparison
+
+|  | Push-to-talk | Hands-free | Send text |
+|---|---|---|---|
+| **How it works** | Player holds a key to transmit voice. | Voice activity detection triggers automatically. | Text string sent directly to the chatbot. |
+| **Best for** | Controlled input, game UX, shared-mic scenarios. | Ambient NPCs, kiosk installations, always-on experiences. | Accessibility features, text-chat UI, automated testing. |
+| **Microphone required** | Yes | Yes | No |
+| **Default** | Yes (default when `BP_ConvaiPlayerComponent` is added) | No — call `UpdateVadBP(true)` to enable. | No — call `SendText()` as needed. |
+
+## Configure your mode
 
 {% tabs %}
 {% tab title="Push-to-talk" %}
-In push-to-talk mode the player holds a key to transmit voice input. This is the default behavior when `UConvaiPlayerComponent` is added to a pawn.
+Push-to-talk is the default mode. The player holds a key to stream voice input; releasing the key stops the stream.
 
-The built-in chat widget provided by `BP_ConvaiPlayerComponent` and `BP_ConvaiSamplePlayer` binds push-to-talk to a default key. You can replace this with any input action in your Blueprint by calling:
+The built-in chat widget provided by `BP_ConvaiPlayerComponent` and `BP_ConvaiSamplePlayer` binds push-to-talk to a default key. Replace it with any input action in your Blueprint by calling:
 
-| Function | Effect |
-|---|---|
-| `UnmuteStreamingAudio()` | Begin streaming microphone audio to the active chatbot. Call on key press. |
-| `MuteStreamingAudio()` | Stop streaming audio. Call on key release. |
+| Function | Returns | Description |
+|---|---|---|
+| `UnmuteStreamingAudio()` | `bool` — `true` if streaming started. | Begin streaming microphone audio to the active chatbot. Call on key press. |
+| `MuteStreamingAudio()` | `void` | Stop streaming audio. Call on key release. |
 
-`UnmuteStreamingAudio()` returns `bool` — `true` if streaming started successfully. `MuteStreamingAudio()` returns `void`. Connect them to your input actions in your player pawn's Blueprint event graph.
+Connect these to your input actions in the player pawn's Blueprint event graph.
 
-You can also toggle mute programmatically without changing the mode. Set the `bMute` property on `UConvaiPlayerComponent` to `true` to silence input and `false` to restore it.
+You can also toggle mute without changing the mode: set the `bMute` property on `UConvaiPlayerComponent` to `true` to silence input and `false` to restore it.
 {% endtab %}
 
 {% tab title="Hands-free" %}
 In hands-free mode the character listens continuously and responds whenever the player speaks, without requiring a key press.
 
-To enable hands-free mode, call `UpdateVadBP(true)` on the `UConvaiPlayerComponent` from Blueprint — for example in the player pawn's **BeginPlay** event. This enables voice activity detection so the character listens continuously without requiring a key press.
+To enable hands-free mode, call `UpdateVadBP(true)` on the `UConvaiPlayerComponent` from Blueprint — for example in the player pawn's **BeginPlay** event. This activates voice activity detection so the character listens without any key binding.
 
-You can still mute the input programmatically. Set the `bMute` property on `UConvaiPlayerComponent` to `true` to silence input and `false` to restore it.
+To disable hands-free mode and return to push-to-talk, call `UpdateVadBP(false)`.
+
+You can still mute input programmatically regardless of the active mode: set the `bMute` property on `UConvaiPlayerComponent` to `true` to silence input and `false` to restore it.
 {% endtab %}
 
 {% tab title="Send text" %}
 Use `SendText()` to send a text message to a chatbot without any microphone input. This is useful for text-chat interfaces, accessibility features, or testing character responses without audio hardware.
 
-```text
-SendText(ChatbotComponent, Text)
-```
-
 | Parameter | Type | Description |
 |---|---|---|
-| `ChatbotComponent` | `UConvaiConversationComponent` | Reference to the target chatbot (`UConvaiChatbotComponent` derives from this) |
-| `Text` | `FString` | The text message to send |
+| `ChatbotComponent` | `UConvaiConversationComponent` | Reference to the target chatbot. (`UConvaiChatbotComponent` derives from this type.) |
+| `Text` | `FString` | The text message to send. |
 
 Connect a text input widget to this function and call it on submit.
 {% endtab %}
 {% endtabs %}
 
+## Fine-tune voice activity detection
+
+Hands-free mode uses voice activity detection (VAD) to decide when the player has started and stopped speaking. The default VAD settings work in most environments. If the character fires on background noise or misses quiet speech, tune the `FConvaiVADSettings` struct.
+
+### Access VAD settings
+
+Use these Blueprint-callable functions from `UConvaiUtils` (no component reference required — call them as utility functions):
+
+| Function | Category | Description |
+|---|---|---|
+| `GetVADSettings()` | `Convai\|VAD` | Returns the current `FConvaiVADSettings` struct. BlueprintPure. |
+| `SetVADSettings(VADSettings)` | `Convai\|VAD` | Applies a new `FConvaiVADSettings` to the VAD pipeline. |
+
+### VAD settings fields
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `bUseServerDefault` | `bool` | `true` | When `true`, the server's default VAD parameters are used and all other fields are ignored. Set to `false` to apply local overrides. |
+| `Confidence` | `float` | `0.5` | Speech confidence threshold (0.0–1.0). Higher values require more certainty before the character begins listening. Raise this to reduce false triggers from background noise. |
+| `StartSecs` | `float` | `0.2` | Seconds of continuous speech required before the listener activates. Increase to avoid triggering on very short sounds. |
+| `StopSecs` | `float` | `0.8` | Seconds of silence before the listener closes the audio stream. Increase to avoid early cutoffs for speakers who pause mid-sentence. |
+| `MinVolume` | `float` | `0.02` | Minimum audio level (0.0–1.0) that counts as speech. Raise this to filter out quiet ambient noise. |
+
+{% hint style="info" %}
+Set `bUseServerDefault` to `false` before assigning any other field — otherwise the server ignores all local values.
+{% endhint %}
+
 ## Chat UI styles
 
-The `BP_ConvaiPlayerComponent` and `BP_ConvaiSamplePlayer` ship a built-in chat widget. The **Convai Player** component's **Details** panel exposes an **Interface Selection** property with three style options (values 1, 2, and 3). Switch between them to change the visual appearance of the chat overlay without replacing the widget Blueprint.
+`BP_ConvaiPlayerComponent` and `BP_ConvaiSamplePlayer` ship a built-in chat widget. The **Convai Player** component's **Details** panel exposes an **Interface Selection** property with three style options (values `1`, `2`, and `3`). For full details on the chat widget, the 3D in-world panel, and replacing the widget with a custom design, see [Add the chat UI](add-chat-ui.md).
 
 ## Recording audio manually
 
-For workflows where you want to capture a complete audio recording before sending it (rather than streaming in real time), use the recording API:
+For workflows where you want to capture a complete audio clip before sending — rather than streaming in real time — use the recording API:
 
 | Function | Returns | Description |
 |---|---|---|
-| `StartRecording()` | void | Begin recording microphone audio into a buffer |
-| `FinishRecording()` | `USoundWave*` | Stop recording and return the captured audio as a Sound Wave |
+| `StartRecording()` | `void` | Begin recording microphone audio into a buffer. |
+| `FinishRecording()` | `USoundWave*` | Stop recording and return the captured audio as a Sound Wave asset. |
 
-You can then process or play back the `USoundWave`, or pass it to other Blueprints. This path is separate from the streaming pipeline and does not interact with the active chatbot session.
+You can process or play back the returned `USoundWave`, or pass it to other Blueprints. This path is separate from the streaming pipeline and does not interact with the active chatbot session.
 
 ## Check streaming and recording state
 
 | Function | Returns | Description |
 |---|---|---|
-| `GetIsStreaming()` | `bool` | `true` while audio is being streamed to a chatbot |
-| `GetIsRecording()` | `bool` | `true` while manual recording is in progress |
+| `GetIsStreaming()` | `bool` | `true` while audio is being streamed to a chatbot. |
+| `GetIsRecording()` | `bool` | `true` while manual recording is in progress. |
+
+## Troubleshooting
+
+### Hands-free mode fires on background noise
+
+**Symptom:** The character begins listening when no one is speaking — ambient sound, keyboard clicks, or music triggers it.
+
+**Cause:** The VAD `Confidence` or `MinVolume` threshold is too low for the environment.
+
+**Fix:** Call `GetVADSettings()`, set `bUseServerDefault` to `false`, raise `Confidence` (try `0.7`–`0.9`) and raise `MinVolume` (try `0.05`–`0.1`), then apply with `SetVADSettings()`.
+
+### Hands-free mode cuts off the player mid-sentence
+
+**Symptom:** The character interrupts listening while the player is still speaking — common with speakers who pause between thoughts.
+
+**Cause:** `StopSecs` is too short for the speaking style.
+
+**Fix:** Call `GetVADSettings()`, set `bUseServerDefault` to `false`, increase `StopSecs` to `1.2`–`2.0` seconds, then apply with `SetVADSettings()`.
+
+### Push-to-talk produces no response
+
+**Symptom:** The player holds the key and speaks, but the character never responds.
+
+**Cause:** `UnmuteStreamingAudio()` is not wired to the key press, or `bMute` is `true` on the player component.
+
+**Fix:** Confirm your input action calls `UnmuteStreamingAudio()` on key press and `MuteStreamingAudio()` on key release. Confirm `bMute` is `false` in the **Details** panel.
 
 ## Next steps
 
-- [Configure the microphone](configure-microphone.md) — select a capture device or adjust volume.
-- [Validate your setup](validate-your-setup.md) — confirm that voice input is reaching the character.
+{% content-ref url="add-chat-ui.md" %}
+[Add the chat UI](add-chat-ui.md)
+{% endcontent-ref %}
+
+{% content-ref url="validate-your-setup.md" %}
+[Validate your setup](validate-your-setup.md)
+{% endcontent-ref %}
