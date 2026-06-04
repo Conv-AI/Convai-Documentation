@@ -1,6 +1,6 @@
 ---
 title: Unreal Engine versions
-description: Supported UE 5.x versions for the Convai Unreal Engine plugin, with module availability notes and known per-version caveats.
+description: Reference for Convai Unreal Engine plugin version support, including module availability per UE version, load phases, and per-version setup notes.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -35,17 +35,17 @@ The plugin declares four modules. Their load phases determine when they become a
 
 ### UE 5.0
 
-The plugin builds and runs on UE 5.0. Several compilation and compatibility issues were resolved for UE 5.0 (alongside UE 5.4, 5.5, and 5.7) so the plugin builds clean on all supported engine versions. The gaze-highlight material was also regenerated under UE 5.0 to ensure it loads correctly across all supported engine versions.
+The plugin builds and runs on UE 5.0. All modules except `ConvaiEditor` are fully functional. No additional setup is required.
 
 ### UE 5.1 and earlier
 
-The `ConvaiEditor` module is disabled on these versions. All Blueprint-based conversation, audio, and animation workflows remain fully functional. Only the in-editor Convai configuration window is unavailable; the API key must be set manually in **Project Settings > Plugins > Convai**.
+The `ConvaiEditor` module is disabled on these versions. All Blueprint-based conversation, audio, and animation workflows remain fully functional. Only the in-editor Convai configuration window is unavailable; set your API key manually in **Project Settings > Plugins > Convai**.
 
-### UE 5.4, 5.5, and 5.7
+### UE 5.2 and later
 
-Release <code class="expression">space.vars.unreal_plugin_version</code> included compilation and compatibility fixes targeting these specific engine versions. No additional steps are required.
+All four modules are fully supported. No version-specific caveats.
 
-## Related reference
+## Next steps
 
 {% content-ref url="platform-support-matrix.md" %}
 [Platform support matrix](platform-support-matrix.md)

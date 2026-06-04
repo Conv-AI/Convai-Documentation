@@ -30,7 +30,9 @@ The `GetBodyAndFaceSkeletalMeshComponents` utility function (Blueprint-callable,
 
 Reallusion CC4 and CC5 characters require a separate animation Blueprint download because the bundled MetaHuman assets are not compatible with the CC rig. The plugin includes `FixCC5LipsyncPostProcessBlendshapes` (Blueprint-callable, category `Convai|LipSync`) to apply a post-process fix for CC5 rigs that use `ExpBoneData` in their post-process animation instance.
 
-Download the animation Blueprint from [Google Drive](https://drive.google.com/drive/folders/1k3072DH3zJXk2xTg-CJ_najnm0pyvZJS).
+{% hint style="info" %}
+The Convai CC4/CC5 animation Blueprint is hosted externally. Download it from [Google Drive](https://drive.google.com/drive/folders/1k3072DH3zJXk2xTg-CJ_najnm0pyvZJS) before proceeding with setup.
+{% endhint %}
 
 After downloading, set `LipSyncMode` to `CC4 Extended Blendshapes` on the `UConvaiFaceSyncComponent` attached to your CC character.
 
@@ -58,11 +60,16 @@ This function is intended for MetaHuman-style rigs but also handles single-mesh 
 
 ## Setup walkthroughs
 
-- [MetaHuman setup walkthrough](https://youtu.be/4fMCKkrfyaA)
-- [Reallusion CC setup walkthrough](https://www.youtube.com/watch?v=nyPNP-S92QI)
+{% embed url="https://youtu.be/4fMCKkrfyaA" %}
+MetaHuman character setup walkthrough
+{% endembed %}
 
-## Related reference
+{% embed url="https://www.youtube.com/watch?v=nyPNP-S92QI" %}
+Reallusion CC character setup walkthrough
+{% endembed %}
 
-{% content-ref url="platform-support-matrix.md" %}
-[Platform support matrix](platform-support-matrix.md)
+## Next steps
+
+{% content-ref url="network-and-api-requirements.md" %}
+[Network and API requirements](network-and-api-requirements.md)
 {% endcontent-ref %}

@@ -1,6 +1,6 @@
 ---
 title: Platform support matrix
-description: Win64 and Android build targets for the Convai Unreal Engine plugin, including required engine plugin dependencies and Android microphone permission handling.
+description: Reference for Convai Unreal Engine plugin platform support, including build targets, engine plugin dependencies, and Android setup requirements.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -10,9 +10,13 @@ The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugi
 
 | Platform | Runtime support | Editor support | Notes |
 |---|---|---|---|
-| Win64 | Yes | Yes | Full feature set; no additional setup required. |
-| Android | Yes | No | Requires microphone permission handling; see below. |
-| Other platforms | No | No | Not listed in the plugin `PlatformAllowList`. |
+| Win64 | ✅ Full | ✅ Yes | Full feature set; no additional setup required. |
+| Android | ✅ Full | ❌ No | Requires microphone permission handling; see below. |
+| Other platforms | ❌ Not supported | ❌ Not supported | Not listed in the plugin `PlatformAllowList`. |
+
+{% hint style="info" %}
+Mac, Linux, and iOS are not officially supported in the current release. Precompiled libraries for these platforms are present in the plugin source and are planned for a future release.
+{% endhint %}
 
 ## Engine plugin dependencies
 
@@ -43,8 +47,8 @@ The `PlatformAllowList` in the plugin manifest applies at the module level. The 
 
 The `ConvaiEditor` module has no `PlatformAllowList` because it only loads in the Unreal Editor, which always runs on Win64. `ConvaiAnimGraph` is declared as `UncookedOnly` and also has no `PlatformAllowList`; the editor includes it, but packaging excludes it from the compiled output.
 
-## Related reference
+## Next steps
 
-{% content-ref url="unreal-engine-versions.md" %}
-[Unreal Engine versions](unreal-engine-versions.md)
+{% content-ref url="character-rig-support.md" %}
+[Character rig support](character-rig-support.md)
 {% endcontent-ref %}

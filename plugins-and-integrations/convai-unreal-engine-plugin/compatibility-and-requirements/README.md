@@ -1,12 +1,10 @@
 ---
 title: Compatibility and requirements
-description: "What you need before installing the Convai Unreal Engine plugin: UE 5.x, a Convai account with an API key, and the AudioCapture dependency."
+description: Find the Unreal Engine version support, platform targets, character rig compatibility, and network requirements for the Convai Unreal Engine plugin.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-This section covers every requirement for running the Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugin_version</code> in a UE 5.x project, including engine version support, platform targets, and character rig compatibility.
-
-## In this section
+Confirm your environment meets these requirements before installing the Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugin_version</code>. The pages below cover Unreal Engine version support, platform targets, character rig compatibility, and network requirements.
 
 <table data-view="cards">
 <thead>
@@ -17,7 +15,7 @@ This section covers every requirement for running the Convai Unreal Engine plugi
 </thead>
 <tbody>
 <tr>
-<td><strong>Unreal Engine versions</strong><br>Supported UE 5.x range, module availability notes per version, and known per-version caveats.</td>
+<td><strong>Unreal Engine versions</strong><br>Supported UE 5.x range, module availability per version, and known per-version caveats.</td>
 <td><a href="unreal-engine-versions.md">unreal-engine-versions.md</a></td>
 </tr>
 <tr>
@@ -27,6 +25,10 @@ This section covers every requirement for running the Convai Unreal Engine plugi
 <tr>
 <td><strong>Character rig support</strong><br>Which character rigs work out of the box, which need additional setup, and links to the rig setup guides.</td>
 <td><a href="character-rig-support.md">character-rig-support.md</a></td>
+</tr>
+<tr>
+<td><strong>Network and API requirements</strong><br>Required domains, protocols, ports, and firewall rules for runtime plugin operation.</td>
+<td><a href="network-and-api-requirements.md">network-and-api-requirements.md</a></td>
 </tr>
 </tbody>
 </table>
@@ -44,4 +46,8 @@ This section covers every requirement for running the Convai Unreal Engine plugi
 
 ## Next steps
 
-Once your environment meets these requirements, install the plugin by following the Getting Started section.
+Once your environment meets these requirements, install the plugin.
+
+{% content-ref url="../getting-started/installation.md" %}
+[Install the Convai Unreal Engine plugin](../getting-started/installation.md)
+{% endcontent-ref %}

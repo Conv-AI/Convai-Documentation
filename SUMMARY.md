@@ -405,6 +405,7 @@
     * [Unreal Engine versions](plugins-and-integrations/convai-unreal-engine-plugin/compatibility-and-requirements/unreal-engine-versions.md)
     * [Platform support matrix](plugins-and-integrations/convai-unreal-engine-plugin/compatibility-and-requirements/platform-support-matrix.md)
     * [Character rig support](plugins-and-integrations/convai-unreal-engine-plugin/compatibility-and-requirements/character-rig-support.md)
+    * [Network and API requirements](plugins-and-integrations/convai-unreal-engine-plugin/compatibility-and-requirements/network-and-api-requirements.md)
   * [Getting started](plugins-and-integrations/convai-unreal-engine-plugin/getting-started/README.md)
     * [Prerequisites](plugins-and-integrations/convai-unreal-engine-plugin/getting-started/prerequisites.md)
     * [Install the Convai plugin](plugins-and-integrations/convai-unreal-engine-plugin/getting-started/installation.md)
