@@ -10,11 +10,11 @@ The Convai Unreal Engine plugin drives facial animation through the `UConvaiFace
 
 | Rig type | Lip sync mode | Out-of-the-box | Additional setup |
 |---|---|---|---|
-| MetaHuman | `MetaHuman Blendshapes` (`BS_MHA`) | Yes — this is the default mode | None required; bundled animation Blueprint included |
-| Reallusion Character Creator (CC4 / CC5) | `CC4 Extended Blendshapes` (`BS_CC4_Extended`) | No | Download and configure the Convai animation Blueprint |
-| ARKit-compatible rigs | `ARKit Blendshapes` (`BS_ARKit`) | No | Configure `LipSyncMode` to `BS_ARKit`; wire 61 blendshape channels to your rig |
-| Viseme-based rigs | `Viseme Based` (`VisemeBased`) | No | Configure `LipSyncMode` to `VisemeBased`; map 15 OVR visemes to your rig |
-| Single-mesh generic rigs | `Auto` or `Off` | Partial | No facial animation without a compatible mode configured |
+| MetaHuman | `MetaHuman Blendshapes` (`BS_MHA`) | ✅ Yes — this is the default mode | None required; bundled animation Blueprint included |
+| Reallusion Character Creator (CC4 / CC5) | `CC4 Extended Blendshapes` (`BS_CC4_Extended`) | ❌ No | Download and configure the Convai animation Blueprint |
+| ARKit-compatible rigs | `ARKit Blendshapes` (`BS_ARKit`) | ❌ No | Configure `LipSyncMode` to `BS_ARKit`; wire 61 blendshape channels to your rig |
+| Viseme-based rigs | `Viseme Based` (`VisemeBased`) | ❌ No | Configure `LipSyncMode` to `VisemeBased`; map 15 OVR visemes to your rig |
+| Single-mesh generic rigs | `Auto` or `Off` | ⚠️ Partial | No facial animation without a compatible mode configured |
 
 ## MetaHuman characters
 

@@ -33,17 +33,9 @@ The plugin declares four modules. Their load phases determine when they become a
 
 ## Version-specific notes
 
-### UE 5.0
-
-The plugin builds and runs on UE 5.0. All modules except `ConvaiEditor` are fully functional. No additional setup is required.
-
 ### UE 5.1 and earlier
 
 The `ConvaiEditor` module is disabled on these versions. All Blueprint-based conversation, audio, and animation workflows remain fully functional. Only the in-editor Convai configuration window is unavailable; set your API key manually in **Project Settings > Plugins > Convai**.
-
-### UE 5.2 and later
-
-All four modules are fully supported. No version-specific caveats.
 
 ## Next steps
 

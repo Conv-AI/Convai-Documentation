@@ -15,7 +15,7 @@ The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugi
 | Other platforms | ❌ Not supported | ❌ Not supported | Not listed in the plugin `PlatformAllowList`. |
 
 {% hint style="info" %}
-Mac, Linux, and iOS are not officially supported in the current release. Precompiled libraries for these platforms are present in the plugin source and are planned for a future release.
+Mac, Linux, and iOS are not officially supported in the current release. Precompiled libraries for these platforms are present in the plugin source and may be supported in a future release.
 {% endhint %}
 
 ## Engine plugin dependencies
@@ -24,11 +24,11 @@ The Convai plugin declares the following engine plugin dependencies in `ConvAI.u
 
 | Dependency | Enabled by default | Required for |
 |---|---|---|
-| `AudioCapture` | Yes | Microphone input on Win64 and Android |
-| `AndroidPermission` | Yes | Requesting microphone permission at runtime on Android |
-| `EditorScriptingUtilities` | Yes | In-editor automation used by `ConvaiEditor` |
-| `PropertyAccessEditor` | Yes | Property-binding UI in `ConvaiEditor` |
-| `AndroidFileServer` | No | Optional file serving for Android development; not required for shipping |
+| `AudioCapture` | ✅ Yes | Microphone input on Win64 and Android |
+| `AndroidPermission` | ✅ Yes | Requesting microphone permission at runtime on Android |
+| `EditorScriptingUtilities` | ✅ Yes | In-editor automation used by `ConvaiEditor` |
+| `PropertyAccessEditor` | ✅ Yes | Property-binding UI in `ConvaiEditor` |
+| `AndroidFileServer` | ❌ No | Optional file serving for Android development; not required for shipping |
 
 ## Android platform notes
 

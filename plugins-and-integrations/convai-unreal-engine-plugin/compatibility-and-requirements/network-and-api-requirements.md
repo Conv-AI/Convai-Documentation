@@ -16,7 +16,7 @@ The Convai Unreal Engine plugin requires internet connectivity during runtime. S
 
 ## Protocol stack
 
-| Protocol               | Port     | Used for                                                 |
+| Protocol               | Port     | Purpose                                                  |
 | ---------------------- | -------- | -------------------------------------------------------- |
 | HTTPS                  | 443      | REST API calls — room connection request, character data |
 | WebSocket Secure (WSS) | 443      | LiveKit signaling — session setup and control messages   |
