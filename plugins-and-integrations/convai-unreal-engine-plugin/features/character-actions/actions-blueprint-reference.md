@@ -158,18 +158,24 @@ All functions are in category **Convai | Actions**.
 |---|---|---|---|
 | `HandleActionCompletion` | `IsSuccessful`, `bAutoReport`, `ShouldRespond`, `AdditionalNote`, `Delay` | `void` | Reports outcome; advances or clears queue. |
 | `AbortActionSequence` | `EventText`, `ShouldRespond` | `void` | Clears queue and optionally notifies Convai. |
-| `IsActionsQueueEmpty` | — | `bool` | `true` when no actions are queued. |
+| `IsActionsQueueEmpty` | — | `bool` | `true` when no actions are queued. BlueprintPure. |
 | `ClearActionQueue` | — | `void` | Discards all queued actions without reporting. |
-| `FetchFirstAction` | `out ConvaiResultAction` | `bool` | Reads (but does not remove) the front of the queue. |
-| `AddAction` | `Action: FConvaiAction` | `void` | Adds a template; takes effect next session. |
-| `AddActionByName` | `Name: FString` | `void` | Convenience: adds a no-description/no-parameter action. |
+| `FetchFirstAction` | `out ConvaiResultAction` | `bool` | Reads (but does not remove) the front of the queue. BlueprintPure. |
+| `AddAction` | `Action: FConvaiAction` | `void` | Adds a single template; takes effect next session. |
+| `AddActions` | `Actions: TArray<FConvaiAction>` | `void` | Adds multiple templates at once; takes effect next session. |
+| `AddActionByName` | `Name: FString` | `void` | Convenience: adds a no-description/no-parameter action by name. |
 | `RemoveAction` | `Name: FString` | `void` | Removes by name (case-sensitive). |
+| `RemoveActions` | `Names: TArray<FString>` | `void` | Removes multiple by name. |
 | `ClearActions` | — | `void` | Removes all action templates. |
-| `AddObject` | `Object, bFlushImmediately` | `void` | Adds to environment; debounced update sent. |
+| `AddObject` | `Object, bFlushImmediately` | `void` | Adds a single object to the environment; debounced update sent. |
+| `AddObjects` | `Objects, bFlushImmediately` | `void` | Adds multiple objects at once. |
 | `RemoveObject` | `ObjectName, bFlushImmediately` | `void` | Removes by name. |
+| `RemoveObjects` | `ObjectNames, bFlushImmediately` | `void` | Removes multiple by name. |
 | `ClearObjects` | `bFlushImmediately` | `void` | Clears all objects. |
-| `AddCharacter` | `Character, bFlushImmediately` | `void` | Adds a character entry. |
+| `AddCharacter` | `Character, bFlushImmediately` | `void` | Adds a single character entry. |
+| `AddCharacters` | `Characters, bFlushImmediately` | `void` | Adds multiple character entries at once. |
 | `RemoveCharacter` | `CharacterName, bFlushImmediately` | `void` | Removes by name. |
+| `RemoveCharacters` | `CharacterNames, bFlushImmediately` | `void` | Removes multiple by name. |
 | `ClearCharacters` | `bFlushImmediately` | `void` | Clears all characters. |
 | `SetObjectInAttention` | `AttentionObject, Text, ShouldRespond, bFlushImmediately` | `void` | Sets the attention slot (Explicit source). |
 | `TrySetObjectInAttentionFromGaze` | `AttentionObject, Text, ShouldRespond, bFlushImmediately` | `bool` | Gaze-gated setter; returns `false` when slot is Explicit. |
@@ -183,6 +189,12 @@ All functions are in category **Convai | Actions**.
 | Event | Display name | Signature |
 |---|---|---|
 | `OnActionReceivedEvent_V2` | On Actions Received | `(ChatbotComponent, InteractingPlayerComponent, SequenceOfActions: TArray<FConvaiResultAction>)` |
+
+## UConvaiChatbotComponent — session properties (action-related)
+
+| Property | Type | Category | Notes |
+|---|---|---|---|
+| `bAutoFillConversationPartnerFromPlayer` | `bool` | `Convai\|Session` | When `true` (default), the plugin auto-registers the conversation partner in the `Characters` list at session start. Disable when registering the partner manually to avoid duplicate entries. |
 
 ## EConvaiAttentionSource
 

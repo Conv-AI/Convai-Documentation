@@ -6,6 +6,18 @@ last_reviewed: "4.0.0-beta.21"
 
 When a player says "Go to it" or "Pick that up," the word "it" or "that" must resolve to a specific object. The plugin solves this through two connected mechanisms: reference grounding (resolving object names from LLM output against the registered environment) and attention (tracking which object the character or player is currently focused on so pronoun references resolve predictably).
 
+## Attention source priority
+
+The attention slot has an ownership model that determines which source can write to it:
+
+| Source | Priority | Set by | Can be overwritten by |
+|---|---|---|---|
+| `None` | — | Default / cleared state | Any source |
+| `Gaze` | Low | Gaze pipeline via `UConvaiObjectComponent` | Another gaze event or Explicit |
+| `Explicit` | High | Blueprint/C++ call to `SetObjectInAttention` | Only another Explicit call |
+
+**Explicit wins.** Once `SetObjectInAttention` sets the slot, gaze events cannot overwrite it until an explicit clear is issued.
+
 ## Reference grounding
 
 When Convai returns an action with a `Reference`-typed parameter, the raw value is a name string the LLM chose from the `action_config.objects` and `action_config.characters` lists. The plugin resolves that string against `EnvironmentData.Objects` and `EnvironmentData.Characters` using a three-pass fuzzy matcher:
@@ -29,8 +41,6 @@ The attention slot has an associated source flag on the chatbot component:
 | `None` | No object is in attention. |
 | `Explicit` | A Blueprint or C++ call to `SetObjectInAttention` set the slot. Gaze cannot overwrite this. |
 | `Gaze` | The gaze pipeline set the slot. Another gaze event can overwrite it. |
-
-The source flag enforces an ownership rule: **Explicit wins**. Once a Blueprint or C++ call sets the slot, gaze events cannot overwrite it until it is explicitly cleared.
 
 ### Setting attention from Blueprint
 
@@ -95,5 +105,10 @@ These are independent of the attention slot and have no effect on the conversati
 
 ## Next steps
 
-- [Configuring actions](configuring-actions.md) — register the objects that the attention and reference system draws from.
-- [Actions Blueprint reference](actions-blueprint-reference.md) — complete reference for `SetObjectInAttention`, `TrySetObjectInAttentionFromGaze`, and `EConvaiAttentionSource`.
+{% content-ref url="configuring-actions.md" %}
+[Configuring actions](configuring-actions.md)
+{% endcontent-ref %}
+
+{% content-ref url="actions-blueprint-reference.md" %}
+[Actions Blueprint reference](actions-blueprint-reference.md)
+{% endcontent-ref %}

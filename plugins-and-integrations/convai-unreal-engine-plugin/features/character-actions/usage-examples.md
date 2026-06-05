@@ -4,7 +4,7 @@ description: End-to-end action recipes for navigating to a registered object, fo
 last_reviewed: "4.0.0-beta.21"
 ---
 
-These examples show complete action handler setups for the most common scenarios. Each example lists the configuration required in the Details panel and the Blueprint logic needed in the NPC Actor.
+These examples show complete action handler setups for the most common scenarios. Each example lists the configuration required in the Details panel and the Blueprint pseudocode for the NPC Actor. Pseudocode blocks describe the nodes and connections to build in the Blueprint Event Graph, using indentation to show execution flow.
 
 ## Example 1: Navigate to a registered object
 
@@ -31,7 +31,7 @@ Event MoveTo(ActionData: FConvaiResultAction)
     // Read the destination object reference
     DestEntry = GetParamAsRef(ActionData, "destination")
 
-    // Guard: reference must have a live Actor
+    // Resolve the entry to AI Move To inputs
     ResolveGoalLocation(
         Entry = DestEntry,
         SourceActor = Self,
@@ -52,19 +52,21 @@ Event MoveTo(ActionData: FConvaiResultAction)
         HandleActionCompletion(IsSuccessful = true)
         return
 
-    // Branch on Out Mode
+    // Branch on Out Mode — wire the correct pin to AI Move To
     if OutMode == Actor:
         AIMoveTo(Target = OutGoalActor, AcceptanceRadius = OutAcceptanceRadius)
     else:
         AIMoveTo(Destination = OutGoalLocation, AcceptanceRadius = OutAcceptanceRadius)
 
-    // Wait for AIMoveTo to complete via OnMoveCompleted or similar
+    // Wait for AIMoveTo to complete via OnMoveCompleted
     // Then call:
     HandleActionCompletion(IsSuccessful = true)
 ```
 
+<figure><img src="../../../../.gitbook/assets/ue-character-actions-move-to-blueprint.png" alt="Unreal Engine Blueprint Event Graph showing the Move To custom event connected to GetParamAsRef, ResolveGoalLocation, a branch on Out Mode, AI Move To, and HandleActionCompletion"><figcaption><p>The Move To handler pattern: read the destination reference, resolve it to goal inputs, branch on the mode, issue AI Move To with the correct pin, then call Handle Action Completion on the move-completed callback.</p></figcaption></figure>
+
 {% hint style="info" %}
-Always branch on the `bOut Success` and `bOut Already There` outputs from **Resolve Goal Location** before issuing `AI Move To`. Passing a destroyed Actor to `AI Move To` silently no-ops in Actor mode, or sends the pawn to a stale location in Vector mode.
+Always branch on `bOut Success` and `bOut Already There` before issuing `AI Move To`. Passing a destroyed Actor to `AI Move To` silently no-ops in Actor mode, or sends the pawn to a stale location in Vector mode.
 {% endhint %}
 
 ---
@@ -96,9 +98,9 @@ Event Follow(ActionData: FConvaiResultAction)
     // Start a repeating timer or use a tracking task
     // that keeps issuing AIMoveTo toward TargetEntry.Ref each tick
 
-    // HandleActionCompletion is called later when "Stop Moving" arrives
-    // and the follow task is cancelled.
-    // Do NOT call HandleActionCompletion here — the action is ongoing.
+    // Do NOT call HandleActionCompletion here — the Follow action is ongoing.
+    // HandleActionCompletion is called inside the Stop Moving handler when
+    // the follow behavior ends.
 ```
 
 ### Blueprint handler — Stop Moving
@@ -117,8 +119,10 @@ Event Stop Moving(ActionData: FConvaiResultAction)
 ```
 
 {% hint style="warning" %}
-`Follow` is an ongoing action. Do not call `HandleActionCompletion` inside the Follow handler itself or the queue will immediately advance to the next action. Call it only when the follow behavior ends (user says "Stop" or the sequence is aborted).
+`Follow` is an ongoing action. Do not call `HandleActionCompletion` inside the Follow handler itself or the queue will immediately advance to the next action. Call it only when the follow behavior ends — typically inside the `Stop Moving` handler.
 {% endhint %}
+
+<figure><img src="../../../../.gitbook/assets/ue-character-actions-follow-blueprint.png" alt="Unreal Engine Blueprint Event Graph showing the Follow custom event starting a repeating movement task without calling HandleActionCompletion, and the Stop Moving event cancelling the task and calling HandleActionCompletion"><figcaption><p>The Follow/Stop Moving pattern keeps the action queue open while following. HandleActionCompletion is only called from Stop Moving, not from Follow itself.</p></figcaption></figure>
 
 ---
 
@@ -145,7 +149,7 @@ Event AdministerTreatment(ActionData: FConvaiResultAction)
 
     // Branch on the treatment type
     switch TreatmentName:
-        case "CPR":           PlayCPRAnimation()
+        case "CPR":            PlayCPRAnimation()
         case "Defibrillation": PlayDefibrillationAnimation()
         case "IV Fluids":      PlayIVFluidsAnimation()
         case "Oxygen Mask":    PlayOxygenMaskAnimation()
@@ -233,8 +237,18 @@ Event Announce(ActionData: FConvaiResultAction)
     )
 ```
 
+---
+
 ## Next steps
 
-- [Parameterized actions](parameterized-actions.md) — full parameter type reference.
-- [Actions Blueprint reference](actions-blueprint-reference.md) — complete struct and function signatures.
-- [Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md) — fix common issues with the examples above.
+{% content-ref url="parameterized-actions.md" %}
+[Parameterized actions](parameterized-actions.md)
+{% endcontent-ref %}
+
+{% content-ref url="actions-blueprint-reference.md" %}
+[Actions Blueprint reference](actions-blueprint-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}

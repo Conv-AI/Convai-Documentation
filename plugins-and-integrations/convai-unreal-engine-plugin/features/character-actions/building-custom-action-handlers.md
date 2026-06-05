@@ -30,6 +30,8 @@ Add one input parameter to the event:
 
 - **Type:** `FConvaiResultAction` (search for `Convai Result Action` in the pin type picker)
 - **Name:** any name you prefer, for example `ActionData`
+
+<figure><img src="../../../../.gitbook/assets/ue-character-actions-custom-event.png" alt="Unreal Engine Blueprint Event Graph showing a Custom Event node named Open Door with one FConvaiResultAction input parameter named ActionData"><figcaption><p>The Custom Event name must match the action name in the Actions array exactly, including case. The single FConvaiResultAction parameter carries the resolved action data including any typed parameters.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -48,6 +50,8 @@ Connect the event's execution pin to your handler logic. For a door-opening acti
 Drag off the `Convai Chatbot` component reference and call **Handle Action Completion**. This is the required closing call — without it, the queue stalls and no further actions fire.
 
 Set **Is Successful** to `true` on success, `false` on failure.
+
+<figure><img src="../../../../.gitbook/assets/ue-character-actions-handle-completion.png" alt="Unreal Engine Blueprint graph showing HandleActionCompletion called on the Convai Chatbot component at the end of a handler, with Is Successful set to true"><figcaption><p>Every code path in the handler must reach a HandleActionCompletion or AbortActionSequence call. Missing this call stalls the entire action queue for the session.</p></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 
@@ -83,7 +87,7 @@ When a handler encounters an unrecoverable error — a target Actor was destroye
 The following pseudocode describes a complete handler for an `"Open Door"` action:
 
 ```text
-// In the NPC Actor Blueprint
+// In the NPC Actor Blueprint — Custom Event named "Open Door"
 
 Event OpenDoor(ActionData: FConvaiResultAction)
     // Read the target object from the action parameters
@@ -126,10 +130,20 @@ On Actions Received(
 )
 ```
 
-The plugin dispatches actions automatically via the name-matching mechanism described above. Binding to `On Actions Received` does not bypass this dispatch — it fires concurrently.
+{% hint style="warning" %}
+Binding to `On Actions Received` does **not** bypass the name-dispatch mechanism. The plugin still dispatches each action to its matching Blueprint handler automatically. The delegate fires concurrently with dispatch — use it for observation, not for replacing handlers.
+{% endhint %}
 
 ## Next steps
 
-- [Parameterized actions](parameterized-actions.md) — read typed parameter values from `FConvaiResultAction`.
-- [Actions Blueprint reference](actions-blueprint-reference.md) — full reference for `FConvaiResultAction`, `HandleActionCompletion`, and `AbortActionSequence`.
-- [Usage examples](usage-examples.md) — end-to-end examples combining movement and custom handler logic.
+{% content-ref url="parameterized-actions.md" %}
+[Parameterized actions](parameterized-actions.md)
+{% endcontent-ref %}
+
+{% content-ref url="actions-blueprint-reference.md" %}
+[Actions Blueprint reference](actions-blueprint-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="usage-examples.md" %}
+[Usage examples](usage-examples.md)
+{% endcontent-ref %}

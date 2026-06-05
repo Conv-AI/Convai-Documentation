@@ -19,6 +19,8 @@ Each parameter on an `FConvaiAction` template is an `FConvaiActionParam` struct 
 | `Choices` | `TArray<FString>` | Optional fixed-choice list. Rendered as `[choice1\|choice2\|...]` in the wire format. |
 | `EnumType` | `UEnum*` | Required when `Type == Enum`. The engine enum whose display names serve as the choice list. |
 
+<figure><img src="../../../../.gitbook/assets/ue-character-actions-action-param-details.png" alt="Unreal Engine Details panel showing an FConvaiActionParam entry with Name, Description, Type dropdown showing all six options, and Choices array"><figcaption><p>Each parameter entry on an action template maps one placeholder to a typed constraint. The Type dropdown controls both the wire format hint and how the plugin interprets the LLM's response.</p></figcaption></figure>
+
 ## Parameter types
 
 `EConvaiActionParamType` controls how the plugin interprets the LLM's filled-in response:
@@ -64,6 +66,8 @@ When you have an existing Unreal `UENUM` you want to mirror:
 1. Set `Type` to `Enum`.
 2. Set `EnumType` to your `UEnum` asset (use the picker in the Details panel).
 3. Leave `Choices` empty — it is auto-derived from the enum's display names and grayed out.
+
+<figure><img src="../../../../.gitbook/assets/ue-character-actions-enum-param.png" alt="Unreal Engine Details panel showing a parameter with Type set to Enum and EnumType pointing to a custom UEnum asset, with the Choices field grayed out"><figcaption><p>When Type is Enum, the Choices field is populated automatically from the UEnum's display names. Set EnumType using the asset picker and leave Choices empty.</p></figcaption></figure>
 
 In your handler, read the matched enum index from `ByteValue` using **Byte to Enum** in Blueprint:
 
@@ -120,6 +124,14 @@ if RefEntry.Ref is None:
 
 ## Next steps
 
-- [Actions Blueprint reference](actions-blueprint-reference.md) — full struct and function signatures.
-- [Attention and reference grounding](attention-and-reference-grounding.md) — understand how Reference params are resolved against the environment.
-- [Usage examples](usage-examples.md) — parameterized action recipes.
+{% content-ref url="actions-blueprint-reference.md" %}
+[Actions Blueprint reference](actions-blueprint-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="attention-and-reference-grounding.md" %}
+[Attention and reference grounding](attention-and-reference-grounding.md)
+{% endcontent-ref %}
+
+{% content-ref url="usage-examples.md" %}
+[Usage examples](usage-examples.md)
+{% endcontent-ref %}

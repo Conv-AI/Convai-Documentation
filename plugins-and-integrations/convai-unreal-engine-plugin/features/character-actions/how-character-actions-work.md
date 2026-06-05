@@ -6,6 +6,29 @@ last_reviewed: "4.0.0-beta.21"
 
 Character actions allow Convai to instruct a character to perform physical behaviors — moving to a location, following a player, interacting with an object — as part of a normal conversation response. The plugin receives a structured sequence of named actions from Convai alongside the spoken reply, then dispatches those actions to Blueprint event handlers on the owning Actor.
 
+## Required setup
+
+| Component / resource | Required for | Notes |
+|---|---|---|
+| `Convai Chatbot` component | All actions | Carries the `Environment` property (action templates, objects, characters) and the `ActionsQueue`. |
+| `Convai Player` component | All actions | Required on the player pawn for speech input. |
+| Blueprint handler functions | Every action that should execute | One function per action name, accepting `FConvaiResultAction`. |
+| AI Controller on the NPC Actor | Movement actions (`Move To`, `Follow`) | Required for `AI Move To` to work. Use Unreal's built-in `AIController` or the plugin sample at `Content/Convai/AI/AI_Controller_Convai`. |
+| `Nav Mesh Bounds Volume` (built) | Movement actions | Must cover the NPC spawn point and all navigation targets. Rebuild after level changes. |
+
+For non-movement actions (custom behaviors, animations, state changes), only the chatbot component and Blueprint handlers are required.
+
+## Key concepts
+
+| Concept | What it means |
+|---|---|
+| **Action contract** (`action_config`) | The list of action templates, scene objects, and characters sent to Convai at session start. Defines what the character is allowed to do and what it can reference. |
+| **Action pipeline** | Two parallel lanes: a speech lane that plays audio and an action lane that appends a sequence of `FConvaiResultAction` structs to the queue. |
+| **Queue and dispatch** | The plugin maintains an `ActionsQueue`. On each `HandleActionCompletion(true)`, the queue advances by one. A name-based dispatcher calls the matching Blueprint function on the owning Actor. |
+| **Completion model** | Handlers are responsible for calling `HandleActionCompletion`. Without it, the queue stalls. `false` clears the remaining queue; `AbortActionSequence` discards everything and optionally asks Convai for a fresh plan. |
+| **Wait-for-speech gate** | A per-action `bWaitForBotSpeech` flag that delays firing until the character begins or finishes speaking, so movement and speech stay synchronized. |
+| **Runtime mutation** | Objects and characters can be added or removed at runtime; changes are sent as `update-scene-metadata` messages to the live session. |
+
 ## The action_config contract
 
 Before a session starts, the chatbot component serializes a description of the character's affordances into a JSON structure called `action_config`. This contract is sent to Convai at `/connect` time and tells Convai which actions the character can perform, which objects exist in the scene, and which characters are present.
@@ -85,6 +108,18 @@ Runtime mutations affect object descriptions and proximity context — they do n
 
 ## Next steps
 
-- [Configuring actions](configuring-actions.md) — set up the action set and environment objects in the Details panel.
-- [Building custom action handlers](building-custom-action-handlers.md) — write Blueprint handlers for your actions.
-- [Actions Blueprint reference](actions-blueprint-reference.md) — complete struct and function reference.
+{% content-ref url="configuring-actions.md" %}
+[Configuring actions](configuring-actions.md)
+{% endcontent-ref %}
+
+{% content-ref url="built-in-action-handlers.md" %}
+[Built-in action handlers](built-in-action-handlers.md)
+{% endcontent-ref %}
+
+{% content-ref url="building-custom-action-handlers.md" %}
+[Building custom action handlers](building-custom-action-handlers.md)
+{% endcontent-ref %}
+
+{% content-ref url="actions-blueprint-reference.md" %}
+[Actions Blueprint reference](actions-blueprint-reference.md)
+{% endcontent-ref %}

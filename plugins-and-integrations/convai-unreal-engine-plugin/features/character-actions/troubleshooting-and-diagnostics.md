@@ -6,6 +6,10 @@ last_reviewed: "4.0.0-beta.21"
 
 This page covers the most common failure modes for character actions, with symptoms, causes, and verified fixes.
 
+{% hint style="info" %}
+Enable verbose logging before debugging — it will show the exact action names, parameter values, and resolution results in the Output Log. See [General diagnostics](#general-diagnostics) at the bottom of this page for setup instructions.
+{% endhint %}
+
 ## Actions not firing
 
 ### No action handler is called after the character responds
@@ -67,7 +71,7 @@ This page covers the most common failure modes for character actions, with sympt
 
 **Cause A:** The NPC Actor has no AI Controller assigned.
 
-**Fix:** Set **AI Controller Class** on the NPC Actor to an `AIController` subclass. The plugin ships a sample Blueprint AI Controller at `Content/AI/AI_Controller_Convai`; you can also use UE's built-in `AIController`. Verify the controller is spawned at runtime with `Get Controller` → `Is Valid` in Blueprint.
+**Fix:** Set **AI Controller Class** on the NPC Actor to an `AIController` subclass. The plugin ships a sample Blueprint AI Controller at `Content/Convai/AI/AI_Controller_Convai`; you can also use UE's built-in `AIController`. Verify the controller is spawned at runtime with `Get Controller` → `Is Valid` in Blueprint.
 
 ---
 
@@ -166,5 +170,10 @@ ConvaiActionUtilsLog=Verbose
 
 ## Next steps
 
-- [How character actions work](how-character-actions-work.md) — review the pipeline if problems persist.
-- [Actions Blueprint reference](actions-blueprint-reference.md) — verify function signatures and parameter names.
+{% content-ref url="how-character-actions-work.md" %}
+[How character actions work](how-character-actions-work.md)
+{% endcontent-ref %}
+
+{% content-ref url="actions-blueprint-reference.md" %}
+[Actions Blueprint reference](actions-blueprint-reference.md)
+{% endcontent-ref %}

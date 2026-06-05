@@ -21,12 +21,16 @@ This section covers everything you need to integrate character actions: how the 
 <td><a href="how-character-actions-work.md">how-character-actions-work.md</a></td>
 </tr>
 <tr>
-<td><strong>Quick start</strong><br>Enable actions, register environment objects, and run the built-in Move To, Follow, Stop Moving, and Wait For actions end-to-end.</td>
+<td><strong>Quick start</strong><br>Enable actions, register a scene object, configure AI navigation on the NPC, and verify the built-in Move To action end-to-end.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
 <td><strong>Configuring actions</strong><br>Define the action set, enable the feature on the chatbot component, and register environment objects and characters.</td>
 <td><a href="configuring-actions.md">configuring-actions.md</a></td>
+</tr>
+<tr>
+<td><strong>Built-in action handlers</strong><br>Complete Blueprint handler implementations for the four default actions: Move To, Follow, Stop Moving, and Wait For.</td>
+<td><a href="built-in-action-handlers.md">built-in-action-handlers.md</a></td>
 </tr>
 <tr>
 <td><strong>Building custom action handlers</strong><br>Write Blueprint event handlers that receive and complete action structs dispatched by the chatbot.</td>
