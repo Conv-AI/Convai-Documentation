@@ -1,16 +1,37 @@
 ---
 title: How gaze attention works
-description: Understand how the gaze trace pipeline, attention promotion timers, highlight rendering, and the attention-source locking rule interact at runtime.
-last_reviewed: "2026-06-04"
+description: Understand the gaze trace pipeline, attention promotion timers, component-scoped targeting, highlight rendering, and the attention-source locking rule.
+last_reviewed: "2026-06-05"
 ---
 
 Gaze attention is a subsystem inside `UConvaiPlayerComponent` that translates where the player is looking into contextual focus for AI characters. When active, it runs every tick, manages visual feedback through a highlight actor and a cursor widget, and writes to the chatbot's "object in attention" slot after a configurable dwell period.
 
 ## Tick pipeline
 
-Each tick, `UConvaiPlayerComponent` calls `TickGazeAttention` when `bEnableGazeAttention` is `true`. The pipeline runs in this order:
+Each tick, `UConvaiPlayerComponent` calls `TickGazeAttention` when `bEnableGazeAttention` is `true`. The diagram below shows the full decision path; the numbered list that follows describes each stage in detail.
 
-1. A line trace fires forward from the player camera along `GazeTraceChannel` (default `ECC_Visibility`) up to `GazeMaxDistance` centimetres (default 5000 cm).
+```mermaid
+flowchart TD
+    A([TickGazeAttention]) --> B{bEnableGazeAttention?}
+    B -- No --> Z([Skip])
+    B -- Yes --> C[Line trace along GazeTraceChannel\nup to GazeMaxDistance]
+    C --> D{Hit actor with\nConvaiObjectComponent?}
+    D -- Yes --> F[GatherMatchingObjects]
+    D -- No --> E{AngleTolerance > 0\nAND trace not blocked\nby non-Convai geometry?}
+    E -- Yes --> G[Dot-product fallback:\nwalk subsystem pool]
+    E -- No --> H([No gaze target this tick])
+    G --> F
+    F --> I[Spawn / update\nAConvaiGazeHighlightActor]
+    I --> J[Update UConvaiGazeCursorWidget\nstate: Active or Idle]
+    J --> K[Tick GazeAccumulator\nor NoGazeAccumulator]
+    K --> L{GazeAccumulator >=\nGazeAttentionDelay?}
+    L -- Yes --> M([PromoteToAttention\nOnAttentionGained fires])
+    L -- No --> N{NoGazeAccumulator >=\nGazeAttentionLossDelay?}
+    N -- Yes --> O([ReleaseAttention\nOnAttentionLost fires])
+    N -- No --> P([Accumulate — no state change])
+```
+
+1. A line trace fires forward from the player camera or VR HMD along `GazeTraceChannel` (default `ECC_Visibility`) up to `GazeMaxDistance` centimetres (default 5000 cm).
 2. The trace result is tested for a `UConvaiObjectComponent` on the hit actor. If the hit actor (or any of its sub-components) carries a `UConvaiObjectComponent`, the actor becomes the current gaze target.
 3. If the line trace misses, a dot-product fallback runs when `GazeAngleTolerance` is greater than zero. The fallback walks every `UConvaiObjectComponent` registered in the subsystem, discards any that are out of range, behind the camera, or outside the cone half-angle, and picks the one with the highest dot product against the view direction. This avoids a sphere-trace physics query and behaves in a distance-independent way — a distant object needs the same on-screen tolerance as a nearby one.
 4. Any transition between gaze targets (entering or leaving) fires `OnGazeBegin` or `OnGazeEnd` on the player component and updates the cursor widget state.
@@ -32,7 +53,19 @@ When `NoGazeAccumulator` reaches `GazeAttentionLossDelay` seconds (default 5.0) 
 
 ## Attention-source locking rule
 
-The chatbot tracks who last set its attention slot via `AttentionSource` (`EConvaiAttentionSource`). The enum has three values:
+The chatbot tracks who last set its attention slot via `AttentionSource` (`EConvaiAttentionSource`). The `AttentionSource` property on `UConvaiChatbotComponent` advances through three states:
+
+```mermaid
+stateDiagram-v2
+    [*] --> None
+    None --> Gaze : TrySetObjectInAttentionFromGaze()
+    Gaze --> Gaze : New gaze target promoted
+    Gaze --> None : TryClearObjectInAttentionFromGaze()\nor loss timer expires
+    None --> Explicit : SetObjectInAttention() called\nfrom Blueprint/C++
+    Gaze --> Explicit : SetObjectInAttention() called\nfrom Blueprint/C++
+    Explicit --> None : SetObjectInAttention() with\nempty FConvaiObjectEntry
+    Explicit --> Explicit : SetObjectInAttention() with\na new object
+```
 
 | Value | Meaning |
 |---|---|
@@ -50,6 +83,36 @@ If a character's attention slot stays on one object regardless of where the play
 
 `SetObjectInAttention` has no effect when `Enable Actions` (`bEnableActions`) is `false` on the chatbot. Convai only resolves object attention when the `action_config` block was included at session connect — which requires actions to be enabled. Gaze attention therefore requires the actions system to be active on the chatbot.
 
+## Component-scoped gaze
+
+By default, every `UConvaiObjectComponent` on an actor represents the whole actor — the gaze system highlights all meshes and promotes the actor as a unit. When `ComponentName` is set on a `UConvaiObjectComponent`, the component becomes **component-scoped**: it matches only when the player's line trace hits that specific sub-component (or a primitive attached to it).
+
+`GatherMatchingObjects` divides `UConvaiObjectComponent` instances on a hit actor into two groups:
+
+| Group | Condition | Fires when |
+|---|---|---|
+| Whole-actor | `ComponentName` is empty | Any hit on the actor, unless a component-scoped match is found on the same hit primitive |
+| Component-scoped | `ComponentName` resolves to a mesh on the actor | Hit primitive matches (or is attached to) the resolved component |
+
+When a component-scoped component matches, any whole-actor component on the same actor also fires ("piggyback" rule). If the hit primitive does not match any component-scoped component, only whole-actor components fire.
+
+**Example — a door actor with two Convai objects:**
+
+```text
+BP_Door
+├── SM_DoorFrame    (ComponentName empty)        → ConvaiObjectComponent "Door"
+└── SM_Handle       (ComponentName: "Handle")    → ConvaiObjectComponent "DoorHandle"
+```
+
+- Player looks at door frame → `ConvaiObjectComponent "Door"` fires (whole-actor match).
+- Player looks at handle → `ConvaiObjectComponent "DoorHandle"` fires; `ConvaiObjectComponent "Door"` also fires (piggyback). The highlight actor scopes to `SM_Handle` only.
+
+`ComponentName` matching is case-insensitive substring lookup, resolved once and cached. Call `GetResolvedComponent(true)` to force a refresh if the component tree changes at runtime. An unresolved `ComponentName` is logged at load time and that component is excluded from all gaze passes.
+
+{% hint style="info" %}
+Use component-scoped `UConvaiObjectComponent` instances to let a single complex prop expose multiple independent interaction points — each with its own `Name`, `Description`, and gaze events — without duplicating the parent actor.
+{% endhint %}
+
 ## Visual feedback
 
 ### Highlight actor
@@ -58,7 +121,7 @@ When a gaze target is identified, `UConvaiPlayerComponent` spawns (or reuses) an
 
 On UE 5.0–5.2, `SetOverlayMaterial` is not available on `UMeshComponent`. The actor falls back to a `DrawDebugBox` wireframe around the target's bounds using `FallbackBoxThickness` and `FallbackBoxPadding`.
 
-If a `UConvaiObjectComponent` has a `ComponentName` filter set (component-scoped attention), the highlight is stamped only on the specific sub-mesh rather than every mesh on the actor. This lets an actor expose different logical parts independently — for example, a door's "Handle" component triggers a highlight only on the handle mesh.
+When a component-scoped `UConvaiObjectComponent` matches, the highlight scopes to that specific sub-mesh rather than every mesh on the actor. See [Component-scoped gaze](#component-scoped-gaze) above for the matching rules.
 
 ### Cursor widget
 

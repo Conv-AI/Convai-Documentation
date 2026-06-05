@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting and diagnostics
-description: Diagnose and fix gaze attention issues — objects not highlighting, attention never promoting, cursor not appearing, and highlight color not applying.
-last_reviewed: "2026-06-04"
+description: Diagnose and fix gaze attention issues — objects not highlighting, attention never promoting, cursor not appearing, and component-scoped gaze not matching.
+last_reviewed: "2026-06-05"
 ---
 
 Use this page to diagnose and fix the most common gaze attention problems. Each entry follows a symptom / cause / fix / verify structure.
@@ -112,6 +112,22 @@ Use this page to diagnose and fix the most common gaze attention problems. Each 
 **Fix:** Reduce `GazeAngleTolerance` (default 5 degrees, advanced display). If the objects require precise aiming, set `GazeAngleTolerance` to `0` to disable the fallback entirely and require a direct line-trace hit.
 
 **Verify:** Set `GazeAngleTolerance` to `0` and enter Play mode. Objects should only highlight when the crosshair is directly over them.
+
+---
+
+## Component-scoped highlight appears on the wrong sub-mesh or the whole actor
+
+**Symptom:** A `UConvaiObjectComponent` with `ComponentName` set highlights the entire actor instead of only the named sub-mesh, or the highlight does not appear at all when looking at the intended part.
+
+**Cause:** The `ComponentName` value does not match any component on the actor. Common reasons: typo, wrong case (matching is case-insensitive but the substring must appear in the component name), the component was renamed after the value was set, or the component is not a `UPrimitiveComponent` descendant.
+
+**Fix:**
+1. In Play mode, call `GetResolvedComponent(true)` on the `UConvaiObjectComponent` from Blueprint and print the return value. A `nullptr` result means the name did not resolve — check the exact component name in the Details panel hierarchy.
+2. Confirm that `ComponentName` is a substring of the target component's label as shown in the **Components** panel (for example, `"Handle"` matches `SM_DoorHandle` but not `SM_Knob`).
+3. If the actor's component tree is built at runtime (procedural generation, dynamic attachment), call `GetResolvedComponent(true)` after the tree is fully constructed rather than relying on the cached result from load time.
+4. Confirm the target component has collision enabled on the `GazeTraceChannel`. A component with no collision will never be hit by the line trace, so the scoped match cannot fire even if the name resolves correctly.
+
+**Verify:** After correcting `ComponentName`, enter Play mode and aim the crosshair at the specific sub-mesh. Only that mesh should highlight; other parts of the actor should remain unaffected. `GetResolvedComponent(false)` should return the correct component reference.
 
 ---
 
