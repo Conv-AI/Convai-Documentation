@@ -16,19 +16,19 @@ This guide walks through connecting a MetaHuman to the Convai Unreal Engine plug
 
 {% stepper %}
 {% step %}
-#### Open Quixel Bridge
+### Open Quixel Bridge
 
 In the Unreal Editor menu bar, select **Window > Quixel Bridge**. In the bridge panel, navigate to the **MetaHuman** section.
 {% endstep %}
 
 {% step %}
-#### Export a MetaHuman to your project
+### Export a MetaHuman to your project
 
 Select the MetaHuman you want to use and click to export it to your project. The first export may take a few minutes while textures and assets download. When the export completes, a `MetaHumans` folder appears in the **Content Browser**.
 {% endstep %}
 
 {% step %}
-#### Open the MetaHuman Blueprint
+### Open the MetaHuman Blueprint
 
 In the **Content Browser**, open the `MetaHumans` folder, find your MetaHuman, and double-click the Blueprint (`.uasset`) file. If Unreal Engine prompts you to enable missing plugins required by the MetaHuman, click **Yes** and restart the editor. After restart, reopen the MetaHuman Blueprint.
 {% endstep %}
@@ -38,7 +38,7 @@ In the **Content Browser**, open the `MetaHumans` folder, find your MetaHuman, a
 
 {% stepper %}
 {% step %}
-#### Add the Convai Chatbot component
+### Add the Convai Chatbot component
 
 In the Blueprint editor for your MetaHuman, click **Add** in the **Components** panel. Search for `BP Convai ChatBot Component` and select it.
 
@@ -46,7 +46,7 @@ In the **Details** panel for the component, paste your **Character ID** from the
 {% endstep %}
 
 {% step %}
-#### Add the Convai Face Sync component
+### Add the Convai Face Sync component
 
 Click **Add** again in the **Components** panel. Search for `Convai Face Sync` and add `UConvaiFaceSyncComponent`.
 
@@ -60,19 +60,19 @@ MetaHuman characters use separate animation blueprints for body and face. The Co
 
 {% stepper %}
 {% step %}
-#### Set the body animation class
+### Set the body animation class
 
 In the Blueprint editor, select the **Body** skeletal mesh component. In the **Details** panel, find the **Anim Class** field under **Animation**. Set it to `Convai_MetaHuman_BodyAnim`.
 {% endstep %}
 
 {% step %}
-#### Set the face animation class
+### Set the face animation class
 
 Select the **Face** skeletal mesh component. In the **Details** panel, find the **Anim Class** field. Set it to `Convai_MetaHuman_FaceAnim`.
 {% endstep %}
 
 {% step %}
-#### Compile and save
+### Compile and save
 
 Click **Compile** and then **Save** in the Blueprint editor toolbar.
 {% endstep %}

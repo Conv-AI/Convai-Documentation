@@ -18,19 +18,19 @@ The window opens and shows a sign-in form if you are not yet authenticated.
 
 {% stepper %}
 {% step %}
-#### Enter your Convai credentials
+### Enter your Convai credentials
 
 In the Convai editor window, sign in with your Convai account credentials. If you do not have an account, create one at <code class="expression">space.vars.dashboard_url</code>.
 {% endstep %}
 
 {% step %}
-#### Complete authentication
+### Complete authentication
 
 Follow the authentication flow in the window. When authentication completes, close the sign-in panel.
 {% endstep %}
 
 {% step %}
-#### Verify your login
+### Verify your login
 
 Click the Convai icon in the toolbar again. The Convai editor window should now show your account dashboard with your login details visible. This confirms that the API key has been stored successfully.
 {% endstep %}

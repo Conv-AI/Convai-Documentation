@@ -37,25 +37,25 @@ The 3D widget (`BP_Convai3DWidgetComponent` / `WBP_3DChatWidget`) renders a floa
 
 {% stepper %}
 {% step %}
-#### Open the character Blueprint
+### Open the character Blueprint
 
 Open the NPC character Blueprint that already has `BP_ConvaiChatbotComponent` attached.
 {% endstep %}
 
 {% step %}
-#### Add the 3D Widget component
+### Add the 3D Widget component
 
 In the **Components** panel, click **Add**. Search for `BP Convai 3D Widget Component` and select it. This adds `BP_Convai3DWidgetComponent` to the Blueprint.
 {% endstep %}
 
 {% step %}
-#### Position the widget
+### Position the widget
 
 Select the **BP Convai 3D Widget Component** in the **Components** panel. In the **Details** panel, adjust **Transform > Location** to position the widget above the character's head. For a standard-height character, `(X=0, Y=0, Z=200)` places the panel roughly above the head.
 {% endstep %}
 
 {% step %}
-#### Compile and save
+### Compile and save
 
 Click **Compile** and **Save** in the Blueprint editor toolbar.
 {% endstep %}
@@ -71,13 +71,13 @@ If neither the built-in overlay nor the 3D panel matches your project's UI desig
 
 {% stepper %}
 {% step %}
-#### Create a Widget Blueprint
+### Create a Widget Blueprint
 
 In the **Content Browser**, right-click and select **User Interface > Widget Blueprint**. Design your custom chat display — a scroll box, a subtitle bar, or any layout you need.
 {% endstep %}
 
 {% step %}
-#### Bind the transcript delegate
+### Bind the transcript delegate
 
 In your widget's event graph (or in the owning actor Blueprint), bind to `OnTranscriptionReceivedDelegate` on the `UConvaiChatbotComponent`:
 
@@ -86,18 +86,16 @@ In your widget's event graph (or in the owning actor Blueprint), bind to `OnTran
 - `IsTranscriptionReady` — `true` when the text is ready to render.
 
 Append each final transcript to your display panel to build up the conversation history.
+
+`OnTranscriptionReceivedDelegate` is available on both the chatbot component (character response) and the player component (player speech). Bind to the **chatbot component** for what the character says, and to the **player component** for what the player said. See [Event system](../core-concepts/event-system.md) for the full delegate signature.
 {% endstep %}
 
 {% step %}
-#### Disable the built-in overlay
+### Disable the built-in overlay
 
 Set **Interface Selection** to `0` on `BP_ConvaiPlayerComponent` to hide the built-in overlay so it does not overlap your custom widget.
 {% endstep %}
 {% endstepper %}
-
-{% hint style="info" %}
-`OnTranscriptionReceivedDelegate` is available on both the chatbot component (character response transcript) and the player component (player speech transcript). Bind to the **chatbot component** to display what the character is saying, and to the **player component** to display what the player said. See [Event system](../core-concepts/event-system.md) for the full delegate signature.
-{% endhint %}
 
 ## Troubleshooting
 
@@ -121,7 +119,11 @@ Set **Interface Selection** to `0` on `BP_ConvaiPlayerComponent` to hide the bui
 
 **Symptom:** The screen-space overlay and the floating 3D panel are both visible, creating duplicate transcript displays.
 
+**Cause:** `BP_Convai3DWidgetComponent` was added to the character without disabling the screen-space overlay on the player pawn.
+
 **Fix:** Set **Interface Selection** to `0` on `BP_ConvaiPlayerComponent` to hide the screen-space overlay, leaving only the 3D widget active.
+
+**Verify:** Enter Play mode and confirm that only the 3D panel above the character is visible — no second overlay appears in the viewport corners.
 
 ## Next steps
 

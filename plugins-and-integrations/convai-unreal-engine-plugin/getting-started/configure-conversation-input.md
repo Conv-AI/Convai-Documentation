@@ -82,11 +82,7 @@ Use these Blueprint-callable functions from `UConvaiUtils` (no component referen
 Set `bUseServerDefault` to `false` before assigning any other field — otherwise the server ignores all local values.
 {% endhint %}
 
-## Chat UI styles
-
-`BP_ConvaiPlayerComponent` and `BP_ConvaiSamplePlayer` ship a built-in chat widget. The **Convai Player** component's **Details** panel exposes an **Interface Selection** property with three style options (values `1`, `2`, and `3`). For full details on the chat widget, the 3D in-world panel, and replacing the widget with a custom design, see [Add the chat UI](add-chat-ui.md).
-
-## Recording audio manually
+## Recording and state inspection
 
 For workflows where you want to capture a complete audio clip before sending — rather than streaming in real time — use the recording API:
 
@@ -97,12 +93,14 @@ For workflows where you want to capture a complete audio clip before sending —
 
 You can process or play back the returned `USoundWave`, or pass it to other Blueprints. This path is separate from the streaming pipeline and does not interact with the active chatbot session.
 
-## Check streaming and recording state
+To check streaming and recording state at any time:
 
 | Function | Returns | Description |
 |---|---|---|
 | `GetIsStreaming()` | `bool` | `true` while audio is being streamed to a chatbot. |
 | `GetIsRecording()` | `bool` | `true` while manual recording is in progress. |
+
+For full details on the built-in chat overlay, the 3D in-world widget, and wiring a custom transcript UI, see [Add the chat UI](add-chat-ui.md).
 
 ## Troubleshooting
 

@@ -31,19 +31,19 @@ By default, character speech does not attenuate with distance. To add distance-b
 
 {% stepper %}
 {% step %}
-#### Create a Sound Attenuation asset
+### Create a Sound Attenuation asset
 
 In the **Content Browser**, right-click and select **Sounds > Sound Attenuation**. Name it (for example, `SA_ConvaiCharacter`). Open it and configure the attenuation shape, falloff distance, and volume curve to match your scene scale.
 {% endstep %}
 
 {% step %}
-#### Assign the attenuation to the chatbot component
+### Assign the attenuation to the chatbot component
 
 Open the character Blueprint and select the **Convai Chatbot** component. In the **Details** panel, expand the **Attenuation** section (inherited from `UAudioComponent`). Enable **Override Attenuation** and assign your `SA_ConvaiCharacter` asset.
 {% endstep %}
 
 {% step %}
-#### Test the attenuation
+### Test the attenuation
 
 Enter Play mode. Walk toward and away from the character. Speech volume should change with distance according to the falloff curve.
 {% endstep %}
@@ -61,11 +61,7 @@ When `InterruptSpeech` is called on `UConvaiChatbotComponent`, the character's s
 |---|---|---|
 | `InterruptVoiceFadeOutDuration` | `Convai` | Seconds over which speech audio fades to silence when interrupted. Shorter values feel more responsive; longer values sound more natural. |
 
-To configure it, select the **Convai Chatbot** component and find **Interrupt Voice Fade Out Duration** in the **Convai** category of the **Details** panel.
-
-{% hint style="info" %}
-You can also override the fade duration per-call by passing `InVoiceFadeOutDuration` directly to `InterruptSpeech` in Blueprint. The per-call value takes precedence over the component's default for that specific interruption.
-{% endhint %}
+To configure it, select the **Convai Chatbot** component and find **Interrupt Voice Fade Out Duration** in the **Convai** category of the **Details** panel. You can also override the fade duration per-call by passing `InVoiceFadeOutDuration` directly to `InterruptSpeech` in Blueprint — the per-call value takes precedence over the component default for that interruption.
 
 ## Troubleshooting
 

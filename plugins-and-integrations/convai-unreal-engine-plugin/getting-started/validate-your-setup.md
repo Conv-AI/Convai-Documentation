@@ -46,19 +46,19 @@ Run this check after all others pass.
 
 {% stepper %}
 {% step %}
-#### Enter Play mode
+### Enter Play mode
 
 Press **Play** in the Unreal Editor toolbar.
 {% endstep %}
 
 {% step %}
-#### Start a conversation
+### Start a conversation
 
 Hold push-to-talk (default: **V**) and speak a short phrase, then release. Alternatively, type a message in the chat widget and press **Enter**.
 {% endstep %}
 
 {% step %}
-#### Observe the character state
+### Observe the character state
 
 While you are speaking, `IsListening()` on `UConvaiChatbotComponent` returns `true`. While the character is generating a response, `IsProcessing()` ("Is Thinking") returns `true`. While the character is speaking, `GetIsTalking()` ("Is Talking") returns `true`.
 
@@ -66,7 +66,7 @@ Add **Print String** nodes in Blueprint connected to these functions to observe 
 {% endstep %}
 
 {% step %}
-#### Confirm audio output
+### Confirm audio output
 
 The character speaks an audible response. If lip sync is configured, the character's mouth moves in sync with the speech.
 {% endstep %}
@@ -88,18 +88,18 @@ When validation passes, the character responds with audio and — if configured 
 
 ## Next steps
 
-{% content-ref url="scene-components.md" %}
-[Scene components](scene-components.md)
+{% content-ref url="configure-microphone.md" %}
+[Configure the microphone](configure-microphone.md)
 {% endcontent-ref %}
 
-{% content-ref url="set-up-a-metahuman-character.md" %}
-[Set up a MetaHuman character](set-up-a-metahuman-character.md)
-{% endcontent-ref %}
-
-{% content-ref url="set-up-a-reallusion-character.md" %}
-[Set up a Reallusion (CC) character](set-up-a-reallusion-character.md)
+{% content-ref url="configure-character-audio.md" %}
+[Configure character audio](configure-character-audio.md)
 {% endcontent-ref %}
 
 {% content-ref url="configure-conversation-input.md" %}
 [Configure conversation input](configure-conversation-input.md)
+{% endcontent-ref %}
+
+{% content-ref url="add-chat-ui.md" %}
+[Add the chat UI](add-chat-ui.md)
 {% endcontent-ref %}

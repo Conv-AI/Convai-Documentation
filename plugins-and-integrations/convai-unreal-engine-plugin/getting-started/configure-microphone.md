@@ -8,7 +8,7 @@ last_reviewed: "4.0.0-beta.21"
 
 ## Default behavior
 
-When `UConvaiPlayerComponent` initializes, it opens the system's default microphone automatically. No additional configuration is required for this path. If the default device works for your project, skip to [Configure conversation input](configure-conversation-input.md).
+When `UConvaiPlayerComponent` initializes, it opens the system's default microphone automatically. No additional configuration is required for this path. If the default device works for your project, skip to [Configure character audio](configure-character-audio.md).
 
 ## Enumerate available devices
 
