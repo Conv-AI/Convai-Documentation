@@ -103,6 +103,42 @@ Use the **AndroidPermission** Blueprint nodes to request the permission:
 
 The `AndroidPermission` plugin nodes are in the `Android Permission` Blueprint category. They are no-ops on Win64 — the same Blueprint graph works on both platforms without platform guards.
 
+## Blueprint usage patterns
+
+### Building a device picker in a settings menu
+
+On the widget's `Construct` event, call `GetAvailableCaptureDeviceNames` on the player component reference and wire the returned `TArray<FString>` to the **Set Options** input of a **ComboBox (String)**. To pre-select the active device, call `GetActiveCaptureDevice` and match `DeviceName` against the options list, then call **Set Selected Option** with that string. Bind **On Selection Changed** to a custom event that calls `SetCaptureDeviceByName` with the selected option.
+
+### Connecting a volume slider to microphone gain
+
+Bind the **On Value Changed** event of a **Slider** widget to a custom event. Inside the event, call `SetMicrophoneVolumeMultiplier` on the player component with the slider's current float value. Check the `Success` output — `false` means no capture device is active and the label should reflect this. A slider range of `0.0`–`2.0` covers silence through double gain; `1.0` applies no change.
+
+## Troubleshooting
+
+### Device enumeration returns an empty array on the first frame
+
+**Cause:** The audio capture subsystem enumerates devices asynchronously during engine startup. Calling `GetAvailableCaptureDeviceDetails` or `GetAvailableCaptureDeviceNames` in a constructor, `PreBeginPlay`, or the first tick can return empty before enumeration completes.
+
+**Fix:** Defer the device query to `BeginPlay` or later. A short **Delay** node of `0.1` s is sufficient on most platforms.
+
+**Verify:** Call `GetAvailableCaptureDeviceDetails` from a button press during PIE — if it returns devices when triggered manually but not in `BeginPlay`, the timing issue is confirmed.
+
+### Volume multiplier has no effect
+
+**Cause:** When hardware AEC is active — either because the device reports `bSupportsHardwareAEC = true` or because software AEC is enabled in project settings — the audio pipeline bypasses the software volume stage and manages gain internally.
+
+**Fix:** Check `IsAECEnabled` (from [Convai utility functions](utility-functions.md)) and `GetActiveCaptureDevice.bSupportsHardwareAEC`. If either is `true`, the multiplier path is inactive. Disable AEC in **Project Settings → Plugins → Convai** if software gain control is required.
+
+**Verify:** Call `GetMicrophoneVolumeMultiplier` after setting a value — if `Success` is `true` and the stored value is correct but the captured level is unchanged, AEC gain override is the cause.
+
+### Android build crashes on first microphone access
+
+**Cause:** `android.permission.RECORD_AUDIO` was not granted before audio capture started. On some Android versions, calling capture functions without the permission throws a fatal exception.
+
+**Fix:** Follow the [Android microphone permission](#android-microphone-permission) flow — check, request, and confirm the permission before calling `StartSession` or `UnmuteStreamingAudio`.
+
+**Verify:** Run with `adb logcat` — a `java.lang.SecurityException: Permission Denial` entry for `RECORD_AUDIO` confirms the permission was absent when capture started.
+
 ## Related reference
 
 The player component page covers the full property surface; the how-to page walks through selecting and testing a device before shipping.

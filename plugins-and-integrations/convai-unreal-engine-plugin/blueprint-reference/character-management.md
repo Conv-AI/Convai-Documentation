@@ -218,6 +218,34 @@ Returns the set of voices available for a given voice type, language, and gender
 The **DEPRECATED Convai Chatbot Get Response** nodes (visible under the `Convai|DEPRECATED` category in the Blueprint palette) are legacy HTTP proxy nodes. For real-time NPC conversation, use `UConvaiPlayerComponent` and `UConvaiChatbotComponent` instead.
 {% endhint %}
 
+## Blueprint usage patterns
+
+### Creating a character and wiring its ID to a chatbot
+
+Drag a **Convai Create Character** node into your Event Graph and supply `CharName`, `Voice`, and `Backstory`. On the `OnSuccess` execution path, wire `CharID` to a variable setter to cache the new character ID. Then pass that variable to `SetCharacterID` on your `UConvaiChatbotComponent` reference — this triggers `LoadCharacter` automatically and the character becomes ready for conversation.
+
+### Populating a voice dropdown
+
+Call **Convai Get Available Voices** with the desired `VoiceType`, `LanguageType`, and `Gender` filter values. On `OnSuccess`, iterate `AvailableVoices.AvailableVoices` using a **For Each Map** node. Use the map key as the display label in a **ComboBox (String)** widget. When the player confirms a selection, store the corresponding `FVoiceLanguageStruct.VoiceValue` and pass it to the `NewVoice` pin of **Convai Update Character**.
+
+## Troubleshooting
+
+### `OnFailure` fires immediately on any node
+
+**Cause:** The Convai API key is missing or incorrect. All REST API nodes authenticate with the same key used for live sessions.
+
+**Fix:** Open **Project Settings → Plugins → Convai** and paste a valid API key from the Convai dashboard. Restart the editor after saving. If the key is set at runtime with `SetAPI_Key`, call that node before any REST node fires.
+
+**Verify:** Open the Output Log and search for `Convai: HTTP` — an `HTTP 401` or `HTTP 403` entry confirms authentication failure.
+
+### **Convai Get All Characters IDs** returns an empty array
+
+**Cause:** No characters exist under the account associated with the current API key, or the key belongs to a different workspace.
+
+**Fix:** Log in to the Convai dashboard and confirm at least one character exists under the API key in use. Compare the key in Project Settings against the one shown on the dashboard profile.
+
+**Verify:** Call **Convai Get All Characters IDs** from a test button during PIE and print the array length — a length of `0` on `OnSuccess` (not `OnFailure`) confirms the account has no characters rather than an authentication problem.
+
 ## Related reference
 
 {% content-ref url="convai-chatbot-component.md" %}

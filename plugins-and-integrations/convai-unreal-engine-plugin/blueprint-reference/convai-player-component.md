@@ -66,6 +66,8 @@ The player component captures microphone audio through an attached `UConvaiAudio
 | `PreferredSampleRate` | `int` | Device's preferred sample rate. |
 | `bSupportsHardwareAEC` | `bool` | `true` when the device supports hardware acoustic echo cancellation. |
 
+`FCaptureDeviceInfoBP` is also documented alongside the audio capture component in [Microphone and audio capture](microphone-and-audio-capture.md).
+
 ### Volume
 
 | Function | Inputs | Category | Description |
@@ -122,6 +124,8 @@ Gaze attention lets the player component automatically promote in-scene objects 
 | `GazeAngleTolerance` | `float` | `5.0` | `Convai\|Gaze Attention` | Half-angle of a dot-product fallback cone (degrees) used when the strict line trace does not hit anything. `0` disables the fallback. |
 | `GazeTraceChannel` | `ECollisionChannel` | `ECC_Visibility` | `Convai\|Gaze Attention` (Advanced) | Collision channel used by the gaze line trace. |
 
+`GazeShouldRespond` accepts `EC_RunLLMOption` values (`Auto`, `Always`, `Never`). For value descriptions, see [Data types and enums](data-types-and-enums.md).
+
 ### Highlight settings
 
 These settings control the silhouette overlay drawn over the gazed-at object.
@@ -171,6 +175,46 @@ Gaze events only fire when `bEnableGazeAttention` is `true`.
 | `OnAttentionLost` | `Convai\|Gaze Attention\|Events` | The attention slot is released: the player looked away for longer than `GazeAttentionLossDelay`, another object took the slot, or the attention target was destroyed. |
 
 See [Event system](../core-concepts/event-system.md) for binding patterns and full parameter details.
+
+## Blueprint usage patterns
+
+### Push-to-talk recording
+
+On an **Input Action Pressed** event for your push-to-talk key, call `StartRecording` on the player component. On the corresponding **Input Action Released** event, call `FinishRecording` — it returns a `USoundWave`. To send the captured utterance as a text message to a chatbot, pass the `USoundWave` through a speech-to-text node, then feed the transcription string to `SendText`. Alternatively, unmute streaming audio (`UnmuteStreamingAudio`) on press and mute it on release (`MuteStreamingAudio`) to stream live microphone audio to the active session instead.
+
+### Populating a microphone device picker
+
+Call `GetAvailableCaptureDeviceNames` on `BeginPlay` and wire the returned `TArray<FString>` into a **Create Widget** flow that feeds a **ComboBox (String)**. Bind the **On Selection Changed** event of the combo box to a custom event that calls `SetCaptureDeviceByName` with the selected string. To pre-select the active device, call `GetActiveCaptureDevice` and match `DeviceName` against the list.
+
+### Enabling gaze attention and reacting to object focus
+
+Set `bEnableGazeAttention = true` on the player component. Configure `GazeAttentionDelay` (default `1.0` s) for how long the player must look before attention is promoted, and `GazeAttentionLossDelay` (default `5.0` s) for how long they can look away before it is released. Bind the **On Attention Gained** event on the player component — it fires with `PlayerComponent` and `ObjectComponent` pins. From `ObjectComponent`, get the object's name or tag to determine which object gained focus and drive UI highlights, dialogue triggers, or state changes.
+
+## Troubleshooting
+
+### Player not connecting
+
+**Cause:** `StartSession` was never called, or `bAutoInitializeSession` was set to `false` without a manual `StartSession` call in `BeginPlay`.
+
+**Fix:** Confirm `bAutoInitializeSession` is `true`, or add a `StartSession` call in `BeginPlay`. Check the Output Log for `Convai:` errors — a missing API key in **Project Settings → Plugins → Convai** also prevents connection.
+
+**Verify:** Call `IsPlayerConnected` after a short delay — it should return `true` once the WebRTC channel is open.
+
+### Microphone not capturing audio
+
+**Cause:** The device index passed to `SetCaptureDeviceByIndex` is out of range, or on Android the microphone permission has not been granted.
+
+**Fix:** Call `GetAvailableCaptureDeviceDetails` and inspect the returned array to confirm the intended device index is valid. On Android, call `AndroidRequestMicrophonePermission` before starting the session and verify the permission is granted before capturing.
+
+**Verify:** Call `GetIsStreaming` after `UnmuteStreamingAudio` — it should return `true`. If it returns `false`, no capture device is active.
+
+### Gaze highlight does not appear
+
+**Cause:** Either `bEnableGazeAttention` is `false` (the master switch is off) or `GazeHighlightActorClass` is unset, so no highlight actor is spawned when gaze hits an object.
+
+**Fix:** Confirm `bEnableGazeAttention` is `true` on the player component. If `GazeHighlightActorClass` is empty, the plugin uses its built-in default — verify the plugin content is present under `/ConvAI/Highlights/`. For a custom visual, set `GazeHighlightActorClass` to a subclass of `AConvaiGazeHighlightActor`.
+
+**Verify:** Enable `bShowGazeCursor` and confirm the cursor appears at screen center — if the cursor shows but no highlight, the issue is in `GazeHighlightActorClass`. If neither appears, `bEnableGazeAttention` is likely `false`.
 
 ## Related reference
 

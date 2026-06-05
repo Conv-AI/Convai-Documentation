@@ -147,6 +147,7 @@ These nodes read and write runtime settings on the active `UConvaiSettings` inst
 | `SetVADSettings` | `Convai\|Settings` | `BlueprintCallable` | Overwrites the VAD settings on the active `UConvaiSettings` instance. Persisted to `.ini` on save. Input: `InSettings (FConvaiVADSettings)`. |
 | `IsAlwaysAllowVisionEnabled` | `Convai\|Settings` | `BlueprintPure` | Returns `true` when the Always Allow Vision setting is enabled. |
 
+`FConvaiVADSettings` field descriptions (`bUseServerDefault`, `Confidence`, `StartSecs`, `StopSecs`, `MinVolume`) are in [Data types and enums](data-types-and-enums.md).
 
 ## Audio helpers
 
@@ -342,6 +343,43 @@ Detection rules:
 | `GetCommandLineFlagValueAsStringNoDefault` | `BlueprintCallable`, `BlueprintPure` | `FString` | Returns the string value of `Flag` with no default parameter. |
 | `GetCommandLineFlagValueAsDouble` | `BlueprintCallable`, `BlueprintPure` | `double` | Returns the double value of `Flag`. Returns `DefaultValue` (default `0.0`) when the flag is absent. |
 
+
+## Connection management
+
+`UConvaiConnectionLibrary` is a Blueprint function library that exposes connection pre-warming. Its node appears in the **Convai|Connection** category and does not need to be attached to an Actor.
+
+### `PrepareCharacterConnection`
+
+Category: `Convai|Connection` — `BlueprintCallable`
+
+Starts a warm Convai session for `CharacterID` with no owner. A later `StartSession` call for the same character reuses this pre-warmed connection without a fresh handshake, reducing first-connect latency.
+
+| Pin | Direction | Type | Description |
+|---|---|---|---|
+| `WorldContextObject` | Input | `UObject*` | World context (auto-wired in Blueprint). |
+| `CharacterID` | Input | `FString` | The character ID to pre-warm. |
+| `PrepTTLOverrideSeconds` | Input | `float` | Duration of the warm window in seconds. Pass `0` or a negative value to use the project default (`GetPrepConnectionTTL`). Positive values are clamped to [1, 600]. |
+| `Return value` | Output | `EC_PrepResult` | Outcome of the prep request — `Accepted`, `AlreadyWarm`, `Rejected`, `InvalidInput`, `Disabled`, or `InternalError`. See [Data types and enums](data-types-and-enums.md) for value descriptions. |
+
+## Blueprint usage patterns
+
+### Pre-warming a character connection on level load
+
+In your level Blueprint's **BeginPlay** event, call `PrepareCharacterConnection` with the target character's ID. Leave `PrepTTLOverrideSeconds` at `0` to use the project default. Connect a **Switch on EC_PrepResult** node to log or discard the result. The warm session persists until its TTL expires; when the player triggers conversation and the chatbot calls `StartSession`, the handshake completes in one round-trip instead of two.
+
+### Remapping blendshapes with `MapBlendshapes`
+
+Call `MapBlendshapes` with the raw blendshape map from `ConvaiGetFaceBlendshapes` on the chatbot component reference and a `BlendshapeMap` data-table asset that defines per-blendshape multipliers, offsets, and target rig names. Feed the return value into **Apply Morph Target** or your mesh driver. Adjust `GlobalMultiplier` to scale all blendshapes at once during runtime tuning without rebuilding the mapping asset.
+
+## Troubleshooting
+
+### `GetBodyAndFaceSkeletalMeshComponents` returns `nullptr` for body or face
+
+**Cause:** The scoring heuristic matches against standard bone-name tokens (`"pelvis"`, `"hand"`, `"neck"`, `"eye"`, `"jaw"`, `"brow"`, …). Custom skeletons with non-standard names — for example `"Root_Spine"` instead of `"pelvis"` — score zero and the fallback rule applies: body defaults to the first skeletal mesh component, face returns `nullptr`.
+
+**Fix:** After calling `GetBodyAndFaceSkeletalMeshComponents`, null-check both outputs. When face is missing, retrieve skeletal mesh components directly with **Get Components by Class** and assign them manually.
+
+**Verify:** In PIE, call `GetBodyAndFaceSkeletalMeshComponents` and print both output display names — the printed names confirm which mesh won each scoring slot.
 
 ## Related reference
 

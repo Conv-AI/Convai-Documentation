@@ -4,7 +4,7 @@ description: Find the complete Blueprint-exposed surface — properties, functio
 last_reviewed: "2026-06-05"
 ---
 
-The Blueprint reference covers every property, function, and event exposed to Blueprint for the runtime components, audio capture, utility library, and character management REST API nodes. Use these pages when you need exact names, types, defaults, or parameter descriptions.
+The Blueprint reference covers every property, function, and event exposed to Blueprint for the runtime components — chatbot, player, and world objects — the audio capture component, the utility library, character management REST API nodes, and all shared data types. Use these pages when you need exact names, types, defaults, or parameter descriptions.
 
 The **Convai Subsystem** connection surface (`GetServerConnectionState`, `ResetIdleTimer`, `InvalidateOrphanedConnection`, `OnServerConnectionStateChangedEvent`, and `OnUserIdleWarning`) is documented in [Session lifecycle](../core-concepts/session-lifecycle.md), not here.
 
@@ -25,6 +25,10 @@ The **Convai Subsystem** connection surface (`GetServerConnectionState`, `ResetI
 <td><a href="convai-player-component.md">convai-player-component.md</a></td>
 </tr>
 <tr>
+<td><strong>Convai Object Component</strong><br>Properties, functions, and events for the world object tagging component, including identity, tracked properties, proximity state, and gaze attention.</td>
+<td><a href="convai-object-component.md">convai-object-component.md</a></td>
+</tr>
+<tr>
 <td><strong>Convai utility functions</strong><br>Blueprint utility library — look-at helpers, component lookups, file I/O, audio helpers, blendshape tools, and settings accessors.</td>
 <td><a href="utility-functions.md">utility-functions.md</a></td>
 </tr>
@@ -35,6 +39,10 @@ The **Convai Subsystem** connection surface (`GetServerConnectionState`, `ResetI
 <tr>
 <td><strong>Character management</strong><br>Blueprint async nodes for creating, updating, and fetching character details via the Convai REST API.</td>
 <td><a href="character-management.md">character-management.md</a></td>
+</tr>
+<tr>
+<td><strong>Data types and enums</strong><br>Reference for every Blueprint-exposed struct and enum — object entries, action types, emotion values, connection states, and audio settings.</td>
+<td><a href="data-types-and-enums.md">data-types-and-enums.md</a></td>
 </tr>
 </tbody>
 </table>

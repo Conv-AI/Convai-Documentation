@@ -153,6 +153,8 @@ These functions update the character's runtime context without restarting the se
 | `ResetDynamicContext` (display name **Reset Dynamic Context**) | — | `Convai\|DynamicContext` | Clears all tracked state properties and events and resets the remote context. |
 | `GetContextStateValue` (display name **Get Context State Value**) | `Name (FString)` → `OutValue (FString)`, returns `bool` | `Convai\|DynamicContext` | Returns the current value of a tracked state property. Returns `false` when the property does not exist. |
 
+`Mode` in `UpdateContext` accepts `EC_ContextUpdateMode` values; `ShouldRespond` on all dynamic context functions accepts `EC_RunLLMOption` values. For value descriptions, see [Data types and enums](data-types-and-enums.md).
+
 ### Dynamic context debounce settings
 
 | Property | Type | Default | Category | Description |
@@ -286,6 +288,8 @@ These properties drive gaze and pointing IK in the AnimBP. They have no effect o
 | `GetEmotionBlendshapes` | — | `TMap<FName, float>` | `Convai\|Emotion` | Returns the current emotion blendshape map for direct application to a skeletal mesh. |
 | `ResetEmotionState` | — | — | `Convai\|Emotion` | Clears all emotion scores back to neutral. |
 
+For `EBasicEmotions` and `EEmotionIntensity` value descriptions, see [Data types and enums](data-types-and-enums.md).
+
 See [Emotion Blueprint reference](../features/emotion/emotion-blueprint-reference.md) for usage patterns.
 
 ## Events (Blueprint-assignable delegates)
@@ -319,6 +323,54 @@ Bind these in your character Blueprint using the **Assign** node on the `Convai 
 {% endhint %}
 
 See [Event system](../core-concepts/event-system.md) for binding patterns and timing details.
+
+## Blueprint usage patterns
+
+### Handling actions from `OnActionReceivedEvent_V2`
+
+Bind the **On Actions Received** event on your chatbot component reference. When it fires, the `SequenceOfActions` output pin carries a `TArray<FConvaiResultAction>`. Connect that pin to a **For Each Loop** node. Inside the loop body, drag off `Array Element` and use a **Switch on String** node driven by the `Action` field to branch on each action name. At the end of each branch — after spawning an effect, playing an animation, or moving a door — call `HandleActionCompletion` on the chatbot component reference.
+
+### Advancing the queue with `HandleActionCompletion`
+
+After your Blueprint finishes the logic for one action, call `HandleActionCompletion` with `IsSuccessful = true`. Leave `bAutoReport = true` and `ShouldRespond = Never` to silently inform the LLM without interrupting the character. If the action fails — the target Actor is no longer valid, navigation is blocked — call `HandleActionCompletion` with `IsSuccessful = false` to clear the remaining queue and let the LLM generate a new plan on the player's next turn.
+
+### Tracking live world state with `SetContextState` and `AddContextEvent`
+
+Call `SetContextState` with a key such as `"DoorState"` and value `"open"` whenever a relevant property changes. Calling it again with `"closed"` replaces the previous value in place. To record a moment in time rather than a current state — a player action, an NPC spawn — use `AddContextEvent` with a short sentence such as `"Player opened the merchant's chest"`. Set `ShouldRespond = Never` on both calls to keep context current without triggering a spoken response; use `Always` only when the event should cause the character to react immediately.
+
+## Troubleshooting
+
+### Character data does not load after setting `CharacterID`
+
+**Cause:** `CharacterID` was assigned before `BeginPlay`, before the Convai subsystem and HTTP client are initialized. The `LoadCharacter` call fires too early and silently fails.
+
+**Fix:** Assign `CharacterID` in `BeginPlay` or later, not in the constructor or a pre-BeginPlay event. With `bAutoInitializeSession = true`, `StartSession` (which includes `LoadCharacter`) runs at the correct time automatically.
+
+**Verify:** Bind `OnCharacterDataLoadEvent_V2` and confirm it fires with `Success = true` after `StartSession`.
+
+### Session does not connect
+
+**Cause:** The Convai API key is missing or incorrect in **Project Settings → Plugins → Convai**.
+
+**Fix:** Open **Project Settings → Plugins → Convai**, paste a valid API key from the Convai dashboard, and restart the editor after saving.
+
+**Verify:** Check the Output Log for a `Convai:` error on connect. `GetChatbotConnectionState` should transition from `Connecting` to `Connected` within a few seconds of `StartSession`.
+
+### `OnActionReceivedEvent_V2` never fires
+
+**Cause:** `EnvironmentData.bEnableActions` is `false`, or the `Actions` array in `EnvironmentData` is empty. Convai only generates action outputs when at least one action template with a non-empty `Name` is registered.
+
+**Fix:** In the **Details** panel, expand **Environment**, confirm **Enable Actions** is checked, and verify the `Actions` array has at least one entry with a non-empty `Name`.
+
+**Verify:** After `StartSession`, call `IsActionsQueueEmpty` — if it returns `true` even after the player speaks a command that matches a registered action, the action set was not sent correctly.
+
+### Emotion does not update mid-session
+
+**Cause:** `LockEmotionState` is `true` — the component ignores all incoming emotion updates from Convai. Because this property is serialized, a Blueprint default or a saved level override can set it without an obvious code path.
+
+**Fix:** Select the chatbot Actor in the **Details** panel and confirm **Lock Emotion State** is unchecked.
+
+**Verify:** Call `GetEmotionScore(Joy)` before and after the character speaks a happy line — the score should change when `LockEmotionState` is `false`.
 
 ## Related reference
 
