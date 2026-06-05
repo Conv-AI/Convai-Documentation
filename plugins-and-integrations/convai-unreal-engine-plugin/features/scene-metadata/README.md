@@ -1,12 +1,12 @@
 ---
 title: Scene metadata
-description: Understand how the Convai Object Component makes world actors visible to AI characters and how to manage the scene environment at runtime.
-last_reviewed: "2026-06-04"
+description: Find guides, component reference, and examples for Scene Metadata — the feature that gives Convai characters awareness of actors in your Unreal Engine level.
+last_reviewed: "2026-06-05"
 ---
 
-Placing a `UConvaiObjectComponent` on any world actor — a door, switch, item, room, vehicle, or prop — makes that actor visible to every Convai character in the level without hand-authoring each chatbot. The component contributes identity (`Name` and `Description`), tracked live-state properties, and an auto-generated proximity key to the scene context that Convai receives at session start and again whenever state changes.
+Placing a `UConvaiObjectComponent` on any world actor — a door, switch, item, room, vehicle, or prop — makes that actor visible to every Convai character in the level without per-chatbot configuration. The component delivers object identity (`Name` and `Description`) and tracked live-state properties to Convai through two channels: a frozen snapshot at session start, and live `update-scene-metadata` messages whenever state changes mid-session.
 
-The runtime environment API on `UConvaiChatbotComponent` lets you add, remove, and update objects mid-session, set a conversation partner, and control which object a character is paying attention to. See [Managing the environment at runtime](managing-the-environment-at-runtime.md) for the full mutation API.
+For runtime mutations — adding objects, removing actors, setting conversation partners, and controlling attention — use the environment API on `UConvaiChatbotComponent`. See [Managing the environment at runtime](managing-the-environment-at-runtime.md) for the full method reference.
 
 <table data-view="cards">
 <thead>
@@ -33,7 +33,7 @@ The runtime environment API on `UConvaiChatbotComponent` lets you add, remove, a
 <td><a href="managing-the-environment-at-runtime.md">managing-the-environment-at-runtime.md</a></td>
 </tr>
 <tr>
-<td><strong>Usage examples</strong><br>Practical Blueprint recipes for exposing world actors, tracking live state, and updating the environment.</td>
+<td><strong>Usage examples</strong><br>Complete setups for medical training, industrial safety drills, military simulations, and runtime environment updates.</td>
 <td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>

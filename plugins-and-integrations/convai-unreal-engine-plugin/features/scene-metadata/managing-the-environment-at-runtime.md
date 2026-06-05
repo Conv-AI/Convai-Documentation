@@ -1,45 +1,54 @@
 ---
 title: Managing the environment at runtime
-description: Add, remove, and update world actors in a chatbot's environment at runtime, and control the conversation partner and attention object.
-last_reviewed: "2026-06-04"
+description: Reference for UConvaiChatbotComponent methods that add, remove, and update objects and characters in a chatbot's environment during an active session.
+last_reviewed: "2026-06-05"
 ---
 
-`UConvaiChatbotComponent` exposes a set of methods that let you mutate which objects and characters are in a chatbot's environment while a session is running. Use these methods to reflect gameplay events — a new NPC entering the scene, a door becoming accessible, or an enemy being defeated — without restarting the session.
+`UConvaiChatbotComponent` exposes mutation methods for every aspect of the runtime environment: the objects and characters the chatbot knows about, the active conversation partner, the in-attention object, and the connect-time environment extras. All methods are `BlueprintCallable` in the `Convai|Actions` category.
 
-## The environment data struct
+## Method groups at a glance
 
-`EnvironmentData` (`FConvaiEnvironmentData`) appears as `"Environment"` in the Details panel under `Convai|Actions`. It holds:
+| Group | Methods | Purpose |
+|---|---|---|
+| Objects | `AddObject`, `AddObjects`, `RemoveObject`, `RemoveObjects`, `ClearObjects` | Add or remove world objects mid-session |
+| Characters | `AddCharacter`, `AddCharacters`, `RemoveCharacter`, `RemoveCharacters`, `ClearCharacters` | Add or remove other NPCs the chatbot can reference |
+| Conversation partner | `SetConversationPartner` | Tell the chatbot who it is speaking with |
+| Attention | `SetObjectInAttention`, `TrySetObjectInAttentionFromGaze` | Set or gate-control the in-attention object |
+| Session start | `GatherEnvironmentExtras` | Populate extras before `/connect` |
+| Utility | `EnsureObjectComponentsForEnvironmentObjects` | Spawn missing `UConvaiObjectComponent` instances |
 
-- `bEnableActions` (`bool`, default `true`) — master toggle. When `false`, the `action_config` block is not sent at `/connect` and the server does not process environment or action data.
-- `Actions` — the default action list (Move To, Follow, Stop Moving, Wait For).
-- `Objects` — Actors exposed as objects to the chatbot.
-- `Characters` — Actors exposed as characters (other NPCs the chatbot can reference or interact with).
+All methods that push network updates accept a `bFlushImmediately` parameter. See [Debounce and flush](#debounce-and-flush) for details.
 
-Always mutate the environment through the methods described below. Do not write to `EnvironmentData` fields directly from Blueprint.
+## The EnvironmentData struct
+
+`EnvironmentData` (`FConvaiEnvironmentData`) is the static configuration that `UConvaiChatbotComponent` sends to Convai at `/connect` time. It holds:
+
+- `bEnableActions` (`bool`, default `true`) — master toggle. When `false`, the `action_config` block is not sent at `/connect` and Convai does not process environment or action data for this chatbot.
+- `Actions` — the default action list (`Move To`, `Follow`, `Stop Moving`, `Wait For`).
+- `Objects` — the objects exposed to the chatbot at connect time.
+- `Characters` — the characters exposed to the chatbot at connect time.
+
+Mutate the environment through the methods below rather than writing to `EnvironmentData` fields directly from Blueprint.
 
 ## Adding and removing objects
 
-Use these methods to update the `Objects` list at runtime (all `BlueprintCallable`, category `Convai|Actions`):
-
 | Method | Description |
 |---|---|
-| `AddObject(Object, bFlushImmediately)` | Adds one `FConvaiObjectEntry` to `EnvironmentData.Objects` and schedules an `update-scene-metadata` push. |
+| `AddObject(Object, bFlushImmediately)` | Adds one `FConvaiObjectEntry` and schedules an `update-scene-metadata` push. |
 | `AddObjects(Objects, bFlushImmediately)` | Adds multiple entries in one call. |
-| `RemoveObject(ObjectName, bFlushImmediately)` | Removes the entry with the matching name from the local list and schedules a sync. |
+| `RemoveObject(ObjectName, bFlushImmediately)` | Removes the entry matching the given name and schedules a sync. |
 | `RemoveObjects(ObjectNames, bFlushImmediately)` | Removes multiple entries by name. |
 | `ClearObjects(bFlushImmediately)` | Removes all objects from the local list. |
 
 {% hint style="warning" %}
-If an object was included in `action_config` at `/connect`, calling `AddObject` with the same name mid-session does not update the server's frozen `action_config` copy. Only objects that are new to the session travel through the live `update-scene-metadata` lane. To apply an updated description to an existing object, call `StopSession` and `StartSession` to reconnect.
+If an object was included in `action_config` at `/connect`, calling `AddObject` with the same name mid-session does not update the server's frozen `action_config` copy. Only objects that are new to the session travel through the live `update-scene-metadata` lane. To propagate a description change to an existing object, call `StopSession` then `StartSession` to reconnect.
 {% endhint %}
 
 ## Adding and removing characters
 
-The same pattern applies to the `Characters` list:
-
 | Method | Description |
 |---|---|
-| `AddCharacter(Character, bFlushImmediately)` | Adds one `FConvaiObjectEntry` to `EnvironmentData.Characters`. |
+| `AddCharacter(Character, bFlushImmediately)` | Adds one `FConvaiObjectEntry` to the characters list. |
 | `AddCharacters(Characters, bFlushImmediately)` | Adds multiple entries. |
 | `RemoveCharacter(InCharacterName, bFlushImmediately)` | Removes the matching entry by name. |
 | `RemoveCharacters(InCharacterNames, bFlushImmediately)` | Removes multiple entries by name. |
@@ -47,15 +56,15 @@ The same pattern applies to the `Characters` list:
 
 ## Setting the conversation partner
 
-`SetConversationPartner(Partner, bFlushImmediately)` tells the chatbot which other character it is currently speaking with. If the entry's Actor is not already in `EnvironmentData.Characters`, the method adds it automatically.
+`SetConversationPartner(Partner, bFlushImmediately)` tells the chatbot which other character it is currently speaking with. If the entry's Actor is not already in the characters list, the method adds it automatically.
 
 To clear the conversation partner without removing the character from the list, pass an `FConvaiObjectEntry` with an empty `Name`.
 
 ## Controlling attention
 
-`SetObjectInAttention(Object, Text, ShouldRespond, bFlushImmediately)` sets the object the chatbot is focused on and optionally triggers a context event. The call has no effect when `EnvironmentData.bEnableActions` is `false`. If the object is not already in `EnvironmentData.Objects`, the method adds it automatically.
+`SetObjectInAttention(Object, Text, ShouldRespond, bFlushImmediately)` sets the object the chatbot is focused on and optionally triggers a context event. The call has no effect when `bEnableActions` is `false`. If the object is not already in the objects list, the method adds it automatically.
 
-`AttentionSource` (Transient, `BlueprintReadOnly`, `EConvaiAttentionSource`) reflects who last set the attention:
+`AttentionSource` (`EConvaiAttentionSource`, `Transient`, `BlueprintReadOnly`, category `Convai|Actions`) reflects who last set the attention:
 
 - `None` — no attention target is set.
 - `Explicit` — attention was set by Blueprint or C++ code.
@@ -65,21 +74,27 @@ When `AttentionSource` is `Explicit`, calls to `TrySetObjectInAttentionFromGaze`
 
 ## Populating the environment at session start
 
-`GatherEnvironmentExtras` is a `BlueprintNativeEvent` (display name `"Gather Environment Extras"`) called once inside `StartSession()`. Override it in a Blueprint subclass of `UConvaiChatbotComponent` to append objects, characters, or actions that depend on runtime world state.
+`GatherEnvironmentExtras` is a `BlueprintNativeEvent` (display name `"Gather Environment Extras"`) called once inside `StartSession()` before the `/connect` handshake. Override it in a Blueprint subclass of `UConvaiChatbotComponent` to append objects, characters, or actions that depend on runtime world state.
 
-The override receives three output arrays — `OutExtraActions`, `OutExtraObjects`, `OutExtraCharacters` — and appends entries to them. It does not replace the `EnvironmentData` defaults; it adds to them. This is the correct place to populate the environment from a world query rather than from the Details panel.
+The override receives three output arrays:
 
-See [Usage examples — Dynamically populating the environment at session start](usage-examples.md) for a worked pseudocode example of this pattern.
+- `OutExtraActions` — appended to the default action list.
+- `OutExtraObjects` — appended to `EnvironmentData.Objects`.
+- `OutExtraCharacters` — appended to `EnvironmentData.Characters`.
+
+The override adds to the configured defaults; it does not replace them. This is the correct place to populate the environment from a world query rather than from the Details panel.
+
+See [Usage examples](usage-examples.md) for a worked pseudocode example of this pattern.
 
 ## Ensuring object components
 
 `EnsureObjectComponentsForEnvironmentObjects()` iterates over every Actor in `EnvironmentData.Objects` and spawns a `UConvaiObjectComponent` on any that does not already have one. It returns the count of newly spawned components and is safe to call multiple times (idempotent).
 
-Call it at `BeginPlay` after populating `EnvironmentData.Objects` from code, or wire it to `AddObject` / `AddObjects` when you add actors dynamically and want the proximity and gaze systems to track them immediately.
+Call it at `BeginPlay` after populating `EnvironmentData.Objects` from code, or after calling `AddObject` / `AddObjects` when you want the proximity and gaze systems to track dynamically added actors immediately.
 
 ## Debounce and flush
 
-All mutation methods batch updates into a debounce window so that rapid calls are coalesced into a single WebRTC message. Pass `bFlushImmediately = true` to bypass debouncing and send immediately. Use `bFlushImmediately` sparingly — high-frequency calls produce many small messages and increase network overhead.
+All mutation methods batch updates into a debounce window, coalescing rapid calls into a single WebRTC message. Pass `bFlushImmediately = true` to bypass the window and send immediately. Use `bFlushImmediately` sparingly — high-frequency calls produce many small messages and increase network overhead.
 
 ## Next steps
 

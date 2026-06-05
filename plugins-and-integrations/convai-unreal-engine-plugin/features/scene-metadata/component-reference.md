@@ -1,24 +1,35 @@
 ---
 title: Component reference
 description: Full property, function, and event reference for the Convai Object Component, including object identity, tracked properties, proximity state, and gaze events.
-last_reviewed: "2026-06-04"
+last_reviewed: "2026-06-05"
 ---
 
-`UConvaiObjectComponent` is an `ActorComponent` (category `Convai`) that registers the owning Actor with the `UConvaiSubsystem` and exposes its identity, live-state properties, and gaze events to every Convai character in the level.
+`UConvaiObjectComponent` is an `ActorComponent` (class group `Convai`) that registers the owning Actor with the `UConvaiSubsystem` and exposes its identity, live-state properties, and gaze events to every Convai character in the level.
 
 ## Object identity
 
-The `ObjectEntry` property (`FConvaiObjectEntry`, category `Convai|Object`) describes the Actor to the AI.
+The `ObjectEntry` property (`FConvaiObjectEntry`, category `Convai|Object`) describes the Actor to the AI. Because `ObjectEntry` uses `ShowOnlyInnerProperties`, its fields appear directly in the Details panel rather than under a collapsed struct.
+
+### Core identity fields
+
+These fields appear under **Convai | Object** in the Details panel.
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `Name` | `FString` | — | Display name chatbots use for this object. Must be unique per level; the subsystem auto-renames duplicates. |
+| `Name` | `FString` | — | Display name chatbots use for this object. Must be unique per level; `UConvaiSubsystem` auto-renames duplicates and writes a warning to the Output Log. |
 | `Description` | `FString` | — | Plain-language description the AI receives at session start. |
+
+### Navigation targeting fields
+
+These fields appear under **Convai | Action API** in the Details panel. They control how AI movement actions navigate to this object.
+
+| Property | Type | Default | Description |
+|---|---|---|---|
 | `MoveTargetMode` | `EConvaiMoveTarget` | `Actor as goal` | How the AI navigates to this object. |
 | `AcceptanceRadius` | `float` (cm) | `150` | Distance in centimetres at which a move-to action is considered complete. |
-| `ComponentName` | `FString` | — | Component sub-target for `Vector` mode. Case-insensitive substring match on component name. |
-| `SocketOrBoneName` | `FName` | — | Socket or bone on the matched component (`Vector` mode only). |
-| `Step Onto Bounds` | `bool` | `false` | When `true`, the AI walks onto the top surface of the actor or component rather than stopping at the outer bounds. |
+| `ComponentName` | `FString` | — | Sub-component target for `Component as goal` mode. Leave empty to target the actor's origin. |
+| `SocketOrBoneName` | `FName` | — | Socket or bone on the matched component (`Component as goal` mode only). |
+| `Step Onto Bounds` (`bStepOntoBounds`) | `bool` | `false` | When `true`, the AI navigates to the top surface of the target bounds rather than stopping at the edge. Works in both `Actor as goal` mode (uses the whole actor's bounds) and `Component as goal` mode (uses the resolved component's bounds). |
 
 ### Movement target modes
 
@@ -35,7 +46,7 @@ The `ObjectEntry` property (`FConvaiObjectEntry`, category `Convai|Object`) desc
 |---|---|---|---|
 | `PropertyPath` | `FName` | — | Dotted path or function name on the owning Actor. Use the **Bind** button in the Details panel to populate this correctly. |
 | `Description` | `FString` | — | What this property means, in plain language for the AI. |
-| `StateValueDescriptions` | `TArray<FConvaiTrackedPropertyStateValueDesc>` | — | Per-value annotations for enums, bools, or named states. Advanced display. |
+| `StateValueDescriptions` | `TArray<FConvaiTrackedPropertyStateValueDesc>` | — | Per-value annotations for enums, bools, or named states. Shown under **Advanced** in the Details panel. |
 | `ShouldRespond` | `EC_RunLLMOption` | `Never` | What happens when the value changes at runtime. |
 
 `FConvaiTrackedPropertyStateValueDesc` has two string fields: `Value` (the literal value as sent to Convai) and `Description` (what that value means in plain language).
@@ -48,7 +59,7 @@ The `ObjectEntry` property (`FConvaiObjectEntry`, category `Convai|Object`) desc
 - `Always` — the chatbot produces a spoken response on each change.
 - `Never` — the value is updated silently; the chatbot is informed but does not speak.
 
-The initial seed at session start is always `Never` regardless of what `ShouldRespond` is set to — the chatbot learns the starting value without reacting.
+The initial seed at session start is always `EC_RunLLMOption::Never` regardless of what `ShouldRespond` is set to — the chatbot learns the starting value without reacting.
 
 ## Proximity state
 
@@ -57,15 +68,17 @@ The initial seed at session start is always `Never` regardless of what `ShouldRe
 | `bAutoGenerateProximityState` | `bool` | `Convai\|Object` | `true` | When `true`, the plugin computes a `"<ObjectName>.Proximity"` state key per chatbot using the UE navigation system. |
 | `bDebugDrawProximityPaths` | `bool` | `Convai\|Object\|Debug` | `false` | Draws navigation paths from each chatbot to this object in the editor viewport. Appears under the **Debug** sub-category in the Details panel. Disable before shipping. |
 
-Proximity state always uses `ShouldRespond = Never`; the chatbot is informed of the spatial relationship without reacting. The poll is deferred while objects are moving and forced through after several consecutive deferred ticks.
+Proximity state always uses `EC_RunLLMOption::Never`; the chatbot is informed of the spatial relationship without reacting. The evaluation is deferred while objects are moving and forced through after several consecutive deferred ticks.
 
 ## Gaze
 
+All gaze properties and events are in the `Convai|Object|Gaze` category.
+
 | Name | Kind | Default | Description |
 |---|---|---|---|
-| `bGazeable` | property (`bool`) | `true` | When `false`, the gaze pipeline skips this object entirely. Set to `false` for background props that should not draw attention. |
-| `OnGazedIn` / `OnGazedOut` | `BlueprintAssignable` event | — | Fires the instant a player's gaze enters or leaves this object (before the attention threshold is crossed). |
-| `OnAttentionGained` / `OnAttentionLost` | `BlueprintAssignable` event | — | Fires when this object becomes or ceases to be the chatbot's in-attention target. |
+| `bGazeable` | `bool` property | `true` | When `false`, the gaze pipeline skips this object entirely — no highlight, no gaze events, no attention promotion. Set to `false` for background props that should exist in the AI's environment but should not draw player gaze. |
+| `OnGazedIn` / `OnGazedOut` | `BlueprintAssignable` delegate | — | Fires the instant a player's gaze enters or leaves this object (before the attention threshold is crossed). |
+| `OnAttentionGained` / `OnAttentionLost` | `BlueprintAssignable` delegate | — | Fires when this object becomes or ceases to be a chatbot's in-attention target. |
 
 ## Blueprint functions
 
@@ -79,15 +92,17 @@ Proximity state always uses `ShouldRespond = Never`; the chatbot is informed of 
 | `UpdateTrackedProperty(PropertyPath, NewSettings)` | `bool` | Updates `Description`, `StateValueDescriptions`, or `ShouldRespond` for an existing entry. The path is the key; to change the path, remove and re-add. |
 | `GetTrackedProperties(OutProperties)` | void | Writes a copy of the current tracked-property list into `OutProperties`. |
 
-When `RemoveTrackedProperty` returns `true`, the last value the chatbot received for that property remains in its context — the property stops updating but is not erased. Design property removal flows with this in mind.
+{% hint style="warning" %}
+Removing a tracked property with `RemoveTrackedProperty` does not erase its last-sent value from the chatbot's context. The property stops updating, but the chatbot retains the last value it received. Design property removal flows with this in mind.
+{% endhint %}
 
 ### Gaze functions (category `Convai|Object|Gaze`)
 
 | Function | Returns | Description |
 |---|---|---|
-| `NotifyGazeBegin(Player)` | void | Signals gaze entry. Called automatically by the Player Component; also callable from a custom focus system. |
+| `NotifyGazeBegin(Player)` | void | Signals gaze entry. Called automatically by `UConvaiPlayerComponent`; also callable from a custom focus system. |
 | `NotifyGazeEnd(Player)` | void | Companion to `NotifyGazeBegin`. |
-| `NotifyGazeAttentionBegin(Player, Text, ShouldRespond)` | void | Promotes this object to the in-attention target and fans the update out to every chatbot via the subsystem. |
+| `NotifyGazeAttentionBegin(Player, Text, ShouldRespond)` | void | Promotes this object to the in-attention target and fans the update out to every chatbot via the subsystem. Also `BlueprintCallable` for non-gaze flows such as cinematic cameras or custom focus systems. |
 | `NotifyGazeAttentionEnd(Player)` | void | Releases the in-attention state. `Player` may be `nullptr` in destroyed-target paths — receivers of `OnAttentionLost` must null-check `Player` before using it. |
 
 ## Related reference
