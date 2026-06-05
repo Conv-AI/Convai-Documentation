@@ -1,6 +1,6 @@
 ---
 title: Record and replay lip sync
-description: Capture a live lip-sync sequence from a Convai conversation and replay it later in cutscenes, cached responses, or offline previews using the Convai Face Sync recording API.
+description: Capture a live lip-sync sequence during a Convai conversation and replay it later in cutscenes, cached responses, or offline previews without re-streaming.
 last_reviewed: 2026-06-05
 ---
 

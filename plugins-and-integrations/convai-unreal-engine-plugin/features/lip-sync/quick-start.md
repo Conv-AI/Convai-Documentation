@@ -38,23 +38,15 @@ Click **Add** in the **Components** panel and search for `Convai Face Sync`. Sel
 {% step %}
 ### Set the lip-sync mode
 
-With the `Convai Face Sync` component selected, open the **Details** panel. Under **Convai | LipSync**, set **Lip Sync Mode** to `MetaHuman Blendshapes`.
-
-{% hint style="info" %}
-You can also set a project-wide default in **Edit > Project Settings > Convai > LipSync Mode**. The per-component value takes priority when both are set.
-{% endhint %}
+With the `Convai Face Sync` component selected, open the **Details** panel. Under **Convai | LipSync**, set **Lip Sync Mode** to `MetaHuman Blendshapes`. You can also set a project-wide default in **Edit > Project Settings > Convai > LipSync Mode** — the per-component value takes priority.
 {% endstep %}
 
 {% step %}
 ### Compile and save
 
-Click **Compile** and then **Save** in the Blueprint editor toolbar.
+Click **Compile** and then **Save** in the Blueprint editor toolbar. The **Components** panel now shows a `Convai Face Sync` entry under the Actor root.
 {% endstep %}
 {% endstepper %}
-
-{% hint style="success" %}
-The **Components** panel now shows a `Convai Face Sync` entry under the Actor root. The component is ready to receive facial data from the server.
-{% endhint %}
 
 ## Add the AnimGraph node
 
