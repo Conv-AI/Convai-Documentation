@@ -1,7 +1,7 @@
 ---
 title: Face Sync component reference
 description: Property reference for the Convai Face Sync component and all six lip-sync mode values with rig compatibility guidance for MetaHuman, CC4, CC5, and custom rigs.
-last_reviewed: 2026-06-03
+last_reviewed: 2026-06-05
 ---
 
 `UConvaiFaceSyncComponent` is a Scene Component (Blueprint display name **"Convai Face Sync"**) that receives server-precomputed facial animation data from Convai, buffers it, and exposes the current blendshape frame each tick. It implements `IConvaiLipSyncInterface` and sets `RequiresPrecomputedFaceData()` to `true`, which instructs the audio streamer to request facial data from the server.

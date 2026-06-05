@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting and diagnostics
 description: Diagnose and fix lip sync issues in the Convai Unreal Engine plugin — no mouth movement, frame starvation, wrong blendshape map, and rig mismatch.
-last_reviewed: 2026-06-03
+last_reviewed: 2026-06-05
 ---
 
 Use this page to identify and fix the most common lip sync problems. Each entry describes what you observe, what causes it, and what to change.

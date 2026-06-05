@@ -1,7 +1,7 @@
 ---
 title: Usage examples
 description: "Configure lip sync for common scenarios: Add vs Override blending, tuning smoothing, mixing with body animation, and remapping blendshapes to a custom rig."
-last_reviewed: 2026-06-03
+last_reviewed: 2026-06-05
 ---
 
 These examples cover the most common `FAnimNode_ConvaiFaceSync` configurations. Each example describes the scenario, the node or component settings to change, and the expected result.

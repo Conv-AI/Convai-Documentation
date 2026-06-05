@@ -1,7 +1,7 @@
 ---
 title: Quick start
 description: Add the Convai Face Sync component and AnimGraph node to a MetaHuman character and hear lip-synced speech in Play In Editor.
-last_reviewed: 2026-06-03
+last_reviewed: 2026-06-05
 ---
 
 In this tutorial we will add lip sync to a MetaHuman character that already has a `UConvaiChatbotComponent` attached. By the end, speaking to the character in Play mode will animate its mouth and face in sync with the response audio.

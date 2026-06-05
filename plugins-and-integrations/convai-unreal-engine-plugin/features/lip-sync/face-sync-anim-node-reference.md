@@ -1,7 +1,7 @@
 ---
 title: Face Sync AnimGraph node reference
 description: Reference for all properties of the Convai Face Sync AnimGraph node — apply mode, face alphas, smoothing, starvation blending, and blendshape mapping.
-last_reviewed: 2026-06-03
+last_reviewed: 2026-06-05
 ---
 
 The `Convai Face Sync` node (`FAnimNode_ConvaiFaceSync`) is an Animation Blueprint node placed in the AnimGraph between a pose source and the output. It reads the current blendshape frame from the `UConvaiFaceSyncComponent` on the owning Actor, applies upper/lower face alphas, optional smoothing, starvation blending, and an optional remapping table, then writes the resulting curve values into the output pose.

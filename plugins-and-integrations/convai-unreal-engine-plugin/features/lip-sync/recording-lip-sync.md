@@ -40,13 +40,9 @@ Trigger a conversation as normal. The character speaks and its face animates. Th
 {% step %}
 ### Stop recording and store the result
 
-When the speech turn ends, call `FinishRecordingLipSync`. The method stops capturing and returns an `FAnimationSequenceBP` value containing the recorded frame array, duration, and frame rate.
+When the speech turn ends, call `FinishRecordingLipSync`. The method stops capturing and returns an `FAnimationSequenceBP` — the Blueprint-visible wrapper that holds the full list of timestamped blendshape frames, the total duration, and the frame rate.
 
 Store the returned value in a Blueprint variable typed `FAnimationSequenceBP` so you can replay it later.
-
-{% hint style="info" %}
-`FAnimationSequenceBP` is the Blueprint-visible wrapper for a recorded sequence. It holds the full list of timestamped blendshape frames that were captured.
-{% endhint %}
 {% endstep %}
 {% endstepper %}
 

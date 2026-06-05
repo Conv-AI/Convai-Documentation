@@ -1,7 +1,7 @@
 ---
 title: How lip sync works
 description: Understand how Convai delivers precomputed facial animation data alongside audio, the six EC_LipSyncMode values, and how the AnimGraph node applies it.
-last_reviewed: 2026-06-03
+last_reviewed: 2026-06-05
 ---
 
 The Convai Unreal Engine plugin animates a character's face by replaying a sequence of blendshape frames that Convai precomputes on the server before the audio is streamed to the client. This page explains that pipeline, the six `EC_LipSyncMode` values, and how the AnimGraph node integrates with Unreal's animation system.
