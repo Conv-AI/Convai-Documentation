@@ -1,11 +1,9 @@
 ---
 title: Convai Unreal Engine plugin overview
-description: Understand what the Convai Unreal Engine plugin is, how its modules are structured, and what changed in each beta release.
+description: Find explanations of what the Convai Unreal Engine plugin is, how its four modules and runtime components are structured, and what changed in each release.
 ---
 
 The pages in this section cover what the Convai Unreal Engine plugin is, how its four modules and five runtime components are structured, and what changed in each release.
-
-## In this section
 
 <table data-view="cards">
 <thead>
@@ -34,9 +32,9 @@ The pages in this section cover what the Convai Unreal Engine plugin is, how its
 </tbody>
 </table>
 
-## Getting started
+## Next steps
 
-To install the plugin and configure your first character, go to the Getting Started section.
+If you are ready to install the plugin, go directly to Getting Started.
 
 {% content-ref url="../getting-started/README.md" %}
 [Getting started](../getting-started/README.md)

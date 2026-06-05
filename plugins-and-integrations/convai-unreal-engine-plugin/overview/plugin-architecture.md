@@ -19,6 +19,33 @@ The plugin declares four modules in `ConvAI.uplugin`.
 
 The `Convai` module loads at `PreDefault` phase so it is available before gameplay systems initialize. `ConvaiEditor` loads at `PostEngineInit` so it can access the fully initialized editor environment.
 
+## System diagram
+
+The diagram below shows the runtime flow for a single player–character conversation turn.
+
+```mermaid
+graph TD
+    Player["UConvaiPlayerComponent\n(audio capture, gaze)"]
+    Chatbot["UConvaiChatbotComponent\n(session, environment, actions)"]
+    Subsystem["UConvaiSubsystem\n(WebRTC client, registry)"]
+    FaceSync["UConvaiFaceSyncComponent\n(blendshapes)"]
+    AnimGraph["ConvaiAnimGraph node\n(AnimBP)"]
+    Object["UConvaiObjectComponent\n(scene object)"]
+    Convai["Convai\n(LLM, voice, narrative)"]
+
+    Player -->|"audio frames"| Subsystem
+    Subsystem -->|"WebRTC stream"| Convai
+    Convai -->|"audio + face data\naction sequence\nemotion state"| Subsystem
+    Subsystem -->|"dispatch to session"| Chatbot
+    Chatbot -->|"FAnimationSequence"| FaceSync
+    FaceSync -->|"blendshape map"| AnimGraph
+    Object -->|"property changes"| Subsystem
+    Subsystem -->|"batched context update"| Chatbot
+    Chatbot -->|"context flush"| Convai
+```
+
+`UConvaiSubsystem` is the single shared connection point. Components register themselves with it at `BeginPlay` and unregister at `EndPlay`. The subsystem's shared object-poll clock fires on every registered `UConvaiObjectComponent` in the same tick so property changes from multiple objects coalesce into one batched update per debounce window.
+
 ## Runtime components
 
 Five components form the Blueprint-facing surface of the plugin's runtime. They attach to Actors like any native Unreal component.
@@ -48,33 +75,6 @@ A scene component that applies precomputed facial animation sequences to a skele
 ### `UConvaiSubsystem` (display name: Convai Subsystem)
 
 A `UGameInstanceSubsystem` that acts as the shared connection manager and component registry. It maintains the WebRTC client, routes audio and data packets to the correct session proxies, and provides registry access to all active `UConvaiChatbotComponent`, `UConvaiPlayerComponent`, and `UConvaiObjectComponent` instances via `GetAllChatbotComponents`, `GetAllPlayerComponents`, and `GetAllObjectComponents`.
-
-## How the components relate
-
-The diagram below shows the runtime flow for a single player–character conversation turn.
-
-```mermaid
-graph TD
-    Player["UConvaiPlayerComponent\n(audio capture, gaze)"]
-    Chatbot["UConvaiChatbotComponent\n(session, environment, actions)"]
-    Subsystem["UConvaiSubsystem\n(WebRTC client, registry)"]
-    FaceSync["UConvaiFaceSyncComponent\n(blendshapes)"]
-    AnimGraph["ConvaiAnimGraph node\n(AnimBP)"]
-    Object["UConvaiObjectComponent\n(scene object)"]
-    Convai["Convai\n(LLM, voice, narrative)"]
-
-    Player -->|"audio frames"| Subsystem
-    Subsystem -->|"WebRTC stream"| Convai
-    Convai -->|"audio + face data\naction sequence\nemotion state"| Subsystem
-    Subsystem -->|"dispatch to session"| Chatbot
-    Chatbot -->|"FAnimationSequence"| FaceSync
-    FaceSync -->|"blendshape map"| AnimGraph
-    Object -->|"property changes"| Subsystem
-    Subsystem -->|"batched context update"| Chatbot
-    Chatbot -->|"context flush"| Convai
-```
-
-`UConvaiSubsystem` is the single shared connection point. Components register themselves with it at `BeginPlay` and unregister at `EndPlay`. The subsystem's shared object-poll clock fires on every registered `UConvaiObjectComponent` in the same tick so property changes from multiple objects coalesce into one batched update per debounce window.
 
 ## Plugin dependencies
 
