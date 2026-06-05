@@ -1,7 +1,7 @@
 ---
 title: Emotion
-description: Animate AI character expressions in sync with conversation context using server-delivered emotion scores and blendshape weights.
-last_reviewed: 2026-06-03
+description: Find guides for animating AI character expressions in sync with conversation — from quick Blueprint setup to full reference and troubleshooting.
+last_reviewed: 2026-06-05
 ---
 
 The emotion system lets a Convai character express feelings through facial blendshapes as it converses. Convai analyzes the character's generated speech and delivers an emotion state alongside the audio. The plugin exposes that state as per-emotion scores and blendshape weights you can read in Blueprint and apply to the character mesh in any way that suits your project.
@@ -36,3 +36,7 @@ The emotion system lets a Convai character express feelings through facial blend
 </tr>
 </tbody>
 </table>
+
+## Start here
+
+Start with [Quick start](quick-start.md) to wire expressions to a character mesh in a few Blueprint steps. Then read [How the emotion system works](how-the-emotion-system-works.md) to understand the scoring model and controls before moving into reference and advanced examples.
