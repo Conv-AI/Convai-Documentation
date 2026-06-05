@@ -1,7 +1,7 @@
 ---
 title: Convai utility functions
 description: Reference for UConvaiUtils and UCommandLineUtils Blueprint libraries — look-at helpers, component lookups, blendshapes, audio, settings, and diagnostic nodes.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "2026-06-05"
 ---
 
 `UConvaiUtils` is a `UBlueprintFunctionLibrary` that exposes miscellaneous helper nodes to Blueprint. It does not need to be attached to an `Actor`; all nodes are callable from any Blueprint graph. Nodes are grouped in the **Convai** category tree in the Blueprint node search palette.
@@ -345,7 +345,7 @@ Detection rules:
 
 ## Related reference
 
-The chatbot component is the primary consumer of the blendshape and look-at utility nodes; the player component uses the component-lookup and microphone helpers.
+The chatbot component is the primary consumer of the blendshape and look-at utility nodes; the player component uses the component-lookup and microphone helpers. For creating, updating, or fetching character data at runtime, see the character management REST API reference.
 
 {% content-ref url="convai-chatbot-component.md" %}
 [Convai Chatbot Component](convai-chatbot-component.md)
@@ -353,4 +353,8 @@ The chatbot component is the primary consumer of the blendshape and look-at util
 
 {% content-ref url="convai-player-component.md" %}
 [Convai Player Component](convai-player-component.md)
+{% endcontent-ref %}
+
+{% content-ref url="character-management.md" %}
+[Character management](character-management.md)
 {% endcontent-ref %}

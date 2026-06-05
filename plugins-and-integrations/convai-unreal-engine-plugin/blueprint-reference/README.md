@@ -1,10 +1,10 @@
 ---
 title: Blueprint reference
-description: Find the complete Blueprint surface for the Convai Chatbot Component, Convai Player Component, audio capture, and utility functions.
-last_reviewed: "4.0.0-beta.21"
+description: Find the complete Blueprint-exposed surface — properties, functions, events, and REST API nodes — for the Convai Unreal Engine Plugin.
+last_reviewed: "2026-06-05"
 ---
 
-The Blueprint reference covers every property, function, and event exposed to Blueprint for the two main runtime components and the supporting utility library. Use these pages when you need exact names, types, defaults, or parameter descriptions.
+The Blueprint reference covers every property, function, and event exposed to Blueprint for the runtime components, audio capture, utility library, and character management REST API nodes. Use these pages when you need exact names, types, defaults, or parameter descriptions.
 
 The **Convai Subsystem** connection surface (`GetServerConnectionState`, `ResetIdleTimer`, `InvalidateOrphanedConnection`, `OnServerConnectionStateChangedEvent`, and `OnUserIdleWarning`) is documented in [Session lifecycle](../core-concepts/session-lifecycle.md), not here.
 
@@ -28,9 +28,13 @@ The **Convai Subsystem** connection surface (`GetServerConnectionState`, `ResetI
 <td><strong>Convai utility functions</strong><br>Blueprint utility library — look-at helpers, component lookups, file I/O, audio helpers, blendshape tools, and settings accessors.</td>
 <td><a href="utility-functions.md">utility-functions.md</a></td>
 </tr>
+<tr>
+<td><strong>Microphone and audio capture</strong><br>Properties, functions, and structs for the microphone device API, audio capture component, and Android microphone permissions.</td>
+<td><a href="microphone-and-audio-capture.md">microphone-and-audio-capture.md</a></td>
+</tr>
+<tr>
+<td><strong>Character management</strong><br>Blueprint async nodes for creating, updating, and fetching character details via the Convai REST API.</td>
+<td><a href="character-management.md">character-management.md</a></td>
+</tr>
 </tbody>
 </table>
-
-{% hint style="info" %}
-The **Convai Audio Capture Component** reference page is not yet available.
-{% endhint %}

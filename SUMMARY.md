@@ -496,6 +496,7 @@
     * [Convai Player Component](plugins-and-integrations/convai-unreal-engine-plugin/blueprint-reference/convai-player-component.md)
     * [Microphone and audio capture](plugins-and-integrations/convai-unreal-engine-plugin/blueprint-reference/microphone-and-audio-capture.md)
     * [Convai utility functions](plugins-and-integrations/convai-unreal-engine-plugin/blueprint-reference/utility-functions.md)
+    * [Character management](plugins-and-integrations/convai-unreal-engine-plugin/blueprint-reference/character-management.md)
   * [The Convai editor window](plugins-and-integrations/convai-unreal-engine-plugin/editor-window/README.md)
     * [Sign in and manage your account](plugins-and-integrations/convai-unreal-engine-plugin/editor-window/sign-in-and-account.md)
     * [Browse samples and content](plugins-and-integrations/convai-unreal-engine-plugin/editor-window/browse-samples-and-content.md)

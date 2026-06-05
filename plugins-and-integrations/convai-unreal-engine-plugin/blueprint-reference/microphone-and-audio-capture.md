@@ -1,7 +1,7 @@
 ---
 title: Microphone and audio capture
 description: Reference for microphone device enumeration, selection, and volume on the Convai Player Component, the audio capture component, and Android permissions.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "2026-06-05"
 ---
 
 `UConvaiPlayerComponent` exposes all Blueprint-callable microphone functions under the `Convai|Microphone` category. Internally it drives a `UConvaiAudioCaptureComponent` instance that wraps the Unreal `AudioCapture` engine plugin. On Android, the `AndroidPermission` plugin handles the runtime microphone permission.
@@ -66,13 +66,17 @@ Both selection functions can be called before or during gameplay. After a succes
 
 `UConvaiAudioCaptureComponent` (C++ class, `ClassGroup = Synth`) extends `USynthComponent` and wraps `FConvaiAudioCaptureSynth`, which in turn wraps the Unreal `FAudioCapture` object. `UConvaiPlayerComponent` creates and owns one instance automatically; you do not need to add `UConvaiAudioCaptureComponent` to your Actor manually.
 
+{% hint style="info" %}
+In most Blueprints, use the microphone functions on `UConvaiPlayerComponent` rather than interacting with `UConvaiAudioCaptureComponent` directly. The player component delegates internally and provides the higher-level streaming API documented in the sections above.
+{% endhint %}
+
 The component exposes one Blueprint-configurable property:
 
 | Property | Type | Category | Constraints | Description |
 |---|---|---|---|---|
 | `JitterLatencyFrames` | `int32` | `Latency` | `ClampMin = 0`, `ClampMax = 1024` | Additional audio frames of induced latency to absorb jitter between microphone capture hardware and the audio render hardware. Increasing this reduces underrun risk at the cost of higher input latency. |
 
-All device-enumeration and device-switching behavior is driven through `UConvaiPlayerComponent` — the functions listed above delegate to the underlying `UConvaiAudioCaptureComponent` internally.
+All device-enumeration and device-switching behavior is driven through `UConvaiPlayerComponent` — the Blueprint functions listed above delegate to the underlying `UConvaiAudioCaptureComponent` internally. The component's own device methods (`GetCaptureDevicesAvailable`, `GetCaptureDeviceInfo`, `GetActiveCaptureDevice`, `SetCaptureDevice`) are C++ internal and are not exposed to Blueprint.
 
 ## Plugin dependencies
 

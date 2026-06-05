@@ -1,7 +1,7 @@
 ---
 title: Convai Player Component
 description: Reference for the player conversation component — every Blueprint-visible property, function, and event exposed by the Convai Player Component.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "2026-06-05"
 ---
 
 `UConvaiPlayerComponent` (Blueprint display name **Convai Player**) is added to the player's `Actor` to represent the human side of a conversation. It manages the player's session with Convai, captures microphone audio, streams it to the active chatbot session, and exposes gaze attention tracking.
@@ -30,12 +30,12 @@ These properties identify the player to Convai and are used for long-term memory
 
 ### Session functions
 
-| Function | Returns | Category | Description |
-|---|---|---|---|
-| `StartSession` | `bool` | `Convai\|Session` | Opens the WebRTC channel for this player. Returns `true` when the session initialized successfully. |
-| `StopSession` | — | `Convai\|Session` | Closes the channel. Calling `StartSession` again reopens it. |
-| `IsPlayerConnected` | `bool` | `Convai\|Session` | `BlueprintPure`. Returns `true` when the session is in the `EC_ConnectionState::Connected` state. |
-| `SendText` | — | `Convai\|Session` | Sends a text message to a `UConvaiConversationComponent` (typically a chatbot). Inputs: `ChatbotComponent (UConvaiConversationComponent*)`, `Text (FString)`. |
+| Function | Inputs | Returns | Category | Description |
+|---|---|---|---|---|
+| `StartSession` | — | `bool` | `Convai\|Session` | Opens the WebRTC channel for this player. Returns `true` when the session initialized successfully. |
+| `StopSession` | — | — | `Convai\|Session` | Closes the channel. Calling `StartSession` again reopens it. |
+| `IsPlayerConnected` | — | `bool` | `Convai\|Session` | `BlueprintPure`. Returns `true` when the session is in the `EC_ConnectionState::Connected` state. |
+| `SendText` | `ChatbotComponent (UConvaiConversationComponent*)`, `Text (FString)` | — | `Convai\|Session` | Sends a text message directly to a chatbot component, bypassing the microphone pipeline. |
 
 See [Session lifecycle](../core-concepts/session-lifecycle.md) for connection states and multiplayer replication details.
 
@@ -176,6 +176,10 @@ See [Event system](../core-concepts/event-system.md) for binding patterns and fu
 
 {% content-ref url="convai-chatbot-component.md" %}
 [Convai Chatbot Component](convai-chatbot-component.md)
+{% endcontent-ref %}
+
+{% content-ref url="microphone-and-audio-capture.md" %}
+[Microphone and audio capture](microphone-and-audio-capture.md)
 {% endcontent-ref %}
 
 {% content-ref url="../core-concepts/session-lifecycle.md" %}
