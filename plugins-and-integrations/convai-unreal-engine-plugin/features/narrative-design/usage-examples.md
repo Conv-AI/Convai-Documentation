@@ -1,7 +1,7 @@
 ---
 title: Usage examples
 description: Blueprint recipes for linear scene progression, dynamic message transitions, template key injection, and session-ready trigger guards in narrative design.
-last_reviewed: "2026-06-04"
+last_reviewed: "2026-06-05"
 ---
 
 The examples below cover common narrative design patterns for training simulations and interactive experiences. Each example assumes a character Actor Blueprint with a `UConvaiChatbotComponent` whose `CharacterID` references a character with a narrative graph configured in the Convai dashboard.
@@ -71,7 +71,35 @@ Event: On Character Data Loaded (Success = true)
   → Call Invoke Narrative Design Trigger
 ```
 
-**Expected outcome:** the trigger fires only after the session is confirmed open, preventing discarded trigger calls.
+**Expected outcome:** the trigger fires as soon as the session is confirmed open. If the component is alive and `bAutoInitializeSession` is `true`, triggers queued before the session opens are replayed automatically.
+
+---
+
+## Fetch triggers to validate names before invoking
+
+**Scenario:** your Blueprint contains many hardcoded trigger name strings. After a dashboard update, one name changes, causing a silent failure. You want to catch name mismatches at load time rather than discovering them during QA.
+
+**Setup:**
+
+1. On `Begin Play`, call `Convai Fetch Narrative Triggers` with the character's `CharacterID`.
+2. On the **On Success** pin, iterate the `Narrative Triggers` array. For each element, extract the `trigger_name` field and add it to a `TSet<FString>` Blueprint variable named `ValidTriggerNames`.
+3. On the **On Failure** pin, print a warning and continue — trigger validation will be skipped if data is unavailable.
+4. Wherever you call `Invoke Narrative Design Trigger`, first check whether the intended `TriggerName` is in `ValidTriggerNames`. If it is not, print the name and the available names from the set to the Output Log.
+
+```text
+Begin Play
+  → Convai Fetch Narrative Triggers (CharacterId = CharacterID)
+      On Success → For Each (Narrative Triggers)
+                      → Add trigger_name to ValidTriggerNames
+      On Failure → Print "Fetch triggers failed — validation skipped"
+
+Before Invoke Narrative Design Trigger:
+  → Branch: ValidTriggerNames Contains TriggerName
+      True  → Invoke Narrative Design Trigger
+      False → Print "Unknown trigger: " + TriggerName
+```
+
+**Expected outcome:** trigger name mismatches surface at load time with a clear log message, before any trigger call reaches Convai. After a dashboard rename, the mismatch is visible on `Begin Play` rather than silently producing no section change.
 
 ---
 

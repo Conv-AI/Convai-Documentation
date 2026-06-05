@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting and diagnostics
 description: Diagnose and fix narrative design issues including missing section events, wrong transitions, ignored template keys, and multiplayer replication gaps.
-last_reviewed: "2026-06-04"
+last_reviewed: "2026-06-05"
 ---
 
 Use the Unreal Engine **Output Log** (open via **Window > Output Log**) to capture connection and session errors from `ConvaiChatbotComponentLog` while reproducing issues.
@@ -18,9 +18,9 @@ Use the Unreal Engine **Output Log** (open via **Window > Output Log**) to captu
 
 **Fix:** verify the `CharacterID` in the Details panel matches the character ID shown in the Convai dashboard.
 
-**Cause — session not connected:** the session was not open when the trigger was called. Triggers are not queued; they are discarded if no active session exists.
+**Cause — session not connected:** the session was not open when the trigger was called, and the component was destroyed before the session reconnected. Pending triggers are normally queued and replayed automatically on reconnection, but if the component is destroyed the queue is discarded.
 
-**Fix:** confirm `bAutoInitializeSession` is `true` on the component, or wait for `On Character Data Loaded` before calling trigger functions. Check the Output Log for connection errors.
+**Fix:** confirm `bAutoInitializeSession` is `true` on the component. Ensure the component is not destroyed or garbage-collected before the session opens. Check the Output Log for connection errors.
 
 **Verify:** after applying the fix, call `Invoke Narrative Design Trigger` again. A non-empty `NarrativeSectionID` delivered to the event confirms the section changed.
 
@@ -80,6 +80,26 @@ Use the Unreal Engine **Output Log** (open via **Window > Output Log**) to captu
 
 ---
 
+## `Convai Fetch Narrative Sections` or `Convai Fetch Narrative Triggers` always fires On Failure
+
+**Symptom:** the async fetch node always routes to the **On Failure** execution pin and `Narrative Sections` or `Narrative Triggers` is empty.
+
+**Cause — invalid API key:** the Convai API key in the plugin settings is missing or incorrect.
+
+**Fix:** open **Project Settings → Plugins → Convai** and verify that the API key matches the key in your Convai account dashboard.
+
+**Cause — invalid `CharacterId`:** the `CharacterId` input does not match any character in the connected Convai account.
+
+**Fix:** copy the character ID from the Convai dashboard character page and paste it exactly into the Blueprint node's `CharacterId` pin.
+
+**Cause — no network:** the device has no internet access at the time the fetch node executes.
+
+**Fix:** add a network-reachability check before calling fetch nodes. Do not call fetch nodes in offline or standalone builds where network access cannot be guaranteed.
+
+**Verify:** after applying the fix, run the fetch node again in PIE. The **On Success** pin should fire and `Narrative Sections` or `Narrative Triggers` should contain at least one entry.
+
+---
+
 ## Related pages
 
 {% content-ref url="narrative-triggers.md" %}
@@ -88,6 +108,10 @@ Use the Unreal Engine **Output Log** (open via **Window > Output Log**) to captu
 
 {% content-ref url="template-keys.md" %}
 [Template keys](template-keys.md)
+{% endcontent-ref %}
+
+{% content-ref url="fetching-narrative-data.md" %}
+[Fetching narrative data](fetching-narrative-data.md)
 {% endcontent-ref %}
 
 {% content-ref url="narrative-design-blueprint-reference.md" %}

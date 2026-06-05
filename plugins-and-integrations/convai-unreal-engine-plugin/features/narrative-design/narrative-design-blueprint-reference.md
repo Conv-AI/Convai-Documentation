@@ -1,10 +1,48 @@
 ---
 title: Narrative design Blueprint reference
 description: Reference for every Blueprint function, event, property, and narrative struct in the Convai Unreal Engine plugin narrative design API.
-last_reviewed: "2026-06-04"
+last_reviewed: "2026-06-05"
 ---
 
-All narrative design Blueprint nodes are exposed on `UConvaiChatbotComponent` (Blueprint display name `"Convai Chatbot"`). The structs below describe the data shapes returned by the system.
+The narrative design API spans two surfaces: instance functions and events on `UConvaiChatbotComponent` (Blueprint display name `"Convai Chatbot"`), and standalone async fetch nodes for querying narrative data from Convai. The structs below describe the data shapes used across both surfaces.
+
+## Async fetch nodes
+
+These nodes are standalone latent Blueprint functions, not methods on `UConvaiChatbotComponent`. They make a REST API call to Convai and return data via On Success / On Failure execution pins. See [Fetching narrative data](fetching-narrative-data.md) for usage guidance.
+
+### `Convai Fetch Narrative Sections`
+
+C++ class: `UFetchNarrativeSectionsProxy`  
+Category: `Convai`  
+Access: `BlueprintCallable` (latent async proxy)
+
+Queries Convai for all narrative sections configured for the specified character.
+
+| Pin | Direction | Type | Description |
+|---|---|---|---|
+| `CharacterId` | Input | `FString` | The character ID to query. |
+| `On Success` | Output (exec) | — | Fires when the request returns at least one section. |
+| `On Failure` | Output (exec) | — | Fires on network error, invalid API key, or unknown character ID. |
+| `Narrative Sections` | Output | `TArray<FNarrativeSection>` | The returned sections. Empty on failure. |
+
+---
+
+### `Convai Fetch Narrative Triggers`
+
+C++ class: `UFetchNarrativeTriggersProxy`  
+Category: `Convai`  
+Access: `BlueprintCallable` (latent async proxy)
+
+Queries Convai for all narrative triggers configured for the specified character.
+
+| Pin | Direction | Type | Description |
+|---|---|---|---|
+| `CharacterId` | Input | `FString` | The character ID to query. |
+| `On Success` | Output (exec) | — | Fires when the request succeeds. |
+| `On Failure` | Output (exec) | — | Fires on error. |
+| `Narrative Triggers` | Output | `TArray<FNarrativeTrigger>` | The returned triggers. Empty on failure. |
+
+---
 
 ## Functions on `UConvaiChatbotComponent`
 
@@ -108,6 +146,7 @@ Represents a named trigger edge between sections.
 | `trigger_name` | `FString` | The name matched by `Invoke Narrative Design Trigger`. |
 | `trigger_message` | `FString` | Message content associated with the trigger. |
 | `destination_section` | `FString` | The `section_id` the graph advances to when this trigger fires. |
+| `character_id` | `FString` | The character this trigger belongs to. |
 
 ---
 
@@ -124,6 +163,10 @@ Represents one outbound decision rule within a section.
 ---
 
 ## Related pages
+
+{% content-ref url="fetching-narrative-data.md" %}
+[Fetching narrative data](fetching-narrative-data.md)
+{% endcontent-ref %}
 
 {% content-ref url="narrative-triggers.md" %}
 [Narrative triggers](narrative-triggers.md)

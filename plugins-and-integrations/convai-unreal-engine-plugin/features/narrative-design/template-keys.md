@@ -1,7 +1,7 @@
 ---
 title: Template keys
 description: Populate the Narrative Template Keys map on a chatbot component so section objectives reference live gameplay values through placeholder substitution.
-last_reviewed: "2026-06-04"
+last_reviewed: "2026-06-05"
 ---
 
 Template keys are key-value pairs stored in the `NarrativeTemplateKeys` property of `UConvaiChatbotComponent`. Convai substitutes `{key}` tokens in a section's objective text with the matching value from this map before the character processes the objective. This lets a single dashboard objective adapt to runtime gameplay data without creating duplicate sections.
@@ -39,10 +39,9 @@ Select the character Actor in the level or open the character Blueprint. In the 
 
 Assign the `Narrative Template Keys` property on the `UConvaiChatbotComponent` reference in Blueprint. Write to the property as you would any `TMap` — add, remove, or replace entries at any point during play.
 
-```cpp
-// Example pseudocode — assign in Blueprint via Set Narrative Template Keys
-NarrativeTemplateKeys["PlayerName"] = "Rivera";
-NarrativeTemplateKeys["QuestStatus"] = "completed";
+```text
+NarrativeTemplateKeys["PlayerName"] = "Rivera"
+NarrativeTemplateKeys["QuestStatus"] = "completed"
 ```
 
 The map is read each time Convai evaluates a section objective, so changes take effect for the next evaluation. You do not need to restart the session.

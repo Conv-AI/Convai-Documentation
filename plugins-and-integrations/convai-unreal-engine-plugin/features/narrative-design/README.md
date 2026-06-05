@@ -1,12 +1,12 @@
 ---
 title: Narrative design
 description: Find guides for structuring character story graphs, invoking narrative triggers, and injecting runtime template keys in the Convai Unreal Engine plugin.
-last_reviewed: "2026-06-04"
+last_reviewed: "2026-06-05"
 ---
 
 The Convai Unreal Engine plugin lets you drive character behavior through a story graph you author in the Convai dashboard. A graph is made up of named sections — each one shapes a character's objectives and behavior for a phase of the experience — and named triggers that move the character from one section to the next. Template keys let you inject runtime values so section objectives can reference live gameplay data such as a player name or quest state.
 
-The entire narrative design API lives on `UConvaiChatbotComponent`. There is no separate manager or trigger component.
+The core narrative design API lives on `UConvaiChatbotComponent`. Standalone async Blueprint nodes are also available to query the character's narrative graph data from Convai at runtime.
 
 <table data-view="cards">
 <thead>
@@ -27,6 +27,10 @@ The entire narrative design API lives on `UConvaiChatbotComponent`. There is no 
 <tr>
 <td><strong>Narrative triggers</strong><br>Use Invoke Narrative Design Trigger and Invoke Speech to move the character through the story graph.</td>
 <td><a href="narrative-triggers.md">narrative-triggers.md</a></td>
+</tr>
+<tr>
+<td><strong>Fetching narrative data</strong><br>Query a character's sections and triggers at runtime using the Fetch Narrative Sections and Fetch Narrative Triggers Blueprint nodes.</td>
+<td><a href="fetching-narrative-data.md">fetching-narrative-data.md</a></td>
 </tr>
 <tr>
 <td><strong>Template keys</strong><br>Populate the Narrative Template Keys map so section objectives reference live gameplay values.</td>

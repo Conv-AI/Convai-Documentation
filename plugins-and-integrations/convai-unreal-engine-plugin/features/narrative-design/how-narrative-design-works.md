@@ -1,7 +1,7 @@
 ---
 title: How narrative design works
 description: Understand the narrative design story graph, the runtime pipeline that advances sections, and how triggers and template keys shape character behavior.
-last_reviewed: "2026-06-04"
+last_reviewed: "2026-06-05"
 ---
 
 Narrative design gives a Convai character a structured story graph — a set of named sections and the triggers that move between them — authored in the Convai dashboard and executed at runtime through `UConvaiChatbotComponent`. Understanding the pipeline helps you design story graphs that respond predictably to gameplay events.
@@ -17,6 +17,8 @@ A narrative design graph consists of three building blocks.
 | Template key | A runtime key-value pair stored in `NarrativeTemplateKeys` on the chatbot component. Convai substitutes `{key}` placeholders in section objectives with the current value. | Set in Blueprint or Details panel |
 
 The graph starts at the section designated as the entry point in the Convai dashboard. The character remains on the current section until a trigger advances the graph.
+
+The full list of sections and triggers for a character is also queryable at runtime via the `Convai Fetch Narrative Sections` and `Convai Fetch Narrative Triggers` Blueprint nodes — useful for validating trigger names or populating in-game UI. See [Fetching narrative data](fetching-narrative-data.md).
 
 ## Runtime pipeline
 
@@ -37,6 +39,8 @@ graph TD
 ```
 
 The `On Narrative Section Received` event fires only when Convai confirms a section change. It does not fire when the trigger is sent — it fires when Convai responds with the new section ID.
+
+If a trigger is called before the session is open, the plugin holds it in a per-component pending queue and replays it automatically when the session connects. Triggers are not discarded on a closed session — they are deferred.
 
 ## Two ways to invoke a transition
 
@@ -62,10 +66,6 @@ The `NarrativeTemplateKeys` property is a `TMap<FString, FString>` on `UConvaiCh
 For example, if the dashboard's objective reads `"Guide {PlayerName} through the safety inspection"`, and `NarrativeTemplateKeys` contains `PlayerName = "Rivera"`, Convai receives `"Guide Rivera through the safety inspection"`.
 
 Keys are applied at the time Convai reads the active section's objective. You can update the map at any point — before the session starts or during an active session — and the next objective evaluation uses the current values.
-
-{% hint style="info" %}
-The `NarrativeTemplateKeys` property has `BlueprintSetter = UpdateNarrativeTemplateKeys`, but the setter function is internal. Assign the property directly in Blueprint or the Details panel; do not call the setter explicitly.
-{% endhint %}
 
 ## Next steps
 

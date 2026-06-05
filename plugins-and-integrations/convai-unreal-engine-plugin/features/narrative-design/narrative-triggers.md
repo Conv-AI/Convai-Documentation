@@ -1,7 +1,7 @@
 ---
 title: Narrative triggers
 description: Invoke named narrative triggers or raw message strings on a Convai character component to advance the story graph and handle the section change event.
-last_reviewed: "2026-06-04"
+last_reviewed: "2026-06-05"
 ---
 
 Narrative triggers advance a character's story graph from one section to the next. The Convai Unreal Engine plugin exposes two Blueprint functions for this on `UConvaiChatbotComponent`, and one event that fires when Convai confirms the transition.
@@ -50,9 +50,17 @@ The event fires only after Convai confirms the section change. It does not fire 
 
 To bind in Blueprint: drag the `UConvaiChatbotComponent` reference into the Event Graph, then select **Assign On Narrative Section Received** from the context menu. The generated event node receives `Chatbot Component` and `Narrative Section ID` as output pins.
 
+## Pending triggers
+
+When `Invoke Narrative Design Trigger` or `Invoke Speech` is called and no active session exists, the plugin stores the call as a pending trigger. Pending triggers are replayed automatically in the order they were queued as soon as the session reconnects. A trigger called before the session opens is not lost — it fires when the connection is established.
+
+{% hint style="warning" %}
+If the `UConvaiChatbotComponent` is destroyed before the session reconnects, the pending queue is discarded and queued triggers are not replayed.
+{% endhint %}
+
 ## Session readiness
 
-Both trigger functions require an active session. The `bAutoInitializeSession` property on `UConvaiChatbotComponent` controls whether the session opens automatically on `Begin Play`. When `true`, the component opens the session automatically and triggers can be called once the session is established. Triggers called before the session is open are not queued — they are discarded. Ensure the session is established before calling trigger functions if `bAutoInitializeSession` is `false`.
+Both trigger functions require an active session. The `bAutoInitializeSession` property on `UConvaiChatbotComponent` controls whether the session opens automatically on `Begin Play`. When `true`, the component opens the session automatically; any triggers called before the session is fully established are held in the pending queue and replayed once the connection is open. If `bAutoInitializeSession` is `false`, manage the session lifecycle explicitly and be aware that triggers sent before the session opens will be queued, not discarded.
 
 ## Next steps
 
