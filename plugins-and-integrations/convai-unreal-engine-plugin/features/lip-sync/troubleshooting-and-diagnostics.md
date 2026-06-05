@@ -48,6 +48,8 @@ Use this page to identify and fix the most common lip sync problems. Each entry 
 | CC4 (extended export) | `CC4 Extended Blendshapes` |
 | Custom rig with OVR viseme curves | `Viseme Based` |
 
+`LipSyncMode` can also be set globally in **Edit > Project Settings > Convai > LipSync Mode**. The per-component value overrides the global setting when both are set.
+
 **Verify:** Reopen the Skeletal Mesh in the editor and check the **Curves** list. Confirm that the curve names match what the selected mode produces.
 
 ## Frame starvation — mouth animates then freezes mid-speech
@@ -114,4 +116,8 @@ Command-line overrides (`-LipSyncAnim*` flags) set during PIE do not carry over 
 
 {% content-ref url="face-sync-anim-node-reference.md" %}
 [Face Sync AnimGraph node reference](face-sync-anim-node-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="../../troubleshooting/lip-sync-and-animation-issues.md" %}
+[Lip sync and animation issues](../../troubleshooting/lip-sync-and-animation-issues.md)
 {% endcontent-ref %}

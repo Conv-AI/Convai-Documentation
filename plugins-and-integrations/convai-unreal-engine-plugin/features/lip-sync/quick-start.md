@@ -39,6 +39,10 @@ Click **Add** in the **Components** panel and search for `Convai Face Sync`. Sel
 ### Set the lip-sync mode
 
 With the `Convai Face Sync` component selected, open the **Details** panel. Under **Convai | LipSync**, set **Lip Sync Mode** to `MetaHuman Blendshapes`.
+
+{% hint style="info" %}
+You can also set a project-wide default in **Edit > Project Settings > Convai > LipSync Mode**. The per-component value takes priority when both are set.
+{% endhint %}
 {% endstep %}
 
 {% step %}
@@ -88,7 +92,11 @@ Click **Compile** and then **Save** in the Animation Blueprint editor.
 
 ## Run the character
 
-Enter Play mode and initiate a conversation with the character. The character's mouth and facial blendshapes should animate in sync with its speech.
+Enter Play mode and initiate a conversation with the character.
+
+{% hint style="success" %}
+The character's mouth and facial blendshapes should animate in sync with its speech. You will see jaw, lip, and cheek curves driving the MetaHuman face as the character talks.
+{% endhint %}
 
 If the mouth does not move, confirm that:
 

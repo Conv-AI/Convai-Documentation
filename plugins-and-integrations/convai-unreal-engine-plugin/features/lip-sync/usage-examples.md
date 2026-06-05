@@ -43,9 +43,9 @@ In the AnimGraph node **Details** panel:
 | Property | Value |
 |---|---|
 | `bEnableLowerFaceSmoothing` | `true` |
-| `LowerFaceSmoothingSpeed` | `0.4` |
+| `LowerFaceSmoothingSpeed` | `6.0` |
 
-A value of `0.4` produces visibly smoother movement. Increase toward `1.0` for a faster, more responsive but less smooth result.
+A value of `6.0` produces smooth, responsive lip movement. Decrease toward `2.0` for heavier smoothing with more lag; increase toward `15.0` for a near-instant but less smooth result. The default of `1.0` produces very heavy smoothing — most productions raise this to `5.0`–`10.0`.
 
 ### Suppressing brow and eye movement
 
@@ -107,12 +107,44 @@ To prevent a specific curve from being driven by Convai at all — for example t
 
 The curve is held at `0.0` regardless of incoming data.
 
+## Recording and replaying a lip-sync sequence
+
+### Capturing a response for cutscene playback
+
+Use the recording API to capture a live lip-sync sequence during a conversation and replay it later — for example in a non-interactive cutscene or a pre-warmed response cache.
+
+In a Blueprint or C++ script on the Actor that owns the `Convai Face Sync` component:
+
+1. Call `StartRecordingLipSync` on the component before or at the start of the speech turn.
+2. Let the character speak. The component captures all incoming blendshape frames.
+3. Call `FinishRecordingLipSync` when the turn ends. Store the returned `FAnimationSequenceBP` in a variable.
+4. When you want to replay the sequence, call `PlayRecordedLipSync` with the stored variable:
+
+| Parameter | Example value | Description |
+|---|---|---|
+| `RecordedLipSync` | *(stored variable)* | The sequence returned by `FinishRecordingLipSync`. |
+| `StartFrame` | `0` | First frame to replay. `0` starts from the beginning. |
+| `EndFrame` | `-1` | Last frame to replay. `-1` plays to the end of the sequence. |
+| `OverwriteDuration` | `0.0` | Override the sequence duration. `0.0` uses the recorded duration. |
+
+{% hint style="info" %}
+Use `IsPlaying()` to poll whether replay is active, and `GetCurrentFrame()` to read the live blendshape values for secondary systems such as audio-driven effects or lipsync debug overlays.
+{% endhint %}
+
 ## Next steps
 
 {% content-ref url="face-sync-anim-node-reference.md" %}
 [Face Sync AnimGraph node reference](face-sync-anim-node-reference.md)
 {% endcontent-ref %}
 
+{% content-ref url="recording-lip-sync.md" %}
+[Record and replay lip sync](recording-lip-sync.md)
+{% endcontent-ref %}
+
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
 [Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}
+
+{% content-ref url="how-lip-sync-works.md" %}
+[How lip sync works](how-lip-sync-works.md)
 {% endcontent-ref %}

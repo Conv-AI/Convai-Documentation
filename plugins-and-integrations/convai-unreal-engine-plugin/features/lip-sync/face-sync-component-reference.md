@@ -14,6 +14,7 @@ Add it to the same Actor as `UConvaiChatbotComponent`. The `FAnimNode_ConvaiFace
 |---|---|---|---|
 | `LipSyncMode` | `EC_LipSyncMode` | `BS_MHA` | Selects the blendshape set the server produces and the curve names the AnimGraph node expects. Must match the curves available on the character's Skeletal Mesh. |
 | `bEnableInterpolation` | `bool` | `false` | When `true`, the component interpolates between consecutive blendshape frames to smooth playback. Exposed in the **Details** panel under **Convai\|LipSync**; not exposed as a Blueprint read/write pin. |
+| `AnchorValue` | `float` | `0.5` | Internal anchor used by the interpolation system when calculating frame timing. Adjusting this value shifts the interpolation anchor point between frames. |
 
 ## EC_LipSyncMode values
 
@@ -38,10 +39,43 @@ The `LipSyncMode` value must correspond to the curve names present on the charac
 - **CC4 characters (extended blendshape export):** use `BS_CC4_Extended`.
 - **Custom rigs with OVR viseme targets:** use `VisemeBased`.
 
+{% hint style="info" %}
+You can set a project-wide default in **Edit > Project Settings > Convai > LipSync Mode**. The per-component `LipSyncMode` value takes priority when both are set. Use the global setting when all characters in the project share the same rig type, and override per-component when you have mixed rigs.
+{% endhint %}
+
+## Recording API
+
+`UConvaiFaceSyncComponent` exposes a Blueprint-callable recording API that lets you capture a live lip-sync sequence during a conversation and replay it later — for example in a cutscene, a cached response, or an offline preview. All three methods are `UFUNCTION(BlueprintCallable)`.
+
+| Method | Returns | Description |
+|---|---|---|
+| `StartRecordingLipSync()` | `void` | Begins capturing incoming blendshape frames from the server into an internal buffer. Call this before or during a conversation turn to record the live facial data. |
+| `FinishRecordingLipSync()` | `FAnimationSequenceBP` | Stops recording and returns the captured sequence as an `FAnimationSequenceBP`. The returned struct wraps an `FAnimationSequence` (frame array, duration, frame rate) and can be stored in a variable or passed directly to `PlayRecordedLipSync`. |
+| `PlayRecordedLipSync(FAnimationSequenceBP RecordedLipSync, int32 StartFrame, int32 EndFrame, float OverwriteDuration)` | `bool` | Replays a previously captured sequence. `StartFrame` and `EndFrame` define the frame range to replay; pass `0` and `-1` to replay the full sequence. `OverwriteDuration` overrides the sequence's stored duration if greater than zero. Returns `false` if the sequence is invalid or empty. |
+
+`FAnimationSequenceBP` is the Blueprint-visible wrapper struct for a recorded lip-sync sequence. It contains a single `AnimationSequence` field of type `FAnimationSequence` (time-indexed frame array with frame rate and duration). Use it to store and pass recorded sequences between Blueprints.
+
+{% hint style="info" %}
+Recorded sequences replay the exact blendshape data that was captured — they do not re-stream from the server. Playback is independent of any active conversation.
+{% endhint %}
+
+## Status queries
+
+These Blueprint-callable methods let you poll the component's current playback state.
+
+| Method | Returns | Description |
+|---|---|---|
+| `IsPlaying() const` | `bool` | Returns `true` when the component is actively replaying frames (either from a live stream or a recorded sequence). |
+| `GetCurrentFrame()` | `TMap<FName, float>` | Returns the blendshape name-to-weight map for the frame the component is currently applying. Useful for debugging or driving secondary systems from the same data. |
+
 ## Related reference
 
 {% content-ref url="face-sync-anim-node-reference.md" %}
 [Face Sync AnimGraph node reference](face-sync-anim-node-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="recording-lip-sync.md" %}
+[Record and replay lip sync](recording-lip-sync.md)
 {% endcontent-ref %}
 
 {% content-ref url="how-lip-sync-works.md" %}

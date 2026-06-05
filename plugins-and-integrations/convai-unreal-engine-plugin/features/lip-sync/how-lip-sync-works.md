@@ -1,10 +1,10 @@
 ---
 title: How lip sync works
-description: Understand how Convai delivers precomputed facial animation data alongside audio, the four lip-sync modes, and how the AnimGraph node applies it.
+description: Understand how Convai delivers precomputed facial animation data alongside audio, the six EC_LipSyncMode values, and how the AnimGraph node applies it.
 last_reviewed: 2026-06-03
 ---
 
-The Convai Unreal Engine plugin animates a character's face by replaying a sequence of blendshape frames that Convai precomputes on the server before the audio is streamed to the client. This page explains that pipeline, the four `EC_LipSyncMode` values, and how the AnimGraph node integrates with Unreal's animation system.
+The Convai Unreal Engine plugin animates a character's face by replaying a sequence of blendshape frames that Convai precomputes on the server before the audio is streamed to the client. This page explains that pipeline, the six `EC_LipSyncMode` values, and how the AnimGraph node integrates with Unreal's animation system.
 
 ## Precomputed data pipeline
 
@@ -44,7 +44,12 @@ The mode must match the curve names baked into the character's Skeletal Mesh:
 - Use `BS_ARKit` for CC4 characters exported with the standard ARKit blendshape set.
 - Use `BS_CC4_Extended` for CC4 characters that have the extended blendshape set enabled in Character Creator 4.
 - Use `VisemeBased` for custom rigs where you have manually created curves named after the 15 OVR visemes: `sil`, `PP`, `FF`, `TH`, `DD`, `kk`, `CH`, `SS`, `nn`, `RR`, `aa`, `E`, `ih`, `oh`, `ou`.
-- Use `Auto` when you want the plugin to delegate the blendshape format selection to the attached `UConvaiFaceSyncComponent`'s own mode at runtime rather than fixing it at the global level. `Off` disables lip sync entirely and stops facial data from being requested.
+- Use `Auto` when you want to read the mode from the attached `UConvaiFaceSyncComponent` at runtime rather than fix it at a global level — useful when different characters in the same project use different rigs.
+- Use `Off` to disable lip sync entirely and stop facial data from being requested.
+
+{% hint style="warning" %}
+If the mode does not match the rig, the AnimGraph node receives data from the server but finds no matching curve names to write. The face will not animate and no error is logged. Always verify that the selected mode matches the curve names present on the character's Skeletal Mesh.
+{% endhint %}
 
 ## AnimGraph integration
 

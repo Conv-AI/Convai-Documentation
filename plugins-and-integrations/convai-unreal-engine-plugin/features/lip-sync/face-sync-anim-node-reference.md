@@ -8,7 +8,7 @@ The `Convai Face Sync` node (`FAnimNode_ConvaiFaceSync`) is an Animation Bluepri
 
 The node resolves its chatbot component automatically from the owning Actor when the `Convai Chatbot Component` pin is unset. All properties listed as "pin hidden by default" are accessible through the node's **Details** panel in the Animation Blueprint editor.
 
-## Links
+## Pose input and component link
 
 | Property | Type | Default | Description |
 |---|---|---|---|
@@ -40,14 +40,14 @@ When `UpperFaceBlendshapeNames` is empty, all curves receive the `LowerFaceAlpha
 
 ## Smoothing
 
-Smoothing uses `FMath::FInterpTo`, which is frame-rate independent. A higher speed value produces a faster response; a lower value produces a smoother but more lagged result.
+Smoothing uses `FMath::FInterpTo`, which is frame-rate independent. A higher speed value produces a faster response; a lower value produces a smoother but more lagged result. There is no enforced upper limit — any positive float is valid. Practical values range from approximately `2.0` (heavy smoothing, visibly lagged) to `20.0` (near-instant). The default of `1.0` produces very heavy smoothing and is intentionally conservative; most production setups use `5.0`–`10.0` for the lower face.
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `bEnableLowerFaceSmoothing` | `bool` | `false` | Enables exponential moving-average smoothing for lower-face curves. |
-| `LowerFaceSmoothingSpeed` | `float` | `1.0` | Interp speed for lower-face smoothing. Active only when `bEnableLowerFaceSmoothing` is `true`. Clamped to `[0.0, 1.0]`. Pin hidden by default. |
-| `bEnableUpperFaceSmoothing` | `bool` | `false` | Enables exponential moving-average smoothing for upper-face curves. |
-| `UpperFaceSmoothingSpeed` | `float` | `1.0` | Interp speed for upper-face smoothing. Active only when `bEnableUpperFaceSmoothing` is `true`. Clamped to `[0.0, 1.0]`. Pin hidden by default. |
+| `bEnableLowerFaceSmoothing` | `bool` | `false` | Enables frame-rate-independent smoothing for lower-face curves. |
+| `LowerFaceSmoothingSpeed` | `float` | `1.0` | Interp speed for lower-face smoothing (`FMath::FInterpTo`). Active only when `bEnableLowerFaceSmoothing` is `true`. Any positive float; typical production range is `5.0`–`10.0`. Pin hidden by default. |
+| `bEnableUpperFaceSmoothing` | `bool` | `false` | Enables frame-rate-independent smoothing for upper-face curves. |
+| `UpperFaceSmoothingSpeed` | `float` | `1.0` | Interp speed for upper-face smoothing (`FMath::FInterpTo`). Active only when `bEnableUpperFaceSmoothing` is `true`. Any positive float; typical production range is `5.0`–`10.0`. Pin hidden by default. |
 
 ## Starvation blending
 
