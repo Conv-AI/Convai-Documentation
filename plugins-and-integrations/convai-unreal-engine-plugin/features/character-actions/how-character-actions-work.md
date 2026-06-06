@@ -13,7 +13,7 @@ Character actions allow Convai to instruct a character to perform physical behav
 | `Convai Chatbot` component | All actions | Carries the `Environment` property (action templates, objects, characters) and the `ActionsQueue`. |
 | `Convai Player` component | All actions | Required on the player pawn for speech input. |
 | Blueprint handler functions | Every action that should execute | One function per action name, accepting `FConvaiResultAction`. |
-| AI Controller on the NPC Actor | Movement actions (`Move To`, `Follow`) | Required for `AI Move To` to work. Use Unreal's built-in `AIController` or the plugin sample at `Content/Convai/AI/AI_Controller_Convai`. |
+| AI Controller on the NPC Actor | Movement actions (`Move To`, `Follow`) | Required for `AI Move To` to work. Use Unreal's built-in `AIController`. |
 | `Nav Mesh Bounds Volume` (built) | Movement actions | Must cover the NPC spawn point and all navigation targets. Rebuild after level changes. |
 
 For non-movement actions (custom behaviors, animations, state changes), only the chatbot component and Blueprint handlers are required.

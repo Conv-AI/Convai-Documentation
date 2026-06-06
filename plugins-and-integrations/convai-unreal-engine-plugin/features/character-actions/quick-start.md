@@ -58,7 +58,7 @@ The default `Move To` action uses Unreal's `AI Move To` Blueprint node. For this
 
 Open the NPC Actor Blueprint. In the **Class Defaults**, under **Pawn**, set **AI Controller Class** to an `AIController` subclass.
 
-You can use Unreal's built-in `AIController` or the sample provided by the plugin at `Content/Convai/AI/AI_Controller_Convai`.
+You can use Unreal's built-in `AIController` class.
 
 {% hint style="warning" %}
 If **AI Controller Class** is `None`, the NPC has no navigation controller and `AI Move To` will silently fail regardless of the NavMesh setup.

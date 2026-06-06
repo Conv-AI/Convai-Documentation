@@ -71,7 +71,7 @@ Enable verbose logging before debugging — it will show the exact action names,
 
 **Cause A:** The NPC Actor has no AI Controller assigned.
 
-**Fix:** Set **AI Controller Class** on the NPC Actor to an `AIController` subclass. The plugin ships a sample Blueprint AI Controller at `Content/Convai/AI/AI_Controller_Convai`; you can also use UE's built-in `AIController`. Verify the controller is spawned at runtime with `Get Controller` → `Is Valid` in Blueprint.
+**Fix:** Set **AI Controller Class** on the NPC Actor to an `AIController` subclass. You can use UE's built-in `AIController`. Verify the controller is spawned at runtime with `Get Controller` → `Is Valid` in Blueprint.
 
 ---
 
