@@ -25,11 +25,7 @@ Click **Convai Editor** in the Level Editor toolbar, or select **Window > Convai
 
 Click the **⚙️** icon in the top-right corner of the editor window. A dropdown appears with **Export Logs** and **Check for Updates**.
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the settings dropdown as it appears after clicking the ⚙️ icon. The image must show both the **Export Logs** and **Check for Updates** options.
-{% endhint %}
-
-<figure><img src="../../../.gitbook/assets/TODO-convai-editor-settings-dropdown.png" alt="The settings dropdown in the Convai editor window showing Export Logs and Check for Updates options"><figcaption><p>TODO: Replace with screenshot of the settings dropdown showing the Export Logs option.</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/TODO-convai-editor-settings-dropdown.png" alt="The settings dropdown in the Convai editor window showing Export Logs and Check for Updates options"><figcaption><p>TODO: Replace with screenshot of the ⚙️ settings dropdown showing the Export Logs option.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
