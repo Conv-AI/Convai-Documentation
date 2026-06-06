@@ -1,10 +1,34 @@
 ---
 title: Installation and plugin issues
-description: Fix plugin-not-found errors, module load failures, and engine version conflicts when installing the Convai Unreal Engine plugin.
-last_reviewed: 2026-06-04
+description: Fix plugin-not-found errors, module load failures, Blueprint-only project limitations, and Android packaging errors in the Convai Unreal Engine plugin.
+last_reviewed: 2026-06-06
 ---
 
 Use this page to resolve problems that occur during installation or when the plugin fails to load in the Unreal Editor. Issues that appear after the plugin loads — such as API key or audio errors — are covered in the other troubleshooting pages.
+
+## First-line check
+
+Before investigating specific symptoms, run through these three checks. They resolve the majority of installation issues in under two minutes.
+
+{% stepper %}
+{% step %}
+**Confirm the plugin appears in the Plugins list**
+
+Open **Edit > Plugins** and search for `Convai`. The plugin entry must appear and be enabled (checkbox checked). If it does not appear, the folder structure is incorrect — see [Plugin does not appear in the Plugins list](#plugin-does-not-appear-in-the-plugins-list).
+{% endstep %}
+
+{% step %}
+**Check the Output Log for LogConvai entries**
+
+Open **Window > Output Log** and type `LogConvai` in the search field. At a successful load you should see settings registered and no error entries. If you see `LogConvai: Error: Failed to find Convai plugin`, the plugin folder or `.uplugin` file is misplaced.
+{% endstep %}
+
+{% step %}
+**Verify the plugin folder structure**
+
+The plugin root must be at `<YourProject>/Plugins/Convai/` and must contain `ConvAI.uplugin` at that exact path. The folder name must be `Convai` — any other name prevents detection.
+{% endstep %}
+{% endstepper %}
 
 ## Plugin does not appear in the Plugins list
 
@@ -34,13 +58,31 @@ Use this page to resolve problems that occur during installation or when the plu
 
 **Verify:** The editor opens without a compile dialog, and the Convai components appear in the **Add Component** menu when editing a Blueprint.
 
----
+## Blueprint-only project cannot load the plugin
 
-**Cause — binary-only project without Build Tools:** The project was created as a Blueprint-only project and has no C++ source, so the Unreal Build Tool cannot recompile it.
+**Symptom:** The plugin is installed correctly but the editor crashes on restart, or shows a dialog saying it cannot compile modules. You are using a Blueprint-only project with no C++ source files.
 
-**Fix:** In the Unreal Editor (before it crashes), select **File > New C++ Class** to add a minimal C++ file and generate the project files. Then build from the IDE and relaunch.
+**Cause:** The Convai plugin contains C++ modules (`Convai`, `ConvaiEditor`, `ConvaiVisionBase`) that require compilation. Blueprint-only projects have no build environment, so the Unreal Build Tool cannot compile the plugin.
 
-**Verify:** The editor restarts cleanly after the build completes.
+{% hint style="warning" %}
+Blueprint-only projects cannot use a project-level plugin installation for the Convai plugin. You must either convert the project to a C++ project or install the plugin at the engine level.
+{% endhint %}
+
+**Fix — option A (recommended): Convert to a C++ project**
+
+In the Unreal Editor, select **File > New C++ Class**, accept the default `None` parent class and the default file name, and click **Create Class**. This generates the project files and sets up the build environment. After the IDE opens, build the solution, then relaunch the editor.
+
+**Fix — option B: Engine-level installation**
+
+Install the plugin into the engine directory instead of the project directory. Place the plugin folder at:
+
+```text
+C:\Program Files\Epic Games\UE_5.x\Engine\Plugins\Marketplace\Convai\
+```
+
+Replace `5.x` with your engine version. The engine already has a build environment, so engine-level plugins do not require a per-project compile step.
+
+**Verify:** The editor restarts cleanly after the build completes. Convai components appear in the **Add Component** menu.
 
 ## `ConvaiEditor` module not available
 
@@ -52,9 +94,7 @@ Use this page to resolve problems that occur during installation or when the plu
 
 **Verify:** After setting the key in the config file, open **Edit > Project Settings > Convai** and confirm the `API Key` field shows the value you set.
 
-{% hint style="info" %}
-The plugin version <code class="expression">space.vars.unreal_plugin_version</code> supports all Unreal Engine 5.x versions from 5.0 onward. The `ConvaiEditor` module is the only component that requires 5.2 or later.
-{% endhint %}
+Plugin version <code class="expression">space.vars.unreal_plugin_version</code> supports all Unreal Engine 5.x versions from 5.0 onward; `ConvaiEditor` is the only component that requires 5.2 or later.
 
 ## `AudioCapture` plugin dependency missing
 
@@ -64,13 +104,13 @@ The plugin version <code class="expression">space.vars.unreal_plugin_version</co
 
 **Fix:** Open **Edit > Plugins**, search for `Audio Capture`, and enable it. Restart the editor.
 
-**Verify:** The Convai plugin loads without errors. You can confirm by checking the Output Log for `LogConvai` messages at startup — there should be no missing-module errors.
+**Verify:** The Convai plugin loads without errors. Check the Output Log for `LogConvai` messages at startup — there should be no missing-module errors.
 
 ## Plugin loads on Windows but not on Android
 
-**Symptom:** The plugin works in the Windows editor and in Windows packaged builds, but fails to load or compile for an Android target.
+**Symptom:** The plugin works in the Windows editor and in Windows packaged builds, but fails to load or causes errors when packaging for an Android target.
 
-**Cause:** The `Convai` and `ConvaiVisionBase` modules explicitly allow only `Win64` and `Android` in their platform lists. A packaging failure usually means the Android NDK or SDK path is not configured, or the `AndroidPermission` plugin is disabled.
+**Cause — missing Android SDK or NDK configuration:** The `Convai` and `ConvaiVisionBase` modules support `Win64` and `Android` platforms. A packaging failure usually means the Android NDK or SDK path is not configured, or the `AndroidPermission` plugin is disabled.
 
 **Fix:**
 1. Confirm that the Android NDK and SDK paths are set in **Edit > Project Settings > Platforms > Android SDK**.
@@ -78,6 +118,25 @@ The plugin version <code class="expression">space.vars.unreal_plugin_version</co
 3. Rebuild the project for the Android target.
 
 **Verify:** The packaging log completes without module-not-found errors for `Convai` or `ConvaiVisionBase`.
+
+---
+
+**Cause — missing native libraries in the APK:** The plugin bundles three native libraries that must be copied into the APK during packaging: `libconvai_client.so`, `libconvai_http_helper.so`, and `libwebrtc.jar`. If any of these are absent from the packaged output, the plugin initializes but the real-time audio connection fails silently on-device.
+
+**Fix:** This is handled automatically by the plugin's `Convai_AndroidAPL.xml`. If you are seeing native-load failures, confirm that:
+1. The plugin's `Convai_AndroidAPL.xml` file is present at `Plugins/Convai/Source/Convai/` and has not been removed or modified.
+2. Your ProGuard or R8 configuration (if enabled) preserves WebRTC classes. Add the following keep rules to your ProGuard config:
+
+```proguard
+-keep class com.google.gson.** { *; }
+-keep class org.webrtc.** { *; }
+```
+
+**Verify:** Run `adb shell ls /data/app/<your.package.name>/lib/arm64/` after installing the APK. You should see `libconvai_client.so` and `libconvai_http_helper.so` listed.
+
+{% hint style="danger" %}
+Deleting the `Intermediate/` and `Binaries/` folders forces a full recompile and can resolve corrupted build state — but only do this as a last resort. Close the editor and IDE before deleting these folders, as open file handles can cause the delete to fail or leave the project in a partially cleaned state. Rebuild from the IDE before relaunching the editor.
+{% endhint %}
 
 ## Next steps
 

@@ -1,10 +1,22 @@
 ---
 title: Lip sync and animation issues
-description: Fix missing mouth movement, wrong blendshape curves, and rig mismatch problems in the Convai Unreal Engine plugin lip sync system.
-last_reviewed: 2026-06-04
+description: Fix missing mouth movement, wrong blendshape curves, frame starvation, and packaged build animation failures in the Convai Unreal Engine plugin.
+last_reviewed: 2026-06-06
 ---
 
 Use this page to resolve problems with facial animation during character speech. Issues where the character produces no audio at all are covered in [Audio and microphone issues](audio-and-microphone-issues.md). For a full reference of `Convai Face Sync` component properties, see [Face Sync component reference](../features/lip-sync/face-sync-component-reference.md).
+
+{% hint style="info" %}
+**Not sure which `LipSyncMode` to use?** Match your rig to the table below before investigating further — most mouth-movement problems are caused by a `LipSyncMode` mismatch.
+
+| Rig type | Correct `LipSyncMode` |
+| --- | --- |
+| MetaHuman | `MetaHuman Blendshapes` |
+| CC5 | `MetaHuman Blendshapes` |
+| CC4 (standard export) | `ARKit Blendshapes` |
+| CC4 (extended export) | `CC4 Extended Blendshapes` |
+| Custom rig with OVR viseme curves | `Viseme Based` |
+{% endhint %}
 
 ## No mouth movement during speech
 
@@ -12,7 +24,7 @@ Use this page to resolve problems with facial animation during character speech.
 
 **Cause — missing Face Sync component:** The `Convai Face Sync` component is not present on the Actor, so no facial data is requested from Convai.
 
-**Fix:** Open the character Blueprint, add a `Convai Face Sync` component, and set `LipSyncMode` to the value that matches the rig. Compile and save.
+**Fix:** Open the character Blueprint, add a `Convai Face Sync` component, and set `LipSyncMode` to the value that matches your rig. Compile and save.
 
 **Verify:** Enter Play mode and confirm that the `Convai Face Sync` component appears in the Actor's component list at runtime.
 
@@ -34,41 +46,55 @@ Use this page to resolve problems with facial animation during character speech.
 
 ## Mouth moves but the wrong curves animate
 
-**Symptom:** Something on the face moves, but it is not the mouth — for example the eyes blink rapidly or unrelated shapes activate.
+**Symptom:** Something on the face moves, but it is not the mouth — for example, the eyes blink rapidly or unrelated shapes activate.
 
 **Cause — `LipSyncMode` mismatch:** The `LipSyncMode` on the `Convai Face Sync` component does not match the curve names on the Skeletal Mesh. For example, the mode is set to `Viseme Based` but the mesh has MetaHuman CTRL curves.
 
-**Fix:** Open the character Blueprint, select the `Convai Face Sync` component, and change `LipSyncMode` to the value that matches the rig:
-
-| Rig type | Correct `LipSyncMode` |
-|---|---|
-| MetaHuman | `MetaHuman Blendshapes` |
-| CC5 | `MetaHuman Blendshapes` |
-| CC4 (standard export) | `ARKit Blendshapes` |
-| CC4 (extended export) | `CC4 Extended Blendshapes` |
-| Custom rig with OVR viseme curves | `Viseme Based` |
+**Fix:** Open the character Blueprint, select the `Convai Face Sync` component, and change `LipSyncMode` to the value that matches the rig. Refer to the quick-decision table at the top of this page.
 
 `LipSyncMode` can be set per-component in the **Details** panel or globally in **Edit > Project Settings > Convai** via the `LipSyncMode` property on `UConvaiSettings`.
 
 **Verify:** Open the Skeletal Mesh in the editor and inspect the **Curves** list. Confirm that the curve names match what the selected mode produces.
 
+{% hint style="warning" %}
+The global `LipSyncMode` in **Edit > Project Settings > Convai** applies to all `Convai Face Sync` components that do not override it locally. If different characters in your project use different rig types, set a per-component override on each `Convai Face Sync` component rather than relying on the global setting — a wrong global value silently breaks every character that does not override it.
+{% endhint %}
+
 ## Frame starvation — mouth animates then freezes mid-speech
 
 **Symptom:** Lip sync starts correctly but the face freezes part-way through a speech turn, then resumes or snaps to neutral.
 
-**Cause:** The AnimGraph node has consumed all buffered frames before new ones arrived from the network. This is a timing issue, often more visible on high-latency connections.
+**Cause — buffer underrun:** The AnimGraph node has consumed all buffered frames before new ones arrived from the network. This is a timing issue, often more visible on high-latency connections.
 
-**Fix:** Increase `StarvationBlendOutDuration` on the AnimGraph node (for example to `1.2`) so the face blends out gradually rather than snapping.
+**Fix:** Increase `StarvationBlendOutDuration` on the AnimGraph node (for example to `1.2`) so the face blends out gradually rather than freezing at the last frame.
 
-**Verify:** In PIE on a high-latency connection, the mouth should fade out smoothly during gaps rather than freezing at the last frame.
+**Verify:** In PIE on a high-latency connection, the mouth should fade out smoothly during gaps rather than freezing.
 
 ---
 
-**Cause — interpolation disabled:** When `bEnableInterpolation` is `false` on the `Convai Face Sync` component, the component replays discrete frames without smoothing, which makes starvation gaps more visible.
+**Cause — frame rate mismatch:** The `Convai Face Sync` component outputs facial data at 90 FPS by default (`OutputFPS` setting). If the game is rendering well below 90 FPS, frames are consumed faster than they are delivered, increasing starvation frequency.
+
+**Fix:** Lower `OutputFPS` on the `Convai Face Sync` component to match your target frame rate. For a game targeting 30 FPS, set `OutputFPS` to `30`. For a game targeting 60 FPS, set it to `60`.
+
+**Verify:** Starvation gaps should become less frequent or disappear at the reduced `OutputFPS`.
+
+---
+
+**Cause — interpolation disabled:** When `bEnableInterpolation` is `false` on the `Convai Face Sync` component, the component replays discrete frames without smoothing, which makes starvation gaps more visible even when they are brief.
 
 **Fix:** Enable `bEnableInterpolation` on the `Convai Face Sync` component in the character Blueprint **Details** panel.
 
-**Verify:** The transitions between frames should appear smoother in PIE.
+**Verify:** Frame transitions should appear smoother in PIE.
+
+## Lip sync appears to lag behind audio
+
+**Symptom:** Mouth movement is correct but consistently starts slightly after the audio begins, making the character look out of sync.
+
+**Cause — `LipSyncTimeOffset` is too high:** The `LipSyncTimeOffset` setting (default 20 ms) shifts animation timing relative to the audio signal. If the value is too high for your audio pipeline, animation lags visibly.
+
+**Fix:** Reduce `LipSyncTimeOffset` on the `Convai Face Sync` component. Start by lowering to `0.01` (10 ms) and observe the result. Adjust in small increments until the animation aligns with the audio.
+
+**Verify:** In PIE, the mouth should open at the same moment the character's audio begins.
 
 ## Custom blendshape remapping produces no output
 
@@ -87,7 +113,7 @@ Use this page to resolve problems with facial animation during character speech.
 **Fix:** Confirm the expected source curve names for the selected mode:
 
 - `Viseme Based`: 15 OVR viseme names — `sil`, `PP`, `FF`, `TH`, `DD`, `kk`, `CH`, `SS`, `nn`, `RR`, `aa`, `E`, `ih`, `oh`, `ou`
-- `ARKit Blendshapes`: 52 standard Apple ARKit curves plus 9 head and eye rotation curves
+- `ARKit Blendshapes`: 52 standard Apple ARKit blendshape names plus 9 head and eye rotation curves
 - `MetaHuman Blendshapes`: MetaHuman CTRL curve names
 
 **Verify:** Temporarily clear the mapping. If the curve animates with 1:1 mapping, the source name is correct and the issue was in `TargetNames`.
@@ -101,10 +127,6 @@ Use this page to resolve problems with facial animation during character speech.
 **Fix:** Confirm that the face Animation Blueprint is referenced by the character Blueprint or by a level that is included in the cook. If curves are stripped, add them to the asset's **Skeleton** and ensure the Skeleton asset is in a cooked package.
 
 **Verify:** Run a Development cook and check the cook log for warnings about stripped curve tracks on the character's Skeleton.
-
-{% hint style="info" %}
-The global `LipSyncMode` in **Edit > Project Settings > Convai** applies to all `Convai Face Sync` components that do not override the mode locally. Set a per-component override when different characters in the same project use different rig types.
-{% endhint %}
 
 ## Next steps
 

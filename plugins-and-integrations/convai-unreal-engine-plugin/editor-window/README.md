@@ -1,10 +1,10 @@
 ---
 title: The Convai editor window
-description: Understand the Convai editor window — what each section does, how to open it, and how the first-time sign-in flow works.
+description: Learn what each section of the Convai editor window does, how to open it, and find step-by-step guides for sign-in, samples, and log export.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai editor window is a docked panel inside Unreal Editor that centralises account management, character browsing, sample content, documentation access, and diagnostic tools for the Convai Unreal Engine plugin. It is provided by the `ConvaiEditor` module and requires Unreal Engine 5.2 or later.
+The Convai editor window is a floating window inside Unreal Editor that brings account management, sample browsing, and support tools directly into your development workflow. It requires Unreal Engine 5.2 or later.
 
 ## How to open the window
 
@@ -13,32 +13,27 @@ Two entry points are available:
 - **Menu bar:** select **Window > Convai > Open Convai Editor**.
 - **Toolbar button:** click the **Convai Editor** button in the Level Editor toolbar (beside the Play controls).
 
-The window opens as a standard dockable Unreal Editor tab. If you have not signed in yet, the welcome flow launches immediately.
+The window opens as a standalone floating window. If you have not signed in yet, the welcome screen appears automatically.
 
 ## Window sections
 
-The window has a navigation sidebar on the left. Each entry routes to a different section.
+The window has a navigation bar at the top. Each entry routes to a different section.
 
 | Section | What it shows |
 |---|---|
-| **Home** | Announcements, changelogs, characters present in the current level, and the latest Convai YouTube video |
-| **Dashboard** | Integrated web view of your convai.com dashboard |
-| **Experiences** | Integrated web view of the Experiences area on convai.com |
-| **Documentation** | Integrated web view of Convai docs |
-| **Forum** | Integrated web view of the Convai forum |
+| **Home** | Your convai.com dashboard, plugin configurations for characters in the level, Convai Experiences preview, the latest Convai YouTube video, announcements, changelogs, and characters active in the current level |
 | **Samples** | Browseable list of sample projects and content items |
+| **Features** | Convai features and experiences |
 | **Account** | Account details, plan information, and per-feature usage quotas |
-| **Support** | Support resources and the log-export dialog |
-| **Settings** | Theme configuration for the window |
+| **Support** | Support resources |
+
+The **⚙️** icon in the top-right corner opens a dropdown with **Export Logs** and **Check for Updates**.
 
 ## First-time sign-in
 
-The first time you open the window, a two-step welcome flow appears:
+The first time you open the window, a welcome screen appears with a **Connect Convai Account** button. Clicking it opens the Convai login page inside the editor, where you can sign in with your email and password, or with a Google or GitHub account.
 
-1. **Welcome screen** — an introductory screen that introduces the plugin.
-2. **API key input** — enter your API key; the window validates it before storing it.
-
-After completing the welcome flow the window opens to the Home section. Your API key is stored in `UConvaiSettings.API_Key`. See [Configure your API key](../getting-started/configure-api-key.md) for full sign-in instructions.
+After sign-in, the window opens to the Home section. See [Sign in and manage your account](sign-in-and-account.md) for full instructions.
 
 ## Related pages
 

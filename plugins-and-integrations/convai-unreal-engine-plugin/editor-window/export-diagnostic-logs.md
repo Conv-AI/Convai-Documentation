@@ -21,15 +21,21 @@ Click **Convai Editor** in the Level Editor toolbar, or select **Window > Convai
 {% endstep %}
 
 {% step %}
-### Open the settings dropdown
+### Click the settings icon
 
-Click the settings (gear) icon in the top-right corner of the Convai editor window.
+Click the **⚙️** icon in the top-right corner of the editor window. A dropdown appears with **Export Logs** and **Check for Updates**.
+
+{% hint style="warning" %}
+**Screenshot required before publishing:** Capture the settings dropdown as it appears after clicking the ⚙️ icon. The image must show both the **Export Logs** and **Check for Updates** options.
+{% endhint %}
+
+<figure><img src="../../../.gitbook/assets/TODO-convai-editor-settings-dropdown.png" alt="The settings dropdown in the Convai editor window showing Export Logs and Check for Updates options"><figcaption><p>TODO: Replace with screenshot of the settings dropdown showing the Export Logs option.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
-### Select Export Logs
+### Click Export Logs
 
-Click **Export Logs** in the dropdown menu.
+Click **Export Logs** in the dropdown.
 {% endstep %}
 
 {% step %}
@@ -39,7 +45,11 @@ A privacy notice dialog titled **Export Logs - Privacy Notice** appears. Review 
 {% endstep %}
 {% endstepper %}
 
-The export runs in the background. A progress notification **Exporting Logs…** appears in the editor. When packaging is complete, a success notification confirms the file count and size, and the system file explorer opens automatically to the folder containing the ZIP archive.
+The export runs in the background. A progress notification **Exporting Logs…** appears in the editor.
+
+{% hint style="success" %}
+When the export is complete, the notification updates to confirm the file count and size. The system file explorer opens automatically to the folder containing the ZIP archive.
+{% endhint %}
 
 ## What the archive contains
 
@@ -66,6 +76,14 @@ The ZIP file is created on your local machine. Attach it to your support ticket 
 **Cause:** A disk-write error, insufficient disk space, or a missing log directory.
 
 **Fix:** Ensure the project directory is writable and that you have enough free disk space. Try the export again. If the problem persists, manually collect logs from `<ProjectRoot>/Saved/Logs/` and attach them to your support ticket.
+
+### The privacy notice does not appear
+
+**Symptom:** Clicking **Export Logs** starts the export immediately without showing a privacy notice dialog.
+
+**Cause:** The privacy notice was already accepted in a previous export.
+
+**Fix:** No action required — the export proceeds normally.
 
 ## Next steps
 

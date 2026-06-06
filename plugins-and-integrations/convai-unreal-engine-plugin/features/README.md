@@ -1,10 +1,12 @@
 ---
 title: Features
-description: Explore the runtime features of the Convai Unreal Engine plugin, including lip sync, character actions, narrative design, and more.
-last_reviewed: 2026-06-03
+description: Find guides for all Convai Unreal Engine plugin features — lip sync, character actions, narrative design, long-term memory, vision, and more.
+last_reviewed: 2026-06-06
 ---
 
-The Convai Unreal Engine plugin extends your characters beyond conversation. Each feature is a self-contained section covering how the capability works, how to set it up, and reference material for every exposed property.
+Features are the plugin's AI-powered capability modules. Each feature connects to Convai for a specific purpose — executing in-scene behaviors, expressing emotions, remembering players across sessions, following authored narrative graphs, or perceiving the world through a camera. Every section includes a conceptual overview, a quick start, Blueprint property references, usage examples, and troubleshooting guidance.
+
+Select a feature to get started:
 
 <table data-view="cards">
 <thead>
@@ -15,39 +17,39 @@ The Convai Unreal Engine plugin extends your characters beyond conversation. Eac
 </thead>
 <tbody>
 <tr>
-<td><strong>Lip sync</strong><br>Drive mouth and face blendshapes in sync with Convai speech using MetaHuman, ARKit, CC4, or viseme targets.</td>
+<td><strong>Lip sync</strong><br>Drive mouth and face blendshapes in sync with Convai speech using <code>UConvaiFaceSyncComponent</code> — supports MetaHuman, ARKit, CC4, and viseme targets.</td>
 <td><a href="lip-sync/README.md">lip-sync/README.md</a></td>
 </tr>
 <tr>
-<td><strong>Emotions</strong><br>Map Convai emotion output to facial expressions and body animations on your character.</td>
-<td><a href="emotions/README.md">emotions/README.md</a></td>
+<td><strong>Emotion</strong><br>Translate Convai emotion signals into per-emotion blendshape weights and scores on any skeletal character.</td>
+<td><a href="emotion/README.md">emotion/README.md</a></td>
 </tr>
 <tr>
-<td><strong>Character actions</strong><br>Let Convai instruct your character to move, interact, or execute custom Blueprint logic.</td>
+<td><strong>Character actions</strong><br>Let Convai return structured action sequences your Blueprint event handlers execute — move to objects, follow the player, or run any custom behavior.</td>
 <td><a href="character-actions/README.md">character-actions/README.md</a></td>
 </tr>
 <tr>
-<td><strong>Scene metadata</strong><br>Pass in-scene context to Convai so characters can reference objects and locations in dialogue.</td>
+<td><strong>Scene metadata</strong><br>Tag world actors with <code>UConvaiObjectComponent</code> so Convai characters know which objects exist in the scene and can reference them by name in conversation.</td>
 <td><a href="scene-metadata/README.md">scene-metadata/README.md</a></td>
 </tr>
 <tr>
-<td><strong>Gaze attention</strong><br>Point the character's head and eyes toward the player or an object of interest.</td>
+<td><strong>Gaze attention</strong><br>Use player line-of-sight to direct which scene object a character focuses on — sustained gaze promotes objects to active attention with configurable dwell timers.</td>
 <td><a href="gaze-attention/README.md">gaze-attention/README.md</a></td>
 </tr>
 <tr>
-<td><strong>Dynamic context</strong><br>Inject real-time text into the character's context window to reflect scene state.</td>
+<td><strong>Dynamic context</strong><br>Push live runtime state — health, inventory, zone, events — into the character's context window mid-session without restarting the connection.</td>
 <td><a href="dynamic-context/README.md">dynamic-context/README.md</a></td>
 </tr>
 <tr>
-<td><strong>Narrative design</strong><br>Structure character conversations into branching sections with triggers and decisions.</td>
+<td><strong>Narrative design</strong><br>Structure character behavior around an authored story graph — sections define objectives and tone, triggers advance the narrative, template keys inject live gameplay data.</td>
 <td><a href="narrative-design/README.md">narrative-design/README.md</a></td>
 </tr>
 <tr>
-<td><strong>Long-term memory</strong><br>Persist facts about players across sessions so characters remember previous interactions.</td>
+<td><strong>Long-term memory</strong><br>Give characters cross-session recall via Speaker IDs and session continuity — characters remember individual players, facts, and past interactions over time.</td>
 <td><a href="long-term-memory/README.md">long-term-memory/README.md</a></td>
 </tr>
 <tr>
-<td><strong>Vision</strong><br>Share camera frames with Convai so characters can perceive and discuss what the player sees.</td>
+<td><strong>Vision</strong><br>Stream scene frames from a capture component to Convai so characters can perceive and discuss what the player sees in real time.</td>
 <td><a href="vision/README.md">vision/README.md</a></td>
 </tr>
 </tbody>
