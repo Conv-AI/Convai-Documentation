@@ -64,6 +64,7 @@ Fetch nodes make a REST API call to Convai each time they are executed. Do not c
 On the **On Success** pin of `Convai Fetch Narrative Triggers`, iterate the `Narrative Triggers` array and extract each `trigger_name` into a `TSet<FString>` or a Map variable. Before calling `Invoke Narrative Design Trigger`, check that the intended name is in the set.
 
 ```text
+// Blueprint pseudocode
 Event Begin Play
   → Fetch Narrative Triggers (CharacterId = MyCharacterID)
       On Success → For Each (Narrative Triggers)

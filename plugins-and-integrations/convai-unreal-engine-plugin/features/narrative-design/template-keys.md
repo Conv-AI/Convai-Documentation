@@ -35,11 +35,16 @@ Keys that appear in the objective but have no entry in the map are left as liter
 
 Select the character Actor in the level or open the character Blueprint. In the **Details** panel, find the **Convai|NarrativeDesign** category. The **Narrative Template Keys** field accepts a `TMap<FString, FString>`. Add entries directly in the Details panel for keys whose values are known at design time.
 
+{% hint style="info" %}
+**Screenshot needed:** add a screenshot of the **Convai|NarrativeDesign** Details panel category showing the Narrative Template Keys map with at least one entry, to help readers locate this field.
+{% endhint %}
+
 ## Set template keys at runtime in Blueprint
 
 Assign the `Narrative Template Keys` property on the `UConvaiChatbotComponent` reference in Blueprint. Write to the property as you would any `TMap` — add, remove, or replace entries at any point during play.
 
 ```text
+// Blueprint pseudocode — assign via Set node on the NarrativeTemplateKeys property
 NarrativeTemplateKeys["PlayerName"] = "Rivera"
 NarrativeTemplateKeys["QuestStatus"] = "completed"
 ```
@@ -62,4 +67,8 @@ The `NarrativeTemplateKeys` property has `BlueprintSetter = UpdateNarrativeTempl
 
 {% content-ref url="usage-examples.md" %}
 [Usage examples](usage-examples.md)
+{% endcontent-ref %}
+
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

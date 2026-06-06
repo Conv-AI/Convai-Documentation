@@ -10,12 +10,11 @@ Narrative triggers advance a character's story graph from one section to the nex
 
 `Invoke Narrative Design Trigger` sends a `TriggerName` string to Convai. Convai matches the name against the outbound triggers configured for the current section in the Convai dashboard and advances the graph if a match is found.
 
-```text
-Invoke Narrative Design Trigger
-  TriggerName          (FString)  — must match the trigger name in the dashboard exactly (case-sensitive)
-  Generate Actions     (bool)     — set true to receive character actions with the response
-  Replicate On Network (bool)     — set true to replicate the call to clients in multiplayer
-```
+| Input | Type | Description |
+|---|---|---|
+| `TriggerName` | `FString` | The trigger name. Must match the dashboard configuration exactly (case-sensitive). |
+| `Generate Actions` | `bool` | Set `true` to receive character actions with the response. |
+| `Replicate On Network` | `bool` | Set `true` to replicate the call to clients in multiplayer. |
 
 Use this function when the transition target is known at design time and the trigger name is a fixed string. This is the standard approach for designed story beats.
 
@@ -27,12 +26,11 @@ Trigger names are case-sensitive. `"start_scene"` and `"Start_Scene"` are treate
 
 `Invoke Speech` (`ExecuteNarrativeTrigger`) sends a raw message string to the active session. Convai processes the message directly without matching it to a named trigger. The character responds to the message content, and if the response causes a section change, `On Narrative Section Received` fires.
 
-```text
-Invoke Speech
-  Trigger Message      (FString)  — the message string to send directly to the session
-  Generate Actions     (bool)
-  Replicate On Network (bool)
-```
+| Input | Type | Description |
+|---|---|---|
+| `Trigger Message` | `FString` | The message string to send directly to the session. |
+| `Generate Actions` | `bool` | Set `true` to receive character actions with the response. |
+| `Replicate On Network` | `bool` | Set `true` to replicate the call to clients in multiplayer. |
 
 Use `Invoke Speech` when the message is assembled at runtime — for example from player dialogue input or a dynamic game state string — and does not correspond to a configured trigger name.
 
@@ -40,11 +38,10 @@ Use `Invoke Speech` when the message is assembled at runtime — for example fro
 
 Bind `On Narrative Section Received` on the chatbot component to react when Convai advances to a new section.
 
-```text
-On Narrative Section Received
-  Chatbot Component    (UConvaiChatbotComponent*)  — the component that received the section
-  Narrative Section ID (FString)                   — the ID of the new active section
-```
+| Output pin | Type | Description |
+|---|---|---|
+| `Chatbot Component` | `UConvaiChatbotComponent*` | The component that received the section update. |
+| `Narrative Section ID` | `FString` | The ID of the new active section. |
 
 The event fires only after Convai confirms the section change. It does not fire when the trigger function is called.
 

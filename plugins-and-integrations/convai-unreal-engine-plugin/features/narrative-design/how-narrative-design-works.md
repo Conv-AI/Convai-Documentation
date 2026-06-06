@@ -46,9 +46,13 @@ If a trigger is called before the session is open, the plugin holds it in a per-
 
 The plugin exposes two functions for advancing the graph.
 
-**`Invoke Narrative Design Trigger`** (`InvokeNarrativeDesignTrigger`) — sends a named trigger. The name must match a trigger configured in the Convai dashboard for the current section. This is the standard approach for designed story beats where the transition target is known at authoring time.
+### `Invoke Narrative Design Trigger`
 
-**`Invoke Speech`** (`ExecuteNarrativeTrigger`) — sends a raw message string directly. Convai processes the message without attempting to match it to a named trigger. Use this for dynamic or programmatic transitions where the message content is assembled at runtime and does not correspond to a dashboard-configured trigger name.
+`InvokeNarrativeDesignTrigger` sends a named trigger. The name must match a trigger configured in the Convai dashboard for the current section. This is the standard approach for designed story beats where the transition target is known at authoring time.
+
+### `Invoke Speech`
+
+`ExecuteNarrativeTrigger` sends a raw message string directly. Convai processes the message without attempting to match it to a named trigger. Use this for dynamic or programmatic transitions where the message content is assembled at runtime and does not correspond to a dashboard-configured trigger name.
 
 ## Shared parameters
 
@@ -71,6 +75,10 @@ Keys are applied at the time Convai reads the active section's objective. You ca
 
 {% content-ref url="quick-start.md" %}
 [Quick start](quick-start.md)
+{% endcontent-ref %}
+
+{% content-ref url="narrative-triggers.md" %}
+[Narrative triggers](narrative-triggers.md)
 {% endcontent-ref %}
 
 {% content-ref url="narrative-design-blueprint-reference.md" %}

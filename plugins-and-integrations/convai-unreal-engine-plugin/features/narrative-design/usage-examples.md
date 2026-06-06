@@ -46,6 +46,7 @@ The examples below cover common narrative design patterns for training simulatio
 2. Assign both to the `UConvaiChatbotComponent`'s `Narrative Template Keys` map before the session starts:
 
 ```text
+// Blueprint pseudocode
 NarrativeTemplateKeys["PlayerName"]   = "Rivera"
 NarrativeTemplateKeys["Department"]   = "Electrical"
 ```
@@ -67,6 +68,7 @@ The `UConvaiChatbotComponent` has a `bAutoInitializeSession` property. When `tru
 If `bAutoInitializeSession` is `false` (for example, you manage session lifecycle explicitly), bind `On Character Data Loaded` (`OnCharacterDataLoadEvent_V2`) and call your trigger functions only from within that event. This ensures the session is established before any trigger is sent.
 
 ```text
+// Blueprint pseudocode
 Event: On Character Data Loaded (Success = true)
   → Call Invoke Narrative Design Trigger
 ```
@@ -87,6 +89,7 @@ Event: On Character Data Loaded (Success = true)
 4. Wherever you call `Invoke Narrative Design Trigger`, first check whether the intended `TriggerName` is in `ValidTriggerNames`. If it is not, print the name and the available names from the set to the Output Log.
 
 ```text
+// Blueprint pseudocode
 Begin Play
   → Convai Fetch Narrative Triggers (CharacterId = CharacterID)
       On Success → For Each (Narrative Triggers)

@@ -88,9 +88,9 @@ Use the Unreal Engine **Output Log** (open via **Window > Output Log**) to captu
 
 **Fix:** open **Project Settings → Plugins → Convai** and verify that the API key matches the key in your Convai account dashboard.
 
-**Cause — invalid `CharacterId`:** the `CharacterId` input does not match any character in the connected Convai account.
+**Cause — invalid `CharacterID`:** the `CharacterID` input does not match any character in the connected Convai account.
 
-**Fix:** copy the character ID from the Convai dashboard character page and paste it exactly into the Blueprint node's `CharacterId` pin.
+**Fix:** copy the character ID from the Convai dashboard character page and paste it exactly into the Blueprint node's `CharacterID` pin.
 
 **Cause — no network:** the device has no internet access at the time the fetch node executes.
 

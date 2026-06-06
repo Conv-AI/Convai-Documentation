@@ -1,6 +1,6 @@
 ---
 title: Narrative design Blueprint reference
-description: Reference for every Blueprint function, event, property, and narrative struct in the Convai Unreal Engine plugin narrative design API.
+description: Complete reference for Blueprint functions, events, properties, and narrative structs in the Convai Unreal Engine plugin narrative design API.
 last_reviewed: "2026-06-05"
 ---
 
@@ -39,7 +39,7 @@ Queries Convai for all narrative triggers configured for the specified character
 |---|---|---|---|
 | `CharacterId` | Input | `FString` | The character ID to query. |
 | `On Success` | Output (exec) | — | Fires when the request succeeds. |
-| `On Failure` | Output (exec) | — | Fires on error. |
+| `On Failure` | Output (exec) | — | Fires on network error, invalid API key, or unknown character ID. |
 | `Narrative Triggers` | Output | `TArray<FNarrativeTrigger>` | The returned triggers. Empty on failure. |
 
 ---
