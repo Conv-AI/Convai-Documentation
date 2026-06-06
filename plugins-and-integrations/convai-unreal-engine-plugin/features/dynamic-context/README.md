@@ -1,12 +1,10 @@
 ---
 title: Dynamic context
-description: Find guides for pushing live state and narrative events into a Convai character's context during a session in the Unreal Engine plugin.
+description: Find all Dynamic Context guides — push live state and events to Convai characters via Blueprint nodes and observe context-aware responses.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin separates character context into two layers: a static layer frozen at session start and a dynamic layer you can modify at any point during play. The dynamic layer lets you push player health, inventory, zone changes, narrative events, and any other runtime information to Convai without restarting the session.
-
-This section explains how both layers work, provides a quick start for your first dynamic update, documents every Blueprint function in the `Convai|DynamicContext` category, and covers common usage patterns and troubleshooting.
+The Convai Unreal Engine plugin separates character context into two layers: a static layer frozen at session start and a dynamic layer you can modify at any point during play. Updates reach the dynamic layer through the high-level `Convai|DynamicContext` node family or the lower-level `UpdateContext` node; both funnel changes through the same debounce-based batch system that groups rapid updates before sending them to Convai. The dynamic layer lets you push player health, inventory, zone changes, narrative events, and any other runtime information without restarting the session.
 
 <table data-view="cards">
 <thead>
@@ -19,6 +17,10 @@ This section explains how both layers work, provides a quick start for your firs
 <tr>
 <td><strong>How dynamic context works</strong><br>Understand state properties, event strings, the debounce window, and the ShouldRespond modes.</td>
 <td><a href="how-dynamic-context-works.md">how-dynamic-context-works.md</a></td>
+</tr>
+<tr>
+<td><strong>Sync behavior and timing</strong><br>Understand what RTVI payload the plugin sends at each flush, the first-appearance deferral rule, and pre-session queuing.</td>
+<td><a href="sync-behavior-and-timing.md">sync-behavior-and-timing.md</a></td>
 </tr>
 <tr>
 <td><strong>Static context at connection time</strong><br>Understand what data is frozen at session start and how it relates to the dynamic layer.</td>
@@ -42,3 +44,15 @@ This section explains how both layers work, provides a quick start for your firs
 </tr>
 </tbody>
 </table>
+
+## Next steps
+
+Start with the quick start to push your first context update, then read how dynamic context works to understand the debounce system and ShouldRespond modes before moving into the reference pages.
+
+{% content-ref url="quick-start.md" %}
+[Quick start](quick-start.md)
+{% endcontent-ref %}
+
+{% content-ref url="how-dynamic-context-works.md" %}
+[How dynamic context works](how-dynamic-context-works.md)
+{% endcontent-ref %}

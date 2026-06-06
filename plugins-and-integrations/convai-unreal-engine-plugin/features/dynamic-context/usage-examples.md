@@ -21,7 +21,7 @@ Event HealthChanged (NewHealth: float)
       ShouldRespond: Never
 ```
 
-To verify the character received the state: speak "What is my current health?" The character should reply with the value.
+**Verify:** Speak "What is my current health?" to the character. The character should reply with the current value.
 
 ## Announce a narrative event
 
@@ -38,6 +38,8 @@ Event AlarmActivated
 ```
 
 The character reacts verbally within the debounce window (default `0.5 s`). If the reaction must be instantaneous, set `bFlushImmediately = true` on the `Add Context Event` node.
+
+**Verify:** The character should react with a spoken response within the debounce window (`0.5 s` by default). If the character does not respond, confirm that `ShouldRespond` is set to `Always` and that the session is active.
 
 ## Update multiple states at once after a scene transition
 
@@ -59,6 +61,8 @@ Event EnteredConferenceRoom
 
 With `ShouldRespond = Auto`, the character may acknowledge the zone change if contextually appropriate, or remain silent if the LLM determines no reaction is needed.
 
+**Verify:** After the event fires, speak to the character or ask "Where are we?" — the character should reference the conference room and available equipment.
+
 ## Remove a state when a condition ends
 
 **Scenario:** A quest item is used and should no longer be part of the character's awareness.
@@ -71,6 +75,8 @@ Event ItemUsed (ItemName: FString)
 ```
 
 After the debounce flush, Convai no longer sees the item in the state block. The character will not reference it in future responses.
+
+**Verify:** After the flush, ask the character about the item by name — it should respond that it is not aware of any such item.
 
 ## Combine state and event for a critical moment
 
@@ -92,6 +98,8 @@ Event CommanderDown
 
 The state update is silent; the event triggers an immediate spoken response. Both updates arrive in the same debounce batch.
 
+**Verify:** The character should respond immediately to the event. The state update (`CommanderStatus = KIA`) arrives in the same batch, so the character references both in the same response.
+
 ## Reset context on level restart
 
 **Scenario:** The player restarts a simulation and all prior runtime state should be discarded.
@@ -101,10 +109,13 @@ The state update is silent; the event triggers an immediate spoken response. Bot
 Event OnLevelRestart
   → ConvaiBotComponent → Reset Dynamic Context
   → ConvaiBotComponent → Stop Session
+  → (Set SessionID to "-1")
   → ConvaiBotComponent → Start Session
 ```
 
-`Reset Dynamic Context` clears the local tracker and sends an empty context to Convai before the session disconnects. Starting a new session then begins with a clean dynamic layer.
+Before calling `Start Session`, set `SessionID` to `"-1"` to start a fresh conversation with no prior memory. `Reset Dynamic Context` clears the local tracker and sends an empty context to Convai before the session disconnects. Starting a new session with `SessionID` set to `"-1"` then begins with a clean dynamic layer and no conversation history.
+
+**Verify:** After restart, ask the character about a state from the previous session — the character should have no knowledge of it.
 
 ## Read a state value in a Blueprint condition
 
@@ -127,7 +138,14 @@ If false:
 
 `Get Context State Value` returns the client-side value immediately — no network round-trip is required.
 
+**Verify:** `Get Context State Value` reads from the local tracker — the return is instant with no network cost.
+
 ## Next steps
 
-- [Dynamic context Blueprint reference](dynamic-context-blueprint-reference.md) — full parameter and enum reference.
-- [Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md) — fix updates that are ignored or arrive too late.
+{% content-ref url="dynamic-context-blueprint-reference.md" %}
+[Dynamic context Blueprint reference](dynamic-context-blueprint-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}

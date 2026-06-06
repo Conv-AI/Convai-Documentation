@@ -1,6 +1,6 @@
 ---
 title: Dynamic context Blueprint reference
-description: Reference for every Blueprint function, property, and enum in the dynamic context category on the Convai Chatbot component.
+description: Reference for every Blueprint node, property, and enum in the dynamic context system, including pre-session queueing behavior and defaults.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -21,7 +21,9 @@ Sets a single state property in the dynamic context. If a property with the same
 | `ShouldRespond` | `EC_RunLLMOption` | `Never` | Whether Convai generates a spoken response after the update. |
 | `bFlushImmediately` | `bool` | `false` | **Advanced.** Bypass the debounce timer and flush in the current frame. |
 
-**Behavior:** The tracker rebuilds the canonical context from all current states and appends a change message. The full canonical context is sent to Convai using `Replace` mode so the entire snapshot is consistent.
+**Behavior:** At flush time the plugin sends a single Replace-mode message. For a **new key with `ShouldRespond = Never`**: the key enters canonical immediately, no delta lines added. For a **new key with `ShouldRespond = Auto` or `Always`**: the key is excluded from canonical on its first flush and appears only as a delta line; it enters canonical on the next flush. For an **update to an existing key**: the updated value enters canonical and a `"Name changed from X to Y"` delta line is appended.
+
+**Pre-session:** Updates staged before the session connects queue safely and flush automatically when the session becomes connected.
 
 ---
 
@@ -36,6 +38,10 @@ Sets multiple state properties at once. When `ShouldRespond` is `Auto` or `Alway
 | `States` | `TMap<FString, FString>` | — | Map of key-value state properties to set or update. |
 | `ShouldRespond` | `EC_RunLLMOption` | `Never` | Whether Convai generates a spoken response after the update. |
 | `bFlushImmediately` | `bool` | `false` | **Advanced.** Bypass the debounce timer and flush in the current frame. |
+
+**Behavior:** All supplied states are applied to the tracker in one operation, producing a single canonical rebuild. When `ShouldRespond` is `Auto` or `Always`, change messages for all supplied states are combined into a single delta block so only one LLM response is triggered.
+
+**Pre-session:** Updates staged before the session connects queue safely and flush automatically when the session becomes connected.
 
 ---
 
@@ -53,6 +59,8 @@ Appends a chronological event string to the dynamic context. Events are not dedu
 
 **Behavior:** The event is appended directly using the provided `ShouldRespond` option. Events are emitted after the state block in the canonical context string.
 
+**Pre-session:** Updates staged before the session connects queue safely and flush automatically when the session becomes connected.
+
 ---
 
 ### Remove Context State
@@ -68,6 +76,8 @@ Removes a state property from the dynamic context and rebuilds the canonical con
 
 **Returns:** Nothing. If `Name` does not exist in the tracker, the call is a no-op.
 
+**Pre-session:** Queues safely and flushes when connected. If the key was never set, this is a no-op with no network traffic.
+
 ---
 
 ### Reset Dynamic Context
@@ -80,7 +90,7 @@ Clears all tracked state properties and events and resets the remote context to 
 |---|---|---|---|
 | — | — | — | No parameters. |
 
-**Behavior:** Always flushes immediately. There is no debounce option for this node. Use it before reconnecting if you want a clean dynamic layer for the new session.
+**Behavior:** Always flushes immediately if the session is connected. If called before the session connects, the reset is scheduled and fires at connect time — discarding any pending staged updates. There is no debounce option for this node.
 
 ---
 
@@ -111,6 +121,19 @@ Low-level node. Sends a context update to Convai with an explicit `Text` string,
 | `ShouldRespond` | `EC_RunLLMOption` | `Auto` | Whether Convai generates a spoken response. |
 
 Use `Update Context` only when the `SetContextState` family does not cover your format requirements.
+
+When `Mode` is `Reset`, the `Text` parameter is ignored — pass an empty string.
+
+## Default ShouldRespond reference
+
+| Function | Default ShouldRespond |
+|---|---|
+| `Set Context State` | `Never` |
+| `Set Context States` | `Never` |
+| `Add Context Event` | `Auto` |
+| `Remove Context State` | _(no ShouldRespond parameter)_ |
+| `Reset Dynamic Context` | _(always silent)_ |
+| `Update Context` | `Auto` |
 
 ## Properties
 
@@ -172,4 +195,14 @@ Controls how a context string is applied when calling `Update Context` directly.
 |---|---|---|
 | `EC_ContextUpdateMode::Append` | Append | The text is appended to the existing context. |
 | `EC_ContextUpdateMode::Replace` | Replace | The full context is replaced with the supplied text. |
-| `EC_ContextUpdateMode::Reset` | Reset | The context is cleared. `Text` is ignored. |
+| `EC_ContextUpdateMode::Reset` | Reset | The context is cleared. `Text` is ignored when mode is `Reset`. |
+
+## Next steps
+
+{% content-ref url="sync-behavior-and-timing.md" %}
+[Sync behavior and timing](sync-behavior-and-timing.md)
+{% endcontent-ref %}
+
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}

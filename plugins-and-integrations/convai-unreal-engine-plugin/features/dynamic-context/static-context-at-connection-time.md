@@ -43,11 +43,26 @@ Calling `StopSession` followed by `StartSession` starts a new session. The new `
 The action config is fixed at `/connect` time. Runtime calls to `AddAction` or `RemoveAction` prepare the set for the **next** session, not the live one. If your application needs to add an action mid-session, call `StopSession` then `StartSession` after mutating the action list.
 {% endhint %}
 
+## Pre-session dynamic context queuing
+
+Calls to `SetContextState`, `SetContextStates`, `AddContextEvent`, and `RemoveContextState` made before `StartSession` completes are safe to issue at any time — including from `BeginPlay`. Each call accumulates its data in the internal pending batch (`PendingContextBatch`). When the session becomes connected, the plugin flushes that batch automatically as the first context update. No guard code or deferred execution is needed on the caller side.
+
+This means you can populate initial runtime state — trainee identity, equipment loadout, starting location — unconditionally in `BeginPlay`, and the values will reach Convai the moment the session connects regardless of connection timing.
+
+{% hint style="warning" %}
+`ResetDynamicContext` called before the session connects clears the local tracker immediately and discards any pending batch accumulated up to that point. When the session connects, a Reset message is sent to Convai before any other context data. If you call `ResetDynamicContext` to clean up from a previous session, call it before issuing new `SetContextState` or `AddContextEvent` calls to avoid discarding the fresh data.
+{% endhint %}
+
 ## SessionID and conversation memory
 
 `SessionID` controls whether Convai resumes a prior conversation. A value of `"-1"` starts a fresh conversation with no prior memory. Set `SessionID` to a value returned from a previous session to restore conversation history. The value is frozen at `/connect`; changing `SessionID` while a session is active has no effect until the next reconnect.
 
 ## Next steps
 
-- [How dynamic context works](how-dynamic-context-works.md) — state properties, events, and the debounce pipeline.
-- [Quick start](quick-start.md) — push your first runtime update.
+{% content-ref url="how-dynamic-context-works.md" %}
+[How dynamic context works](how-dynamic-context-works.md)
+{% endcontent-ref %}
+
+{% content-ref url="quick-start.md" %}
+[Quick start](quick-start.md)
+{% endcontent-ref %}
