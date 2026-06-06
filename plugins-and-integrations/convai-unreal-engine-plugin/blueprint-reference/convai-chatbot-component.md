@@ -52,7 +52,7 @@ See [Session lifecycle](../core-concepts/session-lifecycle.md) for the connectio
 | `EndUserID` | `FString` | `BlueprintReadWrite`, `EditAnywhere` | `Convai` | End-user identity token for long-term memory. Sent to Convai at connect time. |
 | `EndUserMetadata` | `FString` | `BlueprintReadWrite`, `EditAnywhere` | `Convai` | JSON string carrying additional user metadata for LTM. |
 
-See [Long-term memory Blueprint reference](../features/long-term-memory/memory-blueprint-reference.md) for LTM-specific nodes.
+See [LTM Blueprint reference](../features/long-term-memory/ltm-blueprint-reference.md) for LTM-specific nodes.
 
 ## Conversation state queries
 
