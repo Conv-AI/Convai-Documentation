@@ -12,19 +12,19 @@ Before investigating specific symptoms, run through these three checks. They res
 
 {% stepper %}
 {% step %}
-**Confirm the plugin appears in the Plugins list**
+### Confirm the plugin appears in the Plugins list
 
 Open **Edit > Plugins** and search for `Convai`. The plugin entry must appear and be enabled (checkbox checked). If it does not appear, the folder structure is incorrect — see [Plugin does not appear in the Plugins list](#plugin-does-not-appear-in-the-plugins-list).
 {% endstep %}
 
 {% step %}
-**Check the Output Log for LogConvai entries**
+### Check the Output Log for LogConvai entries
 
 Open **Window > Output Log** and type `LogConvai` in the search field. At a successful load you should see settings registered and no error entries. If you see `LogConvai: Error: Failed to find Convai plugin`, the plugin folder or `.uplugin` file is misplaced.
 {% endstep %}
 
 {% step %}
-**Verify the plugin folder structure**
+### Verify the plugin folder structure
 
 The plugin root must be at `<YourProject>/Plugins/Convai/` and must contain `ConvAI.uplugin` at that exact path. The folder name must be `Convai` — any other name prevents detection.
 {% endstep %}

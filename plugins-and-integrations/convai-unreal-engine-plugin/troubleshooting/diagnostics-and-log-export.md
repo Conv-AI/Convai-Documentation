@@ -17,6 +17,7 @@ The plugin declares the following log categories. Use these names as filter term
 | `ConvaiPlayerLog` | `Convai Player` component audio forwarding, session linkage | Audio frames enqueued, Start/Stop Talking events, component references |
 | `ConvaiAudioLog` | `Convai Audio Capture` component: device open/close, stream state, audio data | Device enumeration, stream open results, frame sizes, WAV decode errors |
 | `ConvaiFaceSyncLog` | `Convai Face Sync` component: frame arrival, starvation, mode selection | Frame buffer depth, LipSyncMode resolved, starvation blend events |
+| `ConvaiSubsystemLog` | Convai subsystem session management and latency measurements | Session state transitions, latency measurements (debug builds only) |
 | `LogConvaiEditorConfig` | Convai editor window configuration events | API key write/read, config file path, auth state changes |
 | `LogConvaiEditorNavigation` | Convai editor window navigation events | Tab switches, page load events |
 | `LogConvaiEditorTheme` | Convai editor window theme events | Style load results, theme apply events |
@@ -60,7 +61,7 @@ Remove these lines after debugging to avoid log noise in production builds.
 
 You can change log verbosity at runtime without restarting the editor. Open the in-editor console (backtick key by default) and run:
 
-```text
+```bash
 Log ConvaiAudioLog VeryVerbose
 ```
 
@@ -78,7 +79,7 @@ Each new editor or game session overwrites `<ProjectName>.log` and moves the pre
 
 To find the current log file path, run the following in the editor console:
 
-```text
+```bash
 Log list
 ```
 
@@ -96,13 +97,13 @@ On Windows, this is inside the folder where you extracted the package.
 
 On Android, logs are written to the device's external storage and can be retrieved with:
 
-```text
+```bash
 adb pull /sdcard/UE4Game/<ProjectName>/<ProjectName>/Saved/Logs/<ProjectName>.log
 ```
 
 `UE4Game` is a legacy directory name that Unreal Engine 5 retains on Android. To stream logs live from a running Android session, filter the Android system log:
 
-```text
+```bash
 adb logcat -s ConvaiAudioLog:V LogConvai:V ConvaiChatbotComponentLog:V
 ```
 
@@ -120,7 +121,9 @@ The export includes:
 
 To run a log export, open the Convai editor window and locate the support or diagnostics section. The exported ZIP is saved to `<YourProject>/Saved/` and the export location opens automatically when the process completes.
 
-## Blueprint diagnostic nodes
+## Blueprint diagnostic nodes and events
+
+### State-reading nodes
 
 Use these Blueprint-callable nodes on `UConvaiChatbotComponent` to inspect session state at runtime without reading the Output Log:
 
@@ -134,6 +137,31 @@ Use these Blueprint-callable nodes on `UConvaiChatbotComponent` to inspect sessi
 | `Get Talking Time Remaining` | `float` (seconds) | How much audio remains in the current speech turn? |
 
 The `CharacterID`, `CharacterName`, `Backstory`, `VoiceType`, and `SessionID` properties on `UConvaiChatbotComponent` are Blueprint-readable and show character data as loaded from Convai. A `SessionID` of `-1` means no active session has been established.
+
+### Blueprint-assignable diagnostic events
+
+`UConvaiChatbotComponent` exposes the following events that you can bind in Blueprint or C++ to react to session state changes at runtime:
+
+| Event | Component | When it fires | Diagnostic use |
+| --- | --- | --- | --- |
+| **On Failure** | `Convai Chatbot` | Any connection or session error | Capture the failure moment; read `ConvaiChatbotComponentLog` immediately after for the error string |
+| **On Character Data Loaded** | `Convai Chatbot` | Character metadata arrives from Convai after BeginPlay | Confirm authentication succeeded; check `CharacterName` and `Backstory` are populated |
+| **On Interrupted** | `Convai Chatbot` | Current speech turn is cut short | Useful for detecting unexpected interruptions vs intentional ones |
+| **On Interaction ID Received** | `Convai Chatbot` | Each conversation turn begins | Log the `InteractionID` to correlate turns with Convai server records |
+| **On Started Talking** | `Convai Audio Streamer` | Character begins playing audio | Timestamp this event to measure perceived response latency |
+| **On Finished Talking** | `Convai Audio Streamer` | Character audio playback ends | Useful for triggering post-response UI changes or next-turn logic |
+
+To bind an event in Blueprint, select the relevant component, open the **Details** panel, find the **Events** section, and click **+** next to the event you want. The resulting node appears in the Event Graph and fires automatically at runtime.
+
+## Response latency logging
+
+In debug builds, the plugin logs the round-trip latency from the moment the player stops speaking to the moment the character begins playing audio. This measurement appears in the Output Log under `ConvaiSubsystemLog`:
+
+```text
+ConvaiSubsystemLog: [Latency] Finished Calculating Latency: 483.21 ms
+```
+
+Latency logging is active only when the plugin is compiled with `ConvaiDebugMode` enabled. It is not available in standard Marketplace or Fab builds. If you need to measure response latency in a non-debug build, record timestamps manually in Blueprint: start the timer when the player stops speaking, then stop it when the `On Started Talking` event fires on the `Convai Audio Streamer` component.
 
 ## Configuration defaults reference
 
@@ -162,7 +190,8 @@ The following values are the plugin defaults from `ConvaiUtils.cpp`. They appear
 | Log file on disk | Full session transcript for sharing | `<YourProject>/Saved/Logs/<ProjectName>.log` |
 | `adb logcat` | Live Android device log streaming | `adb logcat -s ConvaiAudioLog:V LogConvai:V` |
 | Convai editor window export | Bundled log + network diagnostics ZIP | **Window > Open Convai Editor** → support section |
-| Blueprint diagnostic nodes | Runtime session state without log reading | `Is In Conversation`, `Is Thinking`, `SessionID` on chatbot component |
+| Blueprint state nodes | Runtime session state without log reading | `Is In Conversation`, `Is Thinking`, `SessionID` on chatbot component |
+| Blueprint events (`On Failure`, `On Character Data Loaded`) | React to errors and load completion at runtime | Bind in Blueprint via **Details > Events** on the Chatbot component |
 
 ## Next steps
 

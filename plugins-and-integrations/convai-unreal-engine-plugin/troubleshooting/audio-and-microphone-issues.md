@@ -12,25 +12,25 @@ Run through these four checks before investigating specific symptoms.
 
 {% stepper %}
 {% step %}
-**Open the Output Log and filter on `ConvaiAudioLog`**
+### Open the Output Log and filter on ConvaiAudioLog
 
 Open **Window > Output Log**, type `ConvaiAudioLog` in the search field, and look for error or warning entries. Most audio capture failures produce a message here immediately on Play.
 {% endstep %}
 
 {% step %}
-**Confirm the `AudioCapture` plugin is enabled**
+### Confirm the AudioCapture plugin is enabled
 
 Open **Edit > Plugins**, search for `Audio Capture`, and verify it is enabled. The `Convai Audio Capture` component depends on this engine plugin. If it is disabled, no capture device can be opened.
 {% endstep %}
 
 {% step %}
-**Confirm a default microphone is set in the OS**
+### Confirm a default microphone is set in the OS
 
 On Windows, open **Sound Settings > Input** and confirm a default recording device is selected and not muted. Unreal Engine uses the OS default device when no explicit device index is set.
 {% endstep %}
 
 {% step %}
-**On Android — confirm the `RECORD_AUDIO` permission is granted**
+### On Android — confirm the RECORD_AUDIO permission is granted
 
 Launch the app on the device, go to **Settings > Apps > [Your App] > Permissions**, and confirm microphone access is granted. If permission was denied previously, it must be re-granted manually before the app can capture audio.
 {% endstep %}

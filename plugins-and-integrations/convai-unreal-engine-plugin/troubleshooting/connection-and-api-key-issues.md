@@ -98,6 +98,24 @@ The `CharacterID` field is case-sensitive and must match the ID shown on the Con
 Do not commit `Config/DefaultEngine.ini` to a public repository if it contains your API key. Add `Config/DefaultEngine.ini` to `.gitignore`, or use environment-specific config files to keep the key out of version control.
 {% endhint %}
 
+## Handle connection errors in Blueprint
+
+The `Convai Chatbot` component exposes Blueprint-assignable events that fire when the session state changes. Binding to these events lets you react to errors at runtime rather than relying on the Output Log alone.
+
+| Event | Fires when | Use for |
+| --- | --- | --- |
+| **On Failure** | Any connection or session error occurs | Show an error message, disable the talking UI, or retry logic |
+| **On Character Data Loaded** | Character metadata loads from Convai (fires once on BeginPlay) | Confirm authentication succeeded and the `CharacterName`, `Backstory`, and `VoiceType` properties are populated |
+| **On Interrupted** | The current speech turn is interrupted | Update the UI to show the character stopped speaking |
+
+To bind to **On Failure** in Blueprint:
+
+1. Select the `Convai Chatbot` component in your character Blueprint.
+2. In the **Details** panel, find the **Events** section and click the **+** button next to **On Failure**.
+3. A new event node is added to the Event Graph. Connect it to your error-handling logic — for example, printing to the screen or disabling the push-to-talk button.
+
+**On Failure** fires without parameters. To see the error detail, read the Output Log under `ConvaiChatbotComponentLog` at the time the event fires — the log entry immediately preceding the failure event contains the error string.
+
 ## Quick reference
 
 | Symptom | Log category to check | Likely cause |
