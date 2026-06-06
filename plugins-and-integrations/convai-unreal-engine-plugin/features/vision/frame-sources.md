@@ -1,5 +1,5 @@
 ---
-title: Frame sources
+title: Vision frame sources
 description: Choose and configure the correct frame source component, create render target assets, and switch or replace the active vision component at runtime.
 last_reviewed: "4.0.0-beta.21"
 ---
@@ -40,17 +40,37 @@ The following properties are declared on `UConvaiWebcamBase` (the abstract base 
 
 The `ConvaiEditor` module registers the **Convai Vision Render Target** asset factory. This factory creates a `UTextureRenderTarget2D` with the correct format and the default size `512 × 512`.
 
-To create one in the editor:
+{% stepper %}
+{% step %}
+#### Open the Convai Vision Render Target factory
 
-1. Right-click in the **Content Browser**.
-2. Choose **Convai Vision Render Target** from the Convai category.
-3. Name the asset (for example `RT_ConvaiVision`) and save it.
+Right-click in the **Content Browser** and choose **Convai Vision Render Target** from the Convai category.
+
+{% hint style="warning" %}
+**Screenshot required before publishing:** Capture the Content Browser right-click context menu showing the "Convai Vision Render Target" option under the Convai category.
+{% endhint %}
+
+<figure><img src="../../../../.gitbook/assets/TODO-vision-frame-sources-create-rt-menu.png" alt="Content Browser right-click menu showing Convai Vision Render Target option"><figcaption><p>TODO: Replace with screenshot showing the Convai Vision Render Target option in the Content Browser context menu.</p></figcaption></figure>
+{% endstep %}
+
+{% step %}
+#### Name and save the asset
+
+Name the asset (for example `RT_ConvaiVision`) and save it.
+{% endstep %}
+{% endstepper %}
 
 You can also create a standard `TextureRenderTarget2D` asset and configure it manually, setting the format to `RTF RGBA8` and the size to `512 × 512`.
 
 ## Assigning the render target
 
 Select the **Environment Webcam** component on your character Blueprint. In the **Details** panel, assign the render target to the **Convai Render Target** property under **Convai | Vision**. The component will use this asset for all subsequent capture calls.
+
+{% hint style="warning" %}
+**Screenshot required before publishing:** Capture the Blueprint Details panel showing the Convai Render Target property under Convai | Vision with the render target asset assigned.
+{% endhint %}
+
+<figure><img src="../../../../.gitbook/assets/TODO-vision-frame-sources-rt-assigned.png" alt="Blueprint Details panel with Convai Render Target property showing the assigned render target asset"><figcaption><p>TODO: Replace with screenshot showing the Convai Render Target property with the asset assigned.</p></figcaption></figure>
 
 ## Starting and stopping capture
 
@@ -84,10 +104,16 @@ When the chatbot requests a frame, it calls `GetImageTexture(ETextureSourceType&
 
 `UEnvironmentWebcam` always sets `TextureSourceType` to `RenderTarget2D`.
 
+## Next steps
+
 {% content-ref url="vision-blueprint-reference.md" %}
 [Vision Blueprint reference](vision-blueprint-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Vision usage examples](usage-examples.md)
+{% endcontent-ref %}
+
+{% content-ref url="custom-vision-components.md" %}
+[Custom vision components](custom-vision-components.md)
 {% endcontent-ref %}

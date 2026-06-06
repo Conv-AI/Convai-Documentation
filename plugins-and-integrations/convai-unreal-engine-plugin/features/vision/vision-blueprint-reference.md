@@ -37,17 +37,13 @@ Declared in `VisionInterface.h`. Describes the texture type returned by `GetImag
 
 Transitions the component from `Stopped` or `Paused` to `Capturing`.
 
-| Parameter | Type | Direction | Description |
-|---|---|---|---|
-| — | — | — | No parameters. |
+No input or output parameters.
 
 ### Stop
 
 Transitions the component from `Capturing` or `Paused` to `Stopped`.
 
-| Parameter | Type | Direction | Description |
-|---|---|---|---|
-| — | — | — | No parameters. |
+No input or output parameters.
 
 ### Get State
 
@@ -127,7 +123,7 @@ Inherited from `UConvaiWebcamBase` (visible on `UEnvironmentWebcam` via inherita
 |---|---|---|---|
 | `Identifier` | `FString` | `""` | Optional label for logging or multi-component disambiguation. |
 | `m_MaxFPS` | `int` | `15` | Maximum capture FPS. Set via `SetMaxFPS`. |
-| `bUpdateOnFetch` | `bool` | — | When `true`, updates the render target on every frame fetch. |
+| `bUpdateOnFetch` | `bool` | `false` | When `true`, updates the render target on every frame fetch. |
 
 ## Chatbot vision nodes
 
@@ -153,10 +149,16 @@ Returns `true` if a vision component is registered and active. `BlueprintPure`.
 |---|---|---|
 | Return Value | `bool` | `true` when a valid `IConvaiVisionInterface` component is present. |
 
+## Next steps
+
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Vision usage examples](usage-examples.md)
 {% endcontent-ref %}
 
 {% content-ref url="frame-sources.md" %}
-[Frame sources](frame-sources.md)
+[Vision frame sources](frame-sources.md)
+{% endcontent-ref %}
+
+{% content-ref url="custom-vision-components.md" %}
+[Custom vision components](custom-vision-components.md)
 {% endcontent-ref %}

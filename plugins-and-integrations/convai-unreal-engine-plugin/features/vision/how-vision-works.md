@@ -10,11 +10,40 @@ Vision lets a Convai character observe its surroundings by capturing scene frame
 
 The vision system is composed of three independent layers that work together.
 
+```mermaid
+flowchart LR
+    subgraph FrameSource["Frame Source Layer"]
+        A[UEnvironmentWebcam]
+    end
+
+    B[IConvaiVisionInterface]
+    C[UConvaiChatbotComponent]
+    D[SendImage]
+    E[WebRTC session]
+    F[Convai]
+
+    A -->|implements| B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+```
+
 **Frame source layer** — A component that implements `IConvaiVisionInterface` captures raw pixels from the scene. The `ConvaiVisionBase` module ships `UEnvironmentWebcam`, the built-in frame source. `UEnvironmentWebcam` holds a `USceneCaptureComponent2D` that renders to a `UTextureRenderTarget2D` each time the component is asked for a frame.
 
 **Interface layer** — `IConvaiVisionInterface` (declared in `VisionInterface.h`) is the contract between the chatbot and any frame source. Because the chatbot talks to an interface, not a concrete class, any component that implements `IConvaiVisionInterface` is a valid frame source.
 
 **Chatbot layer** — `UConvaiChatbotComponent` queries whether a compatible vision component is present on its Actor via `SupportsVision()`, which can be called at any time from Blueprint. When a vision component is registered, the chatbot throttles frame delivery to `CachedVisionFPS` (default 15 FPS) using an accumulator and calls `SendImage` each tick that crosses the interval threshold. `SendImage` compresses the frame and forwards it over the active WebRTC session.
+
+## Key concepts
+
+| Concept | Definition |
+|---|---|
+| **Frame Source** | A component implementing `IConvaiVisionInterface` that captures image data from the scene and exposes it to the chatbot. |
+| **Vision Interface** | `IConvaiVisionInterface`, declared in `VisionInterface.h`; the contract any frame source must satisfy for the chatbot to use it. |
+| **Vision State** | The current lifecycle phase of a frame source, tracked as `EVisionState` (`Stopped`, `Starting`, `Capturing`, `Stopping`, `Paused`). |
+| **Frame Throttling** | Accumulator-based rate limiting in `UConvaiChatbotComponent` that caps frame transmission at `m_MaxFPS` (default 15 FPS). |
+| **Render Target** | A `UTextureRenderTarget2D` that `UEnvironmentWebcam` renders the scene into; must be `RTF RGBA8` at 512 × 512 or larger. |
 
 ## Vision states
 
@@ -55,18 +84,24 @@ The chatbot accumulates delta time each tick. When the accumulated time exceeds 
 
 Compression is applied when the frame is captured. The chatbot passes a `ForceCompressionRatio` to `CaptureCompressed`, which the frame source uses to reduce the image size before transmission. If a compressed frame is already available from an external source, `IsCompressedDataAvailable()` returns `true` and `GetCompressedData` retrieves it without re-compressing.
 
-## Error reporting
-
-Each frame source tracks the last error it encountered. Call `GetLastErrorMessage()` to retrieve the human-readable description and `GetLastErrorCode()` to retrieve the numeric code. These are useful for diagnosing why a component refuses to start or why frames are not being delivered.
-
 ## Render target requirements
 
 `UEnvironmentWebcam` requires a `UTextureRenderTarget2D` assigned to its `ConvaiRenderTarget` property. The render target must use the `RTF RGBA8` format and a size of at least `512 × 512` pixels. The `UConvaiVisionRenderTargetFactory` in the `ConvaiEditor` module creates render targets with those defaults (`DefaultSizeX = 512`, `DefaultSizeY = 512`, `DefaultClearColor = FLinearColor::Black`), so you can use **Right-click → Convai Vision Render Target** in the Content Browser to create a pre-configured asset.
 
+## Error reporting
+
+Each frame source tracks the last error it encountered. Call `GetLastErrorMessage()` to retrieve the human-readable description and `GetLastErrorCode()` to retrieve the numeric code. These are useful for diagnosing why a component refuses to start or why frames are not being delivered.
+
+## Next steps
+
 {% content-ref url="quick-start.md" %}
-[Quick start](quick-start.md)
+[Vision quick start](quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="frame-sources.md" %}
-[Frame sources](frame-sources.md)
+[Vision frame sources](frame-sources.md)
+{% endcontent-ref %}
+
+{% content-ref url="usage-examples.md" %}
+[Vision usage examples](usage-examples.md)
 {% endcontent-ref %}

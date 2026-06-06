@@ -1,6 +1,6 @@
 ---
-title: Troubleshooting and diagnostics
-description: Fix common vision problems in the Convai Unreal Engine plugin, read diagnostic state at runtime, and identify why frames are not reaching Convai.
+title: Troubleshoot vision
+description: Fix common vision problems including blank feeds, incorrect vision states, and frame-rate issues, and read diagnostic state at runtime.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -20,9 +20,7 @@ Call **Get State** on the **Environment Webcam** component. Compare the returned
 
 Call **Get Last Error Message** and **Get Last Error Code** on the component to retrieve the most recent error. An empty message means no error has been recorded since the component was created.
 
-## Troubleshooting
-
-### The character does not respond to visual context
+## The character does not respond to visual context
 
 **Symptom:** The character responds normally to speech but ignores objects visible in the scene.
 
@@ -35,7 +33,7 @@ Call **Get Last Error Message** and **Get Last Error Code** on the component to 
 
 **Verify:** Call **Supports Vision** again. It should return `true`. Ask the character about something visible in front of it; the response should reference scene content.
 
-### Start has no effect — the component stays in Stopped
+## Start has no effect — the component stays in Stopped
 
 **Symptom:** Calling `Start` does not move the component to `Capturing`. `Get State` still returns `Stopped`.
 
@@ -45,7 +43,7 @@ Call **Get Last Error Message** and **Get Last Error Code** on the component to 
 
 **Verify:** Call `Start` again. `Get State` should return `Capturing` within one tick.
 
-### Render target appears black or blank
+## Render target appears black or blank
 
 **Symptom:** The render target in the Content Browser or a debug widget shows a completely black image.
 
@@ -58,7 +56,7 @@ Call **Get Last Error Message** and **Get Last Error Code** on the component to 
 
 **Verify:** Open the render target asset in the Content Browser. With the level running, the preview should update with scene content.
 
-### High latency in character responses when vision is on
+## High latency in character responses when vision is on
 
 **Symptom:** Character response time increases noticeably compared to conversations without vision.
 
@@ -68,7 +66,7 @@ Call **Get Last Error Message** and **Get Last Error Code** on the component to 
 
 **Verify:** Measure response time before and after the FPS change. A lower FPS reduces per-turn data volume.
 
-### Supports Vision returns false after calling Set Vision Component
+## Supports Vision returns false after calling Set Vision Component
 
 **Symptom:** Calling **Set Vision Component** returns `false` and the chatbot still reports vision unsupported.
 
@@ -78,7 +76,7 @@ Call **Get Last Error Message** and **Get Last Error Code** on the component to 
 
 **Verify:** Cast the component to `UConvaiWebcamBase` in Blueprint. If the cast succeeds, the component is a valid vision source. Pass it to `Set Vision Component` and check the return value.
 
-### Frames stop after a few seconds
+## Frames stop after a few seconds
 
 **Symptom:** Vision appears to work initially, then stops sending frames. `Get State` returns `Stopped` or `Paused`.
 
@@ -88,10 +86,16 @@ Call **Get Last Error Message** and **Get Last Error Code** on the component to 
 
 **Verify:** Restart vision by calling `Stop` followed by `Start`. Monitor `Get State` for several seconds; it should remain `Capturing`.
 
+## Next steps
+
 {% content-ref url="vision-blueprint-reference.md" %}
 [Vision Blueprint reference](vision-blueprint-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Vision usage examples](usage-examples.md)
+{% endcontent-ref %}
+
+{% content-ref url="frame-sources.md" %}
+[Vision frame sources](frame-sources.md)
 {% endcontent-ref %}

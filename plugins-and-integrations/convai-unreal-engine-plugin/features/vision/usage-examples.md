@@ -1,5 +1,5 @@
 ---
-title: Usage examples
+title: Vision usage examples
 description: Concrete Blueprint setups for common vision scenarios including auto-start, FPS tuning, runtime component switching, and first-frame event handling.
 last_reviewed: "4.0.0-beta.21"
 ---
@@ -11,6 +11,12 @@ The examples below show how to wire vision into common Blueprint scenarios. Each
 **Scenario:** An industrial safety trainer NPC stands at a fixed workstation. Vision should begin as soon as the level loads, with no manual trigger required.
 
 Set `bAutoStartVision = true` on the **Environment Webcam** component in the **Details** panel. No Event Graph wiring is needed. The component calls `Start` automatically during `BeginPlay`.
+
+{% hint style="warning" %}
+**Screenshot required before publishing:** Capture the Details panel on the Environment Webcam component showing `bAutoStartVision` enabled under the **Convai | Vision** category.
+{% endhint %}
+
+<figure><img src="../../../../.gitbook/assets/TODO-vision-examples-auto-start.png" alt="Blueprint Details panel showing bAutoStartVision enabled on the Environment Webcam component"><figcaption><p>TODO: Replace with screenshot showing bAutoStartVision enabled in the Details panel.</p></figcaption></figure>
 
 **Expected behavior:** The component transitions to `Capturing` within the first tick of `BeginPlay`. The chatbot begins forwarding frames immediately.
 
@@ -24,6 +30,12 @@ Wire the **Event Graph** as follows:
 2. On your procedure-end event, call **Stop** on the same component.
 
 Check `Get State` before calling `Start` to avoid double-starts if your procedure events can fire more than once.
+
+{% hint style="warning" %}
+**Screenshot required before publishing:** Capture the Event Graph showing a procedure-start custom event wired to the **Start** node and a procedure-end custom event wired to the **Stop** node on the Environment Webcam component reference.
+{% endhint %}
+
+<figure><img src="../../../../.gitbook/assets/TODO-vision-examples-manual-start-stop.png" alt="Event Graph showing custom events wired to Start and Stop nodes on the Environment Webcam component"><figcaption><p>TODO: Replace with screenshot showing Start/Stop event wiring in the Event Graph.</p></figcaption></figure>
 
 **Expected behavior:** The component captures frames only during the active procedure phase. Frame transmission to Convai pauses when `Stop` is called and resumes when `Start` is called again.
 
@@ -50,7 +62,7 @@ In the Event Graph (or in a UI widget's tick function), call **Supports Vision**
 Wire the **On Frame Ready** event on the **Environment Webcam** component to a custom event. **On Frame Ready** fires every tick while the component is in the `Capturing` state, so use a boolean flag to ensure the greeting fires only once.
 
 ```text
-// Pseudocode — Blueprint logic
+// Blueprint pseudocode
 bool bGreetingFired = false
 
 OnFrameReady →
@@ -59,9 +71,7 @@ OnFrameReady →
     → trigger character greeting
 ```
 
-{% hint style="info" %}
-`FOnFirstFrameCaptured` exists on `IConvaiVisionInterface` but is a C++-only delegate and is not Blueprint-accessible. The boolean-flag pattern above is the correct Blueprint equivalent.
-{% endhint %}
+`FOnFirstFrameCaptured` exists on `IConvaiVisionInterface` but is a C++-only delegate and is not Blueprint-accessible — the boolean-flag pattern above is the correct Blueprint equivalent.
 
 **Expected behavior:** The greeting logic runs once, on the first tick that **On Frame Ready** fires, guaranteeing the render target has content before the character speaks.
 
@@ -77,10 +87,16 @@ On the player-switch event:
 
 **Expected behavior:** `Set Vision Component` returns `true` and replaces the previously registered vision component. The chatbot forwards frames from the new component on the next tick.
 
+## Next steps
+
 {% content-ref url="vision-blueprint-reference.md" %}
 [Vision Blueprint reference](vision-blueprint-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+[Troubleshoot vision](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}
+
+{% content-ref url="frame-sources.md" %}
+[Vision frame sources](frame-sources.md)
 {% endcontent-ref %}
