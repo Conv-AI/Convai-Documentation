@@ -84,7 +84,7 @@ When validation passes, the character responds with audio and — if configured 
 | No audio from character | Audio output device issue or session not started | Confirm `bAutoInitializeSession` is `true` on the Chatbot component, or call `StartSession()` manually. |
 | Character does not hear the player | Microphone not captured, or Player component missing | Confirm `UConvaiPlayerComponent` is on the pawn; see [Configure the microphone](configure-microphone.md). |
 | Lip sync does not play | Face Sync component missing or wrong lip sync mode | Add `UConvaiFaceSyncComponent` and set the correct `LipSyncMode` for your rig. |
-| `On Failure` event fires | Network error or invalid Character ID | Check the **Output Log** for details; verify network access and Character ID. |
+| `OnFailureEvent` fires | Network error or invalid Character ID | Check the **Output Log** for details; verify network access and Character ID. |
 
 ## Next steps
 

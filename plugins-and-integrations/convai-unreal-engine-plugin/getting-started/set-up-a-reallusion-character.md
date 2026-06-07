@@ -72,13 +72,13 @@ Click **Export**. Enter a filename, choose a destination folder, and click **Sav
 
 ## Install the Reallusion CC Auto Setup for Unreal Engine
 
-The CC Auto Setup plugin sets up the correct materials and skeleton for Reallusion characters in Unreal Engine.
+CC Auto Setup is a third-party tool provided by Reallusion — it is not part of the Convai plugin. It sets up the correct materials, shaders, and skeleton for Reallusion characters imported into Unreal Engine.
 
 {% stepper %}
 {% step %}
 ### Download and install CC Auto Setup
 
-Download the CC Auto Setup tool from the link in the Reallusion tutorial video description. Double-click the installer, accept the license, and click **Next**. Note the destination folder path — you will need it in the next step.
+Download CC Auto Setup from the [Reallusion tools page](https://www.reallusion.com/character-creator/unreal-engine.html) or from the link provided in the Reallusion tutorial video description. Double-click the installer, accept the license, and click **Next**. Note the destination folder path — you will need it in the next step.
 {% endstep %}
 
 {% step %}
@@ -156,6 +156,8 @@ Click **Add** in the **Components** panel. Search for `BP Convai ChatBot Compone
 Drag the character Blueprint from the **Content Browser** into the level viewport and position it.
 {% endstep %}
 {% endstepper %}
+
+If your character Blueprint uses a body and face skeletal mesh split (common in CC5 exports), the `GetBodyAndFaceSkeletalMeshComponents()` utility on `UConvaiUtils` (available from plugin version 4.0.0-beta.20) returns both mesh references in one Blueprint call.
 
 ## Add the Convai Player component to the player pawn
 

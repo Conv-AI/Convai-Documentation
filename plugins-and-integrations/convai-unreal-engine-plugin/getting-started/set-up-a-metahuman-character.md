@@ -50,13 +50,13 @@ In the **Details** panel for the component, paste your **Character ID** from the
 
 Click **Add** again in the **Components** panel. Search for `Convai Face Sync` and add `UConvaiFaceSyncComponent`.
 
-In the **Details** panel, confirm that **Lip Sync Mode** is set to **MetaHuman Blendshapes** (`EC_LipSyncMode::BS_MHA`). This is the default value and the correct setting for MetaHuman characters.
+In the **Details** panel, confirm that **Lip Sync Mode** is set to **MetaHuman Blendshapes**. This is the default value and the correct setting for MetaHuman characters.
 {% endstep %}
 {% endstepper %}
 
 ## Assign the Convai animation blueprints
 
-MetaHuman characters use separate animation blueprints for body and face. The Convai plugin ships two that wire the lip sync data into the MetaHuman skeleton.
+MetaHuman characters use separate animation blueprints for body and face. The Convai plugin ships two assets in `ConvaiContent > MetaHumans > Animations` that wire lip sync data into the MetaHuman skeleton.
 
 {% stepper %}
 {% step %}
@@ -94,37 +94,35 @@ Enter Play mode. Use push-to-talk (default: **V**) or the chat widget to start a
 When the setup is working, the MetaHuman's mouth moves in sync with the character's spoken response and facial expressions change dynamically during the conversation. If the character does not respond, see [Validate your setup](validate-your-setup.md).
 {% endhint %}
 
+## Gesture and gaze animations
+
+Starting in plugin version 4.0.0-beta.20, the plugin ships six AnimBP assets in `ConvaiContent > MetaHumans > Animations > AnimBP` that drive eye blink, eye look, head look, and pointing automatically. When the Actions system issues an LLM gesture command, these blueprints activate without extra Blueprint wiring.
+
+| Asset | Purpose |
+|---|---|
+| `A1D_MH_BEye` | Eye blink and gaze |
+| `A2D_MH_EyeLook` | Eye look direction |
+| `B2D_F_HeadLook` / `B2D_M_HeadLook` | Female / male head look |
+| `B2D_F_Pointing` / `B2D_M_Pointing` | Female / male pointing |
+
+The motion library at `ConvaiContent > MetaHumans > Animations > Motion > Gestures` includes Bye, Hi, Like, No, Think, Wink, and Yes animations with female and male variants and Animation Montage counterparts. These trigger automatically when the Actions system is active on the character.
+
+The animation interface `BPI_Convai_Animation` at `Content/Interfaces/` is used internally by this system.
+
+{% hint style="info" %}
+These assets activate automatically when the Convai Actions system is enabled on your character. No additional Blueprint wiring is required beyond the animation blueprint setup above.
+{% endhint %}
+
 ## Enable hands-free mode
 
 To remove the push-to-talk requirement, open the player pawn Blueprint, select the **Convai Player** component, and call `UpdateVadBP(true)` from the Event Graph (for example in **BeginPlay**). The character will then listen continuously using voice activity detection.
 
 ## Troubleshooting
 
-### No lip sync animation
-
-**Symptom:** The MetaHuman's mouth does not move during character speech, even though audio plays correctly.
-
-**Cause:** The lip sync mode is set to the wrong blendshape target, or the face and body animation classes are not the Convai MetaHuman variants.
-
-**Fix:**
-- Confirm **Lip Sync Mode** on the **Convai Face Sync** component is set to **MetaHuman Blendshapes**.
-- Confirm **Anim Class** on the **Face** skeletal mesh is `Convai_MetaHuman_FaceAnim`.
-- Confirm **Anim Class** on the **Body** skeletal mesh is `Convai_MetaHuman_BodyAnim`.
-
-**Verify:** Enter Play mode and speak to the character. The MetaHuman's lips should animate in sync with the audio response.
-
-### Character does not respond
-
-**Symptom:** The character is present in the level but does not react to voice or text input.
-
-**Cause:** The Character ID is missing or incorrect, the API key is not configured, or the Convai Player component is not present on the player pawn.
-
-**Fix:**
-- Verify the **Character ID** on the **Convai Chatbot** component matches a character in your Convai dashboard.
-- Confirm your API key is set (see [Configure your API key](configure-api-key.md)).
-- Confirm the player pawn has a **Convai Player** component added.
-
-**Verify:** Run through the full checklist at [Validate your setup](validate-your-setup.md).
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| MetaHuman's mouth does not move during speech even though audio plays | **Lip Sync Mode** is set to the wrong target, or the face and body animation classes are not the Convai MetaHuman variants | Confirm **Lip Sync Mode** on `UConvaiFaceSyncComponent` is **MetaHuman Blendshapes**. Confirm **Anim Class** on the **Face** mesh is `Convai_MetaHuman_FaceAnim` and on the **Body** mesh is `Convai_MetaHuman_BodyAnim`. |
+| Character is present in the level but does not react to voice or text input | The Character ID is missing or incorrect, the API key is not configured, or `UConvaiPlayerComponent` is absent from the player pawn | Verify the **Character ID** on the **Convai Chatbot** component matches a character in your Convai dashboard. Confirm your API key is set (see [Configure your API key](configure-api-key.md)). Confirm the player pawn has `UConvaiPlayerComponent` added. |
 
 ## Next steps
 

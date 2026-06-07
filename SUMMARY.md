@@ -410,7 +410,7 @@
     * [Prerequisites](plugins-and-integrations/convai-unreal-engine-plugin/getting-started/prerequisites.md)
     * [Install the Convai plugin](plugins-and-integrations/convai-unreal-engine-plugin/getting-started/installation.md)
     * [Configure your API key](plugins-and-integrations/convai-unreal-engine-plugin/getting-started/configure-api-key.md)
-    * [Run the bundled demo](plugins-and-integrations/convai-unreal-engine-plugin/getting-started/import-and-run-sample-scenes.md)
+    * [Explore the sample Blueprints](plugins-and-integrations/convai-unreal-engine-plugin/getting-started/import-and-run-sample-scenes.md)
     * [Scene components](plugins-and-integrations/convai-unreal-engine-plugin/getting-started/scene-components.md)
     * [Add your first Convai character](plugins-and-integrations/convai-unreal-engine-plugin/getting-started/add-your-first-character.md)
     * [Set up a MetaHuman character](plugins-and-integrations/convai-unreal-engine-plugin/getting-started/set-up-a-metahuman-character.md)

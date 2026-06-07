@@ -1,76 +1,82 @@
 ---
-title: Run the bundled demo
-description: Open the demo level that ships inside the plugin Content folder and confirm the Companion character responds before building your own scene.
+title: Explore the sample Blueprints
+description: Browse the ConvaiConveniencePack assets that ship with the plugin, then wire up a quick test level to confirm your setup before building your own scene.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin ships a demo level inside its `Content/` folder. Running this level confirms that the plugin, your API key, and audio are all working before you add Convai to your own characters.
+The Convai Unreal Engine plugin ships a set of pre-built Blueprint assets in `Content/ConvaiConveniencePack/`. Browse these assets to understand what is included, then run a quick test to confirm your API key, audio setup, and components are all working before you build your own scene.
 
-## What the demo contains
+## Plugin Blueprint assets
 
-| Asset | Path | Purpose |
+| Asset | Location in Content Browser | Purpose |
 |---|---|---|
-| Demo level | `Content/Demo/Convai_Demo.umap` | The pre-built demo level |
-| Demo character | `Content/Demo/Companion.uasset` | The `Companion` character Blueprint |
-| Game mode | `ConvaiDemoGM` | Game mode set on the demo level |
-
-The `Companion` character already has a `UConvaiChatbotComponent` configured with a Character ID and a `UConvaiPlayerComponent` on the player pawn. No additional setup is required.
+| `BP_ConvaiChatbotComponent` | `ConvaiConveniencePack/ConvaiBPComponent/` | Blueprint wrapper for `UConvaiChatbotComponent` — the recommended starting point for NPC Blueprints |
+| `BP_ConvaiPlayerComponent` | `ConvaiConveniencePack/ConvaiBPComponent/` | Blueprint wrapper for `UConvaiPlayerComponent` — the recommended starting point for player pawns |
+| `BP_ConvaiSamplePlayer` | `ConvaiConveniencePack/Sample/` | Fully wired player pawn with push-to-talk (**V**) and text input connected to a Player component |
+| `BP_SampleGameMode` | `ConvaiConveniencePack/Sample/` | Game mode that spawns `BP_ConvaiSamplePlayer` as the default pawn automatically |
+| `BP_Convai3DWidgetComponent` | `ConvaiConveniencePack/3DWidget/` | Actor component that places a 3D in-world chat widget in the scene |
+| `ConvaiBaseCharacter` | `Core/` | Base Blueprint class to subclass when creating NPC characters |
 
 {% hint style="info" %}
-The demo uses a Convai-provided sample character, not a character from your dashboard. This is expected — it lets you verify the full pipeline works before you create your own character.
+The plugin does not include a pre-configured demo character. You must supply a Character ID from your [Convai dashboard](<code class="expression">space.vars.dashboard_url</code>) to see a character respond.
 {% endhint %}
 
-## Open and run the demo
+## Run a quick test
+
+Use `BP_SampleGameMode` and `BP_ConvaiChatbotComponent` to verify your setup in any level without writing custom Blueprints.
 
 {% stepper %}
 {% step %}
-### Locate the demo level
+### Locate the assets
 
-In the **Content Browser**, navigate to the plugin's content folder. Look for the `Demo` subfolder and open `Convai_Demo.umap` by double-clicking it.
+In the **Content Browser**, navigate to `ConvaiContent > ConvaiConveniencePack > Sample`. Confirm that `BP_ConvaiSamplePlayer` and `BP_SampleGameMode` are listed. If the `ConvaiContent` folder is not visible, enable **Show Plugin Content** in the Content Browser filter settings (the eye icon).
 {% endstep %}
 
 {% step %}
-### Verify the game mode
+### Open or create a test level
 
-In the Unreal Editor menu bar, select **Window > World Settings**. Under **Game Mode**, confirm that the **GameMode Override** is set to `ConvaiDemoGM`. If it is not, set it manually.
+Open an existing level or create a new one (**File > New Level > Empty Level**).
 {% endstep %}
 
 {% step %}
-### Press Play
+### Set the game mode
 
-Click the **Play** button in the toolbar (or press **Alt+P**). The demo level loads with the `Companion` character in the scene. A chat UI widget appears in the viewport.
+Select **Window > World Settings**. Under **Game Mode**, set **GameMode Override** to `BP_SampleGameMode`. This tells the level to spawn `BP_ConvaiSamplePlayer` as your controllable pawn when you press Play.
 {% endstep %}
 
 {% step %}
-### Talk to the character
+### Place a character
 
-Hold the push-to-talk key (default: **V**) and speak into your microphone, then release the key. The character processes your speech and responds with voice audio and lip-sync animation.
+Drag any Actor into the level — you can use a skeletal mesh, a static mesh, or a Blueprint derived from `ConvaiBaseCharacter`. With the Actor selected, click **+ Add** in the **Details** panel and search for `BP_ConvaiChatbotComponent`. Add it. In the **Details** panel, locate the **Character ID** field and enter the Character ID from your [Convai dashboard](<code class="expression">space.vars.dashboard_url</code>).
+{% endstep %}
 
-Alternatively, type a message in the chat widget and press **Enter** to send a text message.
+{% step %}
+### Press Play and speak
+
+Click **Play** in the toolbar (or press **Alt+P**). The level spawns `BP_ConvaiSamplePlayer` as your pawn. Hold the push-to-talk key (**V**) and speak, then release the key. Alternatively, type a message in the chat widget and press **Enter**.
 {% endstep %}
 {% endstepper %}
 
 {% hint style="success" %}
-When the demo is working, the `Companion` character responds to voice or text input with spoken audio. If the character does not respond, check your API key configuration (see [Configure your API key](configure-api-key.md)) and microphone setup (see [Configure the microphone](configure-microphone.md)).
+If the character responds with voice audio, your API key, network connection, and audio setup are all working correctly. Continue to [Scene components](scene-components.md) to learn what each component does in detail.
 {% endhint %}
 
-## Browsing the demo Blueprints
+## Browse the Blueprints
 
-The demo is wired using the same components you will use in your own scenes. Inspect it to understand the setup before building from scratch.
+Open the sample Blueprints in the Content Browser to understand how the plugin wires its components before you build your own scene.
 
-{% stepper %}
-{% step %}
-### Open the character Blueprint
+`BP_ConvaiSamplePlayer` shows how a player pawn attaches `BP_ConvaiPlayerComponent`, binds the push-to-talk input action, and initializes the microphone. Use it as a reference when configuring your own player pawn.
 
-In the **Content Browser**, open `Content/Demo/Companion.uasset`. The `UConvaiChatbotComponent` is attached and has a `CharacterID` already set.
-{% endstep %}
+`BP_ConvaiChatbotComponent` shows the default properties set at the Blueprint level: session handling, voice type, language code, and interrupt fade duration. All properties are also configurable per-instance in the **Details** panel.
 
-{% step %}
-### Open the player pawn Blueprint
+## Troubleshooting
 
-Open the player pawn Blueprint linked from `ConvaiDemoGM`. Confirm that `UConvaiPlayerComponent` is attached to the pawn.
-{% endstep %}
-{% endstepper %}
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Character does not respond | **Character ID** is empty or incorrect | Open the chatbot component in the **Details** panel and confirm the Character ID matches the one on your Convai dashboard |
+| No audio input detected | `BP_ConvaiPlayerComponent` is not on the player pawn | Confirm **GameMode Override** is set to `BP_SampleGameMode` so `BP_ConvaiSamplePlayer` spawns as the pawn |
+| Level spawns the wrong pawn | GameMode Override is not set | Set **GameMode Override** to `BP_SampleGameMode` in World Settings |
+| `ConvaiContent` folder not visible | Plugin content is hidden | Enable **Show Plugin Content** in the Content Browser filter settings |
 
 ## Next steps
 

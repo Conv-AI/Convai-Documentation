@@ -53,22 +53,24 @@ The `UConvaiPlayerComponent` and `UConvaiChatbotComponent` connect through the s
 
 **Useful runtime functions (Blueprint-callable):**
 
-| Function | Returns | Description |
-|---|---|---|
-| `IsListening()` | `bool` | `true` while receiving player speech. |
-| `IsProcessing()` | `bool` | `true` while Convai is generating a response ("Is Thinking"). |
-| `GetIsTalking()` | `bool` | `true` while the character is speaking ("Is Talking"). |
-| `IsInConversation()` | `bool` | `true` while an active conversation session exists. |
+| Function | Blueprint display name | Returns | Description |
+|---|---|---|---|
+| `IsListening()` | Is Listening | `bool` | `true` while receiving player speech. |
+| `IsProcessing()` | Is Thinking | `bool` | `true` while Convai is generating a response. |
+| `GetIsTalking()` | Is Talking | `bool` | `true` while the character is speaking. |
+| `IsInConversation()` | — | `bool` | `true` while an active conversation session exists. |
 
 **Blueprint events fired by this component:**
 
-- **On Actions Received** — the character has determined actions to perform.
-- **On Emotion State Changed** — the character's emotional state has updated.
-- **On Character Data Loaded** — character metadata from the dashboard is ready.
-- **On Narrative Section Received** — a narrative design section was triggered.
-- **On Interaction ID Received** — a new interaction was assigned an ID.
-- **On Interrupted** — the character's speech was interrupted by new player input.
-- **On Failure** — a network or authentication error occurred.
+| Event | Description |
+|---|---|
+| `OnActionReceivedEvent_V2` | The character has determined actions to perform. |
+| `OnEmotionStateChangedEvent` | The character's emotional state has updated. |
+| `OnCharacterDataLoadEvent_V2` | Character metadata from the dashboard is ready. |
+| `OnNarrativeSectionReceivedEvent` | A narrative design section was triggered. |
+| `OnInteractionIDReceivedEvent` | A new interaction was assigned an ID. |
+| `OnInterruptedEvent` | The character's speech was interrupted by new player input. |
+| `OnFailureEvent` | A network or authentication error occurred. |
 
 The `CharacterID` field is the only required field. All other fields have usable defaults.
 {% endtab %}
@@ -90,7 +92,7 @@ The `CharacterID` field is the only required field. All other fields have usable
 |---|---|---|
 | `UnmuteStreamingAudio()` | `bool` | Begin streaming microphone audio to the active chatbot. |
 | `MuteStreamingAudio()` | `void` | Stop streaming audio. |
-| `UpdateVadBP(bEnableVad)` | `void` | Enable (`true`) or disable (`false`) hands-free voice activity detection. |
+| `UpdateVadBP(bEnableVad)` | `bool` | Enable (`true`) or disable (`false`) hands-free voice activity detection. Returns `true` on success. |
 | `SendText(ChatbotComponent, Text)` | `void` | Send a text message to the specified chatbot without microphone input. |
 | `GetIsStreaming()` | `bool` | `true` while audio is actively streaming to a chatbot. |
 | `GetAvailableCaptureDeviceNames()` | `TArray<FString>` | List of available microphone device names. |
@@ -98,6 +100,10 @@ The `CharacterID` field is the only required field. All other fields have usable
 | `SetCaptureDeviceByName(Name)` | `bool` | Switch to the device with the specified name. |
 
 One `UConvaiPlayerComponent` on the player pawn can talk to any `UConvaiChatbotComponent` in the level.
+
+**VAD settings (beta.20+):** Voice activity detection thresholds can be configured project-wide in **Edit > Project Settings > Plugins > Convai > Audio Settings | VAD** using `FConvaiVADSettings` fields: `Confidence` (0.0–1.0, default 0.7), `StartSecs` (default 0.2), `StopSecs` (default 2.2), and `MinVolume` (0.0–1.0, default 0.6). Set `bUseServerDefault` to `true` to defer to server-side defaults.
+
+**Pre-wired variant:** `ConvaiPlayerWithVoiceActivation` (`Content/Core/ConvaiPlayerWithVoiceActivation.uasset`) is a ready-to-use base Blueprint that has VAD enabled by default. Use it as a starting point when you want hands-free input without calling `UpdateVadBP(true)` manually.
 {% endtab %}
 
 {% tab title="Convai Object" %}
@@ -123,7 +129,7 @@ The component provides each object with:
 
 | Field | Default | Description |
 |---|---|---|
-| `LipSyncMode` | `BS_MHA` (MetaHuman Blendshapes) | Selects the blendshape target. Must match the character's rig. See the table below for available values. |
+| `LipSyncMode` | MetaHuman Blendshapes | Selects the blendshape target. Must match the character's rig. See the table below for available values. |
 
 **LipSyncMode values:**
 

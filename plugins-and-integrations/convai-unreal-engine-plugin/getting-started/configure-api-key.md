@@ -46,7 +46,7 @@ The API key is stored as a read-only `Config` property on `UConvaiSettings`. It 
 
 ## Verify the key is active
 
-**Expected outcome:** Place any character with a `UConvaiChatbotComponent` (or use the bundled demo) and enter Play mode. If the character responds to input, authentication is working.
+**Expected outcome:** Place any character with a `UConvaiChatbotComponent` and enter Play mode. If the character responds to input, authentication is working. For a guided first test, see [Explore the sample Blueprints](import-and-run-sample-scenes.md).
 
 **If requests fail:**
 
@@ -55,9 +55,10 @@ The API key is stored as a read-only `Config` property on `UConvaiSettings`. It 
 | API key is blank | Go to **Edit > Project Settings > Plugins > Convai** and confirm the key field is populated. If it is empty, sign in again through the Convai editor window. |
 | Account is inactive | Sign in to <code class="expression">space.vars.dashboard_url</code> and confirm your account status. |
 | Network blocked | Ensure the editor can reach Convai's endpoints. See [Prerequisites — Network access](prerequisites.md#network-access). |
+| Convai editor window does not appear (UE 5.0–5.1) | The ConvaiEditor module is disabled on UE 5.0 and 5.1. Enter your API key directly in **Edit > Project Settings > Plugins > Convai > API Key**. |
 
 ## Next steps
 
 {% content-ref url="import-and-run-sample-scenes.md" %}
-[Run the bundled demo](import-and-run-sample-scenes.md)
+[Explore the sample Blueprints](import-and-run-sample-scenes.md)
 {% endcontent-ref %}

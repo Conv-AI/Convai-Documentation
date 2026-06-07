@@ -73,13 +73,13 @@ Use these Blueprint-callable functions from `UConvaiUtils` (no component referen
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `bUseServerDefault` | `bool` | `true` | When `true`, the server's default VAD parameters are used and all other fields are ignored. Set to `false` to apply local overrides. |
-| `Confidence` | `float` | `0.5` | Speech confidence threshold (0.0–1.0). Higher values require more certainty before the character begins listening. Raise this to reduce false triggers from background noise. |
+| `Confidence` | `float` | `0.7` | Speech confidence threshold (0.0–1.0). Higher values require more certainty before the character begins listening. Raise this to reduce false triggers from background noise. |
 | `StartSecs` | `float` | `0.2` | Seconds of continuous speech required before the listener activates. Increase to avoid triggering on very short sounds. |
-| `StopSecs` | `float` | `0.8` | Seconds of silence before the listener closes the audio stream. Increase to avoid early cutoffs for speakers who pause mid-sentence. |
-| `MinVolume` | `float` | `0.02` | Minimum audio level (0.0–1.0) that counts as speech. Raise this to filter out quiet ambient noise. |
+| `StopSecs` | `float` | `2.2` | Seconds of silence before the listener closes the audio stream. Increase to avoid early cutoffs for speakers who pause mid-sentence. |
+| `MinVolume` | `float` | `0.6` | Minimum audio level (0.0–1.0) that counts as speech. Raise this to filter out quiet ambient noise. |
 
 {% hint style="info" %}
-Set `bUseServerDefault` to `false` before assigning any other field — otherwise the server ignores all local values.
+Set `bUseServerDefault` to `false` before assigning any other field — otherwise the server ignores all local values. You can also configure VAD defaults project-wide in **Edit > Project Settings > Plugins > Convai > Audio Settings | VAD** (available from plugin version 4.0.0-beta.20).
 {% endhint %}
 
 ## Recording and state inspection
@@ -110,7 +110,7 @@ For full details on the built-in chat overlay, the 3D in-world widget, and wirin
 
 **Cause:** The VAD `Confidence` or `MinVolume` threshold is too low for the environment.
 
-**Fix:** Call `GetVADSettings()`, set `bUseServerDefault` to `false`, raise `Confidence` (try `0.7`–`0.9`) and raise `MinVolume` (try `0.05`–`0.1`), then apply with `SetVADSettings()`.
+**Fix:** Call `GetVADSettings()`, set `bUseServerDefault` to `false`, raise `Confidence` (try `0.85`–`0.95`) and raise `MinVolume` above the default of `0.6` (try `0.7`–`0.8`), then apply with `SetVADSettings()`.
 
 ### Hands-free mode cuts off the player mid-sentence
 
@@ -118,7 +118,7 @@ For full details on the built-in chat overlay, the 3D in-world widget, and wirin
 
 **Cause:** `StopSecs` is too short for the speaking style.
 
-**Fix:** Call `GetVADSettings()`, set `bUseServerDefault` to `false`, increase `StopSecs` to `1.2`–`2.0` seconds, then apply with `SetVADSettings()`.
+**Fix:** Call `GetVADSettings()`, set `bUseServerDefault` to `false`, increase `StopSecs` above the default of `2.2` (try `3.0`–`4.0` seconds), then apply with `SetVADSettings()`.
 
 ### Push-to-talk produces no response
 

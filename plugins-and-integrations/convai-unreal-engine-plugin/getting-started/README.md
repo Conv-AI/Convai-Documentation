@@ -33,7 +33,7 @@ This section guides you from installing the plugin through placing your first ta
 <td><a href="configure-api-key.md">configure-api-key.md</a></td>
 </tr>
 <tr>
-<td><strong>4. Run the bundled demo</strong><br>Open the demo level that ships with the plugin and verify that the character responds.</td>
+<td><strong>4. Explore the sample Blueprints</strong><br>Browse the ConvaiConveniencePack assets and run a quick test level to verify your setup.</td>
 <td><a href="import-and-run-sample-scenes.md">import-and-run-sample-scenes.md</a></td>
 </tr>
 <tr>
