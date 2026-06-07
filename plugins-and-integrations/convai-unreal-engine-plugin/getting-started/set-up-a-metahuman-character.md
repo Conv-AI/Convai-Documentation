@@ -56,7 +56,7 @@ In the **Details** panel, confirm that **Lip Sync Mode** is set to **MetaHuman B
 
 ## Assign the Convai animation blueprints
 
-MetaHuman characters use separate animation blueprints for body and face. The Convai plugin ships two assets in `ConvaiContent > MetaHumans > Animations` that wire lip sync data into the MetaHuman skeleton.
+MetaHuman characters use separate animation blueprints for body and face. The Convai plugin ships two assets in `ConvAI > MetaHumans > Animations` that wire lip sync data into the MetaHuman skeleton.
 
 {% stepper %}
 {% step %}
@@ -96,7 +96,7 @@ When the setup is working, the MetaHuman's mouth moves in sync with the characte
 
 ## Gesture and gaze animations
 
-Starting in plugin version 4.0.0-beta.20, the plugin ships six AnimBP assets in `ConvaiContent > MetaHumans > Animations > AnimBP` that drive eye blink, eye look, head look, and pointing automatically. When the Actions system issues an LLM gesture command, these blueprints activate without extra Blueprint wiring.
+Starting in plugin version 4.0.0-beta.20, the plugin ships six AnimBP assets in `ConvAI > MetaHumans > Animations > AnimBP` that drive eye blink, eye look, head look, and pointing automatically. When the Actions system issues an LLM gesture command, these blueprints activate without extra Blueprint wiring.
 
 | Asset | Purpose |
 |---|---|
@@ -105,7 +105,7 @@ Starting in plugin version 4.0.0-beta.20, the plugin ships six AnimBP assets in 
 | `B2D_F_HeadLook` / `B2D_M_HeadLook` | Female / male head look |
 | `B2D_F_Pointing` / `B2D_M_Pointing` | Female / male pointing |
 
-The motion library at `ConvaiContent > MetaHumans > Animations > Motion > Gestures` includes Bye, Hi, Like, No, Think, Wink, and Yes animations with female and male variants and Animation Montage counterparts. These trigger automatically when the Actions system is active on the character.
+The motion library at `ConvAI > MetaHumans > Animations > Motion > Gestures` includes Bye, Hi, Like, No, Think, Wink, and Yes animations with female and male variants and Animation Montage counterparts. These trigger automatically when the Actions system is active on the character.
 
 The animation interface `BPI_Convai_Animation` at `Content/Interfaces/` is used internally by this system.
 

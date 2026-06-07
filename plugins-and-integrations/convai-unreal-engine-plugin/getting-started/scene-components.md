@@ -39,17 +39,15 @@ The `UConvaiPlayerComponent` and `UConvaiChatbotComponent` connect through the s
 {% tab title="Convai Chatbot" %}
 `UConvaiChatbotComponent` is the AI brain for a non-player character. It holds the `CharacterID` that links the component to a character you created on the Convai dashboard. At runtime it connects to Convai, receives player speech or text from a `UConvaiPlayerComponent`, and streams the response back.
 
-**Details panel fields:**
+**Editable Details panel fields:**
 
 | Field | Default | Description |
 |---|---|---|
 | `CharacterID` | _(empty)_ | **Required.** The unique ID from the Convai dashboard that identifies which character this component represents. |
-| `CharacterName` | _(empty)_ | Display name shown in transcripts and UI. Optional — can be left empty. |
-| `VoiceType` | _(dashboard value)_ | Voice used for speech synthesis. Set on the dashboard; the component reads this from the character data. |
-| `Backstory` | _(dashboard value)_ | Character personality and context. Set on the dashboard; override here to use a local value instead. |
-| `LanguageCode` | _(empty)_ | Language for speech recognition (e.g., `en-US`). Leave empty to use the dashboard setting. |
 | `bAutoInitializeSession` | `true` | When `true`, the component connects to Convai automatically on BeginPlay. Set to `false` to call `StartSession()` manually. |
-| `InterruptVoiceFadeOutDuration` | `0.5` | Seconds over which the character's speech audio fades out when `InterruptSpeech` is called. `0` cuts audio immediately. See [Configure character audio](configure-character-audio.md). |
+| `InterruptVoiceFadeOutDuration` | `1.0` | Seconds over which the character's speech audio fades out when `InterruptSpeech` is called. `0` cuts audio immediately. See [Configure character audio](configure-character-audio.md). |
+
+**Runtime values (read-only):** `CharacterName`, `VoiceType`, `Backstory`, and `LanguageCode` are populated automatically from the character's dashboard configuration once the session loads. They are `BlueprintReadOnly` — readable in Blueprint but not editable in the **Details** panel. To change a character's name, voice, backstory, or language, edit the character in the Convai dashboard.
 
 **Useful runtime functions (Blueprint-callable):**
 
@@ -113,13 +111,12 @@ One `UConvaiPlayerComponent` on the player pawn can talk to any `UConvaiChatbotC
 
 | Field | Default | Description |
 |---|---|---|
-| `ObjectName` | _(empty)_ | **Required.** The name the AI uses to refer to this object in conversation and actions. |
-| `ObjectDescription` | _(empty)_ | A short description of the object that is included in the character's context. |
-| `TrackedProperties` | _(empty array)_ | UPROPERTY values on the parent Actor to monitor. When a tracked value changes, the update is pushed to all chatbots automatically. |
+| `ObjectEntry` | — | Identity of the object, shown as inline fields in the **Details** panel. Set **Name** (**required** — the name the AI uses to refer to this object in conversation and actions) and **Description** (a short bio included in the character's context). |
+| `TrackedProperties` | _(empty array)_ | `UPROPERTY` values on the parent Actor to monitor. When a tracked value changes, the update is pushed to all chatbots automatically. |
 
 The component provides each object with:
-- **Identity** — a name and description that appear in the character's context.
-- **Live state** — `TrackedProperties` entries that monitor UPROPERTY values on the Actor and push updates to chatbots when they change.
+- **Identity** — the **Name** and **Description** fields of `ObjectEntry`, which appear in the character's context.
+- **Live state** — `TrackedProperties` entries that monitor `UPROPERTY` values on the Actor and push updates to chatbots when they change.
 {% endtab %}
 
 {% tab title="Convai Face Sync" %}

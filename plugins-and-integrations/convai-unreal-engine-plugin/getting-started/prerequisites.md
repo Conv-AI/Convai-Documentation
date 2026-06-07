@@ -8,12 +8,12 @@ Verify each requirement before you install the Convai Unreal Engine plugin. Miss
 
 ## Unreal Engine version
 
-The plugin supports Unreal Engine 5.0 through 5.7. The minimum supported version is <code class="expression">space.vars.unreal_min_version</code>.
+The plugin supports Unreal Engine 5.0 and later — every UE 5.x release, with new versions added as they ship. The minimum supported version is <code class="expression">space.vars.unreal_min_version</code>.
 
 | UE version range | Plugin support | ConvaiEditor window |
 |---|---|---|
 | 5.0–5.1 | Supported | Unavailable — the ConvaiEditor module is disabled on these versions. Configure your API key manually via **Edit > Project Settings > Plugins > Convai**. |
-| 5.2–5.7 | Supported | Fully available |
+| 5.2 and later | Supported | Fully available |
 
 {% hint style="warning" %}
 On Unreal Engine 5.0 and 5.1, the Convai editor window used for API key sign-in is disabled. You must enter your API key directly in **Edit > Project Settings > Plugins > Convai > API Key**. All runtime features remain available.

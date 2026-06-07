@@ -29,7 +29,7 @@ Use `BP_SampleGameMode` and `BP_ConvaiChatbotComponent` to verify your setup in 
 {% step %}
 ### Locate the assets
 
-In the **Content Browser**, navigate to `ConvaiContent > ConvaiConveniencePack > Sample`. Confirm that `BP_ConvaiSamplePlayer` and `BP_SampleGameMode` are listed. If the `ConvaiContent` folder is not visible, enable **Show Plugin Content** in the Content Browser filter settings (the eye icon).
+In the **Content Browser**, navigate to `ConvAI > ConvaiConveniencePack > Sample`. Confirm that `BP_ConvaiSamplePlayer` and `BP_SampleGameMode` are listed. If the `ConvAI` folder is not visible, enable **Show Plugin Content** in the Content Browser filter settings (the eye icon).
 {% endstep %}
 
 {% step %}
@@ -76,7 +76,7 @@ Open the sample Blueprints in the Content Browser to understand how the plugin w
 | Character does not respond | **Character ID** is empty or incorrect | Open the chatbot component in the **Details** panel and confirm the Character ID matches the one on your Convai dashboard |
 | No audio input detected | `BP_ConvaiPlayerComponent` is not on the player pawn | Confirm **GameMode Override** is set to `BP_SampleGameMode` so `BP_ConvaiSamplePlayer` spawns as the pawn |
 | Level spawns the wrong pawn | GameMode Override is not set | Set **GameMode Override** to `BP_SampleGameMode` in World Settings |
-| `ConvaiContent` folder not visible | Plugin content is hidden | Enable **Show Plugin Content** in the Content Browser filter settings |
+| `ConvAI` folder not visible | Plugin content is hidden | Enable **Show Plugin Content** in the Content Browser filter settings |
 
 ## Next steps
 

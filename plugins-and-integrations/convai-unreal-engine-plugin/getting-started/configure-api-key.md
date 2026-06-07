@@ -41,7 +41,7 @@ Your API key is now stored. The Convai editor window shows your account dashboar
 {% endhint %}
 
 {% hint style="info" %}
-The API key is stored as a read-only `Config` property on `UConvaiSettings`. It is managed entirely by the Convai editor window — do not edit it in **Project Settings** or in config files manually. The window calls `SetAPIKey()` and `SaveSettings()` internally.
+The API key is stored as a read-only `Config` property on `UConvaiSettings`. It is managed entirely by the Convai editor window — the window writes and saves the key for you, so there is nothing to edit in **Project Settings** or in config files manually.
 {% endhint %}
 
 ## Verify the key is active

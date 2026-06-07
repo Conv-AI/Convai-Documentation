@@ -31,7 +31,7 @@ All three styles display the same conversation data. The difference is purely vi
 
 ## 3D in-world chat widget
 
-The 3D widget (`BP_Convai3DWidgetComponent` / `WBP_3DChatWidget`, located at `ConvaiContent > ConvaiConveniencePack > 3DWidget`) renders a floating conversation panel above a character in world space. This is useful for open environments where the player faces different characters and needs to see each character's speech separately, or for kiosk installations where the display is part of the environment.
+The 3D widget (`BP_Convai3DWidgetComponent` / `WBP_3DChatWidget`, located at `ConvAI > ConvaiConveniencePack > 3DWidget`) renders a floating conversation panel above a character in world space. This is useful for open environments where the player faces different characters and needs to see each character's speech separately, or for kiosk installations where the display is part of the environment.
 
 ### Add the 3D widget to a character
 

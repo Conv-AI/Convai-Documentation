@@ -100,7 +100,7 @@ Click **Compile** and then **Save**.
 {% endstepper %}
 
 {% hint style="info" %}
-If you do not have an existing player pawn, the plugin ships a ready-made one: `BP_ConvaiSamplePlayer` at `ConvaiContent > ConvaiConveniencePack > Sample`. Drop it into the level and set `BP_SampleGameMode` (same folder) as the **GameMode Override** in World Settings. It already has `BP_ConvaiPlayerComponent` and a chat widget wired up. See [Explore the sample Blueprints](import-and-run-sample-scenes.md) for a full walkthrough. This setup is suitable for prototyping — for production, add `BP Convai Player Component` directly to your own player pawn Blueprint as described above.
+If you do not have an existing player pawn, the plugin ships a ready-made one: `BP_ConvaiSamplePlayer` at `ConvAI > ConvaiConveniencePack > Sample`. Drop it into the level and set `BP_SampleGameMode` (same folder) as the **GameMode Override** in World Settings. It already has `BP_ConvaiPlayerComponent` and a chat widget wired up. See [Explore the sample Blueprints](import-and-run-sample-scenes.md) for a full walkthrough. This setup is suitable for prototyping — for production, add `BP Convai Player Component` directly to your own player pawn Blueprint as described above.
 {% endhint %}
 
 ## Test the conversation
