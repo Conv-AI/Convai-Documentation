@@ -4,18 +4,18 @@ description: Reference for Convai Unreal Engine plugin version support, includin
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugin_version</code> supports Unreal Engine <code class="expression">space.vars.unreal_min_version</code> and all later UE 5.x releases. All four plugin modules are available from UE 5.2 onward. On UE 5.0 and 5.1, `ConvaiEditor` is disabled automatically — all runtime and animation workflows remain unaffected.
+The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugin_version</code> supports Unreal Engine <code class="expression">space.vars.unreal_min_version</code> and all later UE 5.x releases. All four plugin modules load on every supported version, but the `ConvaiEditor` window is available only on UE 5.2 and later. On UE 5.0 and 5.1 the editor window is disabled automatically; all runtime and animation workflows remain unaffected.
 
 ## Supported versions
 
 | UE version | Runtime (`Convai`) | `ConvaiEditor` | `ConvaiAnimGraph` | `ConvaiVisionBase` |
 |---|---|---|---|---|
-| 5.0 | Supported | Not available | Supported | Supported |
-| 5.1 | Supported | Not available | Supported | Supported |
+| 5.0 | Supported | Window unavailable | Supported | Supported |
+| 5.1 | Supported | Window unavailable | Supported | Supported |
 | 5.2 and later | Supported | Supported | Supported | Supported |
 
 {% hint style="info" %}
-`ConvaiEditor` requires a property-binding editor feature that is not available in UE 5.1 and earlier. On those versions, the module is disabled automatically; the runtime and animation modules are unaffected.
+The `ConvaiEditor` window relies on editor APIs — `FAppStyle`, the modern `ToolMenus` system, and `FEditorDelegates::OnEditorInitialized` — that are available only in UE 5.2 and later. On UE 5.0 and 5.1 the editor window is disabled automatically; the runtime and animation modules are unaffected.
 {% endhint %}
 
 ## Module load phases
@@ -35,7 +35,7 @@ The plugin declares four modules. Their load phases determine when they become a
 
 ### UE 5.1 and earlier
 
-The `ConvaiEditor` module is disabled on these versions. All Blueprint-based conversation, audio, and animation workflows remain fully functional. Only the in-editor Convai configuration window is unavailable; set your API key manually in **Project Settings > Plugins > Convai**.
+The `ConvaiEditor` window is unavailable on these versions. All Blueprint-based conversation, audio, and animation workflows remain fully functional; only the in-editor Convai window does not load.
 
 ## Next steps
 

@@ -15,7 +15,7 @@ The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugi
 | Other platforms | ❌ Not supported | ❌ Not supported | Not listed in the plugin `PlatformAllowList`. |
 
 {% hint style="info" %}
-Mac, Linux, and iOS are not officially supported in the current release. Precompiled libraries for these platforms are present in the plugin source and may be supported in a future release.
+Mac, Linux, and iOS are not supported in the current release. The `Convai` and `ConvaiVisionBase` modules list only Win64 and Android in their `PlatformAllowList`, so they are excluded from builds for any other platform.
 {% endhint %}
 
 ## Engine plugin dependencies
@@ -32,7 +32,7 @@ The Convai plugin declares the following engine plugin dependencies in `ConvAI.u
 
 ## Android platform notes
 
-Android builds require microphone access. The plugin bundles `AndroidPermission` as an enabled dependency and uses it to request the `RECORD_AUDIO` permission at runtime. In standard setups `UConvaiPlayerComponent` handles the permission prompt; you do not need to add a separate permission call in Blueprint.
+Android builds require microphone access. The plugin bundles `AndroidPermission` as an enabled dependency and uses it to request the `RECORD_AUDIO` permission at runtime. The `UConvaiSubsystem` requests the permission automatically when it first needs the microphone, so you do not need to add a separate permission call in Blueprint.
 
 {% hint style="warning" %}
 Packaging for Android requires the Android SDK and NDK configured in **Project Settings > Platforms > Android SDK**. This is a standard Unreal Engine packaging requirement and is not specific to the Convai plugin.
