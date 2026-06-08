@@ -15,7 +15,7 @@ The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugi
 | 5.2 and later | Supported | Supported | Supported | Supported |
 
 {% hint style="info" %}
-The `ConvaiEditor` window relies on editor APIs — `FAppStyle`, the modern `ToolMenus` system, and `FEditorDelegates::OnEditorInitialized` — that are available only in UE 5.2 and later. On UE 5.0 and 5.1 the editor window is disabled automatically; the runtime and animation modules are unaffected.
+The `ConvaiEditor` window is built on editor UI APIs — `FAppStyle`, the modern `ToolMenus` system, and editor-initialization delegates — that the plugin enables only on UE 5.2 and later. On UE 5.0 and 5.1 the editor window is disabled automatically; the runtime and animation modules are unaffected.
 {% endhint %}
 
 ## Module load phases
@@ -24,10 +24,10 @@ The plugin declares four modules. Their load phases determine when they become a
 
 | Module | Type | Load phase |
 |---|---|---|
-| `Convai` | Runtime | `PreDefault` |
-| `ConvaiEditor` | Editor | `PostEngineInit` |
-| `ConvaiAnimGraph` | UncookedOnly | `Default` |
-| `ConvaiVisionBase` | Runtime | `Default` |
+| `Convai` | `Runtime` | `PreDefault` |
+| `ConvaiEditor` | `Editor` | `PostEngineInit` |
+| `ConvaiAnimGraph` | `UncookedOnly` | `Default` |
+| `ConvaiVisionBase` | `Runtime` | `Default` |
 
 `ConvaiAnimGraph` is `UncookedOnly`, which means it is available in the Unreal Editor but is not compiled into packaged builds. Animation graph assets that reference its nodes are cooked into the package, but the module code itself is editor-only.
 

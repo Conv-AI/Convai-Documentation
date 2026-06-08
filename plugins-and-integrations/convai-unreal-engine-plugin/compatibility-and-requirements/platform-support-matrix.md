@@ -45,7 +45,7 @@ The `PlatformAllowList` in the plugin manifest applies at the module level. The 
 - `Convai` (Runtime, `PreDefault`)
 - `ConvaiVisionBase` (Runtime, `Default`)
 
-The `ConvaiEditor` module has no `PlatformAllowList` because it only loads in the Unreal Editor, which always runs on Win64. `ConvaiAnimGraph` is declared as `UncookedOnly` and also has no `PlatformAllowList`; the editor includes it, but packaging excludes it from the compiled output.
+The `ConvaiEditor` module has no `PlatformAllowList` because it loads only in the editor and is never part of a packaged runtime build. `ConvaiAnimGraph` is declared as `UncookedOnly` and also has no `PlatformAllowList`; the editor includes it, but packaging excludes it from the compiled output.
 
 ## Next steps
 
