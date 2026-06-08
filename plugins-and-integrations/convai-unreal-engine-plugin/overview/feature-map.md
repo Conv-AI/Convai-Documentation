@@ -18,6 +18,8 @@ Use this map when you know what you want to build but are not sure which feature
 | Understand what each component in the scene does | Component reference | [Scene components](../getting-started/scene-components.md) |
 | Configure microphone input and platform permissions | Microphone | [Configure microphone](../getting-started/configure-microphone.md) |
 | Choose between push-to-talk and hands-free input | Input mode | [Configure conversation input](../getting-started/configure-conversation-input.md) |
+| Tune the character's voice audio output | Character audio | [Configure character audio](../getting-started/configure-character-audio.md) |
+| Display a chat or subtitle UI for the conversation | Chat UI | [Add the chat UI](../getting-started/add-chat-ui.md) |
 | Set up a MetaHuman character with the plugin | MetaHuman | [Set up a MetaHuman character](../getting-started/set-up-a-metahuman-character.md) |
 | Set up a Reallusion character with the plugin | Reallusion | [Set up a Reallusion character](../getting-started/set-up-a-reallusion-character.md) |
 | Verify my scene is configured correctly before shipping | Validation | [Validate your setup](../getting-started/validate-your-setup.md) |
@@ -28,7 +30,7 @@ Use this map when you know what you want to build but are not sure which feature
 |---|---|---|
 | Add real-time lip sync driven by character speech | Lip sync | [Lip sync](../features/lip-sync/) |
 | Show facial emotion on my character driven by the AI response | Emotion | [Emotion](../features/emotion/) |
-| Let my character execute in-scene commands (Move To, Follow, custom) | Character actions | [Character actions](../features/character-actions/) |
+| Let my character execute in-scene commands (`Move To`, `Follow`, custom) | Character actions | [Character actions](../features/character-actions/) |
 | Tag level actors so characters are aware of and can act on them | Scene metadata | [Scene metadata](../features/scene-metadata/) |
 | Route the object under the player's gaze as context to the active character | Gaze attention | [Gaze attention](../features/gaze-attention/) |
 | Push live world state and events into character knowledge at runtime | Dynamic context | [Dynamic context](../features/dynamic-context/) |

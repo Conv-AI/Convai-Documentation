@@ -63,7 +63,7 @@ This plugin is in beta. Beta releases may include breaking changes between minor
 * Refactored `Environment` from `UConvaiEnvironment` UObject to `FConvaiEnvironmentData` USTRUCT. Granular Add/Remove/Clear methods on the chatbot for Objects, Characters, and Actions; debounced scene-metadata flush; `bFlushImmediately` advanced opt-in for time-critical updates.
 * Split legacy `MainCharacter` into `ConversationPartner` (replicated, scene-aware) and `LookAtTarget` (animation-only). New `bAutoFillConversationPartnerFromPlayer` toggle populates the partner from the first registered Convai Player component automatically.
 * New `SetObjectInAttention` rides the dynamic-context flush and auto-registers the entry in `Environment.Objects` if missing.
-* Added `bEnableActions` chatbot toggle. `Environment.Actions` seeded by default with Move To, Follow, Stop Moving, and Wait For.
+* Added `bEnableActions` chatbot toggle. `Environment.Actions` seeded by default with `Move To`, `Follow`, `Stop Moving`, and `Wait For`.
 * Actions V2 — typed action templates: `FConvaiAction` with structured `Parameters` typed via `EConvaiActionParamType`. Optional `Connector` for compound actions, `Choices` for fixed-list constraints, or `EnumType` to draw choices from a `UENUM`.
 * Unified action-result shape: `FConvaiResultAction.Parameters` as `TMap<FString, FConvaiResultParam>`. Legacy `RelatedObjectOrCharacter` and `ConvaiExtraParams` kept as deprecated mirrors.
 * New Blueprint-pure accessors: `Get First Param`, `Get Param`, `Get Param Type`, `Get Param As String/Number/Bool/Ref/Byte`, `Has Param`.
@@ -198,7 +198,7 @@ This plugin is in beta. Beta releases may include breaking changes between minor
 {% update date="2025-12-05" tags="4.0.0-beta.4" %}
 ## 4.0.0-beta.4
 
-* Implemented bulk neurosync blendshape handling with stats logging.
+* Implemented bulk NeuroSync blendshape handling with stats logging.
 * Added audio frame tracking and improved voice handling in `ConvaiAudioStreamer` and `ConvaiChatbotComponent`.
 * Added end user ID functionality and device unique ID support.
 * Fixed voice playback overlap by stopping voice when audio starts.
@@ -374,11 +374,11 @@ Added:
 - Mac lip sync support.
 - Emotions.
 - Object in Attention.
-- New Convai Chatbot Component functions: Invoke Speech, Invoke Narrative Design Trigger, Force Set Emotion, Reset Emotion State, Get Emotion Score, Get Talking Time Elapsed, Get Talking Time Remaining, Set Lipsync Component, Clear Action Queue.
-- New Convai Chatbot Component events: On Narrative Section Received, On Emotion State Changed.
+- New Convai Chatbot Component functions: `Invoke Speech`, `Invoke Narrative Design Trigger`, `Force Set Emotion`, `Reset Emotion State`, `Get Emotion Score`, `Get Talking Time Elapsed`, `Get Talking Time Remaining`, `Set Lipsync Component`, `Clear Action Queue`.
+- New Convai Chatbot Component events: `On Narrative Section Received`, `On Emotion State Changed`.
 - `ConvaiGetLookedAtObjectOrCharacter` function.
 - Actor loses focus with player after predefined time.
-- Move To and Follow action failures trigger a character response.
+- `Move To` and `Follow` action failures trigger a character response.
 - Environment replication for multiplayer use cases.
 
 Improved:
@@ -395,7 +395,7 @@ Fixed:
 - Overall plugin stability and warnings.
 
 Deprecated:
-- `ConvaiOVRLipsync` plugin and component. Delete the plugin from your project and use the new FaceSync component instead.
+- `ConvaiOVRLipsync` plugin and component. Delete the plugin from your project and use the new `FaceSync` component instead.
 
 </details>
 

@@ -1,6 +1,6 @@
 ---
 title: What is the Convai Unreal Engine plugin
-description: Real-time conversational AI characters for Unreal Engine — Blueprint components, voice pipeline, opt-in feature add-ons, and platform requirements.
+description: Understand what the Convai Unreal Engine plugin adds to a project: Blueprint components, a real-time voice pipeline, and opt-in feature add-ons.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -22,7 +22,7 @@ Always active once connected:
 
 Opt-in, each configured through Blueprint or the component Inspector:
 
-* **Lip sync** — real-time blendshape mouth animation driven by audio; supports ARKit naming for MetaHuman and CC5 rigs
+* **Lip sync** — real-time blendshape mouth animation driven by audio, with selectable `Viseme Based`, `MetaHuman Blendshapes`, `ARKit Blendshapes`, and `CC4 Extended Blendshapes` modes for different rigs
 * **Emotion** — Convai infers emotion from conversation and drives blendshape expressions on the character
 * **Character actions** — characters execute structured in-scene commands (Move To, Follow, custom) dispatched from Convai
 * **Dynamic context** — push live world state and events into character knowledge at runtime
@@ -47,12 +47,12 @@ No Convai logic runs inside the game process. The plugin does not bundle a local
 ```mermaid
 graph LR
     MIC[Microphone / text] --> PC[UConvaiPlayerComponent]
-    PC --> |audio stream| SS[UConvaiSubsystem\nWebRTC]
+    PC --> |audio stream| SS[UConvaiSubsystem<br/>WebRTC]
     SS --> |stream| CV[Convai]
-    CV --> |audio + face data\n+ action sequence| SS
+    CV --> |audio + face data<br/>+ action sequence| SS
     SS --> CB[UConvaiChatbotComponent]
     CB --> AUD[Audio playback]
-    CB --> FS[UConvaiFaceSyncComponent\nlip sync]
+    CB --> FS[UConvaiFaceSyncComponent<br/>lip sync]
     CB --> BH[Blueprint action handlers]
 ```
 
@@ -67,12 +67,12 @@ Every feature in the plugin is accessible from Blueprint graphs. C++ access is a
 | Requirement | Minimum |
 |---|---|
 | Unreal Engine | <code class="expression">space.vars.unreal_min_version</code> |
-| Build targets | Win64, Android |
+| Build targets | `Win64`, `Android` |
 | Network | Internet connection to Convai |
-| API key | Free account at [convai.com](https://www.convai.com/) |
+| API key | Free account at [convai.com](https://convai.com) |
 
 {% hint style="info" %}
-Android requires microphone permission handling. The plugin bundles the `AndroidPermission` engine plugin as a dependency and calls the permission request automatically on startup.
+Android requires microphone permission handling. The plugin bundles the `AndroidPermission` engine plugin as a dependency and requests `RECORD_AUDIO` permission automatically when it connects to Convai.
 {% endhint %}
 
 The Convai Unreal Engine plugin is available on [Fab](https://www.fab.com/listings/ba3145af-d2ef-434a-8bc3-f3fa1dfe7d5c). Plugin releases are also published on [GitHub](https://github.com/Conv-AI/Convai-UnrealEngine-SDK-V4/releases).
@@ -97,4 +97,8 @@ To understand the module and component structure before building, see the archit
 [Plugin architecture](plugin-architecture.md)
 {% endcontent-ref %}
 
-For a one-screen overview of every feature and links to the corresponding guides, see the [Feature map](feature-map.md).
+For a one-screen overview of every feature and links to the corresponding guides, see the feature map.
+
+{% content-ref url="feature-map.md" %}
+[Feature map](feature-map.md)
+{% endcontent-ref %}

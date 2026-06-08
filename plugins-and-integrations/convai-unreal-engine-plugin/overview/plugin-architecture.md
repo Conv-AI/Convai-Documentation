@@ -1,10 +1,10 @@
 ---
 title: Plugin architecture
-description: Understand the Convai Unreal Engine plugin's four modules and five runtime components, and how they interact during a conversation.
+description: Understand the Convai Unreal Engine plugin's four modules, four runtime components, and game-instance subsystem, and how they interact during a conversation.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin is structured as four modules and five primary runtime components. Each module has a defined scope and loading phase; each component has a single responsibility and communicates with the others through Unreal's component and subsystem model.
+The Convai Unreal Engine plugin is structured as four modules, four runtime components, and one game-instance subsystem. Each module has a defined scope and loading phase; each component has a single responsibility and communicates with the others through Unreal's component and subsystem model.
 
 ## Modules
 
@@ -13,7 +13,7 @@ The plugin declares four modules in `ConvAI.uplugin`.
 | Module | Type | Platforms | Purpose |
 |---|---|---|---|
 | `Convai` | Runtime | Win64, Android | Core conversation pipeline: WebRTC session management, audio streaming, chatbot and player components, subsystem, dynamic context, environment, actions, vision. |
-| `ConvaiEditor` | Editor | All (editor build only) | In-editor configuration window, API key setup, character dashboard browser, Blueprint graph utilities (e.g. "Create Convai Action Handler" right-click entry). Disabled on UE 5.1 and earlier. |
+| `ConvaiEditor` | Editor | All (editor build only) | In-editor configuration window, API key setup, character dashboard browser, Blueprint graph utilities (e.g. the `Create Convai Action Handler` right-click entry). Disabled on `UE 5.1` and earlier. |
 | `ConvaiAnimGraph` | UncookedOnly | All | Animation graph nodes that drive blendshapes from the live facial animation stream. Available in the Animation Blueprint editor for MetaHuman and other rigs. |
 | `ConvaiVisionBase` | Runtime | Win64, Android | Base layer for the vision feature: frame capture, encoding, and delivery to the WebRTC session. |
 
@@ -25,17 +25,17 @@ The diagram below shows the runtime flow for a single player–character convers
 
 ```mermaid
 graph TD
-    Player["UConvaiPlayerComponent\n(audio capture, gaze)"]
-    Chatbot["UConvaiChatbotComponent\n(session, environment, actions)"]
-    Subsystem["UConvaiSubsystem\n(WebRTC client, registry)"]
-    FaceSync["UConvaiFaceSyncComponent\n(blendshapes)"]
-    AnimGraph["ConvaiAnimGraph node\n(AnimBP)"]
-    Object["UConvaiObjectComponent\n(scene object)"]
-    Convai["Convai\n(LLM, voice, narrative)"]
+    Player["UConvaiPlayerComponent<br/>(audio capture, gaze)"]
+    Chatbot["UConvaiChatbotComponent<br/>(session, environment, actions)"]
+    Subsystem["UConvaiSubsystem<br/>(WebRTC client, registry)"]
+    FaceSync["UConvaiFaceSyncComponent<br/>(blendshapes)"]
+    AnimGraph["ConvaiAnimGraph node<br/>(AnimBP)"]
+    Object["UConvaiObjectComponent<br/>(scene object)"]
+    Convai["Convai<br/>(LLM, voice, narrative)"]
 
     Player -->|"audio frames"| Subsystem
     Subsystem -->|"WebRTC stream"| Convai
-    Convai -->|"audio + face data\naction sequence\nemotion state"| Subsystem
+    Convai -->|"audio + face data<br/>action sequence<br/>emotion state"| Subsystem
     Subsystem -->|"dispatch to session"| Chatbot
     Chatbot -->|"FAnimationSequence"| FaceSync
     FaceSync -->|"blendshape map"| AnimGraph
@@ -48,10 +48,10 @@ graph TD
 
 ## Runtime components
 
-Five components form the Blueprint-facing surface of the plugin's runtime. They attach to Actors like any native Unreal component.
+Four Blueprint-spawnable components form the plugin's runtime surface and attach to Actors like any native Unreal component. A fifth runtime piece, the Convai Subsystem, is a game-instance subsystem the engine creates automatically rather than a component you add.
 
 {% hint style="info" %}
-Each component's **display name** is the label shown in the **Add Component** panel inside the Unreal Editor. Use the display name to find each component when adding it to a Blueprint Actor.
+Each component's **display name** is the label shown in the **Add Component** panel inside the Unreal Editor. Use the display name to find each component when adding it to a Blueprint Actor. The Convai Subsystem is not added this way — the engine creates one per game instance automatically.
 {% endhint %}
 
 ### `UConvaiChatbotComponent` (display name: Convai Chatbot)
@@ -70,7 +70,7 @@ Tags an Actor as a scene object that a chatbot can reference in its environment 
 
 ### `UConvaiFaceSyncComponent` (display name: Convai Face Sync)
 
-A scene component that applies precomputed facial animation sequences to a skeletal mesh. It consumes `FAnimationSequence` data delivered by `UConvaiChatbotComponent`, interpolates blendshape frames, and exposes the resulting `TMap<FName, float>` to an Animation Blueprint through an AnimGraph node in the `ConvaiAnimGraph` module. It supports ARKit blendshape naming for MetaHuman rigs and compatible CC5 rigs.
+A scene component that applies precomputed facial animation sequences to a skeletal mesh. It consumes `FAnimationSequence` data delivered by `UConvaiChatbotComponent`, interpolates blendshape frames, and exposes the resulting `TMap<FName, float>` to an Animation Blueprint through an AnimGraph node in the `ConvaiAnimGraph` module. It supports multiple lip-sync modes — `Viseme Based`, `MetaHuman Blendshapes`, `ARKit Blendshapes`, and `CC4 Extended Blendshapes` — selectable to match the character's rig.
 
 ### `UConvaiSubsystem` (display name: Convai Subsystem)
 
@@ -88,6 +88,8 @@ The plugin declares the following engine plugin dependencies in `ConvAI.uplugin`
 | `PropertyAccessEditor` | Yes | Property-binding editor feature used by `ConvaiEditor` (editor only) |
 
 ## Next steps
+
+With the module and component model in mind, install the plugin or explore the full feature set.
 
 {% content-ref url="../getting-started/" %}
 [Getting started](../getting-started/)
