@@ -157,7 +157,7 @@ Drag the character Blueprint from the **Content Browser** into the level viewpor
 {% endstep %}
 {% endstepper %}
 
-If your character Blueprint uses a body and face skeletal mesh split (common in CC5 exports), the `GetBodyAndFaceSkeletalMeshComponents()` utility on `UConvaiUtils` (available from plugin version 4.0.0-beta.20) returns both mesh references in one Blueprint call.
+If your character Blueprint uses a body and face skeletal mesh split (common in CC5 exports), the **Get Body and Face Skeletal Mesh Components** Blueprint node — found in the **Convai > Utilities** category on `UConvaiUtils` — returns both mesh references in a single call.
 
 ## Add the Convai Player component to the player pawn
 

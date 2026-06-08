@@ -4,7 +4,7 @@ description: Install the Convai Unreal Engine plugin, configure your API key, an
 last_reviewed: "4.0.0-beta.21"
 ---
 
-By the end of this section, your project contains a working Convai character in Unreal Engine. Follow the pages in order — each step builds directly on the previous one.
+By the end of this section, your project contains a working Convai character in Unreal Engine. Follow the core path pages in order — each step builds directly on the previous one. Character rig and configuration pages are optional branches you can complete in any order after the first conversation is working.
 
 {% hint style="info" %}
 **Before you begin:** Confirm your environment meets the requirements on the [Prerequisites](prerequisites.md) page — engine version, account, platform, and network access.
@@ -31,7 +31,7 @@ By the end of this section, your project contains a working Convai character in 
 </tbody>
 </table>
 
-## Scene setup
+## Core path
 
 <table data-view="cards">
 <thead>
@@ -46,25 +46,15 @@ By the end of this section, your project contains a working Convai character in 
 <td><a href="configure-api-key.md">configure-api-key.md</a></td>
 </tr>
 <tr>
-<td><strong>Explore the sample Blueprints</strong><br>Browse the ConvaiConveniencePack assets and run a quick test level to verify your setup.</td>
-<td><a href="import-and-run-sample-scenes.md">import-and-run-sample-scenes.md</a></td>
-</tr>
-<tr>
-<td><strong>Scene components</strong><br>Reference for the Convai Chatbot, Player, Object, and Face Sync components.</td>
-<td><a href="scene-components.md">scene-components.md</a></td>
-</tr>
-<tr>
-<td><strong>Add your first Convai character</strong><br>Place a Convai character in a level and have a live conversation with it.</td>
+<td><strong>Add your first Convai character</strong><br>Place a Convai character in a level and have a live voice conversation with it.</td>
 <td><a href="add-your-first-character.md">add-your-first-character.md</a></td>
-</tr>
-<tr>
-<td><strong>Validate your setup</strong><br>Run through a checklist to confirm that every part of your setup is working.</td>
-<td><a href="validate-your-setup.md">validate-your-setup.md</a></td>
 </tr>
 </tbody>
 </table>
 
 ## Character rigs
+
+Add Convai to a specific character type. Complete this after the first conversation is working.
 
 <table data-view="cards">
 <thead>
@@ -75,7 +65,7 @@ By the end of this section, your project contains a working Convai character in 
 </thead>
 <tbody>
 <tr>
-<td><strong>Set up a MetaHuman character</strong><br>Wire Convai lip sync and animation to a MetaHuman imported via Quixel Bridge.</td>
+<td><strong>Set up a MetaHuman character</strong><br>Wire Convai lip sync and animation to a MetaHuman character in your project.</td>
 <td><a href="set-up-a-metahuman-character.md">set-up-a-metahuman-character.md</a></td>
 </tr>
 <tr>
@@ -86,6 +76,8 @@ By the end of this section, your project contains a working Convai character in 
 </table>
 
 ## Configuration
+
+Tune audio, input, and UI after the first conversation is working. Each page is independent.
 
 <table data-view="cards">
 <thead>
@@ -110,6 +102,27 @@ By the end of this section, your project contains a working Convai character in 
 <tr>
 <td><strong>Add the chat UI</strong><br>Add the built-in overlay or 3D in-world widget, or wire a custom widget to the transcript delegate.</td>
 <td><a href="add-chat-ui.md">add-chat-ui.md</a></td>
+</tr>
+</tbody>
+</table>
+
+## Validate your setup
+
+<table data-view="cards">
+<thead>
+<tr>
+<th></th>
+<th data-hidden data-card-target data-type="content-ref"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Validate your setup</strong><br>Run through a checklist to confirm that every part of your setup is working before adding features.</td>
+<td><a href="validate-your-setup.md">validate-your-setup.md</a></td>
+</tr>
+<tr>
+<td><strong>Scene components reference</strong><br>Reference for the Convai Chatbot, Player, Object, and Face Sync components and their fields.</td>
+<td><a href="scene-components.md">scene-components.md</a></td>
 </tr>
 </tbody>
 </table>

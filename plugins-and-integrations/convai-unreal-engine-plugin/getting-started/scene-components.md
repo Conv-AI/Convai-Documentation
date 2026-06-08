@@ -1,10 +1,12 @@
 ---
-title: Scene components
+title: Scene components reference
 description: Reference for the Convai Chatbot, Player, Object, and Face Sync components — their fields, runtime properties, and how they connect in a scene.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin adds four components to Unreal Engine. Each has a distinct role. Understanding their responsibilities before building a scene prevents the most common wiring mistakes.
+This page is a reference for the four components the Convai plugin provides. Use it while building or debugging your scene. For a step-by-step walkthrough of adding components, see [Add your first Convai character](add-your-first-character.md).
+
+The Convai Unreal Engine plugin adds four components to Unreal Engine. Each has a distinct role — understanding their responsibilities prevents the most common wiring mistakes.
 
 ## Component roles
 
@@ -90,7 +92,7 @@ The `CharacterID` field is the only required field. All other fields have usable
 |---|---|---|
 | `UnmuteStreamingAudio()` | `bool` | Begin streaming microphone audio to the active chatbot. |
 | `MuteStreamingAudio()` | `void` | Stop streaming audio. |
-| `UpdateVadBP(bEnableVad)` | `bool` | Enable (`true`) or disable (`false`) hands-free voice activity detection. Returns `true` on success. |
+| `UpdateVadBP(EnableVAD)` | `bool` | Enable (`true`) or disable (`false`) hands-free voice activity detection. Returns `true` on success. |
 | `SendText(ChatbotComponent, Text)` | `void` | Send a text message to the specified chatbot without microphone input. |
 | `GetIsStreaming()` | `bool` | `true` while audio is actively streaming to a chatbot. |
 | `GetAvailableCaptureDeviceNames()` | `TArray<FString>` | List of available microphone device names. |
@@ -101,7 +103,8 @@ One `UConvaiPlayerComponent` on the player pawn can talk to any `UConvaiChatbotC
 
 **VAD settings (beta.20+):** Voice activity detection thresholds can be configured project-wide in **Edit > Project Settings > Plugins > Convai > Audio Settings | VAD** using `FConvaiVADSettings` fields: `Confidence` (0.0–1.0, default 0.7), `StartSecs` (default 0.2), `StopSecs` (default 2.2), and `MinVolume` (0.0–1.0, default 0.6). Set `bUseServerDefault` to `true` to defer to server-side defaults.
 
-**Pre-wired variant:** `ConvaiPlayerWithVoiceActivation` (`Content/Core/ConvaiPlayerWithVoiceActivation.uasset`) is a ready-to-use base Blueprint that has VAD enabled by default. Use it as a starting point when you want hands-free input without calling `UpdateVadBP(true)` manually.
+**Pre-wired pawn:** `ConvaiPlayerWithVoiceActivation` (`Content/Core/ConvaiPlayerWithVoiceActivation`) is a ready-to-use player pawn with voice-activation capture. Use it as a starting point when you want hands-free input without calling `UpdateVadBP(true)` manually.
+
 {% endtab %}
 
 {% tab title="Convai Object" %}
@@ -136,33 +139,35 @@ The component provides each object with:
 | Auto | `EC_LipSyncMode::Auto` | Lets the plugin choose the mode based on available data. |
 | Viseme Based | `EC_LipSyncMode::VisemeBased` | Custom rigs using OVR visemes (15 shapes). |
 | MetaHuman Blendshapes | `EC_LipSyncMode::BS_MHA` | MetaHuman characters and Reallusion CC5 characters. **(Default)** |
-| ARKit Blendshapes | `EC_LipSyncMode::BS_ARKit` | Generic ARKit-compatible rigs. |
+| ARKit Blendshapes | `EC_LipSyncMode::BS_ARKit` | CC4 characters. |
 | CC4 Extended Blendshapes | `EC_LipSyncMode::BS_CC4_Extended` | Reallusion CC4 characters. |
 {% endtab %}
 {% endtabs %}
 
 ## Blueprint wrappers
 
-The plugin ships Blueprint-wrapped versions of each component in its `Content/` folder. Use these instead of the bare C++ components — they include push-to-talk input binding, chat widget integration, and audio capture out of the box.
+The plugin ships Blueprint-wrapped versions of each component in `Content/`. Use these instead of the bare C++ components — they include push-to-talk input binding, chat widget integration, and audio capture out of the box.
 
-| Asset | What it includes |
-|---|---|
-| `BP_ConvaiChatbotComponent` (`BP Convai ChatBot Component`) | `UConvaiChatbotComponent` pre-wired with push-to-talk and chat UI. |
-| `BP_ConvaiPlayerComponent` (`BP Convai Player Component`) | `UConvaiPlayerComponent` pre-wired with push-to-talk and chat UI. |
-| `BP_ConvaiSamplePlayer` | A full player pawn with `BP_ConvaiPlayerComponent` attached. |
-| `BP_SampleGameMode` | A game mode that pairs with `BP_ConvaiSamplePlayer`. |
-| `BP_Convai3DWidgetComponent` / `WBP_3DChatWidget` | In-world chat UI widget. |
+| Asset | Content path | What it includes |
+|---|---|---|
+| `BP_ConvaiChatbotComponent` (`BP Convai ChatBot Component`) | `ConvaiConveniencePack/ConvaiBPComponent/` | `UConvaiChatbotComponent` pre-wired with push-to-talk and `Chat_WB`. |
+| `BP_ConvaiPlayerComponent` (`BP Convai Player Component`) | `ConvaiConveniencePack/ConvaiBPComponent/` | `UConvaiPlayerComponent` pre-wired with push-to-talk, `Chat_WB`, and `UISelection`. |
+| `BP_ConvaiSamplePlayer` | `ConvaiConveniencePack/Sample/` | Sample player pawn with `BP_ConvaiPlayerComponent` attached. |
+| `BP_SampleGameMode` | `ConvaiConveniencePack/Sample/` | Game mode that sets `BP_ConvaiSamplePlayer` as the default pawn. |
+| `BP_Convai3DWidgetComponent` / `WBP_3DChatWidget` | `ConvaiConveniencePack/3DWidget/` | In-world 3D chat UI widget component. |
+| `Chat_WB` / `MicSettings_WB` | `Widgets/` | Screen-space chat overlay and microphone settings panel. |
+| `ConvaiPlayerWithVoiceActivation` | `Core/` | Player pawn with voice-activation (VAD) enabled by default. |
+
+{% hint style="warning" %}
+`ConvaiBasePlayer` and `ConvaiBaseCharacter` in `Content/Core/` are deprecated. Reparent your classes to a standard Character or Pawn and add `BP_ConvaiPlayerComponent` or `BP_ConvaiChatbotComponent` instead.
+{% endhint %}
 
 ## Next steps
 
-{% content-ref url="add-your-first-character.md" %}
-[Add your first Convai character](add-your-first-character.md)
+{% content-ref url="validate-your-setup.md" %}
+[Validate your setup](validate-your-setup.md)
 {% endcontent-ref %}
 
-{% content-ref url="set-up-a-metahuman-character.md" %}
-[Set up a MetaHuman character](set-up-a-metahuman-character.md)
-{% endcontent-ref %}
-
-{% content-ref url="set-up-a-reallusion-character.md" %}
-[Set up a Reallusion (CC) character](set-up-a-reallusion-character.md)
+{% content-ref url="configure-conversation-input.md" %}
+[Configure conversation input](configure-conversation-input.md)
 {% endcontent-ref %}

@@ -65,8 +65,8 @@ Use these Blueprint-callable functions from `UConvaiUtils` (no component referen
 
 | Function | Category | Description |
 |---|---|---|
-| `GetVADSettings()` | `Convai\|VAD` | Returns the current `FConvaiVADSettings` struct. BlueprintPure. |
-| `SetVADSettings(VADSettings)` | `Convai\|VAD` | Applies a new `FConvaiVADSettings` to the VAD pipeline. |
+| `GetVADSettings()` | `Convai\|Settings` | Returns the current `FConvaiVADSettings` struct. BlueprintPure. |
+| `SetVADSettings(VADSettings)` | `Convai\|Settings` | Applies a new `FConvaiVADSettings` to the VAD pipeline. |
 
 ### VAD settings fields
 

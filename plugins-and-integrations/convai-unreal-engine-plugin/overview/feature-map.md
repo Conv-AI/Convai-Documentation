@@ -14,7 +14,6 @@ Use this map when you know what you want to build but are not sure which feature
 | Install the plugin into my Unreal project | Installation | [Installation](../getting-started/installation.md) |
 | Configure my Convai API key | API key setup | [Configure API key](../getting-started/configure-api-key.md) |
 | Add my first AI character to a scene | Scene setup | [Add your first character](../getting-started/add-your-first-character.md) |
-| Run a sample project to see the plugin working | Sample scenes | [Explore the sample Blueprints](../getting-started/import-and-run-sample-scenes.md) |
 | Understand what each component in the scene does | Component reference | [Scene components](../getting-started/scene-components.md) |
 | Configure microphone input and platform permissions | Microphone | [Configure microphone](../getting-started/configure-microphone.md) |
 | Choose between push-to-talk and hands-free input | Input mode | [Configure conversation input](../getting-started/configure-conversation-input.md) |

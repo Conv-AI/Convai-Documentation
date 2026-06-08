@@ -10,24 +10,24 @@ The Convai plugin ships two chat UI options: a screen-space overlay that appears
 
 The screen-space overlay is included in `BP_ConvaiPlayerComponent`. When you added `BP Convai Player Component` to your player pawn (see [Add your first Convai character](add-your-first-character.md)), the widget was already included. It appears automatically in Play mode — no additional setup is required.
 
-### Switch the interface style
+### Switch the overlay style
 
-The overlay has three built-in visual styles. To change it:
+The built-in overlay is the `Chat_WB` widget (`Content/Widgets/Chat_WB`). `BP_ConvaiPlayerComponent` exposes a `UISelection` variable that selects which overlay style the widget switcher displays. Three background textures ship with the plugin: `UI_CBFV1`, `UI_CBFV2`, and `UI_CBFV3` in `Content/Widgets/Images/`.
+
+To change the style:
 
 1. Select the **Convai Player** component in your player pawn Blueprint.
-2. In the **Details** panel, find **Interface Selection** under the **Convai** category. This property is defined inside the `BP_ConvaiPlayerComponent` Blueprint asset — it does not appear on the bare `UConvaiPlayerComponent` C++ component.
-3. Set the value to `1`, `2`, or `3`.
+2. In the **Details** panel, find `UISelection` under the **Convai** category. This variable is defined on `BP_ConvaiPlayerComponent` — it does not appear on the bare `UConvaiPlayerComponent` C++ component.
+3. Set `UISelection` to `1`, `2`, or `3` to switch styles. Set it to `0` to hide the overlay entirely.
 
-| Value | Description |
+| Value | Effect |
 |---|---|
-| `1` | Default style — compact chat panel at the bottom of the screen. |
-| `2` | Alternative layout — wider panel with a different background treatment. |
-| `3` | Minimal style — smaller overlay, suitable for immersive experiences. |
-| `0` | Widget disabled — no chat overlay is shown. |
+| `0` | Overlay hidden — no screen-space chat widget is shown. |
+| `1` | Style 1 — uses the `UI_CBFV1` background texture. |
+| `2` | Style 2 — uses the `UI_CBFV2` background texture. |
+| `3` | Style 3 — uses the `UI_CBFV3` background texture. |
 
-{% hint style="info" %}
-All three styles display the same conversation data. The difference is purely visual: panel layout, font sizing, and background. There is no functional difference between them.
-{% endhint %}
+All styles display the same conversation data and push-to-talk controls. Only the visual treatment changes.
 
 ## 3D in-world chat widget
 
@@ -93,7 +93,7 @@ Append each final transcript to your display panel to build up the conversation 
 {% step %}
 ### Disable the built-in overlay
 
-Set **Interface Selection** to `0` on `BP_ConvaiPlayerComponent` to hide the built-in overlay so it does not overlap your custom widget.
+Set `UISelection` to `0` on `BP_ConvaiPlayerComponent` to hide the built-in overlay so it does not overlap your custom widget.
 {% endstep %}
 {% endstepper %}
 
@@ -103,9 +103,9 @@ Set **Interface Selection** to `0` on `BP_ConvaiPlayerComponent` to hide the bui
 
 **Symptom:** Play mode starts but no chat widget is visible.
 
-**Cause:** **Interface Selection** is set to `0`, or the player pawn uses the bare `UConvaiPlayerComponent` (the C++ component) rather than `BP Convai Player Component` (the Blueprint wrapper that includes the widget).
+**Cause:** `UISelection` is set to `0`, or the player pawn uses the bare `UConvaiPlayerComponent` (the C++ component) rather than `BP Convai Player Component` (the Blueprint wrapper that includes the widget).
 
-**Fix:** Confirm **Interface Selection** is set to `1`, `2`, or `3` on the **Convai Player** component. Confirm the player pawn was set up using `BP Convai Player Component` — if the bare C++ component was added instead, replace it with the Blueprint wrapper.
+**Fix:** Confirm `UISelection` is set to `1`, `2`, or `3` on the **Convai Player** component. Confirm the player pawn was set up using `BP Convai Player Component` — if the bare C++ component was added instead, replace it with the Blueprint wrapper.
 
 ### 3D widget is visible but shows no text
 
@@ -121,7 +121,7 @@ Set **Interface Selection** to `0` on `BP_ConvaiPlayerComponent` to hide the bui
 
 **Cause:** `BP_Convai3DWidgetComponent` was added to the character without disabling the screen-space overlay on the player pawn.
 
-**Fix:** Set **Interface Selection** to `0` on `BP_ConvaiPlayerComponent` to hide the screen-space overlay, leaving only the 3D widget active.
+**Fix:** Set `UISelection` to `0` on `BP_ConvaiPlayerComponent` to hide the screen-space overlay, leaving only the 3D widget active.
 
 **Verify:** Enter Play mode and confirm that only the 3D panel above the character is visible — no second overlay appears in the viewport corners.
 

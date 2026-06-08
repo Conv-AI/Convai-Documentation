@@ -12,13 +12,17 @@ This guide walks through connecting a MetaHuman to the Convai Unreal Engine plug
 - Unreal Engine and the **MetaHuman** plugin are available in your project.
 - You have a Convai character ID from the dashboard.
 
-## Import a MetaHuman via Quixel Bridge
+## Import a MetaHuman
+
+{% hint style="info" %}
+In **Unreal Engine 5.4 and later**, MetaHumans are managed through the **Fab** plugin rather than Quixel Bridge. The import experience is similar — use **Window > Fab** or the **Fab** button in the toolbar to open the panel and navigate to the MetaHuman section. Refer to the [Unreal Engine MetaHuman documentation](https://dev.epicgames.com/documentation/en-us/metahuman/importing-metahumans-to-unreal-engine-projects) for the current import path for your engine version. The Convai setup steps after import are the same regardless of how the MetaHuman is imported.
+{% endhint %}
 
 {% stepper %}
 {% step %}
-### Open Quixel Bridge
+### Open Quixel Bridge or Fab
 
-In the Unreal Editor menu bar, select **Window > Quixel Bridge**. In the bridge panel, navigate to the **MetaHuman** section.
+In the Unreal Editor menu bar, select **Window > Quixel Bridge** (UE 5.3 and earlier) or **Window > Fab** (UE 5.4 and later). Navigate to the **MetaHuman** section.
 {% endstep %}
 
 {% step %}
@@ -56,7 +60,7 @@ In the **Details** panel, confirm that **Lip Sync Mode** is set to **MetaHuman B
 
 ## Assign the Convai animation blueprints
 
-MetaHuman characters use separate animation blueprints for body and face. The Convai plugin ships two assets in `ConvAI > MetaHumans > Animations` that wire lip sync data into the MetaHuman skeleton.
+MetaHuman characters use separate animation blueprints for body and face. The Convai plugin ships two assets at `MetaHumans/Animations/` (`ConvAI > MetaHumans > Animations` in the Content Browser) that wire lip sync data into the MetaHuman skeleton.
 
 {% stepper %}
 {% step %}
@@ -96,22 +100,43 @@ When the setup is working, the MetaHuman's mouth moves in sync with the characte
 
 ## Gesture and gaze animations
 
-Starting in plugin version 4.0.0-beta.20, the plugin ships six AnimBP assets in `ConvAI > MetaHumans > Animations > AnimBP` that drive eye blink, eye look, head look, and pointing automatically. When the Actions system issues an LLM gesture command, these blueprints activate without extra Blueprint wiring.
+Starting in plugin version 4.0.0-beta.20, the plugin ships gaze and pointing Animation Blueprints plus a gesture motion library under `MetaHumans/Animations/`. When the Actions system issues an LLM gesture command, these assets activate through `BPI_Convai_Animation` without extra Blueprint wiring beyond the lip sync animation Blueprint setup above.
 
-| Asset | Purpose |
-|---|---|
-| `A1D_MH_BEye` | Eye blink and gaze |
-| `A2D_MH_EyeLook` | Eye look direction |
-| `B2D_F_HeadLook` / `B2D_M_HeadLook` | Female / male head look |
-| `B2D_F_Pointing` / `B2D_M_Pointing` | Female / male pointing |
+### Lip sync animation blueprints
 
-The motion library at `ConvAI > MetaHumans > Animations > Motion > Gestures` includes Bye, Hi, Like, No, Think, Wink, and Yes animations with female and male variants and Animation Montage counterparts. These trigger automatically when the Actions system is active on the character.
+| Asset | Content path | Purpose |
+|---|---|---|
+| `Convai_MetaHuman_BodyAnim` | `MetaHumans/Animations/` | Body animation — assign to the **Body** skeletal mesh **Anim Class**. |
+| `Convai_MetaHuman_FaceAnim` | `MetaHumans/Animations/` | Face animation and lip sync — assign to the **Face** skeletal mesh **Anim Class**. |
 
-The animation interface `BPI_Convai_Animation` at `Content/Interfaces/` is used internally by this system.
+### Gaze and pointing Animation Blueprints
 
-{% hint style="info" %}
-These assets activate automatically when the Convai Actions system is enabled on your character. No additional Blueprint wiring is required beyond the animation blueprint setup above.
-{% endhint %}
+| Asset | Content path | Purpose |
+|---|---|---|
+| `A1D_MH_BEye` | `MetaHumans/Animations/AnimBP/` | Eye blink and gaze |
+| `A2D_MH_EyeLook` | `MetaHumans/Animations/AnimBP/` | Eye look direction |
+| `B2D_F_HeadLook` | `MetaHumans/Animations/AnimBP/` | Female head look |
+| `B2D_M_HeadLook` | `MetaHumans/Animations/AnimBP/` | Male head look |
+| `B2D_F_Pointing` | `MetaHumans/Animations/AnimBP/` | Female pointing |
+| `B2D_M_Pointing` | `MetaHumans/Animations/AnimBP/` | Male pointing |
+
+### LLM gesture library
+
+Each gesture ships female (`Anim_F_*`) and male (`Anim_M_*`) animation sequences plus Animation Montage counterparts (`*_Montage`). All paths are under `MetaHumans/Animations/Motion/Gestures/`.
+
+| Gesture | Folder | Key assets (per gender) |
+|---|---|---|
+| Bye | `Gestures/Bye/` | `Anim_F_Bye`, `Anim_F_Bye_Montage` / `Anim_M_Bye`, `Anim_M_Bye_Montage` |
+| Hi | `Gestures/Hi/` | `Anim_F_Hi`, `Anim_F_Hi_Montage` / `Anim_M_Hi`, `Anim_M_Hi_Montage` |
+| Like | `Gestures/Like/` | `Anim_F_Like`, `Anim_F_Like_Montage` / `Anim_M_Like`, `Anim_M_Like_Montage` |
+| No | `Gestures/No/` | `Anim_F_No`, `Anim_F_No_Montage` / `Anim_M_No`, `Anim_M_No_Montage` |
+| Think | `Gestures/Think/` | `Anim_F_Think`, `Anim_F_Think_In`, `Anim_F_Think_Loop`, `Anim_F_Think_Out`, `Anim_F_Think_Montage` / male equivalents (`Anim_M_Think_*`) |
+| Wink | `Gestures/Wink/` | Body: `Anim_F_Wink_Body`, `Anim_F_Wink_Body_Montage` / `Anim_M_Wink_Body`, `Anim_M_Wink_Body_Montage`. Face: `AnimFace_F_Wink`, `AnimFace_F_Wink_Montage` / `AnimFace_M_Wink`, `AnimFace_M_Wink_Montage` |
+| Yes | `Gestures/Yes/` | `Anim_F_Yes`, `Anim_F_Yes_Montage` / `Anim_M_Yes`, `Anim_M_Yes_Montage` |
+
+The plugin also ships additional body-action animations under `MetaHumans/Animations/Motion/Actions/` (Clap, Dance_Disco, Dance_Groove, Dance_GStyle, Jump360) and locomotion assets under `Motion/Idle/`, `Motion/Walk/`, `Motion/Jog/`, and `Motion/Talk/`.
+
+The animation interface `BPI_Convai_Animation` at `Interfaces/BPI_Convai_Animation` connects the Actions system to these assets.
 
 ## Troubleshooting
 

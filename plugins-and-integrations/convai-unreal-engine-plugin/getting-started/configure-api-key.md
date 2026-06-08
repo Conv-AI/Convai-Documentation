@@ -4,13 +4,18 @@ description: Sign in through the Convai editor window to store your API key and 
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin authenticates through the Convai editor window. Signing in stores your API key in `UConvaiSettings.API_Key` so all runtime requests are authenticated automatically. You do not edit this value directly — the Convai editor window manages it entirely.
+The Convai Unreal Engine plugin authenticates through the Convai editor window. Signing in stores your API key in `UConvaiSettings.API_Key` (a read-only `Config` property) so all runtime requests are authenticated automatically. The editor window writes and saves the key — you do not edit this value directly in **Project Settings**.
+
+{% hint style="info" %}
+The Convai editor window requires **Unreal Engine 5.2 or later**. If you are on UE 5.0 or 5.1, skip to [Verify the key is active](#verify-the-key-is-active) and follow the manual entry path in the troubleshooting table.
+{% endhint %}
 
 ## Open the Convai editor window
 
-After enabling the plugin and restarting the editor, the Convai editor window may open automatically. If it does not:
+After enabling the plugin and restarting the editor, the Convai editor window may open automatically as a welcome prompt. If it does not, open it in one of two ways:
 
-- Click the **Convai** icon in the Unreal Editor toolbar.
+- Click the **Convai Editor** button in the Unreal Editor toolbar.
+- Select **Window > Convai > Open Convai Editor** from the menu bar.
 
 The window opens and shows a sign-in form if you are not yet authenticated.
 
@@ -40,25 +45,21 @@ Click the Convai icon in the toolbar again. The Convai editor window should now 
 Your API key is now stored. The Convai editor window shows your account dashboard — you are authenticated and ready to use the plugin.
 {% endhint %}
 
-{% hint style="info" %}
-The API key is stored as a read-only `Config` property on `UConvaiSettings`. It is managed entirely by the Convai editor window — the window writes and saves the key for you, so there is nothing to edit in **Project Settings** or in config files manually.
-{% endhint %}
-
 ## Verify the key is active
 
-To confirm your API key is working, follow the [Run a quick test](import-and-run-sample-scenes.md#run-a-quick-test) steps in the next page.
+To confirm your API key is working, proceed to [Add your first Convai character](add-your-first-character.md) and complete the conversation test.
 
 **If requests fail:**
 
 | Check | Action |
 |---|---|
-| API key is blank | Go to **Edit > Project Settings > Plugins > Convai** and confirm the key field is populated. If it is empty, sign in again through the Convai editor window. |
+| API key is blank | Go to **Edit > Project Settings > Plugins > Convai** and confirm the `API Key` field is populated. If it is empty, sign in again through the Convai editor window. |
 | Account is inactive | Sign in to [convai.com](https://convai.com) and confirm your account status. |
-| Network blocked | Ensure the editor can reach Convai's endpoints. See [Prerequisites — Network access](prerequisites.md#network-access). |
-| Convai editor window does not appear (UE 5.0–5.1) | The ConvaiEditor module is disabled on UE 5.0 and 5.1. Enter your API key directly in **Edit > Project Settings > Plugins > Convai > API Key**. |
+| Network blocked | Confirm the editor can reach Convai over HTTPS. See [Network access](prerequisites.md#network-access). |
+| UE 5.0 or 5.1 — Convai editor window not available | Enter your API key directly in **Edit > Project Settings > Plugins > Convai > API Key**. The key field is editable in Project Settings when the editor UI is absent. |
 
 ## Next steps
 
-{% content-ref url="import-and-run-sample-scenes.md" %}
-[Explore the sample Blueprints](import-and-run-sample-scenes.md)
+{% content-ref url="add-your-first-character.md" %}
+[Add your first Convai character](add-your-first-character.md)
 {% endcontent-ref %}

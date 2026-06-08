@@ -35,9 +35,9 @@ Open the Epic Games Launcher and navigate to the Fab store, or go directly to th
 {% endstep %}
 
 {% step %}
-### Install the plugin for your engine version
+### Install to your engine or project
 
-On the listing page, click **Install Plugin**. Select the Unreal Engine version that matches your project and click **Install**. The download takes a few seconds.
+On the listing page, click **Install to Engine** to install the plugin for a specific engine version, or **Add to project** to add it directly to a project. Select the target engine or project and confirm.
 {% endstep %}
 
 {% step %}
@@ -55,7 +55,7 @@ GitHub Releases ships new features and fixes sooner than Fab. Use this method wh
 {% step %}
 ### Download the release zip
 
-Go to [Convai Unreal Engine SDK releases on GitHub](https://github.com/Conv-AI/Convai-UnrealEngine-SDK/releases) and find the release that matches the version you want. Download the zip file for your Unreal Engine version.
+Go to [Convai Unreal Engine SDK releases on GitHub](https://github.com/Conv-AI/Convai-UnrealEngine-SDK-V4/releases) and find the release that matches the version you want. Download the zip file for your Unreal Engine version.
 {% endstep %}
 
 {% step %}

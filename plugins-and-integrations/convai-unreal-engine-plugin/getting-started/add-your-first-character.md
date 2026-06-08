@@ -100,7 +100,7 @@ Click **Compile** and then **Save**.
 {% endstepper %}
 
 {% hint style="info" %}
-If you do not have an existing player pawn, the plugin ships a ready-made one: `BP_ConvaiSamplePlayer` at `ConvAI > ConvaiConveniencePack > Sample`. Drop it into the level and set `BP_SampleGameMode` (same folder) as the **GameMode Override** in World Settings. It already has `BP_ConvaiPlayerComponent` and a chat widget wired up. See [Explore the sample Blueprints](import-and-run-sample-scenes.md) for a full walkthrough. This setup is suitable for prototyping — for production, add `BP Convai Player Component` directly to your own player pawn Blueprint as described above.
+If you do not have an existing player pawn, the plugin ships a ready-made one: `BP_ConvaiSamplePlayer` at `ConvAI > ConvaiConveniencePack > Sample`. Drop it into the level and set `BP_SampleGameMode` (same folder) as the **GameMode Override** in World Settings. It already has `BP_ConvaiPlayerComponent` and a chat widget pre-configured. This setup is suitable for prototyping — for production, add `BP Convai Player Component` directly to your own player pawn Blueprint as described above.
 {% endhint %}
 
 ## Test the conversation
@@ -117,7 +117,7 @@ Press **Play** in the Unreal Editor toolbar. A chat widget appears in the viewpo
 
 Hold the push-to-talk key (default: **T**), speak into your microphone, then release the key. The character processes your speech, generates a response, and speaks back.
 
-To use hands-free mode instead, select the **BP_ConvaiPlayerComponent** in the **Details** panel, expand the **Convai** category, and disable the **Enable Push to Talk** boolean. The character will then listen continuously using voice activity detection.
+To use hands-free (VAD) mode instead, open the player pawn Blueprint, select the **Convai Player** component, expand the **Convai** category in the **Details** panel, and disable **Enable Push to Talk** (`EnablePushToTalk`). Alternatively, call `UpdateVadBP(true)` from Blueprint. See [Configure conversation input](configure-conversation-input.md) for full VAD tuning options.
 {% endstep %}
 {% endstepper %}
 
@@ -127,8 +127,8 @@ When the setup is working, the character speaks an audible response and the chat
 
 ## Next steps
 
-{% content-ref url="scene-components.md" %}
-[Scene components](scene-components.md)
+{% content-ref url="validate-your-setup.md" %}
+[Validate your setup](validate-your-setup.md)
 {% endcontent-ref %}
 
 {% content-ref url="set-up-a-metahuman-character.md" %}
@@ -143,6 +143,6 @@ When the setup is working, the character speaks an audible response and the chat
 [Configure conversation input](configure-conversation-input.md)
 {% endcontent-ref %}
 
-{% content-ref url="validate-your-setup.md" %}
-[Validate your setup](validate-your-setup.md)
+{% content-ref url="scene-components.md" %}
+[Scene components reference](scene-components.md)
 {% endcontent-ref %}
