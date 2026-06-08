@@ -10,7 +10,7 @@ Character speech is played through `UConvaiAudioStreamer`, which extends Unreal 
 
 | Setting | Default | Notes |
 |---|---|---|
-| Playback volume | `1.0` | Full volume. Controlled by the inherited **Volume Multiplier** in the **Activation** category. |
+| Playback volume | `1.0` | Full volume. Controlled by the inherited **Volume Multiplier** in the **Sound** category. |
 | Spatial audio | Disabled | `AttenuationSettings` is `null` — speech plays at the same volume regardless of distance. |
 | Interrupt fade duration | Configurable | See [Configure interrupt fade duration](#configure-interrupt-fade-duration). |
 
@@ -18,7 +18,7 @@ Character speech is played through `UConvaiAudioStreamer`, which extends Unreal 
 
 1. Open the character Blueprint in the Blueprint editor.
 2. Select the **Convai Chatbot** component in the **Components** panel.
-3. In the **Details** panel, expand the **Activation** section (inherited from `UAudioComponent`).
+3. In the **Details** panel, expand the **Sound** section (inherited from `UAudioComponent`).
 4. Adjust **Volume Multiplier**. `1.0` is full volume; `0.0` is silent.
 
 {% hint style="info" %}
@@ -71,7 +71,7 @@ To configure it, select the **Convai Chatbot** component and find **Interrupt Vo
 
 **Cause:** **Volume Multiplier** on the chatbot component has been reduced below `1.0`, or a spatial attenuation asset is configured with a falloff that drops to zero at short distances.
 
-**Fix:** Select the **Convai Chatbot** component and check **Volume Multiplier** in the **Activation** category. Reset it to `1.0`. If attenuation is enabled, review the attenuation curve and widen the inner and outer radii.
+**Fix:** Select the **Convai Chatbot** component and check **Volume Multiplier** in the **Sound** category. Reset it to `1.0`. If attenuation is enabled, review the attenuation curve and widen the inner and outer radii.
 
 ### Character speech does not attenuate with distance
 
