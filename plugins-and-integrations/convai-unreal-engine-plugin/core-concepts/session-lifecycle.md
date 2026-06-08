@@ -8,17 +8,13 @@ A session is the active WebRTC channel between a component (chatbot or player) a
 
 ## Auto-initialization
 
-Both `UConvaiChatbotComponent` and `UConvaiPlayerComponent` expose `bAutoInitializeSession` in the **Convai | Session** category of the **Details** panel. When this flag is `true`, the component calls `StartSession` in its own `BeginPlay`. This is the recommended path for single-player projects and for dedicated-server characters that should be ready as soon as the level loads.
-
-{% hint style="info" %}
-Set `bAutoInitializeSession` to `false` when you need precise control over when the session opens — for example, in multiplayer games where the character should only connect after the owning client is fully initialized, or in training scenarios where the session should not start until the learner has completed a pre-activity.
-{% endhint %}
+Both `UConvaiChatbotComponent` and `UConvaiPlayerComponent` expose `bAutoInitializeSession` in the **Convai | Session** category of the **Details** panel. When this flag is `true`, the component calls `StartSession` in its own `BeginPlay`. This is the recommended path for single-player projects and for dedicated-server characters that should be ready as soon as the level loads. Set it to `false` when you need precise control over the moment the session opens — for example, when the character should only connect after a multiplayer client is fully initialized, or when a training simulation should gate the session behind a pre-activity check. The third usage example below demonstrates the pre-activity pattern.
 
 ## Starting and stopping a session
 
 `StartSession` and `StopSession` are `BlueprintCallable` functions on both components.
 
-**Chatbot session:** `UConvaiChatbotComponent::StartSession` opens the character-side channel. Before connecting, it invokes `GatherEnvironmentExtras` — a `BlueprintNativeEvent` you can override in Blueprint to append dynamic action, object, and character entries to the environment that is sent at `/connect` time. The override receives three output arrays — `OutExtraActions`, `OutExtraObjects`, and `OutExtraCharacters` — which you populate with any entries to merge into the environment. This is the recommended pattern for injecting actions that depend on runtime state, such as inventory items or abilities that are only available after certain conditions are met — rather than hard-coding them in the component's `EnvironmentData` at edit time. Once connected, the chatbot receives audio, actions, emotion data, and face data from Convai.
+**Chatbot session:** `UConvaiChatbotComponent::StartSession` opens the character-side channel. Before connecting, it invokes `GatherEnvironmentExtras` — a `BlueprintNativeEvent` you can override in Blueprint to append dynamic action, object, and character entries to the environment sent at `/connect` time. The override provides three output arrays: `OutExtraActions` (`TArray<FConvaiAction>`), `OutExtraObjects` (`TArray<FConvaiObjectEntry>`), and `OutExtraCharacters` (`TArray<FConvaiObjectEntry>`). Populate any combination of these arrays; the plugin merges them with the static entries from `EnvironmentData` before assembling the `/connect` payload. The override **appends only** — it does not replace the edit-time defaults in the **Details** panel. This is the recommended pattern for injecting actions or objects that depend on runtime state, such as inventory items, earned abilities, or NPCs that are conditionally present in a scene, rather than hard-coding them in the component's `EnvironmentData` at edit time. Once connected, the chatbot receives audio, actions, emotion data, and face data from Convai.
 
 **Player session:** `UConvaiPlayerComponent::StartSession` opens the player-side channel and returns `true` if the session initialized successfully. Once connected, the player component begins forwarding microphone audio to the subsystem.
 
@@ -131,6 +127,16 @@ A kiosk experience where returning users pick up where they left off.
 3. To start fresh instead, call `ResetConversation` before `StartSession` — this resets `SessionID` to `"-1"`.
 
 Expected result: The character references prior conversation context in its first response.
+
+### Pre-activity gate — delaying the session until a learner is ready
+
+A safety training simulation where the AI instructor should only become active after the learner has completed a written pre-test and confirmed they are ready to begin.
+
+1. Set **Auto Initialize Session** to `false` on both the chatbot component and the player component — no session opens at level start.
+2. Display the pre-test UI. When the learner submits and passes, call **Start Session** on the chatbot component, then **Start Session** on the player component.
+3. Optionally, show a "Connecting…" indicator while `GetChatbotConnectionState` returns `Connecting`, and dismiss it once it returns `Connected`.
+
+Expected result: Neither component connects at level start. The AI instructor and the player's microphone channel both open only after the pre-test passes. Once both sessions reach `Connected`, the interaction proceeds identically to an auto-initialized session.
 
 ## Troubleshooting
 

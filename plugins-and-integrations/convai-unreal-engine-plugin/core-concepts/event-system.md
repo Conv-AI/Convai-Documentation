@@ -1,6 +1,6 @@
 ---
 title: Event system
-description: Reference for every Blueprint-assignable delegate on the Convai Chatbot and Convai Player components, organized by category with timing details.
+description: Reference for every Blueprint-assignable delegate in the Convai plugin, covering components and the subsystem, organized by category with timing details.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -8,7 +8,19 @@ The Convai Unreal Engine plugin communicates runtime results to Blueprint throug
 
 ## Inherited delegates (both components)
 
-`UConvaiChatbotComponent` and `UConvaiPlayerComponent` both inherit from `UConvaiConversationComponent`, which defines two delegates available on every conversation component.
+`UConvaiChatbotComponent` and `UConvaiPlayerComponent` both inherit from `UConvaiConversationComponent`, which in turn inherits from `UConvaiAudioStreamer`. The delegates below are available on every conversation component.
+
+### Audio playback
+
+These three delegates are defined on `UConvaiAudioStreamer` and are available on both the chatbot and player components. None carry parameters.
+
+| Delegate | Category | Fires when |
+|---|---|---|
+| `OnStartedTalkingDelegate` | `Convai` | The component begins playing back audio — the first audio frame from Convai starts rendering. |
+| `OnFinishedTalkingDelegate` | `Convai` | Audio playback ends and the buffer is empty — the character has finished speaking for this turn. |
+| `OnFacialDataReadyDelegate` | `Convai\|LipSync` | A new batch of pre-computed facial animation data has arrived and is ready for the lip-sync pipeline to consume. |
+
+`OnStartedTalkingDelegate` and `OnFinishedTalkingDelegate` are the low-level playback boundary events. For higher-level turn awareness, use the chatbot's speech-state functions (`GetIsTalking`, `IsListening`, `IsProcessing`) or the chatbot-specific delegates such as `OnInterruptedEvent`.
 
 ### Transcription
 
@@ -160,13 +172,81 @@ The promotion and release thresholds are configurable on `UConvaiPlayerComponent
 
 These events only fire when `bGazeable` is `true` on the object component (the default). Set `bGazeable` to `false` on objects that should exist in the chatbot's environment for action or context purposes but should not be reachable via player gaze.
 
+## Subsystem events
+
+`UConvaiSubsystem` exposes two `BlueprintAssignable` delegates that monitor the global connection state across all sessions in the game instance. Access the subsystem from any Blueprint via **Get Game Instance → Get Subsystem (Convai Subsystem)**.
+
+| Delegate | Category | Parameters | Fires when |
+|---|---|---|---|
+| `OnServerConnectionStateChangedEvent` | `Convai\|Connection` | `EC_ConnectionState ConnectionState` | The global WebRTC connection state changes. Fires for every transition — use the `ConnectionState` parameter to react to specific states (`Connected`, `Reconnecting`, etc.). |
+| `OnUserIdleWarning` | `Convai\|Event` | `float RemainingSeconds` | The server detects that the user has been idle. `RemainingSeconds` is the time remaining before the connection closes automatically. Call `ResetIdleTimer` on the subsystem to prevent the disconnection. |
+
+Bind to `OnServerConnectionStateChangedEvent` for UI overlays or logging that should react to any session state change. Bind to `OnUserIdleWarning` to prompt the user or reset the timer programmatically — for example, in a training simulation, reset the timer whenever the learner completes a task step, regardless of whether they spoke.
+
 ## Event binding patterns
 
-Bind delegates in Blueprint using the **Assign** node on the component reference. For the chatbot's events, bind inside the owning character Blueprint's `BeginPlay` (or `Event On Character Data Loaded` if the character setup depends on data first loading). For the subsystem events (`OnServerConnectionStateChangedEvent`, `OnUserIdleWarning`), bind after getting the subsystem from the game instance.
+### Blueprint
+
+Use the **Assign** node on the component reference to bind any `BlueprintAssignable` delegate. For chatbot events, bind inside the owning character Blueprint's `BeginPlay`. If your handler depends on character data being loaded first (for example, displaying the character name), bind from inside the `OnCharacterDataLoadEvent_V2` handler instead. For subsystem events, bind after retrieving the subsystem from the game instance.
 
 {% hint style="warning" %}
 Bind each delegate exactly once — typically in `BeginPlay`. Avoid binding inside a delegate callback or inside any function that may be called more than once per actor lifetime. Each call to **Assign** adds a new binding; duplicate bindings cause the same handler to fire multiple times per event.
 {% endhint %}
+
+### C++
+
+In C++, use `AddDynamic` in `BeginPlay` and `RemoveDynamic` in `EndPlay` to match the Blueprint binding pattern.
+
+```cpp
+// AMyCharacter.h
+UFUNCTION()
+void HandleEmotionChanged(UConvaiChatbotComponent* ChatbotComp,
+                          UConvaiPlayerComponent* PlayerComp);
+
+UFUNCTION()
+void HandleConnectionStateChanged(EC_ConnectionState NewState);
+```
+
+```cpp
+// AMyCharacter.cpp
+void AMyCharacter::BeginPlay()
+{
+    Super::BeginPlay();
+
+    // Bind a chatbot delegate
+    if (ChatbotComponent)
+    {
+        ChatbotComponent->OnEmotionStateChangedEvent.AddDynamic(
+            this, &AMyCharacter::HandleEmotionChanged);
+    }
+
+    // Bind a subsystem delegate
+    if (UConvaiSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UConvaiSubsystem>())
+    {
+        Subsystem->OnServerConnectionStateChangedEvent.AddDynamic(
+            this, &AMyCharacter::HandleConnectionStateChanged);
+    }
+}
+
+void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    if (ChatbotComponent)
+    {
+        ChatbotComponent->OnEmotionStateChangedEvent.RemoveDynamic(
+            this, &AMyCharacter::HandleEmotionChanged);
+    }
+
+    if (UConvaiSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UConvaiSubsystem>())
+    {
+        Subsystem->OnServerConnectionStateChangedEvent.RemoveDynamic(
+            this, &AMyCharacter::HandleConnectionStateChanged);
+    }
+
+    Super::EndPlay(EndPlayReason);
+}
+```
+
+Always remove dynamic delegates in `EndPlay`. Failing to do so leaves stale bindings on the subsystem — which outlives individual actors — and causes null-pointer crashes when the event fires after the actor is destroyed.
 
 ## Usage examples
 

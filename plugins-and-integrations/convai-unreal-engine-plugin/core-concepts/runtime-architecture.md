@@ -10,7 +10,7 @@ The Convai Unreal Engine plugin partitions responsibility across five distinct t
 
 All conversation-capable components share a two-level base:
 
-- `UConvaiAudioStreamer` — the lowest layer. It manages audio playback from a procedural sound wave, delivers per-frame blendshape face data to any attached `IConvaiLipSyncInterface`, and hosts the vision interface (`IConvaiVisionInterface`) for webcam or render-target input. Both chatbot and player inherit audio and face capabilities from this class.
+- `UConvaiAudioStreamer` — the lowest layer. It manages audio playback from a procedural sound wave and delivers per-frame blendshape face data to any component that implements `IConvaiLipSyncInterface`. It also hosts a vision slot (`IConvaiVisionInterface`) for webcam or render-target input. Both interfaces are extension points: `IConvaiLipSyncInterface` is how `UConvaiFaceSyncComponent` (and any custom lip-sync driver) receives face data, and `IConvaiVisionInterface` is how camera-feed or render-target components supply visual context to the AI. Both chatbot and player inherit audio and face capabilities from this class.
 - `UConvaiConversationComponent` — extends `UConvaiAudioStreamer`. It adds the two properties every participant exposes to the system — whether it is a player (`IsPlayer`) and its conversational name (`GetConversationalName`) — plus the two delegates inherited by both chatbot and player: `OnTranscriptionReceivedDelegate` and `OnAttendeeConnectionStateChangedEvent`.
 
 ```mermaid
@@ -75,7 +75,9 @@ The `LipSyncMode` property (`EC_LipSyncMode`) selects the target blend-shape for
 | `BS_ARKit` | ARKit Blendshapes | ARKit-compatible rigs |
 | `BS_CC4_Extended` | CC4 Extended Blendshapes | Reallusion CC4 rigs |
 
-The face sync component is passive — it does not initiate any network activity. Its only input is the `FAnimationSequence` delivered by the chatbot component when audio arrives, and its only output is the `CurrentBlendShapesMap` used by the character's Anim Blueprint each tick.
+The face sync component is passive — it does not initiate any network activity. Its only input is the `FAnimationSequence` delivered by the chatbot component when audio arrives, and its only output is the blendshape map read by the character's Anim Blueprint each tick.
+
+To apply blendshapes from an Anim Blueprint, add the **Convai Face Sync** AnimGraph node (`FAnimNode_ConvaiFaceSync`) to the character's animation graph. The node takes a `UConvaiChatbotComponent` pin (shown by default) and samples the blendshape data on each animation tick. It supports per-bone upper/lower face alpha splits, blendshape name remapping via a `BlendshapeMapping` table, global multiplier and offset, and configurable starvation blend-in/out when no face data has arrived recently.
 
 ## Convai Subsystem
 

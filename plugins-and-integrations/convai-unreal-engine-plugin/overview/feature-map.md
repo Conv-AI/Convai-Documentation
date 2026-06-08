@@ -45,7 +45,9 @@ Use this map when you know what you want to build but are not sure which feature
 | Look up the Chatbot component Blueprint surface | Chatbot component | [Convai Chatbot component](../blueprint-reference/convai-chatbot-component.md) |
 | Look up the Player component Blueprint surface | Player component | [Convai Player component](../blueprint-reference/convai-player-component.md) |
 | Look up microphone and audio capture functions | Audio functions | [Microphone and audio capture](../blueprint-reference/microphone-and-audio-capture.md) |
+| Look up the Object component Blueprint surface | Object component | [Convai Object component](../blueprint-reference/convai-object-component.md) |
 | Look up utility Blueprint functions | Utility functions | [Utility functions](../blueprint-reference/utility-functions.md) |
+| Look up all enums, structs, and data types | Data types and enums | [Data types and enums](../blueprint-reference/data-types-and-enums.md) |
 | Sign in, browse sample content, or export logs from the editor | Editor window | [The Convai editor window](../editor-window/) |
 | Check which Unreal Engine versions are supported | Engine versions | [Unreal Engine versions](../compatibility-and-requirements/unreal-engine-versions.md) |
 | Check which platforms are supported for packaging | Platform support | [Platform support matrix](../compatibility-and-requirements/platform-support-matrix.md) |

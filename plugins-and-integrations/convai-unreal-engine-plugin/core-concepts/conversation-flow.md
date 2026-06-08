@@ -1,6 +1,6 @@
 ---
 title: Conversation flow
-description: Understand the turn states, transcription, action queue execution, narrative triggers, and interruption handling of a Convai chatbot.
+description: Understand the turn states, voice input modes, transcription, action queue execution, narrative triggers, and interruption handling of a Convai chatbot.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -39,6 +39,30 @@ Two additional `BlueprintPure` functions on `UConvaiChatbotComponent` give preci
 
 These are useful for synchronizing animations or subtitles to the character's speech without manually tracking timers.
 
+## Voice input modes
+
+`UConvaiPlayerComponent` supports two modes for controlling when audio is forwarded to Convai.
+
+### Push-to-talk
+
+In push-to-talk mode, the game logic explicitly opens and closes the audio stream. Call `UnmuteStreamingAudio` on `UConvaiPlayerComponent` when the player starts speaking and `MuteStreamingAudio` when they stop. The chatbot receives audio only during the open window; closing the stream signals the end of the player's utterance and triggers the transition to the `IsProcessing` state.
+
+Use push-to-talk in training simulations with ambient noise — machinery sounds, classroom ambience, or multiple co-located users — where automatic voice detection may produce false end-of-turn cuts.
+
+### Voice activity detection
+
+Voice activity detection (VAD) lets the server automatically detect when a user has stopped speaking, without requiring a `MuteStreamingAudio` call. Enable it by calling `UpdateVadBP` on the player component with a populated `FConvaiVADSettings` struct.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `bUseServerDefault` | `bool` | `true` | When `true`, all per-field values below are ignored and the server applies its own defaults. Set to `false` to override individual fields. |
+| `Confidence` | `float` | `0.7` | Minimum VAD model probability that a frame contains speech. Raise this value to reduce false positives from background noise; lower it if the character misses quiet speakers. |
+| `StartSecs` | `float` | `0.2` | Seconds of sustained speech before the "user started speaking" event fires. Higher values ignore brief bursts. |
+| `StopSecs` | `float` | `2.2` | Seconds of silence before the "user stopped speaking" event fires and the stream closes automatically. Lower values produce faster end-of-turn detection at the cost of cutting off slow speakers. |
+| `MinVolume` | `float` | `0.6` | Normalized amplitude floor below which audio is treated as silence. Raise this value to reject quiet background voices. |
+
+VAD is suited for hands-free or mobile scenarios where holding a push-to-talk button is impractical.
+
 ## Transcription
 
 Transcription is surfaced through `OnTranscriptionReceivedDelegate`, a `BlueprintAssignable` delegate on `UConvaiConversationComponent` (inherited by both chatbot and player components). It fires multiple times per utterance — once for each intermediate result and once more for the final result.
@@ -57,7 +81,7 @@ The reason transcription fires on the chatbot rather than only on the player is 
 
 ## Text input
 
-A player can also send text instead of audio. `UConvaiPlayerComponent::SendText` takes a target `UConvaiConversationComponent` (the chatbot) and an `FString`. The chatbot processes the text as if the player had spoken it, producing the same action, emotion, and audio response pipeline. This is useful for push-to-talk text UI, automated testing, and accessibility scenarios.
+A player can also send text instead of audio. `UConvaiPlayerComponent::SendText` takes a target `UConvaiConversationComponent` (the chatbot) and an `FString`. The chatbot processes the text as if the player had spoken it — it enters the same action, emotion, and audio response pipeline as a voice utterance, and `OnTranscriptionReceivedDelegate` fires with the submitted text as the transcript. This is useful for accessibility scenarios, push-to-talk text UI panels, facilitator-controlled overrides during a training simulation, and automated test harnesses that inject scripted dialogue without microphone input.
 
 ## Action queue execution
 
@@ -96,6 +120,27 @@ Use `ExecuteNarrativeTrigger` for one-off, freeform prompts where the exact word
 {% endhint %}
 
 Both functions accept `InGenerateActions` (whether the response should include character actions) and `InReplicateOnNetwork` (whether the trigger should be broadcast to other session attendees). If the session is not yet connected when either function is called, the trigger is queued and fires automatically once the connection is established.
+
+## Usage examples
+
+### Talk-to-character interaction with push-to-talk
+
+A medical training simulation where a learner speaks to a patient character by holding a button.
+
+1. Bind a **Pressed** event on the interaction input action to **Unmute Streaming Audio** on the player component — this opens the audio stream.
+2. Bind the **Released** event to **Mute Streaming Audio** — this closes the stream and triggers the `IsProcessing` state.
+3. While `IsListening` returns `true`, show a "Recording" indicator on the HUD. While `IsProcessing` returns `true`, show a "Thinking" indicator. While `GetIsTalking` returns `true`, show the character's subtitles.
+
+Expected result: The patient character responds to each utterance after the player releases the button. The HUD indicators track the turn state without polling on tick — read the state functions only in response to Blueprint events that might change them.
+
+### Facilitator text injection
+
+A training simulation where a facilitator can type a message that the AI character receives and responds to, without using a microphone.
+
+1. Build a simple in-editor or runtime UI widget with a text field and a **Send** button.
+2. Wire the **Send** button's **On Clicked** event to **Send Text** on the player component, passing the chatbot component as the target and the text field's content as the input string.
+
+Expected result: The character responds to the typed message with audio and actions, as if the facilitator had spoken the words aloud. The `OnTranscriptionReceivedDelegate` fires with the typed text as the transcript, allowing subtitle UI to display it.
 
 ## Troubleshooting
 

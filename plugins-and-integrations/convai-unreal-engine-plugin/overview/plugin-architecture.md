@@ -58,7 +58,7 @@ Each component's **display name** is the label shown in the **Add Component** pa
 
 The central component for an AI character. It holds the character ID, session state, environment contract (actions, objects, scene characters), dynamic context, emotion state, and the action queue. One instance per AI character Actor.
 
-`UConvaiChatbotComponent` owns the WebRTC session for its character. When a session starts it sends the action configuration to Convai, receives audio and facial animation data, drives the audio streamer, and dispatches action sequences to Blueprint handlers.
+`UConvaiChatbotComponent` holds a connection session proxy for its character. When a session starts, the component registers the proxy with `UConvaiSubsystem`, which routes audio and response data through the shared WebRTC client. The chatbot then receives audio, facial animation data, and action sequences, and routes each to the appropriate output: the audio streamer, `UConvaiFaceSyncComponent`, and Blueprint action handlers.
 
 ### `UConvaiPlayerComponent` (display name: Convai Player)
 

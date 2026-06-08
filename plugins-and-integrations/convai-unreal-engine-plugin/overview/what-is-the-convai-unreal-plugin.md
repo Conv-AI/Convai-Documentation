@@ -20,7 +20,7 @@ Always active once connected:
 
 ### Feature add-ons
 
-Opt-in, each configured through Blueprint or the component Inspector:
+Opt-in, each configured through Blueprint or the Details panel:
 
 * **Lip sync** — real-time blendshape mouth animation driven by audio, with selectable `Viseme Based`, `MetaHuman Blendshapes`, `ARKit Blendshapes`, and `CC4 Extended Blendshapes` modes for different rigs
 * **Emotion** — Convai infers emotion from conversation and drives blendshape expressions on the character
@@ -46,14 +46,14 @@ No Convai logic runs inside the game process. The plugin does not bundle a local
 
 ```mermaid
 graph LR
-    MIC[Microphone / text] --> PC[UConvaiPlayerComponent]
-    PC --> |audio stream| SS[UConvaiSubsystem<br/>WebRTC]
-    SS --> |stream| CV[Convai]
-    CV --> |audio + face data<br/>+ action sequence| SS
+    MIC["Microphone / text"] --> PC[UConvaiPlayerComponent]
+    PC -->|"audio stream"| SS["UConvaiSubsystem<br/>(WebRTC)"]
+    SS -->|"stream"| CV[Convai]
+    CV -->|"audio + face data + action sequence"| SS
     SS --> CB[UConvaiChatbotComponent]
-    CB --> AUD[Audio playback]
-    CB --> FS[UConvaiFaceSyncComponent<br/>lip sync]
-    CB --> BH[Blueprint action handlers]
+    CB --> AUD["Audio playback"]
+    CB --> FS["UConvaiFaceSyncComponent<br/>(lip sync)"]
+    CB --> BH["Blueprint action handlers"]
 ```
 
 `UConvaiPlayerComponent` captures microphone audio and forwards it to `UConvaiSubsystem`, which manages the shared WebRTC connection to Convai. `UConvaiChatbotComponent` receives the response — audio, facial animation data, and action sequences — and routes each to the appropriate output: audio playback, `UConvaiFaceSyncComponent` for lip sync, and Blueprint handlers for in-scene actions.
@@ -67,7 +67,7 @@ Every feature in the plugin is accessible from Blueprint graphs. C++ access is a
 | Requirement | Minimum |
 |---|---|
 | Unreal Engine | <code class="expression">space.vars.unreal_min_version</code> |
-| Build targets | `Win64`, `Android` |
+| Platforms | `Win64`, `Android` |
 | Network | Internet connection to Convai |
 | API key | Free account at [convai.com](https://convai.com) |
 
