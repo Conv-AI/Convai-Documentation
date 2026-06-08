@@ -45,7 +45,7 @@ You do not need to enable these manually. If your project has previously disable
 | Android | Yes |
 | Other | No |
 
-Mac, iOS, Linux, and console targets are not in the `PlatformAllowList` in `ConvAI.uplugin` and are not supported in this plugin version.
+Mac, iOS, Linux, and console targets are not supported in this release.
 
 ## Network access
 

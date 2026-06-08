@@ -110,7 +110,7 @@ Plugin version <code class="expression">space.vars.unreal_plugin_version</code> 
 
 **Symptom:** The plugin works in the Windows editor and in Windows packaged builds, but fails to load or causes errors when packaging for an Android target.
 
-**Cause — missing Android SDK or NDK configuration:** The `Convai` and `ConvaiVisionBase` modules support `Win64` and `Android` platforms. A packaging failure usually means the Android NDK or SDK path is not configured, or the `AndroidPermission` plugin is disabled.
+**Cause — missing Android SDK or NDK configuration:** A packaging failure usually means the Android NDK or SDK path is not configured, or the `AndroidPermission` plugin is disabled.
 
 **Fix:**
 1. Confirm that the Android NDK and SDK paths are set in **Edit > Project Settings > Platforms > Android SDK**.

@@ -4,13 +4,13 @@ description: Install the Convai Unreal Engine plugin, configure your API key, an
 last_reviewed: "4.0.0-beta.21"
 ---
 
-This section guides you from installing the plugin through placing your first talking character in a level.
+By the end of this section, your project contains a working Convai character in Unreal Engine. Follow the pages in order — each step builds directly on the previous one.
 
 {% hint style="info" %}
-**Recommended sequence:** Follow pages 1–7 in order for the fastest path to a working result. The character rig pages (MetaHuman, Reallusion) and the configuration pages (microphone, conversation input) are optional stops you can revisit after your first character is working.
+**Before you begin:** Confirm your environment meets the requirements on the [Prerequisites](prerequisites.md) page — engine version, account, platform, and network access.
 {% endhint %}
 
-## Core path
+## Preparation
 
 <table data-view="cards">
 <thead>
@@ -21,31 +21,44 @@ This section guides you from installing the plugin through placing your first ta
 </thead>
 <tbody>
 <tr>
-<td><strong>1. Prerequisites</strong><br>Verify engine version, account, platform, and network requirements before installing.</td>
+<td><strong>Prerequisites</strong><br>Verify engine version, account, platform, and network requirements before installing.</td>
 <td><a href="prerequisites.md">prerequisites.md</a></td>
 </tr>
 <tr>
-<td><strong>2. Install the Convai plugin</strong><br>Install from Fab or GitHub Releases and enable the plugin in your project.</td>
+<td><strong>Install the Convai plugin</strong><br>Install from Fab or GitHub Releases and enable the plugin in your project.</td>
 <td><a href="installation.md">installation.md</a></td>
 </tr>
+</tbody>
+</table>
+
+## Scene setup
+
+<table data-view="cards">
+<thead>
 <tr>
-<td><strong>3. Configure your API key</strong><br>Sign in through the Convai editor window and store your API key.</td>
+<th></th>
+<th data-hidden data-card-target data-type="content-ref"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Configure your API key</strong><br>Sign in through the Convai editor window and store your API key.</td>
 <td><a href="configure-api-key.md">configure-api-key.md</a></td>
 </tr>
 <tr>
-<td><strong>4. Explore the sample Blueprints</strong><br>Browse the ConvaiConveniencePack assets and run a quick test level to verify your setup.</td>
+<td><strong>Explore the sample Blueprints</strong><br>Browse the ConvaiConveniencePack assets and run a quick test level to verify your setup.</td>
 <td><a href="import-and-run-sample-scenes.md">import-and-run-sample-scenes.md</a></td>
 </tr>
 <tr>
-<td><strong>5. Scene components</strong><br>Reference for the Convai Chatbot, Player, Object, and Face Sync components.</td>
+<td><strong>Scene components</strong><br>Reference for the Convai Chatbot, Player, Object, and Face Sync components.</td>
 <td><a href="scene-components.md">scene-components.md</a></td>
 </tr>
 <tr>
-<td><strong>6. Add your first Convai character</strong><br>Place a Convai character in a level and have a live conversation with it.</td>
+<td><strong>Add your first Convai character</strong><br>Place a Convai character in a level and have a live conversation with it.</td>
 <td><a href="add-your-first-character.md">add-your-first-character.md</a></td>
 </tr>
 <tr>
-<td><strong>7. Validate your setup</strong><br>Run through a checklist to confirm that every part of your setup is working.</td>
+<td><strong>Validate your setup</strong><br>Run through a checklist to confirm that every part of your setup is working.</td>
 <td><a href="validate-your-setup.md">validate-your-setup.md</a></td>
 </tr>
 </tbody>
@@ -100,3 +113,17 @@ This section guides you from installing the plugin through placing your first ta
 </tr>
 </tbody>
 </table>
+
+## Next steps
+
+Once you have validated your setup, explore the Features section to add Actions, Emotion, Long-Term Memory, or Vision to your characters.
+
+{% content-ref url="../features/README.md" %}
+[Features](../features/README.md)
+{% endcontent-ref %}
+
+Review Core Concepts for a deeper understanding of the conversation pipeline and component architecture before building further.
+
+{% content-ref url="../core-concepts/README.md" %}
+[Core Concepts](../core-concepts/README.md)
+{% endcontent-ref %}

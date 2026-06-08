@@ -4,7 +4,7 @@ description: Reference for Convai Unreal Engine plugin platform support, includi
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugin_version</code> supports two build targets: Win64 and Android. The runtime modules restrict their compiled output to these two platforms via the `PlatformAllowList` in the plugin manifest.
+The Convai Unreal Engine plugin supports Win64 and Android build targets.
 
 ## Supported platforms
 
@@ -12,40 +12,31 @@ The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugi
 |---|---|---|---|
 | Win64 | ✅ Full | ✅ Yes | Full feature set; no additional setup required. |
 | Android | ✅ Full | ❌ No | Requires microphone permission handling; see below. |
-| Other platforms | ❌ Not supported | ❌ Not supported | Not listed in the plugin `PlatformAllowList`. |
+| Other platforms | ❌ Not supported | ❌ Not supported | Not supported in this release. |
 
 {% hint style="info" %}
-Mac, Linux, and iOS are not supported in the current release. The `Convai` and `ConvaiVisionBase` modules list only Win64 and Android in their `PlatformAllowList`, so they are excluded from builds for any other platform.
+Mac, Linux, and iOS are not supported in the current release.
 {% endhint %}
 
 ## Engine plugin dependencies
 
-The Convai plugin declares the following engine plugin dependencies in `ConvAI.uplugin`. These are enabled automatically when the Convai plugin is active; you do not need to enable them manually.
+The Convai plugin declares the following engine plugin dependencies. These are enabled automatically when the Convai plugin is active; you do not need to enable them manually.
 
 | Dependency | Enabled by default | Required for |
 |---|---|---|
 | `AudioCapture` | ✅ Yes | Microphone input on Win64 and Android |
 | `AndroidPermission` | ✅ Yes | Requesting microphone permission at runtime on Android |
-| `EditorScriptingUtilities` | ✅ Yes | In-editor automation used by `ConvaiEditor` |
-| `PropertyAccessEditor` | ✅ Yes | Property-binding UI in `ConvaiEditor` |
+| `EditorScriptingUtilities` | ✅ Yes | In-editor automation used by the Convai editor window |
+| `PropertyAccessEditor` | ✅ Yes | Property-binding UI in the Convai editor window |
 | `AndroidFileServer` | ❌ No | Optional file serving for Android development; not required for shipping |
 
 ## Android platform notes
 
-Android builds require microphone access. The plugin bundles `AndroidPermission` as an enabled dependency and uses it to request the `RECORD_AUDIO` permission at runtime. The `UConvaiSubsystem` requests the permission automatically when it first needs the microphone, so you do not need to add a separate permission call in Blueprint.
+Android builds require microphone access. The plugin uses the `AndroidPermission` dependency to request the `RECORD_AUDIO` permission at runtime. The Convai subsystem requests the permission automatically when it first needs the microphone, so you do not need to add a separate permission call in Blueprint.
 
 {% hint style="warning" %}
 Packaging for Android requires the Android SDK and NDK configured in **Project Settings > Platforms > Android SDK**. This is a standard Unreal Engine packaging requirement and is not specific to the Convai plugin.
 {% endhint %}
-
-## Modules and platform scope
-
-The `PlatformAllowList` in the plugin manifest applies at the module level. The following modules are restricted to Win64 and Android:
-
-- `Convai` (Runtime, `PreDefault`)
-- `ConvaiVisionBase` (Runtime, `Default`)
-
-The `ConvaiEditor` module has no `PlatformAllowList` because it loads only in the editor and is never part of a packaged runtime build. `ConvaiAnimGraph` is declared as `UncookedOnly` and also has no `PlatformAllowList`; the editor includes it, but packaging excludes it from the compiled output.
 
 ## Next steps
 

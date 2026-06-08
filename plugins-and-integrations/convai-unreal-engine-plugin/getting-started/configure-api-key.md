@@ -46,7 +46,7 @@ The API key is stored as a read-only `Config` property on `UConvaiSettings`. It 
 
 ## Verify the key is active
 
-**Expected outcome:** Place any character with a `UConvaiChatbotComponent` and enter Play mode. If the character responds to input, authentication is working. For a guided first test, see [Explore the sample Blueprints](import-and-run-sample-scenes.md).
+To confirm your API key is working, follow the [Run a quick test](import-and-run-sample-scenes.md#run-a-quick-test) steps in the next page.
 
 **If requests fail:**
 
