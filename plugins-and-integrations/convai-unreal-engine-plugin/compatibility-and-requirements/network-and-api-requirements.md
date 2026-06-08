@@ -10,7 +10,7 @@ The Convai Unreal Engine plugin requires internet connectivity during runtime. S
 
 | Domain                      | Protocol   | Purpose                               |
 | --------------------------- | ---------- | ------------------------------------- |
-| `live.convai.com`           | HTTPS, WSS | Room connection and real-time session |
+| `realtime-api.convai.com`   | HTTPS, WSS | Room connection and real-time session |
 | `api.convai.com`            | HTTPS      | Character metadata and REST API       |
 | LiveKit TURN / STUN servers | UDP / TCP  | WebRTC audio and video transport      |
 
@@ -28,14 +28,14 @@ If UDP is blocked by your network, the connection automatically falls back to TU
 
 ## Authentication
 
-Every request to Convai is authenticated using your API key, sent as an `X-API-Key` header. The key is stored in **Project Settings > Plugins > Convai > API Key**. No per-session token exchange is required.
+Every request to Convai is authenticated using your API key, sent as a `CONVAI-API-KEY` header. The key is stored in **Project Settings > Plugins > Convai > API Key**. No per-session token exchange is required.
 
 ## Enterprise and firewall configuration
 
 Minimum outbound rules required for plugin operation:
 
 ```text
-ALLOW outbound TCP 443 → live.convai.com
+ALLOW outbound TCP 443 → realtime-api.convai.com
 ALLOW outbound TCP 443 → api.convai.com
 ALLOW outbound UDP (any port) → any    ← WebRTC media
 ```
@@ -43,7 +43,7 @@ ALLOW outbound UDP (any port) → any    ← WebRTC media
 TCP 443 TURN fallback activates automatically if UDP is blocked. No inbound ports are required.
 
 {% hint style="warning" %}
-Proxy servers that perform TLS inspection (man-in-the-middle) may break the WebSocket connection. Exclude `live.convai.com` from TLS inspection if your environment uses it.
+Proxy servers that perform TLS inspection (man-in-the-middle) may break the WebSocket connection. Exclude `realtime-api.convai.com` from TLS inspection if your environment uses it.
 {% endhint %}
 
 ## Next steps

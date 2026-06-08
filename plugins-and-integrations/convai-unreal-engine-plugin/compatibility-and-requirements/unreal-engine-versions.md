@@ -15,7 +15,7 @@ The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugi
 | 5.2 and later | Supported | Supported | Supported | Supported |
 
 {% hint style="info" %}
-The `ConvaiEditor` window is built on editor UI APIs — `FAppStyle`, the modern `ToolMenus` system, and editor-initialization delegates — that the plugin enables only on UE 5.2 and later. On UE 5.0 and 5.1 the editor window is disabled automatically; the runtime and animation modules are unaffected.
+The `ConvaiEditor` window requires UE 5.2 or later. On UE 5.0 and 5.1 the window is disabled automatically at startup; all runtime, audio, and animation workflows remain fully functional.
 {% endhint %}
 
 ## Module load phases
