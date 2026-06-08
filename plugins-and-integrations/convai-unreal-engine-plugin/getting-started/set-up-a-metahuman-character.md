@@ -22,9 +22,9 @@ In the Unreal Editor menu bar, select **Window > Quixel Bridge**. In the bridge 
 {% endstep %}
 
 {% step %}
-### Export a MetaHuman to your project
+### Add a MetaHuman to your project
 
-Select the MetaHuman you want to use and click to export it to your project. The first export may take a few minutes while textures and assets download. When the export completes, a `MetaHumans` folder appears in the **Content Browser**.
+Select the MetaHuman you want to use and click to add it to your project. The first download may take a few minutes while textures and assets download. When the download completes, a `MetaHumans` folder appears in the **Content Browser**.
 {% endstep %}
 
 {% step %}
@@ -88,7 +88,7 @@ If you have not already done this, open your player pawn Blueprint and add `UCon
 
 ## Test the setup
 
-Enter Play mode. Use push-to-talk (default: **V**) or the chat widget to start a conversation.
+Enter Play mode. Use push-to-talk (default: **T**) or the chat widget to start a conversation.
 
 {% hint style="success" %}
 When the setup is working, the MetaHuman's mouth moves in sync with the character's spoken response and facial expressions change dynamically during the conversation. If the character does not respond, see [Validate your setup](validate-your-setup.md).
@@ -112,10 +112,6 @@ The animation interface `BPI_Convai_Animation` at `Content/Interfaces/` is used 
 {% hint style="info" %}
 These assets activate automatically when the Convai Actions system is enabled on your character. No additional Blueprint wiring is required beyond the animation blueprint setup above.
 {% endhint %}
-
-## Enable hands-free mode
-
-To remove the push-to-talk requirement, open the player pawn Blueprint, select the **Convai Player** component, and call `UpdateVadBP(true)` from the Event Graph (for example in **BeginPlay**). The character will then listen continuously using voice activity detection.
 
 ## Troubleshooting
 

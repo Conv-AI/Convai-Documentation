@@ -23,7 +23,7 @@ On Unreal Engine 5.0 and 5.1, the Convai editor window used for API key sign-in 
 
 You need a Convai account to authenticate the plugin and to create or manage characters.
 
-1. Go to <code class="expression">space.vars.dashboard_url</code> and create a free account if you do not have one.
+1. Go to [convai.com](https://convai.com) and create a free account if you do not have one.
 2. After signing in, your API key is available on the dashboard. You will enter it through the Convai editor window after installation — see [Configure your API key](configure-api-key.md).
 
 ## Engine plugins (bundled dependencies)

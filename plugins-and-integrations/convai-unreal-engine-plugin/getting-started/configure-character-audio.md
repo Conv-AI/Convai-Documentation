@@ -16,10 +16,31 @@ Character speech is played through `UConvaiAudioStreamer`, which extends Unreal 
 
 ## Adjust playback volume
 
-1. Open the character Blueprint in the Blueprint editor.
-2. Select the **Convai Chatbot** component in the **Components** panel.
-3. In the **Details** panel, expand the **Sound** section (inherited from `UAudioComponent`).
-4. Adjust **Volume Multiplier**. `1.0` is full volume; `0.0` is silent.
+{% stepper %}
+{% step %}
+### Open the character Blueprint
+
+Open the character Blueprint in the Blueprint editor.
+{% endstep %}
+
+{% step %}
+### Select the Convai Chatbot component
+
+Select the **Convai Chatbot** component in the **Components** panel.
+{% endstep %}
+
+{% step %}
+### Expand the Sound section
+
+In the **Details** panel, expand the **Sound** section (inherited from `UAudioComponent`).
+{% endstep %}
+
+{% step %}
+### Adjust the Volume Multiplier
+
+Set **Volume Multiplier** to the desired level. `1.0` is full volume; `0.0` is silent.
+{% endstep %}
+{% endstepper %}
 
 {% hint style="info" %}
 To mute or unmute the character's speech at runtime from Blueprint, call `SetVolumeMultiplier(0.0)` or `SetVolumeMultiplier(1.0)` on the Convai Chatbot component reference. This adjusts playback volume only — it does not affect whether the character receives or processes speech.

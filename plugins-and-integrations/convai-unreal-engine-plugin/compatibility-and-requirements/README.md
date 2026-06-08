@@ -38,7 +38,7 @@ Confirm your environment meets these requirements before installing the Convai U
 | Requirement | Minimum |
 |---|---|
 | Unreal Engine | <code class="expression">space.vars.unreal_min_version</code> (any UE 5.x release) |
-| Convai account | Required — create one at <code class="expression">space.vars.dashboard_url</code> |
+| Convai account | Required — create one at [convai.com](https://convai.com) |
 | API key | Required — generated in the Convai dashboard |
 | `AudioCapture` plugin | Bundled engine plugin; enabled automatically as a dependency |
 | `AndroidPermission` plugin | Bundled engine plugin; required for Android builds only |

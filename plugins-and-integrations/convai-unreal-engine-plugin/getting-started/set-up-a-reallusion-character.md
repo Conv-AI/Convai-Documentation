@@ -167,7 +167,7 @@ To find the player pawn from Play mode: press **Shift+F1** to release the mouse,
 
 ## Test the conversation
 
-Enter Play mode and speak to the character using push-to-talk (default: **V**) or the chat widget. When voice and text input are reaching the character, body and idle animations play. Facial lip sync animation is added in the next section.
+Enter Play mode and speak to the character using push-to-talk (default: **T**) or the chat widget. When voice and text input are reaching the character, body and idle animations play. Facial lip sync animation is added in the next section.
 
 ## Add the Reallusion animation Blueprint
 

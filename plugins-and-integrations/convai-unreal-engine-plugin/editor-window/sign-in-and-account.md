@@ -9,7 +9,7 @@ The Convai editor window requires you to sign in before the plugin can send requ
 ## Prerequisites
 
 - Convai Unreal Engine plugin installed and enabled.
-- A Convai account. Create one at <code class="expression">space.vars.dashboard_url</code> if you do not have one.
+- A Convai account. Create one at [convai.com](https://convai.com) if you do not have one.
 
 ## Complete the welcome flow
 

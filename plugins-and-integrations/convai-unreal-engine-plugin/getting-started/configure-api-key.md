@@ -20,7 +20,7 @@ The window opens and shows a sign-in form if you are not yet authenticated.
 {% step %}
 ### Enter your Convai credentials
 
-In the Convai editor window, sign in with your Convai account credentials. If you do not have an account, create one at <code class="expression">space.vars.dashboard_url</code>.
+In the Convai editor window, sign in with your Convai account credentials. If you do not have an account, create one at [convai.com](https://convai.com).
 {% endstep %}
 
 {% step %}
@@ -53,7 +53,7 @@ The API key is stored as a read-only `Config` property on `UConvaiSettings`. It 
 | Check | Action |
 |---|---|
 | API key is blank | Go to **Edit > Project Settings > Plugins > Convai** and confirm the key field is populated. If it is empty, sign in again through the Convai editor window. |
-| Account is inactive | Sign in to <code class="expression">space.vars.dashboard_url</code> and confirm your account status. |
+| Account is inactive | Sign in to [convai.com](https://convai.com) and confirm your account status. |
 | Network blocked | Ensure the editor can reach Convai's endpoints. See [Prerequisites — Network access](prerequisites.md#network-access). |
 | Convai editor window does not appear (UE 5.0–5.1) | The ConvaiEditor module is disabled on UE 5.0 and 5.1. Enter your API key directly in **Edit > Project Settings > Plugins > Convai > API Key**. |
 

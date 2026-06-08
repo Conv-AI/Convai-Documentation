@@ -19,7 +19,7 @@ We will add a Convai character to an existing Unreal Engine project and have a l
 {% step %}
 ### Open the Convai dashboard
 
-In a browser, go to <code class="expression">space.vars.dashboard_url</code> and sign in.
+In a browser, go to [convai.com](https://convai.com) and sign in.
 {% endstep %}
 
 {% step %}
@@ -115,9 +115,9 @@ Press **Play** in the Unreal Editor toolbar. A chat widget appears in the viewpo
 {% step %}
 ### Talk to the character
 
-Hold the push-to-talk key (default: **V**), speak into your microphone, then release the key. The character processes your speech, generates a response, and speaks back.
+Hold the push-to-talk key (default: **T**), speak into your microphone, then release the key. The character processes your speech, generates a response, and speaks back.
 
-To use hands-free mode instead, open the player pawn's **Event Graph**, select the **Convai Player** component, and call `UpdateVadBP(true)` in **BeginPlay**. In hands-free mode the character listens continuously using voice activity detection.
+To use hands-free mode instead, select the **BP_ConvaiPlayerComponent** in the **Details** panel, expand the **Convai** category, and disable the **Enable Push to Talk** boolean. The character will then listen continuously using voice activity detection.
 {% endstep %}
 {% endstepper %}
 

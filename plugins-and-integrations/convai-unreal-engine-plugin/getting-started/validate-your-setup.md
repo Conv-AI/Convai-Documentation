@@ -54,7 +54,7 @@ Press **Play** in the Unreal Editor toolbar.
 {% step %}
 ### Start a conversation
 
-Hold push-to-talk (default: **V**) and speak a short phrase, then release. Alternatively, type a message in the chat widget and press **Enter**.
+Hold push-to-talk (default: **T**) and speak a short phrase, then release. Alternatively, type a message in the chat widget and press **Enter**.
 {% endstep %}
 
 {% step %}

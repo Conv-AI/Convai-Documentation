@@ -12,14 +12,10 @@ The Convai Unreal Engine plugin ships a set of pre-built Blueprint assets in `Co
 |---|---|---|
 | `BP_ConvaiChatbotComponent` | `ConvaiConveniencePack/ConvaiBPComponent/` | Blueprint wrapper for `UConvaiChatbotComponent` — the recommended starting point for NPC Blueprints |
 | `BP_ConvaiPlayerComponent` | `ConvaiConveniencePack/ConvaiBPComponent/` | Blueprint wrapper for `UConvaiPlayerComponent` — the recommended starting point for player pawns |
-| `BP_ConvaiSamplePlayer` | `ConvaiConveniencePack/Sample/` | Fully wired player pawn with push-to-talk (**V**) and text input connected to a Player component |
+| `BP_ConvaiSamplePlayer` | `ConvaiConveniencePack/Sample/` | Fully wired player pawn with push-to-talk (**T**) and text input connected to a Player component |
 | `BP_SampleGameMode` | `ConvaiConveniencePack/Sample/` | Game mode that spawns `BP_ConvaiSamplePlayer` as the default pawn automatically |
 | `BP_Convai3DWidgetComponent` | `ConvaiConveniencePack/3DWidget/` | Actor component that places a 3D in-world chat widget in the scene |
 | `ConvaiBaseCharacter` | `Core/` | Base Blueprint class to subclass when creating NPC characters |
-
-{% hint style="info" %}
-The plugin does not include a pre-configured demo character. You must supply a Character ID from your [Convai dashboard](<code class="expression">space.vars.dashboard_url</code>) to see a character respond.
-{% endhint %}
 
 ## Run a quick test
 
@@ -47,13 +43,13 @@ Select **Window > World Settings**. Under **Game Mode**, set **GameMode Override
 {% step %}
 ### Place a character
 
-Drag any Actor into the level — you can use a skeletal mesh, a static mesh, or a Blueprint derived from `ConvaiBaseCharacter`. With the Actor selected, click **+ Add** in the **Details** panel and search for `BP_ConvaiChatbotComponent`. Add it. In the **Details** panel, locate the **Character ID** field and enter the Character ID from your [Convai dashboard](<code class="expression">space.vars.dashboard_url</code>).
+Drag any Actor into the level — you can use a skeletal mesh or a static mesh. With the Actor selected, click **+ Add** in the **Details** panel and search for `BP_ConvaiChatbotComponent`. Add it. In the **Details** panel, locate the **Character ID** field and enter the Character ID from your [Convai dashboard](https://convai.com).
 {% endstep %}
 
 {% step %}
 ### Press Play and speak
 
-Click **Play** in the toolbar (or press **Alt+P**). The level spawns `BP_ConvaiSamplePlayer` as your pawn. Hold the push-to-talk key (**V**) and speak, then release the key. Alternatively, type a message in the chat widget and press **Enter**.
+Click **Play** in the toolbar (or press **Alt+P**). The level spawns `BP_ConvaiSamplePlayer` as your pawn. Hold the push-to-talk key (**T**) and speak, then release the key. Alternatively, type a message in the chat widget and press **Enter**.
 {% endstep %}
 {% endstepper %}
 
