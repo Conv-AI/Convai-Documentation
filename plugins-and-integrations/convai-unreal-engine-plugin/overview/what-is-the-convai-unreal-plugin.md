@@ -1,6 +1,6 @@
 ---
 title: What is the Convai Unreal Engine plugin
-description: Understand what the Convai Unreal Engine plugin adds to a project: Blueprint components, a real-time voice pipeline, and opt-in feature add-ons.
+description: "Understand what the Convai Unreal Engine plugin adds to a project: Blueprint components, a real-time voice pipeline, and opt-in feature add-ons."
 last_reviewed: "4.0.0-beta.21"
 ---
 
