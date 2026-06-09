@@ -30,15 +30,15 @@ On Windows, open **Sound Settings > Input** and confirm a default recording devi
 {% endstep %}
 
 {% step %}
-### On Android — confirm the RECORD_AUDIO permission is granted
+### On Android — confirm microphone permission is granted
 
-Launch the app on the device, go to **Settings > Apps > [Your App] > Permissions**, and confirm microphone access is granted. If permission was denied previously, it must be re-granted manually before the app can capture audio.
+Launch the app on the device, go to **Settings > Apps > [Your App] > Permissions**, and confirm microphone access is granted. The plugin declares `android.permission.RECORD_AUDIO` in `Convai_AndroidAPL.xml`, but the user still has to grant the runtime permission on the device.
 {% endstep %}
 {% endstepper %}
 
 ## Microphone input is not detected
 
-**Symptom:** The character never responds to speech. The `ConvaiAudioLog` Output Log shows no audio data received, or reports that no capture device was found.
+**Symptom:** The character never responds to speech. The `ConvaiAudioLog` Output Log shows capture-device warnings, or no audio-forwarding activity appears after Play begins.
 
 **Cause — `AudioCapture` plugin disabled:** The `Convai Audio Capture` component depends on the engine's `AudioCapture` plugin. If that plugin is disabled, no capture device can be opened.
 
@@ -64,7 +64,7 @@ ConvaiAudioLog: Warning: OpenStream returned false
 
 **Cause:** `ConvaiAudioCaptureComponent` opens the system default device unless an explicit device index is set. If the OS default is not the intended device, input comes from the wrong source.
 
-**Fix:** Use the `Get Capture Devices Available` Blueprint node — which returns an array of `FCaptureDeviceInfoBP` structs — to enumerate available devices. Each struct exposes `DeviceName`, `DeviceIndex`, `LongDeviceId`, `InputChannels`, `PreferredSampleRate`, and `bSupportsHardwareAEC`. Pass the `DeviceIndex` of the correct device to the `Set Capture Device` call on the audio component.
+**Fix:** Use `Get Available Capture Device Details` on the `Convai Player` component to enumerate available devices. The node returns an array of `FCaptureDeviceInfoBP` structs. Each struct exposes `DeviceName`, `DeviceIndex`, `LongDeviceId`, `InputChannels`, `PreferredSampleRate`, and `bSupportsHardwareAEC`. Pass the `DeviceIndex` of the correct device to `Set Capture Device By Index`, or use `Set Capture Device By Name` when you prefer to select by device name.
 
 **Verify:** After selecting the device, speak and confirm in `ConvaiAudioLog` that the stream opened on the correct device name.
 
@@ -110,12 +110,12 @@ ConvaiAudioLog: Warning: Audio capture components only support mono and stereo m
 
 **Fix:**
 1. Open **Edit > Plugins**, search for `Android Permission`, and confirm it is enabled.
-2. In **Edit > Project Settings > Platforms > Android**, add `android.permission.RECORD_AUDIO` to the **Extra Permissions** list.
-3. Rebuild and deploy. On first launch, the OS will prompt the user to grant the permission. Ensure your Blueprint calls `Request Android Permissions` at startup and handles the result before starting audio capture.
+2. Rebuild and deploy. The plugin adds `android.permission.RECORD_AUDIO` through `Convai_AndroidAPL.xml`.
+3. On first launch, grant the microphone permission when Android prompts for it. If the permission was denied earlier, enable it manually in Android app settings.
 
 **Verify:** On the Android device, grant the microphone permission when prompted. The character should respond to speech after permission is granted.
 
-If the user denies the permission and the app does not handle the denial gracefully, the audio capture stream fails silently. Add a check in Blueprint: if permission is denied, show a message and disable the talking feature.
+If your project needs to check permission before starting a scene, use the plugin's Android permission helpers or Unreal's Android permission nodes and show a user-facing message when permission is denied.
 {% endtab %}
 
 {% tab title="Native libraries missing" %}
@@ -127,7 +127,7 @@ If the user denies the permission and the app does not handle the denial gracefu
 adb logcat -s ConvaiAudioLog:V LogConvai:V
 ```
 
-If you see `UnsatisfiedLinkError` or `dlopen failed` referencing `libconvai_client.so`, confirm that your ProGuard config preserves native libraries and that `Convai_AndroidAPL.xml` was not removed or overridden.
+If you see `UnsatisfiedLinkError` or `dlopen failed` referencing `libconvai_client.so`, confirm that `Convai_AndroidAPL.xml` was not removed or overridden and that your Android build still packages the plugin's native libraries.
 
 **Verify:** After a clean package rebuild, run `adb shell ls /data/app/<your.package>/lib/arm64/` to confirm `libconvai_client.so` is present in the installed APK.
 {% endtab %}
@@ -138,7 +138,7 @@ If you see `UnsatisfiedLinkError` or `dlopen failed` referencing `libconvai_clie
 **Symptom:** The `Convai Face Sync` component animates (mouth moves), confirming that responses are arriving, but no audio plays from the character. The Output Log may contain:
 
 ```text
-ConvaiAudioLog: Warning: PlayVoiceData: Failed to parse wav header, reason: <detail>
+ConvaiAudioStreamerLog: Warning: PlayVoiceData: Failed to parse wav header, reason: <detail>
 ```
 
 **Cause:** The audio data received from Convai could not be decoded. This is usually a transient network issue — a partial or corrupted packet — rather than a configuration problem.
@@ -156,9 +156,9 @@ ConvaiAudioLog: Warning: PlayVoiceData: Failed to parse wav header, reason: <det
 
 **Cause — device switch not triggered explicitly:** Microphone hot-swap is supported in recent plugin versions. However, the device switch must be triggered explicitly via Blueprint; the plugin does not detect hardware changes automatically.
 
-**Fix:** Call `Set Capture Device` on the `Convai Audio Capture` component with the new `DeviceIndex` after the new device is connected. Enumerate the current device list first using `Get Capture Devices Available` to obtain the correct index for the new device.
+**Fix:** Call `Set Capture Device By Index` on the `Convai Player` component with the new `DeviceIndex` after the new device is connected. Enumerate the current device list first using `Get Available Capture Device Details` to obtain the correct index for the new device.
 
-**Verify:** After calling `Set Capture Device`, speak into the new device and confirm that `ConvaiAudioLog` shows data from the updated device.
+**Verify:** After calling `Set Capture Device By Index`, speak into the new device and confirm that `ConvaiAudioLog` shows data from the updated device.
 
 ## UE version note — audio capture API differences
 
@@ -174,7 +174,6 @@ On Unreal Engine 5.3 and later, the plugin uses `OpenAudioCaptureStream()`. On U
 | `Audio capture components only support mono and stereo mic input - Audio might be mangeled` | Warning | Device has > 2 channels | Set device to mono/stereo in OS settings |
 | `SetCaptureDevice: OpenStream failed for device index %d` | Warning | Requested device index could not be opened | Enumerate devices again; index may have changed |
 | `PlayVoiceData: Failed to parse wav header, reason: %s` | Warning | Received audio data is malformed | Usually transient; check network quality |
-| `No audio data received` | Warning | Capture stream is open but sending no data | Check physical microphone and OS mute state |
 
 ## Next steps
 

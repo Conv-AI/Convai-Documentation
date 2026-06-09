@@ -4,10 +4,10 @@ description: Find fixes for installation, API key, audio, lip sync, and connecti
 last_reviewed: 2026-06-06
 ---
 
-This section covers problems that occur at the plugin level — during installation, authentication, or audio capture — regardless of which features you are using. If the plugin connects successfully but a specific feature such as Lip Sync, Character Actions, or Vision is not working as expected, start with the troubleshooting page inside that feature's section. The pages here address five categories: plugin installation and load failures, API key and session errors, audio and microphone problems, lip sync and animation issues, and log export for self-diagnosis and support.
+This section covers problems that occur at the plugin level: installation, authentication, session startup, microphone capture, general lip sync setup, and diagnostics. If the Convai Unreal Engine plugin connects successfully but one feature behaves incorrectly, start with that feature's troubleshooting page.
 
 {% hint style="info" %}
-**Not sure where to start?** Open the Unreal Editor Output Log (**Window > Output Log**) and look for the first error or warning. The log category prefix tells you which page to use: `ConvaiAudioLog` → Audio and microphone issues; `ConvaiChatbotComponentLog` → Connection and API key issues; `ConvaiFaceSyncLog` → Lip sync and animation issues; `LogConvai` or `LogConvaiEditorConfig` → Installation or connection issues. If you see no Convai entries at all, the plugin may not have loaded — start with Installation and plugin issues.
+**Not sure where to start?** Open the Unreal Editor Output Log (**Window > Output Log**) and look for the first Convai error or warning. Use the log category as the route: `LogConvai` or `LogConvaiEditor` → Installation and plugin issues; `ConvaiConnectionManagerLog`, `ConvaiSubsystemLog`, or `ConvaiChatbotComponentLog` → Connection and API key issues; `ConvaiAudioLog`, `ConvaiAudioStreamerLog`, or `ConvaiPlayerLog` → Audio and microphone issues; `ConvaiFaceSyncLog` → Lip sync and animation issues. If no Convai category appears, start with Installation and plugin issues.
 {% endhint %}
 
 ## Troubleshooting categories
@@ -49,19 +49,19 @@ Problems that occur after the plugin connects successfully — where a specific 
 
 | Feature | Troubleshooting page |
 | --- | --- |
-| Lip Sync | [Lip sync troubleshooting and diagnostics](../features/lip-sync/troubleshooting-and-diagnostics.md) |
-| Character Actions | [Character actions troubleshooting](../features/character-actions/troubleshooting-and-diagnostics.md) |
-| Emotion | [Emotion troubleshooting](../features/emotion/troubleshooting-and-diagnostics.md) |
-| Gaze and Attention | [Gaze and attention troubleshooting](../features/gaze-attention/troubleshooting-and-diagnostics.md) |
-| Narrative Design | [Narrative design troubleshooting](../features/narrative-design/troubleshooting-and-diagnostics.md) |
-| Dynamic Context | [Dynamic context troubleshooting](../features/dynamic-context/troubleshooting-and-diagnostics.md) |
-| Long-Term Memory | [Long-term memory troubleshooting](../features/long-term-memory/troubleshooting-and-diagnostics.md) |
-| Vision | [Vision troubleshooting](../features/vision/troubleshooting-and-diagnostics.md) |
-| Scene Metadata | [Scene metadata troubleshooting](../features/scene-metadata/troubleshooting-and-diagnostics.md) |
+| Lip sync | [Troubleshooting and diagnostics](../features/lip-sync/troubleshooting-and-diagnostics.md) |
+| Character actions | [Troubleshooting and diagnostics](../features/character-actions/troubleshooting-and-diagnostics.md) |
+| Emotion | [Troubleshooting and diagnostics](../features/emotion/troubleshooting-and-diagnostics.md) |
+| Gaze attention | [Troubleshooting and diagnostics](../features/gaze-attention/troubleshooting-and-diagnostics.md) |
+| Narrative design | [Troubleshooting and diagnostics](../features/narrative-design/troubleshooting-and-diagnostics.md) |
+| Dynamic context | [Troubleshooting and diagnostics](../features/dynamic-context/troubleshooting-and-diagnostics.md) |
+| Long-term memory | [Troubleshooting and diagnostics](../features/long-term-memory/troubleshooting-and-diagnostics.md) |
+| Vision | [Troubleshooting and diagnostics](../features/vision/troubleshooting-and-diagnostics.md) |
+| Scene metadata | [Troubleshooting and diagnostics](../features/scene-metadata/troubleshooting-and-diagnostics.md) |
 
 ## Next steps
 
-When a problem is hard to diagnose from a single error message, enable verbose logging for the relevant category and inspect the Output Log. The diagnostics page also covers the Convai Editor Window log export tool, which bundles logs and network diagnostics into a shareable package.
+When a problem is hard to diagnose from a single error message, enable verbose logging for the relevant category and inspect the Output Log. The diagnostics page also explains where Unreal writes logs and how to create a shareable support package from the Convai editor window.
 
 {% content-ref url="diagnostics-and-log-export.md" %}
 [Diagnostics and log export](diagnostics-and-log-export.md)

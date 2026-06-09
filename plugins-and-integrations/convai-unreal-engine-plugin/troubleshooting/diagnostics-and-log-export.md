@@ -12,12 +12,15 @@ The plugin declares the following log categories. Use these names as filter term
 
 | Category | Covers | Typical verbose output |
 | --- | --- | --- |
-| `LogConvai` | Main runtime events: module startup, settings load, general errors | Settings registration, DLL load results, plugin initialization errors |
+| `LogConvai` | Main runtime events: module startup, settings load, native library loading | Settings registration, DLL load results, plugin initialization errors |
+| `ConvaiConnectionManagerLog` | Managed connection proxy creation and connection setup | Session proxy initialization, connection establishment failures |
 | `ConvaiChatbotComponentLog` | `Convai Chatbot` component lifecycle, session events, response errors | Session open/close, character data load, connection error strings |
 | `ConvaiPlayerLog` | `Convai Player` component audio forwarding, session linkage | Audio frames enqueued, Start/Stop Talking events, component references |
 | `ConvaiAudioLog` | `Convai Audio Capture` component: device open/close, stream state, audio data | Device enumeration, stream open results, frame sizes, WAV decode errors |
+| `ConvaiAudioStreamerLog` | Character response audio playback | WAV parsing and playback failures |
 | `ConvaiFaceSyncLog` | `Convai Face Sync` component: frame arrival, starvation, mode selection | Frame buffer depth, LipSyncMode resolved, starvation blend events |
 | `ConvaiSubsystemLog` | Convai subsystem session management and latency measurements | Session state transitions, latency measurements (debug builds only) |
+| `ConvaiObjectComponentLog` | `Convai Object Component` registration and tracked property diagnostics | Object registration, property resolution, environment metadata changes |
 | `LogConvaiEditorConfig` | Convai editor window configuration events | API key write/read, config file path, auth state changes |
 | `LogConvaiEditorNavigation` | Convai editor window navigation events | Tab switches, page load events |
 | `LogConvaiEditorTheme` | Convai editor window theme events | Style load results, theme apply events |
@@ -109,17 +112,27 @@ adb logcat -s ConvaiAudioLog:V LogConvai:V ConvaiChatbotComponentLog:V
 
 ## Convai editor window — log export tool
 
-The Convai editor window (**Window > Open Convai Editor**) includes a built-in log export tool that bundles your session log, network diagnostics, and system information into a ZIP archive for sharing with support.
+The Convai editor window (**Window > Open Convai Editor**) includes a built-in log export tool that packages recent logs and diagnostic metadata into a shareable archive.
 
 The export includes:
 
-- The current Unreal Engine session log
-- Network reachability results for `api.convai.com` (latency and HTTP status)
-- DNS resolution results for Convai endpoints
-- Proxy and firewall environment variable detection
-- Plugin and engine version metadata
+- Recent project, engine, and crash logs, filtered by the default `24` hour window
+- System and project metadata
+- Network diagnostic metadata, including proxy environment values and network adapter information
+- Performance metadata from the editor collector
+- A `Manifest.json` file and `SystemInfo.json` metadata file
 
-To run a log export, open the Convai editor window and locate the support or diagnostics section. The exported ZIP is saved to `<YourProject>/Saved/` and the export location opens automatically when the process completes.
+The package is written under:
+
+```text
+<YourProject>/Saved/ConvaiLogExports/ConvaiLogExport_<timestamp>.zip
+```
+
+For the step-by-step export workflow, use the editor-window guide.
+
+{% content-ref url="../editor-window/export-diagnostic-logs.md" %}
+[Export diagnostic logs](../editor-window/export-diagnostic-logs.md)
+{% endcontent-ref %}
 
 ## Blueprint diagnostic nodes and events
 
@@ -145,11 +158,9 @@ The `CharacterID`, `CharacterName`, and `SessionID` properties on `UConvaiChatbo
 | Event | Component | When it fires | Diagnostic use |
 | --- | --- | --- | --- |
 | **On Failure** | `Convai Chatbot` | Any connection or session error | Capture the failure moment; read `ConvaiChatbotComponentLog` immediately after for the error string |
-| **On Character Data Loaded** | `Convai Chatbot` | Character metadata arrives from Convai after BeginPlay | Confirm authentication succeeded; check `CharacterName` is populated |
+| **On Character Data Loaded** | `Convai Chatbot` | Character metadata load completes and reports `Success` | Confirm authentication succeeded; check `CharacterName` is populated |
 | **On Interrupted** | `Convai Chatbot` | Current speech turn is cut short | Useful for detecting unexpected interruptions vs intentional ones |
 | **On Interaction ID Received** | `Convai Chatbot` | Each conversation turn begins | Log the `InteractionID` to correlate turns with Convai server records |
-| **On Started Talking** | `Convai Audio Streamer` | Character begins playing audio | Timestamp this event to measure perceived response latency |
-| **On Finished Talking** | `Convai Audio Streamer` | Character audio playback ends | Useful for triggering post-response UI changes or next-turn logic |
 
 To bind an event in Blueprint, select the relevant component, open the **Details** panel, find the **Events** section, and click **+** next to the event you want. The resulting node appears in the Event Graph and fires automatically at runtime.
 
@@ -165,19 +176,25 @@ Latency logging is active only when the plugin is compiled with `ConvaiDebugMode
 
 ## Configuration defaults reference
 
-The following values are the plugin defaults from `ConvaiUtils.cpp`. They appear in **Edit > Project Settings > Convai** (where editable) and are useful when interpreting log output.
+The following defaults come from `ConvaiUtils.cpp`, `ConvaiDefinitions.h`, and runtime connection setup. Some values are configurable in **Edit > Project Settings > Plugins > Convai**; others are connection parameters resolved from plugin defaults, config, or command-line overrides.
 
 | Setting | Default | Where to change | Notes |
 | --- | --- | --- | --- |
-| Acoustic Echo Cancellation (AEC) | Enabled | Project Settings > Convai | Reduces echo from speakers picked up by the mic |
-| Voice Activity Detection (VAD) | Enabled, mode 3 | Project Settings > Convai | Mode 3 is most aggressive — reduces false triggers |
-| Audio chunk size | 10 ms | Project Settings > Convai | Smaller chunks reduce latency; larger chunks reduce CPU overhead |
-| Face animation output FPS | 90 | `Convai Face Sync` component | Lower this to match your target frame rate if starvation occurs |
-| Lip sync time offset | 20 ms | `Convai Face Sync` component | Shift animation timing relative to audio; reduce if sync lags |
-| Context debounce window | 0.5 s | Project Settings > Convai | Minimum interval between context updates |
-| Context max debounce window | 3.0 s | Project Settings > Convai | Maximum delay before a context update is forced |
-| Bot-ready timeout | 45 s | Hardcoded | Time allowed for Convai to confirm the session is ready |
-| Orphaned connection TTL | 120 s | Hardcoded | Time before an unused connection object is cleaned up |
+| `AEC` | `1` | Connection parameters | Acoustic echo cancellation flag sent during connection setup |
+| `NoiseSuppression` | `1` | Connection parameters | Noise suppression flag sent during connection setup |
+| `GainControl` | `1` | Connection parameters | Automatic gain control flag sent during connection setup |
+| `HighPassFilter` | `1` | Connection parameters | High-pass filter flag sent during connection setup |
+| `VAD` | `1` | Connection parameters and `FConvaiVADSettings` | Enables voice activity detection |
+| `VADMode` | `3` | Connection parameters | Default VAD mode |
+| `FConvaiVADSettings.Confidence` | `0.7` | **Audio Settings \| VAD** | Ignored when `bUseServerDefault` is `true` |
+| `FConvaiVADSettings.StartSecs` | `0.2` | **Audio Settings \| VAD** | Sustained speech duration before speech starts |
+| `FConvaiVADSettings.StopSecs` | `2.2` | **Audio Settings \| VAD** | Silence duration before speech stops |
+| `FConvaiVADSettings.MinVolume` | `0.6` | **Audio Settings \| VAD** | Amplitude floor for treating input as speech |
+| `ChunkSize` | `10` | Connection parameters | Audio chunk size sent during connection setup |
+| `OutputFPS` | `90` | Connection parameters | Face animation output frame rate |
+| `FramesBufferDuration` | `0.5` | Connection parameters | Lip sync frame buffer duration |
+| `LipSyncTimeOffset` | `0.02` | Connection parameters | Timing offset applied by `Convai Face Sync` |
+| `ClientReadyTimeoutSecs` | `45.0` | Connection parameters | Time allowed for the `bot-ready` signal |
 
 ## Quick reference
 
@@ -189,7 +206,7 @@ The following values are the plugin defaults from `ConvaiUtils.cpp`. They appear
 | `DefaultEngine.ini` verbosity | Persistent verbosity across sessions | `[Core.Log]` section in `Config/DefaultEngine.ini` |
 | Log file on disk | Full session transcript for sharing | `<YourProject>/Saved/Logs/<ProjectName>.log` |
 | `adb logcat` | Live Android device log streaming | `adb logcat -s ConvaiAudioLog:V LogConvai:V` |
-| Convai editor window export | Bundled log + network diagnostics ZIP | **Window > Open Convai Editor** → support section |
+| Convai editor window export | Bundled log archive and diagnostic metadata | **Window > Open Convai Editor** → export logs control |
 | Blueprint state nodes | Runtime session state without log reading | `Is In Conversation`, `Is Thinking`, `SessionID` on chatbot component |
 | Blueprint events (`On Failure`, `On Character Data Loaded`) | React to errors and load completion at runtime | Bind in Blueprint via **Details > Events** on the Chatbot component |
 

@@ -8,7 +8,7 @@ Use this page to resolve problems that occur during installation or when the plu
 
 ## First-line check
 
-Before investigating specific symptoms, run through these three checks. They resolve the majority of installation issues in under two minutes.
+Before investigating specific symptoms, run through these three checks. They confirm whether Unreal can discover the plugin and load the runtime module.
 
 {% stepper %}
 {% step %}
@@ -20,13 +20,13 @@ Open **Edit > Plugins** and search for `Convai`. The plugin entry must appear an
 {% step %}
 ### Check the Output Log for LogConvai entries
 
-Open **Window > Output Log** and type `LogConvai` in the search field. At a successful load you should see settings registered and no error entries. If you see `LogConvai: Error: Failed to find Convai plugin`, the plugin folder or `.uplugin` file is misplaced.
+Open **Window > Output Log** and type `LogConvai` in the search field. A failed native library load appears as `Failed to load %s from %s`. If no Convai log categories appear, Unreal may not have discovered the plugin.
 {% endstep %}
 
 {% step %}
 ### Verify the plugin folder structure
 
-The plugin root must be at `<YourProject>/Plugins/Convai/` and must contain `ConvAI.uplugin` at that exact path. The folder name must be `Convai` — any other name prevents detection.
+For a project-level install, the plugin root must be at `<YourProject>/Plugins/Convai/` and must contain `ConvAI.uplugin`. For an engine-level install, the plugin root is under the engine's `Engine/Plugins/Marketplace/Convai/` folder.
 {% endstep %}
 {% endstepper %}
 
@@ -34,9 +34,16 @@ The plugin root must be at `<YourProject>/Plugins/Convai/` and must contain `Con
 
 **Symptom:** After copying the plugin folder into the project or engine, the Convai entry does not appear under **Edit > Plugins**.
 
-**Cause — incorrect installation location:** The plugin folder was placed inside the engine `Plugins` directory instead of the project `Plugins` folder, or the folder name was changed from `Convai`.
+**Cause — incorrect installation location or folder structure:** The extracted folder does not contain `ConvAI.uplugin` at the plugin root, or the folder was placed in a location Unreal does not scan.
 
-**Fix:** Move the extracted plugin folder to `<YourProject>/Plugins/Convai/`. The folder must be named `Convai` and must contain `ConvAI.uplugin` at its root. Restart the Unreal Editor.
+**Fix:** Move the extracted plugin folder to one supported location, then restart the Unreal Editor:
+
+| Install type | Folder |
+| --- | --- |
+| Project-level install | `<YourProject>/Plugins/Convai/` |
+| Engine-level install | `<UnrealEngine>/Engine/Plugins/Marketplace/Convai/` |
+
+The selected folder must contain `ConvAI.uplugin` at its root.
 
 **Verify:** Open **Edit > Plugins**, search for `Convai`, and confirm the entry appears. Enable it if it is not already enabled, then restart the editor when prompted.
 
@@ -52,7 +59,7 @@ The plugin root must be at `<YourProject>/Plugins/Convai/` and must contain `Con
 
 **Symptom:** You enable the Convai plugin and click **Restart Now**, but the editor crashes or shows a compile dialog on restart.
 
-**Cause — C++ project requires a recompile:** Unreal Engine must recompile project code when a new plugin is added. If compilation fails, the editor will not start.
+**Cause — C++ project requires a recompile:** Unreal Engine may recompile project code when a source plugin is added at the project level. If compilation fails, the editor will not start.
 
 **Fix:** Open the project in Visual Studio (or your configured IDE), select **Build > Build Solution**, resolve any compile errors, then launch the editor again.
 
@@ -62,10 +69,10 @@ The plugin root must be at `<YourProject>/Plugins/Convai/` and must contain `Con
 
 **Symptom:** The plugin is installed correctly but the editor crashes on restart, or shows a dialog saying it cannot compile modules. You are using a Blueprint-only project with no C++ source files.
 
-**Cause:** The Convai plugin contains C++ modules (`Convai`, `ConvaiEditor`, `ConvaiVisionBase`) that require compilation. Blueprint-only projects have no build environment, so the Unreal Build Tool cannot compile the plugin.
+**Cause:** A project-level source plugin can require Unreal Build Tool to compile modules such as `Convai`, `ConvaiEditor`, and `ConvaiVisionBase`. Blueprint-only projects have no generated C++ target, so Unreal cannot compile a project-level source plugin.
 
 {% hint style="warning" %}
-Blueprint-only projects cannot use a project-level plugin installation for the Convai plugin. You must either convert the project to a C++ project or install the plugin at the engine level.
+Blueprint-only projects should use the Fab or engine-level install path for the Convai plugin. Use project-level installation when the project has a C++ build target.
 {% endhint %}
 
 **Fix — option A (recommended): Convert to a C++ project**
@@ -86,13 +93,13 @@ Replace `5.x` with your engine version. The engine already has a build environme
 
 ## `ConvaiEditor` module not available
 
-**Symptom:** On Unreal Engine 5.1 or earlier, the Convai editor window does not appear and the log shows a message that the `ConvaiEditor` module is disabled.
+**Symptom:** On Unreal Engine 5.1 or earlier, the Convai editor window does not appear. The Output Log shows `ConvaiEditor: Editor UI disabled - requires UE 5.2 or later`.
 
 **Cause:** The `ConvaiEditor` module requires a property-binding editor feature that is not available in UE 5.1 and earlier. The module is intentionally disabled on those engine versions.
 
 **Fix:** Upgrade to Unreal Engine 5.2 or later to use the Convai editor window. On UE 5.1 and earlier, configure the API key manually by setting `API_Key` in `Config/DefaultEngine.ini` under the `[/Script/Convai.ConvaiSettings]` section.
 
-**Verify:** After setting the key in the config file, open **Edit > Project Settings > Convai** and confirm the `API Key` field shows the value you set.
+**Verify:** After setting the key in the config file, open **Edit > Project Settings > Plugins > Convai** and confirm the `API Key` field shows the value you set.
 
 Plugin version <code class="expression">space.vars.unreal_plugin_version</code> supports all Unreal Engine 5.x versions from 5.0 onward; `ConvaiEditor` is the only component that requires 5.2 or later.
 
@@ -110,7 +117,7 @@ Plugin version <code class="expression">space.vars.unreal_plugin_version</code> 
 
 **Symptom:** The plugin works in the Windows editor and in Windows packaged builds, but fails to load or causes errors when packaging for an Android target.
 
-**Cause — missing Android SDK or NDK configuration:** A packaging failure usually means the Android NDK or SDK path is not configured, or the `AndroidPermission` plugin is disabled.
+**Cause — missing Android SDK or NDK configuration:** A packaging failure can occur when the Android NDK or SDK path is not configured, or when the `AndroidPermission` plugin dependency is disabled in the project.
 
 **Fix:**
 1. Confirm that the Android NDK and SDK paths are set in **Edit > Project Settings > Platforms > Android SDK**.
@@ -121,15 +128,20 @@ Plugin version <code class="expression">space.vars.unreal_plugin_version</code> 
 
 ---
 
-**Cause — missing native libraries in the APK:** The plugin bundles three native libraries that must be copied into the APK during packaging: `libconvai_client.so`, `libconvai_http_helper.so`, and `libwebrtc.jar`. If any of these are absent from the packaged output, the plugin initializes but the real-time audio connection fails silently on-device.
+**Cause — missing native libraries in the APK:** The plugin's Android APL copies `libconvai_client.so`, `libconvai_http_helper.so`, and `libwebrtc.jar` into the Android build. If a custom packaging step removes these files, the real-time connection can fail on-device.
 
 **Fix:** This is handled automatically by the plugin's `Convai_AndroidAPL.xml`. If you are seeing native-load failures, confirm that:
 1. The plugin's `Convai_AndroidAPL.xml` file is present at `Plugins/Convai/Source/Convai/` and has not been removed or modified.
-2. Your ProGuard or R8 configuration (if enabled) preserves WebRTC classes. Add the following keep rules to your ProGuard config:
+2. Your ProGuard or R8 configuration does not override the keep rules inserted by the plugin. The APL includes rules for WebRTC JNI classes and native methods:
 
 ```proguard
--keep class com.google.gson.** { *; }
--keep class org.webrtc.** { *; }
+-keepattributes Signature
+-dontskipnonpubliclibraryclassmembers
+-keep class **.jni_zero.** { *; }
+-keep class **.webrtc.** { *; }
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
 ```
 
 **Verify:** Run `adb shell ls /data/app/<your.package.name>/lib/arm64/` after installing the APK. You should see `libconvai_client.so` and `libconvai_http_helper.so` listed.
