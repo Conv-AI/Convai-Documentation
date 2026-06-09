@@ -1,10 +1,10 @@
 ---
 title: How character actions work
-description: Understand the action pipeline from the action_config contract to the queue, dispatch, and completion model used by the Convai Unreal Engine plugin.
+description: Understand how Convai character actions move from session setup to queued Blueprint handler execution and completion reporting.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Character actions allow Convai to instruct a character to perform physical behaviors — moving to a location, following a player, interacting with an object — as part of a normal conversation response. The plugin receives a structured sequence of named actions from Convai alongside the spoken reply, then dispatches those actions to Blueprint event handlers on the owning Actor.
+Character actions allow Convai to instruct a character to perform physical behaviors — moving to a location, following a player, interacting with an object — as part of a normal conversation response. The plugin receives a structured sequence of named actions from Convai alongside the spoken reply, then dispatches those actions to matching Blueprint handlers on the owning Actor or, as a fallback, on the chatbot component.
 
 ## Required setup
 
@@ -23,11 +23,11 @@ For non-movement actions (custom behaviors, animations, state changes), only the
 | Concept | What it means |
 |---|---|
 | **Action contract** (`action_config`) | The list of action templates, scene objects, and characters sent to Convai at session start. Defines what the character is allowed to do and what it can reference. |
-| **Action pipeline** | Two parallel lanes: a speech lane that plays audio and an action lane that appends a sequence of `FConvaiResultAction` structs to the queue. |
-| **Queue and dispatch** | The plugin maintains an `ActionsQueue`. On each `HandleActionCompletion(true)`, the queue advances by one. A name-based dispatcher calls the matching Blueprint function on the owning Actor. |
+| **Action pipeline** | Two parallel lanes: a speech lane that plays audio and an action lane that stores a sequence of `FConvaiResultAction` structs in the queue. |
+| **Queue and dispatch** | The plugin maintains an `ActionsQueue`. On each `HandleActionCompletion(true)`, the queue advances by one. A name-based dispatcher calls the matching Blueprint function on the owning Actor or chatbot component. |
 | **Completion model** | Handlers are responsible for calling `HandleActionCompletion`. Without it, the queue stalls. `false` clears the remaining queue; `AbortActionSequence` discards everything and optionally asks Convai for a fresh plan. |
 | **Wait-for-speech gate** | A per-action `bWaitForBotSpeech` flag that delays firing until the character begins or finishes speaking, so movement and speech stay synchronized. |
-| **Runtime mutation** | Objects and characters can be added or removed at runtime; changes are sent as `update-scene-metadata` messages to the live session. |
+| **Runtime mutation** | Objects and characters can be added or removed at runtime; the local environment changes immediately, while scene-context updates are sent to the live session when applicable. |
 
 ## The action_config contract
 
@@ -50,7 +50,7 @@ The action set is fixed at `/connect` time. Adding or removing actions at runtim
 When the player talks to a Convai character, the plugin processes the response through two parallel lanes:
 
 1. **Speech lane** — audio streams to the character's audio component for playback. The chatbot fires `On Actions Received` and `OnStartedTalking` / `OnFinishedTalking` events as speech progresses.
-2. **Action lane** — Convai parses the response against the `action_config` contract and returns a sequence of `FConvaiResultAction` structs. The plugin appends this sequence to the `ActionsQueue` on `UConvaiChatbotComponent`.
+2. **Action lane** — Convai parses the response against the `action_config` contract and returns a sequence of `FConvaiResultAction` structs. The plugin stores this sequence in the `ActionsQueue` on `UConvaiChatbotComponent`.
 
 The two lanes are independent. Speech plays while the action queue executes.
 
@@ -58,11 +58,11 @@ The two lanes are independent. Speech plays while the action queue executes.
 
 The plugin maintains a queue of `FConvaiResultAction` items in `ActionsQueue`. When a new action sequence arrives, the plugin:
 
-1. Appends the incoming sequence to the existing queue (merging the head with any in-progress action).
+1. If the queue already contains an in-progress action, keeps that first action and replaces the remaining queued actions with the incoming sequence. If the queue is empty, stores the incoming sequence as-is.
 2. Calls `StartFirstAction`, which reads the first entry from the queue and calls `TriggerNamedBlueprintAction`.
-3. `TriggerNamedBlueprintAction` looks for a Blueprint function or event on the owning Actor whose name matches the `Action` field of the result. If the function exists and the signature accepts an `FConvaiResultAction`, it is called with the result struct.
+3. `TriggerNamedBlueprintAction` looks for a Blueprint function or event whose name matches the `Action` field of the result. It checks the owning Actor first, then the chatbot component. The handler may accept one `FConvaiResultAction` parameter or no parameters.
 
-The dispatcher is name-based. Unreal resolves handler names case-insensitively, but spaces and punctuation must still match. If no matching function is found on the owning Actor, the plugin logs a warning, the handler is not invoked, and the queue stalls until `HandleActionCompletion` or `AbortActionSequence` is called.
+The dispatcher is name-based. Unreal resolves handler names case-insensitively, but spaces and punctuation must still match. If no matching function is found on either target, the plugin logs a warning, the handler is not invoked, and the queue stalls until `HandleActionCompletion` or `AbortActionSequence` is called.
 
 ## The wait-for-speech gate
 
@@ -90,7 +90,7 @@ sequenceDiagram
 
     Player->>Convai: Speech input
     Convai-->>Plugin: Speech audio + action sequence
-    Plugin->>Plugin: Append sequence to ActionsQueue
+    Plugin->>Plugin: Update ActionsQueue
     Plugin->>Handler: TriggerNamedBlueprintAction(Action, ResultAction)
     Handler->>Handler: Execute behavior
     Handler->>Plugin: HandleActionCompletion(IsSuccessful)
@@ -102,9 +102,9 @@ The diagram above shows a single action. When a sequence contains multiple actio
 
 ## Runtime environment mutation
 
-Objects and characters can be added or removed from the environment at runtime using the `AddObject`, `RemoveObject`, `AddCharacter`, and `RemoveCharacter` family of methods on `UConvaiChatbotComponent`. These methods update the local `EnvironmentData` mirror and schedule a debounced `update-scene-metadata` message to the live session, so Convai's context stays in sync.
+Objects and characters can be added or removed from the local environment at runtime using the `AddObject`, `RemoveObject`, `AddCharacter`, and `RemoveCharacter` family of methods on `UConvaiChatbotComponent`. The local `EnvironmentData` mirror changes immediately and is used by the plugin when parsing later action results.
 
-Runtime mutations affect object descriptions and proximity context — they do not change the action set itself, which is fixed until the next reconnect.
+Runtime mutations do not change the action set itself, which is fixed until the next reconnect. For live sessions, scene-context updates are sent through `update-scene-metadata` when the changed entry is not already part of the connect-time scene metadata snapshot.
 
 ## Next steps
 

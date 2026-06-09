@@ -1,14 +1,14 @@
 ---
 title: Building custom action handlers
-description: Write Blueprint event handlers that receive FConvaiResultAction structs from the chatbot, execute behavior, and report completion so the action queue advances.
+description: Write Blueprint action handlers that execute character behavior and report completion so the action queue can continue safely.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Custom action handlers are Blueprint functions or events on the NPC Actor that the plugin calls when a matching action name arrives in the action queue. Write a handler, complete it with `Handle Action Completion`, and the queue advances to the next action automatically.
+Custom action handlers are Blueprint functions or events on the NPC Actor, or on the chatbot component fallback, that the plugin calls when a matching action name arrives in the action queue. Write a handler, complete it with `Handle Action Completion`, and the queue advances to the next action automatically.
 
 ## How dispatch works
 
-When the plugin's `TriggerNamedBlueprintAction` fires, it searches the owning Actor's Blueprint class for a function or event whose name matches the `Action` field of the incoming `FConvaiResultAction`. Unreal resolves the name case-insensitively through `FName`, but spaces and punctuation must still match — `"Stop Moving"` and `"StopMoving"` are different handlers.
+When the plugin's `TriggerNamedBlueprintAction` fires, it searches the owning Actor's Blueprint class for a function or event whose name matches the `Action` field of the incoming `FConvaiResultAction`. If the Actor has no matching handler, the plugin tries the chatbot component itself. Unreal resolves the name case-insensitively through `FName`, but spaces and punctuation must still match — `"Stop Moving"` and `"StopMoving"` are different handlers.
 
 The function must accept zero or one parameter of type `FConvaiResultAction`. If no matching function is found, the plugin logs a warning and the action is not invoked — the queue stalls until you call `HandleActionCompletion` or `AbortActionSequence`.
 
@@ -31,7 +31,6 @@ Add one input parameter to the event:
 - **Type:** `FConvaiResultAction` (search for `Convai Result Action` in the pin type picker)
 - **Name:** any name you prefer, for example `ActionData`
 
-<figure><img src="../../../../.gitbook/assets/ue-character-actions-custom-event.png" alt="Unreal Engine Blueprint Event Graph showing a Custom Event node named Open Door with one FConvaiResultAction input parameter named ActionData"><figcaption><p>The Custom Event name must match the action name in the Actions array exactly, including case. The single FConvaiResultAction parameter carries the resolved action data including any typed parameters.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -51,7 +50,6 @@ Drag off the `Convai Chatbot` component reference and call **Handle Action Compl
 
 Set **Is Successful** to `true` on success, `false` on failure.
 
-<figure><img src="../../../../.gitbook/assets/ue-character-actions-handle-completion.png" alt="Unreal Engine Blueprint graph showing HandleActionCompletion called on the Convai Chatbot component at the end of a handler, with Is Successful set to true"><figcaption><p>Every code path in the handler must reach a HandleActionCompletion or AbortActionSequence call. Missing this call stalls the entire action queue for the session.</p></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 
@@ -87,9 +85,10 @@ When a handler encounters an unrecoverable error — a target Actor was destroye
 The following pseudocode describes a complete handler for an `"Open Door"` action:
 
 ```text
+// Blueprint pseudocode
 // In the NPC Actor Blueprint — Custom Event named "Open Door"
 
-Event OpenDoor(ActionData: FConvaiResultAction)
+Event Open Door(ActionData: FConvaiResultAction)
     // Read the target object from the action parameters
     TargetEntry = GetParamAsRef(ActionData, "target")
     DoorActor = TargetEntry.Ref
@@ -118,11 +117,12 @@ Event OpenDoor(ActionData: FConvaiResultAction)
 
 ## Handling the On Actions Received event
 
-You can also bind to the `On Actions Received` delegate on the chatbot component to intercept the raw action sequence before it enters the queue. This is useful for logging, filtering, or deciding whether to accept a sequence.
+You can also bind to the `On Actions Received` delegate on the chatbot component to observe the raw action sequence the plugin received. This is useful for logging and diagnostics.
 
 The delegate signature:
 
 ```text
+// Blueprint pseudocode
 On Actions Received(
     ChatbotComponent: UConvaiChatbotComponent,
     InteractingPlayerComponent: UConvaiPlayerComponent,
@@ -131,7 +131,7 @@ On Actions Received(
 ```
 
 {% hint style="warning" %}
-Binding to `On Actions Received` does **not** bypass the name-dispatch mechanism. The plugin still dispatches each action to its matching Blueprint handler automatically. The delegate fires concurrently with dispatch — use it for observation, not for replacing handlers.
+Binding to `On Actions Received` does **not** bypass the name-dispatch mechanism. The plugin still dispatches each action to its matching Blueprint handler automatically, so use the delegate for observation rather than as a replacement for handlers.
 {% endhint %}
 
 ## Next steps

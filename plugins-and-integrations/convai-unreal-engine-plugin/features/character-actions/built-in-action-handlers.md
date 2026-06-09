@@ -1,6 +1,6 @@
 ---
 title: Built-in action handlers
-description: Reference implementations for the four default actions — Move To, Follow, Stop Moving, and Wait For — including parameter structures and complete Blueprint handlers.
+description: Reference handler patterns for the four default Convai character actions, including parameters, completion rules, and Blueprint flow.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -11,19 +11,19 @@ Every new `Convai Chatbot` component includes four pre-configured action templat
 | Action | Parameters | Purpose | Completion model |
 |---|---|---|---|
 | `Move To` | `destination` (Reference) | Navigate to a registered object or position | Completes when movement ends |
-| `Follow` | `character` (Reference) | Continuously follow a registered character | Ongoing — completes only when `Stop Moving` arrives |
+| `Follow` | `character` (Reference) | Start continuously following a registered character | Completes after the follow loop starts |
 | `Stop Moving` | — | Cancel any in-progress movement | Completes immediately |
 | `Wait For` | `time in seconds` (Number) | Pause the action queue for a duration | Completes after the delay |
 
 {% hint style="info" %}
-All four actions use `AI Move To` internally and require an AI Controller and Nav Mesh Bounds Volume. If your NPC does not use Unreal's navigation system, replace the movement logic with your own approach and keep the same `HandleActionCompletion` pattern.
+The movement handler patterns use `AI Move To` and require an AI Controller and Nav Mesh Bounds Volume. `Wait For` does not require navigation. If your NPC does not use Unreal's navigation system, replace the movement logic with your own approach and keep the same `HandleActionCompletion` pattern.
 {% endhint %}
 
 ---
 
 ## Move To
 
-Navigates the NPC to a registered object. The `destination` parameter is a `Reference` type that resolves against the `Objects` array by fuzzy name match.
+Navigates the NPC to a registered object. The `destination` parameter is a `Reference` type that resolves against the registered object name.
 
 **Parameter:**
 
@@ -34,9 +34,10 @@ Navigates the NPC to a registered object. The `destination` parameter is a `Refe
 **Blueprint handler:**
 
 ```text
+// Blueprint pseudocode
 // Custom Event named "Move To" with one FConvaiResultAction input
 
-Event MoveTo(ActionData: FConvaiResultAction)
+Event Move To(ActionData: FConvaiResultAction)
     // Read and resolve the destination
     DestEntry = GetParamAsRef(ActionData, "destination")
     ResolveGoalLocation(
@@ -74,7 +75,7 @@ Event MoveTo(ActionData: FConvaiResultAction)
 
 **Key points:**
 
-- Always branch on `bOut Mode` before wiring `AI Move To` — `Actor` mode uses the actor pin, `Vector` mode uses the location pin. Wiring the wrong pin sends the pawn to `(0, 0, 0)`.
+- Always branch on `Out Mode` before wiring `AI Move To` — `Actor` mode uses the actor pin, `Vector` mode uses the location pin. Wiring the wrong pin makes the movement use the wrong goal interpretation.
 - `ResolveGoalLocation` with a live `Source Actor` also computes `bOut Reachable` and `Out Path Points`, which you can use to bail out early if no navmesh path exists.
 - `AcceptanceRadius` comes from the registered `FConvaiObjectEntry` (default `150` cm). Increase it for large objects or decrease it for precise sub-component targeting.
 
@@ -82,7 +83,7 @@ Event MoveTo(ActionData: FConvaiResultAction)
 
 ## Follow
 
-Continuously tracks and moves toward a registered character until `Stop Moving` is received. Because following is an ongoing behavior, `HandleActionCompletion` must **not** be called from inside the Follow handler — the action must remain open so the queue does not advance.
+Starts a continuous follow behavior for a registered character. The follow timer or task can keep running after the action completes; call `HandleActionCompletion(true)` after the follow loop starts so future actions can dispatch.
 
 **Parameter:**
 
@@ -93,6 +94,7 @@ Continuously tracks and moves toward a registered character until `Stop Moving` 
 **Blueprint handler:**
 
 ```text
+// Blueprint pseudocode
 // Custom Event named "Follow" with one FConvaiResultAction input
 
 Event Follow(ActionData: FConvaiResultAction)
@@ -109,13 +111,14 @@ Event Follow(ActionData: FConvaiResultAction)
     // AIMoveTo(Target = TargetEntry.Ref, AcceptanceRadius = 150.0)
     // Store the timer handle so Stop Moving can cancel it.
 
-    // Do NOT call HandleActionCompletion here.
-    // The action stays open until Stop Moving fires.
+    // Complete the Follow action after the loop starts.
+    // The timer/task keeps running until Stop Moving fires later.
+    HandleActionCompletion(IsSuccessful = true)
 ```
 
 **Implementation note — polling timer:**
 
-A common approach is a `Set Timer by Function Name` node that re-issues `AI Move To` toward the target Actor every 0.5–1.0 seconds. Store the timer handle in a Blueprint variable. When `Stop Moving` fires, clear the timer and call `HandleActionCompletion` from the `Stop Moving` handler.
+A common approach is a `Set Timer by Function Name` node that re-issues `AI Move To` toward the target Actor every 0.5–1.0 seconds. Store the timer handle in a Blueprint variable, then call `HandleActionCompletion(true)` after the timer starts. When `Stop Moving` fires later, clear the timer and complete the stop action.
 
 Alternatively, implement a `BehaviorTree` task that loops until an external signal is set, and signal it from the `Stop Moving` handler.
 
@@ -123,23 +126,24 @@ Alternatively, implement a `BehaviorTree` task that loops until an external sign
 
 ## Stop Moving
 
-Cancels any in-progress movement behavior and completes the current action. Because this action terminates the Follow loop, it must call `HandleActionCompletion` for the **Follow** action that is still open in the queue, not only for itself.
+Cancels any in-progress movement behavior and completes the current action. If `Follow` started a timer or task, `Stop Moving` should clear that timer or task and then call `HandleActionCompletion(true)` for the stop action.
 
 **Parameters:** none
 
 **Blueprint handler:**
 
 ```text
+// Blueprint pseudocode
 // Custom Event named "Stop Moving" with one FConvaiResultAction input
 
-Event StopMoving(ActionData: FConvaiResultAction)
+Event Stop Moving(ActionData: FConvaiResultAction)
     // Cancel the repeating follow timer
     ClearTimer(FollowTimerHandle)
 
     // Stop current movement immediately
     AIController.StopMovement()
 
-    // Complete the action (resolves the open Follow or any other movement action)
+    // Complete the Stop Moving action
     HandleActionCompletion(IsSuccessful = true)
 ```
 
@@ -162,9 +166,10 @@ Pauses the action queue for a configurable number of seconds. After the delay, `
 **Blueprint handler:**
 
 ```text
+// Blueprint pseudocode
 // Custom Event named "Wait For" with one FConvaiResultAction input
 
-Event WaitFor(ActionData: FConvaiResultAction)
+Event Wait For(ActionData: FConvaiResultAction)
     Seconds = GetParamAsNumber(ActionData, "time in seconds")
 
     // Guard: clamp to a sensible range

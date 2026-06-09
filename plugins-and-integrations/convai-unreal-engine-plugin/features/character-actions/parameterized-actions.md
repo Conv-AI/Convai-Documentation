@@ -1,6 +1,6 @@
 ---
 title: Parameterized actions
-description: Declare typed parameters on action templates and read their resolved values from FConvaiResultAction using the Get Param As X Blueprint nodes.
+description: Declare typed inputs for character actions and read resolved values in Blueprint handlers for movement, timing, choices, and custom behavior.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -19,20 +19,18 @@ Each parameter on an `FConvaiAction` template is an `FConvaiActionParam` struct 
 | `Choices` | `TArray<FString>` | Optional fixed-choice list. Rendered as `[choice1\|choice2\|...]` in the wire format. |
 | `EnumType` | `UEnum*` | Required when `Type == Enum`. The engine enum whose display names serve as the choice list. |
 
-<figure><img src="../../../../.gitbook/assets/ue-character-actions-action-param-details.png" alt="Unreal Engine Details panel showing an FConvaiActionParam entry with Name, Description, Type dropdown showing all six options, and Choices array"><figcaption><p>Each parameter entry on an action template maps one placeholder to a typed constraint. The Type dropdown controls both the wire format hint and how the plugin interprets the LLM's response.</p></figcaption></figure>
-
 ## Parameter types
 
 `EConvaiActionParamType` controls how the plugin interprets the LLM's filled-in response:
 
 | Enum value | Display name | How the value is parsed |
 |---|---|---|
-| `Auto` | Auto | Infer type at parse time: try Reference, then Number, then Bool; fall back to String. |
-| `Reference` | Actor Reference | Resolve the value against `Environment.Objects` and `Environment.Characters` by name matching. |
+| `Auto` | Auto | Infer type at parse time: try exact Reference, then Number, then Bool; fall back to String. |
+| `Reference` | Actor Reference | Resolve the value against `Environment.Objects` and `Environment.Characters` by exact registered name. |
 | `String` | String | Treat the value as a raw string. |
 | `Number` | Number | Parse the value as a float. |
 | `Bool` | Bool | `"true"`, `"yes"`, or `"1"` → `true`; anything else → `false`. |
-| `Enum` | Enum | Match the value against the display names of `EnumType`. The matched index is stored in `ByteValue`. |
+| `Enum` | Enum | Match the value against the display names of `EnumType`. The matched enum value is stored in `ByteValue`. |
 
 Regardless of the declared type, the plugin populates all value fields (`StringValue`, `NumberValue`, `BoolValue`, `RefValue`) on a best-effort basis. The declared type signals which field is the intended slot.
 
@@ -52,6 +50,7 @@ The wire format rendered to Convai becomes `Put {object} on {surface}`, and the 
 Set `Choices` to constrain the LLM to a fixed set of values:
 
 ```text
+// Details panel values
 Name = "emotion"
 Type = String
 Choices = ["Happy", "Sad", "Angry", "Calm"]
@@ -65,13 +64,12 @@ When you have an existing Unreal `UENUM` you want to mirror:
 
 1. Set `Type` to `Enum`.
 2. Set `EnumType` to your `UEnum` asset (use the picker in the Details panel).
-3. Leave `Choices` empty — it is auto-derived from the enum's display names and grayed out.
+3. Leave `Choices` empty. When parsing an enum parameter, the plugin uses the selected enum's display names instead of the `Choices` array.
 
-<figure><img src="../../../../.gitbook/assets/ue-character-actions-enum-param.png" alt="Unreal Engine Details panel showing a parameter with Type set to Enum and EnumType pointing to a custom UEnum asset, with the Choices field grayed out"><figcaption><p>When Type is Enum, the Choices field is populated automatically from the UEnum's display names. Set EnumType using the asset picker and leave Choices empty.</p></figcaption></figure>
-
-In your handler, read the matched enum index from `ByteValue` using **Byte to Enum** in Blueprint:
+In your handler, read the matched enum value from `ByteValue` using **Byte to Enum** in Blueprint:
 
 ```text
+// Blueprint pseudocode
 // In the action handler
 ParamByte = GetParamAsByte(ActionData, "emotion")
 Emotion = ByteToEnum<EMyEmotionEnum>(ParamByte)
@@ -93,7 +91,7 @@ Use the `UConvaiActions` function library (Blueprint category **Convai | Action 
 | **Has Param** | `bool` | Check whether a named parameter was filled in before reading it. |
 | **Get Param Type** | `EConvaiActionParamType` | Inspect the resolved type when using `Auto`. |
 
-All these nodes take the `FConvaiResultAction` struct and a `Name` string matching the parameter's `Name` field.
+All named accessor nodes take the `FConvaiResultAction` struct and a `Name` string matching the parameter's `Name` field. `Get First Param` only takes the `FConvaiResultAction` struct.
 
 ## FConvaiResultParam fields
 
@@ -105,14 +103,15 @@ All these nodes take the `FConvaiResultAction` struct and a `Name` string matchi
 | `StringValue` | `FString` | Raw value as a string. Always populated. |
 | `NumberValue` | `float` | `Atof(StringValue)`. `0` if not numeric. |
 | `BoolValue` | `bool` | `true` if `StringValue` is `"true"`, `"yes"`, or `"1"`. |
-| `RefValue` | `FConvaiObjectEntry` | Resolved from `Environment.Objects` / `Environment.Characters` by name. Empty when no match. |
-| `ByteValue` | `uint8` | Matched enum index when `Type == Enum` and `EnumType` was set; `0` otherwise. |
+| `RefValue` | `FConvaiObjectEntry` | Resolved from `Environment.Objects` / `Environment.Characters` by exact registered name. Empty when no match. |
+| `ByteValue` | `uint8` | Matched enum value when `Type == Enum` and `EnumType` was set; `0` otherwise. |
 
 ## AbortActionSequence from a handler
 
 If a required parameter resolves to an empty value (for example a Reference that could not be matched), call `AbortActionSequence` with a descriptive message so Convai can try again:
 
 ```text
+// Blueprint pseudocode
 RefEntry = GetParamAsRef(ActionData, "destination")
 if RefEntry.Ref is None:
     AbortActionSequence(

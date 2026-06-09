@@ -1,6 +1,6 @@
 ---
 title: Actions Blueprint reference
-description: Reference for FConvaiAction, FConvaiResultAction, FConvaiObjectEntry, and all action-queue functions exposed by the Convai Unreal Engine plugin.
+description: Reference for the Blueprint structs, enums, events, and queue functions that power Convai character actions in Unreal Engine.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -27,7 +27,7 @@ Action template struct. Defined at edit time in the `Actions` array of `FConvaiE
 | `Name` | `FString` | `""` | Canonical action name. Must match the Blueprint handler function name, including spaces. Unreal resolves handler names case-insensitively. |
 | `Description` | `FString` | `""` | Optional hint sent to Convai. |
 | `Parameters` | `TArray<FConvaiActionParam>` | `[]` | Ordered typed parameters. |
-| `bWaitForBotSpeech` | `bool` | `false` | Delay first action until the character begins or finishes speaking. |
+| `bWaitForBotSpeech` | `bool` | `false` | Delay the first action in a new sequence until speech begins, speech finishes, no-response fires, or the wait timeout expires. |
 | `DelayAfterBotSpeechSec` | `float` | `0.0` | Additional delay after the speech condition resolves. |
 
 ## FConvaiActionParam
@@ -48,11 +48,11 @@ Parameter template. One entry per placeholder in an `FConvaiAction`.
 | Value | Display name | Parse behavior |
 |---|---|---|
 | `Auto` | Auto | Infer: Reference > Number > Bool > String. |
-| `Reference` | Actor Reference | Resolve against `Objects`/`Characters` by fuzzy name match. |
+| `Reference` | Actor Reference | Resolve against `Objects` / `Characters` by exact registered name. |
 | `String` | String | Raw string. |
 | `Number` | Number | `float` via `Atof`. |
 | `Bool` | Bool | `"true"`/`"yes"`/`"1"` → `true`. |
-| `Enum` | Enum | Match against `EnumType` display names; index stored in `ByteValue`. |
+| `Enum` | Enum | Match against `EnumType` display names; enum value stored in `ByteValue`. |
 
 ## FConvaiResultAction
 
@@ -62,7 +62,7 @@ Struct delivered to action handlers. One per dispatched action.
 |---|---|---|
 | `Action` | `FString` | Canonical action name after template matching. |
 | `ActionString` | `FString` | Raw unprocessed action string from Convai. |
-| `Parameters` | `TMap<FString, FConvaiResultParam>` | Map of parameter name → resolved value. Iteration order is not guaranteed; access by key using `Get Param` / `Get Param As X`. |
+| `Parameters` | `TMap<FString, FConvaiResultParam>` | Map of parameter name → resolved value. Access named parameters by key using `Get Param` / `Get Param As X`. |
 | `bWaitForBotSpeech` | `bool` | Copied from the matching template at parse time. |
 | `DelayAfterBotSpeechSec` | `float` | Copied from the matching template. |
 | `RelatedObjectOrCharacter` | `FConvaiObjectEntry` | **DEPRECATED** — mirrors the first Reference param. Use `Parameters` instead. |
@@ -79,7 +79,7 @@ One resolved parameter value. All fields are populated best-effort regardless of
 | `NumberValue` | `float` | `Atof(StringValue)`. `0` if not numeric. |
 | `BoolValue` | `bool` | `true` if `"true"`, `"yes"`, or `"1"`. |
 | `RefValue` | `FConvaiObjectEntry` | Resolved Actor reference. Empty when no environment match. |
-| `ByteValue` | `uint8` | Matched enum index when `Type == Enum` and `EnumType` set; `0` otherwise. |
+| `ByteValue` | `uint8` | Matched enum value when `Type == Enum` and `EnumType` set; `0` otherwise. |
 
 ## FConvaiObjectEntry
 
@@ -88,7 +88,7 @@ Describes a scene object or character in the environment.
 | Field | Type | Default | Notes |
 |---|---|---|---|
 | `Name` | `FString` | `""` | Unique label. Must be unique across all registered objects. |
-| `Ref` | `TWeakObjectPtr<AActor>` | `null` | The live Actor. Checked before use — a destroyed Actor produces an empty entry. |
+| `Ref` | `TWeakObjectPtr<AActor>` | `null` | The live Actor. If the Actor is destroyed, the entry can still keep its name while `Resolve Goal Location` reports failure. |
 | `Description` | `FString` | `""` | Plain-language description for Convai. |
 | `MoveTargetMode` | `EConvaiMoveTarget` | `Actor` | `Actor as goal` or `Component as goal`. |
 | `AcceptanceRadius` | `float` | `150.0` | Stop distance in cm. |
@@ -167,13 +167,13 @@ All functions are in category **Convai | Actions**.
 | `RemoveAction` | `Name: FString` | `void` | Removes by name (case-sensitive). |
 | `RemoveActions` | `Names: TArray<FString>` | `void` | Removes multiple by name. |
 | `ClearActions` | — | `void` | Removes all action templates. |
-| `AddObject` | `Object, bFlushImmediately` | `void` | Adds a single object to the environment; debounced update sent. |
-| `AddObjects` | `Objects, bFlushImmediately` | `void` | Adds multiple objects at once. |
+| `AddObject` | `Object, bFlushImmediately` | `void` | Adds a single object to the local environment; live scene-context update is sent when applicable. |
+| `AddObjects` | `Objects, bFlushImmediately` | `void` | Adds multiple entries to the local environment at once. |
 | `RemoveObject` | `ObjectName, bFlushImmediately` | `void` | Removes by name. |
 | `RemoveObjects` | `ObjectNames, bFlushImmediately` | `void` | Removes multiple by name. |
 | `ClearObjects` | `bFlushImmediately` | `void` | Clears all objects. |
-| `AddCharacter` | `Character, bFlushImmediately` | `void` | Adds a single character entry. |
-| `AddCharacters` | `Characters, bFlushImmediately` | `void` | Adds multiple character entries at once. |
+| `AddCharacter` | `Character, bFlushImmediately` | `void` | Adds a single character entry to the local environment. |
+| `AddCharacters` | `Characters, bFlushImmediately` | `void` | Adds multiple character entries to the local environment at once. |
 | `RemoveCharacter` | `CharacterName, bFlushImmediately` | `void` | Removes by name. |
 | `RemoveCharacters` | `CharacterNames, bFlushImmediately` | `void` | Removes multiple by name. |
 | `ClearCharacters` | `bFlushImmediately` | `void` | Clears all characters. |

@@ -4,9 +4,9 @@ description: Find guides, references, and examples for the Convai Unreal Engine 
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Character actions connect the conversational output of Convai to physical behavior in your Unreal Engine level. When a player speaks to a Convai character, the plugin can receive a structured sequence of named actions alongside the spoken response, then dispatch those actions to Blueprint event handlers you write on the owning Actor.
+Character actions connect the conversational output of Convai to physical behavior in your Unreal Engine level. When a player speaks to a Convai character, the plugin can receive a structured sequence of named actions alongside the spoken response, then dispatch those actions to matching Blueprint handlers on the owning Actor or, as a fallback, on the chatbot component.
 
-This section covers everything you need to integrate character actions: how the pipeline works, how to configure the environment contract, how to write handlers, and how to use parameterized actions and attention grounding.
+Use this section to understand the pipeline, configure the environment contract, write Blueprint handlers, and work with parameters and attention grounding.
 
 <table data-view="cards">
 <thead>
@@ -17,11 +17,11 @@ This section covers everything you need to integrate character actions: how the 
 </thead>
 <tbody>
 <tr>
-<td><strong>How character actions work</strong><br>Understand the action pipeline, the action_config contract, and the queue-and-dispatch model.</td>
+<td><strong>How character actions work</strong><br>Understand what character actions are, when they are queued, and how Blueprint handlers run.</td>
 <td><a href="how-character-actions-work.md">how-character-actions-work.md</a></td>
 </tr>
 <tr>
-<td><strong>Quick start</strong><br>Enable actions, register a scene object, configure AI navigation on the NPC, and verify the built-in Move To action end-to-end.</td>
+<td><strong>Quick start</strong><br>Enable actions, register a scene object, configure AI navigation, and verify a built-in navigation action end to end.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
@@ -29,7 +29,7 @@ This section covers everything you need to integrate character actions: how the 
 <td><a href="configuring-actions.md">configuring-actions.md</a></td>
 </tr>
 <tr>
-<td><strong>Built-in action handlers</strong><br>Complete Blueprint handler implementations for the four default actions: Move To, Follow, Stop Moving, and Wait For.</td>
+<td><strong>Built-in action handlers</strong><br>Implement Blueprint handlers for the default navigation, follow, stop, and wait behaviors.</td>
 <td><a href="built-in-action-handlers.md">built-in-action-handlers.md</a></td>
 </tr>
 <tr>
@@ -37,7 +37,7 @@ This section covers everything you need to integrate character actions: how the 
 <td><a href="building-custom-action-handlers.md">building-custom-action-handlers.md</a></td>
 </tr>
 <tr>
-<td><strong>Parameterized actions</strong><br>Declare typed parameters on action templates and read them from result structs using the Get Param As X nodes.</td>
+<td><strong>Parameterized actions</strong><br>Declare typed inputs on action templates and read resolved values in Blueprint handlers.</td>
 <td><a href="parameterized-actions.md">parameterized-actions.md</a></td>
 </tr>
 <tr>
@@ -45,7 +45,7 @@ This section covers everything you need to integrate character actions: how the 
 <td><a href="attention-and-reference-grounding.md">attention-and-reference-grounding.md</a></td>
 </tr>
 <tr>
-<td><strong>Actions Blueprint reference</strong><br>Complete reference for FConvaiAction, FConvaiResultAction, FConvaiObjectEntry, and all action-queue functions.</td>
+<td><strong>Actions Blueprint reference</strong><br>Look up the Blueprint structs, events, enums, and queue functions used by character actions.</td>
 <td><a href="actions-blueprint-reference.md">actions-blueprint-reference.md</a></td>
 </tr>
 <tr>

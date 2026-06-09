@@ -1,10 +1,10 @@
 ---
 title: Configuring actions
-description: Define the action set, enable the feature on a Convai Chatbot component, and register environment objects and characters so Convai can reference them.
+description: Define the action set, enable character actions, and register environment objects and characters so Convai can reference them.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The `Convai Chatbot` component exposes an `Environment` property that controls the full character actions configuration: action templates, scene-object registrations, character registrations, and attention state. Use this page to configure all of these at edit time in the Details panel or at runtime through Blueprint.
+The `Convai Chatbot` component exposes an `Environment` property that controls the full character actions configuration: action templates, scene-object registrations, character registrations, and attention state. Configure action templates before connecting the session; use Blueprint at runtime for object, character, and attention updates.
 
 ## The Environment property
 
@@ -20,8 +20,6 @@ The `Convai Chatbot` component (`UConvaiChatbotComponent`) exposes an **Environm
 | `Characters` | `TArray<FConvaiObjectEntry>` | Other characters present in the scene. |
 | `CurrentAttentionObject` | `FConvaiObjectEntry` | The object currently in the chatbot's attention slot (see [Attention and reference grounding](attention-and-reference-grounding.md)). |
 
-<figure><img src="../../../../.gitbook/assets/ue-character-actions-environment-property.png" alt="Unreal Engine Details panel showing the Environment property on a Convai Chatbot component, expanded to show Enable Actions, Actions array, Objects array, and Characters array"><figcaption><p>The Environment property is the single entry point for all character actions configuration. Enable Actions, action templates, and scene registrations are all managed here.</p></figcaption></figure>
-
 ### Enabling actions
 
 **Enable Actions** defaults to `true` on every new `Convai Chatbot` component — no manual step is needed for fresh characters. To disable actions for a character that should only converse without performing physical tasks, expand **Environment** in the Details panel and untick **Enable Actions**.
@@ -32,7 +30,7 @@ Each entry in the `Actions` array is an `FConvaiAction` struct with three primar
 
 | Field | Type | Purpose |
 |---|---|---|
-| `Name` | `FString` | Canonical action name without parameter placeholders. Case-sensitive at dispatch. |
+| `Name` | `FString` | Canonical action name without parameter placeholders. Must match the handler name, including spaces and punctuation. |
 | `Description` | `FString` | Optional human-language hint sent to Convai describing what the action does. |
 | `Parameters` | `TArray<FConvaiActionParam>` | Ordered typed parameters. See [Parameterized actions](parameterized-actions.md) for full details. |
 
@@ -90,11 +88,9 @@ The `Objects` array contains `FConvaiObjectEntry` structs for interactable scene
 4. Set `Description` if helpful.
 5. Adjust `MoveTargetMode` and `AcceptanceRadius` for navigation precision.
 
-<figure><img src="../../../../.gitbook/assets/ue-character-actions-objects-array.png" alt="Unreal Engine Details panel showing the Objects array with one entry expanded, showing Name, Ref, Description, Move Target Mode, and Acceptance Radius fields filled in"><figcaption><p>Each Objects entry maps a unique name to a live Actor in the level. Convai uses the Name and Description to understand scene context; the Ref and movement fields are used locally for navigation.</p></figcaption></figure>
+### Using `UConvaiObjectComponent` for automatic registration
 
-### Using ConvaiObjectComponent for automatic registration
-
-Instead of manually populating the `Objects` array, you can place a `Convai Object` component (`UConvaiObjectComponent`) on any scene Actor. Components register automatically with all chatbots at session start through the `UConvaiSubsystem`. This is the preferred approach for levels with many interactable objects.
+Instead of manually populating the `Objects` array, you can add `UConvaiObjectComponent` to any scene Actor. These components register automatically with all chatbots at session start through the `UConvaiSubsystem`. This is the preferred approach for levels with many interactable objects.
 
 See [Scene metadata](../scene-metadata/README.md) for full documentation of `UConvaiObjectComponent`.
 
@@ -102,7 +98,7 @@ See [Scene metadata](../scene-metadata/README.md) for full documentation of `UCo
 
 The `Characters` array works identically to `Objects` but represents other NPCs or AI characters the chatbot can reference in actions like `Follow`.
 
-At session start, the plugin automatically adds the conversation partner (the player or another NPC currently talking to the chatbot) to the character list when `bAutoFillConversationPartnerFromPlayer` is `true` on the chatbot component. This property is in the **Convai | Session** category of the Details panel and defaults to `true`. Disable it when you register the conversation partner manually to avoid duplicate entries.
+At session start, the plugin can automatically add the player conversation partner to the character list when `bAutoFillConversationPartnerFromPlayer` is `true` on the chatbot component. The plugin uses the first `UConvaiPlayerComponent` it finds, falling back to player pawn `0` named `User` when needed. This property is in the **Convai | Session** category of the Details panel and defaults to `true`. Use `SetConversationPartner` when you need to register a non-player conversation partner.
 
 ## Runtime mutation
 
@@ -121,13 +117,14 @@ You can add or remove entries at runtime using the methods on `UConvaiChatbotCom
 | `RemoveCharacters(CharacterNames, bFlushImmediately)` | Remove multiple characters by name. |
 | `ClearCharacters(bFlushImmediately)` | Remove all characters. |
 
-Runtime object and character changes are batched and sent as an `update-scene-metadata` message so Convai's context stays current. Pass `bFlushImmediately = true` only when an immediate update is critical, as frequent flushes generate excess network traffic.
+Runtime object and character changes update the local `EnvironmentData` mirror immediately. In live sessions, changes that are not already part of the connect-time scene metadata snapshot are batched and sent through `update-scene-metadata` so Convai receives updated scene context. Pass `bFlushImmediately = true` only when an immediate update is critical, as frequent flushes generate excess network traffic.
 
 ### GatherEnvironmentExtras
 
 Override the `Gather Environment Extras` Blueprint native event on the NPC Actor to append additional actions, objects, or characters right before the session starts. The override runs once at `StartSession` time and is additive — it does not replace the Details panel defaults.
 
 ```text
+// Blueprint pseudocode
 // Blueprint native event override — implement in the NPC Actor Blueprint
 Event GatherEnvironmentExtras(out ExtraActions, out ExtraObjects, out ExtraCharacters)
     // Append quest-specific items that depend on runtime state

@@ -1,13 +1,13 @@
 ---
-title: Troubleshooting and diagnostics
-description: Fix actions that are not firing, resolve NavMesh and movement failures, and diagnose parameters that are not resolving in the Convai Unreal Engine plugin.
+title: Troubleshoot character actions
+description: Fix character actions that do not fire, movement failures, reference issues, and queue stalls in the Convai Unreal Engine plugin.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-This page covers the most common failure modes for character actions, with symptoms, causes, and verified fixes.
+Use this page to diagnose character actions that do not fire, stop mid-sequence, move to the wrong place, or receive empty parameters.
 
 {% hint style="info" %}
-Enable verbose logging before debugging — it will show the exact action names, parameter values, and resolution results in the Output Log. See [General diagnostics](#general-diagnostics) at the bottom of this page for setup instructions.
+Use the Output Log while debugging. `ConvaiChatbotComponentLog` reports session, queue, and dispatch messages, including missing handler warnings.
 {% endhint %}
 
 ## Actions not firing
@@ -20,7 +20,7 @@ Enable verbose logging before debugging — it will show the exact action names,
 
 **Fix:** In the Details panel for the `Convai Chatbot` component, expand **Environment** and tick **Enable Actions**.
 
-**Verify:** Check the session log for an `action_config` JSON block. If none appears in the log, `bEnableActions` was still off at connect time.
+**Verify:** Check the session log for an `ActionConfig:` entry. If no action config is sent, confirm **Enable Actions** is on and the `Actions` array is not empty before reconnecting.
 
 ---
 
@@ -35,6 +35,8 @@ Enable verbose logging before debugging — it will show the exact action names,
 **Cause C:** The handler function signature is wrong.
 
 **Fix:** The function must accept zero or one parameter of type `FConvaiResultAction` (`Convai Result Action` in the type picker). If the parameter type is wrong, the plugin logs a warning and the handler is not invoked — the queue stalls until `HandleActionCompletion` or `AbortActionSequence` is called.
+
+**Verify:** Check the Output Log (`ConvaiChatbotComponentLog`) for a warning containing `Ensure it accepts 'FConvaiResultAction' or has no parameters.`
 
 ---
 
@@ -61,6 +63,8 @@ Enable verbose logging before debugging — it will show the exact action names,
 
 **Fix:** Check that no handler is calling `HandleActionCompletion(false)` or `AbortActionSequence` prematurely. Also check that `ClearActionQueue` is not called in an unintended location.
 
+**Verify:** Add a **Print String** node before every `HandleActionCompletion(false)`, `AbortActionSequence`, and `ClearActionQueue` call. Confirm none runs before you inspect the queue.
+
 ---
 
 ## NavMesh and movement failures
@@ -71,7 +75,9 @@ Enable verbose logging before debugging — it will show the exact action names,
 
 **Cause A:** The NPC Actor has no AI Controller assigned.
 
-**Fix:** Set **AI Controller Class** on the NPC Actor to an `AIController` subclass. You can use UE's built-in `AIController`. Verify the controller is spawned at runtime with `Get Controller` → `Is Valid` in Blueprint.
+**Fix:** Set **AI Controller Class** on the NPC Actor to an `AIController` subclass. You can use UE's built-in `AIController`.
+
+**Verify:** In Play In Editor, use `Get Controller` → `Is Valid` in Blueprint. The result should be `true`.
 
 ---
 
@@ -79,17 +85,23 @@ Enable verbose logging before debugging — it will show the exact action names,
 
 **Fix:** In the Editor, select the `Nav Mesh Bounds Volume` and extend its bounds to cover all walkable areas. Rebuild navigation (**Build > Build Paths**). Enable **P** (navigation visualization) in the viewport to confirm the navmesh is present at both the NPC and the destination.
 
+**Verify:** The viewport shows green NavMesh coverage under both the NPC and the registered destination.
+
 ---
 
 **Cause C:** `bOut Success` from `Resolve Goal Location` was `false` but the handler called `AI Move To` anyway.
 
 **Fix:** Always branch on `bOut Success`. When `false`, the `Ref` Actor is null or destroyed and AI Move To will no-op (Actor mode) or send the pawn to a stale position (Vector mode). Call `AbortActionSequence` with an informative message instead.
 
+**Verify:** Print `bOut Success` before `AI Move To`. It must be `true` before the movement node runs.
+
 ---
 
 **Cause D:** The `AcceptanceRadius` is smaller than the AI can physically achieve given the navmesh resolution.
 
 **Fix:** Increase `AcceptanceRadius` on the `FConvaiObjectEntry` (default is `150` cm). For small objects like buttons or levers, use `Component as goal` mode to target a specific point rather than the whole-actor bounds.
+
+**Verify:** Print the `AI Move To` result or completion callback. The move should complete successfully once the radius is reachable.
 
 ---
 
@@ -101,6 +113,8 @@ Enable verbose logging before debugging — it will show the exact action names,
 
 **Fix:** Always branch on `Out Mode`. In `Actor` mode, wire `OutGoalActor` to the actor pin. In `Vector` mode, wire `OutGoalLocation` to the destination pin.
 
+**Verify:** Print `Out Mode` and confirm the corresponding `AI Move To` pin is the only goal pin wired for that branch.
+
 ---
 
 ## Reference and parameter resolution
@@ -111,13 +125,17 @@ Enable verbose logging before debugging — it will show the exact action names,
 
 **Cause A:** The object is not in the `Objects` or `Characters` array. Reference resolution only searches the registered environment.
 
-**Fix:** Add the object to the `Objects` array in the Details panel, or call `AddObject` before the session starts. Objects added after `/connect` appear in the context (via `update-scene-metadata`) but are not in `action_config` and cannot be resolved as Reference params.
+**Fix:** Add the object to the `Objects` or `Characters` array in the Details panel, or call `AddObject` / `AddCharacter` before the response that needs the target. Use a short registered name that Convai can return exactly.
+
+**Verify:** Print the returned `FConvaiObjectEntry.Name` and `FConvaiObjectEntry.Ref` after `GetParamAsRef`. The name should match the registered entry and `Ref` should be valid.
 
 ---
 
-**Cause B:** The name the LLM returned did not fuzzy-match any registered name.
+**Cause B:** The name Convai returned does not exactly match a registered object or character name.
 
-**Fix:** Enable `ConvaiActionUtilsLog=Verbose` (see [General diagnostics](#general-diagnostics)) and check the Output Log. The verbose trace shows the raw value the LLM returned and the closest match found (or no match). Adjust the registered object's `Name` to be closer to what the LLM is likely to generate, or add a more descriptive `Description` to guide the LLM.
+**Fix:** Adjust the registered entry's `Name` to the exact label Convai is likely to return, and use `Description` to guide selection. For example, prefer `SafetyValve` over a long sentence-like name.
+
+**Verify:** Print `GetParamAsString` for the same parameter and compare it to the registered `Name`. They should match exactly.
 
 ---
 
@@ -128,6 +146,8 @@ Enable verbose logging before debugging — it will show the exact action names,
 **Cause:** The LLM returned text like `"five seconds"` rather than `"5"`. `NumberValue` is populated via `Atof`, which returns `0` for non-numeric strings.
 
 **Fix:** Use `GetParamAsString` to read the raw value and parse it manually, or improve the parameter description to guide the LLM toward numeric output: set `Description` to `"A plain integer number of seconds, e.g. 3"`.
+
+**Verify:** Print both `GetParamAsString` and `GetParamAsNumber`. The string should start with a numeric value when automatic number parsing is expected.
 
 ---
 
@@ -141,15 +161,19 @@ Enable verbose logging before debugging — it will show the exact action names,
 
 **Fix:** Enable **Enable Actions** and reconnect the session.
 
+**Verify:** After reconnecting, call `SetObjectInAttention` again and inspect `CurrentAttentionObject` on the chatbot's `Environment` property.
+
 ---
 
 ### Gaze-driven attention is ignored
 
-**Symptom:** The player looks at a `Convai Object` component Actor, but `AttentionSource` stays `Explicit` and the slot does not update.
+**Symptom:** The player looks at an Actor with `UConvaiObjectComponent`, but `AttentionSource` stays `Explicit` and the slot does not update.
 
 **Cause:** A previous `SetObjectInAttention` call set the slot to `Explicit`, which blocks all gaze-driven updates.
 
 **Fix:** Call `SetObjectInAttention` with a default-constructed `FConvaiObjectEntry` (empty `Name`) to clear the Explicit lock. After clearing, the slot returns to `None` and gaze can take ownership again.
+
+**Verify:** Read `AttentionSource` after clearing. It should return to `None` before gaze updates it to `Gaze`.
 
 ---
 
@@ -158,14 +182,14 @@ Enable verbose logging before debugging — it will show the exact action names,
 Enable Convai log categories in **Output Log** to see detailed action pipeline messages:
 
 - `ConvaiChatbotComponentLog` — session, queue, and dispatch messages.
-- `ConvaiActionUtilsLog` — parameter parsing and reference resolution.
+- `ConvaiSubsystemLog` — action parsing and parameter constraint warnings.
 
 These categories are at `Log` verbosity by default. To increase verbosity, add the following to your project's `DefaultEngine.ini`:
 
 ```ini
 [Core.Log]
 ConvaiChatbotComponentLog=Verbose
-ConvaiActionUtilsLog=Verbose
+ConvaiSubsystemLog=Verbose
 ```
 
 ## Next steps
