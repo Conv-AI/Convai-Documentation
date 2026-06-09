@@ -37,7 +37,7 @@ These properties identify the player to Convai and are used for long-term memory
 | `IsPlayerConnected` | — | `bool` | `Convai\|Session` | `BlueprintPure`. Returns `true` when the session is in the `EC_ConnectionState::Connected` state. |
 | `SendText` | `ChatbotComponent (UConvaiConversationComponent*)`, `Text (FString)` | — | `Convai\|Session` | Sends `Text` on the player's active session, bypassing the microphone pipeline. In current source, the `ChatbotComponent` pin is present in the signature but is not used by the implementation. |
 
-See [Session lifecycle](../core-concepts/session-lifecycle.md) for connection states and multiplayer replication details.
+See [Session lifecycle](../core-concepts/session-lifecycle.md) for connection states and session start/stop behavior.
 
 ## Microphone capture
 

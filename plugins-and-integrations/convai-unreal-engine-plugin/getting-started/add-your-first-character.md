@@ -4,7 +4,11 @@ description: Build a talking Convai character in Unreal Engine by adding Chatbot
 last_reviewed: "4.0.0-beta.21"
 ---
 
-We will add a Convai character to an existing Unreal Engine project and have a live voice conversation with it. By the end, you will have a character that listens, generates a response, and speaks back using your microphone. A [quick-setup walkthrough video](https://youtu.be/n-UG3nmMeZQ) covers the same flow visually if you prefer to follow along.
+We will add a Convai character to an existing Unreal Engine project and have a live voice conversation with it. By the end, you will have a character that listens, generates a response, and speaks back using your microphone.
+
+{% embed url="https://youtu.be/n-UG3nmMeZQ" %}
+Add your first Convai character walkthrough
+{% endembed %}
 
 ## Before you start
 
@@ -72,8 +76,12 @@ Skip this step if your character has no facial rig.
 ### Compile and save the Blueprint
 
 Click **Compile** and then **Save** in the Blueprint editor toolbar.
+{% endstep %}
 
-To start the character with a specific expression, expand the **Default** section in the **Details** panel for the **Convai Chatbot** component and set an **Initial Emotion** (for example, **Happy** at **Basic** intensity). Emotions update dynamically as the conversation evolves.
+{% step %}
+### Set a starting expression (optional)
+
+To start the character with a specific expression, open the **Event Graph**, add an **Event BeginPlay** node, get a reference to the **Convai Chatbot** component, and call **Force Set Emotion**. Set **Basic Emotion** to `Happy`, **Intensity** to `Basic`, and **Reset Other Emotions** to `true`. Emotions update dynamically as the conversation evolves. See [Emotion examples](../features/emotion/usage-examples.md).
 {% endstep %}
 {% endstepper %}
 
@@ -84,6 +92,8 @@ To start the character with a specific expression, expand the **Default** sectio
 ### Find the player pawn Blueprint
 
 The fastest way to find it is through **Window > World Settings**. Expand **Game Mode > Selected Game Mode** and note the **Default Pawn Class**. Click the Browse icon next to it to locate the Blueprint in the **Content Browser**, then open it.
+
+Alternatively, from Play mode: press **Shift+F1** to release the mouse, click **Detach** in the toolbar, click the player character in the viewport, then click **Edit Blueprint**.
 {% endstep %}
 
 {% step %}

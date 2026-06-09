@@ -54,19 +54,57 @@ Use `SetMicrophoneVolumeMultiplier` if the character consistently mishears quiet
 
 ## Android microphone permission
 
-On Android, the operating system requires an explicit runtime permission grant before audio capture can start. The Convai plugin depends on the `AndroidPermission` engine plugin — bundled and enabled automatically — to request this permission.
+On Android and standalone VR builds (such as Meta Quest), the operating system requires an explicit runtime permission grant before audio capture can start. The Convai plugin depends on the `AndroidPermission` engine plugin — bundled and enabled automatically — to request this permission.
 
 {% hint style="warning" %}
 Without the microphone permission on Android, `UConvaiPlayerComponent` will initialize but audio capture will silently fail. The character will not receive any speech input.
 {% endhint %}
 
-To request the permission from Blueprint, use the **Android Permission** nodes provided by the `AndroidPermission` engine plugin. Request `android.permission.RECORD_AUDIO` at the point in your application where the player is about to start a conversation — for example, when the player character enters a conversation zone.
+### Prepare the Android build
 
-The standard pattern:
+{% stepper %}
+{% step %}
+### Enable the Android Permission plugin
+
+In the Unreal Editor, open **Edit > Plugins**, search for `Android Permission`, and confirm it is enabled. Restart the editor if prompted.
+{% endstep %}
+
+{% step %}
+### Declare the permission in Project Settings
+
+Open **Edit > Project Settings > Platforms > Android > Advanced APK Packaging**. Under **Extra Permissions**, click **+** and add:
+
+```text
+android.permission.RECORD_AUDIO
+```
+
+Save Project Settings.
+{% endstep %}
+{% endstepper %}
+
+### Request permission at runtime
+
+Request `android.permission.RECORD_AUDIO` at the point in your application where the player is about to start a conversation — for example, in your Game Mode or Player Controller **BeginPlay** event, or when the player enters a conversation zone.
+
+Use the **Android Permission** nodes from the `AndroidPermission` engine plugin:
 
 1. Call **Check Android Permission** with `android.permission.RECORD_AUDIO`.
-2. If the result is `false`, call **Request Android Permission** for that permission.
-3. Bind to the **On Permission Request Complete** delegate and proceed to start the conversation only when the grant is confirmed.
+2. If the result is `false`, call **Request Android Permission** for that permission (or **Request Android Permissions** with a string array containing `android.permission.RECORD_AUDIO`).
+3. Bind to **On Permission Request Complete** (or **On Permissions Granted**) and start the conversation only when the grant is confirmed.
+
+Simplified Blueprint flow:
+
+```text
+Event BeginPlay → Delay (0.5s) → Check Android Permission (RECORD_AUDIO) → Branch
+  → True: start conversation / enable voice input
+  → False: Request Android Permission → On grant confirmed: start conversation
+```
+
+If the player previously denied the permission, enable **Microphone** manually under the device's app settings before testing again.
+
+On Quest devices: **Settings > Apps > [Your App] > Permissions > Microphone > Allow**.
+
+After permission is granted, rebuild and redeploy the Android or Quest package before testing voice input on device.
 
 ## Troubleshooting
 

@@ -4,7 +4,7 @@ description: "Understand what the Convai Unreal Engine plugin adds to a project:
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin connects Unreal Engine 5 projects to Convai, enabling actors in a scene to hold real-time voice and text conversations, express emotions, animate their faces in sync with speech, and respond to player actions. It does this through Blueprint-spawnable components, `UConvaiConnectionSessionProxy` instances, and `UConvaiSubsystem`, the engine subsystem that manages the underlying Convai connection.
+The Convai Unreal Engine plugin connects Unreal Engine 5 projects to Convai so in-scene actors can speak, listen, reason, and act in real time. A player speaks into a microphone or sends text; the plugin captures input, streams it to Convai for speech recognition and language understanding, generates a response with text-to-speech, and plays it back on the character with synchronized lip sync, facial emotion, and optional in-scene actions. The plugin targets Unreal developers building training simulations, interactive experiences, and games.
 
 ## What it includes
 

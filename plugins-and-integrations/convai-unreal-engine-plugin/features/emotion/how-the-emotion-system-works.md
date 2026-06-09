@@ -85,7 +85,7 @@ The state holds whatever values it had when the lock was applied — either from
 This is useful when you want a character to hold a specific expression during a cutscene or cinematic regardless of what Convai sends.
 
 {% hint style="warning" %}
-`LockEmotionState` is a replicated property. Its value is synchronized across the network in multiplayer sessions. Confirm it is reset to `false` after any locking sequence, or subsequent clients that receive the component's state will also see the locked expression.
+Confirm `LockEmotionState` is reset to `false` after any locking sequence, or the character will keep the locked expression until you unlock it.
 {% endhint %}
 
 ## Forcing an emotion

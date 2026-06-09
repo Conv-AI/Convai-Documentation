@@ -34,7 +34,7 @@ These properties identify the character and the loaded runtime name.
 | `ResetConversation` | `Convai` | Resets `SessionID` to `"-1"`, clearing conversation memory. Does not stop the session. |
 | `GatherEnvironmentExtras` (Blueprint native event) | `Convai\|Session` | Override in Blueprint to append extra actions, objects, or characters right before `/connect`. Output pins: `OutExtraActions (TArray<FConvaiAction>)`, `OutExtraObjects (TArray<FConvaiObjectEntry>)`, `OutExtraCharacters (TArray<FConvaiObjectEntry>)`. Details-panel defaults are still sent — this hook only appends to them and does not replace them. |
 
-See [Session lifecycle](../core-concepts/session-lifecycle.md) for the connection state model and multiplayer replication details.
+See [Session lifecycle](../core-concepts/session-lifecycle.md) for connection states and session start/stop behavior.
 
 ## Long-term memory (LTM)
 

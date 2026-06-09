@@ -14,7 +14,7 @@ End-user identity tells Convai which player is speaking to the character. Set a 
 | Account ID | Your project already has login or profile IDs. | Assign your stable account ID directly as `EndUserID`. |
 | Device fallback | One local device maps to one player. | Leave `EndUserID` empty and the plugin derives a device identifier at connect time. |
 
-For most shared-device, training, onboarding, and multiplayer projects, use a Speaker ID or your own account ID. Device fallback can merge memory for multiple users on the same machine.
+For most shared-device, training, and onboarding projects, use a Speaker ID or your own account ID. Device fallback can merge memory for multiple users on the same machine.
 
 ## Create and save a Speaker ID
 
@@ -66,7 +66,7 @@ If you want to pass player context, set `EndUserMetadata` to a JSON string:
 
 On the `UConvaiPlayerComponent`, call **Set End User ID** with the same value.
 
-If you are sending metadata, call **Set End User Metadata** with the same JSON string. The setter functions call reliable server RPCs when the component is replicated.
+If you are sending metadata, call **Set End User Metadata** with the same JSON string.
 {% endstep %}
 
 {% step %}
@@ -79,7 +79,7 @@ At connect time, the plugin reads `GetEndUserID()` and `GetEndUserMetadata()` fr
 {% endstepper %}
 
 {% hint style="warning" %}
-In multiplayer, set identity from an authority-aware flow and wait until your player setup has completed before opening the session. `SetEndUserID()` and `SetEndUserMetadata()` call server RPCs when replicated, but the current source registers only `PlayerName` in `UConvaiPlayerComponent::GetLifetimeReplicatedProps()`.
+Set identity before **Start Session** on both the chatbot and player components. If identity is assigned after the session opens, Convai may not associate the conversation with the intended user record.
 {% endhint %}
 
 ## Use device fallback only when appropriate
@@ -90,7 +90,6 @@ This works for a single local user. It is not enough for:
 
 - Shared classroom or lab machines.
 - Training kiosks used by multiple learners.
-- Multiplayer sessions.
 - Projects where memory must follow a signed-in user across devices.
 
 ## Verify the identity

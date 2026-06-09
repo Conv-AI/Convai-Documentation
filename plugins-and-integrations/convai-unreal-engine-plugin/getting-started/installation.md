@@ -6,9 +6,9 @@ last_reviewed: "4.0.0-beta.21"
 
 The Convai Unreal Engine plugin is available through two channels. Review the comparison below, choose the one that fits your workflow, then follow the corresponding steps.
 
-{% hint style="info" %}
-[Watch the installation walkthrough video](https://youtu.be/n-UG3nmMeZQ) for a full end-to-end visual guide covering install and first-character setup.
-{% endhint %}
+{% embed url="https://youtu.be/n-UG3nmMeZQ" %}
+Install the Convai plugin and add your first character
+{% endembed %}
 
 ## Fab vs GitHub: which to choose
 
@@ -112,12 +112,12 @@ In the search box, type `Convai`. Locate the **Convai** plugin in the results an
 {% step %}
 ### Restart the editor
 
-A restart prompt appears. Click **Restart Now**. After the editor reopens, a sign-in prompt from the Convai editor window may appear automatically. If it does not, click the Convai icon in the toolbar to open it.
+A restart prompt appears. Click **Restart Now**. After the editor reopens, the Convai editor window opens automatically and prompts you to sign in.
 {% endstep %}
 {% endstepper %}
 
 {% hint style="success" %}
-When the plugin loads correctly, the Convai toolbar icon appears in the Unreal Editor toolbar and the Convai editor window opens or is accessible via the icon.
+When the plugin loads correctly, the Convai toolbar icon appears in the Unreal Editor toolbar and the Convai editor window opens for sign-in.
 {% endhint %}
 
 ## Next steps

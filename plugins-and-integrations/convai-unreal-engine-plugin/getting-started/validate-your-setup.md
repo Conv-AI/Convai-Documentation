@@ -36,7 +36,7 @@ If you are not signed in, see [Configure your API key](configure-api-key.md).
 
 | Check | How to verify |
 |---|---|
-| Microphone is available | Call `GetAvailableCaptureDeviceNames()` on the `UConvaiPlayerComponent` at runtime (for example in BeginPlay with a Print String node) and confirm the list is non-empty. |
+| Microphone is available | Press **F10** in Play mode to open the settings panel, then view and test available microphone devices. Alternatively, call `GetAvailableCaptureDeviceNames()` on `UConvaiPlayerComponent` at runtime and confirm the list is non-empty. |
 | Default device opens | Enter Play mode and confirm that `GetIsStreaming()` returns `true` after triggering push-to-talk or enabling hands-free mode. |
 | Android permission granted | On Android, confirm the `android.permission.RECORD_AUDIO` permission was requested and granted before starting a conversation. |
 

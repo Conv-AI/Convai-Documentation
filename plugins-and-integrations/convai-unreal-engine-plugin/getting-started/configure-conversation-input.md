@@ -13,15 +13,27 @@ last_reviewed: "4.0.0-beta.21"
 | **How it works** | Player holds a key to transmit voice. | Voice activity detection triggers automatically. | Text string sent directly to the chatbot. |
 | **Best for** | Controlled input, game UX, shared-mic scenarios. | Ambient NPCs, kiosk installations, always-on experiences. | Accessibility features, text-chat UI, automated testing. |
 | **Microphone required** | Yes | Yes | No |
-| **Default** | Yes (default when `BP_ConvaiPlayerComponent` is added) | No — call `UpdateVadBP(true)` to enable. | No — call `SendText()` as needed. |
+| **Default** | Yes — `Enable Push to Talk` is `true` on `BP_ConvaiPlayerComponent` in the **Details** panel | No — disable **Enable Push to Talk** or call `UpdateVadBP(true)` | No — call `SendText()` as needed. |
+| **Where to configure** | **Details** panel on `BP_ConvaiPlayerComponent` under the **Convai** category, or Blueprint nodes | Same **Details** panel — set **Enable Push to Talk** to `false`, or call `UpdateVadBP(true)` | Blueprint `SendText()` node |
 
 ## Configure your mode
+
+On `BP_ConvaiPlayerComponent`, open the **Details** panel and expand the **Convai** category. The **Enable Push to Talk** checkbox controls the default input mode:
+
+- **Enable Push to Talk** checked (`true`) — push-to-talk is active.
+- **Enable Push to Talk** unchecked (`false`) — hands-free (VAD) mode is active.
+
+You can change this in the **Details** panel without editing Blueprint graphs, or override it at runtime with Blueprint nodes as described in each tab below.
 
 {% tabs %}
 {% tab title="Push-to-talk" %}
 Push-to-talk is the default mode. The player holds a key to stream voice input; releasing the key stops the stream.
 
-The built-in chat widget provided by `BP_ConvaiPlayerComponent` and `BP_ConvaiSamplePlayer` binds push-to-talk to a default key. Replace it with any input action in your Blueprint by calling:
+`BP_ConvaiPlayerComponent` ships with push-to-talk input and a default talk key pre-wired in its Blueprint graph. To change the key, open the player pawn Blueprint, select **BP Convai Player Component**, and edit the input binding in the component's event graph — or replace the default binding with your own input action.
+
+You can also set **Enable Push to Talk** to `true` in the **Details** panel under the **Convai** category to confirm push-to-talk mode is active.
+
+To wire push-to-talk manually, call:
 
 | Function | Returns | Description |
 |---|---|---|
@@ -36,9 +48,9 @@ You can also toggle mute without changing the mode: set the `bMute` property on 
 {% tab title="Hands-free" %}
 In hands-free mode the character listens continuously and responds whenever the player speaks, without requiring a key press.
 
-To enable hands-free mode, call `UpdateVadBP(true)` on the `UConvaiPlayerComponent` from Blueprint — for example in the player pawn's **BeginPlay** event. This requires an attached audio-processing component (`ConvaiAudioProcessing`); `BP_ConvaiPlayerComponent` includes this wiring. The call returns `false` if the audio-processing component is missing.
+Disable **Enable Push to Talk** on `BP_ConvaiPlayerComponent` in the **Details** panel under the **Convai** category, or call `UpdateVadBP(true)` from Blueprint — for example in the player pawn's **BeginPlay** event. This requires an attached audio-processing component (`ConvaiAudioProcessing`); `BP_ConvaiPlayerComponent` includes this wiring. The call returns `false` if the audio-processing component is missing.
 
-To disable hands-free mode and return to push-to-talk, call `UpdateVadBP(false)`.
+To return to push-to-talk, enable **Enable Push to Talk** in the **Details** panel or call `UpdateVadBP(false)`.
 
 You can still mute input programmatically regardless of the active mode: set the `bMute` property on `UConvaiPlayerComponent` to `true` to silence input and `false` to restore it.
 {% endtab %}

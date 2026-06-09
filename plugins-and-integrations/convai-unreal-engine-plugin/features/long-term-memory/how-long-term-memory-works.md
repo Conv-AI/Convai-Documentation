@@ -40,7 +40,7 @@ The `SpeakerID` field from `FConvaiSpeakerInfo` is the value to persist in your 
 
 If `EndUserID` is empty when connection parameters are built, the plugin calls `UConvaiUtils::GetDeviceUniqueIdentifier()`. That helper tries `FPlatformMisc::GetDeviceId()`, then `FPlatformMisc::GetOperatingSystemId()`, then `FPlatformMisc::GetLoginId()`.
 
-This fallback is useful for a single-player project where one device maps to one user. It is not appropriate for shared devices, account-based applications, or multiplayer sessions where each player needs a separate memory scope.
+This fallback is useful for a single-player project where one device maps to one user. It is not appropriate for shared devices or account-based applications where each user needs a separate memory scope.
 
 ## Session continuity
 
@@ -91,7 +91,7 @@ The plugin does not manage your save data. Your project is responsible for stori
 | --- | --- | --- |
 | Single-player project on one device | Device fallback or Speaker ID | Device fallback is minimal; Speaker ID gives explicit records. |
 | Shared training kiosk | Speaker ID or account ID | Each trainee needs a separate memory scope. |
-| Multiplayer simulation | Account ID or Speaker ID per player | Avoids multiple players sharing the same `EndUserID`. |
+| Shared kiosk or training station | Account ID or Speaker ID per user | Avoids multiple users sharing the same `EndUserID`. |
 | Authenticated enterprise app | Your account system's stable user ID | Keeps memory tied to the user's account across devices. |
 
 {% hint style="warning" %}

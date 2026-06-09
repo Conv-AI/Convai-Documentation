@@ -66,7 +66,7 @@ The chatbot exposes speech-state helper functions such as `GetIsTalking`, `IsLis
 <td><a href="runtime-architecture.md">runtime-architecture.md</a></td>
 </tr>
 <tr>
-<td><strong>Session lifecycle</strong><br>How sessions start, stop, and recover — including multiplayer considerations and the subsystem Blueprint surface.</td>
+<td><strong>Session lifecycle</strong><br>How sessions start, stop, and report connection state — plus the subsystem Blueprint surface.</td>
 <td><a href="session-lifecycle.md">session-lifecycle.md</a></td>
 </tr>
 <tr>

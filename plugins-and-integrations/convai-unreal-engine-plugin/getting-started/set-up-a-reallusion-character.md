@@ -4,7 +4,11 @@ description: Export a Reallusion CC5 avatar, import it into Unreal Engine, confi
 last_reviewed: "4.0.0-beta.21"
 ---
 
-This guide covers the full flow for connecting a Reallusion Character Creator 5 (CC5) avatar to the Convai Unreal Engine plugin. Watch the [Set up a Reallusion character walkthrough video](https://www.youtube.com/watch?v=nyPNP-S92QI) for a visual guide alongside these steps.
+This guide covers the full flow for connecting a Reallusion Character Creator 5 (CC5) avatar to the Convai Unreal Engine plugin.
+
+{% embed url="https://www.youtube.com/watch?v=nyPNP-S92QI" %}
+Set up a Reallusion character walkthrough
+{% endembed %}
 
 ## Prerequisites
 
@@ -78,7 +82,7 @@ CC Auto Setup is a third-party tool provided by Reallusion — it is not part of
 {% step %}
 ### Download and install CC Auto Setup
 
-Download CC Auto Setup from the [Reallusion tools page](https://www.reallusion.com/character-creator/unreal-engine.html) or from the link provided in the Reallusion tutorial video description. Double-click the installer, accept the license, and click **Next**. Note the destination folder path — you will need it in the next step.
+Download CC Auto Setup from the [Reallusion CC Auto Setup for Unreal Engine](https://www.reallusion.com/auto-setup/unreal-engine/default.html) page. Double-click the installer, accept the license, and click **Next**. Note the destination folder path — you will need it in the next step.
 {% endstep %}
 
 {% step %}
@@ -157,8 +161,6 @@ Drag the character Blueprint from the **Content Browser** into the level viewpor
 {% endstep %}
 {% endstepper %}
 
-If your character Blueprint uses a body and face skeletal mesh split (common in CC5 exports), the **Get Body and Face Skeletal Mesh Components** Blueprint node — found in the **Convai > Utilities** category on `UConvaiUtils` — returns both mesh references in a single call.
-
 ## Add the Convai Player component to the player pawn
 
 If you have not already done this, open your player pawn Blueprint and add `UConvaiPlayerComponent`. For detailed steps, see [Add your first Convai character](add-your-first-character.md).
@@ -167,11 +169,11 @@ To find the player pawn from Play mode: press **Shift+F1** to release the mouse,
 
 ## Test the conversation
 
-Enter Play mode and speak to the character using push-to-talk (default: **T**) or the chat widget. When voice and text input are reaching the character, body and idle animations play. Facial lip sync animation is added in the next section.
+Enter Play mode and speak to the character using push-to-talk (default: **T**) or the chat widget. At this stage, expect voice and text responses with audio playback only — body animation and lip sync require the animation Blueprint and Face Sync steps below.
 
 ## Add the Reallusion animation Blueprint
 
-The Reallusion character needs a dedicated animation Blueprint to connect the Convai lip sync data with the avatar's skeleton.
+The Reallusion character needs the Convai Reallusion animation Blueprint (`Convai_Reallusion_AnimBP`) to drive idle, talk, focus, and walk states during conversation.
 
 {% stepper %}
 {% step %}
@@ -182,7 +184,7 @@ Download the Reallusion animation Blueprint from the Convai Google Drive folder:
 [Convai Reallusion animation Blueprint (Google Drive)](https://drive.google.com/drive/folders/1k3072DH3zJXk2xTg-CJ_najnm0pyvZJS)
 
 {% hint style="info" %}
-This Google Drive folder is the official distribution channel for the Reallusion animation Blueprint. If the link is unavailable, post a request in the [Convai community forum](https://forum.convai.com) and the team will provide the asset directly.
+This Google Drive folder is the official distribution channel for the Reallusion animation Blueprint. If the link is unavailable, post a request in the [Convai Developer Forum](https://forum.convai.com) and the team will provide the asset directly.
 {% endhint %}
 
 Download the zip, extract it, and locate the animation Blueprint asset file.
@@ -197,15 +199,20 @@ Copy the animation Blueprint asset into the `Content` folder inside your Unreal 
 {% step %}
 ### Configure the animation Blueprint
 
-After restart, find the animation Blueprint in the **Content Browser** and double-click it. When prompted, select your Reallusion avatar's skeleton.
+After restart, find `Convai_Reallusion_AnimBP` in the **Content Browser** and double-click it. When prompted, select your Reallusion avatar's skeleton.
 
-Open the **Animation Graph** inside the animation Blueprint. In the **Content Drawer**, navigate to the character's motion folder and import the animation assets you exported from Character Creator 5. Drag and drop them into the animation graph and connect them to the appropriate states.
+Open the **Animation Graph** inside `Convai_Reallusion_AnimBP`. In the **Content Drawer**, navigate to the character's motion folder and locate the animation assets you exported from Character Creator 5. Drag and drop each animation into the graph and connect it to the matching state:
+
+| State | Animation role |
+|---|---|
+| `BaseAnimation` | Idle animation — the default resting pose |
+| `Talk Animation` | Body animation while the character is speaking |
+| `Focus Animation` | Animation while the character is listening or attentive |
+| `Walk Animation` | Locomotion animation when the character moves |
 
 - If drag and drop does not connect, right-click in the graph, type `Play`, and manually select the animation by name.
-- Repeat this for all required animations.
-- Set the transition animation (used between states) to the idle animation.
-- Talking animations are optional — the idle animation alone is sufficient.
-- Ensure all animations are set to **Loop**.
+- Set transition blends between states to use the idle animation where appropriate.
+- Ensure all looped animations are set to **Loop**.
 
 Click **Compile** and **Save**.
 {% endstep %}
@@ -213,7 +220,7 @@ Click **Compile** and **Save**.
 {% step %}
 ### Assign the animation Blueprint to the character
 
-Open the character Blueprint. Select the **Skeletal Mesh** component. In the **Details** panel, under **Animation**, set **Anim Class** to the Reallusion animation Blueprint you configured.
+Open the character Blueprint. Select the **Skeletal Mesh** component. In the **Details** panel, under **Animation**, set **Anim Class** to `Convai_Reallusion_AnimBP`.
 
 Compile and save the Blueprint.
 {% endstep %}
@@ -261,7 +268,7 @@ When the setup is complete, the Reallusion character's lips and facial expressio
 - Confirm that **Lip Sync Mode** is set to **MetaHuman Blendshapes** for CC5 characters, or **CC4 Extended Blendshapes** for CC4 characters.
 - If the issue persists, re-import the FBX with **Import Morph Targets** checked under the **Advanced** section of the FBX Import Options dialog.
 
-**Verify:** Enter Play mode and speak to the character. The lips should animate in sync with the spoken response.
+**Verify:** Enter Play mode and speak to the character. The lips should animate in sync with the spoken response. If they do not, open **Window > Output Log**, filter on `ConvaiFaceSync`, and check for errors during speech.
 
 ### Body animation does not play
 
@@ -270,11 +277,22 @@ When the setup is complete, the Reallusion character's lips and facial expressio
 **Cause:** **Anim Class** on the Skeletal Mesh is not set to the Reallusion animation Blueprint, animations are not set to loop, or the first and last frames do not match, causing the animation to snap.
 
 **Fix:**
-- Confirm that **Anim Class** on the Skeletal Mesh component is set to the Reallusion animation Blueprint you configured.
-- Open the animation Blueprint and confirm every animation asset is set to **Loop**.
+- Confirm that **Anim Class** on the Skeletal Mesh component is set to `Convai_Reallusion_AnimBP`.
+- Open `Convai_Reallusion_AnimBP` and confirm each state (`BaseAnimation`, `Talk Animation`, `Focus Animation`, `Walk Animation`) has the correct animation assigned.
+- Confirm every looped animation asset is set to **Loop**.
 - Confirm that the first and last frames of each animation are identical.
 
-**Verify:** Enter Play mode and confirm the character plays an idle animation and transitions to a talking animation when responding.
+**Verify:** Enter Play mode and confirm the character plays an idle animation and transitions to a talking animation when responding. Check **Window > Output Log** for animation or Convai errors if states do not change.
+
+### Character does not respond to voice or text
+
+**Symptom:** The Reallusion character is in the level but does not react to input.
+
+**Cause:** The **Character ID** is missing or incorrect, the API key is not configured, or `UConvaiPlayerComponent` is absent from the player pawn.
+
+**Fix:** Verify the **Character ID** on the **Convai Chatbot** component and confirm your API key is set (see [Configure your API key](configure-api-key.md)). Confirm the player pawn has `UConvaiPlayerComponent` added.
+
+**Verify:** Open **Window > Output Log**, filter on `ConvaiChatbotComponentLog` or `ConvaiConnectionManagerLog`, and look for authentication or connection errors when you enter Play mode.
 
 ## Next steps
 

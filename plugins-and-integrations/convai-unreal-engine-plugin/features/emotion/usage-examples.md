@@ -35,7 +35,7 @@ When `On Emotion State Changed` fires from `Force Set Emotion`, the **Interactin
 3. If expressions are not already driven by your event handler, call `Get Emotion Score` for `Angry` and apply the return value to the appropriate morph target.
 4. When the cutscene ends, set `Lock Emotion State` back to `false`. The next server emotion update will replace the locked state and fire the event again.
 
-You can also set `Lock Emotion State` to `true` without a preceding `Force Set Emotion` to freeze the character at whatever expression it held when the cutscene started. In multiplayer, `Lock Emotion State` is a replicated property — confirm it is reset to `false` on all relevant machines after the cutscene ends.
+You can also set `Lock Emotion State` to `true` without a preceding `Force Set Emotion` to freeze the character at whatever expression it held when the cutscene started. Reset `Lock Emotion State` to `false` when the cutscene ends.
 
 ---
 

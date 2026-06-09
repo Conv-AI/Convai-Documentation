@@ -40,7 +40,7 @@ Fires each time a transcription update arrives during or after an utterance. The
 
 **`OnAttendeeConnectionStateChangedEvent`** — category `Convai|Connection`
 
-Fires whenever an attendee's connection state changes. This covers both the chatbot's own state and, in multiplayer sessions, the state of remote participants joining or leaving the session.
+Fires whenever an attendee's connection state changes on the chatbot or player component.
 
 | Parameter | Type | Description |
 |---|---|---|

@@ -4,7 +4,11 @@ description: Add Convai Chatbot and Face Sync components to a MetaHuman, assign 
 last_reviewed: "4.0.0-beta.21"
 ---
 
-This guide walks through connecting a MetaHuman to the Convai Unreal Engine plugin so it speaks with real-time lip sync and facial animation. The [MetaHuman setup walkthrough video](https://youtu.be/4fMCKkrfyaA) shows the full flow visually.
+This guide walks through connecting a MetaHuman to the Convai Unreal Engine plugin so it speaks with real-time lip sync and facial animation.
+
+{% embed url="https://youtu.be/4fMCKkrfyaA" %}
+MetaHuman character setup walkthrough
+{% endembed %}
 
 ## Prerequisites
 
@@ -140,10 +144,25 @@ The animation interface `BPI_Convai_Animation` at `Interfaces/BPI_Convai_Animati
 
 ## Troubleshooting
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| MetaHuman's mouth does not move during speech even though audio plays | **Lip Sync Mode** is set to the wrong target, or the face and body animation classes are not the Convai MetaHuman variants | Confirm **Lip Sync Mode** on `UConvaiFaceSyncComponent` is **MetaHuman Blendshapes**. Confirm **Anim Class** on the **Face** mesh is `Convai_MetaHuman_FaceAnim` and on the **Body** mesh is `Convai_MetaHuman_BodyAnim`. |
-| Character is present in the level but does not react to voice or text input | The Character ID is missing or incorrect, the API key is not configured, or `UConvaiPlayerComponent` is absent from the player pawn | Verify the **Character ID** on the **Convai Chatbot** component matches a character in your Convai dashboard. Confirm your API key is set (see [Configure your API key](configure-api-key.md)). Confirm the player pawn has `UConvaiPlayerComponent` added. |
+### MetaHuman mouth does not move during speech
+
+**Symptom:** Audio plays but the mouth does not animate.
+
+**Cause:** **Lip Sync Mode** is set to the wrong target, or the face and body animation classes are not the Convai MetaHuman variants.
+
+**Fix:** Confirm **Lip Sync Mode** on `UConvaiFaceSyncComponent` is **MetaHuman Blendshapes**. Confirm **Anim Class** on the **Face** mesh is `Convai_MetaHuman_FaceAnim` and on the **Body** mesh is `Convai_MetaHuman_BodyAnim`.
+
+**Verify:** Enter Play mode and speak to the character. Open **Window > Output Log**, filter on `ConvaiFaceSync` or `ConvaiChatbotComponentLog`, and confirm no errors appear while the character speaks.
+
+### Character does not respond to voice or text
+
+**Symptom:** The MetaHuman is in the level but does not react to input.
+
+**Cause:** The **Character ID** is missing or incorrect, the API key is not configured, or `UConvaiPlayerComponent` is absent from the player pawn.
+
+**Fix:** Verify the **Character ID** on the **Convai Chatbot** component matches a character in your Convai dashboard. Confirm your API key is set (see [Configure your API key](configure-api-key.md)). Confirm the player pawn has `UConvaiPlayerComponent` added.
+
+**Verify:** Open **Window > Output Log** and filter on `ConvaiChatbotComponentLog` or `ConvaiConnectionManagerLog`. Look for connection or authentication errors when you enter Play mode and attempt a conversation.
 
 ## Next steps
 

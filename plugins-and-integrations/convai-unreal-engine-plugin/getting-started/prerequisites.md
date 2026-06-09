@@ -10,23 +10,40 @@ Verify each requirement before you install the Convai Unreal Engine plugin. Miss
 
 The plugin supports Unreal Engine 5.0 and later — every UE 5.x release. The minimum supported version is <code class="expression">space.vars.unreal_min_version</code>.
 
-The **Convai editor window** — the in-editor panel used for API key sign-in — requires **UE 5.2 or later**. On UE 5.0 and 5.1, all runtime gameplay features work, but the editor sign-in panel is not available. Set your API key with the **Set API Key** Blueprint node (`UConvaiUtils::SetAPI_Key`, category **Convai > Settings**) instead — see [Configure your API key](configure-api-key.md).
+The **Convai editor window** — the in-editor panel used for API key sign-in — requires **UE 5.2 or later**. On UE 5.0 and 5.1, all runtime gameplay features work, but the editor sign-in panel is not available. Add your API key to `Config/DefaultEngine.ini` instead — see [Configure your API key](configure-api-key.md).
 
-| UE version range | Plugin support | Convai editor window |
+| UE version range | Plugin support | API key setup |
 |---|---|---|
-| 5.0–5.1 | Supported | Not available. Use **Set API Key** (`UConvaiUtils::SetAPI_Key`) or add the key to `Config/DefaultEngine.ini`. |
-| 5.2 and later | Supported | Available via the toolbar **Convai Editor** button and **Window** menu (**Convai** section > **Open Convai Editor**). |
+| 5.0–5.1 | Supported | Add the key to `Config/DefaultEngine.ini` (Project Settings shows the value read-only) |
+| 5.2 and later | Supported | Sign in through the Convai editor window (opens automatically after plugin enable) |
 
 {% hint style="warning" %}
-On Unreal Engine 5.0 and 5.1, the Convai editor window and its Project Settings customization are not loaded. `UConvaiSettings.API_Key` is read-only in the default Project Settings UI — use **Set API Key** or `DefaultEngine.ini` instead.
+On Unreal Engine 5.0 and 5.1, the Convai editor window is not loaded. Add your API key to `Config/DefaultEngine.ini` — the **API Key** field in Project Settings is read-only on those engine versions.
 {% endhint %}
 
 ## Convai account and API key
 
 You need a Convai account to authenticate the plugin and to create or manage characters.
 
-1. Go to [convai.com](https://convai.com) and create a free account if you do not have one.
-2. After signing in, your API key is available on the dashboard. You will enter it through the Convai editor window after installation — see [Configure your API key](configure-api-key.md).
+{% stepper %}
+{% step %}
+### Create a Convai account
+
+Go to [convai.com](https://convai.com) and create a free account if you do not have one.
+{% endstep %}
+
+{% step %}
+### Sign in to the dashboard
+
+Sign in and open your account dashboard. Your API key is available under account settings.
+{% endstep %}
+
+{% step %}
+### Copy your API key
+
+Copy the API key string. You will enter it after installation — through the Convai editor window on UE 5.2+, or in `Config/DefaultEngine.ini` on UE 5.0 and 5.1. See [Configure your API key](configure-api-key.md).
+{% endstep %}
+{% endstepper %}
 
 ## Engine plugins (bundled dependencies)
 
