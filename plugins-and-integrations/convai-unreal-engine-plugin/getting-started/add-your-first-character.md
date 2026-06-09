@@ -117,7 +117,7 @@ Press **Play** in the Unreal Editor toolbar. A chat widget appears in the viewpo
 
 Hold the push-to-talk key (default: **T**), speak into your microphone, then release the key. The character processes your speech, generates a response, and speaks back.
 
-To use hands-free (VAD) mode instead, open the player pawn Blueprint, select the **Convai Player** component, expand the **Convai** category in the **Details** panel, and disable **Enable Push to Talk** (`EnablePushToTalk`). Alternatively, call `UpdateVadBP(true)` from Blueprint. See [Configure conversation input](configure-conversation-input.md) for full VAD tuning options.
+To use hands-free (VAD) mode instead, open the player pawn Blueprint, select the **Convai Player** component (`BP_ConvaiPlayerComponent`), expand the **Convai** category in the **Details** panel, and disable **Enable Push to Talk** (`EnablePushToTalk` — a variable on the Blueprint wrapper, not the bare C++ component). Alternatively, call `UpdateVadBP(true)` from Blueprint. See [Configure conversation input](configure-conversation-input.md) for full VAD tuning options.
 {% endstep %}
 {% endstepper %}
 

@@ -49,16 +49,16 @@ The `UConvaiPlayerComponent` and `UConvaiChatbotComponent` connect through the s
 | `bAutoInitializeSession` | `true` | When `true`, the component connects to Convai automatically on BeginPlay. Set to `false` to call `StartSession()` manually. |
 | `InterruptVoiceFadeOutDuration` | `1.0` | Seconds over which the character's speech audio fades out when `InterruptSpeech` is called. `0` cuts audio immediately. See [Configure character audio](configure-character-audio.md). |
 
-**Runtime values (read-only):** `CharacterName`, `VoiceType`, `Backstory`, and `LanguageCode` are populated automatically from the character's dashboard configuration once the session loads. They are `BlueprintReadOnly` — readable in Blueprint but not editable in the **Details** panel. To change a character's name, voice, backstory, or language, edit the character in the Convai dashboard.
+**Runtime value (read-only):** `CharacterName` is populated from the character's dashboard configuration once the session loads. It is `BlueprintReadOnly` — readable in Blueprint but not editable in the **Details** panel. To change a character's name, voice, backstory, or language, edit the character in the Convai dashboard.
 
 **Useful runtime functions (Blueprint-callable):**
 
 | Function | Blueprint display name | Returns | Description |
 |---|---|---|---|
-| `IsListening()` | Is Listening | `bool` | `true` while receiving player speech. |
-| `IsProcessing()` | Is Thinking | `bool` | `true` while Convai is generating a response. |
 | `GetIsTalking()` | Is Talking | `bool` | `true` while the character is speaking. |
-| `IsInConversation()` | — | `bool` | `true` while an active conversation session exists. |
+| `IsInConversation()` | — | `bool` | `true` while an active conversation session exists (listening, processing, or talking). |
+
+`IsListening()` and `IsProcessing()` are exposed in Blueprint but currently return `false` in the plugin source. Use `GetIsTalking()` and `IsInConversation()` for reliable state checks until those functions are implemented.
 
 **Blueprint events fired by this component:**
 

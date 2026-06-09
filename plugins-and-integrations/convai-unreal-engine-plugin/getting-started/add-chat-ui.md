@@ -81,9 +81,11 @@ In the **Content Browser**, right-click and select **User Interface > Widget Blu
 
 In your widget's event graph (or in the owning actor Blueprint), bind to `OnTranscriptionReceivedDelegate` on the `UConvaiChatbotComponent`:
 
+- `Speaker` — the component that produced the speech (chatbot or player).
+- `Listener` — the component receiving the transcription.
 - `Transcription` — the transcript text at this point in the utterance.
-- `IsFinal` — `true` when this is the last update for the utterance. Use this flag to commit the line to the display and clear any "typing..." indicator.
 - `IsTranscriptionReady` — `true` when the text is ready to render.
+- `IsFinal` — `true` when this is the last update for the utterance. Use this flag to commit the line to the display and clear any "typing..." indicator.
 
 Append each final transcript to your display panel to build up the conversation history.
 
@@ -107,6 +109,8 @@ Set `UISelection` to `0` on `BP_ConvaiPlayerComponent` to hide the built-in over
 
 **Fix:** Confirm `UISelection` is set to `1`, `2`, or `3` on the **Convai Player** component. Confirm the player pawn was set up using `BP Convai Player Component` — if the bare C++ component was added instead, replace it with the Blueprint wrapper.
 
+**Verify:** Enter Play mode and confirm the chat overlay appears in the viewport.
+
 ### 3D widget is visible but shows no text
 
 **Symptom:** The floating panel appears above the character but remains empty during conversation.
@@ -114,6 +118,8 @@ Set `UISelection` to `0` on `BP_ConvaiPlayerComponent` to hide the built-in over
 **Cause:** The chatbot session has not started, or the Character ID is invalid so no conversation data flows through the session.
 
 **Fix:** Confirm `bAutoInitializeSession` is `true` on the **Convai Chatbot** component, or call `StartSession()` in Blueprint before the conversation begins. Confirm the **Character ID** matches a character in your Convai dashboard.
+
+**Verify:** Speak to the character and confirm the 3D panel updates with transcript text.
 
 ### Both the overlay and the 3D widget are showing simultaneously
 

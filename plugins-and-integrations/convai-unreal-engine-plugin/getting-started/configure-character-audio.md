@@ -94,6 +94,8 @@ To configure it, select the **Convai Chatbot** component and find **Interrupt Vo
 
 **Fix:** Select the **Convai Chatbot** component and check **Volume Multiplier** in the **Sound** category. Reset it to `1.0`. If attenuation is enabled, review the attenuation curve and widen the inner and outer radii.
 
+**Verify:** Enter Play mode and confirm the character's voice is audible at normal volume.
+
 ### Character speech does not attenuate with distance
 
 **Symptom:** The character is audible at the same volume regardless of the player's distance from it.
@@ -102,6 +104,8 @@ To configure it, select the **Convai Chatbot** component and find **Interrupt Vo
 
 **Fix:** Follow the [Enable spatial audio](#enable-spatial-audio) steps above.
 
+**Verify:** Walk toward and away from the character in Play mode and confirm volume changes with distance.
+
 ### Speech cuts off instead of fading when interrupted
 
 **Symptom:** When `InterruptSpeech` is called, the character's audio stops instantly with no fade.
@@ -109,6 +113,8 @@ To configure it, select the **Convai Chatbot** component and find **Interrupt Vo
 **Cause:** `InterruptVoiceFadeOutDuration` is set to `0` or a very small value.
 
 **Fix:** Select the **Convai Chatbot** component and increase **Interrupt Voice Fade Out Duration** in the **Convai** category.
+
+**Verify:** Trigger `InterruptSpeech` during character speech and confirm the audio fades out over the configured duration.
 
 ## Next steps
 

@@ -1,6 +1,6 @@
 ---
 title: Configure conversation input
-description: Switch between push-to-talk and hands-free voice capture on UConvaiPlayerComponent, and send text messages without a microphone.
+description: Switch between push-to-talk and hands-free voice capture modes, tune VAD settings, and send text messages to a character without a microphone.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -36,7 +36,7 @@ You can also toggle mute without changing the mode: set the `bMute` property on 
 {% tab title="Hands-free" %}
 In hands-free mode the character listens continuously and responds whenever the player speaks, without requiring a key press.
 
-To enable hands-free mode, call `UpdateVadBP(true)` on the `UConvaiPlayerComponent` from Blueprint — for example in the player pawn's **BeginPlay** event. This activates voice activity detection so the character listens without any key binding.
+To enable hands-free mode, call `UpdateVadBP(true)` on the `UConvaiPlayerComponent` from Blueprint — for example in the player pawn's **BeginPlay** event. This requires an attached audio-processing component (`ConvaiAudioProcessing`); `BP_ConvaiPlayerComponent` includes this wiring. The call returns `false` if the audio-processing component is missing.
 
 To disable hands-free mode and return to push-to-talk, call `UpdateVadBP(false)`.
 
@@ -48,10 +48,10 @@ Use `SendText()` to send a text message to a chatbot without any microphone inpu
 
 | Parameter | Type | Description |
 |---|---|---|
-| `ChatbotComponent` | `UConvaiConversationComponent` | Reference to the target chatbot. (`UConvaiChatbotComponent` derives from this type.) |
+| `ChatbotComponent` | `UConvaiConversationComponent` | Present in the function signature for API compatibility. The current implementation sends through this player component's active session and does not route by this parameter. |
 | `Text` | `FString` | The text message to send. |
 
-Connect a text input widget to this function and call it on submit.
+Connect a text input widget to this function and call it on submit. Ensure the player component has an active session with the target character before calling `SendText()`.
 {% endtab %}
 {% endtabs %}
 
@@ -112,6 +112,8 @@ For full details on the built-in chat overlay, the 3D in-world widget, and wirin
 
 **Fix:** Call `GetVADSettings()`, set `bUseServerDefault` to `false`, raise `Confidence` (try `0.85`–`0.95`) and raise `MinVolume` above the default of `0.6` (try `0.7`–`0.8`), then apply with `SetVADSettings()`.
 
+**Verify:** Enter Play mode in a quiet environment and confirm the character no longer triggers on ambient noise.
+
 ### Hands-free mode cuts off the player mid-sentence
 
 **Symptom:** The character interrupts listening while the player is still speaking — common with speakers who pause between thoughts.
@@ -120,6 +122,8 @@ For full details on the built-in chat overlay, the 3D in-world widget, and wirin
 
 **Fix:** Call `GetVADSettings()`, set `bUseServerDefault` to `false`, increase `StopSecs` above the default of `2.2` (try `3.0`–`4.0` seconds), then apply with `SetVADSettings()`.
 
+**Verify:** Speak with natural pauses and confirm the character waits for you to finish.
+
 ### Push-to-talk produces no response
 
 **Symptom:** The player holds the key and speaks, but the character never responds.
@@ -127,6 +131,8 @@ For full details on the built-in chat overlay, the 3D in-world widget, and wirin
 **Cause:** `UnmuteStreamingAudio()` is not wired to the key press, or `bMute` is `true` on the player component.
 
 **Fix:** Confirm your input action calls `UnmuteStreamingAudio()` on key press and `MuteStreamingAudio()` on key release. Confirm `bMute` is `false` in the **Details** panel.
+
+**Verify:** Hold the push-to-talk key, speak, and confirm `GetIsStreaming()` returns `true`.
 
 ## Next steps
 

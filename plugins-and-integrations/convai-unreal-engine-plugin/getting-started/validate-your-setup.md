@@ -60,9 +60,9 @@ Hold push-to-talk (default: **T**) and speak a short phrase, then release. Alter
 {% step %}
 ### Observe the character state
 
-While you are speaking, `IsListening()` on `UConvaiChatbotComponent` returns `true`. While the character is generating a response, `IsProcessing()` ("Is Thinking") returns `true`. While the character is speaking, `GetIsTalking()` ("Is Talking") returns `true`.
+While the character is speaking, `GetIsTalking()` ("Is Talking") on `UConvaiChatbotComponent` returns `true`. While a session is active, `IsInConversation()` returns `true`.
 
-Add **Print String** nodes in Blueprint connected to these functions to observe state transitions in the viewport.
+Add **Print String** nodes in Blueprint connected to these functions to observe state transitions in the viewport. `IsListening()` and `IsProcessing()` are exposed in Blueprint but currently return `false` in the plugin source.
 {% endstep %}
 
 {% step %}
@@ -78,13 +78,55 @@ When validation passes, the character responds with audio and — if configured 
 
 ## Common failure points
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Character does not respond at all | API key not set, or Character ID missing | See [Configure your API key](configure-api-key.md); confirm the **Character ID** field on the Chatbot component. |
-| No audio from character | Audio output device issue or session not started | Confirm `bAutoInitializeSession` is `true` on the Chatbot component, or call `StartSession()` manually. |
-| Character does not hear the player | Microphone not captured, or Player component missing | Confirm `UConvaiPlayerComponent` is on the pawn; see [Configure the microphone](configure-microphone.md). |
-| Lip sync does not play | Face Sync component missing or wrong lip sync mode | Add `UConvaiFaceSyncComponent` and set the correct `LipSyncMode` for your rig. |
-| `OnFailureEvent` fires | Network error or invalid Character ID | Check the **Output Log** for details; verify network access and Character ID. |
+### Character does not respond at all
+
+**Symptom:** The character never generates a response to voice or text input.
+
+**Cause:** API key not set, or Character ID missing.
+
+**Fix:** See [Configure your API key](configure-api-key.md); confirm the **Character ID** field on the Chatbot component.
+
+**Verify:** Enter Play mode and send a short phrase. The character speaks an audible response.
+
+### No audio from character
+
+**Symptom:** The character appears to process input but produces no speech audio.
+
+**Cause:** Audio output device issue or session not started.
+
+**Fix:** Confirm `bAutoInitializeSession` is `true` on the Chatbot component, or call `StartSession()` manually.
+
+**Verify:** `GetIsTalking()` returns `true` while the character responds.
+
+### Character does not hear the player
+
+**Symptom:** The character never reacts to microphone input.
+
+**Cause:** Microphone not captured, or Player component missing.
+
+**Fix:** Confirm `UConvaiPlayerComponent` is on the pawn; see [Configure the microphone](configure-microphone.md).
+
+**Verify:** `GetIsStreaming()` returns `true` after push-to-talk or VAD activation.
+
+### Lip sync does not play
+
+**Symptom:** Audio plays but the character's mouth does not move.
+
+**Cause:** Face Sync component missing or wrong lip sync mode.
+
+**Fix:** Add `UConvaiFaceSyncComponent` and set the correct `LipSyncMode` for your rig.
+
+**Verify:** Enter Play mode and confirm mouth movement during speech.
+
+### OnFailureEvent fires
+
+**Symptom:** The `OnFailureEvent` delegate fires during conversation.
+
+**Cause:** Network error or invalid Character ID.
+
+**Fix:** Check the **Output Log** for details; verify network access and Character ID.
+
+**Verify:** Retry after fixing the reported error.
 
 ## Next steps
 

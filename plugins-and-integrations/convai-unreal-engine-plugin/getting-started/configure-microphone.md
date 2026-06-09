@@ -18,7 +18,6 @@ Call these Blueprint functions on a `UConvaiPlayerComponent` reference to list a
 |---|---|---|
 | `GetAvailableCaptureDeviceNames()` | `TArray<FString>` | Names of all available input devices. |
 | `GetAvailableCaptureDeviceDetails()` | `TArray<FCaptureDeviceInfoBP>` | Full details: name, index, long ID, channel count, sample rate, AEC support. |
-| `GetDefaultCaptureDeviceInfo(OutInfo)` | `bool` | Fills `OutInfo` with the default device details. |
 | `GetCaptureDeviceInfo(OutInfo, DeviceIndex)` | `bool` | Fills `OutInfo` for the device at `DeviceIndex`. |
 | `GetActiveCaptureDevice(OutInfo)` | `void` | Fills `OutInfo` with the currently active device. |
 
@@ -42,7 +41,7 @@ To switch from the default device, call one of these functions on `UConvaiPlayer
 | `SetCaptureDeviceByIndex(DeviceIndex)` | Device index from the enumeration list. | `bool` — `true` if the switch succeeded. |
 | `SetCaptureDeviceByName(DeviceName)` | Device name string. | `bool` — `true` if the switch succeeded. |
 
-Call either function before or during gameplay. A common pattern is to build a settings menu that lists `GetAvailableCaptureDeviceNames()` and calls `SetCaptureDeviceByIndex()` when the player picks a device. Microphone hot-swapping during an active session is supported from plugin version 4.0.0-beta.20 — earlier versions required a session restart after switching devices.
+Call either function while audio capture is active (for example, during an active push-to-talk or VAD session). A common pattern is to build a settings menu that lists `GetAvailableCaptureDeviceNames()` and calls `SetCaptureDeviceByIndex()` when the player picks a device. Device selection before capture starts may not take effect until the next capture session.
 
 ## Adjust the microphone volume
 
