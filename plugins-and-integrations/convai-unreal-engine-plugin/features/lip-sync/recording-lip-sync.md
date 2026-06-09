@@ -4,7 +4,11 @@ description: Capture a live lip-sync sequence during a Convai conversation and r
 last_reviewed: 2026-06-05
 ---
 
-The `UConvaiFaceSyncComponent` recording API lets you capture the blendshape frames that arrive during a live conversation and replay them on demand — without re-streaming from the server. Use it for cutscenes where the same lip-sync sequence plays back repeatedly, for pre-warming a response before it is triggered, or for debugging and offline preview of facial animation.
+The `UConvaiFaceSyncComponent` recording API lets you capture the blendshape frames that arrive during a live conversation and replay them on demand without re-streaming from Convai. Use it for cutscenes where the same lip-sync sequence plays back repeatedly, for pre-warming a response before it is triggered, or for debugging and offline preview of facial animation.
+
+{% hint style="warning" %}
+The recording API — `StartRecordingLipSync`, `FinishRecordingLipSync`, `PlayRecordedLipSync`, `IsPlaying`, and `GetCurrentFrame` — is C++ only. These methods have no `UFUNCTION` decoration and are not accessible from Blueprints.
+{% endhint %}
 
 ## When to use the recording API
 
@@ -26,33 +30,41 @@ The `UConvaiFaceSyncComponent` recording API lets you capture the blendshape fra
 {% step %}
 ### Start recording before the speech turn
 
-Call `StartRecordingLipSync` on the `Convai Face Sync` component. From this point, every blendshape frame delivered by the server is buffered internally in addition to being applied to the face.
+Call `StartRecordingLipSync()` on the `UConvaiFaceSyncComponent` instance. From this point, every blendshape frame delivered by Convai is buffered internally in addition to being applied to the face.
 
-In Blueprint: get a reference to the `Convai Face Sync` component on the Actor and call **Start Recording Lip Sync**.
+```cpp
+// pseudocode
+UConvaiFaceSyncComponent* FaceSync = MyCharacter->FindComponentByClass<UConvaiFaceSyncComponent>();
+if (FaceSync)
+{
+    FaceSync->StartRecordingLipSync();
+}
+```
 {% endstep %}
 
 {% step %}
 ### Let the character speak
 
-Trigger a conversation as normal. The character speaks and its face animates. The component captures the incoming frames in the background.
+Trigger a conversation as normal. The character speaks and its face animates. The component captures the incoming frames in the background — no additional calls are required while recording.
 {% endstep %}
 
 {% step %}
 ### Stop recording and store the result
 
-When the speech turn ends, call `FinishRecordingLipSync`. The method stops capturing and returns an `FAnimationSequenceBP` — the Blueprint-visible wrapper that holds the full list of timestamped blendshape frames, the total duration, and the frame rate.
+When the speech turn ends, call `FinishRecordingLipSync()`. The method stops capturing and returns an `FAnimationSequenceBP` containing the full list of frame-indexed blendshape frames, the total duration, and the frame rate.
 
-Store the returned value in a Blueprint variable typed `FAnimationSequenceBP` so you can replay it later.
+```cpp
+// pseudocode
+FAnimationSequenceBP CachedSequence = FaceSync->FinishRecordingLipSync();
+```
+
+Store this value as a member variable on your Actor or component so you can replay it later. At this point you have the complete facial animation that played during the conversation turn.
 {% endstep %}
 {% endstepper %}
 
-{% hint style="success" %}
-You now have a stored `FAnimationSequenceBP` variable containing the exact facial animation that played during the conversation turn.
-{% endhint %}
-
 ## Replay a recorded sequence
 
-Call `PlayRecordedLipSync` on the `Convai Face Sync` component to replay the stored sequence. The component feeds the recorded frames to the AnimGraph node exactly as it would during a live stream — no server connection is needed.
+Call `PlayRecordedLipSync` on the `UConvaiFaceSyncComponent` instance to replay the stored sequence. The component feeds the recorded frames to the AnimGraph node exactly as it would during a live stream, with no active Convai conversation stream required.
 
 ### PlayRecordedLipSync parameters
 
@@ -63,25 +75,39 @@ Call `PlayRecordedLipSync` on the `Convai Face Sync` component to replay the sto
 | `EndFrame` | `int32` | Index of the last frame to replay. Pass `-1` to play to the end of the sequence. |
 | `OverwriteDuration` | `float` | Override the sequence's stored playback duration in seconds. Pass `0.0` to use the original duration. |
 
-`PlayRecordedLipSync` returns `bool` — `true` if the sequence started successfully, `false` if the sequence is empty or invalid.
+`PlayRecordedLipSync` returns `bool` — `true` if the sequence started successfully. It returns `false` if the sequence is empty or invalid, recording is still active, `StartFrame` is greater than the last frame index, or `EndFrame` is greater than `0` and less than `StartFrame`.
+
+```cpp
+// pseudocode
+bool bStarted = FaceSync->PlayRecordedLipSync(CachedSequence, 0, -1, 0.0f);
+```
 
 ## Monitor playback state
 
-Use these Blueprint-callable methods to observe the component while a recorded sequence is playing:
+Use these C++ methods to observe the component while a recorded sequence is playing:
 
 | Method | Returns | Description |
 |---|---|---|
-| `IsPlaying()` | `bool` | `true` when the component is actively replaying frames from a recorded or live sequence. |
+| `IsPlaying() const` | `bool` | `true` when the component is actively replaying frames from a recorded or live sequence. |
 | `GetCurrentFrame()` | `TMap<FName, float>` | The blendshape name-to-weight map for the frame currently being applied. Useful for driving secondary systems from the same data. |
 
-## Example Blueprint flow
+## Example C++ flow
 
-A typical cutscene Blueprint sequence looks like this:
+A typical cutscene usage looks like this:
 
-1. **On Begin Play** → call `StartRecordingLipSync` on the `Convai Face Sync` component.
-2. **On conversation response received** → the face animates normally; frames are captured.
-3. **On speech end event** → call `FinishRecordingLipSync` → store result in `CachedSequence`.
-4. **On cutscene trigger** → call `PlayRecordedLipSync(CachedSequence, 0, -1, 0.0)`.
+```cpp
+// pseudocode
+// 1. Before or at the start of the speech turn:
+FaceSync->StartRecordingLipSync();
+
+// 2. The character speaks — recording happens automatically in the background.
+
+// 3. When the speech turn ends:
+FAnimationSequenceBP CachedSequence = FaceSync->FinishRecordingLipSync();
+
+// 4. When you want to replay the sequence (e.g. on cutscene trigger):
+FaceSync->PlayRecordedLipSync(CachedSequence, 0, -1, 0.0f);
+```
 
 {% hint style="info" %}
 Replaying a sequence does not re-trigger audio. Play the matching audio clip separately and align playback start times to keep the face and voice in sync.

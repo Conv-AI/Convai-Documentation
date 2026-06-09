@@ -1,5 +1,5 @@
 ---
-title: Quick start
+title: Character actions quick start
 description: Enable character actions on a Convai chatbot, register a scene object, configure AI navigation, and verify that the built-in Move To action works end to end.
 last_reviewed: "4.0.0-beta.21"
 ---

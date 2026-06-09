@@ -1,10 +1,10 @@
 ---
 title: Event system
-description: Reference for every Blueprint-assignable delegate in the Convai plugin, covering components and the subsystem, organized by category with timing details.
+description: Reference for core runtime Blueprint delegates on Convai components and the subsystem, organized by category with timing details.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin communicates runtime results to Blueprint through `UPROPERTY(BlueprintAssignable)` delegates. Bind these in your character or player Blueprint to drive animations, update UI, dispatch actions, or react to errors. This page lists every delegate, the component it lives on, and the precise moment it fires.
+The Convai Unreal Engine plugin communicates core runtime results to Blueprint through `UPROPERTY(BlueprintAssignable)` delegates on components and the subsystem. Bind these in your character or player Blueprint to drive animations, update UI, dispatch actions, or react to connection changes. This page focuses on the core runtime component and subsystem delegates; async proxy, test, and vision-base delegates are outside this core-concepts reference.
 
 ## Inherited delegates (both components)
 
@@ -12,15 +12,15 @@ The Convai Unreal Engine plugin communicates runtime results to Blueprint throug
 
 ### Audio playback
 
-These three delegates are defined on `UConvaiAudioStreamer` and are available on both the chatbot and player components. None carry parameters.
+These three delegates are defined on `UConvaiAudioStreamer` and are available on both the chatbot and player components. None carry parameters. On chatbot components, the talking delegates mark character audio playback boundaries. On player components, the same delegates are broadcast from the player speech callbacks and represent user speech start/stop events.
 
 | Delegate | Category | Fires when |
 |---|---|---|
-| `OnStartedTalkingDelegate` | `Convai` | The component begins playing back audio — the first audio frame from Convai starts rendering. |
-| `OnFinishedTalkingDelegate` | `Convai` | Audio playback ends and the buffer is empty — the character has finished speaking for this turn. |
+| `OnStartedTalkingDelegate` | `Convai` | Chatbot: character audio playback starts. Player: user speech starts. |
+| `OnFinishedTalkingDelegate` | `Convai` | Chatbot: character audio playback finishes. Player: user speech stops. |
 | `OnFacialDataReadyDelegate` | `Convai\|LipSync` | A new batch of pre-computed facial animation data has arrived and is ready for the lip-sync pipeline to consume. |
 
-`OnStartedTalkingDelegate` and `OnFinishedTalkingDelegate` are the low-level playback boundary events. For higher-level turn awareness, use the chatbot's speech-state functions (`GetIsTalking`, `IsListening`, `IsProcessing`) or the chatbot-specific delegates such as `OnInterruptedEvent`.
+`OnStartedTalkingDelegate` and `OnFinishedTalkingDelegate` are the low-level talking boundary events. For chatbot playback awareness, use `UConvaiChatbotComponent::GetIsTalking` with these delegates. For interruption-specific handling, bind to `OnInterruptedEvent`.
 
 ### Transcription
 
@@ -31,7 +31,7 @@ Fires each time a transcription update arrives during or after an utterance. The
 | Parameter | Type | Description |
 |---|---|---|
 | `Speaker` | `UConvaiConversationComponent*` | The component whose audio produced the transcription. |
-| `Listener` | `UConvaiConversationComponent*` | The component the event is dispatched to. |
+| `Listener` | `UConvaiConversationComponent*` | Present in the delegate signature. Current broadcast sites pass `nullptr`. |
 | `Transcription` | `FString` | The transcription text at this point in the utterance. |
 | `IsTranscriptionReady` | `bool` | `true` when the text is ready to display. |
 | `IsFinal` | `bool` | `true` when this is the last update for the utterance. |
@@ -46,7 +46,7 @@ Fires whenever an attendee's connection state changes. This covers both the chat
 |---|---|---|
 | `ConvaiConversationComponent` | `UConvaiConversationComponent*` | The component that owns this event. |
 | `AttendeeID` | `FString` | Identifier for the attendee whose state changed. |
-| `ConnectionState` | `EC_ConnectionState` | The new state: `Disconnected`, `Connecting`, `Connected`, or `Reconnecting`. |
+| `ConnectionState` | `EC_ConnectionState` | The new state. The enum defines `Disconnected`, `Connecting`, `Connected`, and `Reconnecting`; the current runtime path drives `Disconnected`, `Connecting`, and `Connected`. |
 
 ## Chatbot component delegates
 
@@ -56,7 +56,7 @@ These delegates are on `UConvaiChatbotComponent` and are only relevant when you 
 
 **`OnActionReceivedEvent_V2`** — display name **On Actions Received** — category `Convai` (current version)
 
-Fires when Convai sends a sequence of one or more character actions in response to the player's input or a narrative trigger. The actions are already appended to `ActionsQueue` by the time this delegate fires, so you can either iterate the `SequenceOfActions` parameter directly or use `FetchFirstAction` and `HandleActionCompletion` to drive a queue-based execution model.
+Fires when Convai sends a sequence of one or more character actions in response to the player's input or a narrative trigger. The actions are available through the `SequenceOfActions` parameter and the chatbot's `ActionsQueue`, so you can either iterate the event parameter directly or use `FetchFirstAction` and `HandleActionCompletion` to drive a queue-based execution model.
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -68,7 +68,7 @@ Fires when Convai sends a sequence of one or more character actions in response 
 
 **`OnEmotionStateChangedEvent`** — display name **On Emotion State Changed** — category `Convai`
 
-Fires when Convai returns an updated emotion state for the character. The `EmotionState` property on the chatbot component is already updated when this fires. Read `GetEmotionScore` or `GetEmotionBlendshapes` to obtain the current values and apply them to your animation system.
+Fires when Convai returns an updated emotion state for the character. The `EmotionState` property on the chatbot component is already updated when this fires. Use `GetEmotionScore` to read the current value for a specific basic emotion and apply it to your animation system.
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -79,7 +79,7 @@ Fires when Convai returns an updated emotion state for the character. The `Emoti
 
 **`OnCharacterDataLoadEvent_V2`** — display name **On Character Data Loaded** — category `Convai` (current version)
 
-Fires after the plugin fetches character details from the Convai dashboard — name, voice type, backstory, language code, ReadyPlayerMe link, and avatar image link. This happens automatically when the session starts, after `LoadCharacter` is called, or when `CharacterID` is changed via the Blueprint setter. Use this event to populate UI or update character visuals once the data is available.
+Fires after the plugin attempts to load character data for the chatbot component. This happens during component startup and after `LoadCharacter` is called, including when `CharacterID` is changed through the Blueprint setter. Use the `Success` parameter to decide whether character-dependent UI or setup logic should continue.
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -118,13 +118,13 @@ Fires after `InterruptSpeech` is applied and the audio fade-out begins. Use this
 | Parameter | Type | Description |
 |---|---|---|
 | `ChatbotComponent` | `UConvaiChatbotComponent*` | The chatbot that was interrupted. |
-| `InteractingPlayerComponent` | `UConvaiPlayerComponent*` | The player that triggered the interruption. |
+| `InteractingPlayerComponent` | `UConvaiPlayerComponent*` | Present in the delegate signature. The current `InterruptSpeech` implementation passes `nullptr`. |
 
 ### Failure
 
 **`OnFailureEvent`** — display name **On Failure** — category `Convai`
 
-Fires when the chatbot's session encounters an unrecoverable error — for example, a network failure, an authentication problem, or an invalid character ID. No parameters are passed. When this event fires, call `GetChatbotConnectionState` immediately to inspect the `EC_ConnectionState` and decide on a recovery strategy: display an error indicator, attempt a `StartSession` retry, or log a diagnostic event.
+Declared as a `BlueprintAssignable` chatbot delegate with no parameters. `UConvaiChatbotComponent::OnFailure()` broadcasts this event when that handler is invoked. Do not use it as the primary signal for character-load failures; use `OnCharacterDataLoadEvent_V2` and its `Success` parameter for character data loading.
 
 ## Player component delegates
 
@@ -138,8 +138,8 @@ All four gaze delegates carry the same signature: the player component and the o
 |---|---|---|---|
 | `OnGazeBegin` | — | `Convai\|Gaze Attention\|Events` | The player's gaze cursor enters the bounds of a `UConvaiObjectComponent` for the first time. Fires before any attention threshold. |
 | `OnGazeEnd` | — | `Convai\|Gaze Attention\|Events` | The player's gaze leaves a `UConvaiObjectComponent`, regardless of whether the object had been promoted to "in attention". |
-| `OnAttentionGained` | — | `Convai\|Gaze Attention\|Events` | A gazed-at object has been held in gaze for longer than `GazeAttentionDelay` seconds and is promoted to "object in attention" on the active chatbot. |
-| `OnAttentionLost` | — | `Convai\|Gaze Attention\|Events` | The attention slot is released — either because the player looked away for longer than `GazeAttentionLossDelay` seconds, another object took the slot, or the attention target was destroyed. |
+| `OnAttentionGained` | — | `Convai\|Gaze Attention\|Events` | A gazed-at object has been held in gaze for longer than `GazeAttentionDelay` seconds and the attention notification is sent to eligible registered chatbots. |
+| `OnAttentionLost` | — | `Convai\|Gaze Attention\|Events` | The attention release notification is sent — either because the player looked away for longer than `GazeAttentionLossDelay` seconds, another object took the slot, or the attention target was destroyed. |
 
 **Gaze delegate signature:**
 
@@ -160,8 +160,8 @@ The promotion and release thresholds are configurable on `UConvaiPlayerComponent
 |---|---|---|
 | `OnGazedIn` | `Convai\|Object\|Gaze` | The player's gaze cursor enters this object. Fires before any attention threshold. |
 | `OnGazedOut` | `Convai\|Object\|Gaze` | The player's gaze leaves this object, regardless of attention state. |
-| `OnAttentionGained` | `Convai\|Object\|Gaze` | This object is promoted to the active chatbot's "in attention" target after the sustained-gaze threshold. |
-| `OnAttentionLost` | `Convai\|Object\|Gaze` | This object is released from the in-attention slot — loss timer elapsed, gaze swapped to another object, or target destroyed. |
+| `OnAttentionGained` | `Convai\|Object\|Gaze` | This object sends an attention-gained notification to eligible registered chatbots after the sustained-gaze threshold. |
+| `OnAttentionLost` | `Convai\|Object\|Gaze` | This object sends an attention-lost notification — loss timer elapsed, gaze swapped to another object, or target destroyed. |
 
 **Object gaze event signature:**
 
@@ -178,8 +178,8 @@ These events only fire when `bGazeable` is `true` on the object component (the d
 
 | Delegate | Category | Parameters | Fires when |
 |---|---|---|---|
-| `OnServerConnectionStateChangedEvent` | `Convai\|Connection` | `EC_ConnectionState ConnectionState` | The global WebRTC connection state changes. Fires for every transition — use the `ConnectionState` parameter to react to specific states (`Connected`, `Reconnecting`, etc.). |
-| `OnUserIdleWarning` | `Convai\|Event` | `float RemainingSeconds` | The server detects that the user has been idle. `RemainingSeconds` is the time remaining before the connection closes automatically. Call `ResetIdleTimer` on the subsystem to prevent the disconnection. |
+| `OnServerConnectionStateChangedEvent` | `Convai\|Connection` | `EC_ConnectionState ConnectionState` | The global WebRTC connection state changes. Use the `ConnectionState` parameter to react to driven states such as `Connecting` or `Connected`. |
+| `OnUserIdleWarning` | `Convai\|Event` | `int32 RemainingSeconds` | The server detects that the user has been idle. `RemainingSeconds` is the time remaining before the connection closes automatically. Call `ResetIdleTimer` on the subsystem to prevent the disconnection. |
 
 Bind to `OnServerConnectionStateChangedEvent` for UI overlays or logging that should react to any session state change. Bind to `OnUserIdleWarning` to prompt the user or reset the timer programmatically — for example, in a training simulation, reset the timer whenever the learner completes a task step, regardless of whether they spoke.
 
@@ -246,7 +246,7 @@ void AMyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 }
 ```
 
-Always remove dynamic delegates in `EndPlay`. Failing to do so leaves stale bindings on the subsystem — which outlives individual actors — and causes null-pointer crashes when the event fires after the actor is destroyed.
+Remove dynamic delegates in `EndPlay` when binding actor-owned handlers, especially for subsystem events whose owner outlives individual actors.
 
 ## Usage examples
 
@@ -254,7 +254,7 @@ Always remove dynamic delegates in `EndPlay`. Failing to do so leaves stale bind
 
 A character that updates its facial expression each time Convai returns a new emotion state.
 
-In Blueprint, **Assign** to **On Emotion State Changed** in the character's `BeginPlay` event. The handler node receives the chatbot component reference — call **Get Emotion State** on it to read the current emotion values and forward them to your animation system or Anim Blueprint.
+In Blueprint, **Assign** to **On Emotion State Changed** in the character's `BeginPlay` event. The handler node receives the chatbot component reference — call **Get Emotion Score** on it to read current emotion values and forward them to your animation system or Anim Blueprint.
 
 In C++, bind with `AddDynamic` in `BeginPlay`:
 
@@ -267,7 +267,7 @@ ChatbotComponent->OnEmotionStateChangedEvent.AddDynamic(
 void AMyCharacter::HandleEmotionChanged(UConvaiChatbotComponent* ChatbotComp,
                                          UConvaiPlayerComponent* PlayerComp)
 {
-    // Use GetEmotionScore() or GetEmotionBlendshapes() to drive your Anim Blueprint
+    // Use GetEmotionScore() to drive your Anim Blueprint
 }
 ```
 
@@ -279,13 +279,13 @@ A HUD that shows a "Connecting…" overlay while the Convai session is not yet r
 
 In Blueprint, get the **Convai Subsystem** from the game instance in the HUD's `BeginPlay`, then **Assign** to **On Server Connection State Changed**. In the handler, show or hide the overlay widget based on whether the incoming state is `Connected`.
 
-Expected result: The overlay is visible during `Connecting` and `Reconnecting` states and hides automatically when the session reaches `Connected` — without polling on `Tick`.
+Expected result: The overlay is visible during `Connecting` and hides automatically when the session reaches `Connected` — without polling on `Tick`.
 
 ### Action dispatch system
 
 A character that executes a sequence of physical actions — move, interact, speak — in order.
 
-In Blueprint, **Assign** to **On Actions Received** in `BeginPlay`. In the handler, call **Fetch First Action** to pop the first action from the queue, execute the corresponding game logic (move the character, trigger an animation, open a prop), then call **Handle Action Completion** with `true`. The next action in the sequence is then ready to fetch.
+In Blueprint, **Assign** to **On Actions Received** in `BeginPlay`. In the handler, call **Fetch First Action** to read the first action from the queue, execute the corresponding game logic (move the character, trigger an animation, open a prop), then call **Handle Action Completion** with `true`. A successful completion dequeues the current action and makes the next action ready to fetch.
 
 Expected result: Actions execute in order as each prior action reports completion, and the character's speech plays in parallel.
 
@@ -295,10 +295,12 @@ Expected result: Actions execute in order as each prior action reports completio
 |---|---|---|---|
 | Delegate never fires | Binding was never established, or was created after the event already fired | Bind in the character Blueprint's `BeginPlay` using the **Assign** node, or use `AddDynamic` in C++. For events that depend on character data, bind from inside an `OnCharacterDataLoadEvent_V2` handler instead of in `BeginPlay`. | Add a **Print String** to the handler; it should output when the expected condition occurs. |
 | Handler fires multiple times per event | The delegate was bound more than once — for example, **Assign** is inside a function called on every `StartSession` | Ensure each **Assign** call is reached exactly once per actor lifetime. If re-binding is intentional, call **Remove** (Blueprint) or `RemoveDynamic` (C++) before re-assigning. | Log a counter inside the handler; it should increment by exactly 1 per event. |
-| `OnFailureEvent` fires immediately at session start | Invalid character ID or expired API key | Verify that `CharacterID` in the chatbot component matches a character in your Convai dashboard. Confirm the API key in **Project Settings → Convai**. | `OnCharacterDataLoadEvent_V2` fires with `Success = true` after a valid session start. |
+| Character data setup fails at session start | Invalid `CharacterID` or API key configuration issue | Verify that `CharacterID` in the chatbot component matches a character in your Convai dashboard. Confirm and save the API key in the **Convai Editor window**. | `OnCharacterDataLoadEvent_V2` fires with `Success = true` after a valid session start. |
 | Gaze events never fire | `bEnableGazeAttention` is `false` on the player component, or the target actor has no `UConvaiObjectComponent` | Set **Enable Gaze Attention** to `true` on the player component. Confirm the target actor has a **Convai Object** component with **Gazeable** enabled. | `OnGazeBegin` fires on both the player component and the object component when the player looks at the target. |
 
 ## Related concepts
+
+Use these pages to connect delegate timing with turn behavior, component ownership, and session lifecycle decisions.
 
 {% content-ref url="conversation-flow.md" %}
 [Conversation flow](conversation-flow.md)

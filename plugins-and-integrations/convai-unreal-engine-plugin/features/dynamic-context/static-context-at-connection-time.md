@@ -12,7 +12,7 @@ The following information is determined once when the session starts and does no
 
 | Data | Source on UConvaiChatbotComponent | Notes |
 |---|---|---|
-| Character ID | `CharacterID` property | Determines the character's backstory and voice type pulled from Convai. |
+| Character ID | `CharacterID` property | Determines which character configuration is loaded from Convai. |
 | Character name | `CharacterName` (loaded from Convai after `CharacterID` resolves) | Read-only at runtime; set via the character record in the Convai dashboard. |
 | Session ID | `SessionID` (default `"-1"`) | Set to `"-1"` to start a new conversation; set to a prior session ID to resume memory. |
 | Action config | `EnvironmentData` (when `bEnableActions` is `true`) | Serialized as a JSON `action_config` block. Action set, object list, and character list are fixed until the next reconnect. |
@@ -29,11 +29,11 @@ After the session is connected, three mechanisms can deliver updated context to 
 
 ## Relationship between the static layer and the dynamic layer
 
-The static layer provides the base character definition: who the character is, what they know from their backstory, and what actions they can perform. The dynamic layer carries runtime information that was unknown or had not yet occurred at connect time.
+The static layer provides the base character definition: who the character is, what they know from dashboard configuration, and what actions they can perform. The dynamic layer carries runtime information that was unknown or had not yet occurred at connect time.
 
-Convai combines both layers when generating a response. The static layer is not replaced by dynamic updates — the two coexist. A dynamic state update like "Health" is `50` informs Convai about a current fact; it does not erase backstory or the action contract.
+Convai combines both layers when generating a response. The static layer is not replaced by dynamic updates — the two coexist. A dynamic state update like "Health" is `50` informs Convai about a current fact; it does not erase the base character definition or the action contract.
 
-The practical implication is that you do not need to re-send information already present in the character's backstory or the connect-time snapshot. Push only what changes.
+The practical implication is that you do not need to re-send information already present in the base character definition or the connect-time snapshot. Push only what changes.
 
 ## Reconnect and the dynamic layer
 

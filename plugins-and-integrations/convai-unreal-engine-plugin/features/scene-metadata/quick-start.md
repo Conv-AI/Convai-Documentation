@@ -40,7 +40,7 @@ Names must be unique in the level. See [Component reference](component-reference
 {% step %}
 ### Enter Play mode and ask the character
 
-Press **Play**. Open the **Output Log** and filter by `LogConvai` — at session start you should see messages confirming the object was registered and the session connected. Then walk up to the Convai character and ask: `"What do you know about the door?"` or `"Describe the objects near you."` The character should mention the object using the name and description you set.
+Press **Play**. Walk up to the Convai character and ask: `"What do you know about the door?"` or `"Describe the objects near you."` The character should mention the object using the name and description you set. If it does not, open the **Output Log** and filter by `ConvaiSubsystemLog` for registration warnings or `ConvaiObjectComponentLog` for object-component warnings.
 {% endstep %}
 
 {% step %}

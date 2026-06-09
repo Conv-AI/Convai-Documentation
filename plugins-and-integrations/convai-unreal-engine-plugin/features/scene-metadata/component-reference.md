@@ -65,7 +65,7 @@ The initial seed at session start is always `EC_RunLLMOption::Never` regardless 
 
 | Property | Type | Category | Default | Description |
 |---|---|---|---|---|
-| `bAutoGenerateProximityState` | `bool` | `Convai\|Object` | `true` | When `true`, the plugin computes a `"<ObjectName>.Proximity"` state key per chatbot using the UE navigation system. |
+| `bAutoGenerateProximityState` | `bool` | `Convai\|Object` | `true` | When `true`, the plugin computes a `"<ObjectName>.ProximityToYou"` state key per chatbot using the UE navigation system. |
 | `bDebugDrawProximityPaths` | `bool` | `Convai\|Object\|Debug` | `false` | Draws navigation paths from each chatbot to this object in the editor viewport. Appears under the **Debug** sub-category in the Details panel. Disable before shipping. |
 
 Proximity state always uses `EC_RunLLMOption::Never`; the chatbot is informed of the spatial relationship without reacting. The evaluation is deferred while objects are moving and forced through after several consecutive deferred ticks.

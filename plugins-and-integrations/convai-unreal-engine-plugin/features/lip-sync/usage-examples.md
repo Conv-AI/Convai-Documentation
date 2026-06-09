@@ -43,9 +43,9 @@ In the AnimGraph node **Details** panel:
 | Property | Value |
 |---|---|
 | `bEnableLowerFaceSmoothing` | `true` |
-| `LowerFaceSmoothingSpeed` | `6.0` |
+| `LowerFaceSmoothingSpeed` | `0.4` |
 
-A value of `6.0` produces smooth, responsive lip movement. Decrease toward `2.0` for heavier smoothing with more lag; increase toward `15.0` for a near-instant but less smooth result. The default of `1.0` produces very heavy smoothing — most productions raise this to `5.0`–`10.0`.
+A value of `0.4` produces smoother lip movement while remaining responsive. Decrease toward `0.1` for heavier smoothing with more lag; increase toward `1.0` for a faster response with less smoothing. The default of `1.0` is instant and applies no smoothing.
 
 ### Suppressing brow and eye movement
 
@@ -77,15 +77,15 @@ This order guarantees that idle blinks and other body-layer facial animation sur
 
 ### Mapping one Convai curve to two rig curves
 
-Some rigs split a single blendshape into left and right variants. For example, `jawOpen` from Convai may need to drive both `Jaw_L` and `Jaw_R` on a custom rig.
+Some custom rigs split a single mouth movement into left and right target curves. For example, the MetaHuman source curve `CTRL_expressions_jawOpen` from Convai may need to drive two user-defined target curves on your custom rig.
 
 In the `BlendshapeMapping` table on the AnimGraph node, add an entry:
 
 | Key (`FName`) | `TargetNames` | `Multiplyer` | `Offset` |
 |---|---|---|---|
-| `jawOpen` | `["Jaw_L", "Jaw_R"]` | `1.0` | `0.0` |
+| `CTRL_expressions_jawOpen` | `["InstructorJaw_L", "InstructorJaw_R"]` | `1.0` | `0.0` |
 
-Both `Jaw_L` and `Jaw_R` receive the same value as the source `jawOpen` curve.
+Both custom target curves receive the same value as the source `CTRL_expressions_jawOpen` curve.
 
 ### Scaling a curve down to prevent clipping
 
@@ -93,7 +93,7 @@ If a specific curve drives too much deformation on a particular mesh, add a mapp
 
 | Key (`FName`) | `TargetNames` | `Multiplyer` | `Offset` |
 |---|---|---|---|
-| `mouthOpen` | `["mouthOpen"]` | `0.6` | `0.0` |
+| `CTRL_expressions_jawOpen` | `["CTRL_expressions_jawOpen"]` | `0.6` | `0.0` |
 
 The target curve receives `60%` of the incoming value. The `GlobalMultiplier` still applies unless `IgnoreGlobalModifiers` is set to `true` on this entry.
 
@@ -103,7 +103,7 @@ To prevent a specific curve from being driven by Convai at all — for example t
 
 | Key (`FName`) | `TargetNames` | `UseOverrideValue` | `OverrideValue` |
 |---|---|---|---|
-| `eyeBlink_L` | `["eyeBlink_L"]` | `true` | `0.0` |
+| `CTRL_expressions_eyeBlinkL` | `["CTRL_expressions_eyeBlinkL"]` | `true` | `0.0` |
 
 The curve is held at `0.0` regardless of incoming data.
 
@@ -113,22 +113,28 @@ The curve is held at `0.0` regardless of incoming data.
 
 Use the recording API to capture a live lip-sync sequence during a conversation and replay it later — for example in a non-interactive cutscene or a pre-warmed response cache.
 
-In a Blueprint or C++ script on the Actor that owns the `Convai Face Sync` component:
+The recording API is C++ only. `StartRecordingLipSync`, `FinishRecordingLipSync`, `PlayRecordedLipSync`, `IsPlaying`, and `GetCurrentFrame` are plain C++ methods on `UConvaiFaceSyncComponent` with no `UFUNCTION` decoration.
 
-1. Call `StartRecordingLipSync` on the component before or at the start of the speech turn.
-2. Let the character speak. The component captures all incoming blendshape frames.
-3. Call `FinishRecordingLipSync` when the turn ends. Store the returned `FAnimationSequenceBP` in a variable.
-4. When you want to replay the sequence, call `PlayRecordedLipSync` with the stored variable:
+```cpp
+// pseudocode
+UConvaiFaceSyncComponent* FaceSync = MyCharacter->FindComponentByClass<UConvaiFaceSyncComponent>();
 
-| Parameter | Example value | Description |
-|---|---|---|
-| `RecordedLipSync` | *(stored variable)* | The sequence returned by `FinishRecordingLipSync`. |
-| `StartFrame` | `0` | First frame to replay. `0` starts from the beginning. |
-| `EndFrame` | `-1` | Last frame to replay. `-1` plays to the end of the sequence. |
-| `OverwriteDuration` | `0.0` | Override the sequence duration. `0.0` uses the recorded duration. |
+// 1. Start recording before or at the start of the speech turn.
+FaceSync->StartRecordingLipSync();
+
+// 2. The character speaks — frames are captured automatically.
+
+// 3. Stop recording when the turn ends and store the sequence.
+FAnimationSequenceBP CachedSequence = FaceSync->FinishRecordingLipSync();
+
+// 4. Replay the sequence when needed (e.g. on cutscene trigger).
+//    Parameters: recorded sequence, start frame (0 = beginning),
+//    end frame (-1 = end), overwrite duration (0.0 = use recorded duration).
+FaceSync->PlayRecordedLipSync(CachedSequence, 0, -1, 0.0f);
+```
 
 {% hint style="info" %}
-Use `IsPlaying()` to poll whether replay is active, and `GetCurrentFrame()` to read the live blendshape values for secondary systems such as audio-driven effects or lipsync debug overlays.
+Use `IsPlaying()` to poll whether replay is active, and `GetCurrentFrame()` to read the live blendshape values for secondary systems such as audio-driven effects or lip sync debug overlays.
 {% endhint %}
 
 ## Next steps

@@ -26,7 +26,7 @@ Enable verbose logging before debugging — it will show the exact action names,
 
 **Cause B:** The action name in the `Actions` array does not match the Blueprint function name.
 
-**Fix:** The dispatch is case-sensitive. Ensure the `Name` field on the `FConvaiAction` template exactly matches the name of the Custom Event or function in the NPC Actor Blueprint. For example, if the template name is `"Move To"`, the Blueprint event must also be named `Move To`.
+**Fix:** Ensure the `Name` field on the `FConvaiAction` template matches the Custom Event or function name in the NPC Actor Blueprint, including spaces and punctuation. Unreal resolves handler names case-insensitively, but `"Stop Moving"` and `"StopMoving"` are different names. For example, if the template name is `"Move To"`, the Blueprint event must be named `Move To` (with a space).
 
 **Verify:** Add a **Print String** node at the top of the handler. If it does not fire, the name mismatch is the cause. Check the Output Log (`ConvaiChatbotComponentLog`) for a warning containing `TriggerNamedBlueprintAction: Could not find a valid function '<name>' on the owning actor or the component (self).`
 
@@ -34,7 +34,7 @@ Enable verbose logging before debugging — it will show the exact action names,
 
 **Cause C:** The handler function signature is wrong.
 
-**Fix:** The function must accept exactly one parameter of type `FConvaiResultAction` (`Convai Result Action` in the type picker). If the parameter type is wrong, the dispatch fails silently.
+**Fix:** The function must accept zero or one parameter of type `FConvaiResultAction` (`Convai Result Action` in the type picker). If the parameter type is wrong, the plugin logs a warning and the handler is not invoked — the queue stalls until `HandleActionCompletion` or `AbortActionSequence` is called.
 
 ---
 

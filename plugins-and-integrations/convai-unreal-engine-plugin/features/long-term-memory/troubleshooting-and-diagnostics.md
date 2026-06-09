@@ -1,6 +1,6 @@
 ---
 title: Troubleshooting and diagnostics
-description: Fix memory not persisting, LTM disabled, wrong player being remembered, Speaker ID failures, and sessions that fail to resume in the Convai Unreal Engine plugin.
+description: Fix memory not persisting, LTM disabled, wrong player being remembered, Speaker ID failures, and sessions failing to resume in the Convai Unreal Engine plugin.
 last_reviewed: 2026-06-06
 ---
 
@@ -193,7 +193,7 @@ The Unreal plugin's LTM API operates at the **Speaker ID** and **session** level
 - Retrieve the full memory transcript for a player
 - Seed memory records before a first session
 
-Memory records are managed automatically by Convai based on conversation content. If you need to inspect or modify individual memory records for a character, use the [Convai dashboard](https://convai.com) or the Convai REST API directly.
+Memory records are managed automatically by Convai based on conversation content. If you need to inspect or modify individual memory records for a character, use the [Convai dashboard](https://convai.com).
 
 ---
 

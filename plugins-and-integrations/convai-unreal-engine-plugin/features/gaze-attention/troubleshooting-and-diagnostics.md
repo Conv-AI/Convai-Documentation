@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting and diagnostics
 description: Diagnose and fix gaze attention issues — objects not highlighting, attention never promoting, cursor not appearing, and component-scoped gaze not matching.
-last_reviewed: "2026-06-05"
+last_reviewed: "2026-06-09"
 ---
 
 Use this page to diagnose and fix the most common gaze attention problems. Each entry follows a symptom / cause / fix / verify structure.
@@ -117,17 +117,22 @@ Use this page to diagnose and fix the most common gaze attention problems. Each 
 
 ## Component-scoped highlight appears on the wrong sub-mesh or the whole actor
 
-**Symptom:** A `UConvaiObjectComponent` with `ComponentName` set highlights the entire actor instead of only the named sub-mesh, or the highlight does not appear at all when looking at the intended part.
+**Symptom:** A `UConvaiObjectComponent` with `ObjectEntry.ComponentName` set highlights the entire actor instead of only the named sub-mesh, or the highlight does not appear at all when looking at the intended part.
 
-**Cause:** The `ComponentName` value does not match any component on the actor. Common reasons: typo, wrong case (matching is case-insensitive but the substring must appear in the component name), the component was renamed after the value was set, or the component is not a `UPrimitiveComponent` descendant.
+**Cause:** One of four conditions:
+- `ObjectEntry.MoveTargetMode` is still `Actor as goal` (the default). Gaze ignores `ComponentName` until **Move Target Mode** is `Component as goal`.
+- The `ComponentName` value does not match any component on the actor (typo, renamed component, or substring mismatch).
+- The component tree changed at runtime and the cached resolve is stale.
+- The target sub-mesh has no collision on `GazeTraceChannel`, so the line trace never hits it.
 
 **Fix:**
-1. In Play mode, call `GetResolvedComponent(true)` on the `UConvaiObjectComponent` from Blueprint and print the return value. A `nullptr` result means the name did not resolve — check the exact component name in the Details panel hierarchy.
-2. Confirm that `ComponentName` is a substring of the target component's label as shown in the **Components** panel (for example, `"Handle"` matches `SM_DoorHandle` but not `SM_Knob`).
-3. If the actor's component tree is built at runtime (procedural generation, dynamic attachment), call `GetResolvedComponent(true)` after the tree is fully constructed rather than relying on the cached result from load time.
-4. Confirm the target component has collision enabled on the `GazeTraceChannel`. A component with no collision will never be hit by the line trace, so the scoped match cannot fire even if the name resolves correctly.
+1. On the `UConvaiObjectComponent`, expand **Object Entry** and set **Move Target Mode** to `Component as goal`.
+2. In Play mode, call `GetResolvedComponent(true)` on the `UConvaiObjectComponent` from Blueprint and print the return value. A `nullptr` result means the name did not resolve — check the exact component name in the Details panel hierarchy.
+3. Confirm that `ObjectEntry.ComponentName` is a substring of the target component's label as shown in the **Components** panel (for example, `"Handle"` matches `SM_DoorHandle` but not `SM_Knob`).
+4. If the actor's component tree is built at runtime (procedural generation, dynamic attachment), call `GetResolvedComponent(true)` after the tree is fully constructed rather than relying on the cached result from load time.
+5. Confirm the target component has collision enabled on the `GazeTraceChannel`. A component with no collision will never be hit by the line trace, so the scoped match cannot fire even if the name resolves correctly.
 
-**Verify:** After correcting `ComponentName`, enter Play mode and aim the crosshair at the specific sub-mesh. Only that mesh should highlight; other parts of the actor should remain unaffected. `GetResolvedComponent(false)` should return the correct component reference.
+**Verify:** After correcting **Move Target Mode** and `ComponentName`, enter Play mode and aim the crosshair at the specific sub-mesh. Only that mesh should highlight; other parts of the actor should remain unaffected. `GetResolvedComponent(false)` should return the correct component reference.
 
 ---
 

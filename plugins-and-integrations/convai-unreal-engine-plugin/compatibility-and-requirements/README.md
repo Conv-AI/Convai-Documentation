@@ -19,7 +19,7 @@ Confirm your environment meets these requirements before installing the Convai U
 <td><a href="unreal-engine-versions.md">unreal-engine-versions.md</a></td>
 </tr>
 <tr>
-<td><strong>Platform support matrix</strong><br>Win64 and Android build targets, required plugin dependencies, and Android microphone permission handling.</td>
+<td><strong>Unreal Engine platform support matrix</strong><br>Win64 and Android build targets, required plugin dependencies, and Android microphone permission handling.</td>
 <td><a href="platform-support-matrix.md">platform-support-matrix.md</a></td>
 </tr>
 <tr>
@@ -37,12 +37,12 @@ Confirm your environment meets these requirements before installing the Convai U
 
 | Requirement | Minimum |
 |---|---|
-| Unreal Engine | <code class="expression">space.vars.unreal_min_version</code> (any UE 5.x release) |
-| Convai account | Required — create one at [convai.com](https://convai.com) |
-| API key | Required — generated in the Convai dashboard |
+| Unreal Engine | <code class="expression">space.vars.unreal_min_version</code> minimum |
+| Convai account | Required — create one at <code class="expression">space.vars.dashboard_url</code> |
+| API key | Required for standard setup — generated in the Convai dashboard |
 | `AudioCapture` plugin | Bundled engine plugin; enabled automatically as a dependency |
 | `AndroidPermission` plugin | Bundled engine plugin; required for Android builds only |
-| Build target | Win64 or Android |
+| Build target | `Win64` or `Android` |
 
 ## Next steps
 

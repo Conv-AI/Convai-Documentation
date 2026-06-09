@@ -4,7 +4,7 @@ description: Add the Convai Face Sync component and AnimGraph node to a MetaHuma
 last_reviewed: 2026-06-05
 ---
 
-In this tutorial we will add lip sync to a MetaHuman character that already has a `UConvaiChatbotComponent` attached. By the end, speaking to the character in Play mode will animate its mouth and face in sync with the response audio.
+We will add lip sync to a MetaHuman character that already has a `UConvaiChatbotComponent` attached. By the end, speaking to the character in Play mode will animate its mouth and face in sync with the response audio.
 
 ## What we will build
 
@@ -38,7 +38,7 @@ Click **Add** in the **Components** panel and search for `Convai Face Sync`. Sel
 {% step %}
 ### Set the lip-sync mode
 
-With the `Convai Face Sync` component selected, open the **Details** panel. Under **Convai | LipSync**, set **Lip Sync Mode** to `MetaHuman Blendshapes`. You can also set a project-wide default in **Edit > Project Settings > Convai > LipSync Mode** — the per-component value takes priority.
+With the `Convai Face Sync` component selected, open the **Details** panel. Under **Convai | LipSync**, set **Lip Sync Mode** to `MetaHuman Blendshapes`. A project-wide default also exists at **Edit > Project Settings > Plugins > Convai** under **Advanced > Lip Sync Mode**. For this tutorial, set the mode on the component so the character uses the correct rig-specific value even if the project-wide setting stays on `Auto`.
 {% endstep %}
 
 {% step %}

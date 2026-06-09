@@ -25,7 +25,7 @@ In a browser, go to [convai.com](https://convai.com) and sign in.
 {% step %}
 ### Choose or create a character
 
-Select an existing character from your character list, or create a new one. You can set the character's name, backstory, language, voice, and personality in the dashboard. You can update these settings at any time without changing anything in Unreal Engine.
+Select an existing character from your character list, or create a new one. Manage the character's profile and behavior in the dashboard. You can update dashboard configuration without changing anything in Unreal Engine.
 {% endstep %}
 
 {% step %}

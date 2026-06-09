@@ -1,10 +1,10 @@
 ---
 title: Lip sync
-description: Animate a character's face in sync with Convai speech using server-precomputed blendshape data and the Convai Face Sync AnimGraph node.
+description: Animate a character's face in sync with Convai speech using precomputed blendshape data and the Convai Face Sync AnimGraph node.
 last_reviewed: 2026-06-05
 ---
 
-The lip sync feature drives facial blendshapes on your character in time with audio streamed from Convai. Blendshape data is precomputed on the server side and delivered alongside the audio, so the animation matches speech without any runtime inference cost in Unreal Engine.
+The lip sync feature drives facial blendshapes on your character in time with audio streamed from Convai. Convai precomputes blendshape data and delivers it alongside the audio, so the animation matches speech without any runtime inference cost in Unreal Engine.
 
 <table data-view="cards">
 <thead>
@@ -35,7 +35,7 @@ The lip sync feature drives facial blendshapes on your character in time with au
 <td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
-<td><strong>Record and replay lip sync</strong><br>Capture a live lip-sync sequence during a conversation and replay it later in cutscenes or offline previews.</td>
+<td><strong>Record and replay lip sync</strong><br>Capture a live lip-sync sequence during a conversation and replay it later in cutscenes or offline previews. C++ API.</td>
 <td><a href="recording-lip-sync.md">recording-lip-sync.md</a></td>
 </tr>
 <tr>

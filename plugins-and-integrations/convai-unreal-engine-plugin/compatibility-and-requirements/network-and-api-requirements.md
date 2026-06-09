@@ -4,46 +4,43 @@ description: Reference for Convai Unreal Engine plugin connectivity requirements
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin requires internet connectivity during runtime. Speech processing, language understanding, and text-to-speech all execute through Convai — no offline or LAN mode is available.
+The Convai Unreal Engine plugin requires internet connectivity during runtime. Runtime sessions connect to Convai through the realtime endpoint, while editor and HTTPS API requests use the API endpoint.
 
 ## Required domains
 
-| Domain                      | Protocol   | Purpose                               |
-| --------------------------- | ---------- | ------------------------------------- |
-| `realtime-api.convai.com`   | HTTPS, WSS | Room connection and real-time session |
-| `api.convai.com`            | HTTPS      | Character metadata and REST API       |
-| LiveKit TURN / STUN servers | UDP / TCP  | WebRTC audio and video transport      |
+| Domain | Protocol | Purpose |
+| --- | --- | --- |
+| `realtime-api.convai.com` | HTTPS | Realtime session connection endpoint |
+| `api.convai.com` | HTTPS | Character data, account, and HTTPS API requests |
 
 ## Protocol stack
 
-| Protocol               | Port     | Purpose                                                  |
-| ---------------------- | -------- | -------------------------------------------------------- |
-| HTTPS                  | 443      | REST API calls — room connection request, character data |
-| WebSocket Secure (WSS) | 443      | LiveKit signaling — session setup and control messages   |
-| WebRTC (UDP)           | Variable | Real-time audio, video, and data transport               |
+| Protocol | Port | Purpose |
+| --- | --- | --- |
+| HTTPS | 443 | Realtime connection setup and HTTPS API calls |
+| Convai WebRTC client | Managed by the plugin | Runtime audio, video, and data transport after the session is connected |
 
 {% hint style="info" %}
-If UDP is blocked by your network, the connection automatically falls back to TURN relay using TCP on port 443. All traffic uses TLS encryption.
+The public Unreal source exposes the realtime endpoint as `https://realtime-api.convai.com/connect`. It does not expose separate LiveKit, TURN, STUN, WSS, or UDP port settings.
 {% endhint %}
 
 ## Authentication
 
-Every request to Convai is authenticated using your API key, sent as a `CONVAI-API-KEY` header. The key is stored in **Project Settings > Plugins > Convai > API Key**. No per-session token exchange is required.
+HTTPS API requests use the configured API key as a `CONVAI-API-KEY` header. Realtime session setup starts from the same configured API key, but the subsystem maps that header to `X-API-KEY` before passing it to the Convai WebRTC client. The key is stored on `UConvaiSettings.API_Key` and is visible in **Project Settings > Plugins > Convai > API Key**.
 
 ## Enterprise and firewall configuration
 
-Minimum outbound rules required for plugin operation:
+Minimum outbound rules visible in the public Unreal source:
 
 ```text
 ALLOW outbound TCP 443 → realtime-api.convai.com
 ALLOW outbound TCP 443 → api.convai.com
-ALLOW outbound UDP (any port) → any    ← WebRTC media
 ```
 
-TCP 443 TURN fallback activates automatically if UDP is blocked. No inbound ports are required.
+The Unreal plugin source does not expose additional TURN, STUN, WSS, or UDP firewall targets.
 
 {% hint style="warning" %}
-Proxy servers that perform TLS inspection (man-in-the-middle) may break the WebSocket connection. Exclude `realtime-api.convai.com` from TLS inspection if your environment uses it.
+Proxy servers that block or inspect HTTPS traffic may prevent session setup or HTTPS API requests. Allow outbound HTTPS traffic to both required domains before testing in Play In Editor.
 {% endhint %}
 
 ## Next steps

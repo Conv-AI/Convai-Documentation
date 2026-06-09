@@ -10,18 +10,20 @@ The Convai Unreal Engine plugin drives facial animation through the `UConvaiFace
 
 | Rig type | Lip sync mode | Out-of-the-box | Additional setup |
 |---|---|---|---|
-| MetaHuman | `MetaHuman Blendshapes` (`BS_MHA`) | ✅ Yes — this is the default mode | None required; bundled animation Blueprint included |
-| Reallusion Character Creator (CC5) | `MetaHuman Blendshapes` (`BS_MHA`) | ❌ No | Download and configure the Convai animation Blueprint |
-| Reallusion Character Creator (CC4) | `ARKit Blendshapes` (`BS_ARKit`), or `CC4 Extended Blendshapes` (`BS_CC4_Extended`) for the extended set | ❌ No | Download and configure the Convai animation Blueprint |
-| ARKit-compatible rigs | `ARKit Blendshapes` (`BS_ARKit`) | ❌ No | Configure `LipSyncMode` to `BS_ARKit`; wire 61 blendshape channels to your rig |
-| Viseme-based rigs | `Viseme Based` (`VisemeBased`) | ❌ No | Configure `LipSyncMode` to `VisemeBased`; map 15 OVR visemes to your rig |
-| Single-mesh generic rigs | `Auto` or `Off` | ⚠️ Partial | No facial animation without a compatible mode configured |
+| MetaHuman | `MetaHuman Blendshapes` (`BS_MHA`) | Yes; this is the default mode | Bundled `Convai_MetaHuman_BodyAnim` and `Convai_MetaHuman_FaceAnim` animation Blueprints included |
+| Reallusion Character Creator (CC5) | `MetaHuman Blendshapes` (`BS_MHA`) | No | Download and configure the Convai animation Blueprint |
+| Reallusion Character Creator (CC4) | `ARKit Blendshapes` (`BS_ARKit`), or `CC4 Extended Blendshapes` (`BS_CC4_Extended`) for the extended set | No | Download and configure the Convai animation Blueprint |
+| ARKit-compatible rigs | `ARKit Blendshapes` (`BS_ARKit`) | No | Configure `LipSyncMode` to `BS_ARKit`; wire 61 blendshape channels to your rig |
+| Viseme-based rigs | `Viseme Based` (`VisemeBased`) | No | Configure `LipSyncMode` to `VisemeBased`; map 15 OVR visemes to your rig |
+| Single-mesh generic rigs | `Auto` or `Off` | Partial | No facial animation without a compatible mode configured |
 
 ## MetaHuman characters
 
-MetaHuman is the default rig target. The plugin ships with a bundled MetaHuman animation Blueprint and sets `LipSyncMode` to `BS_MHA` by default on `UConvaiFaceSyncComponent`. No extra download or configuration is required to get facial animation working on a MetaHuman character.
+MetaHuman is the default rig target. The plugin ships with `Convai_MetaHuman_BodyAnim` and `Convai_MetaHuman_FaceAnim` under `Content/MetaHumans/Animations/`, and sets `LipSyncMode` to `BS_MHA` by default on `UConvaiFaceSyncComponent`. No separate animation Blueprint download is required for MetaHuman setup.
 
 The `GetBodyAndFaceSkeletalMeshComponents` utility function (Blueprint-callable, category `Convai|Utilities`) resolves the body and face skeletal mesh components on a MetaHuman-style actor automatically using bone-name heuristics. MetaHuman rigs that separate the face mesh from the body mesh are handled correctly.
+
+Use the MetaHuman setup guide for the rig-specific setup flow.
 
 {% content-ref url="../getting-started/set-up-a-metahuman-character.md" %}
 [Set up a MetaHuman character](../getting-started/set-up-a-metahuman-character.md)
@@ -32,10 +34,12 @@ The `GetBodyAndFaceSkeletalMeshComponents` utility function (Blueprint-callable,
 Reallusion CC4 and CC5 characters require a separate animation Blueprint download because the bundled MetaHuman assets are not compatible with the CC rig. The plugin includes `FixCC5LipsyncPostProcessBlendshapes` (Blueprint-callable, category `Convai|LipSync`) to apply a post-process fix for CC5 rigs that use `ExpBoneData` in their post-process animation instance.
 
 {% hint style="info" %}
-The Convai CC4/CC5 animation Blueprint is hosted externally. Download it from [Google Drive](https://drive.google.com/drive/folders/1k3072DH3zJXk2xTg-CJ_najnm0pyvZJS) before proceeding with setup.
+Reallusion setup uses a separate Convai animation Blueprint. Follow the Reallusion setup guide before assigning a CC4 or CC5 character to your scene.
 {% endhint %}
 
 After downloading, set `LipSyncMode` on the `UConvaiFaceSyncComponent` attached to your CC character based on the rig generation: use `MetaHuman Blendshapes` (`BS_MHA`) for CC5, and `ARKit Blendshapes` (`BS_ARKit`) for CC4. For CC4 rigs that drive the extended Reallusion blendshape set, use `CC4 Extended Blendshapes` (`BS_CC4_Extended`) instead.
+
+Use the Reallusion setup guide for the download and animation Blueprint assignment steps.
 
 {% content-ref url="../getting-started/set-up-a-reallusion-character.md" %}
 [Set up a Reallusion character](../getting-started/set-up-a-reallusion-character.md)
@@ -70,6 +74,8 @@ Reallusion CC character setup walkthrough
 {% endembed %}
 
 ## Next steps
+
+After confirming rig support, check the network requirements before installing or validating the plugin.
 
 {% content-ref url="network-and-api-requirements.md" %}
 [Network and API requirements](network-and-api-requirements.md)

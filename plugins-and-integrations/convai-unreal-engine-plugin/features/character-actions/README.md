@@ -1,6 +1,6 @@
 ---
 title: Character actions
-description: Understand how the Convai Unreal Engine plugin lets characters receive action instructions from Convai and execute Blueprint logic in response.
+description: Find guides, references, and examples for the Convai Unreal Engine character actions system — from quick start to Blueprint API reference.
 last_reviewed: "4.0.0-beta.21"
 ---
 

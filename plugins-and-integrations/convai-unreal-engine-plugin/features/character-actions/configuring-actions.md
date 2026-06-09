@@ -4,7 +4,7 @@ description: Define the action set, enable the feature on a Convai Chatbot compo
 last_reviewed: "4.0.0-beta.21"
 ---
 
-This page covers the full configuration surface for character actions: enabling the feature, defining action templates, registering objects and characters, and managing the environment at runtime.
+The `Convai Chatbot` component exposes an `Environment` property that controls the full character actions configuration: action templates, scene-object registrations, character registrations, and attention state. Use this page to configure all of these at edit time in the Details panel or at runtime through Blueprint.
 
 ## The Environment property
 
@@ -64,7 +64,7 @@ You can rename, describe, or remove these as needed. To remove a default action,
 4. Add entries to **Parameters** if the action needs typed inputs. See [Parameterized actions](parameterized-actions.md).
 
 {% hint style="warning" %}
-Action names are matched case-sensitively at Blueprint dispatch. The name you set here must exactly match the Blueprint function or event name on the owning Actor.
+Action names must match the Blueprint function or event name on the owning Actor, including spaces and punctuation. Unreal resolves handler names case-insensitively, but `"Stop Moving"` and `"StopMoving"` are different names.
 {% endhint %}
 
 ## Registering objects

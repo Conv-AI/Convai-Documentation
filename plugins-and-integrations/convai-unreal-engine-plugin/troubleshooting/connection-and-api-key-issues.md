@@ -88,7 +88,7 @@ The `CharacterID` field is case-sensitive and must match the ID shown on the Con
 | Endpoint | Protocol | Port | Purpose |
 | --- | --- | --- | --- |
 | `realtime-api.convai.com` | HTTPS (gRPC over TLS) | 443 | Real-time audio and session traffic |
-| `api.convai.com` | HTTPS | 443 | Character data, REST API calls |
+| `api.convai.com` | HTTPS | 443 | Character data and HTTPS requests |
 
 **Fix:** Confirm that outbound HTTPS traffic on port 443 is permitted to both `realtime-api.convai.com` and `api.convai.com`. If a proxy is required, configure it at the OS level so Unreal Engine picks it up automatically via the `HTTP_PROXY` or `HTTPS_PROXY` environment variables.
 
@@ -105,7 +105,7 @@ The `Convai Chatbot` component exposes Blueprint-assignable events that fire whe
 | Event | Fires when | Use for |
 | --- | --- | --- |
 | **On Failure** | Any connection or session error occurs | Show an error message, disable the talking UI, or retry logic |
-| **On Character Data Loaded** | Character metadata loads from Convai (fires once on BeginPlay) | Confirm authentication succeeded and the `CharacterName`, `Backstory`, and `VoiceType` properties are populated |
+| **On Character Data Loaded** | Character metadata loads from Convai (fires once on BeginPlay) | Confirm authentication succeeded and `CharacterName` is populated |
 | **On Interrupted** | The current speech turn is interrupted | Update the UI to show the character stopped speaking |
 
 To bind to **On Failure** in Blueprint:

@@ -24,7 +24,7 @@ Action template struct. Defined at edit time in the `Actions` array of `FConvaiE
 
 | Field | Type | Default | Notes |
 |---|---|---|---|
-| `Name` | `FString` | `""` | Canonical action name. Must match the Blueprint handler function name exactly (case-sensitive). |
+| `Name` | `FString` | `""` | Canonical action name. Must match the Blueprint handler function name, including spaces. Unreal resolves handler names case-insensitively. |
 | `Description` | `FString` | `""` | Optional hint sent to Convai. |
 | `Parameters` | `TArray<FConvaiActionParam>` | `[]` | Ordered typed parameters. |
 | `bWaitForBotSpeech` | `bool` | `false` | Delay first action until the character begins or finishes speaking. |

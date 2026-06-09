@@ -8,7 +8,7 @@ The narrative design API spans two surfaces: instance functions and events on `U
 
 ## Async fetch nodes
 
-These nodes are standalone latent Blueprint functions, not methods on `UConvaiChatbotComponent`. They make a REST API call to Convai and return data via On Success / On Failure execution pins. See [Fetching narrative data](fetching-narrative-data.md) for usage guidance.
+These nodes are standalone latent Blueprint functions, not methods on `UConvaiChatbotComponent`. They make an HTTPS request to Convai and return data via On Success / On Failure execution pins. See [Fetching narrative data](fetching-narrative-data.md) for usage guidance.
 
 ### `Convai Fetch Narrative Sections`
 

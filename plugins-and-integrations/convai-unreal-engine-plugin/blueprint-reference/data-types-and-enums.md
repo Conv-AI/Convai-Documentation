@@ -287,6 +287,3 @@ Speaker identity for long-term memory operations. Used when associating session 
 [Convai utility functions](utility-functions.md)
 {% endcontent-ref %}
 
-{% content-ref url="character-management.md" %}
-[Character management](character-management.md)
-{% endcontent-ref %}

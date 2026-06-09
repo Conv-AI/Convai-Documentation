@@ -136,7 +136,7 @@ Use these Blueprint-callable nodes on `UConvaiChatbotComponent` to inspect sessi
 | `Get Talking Time Elapsed` | `float` (seconds) | How long has the current speech turn been playing? |
 | `Get Talking Time Remaining` | `float` (seconds) | How much audio remains in the current speech turn? |
 
-The `CharacterID`, `CharacterName`, `Backstory`, `VoiceType`, and `SessionID` properties on `UConvaiChatbotComponent` are Blueprint-readable and show character data as loaded from Convai. A `SessionID` of `-1` means no active session has been established.
+The `CharacterID`, `CharacterName`, and `SessionID` properties on `UConvaiChatbotComponent` are Blueprint-readable and show the loaded character identity and conversation session state. A `SessionID` of `-1` means no active session has been established.
 
 ### Blueprint-assignable diagnostic events
 
@@ -145,7 +145,7 @@ The `CharacterID`, `CharacterName`, `Backstory`, `VoiceType`, and `SessionID` pr
 | Event | Component | When it fires | Diagnostic use |
 | --- | --- | --- | --- |
 | **On Failure** | `Convai Chatbot` | Any connection or session error | Capture the failure moment; read `ConvaiChatbotComponentLog` immediately after for the error string |
-| **On Character Data Loaded** | `Convai Chatbot` | Character metadata arrives from Convai after BeginPlay | Confirm authentication succeeded; check `CharacterName` and `Backstory` are populated |
+| **On Character Data Loaded** | `Convai Chatbot` | Character metadata arrives from Convai after BeginPlay | Confirm authentication succeeded; check `CharacterName` is populated |
 | **On Interrupted** | `Convai Chatbot` | Current speech turn is cut short | Useful for detecting unexpected interruptions vs intentional ones |
 | **On Interaction ID Received** | `Convai Chatbot` | Each conversation turn begins | Log the `InteractionID` to correlate turns with Convai server records |
 | **On Started Talking** | `Convai Audio Streamer` | Character begins playing audio | Timestamp this event to measure perceived response latency |

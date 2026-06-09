@@ -36,9 +36,9 @@ Use this page to identify and fix the most common lip sync problems. Each entry 
 
 **Symptom:** Something on the face moves, but it is not the mouth — for example the eyes blink rapidly, or unrelated shapes activate.
 
-**Cause — LipSyncMode mismatch:** The `LipSyncMode` on the `Convai Face Sync` component does not match the curve names on the Skeletal Mesh. For example, the mode is set to `VisemeBased` but the mesh has MetaHuman CTRL curves, or vice versa.
+**Cause — LipSyncMode mismatch:** The project-wide **Lip Sync Mode** is `Auto`, and the `LipSyncMode` on the `Convai Face Sync` component does not match the curve names on the Skeletal Mesh. For example, the component mode is set to `VisemeBased` but the mesh has MetaHuman CTRL curves, or vice versa.
 
-**Fix:** Open the character Blueprint, select the `Convai Face Sync` component, and change `LipSyncMode` to the value that matches the rig:
+**Fix:** Open the character Blueprint, select the `Convai Face Sync` component, and change `LipSyncMode` to the value that matches the rig. This per-component value is used when the project-wide **Lip Sync Mode** is `Auto`:
 
 | Rig type | Correct LipSyncMode |
 |---|---|
@@ -48,7 +48,7 @@ Use this page to identify and fix the most common lip sync problems. Each entry 
 | CC4 (extended export) | `CC4 Extended Blendshapes` |
 | Custom rig with OVR viseme curves | `Viseme Based` |
 
-`LipSyncMode` can also be set globally in **Edit > Project Settings > Convai > LipSync Mode**. The per-component value overrides the global setting when both are set.
+Project-wide **Lip Sync Mode** can be set globally in **Edit > Project Settings > Plugins > Convai > Advanced > Lip Sync Mode**. Concrete project-wide values such as `Off`, `VisemeBased`, `BS_MHA`, and `BS_ARKit` override component values during connection setup. Use the project-wide `Auto` value when characters use different rigs, and set the rig-specific value on each `Convai Face Sync` component. For `CC4 Extended Blendshapes`, keep the project-wide setting on `Auto` and set the component to `CC4 Extended Blendshapes`.
 
 **Verify:** Reopen the Skeletal Mesh in the editor and check the **Curves** list. Confirm that the curve names match what the selected mode produces.
 
@@ -76,7 +76,7 @@ Use this page to identify and fix the most common lip sync problems. Each entry 
 
 **Cause — target curve name mismatch:** The `TargetNames` array in the `FConvaiBlendshapeParameters` entry does not match the exact curve name on the Skeletal Mesh.
 
-**Fix:** Open the Skeletal Mesh asset in the editor, navigate to the **Curves** section, and copy the exact curve name. Paste it into the `TargetNames` entry. Curve names are case-sensitive.
+**Fix:** Open the Skeletal Mesh asset in the editor, navigate to the **Curves** section, and copy the exact curve name shown there. Paste it into the `TargetNames` entry.
 
 **Verify:** Add a single test entry in the mapping, enter PIE, and confirm that the targeted curve responds.
 
@@ -105,7 +105,7 @@ Use the exact source name as the map key.
 **Verify:** Run a Development cook and check the cook log for warnings about stripped curve tracks on the character's Skeleton.
 
 {% hint style="info" %}
-Command-line overrides (`-LipSyncAnim*` flags) set during PIE do not carry over to packaged builds unless passed explicitly at launch. See the [Face Sync AnimGraph node reference](face-sync-anim-node-reference.md) for the full list of overridable properties.
+Command-line overrides (`-LipSyncAnim*` flags) set during PIE do not carry over to packaged builds unless passed explicitly at launch. See the [Face Sync AnimGraph node reference](face-sync-anim-node-reference.md) for the full list of supported override flags.
 {% endhint %}
 
 ## Next steps

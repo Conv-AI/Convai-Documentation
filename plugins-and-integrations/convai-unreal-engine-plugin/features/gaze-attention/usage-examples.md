@@ -1,10 +1,10 @@
 ---
 title: Usage examples
 description: Blueprint recipes for gaze events, custom highlight visuals, component-scoped targeting, manual attention locking, and building a custom cursor widget.
-last_reviewed: "2026-06-05"
+last_reviewed: "2026-06-09"
 ---
 
-These examples cover the most common patterns when integrating gaze attention into a Convai project. Each example states its scenario, the setup required, and the expected runtime outcome.
+These Blueprint recipes show the most common `UConvaiPlayerComponent` and `UConvaiObjectComponent` gaze-attention patterns. Each example states its scenario, the setup required, and the expected runtime outcome.
 
 ## React to a gaze event in Blueprint
 
@@ -62,6 +62,10 @@ The player component spawns and destroys the highlight actor automatically. `Get
 ## Lock attention to an object manually
 
 **Scenario:** A narrative sequence must hold the character's attention on a briefing screen regardless of where the player looks.
+
+{% hint style="info" %}
+`SetObjectInAttention` has no effect when **Enable Actions** (`EnvironmentData.bEnableActions`) is `false` on the chatbot. Confirm actions are enabled before wiring this pattern.
+{% endhint %}
 
 **Setup:** Call `SetObjectInAttention` directly from Blueprint at the start of the narrative beat.
 
@@ -140,25 +144,31 @@ Both properties are `BlueprintReadWrite` and can be changed at runtime, for exam
 
 **Setup:**
 
-1. Select `BP_ControlPanel` in the level. In the **Details** panel, click **Add Component** twice to add two `UConvaiObjectComponent` instances. Name them `ConvaiObject_EmergencyStop` and `ConvaiObject_FuelGauge` (the component label is for editor clarity; the gaze filter uses `ComponentName`).
+1. Select `BP_ControlPanel` in the level. In the **Details** panel, click **Add Component** twice to add two `UConvaiObjectComponent` instances. Name them `ConvaiObject_EmergencyStop` and `ConvaiObject_FuelGauge` (the component label is for editor clarity; the gaze filter uses `ObjectEntry.ComponentName`).
 
-2. Configure `ConvaiObject_EmergencyStop` under **Convai | Object**:
+2. Configure `ConvaiObject_EmergencyStop` under **Convai | Object** → **Object Entry**:
    - **Name** — `"EmergencyStop"`
    - **Description** — `"A red mushroom button that cuts power to the whole line."`
-   - **ComponentName** — `"SM_EmergencyStopButton"` (the exact Static Mesh component name on the actor)
+   - **Move Target Mode** — `Component as goal`
+   - **Component Name** — `"SM_EmergencyStopButton"` (the exact Static Mesh component name on the actor)
 
-3. Configure `ConvaiObject_FuelGauge` under **Convai | Object**:
+3. Configure `ConvaiObject_FuelGauge` under **Convai | Object** → **Object Entry**:
    - **Name** — `"FuelGauge"`
    - **Description** — `"A dial showing current fuel pressure in bar."`
-   - **ComponentName** — `"SM_FuelGaugeDial"`
+   - **Move Target Mode** — `Component as goal`
+   - **Component Name** — `"SM_FuelGaugeDial"`
 
-4. On `UConvaiPlayerComponent`, ensure **Gaze Attention Text** and **Gaze Should Respond** are configured as needed.
+4. On `UConvaiPlayerComponent`, ensure **Gaze Attention Text** (`GazeAttentionText`) and **Gaze Should Respond** (`GazeShouldRespond`) are configured as needed.
 
-`ComponentName` matching is case-insensitive substring lookup. A value of `"EmergencyStop"` matches any component whose name contains that string. If the name cannot be resolved, the component is excluded from gaze detection and a warning is logged at load time. Call `GetResolvedComponent(true)` on the `UConvaiObjectComponent` at runtime to confirm the match.
+`ObjectEntry.ComponentName` matching is case-insensitive substring lookup and applies only when **Move Target Mode** is `Component as goal`. A value of `"EmergencyStop"` matches any component whose name contains that string. If the name cannot be resolved, the component is excluded from gaze detection and a warning is logged at load time. Call `GetResolvedComponent(true)` on the `UConvaiObjectComponent` at runtime to confirm the match.
 
 **Outcome:** Looking at `SM_EmergencyStopButton` highlights only that mesh and promotes `"EmergencyStop"` to attention. Looking at `SM_FuelGaugeDial` highlights only that mesh and promotes `"FuelGauge"`. Looking at the panel frame (no scoped component matches) falls back to any whole-actor `UConvaiObjectComponent` on the actor, if one exists.
 
 ## Next steps
+
+{% content-ref url="how-gaze-attention-works.md" %}
+[How gaze attention works](how-gaze-attention-works.md)
+{% endcontent-ref %}
 
 {% content-ref url="gaze-attention-reference.md" %}
 [Gaze attention reference](gaze-attention-reference.md)

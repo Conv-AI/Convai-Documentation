@@ -1,7 +1,7 @@
 ---
 title: How gaze attention works
 description: Understand the gaze trace pipeline, attention promotion timers, component-scoped targeting, highlight rendering, and the attention-source locking rule.
-last_reviewed: "2026-06-05"
+last_reviewed: "2026-06-09"
 ---
 
 Gaze attention is a subsystem inside `UConvaiPlayerComponent` that translates where the player is looking into contextual focus for AI characters. When active, it runs every tick, manages visual feedback through a highlight actor and a cursor widget, and writes to the chatbot's "object in attention" slot after a configurable dwell period.
@@ -85,14 +85,14 @@ If a character's attention slot stays on one object regardless of where the play
 
 ## Component-scoped gaze
 
-By default, every `UConvaiObjectComponent` on an actor represents the whole actor — the gaze system highlights all meshes and promotes the actor as a unit. When `ComponentName` is set on a `UConvaiObjectComponent`, the component becomes **component-scoped**: it matches only when the player's line trace hits that specific sub-component (or a primitive attached to it).
+By default, every `UConvaiObjectComponent` on an actor represents the whole actor — the gaze system highlights all meshes and promotes the actor as a unit. To scope gaze to a sub-mesh, set `ObjectEntry.MoveTargetMode` to **Component as goal** (`Vector`) and set `ObjectEntry.ComponentName` to a case-insensitive substring of the target component's name. With the default **Actor as goal** mode, a non-empty `ComponentName` does not affect gaze.
 
 `GatherMatchingObjects` divides `UConvaiObjectComponent` instances on a hit actor into two groups:
 
 | Group | Condition | Fires when |
 |---|---|---|
-| Whole-actor | `ComponentName` is empty | Any hit on the actor, unless a component-scoped match is found on the same hit primitive |
-| Component-scoped | `ComponentName` resolves to a mesh on the actor | Hit primitive matches (or is attached to) the resolved component |
+| Whole-actor | `MoveTargetMode` is `Actor as goal`, or `ComponentName` is empty | Any hit on the actor, unless a component-scoped match is found on the same hit primitive |
+| Component-scoped | `MoveTargetMode` is `Component as goal` and `ComponentName` resolves to a mesh on the actor | Hit primitive matches (or is attached to) the resolved component |
 
 When a component-scoped component matches, any whole-actor component on the same actor also fires ("piggyback" rule). If the hit primitive does not match any component-scoped component, only whole-actor components fire.
 
@@ -100,8 +100,9 @@ When a component-scoped component matches, any whole-actor component on the same
 
 ```text
 BP_Door
-├── SM_DoorFrame    (ComponentName empty)        → ConvaiObjectComponent "Door"
-└── SM_Handle       (ComponentName: "Handle")    → ConvaiObjectComponent "DoorHandle"
+├── ConvaiObjectComponent "Door"        → MoveTargetMode: Actor as goal
+└── ConvaiObjectComponent "DoorHandle"  → MoveTargetMode: Component as goal, ComponentName: "Handle"
+    └── targets SM_Handle on the actor
 ```
 
 - Player looks at door frame → `ConvaiObjectComponent "Door"` fires (whole-actor match).

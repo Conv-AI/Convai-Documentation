@@ -7,12 +7,12 @@ last_reviewed: "4.0.0-beta.21"
 Track changes to the Convai Unreal Engine plugin across releases. The current release is <code class="expression">space.vars.unreal_plugin_version</code>, supporting Unreal Engine <code class="expression">space.vars.unreal_min_version</code> and later.
 
 {% hint style="info" %}
-This plugin is in beta. Beta releases may include breaking changes between minor versions. Review the notes for each release before upgrading.
+This plugin is in beta. Beta releases may include breaking changes between minor versions. The plugin manifest identifies the current package as <code class="expression">space.vars.unreal_plugin_version</code>; the latest traceable source changelog entry is `4.0.0-beta.20`.
 {% endhint %}
 
 {% updates format="full" %}
-{% update date="2026-05-25" tags="4.0.0-beta.21,Current" %}
-## 4.0.0-beta.21
+{% update date="2026-05-25" tags="4.0.0-beta.20" %}
+## 4.0.0-beta.20
 
 **Animation and gestures**
 
@@ -52,7 +52,7 @@ This plugin is in beta. Beta releases may include breaking changes between minor
 
 * Fixed Android crash on app shutdown.
 * Fixed several UE 5.0 / 5.4 / 5.5 / 5.7 compilation and compatibility issues so the plugin builds clean across all supported engine versions.
-* Disabled the `ConvaiEditor` module on UE 5.1 and earlier (the property-binding editor feature it relies on isn't available there).
+* Disabled the Convai editor UI on UE 5.1 and earlier (the property-binding editor feature it relies on isn't available there).
 * Regenerated the gaze-highlight material under UE 5.0 so the asset loads across all supported engine versions.
 {% endupdate %}
 
@@ -67,7 +67,7 @@ This plugin is in beta. Beta releases may include breaking changes between minor
 * Actions V2 — typed action templates: `FConvaiAction` with structured `Parameters` typed via `EConvaiActionParamType`. Optional `Connector` for compound actions, `Choices` for fixed-list constraints, or `EnumType` to draw choices from a `UENUM`.
 * Unified action-result shape: `FConvaiResultAction.Parameters` as `TMap<FString, FConvaiResultParam>`. Legacy `RelatedObjectOrCharacter` and `ConvaiExtraParams` kept as deprecated mirrors.
 * New Blueprint-pure accessors: `Get First Param`, `Get Param`, `Get Param Type`, `Get Param As String/Number/Bool/Ref/Byte`, `Has Param`.
-* `HandleActionCompletion` gains optional `EventText` and `ShouldRespond`. New `AbortActionSequence` clears the queue without retrying.
+* `HandleActionCompletion` gains optional `AdditionalNote` and `ShouldRespond`. New `AbortActionSequence` accepts optional `EventText` and clears the queue without retrying.
 * Removed the `EnableNewActionSystem` global toggle — the action queue path is now always on.
 * Backward compatibility: legacy `UConvaiEnvironment` and `UConvaiActionContext` resurrected as deprecated shims so older Blueprint graphs keep compiling with deprecation warnings.
 {% endupdate %}
@@ -83,8 +83,8 @@ This plugin is in beta. Beta releases may include breaking changes between minor
 * Added reset idle timer and user idle warning support.
 * Enhanced component resolution in the FaceSync Animation Node to include the parent actor when searching for `UConvaiChatbotComponent`.
 * Renamed `RunLLM` parameter to `ShouldRespond` for improved API clarity in context update methods.
-* Updated `LipSyncTimeOffset` to 200 ms for better audio/animation alignment.
-* Updated `ContextAggregationDelay` from 0.3 s to 0.5 s for improved dynamic context handling.
+* Updated lip-sync timing behavior for better audio/animation alignment. The current source default for `LipSyncTimeOffset` is `0.02` seconds (20 ms).
+* Updated dynamic-context debounce behavior for improved batching consistency. The current source setting is `ContextDebounceWindow`, with a default of `0.5` seconds.
 * Refactored narrative trigger handling to streamline context processing.
 {% endupdate %}
 
@@ -266,7 +266,7 @@ This plugin is in beta. Beta releases may include breaking changes between minor
 
 **3.6.0**
 - UE 5.6 support.
-- Optimized `GetAllChatbotComponents` and `GetAllPlayerComponents` functions.
+- Optimized internal component registry lookups.
 - Added Convai Logger.
 
 </details>

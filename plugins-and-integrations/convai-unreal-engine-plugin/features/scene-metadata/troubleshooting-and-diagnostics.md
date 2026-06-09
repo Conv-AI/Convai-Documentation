@@ -15,7 +15,7 @@ Before reading individual symptom sections, confirm the following. These three c
 3. **Session is active when mutations are called** — `AddObject`, `RemoveObject`, and related methods only push live updates when a session is in the `Connected` state. Mutations called before the session connects are not queued.
 
 {% hint style="info" %}
-Open the **Output Log** in Unreal Engine and filter by `LogConvai` to see all plugin log messages, including duplicate-name warnings, property-bind failures, and session state transitions.
+Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for object registration and duplicate-name warnings, or `ConvaiObjectComponentLog` for tracked-property and gaze warnings.
 {% endhint %}
 
 ## Character doesn't mention the object
@@ -44,7 +44,7 @@ Open the **Output Log** in Unreal Engine and filter by `LogConvai` to see all pl
 
 **Fix:** Verify the chatbot has an active session before calling `AddObject`, or use `bFlushImmediately = true`.
 
-**Verify:** Filter the Output Log by `LogConvai` and confirm the session is in the `Connected` state before calling `AddObject`.
+**Verify:** Confirm the chatbot session is in the `Connected` state before calling `AddObject`.
 
 ## Object reference resolves to the wrong actor
 
@@ -52,7 +52,7 @@ Open the **Output Log** in Unreal Engine and filter by `LogConvai` to see all pl
 
 **Cause:** Two `UConvaiObjectComponent` instances share the same `ObjectEntry.Name`. `UConvaiSubsystem` renames the duplicate automatically, but the renamed label may not match what the character was told.
 
-**Fix:** Filter the Output Log by `LogConvai` and look for a duplicate-name warning at `BeginPlay`. Ensure each `UConvaiObjectComponent` in the level has a unique `ObjectEntry.Name`.
+**Fix:** Filter the Output Log by `ConvaiSubsystemLog` and look for a duplicate-name warning at `BeginPlay`. Ensure each `UConvaiObjectComponent` in the level has a unique `ObjectEntry.Name`.
 
 **Verify:** After correcting the names, re-enter Play mode and confirm the character references the correct Actor when asked.
 
@@ -66,7 +66,7 @@ Open the **Output Log** in Unreal Engine and filter by `LogConvai` to see all pl
 
 **Fix:** Remove the manually typed entry, click **Bind**, and select the property from the picker.
 
-**Verify:** Change the property value in Play mode and filter the Output Log by `LogConvai` to confirm the update is pushed to the chatbot. Alternatively, ask the character about the property and confirm it reports the current value.
+**Verify:** Change the property value in Play mode and filter the Output Log by `ConvaiObjectComponentLog` for tracked-property warnings. Alternatively, ask the character about the property and confirm it reports the current value.
 
 ### Unsupported property type
 
@@ -188,7 +188,7 @@ Is ObjectEntry.Name non-empty on the UConvaiObjectComponent?
                     ├── No  → Enable bEnableActions.
                     └── Yes → Is the description specific and factual?
                               ├── No  → Rewrite with location, visual identifiers, and purpose.
-                              └── Yes → Filter the Output Log by LogConvai and check for duplicate-name warnings at BeginPlay.
+                              └── Yes → Filter the Output Log by ConvaiSubsystemLog and check for duplicate-name warnings at BeginPlay.
 ```
 
 ## Next steps

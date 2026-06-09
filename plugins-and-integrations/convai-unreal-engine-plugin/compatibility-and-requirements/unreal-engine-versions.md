@@ -4,7 +4,7 @@ description: Reference for Convai Unreal Engine plugin version support, includin
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugin_version</code> supports Unreal Engine <code class="expression">space.vars.unreal_min_version</code> and all later UE 5.x releases. All four plugin modules load on every supported version, but the `ConvaiEditor` window is available only on UE 5.2 and later. On UE 5.0 and 5.1 the editor window is disabled automatically; all runtime and animation workflows remain unaffected.
+The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugin_version</code> uses Unreal Engine <code class="expression">space.vars.unreal_min_version</code> as its documented minimum engine version. The plugin manifest declares the same runtime, editor, animation graph, and vision modules for the plugin package. The `ConvaiEditor` window is disabled automatically on UE 5.0 and 5.1; it is available on UE 5.2 and later.
 
 ## Supported versions
 
@@ -15,7 +15,7 @@ The Convai Unreal Engine plugin <code class="expression">space.vars.unreal_plugi
 | 5.2 and later | Supported | Supported | Supported | Supported |
 
 {% hint style="info" %}
-The `ConvaiEditor` window requires UE 5.2 or later. On UE 5.0 and 5.1 the window is disabled automatically at startup; all runtime, audio, and animation workflows remain fully functional.
+The `ConvaiEditor` window requires UE 5.2 or later. On UE 5.0 and 5.1, the editor module logs `ConvaiEditor: Editor UI disabled - requires UE 5.2 or later` and exits the window setup path at startup.
 {% endhint %}
 
 ## Module load phases
@@ -29,18 +29,18 @@ The plugin declares four modules. Their load phases determine when they become a
 | `ConvaiAnimGraph` | `UncookedOnly` | `Default` |
 | `ConvaiVisionBase` | `Runtime` | `Default` |
 
-`ConvaiAnimGraph` is `UncookedOnly`, which means it is available in the Unreal Editor but is not compiled into packaged builds. Animation graph assets that reference its nodes are cooked into the package, but the module code itself is editor-only.
+`ConvaiAnimGraph` is `UncookedOnly`, which means it is available for editor-time animation graph work but should not be treated as runtime module code in packaged builds.
 
 ## Version-specific notes
 
-### UE 5.1 and earlier
+### UE 5.0 and 5.1
 
-The `ConvaiEditor` window is unavailable on these versions. All Blueprint-based conversation, audio, and animation workflows remain fully functional; only the in-editor Convai window does not load.
+The `ConvaiEditor` window is unavailable on these versions. Use Blueprint-based runtime setup and Project Settings configuration instead of the in-editor Convai window.
 
 ## Next steps
 
 With your engine version confirmed, check which build platforms the plugin supports.
 
 {% content-ref url="platform-support-matrix.md" %}
-[Platform support matrix](platform-support-matrix.md)
+[Unreal Engine platform support matrix](platform-support-matrix.md)
 {% endcontent-ref %}

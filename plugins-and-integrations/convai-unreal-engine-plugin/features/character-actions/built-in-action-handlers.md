@@ -123,7 +123,7 @@ Alternatively, implement a `BehaviorTree` task that loops until an external sign
 
 ## Stop Moving
 
-Cancels any in-progress movement behavior and completes the current action. Because this action terminates the Follow loop, it must call `HandleActionCompletion` for the **Follow** action that is still open in the queue, not just for itself.
+Cancels any in-progress movement behavior and completes the current action. Because this action terminates the Follow loop, it must call `HandleActionCompletion` for the **Follow** action that is still open in the queue, not only for itself.
 
 **Parameters:** none
 
@@ -191,7 +191,7 @@ You can rename, remove, or extend any default action in the `Actions` array:
 - **Remove** — select the entry in the `Actions` array and click the delete button. The Blueprint event becomes dead code but does not cause an error.
 - **Add a parameter** — add an `FConvaiActionParam` entry to the `Parameters` array on the template. Update your handler to read the new parameter with `GetParamAs*`.
 
-Action names are matched case-sensitively at Blueprint dispatch. If you rename any of these action templates, rename the corresponding Blueprint Custom Event to match exactly.
+If you rename any of these action templates, rename the corresponding Blueprint Custom Event to match, including spaces. Unreal resolves handler names case-insensitively, but `"Stop Moving"` and `"StopMoving"` are different names.
 
 ---
 

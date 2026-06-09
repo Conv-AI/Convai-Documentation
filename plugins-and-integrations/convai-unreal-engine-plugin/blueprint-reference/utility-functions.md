@@ -383,7 +383,7 @@ Call `MapBlendshapes` with the raw blendshape map from `ConvaiGetFaceBlendshapes
 
 ## Related reference
 
-The chatbot component is the primary consumer of the blendshape and look-at utility nodes; the player component uses the component-lookup and microphone helpers. For creating, updating, or fetching character data at runtime, see the character management REST API reference.
+The chatbot component is the primary consumer of the blendshape and look-at utility nodes; the player component uses the component-lookup and microphone helpers.
 
 {% content-ref url="convai-chatbot-component.md" %}
 [Convai Chatbot Component](convai-chatbot-component.md)
@@ -393,6 +393,3 @@ The chatbot component is the primary consumer of the blendshape and look-at util
 [Convai Player Component](convai-player-component.md)
 {% endcontent-ref %}
 
-{% content-ref url="character-management.md" %}
-[Character management](character-management.md)
-{% endcontent-ref %}

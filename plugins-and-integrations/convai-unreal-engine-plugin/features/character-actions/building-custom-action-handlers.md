@@ -4,13 +4,13 @@ description: Write Blueprint event handlers that receive FConvaiResultAction str
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Custom action handlers are Blueprint functions or events on the NPC Actor that the plugin calls when a matching action name arrives in the action queue. This page covers the dispatch contract, how to write a handler, and how to report success or failure.
+Custom action handlers are Blueprint functions or events on the NPC Actor that the plugin calls when a matching action name arrives in the action queue. Write a handler, complete it with `Handle Action Completion`, and the queue advances to the next action automatically.
 
 ## How dispatch works
 
-When the plugin's `TriggerNamedBlueprintAction` fires, it searches the owning Actor's Blueprint class for a function or event whose name matches the `Action` field of the incoming `FConvaiResultAction`. The match is case-sensitive.
+When the plugin's `TriggerNamedBlueprintAction` fires, it searches the owning Actor's Blueprint class for a function or event whose name matches the `Action` field of the incoming `FConvaiResultAction`. Unreal resolves the name case-insensitively through `FName`, but spaces and punctuation must still match — `"Stop Moving"` and `"StopMoving"` are different handlers.
 
-The function must accept exactly one parameter of type `FConvaiResultAction`. If no matching function is found, the plugin logs a warning and the action is silently skipped — the queue advances without calling any handler.
+The function must accept zero or one parameter of type `FConvaiResultAction`. If no matching function is found, the plugin logs a warning and the action is not invoked — the queue stalls until you call `HandleActionCompletion` or `AbortActionSequence`.
 
 ## Creating a handler function
 

@@ -54,7 +54,7 @@ Call fetch nodes at load time, not repeatedly during gameplay:
 - **Editor utility Blueprints** — use fetch nodes in the Unreal Editor to inspect a character's narrative graph without opening the Convai dashboard.
 
 {% hint style="warning" %}
-Fetch nodes make a REST API call to Convai each time they are executed. Do not call them on Tick or in response to repeated gameplay events. Cache the result in a Blueprint variable and reuse it.
+Fetch nodes make an HTTPS request to Convai each time they are executed. Do not call them on Tick or in response to repeated gameplay events. Cache the result in a Blueprint variable and reuse it.
 {% endhint %}
 
 ## Handle the results

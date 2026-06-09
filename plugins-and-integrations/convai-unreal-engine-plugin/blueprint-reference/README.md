@@ -1,10 +1,10 @@
 ---
 title: Blueprint reference
-description: Find the complete Blueprint-exposed surface — properties, functions, events, and REST API nodes — for the Convai Unreal Engine Plugin.
+description: Find the documented Blueprint component, utility, audio, and shared data surfaces for the Convai Unreal Engine plugin runtime workflow.
 last_reviewed: "2026-06-05"
 ---
 
-The Blueprint reference covers every property, function, and event exposed to Blueprint for the runtime components — chatbot, player, and world objects — the audio capture component, the utility library, character management REST API nodes, and all shared data types. Use these pages when you need exact names, types, defaults, or parameter descriptions.
+The Blueprint reference covers the documented Blueprint surface for the runtime components — chatbot, player, and world objects — the audio capture component, the utility library, and shared data types. Use these pages when you need exact names, types, defaults, or parameter descriptions for the public runtime workflow.
 
 The **Convai Subsystem** connection surface (`GetServerConnectionState`, `ResetIdleTimer`, `InvalidateOrphanedConnection`, `OnServerConnectionStateChangedEvent`, and `OnUserIdleWarning`) is documented in [Session lifecycle](../core-concepts/session-lifecycle.md), not here.
 
@@ -35,10 +35,6 @@ The **Convai Subsystem** connection surface (`GetServerConnectionState`, `ResetI
 <tr>
 <td><strong>Microphone and audio capture</strong><br>Properties, functions, and structs for the microphone device API, audio capture component, and Android microphone permissions.</td>
 <td><a href="microphone-and-audio-capture.md">microphone-and-audio-capture.md</a></td>
-</tr>
-<tr>
-<td><strong>Character management</strong><br>Blueprint async nodes for creating, updating, and fetching character details via the Convai REST API.</td>
-<td><a href="character-management.md">character-management.md</a></td>
 </tr>
 <tr>
 <td><strong>Data types and enums</strong><br>Reference for every Blueprint-exposed struct and enum — object entries, action types, emotion values, connection states, and audio settings.</td>

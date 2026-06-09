@@ -4,7 +4,7 @@ description: "Understand what the Convai Unreal Engine plugin adds to a project:
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin connects Unreal Engine 5 projects to Convai, enabling actors in a scene to hold real-time voice and text conversations, express emotions, animate their faces in sync with speech, and respond to player actions. It does this through a set of Blueprint-spawnable components and a Game Instance Subsystem that manage the WebRTC session between the project and Convai.
+The Convai Unreal Engine plugin connects Unreal Engine 5 projects to Convai, enabling actors in a scene to hold real-time voice and text conversations, express emotions, animate their faces in sync with speech, and respond to player actions. It does this through Blueprint-spawnable components, `UConvaiConnectionSessionProxy` instances, and `UConvaiSubsystem`, the engine subsystem that manages the underlying Convai connection.
 
 ## What it includes
 
@@ -22,45 +22,49 @@ Always active once connected:
 
 Opt-in, each configured through Blueprint or the Details panel:
 
-* **Lip sync** — real-time blendshape mouth animation driven by audio, with selectable `Viseme Based`, `MetaHuman Blendshapes`, `ARKit Blendshapes`, and `CC4 Extended Blendshapes` modes for different rigs
+* **Lip sync** — Convai-provided face animation data drives blendshape mouth movement in sync with speech audio, with selectable `Viseme Based`, `MetaHuman Blendshapes`, `ARKit Blendshapes`, and `CC4 Extended Blendshapes` modes for different rigs
 * **Emotion** — Convai infers emotion from conversation and drives blendshape expressions on the character
-* **Character actions** — characters execute structured in-scene commands (Move To, Follow, custom) dispatched from Convai
+* **Character actions** — characters execute structured in-scene commands (`Move To`, `Follow`, custom) dispatched from Convai
 * **Dynamic context** — push live world state and events into character knowledge at runtime
 * **Narrative design** — trigger scripted conversation branches and sections by name from Blueprint
 * **Long-term memory** — characters remember each player across sessions using an end-user ID
 * **Scene metadata** — tag level actors so characters are aware of and can act on them
 * **Vision** — stream camera frames to Convai so characters can describe what they see
-* **Gaze attention** — route the object under the player's crosshair as context to the active character
+* **Gaze attention** — route the object in the player's gaze direction as context to the active character
 
 ### Editor tooling
 
-The `ConvaiEditor` module adds an in-editor configuration window for API key setup, the character dashboard browser, and Blueprint graph utilities such as the "Create Convai Action Handler" right-click entry.
+The `ConvaiEditor` module adds an in-editor configuration window for API key setup, the character dashboard browser, and Blueprint graph utilities such as the **Create Convai Action Handler** right-click entry.
 
 ## Relationship to Convai
 
 Convai hosts the language model, voice synthesis, narrative design engine, long-term memory store, and character configuration. The plugin is a client-side integration layer: it captures audio or text from the player, streams it to Convai over WebRTC, and delivers the response back to the character's audio and animation pipeline.
 
-No Convai logic runs inside the game process. The plugin does not bundle a local language model. All character knowledge, voice, and decision-making remain in Convai, which means character changes made in the Convai dashboard (backstory, voice, narrative sections, memory) take effect in the project without a recompile or re-deploy.
+The plugin runs client-side integration logic inside the game process, including session routing, audio playback, action handling, dynamic context, gaze attention, and scene metadata. It does not bundle a local language model or Convai decision engine. Character configuration and conversation decisions remain in Convai, so dashboard-side changes do not require recompiling the Unreal project.
 
 ## Voice → Convai → character flow
 
 ```mermaid
 graph LR
-    MIC["Microphone / text"] --> PC[UConvaiPlayerComponent]
-    PC -->|"audio stream"| SS["UConvaiSubsystem<br/>(WebRTC)"]
-    SS -->|"stream"| CV[Convai]
+    MIC["Microphone / text"] --> PC["UConvaiPlayerComponent"]
+    PC -->|"session proxy"| PProxy["UConvaiConnectionSessionProxy<br/>(player)"]
+    Chatbot["UConvaiChatbotComponent"] -->|"session proxy"| CProxy["UConvaiConnectionSessionProxy<br/>(character)"]
+    PProxy --> SS["UConvaiSubsystem<br/>(Convai client)"]
+    CProxy --> SS
+    SS -->|"stream"| CV["Convai"]
     CV -->|"audio + face data + action sequence"| SS
-    SS --> CB[UConvaiChatbotComponent]
-    CB --> AUD["Audio playback"]
-    CB --> FS["UConvaiFaceSyncComponent<br/>(lip sync)"]
-    CB --> BH["Blueprint action handlers"]
+    SS --> CProxy
+    CProxy --> Chatbot
+    Chatbot --> AUD["Audio playback"]
+    Chatbot --> FS["UConvaiFaceSyncComponent<br/>(lip sync)"]
+    Chatbot --> BH["Blueprint action handlers"]
 ```
 
-`UConvaiPlayerComponent` captures microphone audio and forwards it to `UConvaiSubsystem`, which manages the shared WebRTC connection to Convai. `UConvaiChatbotComponent` receives the response — audio, facial animation data, and action sequences — and routes each to the appropriate output: audio playback, `UConvaiFaceSyncComponent` for lip sync, and Blueprint handlers for in-scene actions.
+`UConvaiPlayerComponent` captures microphone audio and sends it through a player session proxy. `UConvaiChatbotComponent` holds a character session proxy. `UConvaiSubsystem` owns the underlying Convai client and routes data between those proxies and Convai. The chatbot receives response data and coordinates audio playback, lip-sync processing, and Blueprint action handlers.
 
 ## Blueprint-first design
 
-Every feature in the plugin is accessible from Blueprint graphs. C++ access is available but is secondary — all public components, events, and functions carry `BlueprintCallable`, `BlueprintPure`, or `BlueprintAssignable` specifiers. The design assumes that most projects will build their character logic in Blueprint and only reach into C++ for performance-critical extensions.
+The main gameplay workflows are exposed to Blueprint graphs. C++ access is available but secondary; most projects can build character logic through Blueprint components, events, and callable nodes, then use C++ only for project-specific extensions.
 
 ## Requirements
 
@@ -69,7 +73,7 @@ Every feature in the plugin is accessible from Blueprint graphs. C++ access is a
 | Unreal Engine | <code class="expression">space.vars.unreal_min_version</code> |
 | Platforms | `Win64`, `Android` |
 | Network | Internet connection to Convai |
-| API key | Free account at [convai.com](https://convai.com) |
+| API key | Account at <code class="expression">space.vars.dashboard_url</code> |
 
 {% hint style="info" %}
 Android requires microphone permission handling. The plugin bundles the `AndroidPermission` engine plugin as a dependency and requests `RECORD_AUDIO` permission automatically when it connects to Convai.

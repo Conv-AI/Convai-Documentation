@@ -54,7 +54,7 @@ If the update reached the character but it did not respond immediately, verify `
 
 **Cause 2 — The update staged correctly but the flush arrived after the conversation turn.** Updates staged before the session connects are safe — they queue in `PendingContextBatch` and flush automatically when the session becomes connected. The issue is not lost updates but timing: if the player initiates a conversation immediately after the session connects and before the debounce timer fires, the update may not have reached Convai yet.
 
-**Fix:** Push the update earlier in the gameplay flow (for example, in `BeginPlay` rather than just before speaking), or set `bFlushImmediately = true` to bypass the debounce timer for time-critical updates.
+**Fix:** Push the update earlier in the gameplay flow (for example, in `BeginPlay` before speaking), or set `bFlushImmediately = true` to bypass the debounce timer for time-critical updates.
 
 **Verify:** Call `Get Context State Value` to confirm the local tracker holds the expected value. If it does but the character did not reference it, the flush arrived after the conversation turn — increase lead time or use `bFlushImmediately = true`.
 
@@ -154,7 +154,7 @@ If the update reached the character but it did not respond immediately, verify `
 
 `Reset Dynamic Context` operates on the **runtime dynamic context layer only**. Three sources of character knowledge are outside its scope.
 
-**System prompt and backstory.** Facts baked into the character's system prompt on the Convai dashboard are not part of the dynamic context layer. No Blueprint node affects them at runtime.
+**Base character definition.** Facts baked into the character configuration on the Convai dashboard are not part of the dynamic context layer. No Blueprint node affects them at runtime.
 
 **Initial `DynamicEnvironmentInfo`.** The value of `DynamicEnvironmentInfo` sent at `/connect` time is part of the session snapshot. `Reset Dynamic Context` does not re-send it and cannot clear it. Ending and restarting the session is the only way to change what was sent at connection time.
 

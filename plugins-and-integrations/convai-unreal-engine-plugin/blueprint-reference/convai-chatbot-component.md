@@ -10,17 +10,12 @@ Add it to any `Actor` through the **Add Component** button in the **Details** pa
 
 ## Identity and character data
 
-These properties identify the character and hold the data fetched from Convai at session start.
+These properties identify the character and the loaded runtime name.
 
 | Property | Type | Access | Category | Description |
 |---|---|---|---|---|
 | `CharacterID` | `FString` | `EditAnywhere`, `Replicated` | `Convai` | The character ID from the [Convai dashboard](https://convai.com). Setting this via the Blueprint setter calls `LoadCharacter`, which fetches character details and fires `OnCharacterDataLoadEvent_V2`. |
 | `CharacterName` | `FString` | `BlueprintReadOnly`, `Replicated` | `Convai` | Character name fetched from Convai. Populated after `OnCharacterDataLoadEvent_V2` fires. |
-| `VoiceType` | `FString` | `BlueprintReadOnly`, `Replicated` | `Convai` | Voice type string fetched from Convai. |
-| `Backstory` | `FString` | `BlueprintReadOnly`, `Replicated` | `Convai` | Character backstory fetched from Convai. |
-| `LanguageCode` | `FString` | `BlueprintReadOnly`, `Replicated` | `Convai` | Language code fetched from Convai. |
-| `ReadyPlayerMeLink` | `FString` | `BlueprintReadOnly`, `Replicated` | `Convai` | ReadyPlayerMe avatar link, if configured in the dashboard. |
-| `AvatarImageLink` | `FString` | `BlueprintReadOnly`, `Replicated` | `Convai` | Avatar thumbnail image link from the dashboard. |
 
 ## Session
 

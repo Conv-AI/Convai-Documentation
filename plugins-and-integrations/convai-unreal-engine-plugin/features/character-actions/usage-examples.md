@@ -105,7 +105,7 @@ Event Follow(ActionData: FConvaiResultAction)
 
 ### Blueprint handler — Stop Moving
 
-The event name must match the registered action name exactly (case-sensitive). Because the default action is registered as `"Stop Moving"` (with a space), the Blueprint Custom Event must also be named `Stop Moving`.
+The event name must match the registered action name, including spaces. Because the default action is registered as `"Stop Moving"` (with a space), the Blueprint Custom Event must also be named `Stop Moving` — not `StopMoving`.
 
 ```text
 Event Stop Moving(ActionData: FConvaiResultAction)

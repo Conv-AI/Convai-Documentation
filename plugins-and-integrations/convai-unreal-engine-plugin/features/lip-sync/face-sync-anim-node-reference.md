@@ -4,7 +4,7 @@ description: Reference for all properties of the Convai Face Sync AnimGraph node
 last_reviewed: 2026-06-05
 ---
 
-The `Convai Face Sync` node (`FAnimNode_ConvaiFaceSync`) is an Animation Blueprint node placed in the AnimGraph between a pose source and the output. It reads the current blendshape frame from the `UConvaiFaceSyncComponent` on the owning Actor, applies upper/lower face alphas, optional smoothing, starvation blending, and an optional remapping table, then writes the resulting curve values into the output pose.
+The `Convai Face Sync` node (`FAnimNode_ConvaiFaceSync`) is an Animation Blueprint node placed in the AnimGraph between a pose source and the output. It resolves a `UConvaiChatbotComponent` on the owning Actor; the chatbot supplies blendshape values from its lip-sync component. The node applies upper/lower face alphas, optional smoothing, starvation blending, and an optional remapping table, then writes the resulting curve values into the output pose.
 
 The node resolves its chatbot component automatically from the owning Actor when the `Convai Chatbot Component` pin is unset. All properties listed as "pin hidden by default" are accessible through the node's **Details** panel in the Animation Blueprint editor.
 
@@ -40,14 +40,14 @@ When `UpperFaceBlendshapeNames` is empty, all curves receive the `LowerFaceAlpha
 
 ## Smoothing
 
-Smoothing uses `FMath::FInterpTo`, which is frame-rate independent. A higher speed value produces a faster response; a lower value produces a smoother but more lagged result. There is no enforced upper limit — any positive float is valid. Practical values range from approximately `2.0` (heavy smoothing, visibly lagged) to `20.0` (near-instant). The default of `1.0` produces very heavy smoothing and is intentionally conservative; most production setups use `5.0`–`10.0` for the lower face.
+Smoothing uses an exponential moving average (EMA). The speed value is clamped to `[0.0, 1.0]` in the editor. `0.0` produces the most lag (the value barely moves toward the target each frame); `1.0` is instant (no smoothing, value reaches the target in one frame). At `0.5` and 60 fps, each curve moves roughly 50% toward its target per frame. Practical starting points: `0.3`–`0.5` for a smooth, responsive lower face; `0.1`–`0.2` for a more restrained upper face.
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `bEnableLowerFaceSmoothing` | `bool` | `false` | Enables frame-rate-independent smoothing for lower-face curves. |
-| `LowerFaceSmoothingSpeed` | `float` | `1.0` | Interp speed for lower-face smoothing (`FMath::FInterpTo`). Active only when `bEnableLowerFaceSmoothing` is `true`. Any positive float; typical production range is `5.0`–`10.0`. Pin hidden by default. |
-| `bEnableUpperFaceSmoothing` | `bool` | `false` | Enables frame-rate-independent smoothing for upper-face curves. |
-| `UpperFaceSmoothingSpeed` | `float` | `1.0` | Interp speed for upper-face smoothing (`FMath::FInterpTo`). Active only when `bEnableUpperFaceSmoothing` is `true`. Any positive float; typical production range is `5.0`–`10.0`. Pin hidden by default. |
+| `bEnableLowerFaceSmoothing` | `bool` | `false` | Enables exponential moving average smoothing for lower-face curves. |
+| `LowerFaceSmoothingSpeed` | `float` | `1.0` | EMA speed for lower-face smoothing. Clamped to `[0.0, 1.0]` in the editor: `0.0` = maximum lag, `1.0` = instant. Active only when `bEnableLowerFaceSmoothing` is `true`. Pin hidden by default. |
+| `bEnableUpperFaceSmoothing` | `bool` | `false` | Enables exponential moving average smoothing for upper-face curves. |
+| `UpperFaceSmoothingSpeed` | `float` | `1.0` | EMA speed for upper-face smoothing. Clamped to `[0.0, 1.0]` in the editor: `0.0` = maximum lag, `1.0` = instant. Active only when `bEnableUpperFaceSmoothing` is `true`. Pin hidden by default. |
 
 ## Starvation blending
 
@@ -85,23 +85,27 @@ Both values apply as a constant rate. A mid-transition reversal takes proportion
 
 ## Command-line overrides
 
-Property values can be overridden at launch using `-LipSyncAnim*` command-line flags. Overrides are resolved once per PIE session during `Initialize_AnyThread`. The following properties support a corresponding command-line flag:
+The tunable properties listed below can be overridden at launch by passing a `-LipSyncAnim*` flag. Overrides are resolved once per PIE session in `Initialize_AnyThread` and take precedence over the value authored in the Animation Blueprint. Flags not set on the command line fall through to the `UPROPERTY` value.
 
-- `UpperFaceAlpha`
-- `LowerFaceAlpha`
-- `StarvationBlendInDuration`
-- `StarvationBlendOutDuration`
-- `GlobalMultiplier`
-- `GlobalOffset`
-- `LowerFaceSmoothingSpeed`
-- `UpperFaceSmoothingSpeed`
-- `bEnableLowerFaceSmoothing`
-- `bEnableUpperFaceSmoothing`
-- A bypass flag for smoothing (`bBypassSmoothing`)
-- A bypass flag for starvation blending (`bBypassStarvationBlend`)
-- `ApplyMode`
+| Flag | Type | Example |
+|---|---|---|
+| `-LipSyncAnimUpperFaceAlpha` | `float` | `-LipSyncAnimUpperFaceAlpha=0.5` |
+| `-LipSyncAnimLowerFaceAlpha` | `float` | `-LipSyncAnimLowerFaceAlpha=0.8` |
+| `-LipSyncAnimStarvationBlendInDuration` | `float` | `-LipSyncAnimStarvationBlendInDuration=0.05` |
+| `-LipSyncAnimStarvationBlendOutDuration` | `float` | `-LipSyncAnimStarvationBlendOutDuration=1.2` |
+| `-LipSyncAnimGlobalMultiplier` | `float` | `-LipSyncAnimGlobalMultiplier=1.2` |
+| `-LipSyncAnimGlobalOffset` | `float` | `-LipSyncAnimGlobalOffset=0.0` |
+| `-LipSyncAnimLowerFaceSmoothingSpeed` | `float` | `-LipSyncAnimLowerFaceSmoothingSpeed=0.4` |
+| `-LipSyncAnimUpperFaceSmoothingSpeed` | `float` | `-LipSyncAnimUpperFaceSmoothingSpeed=0.2` |
+| `-LipSyncAnimEnableLowerFaceSmoothing` | `bool` (`1`/`true`) | `-LipSyncAnimEnableLowerFaceSmoothing=1` |
+| `-LipSyncAnimEnableUpperFaceSmoothing` | `bool` (`1`/`true`) | `-LipSyncAnimEnableUpperFaceSmoothing=1` |
+| `-LipSyncAnimBypassSmoothing` | `bool` (`1`/`true`) | `-LipSyncAnimBypassSmoothing=1` |
+| `-LipSyncAnimBypassStarvationBlend` | `bool` (`1`/`true`) | `-LipSyncAnimBypassStarvationBlend=1` |
+| `-LipSyncAnimApplyMode` | `Add` or `Override` | `-LipSyncAnimApplyMode=Override` |
 
-Exact flag names are documented in the plugin source at `Convai/Docs/LipSyncAnimCommandLineFlags.md` inside the plugin directory.
+{% hint style="info" %}
+Command-line overrides apply per-process. They are useful for tuning lip sync behavior during development without editing and recompiling the Animation Blueprint. They do not persist across editor restarts.
+{% endhint %}
 
 ## Related reference
 

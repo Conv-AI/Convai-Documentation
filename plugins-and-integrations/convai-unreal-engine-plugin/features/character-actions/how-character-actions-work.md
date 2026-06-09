@@ -62,7 +62,7 @@ The plugin maintains a queue of `FConvaiResultAction` items in `ActionsQueue`. W
 2. Calls `StartFirstAction`, which reads the first entry from the queue and calls `TriggerNamedBlueprintAction`.
 3. `TriggerNamedBlueprintAction` looks for a Blueprint function or event on the owning Actor whose name matches the `Action` field of the result. If the function exists and the signature accepts an `FConvaiResultAction`, it is called with the result struct.
 
-The dispatcher is name-based. If no matching function is found on the owning Actor, the plugin logs a warning and the action is silently skipped.
+The dispatcher is name-based. Unreal resolves handler names case-insensitively, but spaces and punctuation must still match. If no matching function is found on the owning Actor, the plugin logs a warning, the handler is not invoked, and the queue stalls until `HandleActionCompletion` or `AbortActionSequence` is called.
 
 ## The wait-for-speech gate
 
