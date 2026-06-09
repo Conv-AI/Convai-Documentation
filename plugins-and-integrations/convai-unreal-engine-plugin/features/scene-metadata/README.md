@@ -1,10 +1,10 @@
 ---
 title: Scene metadata
-description: Find guides, component reference, and examples for Scene Metadata — the feature that gives Convai characters awareness of actors in your Unreal Engine level.
+description: Find guides, reference pages, and examples for giving Convai characters awareness of objects in your Unreal Engine level.
 last_reviewed: "2026-06-05"
 ---
 
-Placing a `UConvaiObjectComponent` on any world actor — a door, switch, item, room, vehicle, or prop — makes that actor visible to every Convai character in the level without per-chatbot configuration. The component delivers object identity (`Name` and `Description`) and tracked live-state properties to Convai through two channels: a frozen snapshot at session start, and live `update-scene-metadata` messages whenever state changes mid-session.
+Placing a `UConvaiObjectComponent` on a world `Actor` makes that object available to Convai characters in the level. Object identity is sent through the session's `action_config` snapshot and runtime environment updates; tracked live-state values use dynamic context state updates.
 
 For runtime mutations — adding objects, removing actors, setting conversation partners, and controlling attention — use the environment API on `UConvaiChatbotComponent`. See [Managing the environment at runtime](managing-the-environment-at-runtime.md) for the full method reference.
 
@@ -21,7 +21,7 @@ For runtime mutations — adding objects, removing actors, setting conversation 
 <td><a href="how-scene-metadata-works.md">how-scene-metadata-works.md</a></td>
 </tr>
 <tr>
-<td><strong>Quick start</strong><br>Tag a world actor with the Convai Object Component and confirm a character can reference it in conversation.</td>
+<td><strong>Quick start</strong><br>Tag a world actor with the Convai Object Component and test whether a character can use it in conversation.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
@@ -37,7 +37,7 @@ For runtime mutations — adding objects, removing actors, setting conversation 
 <td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
-<td><strong>Troubleshooting and diagnostics</strong><br>Diagnose and fix common problems with scene objects not being recognised or tracked properties failing to update.</td>
+<td><strong>Troubleshooting and diagnostics</strong><br>Diagnose and fix common problems with scene objects not being recognized or tracked properties failing to update.</td>
 <td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td>
 </tr>
 </tbody>

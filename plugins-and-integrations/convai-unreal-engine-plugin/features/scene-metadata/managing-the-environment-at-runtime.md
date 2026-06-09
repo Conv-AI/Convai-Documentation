@@ -1,6 +1,6 @@
 ---
 title: Managing the environment at runtime
-description: Reference for UConvaiChatbotComponent methods that add, remove, and update objects and characters in a chatbot's environment during an active session.
+description: Reference for chatbot environment methods that add, remove, and update objects and characters during an active gameplay session.
 last_reviewed: "2026-06-05"
 ---
 
@@ -13,20 +13,21 @@ last_reviewed: "2026-06-05"
 | Objects | `AddObject`, `AddObjects`, `RemoveObject`, `RemoveObjects`, `ClearObjects` | Add or remove world objects mid-session |
 | Characters | `AddCharacter`, `AddCharacters`, `RemoveCharacter`, `RemoveCharacters`, `ClearCharacters` | Add or remove other NPCs the chatbot can reference |
 | Conversation partner | `SetConversationPartner` | Tell the chatbot who it is speaking with |
-| Attention | `SetObjectInAttention`, `TrySetObjectInAttentionFromGaze`, `TryClearObjectInAttentionFromGaze` | Set, gate-control, or clear the in-attention object |
+| Attention | `SetObjectInAttention`, `TrySetObjectInAttentionFromGaze`, `TryClearObjectInAttentionFromGaze` | Set, gaze-gate, or clear the in-attention object |
 | Session start | `GatherEnvironmentExtras` | Populate extras before `/connect` |
 | Utility | `EnsureObjectComponentsForEnvironmentObjects` | Spawn missing `UConvaiObjectComponent` instances |
 
-All methods that push network updates accept a `bFlushImmediately` parameter. See [Debounce and flush](#debounce-and-flush) for details.
+Most methods that push network updates accept a `bFlushImmediately` parameter. `TryClearObjectInAttentionFromGaze` clears through the non-immediate path. See [Debounce and flush](#debounce-and-flush) for details.
 
 ## The EnvironmentData struct
 
 `EnvironmentData` (`FConvaiEnvironmentData`) is the static configuration that `UConvaiChatbotComponent` sends to Convai at `/connect` time. It holds:
 
-- `bEnableActions` (`bool`, default `true`) — master toggle. When `false`, the `action_config` block is not sent at `/connect` and Convai does not process environment or action data for this chatbot.
+- `bEnableActions` (`bool`, default `true`) — connect-time action configuration toggle. When `false`, the `action_config` block is not sent at `/connect`, and attention resolution through `SetObjectInAttention` has no effect.
 - `Actions` — the default action list (`Move To`, `Follow`, `Stop Moving`, `Wait For`).
 - `Objects` — the objects exposed to the chatbot at connect time.
 - `Characters` — the characters exposed to the chatbot at connect time.
+- `CurrentAttentionObject` — the object currently used for attention and reference resolution.
 
 Mutate the environment through the methods below rather than writing to `EnvironmentData` fields directly from Blueprint.
 
@@ -34,14 +35,14 @@ Mutate the environment through the methods below rather than writing to `Environ
 
 | Method | Description |
 |---|---|
-| `AddObject(Object, bFlushImmediately)` | Adds one `FConvaiObjectEntry` and schedules an `update-scene-metadata` push. |
+| `AddObject(Object, bFlushImmediately)` | Adds one `FConvaiObjectEntry` and schedules an `update-scene-metadata` push when the object was not in the connect-time snapshot. |
 | `AddObjects(Objects, bFlushImmediately)` | Adds multiple entries in one call. |
 | `RemoveObject(ObjectName, bFlushImmediately)` | Removes the entry matching the given name and schedules a sync. |
 | `RemoveObjects(ObjectNames, bFlushImmediately)` | Removes multiple entries by name. |
 | `ClearObjects(bFlushImmediately)` | Removes all objects from the local list. |
 
 {% hint style="warning" %}
-If an object was included in `action_config` at `/connect`, calling `AddObject` with the same name mid-session does not update the server's frozen `action_config` copy. Only objects that are new to the session travel through the live `update-scene-metadata` lane. To propagate a description change to an existing object, call `StopSession` then `StartSession` to reconnect.
+If an object was included in `action_config` at `/connect`, calling `AddObject` with the same name mid-session does not update the frozen `action_config` snapshot. Only objects that are new to the session travel through the live `update-scene-metadata` lane. To propagate a description change to an existing object, call `StopSession` then `StartSession` to reconnect.
 {% endhint %}
 
 ## Adding and removing characters
@@ -56,7 +57,7 @@ If an object was included in `action_config` at `/connect`, calling `AddObject` 
 
 ## Setting the conversation partner
 
-`SetConversationPartner(Partner, bFlushImmediately)` tells the chatbot which other character it is currently speaking with. If the entry's Actor is not already in the characters list, the method adds it automatically.
+`SetConversationPartner(Partner, bFlushImmediately)` tells the chatbot which other character it is currently speaking with. If `Partner.Name` is not already in `EnvironmentData.Characters`, the method adds it automatically.
 
 To clear the conversation partner without removing the character from the list, pass an `FConvaiObjectEntry` with an empty `Name`.
 
@@ -67,7 +68,7 @@ To clear the conversation partner without removing the character from the list, 
 `AttentionSource` (`EConvaiAttentionSource`, `Transient`, `BlueprintReadOnly`, category `Convai|Actions`) reflects who last set the attention:
 
 - `None` — no attention target is set.
-- `Explicit` — attention was set by Blueprint or C++ code.
+- `Explicit` (`Explicit (Blueprint/C++)`) — attention was set by Blueprint or C++ code.
 - `Gaze` — attention was set by the gaze pipeline.
 
 When `AttentionSource` is `Explicit`, calls to `TrySetObjectInAttentionFromGaze` are blocked and return `false`. This prevents the gaze system from overriding explicit programmatic attention.
@@ -90,11 +91,11 @@ See [Usage examples](usage-examples.md) for a worked pseudocode example of this 
 
 ## Ensuring object components
 
-`EnsureObjectComponentsForEnvironmentObjects()` iterates over every Actor in `EnvironmentData.Objects` and spawns a `UConvaiObjectComponent` on any that does not already have one. It returns the count of newly spawned components and is safe to call multiple times (idempotent).
+`EnsureObjectComponentsForEnvironmentObjects()` iterates over `EnvironmentData.Objects`. For each entry with a valid `Ref` actor, it spawns a matching `UConvaiObjectComponent` when one does not already cover the same target. It returns the count of newly spawned components and is safe to call multiple times (idempotent).
 
 Auto-spawned components register with the subsystem-wide object pool, so every chatbot in the level can see them through the same proximity, tracked-property, and gaze pipeline as manually placed object components.
 
-Call it at `BeginPlay` after populating `EnvironmentData.Objects` from code, or after calling `AddObject` / `AddObjects` when you want the proximity and gaze systems to track dynamically added actors immediately.
+Call it at `BeginPlay` after populating `EnvironmentData.Objects` from code, or after calling `AddObject` / `AddObjects` when you want the proximity and gaze systems to track dynamically added actors.
 
 ## Debounce and flush
 

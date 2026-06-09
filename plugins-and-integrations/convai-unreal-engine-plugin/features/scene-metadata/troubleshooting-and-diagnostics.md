@@ -1,6 +1,6 @@
 ---
 title: Troubleshooting and diagnostics
-description: Diagnose and fix common problems with scene objects not being recognised, stale environment data, and tracked properties failing to update.
+description: Diagnose and fix common problems with scene objects not being recognized, stale environment data, and tracked properties failing to update.
 last_reviewed: "2026-06-05"
 ---
 
@@ -10,9 +10,9 @@ Use this page to diagnose the most common problems with scene metadata in the Co
 
 Before reading individual symptom sections, confirm the following. These three conditions account for most scene metadata problems:
 
-1. **`ObjectEntry.Name` is non-empty** — objects with an empty name are silently excluded. Select the `UConvaiObjectComponent` in the Details panel and confirm the **Name** field is set.
-2. **`bEnableActions` is `true`** — when `false`, the entire environment and action pipeline is disabled. Check `EnvironmentData.bEnableActions` on the `UConvaiChatbotComponent`.
-3. **Session is active when mutations are called** — `AddObject`, `RemoveObject`, and related methods only push live updates when a session is in the `Connected` state. Mutations called before the session connects are not queued.
+1. **`ObjectEntry.Name` is non-empty** — objects with an empty name are refused and logged with `ConvaiObjectComponent on %s skipped: ObjectEntry.Name is empty`. Select the `UConvaiObjectComponent` in the Details panel and confirm the **Name** field is set.
+2. **`bEnableActions` is `true` for connect-time actions and attention** — when `false`, `action_config` is not sent at `/connect`, and `SetObjectInAttention` has no effect. Check `EnvironmentData.bEnableActions` on the `UConvaiChatbotComponent`.
+3. **Session timing matches the update type** — objects present before `StartSession()` are sent in `action_config`; new runtime entries sync through `update-scene-metadata` after the session is connected.
 
 {% hint style="info" %}
 Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for object registration and duplicate-name warnings, or `ConvaiObjectComponentLog` for tracked-property and gaze warnings.
@@ -24,27 +24,27 @@ Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for 
 
 ### Empty name
 
-**Cause:** Objects with an empty `ObjectEntry.Name` are silently refused by the subsystem. The component must have a non-empty name.
+**Cause:** Objects with an empty `ObjectEntry.Name` are refused by the subsystem. The component must have a non-empty name.
 
 **Fix:** Open the Actor's Details panel, select the `UConvaiObjectComponent`, and confirm that `ObjectEntry.Name` is set.
 
-**Verify:** Enter Play mode and ask the character about the object by the name you set. The character should reference it by that name.
+**Verify:** Enter Play mode and ask about the object by the name you set. If the answer does not use that object context, check the Output Log for the empty-name warning.
 
-### Actor spawned after session start
+### Runtime object added without an object component
 
-**Cause:** If the Actor was spawned after the session started and `AddObject` was not called, the chatbot has no record of it.
+**Cause:** A spawned `Actor` with a valid `UConvaiObjectComponent` registers itself at `BeginPlay`. If you manage environment entries manually without a `UConvaiObjectComponent`, the chatbot needs a matching `AddObject` call for the new entry.
 
-**Fix:** Call `AddObject` on the chatbot component after spawning the Actor. Pass `bFlushImmediately = true` when the session is already active and the character needs to know about the object immediately.
+**Fix:** Add a configured `UConvaiObjectComponent` to the spawned `Actor`, or call `AddObject` on the chatbot component after creating a manual `FConvaiObjectEntry`. Pass `bFlushImmediately = true` when the session is already active and the character needs the object in the next runtime update.
 
-**Verify:** After calling `AddObject`, ask the character about the object. It should acknowledge the new object by name.
+**Verify:** After calling `AddObject`, ask about the object and check whether the response uses the new object context.
 
-### Session not active at update time
+### Debounce delay
 
-**Cause:** `AddObject` with `bFlushImmediately = false` queues the update in the debounce window. If the session ends before the window flushes, the update is dropped.
+**Cause:** `AddObject` with `bFlushImmediately = false` queues the update in the debounce window. The update is not sent until the next environment flush.
 
-**Fix:** Verify the chatbot has an active session before calling `AddObject`, or use `bFlushImmediately = true`.
+**Fix:** Wait for the debounce window to flush, or use `bFlushImmediately = true` for time-sensitive runtime additions.
 
-**Verify:** Confirm the chatbot session is in the `Connected` state before calling `AddObject`.
+**Verify:** Confirm the chatbot session is in the `Connected` state before expecting a live `update-scene-metadata` push.
 
 ## Object reference resolves to the wrong actor
 
@@ -54,7 +54,7 @@ Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for 
 
 **Fix:** Filter the Output Log by `ConvaiSubsystemLog` and look for a duplicate-name warning at `BeginPlay`. Ensure each `UConvaiObjectComponent` in the level has a unique `ObjectEntry.Name`.
 
-**Verify:** After correcting the names, re-enter Play mode and confirm the character references the correct Actor when asked.
+**Verify:** After correcting the names, re-enter Play mode and confirm no duplicate-name warning appears for that `Actor`.
 
 ## Tracked property not updating
 
@@ -62,19 +62,19 @@ Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for 
 
 ### Manual path entry
 
-**Cause:** Typing `PropertyPath` by hand can silently fail if the path does not resolve against the Actor at runtime. The **Bind** button performs the resolution at authoring time and is the reliable method.
+**Cause:** Typing `PropertyPath` by hand can fail if the path does not resolve against the `Actor` at runtime. The **Bind** button performs the resolution at authoring time and is the reliable method.
 
 **Fix:** Remove the manually typed entry, click **Bind**, and select the property from the picker.
 
-**Verify:** Change the property value in Play mode and filter the Output Log by `ConvaiObjectComponentLog` for tracked-property warnings. Alternatively, ask the character about the property and confirm it reports the current value.
+**Verify:** Change the property value in Play mode and filter the Output Log by `ConvaiObjectComponentLog` for tracked-property warnings. Alternatively, ask about the property and check whether the response uses the current value.
 
 ### Unsupported property type
 
-**Cause:** `TrackedProperties` supports `bool`, `int32`, `float`, `FString`, enums, and struct member paths. Object references, class references, delegates, and multicast delegates are not supported and are filtered out silently.
+**Cause:** `TrackedProperties` supports `bool`, `int32`, `float`, `FString`, enums, and struct member paths. Object references, class references, delegates, and multicast delegates are not supported; unsupported paths are skipped and warnings are logged.
 
 **Fix:** Confirm the property type is supported. For complex state, expose a pure `FString`-returning function on the Actor and bind to that function name instead.
 
-**Verify:** After switching to a supported type or function, change the value in Play mode and confirm the chatbot receives the update.
+**Verify:** After switching to a supported type or function, change the value in Play mode and check that no unsupported-path warning appears.
 
 ### Path already tracked
 
@@ -82,15 +82,15 @@ Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for 
 
 **Fix:** Check the return value of `AddTrackedProperty`. Remove the existing entry before adding a new one with the same path.
 
-**Verify:** Confirm `AddTrackedProperty` returns `true` after removing the duplicate, then change the property value and confirm the chatbot receives the update.
+**Verify:** Confirm `AddTrackedProperty` returns `true` after removing the duplicate, then change the property value and check for a dynamic context update.
 
 ### Post-BeginPlay grace window
 
 **Cause:** Changes that occur within approximately the first second after `BeginPlay` are forced to `EC_RunLLMOption::Never` regardless of the property setting. This prevents startup noise from making every chatbot react to initial game state.
 
-**Fix:** This is expected behaviour. If a property has a meaningful initial value, the session-start seed (which always uses `Never`) carries it correctly.
+**Fix:** This is expected behavior. If a property has a meaningful initial value, the session-start seed (which always uses `Never`) carries it correctly.
 
-**Verify:** Change the property value more than one second after Play starts and confirm the chatbot reacts according to the configured `ShouldRespond` setting.
+**Verify:** Change the property value more than one second after Play starts and check whether the update follows the configured `ShouldRespond` setting.
 
 ## Chatbot doesn't react to property changes
 
@@ -100,31 +100,33 @@ Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for 
 
 **Fix:** Change `ShouldRespond` to `Always` or `Auto` for properties whose changes you want the character to speak about.
 
-**Verify:** Change the property value in Play mode more than one second after session start and confirm the character produces a spoken response.
+**Verify:** Change the property value in Play mode more than one second after session start and confirm the update is no longer configured for silent delivery.
 
 {% hint style="info" %}
-The initial seed at session start always uses `EC_RunLLMOption::Never`. The first change after session start uses the configured `ShouldRespond`.
+The initial seed at session start always uses `EC_RunLLMOption::Never`. Later changes use the configured `ShouldRespond` after the post-`BeginPlay` grace window.
 {% endhint %}
 
-## Stale environment after adding objects
+## Stale environment after runtime updates
 
-**Symptom:** An object added mid-session via `AddObject` does not appear to be known by the character.
+**Symptom:** A runtime object update does not appear to affect the character's scene context.
 
-### Debounce delay
+### Runtime update still pending
 
 **Cause:** With `bFlushImmediately = false` (the default), updates wait in the debounce window. There may be a short delay before the update reaches Convai.
 
 **Fix:** Wait for the debounce window to expire, or call `AddObject` with `bFlushImmediately = true` when immediacy is required.
 
-**Verify:** After the debounce window expires (or after using `bFlushImmediately = true`), ask the character about the object and confirm it responds correctly.
+**Verify:** After the debounce window expires (or after using `bFlushImmediately = true`), ask about the object and check whether the response uses the new object context.
 
-### Frozen action_config lane
+## Description change not reflected mid-session
+
+**Symptom:** Updating the description for an object that existed at session start does not change how the character understands that object.
 
 **Cause:** If the object was already in `action_config` at `/connect`, its description in that frozen snapshot cannot be changed through `AddObject`. The live `update-scene-metadata` lane only accepts objects that are new to the session.
 
 **Fix:** Call `StopSession` then `StartSession` to reconnect. The new session sends the updated description in a fresh `action_config`.
 
-**Verify:** After reconnecting, ask the character about the object and confirm it uses the updated description.
+**Verify:** After reconnecting, ask about the object and check whether the response uses the updated description.
 
 ## Proximity state shows wrong description
 
@@ -132,19 +134,19 @@ The initial seed at session start always uses `EC_RunLLMOption::Never`. The firs
 
 ### No NavMesh
 
-**Cause:** The proximity computation uses the Unreal Engine navigation system. If no NavMesh covers the area, path queries fail and the proximity state cannot be computed.
+**Cause:** The proximity computation uses the Unreal Engine navigation system. If no NavMesh covers the area, reachability is marked as no walking path or unreachable.
 
 **Fix:** Add a `NavMeshBoundsVolume` to the level and rebuild navigation (or enable dynamic navigation). Confirm the chatbot Actor has a nav agent configured.
 
-**Verify:** Enable `bDebugDrawProximityPaths` on the `UConvaiObjectComponent` and enter Play mode. Green nav paths confirm the object is reachable; red paths indicate the nav query failed — check `NavMeshBoundsVolume` coverage and nav agent settings.
+**Verify:** Enable `bDebugDrawProximityPaths` on the `UConvaiObjectComponent` and enter Play mode. Green paths confirm the object is reachable, cyan indicates the chatbot is already at the target, and red indicates no valid walking path for the current query. If paths are red, check `NavMeshBoundsVolume` coverage and nav agent settings.
 
-### Debug paths not enabled
+### Diagnose with debug path drawing
 
-**Cause:** Verifying reachability without visual feedback is difficult.
+**Cause:** Reachability problems are difficult to diagnose without seeing the navigation path query result.
 
 **Fix:** Temporarily enable `bDebugDrawProximityPaths` on the `UConvaiObjectComponent` and enter Play mode. The plugin draws the navigation paths from each chatbot to this object. Disable the flag before shipping.
 
-**Verify:** Green paths confirm reachability. Red paths point to a nav system problem.
+**Verify:** Green paths confirm reachability, cyan indicates the chatbot is already at the target, and red means the current query has no valid walking path.
 
 ## SetObjectInAttention has no effect
 
@@ -154,11 +156,11 @@ The initial seed at session start always uses `EC_RunLLMOption::Never`. The firs
 
 **Fix:** Enable `bEnableActions` on the `UConvaiChatbotComponent`.
 
-**Verify:** Restart the session and call `SetObjectInAttention` again. Confirm `AttentionSource` is no longer `None` on the chatbot component.
+**Verify:** Restart the session and call `SetObjectInAttention` again. Confirm `AttentionSource` is `Explicit (Blueprint/C++)` on the chatbot component.
 
 ## Improving object descriptions
 
-The AI uses the `Description` field as ground truth. Vague descriptions produce vague responses — or the character may ignore the object entirely if the description does not give it enough to work with.
+Convai receives the `Description` field as object context. Vague descriptions give the character less useful scene information.
 
 | Avoid | Use instead |
 |---|---|
@@ -170,10 +172,10 @@ The AI uses the `Description` field as ground truth. Vague descriptions produce 
 Write descriptions from the perspective of what a knowledgeable guide or instructor would say. Include:
 
 - Location relative to a landmark or room feature
-- Visual identifiers — colour, size, material
+- Visual identifiers — color, size, material
 - Function or purpose where relevant
 
-Keep each description under 200 characters. The AI uses the text verbatim as grounding — longer is not always better.
+Keep each description concise enough to scan and specific enough to identify the object. The text is sent as object context, so include the details the character needs for conversation.
 
 ## Decision tree
 
@@ -182,9 +184,9 @@ Use this tree when the AI does not respond to scene objects after session start:
 ```text
 Is ObjectEntry.Name non-empty on the UConvaiObjectComponent?
 ├── No  → Set a unique, non-empty Name in the Details panel.
-└── Yes → Was the Actor present at BeginPlay (not spawned mid-session)?
-          ├── No  → Call AddObject on the chatbot component after spawning. Use bFlushImmediately = true.
-          └── Yes → Is bEnableActions true on the chatbot's EnvironmentData?
+└── Yes → Does the spawned Actor have a valid UConvaiObjectComponent?
+          ├── No  → Add the component, or call AddObject for a manual FConvaiObjectEntry.
+          └── Yes → Is bEnableActions true on the chatbot's EnvironmentData when using connect-time actions or attention?
                     ├── No  → Enable bEnableActions.
                     └── Yes → Is the description specific and factual?
                               ├── No  → Rewrite with location, visual identifiers, and purpose.

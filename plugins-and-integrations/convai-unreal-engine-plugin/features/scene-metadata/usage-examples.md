@@ -1,14 +1,14 @@
 ---
-title: Usage examples
-description: Complete scene metadata setups for medical training, industrial safety drills, military simulations, and runtime environment updates using Blueprint and C++.
+title: Scene metadata usage examples
+description: Complete scene metadata setups for training simulations, industrial drills, military bases, and runtime environment updates in Unreal Engine.
 last_reviewed: "2026-06-05"
 ---
 
-The examples below cover realistic setups for training simulations and interactive experiences. Each example describes the scenario, the required Inspector or Blueprint configuration, and the expected runtime outcome. Start with the example that matches your current complexity level.
+The examples below cover realistic setups for training simulations and interactive experiences. Each example describes the scenario, the required Details panel or Blueprint configuration, and the expected runtime outcome. Start with the example that matches your current complexity level.
 
 ## Example 1: Medical training simulation — anatomy lab
 
-**Scenario:** A surgical training simulation where a medical instructor NPC guides trainees through an anatomy lab. The character must recognise and describe physical models and equipment in the room — trainees ask questions such as `"What is this organ?"` or `"Where is the aorta?"`
+**Scenario:** A surgical training simulation where a medical instructor NPC guides trainees through an anatomy lab. The character must recognize and describe physical models and equipment in the room — trainees ask questions such as `"What is this organ?"` or `"Where is the aorta?"`
 
 ### Setup
 
@@ -16,20 +16,20 @@ Add a `UConvaiObjectComponent` to each anatomy model and equipment Actor in the 
 
 | Name | Description |
 |---|---|
-| `HeartModel` | `"Life-size anatomical heart model on the centre examination table. Shows all four chambers and major vessels."` |
-| `LiverModel` | `"Adult liver model mounted on the left side of the display rack. Hepatic veins are colour-coded."` |
+| `HeartModel` | `"Life-size anatomical heart model on the center examination table. Shows all four chambers and major vessels."` |
+| `LiverModel` | `"Adult liver model mounted on the left side of the display rack. Hepatic veins are color-coded."` |
 | `SurgicalScalpel` | `"Standard surgical scalpel resting on the instrument tray. Handle is blue."` |
 | `Stethoscope` | `"Stethoscope hanging on the hook next to the examination table."` |
 
-No Blueprint scripting is required for the standard workflow. The instructor character receives all descriptions at session start and can answer anatomy questions grounded in the actual scene.
+No Blueprint scripting is required for the standard workflow. The instructor character receives all descriptions at session start, so questions about the room can use the actual scene entries as context.
 
 {% hint style="success" %}
-A trainee asks: `"What models are available for study?"` The instructor responds: `"On the centre table you have a life-size heart model showing all four chambers, and to your left on the display rack is an adult liver model with colour-coded hepatic veins."`
+A trainee asks: `"What models are available for study?"` A useful response can reference the `HeartModel` and `LiverModel` descriptions from the scene metadata.
 {% endhint %}
 
 ## Example 2: Industrial safety drill — phase-based object awareness
 
-**Scenario:** A safety training module with multiple drill phases. Each phase introduces different hazards and equipment. The AI instructor should only know about the props relevant to the current phase so it does not reference equipment that is not yet in scope.
+**Scenario:** A safety training module with multiple drill phases. Each phase introduces different hazards and equipment. Runtime object updates are useful when phase props are introduced after the session has started.
 
 ### Setup
 
@@ -54,11 +54,11 @@ void ASafetyDrillManager::LoadPhase(int32 PhaseIndex)
 
 In Blueprint, wire **Clear Objects** (Flush Immediately: false) followed by one or more **Add Object** nodes, with **Flush Immediately** set to `true` on the last one.
 
-Each phase sends only its relevant props to Convai. The instructor adapts its knowledge to the current drill context without knowing about props from other phases.
+This pattern sends new phase props through the runtime environment update path. If a phase object was already included in `action_config` at `/connect`, reconnect before the phase begins so the next session starts with the correct object set.
 
 ## Example 3: Military simulation — forward operating base with live gate state
 
-**Scenario:** A military training simulation where the AI tactical officer knows the layout of a forward operating base. Security gates have a live access state — the officer should acknowledge when a gate opens or closes.
+**Scenario:** A military training simulation where the tactical officer knows the layout of a forward operating base. Security gates have a live access state, and gate changes should be sent to Convai as tracked state.
 
 ### Setup
 
@@ -72,18 +72,18 @@ Add a `UConvaiObjectComponent` to each structure and security gate Actor. For st
 | Name | Description |
 |---|---|
 | `CommandPost` | `"Main command post at grid reference Alpha-7. Houses mission briefing room and communications equipment."` |
-| `Armoury` | `"Armoury building on the eastern perimeter. Access is restricted to authorised personnel."` |
+| `Armoury` | `"Armory building on the eastern perimeter. Access is restricted to authorized personnel."` |
 | `NorthGate` | `"Northern security gate. Controls vehicle and personnel access to the forward operating base."` |
 
-When the `bIsOpen` property changes on the `NorthGate` Actor at runtime, Convai is notified immediately and the officer produces a spoken response.
+When the `bIsOpen` property changes on the `NorthGate` `Actor` at runtime, the plugin detects the change on the tracked-property poll and schedules a dynamic context update with `ShouldRespond` set to `Always`.
 
 {% hint style="success" %}
-The player opens the north gate. The tactical officer says: `"North gate is now open. Watch your flanks — we have an exposed approach on the northern perimeter."`
+The player opens the north gate. The next tracked-property update sends the new `bIsOpen` value with a response request.
 {% endhint %}
 
 ## Example 4: Tracking an enum with per-value descriptions
 
-**Scenario:** A corporate onboarding simulation has a server room terminal with an `ETerminalState` UPROPERTY that cycles through `Offline`, `Standby`, and `Active`. The AI guide should describe the terminal state in plain language, not by enum name.
+**Scenario:** A corporate onboarding simulation has a server room terminal with an `ETerminalState` `UPROPERTY` that cycles through `Offline`, `Standby`, and `Active`. The guide should have plain-language context for what each enum value means.
 
 ### Setup
 
@@ -97,7 +97,7 @@ The player opens the north gate. The tactical officer says: `"North gate is now 
 | `"Standby"` | `"Terminal is powered but idle."` |
 | `"Active"` | `"Terminal is processing requests."` |
 
-Convai receives both the raw enum value and its human-readable description whenever the state changes, giving the character context for a more specific response.
+The state-value descriptions are folded into the object's session-start description, while runtime changes send the current raw enum value. This gives Convai both the value context from `action_config` and the current state from dynamic context updates.
 
 ## Example 5: Dynamically populating the environment at session start
 
@@ -112,7 +112,7 @@ Override `GatherEnvironmentExtras` in a Blueprint subclass of `UConvaiChatbotCom
 // Event: Gather Environment Extras (OutExtraActions, OutExtraObjects, OutExtraCharacters)
 
 For each Actor in GetAllActorsWithComponent(UConvaiObjectComponent):
-    Entry = MakeConvaiObjectEntry(
+    Entry = Create FConvaiObjectEntry(
         Name        = Actor.ConvaiObjectComponent.ObjectEntry.Name,
         Description = Actor.ConvaiObjectComponent.ObjectEntry.Description,
         Ref         = Actor
@@ -120,7 +120,7 @@ For each Actor in GetAllActorsWithComponent(UConvaiObjectComponent):
     OutExtraObjects.Add(Entry)
 ```
 
-`OutExtraObjects` is appended to the static `EnvironmentData.Objects` list — it does not replace it. At the end of `GatherEnvironmentExtras`, the full merged list is sent in `action_config`.
+`OutExtraObjects` is merged with the configured `EnvironmentData.Objects` list before `action_config` is sent. Entries with the same name replace earlier entries in the merged environment.
 
 ## Example 6: Disabling proximity state for background props
 
@@ -134,7 +134,7 @@ Add a `UConvaiObjectComponent` to the mural Actor and set:
 - **Description**: `"A large painted mural depicting the history of the institution, spanning the full back wall of each gallery."`
 - **Auto Generate Proximity State**: disabled (uncheck `bAutoGenerateProximityState` in the Details panel).
 
-The AI guide can refer to the mural in conversation, but the plugin does not compute or broadcast proximity data for it. Use this pattern for any large fixed prop whose spatial relationship to the chatbot is not meaningful.
+The guide can receive the mural's object description, but the plugin does not compute or broadcast proximity data for it. Use this pattern for any large fixed prop whose spatial relationship to the chatbot is not meaningful.
 
 ## Next steps
 
@@ -144,4 +144,12 @@ The AI guide can refer to the mural in conversation, but the plugin does not com
 
 {% content-ref url="component-reference.md" %}
 [Component reference](component-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="how-scene-metadata-works.md" %}
+[How scene metadata works](how-scene-metadata-works.md)
+{% endcontent-ref %}
+
+{% content-ref url="managing-the-environment-at-runtime.md" %}
+[Managing the environment at runtime](managing-the-environment-at-runtime.md)
 {% endcontent-ref %}
