@@ -1,7 +1,7 @@
 ---
 title: How the emotion system works
 description: Understand how Convai delivers emotion state as per-emotion scores, how server scale maps to score values, and what the offset and lock controls do.
-last_reviewed: 2026-06-09
+last_reviewed: "4.0.0-beta.21"
 ---
 
 When a Convai character responds, Convai analyzes the generated speech and sends back an emotion state alongside the audio. The Convai Unreal Engine plugin stores that state on `UConvaiChatbotComponent`, exposes per-emotion float scores through Blueprint, and fires an event each time the state updates.
@@ -17,7 +17,6 @@ When a Convai character responds, Convai analyzes the generated speech and sends
 | `LockEmotionState` | A `bool` flag that blocks incoming server emotion updates and suppresses `On Emotion State Changed` on the server path until released. |
 | `OnEmotionStateChangedEvent` | Delegate that fires on the game thread when emotion state changes — the main hook for Blueprint expression logic. |
 | `GetEmotionScore` | Returns the current `float` score (`0.0`–`1.0`) for one `EBasicEmotions` category. Use this to drive morph targets or Animation Blueprint variables. |
-| `GetEmotionsProvider` | Utility function on `UConvaiUtils` that returns the active emotion provider identifier. |
 
 ## Emotion categories
 
@@ -90,7 +89,7 @@ Confirm `LockEmotionState` is reset to `false` after any locking sequence, or th
 
 ## Forcing an emotion
 
-`Force Set Emotion (EBasicEmotions BasicEmotion, EEmotionIntensity Intensity, bool ResetOtherEmotions)` overwrites the emotion state from Blueprint without waiting for a server update. When `ResetOtherEmotions` is `true`, all other emotion scores are zeroed first. When `false`, the forced score is added to (or replaces the same-category score in) the current state.
+`Force Set Emotion (EBasicEmotions BasicEmotion, EEmotionIntensity Intensity, bool ResetOtherEmotions)` overwrites the emotion state from Blueprint without waiting for a server update. When `ResetOtherEmotions` is `true`, all other emotion scores are zeroed first. When `false`, the forced score replaces the same-category score and leaves other categories unchanged.
 
 The score applied equals the `EEmotionIntensity` multiplier for the chosen level (`Less Intense` = `0.25`, `Basic` = `0.60`, `More Intense` = `1.00`). `EmotionOffset` is not applied.
 
@@ -109,10 +108,6 @@ graph TD
     F["Force Set Emotion"] -- "EEmotionIntensity\nmultiplier (no offset)" --> C
     G["LockEmotionState = true"] -- "blocks server path" --> C
 ```
-
-## Emotion provider
-
-The active emotion provider identifier is available at runtime through `Get Emotions Provider` on `UConvaiUtils`. The default is `"nrclex"`. Override it with `Set Custom Param` (`EmotionsProvider`, ...) under **Convai | Settings** if your Convai configuration requires a different provider.
 
 ## Related pages
 

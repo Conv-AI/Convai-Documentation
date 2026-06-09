@@ -1,10 +1,10 @@
 ---
 title: Emotion quick start
 description: Wire a Convai character's emotion scores to morph targets on its Skeletal Mesh so facial expressions update automatically during conversation.
-last_reviewed: 2026-06-09
+last_reviewed: "4.0.0-beta.21"
 ---
 
-We will wire a Convai character's emotion scores to morph targets on its Skeletal Mesh so that facial expressions update automatically as the character converses. By the end, entering Play In Editor and speaking to the character will produce visible expression changes in real time.
+We will wire a Convai character's emotion scores to morph targets on its Skeletal Mesh so that facial expressions update automatically as the character converses. Emotion data from Convai is enabled by default on every `Convai Chatbot` component — follow this guide only when you want a custom implementation that maps those scores to morph targets on your character's Skeletal Mesh. By the end, entering Play In Editor and speaking to the character will produce visible expression changes in real time.
 
 ## What you will build
 

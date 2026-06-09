@@ -1,10 +1,10 @@
 ---
 title: Emotion Blueprint reference
 description: Reference for emotion properties, functions, events, and enums on the Convai Chatbot component — including types, defaults, and parameter details.
-last_reviewed: 2026-06-09
+last_reviewed: "4.0.0-beta.21"
 ---
 
-The supported score-driven emotion Blueprint nodes and properties live on `UConvaiChatbotComponent` (displayed as `Convai Chatbot` in the Details panel and Components list). The enums `EBasicEmotions` and `EEmotionIntensity` are available throughout Blueprint wherever emotion values are used. `Get Emotions Provider` is a utility function on `UConvaiUtils`.
+The supported score-driven emotion Blueprint nodes and properties live on `UConvaiChatbotComponent` (displayed as `Convai Chatbot` in the Details panel and Components list). The enums `EBasicEmotions` and `EEmotionIntensity` are available throughout Blueprint wherever emotion values are used.
 
 ## Properties
 
@@ -95,18 +95,6 @@ Does **not** fire for server-driven updates while `LockEmotionState` is `true`.
 |---|---|---|
 | `Chatbot Component` | `UConvaiChatbotComponent*` | The chatbot component whose emotion state changed |
 | `Interacting Player Component` | `UConvaiPlayerComponent*` | Always `null` in the current plugin on every path (server-driven, `Force Set Emotion`, and `Reset Emotion State`). Null-check this pin before using it. |
-
-## Utility functions
-
-### Get Emotions Provider
-
-```cpp
-static FString GetEmotionsProvider()  // UConvaiUtils
-```
-
-Returns the active emotion provider identifier as an `FString`. Default: `"nrclex"`. Override with `Set Custom Param` (`EmotionsProvider`, ...). This is a `BlueprintPure` function on `UConvaiUtils`, available in Blueprint under the **Convai | Utilities** category.
-
-Use this to confirm at runtime that the expected emotion provider is active, or to branch Blueprint logic based on provider availability.
 
 ## Enum reference
 

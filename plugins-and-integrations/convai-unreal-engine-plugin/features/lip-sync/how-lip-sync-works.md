@@ -1,7 +1,7 @@
 ---
 title: How lip sync works
 description: Understand how Convai delivers facial animation data alongside audio, the supported lip-sync modes, and how the AnimGraph node applies it.
-last_reviewed: 2026-06-05
+last_reviewed: "4.0.0-beta.21"
 ---
 
 The Convai Unreal Engine plugin animates a character's face by replaying a sequence of blendshape frames that Convai precomputes before audio is streamed to the client. This page explains that pipeline, the six `EC_LipSyncMode` values, and how the AnimGraph node integrates with Unreal's animation system.
@@ -25,7 +25,7 @@ The `UConvaiFaceSyncComponent` sets `RequiresPrecomputedFaceData()` to `true`. T
 
 ## Lip-sync modes
 
-The `EC_LipSyncMode` enum appears both in project settings and on `UConvaiFaceSyncComponent`. Concrete project-wide values such as `Off`, `VisemeBased`, `BS_MHA`, and `BS_ARKit` select the format during connection setup. When the project-wide value is `Auto`, the plugin reads the attached component's `LipSyncMode` value so each character can use the format that matches its rig. Use this `Auto` path for `BS_CC4_Extended`.
+The `EC_LipSyncMode` enum appears both in project settings and on `UConvaiFaceSyncComponent`. Concrete project-wide values such as `Off`, `VisemeBased`, `BS_MHA`, and `BS_ARKit` select the format during connection setup. When the project-wide value is `Auto`, the plugin reads the attached component's `LipSyncMode` value so each character can use the format that matches its rig.
 
 | Mode | Display name | Target rig | Curve count |
 |---|---|---|---|
@@ -57,7 +57,7 @@ The `FAnimNode_ConvaiFaceSync` node is placed in an Animation Blueprint's AnimGr
 
 The node auto-discovers the `UConvaiChatbotComponent` on the owning Actor if the `ConvaiChatbotComponent` pin is left unset. If the Actor has more than one chatbot component, connect the pin explicitly to avoid ambiguity.
 
-For MetaHuman setup and other rig types, add the node to the character's Animation Blueprint as described in [Lip sync quick start](quick-start.md).
+For MetaHuman setup, assign the shipped Convai animation classes as described in [Set up a MetaHuman character](../../getting-started/set-up-a-metahuman-character.md). For custom Animation Blueprints, see [Face Sync AnimGraph node reference](face-sync-anim-node-reference.md).
 
 ### Starvation blending
 
