@@ -1,16 +1,16 @@
 ---
-title: Usage examples
-description: Practical Blueprint recipes for pushing health, zone, inventory, and narrative state into a Convai character's live context during a session.
+title: Dynamic context usage examples
+description: Blueprint recipes for health tracking, context events, zone transitions, state removal, and dynamic context resets in training simulations.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-These examples show how to use `SetContextState`, `SetContextStates`, `AddContextEvent`, and `RemoveContextState` in real gameplay scenarios. All examples assume an Actor with a `Convai Chatbot` component that is connected in an active session.
+These examples show how to use `Set Context State`, `Set Context States`, `Add Context Event`, `Remove Context State`, and `Reset Dynamic Context` in gameplay scenarios. All examples assume an Actor with a `Convai Chatbot` component that can reach a connected session.
 
 ## Track player health
 
-**Scenario:** A medical training simulation where a character (an instructor) comments on the trainee's vitals.
+**Scenario:** A medical training simulation where an instructor character comments on trainee vitals when asked.
 
-Bind to a custom event that fires whenever the health value changes. Call `Set Context State` with `ShouldRespond = Never` — the character should know the health value silently and use it when asked, not interrupt speech to announce every point of damage.
+Bind to a custom event that fires whenever the health value changes. Call `Set Context State` with `ShouldRespond = Never` so the value is tracked silently without requesting a spoken response on every change.
 
 ```text
 // Blueprint pseudocode
@@ -21,13 +21,13 @@ Event HealthChanged (NewHealth: float)
       ShouldRespond: Never
 ```
 
-**Verify:** Speak "What is my current health?" to the character. The character should reply with the current value.
+**Expected outcome:** After the event fires, `Get Context State Value` returns `true` for `PlayerHealth` and `OutValue` matches the latest value. Ask `What is my current health?` only as an end-to-end runtime test; exact response wording depends on character configuration.
 
 ## Announce a narrative event
 
-**Scenario:** An industrial safety drill where triggering a fire alarm should prompt the instructor character to react immediately.
+**Scenario:** An industrial safety drill where triggering a fire alarm should send a high-priority context event.
 
-Call `Add Context Event` with `ShouldRespond = Always` so the character responds the moment the event lands.
+Call `Add Context Event` with `ShouldRespond = Always` to request a spoken response when the event lands.
 
 ```text
 // Blueprint pseudocode
@@ -37,15 +37,15 @@ Event AlarmActivated
       ShouldRespond: Always
 ```
 
-The character reacts verbally within the debounce window (default `0.5 s`). If the reaction must be instantaneous, set `bFlushImmediately = true` on the `Add Context Event` node.
+After the debounce window elapses (default `0.5` s), the plugin flushes the `context-update` with `run_llm` set to `"true"`. For a faster flush, set `bFlushImmediately = true` on the `Add Context Event` node after the session is connected.
 
-**Verify:** The character should react with a spoken response within the debounce window (`0.5 s` by default). If the character does not respond, confirm that `ShouldRespond` is set to `Always` and that the session is active.
+**Expected outcome:** The event is included in canonical context after the flush. Use a conversation turn to test the resulting runtime behavior for your character configuration.
 
-## Update multiple states at once after a scene transition
+## Update multiple states after a scene transition
 
-**Scenario:** A corporate onboarding simulation that changes room, available equipment, and time of day when a trainee moves to a new zone.
+**Scenario:** A corporate onboarding simulation that changes room, available equipment, and time of day when a trainee enters a new zone.
 
-Use `Set Context States` to push all changed values in a single batched call so only one update reaches Convai.
+Use `Set Context States` to push all changed values in one batched call.
 
 ```text
 // Blueprint pseudocode
@@ -59,13 +59,13 @@ Event EnteredConferenceRoom
       ShouldRespond: Auto
 ```
 
-With `ShouldRespond = Auto`, the character may acknowledge the zone change if contextually appropriate, or remain silent if the LLM determines no reaction is needed.
+With `ShouldRespond = Auto`, the batch is sent with `run_llm` set to `"auto"`.
 
-**Verify:** After the event fires, speak to the character or ask "Where are we?" — the character should reference the conference room and available equipment.
+**Expected outcome:** After the flush, `Get Context State Value` returns the latest local values for keys such as `CurrentZone`. Ask `Where are we?` as an end-to-end runtime test for your character configuration.
 
 ## Remove a state when a condition ends
 
-**Scenario:** A quest item is used and should no longer be part of the character's awareness.
+**Scenario:** A training item is used and should no longer be part of the character's awareness.
 
 ```text
 // Blueprint pseudocode
@@ -74,15 +74,15 @@ Event ItemUsed (ItemName: FString)
       Name: ItemName
 ```
 
-After the debounce flush, Convai no longer sees the item in the state block. The character will not reference it in future responses.
+After the debounce flush, Convai no longer sees the item in the state block.
 
-**Verify:** After the flush, ask the character about the item by name — it should respond that it is not aware of any such item.
+**Expected outcome:** After the flush, `Get Context State Value` returns `false` for the removed key.
 
 ## Combine state and event for a critical moment
 
-**Scenario:** A military simulation where a soldier NPC needs to know their commander is down and respond dramatically.
+**Scenario:** A military simulation where a soldier NPC needs to know their commander is down and react to the event.
 
-Push the state change and the event together. Because they are both scheduled in the same burst, they coalesce into a single flush.
+Push the state change and the event in the same execution chain. Both stage in the same debounce burst and coalesce into one flush.
 
 ```text
 // Blueprint pseudocode
@@ -96,9 +96,9 @@ Event CommanderDown
       ShouldRespond: Always
 ```
 
-The state update is silent; the event triggers an immediate spoken response. Both updates arrive in the same debounce batch.
+The state and event coalesce into one `context-update`. Because the event uses `Always`, the combined update is sent with `run_llm` set to `"true"`.
 
-**Verify:** The character should respond immediately to the event. The state update (`CommanderStatus = KIA`) arrives in the same batch, so the character references both in the same response.
+**Expected outcome:** The `CommanderStatus` state is available in the same payload as the event after the flush reaches Convai.
 
 ## Reset context on level restart
 
@@ -109,13 +109,12 @@ The state update is silent; the event triggers an immediate spoken response. Bot
 Event OnLevelRestart
   → ConvaiBotComponent → Reset Dynamic Context
   → ConvaiBotComponent → Stop Session
-  → (Set SessionID to "-1")
   → ConvaiBotComponent → Start Session
 ```
 
-Before calling `Start Session`, set `SessionID` to `"-1"` to start a fresh conversation with no prior memory. `Reset Dynamic Context` clears the local tracker and sends an empty context to Convai before the session disconnects. Starting a new session with `SessionID` set to `"-1"` then begins with a clean dynamic layer and no conversation history.
+`Reset Dynamic Context` drains staged content, sends a `Reset` `context-update`, then clears the tracker. `Stop Session` and `Start Session` reconnect after that reset; they do not clear the tracker by themselves.
 
-**Verify:** After restart, ask the character about a state from the previous session — the character should have no knowledge of it.
+**Expected outcome:** `Get Context State Value` returns `false` for keys from the previous run after the reset completes.
 
 ## Read a state value in a Blueprint condition
 
@@ -136,9 +135,24 @@ If false:
       ShouldRespond: Auto
 ```
 
-`Get Context State Value` returns the client-side value immediately — no network round-trip is required.
+`Get Context State Value` returns the client-side value immediately — no network round-trip.
 
-**Verify:** `Get Context State Value` reads from the local tracker — the return is instant with no network cost.
+**Expected outcome:** The return pin is `true` and `OutValue` matches after `Set Context State` runs locally.
+
+## Seed context before session connect
+
+**Scenario:** A safety training level sets facility and scenario facts in `BeginPlay` before auto-initialization completes.
+
+```text
+// Blueprint pseudocode — Event BeginPlay on the character Actor
+→ Set Context State  Name="Facility"  Value="Offshore Platform Alpha"  ShouldRespond=Never
+→ Set Context State  Name="Scenario"  Value="Fire Drill"               ShouldRespond=Never
+→ Add Context Event  Text="Trainee briefing complete"                   ShouldRespond=Never
+```
+
+All three default debounced calls queue safely. After connection and the debounce deadline, the first flush delivers one `Replace` `context-update` with the assembled canonical snapshot.
+
+**Expected outcome:** After the first post-connect flush, `Get Context State Value` returns the seeded values without additional Blueprint calls.
 
 ## Next steps
 

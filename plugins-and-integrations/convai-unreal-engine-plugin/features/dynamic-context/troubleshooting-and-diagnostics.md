@@ -1,68 +1,74 @@
 ---
-title: Troubleshooting and diagnostics
-description: Fix dynamic context updates that are ignored, arrive too late, or trigger unexpected responses in the Convai Unreal Engine plugin.
+title: Troubleshoot dynamic context
+description: Fix dynamic context updates that arrive too late, trigger unexpected responses, or appear ignored after a flush or reconnect.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Use this page when dynamic context updates do not appear to reach the character, arrive after the conversation turn that should have used them, or trigger more spoken responses than expected.
+Use this page when dynamic context updates do not appear to reach the local tracker, arrive after the gameplay moment that should have staged them, or send an unexpected `run_llm` value.
 
 ## First-line investigation
 
 {% stepper %}
 {% step %}
-### Check the Output Log
+### Confirm the session is connected
 
-Open the Output Log (**Window → Output Log**) and look for messages in the Convai log category. Context update debug messages appear here when `ConvaiDebugMode` is enabled in the plugin settings.
-{% endstep %}
+Call **Get Chatbot Connection State** on the `Convai Chatbot` component. The return value should be `Connected` before you expect a network flush to reach Convai.
 
-{% step %}
-### Verify the session is connected
-
-Use `Get Chatbot Connection State` in the Blueprint graph to check whether the session is active. A context update staged before the session connects queues safely and flushes automatically when the session becomes connected — this is expected behavior, not an error.
+Default debounced updates staged before connect queue safely in `PendingContextBatch`. After the session connects, they flush on the first tick where the debounce deadline has elapsed. That is expected behavior, not an error.
 {% endstep %}
 
 {% step %}
 ### Verify the local tracker accepted the value
 
-Call `Get Context State Value` immediately after any `Set Context State` call and print the `OutValue` pin. If `OutValue` returns the expected value, the local tracker accepted the update. If the character still does not reference it in conversation, the issue is timing — the flush arrived after the conversation turn.
+Call **Get Context State Value** immediately after **Set Context State** and print the `OutValue` pin. If `OutValue` returns the expected value, the local tracker accepted the update.
+
+If the local value is correct but the runtime conversation test does not reflect it, first confirm that the network flush completed before the test turn.
 {% endstep %}
 
 {% step %}
 ### Check the ShouldRespond setting
 
-If the update reached the character but it did not respond immediately, verify `ShouldRespond`:
+If the update reached Convai but the wire `run_llm` value was not what you intended, verify `ShouldRespond`:
 
-- `Never` — context is stored silently. The character references the new state in its next natural turn. This is expected behavior.
-- `Auto` — Convai decides whether to respond. For a guaranteed immediate response, use `Always`.
-- `Always` — always triggers a spoken response immediately after the update arrives.
+- `Never` — the update is sent with `run_llm` set to `"false"`.
+- `Auto` — the update is sent with `run_llm` set to `"auto"`.
+- `Always` — the update is sent with `run_llm` set to `"true"`.
+{% endstep %}
+
+{% step %}
+### Allow the debounce window to elapse
+
+Unless `bFlushImmediately` is `true`, the plugin waits `ContextDebounceWindow` seconds (default `0.5`) after the last staged update before flushing. Wait at least one full debounce cycle before starting a conversation turn that depends on the new context.
 {% endstep %}
 {% endstepper %}
 
 ## Context update appears ignored
 
-### Character does not reference the state in conversation
+### Runtime conversation test does not reflect the state
 
-**Symptom:** You called `Set Context State` before speaking to the character, but the character's response does not reflect the state value.
+**Symptom:** You called `Set Context State` before an end-to-end runtime test, but the test did not reflect the state value.
 
-**Cause 1 — Update arrived after the conversation turn.** The debounce timer fires `0.5 s` after the last staged update. If the player spoke before the timer elapsed, Convai processed the turn without the update.
+**Cause 1 — Update arrived after the conversation turn.** The debounce timer fires after the last staged update. If the player spoke before the timer elapsed, Convai processed the turn without the update.
 
-**Fix:** Send the update earlier in the gameplay flow, or set `bFlushImmediately = true` on the `Set Context State` call to bypass the timer when timing is critical.
+**Fix:** Send the update earlier in the gameplay flow, or set `bFlushImmediately = true` when timing is critical.
 
-**Verify:** Call `Get Context State Value` immediately after `Set Context State` and print the `OutValue` pin. If it returns the expected value, the local tracker accepted the update. If the character still does not reference it after a flush, the update arrived after the conversation turn — increase lead time.
-
----
-
-**Cause 2 — The update staged correctly but the flush arrived after the conversation turn.** Updates staged before the session connects are safe — they queue in `PendingContextBatch` and flush automatically when the session becomes connected. The issue is not lost updates but timing: if the player initiates a conversation immediately after the session connects and before the debounce timer fires, the update may not have reached Convai yet.
-
-**Fix:** Push the update earlier in the gameplay flow (for example, in `BeginPlay` before speaking), or set `bFlushImmediately = true` to bypass the debounce timer for time-critical updates.
-
-**Verify:** Call `Get Context State Value` to confirm the local tracker holds the expected value. If it does but the character did not reference it, the flush arrived after the conversation turn — increase lead time or use `bFlushImmediately = true`.
+**Verify:** `Get Context State Value` returns the expected value locally. If it does and the character still omits the state, increase lead time before the conversation turn or use `bFlushImmediately = true`.
 
 ---
 
-**Cause 3 — `ShouldRespond` is `Never`, and the test question did not prompt recall.** `Never` updates land silently. The character uses the state only when the conversation turn relates to it.
+**Cause 2 — `ShouldRespond` is `Never`, so the update used `run_llm: "false"`.**
 
-**Fix:** Ask a direct question that references the state (for example, "What is my health?" or "What zone am I in?"). If the character still does not know, the flush may not have arrived — verify using `Get Context State Value`.
+**Fix:** If this update should use a different wire value, use `ShouldRespond = Auto` or `ShouldRespond = Always` for that call. Keep `Never` for background facts that should only update context.
+
+**Verify:** Confirm the node pin uses the intended `ShouldRespond` value before the update is staged.
+
+---
+
+**Cause 3 — Session was not connected when you expected a network flush.** Staged updates accumulate offline but do not reach Convai until connect plus debounce.
+
+**Fix:** Check **Get Chatbot Connection State** before testing conversation behavior.
+
+**Verify:** **Get Chatbot Connection State** returns `Connected` before the dependent test turn.
 
 ---
 
@@ -70,119 +76,138 @@ If the update reached the character but it did not respond immediately, verify `
 
 **Symptom:** You called `Remove Context State` but the character still references the removed value.
 
-**Cause:** The removal was staged but not yet flushed when the conversation turn occurred, or the character's prior in-session memory of the value is still influencing responses.
+**Cause:** The removal was staged but not yet flushed when the conversation turn occurred, or the same fact exists outside the dynamic context tracker.
 
-**Fix:** Set `bFlushImmediately = true` on the `Remove Context State` call to flush immediately. If the character continues to reference it after the flush, the character's session memory contains earlier mentions of the value — consider resetting the session with `SessionID = "-1"` to start a clean conversation.
+**Fix:** Set `bFlushImmediately = true` on the `Remove Context State` call after the chatbot is connected. If the value is gone from the tracker after a confirmed flush, inspect other project-specific context sources outside this dynamic context page.
 
-**Verify:** Call `Get Context State Value` for the removed key after the flush. If `OutValue` is empty, the tracker accepted the removal. A character that still references the value after this point is drawing on in-session conversational memory, not the dynamic context layer.
+**Verify:** `Get Context State Value` for the removed key returns `false` after the flush.
 
 ---
 
 ## Debounce timing surprises
 
-### Multiple rapid updates merge into one response
+### Multiple rapid updates merge into one flush
 
-**Symptom:** You called `Set Context State` ten times in a single tick but the character only reacted once.
+**Symptom:** You called `Set Context State` ten times in a single tick but observed one dynamic context send.
 
-**Cause:** This is the intended debounce behavior. Rapid updates within the `ContextDebounceWindow` are coalesced into one flush.
+**Cause:** Intended debounce behavior. Rapid updates within `ContextDebounceWindow` coalesce into one flush.
 
-**Fix:** This is correct behavior — no fix required. If you need each update to trigger a separate response, increase the delay between calls so each falls outside the debounce window. Sending individual flushes on every state change is not recommended for real-time gameplay.
+**Fix:** No fix required. If you need separate sends, space calls outside the debounce window. Sending individual immediate flushes on every state change is not recommended for real-time gameplay.
+
+**Verify:** Wait one debounce cycle and confirm the final local value with **Get Context State Value**.
 
 ---
 
 ### Update arrives too late after a fast conversation turn
 
-**Symptom:** The player speaks immediately after a game event pushes a state update. The character's first response does not reflect the event; the second response does.
+**Symptom:** A test turn starts immediately after a game event pushes a state update, before the flush has completed.
 
 **Cause:** The debounce window delayed the flush past the conversation turn.
 
-**Fix:** Set `bFlushImmediately = true` on the context update call, or push the update earlier (for example, at zone entry rather than at conversation start). For time-critical events that must precede a specific exchange, call `Add Context Event` instead of `Set Context State` — events with `ShouldRespond = Auto` let Convai decide whether to react, so the update arrives and the character can reference it in the very next turn.
+**Fix:** Set `bFlushImmediately = true` on the context update call, or push the update earlier (for example, at zone entry rather than at conversation start). For important events, `Add Context Event` with `ShouldRespond = Always` sends `run_llm: "true"`.
 
-**Verify:** After setting `bFlushImmediately = true`, confirm with `Get Context State Value` that the local tracker holds the expected value before the player speaks.
+**Verify:** Confirm **Get Chatbot Connection State** is `Connected` and allow the flush to complete before the dependent conversation turn.
 
 ---
 
 ### ContextMaxDebounceWindow is not visible in the Details panel
 
-**Symptom:** You want to adjust the debounce cap but cannot find `ContextMaxDebounceWindow` in the Details panel.
+**Symptom:** You want to adjust the debounce cap but cannot find `ContextMaxDebounceWindow`.
 
-**Cause:** Both `ContextDebounceWindow` and `ContextMaxDebounceWindow` are marked **Advanced Display** in the `Convai|DynamicContext` category.
+**Cause:** The underlying fields `ContextDebounceWindow` and `ContextMaxDebounceWindow` are **Advanced Display** properties under **Convai > DynamicContext**.
 
-**Fix:** In the Details panel, scroll to the **Convai > DynamicContext** category and click the **▼ Advanced** expander to reveal both properties.
+**Fix:** Expand the **Advanced** section in the Details panel and look for **Context Debounce Window (s)** and **Max Debounce Window (s)**.
+
+**Verify:** Both labels are visible after expanding **Advanced**.
 
 ---
 
 ## ShouldRespond misuse
 
-### Character speaks unexpectedly after every health update
+### Health update sends `run_llm` unexpectedly
 
-**Symptom:** Each call to `Set Context State` for `"PlayerHealth"` causes the character to interrupt play and comment on the health change.
+**Symptom:** Each call to `Set Context State` for `PlayerHealth` is staged with `ShouldRespond = Auto` or `Always`.
 
 **Cause:** `ShouldRespond` is set to `Auto` or `Always` on the `Set Context State` node.
 
-**Fix:** Use `ShouldRespond = Never` for background state that the character should know silently. Reserve `Auto` for contextually meaningful changes and `Always` for dramatic beats that must trigger an immediate reaction.
+**Fix:** Use `ShouldRespond = Never` for background state. Reserve `Auto` or `Always` for updates where the wire `run_llm` value should be `"auto"` or `"true"`.
+
+**Verify:** The `Set Context State` node for `PlayerHealth` has `ShouldRespond` set to `Never`.
 
 ---
 
-### Character never reacts to important events
+### Event update does not send the intended `run_llm`
 
-**Symptom:** You called `Add Context Event` for a significant narrative moment but the character said nothing.
+**Symptom:** You called `Add Context Event` for a significant context event but the update did not use the `run_llm` value you expected.
 
-**Cause:** `ShouldRespond = Never` was set explicitly, or the event arrived while the character was speaking — characters do not interrupt themselves.
+**Cause:** `ShouldRespond` was not set to the enum value you intended, or another staged item in the same debounce window changed the aggregate rank.
 
-**Fix:** Set `ShouldRespond = Always` to force a response, or use `ShouldRespond = Auto` and verify that the event text is explicit enough for the LLM to determine a reaction is warranted. If the character is currently speaking, wait for `OnFinishedTalking` before sending the event.
+**Fix:** Set `ShouldRespond = Always` when the update should send `run_llm: "true"`. Use **Is Talking** only as a local status check when sequencing your own Blueprint logic.
 
-**Verify:** Temporarily switch to `ShouldRespond = Always` in isolation. If the character now responds, the original event text was not explicit enough for `Auto` — make it more descriptive or keep `Always`.
+**Verify:** Temporarily switch to `ShouldRespond = Always` in isolation and confirm the update is sent with `run_llm` set to `"true"`.
 
 ---
 
 ## ResetDynamicContext and reconnect
 
-### Character still knows old state values after Reset Dynamic Context
+### Local state still appears after Reset Dynamic Context
 
-**Symptom:** You called `Reset Dynamic Context` but the character's responses still reflect values from the previous session.
+**Symptom:** You called `Reset Dynamic Context`, but `Get Context State Value` still returns `true` for a key you expected to clear.
 
-**Cause:** `Reset Dynamic Context` clears the local tracker and the `PendingTriggers` queue, then sends a Reset message to Convai at the next flush. The session's conversational memory (`SessionID`) still carries prior mentions of the state values.
+**Cause:** The Reset has not flushed yet, or new state was staged after the Reset call.
 
-**Fix:** After `Reset Dynamic Context`, also call `Stop Session`, set `SessionID = "-1"`, then call `Start Session`. This starts a clean conversation with no prior memory and a blank dynamic layer.
+**Fix:** Allow the reset flush to complete before staging new state values when starting from empty dynamic context.
 
-**Verify:** Call `Get Context State Value` for any key you expected to be cleared. If `OutValue` is empty, the local tracker was reset. A character that still references the value is drawing on in-session conversational memory — the session restart above is required.
+**Verify:** `Get Context State Value` for cleared keys returns `false` after the Reset flush.
 
 ---
 
-## Reset did not clear everything
+### Reset did not clear everything
 
-`Reset Dynamic Context` operates on the **runtime dynamic context layer only**. Three sources of character knowledge are outside its scope.
+**Symptom:** `Reset Dynamic Context` completed, but related runtime data still appears in the project.
 
-**Base character definition.** Facts baked into the character configuration on the Convai dashboard are not part of the dynamic context layer. No Blueprint node affects them at runtime.
+**Cause:** `Reset Dynamic Context` operates on the **runtime dynamic context tracker only**. It clears tracked state and events after sending the `Reset` `context-update`, but other update paths are separate.
 
-**Initial `DynamicEnvironmentInfo`.** The value of `DynamicEnvironmentInfo` sent at `/connect` time is part of the session snapshot. `Reset Dynamic Context` does not re-send it and cannot clear it. Ending and restarting the session is the only way to change what was sent at connection time.
+**Fix:** Change `DynamicEnvironmentInfo` explicitly if that text also needs to change. Update action and scene metadata through their own environment metadata paths.
 
-**In-session LLM memory.** The character's language model retains conversational context across turns within the same session. `Reset Dynamic Context` sends a Reset message to Convai but does not clear the model's in-session conversational memory. Starting a new session (set `SessionID = "-1"` and call `Start Session`) is the only way to clear in-session memory.
+**Verify:** `Get Context State Value` returns `false` for cleared keys, and any remaining data is handled through the relevant non-tracker update path.
 
 {% hint style="warning" %}
-`Reset Dynamic Context` clears the local state tracker and pending triggers, and sends a Reset message to Convai. It does not clear the character's system prompt, the initial connection-time context, or the LLM's in-session conversational memory. To clear all three, end and restart the session with a fresh `SessionID`.
+`Reset Dynamic Context` clears the local state tracker and sends a Reset `context-update`. It does not clear `DynamicEnvironmentInfo` or environment metadata.
 {% endhint %}
 
 ---
 
-## Character not responding to context updates
+### Staged updates disappeared after offline Reset
 
-The flowchart below covers the full troubleshooting surface for updates that appear to have no effect.
+**Symptom:** You called `Reset Dynamic Context` in `BeginPlay`, then staged new states, but the character never sees the new data.
+
+**Cause:** `Reset Dynamic Context` marks a pending `Reset` that fires **after** staged content at the first post-connect flush. This applies to staged updates in the same offline window whether they were staged before or after the Reset call.
+
+**Fix:** Let the reset flush complete after connect, then stage the new `Set Context State` or `Add Context Event` calls.
+
+**Verify:** After the first post-connect flush, `Get Context State Value` returns `false` for keys that should have been cleared.
+
+---
+
+## Context update diagnostic flow
+
+Use this flow after the first-line investigation. Follow the branches from local tracker state to connection state, flush timing, and the intended `run_llm` value.
 
 ```mermaid
 flowchart TD
-    A[Character not responding to context update] --> B{Did the flush fire?}
-    B -- Check with Get Context State Value --> C{Does OutValue match what you set?}
-    C -- No --> D[Tracker did not accept update\nCheck node connections in Blueprint]
-    C -- Yes --> E{Did flush arrive before\nthe conversation turn?}
-    E -- No --> F[Use bFlushImmediately = true\nor push the update earlier]
-    E -- Yes --> G{What is ShouldRespond?}
-    G -- Never --> H[Expected — no immediate response\nAsk a direct question about the state]
-    G -- Auto --> I{Is event text explicit\nenough for the LLM?}
-    I -- No --> J[Make the event text more explicit\nor switch to Always]
-    I -- Yes --> K[Check Convai dashboard\ncharacter configuration]
-    G -- Always --> K
+    A[Character not using context update] --> B{Does Get Context State Value match?}
+    B -- No --> C[Check Blueprint node wiring and Name pin]
+    B -- Yes --> D{Is Get Chatbot Connection State Connected?}
+    D -- No --> E[Wait for connect or check Start Session setup]
+    D -- Yes --> F{Did flush complete before the turn?}
+    F -- No --> G[Use bFlushImmediately or push update earlier]
+    F -- Yes --> H{What is ShouldRespond?}
+    H -- Never --> I[Use Auto or Always if run_llm should request handling]
+    H -- Auto --> J{Need run_llm true?}
+    J -- Yes --> K[Use Always]
+    J -- No --> L[Inspect runtime context outside this tracker]
+    H -- Always --> L
 ```
 
 ---
@@ -191,13 +216,13 @@ flowchart TD
 
 | Check | How to verify |
 |---|---|
-| Session is connected before staging updates | Check the connection state with `Get Chatbot Connection State`; staged updates queue safely and flush at connect |
-| Local tracker accepted the value | Call `Get Context State Value` and print `OutValue` immediately after `Set Context State` |
-| Flush arrived before the conversation turn | Use `bFlushImmediately = true` on time-critical updates |
-| `ShouldRespond` matches the intent | `Never` for silent background facts; `Auto` for contextual events; `Always` for dramatic beats |
-| Debounce properties are accessible | Expand Advanced in the `Convai|DynamicContext` Details panel section |
-| `Reset Dynamic Context` cleared pending updates | If called before connect, any staged updates in the same `BeginPlay` sequence are discarded. Call `Reset Dynamic Context` before staging new updates, not after. |
-| Character is currently speaking | Characters do not interrupt themselves. Wait for `OnFinishedTalking` before sending events with `ShouldRespond = Always`. |
+| Session is connected | **Get Chatbot Connection State** returns `Connected` |
+| Local tracker accepted the value | **Get Context State Value** returns expected `OutValue` immediately after **Set Context State** |
+| Flush completed before the conversation turn | Wait one debounce cycle, or use `bFlushImmediately = true` |
+| `ShouldRespond` matches intended wire value | `Never` -> `run_llm: "false"`; `Auto` -> `run_llm: "auto"`; `Always` -> `run_llm: "true"` |
+| Debounce properties are accessible | Expand **Advanced** under **Convai > DynamicContext** and look for **Context Debounce Window (s)** and **Max Debounce Window (s)** |
+| Reset ordering is correct | Let **Reset Dynamic Context** flush before staging new updates when starting from empty context |
+| Character speaking status is known | **Is Talking** returns the component's local speaking state |
 
 ## Next steps
 
