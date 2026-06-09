@@ -55,7 +55,7 @@ public sealed class HazardZoneTrigger : MonoBehaviour
 
 ## Scenario 2: Locked welcome expression
 
-**Situation:** A greeter NPC stands at the entrance of an onboarding simulation. During the welcome sequence — before the trainee has started talking — the character should always appear warm and approachable, regardless of any emotion signals the backend might send during the connection handshake.
+**Situation:** A greeter NPC stands at the entrance of an onboarding simulation. During the welcome sequence, before the trainee has started talking, the character should always appear warm and approachable regardless of any emotion signals Convai sends during the connection handshake.
 
 ### Runtime script
 
@@ -130,7 +130,7 @@ public sealed class EmotionBranchDirector : MonoBehaviour
 
 ## Scenario 4: Session analytics logging
 
-**Situation:** A training platform needs to record every emotional shift the AI character experiences during a session, including the raw server label and intensity, so instructors can review the emotional arc of the conversation in a post-session report.
+**Situation:** A training platform needs to record every emotional shift the AI character experiences during a session, including the raw Convai label and intensity, so instructors can review the emotional arc of the conversation in a post-session report.
 
 ### Runtime script
 
@@ -167,7 +167,7 @@ public sealed class EmotionSessionLogger : MonoBehaviour
 }
 ```
 
-`OnCharacterEmotionChanged` fires on every emotion signal from the backend, before the controller has smoothed or processed it. This gives analytics code access to the raw signal rather than the interpolated visual state, which is more meaningful for session review.
+`OnCharacterEmotionChanged` fires on every emotion signal from Convai before the controller has smoothed or processed it. This gives analytics code access to the raw signal rather than the interpolated visual state, which is more meaningful for session review.
 
 ***
 
@@ -206,11 +206,11 @@ Now every time the character's emotion changes, the `Emotion` property from `Cha
 {% endstepper %}
 
 {% hint style="success" %}
-Enter Play Mode and speak to the character. The UI label updates automatically as the backend sends new emotion signals.
+Enter Play Mode and speak to the character. The UI label updates automatically as Convai sends new emotion signals.
 {% endhint %}
 
 {% hint style="info" %}
-`ConvaiCharacterEventRelay` delivers the raw server label (e.g. `"happy"`). If you need a friendlier display name (e.g. `"Joy"` rather than `"happy"`), add a small formatting script that maps raw labels to display strings, or post-process the string in a UnityEvent target method.
+`ConvaiCharacterEventRelay` delivers the raw Convai label, such as `"Joy"` or `"Ecstasy"`. If you need a different display string, add a formatting script or post-process the string in a UnityEvent target method.
 {% endhint %}
 
 ***
@@ -227,7 +227,7 @@ Enter Play Mode and speak to the character. The UI label updates automatically a
 The Scene view updates immediately — blendshapes are applied in Edit Mode because `ConvaiEmotionController` inherits `[ExecuteAlways]` from its base class. Cycle through the labels in your taxonomy to verify each slot mapping visually.
 
 {% hint style="danger" %}
-Set **Lock Emotion** back to `false` before building for production. The field is serialised — if it remains enabled, the character will ignore all backend emotion signals in the shipped build with no runtime error or warning.
+Set **Lock Emotion** back to `false` before building for production. The field is serialised. If it remains enabled, the character ignores all live emotion signals in the shipped build.
 {% endhint %}
 
 ## Next steps
