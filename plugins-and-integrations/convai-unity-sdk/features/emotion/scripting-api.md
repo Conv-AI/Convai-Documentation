@@ -1,9 +1,9 @@
 ---
 title: Emotion scripting API
-description: Reference for the emotion scripting surface — ConvaiEmotionController, EmotionReading, override and lock methods, C# events, and IEmotionStateSource.
+description: Reference for ConvaiEmotionController, EmotionReading, raw emotion state, overrides, locks, C# events, and state source APIs.
 ---
 
-The Emotion system exposes two distinct paths for reacting to and controlling emotional state at runtime. The **Inspector path** uses `ConvaiCharacterEventRelay` — a component that surfaces emotion change callbacks as standard Unity Events, requiring no code. The **scripting path** uses `ConvaiEmotionController` directly, exposing a full C# API for reading live state, injecting overrides, and locking expressions. Both paths can be used simultaneously.
+The Emotion system exposes two distinct paths for reacting to and controlling emotional state at runtime. The **Inspector path** uses `ConvaiCharacterEventRelay`, a component that surfaces emotion change callbacks as standard Unity Events. The **scripting path** uses `ConvaiEmotionController` and `ConvaiCharacter` directly for reading live state, injecting overrides, and locking expressions.
 
 ## Inspector path — ConvaiCharacterEventRelay
 
@@ -28,13 +28,13 @@ The relay exposes an **On Emotion Changed** Unity Event that fires whenever the 
 | --- | --- | --- |
 | `CharacterId` | `string` | Unique identifier of the character. |
 | `CharacterName` | `string` | Display name of the character (falls back to the GameObject name). |
-| `Emotion` | `string` | The raw server label (e.g. `"happy"`). |
-| `Intensity` | `int` | Integer scale 1–3 as sent by the backend. |
+| `Emotion` | `string` | The raw Convai label, such as `"Joy"` or `"Ecstasy"`. |
+| `Intensity` | `int` | Integer scale `1-3` as sent by Convai. |
 
-**Example wiring:** Add a `ConvaiCharacterEventRelay` to your NPC's GameObject. In the **On Emotion Changed** list, click **+**, drag a UI Text component into the object field, and select `Text.text` — the label will update automatically on every emotion change.
+**Example wiring:** Add a `ConvaiCharacterEventRelay` to your NPC's GameObject. In the **On Emotion Changed** list, click **+**, drag a UI Text component into the object field, and select `Text.text`. The label updates automatically on every emotion change.
 
 {% hint style="info" %}
-`ConvaiCharacterEventRelay` fires on the raw server label before taxonomy resolution or smoothing. Use it for UI display, audio cues, or simple branching logic. For smoothed, post-resolution state with scores and hold time, use `ConvaiEmotionController.Current` from script instead.
+`ConvaiCharacterEventRelay` fires on the raw Convai label before taxonomy resolution or smoothing. Use it for UI display, audio cues, or simple branching logic. For smoothed, post-resolution state with scores and hold time, use `ConvaiEmotionController.Current` from script instead.
 {% endhint %}
 
 ## Accessing the controller from script
@@ -110,7 +110,7 @@ The controller has three serialised fields that fix the expression to a specific
 
 ## SetEmotionOverride and ClearEmotionOverride
 
-`SetEmotionOverride` injects an additional score into the accumulator on top of whatever the server is sending. The override is still subject to smoothing — it blends in at `lerpSpeed`, not instantly. Use this when your application logic needs to amplify or steer emotion in response to in-scene events.
+`SetEmotionOverride` injects an additional score into the accumulator on top of whatever Convai is sending. The override is still subject to smoothing; it blends in at `lerpSpeed`, not instantly. Use this when your application logic needs to amplify or steer emotion in response to in-scene events.
 
 ```csharp
 using Convai.Modules.Emotion.Components;
@@ -173,7 +173,7 @@ void ClearEmotionOverride();
 
 ## Subscribing to emotion change events
 
-To react to each new emotion the backend sends — for logging, analytics, or adaptive scenario logic — subscribe to `OnCharacterEmotionChanged` on `ConvaiManager.Events`. This is a standard C# event; subscribe in `OnEnable` and unsubscribe in `OnDisable`.
+To react to each new emotion Convai sends, subscribe to `OnCharacterEmotionChanged` on `ConvaiManager.Events`. Use this for logging, analytics, or adaptive scenario logic. This is a standard C# event; subscribe in `OnEnable` and unsubscribe in `OnDisable`.
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
@@ -206,16 +206,16 @@ public sealed class EmotionEventListener : MonoBehaviour
 | Property | Type | Description |
 | --- | --- | --- |
 | `CharacterId` | `string` | Unique identifier of the character whose emotion changed. |
-| `Emotion` | `string` | The raw server label (e.g. `"happy"`, not the canonical `"joy"`). |
-| `Intensity` | `int` | Integer scale 1–3 as sent by the backend (clamped). |
-| `NormalizedIntensity` | `float` | `(Intensity - 1) / 2f` — maps the 1–3 range to \[0, 1]. |
+| `Emotion` | `string` | The raw Convai label, such as `"Joy"` or `"Ecstasy"`, not the canonical label `joy`. |
+| `Intensity` | `int` | Integer scale `1-3` as sent by Convai, then clamped by Unity. |
+| `NormalizedIntensity` | `float` | `(Intensity - 1) / 2f`, which maps the `1-3` range to `[0, 1]`. |
 | `IsNeutral` | `bool` | `true` if the emotion string is `"neutral"`. |
 | `IsHighIntensity` | `bool` | `true` if `Intensity >= 3`. |
 | `IsLowIntensity` | `bool` | `true` if `Intensity <= 1`. |
 | `Timestamp` | `DateTime` | UTC timestamp of when the event was created. |
 
 {% hint style="warning" %}
-`CharacterEmotionChanged.Emotion` contains the **raw server label** (e.g. `"happy"`), not the canonical taxonomy label (`"joy"`). If you need the canonical label — for example, to look up a score in `AllScores` — resolve it through the taxonomy: `taxonomy.TryResolve(e.Emotion, out EmotionDescriptor descriptor)`.
+`CharacterEmotionChanged.Emotion` contains the raw Convai label, not the canonical taxonomy label. If you need the canonical label, use `ConvaiEmotionController.CurrentResolvedEmotion` for the composed visual state or resolve the raw label through the taxonomy.
 {% endhint %}
 
 ## IEmotionStateSource interface

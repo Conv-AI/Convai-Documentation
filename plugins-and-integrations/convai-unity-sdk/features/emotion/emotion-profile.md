@@ -21,7 +21,7 @@ To get started without creating an asset, assign the bundled `ConvaiSamplesShare
 
 | Field | Default | Description |
 | --- | --- | --- |
-| `taxonomy` | _(none — Plutchik built-in)_ | Optional `EmotionTaxonomyAsset` that defines which emotion labels are recognised and how server labels are resolved to canonical names. Leave empty to use the built-in nine-emotion Plutchik set. |
+| `taxonomy` | _(none — Plutchik built-in)_ | Optional `EmotionTaxonomyAsset` that defines which emotion labels are recognized and how Convai labels are resolved to canonical names. Leave empty to use the built-in nine-emotion Plutchik set. |
 
 The taxonomy also provides per-emotion mouth influence hints used by the LipSync blending layer. See [Emotion taxonomy](emotion-taxonomy.md) for full details on the built-in set and how to create a custom one.
 
@@ -54,7 +54,7 @@ For calm, professional simulations, reduce `microBurstOvershoot` toward 1.1–1.
 
 ## Neutral alternation
 
-A character that receives a sustained emotion signal — for example, remaining "curious" throughout a long explanation — can end up with a frozen expression that breaks immersion. Neutral alternation solves this by periodically fading the active expression toward neutral and then returning it, creating subtle, lifelike variation even when the underlying emotion is constant.
+A character that receives a sustained emotion signal, such as `interest` throughout a long explanation, can end up with a frozen expression that breaks immersion. Neutral alternation solves this by periodically fading the active expression toward neutral and then returning it, creating subtle variation even when the underlying emotion is constant.
 
 | Field | Range | Default | Description |
 | --- | --- | --- | --- |
