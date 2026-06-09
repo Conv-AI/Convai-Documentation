@@ -148,9 +148,9 @@ All four gaze delegates carry the same signature: the player component and the o
 | `PlayerComponent` | `UConvaiPlayerComponent*` | The player whose gaze changed. |
 | `ObjectComponent` | `UConvaiObjectComponent*` | The object involved in the transition. |
 
-Gaze events only fire when `bEnableGazeAttention` is `true` on the player component. When `bEnableGazeAttention` is `false`, none of these delegates are broadcast.
+New gaze begin and attention-gained events require `bEnableGazeAttention` to be `true` on the player component. If gaze attention is disabled while an object is already in attention, the current attention can be released and an attention-lost event can still broadcast.
 
-The promotion and release thresholds are configurable on `UConvaiPlayerComponent`: `OnAttentionGained` fires after the object has been held in continuous gaze for `GazeAttentionDelay` seconds (default 1.0 s). `OnAttentionLost` fires after gaze has been absent for `GazeAttentionLossDelay` seconds (default 5.0 s). Both values can be tuned in the **Details** panel to match the intended interaction speed of the experience.
+The promotion and release thresholds are configurable on `UConvaiPlayerComponent`: `OnAttentionGained` fires after the object has been held in continuous gaze for `GazeAttentionDelay` seconds (default `1.0` s). `OnAttentionLost` fires after gaze has been absent for `GazeAttentionLossDelay` seconds (default `5.0` s). Both values can be tuned in the **Details** panel to match the intended interaction speed of the experience.
 
 ## Object component events
 
@@ -161,7 +161,7 @@ The promotion and release thresholds are configurable on `UConvaiPlayerComponent
 | `OnGazedIn` | `Convai\|Object\|Gaze` | The player's gaze cursor enters this object. Fires before any attention threshold. |
 | `OnGazedOut` | `Convai\|Object\|Gaze` | The player's gaze leaves this object, regardless of attention state. |
 | `OnAttentionGained` | `Convai\|Object\|Gaze` | This object sends an attention-gained notification to eligible registered chatbots after the sustained-gaze threshold. |
-| `OnAttentionLost` | `Convai\|Object\|Gaze` | This object sends an attention-lost notification — loss timer elapsed, gaze swapped to another object, or target destroyed. |
+| `OnAttentionLost` | `Convai\|Object\|Gaze` | This object sends an attention-lost notification when the loss timer elapses or gaze swaps to another object. Destroyed-target paths are handled by the player-level attention-lost delegate with a nullable object parameter. |
 
 **Object gaze event signature:**
 
@@ -179,7 +179,7 @@ These events only fire when `bGazeable` is `true` on the object component (the d
 | Delegate | Category | Parameters | Fires when |
 |---|---|---|---|
 | `OnServerConnectionStateChangedEvent` | `Convai\|Connection` | `EC_ConnectionState ConnectionState` | The global WebRTC connection state changes. Use the `ConnectionState` parameter to react to driven states such as `Connecting` or `Connected`. |
-| `OnUserIdleWarning` | `Convai\|Event` | `int32 RemainingSeconds` | The server detects that the user has been idle. `RemainingSeconds` is the time remaining before the connection closes automatically. Call `ResetIdleTimer` on the subsystem to prevent the disconnection. |
+| `OnUserIdleWarning` | `Convai\|Event` | `int32 RemainingSeconds` | Convai detects that the user has been idle. `RemainingSeconds` is the time remaining before the connection closes automatically. Call `ResetIdleTimer` on the subsystem to prevent the disconnection. |
 
 Bind to `OnServerConnectionStateChangedEvent` for UI overlays or logging that should react to any session state change. Bind to `OnUserIdleWarning` to prompt the user or reset the timer programmatically — for example, in a training simulation, reset the timer whenever the learner completes a task step, regardless of whether they spoke.
 
@@ -296,7 +296,7 @@ Expected result: Actions execute in order as each prior action reports completio
 | Delegate never fires | Binding was never established, or was created after the event already fired | Bind in the character Blueprint's `BeginPlay` using the **Assign** node, or use `AddDynamic` in C++. For events that depend on character data, bind from inside an `OnCharacterDataLoadEvent_V2` handler instead of in `BeginPlay`. | Add a **Print String** to the handler; it should output when the expected condition occurs. |
 | Handler fires multiple times per event | The delegate was bound more than once — for example, **Assign** is inside a function called on every `StartSession` | Ensure each **Assign** call is reached exactly once per actor lifetime. If re-binding is intentional, call **Remove** (Blueprint) or `RemoveDynamic` (C++) before re-assigning. | Log a counter inside the handler; it should increment by exactly 1 per event. |
 | Character data setup fails at session start | Invalid `CharacterID` or API key configuration issue | Verify that `CharacterID` in the chatbot component matches a character in your Convai dashboard. Confirm and save the API key in the **Convai Editor window**. | `OnCharacterDataLoadEvent_V2` fires with `Success = true` after a valid session start. |
-| Gaze events never fire | `bEnableGazeAttention` is `false` on the player component, or the target actor has no `UConvaiObjectComponent` | Set **Enable Gaze Attention** to `true` on the player component. Confirm the target actor has a **Convai Object** component with **Gazeable** enabled. | `OnGazeBegin` fires on both the player component and the object component when the player looks at the target. |
+| Gaze events never fire | `bEnableGazeAttention` is `false` on the player component, or the target actor has no `UConvaiObjectComponent` | Set **Enable Gaze Attention** to `true` on the player component. Confirm the target actor has a `UConvaiObjectComponent` with `bGazeable` enabled. | `OnGazeBegin` fires on both the player component and the object component when the player looks at the target. |
 
 ## Related concepts
 
