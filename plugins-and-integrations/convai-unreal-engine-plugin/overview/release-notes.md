@@ -1,18 +1,18 @@
 ---
 title: Release notes
-description: Version history and notable changes for the Convai Unreal Engine plugin, covering all 4.x beta releases and the full 3.x history.
+description: Version history and notable changes for the Convai Unreal Engine plugin, covering public 4.x beta releases and the full 3.x history.
 last_reviewed: "4.0.0-beta.21"
 ---
 
 Track changes to the Convai Unreal Engine plugin across releases. The current release is <code class="expression">space.vars.unreal_plugin_version</code>, supporting Unreal Engine <code class="expression">space.vars.unreal_min_version</code> and later.
 
 {% hint style="info" %}
-This plugin is in beta. Beta releases may include breaking changes between minor versions. The plugin manifest identifies the current package as <code class="expression">space.vars.unreal_plugin_version</code>; the latest traceable source changelog entry is `4.0.0-beta.20`.
+This plugin is in beta. Beta releases may include breaking changes between minor versions. The plugin manifest identifies the current package as <code class="expression">space.vars.unreal_plugin_version</code>.
 {% endhint %}
 
 {% updates format="full" %}
-{% update date="2026-05-25" tags="4.0.0-beta.20" %}
-## 4.0.0-beta.20
+{% update date="2026-05-25" tags="4.0.0-beta.21" %}
+## 4.0.0-beta.21
 
 **Animation and gestures**
 
