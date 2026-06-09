@@ -54,7 +54,6 @@
 
 ## Plugins & Integrations
 
-* [Introduction](plugins-and-integrations/introduction.md)
 * [Convai Unity SDK](plugins-and-integrations/convai-unity-sdk/README.md)
   * [Convai Unity SDK overview](plugins-and-integrations/convai-unity-sdk/overview/README.md)
     * [What is the Convai Unity SDK](plugins-and-integrations/convai-unity-sdk/overview/what-is-the-convai-unity-sdk.md)
