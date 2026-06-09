@@ -87,7 +87,7 @@ The override receives three output arrays:
 
 The override adds to the configured defaults; it does not replace them. This is the correct place to populate the environment from a world query rather than from the Details panel.
 
-See [Usage examples](usage-examples.md) for a worked pseudocode example of this pattern.
+See [Scene metadata usage examples](usage-examples.md) for a worked pseudocode example of this pattern.
 
 ## Ensuring object components
 
@@ -104,9 +104,9 @@ All mutation methods batch updates into a debounce window, coalescing rapid call
 ## Next steps
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Scene metadata usage examples](usage-examples.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+[Troubleshoot scene metadata](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

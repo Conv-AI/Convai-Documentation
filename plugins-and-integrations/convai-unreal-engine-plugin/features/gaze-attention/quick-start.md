@@ -1,5 +1,5 @@
 ---
-title: Quick start
+title: Gaze attention quick start
 description: Enable gaze attention on the Convai Player Component and verify that a character responds when the player looks at a tagged world object.
 last_reviewed: "2026-06-09"
 ---
@@ -59,7 +59,7 @@ The object will display a pale-yellow silhouette highlight the moment your cross
 When gaze attention is working correctly: the silhouette appears on the object the instant your crosshair enters it, the cursor dot turns white, and — after holding gaze for `GazeAttentionDelay` seconds — the character begins speaking the response.
 {% endhint %}
 
-If the character does not respond, confirm that **Enable Actions** is on for the chatbot and that the actor has a `UConvaiObjectComponent` with a non-empty **Name**. See [Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md) for a full diagnostic checklist.
+If the character does not respond, confirm that **Enable Actions** is on for the chatbot and that the actor has a `UConvaiObjectComponent` with a non-empty **Name**. See [Troubleshoot gaze attention](troubleshooting-and-diagnostics.md) for a full diagnostic checklist.
 
 ## Next steps
 
@@ -72,5 +72,5 @@ If the character does not respond, confirm that **Enable Actions** is on for the
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Gaze attention usage examples](usage-examples.md)
 {% endcontent-ref %}

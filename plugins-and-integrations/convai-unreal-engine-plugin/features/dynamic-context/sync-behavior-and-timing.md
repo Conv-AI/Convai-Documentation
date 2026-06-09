@@ -166,7 +166,7 @@ High-frequency use of `bFlushImmediately` — for example, syncing a value that 
 ## Next steps
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+[Troubleshoot dynamic context](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-blueprint-reference.md" %}

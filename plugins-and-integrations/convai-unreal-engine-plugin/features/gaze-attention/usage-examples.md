@@ -1,5 +1,5 @@
 ---
-title: Usage examples
+title: Gaze attention usage examples
 description: Blueprint recipes for gaze events, custom highlight visuals, component-scoped targeting, manual attention locking, and building a custom cursor widget.
 last_reviewed: "2026-06-09"
 ---
@@ -175,5 +175,5 @@ Both properties are `BlueprintReadWrite` and can be changed at runtime, for exam
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+[Troubleshoot gaze attention](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

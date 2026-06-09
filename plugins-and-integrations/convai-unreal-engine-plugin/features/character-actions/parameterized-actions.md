@@ -132,5 +132,5 @@ if RefEntry.Ref is None:
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Character actions examples](usage-examples.md)
 {% endcontent-ref %}

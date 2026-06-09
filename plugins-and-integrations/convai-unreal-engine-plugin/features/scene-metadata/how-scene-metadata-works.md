@@ -91,11 +91,11 @@ Mutation methods batch their updates into a debounce window by default, so rapid
 ## Next steps
 
 {% content-ref url="quick-start.md" %}
-[Quick start](quick-start.md)
+[Scene metadata quick start](quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="component-reference.md" %}
-[Component reference](component-reference.md)
+[Scene metadata component reference](component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="managing-the-environment-at-runtime.md" %}

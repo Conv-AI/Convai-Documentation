@@ -29,7 +29,7 @@ Dynamic context lets a `Convai Chatbot` component (`UConvaiChatbotComponent`) te
 <td><a href="static-context-at-connection-time.md">static-context-at-connection-time.md</a></td>
 </tr>
 <tr>
-<td><strong>Quick start</strong><br>Push a state property and an event at runtime and verify the character uses the updated context.</td>
+<td><strong>Dynamic context quick start</strong><br>Push a state property and an event at runtime and verify the character uses the updated context.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
@@ -37,11 +37,11 @@ Dynamic context lets a `Convai Chatbot` component (`UConvaiChatbotComponent`) te
 <td><a href="dynamic-context-blueprint-reference.md">dynamic-context-blueprint-reference.md</a></td>
 </tr>
 <tr>
-<td><strong>Usage examples</strong><br>Blueprint recipes for health tracking, zone changes, narrative events, and session resets.</td>
+<td><strong>Dynamic context usage examples</strong><br>Blueprint recipes for health tracking, zone changes, narrative events, and session resets.</td>
 <td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
-<td><strong>Troubleshooting and diagnostics</strong><br>Fix updates that arrive too late, trigger unexpected responses, or appear ignored after a flush.</td>
+<td><strong>Troubleshoot dynamic context</strong><br>Fix updates that arrive too late, trigger unexpected responses, or appear ignored after a flush.</td>
 <td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td>
 </tr>
 </tbody>
@@ -49,10 +49,10 @@ Dynamic context lets a `Convai Chatbot` component (`UConvaiChatbotComponent`) te
 
 ## Next steps
 
-Start with [Quick start](quick-start.md) to push your first context update, then read [How dynamic context works](how-dynamic-context-works.md) before moving into the reference pages.
+Start with [Dynamic context quick start](quick-start.md) to push your first context update, then read [How dynamic context works](how-dynamic-context-works.md) before moving into the reference pages.
 
 {% content-ref url="quick-start.md" %}
-[Quick start](quick-start.md)
+[Dynamic context quick start](quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="how-dynamic-context-works.md" %}

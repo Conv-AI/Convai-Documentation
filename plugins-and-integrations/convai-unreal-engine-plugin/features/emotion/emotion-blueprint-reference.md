@@ -143,5 +143,5 @@ These multipliers apply only when `Force Set Emotion` is called. Server-driven s
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Emotion examples](usage-examples.md)
 {% endcontent-ref %}

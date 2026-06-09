@@ -19,7 +19,7 @@ Enabling gaze attention on `UConvaiPlayerComponent` makes the plugin perform a p
 <td><a href="how-gaze-attention-works.md">how-gaze-attention-works.md</a></td>
 </tr>
 <tr>
-<td><strong>Quick start</strong><br>Enable gaze attention on the Player Component and verify that a character responds when the player looks at a tagged object.</td>
+<td><strong>Gaze attention quick start</strong><br>Enable gaze attention on the Player Component and verify that a character responds when the player looks at a tagged object.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
@@ -27,11 +27,11 @@ Enabling gaze attention on `UConvaiPlayerComponent` makes the plugin perform a p
 <td><a href="gaze-attention-reference.md">gaze-attention-reference.md</a></td>
 </tr>
 <tr>
-<td><strong>Usage examples</strong><br>Blueprint recipes for gaze events, custom highlight visuals, component-scoped targeting, and manual attention locking.</td>
+<td><strong>Gaze attention usage examples</strong><br>Blueprint recipes for gaze events, custom highlight visuals, component-scoped targeting, and manual attention locking.</td>
 <td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
-<td><strong>Troubleshooting and diagnostics</strong><br>Diagnose and fix objects not highlighting, attention not promoting, cursor not appearing, and component-scoped gaze not matching.</td>
+<td><strong>Troubleshoot gaze attention</strong><br>Diagnose and fix objects not highlighting, attention not promoting, cursor not appearing, and component-scoped gaze not matching.</td>
 <td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td>
 </tr>
 </tbody>

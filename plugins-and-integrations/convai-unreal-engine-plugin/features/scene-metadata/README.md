@@ -21,11 +21,11 @@ For runtime mutations — adding objects, removing actors, setting conversation 
 <td><a href="how-scene-metadata-works.md">how-scene-metadata-works.md</a></td>
 </tr>
 <tr>
-<td><strong>Quick start</strong><br>Tag a world actor with the Convai Object Component and test whether a character can use it in conversation.</td>
+<td><strong>Scene metadata quick start</strong><br>Tag a world actor with the Convai Object Component and test whether a character can use it in conversation.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
-<td><strong>Component reference</strong><br>Full property, function, and event reference for the Convai Object Component.</td>
+<td><strong>Scene metadata component reference</strong><br>Full property, function, and event reference for the Convai Object Component.</td>
 <td><a href="component-reference.md">component-reference.md</a></td>
 </tr>
 <tr>
@@ -33,11 +33,11 @@ For runtime mutations — adding objects, removing actors, setting conversation 
 <td><a href="managing-the-environment-at-runtime.md">managing-the-environment-at-runtime.md</a></td>
 </tr>
 <tr>
-<td><strong>Usage examples</strong><br>Complete setups for medical training, industrial safety drills, military simulations, and runtime environment updates.</td>
+<td><strong>Scene metadata usage examples</strong><br>Complete setups for medical training, industrial safety drills, military simulations, and runtime environment updates.</td>
 <td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
-<td><strong>Troubleshooting and diagnostics</strong><br>Diagnose and fix common problems with scene objects not being recognized or tracked properties failing to update.</td>
+<td><strong>Troubleshoot scene metadata</strong><br>Diagnose and fix common problems with scene objects not being recognized or tracked properties failing to update.</td>
 <td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td>
 </tr>
 </tbody>

@@ -1,5 +1,5 @@
 ---
-title: Component reference
+title: Scene metadata component reference
 description: Full property, function, and event reference for the Convai Object Component, including object identity, tracked properties, proximity state, and gaze events.
 last_reviewed: "2026-06-05"
 ---
@@ -116,5 +116,5 @@ Removing a tracked property with `RemoveTrackedProperty` does not erase its last
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Scene metadata usage examples](usage-examples.md)
 {% endcontent-ref %}

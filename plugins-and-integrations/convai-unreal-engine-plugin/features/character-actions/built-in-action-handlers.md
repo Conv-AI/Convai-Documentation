@@ -211,5 +211,5 @@ If you rename any of these action templates, rename the corresponding Blueprint 
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Character actions examples](usage-examples.md)
 {% endcontent-ref %}

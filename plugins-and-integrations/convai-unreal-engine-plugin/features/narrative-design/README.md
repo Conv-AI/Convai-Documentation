@@ -36,7 +36,7 @@ The primary narrative design API lives on `UConvaiChatbotComponent` (`Convai Cha
 </thead>
 <tbody>
 <tr>
-<td><strong>Quick start</strong><br>Invoke a narrative trigger and observe the section change event in a new Blueprint character.</td>
+<td><strong>Narrative design quick start</strong><br>Invoke a narrative trigger and observe the section change event in a new Blueprint character.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
@@ -81,8 +81,8 @@ The primary narrative design API lives on `UConvaiChatbotComponent` (`Convai Cha
 
 ## Next steps
 
-Start with the quick start if you want a working Blueprint path, then use the trigger and template-key guides to add production behavior.
+Start with the narrative design quick start if you want a working Blueprint path, then use the trigger and template-key guides to add production behavior.
 
 {% content-ref url="quick-start.md" %}
-[Quick start](quick-start.md)
+[Narrative design quick start](quick-start.md)
 {% endcontent-ref %}

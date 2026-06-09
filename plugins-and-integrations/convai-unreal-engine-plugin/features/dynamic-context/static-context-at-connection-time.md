@@ -89,5 +89,5 @@ Default debounced calls to `Set Context State`, `Set Context States`, `Add Conte
 {% endcontent-ref %}
 
 {% content-ref url="quick-start.md" %}
-[Quick start](quick-start.md)
+[Dynamic context quick start](quick-start.md)
 {% endcontent-ref %}

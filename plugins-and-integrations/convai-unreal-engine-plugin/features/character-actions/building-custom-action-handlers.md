@@ -145,5 +145,5 @@ Binding to `On Actions Received` does **not** bypass the name-dispatch mechanism
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Character actions examples](usage-examples.md)
 {% endcontent-ref %}

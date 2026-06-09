@@ -1,5 +1,5 @@
 ---
-title: Usage examples
+title: Emotion examples
 description: Six scenarios covering forced expressions, cutscene locks, score-driven VFX, EmotionOffset tuning, neutral reset, and Animation Blueprint blend poses.
 last_reviewed: 2026-06-09
 ---

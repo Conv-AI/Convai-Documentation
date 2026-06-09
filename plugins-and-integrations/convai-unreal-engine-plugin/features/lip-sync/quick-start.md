@@ -1,5 +1,5 @@
 ---
-title: Quick start
+title: Lip sync quick start
 description: Add the Convai Face Sync component and AnimGraph node to a MetaHuman character and hear lip-synced speech in Play In Editor.
 last_reviewed: 2026-06-05
 ---
@@ -96,7 +96,7 @@ If the mouth does not move, confirm that:
 - The `Convai Face Sync` AnimGraph node is connected between the source pose and the final output pose.
 - The `Convai Chatbot` component on the same Actor has a valid character ID and the plugin can reach Convai.
 
-See [Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md) for detailed symptom-and-fix guidance.
+See [Troubleshoot lip sync](troubleshooting-and-diagnostics.md) for detailed symptom-and-fix guidance.
 
 ## Next steps
 

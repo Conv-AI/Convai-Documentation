@@ -252,5 +252,5 @@ Event Announce(ActionData: FConvaiResultAction)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+[Troubleshoot character actions](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

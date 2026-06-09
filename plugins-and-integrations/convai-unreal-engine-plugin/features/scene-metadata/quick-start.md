@@ -1,5 +1,5 @@
 ---
-title: Quick start
+title: Scene metadata quick start
 description: Tag a world actor with the Convai Object Component, assign its name and description, and confirm a Convai character can reference it in conversation.
 last_reviewed: "2026-06-05"
 ---
@@ -34,7 +34,7 @@ With the **Convai Object Component** selected, set the object identity fields in
 - **Name** — a short, unique label, for example `FrontDoor`.
 - **Description** — a plain sentence about the object, for example `A large wooden door at the main entrance.`
 
-Names must be unique in the level. See [Component reference](component-reference.md) for details on duplicate handling and the full field list.
+Names must be unique in the level. See [Scene metadata component reference](component-reference.md) for details on duplicate handling and the full field list.
 {% endstep %}
 
 {% step %}
@@ -48,7 +48,7 @@ Press **Play**. Walk up to the Convai character and ask: `"What do you know abou
 
 To give the character awareness of live game state, expand **Tracked Properties** in the Details panel and click **+** to add a row. Click **Bind** next to **Property Path** and select a `UPROPERTY` from the `Actor`. Set a plain-language **Description** and choose a **ShouldRespond** value.
 
-For the full tracked property workflow, see [Component reference — Tracked properties](component-reference.md#tracked-properties).
+For the full tracked property workflow, see [Scene metadata component reference — Tracked properties](component-reference.md#tracked-properties).
 {% endstep %}
 {% endstepper %}
 
@@ -57,13 +57,13 @@ The object is configured correctly when `ObjectEntry.Name` is non-empty, no regi
 {% endhint %}
 
 {% hint style="info" %}
-For the full list of properties and functions available on the component, see [Component reference](component-reference.md).
+For the full list of properties and functions available on the component, see [Scene metadata component reference](component-reference.md).
 {% endhint %}
 
 ## Next steps
 
 {% content-ref url="component-reference.md" %}
-[Component reference](component-reference.md)
+[Scene metadata component reference](component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="managing-the-environment-at-runtime.md" %}
@@ -71,5 +71,5 @@ For the full list of properties and functions available on the component, see [C
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+[Troubleshoot scene metadata](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

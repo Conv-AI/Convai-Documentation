@@ -1,5 +1,5 @@
 ---
-title: Troubleshooting and diagnostics
+title: Troubleshoot gaze attention
 description: Diagnose and fix gaze attention issues — objects not highlighting, attention never promoting, cursor not appearing, and component-scoped gaze not matching.
 last_reviewed: "2026-06-09"
 ---

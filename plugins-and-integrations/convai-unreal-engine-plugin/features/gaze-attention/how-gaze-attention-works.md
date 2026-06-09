@@ -140,7 +140,7 @@ The cursor is a pure C++ widget that uses Unreal's `FCoreStyle::WhiteBrush`. No 
 ## Next steps
 
 {% content-ref url="quick-start.md" %}
-[Quick start](quick-start.md)
+[Gaze attention quick start](quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="gaze-attention-reference.md" %}

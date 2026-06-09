@@ -21,7 +21,7 @@ Use this section to understand the pipeline, configure the environment contract,
 <td><a href="how-character-actions-work.md">how-character-actions-work.md</a></td>
 </tr>
 <tr>
-<td><strong>Quick start</strong><br>Enable actions, register a scene object, configure AI navigation, and verify a built-in navigation action end to end.</td>
+<td><strong>Character actions quick start</strong><br>Enable actions, register a scene object, configure AI navigation, and verify a built-in navigation action end to end.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
@@ -49,11 +49,11 @@ Use this section to understand the pipeline, configure the environment contract,
 <td><a href="actions-blueprint-reference.md">actions-blueprint-reference.md</a></td>
 </tr>
 <tr>
-<td><strong>Usage examples</strong><br>End-to-end action recipes: navigating to an object, following a character, and using parameterized actions.</td>
+<td><strong>Character actions examples</strong><br>End-to-end action recipes: navigating to an object, following a character, and using parameterized actions.</td>
 <td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
-<td><strong>Troubleshooting and diagnostics</strong><br>Fix actions that are not firing, NavMesh and movement issues, and parameters that are not resolving correctly.</td>
+<td><strong>Troubleshoot character actions</strong><br>Fix actions that are not firing, NavMesh and movement issues, and parameters that are not resolving correctly.</td>
 <td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td>
 </tr>
 </tbody>

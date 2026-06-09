@@ -1,10 +1,10 @@
 ---
-title: Quick start
+title: Narrative design quick start
 description: Invoke a named narrative trigger from Blueprint and confirm a section change by printing the new section ID to the screen.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-We will invoke a narrative trigger on a Convai character and confirm that the story graph advances by printing the returned section ID. By the end, you will have a working Blueprint setup that fires a trigger on a key press and logs the section ID whenever Convai returns one.
+Invoke a narrative trigger on a Convai character and confirm that the story graph advances by printing the returned section ID. After setup, pressing a bound key fires **Invoke Narrative Design Trigger** and **On Narrative Section Received** prints the new `Narrative Section ID` when Convai advances the graph.
 
 ## What we will build
 

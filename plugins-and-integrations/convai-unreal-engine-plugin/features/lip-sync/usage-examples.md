@@ -1,5 +1,5 @@
 ---
-title: Usage examples
+title: Lip sync usage examples
 description: "Configure lip sync for common scenarios: Add vs Override blending, tuning smoothing, mixing with body animation, and remapping blendshapes to a custom rig."
 last_reviewed: 2026-06-05
 ---
@@ -148,7 +148,7 @@ Use `IsPlaying()` to poll whether replay is active, and `GetCurrentFrame()` to r
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+[Troubleshoot lip sync](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}
 
 {% content-ref url="how-lip-sync-works.md" %}

@@ -49,15 +49,15 @@ Problems that occur after the plugin connects successfully — where a specific 
 
 | Feature | Troubleshooting page |
 | --- | --- |
-| Lip sync | [Troubleshooting and diagnostics](../features/lip-sync/troubleshooting-and-diagnostics.md) |
-| Character actions | [Troubleshooting and diagnostics](../features/character-actions/troubleshooting-and-diagnostics.md) |
-| Emotion | [Troubleshooting and diagnostics](../features/emotion/troubleshooting-and-diagnostics.md) |
-| Gaze attention | [Troubleshooting and diagnostics](../features/gaze-attention/troubleshooting-and-diagnostics.md) |
-| Narrative design | [Troubleshooting and diagnostics](../features/narrative-design/troubleshooting-and-diagnostics.md) |
-| Dynamic context | [Troubleshooting and diagnostics](../features/dynamic-context/troubleshooting-and-diagnostics.md) |
-| Long-term memory | [Troubleshooting and diagnostics](../features/long-term-memory/troubleshooting-and-diagnostics.md) |
-| Vision | [Troubleshooting and diagnostics](../features/vision/troubleshooting-and-diagnostics.md) |
-| Scene metadata | [Troubleshooting and diagnostics](../features/scene-metadata/troubleshooting-and-diagnostics.md) |
+| Lip sync | [Troubleshoot lip sync](../features/lip-sync/troubleshooting-and-diagnostics.md) |
+| Character actions | [Troubleshoot character actions](../features/character-actions/troubleshooting-and-diagnostics.md) |
+| Emotion | [Troubleshoot emotion](../features/emotion/troubleshooting-and-diagnostics.md) |
+| Gaze attention | [Troubleshoot gaze attention](../features/gaze-attention/troubleshooting-and-diagnostics.md) |
+| Narrative design | [Troubleshoot narrative design](../features/narrative-design/troubleshooting-and-diagnostics.md) |
+| Dynamic context | [Troubleshoot dynamic context](../features/dynamic-context/troubleshooting-and-diagnostics.md) |
+| Long-term memory | [Troubleshoot long-term memory](../features/long-term-memory/troubleshooting-and-diagnostics.md) |
+| Vision | [Troubleshoot vision](../features/vision/troubleshooting-and-diagnostics.md) |
+| Scene metadata | [Troubleshoot scene metadata](../features/scene-metadata/troubleshooting-and-diagnostics.md) |
 
 ## Next steps
 

@@ -1,5 +1,5 @@
 ---
-title: Troubleshooting and diagnostics
+title: Troubleshoot scene metadata
 description: Diagnose and fix common problems with scene objects not being recognized, stale environment data, and tracked properties failing to update.
 last_reviewed: "2026-06-05"
 ---
@@ -200,5 +200,5 @@ Is ObjectEntry.Name non-empty on the UConvaiObjectComponent?
 {% endcontent-ref %}
 
 {% content-ref url="component-reference.md" %}
-[Component reference](component-reference.md)
+[Scene metadata component reference](component-reference.md)
 {% endcontent-ref %}

@@ -1,5 +1,5 @@
 ---
-title: Quick start
+title: Emotion quick start
 description: Wire a Convai character's emotion scores to morph targets on its Skeletal Mesh so facial expressions update automatically during conversation.
 last_reviewed: 2026-06-09
 ---
@@ -75,7 +75,7 @@ If no expression changes appear, use this checklist:
 - `Get Emotion Score` returns a value above `0.0` when the character speaks — add `Print Float` after the score node to confirm.
 - The **Morph Target Name** on each `Set Morph Target` node matches a name on the character's Skeletal Mesh exactly (case-sensitive).
 
-See [Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md) for detailed guidance.
+See [Troubleshoot emotion](troubleshooting-and-diagnostics.md) for detailed guidance.
 
 ### How it works
 
@@ -94,5 +94,5 @@ Map each `EBasicEmotions` category to morph target names that exist on your rig.
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Emotion examples](usage-examples.md)
 {% endcontent-ref %}

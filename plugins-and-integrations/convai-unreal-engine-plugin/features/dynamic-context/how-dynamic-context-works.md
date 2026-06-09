@@ -129,7 +129,7 @@ Identical event strings staged multiple times within the same debounce window ar
 {% endcontent-ref %}
 
 {% content-ref url="quick-start.md" %}
-[Quick start](quick-start.md)
+[Dynamic context quick start](quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-blueprint-reference.md" %}

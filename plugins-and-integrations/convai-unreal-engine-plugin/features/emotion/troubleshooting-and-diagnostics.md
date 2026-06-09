@@ -1,5 +1,5 @@
 ---
-title: Troubleshooting and diagnostics
+title: Troubleshoot emotion
 description: Fix common emotion problems — expressions not appearing, state locked unintentionally, morph target mismatches, and EmotionOffset with no visible effect.
 last_reviewed: 2026-06-09
 ---
@@ -194,9 +194,9 @@ flowchart TD
 {% endcontent-ref %}
 
 {% content-ref url="quick-start.md" %}
-[Quick start](quick-start.md)
+[Emotion quick start](quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Emotion examples](usage-examples.md)
 {% endcontent-ref %}

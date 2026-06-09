@@ -22,7 +22,7 @@ The recording API — `StartRecordingLipSync`, `FinishRecordingLipSync`, `PlayRe
 ## Prerequisites
 
 - The Actor has a `Convai Face Sync` component and a working `Convai Chatbot` component.
-- The character already produces lip sync during conversation (see the [Quick start](quick-start.md) if not).
+- The character already produces lip sync during conversation (see [Lip sync quick start](quick-start.md) if not).
 
 ## Record a sequence
 
@@ -120,5 +120,5 @@ Replaying a sequence does not re-trigger audio. Play the matching audio clip sep
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Lip sync usage examples](usage-examples.md)
 {% endcontent-ref %}

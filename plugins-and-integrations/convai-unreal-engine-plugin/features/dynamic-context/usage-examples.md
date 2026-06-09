@@ -161,5 +161,5 @@ All three default debounced calls queue safely. After connection and the debounc
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+[Troubleshoot dynamic context](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

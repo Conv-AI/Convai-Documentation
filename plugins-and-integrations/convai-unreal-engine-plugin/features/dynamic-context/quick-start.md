@@ -133,7 +133,7 @@ After the debounce window (`0.5` s by default), the plugin sends one `Replace` `
 
 Speak to the character or use text input. Ask `How is my health?` or `What is happening in the facility?` as an end-to-end runtime test after the SDK has flushed the context update. Exact response wording is outside the SDK source and depends on the character configuration.
 
-If the character does not reference either value, see [Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md).
+If the character does not reference either value, see [Troubleshoot dynamic context](troubleshooting-and-diagnostics.md).
 {% endstep %}
 {% endstepper %}
 
@@ -158,5 +158,5 @@ Use the concept page for the mental model, the reference page for exact node beh
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Dynamic context usage examples](usage-examples.md)
 {% endcontent-ref %}

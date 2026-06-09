@@ -19,7 +19,7 @@ The emotion system lets a Convai character express feelings through facial anima
 <td><a href="how-the-emotion-system-works.md">how-the-emotion-system-works.md</a></td>
 </tr>
 <tr>
-<td><strong>Quick start</strong><br>Subscribe to emotion state changes and apply per-emotion scores to morph targets on a character mesh in a few Blueprint steps.</td>
+<td><strong>Emotion quick start</strong><br>Subscribe to emotion state changes and apply per-emotion scores to morph targets on a character mesh in a few Blueprint steps.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
@@ -27,11 +27,11 @@ The emotion system lets a Convai character express feelings through facial anima
 <td><a href="emotion-blueprint-reference.md">emotion-blueprint-reference.md</a></td>
 </tr>
 <tr>
-<td><strong>Usage examples</strong><br>Force an emotion, lock expression state, and read scores to drive gameplay effects or visual feedback.</td>
+<td><strong>Emotion examples</strong><br>Force an emotion, lock expression state, and read scores to drive gameplay effects or visual feedback.</td>
 <td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
-<td><strong>Troubleshooting and diagnostics</strong><br>Fix emotions not appearing, a state stuck in locked mode, and morph target mismatches on the character mesh.</td>
+<td><strong>Troubleshoot emotion</strong><br>Fix emotions not appearing, a state stuck in locked mode, and morph target mismatches on the character mesh.</td>
 <td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td>
 </tr>
 </tbody>
@@ -39,4 +39,4 @@ The emotion system lets a Convai character express feelings through facial anima
 
 ## Start here
 
-Start with [Quick start](quick-start.md) to wire expression scores to a character mesh in a few Blueprint steps. Then read [How the emotion system works](how-the-emotion-system-works.md) to understand the scoring model and controls before moving into reference and advanced examples.
+Start with [Emotion quick start](quick-start.md) to wire expression scores to a character mesh in a few Blueprint steps. Then read [How the emotion system works](how-the-emotion-system-works.md) to understand the scoring model and controls before moving into reference and advanced examples.

@@ -75,7 +75,7 @@ The plugin sends template keys to Convai when the session connects (`OnAttendeeC
 ## Next steps
 
 {% content-ref url="quick-start.md" %}
-[Quick start](quick-start.md)
+[Narrative design quick start](quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="narrative-triggers.md" %}

@@ -201,9 +201,9 @@ Movement-only fields (`AcceptanceRadius`, `SocketOrBoneName`, `bStepOntoBounds`,
 ## Next steps
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Gaze attention usage examples](usage-examples.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+[Troubleshoot gaze attention](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

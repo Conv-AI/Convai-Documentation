@@ -139,11 +139,11 @@ The guide can receive the mural's object description, but the plugin does not co
 ## Next steps
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+[Troubleshoot scene metadata](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}
 
 {% content-ref url="component-reference.md" %}
-[Component reference](component-reference.md)
+[Scene metadata component reference](component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="how-scene-metadata-works.md" %}

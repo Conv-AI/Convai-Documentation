@@ -57,7 +57,7 @@ The `FAnimNode_ConvaiFaceSync` node is placed in an Animation Blueprint's AnimGr
 
 The node auto-discovers the `UConvaiChatbotComponent` on the owning Actor if the `ConvaiChatbotComponent` pin is left unset. If the Actor has more than one chatbot component, connect the pin explicitly to avoid ambiguity.
 
-For MetaHuman setup and other rig types, add the node to the character's Animation Blueprint as described in the [Quick start](quick-start.md).
+For MetaHuman setup and other rig types, add the node to the character's Animation Blueprint as described in [Lip sync quick start](quick-start.md).
 
 ### Starvation blending
 
