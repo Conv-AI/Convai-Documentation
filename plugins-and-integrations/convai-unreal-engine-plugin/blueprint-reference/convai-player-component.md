@@ -1,12 +1,12 @@
 ---
 title: Convai Player Component
 description: Reference for the player conversation component — every Blueprint-visible property, function, and event exposed by the Convai Player Component.
-last_reviewed: "2026-06-05"
+last_reviewed: "4.0.0-beta.21"
 ---
 
 `UConvaiPlayerComponent` (Blueprint display name **Convai Player**) is added to the player's `Actor` to represent the human side of a conversation. It manages the player's session with Convai, captures microphone audio, streams it to the active chatbot session, and exposes gaze attention tracking.
 
-Add it to the player pawn through the **Add Component** button in the **Details** panel.
+Add Component path: **Convai Player**.
 
 ## Identity
 
@@ -14,19 +14,19 @@ These properties identify the player to Convai and are used for long-term memory
 
 | Property | Type | Access | Category | Description |
 |---|---|---|---|---|
-| `PlayerName` | `FString` | `EditAnywhere`, `Replicated` | `Convai` | Display name used by chatbots to address this player. Setting via the Blueprint setter calls `SetPlayerName`, which also calls the `Server Reliable` RPC `SetPlayerNameServer` so clients can update their own name. |
-| `EndUserID` | `FString` | `EditAnywhere`, `Replicated` | `Convai` | End-user identity token for long-term memory. Sent to Convai at connect time. Use the Blueprint setter `SetEndUserID` to trigger replication. |
-| `EndUserMetadata` | `FString` | `EditAnywhere`, `Replicated` | `Convai` | JSON string with additional user metadata for LTM. Use the Blueprint setter `SetEndUserMetadata` to trigger replication. |
+| `PlayerName` | `FString` | `EditAnywhere`, `Replicated` | `Convai` | Display name used by chatbots to address this player. Default: `"User"`. Setting via the Blueprint setter calls `SetPlayerName`, which also calls the `Server Reliable` RPC `SetPlayerNameServer` so clients can update their own name. |
+| `EndUserID` | `FString` | `EditAnywhere`, server-updated by setter RPC | `Convai` | End-user identity token for long-term memory. Sent to Convai at connect time. The Blueprint setter calls `SetEndUserIDServer` when the component is replicated, updating the server copy. |
+| `EndUserMetadata` | `FString` | `EditAnywhere`, server-updated by setter RPC | `Convai` | JSON string with additional user metadata for LTM. The Blueprint setter calls `SetEndUserMetadataServer` when the component is replicated, updating the server copy. |
 
 {% hint style="info" %}
-`SetPlayerName`, `SetEndUserID`, and `SetEndUserMetadata` each have a corresponding `Server Reliable` RPC (`SetPlayerNameServer`, `SetEndUserIDServer`, `SetEndUserMetadataServer`). These are called automatically by the Blueprint setter so that a locally owned client pawn can update its own identity and have the change propagate to the server.
+`SetPlayerName`, `SetEndUserID`, and `SetEndUserMetadata` each have a corresponding `Server Reliable` RPC (`SetPlayerNameServer`, `SetEndUserIDServer`, `SetEndUserMetadataServer`). In current source, only `PlayerName` is registered with `DOREPLIFETIME`; `EndUserID` and `EndUserMetadata` are updated on the server through their setter RPCs but are not property-replicated back to other clients.
 {% endhint %}
 
 ## Session
 
 | Property | Type | Default | Category | Description |
 |---|---|---|---|---|
-| `bAutoInitializeSession` | `bool` | `true` | `Convai\|Session` | When `true`, calls `StartSession` automatically in `BeginPlay`. |
+| `bAutoInitializeSession` | `bool` | `true` | `Convai\|Session` | When `true`, calls `StartSession` automatically after the Convai server connection state reaches `Connected`. |
 
 ### Session functions
 
@@ -35,7 +35,7 @@ These properties identify the player to Convai and are used for long-term memory
 | `StartSession` | — | `bool` | `Convai\|Session` | Opens the WebRTC channel for this player. Returns `true` when the session initialized successfully. |
 | `StopSession` | — | — | `Convai\|Session` | Closes the channel. Calling `StartSession` again reopens it. |
 | `IsPlayerConnected` | — | `bool` | `Convai\|Session` | `BlueprintPure`. Returns `true` when the session is in the `EC_ConnectionState::Connected` state. |
-| `SendText` | `ChatbotComponent (UConvaiConversationComponent*)`, `Text (FString)` | — | `Convai\|Session` | Sends a text message directly to a chatbot component, bypassing the microphone pipeline. |
+| `SendText` | `ChatbotComponent (UConvaiConversationComponent*)`, `Text (FString)` | — | `Convai\|Session` | Sends `Text` on the player's active session, bypassing the microphone pipeline. In current source, the `ChatbotComponent` pin is present in the signature but is not used by the implementation. |
 
 See [Session lifecycle](../core-concepts/session-lifecycle.md) for connection states and multiplayer replication details.
 
@@ -45,15 +45,15 @@ The player component captures microphone audio through an attached `UConvaiAudio
 
 ### Device selection
 
-| Function | Returns | Category | Description |
-|---|---|---|---|
-| `GetDefaultCaptureDeviceInfo` | `bool`, `OutInfo (FCaptureDeviceInfoBP)` | `Convai\|Microphone` | Populates `OutInfo` with the system default capture device details. Returns `false` when no device is available. |
-| `GetCaptureDeviceInfo` | `bool`, `OutInfo (FCaptureDeviceInfoBP)` | `Convai\|Microphone` | Returns info for the capture device at the given `DeviceIndex`. |
-| `GetAvailableCaptureDeviceDetails` | `TArray<FCaptureDeviceInfoBP>` | `Convai\|Microphone` | Returns details for all available capture devices. |
-| `GetAvailableCaptureDeviceNames` | `TArray<FString>` | `Convai\|Microphone` | Returns the display names of all available capture devices. |
-| `GetActiveCaptureDevice` | `OutInfo (FCaptureDeviceInfoBP)` | `Convai\|Microphone` | Populates `OutInfo` with the device currently in use. |
-| `SetCaptureDeviceByIndex` | `bool` | `Convai\|Microphone` | Switches to the device at the given index. Returns `false` on failure. |
-| `SetCaptureDeviceByName` | `bool` | `Convai\|Microphone` | Switches to the first device whose name matches `DeviceName`. Returns `false` when no match is found. |
+| Function | Inputs | Returns / outputs | Category | Description |
+|---|---|---|---|---|
+| `GetDefaultCaptureDeviceInfo` | — | `bool` return, `OutInfo (FCaptureDeviceInfoBP)` out | `Convai\|Microphone` | **Current source:** validates `AudioCaptureComponent`, then always returns `false` without populating `OutInfo`. Do not rely on `OutInfo` from this node. Use `GetAvailableCaptureDeviceDetails` or `GetActiveCaptureDevice` instead. See [Microphone and audio capture](microphone-and-audio-capture.md). |
+| `GetCaptureDeviceInfo` | `DeviceIndex (int)` | `bool` return, `OutInfo (FCaptureDeviceInfoBP)` out | `Convai\|Microphone` | Returns info for the capture device at the given `DeviceIndex`. |
+| `GetAvailableCaptureDeviceDetails` | — | `TArray<FCaptureDeviceInfoBP>` return | `Convai\|Microphone` | Returns details for all available capture devices. |
+| `GetAvailableCaptureDeviceNames` | — | `TArray<FString>` return | `Convai\|Microphone` | Returns the display names of all available capture devices. |
+| `GetActiveCaptureDevice` | — | `OutInfo (FCaptureDeviceInfoBP)` out | `Convai\|Microphone` | Populates `OutInfo` with the currently selected capture device. |
+| `SetCaptureDeviceByIndex` | `DeviceIndex (int)` | `bool` return | `Convai\|Microphone` | Switches to the device at the given index. Returns `false` on failure. |
+| `SetCaptureDeviceByName` | `DeviceName (FString)` | `bool` return | `Convai\|Microphone` | Switches to the last device in the enumerated list whose name matches `DeviceName`. Returns `false` when no match is found. |
 
 `FCaptureDeviceInfoBP` fields:
 
@@ -70,10 +70,10 @@ The player component captures microphone audio through an attached `UConvaiAudio
 
 ### Volume
 
-| Function | Inputs | Category | Description |
-|---|---|---|---|
-| `SetMicrophoneVolumeMultiplier` | `InVolumeMultiplier (float)`, `Success (bool)` out | `Convai\|Microphone` | Adjusts the microphone input gain. `Success` is `false` when no capture device is active. |
-| `GetMicrophoneVolumeMultiplier` | — | `Convai\|Microphone` | Returns `OutVolumeMultiplier (float)` and `Success (bool)`. |
+| Function | Inputs | Outputs | Category | Description |
+|---|---|---|---|---|
+| `SetMicrophoneVolumeMultiplier` | `InVolumeMultiplier (float)` | `Success (bool)` out | `Convai\|Microphone` | Adjusts the microphone input gain. `Success` reflects whether a capture component was available, not whether microphone capture is currently streaming or recording. |
+| `GetMicrophoneVolumeMultiplier` | — | `OutVolumeMultiplier (float)` out, `Success (bool)` out | `Convai\|Microphone` | Reads the current microphone volume multiplier. `Success` reflects capture-component availability. |
 
 ## Audio streaming and recording
 
@@ -101,7 +101,7 @@ Use recording to capture a complete utterance and obtain a `USoundWave`.
 
 | Property | Type | Default | Category | Description |
 |---|---|---|---|---|
-| `bMute` | `bool` | `false` | `Convai\|AudioProcessing` | When `true`, the player's microphone audio is silenced before it reaches the session. |
+| `bMute` | `bool` | `false` | `Convai\|AudioProcessing` | When `true`, blocks the direct non-audio-processing streaming path. With an active `IConvaiAudioProcessingInterface`, processed audio can still be forwarded by the current implementation. |
 
 | Function | Inputs | Returns | Category | Description |
 |---|---|---|---|---|
@@ -134,7 +134,7 @@ These settings control the silhouette overlay drawn over the gazed-at object.
 |---|---|---|---|---|
 | `GazeHighlightActorClass` | `TSubclassOf<AConvaiGazeHighlightActor>` | Plugin default | `Convai\|Gaze Attention\|Highlight` | The actor class spawned to show the highlight. Subclass `AConvaiGazeHighlightActor` for a custom visual. |
 | `GazeHighlightColor` | `FLinearColor` | `(1.0, 0.9, 0.2, 1.0)` | `Convai\|Gaze Attention\|Highlight` | Tint applied to the silhouette or wireframe. |
-| `GazeOverlayMaterial` | `TSoftObjectPtr<UMaterialInterface>` | Plugin default | `Convai\|Gaze Attention\|Highlight` | Overlay material applied via `UMeshComponent::SetOverlayMaterial`. Leave unset to use the plugin's built-in Fresnel-rim material (`/ConvAI/Highlights/M_ConvaiGazeOverlay`). The material must expose an `EmissiveColor` vector parameter. |
+| `GazeOverlayMaterial` | `TSoftObjectPtr<UMaterialInterface>` | Unset | `Convai\|Gaze Attention\|Highlight` | Overlay material applied via `UMeshComponent::SetOverlayMaterial`. Leave unset to use the plugin's built-in Fresnel-rim material (`/ConvAI/Highlights/M_ConvaiGazeOverlay`). The material must expose an `EmissiveColor` vector parameter. |
 | `GazeHighlightEmissiveIntensity` | `float` | `2.5` | `Convai\|Gaze Attention\|Highlight` (Advanced) | Multiplier on `GazeHighlightColor` before it is passed to the `EmissiveColor` parameter. |
 
 ### Cursor settings
@@ -165,7 +165,7 @@ Bind these in the player Blueprint using the **Assign** node on the `Convai Play
 
 All four gaze delegates carry the same signature: `PlayerComponent (UConvaiPlayerComponent*)` and `ObjectComponent (UConvaiObjectComponent*)`.
 
-Gaze events only fire when `bEnableGazeAttention` is `true`.
+Most gaze events fire while `bEnableGazeAttention` is `true`; `OnAttentionLost` can also fire during teardown when gaze attention is disabled.
 
 | Event | Category | Fires when |
 |---|---|---|
@@ -174,47 +174,7 @@ Gaze events only fire when `bEnableGazeAttention` is `true`.
 | `OnAttentionGained` | `Convai\|Gaze Attention\|Events` | A gazed-at object is promoted to "in attention" after the sustained-gaze period (`GazeAttentionDelay`). |
 | `OnAttentionLost` | `Convai\|Gaze Attention\|Events` | The attention slot is released: the player looked away for longer than `GazeAttentionLossDelay`, another object took the slot, or the attention target was destroyed. |
 
-See [Event system](../core-concepts/event-system.md) for binding patterns and full parameter details.
-
-## Blueprint usage patterns
-
-### Push-to-talk recording
-
-On an **Input Action Pressed** event for your push-to-talk key, call `StartRecording` on the player component. On the corresponding **Input Action Released** event, call `FinishRecording` — it returns a `USoundWave`. To send the captured utterance as a text message to a chatbot, pass the `USoundWave` through a speech-to-text node, then feed the transcription string to `SendText`. Alternatively, unmute streaming audio (`UnmuteStreamingAudio`) on press and mute it on release (`MuteStreamingAudio`) to stream live microphone audio to the active session instead.
-
-### Populating a microphone device picker
-
-Call `GetAvailableCaptureDeviceNames` on `BeginPlay` and wire the returned `TArray<FString>` into a **Create Widget** flow that feeds a **ComboBox (String)**. Bind the **On Selection Changed** event of the combo box to a custom event that calls `SetCaptureDeviceByName` with the selected string. To pre-select the active device, call `GetActiveCaptureDevice` and match `DeviceName` against the list.
-
-### Enabling gaze attention and reacting to object focus
-
-Set `bEnableGazeAttention = true` on the player component. Configure `GazeAttentionDelay` (default `1.0` s) for how long the player must look before attention is promoted, and `GazeAttentionLossDelay` (default `5.0` s) for how long they can look away before it is released. Bind the **On Attention Gained** event on the player component — it fires with `PlayerComponent` and `ObjectComponent` pins. From `ObjectComponent`, get the object's name or tag to determine which object gained focus and drive UI highlights, dialogue triggers, or state changes.
-
-## Troubleshooting
-
-### Player not connecting
-
-**Cause:** `StartSession` was never called, or `bAutoInitializeSession` was set to `false` without a manual `StartSession` call in `BeginPlay`.
-
-**Fix:** Confirm `bAutoInitializeSession` is `true`, or add a `StartSession` call in `BeginPlay`. Check the Output Log for `Convai:` errors — a missing API key in **Project Settings → Plugins → Convai** also prevents connection.
-
-**Verify:** Call `IsPlayerConnected` after a short delay — it should return `true` once the WebRTC channel is open.
-
-### Microphone not capturing audio
-
-**Cause:** The device index passed to `SetCaptureDeviceByIndex` is out of range, or on Android the microphone permission has not been granted.
-
-**Fix:** Call `GetAvailableCaptureDeviceDetails` and inspect the returned array to confirm the intended device index is valid. On Android, call `AndroidRequestMicrophonePermission` before starting the session and verify the permission is granted before capturing.
-
-**Verify:** Call `GetIsStreaming` after `UnmuteStreamingAudio` — it should return `true`. If it returns `false`, no capture device is active.
-
-### Gaze highlight does not appear
-
-**Cause:** Either `bEnableGazeAttention` is `false` (the master switch is off) or `GazeHighlightActorClass` is unset, so no highlight actor is spawned when gaze hits an object.
-
-**Fix:** Confirm `bEnableGazeAttention` is `true` on the player component. If `GazeHighlightActorClass` is empty, the plugin uses its built-in default — verify the plugin content is present under `/ConvAI/Highlights/`. For a custom visual, set `GazeHighlightActorClass` to a subclass of `AConvaiGazeHighlightActor`.
-
-**Verify:** Enable `bShowGazeCursor` and confirm the cursor appears at screen center — if the cursor shows but no highlight, the issue is in `GazeHighlightActorClass`. If neither appears, `bEnableGazeAttention` is likely `false`.
+See [Event system](../core-concepts/event-system.md) for binding patterns and full parameter details. For microphone setup and gaze task flows, see [Configure the microphone](../getting-started/configure-microphone.md) and [Gaze attention reference](../features/gaze-attention/gaze-attention-reference.md).
 
 ## Related reference
 

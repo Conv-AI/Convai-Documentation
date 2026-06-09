@@ -1,7 +1,7 @@
 ---
 title: Microphone and audio capture
 description: Reference for microphone device enumeration, selection, and volume on the Convai Player Component, the audio capture component, and Android permissions.
-last_reviewed: "2026-06-05"
+last_reviewed: "4.0.0-beta.21"
 ---
 
 `UConvaiPlayerComponent` exposes all Blueprint-callable microphone functions under the `Convai|Microphone` category. Internally it drives a `UConvaiAudioCaptureComponent` instance that wraps the Unreal `AudioCapture` engine plugin. On Android, the `AndroidPermission` plugin handles the runtime microphone permission.
@@ -27,20 +27,20 @@ These `BlueprintCallable` functions are all on `UConvaiPlayerComponent` (Bluepri
 
 ### Device enumeration
 
-| Function | Returns | Description |
-|---|---|---|
-| `GetAvailableCaptureDeviceNames` | `TArray<FString>` | Names of all available input devices. Use these strings as display labels and as the `DeviceName` argument to `SetCaptureDeviceByName`. |
-| `GetAvailableCaptureDeviceDetails` | `TArray<FCaptureDeviceInfoBP>` | Full `FCaptureDeviceInfoBP` structs for every available device. Includes index, long ID, channel count, sample rate, and AEC flag. |
-| `GetDefaultCaptureDeviceInfo` | `bool`, `OutInfo (FCaptureDeviceInfoBP)` | Populates `OutInfo` with the system default device. Returns `false` when no capture device is available. |
-| `GetCaptureDeviceInfo` | `bool`, `OutInfo (FCaptureDeviceInfoBP)` | Populates `OutInfo` for the device at `DeviceIndex`. Returns `false` when the index is out of range. |
-| `GetActiveCaptureDevice` | `OutInfo (FCaptureDeviceInfoBP)` | Populates `OutInfo` with the device currently open for capture. |
+| Function | Parameters | Returns | Description |
+|---|---|---|---|
+| `GetAvailableCaptureDeviceNames` | — | `TArray<FString>` | Names of all available input devices. Use these strings as display labels and as the `DeviceName` argument to `SetCaptureDeviceByName`. |
+| `GetAvailableCaptureDeviceDetails` | — | `TArray<FCaptureDeviceInfoBP>` | Full `FCaptureDeviceInfoBP` structs for every available device. Includes index, long ID, channel count, sample rate, and AEC flag. |
+| `GetDefaultCaptureDeviceInfo` | `OutInfo (FCaptureDeviceInfoBP)` out | `bool` | **Current source:** validates `AudioCaptureComponent`, then always returns `false` without populating `OutInfo`. Do not rely on `OutInfo` from this node. Use `GetAvailableCaptureDeviceDetails` or `GetActiveCaptureDevice` instead. |
+| `GetCaptureDeviceInfo` | `OutInfo (FCaptureDeviceInfoBP)` out, `DeviceIndex (int)` | `bool` | Populates `OutInfo` for the device at `DeviceIndex`. Returns `false` when the index is out of range. |
+| `GetActiveCaptureDevice` | `OutInfo (FCaptureDeviceInfoBP)` out | — | Populates `OutInfo` with the currently selected capture device. |
 
 ### Device selection
 
-| Function | Returns | Description |
-|---|---|---|
-| `SetCaptureDeviceByIndex` | `bool` | Opens the capture device at `DeviceIndex`. Returns `false` when the index is out of range or the device cannot be opened. |
-| `SetCaptureDeviceByName` | `bool` | Opens the first device whose `DeviceName` matches the `DeviceName` argument. Returns `false` when no match is found. |
+| Function | Parameters | Returns | Description |
+|---|---|---|---|
+| `SetCaptureDeviceByIndex` | `DeviceIndex (int)` | `bool` | Opens the capture device at `DeviceIndex`. Returns `false` when the index is out of range or the device cannot be opened. |
+| `SetCaptureDeviceByName` | `DeviceName (FString)` | `bool` | Opens the last device in the enumerated list whose `DeviceName` matches the input. Returns `false` when no match is found. |
 
 Both selection functions can be called before or during gameplay. After a successful call, `GetActiveCaptureDevice` reflects the new device.
 
@@ -48,8 +48,8 @@ Both selection functions can be called before or during gameplay. After a succes
 
 | Function | Parameters | Returns | Description |
 |---|---|---|---|
-| `SetMicrophoneVolumeMultiplier` | `InVolumeMultiplier (float)` | `Success (bool)` | Scales the captured audio signal. `Success` is `false` when no capture device is currently active. |
-| `GetMicrophoneVolumeMultiplier` | — | `OutVolumeMultiplier (float)`, `Success (bool)` | Reads the current volume multiplier. `Success` is `false` when no capture device is active. |
+| `SetMicrophoneVolumeMultiplier` | `InVolumeMultiplier (float)` | `Success (bool)` | Scales the captured audio signal. `Success` reflects whether a capture component is available, not whether microphone capture is currently streaming or recording. |
+| `GetMicrophoneVolumeMultiplier` | — | `OutVolumeMultiplier (float)`, `Success (bool)` | Reads the current volume multiplier. `Success` reflects capture-component availability. |
 
 `InVolumeMultiplier` has no enforced range in the API. A value of `1.0` applies no gain change. Values above `1.0` amplify the signal; values below `1.0` attenuate it. A value of `0.0` silences the captured audio while keeping the capture session active.
 
@@ -70,13 +70,15 @@ Both selection functions can be called before or during gameplay. After a succes
 In most Blueprints, use the microphone functions on `UConvaiPlayerComponent` rather than interacting with `UConvaiAudioCaptureComponent` directly. The player component delegates internally and provides the higher-level streaming API documented in the sections above.
 {% endhint %}
 
-The component exposes one Blueprint-configurable property:
+The component declares one Convai-specific Blueprint-configurable property; inherited `USynthComponent` properties also apply.
 
 | Property | Type | Category | Constraints | Description |
 |---|---|---|---|---|
-| `JitterLatencyFrames` | `int32` | `Latency` | `ClampMin = 0`, `ClampMax = 1024` | Additional audio frames of induced latency to absorb jitter between microphone capture hardware and the audio render hardware. Increasing this reduces underrun risk at the cost of higher input latency. |
+| `JitterLatencyFrames` | `int32` | `Latency` | `ClampMin = 0`, `ClampMax = 1024` | Declared latency setting for induced jitter buffering. In current plugin source, this property is not read by the Convai capture implementation, so changing it has no verified runtime effect. |
 
-All device-enumeration and device-switching behavior is driven through `UConvaiPlayerComponent` — the Blueprint functions listed above delegate to the underlying `UConvaiAudioCaptureComponent` internally. The component's own device methods (`GetCaptureDevicesAvailable`, `GetCaptureDeviceInfo`, `GetActiveCaptureDevice`, `SetCaptureDevice`) are C++ internal and are not exposed to Blueprint.
+Most device-enumeration and device-switching behavior is driven through `UConvaiPlayerComponent` — the Blueprint functions listed above delegate to the underlying `UConvaiAudioCaptureComponent` internally, except `GetDefaultCaptureDeviceInfo` on the player component, which does not currently forward to the capture component.
+
+At the C++ layer, `UConvaiAudioCaptureComponent::GetDefaultCaptureDeviceInfo` does populate the system default device. That method is not exposed to Blueprint. The component's other device methods (`GetCaptureDevicesAvailable`, `GetCaptureDeviceInfo`, `GetActiveCaptureDevice`, `SetCaptureDevice`) are also C++ internal.
 
 ## Plugin dependencies
 
@@ -89,55 +91,19 @@ Both dependencies are declared in `ConvAI.uplugin` and are enabled automatically
 
 ### Android microphone permission
 
-On Android, the OS requires a runtime permission grant for audio capture. Without it, `UConvaiAudioCaptureComponent` initializes but captures no audio — the Convai character receives no speech input and no error is surfaced in the log.
+On Android, the OS requires a runtime permission grant for audio capture. Without it, `UConvaiAudioCaptureComponent` initializes but captures no audio — the Convai character receives no speech input. The plugin does not log a permission-denied message, although stream-open failures can still produce capture warnings.
 
 {% hint style="warning" %}
 Request `android.permission.RECORD_AUDIO` before calling `StartSession` or `UnmuteStreamingAudio`. If the permission is denied, audio capture silently produces no data.
 {% endhint %}
 
-Use the **AndroidPermission** Blueprint nodes to request the permission:
+Use the `AndroidPermission` Blueprint nodes to request the permission:
 
-1. Call **Check Android Permission** with the permission string `android.permission.RECORD_AUDIO`.
-2. If the return value is `false`, call **Request Android Permission** for that same string.
-3. Bind to the **On Permission Request Complete** delegate and start the conversation only after the permission is confirmed as granted.
+1. Call `Check Android Permission` with the permission string `android.permission.RECORD_AUDIO`.
+2. If the return value is `false`, call `Request Android Permission` for that same string.
+3. Bind to the `On Permission Request Complete` delegate and start the conversation only after the permission is confirmed as granted.
 
 The `AndroidPermission` plugin nodes are in the `Android Permission` Blueprint category. They are no-ops on Win64 — the same Blueprint graph works on both platforms without platform guards.
-
-## Blueprint usage patterns
-
-### Building a device picker in a settings menu
-
-On the widget's `Construct` event, call `GetAvailableCaptureDeviceNames` on the player component reference and wire the returned `TArray<FString>` to the **Set Options** input of a **ComboBox (String)**. To pre-select the active device, call `GetActiveCaptureDevice` and match `DeviceName` against the options list, then call **Set Selected Option** with that string. Bind **On Selection Changed** to a custom event that calls `SetCaptureDeviceByName` with the selected option.
-
-### Connecting a volume slider to microphone gain
-
-Bind the **On Value Changed** event of a **Slider** widget to a custom event. Inside the event, call `SetMicrophoneVolumeMultiplier` on the player component with the slider's current float value. Check the `Success` output — `false` means no capture device is active and the label should reflect this. A slider range of `0.0`–`2.0` covers silence through double gain; `1.0` applies no change.
-
-## Troubleshooting
-
-### Device enumeration returns an empty array on the first frame
-
-**Cause:** The audio capture subsystem enumerates devices asynchronously during engine startup. Calling `GetAvailableCaptureDeviceDetails` or `GetAvailableCaptureDeviceNames` in a constructor, `PreBeginPlay`, or the first tick can return empty before enumeration completes.
-
-**Fix:** Defer the device query to `BeginPlay` or later. A short **Delay** node of `0.1` s is sufficient on most platforms.
-
-**Verify:** Call `GetAvailableCaptureDeviceDetails` from a button press during PIE — if it returns devices when triggered manually but not in `BeginPlay`, the timing issue is confirmed.
-
-### Volume multiplier has no effect
-
-**Cause:** When hardware AEC is active — either because the device reports `bSupportsHardwareAEC = true` or because software AEC is enabled in project settings — the audio pipeline bypasses the software volume stage and manages gain internally.
-
-**Fix:** Check `IsAECEnabled` (from [Convai utility functions](utility-functions.md)) and `GetActiveCaptureDevice.bSupportsHardwareAEC`. If either is `true`, the multiplier path is inactive. Disable AEC in **Project Settings → Plugins → Convai** if software gain control is required.
-
-**Verify:** Call `GetMicrophoneVolumeMultiplier` after setting a value — if `Success` is `true` and the stored value is correct but the captured level is unchanged, AEC gain override is the cause.
-
-### Android build crashes on first microphone access
-
-**Cause:** `android.permission.RECORD_AUDIO` was not granted before audio capture started. On some Android versions, calling capture functions without the permission throws a fatal exception.
-
-**Fix:** Follow the [Android microphone permission](#android-microphone-permission) flow — check, request, and confirm the permission before calling `StartSession` or `UnmuteStreamingAudio`.
-
-**Verify:** Run with `adb logcat` — a `java.lang.SecurityException: Permission Denial` entry for `RECORD_AUDIO` confirms the permission was absent when capture started.
 
 ## Related reference
 

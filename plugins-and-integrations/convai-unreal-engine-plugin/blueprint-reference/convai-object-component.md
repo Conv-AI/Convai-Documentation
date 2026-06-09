@@ -1,26 +1,26 @@
 ---
 title: Convai Object Component
 description: Reference for the object tagging component — every Blueprint-visible property, function, and event exposed by the Convai Object Component.
-last_reviewed: "2026-06-05"
+last_reviewed: "4.0.0-beta.21"
 ---
 
-`UConvaiObjectComponent` (Blueprint menu path **Convai > Convai Object Component**) is added to any Actor — a door, switch, crate, room trigger, vehicle — to make it automatically visible to all Convai chatbots in the level. It serves the same role for world objects that `UConvaiChatbotComponent` serves for AI characters and `UConvaiPlayerComponent` serves for the player.
+`UConvaiObjectComponent` is added to any `Actor` — a door, switch, crate, room trigger, vehicle — to make it automatically visible to all Convai chatbots in the level. It serves the same role for world objects that `UConvaiChatbotComponent` serves for AI characters and `UConvaiPlayerComponent` serves for the player.
 
-Add it to any Actor through the **Add Component** button in the **Details** panel. No manual registration with individual chatbots is required: the plugin's subsystem discovers all registered object components and seeds their identity and state into every chatbot at session start.
+Add Component path: `Convai Object Component`. No manual registration with individual chatbots is required: the plugin's subsystem discovers all registered object components and seeds their identity and state into every chatbot at session start.
 
 ## Identity
 
-The `ObjectEntry` property exposes the object's name, description, and movement targeting data as a flat set of inner properties via `ShowOnlyInnerProperties`. All fields in the table below appear directly in the component's Details panel rather than inside a nested struct.
+The `ObjectEntry` property exposes the object's name, description, and movement targeting data as a flat set of inner properties via `ShowOnlyInnerProperties`. All fields in the table below appear directly in the component's Details panel rather than inside a nested struct. The parent component property is in `Convai|Object`; the inner struct fields keep their `Convai|Action API` metadata.
 
 | Property | Type | Default | Category | Description |
 |---|---|---|---|---|
-| `Name` *(via ObjectEntry)* | `FString` | `""` | `Convai\|Object` | Display name sent to Convai. Must be unique across all objects and characters in the level — duplicates are renamed automatically by the subsystem. |
-| `Description` *(via ObjectEntry)* | `FString` | `""` | `Convai\|Object` | Natural language description of this object for the AI. |
-| `MoveTargetMode` *(via ObjectEntry)* | `EConvaiMoveTarget` | `Actor` | `Convai\|Object` | Whether AI movement actions target the whole actor (`Actor as goal`) or a specific component or socket on it (`Component as goal`). |
-| `AcceptanceRadius` *(via ObjectEntry)* | `float` (cm) | `150.0` | `Convai\|Object` | Distance at which AI Move To considers the move complete. |
-| `ComponentName` *(via ObjectEntry)* | `FString` | `""` | `Convai\|Object` | Case-insensitive substring matched against the actor's components when `MoveTargetMode` is `Component as goal`. Leave empty to use the actor's origin. |
-| `SocketOrBoneName` *(via ObjectEntry)* | `FName` | `None` | `Convai\|Object` | Socket or bone on the resolved component. Active only when `MoveTargetMode` is `Component as goal`. Falls back to component origin when not found. |
-| `bStepOntoBounds` *(via ObjectEntry)* | `bool` | `false` | `Convai\|Object` | When `true`, the goal point projects to the top of the target's bounding box so the AI walks onto a platform or surface rather than stopping at its edge. Works in both move target modes. |
+| `Name` *(via `ObjectEntry`)* | `FString` | `""` | `Convai\|Action API` | Display name sent to Convai. Must be unique across all objects and characters in the level — duplicates are renamed automatically by the subsystem. |
+| `Description` *(via `ObjectEntry`)* | `FString` | `""` | `Convai\|Action API` | Natural language description of this object for the AI. |
+| `MoveTargetMode` *(via `ObjectEntry`)* | `EConvaiMoveTarget` | `Actor` | `Convai\|Action API` | Whether AI movement actions target the whole actor (`Actor as goal`) or a specific component or socket on it (`Component as goal`). |
+| `AcceptanceRadius` *(via `ObjectEntry`)* | `float` (cm) | `150.0` | `Convai\|Action API` | Distance at which `AI Move To` considers the move complete. |
+| `ComponentName` *(via `ObjectEntry`)* | `FString` | `""` | `Convai\|Action API` | Case-insensitive substring matched against the actor's components when `MoveTargetMode` is `Component as goal`. Leave empty to use the actor's origin. |
+| `SocketOrBoneName` *(via `ObjectEntry`)* | `FName` | `None` | `Convai\|Action API` | Socket or bone on the resolved component. Active only when `MoveTargetMode` is `Component as goal`. Falls back to component origin when not found. |
+| `bStepOntoBounds` *(via `ObjectEntry`)* | `bool` | `false` | `Convai\|Action API` | When `true`, the goal point projects to the top of the target's bounding box so the AI walks onto a platform or surface rather than stopping at its edge. Works in both move target modes. |
 
 For a full description of `FConvaiObjectEntry` fields and the `EConvaiMoveTarget` enum, see [Data types and enums](data-types-and-enums.md).
 
@@ -55,10 +55,12 @@ These functions add, remove, and update tracked properties at runtime — useful
 
 | Property | Type | Default | Category | Description |
 |---|---|---|---|---|
-| `bAutoGenerateProximityState` | `bool` | `true` | `Convai\|Object` | When `true`, the plugin automatically generates a per-chatbot `"<ObjectName>.Proximity"` state key that describes where this object is relative to each chatbot in plain language — for example, "close by, in front and to the right" or "far away, behind me, out of reach". The value is sent to each chatbot as a tracked property with `ShouldRespond = Never`. The plugin defers updates while the chatbot or object is moving and reuses the last reachability result until either endpoint moves more than ~100 cm, so idle scenes pay almost no performance cost. |
+| `bAutoGenerateProximityState` | `bool` | `true` | `Convai\|Object` | When `true`, the plugin automatically generates a per-chatbot `"<ObjectName>.ProximityToYou"` state key that describes where this object is relative to each chatbot in plain language. Example values include `"close by, in front and to the right"`, `"far away, behind"`, and `"no walking path, behind"`. |
+
+The proximity value is sent to each chatbot as a tracked property with `ShouldRespond = Never`. The plugin defers updates while the chatbot or object is moving and reuses the last reachability result until either endpoint moves more than `~100 cm`, so idle scenes pay almost no performance cost. A designer-authored `TrackedProperties` entry named `ProximityToYou` overrides the synthesized value for the same state key.
 
 {% hint style="info" %}
-Proximity state uses Unreal's navigation system (partial paths allowed) and evaluates on a shared poll tick (typically 0.25 s per object). A path that ends within ~300 cm of this object's bounding box horizontally and within the chatbot owner's height vertically counts as reachable.
+Proximity state uses Unreal's navigation system (partial paths allowed) and evaluates on a shared poll tick (typically `0.25 s` per object). When `bStepOntoBounds` is `false`, a path endpoint within `max(AcceptanceRadius * 2, 150 cm)` horizontally counts as reachable; with the default `AcceptanceRadius` of `150.0`, that horizontal tolerance is `300 cm`. When `bStepOntoBounds` is `true`, the endpoint must be contained in the object's footprint with a small `1.0 uu` epsilon. Vertical tolerance uses `max(SourceHeight, 150 cm)`.
 {% endhint %}
 
 ## Gaze attention
@@ -84,7 +86,7 @@ These functions are called by `UConvaiPlayerComponent` automatically when its ga
 
 | Property | Type | Default | Category | Description |
 |---|---|---|---|---|
-| `bDebugDrawProximityPaths` | `bool` | `false` | `Convai\|Object\|Debug` | When `true`, draws navigation paths from each subscribed chatbot to this object in the viewport — green when reachable, red when not. Paths are redrawn on every proximity re-evaluation and persist until the next. Each object component owns its own line batch so multiple components with this toggle on do not clobber each other. Has no effect when `bAutoGenerateProximityState` is `false`. Disable in shipping builds. |
+| `bDebugDrawProximityPaths` | `bool` | `false` | `Convai\|Object\|Debug` | When `true`, draws navigation paths from each subscribed chatbot to this object in the viewport — cyan when the chatbot is already there, green when reachable, and red when not reachable. Paths are redrawn on every proximity re-evaluation and persist until the next. Each object component owns its own line batch so multiple components with this toggle on do not clobber each other. Has no effect when `bAutoGenerateProximityState` is `false`. Disable in shipping builds. |
 
 ## Events (Blueprint-assignable delegates)
 
@@ -92,10 +94,10 @@ All four events share the `FConvaiObjectGazeEvent` delegate signature: `(ObjectC
 
 | Event | Display name | Category | Fires when |
 |---|---|---|---|
-| `OnGazedIn` | On Gazed In | `Convai\|Object\|Gaze` | A player's gaze enters this object's bounds (before any attention dwell threshold). |
-| `OnGazedOut` | On Gazed Out | `Convai\|Object\|Gaze` | A player's gaze leaves this object. |
-| `OnAttentionGained` | On Attention Gained | `Convai\|Object\|Gaze` | This object becomes a chatbot's current attention target after the gaze dwell threshold is met. |
-| `OnAttentionLost` | On Attention Lost | `Convai\|Object\|Gaze` | This object is released from the chatbot's attention slot. `PlayerComponent` may be `nullptr` in destroyed-target paths — always null-check before use. |
+| `OnGazedIn` | `On Gazed In` | `Convai\|Object\|Gaze` | A player's gaze enters this object's bounds (before any attention dwell threshold). |
+| `OnGazedOut` | `On Gazed Out` | `Convai\|Object\|Gaze` | A player's gaze leaves this object. |
+| `OnAttentionGained` | `On Attention Gained` | `Convai\|Object\|Gaze` | This object becomes a chatbot's current attention target after the gaze dwell threshold is met. |
+| `OnAttentionLost` | `On Attention Lost` | `Convai\|Object\|Gaze` | This object is released from the chatbot's attention slot. `PlayerComponent` may be `nullptr` because `NotifyGazeAttentionEnd` accepts a nullable player parameter; always null-check before use. |
 
 ## Related reference
 

@@ -1,14 +1,24 @@
 ---
 title: Convai utility functions
-description: Reference for UConvaiUtils and UCommandLineUtils Blueprint libraries — look-at helpers, component lookups, blendshapes, audio, settings, and diagnostic nodes.
-last_reviewed: "2026-06-05"
+description: Find cross-cutting Blueprint helper nodes for look-at queries, component lookup, audio utilities, settings, diagnostics, and command-line flags.
+last_reviewed: "4.0.0-beta.21"
 ---
 
 `UConvaiUtils` is a `UBlueprintFunctionLibrary` that exposes miscellaneous helper nodes to Blueprint. It does not need to be attached to an `Actor`; all nodes are callable from any Blueprint graph. Nodes are grouped in the **Convai** category tree in the Blueprint node search palette.
 
+This page documents cross-cutting utility libraries only. Feature-specific Blueprint libraries are documented in their feature reference pages:
+
+| Library / surface | Documented in |
+|---|---|
+| `UConvaiActions` (action parameter accessors) | [Actions Blueprint reference](../features/character-actions/actions-blueprint-reference.md) |
+| Dynamic context transport helpers | [Dynamic context Blueprint reference](../features/dynamic-context/dynamic-context-blueprint-reference.md) |
+| Emotion helpers beyond `UConvaiChatbotComponent` | [Emotion Blueprint reference](../features/emotion/emotion-blueprint-reference.md) |
+| LTM speaker and identity helpers | [LTM Blueprint reference](../features/long-term-memory/ltm-blueprint-reference.md) |
+| Gaze highlight widgets and actors | [Gaze attention reference](../features/gaze-attention/gaze-attention-reference.md) |
+
 ## Look-at helpers
 
-These nodes cast a world-space ray from the player controller's camera and find the nearest Convai component within a given radius.
+These nodes evaluate registered Convai components near the player controller's camera and return a candidate inside the configured radius and camera forward-angle threshold.
 
 ### `ConvaiGetLookedAtCharacter`
 
@@ -20,7 +30,7 @@ Returns the `UConvaiChatbotComponent` on the character the player is currently l
 |---|---|---|---|
 | `WorldContextObject` | Input | `UObject*` | World context (auto-wired in Blueprint). |
 | `PlayerController` | Input | `APlayerController*` | The controller whose camera orientation is used for the look direction. |
-| `Radius` | Input | `float` | Search radius in world units around the look direction ray. |
+| `Radius` | Input | `float` | Search radius in world units from the camera location. |
 | `PlaneView` | Input | `bool` | When `true`, only the horizontal plane angle is used (ignores vertical pitch). |
 | `IncludedCharacters` | Input | `TArray<UObject*>` | Optional allowlist — only these objects are considered. Pass an empty array to consider all. |
 | `ExcludedCharacters` | Input | `TArray<UObject*>` | Optional denylist — these objects are always skipped. |
@@ -87,7 +97,7 @@ Returns all `UConvaiPlayerComponent` instances currently registered in the world
 | Pin | Direction | Type | Description |
 |---|---|---|---|
 | `WorldContextObject` | Input | `UObject*` | World context (auto-wired in Blueprint). |
-| `bOnlyConnected` | Input | `bool` | When `true`, only returns components that have a started or active session. |
+| `bOnlyConnected` | Input | `bool` | When `true`, only returns players whose session state is `Connected`. |
 | `ConvaiPlayerComponents` | Output | `TArray<UConvaiPlayerComponent*>` | All matching player components. |
 | `OutOwners` | Output | `TArray<AActor*>` | Owning actors in the same order as `ConvaiPlayerComponents`. |
 
@@ -100,7 +110,7 @@ Returns the first `UConvaiPlayerComponent` found in the world.
 | Pin | Direction | Type | Description |
 |---|---|---|---|
 | `WorldContextObject` | Input | `UObject*` | World context (auto-wired in Blueprint). |
-| `bOnlyConnected` | Input | `bool` | When `true`, only considers components with an active session. |
+| `bOnlyConnected` | Input | `bool` | When `true`, only considers players whose session state is `Connected`. |
 | `Return value` | Output | `UConvaiPlayerComponent*` | The first matching component, or `nullptr` when none exist. |
 | `OutOwner` | Output | `AActor*` | The owning actor of the returned component. |
 
@@ -142,7 +152,7 @@ These nodes read and write runtime settings on the active `UConvaiSettings` inst
 | `GetTestCharacterID` | `Convai\|Settings` | `BlueprintPure` | Returns the test character ID configured in settings. |
 | `SetCustomParam` | `Convai\|Settings` | `BlueprintCallable` | Writes a key-value pair into the `CustomPrams` settings map. The value is resolved by `GetCustomParam` using the chain: built-in defaults → `CustomPrams` → command-line overrides. Inputs: `Key (FString)`, `Value (FString)`. |
 | `GetCustomParam` | `Convai\|Settings` | `BlueprintPure` | Returns the resolved value for `Key` using the full resolve chain. Returns `DefaultValue` when the chain yields an empty string. Inputs: `Key (FString)`, `DefaultValue (FString)`. Return: `FString`. |
-| `GetClientVersion` | `Convai\|Settings` | `BlueprintPure` | Returns the `client_version` resolved via the `CustomPrams` / command-line resolve chain. Return: `FString`. |
+| `GetClientVersion` | `Convai\|Settings` | `BlueprintPure` | Returns the `ClientVersion` value resolved via the `CustomPrams` / command-line resolve chain. Return: `FString`. |
 | `GetVADSettings` | `Convai\|Settings` | `BlueprintPure` | Returns a snapshot of the current `FConvaiVADSettings` from project settings. |
 | `SetVADSettings` | `Convai\|Settings` | `BlueprintCallable` | Overwrites the VAD settings on the active `UConvaiSettings` instance. Persisted to `.ini` on save. Input: `InSettings (FConvaiVADSettings)`. |
 | `IsAlwaysAllowVisionEnabled` | `Convai\|Settings` | `BlueprintPure` | Returns `true` when the Always Allow Vision setting is enabled. |
@@ -155,7 +165,7 @@ These nodes read and write runtime settings on the active `UConvaiSettings` inst
 
 Category: `Convai|Utilities`
 
-Converts stereo WAV bytes to mono WAV bytes in-place.
+Converts stereo WAV bytes and writes the converted mono WAV bytes to the output pin.
 
 | Pin | Direction | Type | Description |
 |---|---|---|---|
@@ -215,18 +225,7 @@ Maps and transforms blendshapes from one naming convention or rig to another. Su
 | `GlobalOffset` | Input | `float` | Added to all blendshapes except those with `IgnoreGlobalModifiers` set. |
 | `Return value` | Output | `TMap<FName, float>` | Transformed blendshape map ready for the target rig. |
 
-`FConvaiBlendshapeParameters` fields:
-
-| Field | Type | Default | Description |
-|---|---|---|---|
-| `TargetNames` | `TArray<FName>` | — | Output key names to write the transformed value to. |
-| `Multiplyer` | `float` | `1.0` | Per-blendshape multiplier applied before global modifiers. |
-| `Offset` | `float` | `0.0` | Per-blendshape offset applied after multiplication. |
-| `UseOverrideValue` | `bool` | `false` | When `true`, writes `OverrideValue` directly, ignoring input and modifiers. |
-| `IgnoreGlobalModifiers` | `bool` | `false` | When `true`, `GlobalMultiplier` and `GlobalOffset` are not applied to this entry. |
-| `OverrideValue` | `float` | `0.0` | Fixed value written when `UseOverrideValue` is `true`. |
-| `ClampMinValue` | `float` | `0.0` | Output is clamped to this minimum. |
-| `ClampMaxValue` | `float` | `1.0` | Output is clamped to this maximum. |
+`FConvaiBlendshapeParameters` field descriptions are in [Data types and enums](data-types-and-enums.md).
 
 ### `SplitBlendshapeMapByKeys`
 
@@ -253,20 +252,6 @@ Merges two blendshape maps. When the same key exists in both maps, the value fro
 | `Return value` | Output | `TMap<FName, float>` | Combined map. |
 
 
-## Lip sync helpers
-
-### `FixCC5LipsyncPostProcessBlendshapes`
-
-Category: `Convai|LipSync`
-
-Fixes a conflict between post-process facial animation and lip sync on Character Creator 5 characters. The function locates the `ExpBoneData` array property (of type `RLExpStruct`) on the skeletal mesh's post-process anim instance and removes the word `"jaw"` from each `ExpName` and `BoneName` field.
-
-| Pin | Direction | Type | Description |
-|---|---|---|---|
-| `AnimInstance` | Input | `UAnimInstance*` | The animation instance whose owning skeletal mesh component is inspected. |
-| `Return value` | Output | `bool` | `true` when the fix was applied successfully. |
-
-
 ## Skeletal mesh helpers
 
 ### `GetBodyAndFaceSkeletalMeshComponents`
@@ -280,7 +265,7 @@ Detection rules:
 
 - 0 skeletal mesh components: both outputs are `nullptr`.
 - Exactly 1: that mesh becomes the body; face is `nullptr`.
-- 2 or more: each candidate is scored against body tokens (`"pelvis"`, `"hand"`, `"neck"`, …) and face tokens (`"eye"`, `"jaw"`, `"brow"`, …). The highest-scoring mesh wins each slot. If no mesh scores for body, the first component is used. If no mesh scores for face, `FaceComponent` is `nullptr`.
+- 2 or more: each candidate is scored against body tokens (`"pelvis"`, `"hand"`, `"neck"`, …) and face tokens (`"eye"`, `"jaw"`, `"brow"`, …). The highest-scoring mesh wins each slot. If no mesh scores for body, the shallowest skeletal mesh wins; `SkelMeshes[0]` is used only if no candidate is ranked. If no mesh scores for face, `FaceComponent` is `nullptr`.
 
 | Pin | Direction | Type | Description |
 |---|---|---|---|
@@ -320,16 +305,7 @@ Detection rules:
 | `GetContextDebounceWindowDefault` | `Convai\|Utilities` | `BlueprintPure` | `float` | Returns the default debounce window duration in seconds for context updates. |
 | `GetContextMaxDebounceWindowDefault` | `Convai\|Utilities` | `BlueprintPure` | `float` | Returns the maximum debounce window duration in seconds for context updates. |
 
-`EC_LipSyncMode` values:
-
-| Enum value | Display name |
-|---|---|
-| `Off` | Off |
-| `Auto` | Auto |
-| `VisemeBased` | Viseme Based |
-| `BS_MHA` | MetaHuman Blendshapes |
-| `BS_ARKit` | ARKit Blendshapes |
-| `BS_CC4_Extended` | CC4 Extended Blendshapes |
+`EC_LipSyncMode` values are documented in [Data types and enums](data-types-and-enums.md).
 
 
 ## Command-line utilities
@@ -346,40 +322,14 @@ Detection rules:
 
 ## Connection management
 
-`UConvaiConnectionLibrary` is a Blueprint function library that exposes connection pre-warming. Its node appears in the **Convai|Connection** category and does not need to be attached to an Actor.
-
-### `PrepareCharacterConnection`
-
-Category: `Convai|Connection` — `BlueprintCallable`
-
-Starts a warm Convai session for `CharacterID` with no owner. A later `StartSession` call for the same character reuses this pre-warmed connection without a fresh handshake, reducing first-connect latency.
+`UConvaiConnectionLibrary` exposes the `PrepareCharacterConnection` Blueprint node in the `Convai|Connection` category. It pre-warms a character connection for later reuse by `StartSession`; see [Session lifecycle](../core-concepts/session-lifecycle.md) for the connection workflow, and [Data types and enums](data-types-and-enums.md) for `EC_PrepResult` values.
 
 | Pin | Direction | Type | Description |
 |---|---|---|---|
 | `WorldContextObject` | Input | `UObject*` | World context (auto-wired in Blueprint). |
-| `CharacterID` | Input | `FString` | The character ID to pre-warm. |
-| `PrepTTLOverrideSeconds` | Input | `float` | Duration of the warm window in seconds. Pass `0` or a negative value to use the project default (`GetPrepConnectionTTL`). Positive values are clamped to [1, 600]. |
-| `Return value` | Output | `EC_PrepResult` | Outcome of the prep request — `Accepted`, `AlreadyWarm`, `Rejected`, `InvalidInput`, `Disabled`, or `InternalError`. See [Data types and enums](data-types-and-enums.md) for value descriptions. |
-
-## Blueprint usage patterns
-
-### Pre-warming a character connection on level load
-
-In your level Blueprint's **BeginPlay** event, call `PrepareCharacterConnection` with the target character's ID. Leave `PrepTTLOverrideSeconds` at `0` to use the project default. Connect a **Switch on EC_PrepResult** node to log or discard the result. The warm session persists until its TTL expires; when the player triggers conversation and the chatbot calls `StartSession`, the handshake completes in one round-trip instead of two.
-
-### Remapping blendshapes with `MapBlendshapes`
-
-Call `MapBlendshapes` with the raw blendshape map from `ConvaiGetFaceBlendshapes` on the chatbot component reference and a `BlendshapeMap` data-table asset that defines per-blendshape multipliers, offsets, and target rig names. Feed the return value into **Apply Morph Target** or your mesh driver. Adjust `GlobalMultiplier` to scale all blendshapes at once during runtime tuning without rebuilding the mapping asset.
-
-## Troubleshooting
-
-### `GetBodyAndFaceSkeletalMeshComponents` returns `nullptr` for body or face
-
-**Cause:** The scoring heuristic matches against standard bone-name tokens (`"pelvis"`, `"hand"`, `"neck"`, `"eye"`, `"jaw"`, `"brow"`, …). Custom skeletons with non-standard names — for example `"Root_Spine"` instead of `"pelvis"` — score zero and the fallback rule applies: body defaults to the first skeletal mesh component, face returns `nullptr`.
-
-**Fix:** After calling `GetBodyAndFaceSkeletalMeshComponents`, null-check both outputs. When face is missing, retrieve skeletal mesh components directly with **Get Components by Class** and assign them manually.
-
-**Verify:** In PIE, call `GetBodyAndFaceSkeletalMeshComponents` and print both output display names — the printed names confirm which mesh won each scoring slot.
+| `CharacterID` | Input | `FString` | Character ID to pre-warm. |
+| `PrepTTLOverrideSeconds` | Input | `float` | Optional warm-window duration. Default `0.0` uses the project setting; positive values are clamped to `1`–`600` seconds. |
+| `Return value` | Output | `EC_PrepResult` | Result of the pre-warm request. |
 
 ## Related reference
 
