@@ -1,166 +1,114 @@
 ---
 title: Speaker ID management
-description: List, create, and delete Speaker ID records for players using the Convai Blueprint nodes so you can manage which player identities are registered with Convai.
-last_reviewed: 2026-06-06
+description: Create, list, and delete Speaker ID records from Unreal Blueprints so each player keeps a stable memory identity across sessions.
+last_reviewed: "4.0.0-beta.21"
 ---
 
-Speaker IDs are server-side records that pair a player's name and device identifier with a stable `SpeakerID` string. You assign that `SpeakerID` as `EndUserID` on the Convai components so each player's memory is scoped correctly. This page covers creating, listing, and deleting Speaker ID records using the Blueprint nodes in the `Convai|LTM` category.
+Speaker IDs are Convai identity records used by the Convai Unreal Engine plugin's long-term memory workflow. Create one record per player, save its `SpeakerID`, and assign that value as `EndUserID` before starting a session.
 
----
+## FConvaiSpeakerInfo
 
-## Prerequisites
-
-- The Convai Unreal Engine plugin version <code class="expression">space.vars.unreal_plugin_version</code> is installed and the API key is configured.
-
----
-
-## The FConvaiSpeakerInfo struct
-
-All Speaker ID operations return or accept values from the `FConvaiSpeakerInfo` struct:
+`FConvaiSpeakerInfo` is the struct returned by **Convai Create Speaker ID** and **Convai List Speaker IDs**.
 
 | Field | Type | Description |
-|-------|------|-------------|
-| `SpeakerID` | `FString` | Server-assigned unique identifier. Use this as `EndUserID` on both Convai components. |
-| `Name` | `FString` | Human-readable display name provided when the record was created. |
-| `DeviceID` | `FString` | Device identifier provided at creation time (may be empty if none was supplied). |
-
----
+| --- | --- | --- |
+| `SpeakerID` | `FString` | Convai-assigned identifier. Save this and reuse it as `EndUserID`. |
+| `Name` | `FString` | Speaker name returned by Convai. |
+| `DeviceID` | `FString` | Device ID returned by Convai. Empty when no device ID was provided or returned. |
 
 ## Create a Speaker ID
 
-Call **Convai Create Speaker ID** once per player to register a new record. Supply a display name and, optionally, a device-unique string. The **On Success** delegate returns the assigned `FConvaiSpeakerInfo`.
+Use **Convai Create Speaker ID** the first time a player profile is created.
 
-{% tabs %}
-{% tab title="Blueprint" %}
-1. Add a **Convai Create Speaker ID** node.
-2. Set **Speaker Name** to the player's display name.
-3. Set **Device Id** to the device's unique identifier (optional but recommended for cross-device disambiguation).
-4. Bind **On Success** to break the returned **Speaker ID** struct and persist the **Speaker ID** field to your `SaveGame`.
-5. Bind **On Failure** to log the error and fall back to the device-based identity.
-{% endtab %}
-{% tab title="C++" %}
-```cpp
-#include "RestAPI/ConvaiLTMProxy.h"
+{% stepper %}
+{% step %}
+### Add the node
 
-void AMyGameMode::RegisterPlayer(const FString& PlayerName, const FString& DeviceId)
-{
-    UConvaiCreateSpeakerID* Create = UConvaiCreateSpeakerID::ConvaiCreateSpeakerIDProxy(
-        PlayerName,
-        DeviceId
-    );
-    Create->OnSuccess.AddDynamic(this, &AMyGameMode::OnSpeakerCreated);
-    Create->OnFailure.AddDynamic(this, &AMyGameMode::OnSpeakerCreateFailed);
-    Create->Activate();
-}
+In a Blueprint that runs during profile setup, add **Convai Create Speaker ID** from the `Convai|LTM` category.
+{% endstep %}
 
-void AMyGameMode::OnSpeakerCreated(const FConvaiSpeakerInfo& SpeakerInfo)
-{
-    // Persist SpeakerInfo.SpeakerID for use as EndUserID in future sessions.
-    MySaveGame->ConvaiSpeakerID = SpeakerInfo.SpeakerID;
-    UGameplayStatics::SaveGameToSlot(MySaveGame, TEXT("PlayerSave"), 0);
-}
+{% step %}
+### Set inputs
 
-void AMyGameMode::OnSpeakerCreateFailed(const FConvaiSpeakerInfo& /* unused */)
-{
-    UE_LOG(LogTemp, Warning, TEXT("Speaker ID creation failed. Falling back to device-based identity."));
-}
-```
-{% endtab %}
-{% endtabs %}
+Set **Speaker Name** to a non-empty player display name. Set **Device Id** to a stable device or account identifier if available.
+
+If **Speaker Name** is empty, the plugin logs `Speaker name is empty` and fires **On Failure** before sending the request.
+{% endstep %}
+
+{% step %}
+### Persist the result
+
+On **On Success**, break the returned `FConvaiSpeakerInfo` and save `SpeakerID`.
+
+On later launches, load the saved value and skip record creation.
+{% endstep %}
+{% endstepper %}
 
 {% hint style="warning" %}
-Calling **Convai Create Speaker ID** multiple times for the same player creates duplicate records. Check your save data for an existing `SpeakerID` before calling this node. If a valid stored ID is found, use it directly without creating a new one.
+Do not create a new Speaker ID every time the game starts. Repeated creation produces multiple records for the same player, which makes identity debugging harder.
 {% endhint %}
-
----
 
 ## List Speaker IDs
 
-Call **Convai List Speaker IDs** to retrieve all Speaker ID records registered under your API key. This is useful for auditing which players have records, debugging identity issues, or building an admin tool.
+Use **Convai List Speaker IDs** to inspect the records available to the configured API key.
 
-{% tabs %}
-{% tab title="Blueprint" %}
-1. Add a **Convai List Speaker IDs** node (no inputs required).
-2. Bind **On Success** to receive a **Speaker IDs** array of `FConvaiSpeakerInfo`.
-3. Use a **For Each Loop** on the array to iterate over records and break each struct to read **Speaker ID**, **Name**, and **Device ID**.
-{% endtab %}
-{% tab title="C++" %}
-```cpp
-UConvaiListSpeakerID* List = UConvaiListSpeakerID::ConvaiListSpeakerIDProxy();
-List->OnSuccess.AddDynamic(this, &AMyActor::OnSpeakersListed);
-List->Activate();
+1. Add **Convai List Speaker IDs** from the `Convai|LTM` category.
+2. Bind **On Success**.
+3. Iterate over the returned `FConvaiSpeakerInfo` array.
+4. Print or display `SpeakerID`, `Name`, and `DeviceID`.
 
-void AMyActor::OnSpeakersListed(const TArray<FConvaiSpeakerInfo>& SpeakerIDs)
-{
-    for (const FConvaiSpeakerInfo& Info : SpeakerIDs)
-    {
-        UE_LOG(LogTemp, Log, TEXT("Speaker: %s | Name: %s | Device: %s"),
-            *Info.SpeakerID, *Info.Name, *Info.DeviceID);
-    }
-}
-```
-{% endtab %}
-{% endtabs %}
-
----
+This is useful for test tools, admin panels, and debugging shared-device identity issues.
 
 ## Delete a Speaker ID
 
-Call **Convai Delete Speaker ID** to permanently remove a speaker record. After deletion, Convai no longer associates any new sessions with that `SpeakerID`. Existing memory stored under the deleted identity is no longer accessible.
+Use **Convai Delete Speaker ID** when a player identity should be removed.
 
-{% tabs %}
-{% tab title="Blueprint" %}
-1. Add a **Convai Delete Speaker ID** node.
-2. Set **Speaker ID** to the `SpeakerID` string of the record to remove.
-3. Bind **On Success** to confirm the deletion and clear the stored `SpeakerID` from your save data.
-{% endtab %}
-{% tab title="C++" %}
-```cpp
-UConvaiDeleteSpeakerID* Delete = UConvaiDeleteSpeakerID::ConvaiDeleteSpeakerIDProxy(
-    TEXT("the-speaker-id-to-remove")
-);
-Delete->OnSuccess.AddDynamic(this, &AMyActor::OnSpeakerDeleted);
-Delete->OnFailure.AddDynamic(this, &AMyActor::OnSpeakerDeleteFailed);
-Delete->Activate();
+{% stepper %}
+{% step %}
+### Select the record
 
-void AMyActor::OnSpeakerDeleted(const FString& Response)
-{
-    // Clear the stored SpeakerID from save data.
-    MySaveGame->ConvaiSpeakerID = TEXT("-1");
-    UGameplayStatics::SaveGameToSlot(MySaveGame, TEXT("PlayerSave"), 0);
-}
-```
-{% endtab %}
-{% endtabs %}
+Find the target `SpeakerID` from your saved profile data or from **Convai List Speaker IDs**.
+{% endstep %}
 
-{% hint style="warning" %}
-Deletion is permanent. Memory stored under the deleted `SpeakerID` is no longer retrievable. If you want to allow the player to start fresh without deleting the record, call `ResetConversation` instead, which only clears the local `SessionID`.
+{% step %}
+### Call the delete node
+
+Add **Convai Delete Speaker ID** and set **Speaker ID** to the target value.
+
+On **On Success**, clear the stored `SpeakerID` from your save data so the project does not reuse a deleted identity.
+{% endstep %}
+
+{% step %}
+### Create a new identity if needed
+
+If the player should continue using LTM, create a new Speaker ID and assign it as the next `EndUserID`.
+{% endstep %}
+{% endstepper %}
+
+{% hint style="danger" %}
+Deleting an end-user identity removes that user record and associated long-term memory records for that user across characters. Add a confirmation step before exposing this action to players or administrators.
 {% endhint %}
 
----
+## When to use each operation
 
-## When to use CreateSpeakerID vs. passing EndUserID directly
-
-| Scenario | Approach |
-|----------|---------|
-| First-time player on a new device | Create a Speaker ID; persist the returned `SpeakerID`. |
-| Returning player with a saved `SpeakerID` | Load and assign the saved `SpeakerID` as `EndUserID` — no new creation needed. |
-| Single-player game, one device per player | Device-based fallback (`EndUserID` left empty) may be sufficient. |
-| Shared device or multiple accounts | Always use Speaker IDs to ensure per-account memory separation. |
-| Admin: auditing or cleaning up test records | Use **Convai List Speaker IDs** then **Convai Delete Speaker ID**. |
-
----
+| Goal | Operation |
+| --- | --- |
+| Register a first-time player | **Convai Create Speaker ID** |
+| Reuse a returning player's memory | Load saved `SpeakerID`; do not call create again |
+| Audit identity records | **Convai List Speaker IDs** |
+| Remove a test or user identity | **Convai Delete Speaker ID** |
+| Start a fresh conversation without deleting identity | `ResetConversation()` |
 
 ## Next steps
 
 {% content-ref url="end-user-identity.md" %}
-end-user-identity.md
+[End-user identity](end-user-identity.md)
 {% endcontent-ref %}
 
 {% content-ref url="ltm-blueprint-reference.md" %}
-ltm-blueprint-reference.md
+[LTM Blueprint reference](ltm-blueprint-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-usage-examples.md
+[Long-term memory usage examples](usage-examples.md)
 {% endcontent-ref %}

@@ -1,148 +1,95 @@
 ---
 title: Long-term memory quick start
-description: Enable LTM for a character, register a player Speaker ID, and verify the character remembers the player across sessions in three steps.
-last_reviewed: 2026-06-06
+description: Enable memory for one Unreal character, set a stable player identity, and verify cross-session recall in Play In Editor.
+last_reviewed: "4.0.0-beta.21"
 ---
 
-This quick start takes you from zero to a working long-term memory setup. By the end, a Convai character will recognise a returning player and recall details from a previous session.
-
-{% hint style="info" %}
-Long-term memory requires LTM to be enabled for the character on Convai. If you skip step 1 the character silently discards all memory.
-{% endhint %}
+Set up long-term memory for a working Convai character and verify that it remembers a returning player. By the end, the character can recall a fact from an earlier Play In Editor session when the same `EndUserID` is assigned before `StartSession`.
 
 ## Prerequisites
 
-- The Convai Unreal Engine plugin version <code class="expression">space.vars.unreal_plugin_version</code> is installed and a valid API key is configured.
-- A `UConvaiChatbotComponent` (**Convai Chatbot**) and a `UConvaiPlayerComponent` are added to the relevant Actors in your project.
-- You have the **Character ID** of the character you want to give memory to (visible in the Convai dashboard).
+- The Convai Unreal Engine plugin is installed and the API key is configured. See [Install the Convai Unreal Engine plugin](../../getting-started/installation.md).
+- A level contains a `UConvaiChatbotComponent` on the AI character and a `UConvaiPlayerComponent` on the player Actor.
+- The chatbot component has a valid `CharacterID` from the Convai dashboard.
+- Your project has a `SaveGame`, account profile, or equivalent place to store a `SpeakerID`.
 
----
-
-## Step 1 — Enable LTM for the character
-
-LTM is disabled by default for every character. Call **Convai Set LTM Status** once to switch it on. You only need to do this once per character; the setting persists on Convai.
-
-{% tabs %}
-{% tab title="Blueprint" %}
-In any Blueprint — for example your `GameMode` or a one-off utility Actor — drag off an execution pin and add a **Convai Set LTM Status** node:
-
-1. Set **Character ID** to the Character ID string from your Convai dashboard.
-2. Set **B Enable** to `true`.
-3. Connect **On Success** to a **Print String** node to confirm the call succeeded.
-
-Run the game once. After **On Success** fires you can remove or disable this logic; the setting is permanent until you change it.
-{% endtab %}
-{% tab title="C++" %}
-```cpp
-#include "RestAPI/ConvaiLTMProxy.h"
-
-// Call once — for example in a dedicated setup utility or editor script.
-UConvaiSetLTMStatus* SetStatus = UConvaiSetLTMStatus::ConvaiSetLTMStatusProxy(
-    TEXT("your-character-id"),
-    true /* bEnable */
-);
-SetStatus->OnSuccess.AddDynamic(this, &AMyActor::OnLTMEnabled);
-SetStatus->OnFailure.AddDynamic(this, &AMyActor::OnLTMFailed);
-SetStatus->Activate();
-```
-{% endtab %}
-{% endtabs %}
-
-{% hint style="warning" %}
-**Convai Set LTM Status** makes a network request. Do not call it on every session start — it modifies the character definition and counts against your API quota. Enable once; verify with **Convai Get LTM Status** if needed.
+{% hint style="info" %}
+Memory is disabled by default for new characters in the Convai dashboard. Enable it before testing recall.
 {% endhint %}
 
----
-
-## Step 2 — Register a Speaker ID and assign it as EndUserID
-
-A Speaker ID is a stable identifier that links a player's device and name to a record on Convai. Use **Convai Create Speaker ID** to register the player the first time, then store the returned `SpeakerID` and assign it to `EndUserID` on both components before each session.
+## Enable memory and start a remembered session
 
 {% stepper %}
 {% step %}
-### Create a Speaker ID on first launch
+### Enable LTM for the character
 
-Call **Convai Create Speaker ID** with the player's display name and a device-unique string. The **On Success** pin returns an `FConvaiSpeakerInfo` struct containing the assigned `SpeakerID`.
+In a development Blueprint, add **Convai Set LTM Status** from the `Convai|LTM` category.
 
-```cpp
-#include "RestAPI/ConvaiLTMProxy.h"
+Set **Character ID** to the character ID from the Convai dashboard. Set **B Enable** to `true`, then connect **On Success** to a **Print String** node so you can see that the request completed.
 
-// Call once per device/player combination, then persist the SpeakerID.
-FString DeviceId = FPlatformMisc::GetDeviceId(); // or your platform's device ID
-UConvaiCreateSpeakerID* Create = UConvaiCreateSpeakerID::ConvaiCreateSpeakerIDProxy(
-    TEXT("Alex"),   // SpeakerName
-    DeviceId
-);
-Create->OnSuccess.AddDynamic(this, &AMyActor::OnSpeakerCreated);
-Create->Activate();
-
-// In OnSpeakerCreated:
-void AMyActor::OnSpeakerCreated(const FConvaiSpeakerInfo& SpeakerInfo)
-{
-    // Persist SpeakerInfo.SpeakerID in your SaveGame object.
-    MySave->ConvaiSpeakerID = SpeakerInfo.SpeakerID;
-    UGameplayStatics::SaveGameToSlot(MySave, TEXT("PlayerSave"), 0);
-}
-```
-
-In Blueprints, drag off from **Convai Create Speaker ID → On Success**, break the **Speaker ID** struct pin, and save the **Speaker ID** field to your save game.
+After the call succeeds, remove this setup logic from normal session startup. For later verification, use **Convai Get LTM Status** with the same **Character ID**.
 {% endstep %}
 
 {% step %}
-### Assign the SpeakerID as EndUserID before each session
+### Create a Speaker ID for the player
 
-On subsequent launches, load the saved `SpeakerID` and assign it to **End User ID** on both the chatbot component and the player component before calling `StartSession`.
+The first time a player uses your project, call **Convai Create Speaker ID**.
 
-```cpp
-// After loading save data, before StartSession:
-FString SpeakerID = MySave->ConvaiSpeakerID;
+Set **Speaker Name** to a display name such as `Alex`. Set **Device Id** to a stable device or account identifier if you have one. When **On Success** fires, break the returned `FConvaiSpeakerInfo` and save `SpeakerID` in your `SaveGame` or account profile. Confirm the saved value is non-empty before continuing.
 
-ChatbotComponent->EndUserID = SpeakerID;
-PlayerComponent->SetEndUserID(SpeakerID);
+For later launches, load the saved `SpeakerID` instead of creating a new record.
+{% endstep %}
 
-// Optionally send player metadata:
-FString Meta = TEXT("{\"name\": \"Alex\"}");
-ChatbotComponent->EndUserMetadata = Meta;
-PlayerComponent->SetEndUserMetadata(Meta);
+{% step %}
+### Assign the identity before starting the session
+
+Before calling `StartSession`, assign the saved `SpeakerID` to both components:
+
+- Set `UConvaiChatbotComponent.EndUserID` on the chatbot component.
+- Call **Set End User ID** on the `UConvaiPlayerComponent`.
+
+Optionally set `EndUserMetadata` on both components with a JSON string:
+
+```json
+{"name": "Alex", "role": "field technician"}
 ```
 {% endstep %}
 
 {% step %}
-### Call StartSession
+### Start the chatbot session
 
-With `EndUserID` set, call `StartSession` on the chatbot component. Convai loads the memory associated with that Speaker ID.
+Call `StartSession` on the chatbot component after `EndUserID` and optional `EndUserMetadata` are set.
 
-```cpp
-ChatbotComponent->StartSession();
-```
+The WebRTC connection sends `EndUserID` and `EndUserMetadata` at connect time. Convai uses that identity with the character ID to load the correct long-term memory scope.
 {% endstep %}
 {% endstepper %}
 
----
-
-## Step 3 — Verify memory persists
-
-1. Run the game and tell the character something personal — for example, "My name is Alex and I am a field engineer."
-2. Stop the game session.
-3. Run the game again. The saved `SpeakerID` is loaded and assigned as `EndUserID`.
-4. Ask the character: "Do you remember who I am?" The character should recall the detail from the previous session.
-
-{% hint style="info" %}
-If the character does not recall, check that `SessionID` is also saved and restored. Session continuity — which carries the conversation transcript — is separate from end-user identity. See [Configure memory for a character](configure-memory-for-a-character.md) for the full save/restore flow.
+{% hint style="success" %}
+The setup is ready when **Convai Get LTM Status** returns `true` and the same `SpeakerID` is assigned to both components before each `StartSession`.
 {% endhint %}
 
----
+## Verify cross-session recall
+
+1. Press **Play**.
+2. Tell the character a persistent fact, such as `My name is Alex, and I inspect safety valves.`
+3. Let the conversation continue long enough for the character to respond.
+4. Stop Play In Editor.
+5. Press **Play** again.
+6. Restore the same `SpeakerID` to both components before `StartSession`.
+7. Ask `Do you remember what I inspect?`
+
+The character should respond using the earlier fact. If it starts fresh, see [Troubleshoot long-term memory](troubleshooting-and-diagnostics.md) for LTM status and identity mismatch checks.
 
 ## Next steps
 
 {% content-ref url="how-long-term-memory-works.md" %}
-how-long-term-memory-works.md
+[How long-term memory works](how-long-term-memory-works.md)
 {% endcontent-ref %}
 
 {% content-ref url="end-user-identity.md" %}
-end-user-identity.md
+[End-user identity](end-user-identity.md)
 {% endcontent-ref %}
 
 {% content-ref url="configure-memory-for-a-character.md" %}
-configure-memory-for-a-character.md
+[Configure memory for a character](configure-memory-for-a-character.md)
 {% endcontent-ref %}

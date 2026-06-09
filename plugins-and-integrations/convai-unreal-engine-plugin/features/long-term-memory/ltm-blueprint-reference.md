@@ -1,166 +1,133 @@
 ---
 title: LTM Blueprint reference
-description: Reference for all long-term memory Blueprint nodes, data structures, and component properties in the Convai Unreal Engine plugin.
-last_reviewed: 2026-06-06
+description: Reference for Unreal long-term memory Blueprint nodes, Speaker ID data, component properties, and session fields used during startup.
+last_reviewed: "4.0.0-beta.21"
 ---
 
-This reference covers every Blueprint node, struct, and component property related to long-term memory (LTM). All items are verified against `ConvaiLTMProxy.h`, `ConvaiDefinitions.h`, `ConvaiChatbotComponent.h`, and `ConvaiPlayerComponent.h` in the plugin source.
+This reference lists the public long-term memory surface in the Convai Unreal Engine plugin. LTM management nodes are in the `Convai|LTM` Blueprint category.
 
----
+## LTM nodes
 
-## LTM management nodes
-
-All nodes below are Blueprint-callable and located in the **Convai|LTM** category. Each is an async proxy node with **On Success** and **On Failure** delegate pins.
+All nodes on this page are async proxy nodes. Each node exposes **On Success** and **On Failure** delegates.
 
 ### Convai Create Speaker ID
 
-Registers a new speaker record on Convai and returns the assigned `FConvaiSpeakerInfo`.
+Creates a Speaker ID record.
 
-| Pin | Direction | Type | Description |
-|-----|-----------|------|-------------|
-| **Speaker Name** | Input | `FString` | Human-readable display name for the player. Must be non-empty. |
-| **Device Id** | Input | `FString` | Device-unique identifier (optional). Leave empty to omit. |
-| **On Success** | Output delegate | `FConvaiSpeakerInfo` | Fires with the created record when the request succeeds. |
-| **On Failure** | Output delegate | `FConvaiSpeakerInfo` | Fires with an empty struct when the request fails. |
+| Item | Type | Description |
+| --- | --- | --- |
+| **Speaker Name** | `FString` input | Human-readable speaker name. Empty values fail before the request is sent. |
+| **Device Id** | `FString` input | Optional device identifier. Omitted from the request when empty. |
+| **On Success** | `FConvaiSpeakerInfo` delegate | Returns the created speaker record. |
+| **On Failure** | `FConvaiSpeakerInfo` delegate | Returns an empty `FConvaiSpeakerInfo`. |
+| C++ factory | `UConvaiCreateSpeakerID::ConvaiCreateSpeakerIDProxy(FString SpeakerName, FString DeviceId)` | Static factory used by the Blueprint node. |
 
-**C++ static factory:** `UConvaiCreateSpeakerID::ConvaiCreateSpeakerIDProxy(FString SpeakerName, FString DeviceId)`
-
----
+Source validation logs `Speaker name is empty` when **Speaker Name** is empty.
 
 ### Convai List Speaker IDs
 
-Retrieves all speaker records registered under the current API key.
+Lists Speaker ID records associated with the configured API key.
 
-| Pin | Direction | Type | Description |
-|-----|-----------|------|-------------|
-| **On Success** | Output delegate | `TArray<FConvaiSpeakerInfo>` | Fires with the full speaker list when the request succeeds. |
-| **On Failure** | Output delegate | `TArray<FConvaiSpeakerInfo>` | Fires with an empty array when the request fails. |
-
-**C++ static factory:** `UConvaiListSpeakerID::ConvaiListSpeakerIDProxy()`
-
----
+| Item | Type | Description |
+| --- | --- | --- |
+| **On Success** | `TArray<FConvaiSpeakerInfo>` delegate | Returns the speaker list. |
+| **On Failure** | `TArray<FConvaiSpeakerInfo>` delegate | Returns an empty array. |
+| C++ factory | `UConvaiListSpeakerID::ConvaiListSpeakerIDProxy()` | Static factory used by the Blueprint node. |
 
 ### Convai Delete Speaker ID
 
-Permanently removes a speaker record by its `SpeakerID`.
+Deletes a Speaker ID record.
 
-| Pin | Direction | Type | Description |
-|-----|-----------|------|-------------|
-| **Speaker ID** | Input | `FString` | The `SpeakerID` of the record to delete. Must be non-empty. |
-| **On Success** | Output delegate | `FString` | Fires with the raw response string when the request succeeds. |
-| **On Failure** | Output delegate | `FString` | Fires with an error string when the request fails. |
-
-**C++ static factory:** `UConvaiDeleteSpeakerID::ConvaiDeleteSpeakerIDProxy(FString SpeakerID)`
-
----
+| Item | Type | Description |
+| --- | --- | --- |
+| **Speaker ID** | `FString` input | Speaker record identifier to delete. Empty values fail before the request is sent. |
+| **On Success** | `FString` delegate | Returns the response string. |
+| **On Failure** | `FString` delegate | Returns `Http req failed`. |
+| C++ factory | `UConvaiDeleteSpeakerID::ConvaiDeleteSpeakerIDProxy(FString SpeakerID)` | Static factory used by the Blueprint node. |
 
 ### Convai Get LTM Status
 
-Queries whether LTM is currently enabled for a character.
+Returns the LTM enabled state for a character.
 
-| Pin | Direction | Type | Description |
-|-----|-----------|------|-------------|
-| **Character ID** | Input | `FString` | The Character ID from the Convai dashboard. Must be non-empty. |
-| **On Success** | Output delegate | `bool` (**Status**) | Fires with `true` if LTM is enabled, `false` if disabled. |
-| **On Failure** | Output delegate | `bool` (**Status**) | Fires with `false` when the request fails. |
-
-**C++ static factory:** `UConvaiGetLTMStatus::ConvaiGetLTMStatusProxy(FString CharacterID)`
-
----
+| Item | Type | Description |
+| --- | --- | --- |
+| **Character ID** | `FString` input | Character ID from the Convai dashboard. Empty values fail before the request is sent. |
+| **On Success** | `bool` delegate named **Status** | Returns `true` when LTM is enabled and `false` when disabled. |
+| **On Failure** | `bool` delegate named **Status** | Returns `false`. |
+| C++ factory | `UConvaiGetLTMStatus::ConvaiGetLTMStatusProxy(FString CharacterID)` | Static factory used by the Blueprint node. |
 
 ### Convai Set LTM Status
 
-Enables or disables LTM for a character. This modifies the character definition on Convai.
+Enables or disables LTM for a character by sending a `memorySettings.enabled` update.
 
-| Pin | Direction | Type | Description |
-|-----|-----------|------|-------------|
-| **Character ID** | Input | `FString` | The Character ID from the Convai dashboard. Must be non-empty. |
-| **B Enable** | Input | `bool` | `true` to enable LTM, `false` to disable. |
-| **On Success** | Output delegate | `FString` | Fires with the raw response string when the request succeeds. |
-| **On Failure** | Output delegate | `FString` | Fires with the raw response string when the request fails. |
-
-**C++ static factory:** `UConvaiSetLTMStatus::ConvaiSetLTMStatusProxy(FString CharacterID, bool bEnable)`
-
-{% hint style="warning" %}
-**Convai Set LTM Status** modifies the character definition and counts against your API quota. Call it once to configure the character — not on every session start.
-{% endhint %}
-
----
+| Item | Type | Description |
+| --- | --- | --- |
+| **Character ID** | `FString` input | Character ID from the Convai dashboard. Empty values fail before the request is sent. |
+| **B Enable** | `bool` input | `true` enables LTM; `false` disables it. |
+| **On Success** | `FString` delegate | Returns the response string. |
+| **On Failure** | `FString` delegate | Returns the response string available to the proxy. |
+| C++ factory | `UConvaiSetLTMStatus::ConvaiSetLTMStatusProxy(FString CharacterID, bool bEnable)` | Static factory used by the Blueprint node. |
 
 ## Data structures
 
 ### FConvaiSpeakerInfo
 
-Returned by **Convai Create Speaker ID** and elements of the array returned by **Convai List Speaker IDs**.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `SpeakerID` | `FString` | Server-assigned unique identifier. Assign this to `EndUserID` on the Convai components. |
-| `Name` | `FString` | Display name supplied at creation time. |
-| `DeviceID` | `FString` | Device identifier supplied at creation time. Empty if none was provided. |
-
-**Source:** `ConvaiDefinitions.h`, struct `FConvaiSpeakerInfo`.
-
----
+| Field | Type | Category | Description |
+| --- | --- | --- | --- |
+| `SpeakerID` | `FString` | `Speaker Info` | Identifier to save and reuse as `EndUserID`. |
+| `Name` | `FString` | `Speaker Info` | Speaker name returned by Convai. |
+| `DeviceID` | `FString` | `Speaker Info` | Device identifier returned by Convai. |
 
 ## UConvaiChatbotComponent
 
-Blueprint display name: **Convai Chatbot**. This component drives the conversation session and is the primary surface for LTM configuration.
+Blueprint display name: **Convai Chatbot**.
 
-| Property / Function | Type | Specifiers | Description |
-|---|---|---|---|
-| `EndUserID` | `FString` | `BlueprintReadWrite`, `EditAnywhere`, Category `"Convai"` | Unique player identifier sent to Convai at connect time via `GetEndUserID()`. Assign the `SpeakerID` from `FConvaiSpeakerInfo` here. Must be set before `StartSession`. |
-| `EndUserMetadata` | `FString` | `BlueprintReadWrite`, `EditAnywhere`, Category `"Convai"` | JSON string with additional player context (name, role, etc.). Sent at connect time via `GetEndUserMetadata()`. Optional — leave empty to omit. |
-| `SessionID` | `FString` | `BlueprintReadWrite`, Category `"Convai"`, `Replicated` | Conversation session identifier. Default `"-1"` means no prior session. Convai updates this during a session. Save and restore this value to resume a previous conversation. |
-| `ResetConversation` | `void` | `BlueprintCallable`, Category `"Convai"` | Sets `SessionID` to `"-1"`, clearing the link to any prior session. Call `StartSession` after this to open a new session. |
+| Member | Type | Specifiers | Description |
+| --- | --- | --- | --- |
+| `EndUserID` | `FString` | `BlueprintReadWrite`, `EditAnywhere`, category `Convai` | Player identity sent at connect time through `GetEndUserID()`. |
+| `EndUserMetadata` | `FString` | `BlueprintReadWrite`, `EditAnywhere`, category `Convai` | Optional JSON string sent at connect time through `GetEndUserMetadata()`. |
+| `SessionID` | `FString` | `BlueprintReadWrite`, category `Convai`, `Replicated` | Local conversation link marker. Default is `"-1"`. Cleared by `ResetConversation()`. Not sent by WebRTC `StartSession`. |
+| `ResetConversation()` | `void` | `BlueprintCallable`, category `Convai` | Sets `SessionID` to `"-1"`. |
+| `StartSession()` | `void` | `BlueprintCallable`, category `Convai|Session` | Opens the chatbot session after configuration values are set. |
 
-### IConvaiConnectionInterface overrides
-
-`UConvaiChatbotComponent` implements `IConvaiConnectionInterface`. These overrides are called internally when establishing a session — do not call them directly.
-
-| Override | Returns |
-|---|---|
-| `GetEndUserID()` | The value of `EndUserID` |
-| `GetEndUserMetadata()` | The value of `EndUserMetadata` |
-
----
+`UConvaiChatbotComponent` implements `IConvaiConnectionInterface`. Its `GetEndUserID()` and `GetEndUserMetadata()` overrides return the component properties.
 
 ## UConvaiPlayerComponent
 
-Represents the local player in the conversation. Also implements `IConvaiConnectionInterface`. `EndUserID` and `EndUserMetadata` are replicated and must be set through the Blueprint setter nodes (or their C++ equivalents) in multiplayer to trigger the server RPC.
+Blueprint display name: **Convai Player**.
 
-| Property / Function | Type | Specifiers | Description |
-|---|---|---|---|
-| `EndUserID` | `FString` | `EditAnywhere`, Category `"Convai"`, `Replicated`, `BlueprintSetter = SetEndUserID` | Unique player identifier. Use the **Set End User ID** setter node (or `SetEndUserID()` in C++) — do not assign this property directly in multiplayer, as direct assignment bypasses the server RPC. |
-| `SetEndUserID` | `void (FString NewEndUserID)` | `BlueprintCallable`, Category `"Convai"` | Setter for `EndUserID`. In multiplayer, delegates to `SetEndUserIDServer` via a reliable server RPC. |
-| `SetEndUserIDServer` | `void (const FString& NewEndUserID)` | `Server`, `Reliable`, Category `"Convai|Network"` | Server RPC that applies the `EndUserID` change on the authoritative copy. Called automatically by `SetEndUserID`. |
-| `EndUserMetadata` | `FString` | `EditAnywhere`, Category `"Convai"`, `Replicated`, `BlueprintSetter = SetEndUserMetadata` | JSON metadata string. Use the **Set End User Metadata** setter node (or `SetEndUserMetadata()` in C++) for the same reason as `EndUserID`. |
-| `SetEndUserMetadata` | `void (FString NewEndUserMetadata)` | `BlueprintCallable`, Category `"Convai"` | Setter for `EndUserMetadata`. In multiplayer, delegates to `SetEndUserMetadataServer`. |
-| `SetEndUserMetadataServer` | `void (const FString& NewEndUserMetadata)` | `Server`, `Reliable`, Category `"Convai|Network"` | Server RPC that applies the `EndUserMetadata` change on the authoritative copy. Called automatically by `SetEndUserMetadata`. |
+| Member | Type | Specifiers | Description |
+| --- | --- | --- | --- |
+| `EndUserID` | `FString` | `EditAnywhere`, category `Convai`, `Replicated`, `BlueprintSetter = SetEndUserID` | Player identity sent at connect time through `GetEndUserID()`. |
+| `SetEndUserID()` | `void (FString NewEndUserID)` | `BlueprintCallable`, `BlueprintInternalUseOnly`, category `Convai` | Sets `EndUserID`. Calls `SetEndUserIDServer()` when the component is replicated. |
+| `SetEndUserIDServer()` | `void (const FString& NewEndUserID)` | `Server`, `Reliable`, category `Convai|Network` | Server RPC used by `SetEndUserID()`. |
+| `EndUserMetadata` | `FString` | `EditAnywhere`, category `Convai`, `Replicated`, `BlueprintSetter = SetEndUserMetadata` | Optional JSON metadata sent at connect time. |
+| `SetEndUserMetadata()` | `void (FString NewEndUserMetadata)` | `BlueprintCallable`, `BlueprintInternalUseOnly`, category `Convai` | Sets `EndUserMetadata`. Calls `SetEndUserMetadataServer()` when the component is replicated. |
+| `SetEndUserMetadataServer()` | `void (const FString& NewEndUserMetadata)` | `Server`, `Reliable`, category `Convai|Network` | Server RPC used by `SetEndUserMetadata()`. |
 
-### IConvaiConnectionInterface overrides
+Source note: `UConvaiPlayerComponent` declares `EndUserID` and `EndUserMetadata` with replication metadata and server RPC setters. In the current source, `GetLifetimeReplicatedProps()` registers `PlayerName`; it does not register `EndUserID` or `EndUserMetadata`.
 
-| Override | Returns |
-|---|---|
-| `GetEndUserID()` | The value of `EndUserID` |
-| `GetEndUserMetadata()` | The value of `EndUserMetadata` |
+## Source files
 
----
+- `Source/Convai/Public/RestAPI/ConvaiLTMProxy.h`
+- `Source/Convai/Private/RestAPI/ConvaiLTMProxy.cpp`
+- `Source/Convai/Public/ConvaiDefinitions.h`
+- `Source/Convai/Public/ConvaiChatbotComponent.h`
+- `Source/Convai/Private/ConvaiChatbotComponent.cpp`
+- `Source/Convai/Public/ConvaiPlayerComponent.h`
+- `Source/Convai/Private/ConvaiPlayerComponent.cpp`
+- `Source/Convai/Public/ConvaiConnectionInterface.h`
 
 ## Related pages
 
 {% content-ref url="end-user-identity.md" %}
-end-user-identity.md
+[End-user identity](end-user-identity.md)
 {% endcontent-ref %}
 
 {% content-ref url="speaker-id-management.md" %}
-speaker-id-management.md
+[Speaker ID management](speaker-id-management.md)
 {% endcontent-ref %}
 
 {% content-ref url="configure-memory-for-a-character.md" %}
-configure-memory-for-a-character.md
-{% endcontent-ref %}
-
-{% content-ref url="usage-examples.md" %}
-usage-examples.md
+[Configure memory for a character](configure-memory-for-a-character.md)
 {% endcontent-ref %}

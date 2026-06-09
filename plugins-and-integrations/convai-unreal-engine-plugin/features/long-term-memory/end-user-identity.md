@@ -1,153 +1,117 @@
 ---
 title: End-user identity
-description: Register players with the Speaker ID system and assign their SpeakerID as EndUserID on the Convai components so each player's memory is kept separate.
-last_reviewed: 2026-06-06
+description: Configure a stable Unreal player identity so each Convai character loads memory for the correct user before a session starts.
+last_reviewed: "4.0.0-beta.21"
 ---
 
-End-user identity tells Convai which player the character is speaking with. The recommended approach is the **Speaker ID system**: you call **Convai Create Speaker ID** once per player to register a stable server-side record, then assign the returned `SpeakerID` to the `EndUserID` property on both `UConvaiChatbotComponent` and `UConvaiPlayerComponent` before each session. Convai uses `EndUserID` to load that player's memory at connect time.
+End-user identity tells Convai which player is speaking to the character. Set a stable `EndUserID` before `StartSession` so memory from one user does not appear in another user's conversation.
 
----
+## Choose an identity strategy
 
-## Prerequisites
+| Strategy | Use when | Notes |
+| --- | --- | --- |
+| Speaker ID | You want a Blueprint-managed identity record that can be listed or deleted from Unreal. | Use **Convai Create Speaker ID** once, then save the returned `SpeakerID`. |
+| Account ID | Your project already has login or profile IDs. | Assign your stable account ID directly as `EndUserID`. |
+| Device fallback | One local device maps to one player. | Leave `EndUserID` empty and the plugin derives a device identifier at connect time. |
 
-- The Convai Unreal Engine plugin version <code class="expression">space.vars.unreal_plugin_version</code> is installed and the API key is configured.
-- LTM is enabled for the character as described in [Configure memory for a character](configure-memory-for-a-character.md).
-- A `UConvaiChatbotComponent` (**Convai Chatbot**) is attached to the character Actor and a `UConvaiPlayerComponent` is attached to the player Actor.
+For most shared-device, training, onboarding, and multiplayer projects, use a Speaker ID or your own account ID. Device fallback can merge memory for multiple users on the same machine.
 
----
-
-## Option A — Speaker ID registration (recommended)
-
-Use this approach when you want a server-registered identity that survives device changes or reinstalls, or when you want to list and manage player records via the Blueprint API.
+## Create and save a Speaker ID
 
 {% stepper %}
 {% step %}
-### Create a Speaker ID on first launch
+### Call Convai Create Speaker ID
 
-On the player's first run, call **Convai Create Speaker ID** with the player's display name and a device-unique string. The **On Success** delegate returns an `FConvaiSpeakerInfo` struct containing the assigned `SpeakerID`.
+In a Blueprint that runs during first-time profile setup, add **Convai Create Speaker ID** from the `Convai|LTM` category.
 
-{% tabs %}
-{% tab title="Blueprint" %}
-Place a **Convai Create Speaker ID** node in a Blueprint that runs on first launch (for example, in your `GameInstance → Init` or in a post-login handler). Wire:
-
-- **Speaker Name** → the player's display name (e.g. from your account system or a saved preference).
-- **Device Id** → a hardware device ID (use the **Get Device Id** utility or your platform's equivalent).
-
-On **On Success**, break the **Speaker ID** output struct and save the **Speaker ID** field to your `SaveGame` object.
-{% endtab %}
-{% tab title="C++" %}
-```cpp
-#include "RestAPI/ConvaiLTMProxy.h"
-
-void AMyGameMode::RegisterNewPlayer(const FString& DisplayName)
-{
-    FString DeviceId = FPlatformMisc::GetDeviceId();
-
-    UConvaiCreateSpeakerID* Create = UConvaiCreateSpeakerID::ConvaiCreateSpeakerIDProxy(
-        DisplayName,
-        DeviceId
-    );
-    Create->OnSuccess.AddDynamic(this, &AMyGameMode::OnSpeakerCreated);
-    Create->OnFailure.AddDynamic(this, &AMyGameMode::OnSpeakerCreateFailed);
-    Create->Activate();
-}
-
-void AMyGameMode::OnSpeakerCreated(const FConvaiSpeakerInfo& SpeakerInfo)
-{
-    // SpeakerInfo.SpeakerID is the stable identifier to persist.
-    MySaveGame->ConvaiSpeakerID = SpeakerInfo.SpeakerID;
-    UGameplayStatics::SaveGameToSlot(MySaveGame, TEXT("PlayerSave"), 0);
-}
-```
-{% endtab %}
-{% endtabs %}
-
-{% hint style="info" %}
-Only call **Convai Create Speaker ID** once per player. On subsequent launches, load the stored `SpeakerID` from your save data rather than creating a new one. Repeated creation produces duplicate records.
-{% endhint %}
+Set **Speaker Name** to the player's display name. Set **Device Id** to a stable device or account identifier if one is available.
 {% endstep %}
 
 {% step %}
-### Assign SpeakerID as EndUserID on the chatbot component
+### Save the returned SpeakerID
 
-Before calling `StartSession`, assign the saved `SpeakerID` to the **End User ID** property on the **Convai Chatbot** component.
+On **On Success**, break the returned `FConvaiSpeakerInfo` struct. Save the `SpeakerID` field in your `SaveGame`, player profile, or account data.
 
-In Blueprints, retrieve the loaded `SpeakerID` from your save object and set the **End User ID** property on the component reference directly.
-
-```cpp
-// C++ — after loading save data, before StartSession:
-ChatbotComponent->EndUserID = MySaveGame->ConvaiSpeakerID;
-```
+The struct also contains `Name` and `DeviceID`, which mirror the values returned by Convai for that speaker record.
 {% endstep %}
 
 {% step %}
-### Optionally set EndUserMetadata on the chatbot component
+### Reuse the SpeakerID on future launches
 
-Set **End User Metadata** to a JSON string with additional player context the character should be aware of:
+Before creating a new Speaker ID, check whether your saved profile already has one. If it does, load and reuse that value.
 
-```json
-{"name": "Alex", "role": "field technician", "clearance": "level-2"}
-```
-
-Leave the field empty if no extra context is needed. The plugin omits the field when it is empty.
-
-```cpp
-ChatbotComponent->EndUserMetadata = TEXT("{\"name\": \"Alex\", \"role\": \"technician\"}");
-```
-{% endstep %}
-
-{% step %}
-### Set EndUserID on the player component
-
-Use the **Set End User ID** Blueprint setter node (or `PlayerComponent->SetEndUserID(SpeakerID)` in C++) to assign the same value. The setter routes through a reliable server RPC (`SetEndUserIDServer`) in multiplayer, ensuring the authoritative value is in place before the session opens.
-
-{% hint style="warning" %}
-In C++, always call `SetEndUserID()` rather than assigning `PlayerComponent->EndUserID` directly. Direct property assignment bypasses the server RPC and the identity will be wrong on the authoritative copy in multiplayer.
-{% endhint %}
-{% endstep %}
-
-{% step %}
-### Optionally set EndUserMetadata on the player component
-
-Call **Set End User Metadata** (or `PlayerComponent->SetEndUserMetadata(MetadataJSON)`) with the same metadata string used on the chatbot component.
-{% endstep %}
-
-{% step %}
-### Call StartSession
-
-With both components configured, call `StartSession` on the chatbot. Convai reads `EndUserID` and `EndUserMetadata` from both components at this point via `IConvaiConnectionInterface` and loads the matching player memory.
+Creating a new Speaker ID for every launch creates multiple identity records for the same player.
 {% endstep %}
 {% endstepper %}
 
----
+## Assign identity before StartSession
 
-## Option B — Device-based implicit identity
+Set the same player identity before opening the session.
 
-If you do not call **Convai Create Speaker ID**, and `EndUserID` is left empty, the plugin falls back to a device-unique identifier at connect time. All players on the same device then share a single memory entry.
+{% stepper %}
+{% step %}
+### Set the chatbot identity
 
-| | Speaker ID (Option A) | Device fallback (Option B) |
-|---|---|---|
-| Suitable for | Multi-player, shared devices, authenticated accounts | Single-player games, one device per player |
-| Identity survives reinstall | Yes (server-stored) | No (device ID may change) |
-| Can list / delete records | Yes, via Blueprint nodes | No |
-| Setup required | One-time `CreateSpeakerID` call | None |
+On the `UConvaiChatbotComponent`, set the `EndUserID` property to the saved `SpeakerID` or account ID.
 
----
+If you want to pass player context, set `EndUserMetadata` to a JSON string:
+
+```json
+{"name": "Alex", "role": "trainee", "course": "fire-safety"}
+```
+{% endstep %}
+
+{% step %}
+### Set the player identity
+
+On the `UConvaiPlayerComponent`, call **Set End User ID** with the same value.
+
+If you are sending metadata, call **Set End User Metadata** with the same JSON string. The setter functions call reliable server RPCs when the component is replicated.
+{% endstep %}
+
+{% step %}
+### Start the chatbot session
+
+Call `StartSession` after identity values are set.
+
+At connect time, the plugin reads `GetEndUserID()` and `GetEndUserMetadata()` from the active connection interface and includes those values in the connection parameters.
+{% endstep %}
+{% endstepper %}
 
 {% hint style="warning" %}
-`EndUserID` on the chatbot component and on the player component must both be set to the same value before `StartSession`. A mismatch — for example if the player component still holds an old value — causes Convai to load inconsistent memory for the session.
+In multiplayer, set identity from an authority-aware flow and wait until your player setup has completed before opening the session. `SetEndUserID()` and `SetEndUserMetadata()` call server RPCs when replicated, but the current source registers only `PlayerName` in `UConvaiPlayerComponent::GetLifetimeReplicatedProps()`.
 {% endhint %}
+
+## Use device fallback only when appropriate
+
+If `EndUserID` is empty at connect time, the plugin calls `UConvaiUtils::GetDeviceUniqueIdentifier()`. The helper tries `FPlatformMisc::GetDeviceId()`, then `FPlatformMisc::GetOperatingSystemId()`, then `FPlatformMisc::GetLoginId()`.
+
+This works for a single local user. It is not enough for:
+
+- Shared classroom or lab machines.
+- Training kiosks used by multiple learners.
+- Multiplayer sessions.
+- Projects where memory must follow a signed-in user across devices.
+
+## Verify the identity
+
+Before `StartSession`, print these values:
+
+- `UConvaiChatbotComponent.EndUserID`
+- `UConvaiPlayerComponent.EndUserID`
+
+The two `EndUserID` values should match before `StartSession`.
 
 ## Next steps
 
 {% content-ref url="speaker-id-management.md" %}
-speaker-id-management.md
+[Speaker ID management](speaker-id-management.md)
 {% endcontent-ref %}
 
 {% content-ref url="configure-memory-for-a-character.md" %}
-configure-memory-for-a-character.md
+[Configure memory for a character](configure-memory-for-a-character.md)
 {% endcontent-ref %}
 
 {% content-ref url="ltm-blueprint-reference.md" %}
-ltm-blueprint-reference.md
+[LTM Blueprint reference](ltm-blueprint-reference.md)
 {% endcontent-ref %}
