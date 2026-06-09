@@ -1,49 +1,58 @@
 ---
 title: How vision works
-description: Understand the three-layer frame capture pipeline, vision state lifecycle, and how the chatbot component forwards frames to Convai.
+description: Understand how Unreal vision components are discovered, started, throttled, and used to send scene frames during a Convai session.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Vision lets a Convai character observe its surroundings by capturing scene frames and sending them to Convai as part of the ongoing conversation. This page explains the architecture behind that pipeline so you can configure it correctly and diagnose problems when they arise.
+Vision works by placing a frame source component on the same Actor as the Convai Chatbot component. During the session, the chatbot reads raw frames from that source at the configured capture rate and sends them to Convai with the conversation stream.
 
-## The three-layer architecture
+## Runtime architecture
 
-The vision system is composed of three independent layers that work together.
+The Unreal vision path has three user-facing parts: a frame source, the `IConvaiVisionInterface` contract, and the Chatbot component that sends frames.
 
 ```mermaid
 flowchart LR
-    subgraph FrameSource["Frame Source Layer"]
-        A[UEnvironmentWebcam]
+    subgraph frameSourceLayer["Frame source"]
+        environmentWebcam["UEnvironmentWebcam"]
     end
 
-    B[IConvaiVisionInterface]
-    C[UConvaiChatbotComponent]
-    D[SendImage]
-    E[WebRTC session]
-    F[Convai]
+    visionInterface["IConvaiVisionInterface"]
+    chatbot["UConvaiChatbotComponent"]
+    sendImage["SendImage"]
+    sessionProxy["SessionProxyInstance"]
+    convai["Convai"]
 
-    A -->|implements| B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
+    environmentWebcam -->|"implements"| visionInterface
+    visionInterface --> chatbot
+    chatbot --> sendImage
+    sendImage --> sessionProxy
+    sessionProxy --> convai
 ```
 
-**Frame source layer** — A component that implements `IConvaiVisionInterface` captures raw pixels from the scene. The `ConvaiVisionBase` module ships `UEnvironmentWebcam`, the built-in frame source. `UEnvironmentWebcam` holds a `USceneCaptureComponent2D` that renders to a `UTextureRenderTarget2D` each time the component is asked for a frame.
+**Frame source** — `UEnvironmentWebcam` is the built-in frame source in the `ConvaiVisionBase` module. It owns a `USceneCaptureComponent2D`, renders into a `UTextureRenderTarget2D`, and exposes the render target through `IConvaiVisionInterface`.
 
-**Interface layer** — `IConvaiVisionInterface` (declared in `VisionInterface.h`) is the contract between the chatbot and any frame source. Because the chatbot talks to an interface, not a concrete class, any component that implements `IConvaiVisionInterface` is a valid frame source.
+**Interface contract** — `IConvaiVisionInterface` is declared in `VisionInterface.h`. It defines the capture state, raw-frame access, texture access, FPS settings, and diagnostic methods used by the chatbot.
 
-**Chatbot layer** — `UConvaiChatbotComponent` queries whether a compatible vision component is present on its Actor via `SupportsVision()`, which can be called at any time from Blueprint. When a vision component is registered, the chatbot throttles frame delivery to `CachedVisionFPS` (default 15 FPS) using an accumulator and calls `SendImage` each tick that crosses the interval threshold. `SendImage` compresses the frame and forwards it over the active WebRTC session.
+**Chatbot sender** — `UConvaiChatbotComponent` inherits the vision functions from `UConvaiAudioStreamer`. At runtime it discovers the first component on the owning Actor that implements `IConvaiVisionInterface`, or uses the component passed to **Set Vision Component**. Its `SendImage` tick path calls `CaptureRaw`, then forwards the raw width, height, and byte array through the active session.
 
 ## Key concepts
 
 | Concept | Definition |
 |---|---|
 | **Frame Source** | A component implementing `IConvaiVisionInterface` that captures image data from the scene and exposes it to the chatbot. |
-| **Vision Interface** | `IConvaiVisionInterface`, declared in `VisionInterface.h`; the contract any frame source must satisfy for the chatbot to use it. |
+| **Vision Interface** | `IConvaiVisionInterface`, the contract any frame source must satisfy before the chatbot can register it. |
 | **Vision State** | The current lifecycle phase of a frame source, tracked as `EVisionState` (`Stopped`, `Starting`, `Capturing`, `Stopping`, `Paused`). |
-| **Frame Throttling** | Accumulator-based rate limiting in `UConvaiChatbotComponent` that caps frame transmission at `m_MaxFPS` (default 15 FPS). |
-| **Render Target** | A `UTextureRenderTarget2D` that `UEnvironmentWebcam` renders the scene into; must be `RTF RGBA8` at 512 × 512 or larger. |
+| **Frame throttling** | Accumulator-based rate limiting in `UConvaiChatbotComponent` that uses the vision component's `GetMaxFPS()` value. |
+| **Render target** | The `UTextureRenderTarget2D` assigned to `ConvaiRenderTarget`. The built-in creation path uses `RTF_RGBA8` and `512 x 512`. |
+| **Video connection** | The connection type used when vision is supported. The session setup selects `video` when the chatbot reports vision support or `AlwaysAllowVision` is enabled. |
+
+## Component discovery
+
+`UConvaiAudioStreamer::FindFirstVisionComponent()` searches the owning Actor for components that implement `UConvaiVisionInterface`. If it finds at least one, it passes the first component to `SetVisionComponent`.
+
+`SetVisionComponent(UActorComponent* VisionComponent)` returns `true` only when the supplied component implements `UConvaiVisionInterface`. Passing a plain `USceneCaptureComponent2D` returns `false` because it is a capture component, not a Convai vision source.
+
+`SupportsVision()` returns `true` when a valid vision interface component is registered. If no component is registered yet, it tries discovery once before returning.
 
 ## Vision states
 
@@ -57,15 +66,15 @@ Every frame source component tracks its lifecycle through `EVisionState`, declar
 | `Stopping` | The vision system is shutting down. Transitional; normally brief. |
 | `Paused` | The vision system is suspended. It was previously running but is not capturing now. |
 
-Calling `Start()` on a frame source transitions it from `Stopped` or `Paused` to `Capturing`. Calling `Stop()` transitions it from `Capturing` or `Paused` to `Stopped`. The chatbot reacts to the current state when deciding whether to request a frame.
+`UEnvironmentWebcam` uses `Capturing` and `Stopped` directly in the verified source path. Calling `Start()` validates `CaptureComponent` and `ConvaiRenderTarget`, then sets the state to `Capturing`. Calling `Stop()` sets the state to `Stopped` and disables `CaptureComponent->bCaptureEveryFrame`.
 
-Three C++ delegates on `IConvaiVisionInterface` fire at key transitions. These are plain C++ `DECLARE_DELEGATE` delegates — they are **not Blueprint-assignable** and are intended for C++ integrations:
+Three C++ delegates on `IConvaiVisionInterface` are available for native integrations. These are plain C++ `DECLARE_DELEGATE` delegates, not Blueprint-assignable events:
 
 - `FOnVisionStateChanged` — fires whenever the state changes, carrying the new `EVisionState`.
-- `FOnFirstFrameCaptured` — fires at the beginning of a `Start()` call (when capture is initiated, before the first frame is rendered to the target).
+- `FOnFirstFrameCaptured` — fires during `UEnvironmentWebcam::Start()` after capture is enabled.
 - `FOnFramesStopped` — fires when frame capturing stops.
 
-Blueprint users can bind to the **On Frame Ready** event on `UConvaiWebcamBase` instead. It is `BlueprintAssignable` and fires every tick while the component is in the `Capturing` state. To react only on the first frame, use a boolean flag in the bound event to guard the logic.
+Blueprint users can bind to the **On Frame Ready** event on `UConvaiWebcamBase`. `UEnvironmentWebcam::TickComponent()` broadcasts it while the component is in the `Capturing` state and the event has at least one binding.
 
 ## Texture source types
 
@@ -80,17 +89,19 @@ Blueprint users can bind to the **On Frame Ready** event on `UConvaiWebcamBase` 
 
 ## Frame delivery and FPS throttling
 
-The chatbot accumulates delta time each tick. When the accumulated time exceeds the target frame interval, it requests a compressed frame from the vision component and sends it over the session. The target interval defaults to `1.0f / 15.f` (15 FPS). You can read the current maximum FPS setting with `GetMaxFPS()` or change it with `SetMaxFPS(int MaxFPS)` on the vision component.
+The chatbot accumulates `DeltaTime` each tick. When the accumulated time reaches `TargetFrameInterval`, it calls `CaptureRaw` on the active vision component and sends the frame through `SessionProxyInstance->SendImage`.
 
-Compression is applied when the frame is captured. The chatbot passes a `ForceCompressionRatio` to `CaptureCompressed`, which the frame source uses to reduce the image size before transmission. If a compressed frame is already available from an external source, `IsCompressedDataAvailable()` returns `true` and `GetCompressedData` retrieves it without re-compressing.
+The default target interval is `1.0f / 15.f`. When `GetMaxFPS()` changes, the chatbot clamps the cached FPS to the `1` to `60` range before recalculating the interval. `UConvaiWebcamBase::SetMaxFPS(int MaxFPS)` rejects values `<= 0`; it does not clamp upper values itself.
 
 ## Render target requirements
 
-`UEnvironmentWebcam` requires a `UTextureRenderTarget2D` assigned to its `ConvaiRenderTarget` property. The render target must use the `RTF RGBA8` format and a size of at least `512 × 512` pixels. The `UConvaiVisionRenderTargetFactory` in the `ConvaiEditor` module creates render targets with those defaults (`DefaultSizeX = 512`, `DefaultSizeY = 512`, `DefaultClearColor = FLinearColor::Black`), so you can use **Right-click → Convai Vision Render Target** in the Content Browser to create a pre-configured asset.
+`UEnvironmentWebcam` requires a `UTextureRenderTarget2D` assigned to `ConvaiRenderTarget`. If the property is not assigned, `CanStart()` records `ConvaiRenderTarget is null. Cannot start capture.` and `Start()` returns without entering `Capturing`.
+
+The Convai editor code creates render targets with `DefaultSizeX = 512`, `DefaultSizeY = 512`, `RTF_RGBA8`, and `FLinearColor::Black`. The source path verifies these as creation defaults, not as a runtime minimum-size validation rule.
 
 ## Error reporting
 
-Each frame source tracks the last error it encountered. Call `GetLastErrorMessage()` to retrieve the human-readable description and `GetLastErrorCode()` to retrieve the numeric code. These are useful for diagnosing why a component refuses to start or why frames are not being delivered.
+Each `UConvaiWebcamBase` stores the last error code and message set through `SetErrorCodeAndMessage`. Blueprint users can call **Get Last Error Message** and **Get Last Error Code** to read those values.
 
 ## Next steps
 

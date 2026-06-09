@@ -1,66 +1,72 @@
 ---
 title: Vision frame sources
-description: Choose and configure the correct frame source component, create render target assets, and switch or replace the active vision component at runtime.
+description: Configure the built-in Environment Webcam frame source, create its render target, and select the active vision component at runtime.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-A frame source is any Actor component that implements `IConvaiVisionInterface`. The `ConvaiVisionBase` module provides `UEnvironmentWebcam` as the built-in frame source. This page covers how to configure it, create the required render target asset, and swap the active vision component when needed.
+A frame source is an Actor component that implements `IConvaiVisionInterface`. The `ConvaiVisionBase` module provides `UEnvironmentWebcam` as the built-in frame source for capturing the Unreal level through a `USceneCaptureComponent2D`.
 
-## Built-in frame source: UEnvironmentWebcam
+## Built-in frame source
 
-`UEnvironmentWebcam` (Blueprint class name **Environment Webcam**) captures the scene from the component's position using an internal `USceneCaptureComponent2D`. It renders each frame into a `UTextureRenderTarget2D` and compresses the result before handing it to the chatbot.
+`UEnvironmentWebcam` appears in Blueprint as **Environment Webcam**. It captures the scene from the component's transform, renders into a `UTextureRenderTarget2D`, and exposes raw RGBA frame data to the chatbot.
 
 ### Properties
 
-`UEnvironmentWebcam` owns the following properties (category **Convai | Vision**):
+`UEnvironmentWebcam` owns the following properties in category **Convai | Vision**:
 
-| Property | Description |
-|---|---|
-| `ConvaiRenderTarget` | The `UTextureRenderTarget2D` to render into. Must be assigned before calling `Start`. |
-| `CaptureComponent` | The internal `USceneCaptureComponent2D`. Accessible for adjustments such as FOV or clip planes. |
-| `bCopyPostProcessProperties` | When `true`, copies post-process volume settings onto the capture component before each frame. Adds one copy pass per frame. |
-| `bAutoStartVision` | When `true`, the component calls `Start` automatically during `BeginPlay`. Equivalent to calling `Start` manually from the Event Graph. |
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `ConvaiRenderTarget` | `UTextureRenderTarget2D*` | `null` | Render target the component captures into. Must be assigned before `Start()` can enter `Capturing`. |
+| `CaptureComponent` | `USceneCaptureComponent2D*` | Auto-created | Internal scene capture component named `EnvironmentSceneCapture2D`. |
+| `bCopyPostProcessProperties` | `bool` | `false` | Copies settings from the first `APostProcessVolume` found in the world during `BeginPlay`. |
+| `bAutoStartVision` | `bool` | `false` | Calls `Start()` during `BeginPlay` when enabled. |
 
-The following properties are declared on `UConvaiWebcamBase` (the abstract base class) and are visible on `UEnvironmentWebcam` via inheritance:
+The following properties are inherited from `UConvaiWebcamBase`:
 
-| Property | Description |
-|---|---|
-| `Identifier` | Optional string label, useful for logging or distinguishing between multiple vision components on the same Actor. |
-| `m_MaxFPS` | Maximum frames per second the component will capture. Adjustable at runtime with `SetMaxFPS`. |
-| `bUpdateOnFetch` | When `true`, the component updates the render target on every frame fetch rather than relying on the scene capture's own tick schedule. |
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `Identifier` | `FString` | `""` | Optional label for distinguishing vision components. |
+| `m_MaxFPS` | `int` | `15` | Maximum capture FPS exposed in the Details panel as **Maximum FPS**. |
+| `bUpdateOnFetch` | `bool` | `true` | Stored on the base class for update-on-fetch behavior. |
 
 ### Render target requirements
 
-`UEnvironmentWebcam` will not start unless a `UTextureRenderTarget2D` is assigned to `ConvaiRenderTarget`. The render target must meet the following requirements:
+`UEnvironmentWebcam` will not start unless a `UTextureRenderTarget2D` is assigned to `ConvaiRenderTarget`.
 
-- Format: `RTF RGBA8`
-- Size: at least `512 × 512` pixels (larger sizes increase latency with no quality benefit at current transmission limits)
+Use the Convai render target creation path when possible. It creates a render target with:
+
+| Setting | Value |
+|---|---|
+| Width | `512` |
+| Height | `512` |
+| Render target format | `RTF_RGBA8` |
+| Clear color | `FLinearColor::Black` |
 
 ## Creating a render target
 
-The `ConvaiEditor` module registers the **Convai Vision Render Target** asset factory. This factory creates a `UTextureRenderTarget2D` with the correct format and the default size `512 × 512`.
+The `ConvaiEditor` module provides a Convai Content Browser action for creating a preconfigured render target.
 
 {% stepper %}
 {% step %}
-#### Open the Convai Vision Render Target factory
+### Open the Convai render target action
 
-Right-click in the **Content Browser** and choose **Convai Vision Render Target** from the Convai category.
+Right-click in the **Content Browser**, open the **Convai** submenu, and choose **Vision Render Target**.
 
 {% hint style="warning" %}
-**Screenshot required before publishing:** Capture the Content Browser right-click context menu showing the "Convai Vision Render Target" option under the Convai category.
+**Screenshot required before publishing:** Capture the Content Browser right-click context menu showing the Vision Render Target option under the Convai submenu.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/TODO-vision-frame-sources-create-rt-menu.png" alt="Content Browser right-click menu showing Convai Vision Render Target option"><figcaption><p>TODO: Replace with screenshot showing the Convai Vision Render Target option in the Content Browser context menu.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/TODO-vision-frame-sources-create-rt-menu.png" alt="Content Browser right-click menu showing the Vision Render Target option under the Convai submenu"><figcaption><p>TODO: Replace with screenshot showing the Vision Render Target option in the Content Browser context menu.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
-#### Name and save the asset
+### Name and save the asset
 
-Name the asset (for example `RT_ConvaiVision`) and save it.
+Name the asset, for example `RT_ConvaiVision`, and save it.
 {% endstep %}
 {% endstepper %}
 
-You can also create a standard `TextureRenderTarget2D` asset and configure it manually, setting the format to `RTF RGBA8` and the size to `512 × 512`.
+You can also create a standard `TextureRenderTarget2D` asset manually. Match the Convai defaults by setting the render target format to `RTF_RGBA8` and the size to `512 x 512`.
 
 ## Assigning the render target
 
@@ -74,9 +80,9 @@ Select the **Environment Webcam** component on your character Blueprint. In the 
 
 ## Starting and stopping capture
 
-Call `Start` (category **Convai | Vision**) on the frame source to begin capturing. The component transitions through `Starting` and into `Capturing`. Call `Stop` to transition through `Stopping` into `Stopped`.
+Call **Start** (category **Convai | Vision**) on the frame source to begin capturing. `UEnvironmentWebcam` validates that `CaptureComponent` and `ConvaiRenderTarget` are assigned, sets its state to `Capturing`, assigns the render target to the capture component if needed, and enables `bCaptureEveryFrame`.
 
-Alternatively, set `bAutoStartVision = true` in the **Details** panel to start capture automatically at `BeginPlay` without any Blueprint wiring.
+Call **Stop** to set the state to `Stopped` and disable `bCaptureEveryFrame`. Alternatively, set `bAutoStartVision = true` in the **Details** panel to call `Start()` automatically during `BeginPlay`.
 
 ## Changing the active vision component at runtime
 
@@ -92,6 +98,12 @@ ChatbotComponent → Set Vision Component (VisionComponent: NewWebcam)
 ## Using multiple vision components
 
 Only one vision component is active at a time per chatbot. If multiple components implement `IConvaiVisionInterface` on the same Actor, the chatbot uses the first one found by `FindFirstVisionComponent`. To select a specific component, call `SetVisionComponent` explicitly in `BeginPlay`.
+
+## Enabling late vision setup
+
+The project setting `AlwaysAllowVision` lives on `UConvaiSettings` under category **Convai** with `AdvancedDisplay`. When enabled, session setup uses the `video` connection type even if the chatbot has not reported a vision component yet.
+
+Use this setting only when your project registers or swaps the vision component after initial connection setup. For normal Blueprint setup where the Environment Webcam component is already on the Chatbot Actor before `BeginPlay`, `SupportsVision()` is enough for the session setup to choose the vision-capable connection.
 
 ## ETextureSourceType
 

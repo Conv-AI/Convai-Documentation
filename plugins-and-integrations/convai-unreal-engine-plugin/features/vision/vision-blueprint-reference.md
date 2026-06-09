@@ -1,10 +1,10 @@
 ---
 title: Vision Blueprint reference
-description: Reference for all Blueprint-accessible vision enums, webcam component properties, nodes, and chatbot vision integration functions.
+description: Reference for Blueprint-accessible vision enums, Environment Webcam properties, webcam nodes, events, and Chatbot integration functions.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Complete reference for all Blueprint-accessible vision types, components, and nodes in the Convai Unreal Engine plugin. Every item here is verified against `VisionInterface.h`, `ConvaiWebcamBase.h`, `EnvironmentWebcam.h`, and `ConvaiAudioStreamer.h`.
+Complete reference for the Blueprint-accessible vision surface in the Convai Unreal Engine plugin. Items here are verified against `VisionInterface.h`, `ConvaiWebcamBase.h`, `EnvironmentWebcame.h`, `EnvironmentWebcame.cpp`, `ConvaiAudioStreamer.h`, and `ConvaiAudioStreamer.cpp`.
 
 ## Enums
 
@@ -35,13 +35,13 @@ Declared in `VisionInterface.h`. Describes the texture type returned by `GetImag
 
 ### Start
 
-Transitions the component from `Stopped` or `Paused` to `Capturing`.
+Starts capture on the component. In `UEnvironmentWebcam`, this validates the capture component and render target, then sets state to `Capturing`.
 
 No input or output parameters.
 
 ### Stop
 
-Transitions the component from `Capturing` or `Paused` to `Stopped`.
+Stops capture on the component. In `UEnvironmentWebcam`, this sets state to `Stopped` and disables `CaptureComponent->bCaptureEveryFrame`.
 
 No input or output parameters.
 
@@ -55,7 +55,7 @@ Returns the current `EVisionState` of the component. `BlueprintPure`.
 
 ### Set Max FPS
 
-Sets the maximum capture rate in frames per second.
+Sets the maximum capture rate in frames per second. Values `<= 0` are rejected and recorded as an error.
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -79,7 +79,7 @@ Returns the last error message recorded by the component. `BlueprintPure`.
 
 ### Get Last Error Code
 
-Returns the last error code recorded by the component. `BlueprintPure`.
+Returns the last error code recorded by the component. `BlueprintPure`. The initial value is `-1`.
 
 | Return | Type | Description |
 |---|---|---|
@@ -98,7 +98,7 @@ Returns the current frame texture and its source type.
 
 ### OnFrameReady
 
-A `BlueprintAssignable` delegate property on `UConvaiWebcamBase`. Fires every tick while the component is in the `Capturing` state. Bind to this event to react each time a new frame is ready.
+A `BlueprintAssignable` delegate property on `UConvaiWebcamBase`. For `UEnvironmentWebcam`, it broadcasts during `TickComponent()` while the component is in the `Capturing` state and the event is bound.
 
 {% hint style="info" %}
 To act only on the **first** frame, use a boolean flag inside the bound event to guard the logic. The `FOnFirstFrameCaptured` delegate on `IConvaiVisionInterface` fires at the start of a `Start()` call but is C++ only and is not Blueprint-accessible.
@@ -113,8 +113,8 @@ Own properties declared on `UEnvironmentWebcam`:
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `ConvaiRenderTarget` | `UTextureRenderTarget2D*` | `null` | The render target the component renders into. Must be assigned before calling `Start`. |
-| `CaptureComponent` | `USceneCaptureComponent2D*` | Auto-created | The internal scene capture component. Accessible for FOV or clip plane adjustments. |
-| `bCopyPostProcessProperties` | `bool` | `false` | Copies post-process volume settings to the capture component before each frame. |
+| `CaptureComponent` | `USceneCaptureComponent2D*` | Auto-created as `EnvironmentSceneCapture2D` | The internal scene capture component. The constructor sets `bCaptureEveryFrame = false`, `bCaptureOnMovement = false`, and `CaptureSource = SCS_FinalToneCurveHDR`. |
+| `bCopyPostProcessProperties` | `bool` | `false` | When enabled, copies settings from the first `APostProcessVolume` found in the world during `BeginPlay`. |
 | `bAutoStartVision` | `bool` | `false` | When `true`, calls `Start` automatically during `BeginPlay`. |
 
 Inherited from `UConvaiWebcamBase` (visible on `UEnvironmentWebcam` via inheritance):
@@ -123,7 +123,17 @@ Inherited from `UConvaiWebcamBase` (visible on `UEnvironmentWebcam` via inherita
 |---|---|---|---|
 | `Identifier` | `FString` | `""` | Optional label for logging or multi-component disambiguation. |
 | `m_MaxFPS` | `int` | `15` | Maximum capture FPS. Set via `SetMaxFPS`. |
-| `bUpdateOnFetch` | `bool` | `false` | When `true`, updates the render target on every frame fetch. |
+| `bUpdateOnFetch` | `bool` | `true` | Stored on the base vision component for update-on-fetch behavior. |
+
+## UEnvironmentWebcam runtime behavior
+
+| Function | Behavior |
+|---|---|
+| `BeginPlay()` | Copies post-process settings if `bCopyPostProcessProperties` is `true`, then calls `Start()` if `bAutoStartVision` is `true`. |
+| `Start()` | Returns without changing state if `CanStart()` fails. Otherwise sets state to `Capturing`, assigns `ConvaiRenderTarget` to `CaptureComponent->TextureTarget` if needed, enables `bCaptureEveryFrame`, and fires `OnFirstFrameCaptured` if bound. |
+| `Stop()` | Returns without changing state if `CanStop()` fails. Otherwise sets state to `Stopped`, disables `bCaptureEveryFrame`, and fires `OnFramesStopped` if bound. |
+| `CaptureRaw()` | Reads raw RGBA bytes from `ConvaiRenderTarget` and returns width and height from the render target. |
+| `CaptureCompressed()` | Converts `ConvaiRenderTarget` to JPEG bytes with the supplied compression value. The current chatbot send path uses `CaptureRaw()`. |
 
 ## Chatbot vision nodes
 
@@ -143,11 +153,17 @@ Registers a vision component with the chatbot, replacing any previously register
 
 ### Supports Vision
 
-Returns `true` if a vision component is registered and active. `BlueprintPure`.
+Returns `true` if a valid vision component is registered. If no component is registered, the function searches the owning Actor for the first component that implements `UConvaiVisionInterface`.
 
 | Return | Type | Description |
 |---|---|---|
 | Return Value | `bool` | `true` when a valid `IConvaiVisionInterface` component is present. |
+
+## Project setting
+
+### AlwaysAllowVision
+
+`AlwaysAllowVision` is a `Config` property on `UConvaiSettings` in category **Convai** with `AdvancedDisplay`. It forces initial connection setup to use the `video` connection type, which allows projects to register vision components after `BeginPlay`.
 
 ## Next steps
 

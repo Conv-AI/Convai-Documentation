@@ -1,14 +1,10 @@
 ---
 title: Vision
-description: Find guides for giving Convai characters the ability to see the game world and respond to visual context in Unreal Engine.
+description: Find guides for giving Convai characters scene vision in Unreal Engine, including setup, frame sources, C++ extension, and troubleshooting.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Vision gives a Convai character the ability to perceive its surroundings by streaming frames from an in-scene camera to Convai, which incorporates that visual context into its responses. The `ConvaiVisionBase` module provides `UEnvironmentWebcam`, the built-in frame source that renders the scene through a `USceneCaptureComponent2D`; `IConvaiVisionInterface` (declared in `VisionInterface.h`) defines the contract that any frame source must implement; and `UConvaiChatbotComponent` auto-discovers the first component on its Actor that satisfies that interface and forwards compressed frames to Convai each tick. You can replace the built-in source with any custom component that implements `IConvaiVisionInterface`.
-
-{% hint style="warning" %}
-Vision requires a Convai character model with multimodal (image) input support enabled. Verify that this option is turned on in **Core AI Settings** on the Convai dashboard before testing vision in-level.
-{% endhint %}
+Vision lets a Convai character use frames captured from the Unreal level as part of a conversation. The built-in `UEnvironmentWebcam` component renders the scene through a `USceneCaptureComponent2D`, and `UConvaiChatbotComponent` sends raw image frames from the active `IConvaiVisionInterface` component to Convai while the session is running.
 
 <table data-view="cards">
 <thead>
@@ -19,7 +15,7 @@ Vision requires a Convai character model with multimodal (image) input support e
 </thead>
 <tbody>
 <tr>
-<td><strong>How vision works</strong><br>Understand the frame capture pipeline, vision lifecycle states, and how compressed frames travel from the scene to Convai.</td>
+<td><strong>How vision works</strong><br>Understand component discovery, capture state, frame-rate throttling, and how scene frames reach Convai.</td>
 <td><a href="how-vision-works.md">how-vision-works.md</a></td>
 </tr>
 <tr>
@@ -27,23 +23,23 @@ Vision requires a Convai character model with multimodal (image) input support e
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
-<td><strong>Vision frame sources</strong><br>Choose and configure the right frame source component for your scene, including resolution, render target setup, and frame-rate limits.</td>
+<td><strong>Vision frame sources</strong><br>Configure the built-in Environment Webcam component, render target asset, capture FPS, and active source selection.</td>
 <td><a href="frame-sources.md">frame-sources.md</a></td>
 </tr>
 <tr>
-<td><strong>Vision Blueprint reference</strong><br>Complete reference for vision components, enums, and Blueprint nodes, including all fields on <code>UEnvironmentWebcam</code> and the <code>EVisionState</code> lifecycle enum.</td>
+<td><strong>Vision Blueprint reference</strong><br>Reference for Blueprint-accessible vision enums, component properties, events, and Chatbot component functions.</td>
 <td><a href="vision-blueprint-reference.md">vision-blueprint-reference.md</a></td>
 </tr>
 <tr>
-<td><strong>Custom vision components</strong><br>Implement <code>IConvaiVisionInterface</code> in C++ to create a custom frame source for any image pipeline the built-in component does not cover.</td>
+<td><strong>Custom vision components</strong><br>Create a C++ frame source for custom image pipelines that the built-in Environment Webcam component does not cover.</td>
 <td><a href="custom-vision-components.md">custom-vision-components.md</a></td>
 </tr>
 <tr>
-<td><strong>Vision usage examples</strong><br>End-to-end Blueprint setups for common vision scenarios, including safety training walkthroughs and environment-aware NPC responses.</td>
+<td><strong>Vision usage examples</strong><br>Apply common Blueprint patterns for auto-start capture, manual start and stop, FPS tuning, and source switching.</td>
 <td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
-<td><strong>Troubleshoot vision</strong><br>Diagnose and fix common vision problems — blank feeds, incorrect vision states, and frame-rate issues — and read diagnostic state at runtime.</td>
+<td><strong>Troubleshoot vision</strong><br>Diagnose missing visual context, failed starts, blank render targets, invalid sources, and capture-rate problems.</td>
 <td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td>
 </tr>
 </tbody>
