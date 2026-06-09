@@ -1,15 +1,40 @@
 ---
 title: Export diagnostic logs
-description: Package engine logs, crash reports, and diagnostics into a ZIP file from the Convai editor window to attach to a support request.
+description: Export Convai diagnostics from Unreal Editor and attach the generated log package to a Convai Developer Forum support request.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai editor window includes a log-export action that collects engine logs, crash reports, network diagnostics, performance metrics, and system information into a single ZIP archive. Use it when filing a support request or bug report.
+The Convai editor window includes support tools for checking plugin updates and exporting diagnostics. Use **Export Logs** before posting on the Convai Developer Forum so your report includes Unreal Engine logs, Convai plugin logs, crash reports, configuration files, and environment details.
 
 ## Prerequisites
 
-- Convai Unreal Engine plugin installed and enabled.
-- Signed in through the Convai editor window (see [Sign in and manage your account](sign-in-and-account.md)).
+- Convai Unreal Engine plugin installed and enabled in Unreal Engine 5.2 or later. The full Convai editor window UI is not available on earlier Unreal Engine 5 versions.
+- Convai editor window available from **Window > Convai > Open Convai Editor** or the **Convai Editor** toolbar button.
+- A reproducible issue, error message, or support question to share with Convai support.
+
+## Check for plugin updates
+
+Before exporting logs, check whether a newer plugin release is available. The update check compares your installed plugin version with the latest GitHub release.
+
+{% stepper %}
+{% step %}
+### Open the settings menu
+
+Open the Convai editor window and click the settings icon in the top-right corner.
+{% endstep %}
+
+{% step %}
+### Click Check for Updates
+
+Click **Check for Updates**. Unreal Editor shows a notification while the plugin checks GitHub.
+{% endstep %}
+
+{% step %}
+### Review the result
+
+If an update is available, the notification shows your current version, the available version, and a link to the release page. If no update is available, the notification confirms that the current stable version is installed.
+{% endstep %}
+{% endstepper %}
 
 ## Export the logs
 
@@ -24,8 +49,6 @@ Click **Convai Editor** in the Level Editor toolbar, or select **Window > Convai
 ### Click the settings icon
 
 Click the **⚙️** icon in the top-right corner of the editor window. A dropdown appears with **Export Logs** and **Check for Updates**.
-
-<figure><img src="../../../.gitbook/assets/TODO-convai-editor-settings-dropdown.png" alt="The settings dropdown in the Convai editor window showing Export Logs and Check for Updates options"><figcaption><p>TODO: Replace with screenshot of the ⚙️ settings dropdown showing the Export Logs option.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -41,27 +64,38 @@ A privacy notice dialog titled **Export Logs - Privacy Notice** appears. Review 
 {% endstep %}
 {% endstepper %}
 
-The export runs in the background. A progress notification **Exporting Logs…** appears in the editor.
+The export runs in the background. A progress notification appears with **Exporting Logs... Please wait while we package your log files.**
 
 {% hint style="success" %}
-When the export is complete, the notification updates to confirm the file count and size. The system file explorer opens automatically to the folder containing the ZIP archive.
+When the export completes, the notification changes to **Logs Exported Successfully** and shows the file count and archive size. The system file explorer opens to the generated package location. If it does not open, check `<ProjectRoot>/Saved/ConvaiLogExports/`.
 {% endhint %}
 
 ## What the archive contains
 
 | Item | Notes |
 |---|---|
-| Engine logs | Logs from the last 24 hours |
-| Crash logs | Unreal Engine crash reports |
-| Network diagnostics | Connectivity and latency information |
-| Performance metrics | CPU, memory, and frame-time data |
-| Project info | Project name, engine version, plugin version |
-| System info | OS, hardware, and driver details |
-| Screenshots | Captured at export time if available |
+| Convai plugin logs | Recent `.log` files from `<ProjectRoot>/Saved/ConvaiLogs/` |
+| Unreal Engine logs | Recent `.log` files from `<ProjectRoot>/Saved/Logs/` |
+| Crash reports | `.log`, `.txt`, and `.xml` files from up to five recent folders under `<ProjectRoot>/Saved/Crashes/` |
+| Config files | Selected project and plugin config files, including `DefaultEngine.ini`, `DefaultGame.ini`, and `ConvaiEditorSettings.ini` when present |
+| Project info | Project name, Unreal Engine version, plugin metadata, and project configuration |
+| System info | Operating system, CPU, GPU, RAM, screen, locale, and language information |
+| Network and performance data | Network adapter information, session uptime, FPS, and memory usage statistics |
 
 {% hint style="info" %}
-The ZIP file is created on your local machine. Attach it to your support ticket or forum post — it is not uploaded automatically.
+The export package is created on your local machine. It is not uploaded automatically. Review your support post before attaching the file.
 {% endhint %}
+
+## Share the package on the Developer Forum
+
+Open the Convai editor window, click **Support**, and choose **Convai Developer Forum**. When you create a forum post, include:
+
+- Unreal Engine version and Convai plugin version.
+- What you expected to happen.
+- What happened instead.
+- The smallest set of steps that reproduces the issue.
+- Any exact Output Log message shown in Unreal Editor.
+- The exported log package from **Export Logs**.
 
 ## Troubleshooting
 
@@ -69,20 +103,38 @@ The ZIP file is created on your local machine. Attach it to your support ticket 
 
 **Symptom:** The progress notification changes to **Log Export Failed**.
 
-**Cause:** A disk-write error, insufficient disk space, or a missing log directory.
+**Cause:** The exporter could not create the package folder, copy collected files, write the manifest, write metadata, or create the archive.
 
-**Fix:** Ensure the project directory is writable and that you have enough free disk space. Try the export again. If the problem persists, manually collect logs from `<ProjectRoot>/Saved/Logs/` and attach them to your support ticket.
+**Fix:** Ensure the project `Saved/` directory is writable, then try the export again. If the problem persists, manually collect logs from `<ProjectRoot>/Saved/Logs/` and attach them to your support ticket.
 
-### The privacy notice does not appear
+**Verify:** The notification changes to **Logs Exported Successfully** and the file explorer opens to the package location.
 
-**Symptom:** Clicking **Export Logs** starts the export immediately without showing a privacy notice dialog.
+### No log files are found
 
-**Cause:** The privacy notice was already accepted in a previous export.
+**Symptom:** The export fails with `No log files found to export`.
 
-**Fix:** No action required — the export proceeds normally.
+**Cause:** The exporter found no files to package from recent Convai logs, Unreal Engine logs, crash reports, or selected config files.
+
+**Fix:** Reproduce the issue once in the editor, save the project if needed so config files exist, then run **Export Logs** again.
+
+**Verify:** The generated package contains log files and metadata.
+
+### Update check fails
+
+**Symptom:** The notification shows **Update Check Failed**.
+
+**Cause:** Unreal Editor cannot reach GitHub releases, or the update check service could not complete the request.
+
+**Fix:** Confirm your internet connection and allow Unreal Editor to access GitHub over HTTPS. Retry **Check for Updates**.
+
+**Verify:** The notification either reports an available update or confirms that the installed version is current.
 
 ## Next steps
 
 {% content-ref url="../troubleshooting/README.md" %}
 [Troubleshooting](../troubleshooting/README.md)
+{% endcontent-ref %}
+
+{% content-ref url="../troubleshooting/diagnostics-and-log-export.md" %}
+[Diagnostics and log export](../troubleshooting/diagnostics-and-log-export.md)
 {% endcontent-ref %}

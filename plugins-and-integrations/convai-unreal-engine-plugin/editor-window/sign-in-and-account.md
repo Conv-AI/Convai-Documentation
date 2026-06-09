@@ -1,19 +1,21 @@
 ---
 title: Sign in and manage your account
-description: Sign in to the Convai editor window using email, Google, or GitHub, and review your plan and usage quotas in the Account section.
+description: Connect your Convai account, validate the project API key, and review plan, quota, and usage details inside Unreal Editor.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai editor window requires you to sign in before the plugin can send requests to Convai. The first time you open the window, a welcome screen appears. After sign-in, the Account section shows your plan details and per-feature usage.
+The Convai editor window helps you connect the Unreal project to Convai. You can authenticate with your Convai account, then use the Account section to review or edit the stored API key, plan details, and usage quotas.
 
 ## Prerequisites
 
 - Convai Unreal Engine plugin installed and enabled.
-- A Convai account. Create one at [convai.com](https://convai.com) if you do not have one.
+- Convai Editor window available. See [The Convai editor window](README.md) for editor-window version requirements.
+- A Convai account.
+- Internet access from Unreal Editor.
 
 ## Complete the welcome flow
 
-The welcome flow appears the first time you open the editor window, or if your session expires.
+The welcome flow can appear after Unreal Editor initializes when the project has not completed welcome setup or does not have a valid API key.
 
 {% stepper %}
 {% step %}
@@ -21,99 +23,103 @@ The welcome flow appears the first time you open the editor window, or if your s
 
 Click the **Convai Editor** button in the Level Editor toolbar, or select **Window > Convai > Open Convai Editor** from the menu bar.
 
-If you have not signed in before, the welcome screen appears automatically.
+If the **Welcome to Convai** screen is already open, continue with the next step.
 {% endstep %}
 
 {% step %}
 ### Click Connect Convai Account
 
-Click the **Connect Convai Account** button. The Convai login page opens inside the editor window.
+Click **Connect Convai Account**. The plugin opens the Convai login flow.
+{% endstep %}
+
+{% step %}
+### Finish authentication
+
+Follow the Convai login flow. Email and password authentication stays in the Convai authentication window. OAuth provider buttons, such as Google or GitHub, open in your external browser.
+{% endstep %}
+
+{% step %}
+### Wait for the editor window to open
+
+When authentication completes, the plugin validates and stores the API key, closes the authentication window, and opens the Convai editor window.
 {% endstep %}
 {% endstepper %}
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the Convai login page as it appears inside the editor window. The image must show the email and password fields, the **Login to Convai** button, and the Google and GitHub sign-in icons.
-{% endhint %}
-
-<figure><img src="../../../.gitbook/assets/TODO-convai-editor-login-page.png" alt="The Convai login page inside the editor window, showing email and password fields and Google and GitHub sign-in options"><figcaption><p>TODO: Replace with screenshot of the Convai login page inside the editor window.</p></figcaption></figure>
-
-Sign in using one of the available methods:
-
-{% tabs %}
-{% tab title="Email and password" %}
-Enter your Convai account email address and password, then click **Login to Convai**.
-{% endtab %}
-
-{% tab title="Google" %}
-Click the **Google** icon below the login form. Your default browser opens to the Google authorization page. Select your Google account and approve access.
-
-Your browser tab then displays: **Authentication Successful! You can now return to Unreal Engine. Please close this window.**
-
-Close the browser tab and return to Unreal Editor. The editor window completes sign-in automatically.
-{% endtab %}
-
-{% tab title="GitHub" %}
-Click the **GitHub** icon below the login form. Your default browser opens to the GitHub authorization page. Sign in and approve access. After authorization, your browser shows the authentication success message. Close the browser tab and return to Unreal Editor — the editor window completes sign-in automatically.
-{% endtab %}
-{% endtabs %}
-
 {% hint style="success" %}
-Sign-in is complete when the editor window opens to the Home section. The welcome flow does not appear again unless your session expires.
+Authentication is complete when the Convai editor window opens and the Account section shows a populated API key.
 {% endhint %}
+
+## Edit the API key
+
+Use the Account section when you need to update the API key stored for the project.
+
+{% stepper %}
+{% step %}
+### Open the Account section
+
+Open the Convai editor window and click **Account** in the navigation bar.
+{% endstep %}
+
+{% step %}
+### Paste the API key
+
+Paste your Convai API key into the **Paste your API key here** field.
+{% endstep %}
+
+{% step %}
+### Validate the key
+
+The plugin stores the key as you edit the field and validates it. Press Enter or move focus away from the field to force validation.
+{% endstep %}
+{% endstepper %}
+
+The stored key is written through `UConvaiSettings.API_Key`, which is a `Config` property managed by the plugin.
 
 ## View your account details
 
-Click **Account** in the navigation bar to open the Account section. The following information is displayed:
+Click **Account** in the navigation bar to open the Account section.
 
-| Field | Description |
+| Area | What it shows |
 |---|---|
-| **Username** | Your Convai account username |
-| **Email** | The email address associated with your account |
-| **Plan** | Your current subscription plan |
-| **Interaction usage** | Number of interactions consumed in the current period |
-| **ElevenLabs voice usage** | ElevenLabs voice quota consumed |
-| **Core API usage** | Core API calls consumed |
-| **Pixel Streaming usage** | Pixel Streaming minutes consumed |
-| **Plan expiry date** | Date on which your current plan period ends |
-| **Quota renewal date** | Date on which usage quotas reset |
+| **Account Details** | Current plan, plan expiry, and quota renewal date |
+| **API Key** | Editable API key field with visibility toggle |
+| **Usages** | Interaction Usage, Elevenlabs Usage, Core API Usage, and Pixel Streaming Usage |
+
+The account menu in the top-right corner shows the cached username and email after the authentication response includes user information.
 
 ## Troubleshooting
 
 ### Sign-in fails
 
-**Symptom:** The login page shows an error after clicking **Login to Convai**, or the window does not advance to the Home section after signing in.
+**Symptom:** The authentication flow does not return to Unreal Editor, or the Convai editor window does not open after login.
 
-**Cause:** Incorrect credentials, or the editor cannot reach the Convai login page.
+**Cause:** The login was not completed, the local callback was not received, or Unreal Editor could not reach Convai.
 
-**Fix:** Verify your email and password. Confirm that your internet connection is active and that no firewall is blocking outbound HTTPS.
+**Fix:** Repeat the login flow. Keep Unreal Editor open until authentication completes, and confirm that your network allows outbound HTTPS.
 
-**Verify:** After successful sign-in, the window opens to the Home section.
+**Verify:** The Convai editor window opens and the Account section shows a populated API key.
 
-### OAuth sign-in does not complete
+### Manual API key validation fails
 
-**Symptom:** The browser opens for Google or GitHub authorization, but the editor window does not advance after you close the browser.
+**Symptom:** The Account section shows a validation error after you edit the API key.
 
-**Cause:** The browser was closed before the authorization completed, or the OAuth callback was not received.
+**Cause:** The key is empty, mistyped, rejected by Convai, or cannot be validated because the editor has no network access.
 
-**Fix:** Reopen the editor window and repeat the sign-in flow. Ensure you complete the full authorization step in the browser before closing it.
+**Fix:** Copy the API key again from your Convai account, paste it into the field, and validate it again. Confirm that Unreal Editor can reach Convai over HTTPS.
 
-**Verify:** The editor window opens to the Home section.
+**Verify:** The validation error clears and the Account section shows the stored API key.
 
 ### Account section shows no usage data
 
-**Symptom:** The Account section is blank or shows placeholder values.
+**Symptom:** The Account section shows empty or placeholder usage values.
 
-**Cause:** The window has not yet refreshed data from Convai, or the session is no longer valid.
+**Cause:** The window has not loaded usage data yet, the API key is invalid, or the editor cannot reach Convai.
 
-**Fix:** Close and reopen the window. If the welcome flow reappears, sign in again.
+**Fix:** Confirm that the API key is populated, then close and reopen the Convai editor window. If the key is invalid, enter a valid key and wait for validation.
 
-**Verify:** The Account section populates with your username, email, and plan details.
+**Verify:** The Account section shows plan details and usage bars.
 
 ## Next steps
-
-{% content-ref url="browse-samples-and-content.md" %}
-[Browse samples and content](browse-samples-and-content.md)
-{% endcontent-ref %}
 
 {% content-ref url="export-diagnostic-logs.md" %}
 [Export diagnostic logs](export-diagnostic-logs.md)

@@ -1,59 +1,40 @@
 ---
 title: Browse samples and content
-description: Browse, search, and open sample projects from the Samples section of the Convai editor window to explore example content and assets in Unreal Editor.
+description: Check the current Samples area in the Convai Editor window and understand how sample projects will be surfaced in future updates.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Samples section of the Convai editor window lists sample projects and content items available for the plugin. Each item shows its name, a short description, and associated tags. Featured items are highlighted separately at the top of the list. You can search and filter the list and open items directly from the window.
+The Samples area in the Convai Editor window is reserved for future sample projects and templates. In the current plugin version, the header dropdown for **Samples** shows a **Coming Soon** message, and the Samples page is not a complete sample download or launcher workflow.
 
 ## Prerequisites
 
 - Convai Unreal Engine plugin installed and enabled.
-- Signed in through the Convai editor window (see [Sign in and manage your account](sign-in-and-account.md)).
+- Convai Editor window available from **Window > Convai > Open Convai Editor** or the **Convai Editor** toolbar button.
 
-## Open the Samples section
+## Current behavior
 
-{% stepper %}
-{% step %}
-### Open the Convai editor window
-
-Click **Convai Editor** in the Level Editor toolbar, or select **Window > Convai > Open Convai Editor**.
-{% endstep %}
-
-{% step %}
-### Select Samples in the navigation bar
-
-Click **Samples** in the navigation bar. The samples list loads from the content feed.
-{% endstep %}
-{% endstepper %}
-
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the Samples section as it appears after loading. The image must show the Featured group at the top, the All Samples list below, and the Search field.
-{% endhint %}
-
-<figure><img src="../../../.gitbook/assets/TODO-convai-editor-samples-section.png" alt="The Samples section of the Convai editor window showing Featured and All Samples groups with a search field at the top"><figcaption><p>TODO: Replace with screenshot of the Samples section showing the Featured group, All Samples list, and Search field.</p></figcaption></figure>
-
-## Browse and filter samples
-
-The Samples section displays two groups of items:
-
-- **Featured** — highlighted items that appear at the top of the list.
-- **All samples** — the full list of available sample items.
-
-Each item card shows the item name, a short description, and any associated tags.
-
-To narrow the list, type in the **Search** field at the top of the section. The list filters in real time to show only items whose name, description, or tags match the search text.
-
-## Open a sample
-
-Click an item card to open it. The sample loads in the editor according to its type — for example, a level opens in the viewport and a Blueprint asset opens in the Blueprint editor.
+The current UI contains static sample cards used by the editor window. The card data includes example names such as **Neural Nexus Game**, **Classroom Demo**, **Train Station Demo**, **Fire Station Demo**, **Space Demo**, and **Forest Demo**.
 
 {% hint style="info" %}
-Sample items are loaded via the plugin's content feed. An internet connection is required for the list to populate.
+The current Samples page does not open levels, Blueprints, or downloadable projects when a card is selected. Future plugin updates are expected to add sample projects and templates to this area.
 {% endhint %}
+
+## What to use today
+
+Use the getting started guides when building or testing a scene today. The current Samples page does not provide a complete demo level or a sample launcher workflow.
+
+For the first working scene path, follow [Add your first Convai character](../getting-started/add-your-first-character.md). For the core Actor and Component setup used by that path, see [Scene components reference](../getting-started/scene-components.md).
+
+## Future sample content
+
+When Convai adds sample projects to the Convai Editor window, this page will list the exact sample names, what each sample demonstrates, and the steps to open or import them. Until then, avoid relying on the Samples area as a setup path for production projects or support reproduction steps.
 
 ## Next steps
 
-{% content-ref url="export-diagnostic-logs.md" %}
-[Export diagnostic logs](export-diagnostic-logs.md)
+{% content-ref url="../getting-started/add-your-first-character.md" %}
+[Add your first Convai character](../getting-started/add-your-first-character.md)
+{% endcontent-ref %}
+
+{% content-ref url="../getting-started/scene-components.md" %}
+[Scene components reference](../getting-started/scene-components.md)
 {% endcontent-ref %}
