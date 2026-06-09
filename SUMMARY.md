@@ -100,7 +100,7 @@
     * [Dynamic context](plugins-and-integrations/convai-unity-sdk/features/dynamic-context/README.md)
       * [How dynamic context works](plugins-and-integrations/convai-unity-sdk/features/dynamic-context/how-dynamic-context-works.md)
       * [Dynamic context quick start](plugins-and-integrations/convai-unity-sdk/features/dynamic-context/dynamic-context-quick-start.md)
-      * [Command component reference](plugins-and-integrations/convai-unity-sdk/features/dynamic-context/command-component-reference.md)
+      * [Relay component reference](plugins-and-integrations/convai-unity-sdk/features/dynamic-context/relay-component-reference.md)
       * [Static context at connection time](plugins-and-integrations/convai-unity-sdk/features/dynamic-context/static-context-at-connection-time.md)
       * [Sync behavior and timing](plugins-and-integrations/convai-unity-sdk/features/dynamic-context/sync-behavior-and-timing.md)
       * [Dynamic context scripting API](plugins-and-integrations/convai-unity-sdk/features/dynamic-context/dynamic-context-scripting-api.md)
