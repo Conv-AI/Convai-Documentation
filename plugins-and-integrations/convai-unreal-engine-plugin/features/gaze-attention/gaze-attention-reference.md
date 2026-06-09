@@ -30,7 +30,7 @@ All properties are in the **Convai | Gaze Attention** category in the Details pa
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `GazeMaxDistance` | `float` (cm, AdvancedDisplay) | `5000.0` | Maximum line trace distance from the player camera or VR HMD. |
-| `GazeAngleTolerance` | `float` (degrees) | `5.0` | Half-angle of the dot-product fallback cone. When the strict line trace misses, the system walks all `UConvaiObjectComponent` instances in the subsystem pool and picks the one best-aligned with the view direction inside this cone. Set to `0` to disable the fallback. |
+| `GazeAngleTolerance` | `float` (degrees) | `5.0` | Half-angle of the dot-product fallback cone. When the strict trace does not engage a valid gaze target and is not blocked by non-Convai geometry, the system walks all `UConvaiObjectComponent` instances in the subsystem pool and picks the one best-aligned with the view direction inside this cone. Set to `0` to disable the fallback. |
 | `GazeTraceChannel` | `ECollisionChannel` (AdvancedDisplay) | `ECC_Visibility` | Collision channel used by the gaze line trace. |
 
 ### Highlight properties (category: Convai | Gaze Attention | Highlight)
@@ -149,7 +149,7 @@ Objects tagged with `UConvaiObjectComponent` expose gaze properties, methods, an
 |---|---|
 | `OnGazedIn` | Fired the instant a player's gaze enters this object, before any attention threshold is reached. |
 | `OnGazedOut` | Fired the instant a player's gaze leaves this object. |
-| `OnAttentionGained` | Fired when this object becomes a chatbot's in-attention target after the sustained-gaze threshold. |
+| `OnAttentionGained` | Fired when the gaze system promotes this object after the sustained-gaze threshold. Chatbot acceptance is separate and can fail if **Enable Actions** is off or `AttentionSource` is `Explicit (Blueprint/C++)`. |
 | `OnAttentionLost` | Fired when this object is released from the in-attention slot. |
 
 ## `UConvaiChatbotComponent` — attention API
@@ -165,7 +165,7 @@ The following methods are called internally by the gaze system but are also Blue
 
 | Method | Signature | Returns | Description |
 |---|---|---|---|
-| `TrySetObjectInAttentionFromGaze` | `(FConvaiObjectEntry AttentionObject, FString Text = "", EC_RunLLMOption ShouldRespond = Auto, bool bFlushImmediately = false) → bool` | `true` if accepted, `false` if rejected | Sets the attention slot only when `AttentionSource` is `None` or `Gaze`. On success, stamps `AttentionSource = Gaze`. Silently returns `false` when the slot is locked by an `Explicit` caller. Used internally by `UConvaiPlayerComponent`; exposed to Blueprint for custom gaze integrations that must respect the ownership protocol. |
+| `TrySetObjectInAttentionFromGaze` | `(FConvaiObjectEntry AttentionObject, FString Text = "", EC_RunLLMOption ShouldRespond = Auto, bool bFlushImmediately = false) → bool` | `true` if accepted, `false` if rejected | Sets the attention slot only when `EnvironmentData.bEnableActions` is `true` and `AttentionSource` is `None` or `Gaze`. On success, stamps `AttentionSource = Gaze`. Silently returns `false` when actions are disabled or the slot is locked by an `Explicit` caller. Used internally by `UConvaiPlayerComponent`; exposed to Blueprint for custom gaze integrations that must respect the ownership protocol. |
 | `TryClearObjectInAttentionFromGaze` | `(FConvaiObjectEntry ExpectedObject) → bool` | `true` if cleared, `false` if skipped | Clears the attention slot only when `AttentionSource == Gaze` AND the currently attended object matches `ExpectedObject`. Prevents a stale or late gaze-lost call from clearing an attention slot that was already claimed by a different player or system. |
 
 ### `EConvaiAttentionSource`

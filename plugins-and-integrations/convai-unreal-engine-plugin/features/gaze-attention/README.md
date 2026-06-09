@@ -1,10 +1,10 @@
 ---
 title: Gaze attention
 description: Find guides and reference for the gaze attention system, which lets players direct a Convai character's focus by looking at world objects.
-last_reviewed: "2026-06-05"
+last_reviewed: "2026-06-09"
 ---
 
-Enabling gaze attention on `UConvaiPlayerComponent` makes the plugin perform a per-tick line trace from the player camera or VR HMD. Any world actor that carries a `UConvaiObjectComponent` and falls under the crosshair is visually highlighted. After the player holds their gaze for a configurable number of seconds, that object becomes the chatbot's "object in attention," giving the AI character direct awareness of what the player is focused on.
+Enabling gaze attention on `UConvaiPlayerComponent` makes the plugin perform a per-tick line trace from the player camera or VR HMD. A gazeable `UConvaiObjectComponent` is visually highlighted when its actor or configured component scope matches the gaze hit. After the player holds their gaze for a configurable number of seconds, that object becomes the chatbot's "object in attention," giving the AI character direct awareness of what the player is focused on.
 
 <table data-view="cards">
 <thead>

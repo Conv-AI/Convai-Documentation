@@ -1,16 +1,16 @@
 ---
 title: Quick start
 description: Enable gaze attention on the Convai Player Component and verify that a character responds when the player looks at a tagged world object.
-last_reviewed: "2026-06-05"
+last_reviewed: "2026-06-09"
 ---
 
-In this tutorial we will turn on gaze attention on a `UConvaiPlayerComponent`, tag a world actor so it can receive attention, and verify that the Convai character acknowledges the object after the player holds their gaze on it. By the end, the character will react when the player looks at the actor for the `GazeAttentionDelay` duration (default: 1.0 s).
+Enable gaze attention on `UConvaiPlayerComponent`, tag a world actor so it can receive attention, and verify that the Convai character acknowledges the object after the player holds their gaze on it. By the end, the character will react when the player looks at the actor for the `GazeAttentionDelay` duration (default: 1.0 s).
 
 ## Prerequisites
 
 - The Convai Unreal Engine plugin installed and the API key configured. See [Install the Convai plugin](../../getting-started/installation.md).
 - A level containing a `UConvaiChatbotComponent` (on your AI character) and a `UConvaiPlayerComponent` (on your player pawn), with a valid `CharacterID` set and a working microphone.
-- **Enable Actions** turned on in the chatbot's Details panel (**Convai > Action API > Enable Actions**). Gaze attention writes to the attention slot, which requires the actions system to be active.
+- **Enable Actions** verified in the chatbot's Details panel. Under **Convai | Actions**, expand **Environment** and confirm **Enable Actions** (`bEnableActions`) is checked. Gaze attention writes to the attention slot, which requires the actions system to be active.
 
 ## Enable gaze attention and tag an object
 
@@ -49,9 +49,9 @@ Expand **Convai > Object** and set:
 {% step %}
 ### Enter Play mode and look at the object
 
-Press **Play**. Centre your crosshair on the tagged actor and hold it there. After the `GazeAttentionDelay` duration (default: 1.0 s), the character should acknowledge the object in speech.
+Press **Play**. Center your crosshair on the tagged actor and hold it there. After the `GazeAttentionDelay` duration (default: 1.0 s), the character should acknowledge the object in speech.
 
-The object will display a pale-yellow silhouette highlight the moment your crosshair enters it (before the attention threshold). The cursor dot at screen centre turns white while gaze is on the object.
+The object will display a pale-yellow silhouette highlight the moment your crosshair enters it (before the attention threshold). The cursor dot at screen center turns white while gaze is on the object.
 {% endstep %}
 {% endstepper %}
 

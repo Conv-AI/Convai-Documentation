@@ -15,13 +15,15 @@ flowchart TD
     A([TickGazeAttention]) --> B{bEnableGazeAttention?}
     B -- No --> Z([Skip])
     B -- Yes --> C[Line trace along GazeTraceChannel\nup to GazeMaxDistance]
-    C --> D{Hit actor with\nConvaiObjectComponent?}
-    D -- Yes --> F[GatherMatchingObjects]
+    C --> F[GatherMatchingObjects]
+    F --> D{Valid gaze target?}
+    D -- Yes --> I[Spawn / update\nAConvaiGazeHighlightActor]
     D -- No --> E{AngleTolerance > 0\nAND trace not blocked\nby non-Convai geometry?}
     E -- Yes --> G[Dot-product fallback:\nwalk subsystem pool]
     E -- No --> H([No gaze target this tick])
-    G --> F
-    F --> I[Spawn / update\nAConvaiGazeHighlightActor]
+    G --> Q{Fallback target?}
+    Q -- Yes --> I
+    Q -- No --> H
     I --> J[Update UConvaiGazeCursorWidget\nstate: Active or Idle]
     J --> K[Tick GazeAccumulator\nor NoGazeAccumulator]
     K --> L{GazeAccumulator >=\nGazeAttentionDelay?}
@@ -31,9 +33,9 @@ flowchart TD
     N -- No --> P([Accumulate — no state change])
 ```
 
-1. A line trace fires forward from the player camera or VR HMD along `GazeTraceChannel` (default `ECC_Visibility`) up to `GazeMaxDistance` centimetres (default 5000 cm).
-2. The trace result is tested for a `UConvaiObjectComponent` on the hit actor. If the hit actor (or any of its sub-components) carries a `UConvaiObjectComponent`, the actor becomes the current gaze target.
-3. If the line trace misses, a dot-product fallback runs when `GazeAngleTolerance` is greater than zero. The fallback walks every `UConvaiObjectComponent` registered in the subsystem, discards any that are out of range, behind the camera, or outside the cone half-angle, and picks the one with the highest dot product against the view direction. This avoids a sphere-trace physics query and behaves in a distance-independent way — a distant object needs the same on-screen tolerance as a nearby one.
+1. A line trace fires forward from the player camera or VR HMD along `GazeTraceChannel` (default `ECC_Visibility`) up to `GazeMaxDistance` (default 5000 cm).
+2. The trace result is tested for a gazeable `UConvaiObjectComponent` on the hit actor. The gaze target is accepted only when the object is whole-actor scoped or the hit primitive matches the object's configured component scope.
+3. If the strict trace does not engage a valid gaze target, a dot-product fallback runs when `GazeAngleTolerance` is greater than zero and the primary trace was not blocked by non-Convai geometry. The fallback walks every `UConvaiObjectComponent` registered in the subsystem, discards any that are out of range, behind the camera, or outside the cone half-angle, and picks the one with the highest dot product against the view direction. This avoids a sphere-trace physics query and behaves in a distance-independent way — a distant object needs the same on-screen tolerance as a nearby one.
 4. Any transition between gaze targets (entering or leaving) fires `OnGazeBegin` or `OnGazeEnd` on the player component and updates the cursor widget state.
 5. Two accumulators run in parallel: `GazeAccumulator` counts how long the current target has been held, and `NoGazeAccumulator` counts how long the player has been looking away from any Convai object.
 
@@ -45,7 +47,7 @@ When `GazeAccumulator` reaches `GazeAttentionDelay` seconds (default 1.0), the g
 - `OnAttentionGained` fires on the player component.
 - The chatbot's `AttentionSource` property is stamped to `EConvaiAttentionSource::Gaze`.
 
-When `NoGazeAccumulator` reaches `GazeAttentionLossDelay` seconds (default 5.0) and no new target has been gazed at, the slot is released:
+When `NoGazeAccumulator` reaches `GazeAttentionLossDelay` seconds (default 5.0) and the player is no longer gazing at the current attention actor/primitive pair, the slot is released:
 
 - The player component calls an internal method on the chatbot component to clear the attention slot. Again, this is automatic.
 - `OnAttentionLost` fires on the player component.
@@ -91,10 +93,10 @@ By default, every `UConvaiObjectComponent` on an actor represents the whole acto
 
 | Group | Condition | Fires when |
 |---|---|---|
-| Whole-actor | `MoveTargetMode` is `Actor as goal`, or `ComponentName` is empty | Any hit on the actor, unless a component-scoped match is found on the same hit primitive |
+| Whole-actor | `MoveTargetMode` is `Actor as goal`, or `ComponentName` is empty | Any hit on the actor when the actor has no resolved component-scoped objects. If a component-scoped object on the same actor matches, whole-actor objects fire as piggyback. |
 | Component-scoped | `MoveTargetMode` is `Component as goal` and `ComponentName` resolves to a mesh on the actor | Hit primitive matches (or is attached to) the resolved component |
 
-When a component-scoped component matches, any whole-actor component on the same actor also fires ("piggyback" rule). If the hit primitive does not match any component-scoped component, only whole-actor components fire.
+When a component-scoped component matches, any whole-actor component on the same actor also fires ("piggyback" rule). If the actor has resolved component-scoped objects but the hit primitive does not match any of them, no gaze object fires for that hit.
 
 **Example — a door actor with two Convai objects:**
 
@@ -105,10 +107,10 @@ BP_Door
     └── targets SM_Handle on the actor
 ```
 
-- Player looks at door frame → `ConvaiObjectComponent "Door"` fires (whole-actor match).
+- Player looks at door frame → no gaze object fires, because the actor has a resolved component-scoped object and the hit primitive does not match it.
 - Player looks at handle → `ConvaiObjectComponent "DoorHandle"` fires; `ConvaiObjectComponent "Door"` also fires (piggyback). The highlight actor scopes to `SM_Handle` only.
 
-`ComponentName` matching is case-insensitive substring lookup, resolved once and cached. Call `GetResolvedComponent(true)` to force a refresh if the component tree changes at runtime. An unresolved `ComponentName` is logged at load time and that component is excluded from all gaze passes.
+`ComponentName` matching is case-insensitive substring lookup, resolved once and cached. Call `GetResolvedComponent(true)` to force a refresh if the component tree changes at runtime. An unresolved `ComponentName` logs a warning on first component resolve and that component is excluded from scoped gaze passes.
 
 {% hint style="info" %}
 Use component-scoped `UConvaiObjectComponent` instances to let a single complex prop expose multiple independent interaction points — each with its own `Name`, `Description`, and gaze events — without duplicating the parent actor.
@@ -118,7 +120,7 @@ Use component-scoped `UConvaiObjectComponent` instances to let a single complex 
 
 ### Highlight actor
 
-When a gaze target is identified, `UConvaiPlayerComponent` spawns (or reuses) an `AConvaiGazeHighlightActor` over the target. The highlight actor paints the target's meshes using `UMeshComponent::SetOverlayMaterial` on UE 5.3 and later. The default overlay material is `/ConvAI/Highlights/M_ConvaiGazeOverlay`, a Fresnel rim silhouette that reads an `EmissiveColor` vector parameter driven by `GazeHighlightColor * GazeHighlightEmissiveIntensity`.
+When a gaze target is identified, `UConvaiPlayerComponent` spawns (or reuses) an `AConvaiGazeHighlightActor` over the target. The highlight actor paints the target's meshes using `UMeshComponent::SetOverlayMaterial` on UE 5.3 and later. By default, the highlight actor loads `/ConvAI/Highlights/M_ConvaiGazeOverlay`, a Fresnel rim silhouette material referenced by the plugin source. The actor writes `GazeHighlightColor` to the material's `EmissiveColor` and `Color` vector parameters, then writes `GazeHighlightEmissiveIntensity` to the `EmissiveIntensity` scalar parameter.
 
 On UE 5.0–5.2, `SetOverlayMaterial` is not available on `UMeshComponent`. The actor falls back to a `DrawDebugBox` wireframe around the target's bounds using `FallbackBoxThickness` and `FallbackBoxPadding`.
 

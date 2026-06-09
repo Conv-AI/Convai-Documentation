@@ -160,9 +160,9 @@ Both properties are `BlueprintReadWrite` and can be changed at runtime, for exam
 
 4. On `UConvaiPlayerComponent`, ensure **Gaze Attention Text** (`GazeAttentionText`) and **Gaze Should Respond** (`GazeShouldRespond`) are configured as needed.
 
-`ObjectEntry.ComponentName` matching is case-insensitive substring lookup and applies only when **Move Target Mode** is `Component as goal`. A value of `"EmergencyStop"` matches any component whose name contains that string. If the name cannot be resolved, the component is excluded from gaze detection and a warning is logged at load time. Call `GetResolvedComponent(true)` on the `UConvaiObjectComponent` at runtime to confirm the match.
+`ObjectEntry.ComponentName` matching is case-insensitive substring lookup and applies only when **Move Target Mode** is `Component as goal`. A value of `"EmergencyStop"` matches any component whose name contains that string. If the name cannot be resolved, the component is excluded from scoped gaze detection and a warning is logged on first component resolve, such as the first gaze check or a `GetResolvedComponent(true)` call. Call `GetResolvedComponent(true)` on the `UConvaiObjectComponent` at runtime to confirm the match.
 
-**Outcome:** Looking at `SM_EmergencyStopButton` highlights only that mesh and promotes `"EmergencyStop"` to attention. Looking at `SM_FuelGaugeDial` highlights only that mesh and promotes `"FuelGauge"`. Looking at the panel frame (no scoped component matches) falls back to any whole-actor `UConvaiObjectComponent` on the actor, if one exists.
+**Outcome:** Looking at `SM_EmergencyStopButton` highlights only that mesh and promotes `"EmergencyStop"` to attention. Looking at `SM_FuelGaugeDial` highlights only that mesh and promotes `"FuelGauge"`. Looking at the panel frame does not promote either scoped object because no configured component scope matches that hit.
 
 ## Next steps
 
