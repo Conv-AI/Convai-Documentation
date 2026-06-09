@@ -6,12 +6,12 @@ description: >-
 last_reviewed: "4.2.0"
 ---
 
-The Convai SDK for Unity ships with two sample scenes. Running one is the fastest way to confirm your installation, API key, and audio setup are working before you build your own scene.
+The Convai SDK for Unity ships with two sample packages. Running one is the fastest way to confirm your installation, API key, and audio setup are working before you build your own scene.
 
-| Sample | Description |
+| Sample package | Scenes | Description |
 | --- | --- |
-| **Basic Sample** | Basic conversation with a robot character |
-| **LipSync Sample** | High-quality character with real-time lip sync |
+| **Basic Sample** | `Basic Sample.unity`, `Basic Sample 1.unity` | Basic conversation with a robot character. `Basic Sample 1.unity` is an alternate layout that uses the refreshed robot materials. |
+| **LipSync Sample** | `LipSync Sample.unity` | High-quality character with real-time lip sync |
 
 The steps for locating the samples differ depending on how you installed the SDK.
 
@@ -47,11 +47,11 @@ In the Project window, navigate to the imported sample folder and open its `.uni
 
 When installed via the Asset Store, all sample scenes are imported into your project automatically. In the Project window, navigate to:
 
-```
+```text
 Assets/Convai SDK For Unity/Samples/
 ```
 
-Two folders are present: `BasicSample` and `LipSyncSample`.
+Two sample folders are present: `BasicSample` and `LipSyncSample`.
 {% endstep %}
 
 {% step %}

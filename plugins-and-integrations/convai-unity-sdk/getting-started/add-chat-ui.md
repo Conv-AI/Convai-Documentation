@@ -1,8 +1,8 @@
 ---
 title: Add chat UI
 description: >-
-  Add a transcript UI component to display conversation text on screen during
-  character interactions.
+  Add the built-in chat transcript UI, configure typed input, and display
+  player and character turns during conversations.
 last_reviewed: "4.2.0"
 ---
 
@@ -26,7 +26,7 @@ The SDK supports three presentation modes for conversation text.
 
 In the Project window, navigate to:
 
-```
+```text
 Packages/Convai SDK for Unity/Prefabs/TranscriptUI/TranscriptUI_Chat.prefab
 ```
 {% endstep %}
@@ -62,15 +62,15 @@ If you need to customize the layout, select the prefab instance and inspect the 
 | `playerMessagePrefab`    | `GameObject`     | Template for player speech bubbles                      |
 | `chatInputField`         | `TMP_InputField` | Text field for typed input (optional)                   |
 
+When `chatInputField` is assigned, pressing **Enter** focuses the chat input when it is not already active. Pressing **Enter** again while the field is active submits the typed message.
+
 **Fade Settings:**
 
 | Field          | Default | Description                         |
 | -------------- | ------- | ----------------------------------- |
 | `fadeDuration` | `0.5`   | Seconds for fade-in/out transitions |
 
-{% hint style="warning" %}
-If `chatContainer` is not assigned, messages will not appear and the Console logs: `[ChatTranscriptUI] chatContainer is not assigned - messages will not display`. The bundled prefab has all references pre-wired.
-{% endhint %}
+If `chatContainer` is not assigned, messages will not appear and the Console logs `[ChatTranscriptUI] chatContainer is not assigned - messages will not display`. The bundled prefab has all references pre-wired.
 
 ## Usage examples
 

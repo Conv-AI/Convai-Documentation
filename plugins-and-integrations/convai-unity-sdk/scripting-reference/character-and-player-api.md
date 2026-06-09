@@ -2,7 +2,7 @@
 title: Character and Player API
 description: >-
   Reference for ConvaiCharacter and ConvaiPlayer, including properties, methods,
-  and events for session control, speech, audio, and attention.
+  and events for session control, speech, audio, session resume, and attention.
 last_reviewed: "4.2.0"
 ---
 
@@ -50,9 +50,10 @@ var player = ConvaiManager.ActiveManager?.Player;
 | `NameTagColor`                    | `Color`                  | Read       | Color used for this character's name tag in UI                      |
 | `EnableRemoteAudioOnStart`        | `bool`                   | Read       | Whether remote audio output starts enabled                          |
 | `EnableSessionResume`             | `bool`                   | Read       | Whether the session attempts to resume after reconnection           |
+| `CharacterSessionId`              | `string`                 | Read       | Normalized `character_session_id` used for the next connection when session resume is enabled |
 | `CharacterReadyTimeoutSeconds`    | `float`                  | Read/Write | Seconds to wait for the character ready handshake before timing out |
-| `InitialDynamicInfoText`          | `string`                 | Read       | Dynamic context text sent at session start                          |
-| `InitialDynamicInfoKeepInContext` | `bool`                   | Read       | Whether the initial dynamic context persists across turns           |
+| `InitialDynamicContextText`       | `string`                 | Read       | Dynamic context text sent at session start                          |
+| `InitialDynamicContextKeepInContext` | `bool`                | Read       | Whether the initial dynamic context persists across turns           |
 | `ActionConfig`                    | `ConvaiActionConfig`     | Read       | Action configuration for this character                             |
 | `DynamicContext`                  | `IConvaiDynamicContext`  | Read       | Dynamic context command interface                                   |
 | `NarrativeDesign`                 | `IConvaiNarrativeDesign` | Read       | Narrative design interface                                          |
@@ -74,6 +75,8 @@ var player = ConvaiManager.ActiveManager?.Player;
 | `WaitForCharacterReadyAsync(float? timeoutSeconds = null, CancellationToken ct = default)` | `IConvaiOperation<Unit>` | Waits until the character completes its ready handshake. Use after `StartConversationAsync` before sending input. |
 | `ResetAndRetryAsync(CancellationToken ct = default)`                                       | `IConvaiOperation<Unit>` | Resets the character's session state and retries initialization. Use after an error.                              |
 | `Reset()`                                                                                  | `bool`                   | Synchronously resets local session state. Returns `true` if the reset was applied.                                |
+| `SetCharacterSessionId(string characterSessionId)`                                         | `void`                   | Sets the `character_session_id` used by the next connection when session resume is enabled. Passing `null`, empty, or whitespace clears the value. |
+| `ClearCharacterSessionId()`                                                                | `void`                   | Clears the configured `character_session_id` so the next connection starts fresh.                                  |
 
 ```csharp
 // Connect and wait for character ready before sending input
@@ -85,6 +88,8 @@ if (startOp.IsSuccessful)
     Debug.Log("Character is ready for input.");
 }
 ```
+
+Successful connections write Convai's returned `character_session_id` back to `CharacterSessionId`. Use `SetCharacterSessionId()` only when you need to resume a known session from your own save system or test a specific session ID.
 
 ### Speech control
 
@@ -108,11 +113,13 @@ Per-character audio control lets you mute individual characters in multi-charact
 
 ### Dynamic context and narrative
 
-| Method                                                          | Returns | Description                                                                                                                   |
-| --------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `SendDynamicInfo(string contextText)`                           | `void`  | Sends a dynamic context update to Convai for this character. Updates the character's in-session context without reconnecting. |
-| `SendTrigger(string triggerName, string triggerMessage = null)` | `void`  | Sends a Narrative Design trigger by name. `triggerMessage` overrides the trigger's configured message if provided.            |
-| `UpdateTemplateKeys(Dictionary<string, string> templateKeys)`   | `void`  | Updates Narrative Design template key values for dynamic narrative variable substitution.                                     |
+| Method                                                          | Returns | Description                                                                                                        |
+| --------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| `DynamicContext.SetState(string name, string value)`            | `void`  | Sets or updates one tracked Dynamic Context state on this character.                                                |
+| `DynamicContext.AddEvent(string text)`                          | `void`  | Adds one chronological Dynamic Context event on this character.                                                     |
+| `DynamicContext.Flush()`                                        | `void`  | Sends pending tracked Dynamic Context changes immediately when the character is in conversation.                    |
+| `SendTrigger(string triggerName, string triggerMessage = null)` | `void`  | Sends a Narrative Design trigger by name. `triggerMessage` overrides the trigger's configured message if provided. |
+| `UpdateTemplateKeys(Dictionary<string, string> templateKeys)`   | `void`  | Updates Narrative Design template key values for dynamic narrative variable substitution.                          |
 
 ### Attention and actions
 
@@ -342,7 +349,7 @@ public class AccessibilityTextInput : MonoBehaviour
 | Symptom                                                   | Likely Cause                                                      | Fix                                                                                                 |
 | --------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `WaitForCharacterReadyAsync` times out                    | Character never receives ready confirmation from Convai           | Verify API key, check network; call after `StartConversationAsync` succeeds, not before             |
-| `SendDynamicInfo` has no visible effect                   | Called before character session is connected                      | Call after `WaitForCharacterReadyAsync` resolves successfully                                       |
+| `DynamicContext.Apply()` has no visible effect             | Called before character session is connected                      | Use tracked methods before connection, or call `Apply()` after `WaitForCharacterReadyAsync` resolves successfully |
 | `ToggleRemoteAudio()` has no effect                       | `EnableRemoteAudioOnStart` is `false` and audio was never enabled | Call `EnableRemoteAudio()` first to activate audio, then toggle                                     |
 | `SendTextMessage` sends but character does not respond    | Session not in `Connected` state                                  | Check `character.IsSessionConnected` before sending                                                 |
 | `OnActionsReceived` fires but no in-scene actions execute | `ConvaiActionDispatcher` not in scene or action names don't match | Verify dispatcher is present; action names are case-insensitive but must match the configured names |

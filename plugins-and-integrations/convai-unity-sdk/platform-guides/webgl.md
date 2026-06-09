@@ -1,9 +1,8 @@
 ---
 title: WebGL
 description: >-
-  Configure and validate the Convai Unity SDK for WebGL — covers HTTPS
-  requirements, browser audio gesture handling, Vision canvas capture, and the
-  known lip-sync drift defect.
+  Configure and validate the Convai Unity SDK for WebGL, including HTTPS,
+  browser audio gestures, Vision canvas capture, and lip-sync timing.
 last_reviewed: "4.2.0"
 ---
 
@@ -14,7 +13,7 @@ The Convai Unity SDK supports voice conversation, lip sync, actions, dynamic con
 | Feature                      | WebGL                                               |
 | ---------------------------- | --------------------------------------------------- |
 | Voice conversation           | ✅ Full                                              |
-| Lip sync                     | ✅ Full (see known issue in Troubleshooting)         |
+| Lip sync                     | ⚠️ Supported; intermittent timing drift can occur    |
 | Actions                      | ✅ Full                                              |
 | Dynamic Context              | ✅ Full                                              |
 | Emotion                      | ✅ Full                                              |
@@ -64,7 +63,7 @@ Browsers require a user interaction before allowing audio playback or microphone
 
 **Explicit Start button (recommended for UI-heavy scenes):** For scenes with full-screen overlays, loading screens, or any UI that covers the view on load, automatic detection may not fire reliably. Add an explicit Start button and wire it to `ConvaiManager.EnableAudioAndStartListening()`.
 
-The automatic gesture detection and the explicit Start button are not mutually exclusive — both can be active at the same time. The Start button approach is simply more reliable when UI covers the scene on load.
+The automatic gesture detection and the explicit Start button are not mutually exclusive — both can be active at the same time. The Start button approach is more reliable when UI covers the scene on load.
 
 {% tabs %}
 {% tab title="Inspector" %}
@@ -150,20 +149,8 @@ Before shipping a WebGL build, verify each item:
 | Microphone dropdown is empty in Settings Panel                | Expected — browser controls device selection on WebGL                             | No fix needed. The browser permission prompt handles device selection.                |
 | Microphone test fails or is unavailable                       | Not supported on WebGL                                                            | Expected behavior — inform users that mic testing is unavailable on browser builds.   |
 | No spatial audio; voices lack 3D positioning                  | Spatial audio not supported on WebGL                                              | Expected. Consider communicating this in UI (e.g., headphone prompt).                 |
-
-### Lip-sync timing drift
-
-{% hint style="warning" %}
-**Lip-sync timing drift is a known defect on WebGL.** No workaround currently exists. Validate your WebGL build visually in a browser before shipping and account for this limitation in your production timeline.
-{% endhint %}
-
-**Symptom:** Visible desynchronization between speech audio and mouth animation, particularly on longer utterances.
-
-**Cause:** On WebGL, the SDK uses `RealtimePlaybackClock` (based on `Time.realtimeSinceStartupAsDouble`) instead of the hardware DSP clock used on native platforms. The DSP clock is tied to the audio hardware and provides sample-accurate timing. `Time.realtimeSinceStartupAsDouble` runs independently of the audio pipeline, which causes drift to accumulate over time.
-
-**Fix:** No workaround currently exists.
-
-**Verify:** Evaluate lip-sync timing visually in a browser across a full conversation turn before shipping.
+| Lip sync does not start with character audio                  | Browser audio unlock or playback start happened before the user gesture completed | Start audio from an explicit button and validate a full response turn in the browser. |
+| Lip sync drifts from speech audio during longer turns         | Known intermittent WebGL timing issue                                             | Validate in the target browser and keep the SDK updated. If drift appears, retry with an explicit Start button and a fresh browser session. |
 
 ## Next steps
 

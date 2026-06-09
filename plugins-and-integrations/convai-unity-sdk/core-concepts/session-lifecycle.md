@@ -1,10 +1,10 @@
 ---
 title: Session lifecycle
-description: Understand how ConvaiCharacter sessions transition through states, where session IDs are stored, and how to configure reconnection and conversation-resume behavior.
+description: Understand ConvaiCharacter session states, session ID resolution, persistence, reconnection, and conversation-resume behavior.
 last_reviewed: "4.2.0"
 ---
 
-Every `ConvaiCharacter` in your scene maintains an independent session with Convai. That session tracks whether the character is connected, what its current state is, and — when persistence is enabled — what conversation it was in the last time you connected. Understanding how sessions are created, persisted, and recovered lets you build reliable, resumable character interactions across training simulations, interactive experiences, and games.
+Every `ConvaiCharacter` in your scene maintains an independent session with Convai. That session tracks whether the character is connected, what its current state is, and - when resume is enabled - what conversation it was in the last time you connected. Understanding how sessions are created, persisted, and recovered lets you build reliable, resumable character interactions across training simulations, interactive experiences, and games.
 
 ***
 
@@ -43,9 +43,25 @@ You receive state transitions as `SessionStateChangedRelayData` events via `Conv
 
 ## Per-character sessions
 
-Each `ConvaiCharacter` has its own independent session. Sessions are not shared between characters. In multi-character scenes, each character connects and disconnects independently — session IDs are keyed to the character's ID string set in the Inspector (not the scene or object name), reconnect policy applies per character, and a session error on one character does not affect others.
+Each `ConvaiCharacter` has its own independent session. Sessions are not shared between characters. In multi-character scenes, each character connects and disconnects independently - session IDs are keyed to the character's ID string set in the Inspector, reconnect policy applies per character, and a session error on one character does not affect others.
 
-`ConvaiSessionData` is the persistent session store that maps each character to its current session identifier. It loads from disk automatically at startup and writes to `{Application.persistentDataPath}/Convai/sessions.json` on every change — session IDs survive application restarts without any additional setup.
+The SDK can resolve a `character_session_id` from two places:
+
+| Source | Where to set it | When it is used |
+| --- | --- | --- |
+| Character field | `ConvaiCharacter` Inspector -> **Session Resume** and **Character Session ID** | Used first when **Session Resume** is enabled and **Character Session ID** is not empty. |
+| Persistence store | `ISessionPersistence`, backed by `PlayerPrefs` by default | Used as fallback when resume is enabled and no explicit character session ID is set. |
+
+Successful connections write the returned `character_session_id` back to `ConvaiCharacter.CharacterSessionId`. In the Inspector, use **Copy Session ID** to copy the current value or **Clear** to make the next connection start fresh.
+
+From code, use the character methods when you want explicit control over the next connection:
+
+```csharp
+character.SetCharacterSessionId(savedCharacterSessionId);
+character.ClearCharacterSessionId();
+```
+
+`ConvaiSessionData` is an additional persistent session store that maps each character to its current session identifier. It loads from disk automatically at startup and writes to `{Application.persistentDataPath}/Convai/sessions.json` on every change.
 
 | Method                                   | Description                                                                 |
 | ---------------------------------------- | --------------------------------------------------------------------------- |
@@ -56,7 +72,7 @@ Each `ConvaiCharacter` has its own independent session. Sessions are not shared 
 | `GetAllSessionIds()`                     | Returns a read-only snapshot of all current character→sessionId mappings.   |
 
 {% hint style="info" %}
-`ConvaiSessionData` is a singleton. Data is stored at `{Application.persistentDataPath}/Convai/sessions.json` and persists across application restarts. Call `ClearAllSessionIds()` explicitly if you need a clean slate.
+`ConvaiSessionData` is a singleton. Data is stored at `{Application.persistentDataPath}/Convai/sessions.json` and persists across application restarts. Call `ClearAllSessionIds()` explicitly if you need to clear this JSON store.
 {% endhint %}
 
 ***
@@ -69,7 +85,7 @@ When a session ID is persisted, the SDK can resume a previous conversation on th
 
 | On Reconnect                 | Behavior                                            |
 | ---------------------------- | --------------------------------------------------- |
-| Session ID                   | Persisted via `ConvaiSessionData` — enables resume  |
+| Session ID                   | Resolved from `ConvaiCharacter.CharacterSessionId` first, then persistent storage |
 | Conversation history         | Managed by Convai; resumed when session ID is valid |
 | In-flight audio              | Reset — any audio mid-stream is discarded           |
 | Active turn state            | Reset — the turn restarts clean                     |
@@ -79,7 +95,7 @@ When a session ID is persisted, the SDK can resume a previous conversation on th
 
 The SDK exposes a pluggable persistence layer via `ISessionPersistence` for projects that need a custom backing store (encrypted storage, cloud saves, a database). The default stack is:
 
-```
+```text
 ISessionPersistence
   └─ KeyValueStoreSessionPersistence        ← maps characterId → sessionId with prefix "convai.session."
        └─ PlayerPrefsKeyValueStore           ← default IKeyValueStore implementation; wraps Unity PlayerPrefs

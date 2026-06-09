@@ -1,10 +1,58 @@
 ---
 title: Scene metadata scripting API
-description: Reference for ConvaiMetadataRegistry and ConvaiSceneMetadataCollector, including static events, manual trigger patterns, and debug utilities.
+description: Reference for scene metadata APIs, including world object registration, tracked properties, manual collection, and debug utilities.
 last_reviewed: "4.2.0"
 ---
 
-The Scene Metadata scripting surface has two parts. `ConvaiMetadataRegistry` is the static central registry — use it to query registration state and listen for changes. `ConvaiSceneMetadataCollector` is the runtime orchestrator — use it to trigger collection, check readiness, and audit all registered objects.
+The Scene Metadata scripting surface has three parts. `ConvaiObjectMetadata` describes one world object and can push tracked state. `ConvaiMetadataRegistry` is the static central registry. `ConvaiSceneMetadataCollector` triggers collection, checks readiness, and audits registered objects.
+
+## ConvaiObjectMetadata
+
+Access this component from the world object it describes.
+
+### Properties
+
+| Member | Type | Description |
+| --- | --- | --- |
+| `ObjectName` | `string` | Display name sent to Convai and used as the prefix for tracked Dynamic Context keys. |
+| `ObjectDescription` | `string` | Description sent in the scene metadata payload. |
+| `IncludeInMetadata` | `bool` | Controls whether this object is included in the next scene metadata collection. |
+| `IsRegistered` | `bool` | `true` when this component is registered in `ConvaiMetadataRegistry`. |
+| `IsValid` | `bool` | `true` when `ObjectName` is not empty or whitespace. |
+
+### Methods
+
+| Method | Returns | Description |
+| --- | --- | --- |
+| `SetTrackedPropertyValue(string propertyName, string value, ConvaiDynamicContextReactionMode reaction = ConvaiDynamicContextReactionMode.SyncOnly)` | `void` | Updates one tracked property and sends `{ObjectName}.{propertyName}` to all connected characters as Dynamic Context. Ignores empty property names and `null` values. |
+| `BuildStateKey(string propertyName)` | `string` | Returns the Dynamic Context key for one tracked property. |
+| `GetValidationErrors()` | `List<string>` | Returns editor-facing validation warnings for missing names or length recommendations. |
+| `ToSceneMetadata()` | `SceneMetadata` | Converts this component to the transport payload item sent by `ConvaiSceneMetadataCollector`. |
+
+```csharp
+using Convai.Runtime.DynamicContext;
+using Convai.Runtime.SceneMetadata;
+using UnityEngine;
+
+public sealed class DoorStateBridge : MonoBehaviour
+{
+    [SerializeField] private ConvaiObjectMetadata doorMetadata;
+
+    public void SetDoorLocked(bool locked)
+    {
+        doorMetadata.SetTrackedPropertyValue(
+            "Locked",
+            locked ? "true" : "false",
+            ConvaiDynamicContextReactionMode.SyncOnly);
+    }
+}
+```
+
+## ConvaiWorldObjectFocusProvider
+
+`ConvaiWorldObjectFocusProvider` exposes a `ConvaiObjectMetadata` object as an attention candidate. Add it to the same GameObject as `ConvaiObjectMetadata` when gaze or attention systems should be able to focus that object by its metadata name.
+
+When paired with `ConvaiAttentionDynamicContextBridge` on the character's embodiment setup, committed attention targets are mirrored into Dynamic Context as `current_attention_object`.
 
 ## ConvaiMetadataRegistry
 

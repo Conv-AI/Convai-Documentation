@@ -20,6 +20,8 @@ The SDK includes a sample UI prefab for testing Dynamic Context without writing 
 
 **Prefab path:** Packages/<code class="expression">space.vars.sdk_package_id</code>/Prefabs/SampleDynamicContextUI.prefab
 
+The `LipSync Sample.unity` scene also includes `DynamicContextDebugPanel`, a self-building runtime panel for deeper manual testing of state, events, attention, raw updates, reset, and acknowledgement results.
+
 {% stepper %}
 {% step %}
 ### Add the prefab
