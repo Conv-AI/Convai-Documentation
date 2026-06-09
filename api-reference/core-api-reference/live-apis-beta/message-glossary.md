@@ -102,7 +102,6 @@ For every client-to-server message, the server automatically sends a `server-res
 
 | Message Type                  | Purpose                                    | Details Page                                                                             |
 | ----------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| `action_config`               | Configure actions at connection time       | See [Connect API](connect-api.md)                                                        |
 | `trigger-message`             | Trigger narrative events or send context   | [client-to-server-messages.md](client-to-server-messages.md#trigger-message)             |
 | `user_text_message`           | Send text input as user                    | [client-to-server-messages.md](client-to-server-messages.md#user_text_message)           |
 | `update-template-keys`        | Update prompt template variables           | [client-to-server-messages.md](client-to-server-messages.md#update-template-keys)        |

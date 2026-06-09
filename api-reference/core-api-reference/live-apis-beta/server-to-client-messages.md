@@ -9,7 +9,11 @@ The Convai Live API server sends these messages over the WebRTC data channel dur
 All server messages except `server-response` use the RTVI envelope format shown under [`interaction-created`](#interaction-created). Subsequent examples in this page show only the inner `data` payload for clarity.
 {% endhint %}
 
-## server-response
+---
+
+## Acknowledgment
+
+### server-response
 
 `server-response` is sent for every client-to-server message to acknowledge receipt and report the processing outcome. It uses the **direct (legacy) format** — not the RTVI envelope — so the fields appear at the top level of the JSON object, not nested under `data`.
 
@@ -51,7 +55,6 @@ All server messages except `server-response` use the RTVI envelope format shown 
 | `stt-toggle` | `muted` |
 | `trigger-message` | `trigger_name`, `has_speak_tag` |
 | `user_text_message` | `text` |
-| `kill-pipeline` | `room_name` |
 
 **Error example**
 
@@ -104,7 +107,9 @@ All server messages except `server-response` use the RTVI envelope format shown 
 
 ---
 
-## interaction-created
+## Session & lifecycle
+
+### interaction-created
 
 Sent early in the session lifecycle when an interaction ID is created. This is the first message that carries the full RTVI envelope.
 
@@ -142,7 +147,7 @@ Sent early in the session lifecycle when an interaction ID is created. This is t
 
 ---
 
-## usage-limit-reached
+### usage-limit-reached
 
 Sent when a usage quota is exceeded. Handle this message to display appropriate feedback and close the session.
 
@@ -164,7 +169,7 @@ Sent when a usage quota is exceeded. Handle this message to display appropriate 
 
 ---
 
-## bot-turn-completed
+### bot-turn-completed
 
 Sent when the bot reaches a terminal turn state: it finished speaking, was interrupted by the user, or aborted because required output could not be delivered.
 
@@ -188,100 +193,51 @@ Sent when the bot reaches a terminal turn state: it finished speaking, was inter
 
 ---
 
-## bot-emotion
+### user-idle-warning
 
-Sent when the bot expresses an emotion. Use this to trigger avatar animations or update visual feedback elements.
+Sent when the user has been idle for a configured period, warning that disconnection is approaching.
 
 ```json
 {
-  "type": "bot-emotion",
-  "emotion": "happy",
-  "scale": 2
+  "type": "user-idle-warning",
+  "remaining_seconds": 300,
+  "message": "You've been idle. You will be disconnected in 5 minutes."
 }
 ```
 
 | Field | Type | Description |
 |---|---|---|
-| `type` | string | Always `"bot-emotion"` |
-| `emotion` | string | Emotion name, for example `"happy"`, `"sad"`, `"excited"`, or `"angry"` |
-| `scale` | integer | Intensity level: `1` = subtle, `2` = moderate, `3` = intense |
+| `type` | string | Always `"user-idle-warning"` |
+| `remaining_seconds` | integer | Seconds remaining before the session is disconnected |
+| `message` | string \| null | Optional human-readable warning message |
 
-**Recommended action:** Trigger the corresponding avatar expression or animation for the received `emotion` and `scale`.
+**Recommended action:** Display the warning to the user and prompt for activity, or send a [`reset-idle-timer`](client-to-server-messages.md#reset-idle-timer) message to reset the idle timer.
 
 ---
 
-## behavior-tree-response
+### llm-no-response
 
-Sent with behavior tree data for character AI behavior.
+Sent when the LLM explicitly decides not to respond to user input.
 
 ```json
 {
-  "type": "behavior-tree-response",
-  "bt_code": "...",
-  "bt_constants": "...",
-  "narrative_section_id": "section_1"
+  "type": "llm-no-response",
+  "reason": "abstain"
 }
 ```
 
 | Field | Type | Description |
 |---|---|---|
-| `type` | string | Always `"behavior-tree-response"` |
-| `bt_code` | string | Behavior tree code |
-| `bt_constants` | string | Constants for the behavior tree |
-| `narrative_section_id` | string | Current narrative section identifier |
+| `type` | string | Always `"llm-no-response"` |
+| `reason` | string \| null | Reason for no response; `"abstain"` indicates the model chose not to speak |
+
+**Recommended action:** Update your UI to indicate the bot chose not to respond, or handle the event silently depending on your UX requirements.
 
 ---
 
-## moderation-response
+## Interaction & transcription
 
-Sent when content moderation has processed user input.
-
-```json
-{
-  "type": "moderation-response",
-  "result": false,
-  "user_input": "the flagged content",
-  "reason": "Inappropriate language"
-}
-```
-
-| Field | Type | Description |
-|---|---|---|
-| `type` | string | Always `"moderation-response"` |
-| `result` | boolean | `true` if content passed moderation; `false` if blocked |
-| `user_input` | string | The input text that was moderated |
-| `reason` | string \| null | Reason for blocking; `null` if content passed |
-
-**Recommended action:** If `result` is `false`, optionally display feedback to the user indicating the input was blocked.
-
----
-
-## action-response
-
-Sent with an ordered list of actions or animations the bot wants to perform. Actions reference only the objects, characters, and action types declared in `action_config` at connect time. See the [Connect API](connect-api.md) for details on `action_config`.
-
-```json
-{
-  "type": "action-response",
-  "actions": [
-    { "name": "Move To", "target": "cube" },
-    { "name": "Wave" }
-  ]
-}
-```
-
-| Field | Type | Description |
-|---|---|---|
-| `type` | string | Always `"action-response"` |
-| `actions` | object[] | Ordered array of actions to trigger |
-| `actions[].name` | string | Action or animation identifier |
-| `actions[].target` | string | Optional target object or character name |
-
-**Recommended action:** Iterate over `actions` in order and trigger the corresponding animations or behaviors on your avatar or scene.
-
----
-
-## final-user-transcription
+### final-user-transcription
 
 Sent with the finalized transcription of what the user said in the current turn.
 
@@ -307,7 +263,104 @@ Sent with the finalized transcription of what the user said in the current turn.
 
 ---
 
-## visemes
+### moderation-response
+
+Sent when content moderation has processed user input.
+
+```json
+{
+  "type": "moderation-response",
+  "result": false,
+  "user_input": "the flagged content",
+  "reason": "Inappropriate language"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `type` | string | Always `"moderation-response"` |
+| `result` | boolean | `true` if content passed moderation; `false` if blocked |
+| `user_input` | string | The input text that was moderated |
+| `reason` | string \| null | Reason for blocking; `null` if content passed |
+
+**Recommended action:** If `result` is `false`, optionally display feedback to the user indicating the input was blocked.
+
+---
+
+### behavior-tree-response
+
+Sent with behavior tree data for character AI behavior.
+
+```json
+{
+  "type": "behavior-tree-response",
+  "bt_code": "...",
+  "bt_constants": "...",
+  "narrative_section_id": "section_1"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `type` | string | Always `"behavior-tree-response"` |
+| `bt_code` | string | Behavior tree code |
+| `bt_constants` | string | Constants for the behavior tree |
+| `narrative_section_id` | string | Current narrative section identifier |
+
+---
+
+## Actions
+
+### action-response
+
+Sent with an ordered list of actions or animations the bot wants to perform. Actions reference only the objects, characters, and action types declared in `action_config` at connect time. See the [Connect API](connect-api.md) for details on `action_config`.
+
+```json
+{
+  "type": "action-response",
+  "actions": [
+    { "name": "Move To", "target": "cube" },
+    { "name": "Wave" }
+  ]
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `type` | string | Always `"action-response"` |
+| `actions` | object[] | Ordered array of actions to trigger |
+| `actions[].name` | string | Action or animation identifier |
+| `actions[].target` | string | Optional target object or character name |
+
+**Recommended action:** Iterate over `actions` in order and trigger the corresponding animations or behaviors on your avatar or scene.
+
+---
+
+## Animation & lip sync
+
+### bot-emotion
+
+Sent when the bot expresses an emotion. Use this to trigger avatar animations or update visual feedback elements.
+
+```json
+{
+  "type": "bot-emotion",
+  "emotion": "happy",
+  "scale": 2
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `type` | string | Always `"bot-emotion"` |
+| `emotion` | string | Emotion name, for example `"happy"`, `"sad"`, `"excited"`, or `"angry"` |
+| `scale` | integer | Intensity level: `1` = subtle, `2` = moderate, `3` = intense |
+
+**Recommended action:** Trigger the corresponding avatar expression or animation for the received `emotion` and `scale`.
+
+---
+
+### visemes
 
 Sent frequently during bot speech with lip-sync data for avatar mouth animation. Values represent blend weights for each mouth shape.
 
@@ -363,7 +416,7 @@ Sent frequently during bot speech with lip-sync data for avatar mouth animation.
 
 ---
 
-## neurosync-blendshapes
+### neurosync-blendshapes
 
 Sent with a single frame of facial animation blendshape data (251 values per frame).
 
@@ -383,7 +436,7 @@ Sent with a single frame of facial animation blendshape data (251 values per fra
 
 ---
 
-## chunked-neurosync-blendshapes
+### chunked-neurosync-blendshapes
 
 Sent with multiple frames of blendshape data batched into a single message. Use this message type instead of `neurosync-blendshapes` when the server sends batched data for efficiency.
 
@@ -407,7 +460,7 @@ Sent with multiple frames of blendshape data batched into a single message. Use 
 
 ---
 
-## blendshape-turn-stats
+### blendshape-turn-stats
 
 Sent at the end of a bot turn with statistics about the blendshape generation for that turn. Use this for debugging or analytics.
 
@@ -437,49 +490,9 @@ Sent at the end of a bot turn with statistics about the blendshape generation fo
 
 ---
 
-## user-idle-warning
+## Audio
 
-Sent when the user has been idle for a configured period, warning that disconnection is approaching.
-
-```json
-{
-  "type": "user-idle-warning",
-  "remaining_seconds": 300,
-  "message": "You've been idle. You will be disconnected in 5 minutes."
-}
-```
-
-| Field | Type | Description |
-|---|---|---|
-| `type` | string | Always `"user-idle-warning"` |
-| `remaining_seconds` | integer | Seconds remaining before the session is disconnected |
-| `message` | string \| null | Optional human-readable warning message |
-
-**Recommended action:** Display the warning to the user and prompt for activity, or send a `reset-idle-timer` message to reset the idle timer.
-
----
-
-## llm-no-response
-
-Sent when the LLM explicitly decides not to respond to user input.
-
-```json
-{
-  "type": "llm-no-response",
-  "reason": "abstain"
-}
-```
-
-| Field | Type | Description |
-|---|---|---|
-| `type` | string | Always `"llm-no-response"` |
-| `reason` | string \| null | Reason for no response; `"abstain"` indicates the model chose not to speak |
-
-**Recommended action:** Update your UI to indicate the bot chose not to respond, or handle the event silently depending on your UX requirements.
-
----
-
-## audio-data
+### audio-data
 
 Sent when audio is routed through the data channel instead of (or in addition to) the standard WebRTC audio track. This message is only received when `audio_routing` is set to `"data_only"` or `"both"` in the `audio_config` of the `/connect` request.
 

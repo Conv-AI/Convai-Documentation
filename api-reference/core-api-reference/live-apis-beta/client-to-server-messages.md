@@ -23,10 +23,6 @@ Every client-to-server message uses this envelope:
 
 The server acknowledges every client message with a `server-response` message. See [Server response](#server-response) below.
 
-{% hint style="info" %}
-`action_config` is the one exception: it is supplied in the `/connect` HTTP request body, not sent over the data channel at runtime. See [action\_config at /connect](#action_config-at-connect).
-{% endhint %}
-
 ## Server response
 
 The server sends a `server-response` message for every client-to-server message it receives, regardless of type.
@@ -61,46 +57,9 @@ The server sends a `server-response` message for every client-to-server message 
 
 ---
 
-## action\_config at /connect
+## Interaction & events
 
-Action affordances are supplied at connect time in the `action_config` field of the `/connect` HTTP request body. This is the authoritative action contract for the session. It cannot be updated at runtime over the data channel.
-
-```json
-{
-  "character_id": "00000000-0000-0000-0000-000000000000",
-  "action_config": {
-    "actions": ["Move To", "Pick Up", "Drop", "Follow"],
-    "objects": [
-      { "name": "cube", "description": "A red cube on the table" },
-      { "name": "lever", "description": "A metal lever on the wall" }
-    ],
-    "characters": [
-      { "name": "Player", "bio": "The current user" },
-      { "name": "Guard", "bio": "A nearby guard" }
-    ],
-    "current_attention_object": "cube"
-  }
-}
-```
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `actions` | string[] | No | Action names the bot may use. |
-| `objects` | object[] | No | Objects the bot may reference. Each entry has `name` and `description`. |
-| `characters` | object[] | No | Characters the bot may reference. Each entry has `name` and `bio`. |
-| `current_attention_object` | string | No | Initial attention object. Must match one of the `objects[].name` values. |
-
-**Notes:**
-
-- `actions`, `objects`, and `characters` define the complete set of action affordances for the session.
-- `scene_description` (a separate `/connect` field) provides descriptive context only. It does not authorize actions or targets.
-- `current_attention_object` must exactly match one of the `objects[].name` values.
-
-See [Connect API](connect-api.md) for the full `/connect` request reference.
-
----
-
-## trigger-message
+### trigger-message
 
 Triggers a narrative event, sends contextual information to the bot, or initiates specific bot behaviors.
 
@@ -134,7 +93,7 @@ Triggers a narrative event, sends contextual information to the bot, or initiate
 
 ---
 
-## user\_text\_message
+### user\_text\_message
 
 Sends text as user input, simulating speech without audio.
 
@@ -159,7 +118,9 @@ Sends text as user input, simulating speech without audio.
 
 ---
 
-## update-template-keys
+## Context & state
+
+### update-template-keys
 
 Updates template variables used in the bot's system prompt.
 
@@ -187,7 +148,7 @@ Updates template variables used in the bot's system prompt.
 
 ---
 
-## update-scene-metadata
+### update-scene-metadata
 
 Updates the descriptive scene context the bot knows about, including in-scene objects and their descriptions.
 
@@ -221,7 +182,7 @@ Updates the descriptive scene context the bot knows about, including in-scene ob
 
 ---
 
-## update-dynamic-info
+### update-dynamic-info
 
 Updates dynamic information injected into the bot's system prompt. Use this for basic single-field context updates. For mode-controlled updates with token budget tracking, use [`context-update`](#context-update) instead.
 
@@ -242,7 +203,7 @@ Updates dynamic information injected into the bot's system prompt. Use this for 
 
 ---
 
-## context-update
+### context-update
 
 Updates the bot's runtime dynamic context with full control over mode, token budget, and LLM triggering. This is the preferred message for runtime context management.
 
@@ -262,12 +223,12 @@ Updates the bot's runtime dynamic context with full control over mode, token bud
 | Field | Type | Required | Default | Description |
 |---|---|---|---|---|
 | `text` | string | Yes, unless `mode` is `"reset"` | — | The context text to apply. |
-| `mode` | string | No | `"append"` | How to apply the context. See [Mode values](#mode-values). |
-| `run_llm` | string | No | `"auto"` | Whether to trigger an LLM response after the update. See [run\_llm values](#run_llm-values). |
+| `mode` | string | No | `"append"` | How to apply the context. |
+| `run_llm` | string | No | `"auto"` | Whether to trigger an LLM response after the update. |
 | `current_attention_object` | string or object | No | — | Updates the active attention object for action-reference grounding. |
 | `remove_static` | boolean | No | `false` | For `"reset"` mode only: when `true`, also clears the static context. |
 
-### Mode values
+**Mode values**
 
 | Value | Behavior |
 |---|---|
@@ -275,7 +236,7 @@ Updates the bot's runtime dynamic context with full control over mode, token bud
 | `"replace"` | Replaces existing runtime dynamic context with `text`. |
 | `"reset"` | Clears runtime dynamic context. Also clears static context if `remove_static` is `true`. `text` is not required. |
 
-### run\_llm values
+**run\_llm values**
 
 | Value | Behavior |
 |---|---|
@@ -283,7 +244,7 @@ Updates the bot's runtime dynamic context with full control over mode, token bud
 | `"false"` | Never trigger a bot response. |
 | `"auto"` | Convai decides whether to trigger a response based on context. |
 
-### Token budget
+**Token budget**
 
 Dynamic context uses an estimated token budget:
 
@@ -297,14 +258,14 @@ When runtime `text` exceeds its 30,000-token budget, Convai trims the oldest run
 
 `static_text` is session and environment context supplied for this connection. It is preserved across `reset` calls unless `remove_static` is `true`.
 
-### Attention update rules
+**Attention update rules**
 
 - `current_attention_object` is validated against the connected session's `action_config.objects`.
 - Send either the object name string or the full object payload.
 - Send an empty string (`""`) to clear the current attention object.
 - Updating `current_attention_object` regenerates the system prompt, even when `run_llm` is `"false"`.
 
-### Success response
+**Success response**
 
 On success, the server returns a `server-response` with the following `extras`:
 
@@ -340,7 +301,7 @@ On success, the server returns a `server-response` with the following `extras`:
 
 Legacy `word_count`, `static_word_count`, `runtime_word_count`, `max_words`, and `remaining_words` fields may appear for older clients. The token fields are authoritative.
 
-### Error response
+**Error response**
 
 When a token limit is exceeded, the server returns a `server-response` with `"status": "error"`:
 
@@ -359,7 +320,9 @@ When a token limit is exceeded, the server returns a `server-response` with `"st
 
 ---
 
-## tts-toggle
+## Audio control
+
+### tts-toggle
 
 Enables or disables the bot's text-to-speech audio output.
 
@@ -389,7 +352,7 @@ Enables or disables the bot's text-to-speech audio output.
 
 ---
 
-## stt-toggle
+### stt-toggle
 
 Mutes or unmutes speech-to-text microphone input processing.
 
@@ -419,7 +382,7 @@ Mutes or unmutes speech-to-text microphone input processing.
 
 ---
 
-## interrupt-bot
+### interrupt-bot
 
 Immediately stops the bot's current speech.
 
@@ -438,7 +401,7 @@ No `data` payload is required.
 
 ---
 
-## force-user-stopped-speaking
+### force-user-stopped-speaking
 
 Signals to the server that the user has finished speaking. Use this in push-to-talk implementations to end the speech segment explicitly.
 
@@ -457,7 +420,9 @@ No `data` payload is required.
 
 ---
 
-## reset-idle-timer
+## Session management
+
+### reset-idle-timer
 
 Resets the user idle timeout countdown. Send this to signal user activity and prevent idle disconnection.
 
