@@ -1,10 +1,10 @@
 ---
 title: Sign in and manage your account
-description: Connect your Convai account, validate the project API key, and review plan, quota, and usage details inside Unreal Editor.
+description: Connect your Convai account through the editor window, sign out to switch accounts, and review plan, quota, and usage details inside Unreal Editor.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai editor window helps you connect the Unreal project to Convai. You can authenticate with your Convai account, then use the Account section to review or edit the stored API key, plan details, and usage quotas.
+The Convai editor window helps you connect the Unreal project to Convai. Sign in with your Convai account to store the project API key automatically, review plan details and usage quotas in the **Account** section, and sign out from the top-right account menu when you need to use a different account.
 
 ## Prerequisites
 
@@ -46,34 +46,32 @@ When authentication completes, the plugin validates and stores the API key, clos
 {% endstepper %}
 
 {% hint style="success" %}
-Authentication is complete when the Convai editor window opens and the Account section shows a populated API key.
+Authentication is complete when the Convai editor window opens and the **Account** section shows your plan details.
 {% endhint %}
 
-## Edit the API key
+## Sign out and switch accounts
 
-Use the Account section when you need to update the API key stored for the project.
+Use the account menu in the top-right corner when you need to sign out and connect a different Convai account.
 
 {% stepper %}
 {% step %}
-### Open the Account section
+### Open the account menu
 
-Open the Convai editor window and click **Account** in the navigation bar.
+In the Convai editor window, click the account control in the top-right corner. It shows two letters from your account name.
 {% endstep %}
 
 {% step %}
-### Paste the API key
+### Sign out
 
-Paste your Convai API key into the **Paste your API key here** field.
+Select **Sign out**. The plugin clears the stored authentication for this project.
 {% endstep %}
 
 {% step %}
-### Validate the key
+### Sign in with another account
 
-The plugin stores the key as you edit the field and validates it. Press Enter or move focus away from the field to force validation.
+Repeat the welcome flow above and sign in with the Convai account you want to use. The plugin stores the API key for the new account automatically.
 {% endstep %}
 {% endstepper %}
-
-The stored key is written through `UConvaiSettings.API_Key`, which is a `Config` property managed by the plugin.
 
 ## View your account details
 
@@ -82,10 +80,9 @@ Click **Account** in the navigation bar to open the Account section.
 | Area | What it shows |
 |---|---|
 | **Account Details** | Current plan, plan expiry, and quota renewal date |
-| **API Key** | Editable API key field with visibility toggle |
 | **Usages** | Interaction Usage, Elevenlabs Usage, Core API Usage, and Pixel Streaming Usage |
 
-The account menu in the top-right corner shows the cached username and email after the authentication response includes user information.
+The account menu in the top-right corner shows two letters from your account name, your cached username and email after authentication, and a **Sign out** option.
 
 ## Troubleshooting
 
@@ -97,25 +94,15 @@ The account menu in the top-right corner shows the cached username and email aft
 
 **Fix:** Repeat the login flow. Keep Unreal Editor open until authentication completes, and confirm that your network allows outbound HTTPS.
 
-**Verify:** The Convai editor window opens and the Account section shows a populated API key.
-
-### Manual API key validation fails
-
-**Symptom:** The Account section shows a validation error after you edit the API key.
-
-**Cause:** The key is empty, mistyped, rejected by Convai, or cannot be validated because the editor has no network access.
-
-**Fix:** Copy the API key again from your Convai account, paste it into the field, and validate it again. Confirm that Unreal Editor can reach Convai over HTTPS.
-
-**Verify:** The validation error clears and the Account section shows the stored API key.
+**Verify:** The Convai editor window opens and the **Account** section shows your plan details.
 
 ### Account section shows no usage data
 
 **Symptom:** The Account section shows empty or placeholder usage values.
 
-**Cause:** The window has not loaded usage data yet, the API key is invalid, or the editor cannot reach Convai.
+**Cause:** The window has not loaded usage data yet, authentication is invalid, or the editor cannot reach Convai.
 
-**Fix:** Confirm that the API key is populated, then close and reopen the Convai editor window. If the key is invalid, enter a valid key and wait for validation.
+**Fix:** Close and reopen the Convai editor window. If the data still does not load, sign out from the account menu, sign in again, and wait for the **Account** section to refresh.
 
 **Verify:** The Account section shows plan details and usage bars.
 

@@ -4,7 +4,7 @@ description: Open the Convai editor window, understand its main sections, and fi
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai editor window is a floating Unreal Editor window for account connection, API key management, update checks, support links, and diagnostic log export. Use it after installing the Convai Unreal Engine plugin to connect the project to Convai and collect support information without leaving the editor.
+The Convai editor window is a floating Unreal Editor window for account connection, plan and usage review, update checks, support links, and diagnostic log export. Use it after installing the Convai Unreal Engine plugin to connect the project to Convai and collect support information without leaving the editor.
 
 {% hint style="info" %}
 The Convai editor window requires Unreal Engine 5.2 or later. On earlier Unreal Engine 5 versions, the editor module loads without the full window UI.
@@ -28,14 +28,14 @@ The header contains routed pages, hover menus, and window controls.
 | **Home** | Dashboard, configurations, Convai Experiences, announcements, changelogs, latest YouTube content, and characters detected in the current level |
 | **Samples** | Hover menu that currently shows a **Coming Soon** message for sample projects and templates |
 | **Features** | Hover menu that currently shows a **Coming Soon** message for feature shortcuts |
-| **Account** | API key field, plan information, quota renewal, and per-feature usage bars |
+| **Account** | Plan information, quota renewal, and per-feature usage bars |
 | **Support** | Documentation, YouTube Tutorials, and Convai Developer Forum cards |
 
-The account icon opens an account menu. The settings icon in the top-right corner opens **Export Logs** and **Check for Updates**.
+The account control in the top-right corner shows two letters from your account name and opens an account menu with **Sign out**. The settings icon opens **Export Logs** and **Check for Updates**.
 
 ## Connect the project
 
-The welcome screen starts with **Connect Convai Account**. The login flow opens a Convai authentication window and stores the API key after authentication completes. You can review or edit the stored key later from the **Account** section.
+The welcome screen starts with **Connect Convai Account**. The login flow opens a Convai authentication window and stores the API key after authentication completes. Use the account menu to sign out and sign in again when you need to switch Convai accounts.
 
 See [Sign in and manage your account](sign-in-and-account.md) for the full setup path.
 
@@ -60,7 +60,7 @@ Use the settings menu when you need to check whether a newer plugin release is a
 </thead>
 <tbody>
 <tr>
-<td><strong>Sign in and manage your account</strong><br>Complete the welcome flow and review your plan and usage quotas.</td>
+<td><strong>Sign in and manage your account</strong><br>Complete the welcome flow, sign out to switch accounts, and review your plan and usage quotas.</td>
 <td><a href="sign-in-and-account.md">sign-in-and-account.md</a></td>
 </tr>
 <tr>
