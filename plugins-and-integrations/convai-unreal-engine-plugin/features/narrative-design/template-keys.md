@@ -1,7 +1,7 @@
 ---
 title: Template keys
 description: Populate the Narrative Template Keys map on a chatbot component so section objectives reference live gameplay values through placeholder substitution.
-last_reviewed: "2026-06-05"
+last_reviewed: "4.0.0-beta.21"
 ---
 
 Template keys are key-value pairs stored in the `NarrativeTemplateKeys` property of `UConvaiChatbotComponent`. Convai substitutes `{key}` tokens in a section's objective text with the matching value from this map before the character processes the objective. This lets a single dashboard objective adapt to runtime gameplay data without creating duplicate sections.
@@ -33,11 +33,9 @@ Keys that appear in the objective but have no entry in the map are left as liter
 
 ## Set template keys in the Details panel
 
-Select the character Actor in the level or open the character Blueprint. In the **Details** panel, find the **Convai|NarrativeDesign** category. The **Narrative Template Keys** field accepts a `TMap<FString, FString>`. Add entries directly in the Details panel for keys whose values are known at design time.
+Select the character Actor in the level or open the character Blueprint. In the **Details** panel, find the **Convai|NarrativeDesign** category. The `Narrative Template Keys` field is a `TMap<FString, FString>`. Add entries directly in the Details panel for keys whose values are known at design time.
 
-{% hint style="info" %}
-**Screenshot needed:** add a screenshot of the **Convai|NarrativeDesign** Details panel category showing the Narrative Template Keys map with at least one entry, to help readers locate this field.
-{% endhint %}
+In the **Components** panel, select the **Convai Chatbot** component, then expand **Convai|NarrativeDesign** in the **Details** panel to locate `Narrative Template Keys`.
 
 ## Set template keys at runtime in Blueprint
 
@@ -49,14 +47,16 @@ NarrativeTemplateKeys["PlayerName"] = "Rivera"
 NarrativeTemplateKeys["QuestStatus"] = "completed"
 ```
 
-The map is read each time Convai evaluates a section objective, so changes take effect for the next evaluation. You do not need to restart the session.
+Assigning the property calls `UpdateNarrativeTemplateKeys` internally. If the chatbot session is connected, the plugin sends an `update-template-keys` message to Convai with the current map.
 
-## Timing
+## When keys are applied
 
-Template keys are applied when the character processes the active section's objective — not when the trigger fires. If you update a key after the trigger fires but before Convai processes the objective, the updated value is used. Set keys for a new section before calling `Invoke Narrative Design Trigger` to ensure they are in place when the destination section's objective is evaluated.
+Template keys are applied when Convai evaluates the active section's objective — not when the trigger fires. Set keys for a new section before calling **Invoke Narrative Design Trigger** so they are in place when the destination section's objective is evaluated.
+
+The plugin also sends `NarrativeTemplateKeys` when the session connects (`OnAttendeeConnected`). Populate the map in **Begin Play** before triggers fire if you need values available from the first section onward.
 
 {% hint style="info" %}
-The `NarrativeTemplateKeys` property has `BlueprintSetter = UpdateNarrativeTemplateKeys`. The setter function is marked `BlueprintInternalUseOnly` and is not available as a callable Blueprint node. Assign the property directly.
+`UpdateNarrativeTemplateKeys` is marked `BlueprintInternalUseOnly` and is not available as a callable Blueprint node. Assign the **Narrative Template Keys** property directly.
 {% endhint %}
 
 ## Next steps
@@ -66,9 +66,9 @@ The `NarrativeTemplateKeys` property has `BlueprintSetter = UpdateNarrativeTempl
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Narrative design usage examples](usage-examples.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshooting and diagnostics](troubleshooting-and-diagnostics.md)
+[Troubleshoot narrative design](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

@@ -1,63 +1,71 @@
 ---
 title: Narrative triggers
-description: Invoke named narrative triggers or raw message strings on a Convai character component to advance the story graph and handle the section change event.
-last_reviewed: "2026-06-05"
+description: Invoke named narrative triggers or dynamic context messages on a Convai chatbot component to advance the story graph and handle the section change event.
+last_reviewed: "4.0.0-beta.21"
 ---
 
-Narrative triggers advance a character's story graph from one section to the next. The Convai Unreal Engine plugin exposes two Blueprint functions for this on `UConvaiChatbotComponent`, and one event that fires when Convai confirms the transition.
+Narrative triggers advance a character's story graph from one section to the next. The Convai Unreal Engine plugin exposes two Blueprint functions on `UConvaiChatbotComponent` and one event that fires when Convai confirms a section change.
 
 ## Invoke a named trigger
 
-`Invoke Narrative Design Trigger` sends a `TriggerName` string to Convai. Convai matches the name against the outbound triggers configured for the current section in the Convai dashboard and advances the graph if a match is found.
+**Invoke Narrative Design Trigger** (`InvokeNarrativeDesignTrigger`) sends a `TriggerName` string to Convai through `SendTriggerMessage`. Convai matches the name against the outbound triggers configured for the current section in the Convai dashboard and advances the graph if a match is found.
 
 | Input | Type | Description |
 |---|---|---|
 | `TriggerName` | `FString` | The trigger name. Must match the dashboard configuration exactly (case-sensitive). |
-| `Generate Actions` | `bool` | Set `true` to receive character actions with the response. |
-| `Replicate On Network` | `bool` | Set `true` to replicate the call to clients in multiplayer. |
+| `InGenerateActions` | `bool` | Present in the Blueprint signature. Not applied in the current plugin source. |
+| `InReplicateOnNetwork` | `bool` | Present in the Blueprint signature. Not applied in the current plugin source. |
 
-Use this function when the transition target is known at design time and the trigger name is a fixed string. This is the standard approach for designed story beats.
+Use this function when the transition target is known at design time and the trigger name is a fixed string. This is the standard approach for designed story beats in training simulations, onboarding flows, and guided practice scenarios.
 
 {% hint style="warning" %}
-Trigger names are case-sensitive. `"start_scene"` and `"Start_Scene"` are treated as different triggers. Verify the name matches the dashboard configuration character-for-character.
+Trigger names are case-sensitive. `start_scene` and `Start_Scene` are treated as different triggers. Verify the name matches the dashboard configuration character-for-character.
 {% endhint %}
 
-## Invoke a raw message
+If `TriggerName` is empty, the plugin logs `Invoke Narrative Design Trigger: TriggerName is missing` and returns without sending a trigger.
 
-`Invoke Speech` (`ExecuteNarrativeTrigger`) sends a raw message string to the active session. Convai processes the message directly without matching it to a named trigger. The character responds to the message content, and if the response causes a section change, `On Narrative Section Received` fires.
+## Invoke a dynamic context message
+
+**Invoke Speech** (`ExecuteNarrativeTrigger`) stages a dynamic context event through `AddContextEvent` with `EC_RunLLMOption::Always`. It does not send a `trigger-message` packet and does not queue in `PendingTriggers`.
 
 | Input | Type | Description |
 |---|---|---|
-| `Trigger Message` | `FString` | The message string to send directly to the session. |
-| `Generate Actions` | `bool` | Set `true` to receive character actions with the response. |
-| `Replicate On Network` | `bool` | Set `true` to replicate the call to clients in multiplayer. |
+| `TriggerMessage` | `FString` | The message string staged as a context event. |
+| `InGenerateActions` | `bool` | Present in the Blueprint signature. Not applied in the current plugin source. |
+| `InReplicateOnNetwork` | `bool` | Present in the Blueprint signature. Not applied in the current plugin source. |
 
-Use `Invoke Speech` when the message is assembled at runtime — for example from player dialogue input or a dynamic game state string — and does not correspond to a configured trigger name.
+Use **Invoke Speech** when the message is assembled at runtime — for example from player speech-to-text or a dynamic game-state string — and you want Convai to process it as conversational context rather than match a dashboard trigger name. If Convai determines a section change is appropriate, **On Narrative Section Received** still fires through the same `BTResponse` path.
+
+If `TriggerMessage` is empty, the plugin logs `Invoke Speech: TriggerMessage is missing` and returns without staging an event.
 
 ## Handle the section change event
 
-Bind `On Narrative Section Received` on the chatbot component to react when Convai advances to a new section.
+Bind **On Narrative Section Received** (`OnNarrativeSectionReceivedEvent`) on the chatbot component to react when Convai advances to a new section.
 
 | Output pin | Type | Description |
 |---|---|---|
-| `Chatbot Component` | `UConvaiChatbotComponent*` | The component that received the section update. |
-| `Narrative Section ID` | `FString` | The ID of the new active section. |
+| `ChatbotComponent` | `UConvaiChatbotComponent*` | The component that received the section update. |
+| `NarrativeSectionID` | `FString` | The `section_id` of the new active section. |
 
-The event fires only after Convai confirms the section change. It does not fire when the trigger function is called.
+The event fires only after Convai confirms the section change through a `BTResponse` packet. It does not fire when the trigger function is called.
 
-To bind in Blueprint: drag the `UConvaiChatbotComponent` reference into the Event Graph, then select **Assign On Narrative Section Received** from the context menu. The generated event node receives `Chatbot Component` and `Narrative Section ID` as output pins.
+To bind in Blueprint: drag the `UConvaiChatbotComponent` reference into the Event Graph, then select **Assign On Narrative Section Received** from the context menu.
 
-## Pending triggers
+## Pending named triggers
 
-When `Invoke Narrative Design Trigger` or `Invoke Speech` is called and no active session exists, the plugin stores the call as a pending trigger. Pending triggers are replayed automatically in the order they were queued as soon as the session reconnects. A trigger called before the session opens is not lost — it fires when the connection is established.
+When **Invoke Narrative Design Trigger** is called and the chatbot session is not connected, the plugin stores the call in `PendingTriggers`. Pending triggers replay in order after the session connects and the dynamic context flush completes. A named trigger called before the session opens is not lost.
 
 {% hint style="warning" %}
-If the `UConvaiChatbotComponent` is destroyed before the session reconnects, the pending queue is discarded and queued triggers are not replayed.
+If the `UConvaiChatbotComponent` is destroyed before the session reconnects, the pending queue is discarded and queued triggers are not replayed. Calling `Reset Dynamic Context` also clears `PendingTriggers`.
 {% endhint %}
+
+**Invoke Speech** does not use the pending trigger queue. It stages context events through the dynamic context batch instead.
 
 ## Session readiness
 
-Both trigger functions require an active session. The `bAutoInitializeSession` property on `UConvaiChatbotComponent` controls whether the session opens automatically on `Begin Play`. When `true`, the component opens the session automatically; any triggers called before the session is fully established are held in the pending queue and replayed once the connection is open. If `bAutoInitializeSession` is `false`, manage the session lifecycle explicitly and be aware that triggers sent before the session opens will be queued, not discarded.
+`bAutoInitializeSession` on `UConvaiChatbotComponent` defaults to `true`. When enabled, the component calls `StartSession` on **Begin Play**. Named triggers called before the session connects queue in `PendingTriggers` and replay once the connection is open.
+
+If `bAutoInitializeSession` is `false`, call `StartSession` explicitly before you expect triggers to send immediately. You can also bind **On Character Data Loaded** (`OnCharacterDataLoadEvent_V2`) and invoke triggers from that event when you need confirmation that character data has loaded.
 
 ## Next steps
 
@@ -70,5 +78,5 @@ Both trigger functions require an active session. The `bAutoInitializeSession` p
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[Usage examples](usage-examples.md)
+[Narrative design usage examples](usage-examples.md)
 {% endcontent-ref %}
