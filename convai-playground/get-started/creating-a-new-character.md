@@ -21,7 +21,7 @@ The Convai Playground allows you to design AI-powered characters with unique per
 * A new character creation interface will open.
 * In the left menu, only **Character Description**, **Avatar**, and **Language and Speech** are active initially. Other sections will unlock after the character is created.
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (3).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -36,7 +36,7 @@ The Convai Playground allows you to design AI-powered characters with unique per
   * **Unlisted** _(default)_ – Only accessible via a direct link.
   * **Private** – Restricted to you and invited users.
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (4).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -47,7 +47,7 @@ The Convai Playground allows you to design AI-powered characters with unique per
 * Follow the steps in the [**Avatar Studio Documentation**](../../no-code-experiences/avatar-studio-experiences/) to learn how to adjust facial features, clothing, and other design elements.
 * Click **Save Changes** when done.
 
-<figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3) (2).png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -57,7 +57,7 @@ The Convai Playground allows you to design AI-powered characters with unique per
 * In **Language**, select one or more languages your character can speak.
 * In **Voice**, choose from the filtered voice options for your selected languages
 
-<figure><img src="../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (4) (4).png" alt=""><figcaption></figcaption></figure>
 
 ***
 

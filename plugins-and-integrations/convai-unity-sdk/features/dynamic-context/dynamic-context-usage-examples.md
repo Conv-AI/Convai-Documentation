@@ -1,169 +1,192 @@
 ---
 title: Dynamic context usage examples
-description: Apply runtime context updates to safety drills, onboarding flows, guided tours, and emergency transitions in connected Unity scenes.
-last_reviewed: "4.2.0"
+last_reviewed: 4.2.0
+description: >-
+  Four Dynamic Context examples covering a safety drill, an onboarding
+  walkthrough, a guided tour with timeline events, and a multi-state emergency
+  transition.
 ---
 
-These examples show production-style ways to send live context from Unity. They use `ConvaiCharacter.DynamicContext` directly or route scene events through `ConvaiDynamicContextRelay`.
+# Dynamic context usage examples
+
+The following examples progress from a single-state Inspector setup to multi-state scripting scenarios. Each example includes the scenario context, concrete setup, and the expected runtime outcome.
 
 {% hint style="info" %}
-All examples assume a working `ConvaiManager`, a connected `ConvaiCharacter`, and a scene event that knows when the context should change.
+All examples assume `ConvaiManager` is in the scene with a valid API key configured, and the target NPC has a `ConvaiCharacter` component with a Character ID assigned and is able to hold a conversation.
 {% endhint %}
 
-## Safety drill: station tracking
+### Safety drill: station tracking
 
-**Scenario:** A trainer character guides a trainee through fire suppression stations. The character should know the trainee's current station and react as soon as the trainee enters a new zone.
+**Context:** A fire suppression certification drill. A trainer NPC guides operators through suppression stations. The character must always know the operator's current station to give station-specific instructions and hazard warnings.
 
-{% code title="Assets/Scripts/StationContextTrigger.cs" lineNumbers="true" overflow="wrap" %}
-```csharp
-using Convai.Runtime.Components;
-using Convai.Runtime.DynamicContext;
-using UnityEngine;
+#### Setup (Inspector)
 
-public sealed class StationContextTrigger : MonoBehaviour
-{
-    [SerializeField] private ConvaiCharacter trainer;
-    [SerializeField] private string stationName = "Fire Suppression Bay";
+1. Add `ConvaiDynamicContextCommand` to the trainer NPC's GameObject.
+2. Set **Command Type** to **Set State**.
+3. Set **State Name** to `Station`.
+4. Set **State Value** to `Fire Suppression Bay`.
+5. Set **Reaction Mode** to **React Immediately** — the character should acknowledge each station transition.
+6. Add a trigger collider to the Fire Suppression Bay zone. Wire its `OnTriggerEnter` event to the command's `Execute()` method.
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (!other.CompareTag("Player")) return;
+Repeat with a separate child-GameObject command for each additional station, each with the appropriate **State Value**. In each child command's **Target** section, disable **Auto Resolve Character** and assign the NPC's `ConvaiCharacter` explicitly — auto-resolve only searches the same GameObject.
 
-        trainer.DynamicContext.SetState(
-            "Station",
-            stationName,
-            ConvaiDynamicContextReactionMode.ReactImmediately);
+#### Expected outcome
 
-        trainer.DynamicContext.Flush();
-    }
-}
-```
-{% endcode %}
+When the operator enters the Fire Suppression Bay, `Execute()` fires. The character receives the updated `Station` state and immediately responds:
 
-**Expected result:** The trainee enters the zone, Unity sends `Station is Fire Suppression Bay`, and the trainer immediately acknowledges the station change.
+> _"You've arrived at the Fire Suppression Bay. With the current extreme hazard rating, confirm your PPE is on before touching any equipment."_
 
-## Onboarding: batch completion state
+The `Station` state persists in the tracker. If the operator asks "Where am I?" at any point, the character answers with the current station value.
 
-**Scenario:** A new employee collects an access card and completes the security briefing in the same interaction. Send both facts in one batch.
+### Onboarding walkthrough: batch state update
 
-{% code title="Assets/Scripts/OnboardingProgressTracker.cs" lineNumbers="true" overflow="wrap" %}
+**Context:** A corporate onboarding simulation. An HR representative NPC adapts its guidance based on which items a new employee has collected and which checkpoints they have cleared. Two conditions are met simultaneously — they should be sent in one atomic update.
+
+#### Setup (Scripting)
+
 ```csharp
 using System.Collections.Generic;
 using Convai.Runtime.Components;
 using Convai.Runtime.DynamicContext;
 using UnityEngine;
 
-public sealed class OnboardingProgressTracker : MonoBehaviour
+public class OnboardingProgressTracker : MonoBehaviour
 {
-    [SerializeField] private ConvaiCharacter hrCharacter;
+    [SerializeField] private ConvaiCharacter _hrCharacter;
 
-    public void CompleteAccessSetup()
+    public void OnAccessCardAndBriefingComplete()
     {
-        hrCharacter.DynamicContext.SetStates(
+        // Batch update — one canonical rebuild, one network round-trip
+        _hrCharacter.DynamicContext.SetStates(
             new Dictionary<string, string>
             {
-                ["AccessCard"] = "Collected",
-                ["SecurityBriefing"] = "Completed"
+                { "AccessCard", "Collected" },
+                { "SecurityBriefing", "Completed" }
             },
-            ConvaiDynamicContextReactionMode.ReactImmediately);
-
-        hrCharacter.DynamicContext.Flush();
+            ConvaiContextReactionMode.ReactImmediately
+        );
     }
 
-    public bool IsReadyForFloorAccess()
+    public void CheckIfReadyForFloorAccess()
     {
-        bool hasCard = hrCharacter.DynamicContext.TryGetStateValue("AccessCard", out string card)
-                       && card == "Collected";
-        bool hasBriefing = hrCharacter.DynamicContext.TryGetStateValue("SecurityBriefing", out string briefing)
-                           && briefing == "Completed";
+        // Read local tracker — no network call
+        bool hasCard = _hrCharacter.DynamicContext.TryGetStateValue("AccessCard", out string cardState)
+                       && cardState == "Collected";
+        bool hasBriefing = _hrCharacter.DynamicContext.TryGetStateValue("SecurityBriefing", out string briefingState)
+                           && briefingState == "Completed";
 
-        return hasCard && hasBriefing;
+        if (hasCard && hasBriefing)
+            Debug.Log("Employee is ready for floor access.");
     }
 }
 ```
-{% endcode %}
 
-**Expected result:** The HR character receives one composed update and can tell the employee they are ready for floor access. `TryGetStateValue` reads the local tracker without a network call.
+#### Expected outcome
 
-## Guided tour: relay from scene events
+`OnAccessCardAndBriefingComplete()` sends one atomic update. The HR character responds immediately:
 
-**Scenario:** A docent character tracks the active exhibit and records visitor actions. Scene triggers call a relay so the context target and flush behavior stay centralized.
+> _"You've collected your access card and completed the security briefing — you're cleared for floor access. Head to Workstation 4B next."_
 
-{% code title="Assets/Scripts/TourContextEmitter.cs" lineNumbers="true" overflow="wrap" %}
-```csharp
-using Convai.Runtime.Presentation.DynamicContext;
-using UnityEngine;
+`TryGetStateValue` reads from the local tracker with no network round-trip. It returns the current value if the state was set, or `false` if it was never set or has been removed.
 
-public sealed class TourContextEmitter : MonoBehaviour
-{
-    [SerializeField] private ConvaiDynamicContextRelay relay;
+### Guided tour: multiple commands and timeline events
 
-    public void EnterAncientRomeExhibit()
-    {
-        relay.SetState("ActiveExhibit", "Ancient Rome Collection");
-    }
+**Context:** A museum guided tour. A docent NPC tracks which exhibit is currently active and records visitor interactions as chronological events. The docent uses that history to give personalized recommendations.
 
-    public void RecordColosseumQuestion()
-    {
-        relay.AddEvent("Visitor asked about the Colosseum reconstruction");
-    }
+#### Setup (Inspector — multiple child commands)
 
-    public void FlushTourContext()
-    {
-        relay.Flush();
-    }
-}
+Because `ConvaiDynamicContextCommand` allows only one instance per GameObject, each command lives on a child GameObject of the NPC.
+
+**Child GameObject 1 — "SetActiveExhibit"**
+
+* Command Type: `Set State`
+* State Name: `ActiveExhibit`
+* State Value: `Ancient Rome Collection`
+* Reaction Mode: `SyncOnly` — the exhibit name updates silently; tour narrative drives pacing
+* Target → Auto Resolve Character: disabled; Character field: NPC's `ConvaiCharacter`
+
+**Child GameObject 2 — "RecordVisitorQuestion"**
+
+* Command Type: `Add Event`
+* Event Text: `Visitor asked about the Colosseum reconstruction`
+* Reaction Mode: `Auto`
+* Target → Auto Resolve Character: disabled; Character field: NPC's `ConvaiCharacter`
+
+**Child GameObject 3 — "RecordPhotoTaken"**
+
+* Command Type: `Add Event`
+* Event Text: `Visitor photographed the gladiator exhibit`
+* Reaction Mode: `Auto`
+* Target → Auto Resolve Character: disabled; Character field: NPC's `ConvaiCharacter`
+
+Wire each child command's `Execute()` to timeline markers, interaction zones, or UI buttons. Wire the **On Executed** event on each child to drive UI feedback — highlight exhibit cards, update tour progress — without additional scripting.
+
+#### Expected outcome
+
+As the visitor progresses, the docent's canonical context accumulates:
+
 ```
-{% endcode %}
+ActiveExhibit is Ancient Rome Collection
+Visitor asked about the Colosseum reconstruction
+Visitor photographed the gladiator exhibit
+```
 
-Configure the relay's **Reaction Mode** to `Auto`. Leave **Flush Immediately** disabled if several exhibit events can happen together, then call `FlushTourContext()` at the end of the interaction.
+The docent references both the current exhibit and the visitor's specific interactions:
 
-**Expected result:** The docent can reference the current exhibit and recent visitor actions in later dialogue.
+> _"Since you photographed the gladiator exhibit, you might enjoy the additional display on Roman military equipment in the next room."_
 
-## Emergency response: state and event in one flush
+### Emergency response: multi-state transition
 
-**Scenario:** An industrial safety simulation shifts from routine inspection to emergency mode. Several states change at the same time, and the triggering alarm should remain in the event history.
+**Context:** An industrial safety simulation. A supervisor NPC must respond to a simultaneous shift from routine inspection to emergency mode — three conditions change at once, and the character must acknowledge all of them immediately.
 
-{% code title="Assets/Scripts/EmergencyResponseContext.cs" lineNumbers="true" overflow="wrap" %}
+#### Setup (Scripting)
+
 ```csharp
 using System.Collections.Generic;
 using Convai.Runtime.Components;
 using Convai.Runtime.DynamicContext;
 using UnityEngine;
 
-public sealed class EmergencyResponseContext : MonoBehaviour
+public class EmergencyResponseController : MonoBehaviour
 {
-    [SerializeField] private ConvaiCharacter supervisor;
+    [SerializeField] private ConvaiCharacter _supervisorCharacter;
 
     public void TriggerChemicalLeak()
     {
-        supervisor.DynamicContext.SetStates(
+        // All three states change simultaneously — one atomic update, one canonical rebuild
+        _supervisorCharacter.DynamicContext.SetStates(
             new Dictionary<string, string>
             {
-                ["OperationMode"] = "Emergency",
-                ["HazardType"] = "Chemical Leak - Bay 7",
-                ["EvacuationStatus"] = "In Progress"
+                { "OperationMode", "Emergency" },
+                { "HazardType", "Chemical Leak — Bay 7" },
+                { "EvacuationStatus", "In Progress" }
             },
-            ConvaiDynamicContextReactionMode.ReactImmediately);
+            ConvaiContextReactionMode.ReactImmediately
+        );
 
-        supervisor.DynamicContext.AddEvent(
-            "Chemical leak alarm triggered at Bay 7; ventilation engaged",
-            ConvaiDynamicContextReactionMode.SyncOnly);
-
-        supervisor.DynamicContext.Flush();
+        // Log the triggering event after the state batch
+        _supervisorCharacter.DynamicContext.AddEvent(
+            "Chemical leak alarm triggered at Bay 7 — automated ventilation engaged",
+            ConvaiContextReactionMode.SyncOnly
+        );
     }
 }
 ```
-{% endcode %}
 
-**Expected result:** The supervisor receives the state transition and alarm event in one composed update. The strongest reaction in the batch is `ReactImmediately`, so the character is asked to respond right away.
+#### Expected outcome
 
-## Next steps
+The supervisor character receives three state updates and one event. The `ReactImmediately` mode on `SetStates` triggers an immediate response acknowledging all simultaneous changes:
+
+> _"Chemical leak at Bay 7 — all personnel evacuate the east wing immediately. Bay 7 ventilation is engaged. Do not re-enter until the all-clear is given."_
+
+Using `SetStates` for three simultaneous transitions produces one canonical rebuild rather than three sequential ones, ensuring the character receives a coherent picture rather than three partial updates.
+
+### Next steps
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[Dynamic context scripting API](dynamic-context-scripting-api.md)
+[dynamic-context-scripting-api.md](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="sync-behavior-and-timing.md" %}
-[Sync behavior and timing](sync-behavior-and-timing.md)
+[sync-behavior-and-timing.md](sync-behavior-and-timing.md)
 {% endcontent-ref %}

@@ -1,87 +1,100 @@
 ---
 title: Static context at connection time
-description: Configure fixed scenario facts that are sent with the room connection before runtime updates, events, and attention changes begin.
-last_reviewed: "4.2.0"
+last_reviewed: 4.2.0
+description: >-
+  Configure InitialDynamicInfoText and InitialDynamicInfoKeepInContext on
+  ConvaiCharacter to send fixed scenario facts once at the start of each
+  conversation.
 ---
 
-Static connection-time context is for facts that are already known before a character session starts. Use it for the facility name, scenario title, trainee role, or initial drill conditions. Use runtime Dynamic Context for values that change after the session begins.
+# Static context at connection time
 
-## Inspector fields
+Every Convai character has two fields — **Initial Dynamic Info Text** and **Initial Dynamic Info Keep In Context** — that inject a fixed block of context into the session request at the moment the conversation connects. This context is delivered to Convai once, before the first response, and is separate from runtime Dynamic Context updates.
 
-The fields are on `ConvaiCharacter` in the connection section.
+Use this mechanism for facts that are true before the conversation begins and will not change during the session: the facility name, the character's role, the training scenario type, or the starting conditions of a drill. Use runtime Dynamic Context (`ConvaiDynamicContextCommand` or `IConvaiDynamicContext`) for everything that evolves as the session progresses.
 
-| Inspector label | Runtime property | Default | Description |
-|---|---|---|---|
-| **Keep Initial Dynamic Context** | `InitialDynamicContextKeepInContext` | `false` | Enables initial context text for the connection request. |
-| **Initial Dynamic Context Text** | `InitialDynamicContextText` | Empty | Fixed text sent in the room connection request when keep is enabled. |
+### Inspector configuration
 
-The text field is shown only when **Keep Initial Dynamic Context** is enabled.
+Both fields are on the `ConvaiCharacter` component under the **Dynamic Info (Connection Request)** header.
+
+<figure><img src="../../../../.gitbook/assets/convai-character-dynamic-info-inspector.png" alt="Unity Inspector showing the Dynamic Info (Connection Request) section on ConvaiCharacter with Initial Dynamic Info Text and Initial Dynamic Info Keep In Context fields"><figcaption><p>Dynamic Info fields on ConvaiCharacter — Initial Dynamic Info Text is delivered once at session start; enable Keep In Context to retain these facts across all LLM turns for the duration of the session.</p></figcaption></figure>
+
+| Field                                | Type     | Default   | Description                                                                                                                                         |
+| ------------------------------------ | -------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Initial Dynamic Info Text            | `string` | _(empty)_ | Free-text block sent as part of the session connection request. No format constraints — write plain sentences or key-value lines.                   |
+| Initial Dynamic Info Keep In Context | `bool`   | `false`   | When `true`, Convai retains this text across all LLM turns for the duration of the session. When `false`, the text informs only the first response. |
 
 {% hint style="warning" %}
-When **Keep Initial Dynamic Context** is disabled, Unity does not send the initial context text. Enable the toggle before entering fixed scenario facts.
+**Initial Dynamic Info Keep In Context defaults to `false`.** When disabled, Convai uses the initial context text to inform the character's first response only — it is not retained across turns. If you expect the character to reference initial facts throughout a long session, enable this field. Leaving it disabled is a common cause of characters appearing to "forget" scenario context after the first exchange.
 {% endhint %}
 
-## Example
+#### Example configuration
 
-For a fire suppression certification drill, enable **Keep Initial Dynamic Context** and set **Initial Dynamic Context Text** to:
+For a fire suppression certification drill, set **Initial Dynamic Info Text** to:
 
-```text
+```
 Facility: Offshore Platform Alpha
 Scenario: Fire Suppression Certification Drill
 Trainee role: Operator under assessment
 ```
 
-The SDK serializes this into the room connection request as `dynamic_info.text` with `dynamic_info.keep_in_context` set to `true`.
+Enable **Initial Dynamic Info Keep In Context**.
 
-## Relationship to runtime Dynamic Context
+The character will reference these facts throughout the conversation. You do not need to re-send them via runtime Dynamic Context — they persist for the life of the session.
 
-| Context source | When sent | Best for | Runtime API |
-|---|---|---|---|
-| Initial dynamic context | During room connection | Fixed scenario facts known before the session starts | Read-only properties on `ConvaiCharacter` |
-| Runtime Dynamic Context | During the active session | Live state, events, resets, and attention objects | `ConvaiCharacter.DynamicContext` |
+### Relationship to runtime Dynamic Context
 
-The two sources are complementary. Initial context establishes the starting scenario. Runtime Dynamic Context layers live changes on top.
+Initial context and runtime Dynamic Context are complementary — not alternatives.
 
-```csharp
-character.DynamicContext.SetState("Station", "Chemical Storage Bay");
-character.DynamicContext.SetState("HazardLevel", "Extreme");
-character.DynamicContext.AddEvent("Trainee bypassed manual lockout procedure");
-```
+|                           | Initial Dynamic Info                         | Runtime Dynamic Context                         |
+| ------------------------- | -------------------------------------------- | ----------------------------------------------- |
+| **When sent**             | Once, at `ConnectAsync`                      | During the session, on demand                   |
+| **Content**               | Fixed facts set at design time               | Live state and events set at runtime            |
+| **Suitable for**          | Facility name, scenario type, character role | Trainee location, equipment state, hazard level |
+| **Modifiable at runtime** | No — sent once per connection                | Yes — via `SetState`, `AddEvent`, `Reset`       |
 
-## Reset scope
-
-`Reset()` clears runtime tracked states and events. It does not edit the serialized initial-context fields or dashboard prompt text.
-
-Use `Reset(removeStatic: true)` when the current session should also clear static connect-time context on Convai.
+Both mechanisms feed into the character's awareness simultaneously. Initial context provides a stable foundation; runtime Dynamic Context layers live updates on top.
 
 ```csharp
-character.DynamicContext.Reset(removeStatic: true);
-character.DynamicContext.Flush();
+// These complement the initial context — not replace it
+_character.DynamicContext.SetState("Station", "Chemical Storage Bay");
+_character.DynamicContext.SetState("HazardLevel", "Extreme");
+_character.DynamicContext.AddEvent("Trainee bypassed manual lockout procedure");
 ```
 
-This request affects the current session. If you reconnect later and **Keep Initial Dynamic Context** is still enabled, Unity can send the configured initial context again.
+### What `Reset()` does not clear
 
-## Scripting access
+Calling `Reset()` on the runtime Dynamic Context layer clears all tracked states and events. It does **not** affect initial dynamic info:
 
-Both values are readable at runtime.
+* **Initial Dynamic Info Text** was sent at connection time and cannot be recalled or re-sent by any runtime call.
+* **System prompt facts** on the Convai dashboard are not part of the Dynamic Context layer. No SDK call affects them at runtime.
+* **In-session LLM memory** — the character retains conversational context across turns within the same session. `Reset()` clears the Dynamic Context tracker and sends a Reset message to Convai, but it does not clear the model's in-session conversational memory.
+
+{% hint style="info" %}
+To change the initial context for a new session, end the current conversation, update the **Initial Dynamic Info Text** field, and reconnect. Initial context is sent once per `ConnectAsync` call.
+{% endhint %}
+
+### Scripting access
+
+Both fields are readable via C# properties on `ConvaiCharacter`:
 
 ```csharp
-string initialText = character.InitialDynamicContextText;
-bool keepInContext = character.InitialDynamicContextKeepInContext;
+string initialText = _character.InitialDynamicInfoText;
+bool keepInContext = _character.InitialDynamicInfoKeepInContext;
 ```
 
-Set the values in the Inspector before Play mode, or through editor tooling that edits the serialized fields.
+These properties are read-only at runtime. Set the values in the Inspector before the scene is played, or via `SerializedObject` in a custom Editor tool.
 
-## Next steps
+### Next steps
+
+{% content-ref url="command-component-reference.md" %}
+[command-component-reference.md](command-component-reference.md)
+{% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[Dynamic context scripting API](dynamic-context-scripting-api.md)
+[dynamic-context-scripting-api.md](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="sync-behavior-and-timing.md" %}
-[Sync behavior and timing](sync-behavior-and-timing.md)
-{% endcontent-ref %}
-
-{% content-ref url="troubleshoot-dynamic-context.md" %}
-[Troubleshoot dynamic context](troubleshoot-dynamic-context.md)
+[sync-behavior-and-timing.md](sync-behavior-and-timing.md)
 {% endcontent-ref %}

@@ -1,38 +1,16 @@
 ---
 title: Release notes
 description: >-
-  Release notes for the Convai Unity SDK — current version highlights,
-  previous release notes, bug fixes, and migration guidance for each release.
+  Release notes for the Convai Unity SDK — current version highlights, previous
+  release notes, bug fixes, and migration guidance for each release.
 ---
+
+# Release notes
 
 Track changes to the Convai Unity SDK across releases, including new features, bug fixes, and configuration changes.
 
 {% updates format="full" %}
-{% update date="2026-06-10" tags="v4.2.0,Current" %}
-## June 2026 SDK updates
-
-**Session resume**
-
-`ConvaiCharacter` now exposes `CharacterSessionId`, `SetCharacterSessionId()`, and `ClearCharacterSessionId()` so projects can explicitly control the next `character_session_id` used when **Session Resume** is enabled.
-
-**Scene Metadata and Dynamic Context**
-
-World objects can now define tracked properties on `ConvaiObjectMetadata`. The SDK seeds those values into `ConvaiCharacter.DynamicContext` and pushes runtime changes with state keys such as `Door.Status`.
-
-**WebGL lip sync**
-
-WebGL audio playback timing and lip-sync timing were improved. Intermittent drift can still occur in browser builds, so validate lip sync in the target browser before shipping.
-
-**Samples**
-
-The Basic Sample includes `Basic Sample 1.unity` as an alternate scene using refreshed robot materials. The LipSync Sample includes `DynamicContextDebugPanel` for manual Dynamic Context testing.
-
-**Chat UI**
-
-`ChatTranscriptUI` now focuses the typed input field when the player presses **Enter** while chat is active.
-{% endupdate %}
-
-{% update date="2026-05-08" tags="v4.2.0" %}
+{% update date="2026-05-08" tags="v4.2.0,Current" %}
 ## v4.2.0
 
 **Actions System**
@@ -96,10 +74,10 @@ Initial public release of the Convai Unity SDK.
 {% endupdate %}
 {% endupdates %}
 
-## Next steps
+### Next steps
 
 To start using the SDK, follow Getting Started.
 
-{% content-ref url="../getting-started/README.md" %}
-[Getting Started](../getting-started/README.md)
+{% content-ref url="../getting-started/" %}
+[getting-started](../getting-started/)
 {% endcontent-ref %}

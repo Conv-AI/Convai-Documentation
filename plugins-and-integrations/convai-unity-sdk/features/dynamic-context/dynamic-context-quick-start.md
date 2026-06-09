@@ -1,116 +1,96 @@
 ---
 title: Dynamic context quick start
-description: Verify live context delivery in Unity, then send and flush a first runtime state update that a character can reference in conversation.
-last_reviewed: "4.2.0"
+last_reviewed: 4.2.0
+description: >-
+  Add ConvaiDynamicContextCommand to an NPC, configure a SetState command, and
+  confirm the character acknowledges live scene conditions.
 ---
 
-Use this guide to prove that Dynamic Context is working in a scene. We will test with the sample UI first, then wire one small script that sends a `Location` state and flushes it immediately.
+# Dynamic context quick start
 
-## Prerequisites
+This guide walks you through the minimum setup to verify that your Convai character acknowledges live in-scene conditions. You will add the `ConvaiDynamicContextCommand` component, configure a `SetState` command, wire it to a UI button, and confirm the character references the state you sent.
 
-Before starting, verify that:
+### Prerequisites
 
-* A `ConvaiManager` is in the scene.
-* A `ConvaiCharacter` is in the scene with a valid character ID.
-* The character can start a conversation and respond in Play mode.
+Before starting, verify:
 
-## Test with the sample UI
-
-The SDK includes a sample UI prefab for testing Dynamic Context without writing integration code.
-
-**Prefab path:** Packages/<code class="expression">space.vars.sdk_package_id</code>/Prefabs/SampleDynamicContextUI.prefab
-
-The `LipSync Sample.unity` scene also includes `DynamicContextDebugPanel`, a self-building runtime panel for deeper manual testing of state, events, attention, raw updates, reset, and acknowledgement results.
+* [ ] A `ConvaiCharacter` is in the scene and responds to speech in Play Mode
 
 {% stepper %}
 {% step %}
-### Add the prefab
+#### Add the command component
 
-Drag `SampleDynamicContextUI.prefab` into the scene. If the prefab does not auto-resolve the target, assign your `ConvaiCharacter` in the Inspector.
+Select the NPC's GameObject in the Hierarchy. In the Inspector, click **Add Component** and search for **Convai Dynamic Context Command**, or navigate to **Convai → Dynamic Context → Convai Dynamic Context Command**.
+
+The component appears with three sections: **Target**, **Command**, and **Events**.
+
+<figure><img src="../../../../.gitbook/assets/image (57).png" alt="Unity Inspector showing ConvaiDynamicContextCommand added to the NPC GameObject, with Target, Command, and Events sections visible"><figcaption><p>ConvaiDynamicContextCommand added to the NPC — three sections appear: Target resolves the character, Command defines the context operation, and Events exposes execution callbacks.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
-### Start the conversation
+#### Verify character resolution
 
-Enter Play mode and start a conversation with the character.
+In the **Target** section, confirm that **Auto Resolve Character** is enabled (the default). The component finds the `ConvaiCharacter` on the same GameObject automatically.
+
+If `ConvaiCharacter` is on a different GameObject, disable **Auto Resolve Character** and drag the correct `ConvaiCharacter` into the **Character** field.
 {% endstep %}
 
 {% step %}
-### Send a state
+#### Configure the command
 
-In the sample UI, set the state name to `Location` and the value to `Fire Exit Corridor`. Use the **Set State** button.
+In the **Command** section:
 
-The SDK batches tracked updates briefly. The state is delivered automatically while the conversation is active.
+* Set **Command Type** to **Set State**
+* Set **State Name** to `Location`
+* Set **State Value** to `Fire Exit Corridor`
+* Leave **Reaction Mode** at **Auto** (the default)
+
+The component is now configured to set a tracked state named `Location` to `Fire Exit Corridor` whenever `Execute()` is called.
 {% endstep %}
 
 {% step %}
-### Verify character awareness
+#### Wire the trigger
 
-Ask the character where you are or what area you are in. The response should reference `Fire Exit Corridor`.
+In the **Events** section of a UI Button in your scene (create a temporary one if needed), locate **On Click ()**.
+
+Click **+** to add a listener, drag the NPC's GameObject into the object field, and select **ConvaiDynamicContextCommand → Execute ()** from the function dropdown.
+
+<figure><img src="../../../../.gitbook/assets/image (505).png" alt="Unity Inspector showing a UI Button&#x27;s On Click event wired to ConvaiDynamicContextCommand.Execute() on the NPC GameObject"><figcaption><p>Execute() wired to the button's On Click event — pressing the button at runtime delivers the configured context update to Convai and triggers the character's reaction according to the configured Reaction Mode.</p></figcaption></figure>
+{% endstep %}
+
+{% step %}
+#### Test in Play Mode
+
+Enter Play Mode and start a conversation with the character. Click the button you wired in the previous step, then ask the character where you are.
+
+The character should reference the location — for example: _"You're at the Fire Exit Corridor. Make sure you know the evacuation procedure before proceeding."_
+
+If the character does not respond with location awareness, open the Unity Console and check for a `[ConvaiDynamicContextCommand]` warning. See [Troubleshoot dynamic context](troubleshoot-dynamic-context.md) for a full diagnosis checklist.
 {% endstep %}
 {% endstepper %}
 
 {% hint style="success" %}
-If the character references the state, Dynamic Context delivery is working. Integration issues after this point are usually timing, reaction mode, or target-reference problems.
+Your character is now context-aware. The `Location` state is tracked locally and delivered to Convai when the conversation is active. Any future `SetState` call for the same name updates the value and notifies the character automatically.
 {% endhint %}
 
-## Send one state from code
+### Test without custom code
 
-Create a small wrapper script when a Unity UI button, trigger volume, or interaction should send a fixed context update.
+The SDK includes a pre-built test UI for exploring the full Dynamic Context system without writing any integration code.
 
-{% code title="Assets/Scripts/LocationContextButton.cs" lineNumbers="true" overflow="wrap" %}
-```csharp
-using Convai.Runtime.Components;
-using Convai.Runtime.DynamicContext;
-using UnityEngine;
+**Prefab path:** Packages/<code class="expression">space.vars.sdk_package_id</code>/Prefabs/SampleDynamicContextUI.prefab
 
-public sealed class LocationContextButton : MonoBehaviour
-{
-    [SerializeField] private ConvaiCharacter character;
+Drop it into your scene, assign your `ConvaiCharacter`, enter Play Mode, and use the **Set State** button to send known values. If the character responds correctly through the Sample UI but not through your own integration, the issue is in your code — not in the Dynamic Context system itself.
 
-    public void SendLocation()
-    {
-        character.DynamicContext.SetState(
-            "Location",
-            "Fire Exit Corridor",
-            ConvaiDynamicContextReactionMode.ReactImmediately);
+### Next steps
 
-        character.DynamicContext.Flush();
-    }
-}
-```
-{% endcode %}
-
-{% stepper %}
-{% step %}
-### Add the script
-
-Add `LocationContextButton` to a GameObject in the scene and assign the target `ConvaiCharacter`.
-{% endstep %}
-
-{% step %}
-### Wire a trigger
-
-Bind a UI button, trigger volume, or interaction event to `LocationContextButton.SendLocation()`.
-{% endstep %}
-
-{% step %}
-### Test the update
-
-Enter Play mode, start a conversation, and invoke the event. The script calls `SetState`, then `Flush()` sends the pending batch immediately.
-{% endstep %}
-{% endstepper %}
-
-## Next steps
-
-{% content-ref url="relay-component-reference.md" %}
-[Relay component reference](relay-component-reference.md)
+{% content-ref url="command-component-reference.md" %}
+[command-component-reference.md](command-component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[Dynamic context scripting API](dynamic-context-scripting-api.md)
+[dynamic-context-scripting-api.md](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-usage-examples.md" %}
-[Dynamic context usage examples](dynamic-context-usage-examples.md)
+[dynamic-context-usage-examples.md](dynamic-context-usage-examples.md)
 {% endcontent-ref %}

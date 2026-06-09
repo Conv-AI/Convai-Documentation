@@ -1,12 +1,17 @@
 ---
 title: Scene metadata quick start
-description: Add ConvaiObjectMetadata to scene objects and configure ConvaiSceneMetadataCollector so a Convai character receives object awareness at session start.
-last_reviewed: "4.2.0"
+last_reviewed: 4.2.0
+description: >-
+  Add ConvaiObjectMetadata to scene objects and configure
+  ConvaiSceneMetadataCollector so a Convai character receives object awareness
+  at session start.
 ---
+
+# Scene metadata quick start
 
 Set up Scene Metadata to give a Convai character awareness of named objects in your scene. By the end, your character knows what objects exist and can reference them in conversation — entirely from the Inspector.
 
-## Prerequisites
+### Prerequisites
 
 Before starting, verify:
 
@@ -14,9 +19,9 @@ Before starting, verify:
 
 {% stepper %}
 {% step %}
-### Add ConvaiObjectMetadata to a scene object
+#### Add ConvaiObjectMetadata to a scene object
 
-Select any GameObject in your scene that the character should know about - a piece of equipment, a fire extinguisher, a door, or an exhibit. In the Inspector, click **Add Component** and search for `Convai World Object`.
+Select any GameObject in your scene that the AI character should know about — a piece of equipment, a fire extinguisher, a door, an exhibit. In the Inspector, click **Add Component** and search for `Convai Object Metadata`.
 
 The **Object Name** field auto-fills from the GameObject's name. Edit it to a clear, human-readable label if the GameObject name is not descriptive — for example, change `Prop_FireExt_01` to `Fire Extinguisher`.
 
@@ -28,17 +33,15 @@ Optionally fill in **Object Description** with one to two factual sentences: wha
 {% endstep %}
 
 {% step %}
-### Add ConvaiObjectMetadata to remaining objects
+#### Add ConvaiObjectMetadata to remaining objects
 
 Add `ConvaiObjectMetadata` to each additional object the AI should know about. You do not need to add it to every GameObject — only to objects relevant to AI conversations.
 
 Each component registers itself with `ConvaiMetadataRegistry` automatically when enabled. No manual wiring or registration calls are needed.
-
-If an object has runtime state the character should know about, add a tracked property in **Tracked Properties**. For example, add `Status` with initial value `Locked` on a door. The SDK sends it as Dynamic Context state key `Door.Status`.
 {% endstep %}
 
 {% step %}
-### Add ConvaiSceneMetadataCollector and enable auto-collection
+#### Add ConvaiSceneMetadataCollector and enable auto-collection
 
 On any GameObject in your scene, click **Add Component** and search for `Convai Scene Metadata Collector`. Placing it on the same GameObject as `ConvaiManager` is a useful organizational convention.
 
@@ -50,11 +53,11 @@ Leave **Log Statistics** enabled — it writes a Console entry on each collectio
 {% endstep %}
 
 {% step %}
-### Enter Play Mode and verify
+#### Enter Play Mode and verify
 
 Press Play. When the room connects, the collector fires automatically. Check the Console for a debug entry similar to:
 
-```text
+```
 [ConvaiSceneMetadataCollector] Collected 4 metadata objects in 0.0010s. Registry stats: 4 total, 4 valid, 0 invalid
 ```
 
@@ -66,12 +69,12 @@ This confirms the payload was assembled and sent to Convai. Test the character b
 The character responds with information that reflects the names and descriptions you entered. Scene Metadata is working.
 {% endhint %}
 
-## Next steps
+### Next steps
 
 {% content-ref url="component-reference.md" %}
-[Scene metadata component reference](component-reference.md)
+[component-reference.md](component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot scene metadata](troubleshooting-and-diagnostics.md)
+[troubleshooting-and-diagnostics.md](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}
