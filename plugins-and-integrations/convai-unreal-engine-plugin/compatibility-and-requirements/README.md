@@ -15,7 +15,7 @@ Confirm your environment meets these requirements before installing the Convai U
 </thead>
 <tbody>
 <tr>
-<td><strong>Unreal Engine versions</strong><br>Supported UE 5.x range, module availability per version, and known per-version caveats.</td>
+<td><strong>Unreal Engine versions</strong><br>Supported Unreal Engine range, module availability per version, and known per-version caveats.</td>
 <td><a href="unreal-engine-versions.md">unreal-engine-versions.md</a></td>
 </tr>
 <tr>
