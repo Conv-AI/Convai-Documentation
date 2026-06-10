@@ -1,12 +1,16 @@
 ---
 title: Emotion
-description: Find guides for adding emotionally responsive facial animation to Convai characters — from quick setup to scripting API and troubleshooting.
+description: >-
+  Find guides for adding emotionally responsive facial animation to Convai
+  characters — from quick setup to scripting API and troubleshooting.
 ---
+
+# Emotion
 
 The Emotion system translates Convai AI emotional signals into live facial animation, driving blendshapes, Animator parameters, or both simultaneously. This section covers everything from a first working setup to custom taxonomy authoring and the complete scripting API.
 
 <table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>How the emotion system works</strong><br>Understand the pipeline, key concepts, and required component placement.</td><td><a href="how-the-emotion-system-works.md">how-the-emotion-system-works.md</a></td></tr><tr><td><strong>Emotion quick start</strong><br>Attach the Emotion Controller, assign the bundled profile, and see your NPC react emotionally to conversation — no custom assets required.</td><td><a href="quick-start.md">quick-start.md</a></td></tr><tr><td><strong>Emotion profile</strong><br>Configure smoothing speed, micro-expression bursts, neutral alternation, and output bindings in one portable asset.</td><td><a href="emotion-profile.md">emotion-profile.md</a></td></tr><tr><td><strong>Emotion output bindings</strong><br>Map smoothed emotion scores to facial blendshapes and Animator float parameters, with per-slot weight and LipSync control.</td><td><a href="output-bindings.md">output-bindings.md</a></td></tr><tr><td><strong>Emotion taxonomy</strong><br>Understand the built-in Plutchik vocabulary, how server aliases are resolved, and how to author a custom taxonomy.</td><td><a href="emotion-taxonomy.md">emotion-taxonomy.md</a></td></tr><tr><td><strong>Emotion scripting API</strong><br>Read live emotion state, inject overrides, lock expressions, and react to emotion events — from Inspector relays to typed C# subscriptions.</td><td><a href="scripting-api.md">scripting-api.md</a></td></tr><tr><td><strong>Emotion examples</strong><br>Complete scenarios covering hazard triggers, locked greetings, distress branching, analytics logging, and Editor debugging.</td><td><a href="usage-examples.md">usage-examples.md</a></td></tr><tr><td><strong>Troubleshoot emotion</strong><br>Step-by-step fixes for the most common problems — from expressions that will not move to LipSync conflicts and production build issues.</td><td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td></tr></tbody></table>
 
-## Next steps
+### Next steps
 
 Start with [Emotion quick start](quick-start.md) to get expressions running on your first NPC. Then read [How the emotion system works](how-the-emotion-system-works.md) to understand the pipeline and component roles before moving into configuration and reference pages.

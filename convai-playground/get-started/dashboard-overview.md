@@ -59,7 +59,7 @@ At the bottom of the sidebar:
 * **Legacy Playground** – Access the previous Convai Playground interface.
 * **Beta Feedback** – Submit feedback directly to the Convai team.
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
 ***
 

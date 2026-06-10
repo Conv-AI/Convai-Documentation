@@ -1,12 +1,16 @@
 ---
 title: Platform support matrix
-description: Reference for Convai Unity SDK platform support, including feature availability across Windows, macOS, Android, iOS, Meta Quest, and WebGL.
-last_reviewed: "4.2.0"
+last_reviewed: 4.2.0
+description: >-
+  Reference for Convai Unity SDK platform support, including feature
+  availability across Windows, macOS, Android, iOS, Meta Quest, and WebGL.
 ---
+
+# Platform support matrix
 
 The Convai Unity SDK runs on all major Unity deployment targets. Feature availability varies by platform — use the matrix below to confirm support before building for a specific target.
 
-## Feature × platform matrix
+### Feature × platform matrix
 
 | Feature                    | Windows / macOS / Linux | Android                        | iOS                                    | Meta Quest            | WebGL                                  |
 | -------------------------- | ----------------------- | ------------------------------ | -------------------------------------- | --------------------- | -------------------------------------- |
@@ -24,7 +28,7 @@ The Convai Unity SDK runs on all major Unity deployment targets. Feature availab
 | Vision — Webcam            | ✅ Full                  | ⚠️ Runtime permission required | ⚠️ `NSCameraUsageDescription` required | ❌ Not applicable      | ❌ Not supported                        |
 | Vision — Quest passthrough | ❌ Not supported         | ❌ Not supported                | ❌ Not supported                        | ✅ Full                | ❌ Not supported                        |
 
-## Platform-specific requirements
+### Platform-specific requirements
 
 {% tabs %}
 {% tab title="WebGL" %}
@@ -47,7 +51,7 @@ Always validate WebGL builds in the actual hosting environment, especially if th
 For detailed WebGL setup, browser compatibility, and deployment steps, see the WebGL platform guide.
 
 {% content-ref url="../platform-guides/webgl.md" %}
-[WebGL deployment guide](../platform-guides/webgl.md)
+[webgl.md](../platform-guides/webgl.md)
 {% endcontent-ref %}
 {% endtab %}
 
@@ -58,7 +62,7 @@ For detailed WebGL setup, browser compatibility, and deployment steps, see the W
 For Android build configuration, permission handling, and microphone setup, see the iOS and Android platform guide.
 
 {% content-ref url="../platform-guides/ios-and-android.md" %}
-[iOS and Android platform guide](../platform-guides/ios-and-android.md)
+[ios-and-android.md](../platform-guides/ios-and-android.md)
 {% endcontent-ref %}
 {% endtab %}
 
@@ -70,7 +74,7 @@ For Android build configuration, permission handling, and microphone setup, see 
 For iOS build configuration, permission setup, and Info.plist requirements, see the iOS and Android platform guide.
 
 {% content-ref url="../platform-guides/ios-and-android.md" %}
-[iOS and Android platform guide](../platform-guides/ios-and-android.md)
+[ios-and-android.md](../platform-guides/ios-and-android.md)
 {% endcontent-ref %}
 {% endtab %}
 
@@ -91,15 +95,15 @@ On other Quest hardware or non-Quest platforms, `QuestVisionFrameSource` produce
 For Meta Quest project setup, XR SDK configuration, and passthrough Vision integration, see the XR headsets platform guide.
 
 {% content-ref url="../platform-guides/xr-headsets.md" %}
-[XR headsets platform guide](../platform-guides/xr-headsets.md)
+[xr-headsets.md](../platform-guides/xr-headsets.md)
 {% endcontent-ref %}
 {% endtab %}
 {% endtabs %}
 
-## Next steps
+### Next steps
 
 With platform constraints confirmed, review the network requirements for real-time SDK operation.
 
 {% content-ref url="network-and-api-requirements.md" %}
-[Network and API requirements](network-and-api-requirements.md)
+[network-and-api-requirements.md](network-and-api-requirements.md)
 {% endcontent-ref %}

@@ -1,9 +1,11 @@
 ---
 title: Release notes
 description: >-
-  Release notes for the Convai Unity SDK — current version highlights,
-  previous release notes, bug fixes, and migration guidance for each release.
+  Release notes for the Convai Unity SDK — current version highlights, previous
+  release notes, bug fixes, and migration guidance for each release.
 ---
+
+# Release notes
 
 Track changes to the Convai Unity SDK across releases, including new features, bug fixes, and configuration changes.
 
@@ -72,10 +74,10 @@ Initial public release of the Convai Unity SDK.
 {% endupdate %}
 {% endupdates %}
 
-## Next steps
+### Next steps
 
 To start using the SDK, follow Getting Started.
 
-{% content-ref url="../getting-started/README.md" %}
-[Getting Started](../getting-started/README.md)
+{% content-ref url="../getting-started/" %}
+[getting-started](../getting-started/)
 {% endcontent-ref %}
