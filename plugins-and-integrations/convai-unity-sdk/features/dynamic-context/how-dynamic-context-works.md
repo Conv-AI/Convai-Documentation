@@ -1,16 +1,12 @@
 ---
 title: How dynamic context works
-last_reviewed: 4.2.0
-description: >-
-  Understand the states and events model, canonical context format, and how
-  updates queue and flush before and during conversations.
+description: Understand the states and events model, canonical context format, and how updates queue and flush before and during conversations.
+last_reviewed: "4.2.0"
 ---
-
-# How dynamic context works
 
 Dynamic Context gives characters a live, structured view of what is happening in the scene. Instead of relying only on the static system prompt configured on the Convai dashboard, a character can reference a trainee's current location, the equipment they have collected, or an alarm that just triggered — because that information was injected directly into the session as it occurred. This page explains the underlying model: what the primitives are, how the SDK assembles them into a canonical context string, and why updates queue safely before a conversation starts.
 
-### States and events
+## States and events
 
 Dynamic Context is built on two primitive types.
 
@@ -20,7 +16,7 @@ Dynamic Context is built on two primitive types.
 
 Both primitives feed into the character's awareness simultaneously. States provide a stable, queryable snapshot of current conditions; events provide a chronological record of what has happened.
 
-### Canonical context format
+## Canonical context format
 
 When the SDK sends an update to Convai, it assembles a canonical context string from all tracked states and events:
 
@@ -54,7 +50,7 @@ Operator bypassed interlock
 
 You supply only names, values, and event text. The SDK assembles and delivers the canonical string automatically.
 
-### Two entry points
+## Two entry points
 
 Dynamic Context has two entry points that write to the same underlying tracker and produce identical network behavior.
 
@@ -63,10 +59,9 @@ Dynamic Context has two entry points that write to the same underlying tracker a
 Add this `MonoBehaviour` to the NPC's GameObject and configure the command type, fields, and reaction mode in the Inspector. Call `Execute()` from a `UnityEvent`, trigger collider, timeline marker, or UI button. No scripting required. One component encapsulates one command; for multiple commands per NPC, place each on a child GameObject.
 
 Use this entry point when:
-
-* Context changes are tied to scene events that already fire `UnityEvent` callbacks
-* Non-programmers need to configure or modify context triggers
-* You want to prototype quickly without writing glue code
+- Context changes are tied to scene events that already fire `UnityEvent` callbacks
+- Non-programmers need to configure or modify context triggers
+- You want to prototype quickly without writing glue code
 
 **Scripting — `IConvaiDynamicContext`**
 
@@ -79,13 +74,12 @@ context.AddEvent("Operator bypassed interlock");
 ```
 
 Use this entry point when:
+- Context updates depend on runtime logic or data that cannot be expressed as static Inspector fields
+- Multiple states must change atomically (use `SetStates`)
+- You need to read state values back (`TryGetStateValue`)
+- The update source is an external system such as a state machine or analytics pipeline
 
-* Context updates depend on runtime logic or data that cannot be expressed as static Inspector fields
-* Multiple states must change atomically (use `SetStates`)
-* You need to read state values back (`TryGetStateValue`)
-* The update source is an external system such as a state machine or analytics pipeline
-
-### Pre-conversation queueing
+## Pre-conversation queueing
 
 Updates made before a conversation begins are automatically queued by all tracked methods — `SetState`, `SetStates`, `AddEvent`, `RemoveState`, and `Reset`. When the session connects, the SDK delivers a single Replace message containing the full canonical context at that moment.
 
@@ -107,27 +101,27 @@ The reason this collapses into one Replace rather than replaying individual mess
 `Apply()` is the one exception: it does not queue. If called before a conversation starts, the update is discarded. Use `SetState`, `AddEvent`, or other tracked methods for pre-conversation context. See [Dynamic context scripting API](dynamic-context-scripting-api.md) for details.
 {% endhint %}
 
-### When to use which command type
+## When to use which command type
 
-| Goal                                                    | Use                                                         |
-| ------------------------------------------------------- | ----------------------------------------------------------- |
-| Track one current condition                             | `SetState`                                                  |
+| Goal | Use |
+|---|---|
+| Track one current condition | `SetState` |
 | Track several conditions that change at the same moment | `SetStates` (one canonical rebuild, one network round-trip) |
-| Record that something happened                          | `AddEvent`                                                  |
-| Remove a condition that no longer applies               | `RemoveState`                                               |
-| Clear all runtime context (for a new scenario phase)    | `Reset`                                                     |
-| Send externally constructed context text                | `Apply()` — advanced; does not queue                        |
+| Record that something happened | `AddEvent` |
+| Remove a condition that no longer applies | `RemoveState` |
+| Clear all runtime context (for a new scenario phase) | `Reset` |
+| Send externally constructed context text | `Apply()` — advanced; does not queue |
 
-### Next steps
+## Next steps
 
 {% content-ref url="dynamic-context-quick-start.md" %}
-[dynamic-context-quick-start.md](dynamic-context-quick-start.md)
+[Dynamic context quick start](dynamic-context-quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="command-component-reference.md" %}
-[command-component-reference.md](command-component-reference.md)
+[Command component reference](command-component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="sync-behavior-and-timing.md" %}
-[sync-behavior-and-timing.md](sync-behavior-and-timing.md)
+[Sync behavior and timing](sync-behavior-and-timing.md)
 {% endcontent-ref %}

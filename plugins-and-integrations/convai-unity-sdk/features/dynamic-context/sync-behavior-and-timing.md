@@ -1,16 +1,14 @@
 ---
 title: Sync behavior and timing
-last_reviewed: 4.2.0
 description: >-
   Understand how the SDK transmits Replace, Append, and Reset messages for each
   Dynamic Context operation, including queueing and Apply() behavior.
+last_reviewed: "4.2.0"
 ---
-
-# Sync behavior and timing
 
 Every tracked Dynamic Context operation produces one or two RTVI `context-update` messages sent to Convai. This page documents the exact message sequence for each scenario, the pre-conversation queuing behavior, and how the SDK flushes pending context when a conversation starts.
 
-### Canonical context format
+## Canonical context format
 
 Before describing sync scenarios, it helps to understand what the SDK sends. The canonical context is a newline-separated string assembled from all tracked states and events:
 
@@ -40,9 +38,9 @@ HazardLevel is High
 Operator bypassed interlock
 ```
 
-### Sync scenarios during active conversations
+## Sync scenarios during active conversations
 
-#### Adding a new state
+### Adding a new state
 
 **SDK call:** `SetState("Station", "Bay 3")` — `Station` has never been set.
 
@@ -55,7 +53,7 @@ text:  "Station is Bay 3"
 
 The server appends this line to its existing context view.
 
-#### Updating an existing state
+### Updating an existing state
 
 **SDK call:** `SetState("Station", "Bay 7")` — `Station` was previously `"Bay 3"`.
 
@@ -81,7 +79,7 @@ The Replace gives the character an authoritative complete picture of the current
 Two messages for one `SetState` call on an existing state is expected behavior. If you are monitoring network traffic during debugging, expect this pattern for every existing-state modification.
 {% endhint %}
 
-#### Removing a state
+### Removing a state
 
 **SDK call:** `RemoveState("Station")`.
 
@@ -92,7 +90,7 @@ mode:  Replace
 text:  "HazardLevel is High\nOperator bypassed interlock"
 ```
 
-#### Batch update with `SetStates`
+### Batch update with `SetStates`
 
 **SDK call:** `SetStates({ "Station": "Bay 7", "HazardLevel": "Extreme" })` — `Station` existed (`"Bay 3"`), `HazardLevel` is new.
 
@@ -114,7 +112,7 @@ text:  "Station changed from Bay 3 to Bay 7\nHazardLevel is Extreme"
 
 **All-new states only:** If every state in `SetStates` is new (none existed before), only one Append is sent — no Replace. The Append contains all new state lines joined by newline.
 
-#### Adding an event
+### Adding an event
 
 **SDK call:** `AddEvent("Operator bypassed interlock")`.
 
@@ -127,7 +125,7 @@ text:  "Operator bypassed interlock"
 
 Events never trigger a Replace. The server appends the event text to its context view.
 
-#### Resetting all context
+### Resetting all context
 
 **SDK call:** `Reset()`.
 
@@ -140,7 +138,7 @@ text:  null
 
 The server clears its Dynamic Context view. The local tracker is also cleared — all states and events are removed.
 
-### Pre-conversation queuing
+## Pre-conversation queuing
 
 All tracked methods — `SetState`, `SetStates`, `AddEvent`, `RemoveState`, `Reset` — queue automatically when no conversation is active.
 
@@ -169,7 +167,7 @@ Scenario is Fire Drill
 Session initialized
 ```
 
-### `Apply()` exception
+## `Apply()` exception
 
 `Apply()` bypasses the tracker entirely and does **not** queue pre-conversation.
 
@@ -181,12 +179,12 @@ Session initialized
 Do not use `Apply()` for context that must be delivered before a conversation starts. Use `SetState`, `AddEvent`, or other tracked methods instead — they queue automatically and flush on connection.
 {% endhint %}
 
-### Next steps
+## Next steps
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[dynamic-context-scripting-api.md](dynamic-context-scripting-api.md)
+[Dynamic context scripting API](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshoot-dynamic-context.md" %}
-[troubleshoot-dynamic-context.md](troubleshoot-dynamic-context.md)
+[Troubleshoot dynamic context](troubleshoot-dynamic-context.md)
 {% endcontent-ref %}

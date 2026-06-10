@@ -1,26 +1,22 @@
 ---
 title: Scene metadata scripting API
-last_reviewed: 4.2.0
-description: >-
-  Reference for ConvaiMetadataRegistry and ConvaiSceneMetadataCollector,
-  including static events, manual trigger patterns, and debug utilities.
+description: Reference for ConvaiMetadataRegistry and ConvaiSceneMetadataCollector, including static events, manual trigger patterns, and debug utilities.
+last_reviewed: "4.2.0"
 ---
-
-# Scene metadata scripting API
 
 The Scene Metadata scripting surface has two parts. `ConvaiMetadataRegistry` is the static central registry — use it to query registration state and listen for changes. `ConvaiSceneMetadataCollector` is the runtime orchestrator — use it to trigger collection, check readiness, and audit all registered objects.
 
-### ConvaiMetadataRegistry
+## ConvaiMetadataRegistry
 
 `ConvaiMetadataRegistry` is a static class. Access all members directly by class name — no instance or component reference needed.
 
-#### Properties
+### Properties
 
 | Member  | Type  | Description                                                                                       |
 | ------- | ----- | ------------------------------------------------------------------------------------------------- |
 | `Count` | `int` | Total number of registered `ConvaiObjectMetadata` instances, including invalid and disabled ones. |
 
-#### Methods
+### Methods
 
 | Method                    | Returns                      | Description                                                                                                                                                                  |
 | ------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -31,7 +27,7 @@ The Scene Metadata scripting surface has two parts. `ConvaiMetadataRegistry` is 
 | `CleanupNullReferences()` | `int`                        | Removes destroyed-but-not-unregistered entries. Returns the count removed. Call this if objects are destroyed outside normal Unity lifecycle events.                         |
 | `Clear()`                 | `void`                       | Clears all registered entries. Intended for testing and scene teardown. Do not call in production.                                                                           |
 
-#### Static events
+### Static events
 
 | Event                    | Signature                      | Fires when                                                                          |
 | ------------------------ | ------------------------------ | ----------------------------------------------------------------------------------- |
@@ -62,7 +58,7 @@ private void HandleObjectUnregistered(ConvaiObjectMetadata metadata)
 }
 ```
 
-### ConvaiSceneMetadataCollector
+## ConvaiSceneMetadataCollector
 
 Access via a component reference. `ConvaiManager` injects dependencies at startup — no manual setup required.
 
@@ -75,17 +71,17 @@ void Awake()
 }
 ```
 
-#### Public methods
+### Public methods
 
-| Method                          | Returns               | Description                                                                                                                                                                                                                                                                 |
-| ------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `IsReadyToSendMetadata()`       | `bool`                | Returns `true` when dependencies are injected and the room session is in `Connected` state. Always check this before calling `CollectAndSendSceneMetadata()` manually.                                                                                                      |
+| Method                          | Returns               | Description                                                                                                                                                                                             |
+| ------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IsReadyToSendMetadata()`       | `bool`                | Returns `true` when dependencies are injected and the room session is in `Connected` state. Always check this before calling `CollectAndSendSceneMetadata()` manually.                                  |
 | `CollectAndSendSceneMetadata()` | `void`                | Reads all valid metadata from `ConvaiMetadataRegistry`, assembles the payload, and sends it to Convai via the RTVI `update-scene-metadata` message. Returns early and logs a warning or error to the Console if the room is not connected or dependencies are not injected. |
-| `GetMetadataCount()`            | `int`                 | Returns the count of valid, includable objects without triggering a send. Use for UI display or pre-send validation.                                                                                                                                                        |
-| `GetCurrentMetadata()`          | `List<SceneMetadata>` | Returns the current payload list without triggering a send. Use to inspect what would be sent on the next call.                                                                                                                                                             |
-| `ValidateAllMetadata()`         | `void`                | Logs validation issues for all registered objects to the Console. Use this during development to catch missing names, length overflows, or disabled objects.                                                                                                                |
+| `GetMetadataCount()`            | `int`                 | Returns the count of valid, includable objects without triggering a send. Use for UI display or pre-send validation.                                                                                    |
+| `GetCurrentMetadata()`          | `List<SceneMetadata>` | Returns the current payload list without triggering a send. Use to inspect what would be sent on the next call.                                                                                         |
+| `ValidateAllMetadata()`         | `void`                | Logs validation issues for all registered objects to the Console. Use this during development to catch missing names, length overflows, or disabled objects.                                            |
 
-#### Common patterns
+### Common patterns
 
 **Manual trigger on scenario load:**
 
@@ -134,12 +130,12 @@ foreach (var kv in stats)
     Debug.Log($"{kv.Key}: {kv.Value}");
 ```
 
-### Next steps
+## Next steps
 
 {% content-ref url="usage-examples.md" %}
-[usage-examples.md](usage-examples.md)
+[Scene metadata usage examples](usage-examples.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[troubleshooting-and-diagnostics.md](troubleshooting-and-diagnostics.md)
+[Troubleshoot scene metadata](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

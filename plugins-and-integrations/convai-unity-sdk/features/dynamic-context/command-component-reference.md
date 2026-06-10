@@ -1,4 +1,6 @@
 ---
+title: Command component reference
+last_reviewed: 4.2.0
 description: >-
   Complete field-by-field reference for ConvaiDynamicContextCommand — all six
   command types, reaction modes, validation warnings, and multi-command child

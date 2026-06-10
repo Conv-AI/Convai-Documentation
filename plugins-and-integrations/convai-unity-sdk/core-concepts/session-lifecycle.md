@@ -1,19 +1,14 @@
 ---
 title: Session lifecycle
-last_reviewed: 4.2.0
-description: >-
-  Understand how ConvaiCharacter sessions transition through states, where
-  session IDs are stored, and how to configure reconnection and
-  conversation-resume behavior.
+description: Understand how ConvaiCharacter sessions transition through states, where session IDs are stored, and how to configure reconnection and conversation-resume behavior.
+last_reviewed: "4.2.0"
 ---
-
-# Session lifecycle
 
 Every `ConvaiCharacter` in your scene maintains an independent session with Convai. That session tracks whether the character is connected, what its current state is, and — when persistence is enabled — what conversation it was in the last time you connected. Understanding how sessions are created, persisted, and recovered lets you build reliable, resumable character interactions across training simulations, interactive experiences, and games.
 
 ***
 
-### Session state machine
+## Session state machine
 
 Each character session moves through the following states.
 
@@ -46,7 +41,7 @@ You receive state transitions as `SessionStateChangedRelayData` events via `Conv
 
 ***
 
-### Per-character sessions
+## Per-character sessions
 
 Each `ConvaiCharacter` has its own independent session. Sessions are not shared between characters. In multi-character scenes, each character connects and disconnects independently — session IDs are keyed to the character's ID string set in the Inspector (not the scene or object name), reconnect policy applies per character, and a session error on one character does not affect others.
 
@@ -66,11 +61,11 @@ Each `ConvaiCharacter` has its own independent session. Sessions are not shared 
 
 ***
 
-### Session persistence
+## Session persistence
 
 When a session ID is persisted, the SDK can resume a previous conversation on the next connect — the character remembers context from prior interactions.
 
-#### What persists vs. what resets
+### What persists vs. what resets
 
 | On Reconnect                 | Behavior                                            |
 | ---------------------------- | --------------------------------------------------- |
@@ -80,7 +75,7 @@ When a session ID is persisted, the SDK can resume a previous conversation on th
 | Active turn state            | Reset — the turn restarts clean                     |
 | Module state (e.g., emotion) | Reset — modules reinitialize on reconnect           |
 
-#### Default persistence stack
+### Default persistence stack
 
 The SDK exposes a pluggable persistence layer via `ISessionPersistence` for projects that need a custom backing store (encrypted storage, cloud saves, a database). The default stack is:
 
@@ -93,7 +88,7 @@ ISessionPersistence
 
 Session IDs are stored under keys formatted as `convai.session.<characterId>`.
 
-#### Replacing the persistence store
+### Replacing the persistence store
 
 Implement `IKeyValueStore` to use any backing store — a database, encrypted storage, a cloud save system. `PlayerPrefsKeyValueStore` marshals all reads and writes to the Unity main thread internally; apply the same thread-safety pattern if your backing store has thread restrictions.
 
@@ -128,7 +123,7 @@ var runtime = new ConvaiRuntimeBuilder()
 
 ***
 
-### Reconnect policy
+## Reconnect policy
 
 `ReconnectPolicy` controls what the SDK does when a connection drops unexpectedly.
 
@@ -141,7 +136,7 @@ var runtime = new ConvaiRuntimeBuilder()
 | `StartWaitTimeoutMs`       | `int`          | `5000`             | Timeout in milliseconds for the connection `Start()` phase before the attempt is considered failed.                                |
 | `AutoMicStartDelaySeconds` | `float`        | `0.5`              | Seconds to wait after connection before starting the microphone. Prevents audio capture before the session is fully ready.         |
 
-#### `ResumePolicy` options
+### `ResumePolicy` options
 
 | Value              | Behavior                                                                                                               |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
@@ -149,7 +144,7 @@ var runtime = new ConvaiRuntimeBuilder()
 | `ResumeIfPossible` | Attempt to resume the previous conversation. If the session has expired or resume fails, fall back to a fresh session. |
 | `AlwaysResume`     | Always resume. If resume fails, the connection fails — no fallback to a fresh session.                                 |
 
-#### Preset policies
+### Preset policies
 
 | Preset                            | Description                                                     |
 | --------------------------------- | --------------------------------------------------------------- |
@@ -171,9 +166,9 @@ var policy = new ReconnectPolicy(
 
 ***
 
-### Usage examples
+## Usage examples
 
-#### Example 1: Medical training simulation — resume after network drop
+### Example 1: Medical training simulation — resume after network drop
 
 A learner is mid-assessment when the network drops. When connection is restored, the patient character resumes the same conversation — no context is lost.
 
@@ -190,7 +185,7 @@ var policy = new ReconnectPolicy(
 
 ***
 
-#### Example 2: Corporate onboarding kiosk — always-fresh conversations
+### Example 2: Corporate onboarding kiosk — always-fresh conversations
 
 Each new employee who approaches the kiosk should start from the beginning with no memory of previous users. `AlwaysFresh` and `AlwaysCreateNew` ensure a clean slate every time.
 
@@ -218,7 +213,7 @@ public class KioskSessionReset : MonoBehaviour
 
 ***
 
-#### Example 3: Handling the error state in a training simulation
+### Example 3: Handling the error state in a training simulation
 
 When all reconnect attempts are exhausted, the session enters `Error` state. Surface this to the facilitator and allow manual retry rather than silently hanging.
 
@@ -250,7 +245,7 @@ public class SessionErrorHandler : MonoBehaviour
 
 ***
 
-### Troubleshooting
+## Troubleshooting
 
 | Symptom                                                                          | Likely Cause                                                                                            | Fix                                                                                                                                                 |
 | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -262,14 +257,14 @@ public class SessionErrorHandler : MonoBehaviour
 
 ***
 
-### Next steps
+## Next steps
 
 You now know how character sessions are created, how state transitions work, how session IDs are persisted across restarts, and how to configure reconnection behavior. Read Turn-taking modes next to configure how the SDK detects speech input, then Event system to learn how to subscribe to session and character events from your scene scripts.
 
 {% content-ref url="turn-taking-modes.md" %}
-[turn-taking-modes.md](turn-taking-modes.md)
+[Turn-taking modes](turn-taking-modes.md)
 {% endcontent-ref %}
 
 {% content-ref url="event-system.md" %}
-[event-system.md](event-system.md)
+[Event system](event-system.md)
 {% endcontent-ref %}

@@ -10,11 +10,11 @@ To import your custom characters into your Convai-powered Unity project, you wil
 
 ## Prerequisites
 
-When you want to set up your custom character with Convai, you will need your character model and two animations: Idle and Talking.
+When you want to set up your custom character with Convai, you will need your character model and two animations: Idle and Talking.&#x20;
 
-Create an animator controller with the two animations that looks like this. You should also add a 'Talk' Boolean to ensure that you can trigger the animation. [Here is a YouTube tutorial on how to set up an animator controller](https://www.youtube.com/watch?v=JeZkctmoBPw\&t=53s). This is the bare minimum animator setup that you need to do.
+Create an animator controller with the two animations that looks like this. You should also add a 'Talk' Boolean to ensure that you can trigger the animation. [Here is a YouTube tutorial on how to set up an animator controller](https://www.youtube.com/watch?v=JeZkctmoBPw\&t=53s). This is the bare minimum animator setup that you need to do.&#x20;
 
-<figure><img src="../../.gitbook/assets/image (222).png" alt=""><figcaption><p>The animator controller should look like this. This is the in-box NPC Animator.</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (222).png" alt=""><figcaption><p>The animator controller should look like this. This is the in-box NPC Animator. </p></figcaption></figure>
 
 ### Step 1: Add Animator to your custom character
 
@@ -34,6 +34,8 @@ With your custom character selected, add a Collision shape of your choice, for t
 
 We will make this Collider a trigger, for this we will enable the `Is Trigger` option in the inspector panel
 
+
+
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 200219.png" alt=""><figcaption><p>Screenshot showing enable of Is Trigger option</p></figcaption></figure>
 
 We will adjust the Center, Radius and Height of the collider such that it fits our character
@@ -50,7 +52,7 @@ We assume that nothing other than pre-instructed components were added by you; y
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 201324.png" alt=""><figcaption><p>Screenshot showing newly added ConvaiNPC Component</p></figcaption></figure>
 
-Copy your character's ID and name from [Convai Playground](https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/convai-playground) and paste them here.
+Copy your character's ID and name from [Convai Playground](/broken/pages/31tnQsuqz1OK69s2j3ft) and paste them here.
 
 <figure><img src="../../.gitbook/assets/Screenshot 2024-05-23 201727.png" alt=""><figcaption><p>Screenshot showing filled-in character information.</p></figcaption></figure>
 

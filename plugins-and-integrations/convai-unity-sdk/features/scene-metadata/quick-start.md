@@ -1,17 +1,12 @@
 ---
 title: Scene metadata quick start
-last_reviewed: 4.2.0
-description: >-
-  Add ConvaiObjectMetadata to scene objects and configure
-  ConvaiSceneMetadataCollector so a Convai character receives object awareness
-  at session start.
+description: Add ConvaiObjectMetadata to scene objects and configure ConvaiSceneMetadataCollector so a Convai character receives object awareness at session start.
+last_reviewed: "4.2.0"
 ---
-
-# Scene metadata quick start
 
 Set up Scene Metadata to give a Convai character awareness of named objects in your scene. By the end, your character knows what objects exist and can reference them in conversation — entirely from the Inspector.
 
-### Prerequisites
+## Prerequisites
 
 Before starting, verify:
 
@@ -19,7 +14,7 @@ Before starting, verify:
 
 {% stepper %}
 {% step %}
-#### Add ConvaiObjectMetadata to a scene object
+### Add ConvaiObjectMetadata to a scene object
 
 Select any GameObject in your scene that the AI character should know about — a piece of equipment, a fire extinguisher, a door, an exhibit. In the Inspector, click **Add Component** and search for `Convai Object Metadata`.
 
@@ -33,7 +28,7 @@ Optionally fill in **Object Description** with one to two factual sentences: wha
 {% endstep %}
 
 {% step %}
-#### Add ConvaiObjectMetadata to remaining objects
+### Add ConvaiObjectMetadata to remaining objects
 
 Add `ConvaiObjectMetadata` to each additional object the AI should know about. You do not need to add it to every GameObject — only to objects relevant to AI conversations.
 
@@ -41,7 +36,7 @@ Each component registers itself with `ConvaiMetadataRegistry` automatically when
 {% endstep %}
 
 {% step %}
-#### Add ConvaiSceneMetadataCollector and enable auto-collection
+### Add ConvaiSceneMetadataCollector and enable auto-collection
 
 On any GameObject in your scene, click **Add Component** and search for `Convai Scene Metadata Collector`. Placing it on the same GameObject as `ConvaiManager` is a useful organizational convention.
 
@@ -53,7 +48,7 @@ Leave **Log Statistics** enabled — it writes a Console entry on each collectio
 {% endstep %}
 
 {% step %}
-#### Enter Play Mode and verify
+### Enter Play Mode and verify
 
 Press Play. When the room connects, the collector fires automatically. Check the Console for a debug entry similar to:
 
@@ -69,12 +64,12 @@ This confirms the payload was assembled and sent to Convai. Test the character b
 The character responds with information that reflects the names and descriptions you entered. Scene Metadata is working.
 {% endhint %}
 
-### Next steps
+## Next steps
 
 {% content-ref url="component-reference.md" %}
-[component-reference.md](component-reference.md)
+[Scene metadata component reference](component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[troubleshooting-and-diagnostics.md](troubleshooting-and-diagnostics.md)
+[Troubleshoot scene metadata](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}
