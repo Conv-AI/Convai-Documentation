@@ -3,6 +3,7 @@ description: >-
   Explore the Convai Unreal Plugin Beta — built on the new Convai backend to
   deliver hands-free, low-latency, and vision-enabled AI character interactions
   in Unreal Engine.
+hidden: true
 ---
 
 # Unreal Engine Plugin (Beta) Overview

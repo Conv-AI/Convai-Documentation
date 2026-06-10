@@ -7,3 +7,5 @@ dep_inputsystem_version: 1.18.0
 sdk_package_id: com.convai.convai-sdk-for-unity
 dashboard_url: https://convai.com
 live_server_url: https://live.convai.com
+unreal_plugin_version: 4.0.0-beta.21
+unreal_min_version: '5.0'
