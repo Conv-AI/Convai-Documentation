@@ -15,12 +15,12 @@ The emotion system lets a Convai character express feelings through facial anima
 </thead>
 <tbody>
 <tr>
-<td><strong>How the emotion system works</strong><br>Understand how Convai delivers emotion state, how server scale maps to scores, and what the offset and lock controls do.</td>
-<td><a href="how-the-emotion-system-works.md">how-the-emotion-system-works.md</a></td>
-</tr>
-<tr>
 <td><strong>Emotion quick start</strong><br>Subscribe to emotion state changes and apply per-emotion scores to morph targets on a character mesh in a few Blueprint steps.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
+</tr>
+<tr>
+<td><strong>How the emotion system works</strong><br>Understand how Convai delivers emotion state, how server scale maps to scores, and what the offset and lock controls do.</td>
+<td><a href="how-the-emotion-system-works.md">how-the-emotion-system-works.md</a></td>
 </tr>
 <tr>
 <td><strong>Emotion Blueprint reference</strong><br>The supported score-driven emotion properties, functions, and state-changed event on the Convai Chatbot component.</td>

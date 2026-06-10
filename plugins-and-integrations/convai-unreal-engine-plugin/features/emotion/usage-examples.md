@@ -1,6 +1,6 @@
 ---
 title: Emotion examples
-description: Six scenarios covering forced expressions, cutscene locks, score-driven VFX, EmotionOffset tuning, neutral reset, and Animation Blueprint blend poses.
+description: Six scenarios covering forced expressions, cutscene locks, score-driven VFX, offset tuning, neutral reset, and Animation Blueprint blend poses.
 last_reviewed: 2026-06-09
 ---
 
@@ -15,8 +15,10 @@ These scenarios show common ways to work with the emotion system on `UConvaiChat
 ### Blueprint steps
 
 1. Get a reference to the `Convai Chatbot` component on the character.
-2. Call **Force Set Emotion**. Set **Basic Emotion** to `Sad`, **Intensity** to `More Intense`, and **Reset Other Emotions** to `true`. The score applied will be `1.0` (the `More Intense` multiplier).
+2. Call `Force Set Emotion`. Set **Basic Emotion** to `Sad`, **Intensity** to `More Intense`, and **Reset Other Emotions** to `true`. The score applied will be `1.0` (the `More Intense` multiplier).
 3. `On Emotion State Changed` fires immediately after the call completes. If your handler maps scores to morph targets, call `Get Emotion Score` for `Sad` and apply the return value with `Set Morph Target`.
+
+**Verify:** `Get Emotion Score` for `Sad` returns `1.0` and the character's face shows a sad expression on the mapped morph targets.
 
 {% hint style="info" %}
 When `On Emotion State Changed` fires from `Force Set Emotion`, the **Interacting Player Component** output pin is `null`. Null-check that pin before using it in your handler.
@@ -30,12 +32,14 @@ When `On Emotion State Changed` fires from `Force Set Emotion`, the **Interactin
 
 ### Blueprint steps
 
-1. Before the cutscene begins, call **Force Set Emotion** with **Basic Emotion** = `Angry`, **Intensity** = `Basic`, **Reset Other Emotions** = `true` to establish the desired expression.
+1. Before the cutscene begins, call `Force Set Emotion` with **Basic Emotion** = `Angry`, **Intensity** = `Basic`, **Reset Other Emotions** = `true` to establish the desired expression.
 2. Set `Lock Emotion State` to `true` on the `Convai Chatbot` component. All server emotion updates arriving during the cutscene are silently discarded, and `On Emotion State Changed` does not fire for server-driven updates while locked.
 3. If expressions are not already driven by your event handler, call `Get Emotion Score` for `Angry` and apply the return value to the appropriate morph target.
 4. When the cutscene ends, set `Lock Emotion State` back to `false`. The next server emotion update will replace the locked state and fire the event again.
 
 You can also set `Lock Emotion State` to `true` without a preceding `Force Set Emotion` to freeze the character at whatever expression it held when the cutscene started. Reset `Lock Emotion State` to `false` when the cutscene ends.
+
+**Verify:** During the cutscene, the angry expression holds even when the character speaks. After unlock, new speech produces updated expressions and `On Emotion State Changed` fires again.
 
 ---
 
@@ -51,9 +55,11 @@ You can also set `Lock Emotion State` to `true` without a preceding `Force Set E
 
 The same pattern works for any `EBasicEmotions` value — drive UI meters, material parameters, audio pitch, or any other data-driven system with the score.
 
+**Verify:** When the character speaks with fearful content, the particle effect intensifies in proportion to the `Afraid` score.
+
 ---
 
-## Scenario 4: Amplifying all emotions with EmotionOffset
+## Scenario 4: Amplifying all emotions with offset tuning
 
 **Situation:** Testing shows that a character's emotions are too subtle to read clearly in the target lighting and at the intended camera distance.
 
@@ -64,6 +70,8 @@ The same pattern works for any `EBasicEmotions` value — drive UI meters, mater
 3. To set it at runtime from Blueprint, get a reference to the chatbot component, drag off it, and use a **Set** node on the `Emotion Offset` property.
 
 Lower `Emotion Offset` below `0.0` to produce a more reserved character where all expressions are toned down.
+
+**Verify:** After speaking to the character, facial expressions read more clearly at the intended camera distance and `Get Emotion Score` returns higher values than before the offset change.
 
 {% hint style="info" %}
 `Emotion Offset` applies only to server-driven updates — it has no effect on scores set via `Force Set Emotion`. To amplify a forced expression, choose `More Intense` as the intensity level instead.
@@ -81,6 +89,8 @@ Lower `Emotion Offset` below `0.0` to produce a more reserved character where al
 2. In your event handler (or inline after the reset), call `Get Emotion Score` for each emotion category you drive — all scores will be `0.0`.
 3. Apply zero weights to the mesh using `Set Morph Target` for each mapped morph target. The character's face returns to its rest pose.
 
+**Verify:** All emotion scores read `0.0` and the character's face returns to its default rest pose before the next interaction.
+
 ---
 
 ## Scenario 6: Driving a blend pose in an Animation Blueprint
@@ -95,7 +105,9 @@ Lower `Emotion Offset` below `0.0` to produce a more reserved character where al
 4. In the **AnimGraph**, add a **Blend Poses by float** node. Connect your base pose to input **A**, your surprised pose (or a Pose Asset) to input **B**, and wire `SurpriseWeight` to the **Alpha** pin.
 5. Compile and test in Play In Editor. The character blends toward the surprised pose as the `Surprise` score rises.
 
-This approach keeps expression blending inside the Animation Blueprint and avoids the need to call `Set Morph Target` from the event handler. You can layer multiple `Blend Poses by float` nodes — one per emotion category — to drive a full expressive rig entirely from Animation Blueprint state.
+This approach keeps expression blending inside the Animation Blueprint and avoids the need to call `Set Morph Target` from the event handler. You can layer multiple **Blend Poses by float** nodes — one per emotion category — to drive a full expressive rig entirely from Animation Blueprint state.
+
+**Verify:** In Play In Editor, the character smoothly blends toward the surprised pose as the `Surprise` score rises during conversation.
 
 ---
 
