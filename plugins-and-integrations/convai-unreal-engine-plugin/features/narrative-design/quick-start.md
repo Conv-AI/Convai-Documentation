@@ -4,7 +4,7 @@ description: Invoke a named narrative trigger from Blueprint and confirm a secti
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Invoke a narrative trigger on a Convai character and confirm that the story graph advances by printing the returned section ID. After setup, pressing a bound key fires **Invoke Narrative Design Trigger** and **On Narrative Section Received** prints the new `Narrative Section ID` when Convai advances the graph.
+We will invoke a named narrative trigger on a Convai character and confirm that the story graph advances. After setup, pressing a bound key calls **Invoke Narrative Design Trigger**; when Convai advances the graph, **On Narrative Section Received** prints the new `Narrative Section ID` to the screen.
 
 ## What we will build
 
@@ -12,9 +12,18 @@ A character Blueprint that binds **On Narrative Section Received** on its `UConv
 
 ## Prerequisites
 
-- The Convai Unreal Engine plugin installed and the API key configured
-- A character `Actor` Blueprint with a `UConvaiChatbotComponent` (`CharacterID` set to a valid ID)
-- At least one section and one trigger configured in the Convai dashboard for that character ID — the trigger name must match the string you pass to **Invoke Narrative Design Trigger** exactly (case-sensitive)
+- The Convai Unreal Engine plugin is installed and the API key is configured. See [Install the Convai plugin](../../getting-started/installation.md) and [Configure your API key](../../getting-started/configure-api-key.md).
+- A character `Actor` Blueprint with a `UConvaiChatbotComponent` (`Convai Chatbot`) and `CharacterID` set to a valid ID. See [Add your first Convai character](../../getting-started/add-your-first-character.md).
+- At least one section and one trigger configured in the Convai dashboard for that character ID. See [Narrative Design | Playground](../../../convai-playground/character-customization/narrative-design.md).
+
+Before you open Unreal Engine, confirm in the dashboard:
+
+| Check | What to verify |
+|---|---|
+| Graph exists | The character has at least one section and one outbound trigger. |
+| Trigger name | Copy the trigger name exactly — it is case-sensitive. |
+| Reachable edge | The trigger is an outbound edge from the section the character starts on. |
+| Character ID | The `CharacterID` on `UConvaiChatbotComponent` matches the dashboard character. |
 
 ## Build the Blueprint
 
@@ -47,24 +56,22 @@ From the Event Graph, add a **Keyboard** event node (for example `F` key). Drag 
 Set `Trigger Name` to the trigger name exactly as it appears in the Convai dashboard (for example `start_inspection`). Connect the **Pressed** execution pin of the keyboard event to **Invoke Narrative Design Trigger**.
 
 {% hint style="info" %}
-`bAutoInitializeSession` defaults to `true` on `UConvaiChatbotComponent`, so the session opens on **Begin Play**. If you press the key before the session connects, the trigger is queued in `PendingTriggers` and replays automatically once the connection is open.
+`bAutoInitializeSession` defaults to `true` on `UConvaiChatbotComponent`, so the session opens on **Begin Play**. If you press the key before the session connects, the trigger queues in `PendingTriggers` and replays once the connection is open.
 {% endhint %}
 {% endstep %}
 
 {% step %}
-### Play in Editor and activate the trigger
+### Play In Editor and activate the trigger
 
 Click **Play In Editor**. After the session connects, press the key you bound. Watch the screen for a printed section ID string.
 
-If the trigger name matches a trigger in the dashboard for the current section, Convai advances the story graph and **On Narrative Section Received** fires with the new `Narrative Section ID`.
+If the trigger name matches a trigger reachable from the character's current section, Convai advances the story graph and **On Narrative Section Received** fires with the new `Narrative Section ID`.
 
-{% hint style="warning" %}
-If nothing prints, check these common causes: the trigger name in the Blueprint does not match the dashboard exactly (including case); the `CharacterID` on `UConvaiChatbotComponent` does not match the character whose narrative graph is configured; or the trigger is not connected to the character's current section in the dashboard. Check the **Output Log** for `ConvaiChatbotComponentLog` messages such as `Invoke Narrative Design Trigger: TriggerName is missing`.
-{% endhint %}
+If nothing prints, see [Troubleshoot narrative design](troubleshooting-and-diagnostics.md). Common causes: trigger name mismatch, wrong `CharacterID`, or a trigger not connected to the current section in the dashboard.
 {% endstep %}
 {% endstepper %}
 
-A non-empty section ID printed to the screen confirms that Convai received the trigger and advanced the story graph successfully.
+A non-empty section ID printed to the screen confirms that Convai received the trigger and advanced the story graph.
 
 ## Next steps
 

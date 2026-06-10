@@ -1,6 +1,6 @@
 ---
 title: Narrative design Blueprint reference
-description: Complete reference for Blueprint functions, events, properties, and narrative structs in the Convai Unreal Engine plugin narrative design API.
+description: Reference for Blueprint functions, events, properties, and narrative structs on UConvaiChatbotComponent in the narrative design API.
 last_reviewed: "4.0.0-beta.21"
 ---
 
@@ -34,6 +34,8 @@ Endpoint: `character/narrative/list-sections`
 | `UFetchNarrativeSectionsProxy::Activate Invalid Character or API key` | Auth key or character ID failed validation. |
 | `HTTP request failed with code %d` | Non-2xx HTTP response. |
 
+If the HTTP request succeeds but the response array cannot be parsed into `FNarrativeSection` entries, the proxy may return without firing **On Success** or **On Failure**.
+
 ---
 
 ### Convai Fetch Narrative Triggers
@@ -60,6 +62,8 @@ Endpoint: `character/narrative/list-triggers`
 | `UFetchNarrativeTriggersProxy::Activate Invalid Character or API key` | Auth key or character ID failed validation. |
 | `HTTP request failed with code %d` | Non-2xx HTTP response. |
 
+If the HTTP request succeeds but the response array cannot be parsed into `FNarrativeTrigger` entries, the proxy may return without firing **On Success** or **On Failure**.
+
 ---
 
 ## Functions on `UConvaiChatbotComponent`
@@ -74,7 +78,7 @@ Sends a named trigger through `SendTriggerMessage` as a `trigger-message` packet
 
 | Parameter | Type | Description |
 |---|---|---|
-| `TriggerName` | `FString` | The trigger name. Must match the dashboard configuration exactly (case-sensitive). |
+| `TriggerName` | `FString` | The trigger name. Must match the dashboard configuration exactly. |
 | `InGenerateActions` | `bool` | Present in the Blueprint signature. Not applied in the current plugin source. |
 | `InReplicateOnNetwork` | `bool` | Present in the Blueprint signature. Not applied in the current plugin source. |
 
@@ -141,7 +145,7 @@ Category: `Convai|NarrativeDesign`
 Access: `BlueprintReadWrite, EditAnywhere`  
 Blueprint setter: `UpdateNarrativeTemplateKeys` (`BlueprintInternalUseOnly`)
 
-Key-value pairs used for placeholder substitution in section objectives. Convai replaces `{key}` tokens in objective text with the corresponding values from this map. Assigning the property sends `update-template-keys` when the session is connected.
+Key-value pairs sent to Convai through `update-template-keys` when the session is connected. Assigning the property triggers `UpdateNarrativeTemplateKeys`, which stores the map and sends it if a session proxy is active.
 
 ### bAutoInitializeSession
 
@@ -167,7 +171,7 @@ Represents one section (story beat) in the narrative graph.
 |---|---|---|---|
 | `section_id` | `FString` | Read only | Unique identifier for this section. |
 | `section_name` | `FString` | Read only | Human-readable name shown in the dashboard. |
-| `objective` | `FString` | Read only | The behavior objective for this section, including any `{key}` template tokens. |
+| `objective` | `FString` | Read only | The behavior objective for this section. |
 | `character_id` | `FString` | Read only | The character this section belongs to. |
 | `behavior_tree_code` | `FString` | Read only | Behavior tree code for advanced automation (may be empty). |
 | `bt_constants` | `FString` | Read only | Constants referenced by `behavior_tree_code` (may be empty). |
@@ -204,16 +208,16 @@ Represents one outbound decision rule within a section.
 
 ## Related pages
 
-{% content-ref url="fetching-narrative-data.md" %}
-[Fetching narrative data](fetching-narrative-data.md)
-{% endcontent-ref %}
-
 {% content-ref url="narrative-triggers.md" %}
 [Narrative triggers](narrative-triggers.md)
 {% endcontent-ref %}
 
 {% content-ref url="template-keys.md" %}
 [Template keys](template-keys.md)
+{% endcontent-ref %}
+
+{% content-ref url="fetching-narrative-data.md" %}
+[Fetching narrative data](fetching-narrative-data.md)
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}

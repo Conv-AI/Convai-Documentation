@@ -4,11 +4,22 @@ description: Invoke named narrative triggers or dynamic context messages on a Co
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Narrative triggers advance a character's story graph from one section to the next. The Convai Unreal Engine plugin exposes two Blueprint functions on `UConvaiChatbotComponent` and one event that fires when Convai confirms a section change.
+Narrative triggers advance a character's story graph from one section to the next. `UConvaiChatbotComponent` exposes two Blueprint functions for firing triggers and one event for reacting to section changes. If you have not invoked a trigger before, complete [Narrative design quick start](quick-start.md) first.
+
+## Choose the right function
+
+| Goal | Function | What it sends |
+|---|---|---|
+| Advance the graph using a dashboard trigger name | **Invoke Narrative Design Trigger** | `trigger-message` with `trigger_name` |
+| Stage a runtime message as conversational context | **Invoke Speech** | Dynamic context event through `AddContextEvent` |
+
+Use **Invoke Narrative Design Trigger** when the transition target is known at design time and the trigger name is a fixed string in the dashboard. Use **Invoke Speech** when the message is assembled at runtime — for example from player speech-to-text or a dynamic game-state string — and you want Convai to process it as context rather than match a dashboard trigger name.
+
+**On Narrative Section Received** fires only after Convai confirms a section change through a `BTResponse` packet. It does not fire when either function is called.
 
 ## Invoke a named trigger
 
-**Invoke Narrative Design Trigger** (`InvokeNarrativeDesignTrigger`) sends a `TriggerName` string to Convai through `SendTriggerMessage`. Convai matches the name against the outbound triggers configured for the current section in the Convai dashboard and advances the graph if a match is found.
+**Invoke Narrative Design Trigger** (`InvokeNarrativeDesignTrigger`) sends a `TriggerName` string to Convai through `SendTriggerMessage`. Convai matches the name against outbound triggers configured for the current section in the dashboard.
 
 | Input | Type | Description |
 |---|---|---|
@@ -16,13 +27,11 @@ Narrative triggers advance a character's story graph from one section to the nex
 | `InGenerateActions` | `bool` | Present in the Blueprint signature. Not applied in the current plugin source. |
 | `InReplicateOnNetwork` | `bool` | Present in the Blueprint signature. Not applied in the current plugin source. |
 
-Use this function when the transition target is known at design time and the trigger name is a fixed string. This is the standard approach for designed story beats in training simulations, onboarding flows, and guided practice scenarios.
+If `TriggerName` is empty, the plugin logs `Invoke Narrative Design Trigger: TriggerName is missing` and returns without sending a trigger.
 
 {% hint style="warning" %}
-Trigger names are case-sensitive. `start_scene` and `Start_Scene` are treated as different triggers. Verify the name matches the dashboard configuration character-for-character.
+Copy the trigger name from the dashboard character-for-character. A mismatch between the Blueprint string and the dashboard `trigger_name` produces no section change.
 {% endhint %}
-
-If `TriggerName` is empty, the plugin logs `Invoke Narrative Design Trigger: TriggerName is missing` and returns without sending a trigger.
 
 ## Invoke a dynamic context message
 
@@ -34,7 +43,7 @@ If `TriggerName` is empty, the plugin logs `Invoke Narrative Design Trigger: Tri
 | `InGenerateActions` | `bool` | Present in the Blueprint signature. Not applied in the current plugin source. |
 | `InReplicateOnNetwork` | `bool` | Present in the Blueprint signature. Not applied in the current plugin source. |
 
-Use **Invoke Speech** when the message is assembled at runtime — for example from player speech-to-text or a dynamic game-state string — and you want Convai to process it as conversational context rather than match a dashboard trigger name. If Convai determines a section change is appropriate, **On Narrative Section Received** still fires through the same `BTResponse` path.
+If Convai determines a section change is appropriate, **On Narrative Section Received** still fires through the same `BTResponse` path.
 
 If `TriggerMessage` is empty, the plugin logs `Invoke Speech: TriggerMessage is missing` and returns without staging an event.
 
@@ -47,19 +56,15 @@ Bind **On Narrative Section Received** (`OnNarrativeSectionReceivedEvent`) on th
 | `ChatbotComponent` | `UConvaiChatbotComponent*` | The component that received the section update. |
 | `NarrativeSectionID` | `FString` | The `section_id` of the new active section. |
 
-The event fires only after Convai confirms the section change through a `BTResponse` packet. It does not fire when the trigger function is called.
-
 To bind in Blueprint: drag the `UConvaiChatbotComponent` reference into the Event Graph, then select **Assign On Narrative Section Received** from the context menu.
 
 ## Pending named triggers
 
-When **Invoke Narrative Design Trigger** is called and the chatbot session is not connected, the plugin stores the call in `PendingTriggers`. Pending triggers replay in order after the session connects and the dynamic context flush completes. A named trigger called before the session opens is not lost.
+When **Invoke Narrative Design Trigger** is called and the session is not connected, the plugin stores the call in `PendingTriggers`. Pending triggers replay in order after the session connects and the dynamic context flush completes.
 
 {% hint style="warning" %}
-If the `UConvaiChatbotComponent` is destroyed before the session reconnects, the pending queue is discarded and queued triggers are not replayed. Calling `Reset Dynamic Context` also clears `PendingTriggers`.
+Calling `Reset Dynamic Context` clears `PendingTriggers`. If the component is destroyed before the session reconnects, queued triggers are also discarded. **Invoke Speech** does not use the pending trigger queue.
 {% endhint %}
-
-**Invoke Speech** does not use the pending trigger queue. It stages context events through the dynamic context batch instead.
 
 ## Session readiness
 

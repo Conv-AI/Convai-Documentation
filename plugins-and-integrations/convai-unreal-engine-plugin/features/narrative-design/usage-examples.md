@@ -6,6 +6,8 @@ last_reviewed: "4.0.0-beta.21"
 
 The examples below cover common narrative design patterns for training simulations and interactive experiences. Each example assumes a character Actor Blueprint with a `UConvaiChatbotComponent` whose `CharacterID` references a character with a narrative graph configured in the Convai dashboard.
 
+For trigger invocation basics, see [Narrative design quick start](quick-start.md). For API details, see [Narrative design Blueprint reference](narrative-design-blueprint-reference.md).
+
 ## Linear scene progression
 
 **Scenario:** a player enters a restricted zone in an industrial safety simulation. The character advances to the next narrative section when the player crosses the boundary.
@@ -23,7 +25,7 @@ The examples below cover common narrative design patterns for training simulatio
 
 ## Dynamic context event during debrief
 
-**Scenario:** a healthcare training simulation lets the player speak freely during a debrief phase. The instructor character should respond to whatever the player says, and the narrative may advance if Convai determines a section change is appropriate.
+**Scenario:** a healthcare training simulation lets the player speak freely during a debrief phase. The instructor character responds to whatever the player says, and the narrative may advance if Convai determines a section change is appropriate.
 
 **Setup:**
 
@@ -33,6 +35,8 @@ The examples below cover common narrative design patterns for training simulatio
 4. **On Narrative Section Received** fires if Convai returns a `BTResponse` packet with a `narrative_section_id`.
 
 **Expected outcome:** the character responds to the staged context event. If the content satisfies conditions for a section transition in the narrative graph, the story advances and **On Narrative Section Received** fires.
+
+For when to choose **Invoke Speech** over **Invoke Narrative Design Trigger**, see [Narrative triggers](narrative-triggers.md).
 
 ---
 
@@ -55,6 +59,8 @@ NarrativeTemplateKeys["Department"]   = "Electrical"
 
 **Expected outcome:** every section objective Convai evaluates for this session uses the correct player name and department. Updating the map while connected sends new values to Convai for the next objective evaluation.
 
+See [Template keys](template-keys.md) for verification steps.
+
 ---
 
 ## Guarding a trigger until the session is ready
@@ -63,9 +69,9 @@ NarrativeTemplateKeys["Department"]   = "Electrical"
 
 **Setup:**
 
-`bAutoInitializeSession` defaults to `true` on `UConvaiChatbotComponent`, so the component calls `StartSession` on **Begin Play**. Named triggers called before the session connects queue in `PendingTriggers` and replay automatically once the connection is open. You do not need a manual delay for the default configuration.
+`bAutoInitializeSession` defaults to `true` on `UConvaiChatbotComponent`, so the component calls `StartSession` on **Begin Play**. Named triggers called before the session connects queue in `PendingTriggers` and replay automatically once the connection is open.
 
-If `bAutoInitializeSession` is `false`, call `StartSession` explicitly or bind **On Character Data Loaded** (`OnCharacterDataLoadEvent_V2`) and invoke triggers from that event when you need confirmation that character data has loaded.
+If `bAutoInitializeSession` is `false`, call `StartSession` explicitly or bind **On Character Data Loaded** (`OnCharacterDataLoadEvent_V2`) and invoke triggers from that event.
 
 ```text
 // Blueprint pseudocode
@@ -75,11 +81,13 @@ Event: On Character Data Loaded (Success = true)
 
 **Expected outcome:** named triggers reach Convai after the session is open. Early calls queue rather than fail when `bAutoInitializeSession` is `true`.
 
+For pending-queue behavior and `Reset Dynamic Context`, see [Narrative triggers](narrative-triggers.md).
+
 ---
 
 ## Fetch triggers to validate names before invoking
 
-**Scenario:** your Blueprint contains many hardcoded trigger name strings. After a dashboard update, one name changes, causing a silent failure. You want to catch name mismatches at load time rather than discovering them during QA.
+**Scenario:** your Blueprint contains many hardcoded trigger name strings. After a dashboard update, one name changes, causing a silent failure. You want to catch name mismatches at load time.
 
 **Setup:**
 
@@ -102,7 +110,9 @@ Before Invoke Narrative Design Trigger:
       False → Print "Unknown trigger: " + TriggerName
 ```
 
-**Expected outcome:** trigger name mismatches surface at load time with a clear log message, before any trigger call reaches Convai. After a dashboard rename, the mismatch is visible on **Begin Play** rather than silently producing no section change.
+**Expected outcome:** trigger name mismatches surface at load time with a clear log message. After a dashboard rename, the mismatch is visible on **Begin Play** rather than silently producing no section change.
+
+For fetch prerequisites and verification, see [Fetching narrative data](fetching-narrative-data.md).
 
 ---
 

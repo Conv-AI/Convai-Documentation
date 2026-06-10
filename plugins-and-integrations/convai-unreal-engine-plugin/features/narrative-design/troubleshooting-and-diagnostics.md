@@ -10,7 +10,7 @@ Use this page to diagnose narrative design issues such as missing section events
 
 **Symptom:** the Blueprint event bound to **On Narrative Section Received** does not execute after calling **Invoke Narrative Design Trigger**.
 
-**Cause — trigger name mismatch:** the `TriggerName` string does not match any trigger name configured for the current section in the Convai dashboard. Trigger names are case-sensitive.
+**Cause — trigger name mismatch:** the `TriggerName` string does not match any trigger name configured for the current section in the Convai dashboard.
 
 **Fix:** open the Convai dashboard, navigate to the narrative graph for the character, and copy the trigger name exactly as entered. Paste it into the Blueprint node's `TriggerName` input. Confirm there are no leading or trailing spaces.
 
@@ -38,7 +38,7 @@ Use this page to diagnose narrative design issues such as missing section events
 
 **Fix:** open the Convai dashboard and review all triggers on the current section. Confirm each trigger name is unique within the section. Print the current `NarrativeSectionID` from the last **On Narrative Section Received** event before calling the trigger to verify the character is on the intended section.
 
-**Verify:** after deduplicating trigger names, confirm that the returned `NarrativeSectionID` matches the `destination_section` of the intended trigger from **Convai Fetch Narrative Triggers**.
+**Verify:** confirm in the dashboard that the returned `NarrativeSectionID` matches the `destination_section` of the intended trigger.
 
 ---
 
@@ -50,7 +50,7 @@ Use this page to diagnose narrative design issues such as missing section events
 
 **Fix:** assign all required template keys in **Begin Play** before any trigger fires, or before calling the trigger that advances to the section whose objective references those keys.
 
-**Cause — key name mismatch:** the key name in the map does not match the placeholder token in the dashboard objective. Token names are case-sensitive. `{PlayerName}` requires a map entry with key `PlayerName`, not `playername` or `player_name`.
+**Cause — key name mismatch:** the key name in the map does not match the placeholder token in the dashboard objective.
 
 **Fix:** compare the placeholder text in the dashboard objective character-for-character against the key strings in the **Narrative Template Keys** map.
 
@@ -58,7 +58,7 @@ Use this page to diagnose narrative design issues such as missing section events
 
 **Fix:** confirm in the **Details** panel or through a Blueprint print that the map is populated at the time the trigger fires.
 
-**Verify:** print the `NarrativeTemplateKeys` map before calling the trigger and confirm the expected key-value pairs are present.
+**Verify:** print the `NarrativeTemplateKeys` map before calling the trigger and confirm the expected key-value pairs are present. Confirm the **Output Log** shows no connection errors and that the session is open when you assign the map.
 
 ---
 
@@ -70,7 +70,19 @@ Use this page to diagnose narrative design issues such as missing section events
 
 **Fix:** open the Convai dashboard and verify that the trigger is configured as an outbound edge from the current section, not from a different section.
 
-**Verify:** confirm in the dashboard that the trigger appears in the outbound edges list for the section the character is currently on. Use **Convai Fetch Narrative Triggers** to compare `trigger_name` and `destination_section` values against your Blueprint setup.
+**Verify:** confirm in the dashboard that the trigger appears in the outbound edges list for the section the character is currently on. Compare the `TriggerName` in Blueprint against the dashboard `trigger_name` character-for-character.
+
+---
+
+## Pending triggers are lost after Reset Dynamic Context
+
+**Symptom:** you called **Invoke Narrative Design Trigger** before the session connected, but the trigger never replays after connect.
+
+**Cause:** `Reset Dynamic Context` clears `PendingTriggers`. Any named triggers queued before the reset are discarded.
+
+**Fix:** avoid calling `Reset Dynamic Context` between queuing a named trigger and session connect. If you must reset dynamic context, re-invoke the trigger after the session is open.
+
+**Verify:** after connect, check the **Output Log** for `Invoke Narrative Design Trigger: Executed | Character ID : ... | Session ID : ...` when you call the trigger again.
 
 ---
 
@@ -110,9 +122,19 @@ Use this page to diagnose narrative design issues such as missing section events
 
 ---
 
-## Related pages
+## Fetch node does not fire On Success or On Failure
 
-Use these pages when you need the setup path, exact API shape, or runtime fetch details for the issue you are diagnosing.
+**Symptom:** **Convai Fetch Narrative Sections** or **Convai Fetch Narrative Triggers** runs but neither **On Success** nor **On Failure** executes.
+
+**Cause:** the HTTP request may have succeeded but the response array could not be parsed into narrative structs. In the current plugin source, this path returns without broadcasting either delegate.
+
+**Fix:** confirm the character has narrative sections or triggers configured in the dashboard. Check the **Output Log** for `ConvaiNarrativeHTTP` messages. Retry after verifying the `CharacterId` and API key.
+
+**Verify:** after fixing the dashboard data or credentials, run the fetch node again and confirm **On Success** fires with a non-empty array.
+
+---
+
+## Related pages
 
 {% content-ref url="narrative-triggers.md" %}
 [Narrative triggers](narrative-triggers.md)

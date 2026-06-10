@@ -1,14 +1,14 @@
 ---
 title: Narrative design
-description: Find guides for structuring character story graphs, invoking narrative triggers, and injecting runtime template keys in the Convai Unreal Engine plugin.
+description: Drive character story graphs from Unreal Engine by invoking narrative triggers, injecting template keys, and handling section change events.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin lets you drive character behavior through a story graph you author in the Convai dashboard. A graph is made up of named sections, named triggers, and template keys that adapt objectives to live gameplay data such as a player name or quest state.
+Narrative design gives a Convai character a structured story graph — named sections, named triggers, and template keys that adapt objectives to live gameplay data. You author the graph in the Convai dashboard; at runtime, `UConvaiChatbotComponent` (`Convai Chatbot`) invokes triggers and receives section changes from Convai.
 
-The primary narrative design API lives on `UConvaiChatbotComponent` (`Convai Chatbot`). Async Blueprint nodes under **Convai|REST API** can also query a character's sections and triggers from Convai at runtime.
+**New to narrative design?** Start with [Narrative design quick start](quick-start.md) after you have a character with a graph configured in the dashboard. Use [Narrative Design | Playground](../../../convai-playground/character-customization/narrative-design.md) to create sections and triggers before you open Unreal Engine.
 
-## Understand the workflow
+## Get started
 
 <table data-view="cards">
 <thead>
@@ -19,7 +19,11 @@ The primary narrative design API lives on `UConvaiChatbotComponent` (`Convai Cha
 </thead>
 <tbody>
 <tr>
-<td><strong>How narrative design works</strong><br>Understand the story graph, sections, triggers, and how the plugin's runtime pipeline connects them.</td>
+<td><strong>Narrative design quick start</strong><br>Invoke a named trigger from Blueprint and confirm a section change by printing the new section ID.</td>
+<td><a href="quick-start.md">quick-start.md</a></td>
+</tr>
+<tr>
+<td><strong>How narrative design works</strong><br>Understand sections, triggers, template keys, and the runtime pipeline from trigger call to section event.</td>
 <td><a href="how-narrative-design-works.md">how-narrative-design-works.md</a></td>
 </tr>
 </tbody>
@@ -36,20 +40,16 @@ The primary narrative design API lives on `UConvaiChatbotComponent` (`Convai Cha
 </thead>
 <tbody>
 <tr>
-<td><strong>Narrative design quick start</strong><br>Invoke a narrative trigger and observe the section change event in a new Blueprint character.</td>
-<td><a href="quick-start.md">quick-start.md</a></td>
-</tr>
-<tr>
 <td><strong>Narrative triggers</strong><br>Use <code>Invoke Narrative Design Trigger</code> for named graph transitions and <code>Invoke Speech</code> for dynamic context events.</td>
 <td><a href="narrative-triggers.md">narrative-triggers.md</a></td>
 </tr>
 <tr>
-<td><strong>Fetching narrative data</strong><br>Query a character's sections and triggers at runtime using <code>Convai Fetch Narrative Sections</code> and <code>Convai Fetch Narrative Triggers</code>.</td>
-<td><a href="fetching-narrative-data.md">fetching-narrative-data.md</a></td>
-</tr>
-<tr>
 <td><strong>Template keys</strong><br>Populate the <code>Narrative Template Keys</code> map so section objectives reference live gameplay values.</td>
 <td><a href="template-keys.md">template-keys.md</a></td>
+</tr>
+<tr>
+<td><strong>Fetching narrative data</strong><br>Query a character's sections and triggers at runtime with <code>Convai Fetch Narrative Sections</code> and <code>Convai Fetch Narrative Triggers</code>.</td>
+<td><a href="fetching-narrative-data.md">fetching-narrative-data.md</a></td>
 </tr>
 </tbody>
 </table>
@@ -65,7 +65,7 @@ The primary narrative design API lives on `UConvaiChatbotComponent` (`Convai Cha
 </thead>
 <tbody>
 <tr>
-<td><strong>Narrative design Blueprint reference</strong><br>Reference for every Blueprint function, event, property, and narrative struct in the narrative design API.</td>
+<td><strong>Narrative design Blueprint reference</strong><br>Reference for Blueprint functions, events, properties, async fetch nodes, and narrative structs.</td>
 <td><a href="narrative-design-blueprint-reference.md">narrative-design-blueprint-reference.md</a></td>
 </tr>
 <tr>
@@ -73,7 +73,7 @@ The primary narrative design API lives on `UConvaiChatbotComponent` (`Convai Cha
 <td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
-<td><strong>Troubleshoot narrative design</strong><br>Fix section events that do not fire, wrong transitions, template keys that are ignored, and fetch failures.</td>
+<td><strong>Troubleshoot narrative design</strong><br>Fix section events that do not fire, wrong transitions, template keys that are ignored, fetch failures, and session readiness issues.</td>
 <td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td>
 </tr>
 </tbody>
@@ -81,8 +81,10 @@ The primary narrative design API lives on `UConvaiChatbotComponent` (`Convai Cha
 
 ## Next steps
 
-Start with the narrative design quick start if you want a working Blueprint path, then use the trigger and template-key guides to add production behavior.
-
 {% content-ref url="quick-start.md" %}
 [Narrative design quick start](quick-start.md)
+{% endcontent-ref %}
+
+{% content-ref url="../../../convai-playground/character-customization/narrative-design.md" %}
+[Narrative Design | Playground](../../../convai-playground/character-customization/narrative-design.md)
 {% endcontent-ref %}

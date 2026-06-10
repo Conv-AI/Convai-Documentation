@@ -4,17 +4,23 @@ description: Query a character's narrative sections and triggers at runtime usin
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The Convai Unreal Engine plugin exposes two async Blueprint nodes under **Convai|REST API** that retrieve narrative sections and triggers for a character directly from Convai. Use these nodes to validate trigger names before invoking them, populate dynamic UI, or pre-cache narrative data during a loading screen — without hard-coding assumptions about the character's story graph.
+The Convai Unreal Engine plugin exposes two async Blueprint nodes under **Convai|REST API** that retrieve narrative sections and triggers for a character from Convai. Use these nodes to validate trigger names before invoking them, populate dynamic UI, or pre-cache narrative data during a loading screen.
 
 These nodes are optional. The normal story progression path is **Invoke Narrative Design Trigger** on `UConvaiChatbotComponent`, not fetch-and-invoke.
 
+## Prerequisites
+
+- The Convai Unreal Engine plugin is installed and the API key is configured. See [Configure your API key](../../getting-started/configure-api-key.md).
+- A valid `CharacterId` that matches the `CharacterID` on the target `UConvaiChatbotComponent`.
+- Network access at the time the fetch node executes. Fetch nodes make HTTPS POST requests to Convai.
+
 ## Fetch Narrative Sections
 
-**Convai Fetch Narrative Sections** is an async latent Blueprint node implemented by `UFetchNarrativeSectionsProxy`. Call it with a `CharacterId` string; it POSTs to `character/narrative/list-sections` and returns narrative sections configured for that character in the Convai dashboard.
+**Convai Fetch Narrative Sections** is an async latent Blueprint node implemented by `UFetchNarrativeSectionsProxy`. It POSTs to `character/narrative/list-sections` and returns sections configured for that character in the dashboard.
 
 | Pin | Direction | Type | Description |
 |---|---|---|---|
-| `CharacterId` | Input | `FString` | The character ID to query. Must match the `CharacterID` set on the target `UConvaiChatbotComponent`. |
+| `CharacterId` | Input | `FString` | The character ID to query. Must match the `CharacterID` on the target `UConvaiChatbotComponent`. |
 | `On Success` | Output (exec) | — | Fires when the HTTP request succeeds and the response is parsed into `FNarrativeSection` entries. |
 | `On Failure` | Output (exec) | — | Fires when activation validation fails, the response pointer is invalid, or the HTTP response is outside the `2xx` range. |
 | `Narrative Sections` | Output | `TArray<FNarrativeSection>` | The sections returned on success. Empty on failure. |
@@ -25,10 +31,6 @@ These nodes are optional. The normal story progression path is **Invoke Narrativ
 2. Select **Convai Fetch Narrative Sections** under **Convai|REST API**.
 3. Set the `CharacterId` input to the same value used by the `UConvaiChatbotComponent` you are working with.
 4. Connect nodes to both **On Success** and **On Failure** execution pins.
-
-{% hint style="info" %}
-The `CharacterId` input must match the `CharacterID` property on the `UConvaiChatbotComponent` for the sections to be relevant to that character's active session.
-{% endhint %}
 
 ## Fetch Narrative Triggers
 
@@ -57,43 +59,33 @@ Fetch nodes make an HTTPS request to Convai each time they are executed. Do not 
 
 ## Handle the results
 
-**Build a trigger name lookup:**
-
 On the **On Success** pin of **Convai Fetch Narrative Triggers**, iterate the `Narrative Triggers` array and extract each `trigger_name` into a `TSet<FString>` or Map variable. Before calling **Invoke Narrative Design Trigger**, check that the intended name is in the set.
 
-```text
-// Blueprint pseudocode
-Event Begin Play
-  → Convai Fetch Narrative Triggers (CharacterId = MyCharacterID)
-      On Success → For Each (Narrative Triggers)
-                      → Add trigger_name to ValidTriggerNames (Set variable)
-      On Failure → Print "Failed to fetch triggers"
+On the **On Success** pin of **Convai Fetch Narrative Sections**, iterate `Narrative Sections` and use each `section_id` and `section_name` to populate a dropdown or debug overlay.
 
-Later, before invoking:
-  → Branch: ValidTriggerNames Contains "enter_zone"
-      True  → Invoke Narrative Design Trigger (TriggerName = "enter_zone")
-      False → Print "Trigger name not found — check dashboard"
-```
+For a complete trigger-validation recipe, see [Narrative design usage examples](usage-examples.md#fetch-triggers-to-validate-names-before-invoking).
 
-**Enumerate sections for UI:**
+## Verify the fetch
 
-On the **On Success** pin of **Convai Fetch Narrative Sections**, iterate `Narrative Sections` and use each `section_id` and `section_name` to populate a dropdown or debug overlay showing the available story beats.
+After running a fetch node in Play In Editor:
+
+1. Confirm the **On Success** execution pin fires (not **On Failure**).
+2. Inspect `Narrative Sections` or `Narrative Triggers` — the array should contain entries for the character you queried.
+3. If **On Failure** fires, check the **Output Log** for `ConvaiNarrativeHTTP` messages. See [Troubleshoot narrative design](troubleshooting-and-diagnostics.md).
+
+{% hint style="info" %}
+If the HTTP request succeeds but the response array cannot be parsed into narrative structs, the fetch proxy may return without firing **On Success** or **On Failure**. If a latent node appears to hang, check the **Output Log** for `ConvaiNarrativeHTTP` and retry after confirming the character has narrative data in the dashboard.
+{% endhint %}
 
 ## Next steps
-
-Use the trigger guide when you are ready to invoke a validated trigger name from gameplay.
 
 {% content-ref url="narrative-triggers.md" %}
 [Narrative triggers](narrative-triggers.md)
 {% endcontent-ref %}
 
-Use the reference page for the exact fetch-node pins and returned struct fields.
-
 {% content-ref url="narrative-design-blueprint-reference.md" %}
 [Narrative design Blueprint reference](narrative-design-blueprint-reference.md)
 {% endcontent-ref %}
-
-Use troubleshooting if a fetch node routes to **On Failure** or returns an empty array.
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
 [Troubleshoot narrative design](troubleshooting-and-diagnostics.md)
