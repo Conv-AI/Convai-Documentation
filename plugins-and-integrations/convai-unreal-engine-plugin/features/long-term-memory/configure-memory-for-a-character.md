@@ -4,14 +4,12 @@ description: Enable long-term memory for an Unreal character, verify the dashboa
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Configure a Convai character so it can remember returning players. Enable the character-level LTM setting, confirm player identity is assigned before `StartSession`, and reset the local conversation link when you need a fresh thread.
+Configure a Convai character so it can remember returning players. Enable the character-level LTM setting, verify it is active, and reset the local conversation link when you need a fresh thread.
 
 ## Prerequisites
 
 - The Convai Unreal Engine plugin is installed and the API key is configured.
 - The character Actor has a `UConvaiChatbotComponent` with a valid `CharacterID`.
-- The player Actor has a `UConvaiPlayerComponent`.
-- Your project has a persistence layer such as a `SaveGame` object.
 - Player identity is configured. See [End-user identity](end-user-identity.md).
 
 ## Enable LTM for the character
@@ -42,39 +40,9 @@ Call **Convai Get LTM Status** again. Continue only when **Status** returns `tru
 {% endstep %}
 {% endstepper %}
 
-## Assign identity before StartSession
-
-Cross-session recall depends on a stable `EndUserID`, not on saving `SessionID` for the WebRTC `StartSession` flow.
-
-{% stepper %}
-{% step %}
-### Load saved identity
-
-Load your saved `SpeakerID` or account ID and optional metadata from your persistence layer.
-{% endstep %}
-
-{% step %}
-### Assign values to the components
-
-Set `UConvaiChatbotComponent.EndUserID` and call **Set End User ID** on `UConvaiPlayerComponent` with the same value.
-{% endstep %}
-
-{% step %}
-### Start the session
-
-Call `StartSession` on the chatbot component.
-
-The plugin sends `EndUserID` and `EndUserMetadata` at connect time. Convai uses that identity with the character ID to load the correct memory scope.
-{% endstep %}
-{% endstepper %}
-
-{% hint style="info" %}
-`UConvaiChatbotComponent.SessionID` defaults to `"-1"` and is cleared by `ResetConversation()`. The WebRTC connection does not send this property. Use it for local reset tracking or HTTP Bot Query flows.
-{% endhint %}
-
 ## Reset the conversation link
 
-Use `ResetConversation()` when the player starts a new playthrough, switches profiles, or needs a fresh conversation session.
+Use `ResetConversation()` when the player starts a new playthrough, switches profiles, or needs a fresh conversation session without deleting long-term memory.
 
 {% tabs %}
 {% tab title="Blueprint" %}
@@ -88,15 +56,21 @@ ChatbotComponent->ResetConversation();
 {% endtab %}
 {% endtabs %}
 
-`ResetConversation()` sets the local `SessionID` property to `"-1"`. It does not delete the player's Speaker ID or individual memory records from Convai.
+`ResetConversation()` sets the local `SessionID` property to `"-1"`. It does not delete the player's Speaker ID or individual memory records from Convai. The same `EndUserID` continues to scope long-term memory for that player.
+
+{% hint style="info" %}
+`UConvaiChatbotComponent.SessionID` defaults to `"-1"` and is cleared by `ResetConversation()`. The WebRTC connection does not send this property. Use it for local reset tracking or HTTP Bot Query flows.
+{% endhint %}
 
 ## Verify the configuration
 
 Before `StartSession`, confirm:
 
 - **Convai Get LTM Status** returns `true`.
-- The chatbot and player components use the same `EndUserID`.
+- `UConvaiChatbotComponent.EndUserID` is set to a non-empty, stable value.
 - `SessionID` is `"-1"` after `ResetConversation()`, or unchanged when you are continuing with the same identity.
+
+For identity assignment steps, see [End-user identity](end-user-identity.md).
 
 ## Next steps
 

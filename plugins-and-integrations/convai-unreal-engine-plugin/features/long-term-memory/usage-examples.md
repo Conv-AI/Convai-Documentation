@@ -4,7 +4,7 @@ description: Apply Unreal long-term memory patterns for returning learners, shar
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Use these patterns after [Long-term memory quick start](quick-start.md) is working. Each example focuses on which identity values to set before `StartSession`.
+Use these patterns after [Long-term memory quick start](quick-start.md) is working. Each example focuses on which identity values to set on the chatbot component before `StartSession`. For assignment steps, see [End-user identity](end-user-identity.md).
 
 ## Returning learner in a training simulation
 
@@ -12,32 +12,14 @@ A safety training simulation should remember that a learner has already complete
 
 **Setup:**
 
-- Long-term memory (LTM) is enabled for the training character.
+- LTM is enabled for the training character.
 - The learner has a saved `SpeakerID`.
 
 **Blueprint flow:**
 
-{% stepper %}
-{% step %}
-### Load saved values
-
-Load `SpeakerID` from the learner's `SaveGame` or account profile.
-{% endstep %}
-
-{% step %}
-### Assign identity
-
-Set `UConvaiChatbotComponent.EndUserID` to the saved `SpeakerID`.
-
-Call **Set End User ID** on `UConvaiPlayerComponent` with the same value.
-{% endstep %}
-
-{% step %}
-### Connect
-
-Call `StartSession` after the identity values are assigned.
-{% endstep %}
-{% endstepper %}
+1. Load `SpeakerID` from the learner's `SaveGame` or account profile.
+2. Set `UConvaiChatbotComponent.EndUserID` and `UConvaiPlayerComponent.EndUserID` to the saved value.
+3. Call `StartSession` on the chatbot component.
 
 **Expected outcome:** The character can refer to facts learned in earlier sessions for the same learner and character.
 
@@ -53,10 +35,11 @@ A new player starts the application with no stored identity.
 **Blueprint flow:**
 
 1. Call **Convai Create Speaker ID** with **Speaker Name** set to the display name.
-2. Optionally set **Device Id** to a stable device or account identifier.
-3. On **On Success**, save the returned `SpeakerID`.
-4. Assign that `SpeakerID` to the chatbot and player components.
-5. Call `StartSession`.
+2. On **On Success**, save the returned `SpeakerID`.
+3. Set both components' `EndUserID` to the saved value.
+4. Call `StartSession`.
+
+For the full create workflow, see [Speaker ID management](speaker-id-management.md).
 
 **Expected outcome:** Convai creates a distinct memory scope for this player and character pair. Future launches should reuse the saved `SpeakerID`.
 
@@ -89,15 +72,14 @@ An enterprise onboarding app already has a user account ID and does not need a S
 **Blueprint flow:**
 
 1. Load the signed-in user's account ID.
-2. Assign it directly to `UConvaiChatbotComponent.EndUserID`.
-3. Call **Set End User ID** on `UConvaiPlayerComponent` with the same value.
-4. Set `EndUserMetadata` on the chatbot component and call **Set End User Metadata** on `UConvaiPlayerComponent` with the same JSON string, such as:
+2. Set `UConvaiChatbotComponent.EndUserID` and `UConvaiPlayerComponent.EndUserID` to the account ID.
+3. Optionally set `EndUserMetadata` on both components with the same JSON string:
 
 ```json
 {"name": "Jordan Kim", "department": "Facilities"}
 ```
 
-5. Call `StartSession`.
+4. Call `StartSession`.
 
 **Expected outcome:** Memory follows the account identity instead of the local device.
 

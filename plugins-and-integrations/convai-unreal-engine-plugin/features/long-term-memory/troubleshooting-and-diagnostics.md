@@ -9,7 +9,7 @@ Use this page when a Convai character does not remember a returning player, reme
 ## First-line checks
 
 1. Confirm LTM is enabled for the character. In the Convai dashboard, memory is disabled by default for new characters. In Unreal, call **Convai Get LTM Status** and confirm **Status** is `true`.
-2. Confirm the same `EndUserID` is used every time the same player returns.
+2. Confirm `UConvaiChatbotComponent.EndUserID` is set to a non-empty, stable value before each `StartSession`.
 3. Confirm the chatbot and player components use the same `EndUserID` before `StartSession`.
 4. Confirm the API key is configured and other Convai session requests are succeeding.
 
@@ -30,15 +30,15 @@ graph TD
 
 **Symptom:** The character starts fresh every time, even after the player shared facts in an earlier session.
 
-**Cause:** LTM is disabled for the character or `EndUserID` changes between sessions.
+**Cause:** LTM is disabled for the character or `EndUserID` on the chatbot component changes between sessions.
 
 **Fix:**
 
 1. Call **Convai Get LTM Status** for the character ID.
 2. If **Status** is `false`, call **Convai Set LTM Status** with **B Enable** set to `true`.
-3. Print the saved `SpeakerID` or account ID immediately before `StartSession`.
+3. Print `UConvaiChatbotComponent.EndUserID` immediately before `StartSession`.
 
-**Verify:** Run two Play In Editor sessions with the same `EndUserID` assigned to both components before each `StartSession`.
+**Verify:** Run two Play In Editor sessions with the same `EndUserID` on the chatbot component before each `StartSession`.
 
 ## Character remembers the wrong player
 
@@ -46,7 +46,7 @@ graph TD
 
 **Cause:** Multiple players are sharing the same `EndUserID`. This often happens when device fallback is used on a shared machine.
 
-**Fix:** Create or assign a unique identity per player. For Blueprint-managed identity, call **Convai Create Speaker ID** once per player profile and save the returned `SpeakerID`.
+**Fix:** Create or assign a unique identity per player. For Blueprint-managed identity, call **Convai Create Speaker ID** once per player profile and save the returned `SpeakerID`. See [End-user identity](end-user-identity.md).
 
 **Verify:** Print the active `EndUserID` for each profile before `StartSession`. Each player should have a distinct value.
 
@@ -96,6 +96,8 @@ The current source contains these LTM-specific log messages:
 | `Parse Json failed` | **Convai Create Speaker ID** | The create response could not be parsed. |
 | `Parse speaker id failed` | **Convai List Speaker IDs** | The list response could not be parsed. |
 | `GetLTMStatus failed` | **Convai Get LTM Status** | The character details response did not contain the expected LTM status data. |
+| `End User ID not provided, using Device ID: %s` | Connect parameter build | Chatbot `EndUserID` was empty; device fallback was used. |
+| `Using End User ID: %s` | Connect parameter build | The chatbot `EndUserID` was sent at connect time. |
 | `HTTP request failed with code %d, and with response:%s` | Shared API proxy | The HTTP request returned a non-2xx response. |
 
 ## What Unreal LTM does not expose
@@ -112,6 +114,14 @@ For a fresh local conversation link, use `ResetConversation()`. For identity del
 
 {% content-ref url="end-user-identity.md" %}
 [End-user identity](end-user-identity.md)
+{% endcontent-ref %}
+
+{% content-ref url="quick-start.md" %}
+[Long-term memory quick start](quick-start.md)
+{% endcontent-ref %}
+
+{% content-ref url="speaker-id-management.md" %}
+[Speaker ID management](speaker-id-management.md)
 {% endcontent-ref %}
 
 {% content-ref url="ltm-blueprint-reference.md" %}

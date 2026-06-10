@@ -6,6 +6,8 @@ last_reviewed: "4.0.0-beta.21"
 
 This reference lists the public long-term memory surface in the Convai Unreal Engine plugin. LTM management nodes are in the `Convai|LTM` Blueprint category.
 
+For connect-time identity, the plugin reads `EndUserID` and `EndUserMetadata` from `UConvaiChatbotComponent` through `IConvaiConnectionInterface` when `StartSession` builds connection parameters. Set these values on the chatbot component before calling `StartSession`.
+
 ## LTM nodes
 
 All nodes on this page are async proxy nodes. Each node exposes **On Success** and **On Failure** delegates.
@@ -84,7 +86,7 @@ Blueprint display name: **Convai Chatbot**.
 
 | Member | Type | Specifiers | Description |
 | --- | --- | --- | --- |
-| `EndUserID` | `FString` | `BlueprintReadWrite`, `EditAnywhere`, category `Convai` | Player identity sent at connect time through `GetEndUserID()`. |
+| `EndUserID` | `FString` | `BlueprintReadWrite`, `EditAnywhere`, category `Convai` | Player identity sent at connect time through `GetEndUserID()`. Set this before `StartSession`. |
 | `EndUserMetadata` | `FString` | `BlueprintReadWrite`, `EditAnywhere`, category `Convai` | Optional JSON string sent at connect time through `GetEndUserMetadata()`. |
 | `SessionID` | `FString` | `BlueprintReadWrite`, category `Convai`, `Replicated` | Local conversation link marker. Default is `"-1"`. Cleared by `ResetConversation()`. Not sent by WebRTC `StartSession`. |
 | `ResetConversation()` | `void` | `BlueprintCallable`, category `Convai` | Sets `SessionID` to `"-1"`. |
@@ -98,25 +100,33 @@ Blueprint display name: **Convai Player**.
 
 | Member | Type | Specifiers | Description |
 | --- | --- | --- | --- |
-| `EndUserID` | `FString` | `EditAnywhere`, category `Convai`, `Replicated`, `BlueprintSetter = SetEndUserID` | Player identity sent at connect time through `GetEndUserID()`. |
+| `EndUserID` | `FString` | `EditAnywhere`, category `Convai`, `Replicated`, `BlueprintSetter = SetEndUserID` | Player identity on the player component. Set to match the chatbot value for project consistency. |
 | `SetEndUserID()` | `void (FString NewEndUserID)` | `BlueprintCallable`, `BlueprintInternalUseOnly`, category `Convai` | Sets `EndUserID`. Calls `SetEndUserIDServer()` when the component is replicated. |
 | `SetEndUserIDServer()` | `void (const FString& NewEndUserID)` | `Server`, `Reliable`, category `Convai|Network` | Server RPC used by `SetEndUserID()`. |
-| `EndUserMetadata` | `FString` | `EditAnywhere`, category `Convai`, `Replicated`, `BlueprintSetter = SetEndUserMetadata` | Optional JSON metadata sent at connect time. |
+| `EndUserMetadata` | `FString` | `EditAnywhere`, category `Convai`, `Replicated`, `BlueprintSetter = SetEndUserMetadata` | Optional JSON metadata. Set to match the chatbot value. |
 | `SetEndUserMetadata()` | `void (FString NewEndUserMetadata)` | `BlueprintCallable`, `BlueprintInternalUseOnly`, category `Convai` | Sets `EndUserMetadata`. Calls `SetEndUserMetadataServer()` when the component is replicated. |
 | `SetEndUserMetadataServer()` | `void (const FString& NewEndUserMetadata)` | `Server`, `Reliable`, category `Convai|Network` | Server RPC used by `SetEndUserMetadata()`. |
 
 Source note: `UConvaiPlayerComponent` declares `EndUserID` and `EndUserMetadata` with replication metadata and server RPC setters. In the current source, `GetLifetimeReplicatedProps()` registers `PlayerName`; it does not register `EndUserID` or `EndUserMetadata`.
+
+## Device fallback utility
+
+| Member | Category | Description |
+| --- | --- | --- |
+| `UConvaiUtils::GetDeviceUniqueIdentifier()` | `Convai|Utilities` | Returns a stable device identifier. Used when chatbot `EndUserID` is empty at connect time. |
 
 ## Source files
 
 - `Source/Convai/Public/RestAPI/ConvaiLTMProxy.h`
 - `Source/Convai/Private/RestAPI/ConvaiLTMProxy.cpp`
 - `Source/Convai/Public/ConvaiDefinitions.h`
+- `Source/Convai/Private/ConvaiDefinitions.cpp`
 - `Source/Convai/Public/ConvaiChatbotComponent.h`
 - `Source/Convai/Private/ConvaiChatbotComponent.cpp`
 - `Source/Convai/Public/ConvaiPlayerComponent.h`
 - `Source/Convai/Private/ConvaiPlayerComponent.cpp`
 - `Source/Convai/Public/ConvaiConnectionInterface.h`
+- `Source/Convai/Public/ConvaiUtils.h`
 
 ## Related pages
 

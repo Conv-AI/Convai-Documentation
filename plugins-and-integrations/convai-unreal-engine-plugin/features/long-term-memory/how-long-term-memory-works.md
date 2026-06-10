@@ -4,69 +4,43 @@ description: Understand how Unreal long-term memory uses character settings, pla
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Long-term memory (LTM) gives a Convai character a persistent memory store scoped to one player and one character. In the Unreal plugin, a session can use memory only when the character has LTM enabled and the WebRTC connection sends a stable `EndUserID`.
+Long-term memory (LTM) gives a Convai character a persistent memory store scoped to one player and one character. A session can use memory only when the character has LTM enabled and the chatbot sends a stable `EndUserID` at connect time.
 
-## Character memory setting
+## Key terms
 
-LTM is disabled by default on new characters in the Convai dashboard. The Unreal plugin exposes two Blueprint nodes in the `Convai|LTM` category to read and update that character-level setting:
+| Term | What it is | Who manages it |
+| --- | --- | --- |
+| `EndUserID` | The player identity string sent to Convai at connect time. | Your project assigns it on `UConvaiChatbotComponent` before `StartSession`. |
+| `SpeakerID` | A Convai-assigned identifier returned when you create a Speaker ID record. | Convai returns it; your project saves it and reuses it as `EndUserID`. |
+| `EndUserMetadata` | Optional JSON context sent alongside `EndUserID` at connect time. | Your project assigns it on the chatbot component. |
+| `SessionID` | A local conversation link marker on `UConvaiChatbotComponent`. Defaults to `"-1"`. | The plugin manages it locally. It is not sent by WebRTC `StartSession`. |
 
-| Node | Purpose |
-| --- | --- |
-| **Convai Get LTM Status** | Queries whether LTM is currently enabled for a character ID. |
-| **Convai Set LTM Status** | Enables or disables LTM by sending a `memorySettings.enabled` update for a character ID. |
+For the WebRTC `StartSession` flow, the plugin reads `EndUserID` from `UConvaiChatbotComponent` through `IConvaiConnectionInterface`. Set the chatbot `EndUserID` before `StartSession`. Also set the same value on `UConvaiPlayerComponent` so both components stay in sync in your project.
 
-When LTM is disabled, the character does not build persistent memory records. Enable LTM once for each character that should remember returning players. Use **Convai Get LTM Status** when you need to verify the current state from Blueprints.
+## What must be true for memory to work
 
-## End-user identity
+Two conditions must be met before a character can recall a returning player:
 
-Every session sends an `EndUserID` string to Convai at connect time. Convai uses the `EndUserID` plus the character ID to scope which player memory should be loaded.
-
-The plugin exposes this identity on both main conversation components:
-
-- `UConvaiChatbotComponent.EndUserID`
-- `UConvaiPlayerComponent.EndUserID`
-
-The recommended Blueprint-first workflow is the Speaker ID system. A Speaker ID record stores a name and optional device identifier, then returns a stable `SpeakerID` value that you can save and reuse as `EndUserID`.
-
-| Node | Purpose |
-| --- | --- |
-| **Convai Create Speaker ID** | Registers a new speaker and returns an `FConvaiSpeakerInfo` with the assigned `SpeakerID`. |
-| **Convai List Speaker IDs** | Returns all speaker records associated with the configured API key as an array of `FConvaiSpeakerInfo`. |
-| **Convai Delete Speaker ID** | Removes a speaker record by its `SpeakerID`. |
-
-The `SpeakerID` field from `FConvaiSpeakerInfo` is the value to persist in your save data and assign before session start.
-
-## Device fallback
-
-If `EndUserID` is empty when connection parameters are built, the plugin calls `UConvaiUtils::GetDeviceUniqueIdentifier()`. That helper tries `FPlatformMisc::GetDeviceId()`, then `FPlatformMisc::GetOperatingSystemId()`, then `FPlatformMisc::GetLoginId()`.
-
-This fallback is useful for a single-player project where one device maps to one user. It is not appropriate for shared devices or account-based applications where each user needs a separate memory scope.
-
-## Session continuity
-
-`EndUserID` controls whose long-term memory is loaded. For the WebRTC `StartSession` flow, the plugin sends `EndUserID` and optional `EndUserMetadata` at connect time. It does not send `UConvaiChatbotComponent.SessionID` in the connection parameters.
-
-`SessionID` is still a replicated property on `UConvaiChatbotComponent`. It defaults to `"-1"` and is used by `ResetConversation()` to mark a fresh local conversation link. The HTTP Bot Query nodes also accept a `SessionID` input for REST-based conversations.
-
-Calling `ResetConversation()` sets `SessionID` back to `"-1"`. This does not delete individual memory records from Convai. Long-term facts remain tied to the same `EndUserID`.
+1. **Character LTM is enabled.** LTM is disabled by default on new characters in the Convai dashboard. Enable it on the dashboard or through **Convai Set LTM Status** in Blueprints. See [Configure memory for a character](configure-memory-for-a-character.md).
+2. **A stable `EndUserID` is sent at connect time.** Convai uses `EndUserID` plus the character ID to load the correct memory scope. If the value changes between sessions, Convai treats the player as someone new. See [End-user identity](end-user-identity.md).
 
 ## Connect-time flow
 
-The Unreal plugin reads identity and session values when a session is opened. Set them before calling `StartSession`.
+Set identity on the chatbot component, then call `StartSession`. The plugin builds connection parameters and sends `EndUserID` and optional `EndUserMetadata` to Convai.
 
 ```mermaid
 sequenceDiagram
     participant Game as Unreal project
-    participant Plugin as Convai plugin
+    participant Chatbot as UConvaiChatbotComponent
     participant Convai as Convai
 
-    Game->>Plugin: Set EndUserID and optional EndUserMetadata
-    Game->>Plugin: StartSession()
-    Plugin->>Convai: Connect with character ID, EndUserID, metadata
-    Convai-->>Plugin: Session connected
+    Game->>Chatbot: Set EndUserID and optional EndUserMetadata
+    Game->>Chatbot: StartSession()
+    Chatbot->>Convai: Connect with character ID, EndUserID, metadata
+    Convai-->>Chatbot: Session connected with memory context
 ```
 
-The plugin does not manage your save data. Your project is responsible for storing the returned `SpeakerID` or account ID and assigning it before the next `StartSession` call.
+If `EndUserID` is empty when connection parameters are built, the plugin calls `UConvaiUtils::GetDeviceUniqueIdentifier()` as a fallback. That works for a single local user on one device. It is not appropriate for shared kiosks or account-based applications where each user needs a separate memory scope.
 
 ## What persists where
 
@@ -74,10 +48,10 @@ The plugin does not manage your save data. Your project is responsible for stori
 | --- | --- | --- |
 | Character LTM enabled state | Convai | Set from the dashboard or **Convai Set LTM Status**. |
 | Speaker ID records | Convai | Created, listed, and deleted through `Convai|LTM` Blueprint nodes. |
-| Memory records | Convai | Created from conversation content when LTM is enabled. The Unreal plugin does not expose memory-record CRUD nodes. |
+| Memory records | Convai | Built from conversation content when LTM is enabled. The plugin does not expose memory-record CRUD nodes. |
 | `EndUserID` | Your project | Save the returned `SpeakerID`, account ID, or other stable identifier. |
 | `EndUserMetadata` | Your project | Optional JSON string sent at connect time. |
-| `SessionID` | `UConvaiChatbotComponent` | Local conversation link marker. Defaults to `"-1"`. Cleared by `ResetConversation()`. Not sent by WebRTC `StartSession`. |
+| `SessionID` | `UConvaiChatbotComponent` | Local conversation link marker. Cleared by `ResetConversation()`. Not sent by WebRTC `StartSession`. |
 
 `EndUserMetadata` is a JSON string. Use it for supplementary context such as a display name or role:
 
@@ -85,17 +59,22 @@ The plugin does not manage your save data. Your project is responsible for stori
 {"name": "Alex", "role": "field technician", "training_module": "fire-safety"}
 ```
 
+## Session continuity and reset
+
+`EndUserID` controls whose long-term memory is loaded. `SessionID` controls the local conversation link on the chatbot component.
+
+Calling `ResetConversation()` sets `SessionID` back to `"-1"`. This starts a fresh local conversation link. It does not delete the player's Speaker ID or individual memory records from Convai. Long-term facts remain tied to the same `EndUserID`.
+
 ## Common design choices
 
 | Scenario | Recommended identity | Why |
 | --- | --- | --- |
-| Single-player project on one device | Device fallback or Speaker ID | Device fallback is minimal; Speaker ID gives explicit records. |
-| Shared training kiosk | Speaker ID or account ID | Each trainee needs a separate memory scope. |
-| Shared kiosk or training station | Account ID or Speaker ID per user | Avoids multiple users sharing the same `EndUserID`. |
+| Single-player project on one device | Device fallback or Speaker ID | Device fallback needs no save data; Speaker ID gives explicit records. |
+| Shared kiosk or training station | Speaker ID or account ID per user | Avoids multiple users sharing the same `EndUserID`. |
 | Authenticated enterprise app | Your account system's stable user ID | Keeps memory tied to the user's account across devices. |
 
 {% hint style="warning" %}
-Set identity values before `StartSession`. Changing `EndUserID` or `EndUserMetadata` after the session has opened affects the next session, not the already-open connection.
+Set `EndUserID` on the chatbot component before `StartSession`. Changing identity after the session has opened affects the next session, not the already-open connection.
 {% endhint %}
 
 ## Next steps
@@ -110,4 +89,12 @@ Set identity values before `StartSession`. Changing `EndUserID` or `EndUserMetad
 
 {% content-ref url="configure-memory-for-a-character.md" %}
 [Configure memory for a character](configure-memory-for-a-character.md)
+{% endcontent-ref %}
+
+{% content-ref url="speaker-id-management.md" %}
+[Speaker ID management](speaker-id-management.md)
+{% endcontent-ref %}
+
+{% content-ref url="ltm-blueprint-reference.md" %}
+[LTM Blueprint reference](ltm-blueprint-reference.md)
 {% endcontent-ref %}

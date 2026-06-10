@@ -4,55 +4,35 @@ description: Configure a stable Unreal player identity so each Convai character 
 last_reviewed: "4.0.0-beta.21"
 ---
 
-End-user identity tells Convai which player is speaking to the character. Set a stable `EndUserID` before `StartSession` so memory from one user does not appear in another user's conversation.
+End-user identity tells Convai which player is speaking to the character. Set a stable `EndUserID` on the chatbot component before `StartSession` so memory from one user does not appear in another user's conversation.
+
+## Key terms
+
+| Term | Role |
+| --- | --- |
+| `EndUserID` | The identity string your project sends to Convai at connect time. Set it on `UConvaiChatbotComponent` before `StartSession`. |
+| `SpeakerID` | A Convai-assigned identifier from a Speaker ID record. Save it and reuse it as `EndUserID`. |
+| `EndUserMetadata` | Optional JSON context sent alongside `EndUserID`. Set it on the chatbot component. |
+
+For the WebRTC `StartSession` flow, the plugin reads `EndUserID` from `UConvaiChatbotComponent` through `IConvaiConnectionInterface`. Also set the same value on `UConvaiPlayerComponent` so both components stay in sync in your project.
 
 ## Choose an identity strategy
 
 | Strategy | Use when | Notes |
 | --- | --- | --- |
-| Speaker ID | You want a Blueprint-managed identity record that can be listed or deleted from Unreal. | Use **Convai Create Speaker ID** once, then save the returned `SpeakerID`. |
+| Speaker ID | Your project needs a Blueprint-managed identity record that can be listed or deleted from Unreal. | Call **Convai Create Speaker ID** once, then save the returned `SpeakerID`. See [Speaker ID management](speaker-id-management.md). |
 | Account ID | Your project already has login or profile IDs. | Assign your stable account ID directly as `EndUserID`. |
-| Device fallback | One local device maps to one player. | Leave `EndUserID` empty and the plugin derives a device identifier at connect time. |
+| Device fallback | One local device maps to one player. | Leave chatbot `EndUserID` empty and the plugin derives a device identifier at connect time. |
 
-For most shared-device, training, and onboarding projects, use a Speaker ID or your own account ID. Device fallback can merge memory for multiple users on the same machine.
-
-## Create and save a Speaker ID
-
-{% stepper %}
-{% step %}
-### Call Convai Create Speaker ID
-
-In a Blueprint that runs during first-time profile setup, add **Convai Create Speaker ID** from the `Convai|LTM` category.
-
-Set **Speaker Name** to the player's display name. Set **Device Id** to a stable device or account identifier if one is available.
-{% endstep %}
-
-{% step %}
-### Save the returned SpeakerID
-
-On **On Success**, break the returned `FConvaiSpeakerInfo` struct. Save the `SpeakerID` field in your `SaveGame`, player profile, or account data.
-
-The struct also contains `Name` and `DeviceID`, which mirror the values returned by Convai for that speaker record.
-{% endstep %}
-
-{% step %}
-### Reuse the SpeakerID on future launches
-
-Before creating a new Speaker ID, check whether your saved profile already has one. If it does, load and reuse that value.
-
-Creating a new Speaker ID for every launch creates multiple identity records for the same player.
-{% endstep %}
-{% endstepper %}
+For shared-device, training, and onboarding projects, use a Speaker ID or your own account ID. Device fallback can merge memory for multiple users on the same machine.
 
 ## Assign identity before StartSession
-
-Set the same player identity before opening the session.
 
 {% stepper %}
 {% step %}
 ### Set the chatbot identity
 
-On the `UConvaiChatbotComponent`, set the `EndUserID` property to the saved `SpeakerID` or account ID.
+On `UConvaiChatbotComponent`, set `EndUserID` to the saved `SpeakerID` or account ID.
 
 If you want to pass player context, set `EndUserMetadata` to a JSON string:
 
@@ -62,29 +42,29 @@ If you want to pass player context, set `EndUserMetadata` to a JSON string:
 {% endstep %}
 
 {% step %}
-### Set the player identity
+### Match the player component
 
-On the `UConvaiPlayerComponent`, call **Set End User ID** with the same value.
+On `UConvaiPlayerComponent`, set `EndUserID` to the same value.
 
-If you are sending metadata, call **Set End User Metadata** with the same JSON string.
+If you are sending metadata, set `EndUserMetadata` to the same JSON string on the player component.
 {% endstep %}
 
 {% step %}
 ### Start the chatbot session
 
-Call `StartSession` after identity values are set.
+Call `StartSession` on the chatbot component after identity values are set.
 
-At connect time, the plugin reads `GetEndUserID()` and `GetEndUserMetadata()` from the active connection interface and includes those values in the connection parameters.
+The plugin sends `EndUserID` and `EndUserMetadata` at connect time. Convai uses that identity with the character ID to load the correct memory scope.
 {% endstep %}
 {% endstepper %}
 
 {% hint style="warning" %}
-Set identity before **Start Session** on both the chatbot and player components. If identity is assigned after the session opens, Convai may not associate the conversation with the intended user record.
+Set identity before `StartSession`. If identity is assigned after the session opens, Convai may not associate the conversation with the intended user record.
 {% endhint %}
 
 ## Use device fallback only when appropriate
 
-If `EndUserID` is empty at connect time, the plugin calls `UConvaiUtils::GetDeviceUniqueIdentifier()`. The helper tries `FPlatformMisc::GetDeviceId()`, then `FPlatformMisc::GetOperatingSystemId()`, then `FPlatformMisc::GetLoginId()`.
+If chatbot `EndUserID` is empty at connect time, the plugin calls `UConvaiUtils::GetDeviceUniqueIdentifier()`. The helper tries `FPlatformMisc::GetDeviceId()`, then `FPlatformMisc::GetOperatingSystemId()`, then `FPlatformMisc::GetLoginId()`.
 
 This works for a single local user. It is not enough for:
 
@@ -99,7 +79,7 @@ Before `StartSession`, print these values:
 - `UConvaiChatbotComponent.EndUserID`
 - `UConvaiPlayerComponent.EndUserID`
 
-The two `EndUserID` values should match before `StartSession`.
+Both values should match. The chatbot value is the one sent to Convai at connect time.
 
 ## Next steps
 

@@ -4,7 +4,7 @@ description: Create, list, and delete Speaker ID records from Unreal Blueprints 
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Speaker IDs are Convai identity records used by the Convai Unreal Engine plugin's long-term memory workflow. Create one record per player, save its `SpeakerID`, and assign that value as `EndUserID` before starting a session.
+Speaker IDs are Convai identity records used by the long-term memory workflow. Create one record per player, save its `SpeakerID`, and assign that value as `EndUserID` before starting a session. For assignment steps, see [End-user identity](end-user-identity.md).
 
 ## FConvaiSpeakerInfo
 
@@ -38,7 +38,7 @@ If **Speaker Name** is empty, the plugin logs `Speaker name is empty` and fires 
 {% step %}
 ### Persist the result
 
-On **On Success**, break the returned `FConvaiSpeakerInfo` and save `SpeakerID`.
+On **On Success**, break the returned `FConvaiSpeakerInfo` and save `SpeakerID` in your `SaveGame` or account profile.
 
 On later launches, load the saved value and skip record creation.
 {% endstep %}
@@ -81,7 +81,7 @@ On **On Success**, clear the stored `SpeakerID` from your save data so the proje
 {% step %}
 ### Create a new identity if needed
 
-If the player should continue using LTM, create a new Speaker ID and assign it as the next `EndUserID`.
+If the player should continue using LTM, create a new Speaker ID and assign it as the next `EndUserID`. See [End-user identity](end-user-identity.md).
 {% endstep %}
 {% endstepper %}
 
