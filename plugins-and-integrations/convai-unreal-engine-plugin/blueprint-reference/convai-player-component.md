@@ -174,7 +174,7 @@ Most gaze events fire while `bEnableGazeAttention` is `true`; `OnAttentionLost` 
 | `OnAttentionGained` | `Convai\|Gaze Attention\|Events` | The sustained-gaze dwell threshold (`GazeAttentionDelay`) was reached and gaze promotion was attempted. Fires even when every chatbot rejects the update. |
 | `OnAttentionLost` | `Convai\|Gaze Attention\|Events` | The attention slot is released: the player looked away for longer than `GazeAttentionLossDelay`, another object took the slot, or the attention target was destroyed. |
 
-See [Event system](../core-concepts/event-system.md) for binding patterns and full parameter details. For microphone setup and gaze task flows, see [Configure the microphone](../getting-started/configure-microphone.md) and [Gaze attention reference](../features/gaze-attention/gaze-attention-reference.md).
+See [Event system](../core-concepts/event-system.md) for binding patterns and full parameter details. For microphone setup and gaze task flows, see [Configure the microphone](../getting-started/configure-the-microphone.md) and [Gaze attention reference](../features/gaze-attention/gaze-attention-reference.md).
 
 ## Related reference
 

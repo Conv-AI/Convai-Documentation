@@ -21,7 +21,7 @@ Use this page to confirm that every part of your Convai setup is working before 
 | Signed in | Open the Convai editor window (click the Convai toolbar icon) and confirm your account details are shown. |
 | Key is stored | `UConvaiSettings.API_Key` is populated — readable under **Edit > Project Settings > Plugins > Convai**. |
 
-If you are not signed in, see [Configure your API key](configure-api-key.md).
+If you are not signed in, see [Configure your API key](configure-your-api-key.md).
 
 ## Component check
 
@@ -84,7 +84,7 @@ When validation passes, the character responds with audio and — if configured 
 
 **Cause:** API key not set, or Character ID missing.
 
-**Fix:** See [Configure your API key](configure-api-key.md); confirm the **Character ID** field on the Chatbot component.
+**Fix:** See [Configure your API key](configure-your-api-key.md); confirm the **Character ID** field on the Chatbot component.
 
 **Verify:** Enter Play mode and send a short phrase. The character speaks an audible response.
 
@@ -104,7 +104,7 @@ When validation passes, the character responds with audio and — if configured 
 
 **Cause:** Microphone not captured, or Player component missing.
 
-**Fix:** Confirm `UConvaiPlayerComponent` is on the pawn; see [Configure the microphone](configure-microphone.md).
+**Fix:** Confirm `UConvaiPlayerComponent` is on the pawn; see [Configure the microphone](configure-the-microphone.md).
 
 **Verify:** `GetIsStreaming()` returns `true` after push-to-talk or VAD activation.
 
@@ -130,8 +130,8 @@ When validation passes, the character responds with audio and — if configured 
 
 ## Next steps
 
-{% content-ref url="configure-microphone.md" %}
-[Configure the microphone](configure-microphone.md)
+{% content-ref url="configure-the-microphone.md" %}
+[Configure the microphone](configure-the-microphone.md)
 {% endcontent-ref %}
 
 {% content-ref url="configure-character-audio.md" %}
@@ -142,6 +142,6 @@ When validation passes, the character responds with audio and — if configured 
 [Configure conversation input](configure-conversation-input.md)
 {% endcontent-ref %}
 
-{% content-ref url="add-chat-ui.md" %}
-[Add the chat UI](add-chat-ui.md)
+{% content-ref url="add-the-chat-ui.md" %}
+[Add the chat UI](add-the-chat-ui.md)
 {% endcontent-ref %}

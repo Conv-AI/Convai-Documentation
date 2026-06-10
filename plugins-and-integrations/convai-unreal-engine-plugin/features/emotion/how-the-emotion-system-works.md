@@ -49,7 +49,7 @@ The server sends a short emotion label string alongside an intensity scale (`1`�
 | `"Anger"` | `Anger` |
 | `"Neutral"` | `None` (no active emotion) |
 
-When a server update arrives, the plugin first resets all emotion scores, then writes the score for the resolved category. A label the plugin does not recognize maps to `None` — the scores are still reset, so the character returns to a neutral score table rather than preserving the previous expression. If a specific emotion never appears during conversation, verify that Convai is sending one of the labels listed above — see [Troubleshoot emotion](troubleshooting-and-diagnostics.md).
+When a server update arrives, the plugin first resets all emotion scores, then writes the score for the resolved category. A label the plugin does not recognize maps to `None` — the scores are still reset, so the character returns to a neutral score table rather than preserving the previous expression. If a specific emotion never appears during conversation, verify that Convai is sending one of the labels listed above — see [Troubleshoot emotion](troubleshoot-emotion.md).
 
 ## Emotion scores
 
@@ -115,6 +115,6 @@ graph TD
 [Emotion Blueprint reference](emotion-blueprint-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="usage-examples.md" %}
-[Emotion examples](usage-examples.md)
+{% content-ref url="emotion-examples.md" %}
+[Emotion examples](emotion-examples.md)
 {% endcontent-ref %}

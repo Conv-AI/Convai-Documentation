@@ -113,6 +113,6 @@ The player component page covers the full property surface; the how-to page walk
 [Convai Player Component](convai-player-component.md)
 {% endcontent-ref %}
 
-{% content-ref url="../getting-started/configure-microphone.md" %}
-[Configure the microphone](../getting-started/configure-microphone.md)
+{% content-ref url="../getting-started/configure-the-microphone.md" %}
+[Configure the microphone](../getting-started/configure-the-microphone.md)
 {% endcontent-ref %}

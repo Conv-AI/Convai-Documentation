@@ -20,7 +20,7 @@ When a player speaks to a Convai character, the plugin can make the character ph
 </tr>
 <tr>
 <td><strong>Character actions quick start</strong><br>Enable actions, add the default handlers, set up pawn movement and NavMesh, register scene objects, and test movement.</td>
-<td><a href="quick-start.md">quick-start.md</a></td>
+<td><a href="character-actions-quick-start.md">character-actions-quick-start.md</a></td>
 </tr>
 <tr>
 <td><strong>Configuring actions</strong><br>Define the action set, enable the feature on the chatbot component, and register environment objects and characters.</td>
@@ -48,11 +48,11 @@ When a player speaks to a Convai character, the plugin can make the character ph
 </tr>
 <tr>
 <td><strong>Character actions examples</strong><br>End-to-end action recipes: navigating to an object, following a character, and using parameterized actions.</td>
-<td><a href="usage-examples.md">usage-examples.md</a></td>
+<td><a href="character-actions-examples.md">character-actions-examples.md</a></td>
 </tr>
 <tr>
 <td><strong>Troubleshoot character actions</strong><br>Fix actions that are not firing, NavMesh and movement issues, and parameters that are not resolving correctly.</td>
-<td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td>
+<td><a href="troubleshoot-character-actions.md">troubleshoot-character-actions.md</a></td>
 </tr>
 </tbody>
 </table>

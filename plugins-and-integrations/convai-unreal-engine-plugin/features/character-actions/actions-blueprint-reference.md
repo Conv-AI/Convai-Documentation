@@ -233,6 +233,6 @@ Controls whether `HandleActionCompletion` and `AbortActionSequence` trigger a sp
 [Parameterized actions](parameterized-actions.md)
 {% endcontent-ref %}
 
-{% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot character actions](troubleshooting-and-diagnostics.md)
+{% content-ref url="troubleshoot-character-actions.md" %}
+[Troubleshoot character actions](troubleshoot-character-actions.md)
 {% endcontent-ref %}

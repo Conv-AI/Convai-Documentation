@@ -130,6 +130,6 @@ These multipliers apply only when `Force Set Emotion` is called. Server-driven s
 [How the emotion system works](how-the-emotion-system-works.md)
 {% endcontent-ref %}
 
-{% content-ref url="usage-examples.md" %}
-[Emotion examples](usage-examples.md)
+{% content-ref url="emotion-examples.md" %}
+[Emotion examples](emotion-examples.md)
 {% endcontent-ref %}

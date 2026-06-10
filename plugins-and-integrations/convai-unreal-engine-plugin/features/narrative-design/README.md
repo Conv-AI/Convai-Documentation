@@ -6,7 +6,7 @@ last_reviewed: "4.0.0-beta.21"
 
 Narrative design gives a Convai character a structured story graph — named sections, named triggers, and template keys that adapt objectives to live gameplay data. You author the graph in the Convai dashboard; at runtime, `UConvaiChatbotComponent` (`Convai Chatbot`) invokes triggers and receives section changes from Convai.
 
-**New to narrative design?** Start with [How narrative design works](how-narrative-design-works.md) to understand sections, triggers, and template keys. Then follow [Narrative design quick start](quick-start.md) after you have a character with a graph configured in the dashboard. Use [Narrative Design | Playground](../../../convai-playground/character-customization/narrative-design.md) to create sections and triggers before you open Unreal Engine.
+**New to narrative design?** Start with [How narrative design works](how-narrative-design-works.md) to understand sections, triggers, and template keys. Then follow [Narrative design quick start](narrative-design-quick-start.md) after you have a character with a graph configured in the dashboard. Use [Narrative Design | Playground](../../../../convai-playground/character-customization/narrative-design.md) to create sections and triggers before you open Unreal Engine.
 
 ## Get started
 
@@ -24,7 +24,7 @@ Narrative design gives a Convai character a structured story graph — named sec
 </tr>
 <tr>
 <td><strong>Narrative design quick start</strong><br>Invoke a named trigger from Blueprint and confirm a section change by printing the new section ID.</td>
-<td><a href="quick-start.md">quick-start.md</a></td>
+<td><a href="narrative-design-quick-start.md">narrative-design-quick-start.md</a></td>
 </tr>
 </tbody>
 </table>
@@ -70,21 +70,21 @@ Narrative design gives a Convai character a structured story graph — named sec
 </tr>
 <tr>
 <td><strong>Narrative design usage examples</strong><br>Worked Blueprint recipes for linear progression, dynamic context events, template keys, and trigger validation.</td>
-<td><a href="usage-examples.md">usage-examples.md</a></td>
+<td><a href="narrative-design-usage-examples.md">narrative-design-usage-examples.md</a></td>
 </tr>
 <tr>
 <td><strong>Troubleshoot narrative design</strong><br>Fix section events that do not fire, wrong transitions, template keys that are ignored, fetch failures, and session readiness issues.</td>
-<td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td>
+<td><a href="troubleshoot-narrative-design.md">troubleshoot-narrative-design.md</a></td>
 </tr>
 </tbody>
 </table>
 
 ## Next steps
 
-{% content-ref url="quick-start.md" %}
-[Narrative design quick start](quick-start.md)
+{% content-ref url="narrative-design-quick-start.md" %}
+[Narrative design quick start](narrative-design-quick-start.md)
 {% endcontent-ref %}
 
-{% content-ref url="../../../convai-playground/character-customization/narrative-design.md" %}
-[Narrative Design | Playground](../../../convai-playground/character-customization/narrative-design.md)
+{% content-ref url="../../../../convai-playground/character-customization/narrative-design.md" %}
+[Narrative Design | Playground](../../../../convai-playground/character-customization/narrative-design.md)
 {% endcontent-ref %}

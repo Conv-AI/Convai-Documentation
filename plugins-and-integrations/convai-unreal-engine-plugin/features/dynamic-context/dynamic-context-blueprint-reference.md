@@ -248,6 +248,6 @@ Sent by `UpdateDynamicInfo` for `DynamicEnvironmentInfo` changes and on attendee
 [Sync behavior and timing](sync-behavior-and-timing.md)
 {% endcontent-ref %}
 
-{% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot dynamic context](troubleshooting-and-diagnostics.md)
+{% content-ref url="troubleshoot-dynamic-context.md" %}
+[Troubleshoot dynamic context](troubleshoot-dynamic-context.md)
 {% endcontent-ref %}

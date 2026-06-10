@@ -69,12 +69,12 @@ These C++ methods let you poll the component's current playback state. They have
 
 ## Related reference
 
-{% content-ref url="face-sync-anim-node-reference.md" %}
-[Face Sync AnimGraph node reference](face-sync-anim-node-reference.md)
+{% content-ref url="face-sync-animgraph-node-reference.md" %}
+[Face Sync AnimGraph node reference](face-sync-animgraph-node-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="recording-lip-sync.md" %}
-[Record and replay lip sync](recording-lip-sync.md)
+{% content-ref url="record-and-replay-lip-sync.md" %}
+[Record and replay lip sync](record-and-replay-lip-sync.md)
 {% endcontent-ref %}
 
 {% content-ref url="how-lip-sync-works.md" %}

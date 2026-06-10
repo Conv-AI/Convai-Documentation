@@ -41,6 +41,6 @@ The `ConvaiEditor` window is unavailable on these versions. Use Blueprint-based 
 
 With your engine version confirmed, check which build platforms the plugin supports.
 
-{% content-ref url="platform-support-matrix.md" %}
-[Unreal Engine platform support matrix](platform-support-matrix.md)
+{% content-ref url="unreal-engine-platform-support-matrix.md" %}
+[Unreal Engine platform support matrix](unreal-engine-platform-support-matrix.md)
 {% endcontent-ref %}

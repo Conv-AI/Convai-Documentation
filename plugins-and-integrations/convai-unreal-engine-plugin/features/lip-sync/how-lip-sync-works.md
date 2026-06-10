@@ -57,7 +57,7 @@ The `FAnimNode_ConvaiFaceSync` node is placed in an Animation Blueprint's AnimGr
 
 The node auto-discovers the `UConvaiChatbotComponent` on the owning Actor if the `ConvaiChatbotComponent` pin is left unset. If the Actor has more than one chatbot component, connect the pin explicitly to avoid ambiguity.
 
-For MetaHuman setup, assign the shipped Convai animation classes as described in [Set up a MetaHuman character](../../getting-started/set-up-a-metahuman-character.md). For custom Animation Blueprints, see [Face Sync AnimGraph node reference](face-sync-anim-node-reference.md).
+For MetaHuman setup, assign the shipped Convai animation classes as described in [Set up a MetaHuman character](../../getting-started/set-up-a-metahuman-character.md). For custom Animation Blueprints, see [Face Sync AnimGraph node reference](face-sync-animgraph-node-reference.md).
 
 ### Starvation blending
 
@@ -77,6 +77,6 @@ The node separates blendshapes into upper-face (brow, eyes, lids) and lower-face
 [Face Sync component reference](face-sync-component-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="face-sync-anim-node-reference.md" %}
-[Face Sync AnimGraph node reference](face-sync-anim-node-reference.md)
+{% content-ref url="face-sync-animgraph-node-reference.md" %}
+[Face Sync AnimGraph node reference](face-sync-animgraph-node-reference.md)
 {% endcontent-ref %}

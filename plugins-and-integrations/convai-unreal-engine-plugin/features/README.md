@@ -1,7 +1,7 @@
 ---
 title: Features
 description: Find guides for all Convai Unreal Engine plugin features — lip sync, character actions, narrative design, long-term memory, vision, and more.
-last_reviewed: 2026-06-06
+last_reviewed: "4.0.0-beta.21"
 ---
 
 Features are the plugin's AI-powered capability modules. Each feature connects to Convai for a specific purpose — executing in-scene behaviors, expressing emotions, remembering players across sessions, following authored narrative graphs, or perceiving the world through a camera. Every section includes a conceptual overview, a quick start, Blueprint property references, usage examples, and troubleshooting guidance.

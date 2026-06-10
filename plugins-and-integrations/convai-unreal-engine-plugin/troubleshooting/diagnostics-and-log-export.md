@@ -1,7 +1,7 @@
 ---
 title: Diagnostics and log export
 description: Reference for Convai log categories, verbosity levels, configuration defaults, Blueprint diagnostic nodes, and log file export for the Unreal Engine plugin.
-last_reviewed: 2026-06-06
+last_reviewed: "4.0.0-beta.21"
 ---
 
 When a problem is not covered by the symptom-specific troubleshooting pages, the Output Log is the primary source of diagnostic information. This page describes which log categories the Convai Unreal Engine plugin uses, how to control verbosity, how to inspect runtime state from Blueprint, and how to export logs for support.

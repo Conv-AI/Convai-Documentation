@@ -137,14 +137,14 @@ Identical event strings staged multiple times within the same debounce window ar
 [Sync behavior and timing](sync-behavior-and-timing.md)
 {% endcontent-ref %}
 
-{% content-ref url="quick-start.md" %}
-[Dynamic context quick start](quick-start.md)
+{% content-ref url="dynamic-context-quick-start.md" %}
+[Dynamic context quick start](dynamic-context-quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-blueprint-reference.md" %}
 [Dynamic context Blueprint reference](dynamic-context-blueprint-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot dynamic context](troubleshooting-and-diagnostics.md)
+{% content-ref url="troubleshoot-dynamic-context.md" %}
+[Troubleshoot dynamic context](troubleshoot-dynamic-context.md)
 {% endcontent-ref %}

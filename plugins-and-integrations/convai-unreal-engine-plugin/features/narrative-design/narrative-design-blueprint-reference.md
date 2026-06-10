@@ -220,6 +220,6 @@ Represents one outbound decision rule within a section.
 [Fetching narrative data](fetching-narrative-data.md)
 {% endcontent-ref %}
 
-{% content-ref url="usage-examples.md" %}
-[Narrative design usage examples](usage-examples.md)
+{% content-ref url="narrative-design-usage-examples.md" %}
+[Narrative design usage examples](narrative-design-usage-examples.md)
 {% endcontent-ref %}

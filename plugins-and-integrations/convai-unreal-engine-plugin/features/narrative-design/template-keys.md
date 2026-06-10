@@ -63,7 +63,7 @@ Before calling a trigger that advances to a section with `{key}` tokens in its o
 
 1. Print or inspect `NarrativeTemplateKeys` in Blueprint or the **Details** panel — confirm the expected key-value pairs are present.
 2. Compare each key string character-for-character against the `{key}` tokens in the dashboard objective.
-3. After the trigger fires, confirm the character's behavior reflects the substituted values. If `{key}` tokens appear literally in responses, a key name mismatch or empty map is the most likely cause. See [Troubleshoot narrative design](troubleshooting-and-diagnostics.md).
+3. After the trigger fires, confirm the character's behavior reflects the substituted values. If `{key}` tokens appear literally in responses, a key name mismatch or empty map is the most likely cause. See [Troubleshoot narrative design](troubleshoot-narrative-design.md).
 
 ## Next steps
 
@@ -75,10 +75,10 @@ Before calling a trigger that advances to a section with `{key}` tokens in its o
 [Narrative design Blueprint reference](narrative-design-blueprint-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="usage-examples.md" %}
-[Narrative design usage examples](usage-examples.md)
+{% content-ref url="narrative-design-usage-examples.md" %}
+[Narrative design usage examples](narrative-design-usage-examples.md)
 {% endcontent-ref %}
 
-{% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot narrative design](troubleshooting-and-diagnostics.md)
+{% content-ref url="troubleshoot-narrative-design.md" %}
+[Troubleshoot narrative design](troubleshoot-narrative-design.md)
 {% endcontent-ref %}

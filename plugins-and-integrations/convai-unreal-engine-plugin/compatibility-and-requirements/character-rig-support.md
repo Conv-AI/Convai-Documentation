@@ -11,7 +11,7 @@ The Convai Unreal Engine plugin drives facial animation through the `UConvaiFace
 | Rig type | Lip sync mode | Out-of-the-box | Additional setup |
 |---|---|---|---|
 | [MetaHuman](../getting-started/set-up-a-metahuman-character.md) | `MetaHuman Blendshapes` (`BS_MHA`) | Yes; this is the default mode | Bundled `Convai_MetaHuman_BodyAnim` and `Convai_MetaHuman_FaceAnim` animation Blueprints included |
-| [Reallusion Character Creator (CC4 and CC5)](https://www.reallusion.com/auto-setup/unreal-engine/default.html) | CC5: `MetaHuman Blendshapes` (`BS_MHA`); CC4: `ARKit Blendshapes` (`BS_ARKit`) or `CC4 Extended Blendshapes` (`BS_CC4_Extended`) | No | Follow the [Reallusion setup guide](../getting-started/set-up-a-reallusion-character.md) for animation Blueprint setup |
+| [Reallusion Character Creator (CC4 and CC5)](https://www.reallusion.com/auto-setup/unreal-engine/default.html) | CC5: `MetaHuman Blendshapes` (`BS_MHA`); CC4: `ARKit Blendshapes` (`BS_ARKit`) or `CC4 Extended Blendshapes` (`BS_CC4_Extended`) | No | Follow the [Reallusion setup guide](../getting-started/set-up-a-reallusion-cc-character.md) for animation Blueprint setup |
 | ARKit-compatible rigs | `ARKit Blendshapes` (`BS_ARKit`) | No | Configure `LipSyncMode` to `BS_ARKit`; wire 61 blendshape channels to your rig |
 | Viseme-based rigs | `Viseme Based` (`VisemeBased`) | No | Configure `LipSyncMode` to `VisemeBased`; map 15 OVR visemes to your rig |
 | Single-mesh generic rigs | `Auto` or `Off` | Partial | No facial animation without a compatible mode configured |
@@ -44,8 +44,8 @@ After the Reallusion animation Blueprint is assigned, set `LipSyncMode` on the `
 
 Use the Reallusion setup guide for the download and animation Blueprint assignment steps.
 
-{% content-ref url="../getting-started/set-up-a-reallusion-character.md" %}
-[Set up a Reallusion character](../getting-started/set-up-a-reallusion-character.md)
+{% content-ref url="../getting-started/set-up-a-reallusion-cc-character.md" %}
+[Set up a Reallusion character](../getting-started/set-up-a-reallusion-cc-character.md)
 {% endcontent-ref %}
 
 {% embed url="https://www.youtube.com/watch?v=nyPNP-S92QI" %}

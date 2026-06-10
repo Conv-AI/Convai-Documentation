@@ -74,14 +74,14 @@ For identity assignment steps, see [End-user identity](end-user-identity.md).
 
 ## Next steps
 
-{% content-ref url="usage-examples.md" %}
-[Long-term memory usage examples](usage-examples.md)
+{% content-ref url="long-term-memory-usage-examples.md" %}
+[Long-term memory usage examples](long-term-memory-usage-examples.md)
 {% endcontent-ref %}
 
 {% content-ref url="ltm-blueprint-reference.md" %}
 [LTM Blueprint reference](ltm-blueprint-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot long-term memory](troubleshooting-and-diagnostics.md)
+{% content-ref url="troubleshoot-long-term-memory.md" %}
+[Troubleshoot long-term memory](troubleshoot-long-term-memory.md)
 {% endcontent-ref %}

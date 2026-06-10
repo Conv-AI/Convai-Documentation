@@ -23,7 +23,7 @@ The current Samples page does not open levels, Blueprints, or downloadable proje
 
 Use the getting started guides when building or testing a scene today. The current Samples page does not provide a complete demo level or a sample launcher workflow.
 
-For the first working scene path, follow [Add your first Convai character](../getting-started/add-your-first-character.md). For the core Actor and Component setup used by that path, see [Scene components reference](../getting-started/scene-components.md).
+For the first working scene path, follow [Add your first Convai character](../getting-started/add-your-first-convai-character.md). For the core Actor and Component setup used by that path, see [Scene components reference](../getting-started/scene-components-reference.md).
 
 ## Future sample content
 
@@ -31,10 +31,10 @@ When Convai adds sample projects to the Convai Editor window, this page will lis
 
 ## Next steps
 
-{% content-ref url="../getting-started/add-your-first-character.md" %}
-[Add your first Convai character](../getting-started/add-your-first-character.md)
+{% content-ref url="../getting-started/add-your-first-convai-character.md" %}
+[Add your first Convai character](../getting-started/add-your-first-convai-character.md)
 {% endcontent-ref %}
 
-{% content-ref url="../getting-started/scene-components.md" %}
-[Scene components reference](../getting-started/scene-components.md)
+{% content-ref url="../getting-started/scene-components-reference.md" %}
+[Scene components reference](../getting-started/scene-components-reference.md)
 {% endcontent-ref %}

@@ -1,7 +1,7 @@
 ---
 title: How scene metadata works
 description: Understand how scene object metadata reaches Convai at connect time, through live updates, and via tracked property changes.
-last_reviewed: "2026-06-05"
+last_reviewed: "4.0.0-beta.21"
 ---
 
 Scene metadata is how you give a Convai character knowledge of the objects in your level. Add a `UConvaiObjectComponent` to any `Actor` — a door, a machine, a piece of equipment — and every character in the level will know that object exists, what it is called, and what it does. When a player asks "What's in this room?" or "Is the north gate open?", the character uses this information to answer.
@@ -88,12 +88,12 @@ When you call multiple add or remove methods in quick succession, the plugin coa
 
 ## Next steps
 
-{% content-ref url="quick-start.md" %}
-[Scene metadata quick start](quick-start.md)
+{% content-ref url="scene-metadata-quick-start.md" %}
+[Scene metadata quick start](scene-metadata-quick-start.md)
 {% endcontent-ref %}
 
-{% content-ref url="component-reference.md" %}
-[Scene metadata component reference](component-reference.md)
+{% content-ref url="scene-metadata-component-reference.md" %}
+[Scene metadata component reference](scene-metadata-component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="managing-the-environment-at-runtime.md" %}

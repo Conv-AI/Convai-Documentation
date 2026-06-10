@@ -16,7 +16,7 @@ New to the plugin? Start with what it is and how it is built, then use the featu
 <tbody>
 <tr>
 <td><strong>What is the Convai Unreal Engine plugin</strong><br>Understand what the plugin does, its relationship to Convai, and what it adds to a UE project.</td>
-<td><a href="what-is-the-convai-unreal-plugin.md">what-is-the-convai-unreal-plugin.md</a></td>
+<td><a href="what-is-the-convai-unreal-engine-plugin.md">what-is-the-convai-unreal-engine-plugin.md</a></td>
 </tr>
 <tr>
 <td><strong>Plugin architecture</strong><br>Understand the plugin modules and how the runtime components fit together.</td>

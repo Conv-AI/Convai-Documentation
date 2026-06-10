@@ -1,7 +1,7 @@
 ---
 title: Gaze attention reference
 description: Complete property, event, method, and class reference for the gaze attention system, including all defaults and version-specific behavior.
-last_reviewed: "2026-06-09"
+last_reviewed: "4.0.0-beta.21"
 ---
 
 Canonical reference for every property, event, method, and class in the gaze attention system. The [Convai Player Component](../../blueprint-reference/convai-player-component.md) and [Convai Object Component](../../blueprint-reference/convai-object-component.md) pages summarize only their component-local gaze surface; use this page for the full cross-component API, defaults, and version-specific behavior.
@@ -206,10 +206,10 @@ Movement-only fields (`AcceptanceRadius`, `SocketOrBoneName`, `bStepOntoBounds`,
 
 ## Next steps
 
-{% content-ref url="usage-examples.md" %}
-[Gaze attention usage examples](usage-examples.md)
+{% content-ref url="gaze-attention-usage-examples.md" %}
+[Gaze attention usage examples](gaze-attention-usage-examples.md)
 {% endcontent-ref %}
 
-{% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot gaze attention](troubleshooting-and-diagnostics.md)
+{% content-ref url="troubleshoot-gaze-attention.md" %}
+[Troubleshoot gaze attention](troubleshoot-gaze-attention.md)
 {% endcontent-ref %}

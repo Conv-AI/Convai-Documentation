@@ -20,7 +20,7 @@ Long-term memory (LTM) lets a Convai character retain facts about a specific pla
 </tr>
 <tr>
 <td><strong>Long-term memory quick start</strong><br>Enable memory for one character, assign a stable player identity, and verify cross-session recall in Play In Editor.</td>
-<td><a href="quick-start.md">quick-start.md</a></td>
+<td><a href="long-term-memory-quick-start.md">long-term-memory-quick-start.md</a></td>
 </tr>
 <tr>
 <td><strong>Configure memory for a character</strong><br>Enable or verify the character LTM setting and reset the local conversation link when needed.</td>
@@ -40,23 +40,23 @@ Long-term memory (LTM) lets a Convai character retain facts about a specific pla
 </tr>
 <tr>
 <td><strong>Long-term memory usage examples</strong><br>Blueprint-first patterns for returning learners, shared devices, account-backed identity, and fresh-start resets.</td>
-<td><a href="usage-examples.md">usage-examples.md</a></td>
+<td><a href="long-term-memory-usage-examples.md">long-term-memory-usage-examples.md</a></td>
 </tr>
 <tr>
 <td><strong>Troubleshoot long-term memory</strong><br>Diagnose disabled memory, identity mismatches, Speaker ID failures, and sessions that start fresh.</td>
-<td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td>
+<td><a href="troubleshoot-long-term-memory.md">troubleshoot-long-term-memory.md</a></td>
 </tr>
 </tbody>
 </table>
 
 ## Next steps
 
-Start with [How long-term memory works](how-long-term-memory-works.md) for the mental model, then follow [Long-term memory quick start](quick-start.md) to get memory running in your level.
+Start with [How long-term memory works](how-long-term-memory-works.md) for the mental model, then follow [Long-term memory quick start](long-term-memory-quick-start.md) to get memory running in your level.
 
 {% content-ref url="how-long-term-memory-works.md" %}
 [How long-term memory works](how-long-term-memory-works.md)
 {% endcontent-ref %}
 
-{% content-ref url="quick-start.md" %}
-[Long-term memory quick start](quick-start.md)
+{% content-ref url="long-term-memory-quick-start.md" %}
+[Long-term memory quick start](long-term-memory-quick-start.md)
 {% endcontent-ref %}

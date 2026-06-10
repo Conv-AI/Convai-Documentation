@@ -8,7 +8,7 @@ Custom action handlers are Blueprint functions or events on the NPC Actor that t
 
 ## Prerequisites
 
-- Character actions are enabled on the chatbot. See [Character actions quick start](quick-start.md).
+- Character actions are enabled on the chatbot. See [Character actions quick start](character-actions-quick-start.md).
 - You know the action name you want to add matches the handler name exactly, including spaces.
 
 ## Declare the action template
@@ -166,6 +166,6 @@ Event Open Door(ActionData: FConvaiResultAction)
 [Actions Blueprint reference](actions-blueprint-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="usage-examples.md" %}
-[Character actions examples](usage-examples.md)
+{% content-ref url="character-actions-examples.md" %}
+[Character actions examples](character-actions-examples.md)
 {% endcontent-ref %}

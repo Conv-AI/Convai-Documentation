@@ -37,7 +37,7 @@ The account control in the top-right corner shows two letters from your account 
 
 The welcome screen starts with **Connect Convai Account**. The login flow opens a Convai authentication window and stores the API key after authentication completes. Use the account menu to sign out and sign in again when you need to switch Convai accounts.
 
-See [Sign in and manage your account](sign-in-and-account.md) for the full setup path.
+See [Sign in and manage your account](sign-in-and-manage-your-account.md) for the full setup path.
 
 ## Update and support tools
 
@@ -61,7 +61,7 @@ Use the settings menu when you need to check whether a newer plugin release is a
 <tbody>
 <tr>
 <td><strong>Sign in and manage your account</strong><br>Complete the welcome flow, sign out to switch accounts, and review your plan and usage quotas.</td>
-<td><a href="sign-in-and-account.md">sign-in-and-account.md</a></td>
+<td><a href="sign-in-and-manage-your-account.md">sign-in-and-manage-your-account.md</a></td>
 </tr>
 <tr>
 <td><strong>Browse samples and content</strong><br>Check the current Samples area and understand what will be added in future plugin updates.</td>

@@ -1,7 +1,7 @@
 ---
 title: Managing the environment at runtime
 description: Reference for chatbot environment methods that add, remove, and update objects and characters during an active gameplay session.
-last_reviewed: "2026-06-05"
+last_reviewed: "4.0.0-beta.21"
 ---
 
 Use these methods to update a chatbot's world knowledge while the game is running — for example, when a new room loads, a prop spawns, or a new NPC enters the scene. `UConvaiChatbotComponent` exposes mutation methods for objects, characters, the active conversation partner, the in-attention object, and the connect-time environment extras. Runtime mutation methods are `BlueprintCallable` in the `Convai|Actions` category; `GatherEnvironmentExtras` is `BlueprintCallable` in the `Convai|Session` category.
@@ -89,7 +89,7 @@ The override receives three output arrays:
 
 The override adds to the configured defaults; it does not replace them. This is the correct place to populate the environment from a world query rather than from the Details panel.
 
-See [Scene metadata usage examples](usage-examples.md) for a worked pseudocode example of this pattern.
+See [Scene metadata usage examples](scene-metadata-usage-examples.md) for a worked pseudocode example of this pattern.
 
 ## Ensuring object components
 
@@ -105,10 +105,10 @@ All mutation methods batch updates into a debounce window, coalescing rapid call
 
 ## Next steps
 
-{% content-ref url="usage-examples.md" %}
-[Scene metadata usage examples](usage-examples.md)
+{% content-ref url="scene-metadata-usage-examples.md" %}
+[Scene metadata usage examples](scene-metadata-usage-examples.md)
 {% endcontent-ref %}
 
-{% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot scene metadata](troubleshooting-and-diagnostics.md)
+{% content-ref url="troubleshoot-scene-metadata.md" %}
+[Troubleshoot scene metadata](troubleshoot-scene-metadata.md)
 {% endcontent-ref %}

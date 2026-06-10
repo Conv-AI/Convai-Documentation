@@ -79,8 +79,8 @@ Set `EndUserID` on the chatbot component before `StartSession`. Changing identit
 
 ## Next steps
 
-{% content-ref url="quick-start.md" %}
-[Long-term memory quick start](quick-start.md)
+{% content-ref url="long-term-memory-quick-start.md" %}
+[Long-term memory quick start](long-term-memory-quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="end-user-identity.md" %}

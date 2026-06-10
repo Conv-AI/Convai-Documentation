@@ -113,6 +113,6 @@ All four events share the `FConvaiObjectGazeEvent` delegate signature: `(ObjectC
 [Data types and enums](data-types-and-enums.md)
 {% endcontent-ref %}
 
-{% content-ref url="utility-functions.md" %}
-[Convai utility functions](utility-functions.md)
+{% content-ref url="convai-utility-functions.md" %}
+[Convai utility functions](convai-utility-functions.md)
 {% endcontent-ref %}

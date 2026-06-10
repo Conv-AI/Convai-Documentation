@@ -4,7 +4,7 @@ description: Implement a C++ frame source component for custom Unreal image pipe
 last_reviewed: "4.0.0-beta.21"
 ---
 
-This page is for advanced C++ projects. Most teams should use the built-in **Environment Webcam** component from [Vision quick start](quick-start.md).
+This page is for advanced C++ projects. Most teams should use the built-in **Environment Webcam** component from [Vision quick start](vision-quick-start.md).
 
 When your project needs a different image source, create a custom component that implements `IConvaiVisionInterface` so `UConvaiChatbotComponent` can discover or register it. When deriving from `UConvaiWebcamBase`, subclass `USceneComponent`.
 
@@ -12,7 +12,7 @@ When your project needs a different image source, create a custom component that
 
 - A C++ Unreal project with the Convai plugin enabled.
 - `ConvaiVisionBase` added to your module's `PublicDependencyModuleNames` in `Build.cs`.
-- A working chatbot setup from [Add your first Convai character](../../getting-started/add-your-first-character.md).
+- A working chatbot setup from [Add your first Convai character](../../getting-started/add-your-first-convai-character.md).
 
 ## When to implement a custom component
 
@@ -141,8 +141,8 @@ Add the component to the same `Actor` as `UConvaiChatbotComponent`.
 [Vision Blueprint reference](vision-blueprint-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="frame-sources.md" %}
-[Vision frame sources](frame-sources.md)
+{% content-ref url="vision-frame-sources.md" %}
+[Vision frame sources](vision-frame-sources.md)
 {% endcontent-ref %}
 
 {% content-ref url="how-vision-works.md" %}

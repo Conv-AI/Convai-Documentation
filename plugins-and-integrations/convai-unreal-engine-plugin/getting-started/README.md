@@ -26,7 +26,7 @@ By the end of this section, your project contains a working Convai character in 
 </tr>
 <tr>
 <td><strong>Install the Convai plugin</strong><br>Install from Fab or GitHub Releases and enable the plugin in your project.</td>
-<td><a href="installation.md">installation.md</a></td>
+<td><a href="install-the-convai-plugin.md">install-the-convai-plugin.md</a></td>
 </tr>
 </tbody>
 </table>
@@ -43,15 +43,15 @@ By the end of this section, your project contains a working Convai character in 
 <tbody>
 <tr>
 <td><strong>Configure your API key</strong><br>Sign in through the Convai editor window and store your API key.</td>
-<td><a href="configure-api-key.md">configure-api-key.md</a></td>
+<td><a href="configure-your-api-key.md">configure-your-api-key.md</a></td>
 </tr>
 <tr>
 <td><strong>Scene components reference</strong><br>Reference for the Convai Chatbot, Player, Object, and Face Sync components and their fields.</td>
-<td><a href="scene-components.md">scene-components.md</a></td>
+<td><a href="scene-components-reference.md">scene-components-reference.md</a></td>
 </tr>
 <tr>
 <td><strong>Add your first Convai character</strong><br>Place a Convai character in a level and have a live voice conversation with it.</td>
-<td><a href="add-your-first-character.md">add-your-first-character.md</a></td>
+<td><a href="add-your-first-convai-character.md">add-your-first-convai-character.md</a></td>
 </tr>
 </tbody>
 </table>
@@ -74,7 +74,7 @@ Add Convai to a specific character type. Complete this after the first conversat
 </tr>
 <tr>
 <td><strong>Set up a Reallusion (CC) character</strong><br>Export a Reallusion CC4 or CC5 avatar, import it into Unreal, and connect Convai.</td>
-<td><a href="set-up-a-reallusion-character.md">set-up-a-reallusion-character.md</a></td>
+<td><a href="set-up-a-reallusion-cc-character.md">set-up-a-reallusion-cc-character.md</a></td>
 </tr>
 </tbody>
 </table>
@@ -93,7 +93,7 @@ Tune audio, input, and UI after the first conversation is working. Each page is 
 <tbody>
 <tr>
 <td><strong>Configure the microphone</strong><br>Select a capture device and adjust volume so the player's voice reaches the character.</td>
-<td><a href="configure-microphone.md">configure-microphone.md</a></td>
+<td><a href="configure-the-microphone.md">configure-the-microphone.md</a></td>
 </tr>
 <tr>
 <td><strong>Configure character audio</strong><br>Adjust speech playback volume, enable spatial audio attenuation, and set the interrupt fade duration.</td>
@@ -105,7 +105,7 @@ Tune audio, input, and UI after the first conversation is working. Each page is 
 </tr>
 <tr>
 <td><strong>Add the chat UI</strong><br>Add the built-in overlay or 3D in-world widget, or wire a custom widget to the transcript delegate.</td>
-<td><a href="add-chat-ui.md">add-chat-ui.md</a></td>
+<td><a href="add-the-chat-ui.md">add-the-chat-ui.md</a></td>
 </tr>
 </tbody>
 </table>

@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting
 description: Find fixes for installation, API key, audio, lip sync, and connection problems in the Convai Unreal Engine plugin, plus log export and diagnostic guidance.
-last_reviewed: 2026-06-06
+last_reviewed: "4.0.0-beta.21"
 ---
 
 This section covers problems that occur at the plugin level: installation, authentication, session startup, microphone capture, general lip sync setup, and diagnostics. If the Convai Unreal Engine plugin connects successfully but one feature behaves incorrectly, start with that feature's troubleshooting page.
@@ -49,15 +49,15 @@ Problems that occur after the plugin connects successfully — where a specific 
 
 | Feature | Troubleshooting page |
 | --- | --- |
-| Character actions | [Troubleshoot character actions](../features/character-actions/troubleshooting-and-diagnostics.md) |
-| Dynamic context | [Troubleshoot dynamic context](../features/dynamic-context/troubleshooting-and-diagnostics.md) |
-| Emotion | [Troubleshoot emotion](../features/emotion/troubleshooting-and-diagnostics.md) |
-| Long-term memory | [Troubleshoot long-term memory](../features/long-term-memory/troubleshooting-and-diagnostics.md) |
-| Narrative design | [Troubleshoot narrative design](../features/narrative-design/troubleshooting-and-diagnostics.md) |
-| Scene metadata | [Troubleshoot scene metadata](../features/scene-metadata/troubleshooting-and-diagnostics.md) |
-| Vision | [Troubleshoot vision](../features/vision/troubleshooting-and-diagnostics.md) |
-| Gaze attention | [Troubleshoot gaze attention](../features/gaze-attention/troubleshooting-and-diagnostics.md) |
-| Lip sync | [Troubleshoot lip sync](../features/lip-sync/troubleshooting-and-diagnostics.md) |
+| Character actions | [Troubleshoot character actions](../features/character-actions/troubleshoot-character-actions.md) |
+| Dynamic context | [Troubleshoot dynamic context](../features/dynamic-context/troubleshoot-dynamic-context.md) |
+| Emotion | [Troubleshoot emotion](../features/emotion/troubleshoot-emotion.md) |
+| Long-term memory | [Troubleshoot long-term memory](../features/long-term-memory/troubleshoot-long-term-memory.md) |
+| Narrative design | [Troubleshoot narrative design](../features/narrative-design/troubleshoot-narrative-design.md) |
+| Scene metadata | [Troubleshoot scene metadata](../features/scene-metadata/troubleshoot-scene-metadata.md) |
+| Vision | [Troubleshoot vision](../features/vision/troubleshoot-vision.md) |
+| Gaze attention | [Troubleshoot gaze attention](../features/gaze-attention/troubleshoot-gaze-attention.md) |
+| Lip sync | [Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md) |
 
 ## Next steps
 

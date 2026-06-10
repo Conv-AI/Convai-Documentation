@@ -142,7 +142,7 @@ Expected result: The local `SessionID` returns to `"-1"` before the next interac
 | Symptom | Likely cause | Fix | Verify |
 |---|---|---|---|
 | Character does not respond at level start | **Auto Initialize Session** is `false` and **Start Session** was never called | Enable auto-init or call **Start Session** explicitly. | `GetChatbotConnectionState` returns `Connected`. |
-| State stays `Connecting` | Invalid API key or blocked network | Confirm the API key (see [Configure your API key](../getting-started/configure-api-key.md)) and network access. | State transitions to `Connected`. |
+| State stays `Connecting` | Invalid API key or blocked network | Confirm the API key (see [Configure your API key](../getting-started/configure-your-api-key.md)) and network access. | State transitions to `Connected`. |
 | Stale connection after an orphaned-connection log | Previous connection parked in `Orphaned` state | Call `InvalidateOrphanedConnection`, then **Start Session** again. | Next connection attempt succeeds. |
 | Actions missing during the session | Actions added after **Start Session** | Use **Gather Environment Extras** or add actions before **Start Session**. | Expected actions appear in the first response. |
 

@@ -1,7 +1,7 @@
 ---
 title: Installation and plugin issues
 description: Fix plugin-not-found errors, module load failures, Blueprint-only project limitations, and Android packaging errors in the Convai Unreal Engine plugin.
-last_reviewed: 2026-06-06
+last_reviewed: "4.0.0-beta.21"
 ---
 
 Use this page to resolve problems that occur during installation or when the plugin fails to load in the Unreal Editor. Issues that appear after the plugin loads — such as API key or audio errors — are covered in the other troubleshooting pages.

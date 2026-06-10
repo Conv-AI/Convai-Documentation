@@ -83,12 +83,12 @@ Enable `AlwaysAllowVision` in **Edit > Project Settings > Plugins > Convai** (ad
 
 ## Next steps
 
-{% content-ref url="quick-start.md" %}
-[Vision quick start](quick-start.md)
+{% content-ref url="vision-quick-start.md" %}
+[Vision quick start](vision-quick-start.md)
 {% endcontent-ref %}
 
-{% content-ref url="frame-sources.md" %}
-[Vision frame sources](frame-sources.md)
+{% content-ref url="vision-frame-sources.md" %}
+[Vision frame sources](vision-frame-sources.md)
 {% endcontent-ref %}
 
 {% content-ref url="vision-blueprint-reference.md" %}

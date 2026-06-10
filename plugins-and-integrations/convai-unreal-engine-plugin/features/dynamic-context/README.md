@@ -22,7 +22,7 @@ Use dynamic context when a fact changes during gameplay and the character should
 </tr>
 <tr>
 <td><strong>Dynamic context quick start</strong><br>Push your first state and event in Blueprint, then verify the character can use the updated context.</td>
-<td><a href="quick-start.md">quick-start.md</a></td>
+<td><a href="dynamic-context-quick-start.md">dynamic-context-quick-start.md</a></td>
 </tr>
 <tr>
 <td><strong>Static context at connection time</strong><br>Understand what data is fixed at session start and how it differs from live dynamic context.</td>
@@ -38,11 +38,11 @@ Use dynamic context when a fact changes during gameplay and the character should
 </tr>
 <tr>
 <td><strong>Dynamic context usage examples</strong><br>Blueprint recipes for health tracking, zone changes, narrative events, and session resets.</td>
-<td><a href="usage-examples.md">usage-examples.md</a></td>
+<td><a href="dynamic-context-usage-examples.md">dynamic-context-usage-examples.md</a></td>
 </tr>
 <tr>
 <td><strong>Troubleshoot dynamic context</strong><br>Fix updates that arrive too late, trigger unexpected responses, or appear ignored after a flush.</td>
-<td><a href="troubleshooting-and-diagnostics.md">troubleshooting-and-diagnostics.md</a></td>
+<td><a href="troubleshoot-dynamic-context.md">troubleshoot-dynamic-context.md</a></td>
 </tr>
 </tbody>
 </table>
@@ -50,7 +50,7 @@ Use dynamic context when a fact changes during gameplay and the character should
 ## Recommended reading order
 
 1. [How dynamic context works](how-dynamic-context-works.md) — learn the state and event model.
-2. [Dynamic context quick start](quick-start.md) — push and verify your first update.
+2. [Dynamic context quick start](dynamic-context-quick-start.md) — push and verify your first update.
 3. [Static context at connection time](static-context-at-connection-time.md) — separate session-start facts from live updates.
 4. [Sync behavior and timing](sync-behavior-and-timing.md) — tune flushing, queueing, and immediate sync behavior.
 5. Reference, examples, and troubleshooting pages — use when you need exact node behavior, applied patterns, or a fix.
@@ -59,6 +59,6 @@ Use dynamic context when a fact changes during gameplay and the character should
 [How dynamic context works](how-dynamic-context-works.md)
 {% endcontent-ref %}
 
-{% content-ref url="quick-start.md" %}
-[Dynamic context quick start](quick-start.md)
+{% content-ref url="dynamic-context-quick-start.md" %}
+[Dynamic context quick start](dynamic-context-quick-start.md)
 {% endcontent-ref %}

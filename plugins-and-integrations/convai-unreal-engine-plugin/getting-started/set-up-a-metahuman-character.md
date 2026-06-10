@@ -12,7 +12,7 @@ MetaHuman character setup walkthrough
 
 ## Prerequisites
 
-- The Convai plugin is installed and your API key is configured — see [Install the Convai plugin](installation.md) and [Configure your API key](configure-api-key.md).
+- The Convai plugin is installed and your API key is configured — see [Install the Convai plugin](install-the-convai-plugin.md) and [Configure your API key](configure-your-api-key.md).
 - Unreal Engine and the **MetaHuman** plugin are available in your project.
 - You have a Convai character ID from the dashboard.
 
@@ -92,7 +92,7 @@ Drag the MetaHuman Blueprint from the **Content Browser** into the level viewpor
 
 ## Add the Convai Player component to the player pawn
 
-If you have not already done this, open your player pawn Blueprint and add `UConvaiPlayerComponent`. See [Add your first Convai character](add-your-first-character.md) for the steps.
+If you have not already done this, open your player pawn Blueprint and add `UConvaiPlayerComponent`. See [Add your first Convai character](add-your-first-convai-character.md) for the steps.
 
 ## Test the setup
 
@@ -160,14 +160,14 @@ The animation interface `BPI_Convai_Animation` at `Interfaces/BPI_Convai_Animati
 
 **Cause:** The **Character ID** is missing or incorrect, the API key is not configured, or `UConvaiPlayerComponent` is absent from the player pawn.
 
-**Fix:** Verify the **Character ID** on the **Convai Chatbot** component matches a character in your Convai dashboard. Confirm your API key is set (see [Configure your API key](configure-api-key.md)). Confirm the player pawn has `UConvaiPlayerComponent` added.
+**Fix:** Verify the **Character ID** on the **Convai Chatbot** component matches a character in your Convai dashboard. Confirm your API key is set (see [Configure your API key](configure-your-api-key.md)). Confirm the player pawn has `UConvaiPlayerComponent` added.
 
 **Verify:** Open **Window > Output Log** and filter on `ConvaiChatbotComponentLog` or `ConvaiConnectionManagerLog`. Look for connection or authentication errors when you enter Play mode and attempt a conversation.
 
 ## Next steps
 
-{% content-ref url="set-up-a-reallusion-character.md" %}
-[Set up a Reallusion (CC) character](set-up-a-reallusion-character.md)
+{% content-ref url="set-up-a-reallusion-cc-character.md" %}
+[Set up a Reallusion (CC) character](set-up-a-reallusion-cc-character.md)
 {% endcontent-ref %}
 
 {% content-ref url="configure-conversation-input.md" %}

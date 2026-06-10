@@ -109,6 +109,6 @@ Deleting an end-user identity removes that user record and associated long-term 
 [LTM Blueprint reference](ltm-blueprint-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="usage-examples.md" %}
-[Long-term memory usage examples](usage-examples.md)
+{% content-ref url="long-term-memory-usage-examples.md" %}
+[Long-term memory usage examples](long-term-memory-usage-examples.md)
 {% endcontent-ref %}

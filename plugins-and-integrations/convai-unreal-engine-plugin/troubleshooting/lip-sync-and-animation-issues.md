@@ -1,7 +1,7 @@
 ---
 title: Lip sync and animation issues
 description: Fix missing mouth movement, wrong blendshape curves, frame starvation, and packaged build animation failures in the Convai Unreal Engine plugin.
-last_reviewed: 2026-06-06
+last_reviewed: "4.0.0-beta.21"
 ---
 
 Use this page to resolve problems with facial animation during character speech. Issues where the character produces no audio at all are covered in [Audio and microphone issues](audio-and-microphone-issues.md). For a full reference of `Convai Face Sync` component properties, see [Face Sync component reference](../features/lip-sync/face-sync-component-reference.md).
@@ -25,10 +25,10 @@ Start with the top-level checks on this page when you are not sure whether the i
 | What you observe | Start here |
 | --- | --- |
 | Character produces no audio and no mouth movement | [Audio and microphone issues](audio-and-microphone-issues.md) |
-| Character speaks but the face does not move | This page, then [Troubleshoot lip sync](../features/lip-sync/troubleshooting-and-diagnostics.md) |
+| Character speaks but the face does not move | This page, then [Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md) |
 | Mouth moves but the wrong facial curves animate | This page, then [Face Sync component reference](../features/lip-sync/face-sync-component-reference.md) |
-| Lip sync starts, then freezes or fades during speech | [Troubleshoot lip sync](../features/lip-sync/troubleshooting-and-diagnostics.md) |
-| Custom curve remapping does not work | [Troubleshoot lip sync](../features/lip-sync/troubleshooting-and-diagnostics.md) |
+| Lip sync starts, then freezes or fades during speech | [Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md) |
+| Custom curve remapping does not work | [Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md) |
 
 ## No mouth movement during speech
 
@@ -72,8 +72,8 @@ Use per-component `LipSyncMode` values when one project contains multiple rig ty
 
 **Verify:** The mouth should remain synchronized with the spoken audio through the full response.
 
-{% content-ref url="../features/lip-sync/troubleshooting-and-diagnostics.md" %}
-[Troubleshoot lip sync](../features/lip-sync/troubleshooting-and-diagnostics.md)
+{% content-ref url="../features/lip-sync/troubleshoot-lip-sync.md" %}
+[Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md)
 {% endcontent-ref %}
 
 ## Face animates in editor but not in a packaged build
@@ -92,8 +92,8 @@ Use per-component `LipSyncMode` values when one project contains multiple rig ty
 [Face Sync component reference](../features/lip-sync/face-sync-component-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="../features/lip-sync/troubleshooting-and-diagnostics.md" %}
-[Troubleshoot lip sync](../features/lip-sync/troubleshooting-and-diagnostics.md)
+{% content-ref url="../features/lip-sync/troubleshoot-lip-sync.md" %}
+[Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md)
 {% endcontent-ref %}
 
 {% content-ref url="diagnostics-and-log-export.md" %}

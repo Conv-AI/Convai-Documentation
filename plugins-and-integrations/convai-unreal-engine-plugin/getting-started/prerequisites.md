@@ -10,7 +10,7 @@ Verify each requirement before you install the Convai Unreal Engine plugin. Miss
 
 The plugin supports Unreal Engine 5.0 and later — every UE 5.x release. The minimum supported version is <code class="expression">space.vars.unreal_min_version</code>.
 
-The **Convai editor window** — the in-editor panel used for API key sign-in — requires **UE 5.2 or later**. On UE 5.0 and 5.1, all runtime gameplay features work, but the editor sign-in panel is not available. Add your API key to `Config/DefaultEngine.ini` instead — see [Configure your API key](configure-api-key.md).
+The **Convai editor window** — the in-editor panel used for API key sign-in — requires **UE 5.2 or later**. On UE 5.0 and 5.1, all runtime gameplay features work, but the editor sign-in panel is not available. Add your API key to `Config/DefaultEngine.ini` instead — see [Configure your API key](configure-your-api-key.md).
 
 | UE version range | Plugin support | API key setup |
 |---|---|---|
@@ -41,7 +41,7 @@ Sign in and open your account dashboard. Your API key is available under account
 {% step %}
 ### Copy your API key
 
-Copy the API key string. You will enter it after installation — through the Convai editor window on UE 5.2+, or in `Config/DefaultEngine.ini` on UE 5.0 and 5.1. See [Configure your API key](configure-api-key.md).
+Copy the API key string. You will enter it after installation — through the Convai editor window on UE 5.2+, or in `Config/DefaultEngine.ini` on UE 5.0 and 5.1. See [Configure your API key](configure-your-api-key.md).
 {% endstep %}
 {% endstepper %}
 
@@ -76,6 +76,6 @@ When all requirements are met, you are ready to install the plugin.
 
 ## Next steps
 
-{% content-ref url="installation.md" %}
-[Install the Convai plugin](installation.md)
+{% content-ref url="install-the-convai-plugin.md" %}
+[Install the Convai plugin](install-the-convai-plugin.md)
 {% endcontent-ref %}

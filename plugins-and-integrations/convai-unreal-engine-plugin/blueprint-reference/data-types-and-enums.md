@@ -291,7 +291,7 @@ Configured by the face sync component and returned by lip sync helper functions.
 
 ### FConvaiBlendshapeParameters
 
-Per-blendshape transform configuration used by `MapBlendshapes` in [Convai utility functions](utility-functions.md).
+Per-blendshape transform configuration used by `MapBlendshapes` in [Convai utility functions](convai-utility-functions.md).
 
 | Field | Type | Default | Description |
 |---|---|---|---|
@@ -318,7 +318,7 @@ Per-blendshape transform configuration used by `MapBlendshapes` in [Convai utili
 [Convai Object Component](convai-object-component.md)
 {% endcontent-ref %}
 
-{% content-ref url="utility-functions.md" %}
-[Convai utility functions](utility-functions.md)
+{% content-ref url="convai-utility-functions.md" %}
+[Convai utility functions](convai-utility-functions.md)
 {% endcontent-ref %}
 

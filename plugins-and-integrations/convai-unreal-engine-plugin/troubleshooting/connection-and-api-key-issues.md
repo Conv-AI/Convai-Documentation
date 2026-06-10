@@ -1,7 +1,7 @@
 ---
 title: Connection and API key issues
 description: Fix authentication failures, missing API key errors, session timeout, and firewall problems in the Convai Unreal Engine plugin.
-last_reviewed: 2026-06-06
+last_reviewed: "4.0.0-beta.21"
 ---
 
 Use this page to resolve problems where the Convai plugin cannot authenticate or establish a session with Convai. Installation problems are covered in [Installation and plugin issues](installation-and-plugin-issues.md).

@@ -112,7 +112,7 @@ To check streaming and recording state at any time:
 | `GetIsStreaming()` | `bool` | `true` while audio is being streamed to a chatbot. |
 | `GetIsRecording()` | `bool` | `true` while manual recording is in progress. |
 
-For full details on the built-in chat overlay, the 3D in-world widget, and wiring a custom transcript UI, see [Add the chat UI](add-chat-ui.md).
+For full details on the built-in chat overlay, the 3D in-world widget, and wiring a custom transcript UI, see [Add the chat UI](add-the-chat-ui.md).
 
 ## Troubleshooting
 
@@ -148,8 +148,8 @@ For full details on the built-in chat overlay, the 3D in-world widget, and wirin
 
 ## Next steps
 
-{% content-ref url="add-chat-ui.md" %}
-[Add the chat UI](add-chat-ui.md)
+{% content-ref url="add-the-chat-ui.md" %}
+[Add the chat UI](add-the-chat-ui.md)
 {% endcontent-ref %}
 
 {% content-ref url="validate-your-setup.md" %}

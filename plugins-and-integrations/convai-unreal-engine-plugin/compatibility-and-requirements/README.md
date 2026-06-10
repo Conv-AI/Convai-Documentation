@@ -20,7 +20,7 @@ Confirm your environment meets these requirements before installing the Convai U
 </tr>
 <tr>
 <td><strong>Unreal Engine platform support matrix</strong><br>Win64 and Android build targets, required plugin dependencies, and Android microphone permission handling.</td>
-<td><a href="platform-support-matrix.md">platform-support-matrix.md</a></td>
+<td><a href="unreal-engine-platform-support-matrix.md">unreal-engine-platform-support-matrix.md</a></td>
 </tr>
 <tr>
 <td><strong>Character rig support</strong><br>Which character rigs work out of the box, which need additional setup, and links to the rig setup guides.</td>
@@ -48,6 +48,6 @@ Confirm your environment meets these requirements before installing the Convai U
 
 Once your environment meets these requirements, install the plugin.
 
-{% content-ref url="../getting-started/installation.md" %}
-[Install the Convai Unreal Engine plugin](../getting-started/installation.md)
+{% content-ref url="../getting-started/install-the-convai-plugin.md" %}
+[Install the Convai Unreal Engine plugin](../getting-started/install-the-convai-plugin.md)
 {% endcontent-ref %}

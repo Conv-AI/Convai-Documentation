@@ -4,7 +4,7 @@ description: Understand the narrative design story graph, the runtime pipeline t
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Narrative design gives a Convai character a structured story graph — named sections and the triggers that move between them — authored in the Convai dashboard and executed at runtime through `UConvaiChatbotComponent`. This page explains the mental model and the runtime pipeline. For hands-on setup, start with [Narrative design quick start](quick-start.md).
+Narrative design gives a Convai character a structured story graph — named sections and the triggers that move between them — authored in the Convai dashboard and executed at runtime through `UConvaiChatbotComponent`. This page explains the mental model and the runtime pipeline. For hands-on setup, start with [Narrative design quick start](narrative-design-quick-start.md).
 
 ## The story graph model
 
@@ -18,7 +18,7 @@ A narrative design graph has three building blocks you work with from Unreal Eng
 
 The character stays on the current section until **Invoke Narrative Design Trigger** activates another section. After that section becomes active, the player's answers and the section's decisions guide the next transition through the graph. See `FNarrativeDecision` in [Narrative design Blueprint reference](narrative-design-blueprint-reference.md) for the decision struct fields.
 
-Author sections, triggers, and entry behavior in the Convai dashboard. See [Narrative Design | Playground](../../../convai-playground/character-customization/narrative-design.md) for graph authoring guidance.
+Author sections, triggers, and entry behavior in the Convai dashboard. See [Narrative Design | Playground](../../../../convai-playground/character-customization/narrative-design.md) for graph authoring guidance.
 
 ## Runtime pipeline for named triggers
 
@@ -72,7 +72,7 @@ The plugin sends template keys when the session connects and whenever you assign
 
 ## Validate trigger names in the dashboard
 
-Before hardcoding trigger names in Blueprint, open the character's narrative graph in the Convai dashboard and copy each `trigger_name` exactly as authored. Confirm the trigger is an outbound edge from the section the character starts on. See [Narrative Design | Playground](../../../convai-playground/character-customization/narrative-design.md).
+Before hardcoding trigger names in Blueprint, open the character's narrative graph in the Convai dashboard and copy each `trigger_name` exactly as authored. Confirm the trigger is an outbound edge from the section the character starts on. See [Narrative Design | Playground](../../../../convai-playground/character-customization/narrative-design.md).
 
 ## Query narrative data at runtime
 
@@ -80,8 +80,8 @@ The full list of sections and triggers for a character is queryable through **Co
 
 ## Next steps
 
-{% content-ref url="quick-start.md" %}
-[Narrative design quick start](quick-start.md)
+{% content-ref url="narrative-design-quick-start.md" %}
+[Narrative design quick start](narrative-design-quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="narrative-triggers.md" %}

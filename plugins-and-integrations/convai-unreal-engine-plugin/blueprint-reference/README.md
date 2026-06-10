@@ -34,7 +34,7 @@ Feature-specific Blueprint nodes — actions parameter accessors, dynamic contex
 </tr>
 <tr>
 <td><strong>Convai utility functions</strong><br>Blueprint libraries for look-at helpers, component lookups, settings accessors, blendshape tools, file I/O, and connection pre-warming.</td>
-<td><a href="utility-functions.md">utility-functions.md</a></td>
+<td><a href="convai-utility-functions.md">convai-utility-functions.md</a></td>
 </tr>
 <tr>
 <td><strong>Data types and enums</strong><br>Shared Blueprint structs and enums used across components, including object entries, action types, connection states, and VAD settings.</td>

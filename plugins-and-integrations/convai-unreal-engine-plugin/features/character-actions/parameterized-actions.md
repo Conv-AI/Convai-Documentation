@@ -214,6 +214,6 @@ Regardless of declared type, all value fields on `FConvaiResultParam` are popula
 [Attention and reference grounding](attention-and-reference-grounding.md)
 {% endcontent-ref %}
 
-{% content-ref url="usage-examples.md" %}
-[Character actions examples](usage-examples.md)
+{% content-ref url="character-actions-examples.md" %}
+[Character actions examples](character-actions-examples.md)
 {% endcontent-ref %}

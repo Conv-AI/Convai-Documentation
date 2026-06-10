@@ -212,6 +212,6 @@ If you rename any of these action templates, rename the corresponding Blueprint 
 [Parameterized actions](parameterized-actions.md)
 {% endcontent-ref %}
 
-{% content-ref url="usage-examples.md" %}
-[Character actions examples](usage-examples.md)
+{% content-ref url="character-actions-examples.md" %}
+[Character actions examples](character-actions-examples.md)
 {% endcontent-ref %}

@@ -107,6 +107,6 @@ With the module and component model in mind, install the plugin or explore the f
 [Feature map](feature-map.md)
 {% endcontent-ref %}
 
-{% content-ref url="what-is-the-convai-unreal-plugin.md" %}
-[What is the Convai Unreal Engine plugin](what-is-the-convai-unreal-plugin.md)
+{% content-ref url="what-is-the-convai-unreal-engine-plugin.md" %}
+[What is the Convai Unreal Engine plugin](what-is-the-convai-unreal-engine-plugin.md)
 {% endcontent-ref %}

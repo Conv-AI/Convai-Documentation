@@ -47,6 +47,6 @@ Proxy servers that block or inspect HTTPS traffic may prevent session setup or H
 
 With network requirements confirmed, you are ready to install the plugin.
 
-{% content-ref url="../getting-started/installation.md" %}
-[Install the Convai Unreal Engine plugin](../getting-started/installation.md)
+{% content-ref url="../getting-started/install-the-convai-plugin.md" %}
+[Install the Convai Unreal Engine plugin](../getting-started/install-the-convai-plugin.md)
 {% endcontent-ref %}

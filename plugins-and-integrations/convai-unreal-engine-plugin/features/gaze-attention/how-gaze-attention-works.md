@@ -1,12 +1,12 @@
 ---
 title: How gaze attention works
 description: Understand the gaze trace pipeline, attention promotion timers, component-scoped targeting, highlight rendering, and the attention-source locking rule.
-last_reviewed: "2026-06-09"
+last_reviewed: "4.0.0-beta.21"
 ---
 
 Gaze attention is a subsystem inside `UConvaiPlayerComponent` that translates where the player is looking into contextual focus for AI characters. When active, it runs every tick, manages visual feedback through a highlight actor and a cursor widget, and writes to the chatbot's "object in attention" slot after a configurable dwell period.
 
-If you have not enabled gaze attention yet, start with [Gaze attention quick start](quick-start.md). This page explains the mental model behind that setup.
+If you have not enabled gaze attention yet, start with [Gaze attention quick start](gaze-attention-quick-start.md). This page explains the mental model behind that setup.
 
 ## Three core ideas
 
@@ -153,18 +153,18 @@ The cursor is a pure C++ widget that uses Unreal's `FCoreStyle::WhiteBrush`. No 
 
 ## Next steps
 
-{% content-ref url="quick-start.md" %}
-[Gaze attention quick start](quick-start.md)
+{% content-ref url="gaze-attention-quick-start.md" %}
+[Gaze attention quick start](gaze-attention-quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="gaze-attention-reference.md" %}
 [Gaze attention reference](gaze-attention-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="usage-examples.md" %}
-[Gaze attention usage examples](usage-examples.md)
+{% content-ref url="gaze-attention-usage-examples.md" %}
+[Gaze attention usage examples](gaze-attention-usage-examples.md)
 {% endcontent-ref %}
 
-{% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot gaze attention](troubleshooting-and-diagnostics.md)
+{% content-ref url="troubleshoot-gaze-attention.md" %}
+[Troubleshoot gaze attention](troubleshoot-gaze-attention.md)
 {% endcontent-ref %}

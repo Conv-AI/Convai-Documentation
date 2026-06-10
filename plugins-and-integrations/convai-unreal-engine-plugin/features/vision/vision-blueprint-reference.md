@@ -177,12 +177,12 @@ Blueprint users can also read the setting with **Is Always Allow Vision Enabled*
 
 ## Next steps
 
-{% content-ref url="usage-examples.md" %}
-[Vision usage examples](usage-examples.md)
+{% content-ref url="vision-usage-examples.md" %}
+[Vision usage examples](vision-usage-examples.md)
 {% endcontent-ref %}
 
-{% content-ref url="frame-sources.md" %}
-[Vision frame sources](frame-sources.md)
+{% content-ref url="vision-frame-sources.md" %}
+[Vision frame sources](vision-frame-sources.md)
 {% endcontent-ref %}
 
 {% content-ref url="custom-vision-components.md" %}

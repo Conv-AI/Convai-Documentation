@@ -4,7 +4,7 @@ description: Invoke named narrative triggers or dynamic context messages on a Co
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Narrative triggers advance a character's story graph from one section to the next. `UConvaiChatbotComponent` exposes two Blueprint functions for firing triggers and one event for reacting to section changes. If you have not invoked a trigger before, complete [Narrative design quick start](quick-start.md) first.
+Narrative triggers advance a character's story graph from one section to the next. `UConvaiChatbotComponent` exposes two Blueprint functions for firing triggers and one event for reacting to section changes. If you have not invoked a trigger before, complete [Narrative design quick start](narrative-design-quick-start.md) first.
 
 ## Choose the right function
 
@@ -86,6 +86,6 @@ If `bAutoInitializeSession` is `false`, call `StartSession` explicitly before yo
 [Narrative design Blueprint reference](narrative-design-blueprint-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="usage-examples.md" %}
-[Narrative design usage examples](usage-examples.md)
+{% content-ref url="narrative-design-usage-examples.md" %}
+[Narrative design usage examples](narrative-design-usage-examples.md)
 {% endcontent-ref %}

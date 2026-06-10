@@ -10,7 +10,7 @@ These nodes are optional. The normal story progression path is **Invoke Narrativ
 
 ## Prerequisites
 
-- The Convai Unreal Engine plugin is installed and the API key is configured. See [Configure your API key](../../getting-started/configure-api-key.md).
+- The Convai Unreal Engine plugin is installed and the API key is configured. See [Configure your API key](../../getting-started/configure-your-api-key.md).
 - A valid `CharacterId` that matches the `CharacterID` on the target `UConvaiChatbotComponent`.
 - Network access at the time the fetch node executes. Fetch nodes make HTTPS POST requests to Convai.
 
@@ -63,7 +63,7 @@ On the **On Success** pin of **Convai Fetch Narrative Triggers**, iterate the `N
 
 On the **On Success** pin of **Convai Fetch Narrative Sections**, iterate `Narrative Sections` and use each `section_id` and `section_name` to populate a dropdown or debug overlay.
 
-For a complete trigger-validation recipe, see [Narrative design usage examples](usage-examples.md#fetch-triggers-to-validate-names-before-invoking).
+For a complete trigger-validation recipe, see [Narrative design usage examples](narrative-design-usage-examples.md#fetch-triggers-to-validate-names-before-invoking).
 
 ## Verify the fetch
 
@@ -71,7 +71,7 @@ After running a fetch node in Play In Editor:
 
 1. Confirm the **On Success** execution pin fires (not **On Failure**).
 2. Inspect `Narrative Sections` or `Narrative Triggers` — the array should contain entries for the character you queried.
-3. If **On Failure** fires, check the **Output Log** for `ConvaiNarrativeHTTP` messages. See [Troubleshoot narrative design](troubleshooting-and-diagnostics.md).
+3. If **On Failure** fires, check the **Output Log** for `ConvaiNarrativeHTTP` messages. See [Troubleshoot narrative design](troubleshoot-narrative-design.md).
 
 {% hint style="info" %}
 If the HTTP request succeeds but the response array cannot be parsed into narrative structs, the fetch proxy may return without firing **On Success** or **On Failure**. If a latent node appears to hang, check the **Output Log** for `ConvaiNarrativeHTTP` and retry after confirming the character has narrative data in the dashboard.
@@ -87,6 +87,6 @@ If the HTTP request succeeds but the response array cannot be parsed into narrat
 [Narrative design Blueprint reference](narrative-design-blueprint-reference.md)
 {% endcontent-ref %}
 
-{% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot narrative design](troubleshooting-and-diagnostics.md)
+{% content-ref url="troubleshoot-narrative-design.md" %}
+[Troubleshoot narrative design](troubleshoot-narrative-design.md)
 {% endcontent-ref %}

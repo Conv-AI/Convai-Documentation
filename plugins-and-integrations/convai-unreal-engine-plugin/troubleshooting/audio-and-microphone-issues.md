@@ -1,7 +1,7 @@
 ---
 title: Audio and microphone issues
 description: Fix audio capture failures, wrong microphone device, Android permission errors, and audio playback problems in the Convai Unreal Engine plugin.
-last_reviewed: 2026-06-06
+last_reviewed: "4.0.0-beta.21"
 ---
 
 Use this page to resolve problems where the plugin cannot capture microphone input, uses the wrong audio device, or fails to play character audio. Connection and API key problems are covered in [Connection and API key issues](connection-and-api-key-issues.md).
