@@ -28,8 +28,6 @@ In the **Content Browser**, double-click the Blueprint for your Convai character
 ### Add the Environment Webcam component
 
 In the **Components** panel, click **Add** and search for `EnvironmentWebcam`. Select **Environment Webcam** to add it to the same `Actor` as the **Convai Chatbot** component.
-
-<figure><img src="../../../../.gitbook/assets/TODO-vision-qs-components-panel.png" alt="Blueprint Editor Components panel showing Environment Webcam added to the component hierarchy"><figcaption><p>TODO: Replace with screenshot showing the Environment Webcam component in the Components panel.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -50,16 +48,12 @@ The Convai render target action creates a `UTextureRenderTarget2D` with `RTF_RGB
 ### Assign the render target
 
 Select **Environment Webcam** in the character Blueprint. In the **Details** panel, assign the asset to **Convai Render Target** under **Convai | Vision**.
-
-<figure><img src="../../../../.gitbook/assets/TODO-vision-qs-render-target-assigned.png" alt="Blueprint Details panel showing Convai Render Target property with RT_ConvaiVision assigned under the Convai | Vision category"><figcaption><p>TODO: Replace with screenshot showing the Details panel with the render target assigned.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
 ### Start capture from BeginPlay
 
 Open the **Event Graph**. Drag **Environment Webcam** from the **Components** panel into the graph. From the component pin, call **Start** (category **Convai | Vision**). Connect **Event BeginPlay** to **Start**.
-
-<figure><img src="../../../../.gitbook/assets/TODO-vision-qs-event-graph-start.png" alt="Blueprint Event Graph with Event BeginPlay connected to the Start node on the Environment Webcam component"><figcaption><p>TODO: Replace with screenshot showing the BeginPlay → Start wiring in the Event Graph.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}

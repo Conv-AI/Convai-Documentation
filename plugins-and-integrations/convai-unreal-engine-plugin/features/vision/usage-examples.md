@@ -14,8 +14,6 @@ Each example includes a scenario, the setup to apply, the expected runtime behav
 
 **Setup:** Select **Environment Webcam** in the character Blueprint. In the **Details** panel under **Convai | Vision**, enable `bAutoStartVision`. Assign **Convai Render Target** before entering Play mode.
 
-<figure><img src="../../../../.gitbook/assets/TODO-vision-examples-auto-start.png" alt="Blueprint Details panel showing bAutoStartVision enabled on the Environment Webcam component"><figcaption><p>TODO: Replace with screenshot showing bAutoStartVision enabled in the Details panel.</p></figcaption></figure>
-
 **Expected behavior:** During `BeginPlay`, the component calls **Start**. When **Convai Render Target** is assigned, **Get State** returns `Capturing` and the chatbot can send frames during an active session.
 
 **Verify:** Call **Supports Vision** on the chatbot and **Get State** on **Environment Webcam**. Both should report an active vision source in `Capturing` state.
@@ -29,8 +27,6 @@ Each example includes a scenario, the setup to apply, the expected runtime behav
 1. On your procedure-start event, get a reference to **Environment Webcam** and call **Start**.
 2. On your procedure-end event, call **Stop** on the same component.
 3. Before calling **Start**, check **Get State** to avoid double-starts if the event can fire more than once.
-
-<figure><img src="../../../../.gitbook/assets/TODO-vision-examples-manual-start-stop.png" alt="Event Graph showing custom events wired to Start and Stop nodes on the Environment Webcam component"><figcaption><p>TODO: Replace with screenshot showing Start/Stop event wiring in the Event Graph.</p></figcaption></figure>
 
 **Expected behavior:** The component captures frames only during the active procedure phase. **Get State** returns `Capturing` after **Start** and `Stopped` after **Stop**.
 
