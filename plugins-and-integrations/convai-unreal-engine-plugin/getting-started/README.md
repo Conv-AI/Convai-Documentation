@@ -46,6 +46,10 @@ By the end of this section, your project contains a working Convai character in 
 <td><a href="configure-api-key.md">configure-api-key.md</a></td>
 </tr>
 <tr>
+<td><strong>Scene components reference</strong><br>Reference for the Convai Chatbot, Player, Object, and Face Sync components and their fields.</td>
+<td><a href="scene-components.md">scene-components.md</a></td>
+</tr>
+<tr>
 <td><strong>Add your first Convai character</strong><br>Place a Convai character in a level and have a live voice conversation with it.</td>
 <td><a href="add-your-first-character.md">add-your-first-character.md</a></td>
 </tr>
@@ -119,10 +123,6 @@ Tune audio, input, and UI after the first conversation is working. Each page is 
 <tr>
 <td><strong>Validate your setup</strong><br>Run through a checklist to confirm that every part of your setup is working before adding features.</td>
 <td><a href="validate-your-setup.md">validate-your-setup.md</a></td>
-</tr>
-<tr>
-<td><strong>Scene components reference</strong><br>Reference for the Convai Chatbot, Player, Object, and Face Sync components and their fields.</td>
-<td><a href="scene-components.md">scene-components.md</a></td>
 </tr>
 </tbody>
 </table>

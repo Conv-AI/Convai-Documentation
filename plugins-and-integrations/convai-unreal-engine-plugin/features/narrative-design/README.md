@@ -6,7 +6,7 @@ last_reviewed: "4.0.0-beta.21"
 
 Narrative design gives a Convai character a structured story graph — named sections, named triggers, and template keys that adapt objectives to live gameplay data. You author the graph in the Convai dashboard; at runtime, `UConvaiChatbotComponent` (`Convai Chatbot`) invokes triggers and receives section changes from Convai.
 
-**New to narrative design?** Start with [Narrative design quick start](quick-start.md) after you have a character with a graph configured in the dashboard. Use [Narrative Design | Playground](../../../convai-playground/character-customization/narrative-design.md) to create sections and triggers before you open Unreal Engine.
+**New to narrative design?** Start with [How narrative design works](how-narrative-design-works.md) to understand sections, triggers, and template keys. Then follow [Narrative design quick start](quick-start.md) after you have a character with a graph configured in the dashboard. Use [Narrative Design | Playground](../../../convai-playground/character-customization/narrative-design.md) to create sections and triggers before you open Unreal Engine.
 
 ## Get started
 
@@ -19,12 +19,12 @@ Narrative design gives a Convai character a structured story graph — named sec
 </thead>
 <tbody>
 <tr>
-<td><strong>Narrative design quick start</strong><br>Invoke a named trigger from Blueprint and confirm a section change by printing the new section ID.</td>
-<td><a href="quick-start.md">quick-start.md</a></td>
-</tr>
-<tr>
 <td><strong>How narrative design works</strong><br>Understand sections, triggers, template keys, and the runtime pipeline from trigger call to section event.</td>
 <td><a href="how-narrative-design-works.md">how-narrative-design-works.md</a></td>
+</tr>
+<tr>
+<td><strong>Narrative design quick start</strong><br>Invoke a named trigger from Blueprint and confirm a section change by printing the new section ID.</td>
+<td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 </tbody>
 </table>

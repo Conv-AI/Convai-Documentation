@@ -31,12 +31,12 @@ Lip sync makes a character's mouth and face move in time with its voice. When th
 <td><a href="face-sync-anim-node-reference.md">face-sync-anim-node-reference.md</a></td>
 </tr>
 <tr>
-<td><strong>Lip sync usage examples</strong><br>Common setups including Add vs Override blending, smoothing tuning, and custom blendshape remapping.</td>
-<td><a href="usage-examples.md">usage-examples.md</a></td>
-</tr>
-<tr>
 <td><strong>Record and replay lip sync</strong><br>Capture a live lip-sync sequence during a conversation and replay it later with the C++ recording API.</td>
 <td><a href="recording-lip-sync.md">recording-lip-sync.md</a></td>
+</tr>
+<tr>
+<td><strong>Lip sync usage examples</strong><br>Common setups including Add vs Override blending, smoothing tuning, and custom blendshape remapping.</td>
+<td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
 <td><strong>Troubleshoot lip sync</strong><br>Fix no mouth movement, frame starvation, wrong blendshape map, and rig mismatch.</td>
@@ -47,4 +47,4 @@ Lip sync makes a character's mouth and face move in time with its voice. When th
 
 ## Next steps
 
-Start with [Lip sync quick start](quick-start.md) to get lip sync running on a MetaHuman character. Then read [How lip sync works](how-lip-sync-works.md) to understand the data pipeline and the six lip-sync modes before moving into the reference pages.
+Start with [How lip sync works](how-lip-sync-works.md) to understand the data pipeline and the six lip-sync modes. Then follow [Lip sync quick start](quick-start.md) to get lip sync running on a MetaHuman character before moving into the reference pages.

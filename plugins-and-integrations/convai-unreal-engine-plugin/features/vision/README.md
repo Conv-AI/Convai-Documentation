@@ -15,28 +15,28 @@ Vision lets a Convai character see the Unreal level during conversation. You add
 </thead>
 <tbody>
 <tr>
-<td><strong>Vision quick start</strong><br>Add the Environment Webcam component to a character and confirm scene vision works in one Play In Editor session.</td>
-<td><a href="quick-start.md">quick-start.md</a></td>
-</tr>
-<tr>
 <td><strong>How vision works</strong><br>Understand how scene frames are captured, discovered, and sent to Convai during a session.</td>
 <td><a href="how-vision-works.md">how-vision-works.md</a></td>
+</tr>
+<tr>
+<td><strong>Vision quick start</strong><br>Add the Environment Webcam component to a character and confirm scene vision works in one Play In Editor session.</td>
+<td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
 <td><strong>Vision frame sources</strong><br>Configure the built-in Environment Webcam component, its render target, capture rate, and active source selection.</td>
 <td><a href="frame-sources.md">frame-sources.md</a></td>
 </tr>
 <tr>
-<td><strong>Vision usage examples</strong><br>Apply common Blueprint patterns for auto-start capture, manual start and stop, FPS tuning, and source switching.</td>
-<td><a href="usage-examples.md">usage-examples.md</a></td>
+<td><strong>Custom vision components</strong><br>Create a C++ frame source when the built-in Environment Webcam component does not cover your image pipeline.</td>
+<td><a href="custom-vision-components.md">custom-vision-components.md</a></td>
 </tr>
 <tr>
 <td><strong>Vision Blueprint reference</strong><br>Reference for Blueprint-accessible vision enums, component properties, events, and Chatbot integration nodes.</td>
 <td><a href="vision-blueprint-reference.md">vision-blueprint-reference.md</a></td>
 </tr>
 <tr>
-<td><strong>Custom vision components</strong><br>Create a C++ frame source when the built-in Environment Webcam component does not cover your image pipeline.</td>
-<td><a href="custom-vision-components.md">custom-vision-components.md</a></td>
+<td><strong>Vision usage examples</strong><br>Apply common Blueprint patterns for auto-start capture, manual start and stop, FPS tuning, and source switching.</td>
+<td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
 <td><strong>Troubleshoot vision</strong><br>Diagnose missing visual context, failed starts, blank render targets, invalid sources, and capture-rate problems.</td>
@@ -47,4 +47,4 @@ Vision lets a Convai character see the Unreal level during conversation. You add
 
 ## Next steps
 
-Start with [Vision quick start](quick-start.md) to add scene vision to a character and confirm it works in Play In Editor. Then read [How vision works](how-vision-works.md) before tuning capture settings in [Vision frame sources](frame-sources.md) or applying patterns in [Vision usage examples](usage-examples.md).
+Start with [How vision works](how-vision-works.md) to understand the capture pipeline. Then follow [Vision quick start](quick-start.md) before tuning capture settings in [Vision frame sources](frame-sources.md) or applying patterns in [Vision usage examples](usage-examples.md).

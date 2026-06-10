@@ -35,12 +35,12 @@ Long-term memory (LTM) lets a Convai character retain facts about a specific pla
 <td><a href="speaker-id-management.md">speaker-id-management.md</a></td>
 </tr>
 <tr>
-<td><strong>Long-term memory usage examples</strong><br>Blueprint-first patterns for returning learners, shared devices, account-backed identity, and fresh-start resets.</td>
-<td><a href="usage-examples.md">usage-examples.md</a></td>
-</tr>
-<tr>
 <td><strong>LTM Blueprint reference</strong><br>Reference for runtime `Convai|LTM` Blueprint nodes, `FConvaiSpeakerInfo`, and the memory properties on both Convai components.</td>
 <td><a href="ltm-blueprint-reference.md">ltm-blueprint-reference.md</a></td>
+</tr>
+<tr>
+<td><strong>Long-term memory usage examples</strong><br>Blueprint-first patterns for returning learners, shared devices, account-backed identity, and fresh-start resets.</td>
+<td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
 <td><strong>Troubleshoot long-term memory</strong><br>Diagnose disabled memory, identity mismatches, Speaker ID failures, and sessions that start fresh.</td>

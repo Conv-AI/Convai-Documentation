@@ -52,12 +52,12 @@ Problems that occur after the plugin connects successfully — where a specific 
 | Character actions | [Troubleshoot character actions](../features/character-actions/troubleshooting-and-diagnostics.md) |
 | Dynamic context | [Troubleshoot dynamic context](../features/dynamic-context/troubleshooting-and-diagnostics.md) |
 | Emotion | [Troubleshoot emotion](../features/emotion/troubleshooting-and-diagnostics.md) |
-| Gaze attention | [Troubleshoot gaze attention](../features/gaze-attention/troubleshooting-and-diagnostics.md) |
-| Lip sync | [Troubleshoot lip sync](../features/lip-sync/troubleshooting-and-diagnostics.md) |
 | Long-term memory | [Troubleshoot long-term memory](../features/long-term-memory/troubleshooting-and-diagnostics.md) |
 | Narrative design | [Troubleshoot narrative design](../features/narrative-design/troubleshooting-and-diagnostics.md) |
 | Scene metadata | [Troubleshoot scene metadata](../features/scene-metadata/troubleshooting-and-diagnostics.md) |
 | Vision | [Troubleshoot vision](../features/vision/troubleshooting-and-diagnostics.md) |
+| Gaze attention | [Troubleshoot gaze attention](../features/gaze-attention/troubleshooting-and-diagnostics.md) |
+| Lip sync | [Troubleshoot lip sync](../features/lip-sync/troubleshooting-and-diagnostics.md) |
 
 ## Next steps
 

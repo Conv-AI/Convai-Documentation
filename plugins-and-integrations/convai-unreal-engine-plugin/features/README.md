@@ -29,14 +29,6 @@ Select a feature to get started:
 <td><a href="emotion/README.md">emotion/README.md</a></td>
 </tr>
 <tr>
-<td><strong>Gaze attention</strong><br>Use player line-of-sight to direct which scene object a character focuses on — sustained gaze promotes objects to active attention with configurable dwell timers.</td>
-<td><a href="gaze-attention/README.md">gaze-attention/README.md</a></td>
-</tr>
-<tr>
-<td><strong>Lip sync</strong><br>Drive mouth and face blendshapes in sync with Convai speech using <code>UConvaiFaceSyncComponent</code> — supports MetaHuman, ARKit, CC4, and viseme targets.</td>
-<td><a href="lip-sync/README.md">lip-sync/README.md</a></td>
-</tr>
-<tr>
 <td><strong>Long-term memory</strong><br>Give characters cross-session recall via Speaker IDs and session continuity — characters remember individual players, facts, and past interactions over time.</td>
 <td><a href="long-term-memory/README.md">long-term-memory/README.md</a></td>
 </tr>
@@ -51,6 +43,14 @@ Select a feature to get started:
 <tr>
 <td><strong>Vision</strong><br>Stream scene frames from a capture component to Convai so characters can perceive and discuss what the player sees in real time.</td>
 <td><a href="vision/README.md">vision/README.md</a></td>
+</tr>
+<tr>
+<td><strong>Gaze attention</strong><br>Use player line-of-sight to direct which scene object a character focuses on — sustained gaze promotes objects to active attention with configurable dwell timers.</td>
+<td><a href="gaze-attention/README.md">gaze-attention/README.md</a></td>
+</tr>
+<tr>
+<td><strong>Lip sync</strong><br>Drive mouth and face blendshapes in sync with Convai speech using <code>UConvaiFaceSyncComponent</code> — supports MetaHuman, ARKit, CC4, and viseme targets.</td>
+<td><a href="lip-sync/README.md">lip-sync/README.md</a></td>
 </tr>
 </tbody>
 </table>

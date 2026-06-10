@@ -29,12 +29,12 @@ Feature-specific Blueprint nodes — actions parameter accessors, dynamic contex
 <td><a href="convai-object-component.md">convai-object-component.md</a></td>
 </tr>
 <tr>
-<td><strong>Convai utility functions</strong><br>Blueprint libraries for look-at helpers, component lookups, settings accessors, blendshape tools, file I/O, and connection pre-warming.</td>
-<td><a href="utility-functions.md">utility-functions.md</a></td>
-</tr>
-<tr>
 <td><strong>Microphone and audio capture</strong><br>Microphone device structs, player-component capture functions, the audio capture component, and Android permission requirements.</td>
 <td><a href="microphone-and-audio-capture.md">microphone-and-audio-capture.md</a></td>
+</tr>
+<tr>
+<td><strong>Convai utility functions</strong><br>Blueprint libraries for look-at helpers, component lookups, settings accessors, blendshape tools, file I/O, and connection pre-warming.</td>
+<td><a href="utility-functions.md">utility-functions.md</a></td>
 </tr>
 <tr>
 <td><strong>Data types and enums</strong><br>Shared Blueprint structs and enums used across components, including object entries, action types, connection states, and VAD settings.</td>
@@ -52,8 +52,8 @@ Use these pages for feature-specific nodes that extend the core component APIs:
 | Character actions | [Actions Blueprint reference](../features/character-actions/actions-blueprint-reference.md) |
 | Dynamic context | [Dynamic context Blueprint reference](../features/dynamic-context/dynamic-context-blueprint-reference.md) |
 | Emotion | [Emotion Blueprint reference](../features/emotion/emotion-blueprint-reference.md) |
-| Gaze attention | [Gaze attention reference](../features/gaze-attention/gaze-attention-reference.md) |
-| Lip sync | [Face Sync component reference](../features/lip-sync/face-sync-component-reference.md) |
 | Long-term memory | [LTM Blueprint reference](../features/long-term-memory/ltm-blueprint-reference.md) |
 | Narrative design | [Narrative design Blueprint reference](../features/narrative-design/narrative-design-blueprint-reference.md) |
 | Vision | [Vision Blueprint reference](../features/vision/vision-blueprint-reference.md) |
+| Gaze attention | [Gaze attention reference](../features/gaze-attention/gaze-attention-reference.md) |
+| Lip sync | [Face Sync component reference](../features/lip-sync/face-sync-component-reference.md) |

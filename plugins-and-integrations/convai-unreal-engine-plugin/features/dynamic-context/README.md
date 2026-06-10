@@ -25,20 +25,20 @@ Use dynamic context when a fact changes during gameplay and the character should
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
-<td><strong>Dynamic context usage examples</strong><br>Blueprint recipes for health tracking, zone changes, narrative events, and session resets.</td>
-<td><a href="usage-examples.md">usage-examples.md</a></td>
+<td><strong>Static context at connection time</strong><br>Understand what data is fixed at session start and how it differs from live dynamic context.</td>
+<td><a href="static-context-at-connection-time.md">static-context-at-connection-time.md</a></td>
 </tr>
 <tr>
 <td><strong>Sync behavior and timing</strong><br>Understand when updates flush, how offline queueing works, and when to use immediate flush.</td>
 <td><a href="sync-behavior-and-timing.md">sync-behavior-and-timing.md</a></td>
 </tr>
 <tr>
-<td><strong>Static context at connection time</strong><br>Understand what data is fixed at session start and how it differs from live dynamic context.</td>
-<td><a href="static-context-at-connection-time.md">static-context-at-connection-time.md</a></td>
-</tr>
-<tr>
 <td><strong>Dynamic context Blueprint reference</strong><br>Reference for every `Convai|DynamicContext` node, property, enum, and transport field.</td>
 <td><a href="dynamic-context-blueprint-reference.md">dynamic-context-blueprint-reference.md</a></td>
+</tr>
+<tr>
+<td><strong>Dynamic context usage examples</strong><br>Blueprint recipes for health tracking, zone changes, narrative events, and session resets.</td>
+<td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
 <td><strong>Troubleshoot dynamic context</strong><br>Fix updates that arrive too late, trigger unexpected responses, or appear ignored after a flush.</td>
@@ -51,8 +51,9 @@ Use dynamic context when a fact changes during gameplay and the character should
 
 1. [How dynamic context works](how-dynamic-context-works.md) — learn the state and event model.
 2. [Dynamic context quick start](quick-start.md) — push and verify your first update.
-3. [Dynamic context usage examples](usage-examples.md) — apply common gameplay patterns.
-4. Reference and troubleshooting pages — use when you need exact node behavior or a fix.
+3. [Static context at connection time](static-context-at-connection-time.md) — separate session-start facts from live updates.
+4. [Sync behavior and timing](sync-behavior-and-timing.md) — tune flushing, queueing, and immediate sync behavior.
+5. Reference, examples, and troubleshooting pages — use when you need exact node behavior, applied patterns, or a fix.
 
 {% content-ref url="how-dynamic-context-works.md" %}
 [How dynamic context works](how-dynamic-context-works.md)

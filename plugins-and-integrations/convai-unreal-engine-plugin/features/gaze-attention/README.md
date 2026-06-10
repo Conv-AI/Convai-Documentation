@@ -13,7 +13,7 @@ Gaze attention builds on scene metadata and character actions. Before you start,
 - **Enable Actions** checked on the chatbot under **Convai | Actions** → **Environment**. See [Character actions quick start](../character-actions/quick-start.md) if actions are not configured.
 - `UConvaiPlayerComponent` on the player pawn with **Enable Gaze Attention** turned on.
 
-New to this feature? Start with [Gaze attention quick start](quick-start.md), then read [How gaze attention works](how-gaze-attention-works.md) for the full pipeline.
+New to this feature? Start with [How gaze attention works](how-gaze-attention-works.md) for the full pipeline, then follow [Gaze attention quick start](quick-start.md).
 {% endhint %}
 
 <table data-view="cards">
@@ -25,12 +25,12 @@ New to this feature? Start with [Gaze attention quick start](quick-start.md), th
 </thead>
 <tbody>
 <tr>
-<td><strong>Gaze attention quick start</strong><br>Enable gaze attention on the Player Component and verify that a character responds when the player looks at a tagged object.</td>
-<td><a href="quick-start.md">quick-start.md</a></td>
-</tr>
-<tr>
 <td><strong>How gaze attention works</strong><br>Understand the trace pipeline, attention promotion timers, component-scoped targeting, and the attention-source locking rule.</td>
 <td><a href="how-gaze-attention-works.md">how-gaze-attention-works.md</a></td>
+</tr>
+<tr>
+<td><strong>Gaze attention quick start</strong><br>Enable gaze attention on the Player Component and verify that a character responds when the player looks at a tagged object.</td>
+<td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
 <td><strong>Gaze attention reference</strong><br>Complete property, event, method, and class reference for all gaze attention components and their defaults.</td>

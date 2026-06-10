@@ -22,15 +22,15 @@ Always active once connected:
 
 Opt-in, each configured through Blueprint or the Details panel:
 
-* **Lip sync** — Convai-provided face animation data drives blendshape mouth movement in sync with speech audio, with selectable `Viseme Based`, `MetaHuman Blendshapes`, `ARKit Blendshapes`, and `CC4 Extended Blendshapes` modes for different rigs
-* **Emotion** — Convai infers emotion from conversation and drives blendshape expressions on the character
 * **Character actions** — characters execute structured in-scene commands (`Move To`, `Follow`, custom) dispatched from Convai
 * **Dynamic context** — push live world state and events into character knowledge at runtime
-* **Narrative design** — trigger scripted conversation branches and sections by name from Blueprint
+* **Emotion** — Convai infers emotion from conversation and drives blendshape expressions on the character
 * **Long-term memory** — characters remember each player across sessions using an end-user ID
+* **Narrative design** — trigger scripted conversation branches and sections by name from Blueprint
 * **Scene metadata** — tag level actors so characters are aware of and can act on them
 * **Vision** — stream camera frames to Convai so characters can describe what they see
 * **Gaze attention** — route the object in the player's gaze direction as context to the active character
+* **Lip sync** — Convai-provided face animation data drives blendshape mouth movement in sync with speech audio, with selectable `Viseme Based`, `MetaHuman Blendshapes`, `ARKit Blendshapes`, and `CC4 Extended Blendshapes` modes for different rigs
 
 ### Editor tooling
 
