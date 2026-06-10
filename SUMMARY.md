@@ -497,6 +497,8 @@
       * [Record and replay lip sync](plugins-and-integrations/convai-unreal-engine-plugin/features/lip-sync/record-and-replay-lip-sync.md)
       * [Lip sync usage examples](plugins-and-integrations/convai-unreal-engine-plugin/features/lip-sync/lip-sync-usage-examples.md)
       * [Troubleshoot lip sync](plugins-and-integrations/convai-unreal-engine-plugin/features/lip-sync/troubleshoot-lip-sync.md)
+  * [Advanced topics](plugins-and-integrations/convai-unreal-engine-plugin/advanced-topics/README.md)
+    * [Use personal access tokens](plugins-and-integrations/convai-unreal-engine-plugin/advanced-topics/personal-access-token.md)
   * [Blueprint reference](plugins-and-integrations/convai-unreal-engine-plugin/blueprint-reference/README.md)
     * [Convai Chatbot Component](plugins-and-integrations/convai-unreal-engine-plugin/blueprint-reference/convai-chatbot-component.md)
     * [Convai Player Component](plugins-and-integrations/convai-unreal-engine-plugin/blueprint-reference/convai-player-component.md)

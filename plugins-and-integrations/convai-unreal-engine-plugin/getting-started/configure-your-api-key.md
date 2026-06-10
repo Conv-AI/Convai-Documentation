@@ -44,6 +44,16 @@ If the Convai editor window did not open after restart, click the **Convai Edito
 
 To confirm your API key is working, proceed to [Add your first Convai character](add-your-first-convai-character.md) and complete the conversation test.
 
+## Prepare authentication for production
+
+The API key flow above is the fastest way to validate the plugin in the editor and during early development. When you ship a **packaged application**, avoid embedding the real API key in the build — packaged project files and config can be inspected.
+
+For production builds, use a **personal access token** flow instead: your backend stores the real API key, generates a short-lived `apiAuthToken`, and the Unreal project sets that token at runtime before a Convai session starts. Do not ship a real API key inside a packaged build.
+
+{% content-ref url="../advanced-topics/personal-access-token.md" %}
+[Use personal access tokens](../advanced-topics/personal-access-token.md)
+{% endcontent-ref %}
+
 ## UE 5.0 and 5.1 fallback
 
 The Convai editor window is not available on UE 5.0 or 5.1. Add your API key to `DefaultEngine.ini`:

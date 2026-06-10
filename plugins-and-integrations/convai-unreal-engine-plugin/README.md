@@ -22,7 +22,7 @@ Each feature is opt-in and builds on the core components.
 
 ## Reference
 
-<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Blueprint reference</strong><br>Full property, function, and event surface for all components.</td><td><a href="blueprint-reference/">blueprint-reference</a></td></tr><tr><td><strong>The Convai editor window</strong><br>Sign in, browse samples, and export diagnostic logs from within the editor.</td><td><a href="editor-window/">editor-window</a></td></tr><tr><td><strong>Troubleshooting</strong><br>Common failure modes, diagnostic steps, and known issues.</td><td><a href="troubleshooting/">troubleshooting</a></td></tr></tbody></table>
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Advanced topics</strong><br>Production authentication and integration guides beyond the core setup path.</td><td><a href="advanced-topics/">advanced-topics</a></td></tr><tr><td><strong>Blueprint reference</strong><br>Full property, function, and event surface for all components.</td><td><a href="blueprint-reference/">blueprint-reference</a></td></tr><tr><td><strong>The Convai editor window</strong><br>Sign in, browse samples, and export diagnostic logs from within the editor.</td><td><a href="editor-window/">editor-window</a></td></tr><tr><td><strong>Troubleshooting</strong><br>Common failure modes, diagnostic steps, and known issues.</td><td><a href="troubleshooting/">troubleshooting</a></td></tr></tbody></table>
 
 ## Latest release
 
