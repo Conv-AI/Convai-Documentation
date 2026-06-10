@@ -1,10 +1,10 @@
 ---
 title: Long-term memory quick start
-description: Enable memory for one Unreal character, set a stable player identity, and verify cross-session recall in Play In Editor.
+description: Set up long-term memory for an Unreal character, assign a stable player identity, and confirm recall across Play In Editor sessions.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-We will enable long-term memory for one Convai character and verify that it remembers a returning player across two Play In Editor sessions.
+Set up long-term memory for a working Convai character, then confirm that the character recalls the same player in a later Play In Editor session.
 
 ## Prerequisites
 
