@@ -27,14 +27,14 @@ Use this map when you know what you want to build but are not sure which feature
 
 | I want to... | Feature | Documentation |
 |---|---|---|
-| Add real-time lip sync driven by character speech | Lip sync | [Lip sync](../features/lip-sync/) |
-| Show facial emotion on my character driven by the AI response | Emotion | [Emotion](../features/emotion/) |
 | Let my character execute in-scene commands (`Move To`, `Follow`, custom) | Character actions | [Character actions](../features/character-actions/) |
-| Tag level actors so characters are aware of and can act on them | Scene metadata | [Scene metadata](../features/scene-metadata/) |
-| Route the object under the player's gaze as context to the active character | Gaze attention | [Gaze attention](../features/gaze-attention/) |
 | Push live world state and events into character knowledge at runtime | Dynamic context | [Dynamic context](../features/dynamic-context/) |
-| Trigger scripted conversation branches and sections by name from Blueprint | Narrative design | [Narrative design](../features/narrative-design/) |
+| Show facial emotion on my character driven by the AI response | Emotion | [Emotion](../features/emotion/) |
+| Route the object under the player's gaze as context to the active character | Gaze attention | [Gaze attention](../features/gaze-attention/) |
+| Add real-time lip sync driven by character speech | Lip sync | [Lip sync](../features/lip-sync/) |
 | Make characters remember each player across sessions | Long-term memory | [Long-term memory](../features/long-term-memory/) |
+| Trigger scripted conversation branches and sections by name from Blueprint | Narrative design | [Narrative design](../features/narrative-design/) |
+| Tag level actors so characters are aware of and can act on them | Scene metadata | [Scene metadata](../features/scene-metadata/) |
 | Stream camera frames so characters can see and describe the scene | Vision | [Vision](../features/vision/) |
 
 ## Reference

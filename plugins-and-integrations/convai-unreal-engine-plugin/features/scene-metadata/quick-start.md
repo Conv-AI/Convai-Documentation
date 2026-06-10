@@ -21,9 +21,9 @@ Open your level and click the `Actor` you want Convai characters to know about, 
 {% endstep %}
 
 {% step %}
-### Add the Convai Object Component
+### Add the object component
 
-In the **Details** panel, click **Add Component** and search for **Convai Object Component**. Select it to add it to the `Actor`.
+In the **Details** panel, click **Add Component** and search for `UConvaiObjectComponent` or `Convai Object`. Select the component to add it to the `Actor`.
 {% endstep %}
 
 {% step %}
@@ -31,8 +31,8 @@ In the **Details** panel, click **Add Component** and search for **Convai Object
 
 With the **Convai Object Component** selected, set the object identity fields in the **Details** panel:
 
-- **Name** — a short, unique label, for example `FrontDoor`.
-- **Description** — a plain sentence about the object, for example `A large wooden door at the main entrance.`
+- **`Name`** — a short, unique label, for example `FrontDoor`.
+- **`Description`** — a plain sentence about the object, for example `A large wooden door at the main entrance.`
 
 Names must be unique in the level. See [Scene metadata component reference](component-reference.md) for details on duplicate handling and the full field list.
 {% endstep %}
@@ -40,20 +40,22 @@ Names must be unique in the level. See [Scene metadata component reference](comp
 {% step %}
 ### Enter Play mode and ask the character
 
-Press **Play**. Walk up to the Convai character and ask: `"What do you know about the door?"` or `"Describe the objects near you."` If the character does not use the object context you configured, open the **Output Log** and filter by `ConvaiSubsystemLog` for registration warnings or `ConvaiObjectComponentLog` for object-component warnings.
+Press **Play**. Walk up to the Convai character and ask: `"What do you know about the door?"` or `"Describe the objects near you."` The character should mention the name and description you set.
+
+If the character does not reference the object, open the **Output Log** and filter by `ConvaiSubsystemLog` for registration warnings or `ConvaiObjectComponentLog` for component warnings. See [Troubleshoot scene metadata](troubleshooting-and-diagnostics.md) for a full list of symptoms.
 {% endstep %}
 
 {% step %}
 ### Add a tracked property (optional)
 
-To give the character awareness of live game state, expand **Tracked Properties** in the Details panel and click **+** to add a row. Click **Bind** next to **Property Path** and select a `UPROPERTY` from the `Actor`. Set a plain-language **Description** and choose a **ShouldRespond** value.
+To give the character awareness of live game state, expand **Tracked Properties** in the Details panel and click **+** to add a row. Click **Bind** next to **Property Path** and select a `UPROPERTY` from the `Actor`. Set a plain-language **`Description`** and choose a **`ShouldRespond`** value.
 
 For the full tracked property workflow, see [Scene metadata component reference — Tracked properties](component-reference.md#tracked-properties).
 {% endstep %}
 {% endstepper %}
 
 {% hint style="success" %}
-The object is configured correctly when `ObjectEntry.Name` is non-empty, no registration warning appears in the Output Log, and the session starts after `BeginPlay` so the object can be included in scene metadata.
+When configured correctly, the character responds to questions about the object using the name and description you set.
 {% endhint %}
 
 {% hint style="info" %}

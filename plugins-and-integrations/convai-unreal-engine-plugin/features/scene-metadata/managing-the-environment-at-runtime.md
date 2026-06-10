@@ -4,7 +4,7 @@ description: Reference for chatbot environment methods that add, remove, and upd
 last_reviewed: "2026-06-05"
 ---
 
-`UConvaiChatbotComponent` exposes mutation methods for every aspect of the runtime environment: the objects and characters the chatbot knows about, the active conversation partner, the in-attention object, and the connect-time environment extras. Runtime mutation methods are `BlueprintCallable` in the `Convai|Actions` category; `GatherEnvironmentExtras` is `BlueprintCallable` in the `Convai|Session` category.
+Use these methods to update a chatbot's world knowledge while the game is running — for example, when a new room loads, a prop spawns, or a new NPC enters the scene. `UConvaiChatbotComponent` exposes mutation methods for objects, characters, the active conversation partner, the in-attention object, and the connect-time environment extras. Runtime mutation methods are `BlueprintCallable` in the `Convai|Actions` category; `GatherEnvironmentExtras` is `BlueprintCallable` in the `Convai|Session` category.
 
 ## Method groups at a glance
 
@@ -19,7 +19,7 @@ last_reviewed: "2026-06-05"
 
 Most methods that push network updates accept a `bFlushImmediately` parameter. `TryClearObjectInAttentionFromGaze` clears through the non-immediate path. See [Debounce and flush](#debounce-and-flush) for details.
 
-## The EnvironmentData struct
+## The `FConvaiEnvironmentData` struct
 
 `EnvironmentData` (`FConvaiEnvironmentData`) is the static configuration that `UConvaiChatbotComponent` sends to Convai at `/connect` time. It holds:
 
@@ -76,6 +76,8 @@ When `AttentionSource` is `Explicit`, calls to `TrySetObjectInAttentionFromGaze`
 `TryClearObjectInAttentionFromGaze(ExpectedObject)` clears a gaze-owned attention slot only when `AttentionSource` is `Gaze` and the current attention object still matches `ExpectedObject.Name`. This protects a newer attention target from being cleared by a late gaze-end event from an older target.
 
 ## Populating the environment at session start
+
+Use `GatherEnvironmentExtras` when your level is procedurally generated or when you need to build the object list from a runtime world query rather than placing components manually in the Details panel.
 
 `GatherEnvironmentExtras` is a `BlueprintNativeEvent` (display name `"Gather Environment Extras"`) called once inside `StartSession()` before the `/connect` handshake. Override it in a Blueprint subclass of `UConvaiChatbotComponent` to append objects, characters, or actions that depend on runtime world state.
 

@@ -12,7 +12,7 @@ The examples below cover realistic setups for training simulations and interacti
 
 ### Setup
 
-Add a `UConvaiObjectComponent` to each anatomy model and equipment Actor in the level. In the **Details** panel, set **Name** and **Description** under **Convai | Object**:
+No Blueprint scripting is required for this example. Add a `UConvaiObjectComponent` to each anatomy model and equipment `Actor` in the level. In the **Details** panel, set the `Name` and `Description` fields on `ObjectEntry`:
 
 | Name | Description |
 |---|---|
@@ -21,7 +21,7 @@ Add a `UConvaiObjectComponent` to each anatomy model and equipment Actor in the 
 | `SurgicalScalpel` | `"Standard surgical scalpel resting on the instrument tray. Handle is blue."` |
 | `Stethoscope` | `"Stethoscope hanging on the hook next to the examination table."` |
 
-No Blueprint scripting is required for the standard workflow. The instructor character receives all descriptions at session start, so questions about the room can use the actual scene entries as context.
+The instructor character receives all descriptions at session start, so questions about the room can use the actual scene entries as context.
 
 {% hint style="success" %}
 A trainee asks: `"What models are available for study?"` A useful response can reference the `HeartModel` and `LiverModel` descriptions from the scene metadata.
@@ -52,7 +52,7 @@ void ASafetyDrillManager::LoadPhase(int32 PhaseIndex)
 }
 ```
 
-In Blueprint, wire **Clear Objects** (Flush Immediately: false) followed by one or more **Add Object** nodes, with **Flush Immediately** set to `true` on the last one.
+In Blueprint, wire **Clear Objects** (Flush Immediately: `false`) followed by one or more **Add Object** nodes, with **Flush Immediately** set to `true` on the last one.
 
 This pattern sends new phase props through the runtime environment update path. If a phase object was already included in `action_config` at `/connect`, reconnect before the phase begins so the next session starts with the correct object set.
 
@@ -62,12 +62,12 @@ This pattern sends new phase props through the runtime environment update path. 
 
 ### Setup
 
-Add a `UConvaiObjectComponent` to each structure and security gate Actor. For static structures, only `Name` and `Description` are needed. For security gates, also add a tracked property:
+Add a `UConvaiObjectComponent` to each structure and security gate `Actor`. For static structures, only `Name` and `Description` are needed. For security gates, also add a tracked property:
 
 1. Expand **Tracked Properties** and click **+**.
-2. Click **Bind** next to **Property Path** and select `bIsOpen` from the gate Actor.
-3. Set **Description** to `"Whether the security gate is currently open."`.
-4. Set **ShouldRespond** to `Always`.
+2. Click **Bind** next to **Property Path** and select `bIsOpen` from the gate `Actor`.
+3. Set **`Description`** to `"Whether the security gate is currently open."`.
+4. Set **`ShouldRespond`** to `Always`.
 
 | Name | Description |
 |---|---|
@@ -88,7 +88,7 @@ The player opens the north gate. The next tracked-property update sends the new 
 ### Setup
 
 1. Bind `TerminalState` as a tracked property.
-2. Set **Description** to `"The current operating state of the server terminal."`.
+2. Set **`Description`** to `"The current operating state of the server terminal."`.
 3. Expand **State Value Descriptions** (shown under **Advanced** in the Details panel) and add three rows:
 
 | Value | Description |
@@ -128,11 +128,11 @@ For each Actor in GetAllActorsWithComponent(UConvaiObjectComponent):
 
 ### Setup
 
-Add a `UConvaiObjectComponent` to the mural Actor and set:
+Add a `UConvaiObjectComponent` to the mural `Actor` and set:
 
-- **Name**: `"HistoryMural"`
-- **Description**: `"A large painted mural depicting the history of the institution, spanning the full back wall of each gallery."`
-- **Auto Generate Proximity State**: disabled (uncheck `bAutoGenerateProximityState` in the Details panel).
+- **`Name`**: `"HistoryMural"`
+- **`Description`**: `"A large painted mural depicting the history of the institution, spanning the full back wall of each gallery."`
+- **Auto Generate Proximity State** (`bAutoGenerateProximityState`): disabled.
 
 The guide can receive the mural's object description, but the plugin does not compute or broadcast proximity data for it. Use this pattern for any large fixed prop whose spatial relationship to the chatbot is not meaningful.
 

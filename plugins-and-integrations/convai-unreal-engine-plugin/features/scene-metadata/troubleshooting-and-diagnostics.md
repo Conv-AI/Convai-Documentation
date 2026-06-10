@@ -10,9 +10,9 @@ Use this page to diagnose the most common problems with scene metadata in the Co
 
 Before reading individual symptom sections, confirm the following. These three conditions account for most scene metadata problems:
 
-1. **`ObjectEntry.Name` is non-empty** — objects with an empty name are refused and logged with `ConvaiObjectComponent on %s skipped: ObjectEntry.Name is empty`. Select the `UConvaiObjectComponent` in the Details panel and confirm the **Name** field is set.
+1. **`ObjectEntry.Name` is non-empty** — objects with an empty name are refused and logged with `ConvaiObjectComponent on %s skipped: ObjectEntry.Name is empty`. Select the `UConvaiObjectComponent` in the Details panel and confirm the **`Name`** field is set.
 2. **`bEnableActions` is `true` for connect-time actions and attention** — when `false`, `action_config` is not sent at `/connect`, and `SetObjectInAttention` has no effect. Check `EnvironmentData.bEnableActions` on the `UConvaiChatbotComponent`.
-3. **Session timing matches the update type** — objects present before `StartSession()` are sent in `action_config`; new runtime entries sync through `update-scene-metadata` after the session is connected.
+3. **Object added before or after the session starts** — any `Actor` with a `UConvaiObjectComponent` that is active before `StartSession()` is included in the initial snapshot; `Actor`s that spawn or are added after the session starts must use `AddObject` on the chatbot component to reach Convai.
 
 {% hint style="info" %}
 Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for object registration and duplicate-name warnings, or `ConvaiObjectComponentLog` for tracked-property and gaze warnings.
@@ -20,13 +20,13 @@ Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for 
 
 ## Character doesn't mention the object
 
-**Symptom:** The character never references an Actor that has a `UConvaiObjectComponent`.
+**Symptom:** The character never references an `Actor` that has a `UConvaiObjectComponent`.
 
 ### Empty name
 
 **Cause:** Objects with an empty `ObjectEntry.Name` are refused by the subsystem. The component must have a non-empty name.
 
-**Fix:** Open the Actor's Details panel, select the `UConvaiObjectComponent`, and confirm that `ObjectEntry.Name` is set.
+**Fix:** Open the `Actor`'s Details panel, select the `UConvaiObjectComponent`, and confirm that `ObjectEntry.Name` is set.
 
 **Verify:** Enter Play mode and ask about the object by the name you set. If the answer does not use that object context, check the Output Log for the empty-name warning.
 
@@ -48,7 +48,7 @@ Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for 
 
 ## Object reference resolves to the wrong actor
 
-**Symptom:** The character references an object by an unexpected name, or navigation targets the wrong Actor.
+**Symptom:** The character references an object by an unexpected name, or navigation targets the wrong `Actor`.
 
 **Cause:** Two `UConvaiObjectComponent` instances share the same `ObjectEntry.Name`. `UConvaiSubsystem` renames the duplicate automatically, but the renamed label may not match what the character was told.
 
@@ -58,7 +58,7 @@ Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for 
 
 ## Tracked property not updating
 
-**Symptom:** The chatbot does not receive a new value when an Actor property changes at runtime.
+**Symptom:** The chatbot does not receive a new value when an `Actor` property changes at runtime.
 
 ### Manual path entry
 
@@ -70,9 +70,9 @@ Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for 
 
 ### Unsupported property type
 
-**Cause:** `TrackedProperties` supports `bool`, `int32`, `float`, `FString`, enums, and struct member paths. Object references, class references, delegates, and multicast delegates are not supported; unsupported paths are skipped and warnings are logged.
+**Cause:** `TrackedProperties` supports leaf values such as `bool`, numeric types, `FString`, `FName`, `FText`, enums, whitelisted value structs, containers of supported leaf types, struct member paths, and pure parameterless functions that return a supported leaf value. Object references, class references, delegates, and multicast delegates are not supported; unsupported paths are skipped and warnings are logged.
 
-**Fix:** Confirm the property type is supported. For complex state, expose a pure `FString`-returning function on the Actor and bind to that function name instead.
+**Fix:** Confirm the property type is supported. For complex state, expose a pure parameterless function that returns a supported leaf value, then bind to that function name.
 
 **Verify:** After switching to a supported type or function, change the value in Play mode and check that no unsupported-path warning appears.
 
@@ -84,7 +84,7 @@ Open the **Output Log** in Unreal Engine and filter by `ConvaiSubsystemLog` for 
 
 **Verify:** Confirm `AddTrackedProperty` returns `true` after removing the duplicate, then change the property value and check for a dynamic context update.
 
-### Post-BeginPlay grace window
+### Post-`BeginPlay` grace window
 
 **Cause:** Changes that occur within approximately the first second after `BeginPlay` are forced to `EC_RunLLMOption::Never` regardless of the property setting. This prevents startup noise from making every chatbot react to initial game state.
 
@@ -118,7 +118,7 @@ The initial seed at session start always uses `EC_RunLLMOption::Never`. Later ch
 
 **Verify:** After the debounce window expires (or after using `bFlushImmediately = true`), ask about the object and check whether the response uses the new object context.
 
-## Description change not reflected mid-session
+## `Description` change not reflected mid-session
 
 **Symptom:** Updating the description for an object that existed at session start does not change how the character understands that object.
 
@@ -130,13 +130,13 @@ The initial seed at session start always uses `EC_RunLLMOption::Never`. Later ch
 
 ## Proximity state shows wrong description
 
-**Symptom:** The chatbot receives unexpected or missing proximity information for an Actor.
+**Symptom:** The chatbot receives unexpected or missing proximity information for an `Actor`.
 
 ### No NavMesh
 
 **Cause:** The proximity computation uses the Unreal Engine navigation system. If no NavMesh covers the area, reachability is marked as no walking path or unreachable.
 
-**Fix:** Add a `NavMeshBoundsVolume` to the level and rebuild navigation (or enable dynamic navigation). Confirm the chatbot Actor has a nav agent configured.
+**Fix:** Add a `NavMeshBoundsVolume` to the level and rebuild navigation (or enable dynamic navigation). Confirm the chatbot `Actor` has a nav agent configured.
 
 **Verify:** Enable `bDebugDrawProximityPaths` on the `UConvaiObjectComponent` and enter Play mode. Green paths confirm the object is reachable, cyan indicates the chatbot is already at the target, and red indicates no valid walking path for the current query. If paths are red, check `NavMeshBoundsVolume` coverage and nav agent settings.
 
@@ -148,7 +148,7 @@ The initial seed at session start always uses `EC_RunLLMOption::Never`. Later ch
 
 **Verify:** Green paths confirm reachability, cyan indicates the chatbot is already at the target, and red means the current query has no valid walking path.
 
-## SetObjectInAttention has no effect
+## `SetObjectInAttention` has no effect
 
 **Symptom:** Calling `SetObjectInAttention` from Blueprint does not change the chatbot's attention target.
 

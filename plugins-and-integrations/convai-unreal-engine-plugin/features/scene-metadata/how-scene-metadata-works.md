@@ -4,11 +4,13 @@ description: Understand how scene object metadata reaches Convai at connect time
 last_reviewed: "2026-06-05"
 ---
 
-Scene metadata is the information that Convai receives about the physical world around a character. The Convai Unreal Engine plugin assembles this information from components you place on individual `Actor`s, then sends object entries through the connect-time `action_config` snapshot and runtime environment updates. Tracked property values use dynamic context state updates so live object state can change during gameplay.
+Scene metadata is how you give a Convai character knowledge of the objects in your level. Add a `UConvaiObjectComponent` to any `Actor` — a door, a machine, a piece of equipment — and every character in the level will know that object exists, what it is called, and what it does. When a player asks "What's in this room?" or "Is the north gate open?", the character uses this information to answer.
 
-## Registration and delivery flow
+## How tagged objects reach Convai
 
-Every `UConvaiObjectComponent` registers itself with the `UConvaiSubsystem` global pool at `BeginPlay` and binds its `ObjectEntry.Ref` to the owning `Actor`. When a chatbot calls `StartSession()`, `UConvaiChatbotComponent` gathers registered object components from the subsystem, builds the `action_config` payload, and sends it to Convai as part of the `/connect` handshake. Objects added after the session is live can travel through a separate `update-scene-metadata` message instead.
+When the session starts, the plugin collects all tagged objects and sends their names and descriptions to Convai in one batch. Objects you add or remove while the game is running are synced through a separate update message.
+
+Internally, every `UConvaiObjectComponent` registers itself with the `UConvaiSubsystem` global pool at `BeginPlay`. When a chatbot calls `StartSession()`, `UConvaiChatbotComponent` gathers registered object components from the subsystem, builds the `action_config` payload, and sends it to Convai as part of the `/connect` handshake. Objects added after the session is live travel through a separate `update-scene-metadata` message instead.
 
 ```mermaid
 flowchart TD
@@ -20,20 +22,16 @@ flowchart TD
     F --> E
 ```
 
-Objects that were present at `/connect` live in the frozen `action_config` snapshot and cannot be updated mid-session without restarting the session. New object entries added after session start are sent through `update-scene-metadata` on the next debounce flush, unless the mutation call uses `bFlushImmediately = true`.
+Objects that were present at session start live in a frozen snapshot and cannot be updated mid-session without restarting the session. New object entries added after session start are sent through `update-scene-metadata` on the next debounce flush, unless the mutation call uses `bFlushImmediately = true`.
 
-{% hint style="info" %}
-Scene metadata tells Convai what objects exist in the scene. Tracked properties tell Convai what is happening to those objects in real time. Both reach Convai through different channels but complement each other.
-{% endhint %}
-
-## Context mechanisms at a glance
+## Context channels at a glance
 
 The plugin gives Convai characters three channels of world context, each with a different purpose:
 
 |  | Scene metadata | Tracked properties | `SetObjectInAttention` |
 |---|---|---|---|
 | **What it describes** | Static `Actor`s and props in the scene | Live state of an `Actor` `UPROPERTY` or function | The specific object the character is focused on right now |
-| **When it's sent** | Once, at `/connect` (frozen snapshot) or through runtime environment updates for new entries | At session start, then on detected value changes | On an explicit call or gaze pipeline trigger |
+| **When it's sent** | Once, at session start (frozen snapshot) or through runtime environment updates for new entries | At session start, then on detected value changes | On an explicit call or gaze pipeline trigger |
 | **Typical use** | `"A locked door at the main entrance"` | `"The door is now unlocked"` | `"The character notices the fire extinguisher"` |
 
 Use all three together for the most context-rich experience.
@@ -76,17 +74,17 @@ The value combines reachability and relative direction in phrases such as `"clos
 
 `bDebugDrawProximityPaths` draws the navigation paths from each chatbot to this object in the editor viewport while `bAutoGenerateProximityState` is on. Disable this flag before shipping.
 
-## Connect-time vs live updates
+## What gets sent at session start vs during gameplay
 
-The `/connect` handshake delivers a frozen snapshot of `action_config.objects`. The `bEnableActions` bool on `EnvironmentData` controls the connect-time action configuration: when it is `false`, the `action_config` block is not sent at `/connect`, and attention resolution through `SetObjectInAttention` has no effect.
+The session handshake delivers a frozen snapshot of the object list (`action_config.objects`). The `bEnableActions` bool on `EnvironmentData` controls the connect-time action configuration: when it is `false`, the `action_config` block is not sent at session start, and attention resolution through `SetObjectInAttention` has no effect.
 
 Once a session is live, object and character mutation methods on `UConvaiChatbotComponent` update the local environment mirror and schedule a sync. New scene entries and removals are sent through `update-scene-metadata`; existing entries that were already present in the connect-time snapshot keep their original `action_config` data until reconnect.
 
-One important constraint applies: if an object was already included in `action_config` at `/connect`, its description in the frozen snapshot cannot be changed mid-session. Only objects that are new to the session travel through the live `update-scene-metadata` lane. To propagate a description change to an existing object, call `StopSession` then `StartSession` to reconnect with the updated description.
+One important constraint applies: if an object was already included in `action_config` at session start, its description in the frozen snapshot cannot be changed mid-session. Only objects that are new to the session travel through the live `update-scene-metadata` lane. To propagate a description change to an existing object, call `StopSession` then `StartSession` to reconnect with the updated description.
 
-## Debounce and flush
+## Batching updates
 
-Mutation methods batch their updates into a debounce window by default, so rapid calls are coalesced into a single network message. Passing `bFlushImmediately = true` skips the debounce window and sends immediately. Use `bFlushImmediately` sparingly — high-frequency calls produce many small WebRTC messages and increase network overhead.
+When you call multiple add or remove methods in quick succession, the plugin coalesces them into a single network message rather than sending one message per call. This is the default behavior. Passing `bFlushImmediately = true` skips the batch window and sends immediately. Use `bFlushImmediately` sparingly — high-frequency calls produce many small WebRTC messages and increase network overhead.
 
 ## Next steps
 
