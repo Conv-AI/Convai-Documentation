@@ -15,12 +15,12 @@ The following examples show the most common parameter patterns. The full field r
 
 ## Choosing a parameter type
 
-Use `String` for free-form text, `Reference` for a registered object or character, `Number` for a numeric value, and `String` with **Choices** when only a few values are valid (for example a fixed list of dance styles). The full type list is in the reference table below.
+Use `String` for free-form text, **Actor Reference** for a registered object or character, `Number` for a numeric value, and `String` with **Choices** when only a few values are valid (for example a fixed list of dance styles). The full type list is in the reference table below.
 
 | Type | Use when |
 |---|---|
 | `String` | The value is open-ended text. |
-| `Reference` | The value must resolve to a registered object or character in the scene. |
+| Actor Reference | The value must resolve to a registered object or character in the scene. |
 | `Number` | The value is a number (distance, duration, count). |
 | `Bool` | The value is a true/false flag. |
 | `String` + Choices | The value must be one of a fixed list of options. |

@@ -45,14 +45,14 @@ Additional timing fields:
 
 The `Actions` array is pre-populated with four entries out of the box:
 
-| Action name | Parameters | Description |
+| Action name | Parameters | Purpose |
 |---|---|---|
-| `Move To` | `destination` (Reference) | Navigate to a registered object or character target. |
-| `Follow` | `character` (Reference) | Follow a registered character or the player. |
+| `Move To` | `destination` (Actor Reference) | Navigate to a registered object or character target. |
+| `Follow` | `character` (Actor Reference) | Follow a registered character or the player. |
 | `Stop Moving` | — | Stop navigating. |
 | `Wait For` | `time in seconds` (Number) | Wait for a specified duration. |
 
-You can rename, describe, or remove these as needed. To remove a default action, select it in the array and click the delete button.
+Default **Description** values on these templates are empty except `Follow`, which ships with `"Follow a character"`. You can rename, describe, or remove any default action as needed. To remove a default action, select it in the array and click the delete button.
 
 ### Adding a custom action
 

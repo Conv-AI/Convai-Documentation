@@ -51,7 +51,7 @@ Open the NPC Actor Blueprint that owns the `Convai Chatbot` component.
 
 Right-click in the **Event Graph** and search for **Create Convai Action Handler**.
 
-Select the action you added (for example `Print`) and confirm creation. The utility adds a Custom Event named exactly like the action, with one `FConvaiResultAction` input, and wires a `Handle Action Completion` call at the end.
+Select the action you added (for example `Print`), choose **Event (on Event Graph)** or **Function (new function graph)**, and confirm creation. The utility adds a handler named exactly like the action, with one `FConvaiResultAction` input, and wires a `Handle Action Completion` call at the end.
 {% endstep %}
 
 {% step %}

@@ -156,7 +156,7 @@ These editor-only tools scaffold common action setup tasks. They are not Bluepri
 
 | Utility | Where to find it | Purpose |
 |---|---|---|
-| **Create Convai Action Handler** | Right-click in a character Blueprint **Event Graph** | Scaffolds a Custom Event named after a declared action, with an `FConvaiResultAction` input and a `Handle Action Completion` call. |
+| **Create Convai Action Handler** | Right-click in a character Blueprint **Event Graph** | Scaffolds an **Event (on Event Graph)** or **Function (new function graph)** handler named after a declared action, with an `FConvaiResultAction` input and a `Handle Action Completion` call. |
 | **Setup Convai Pawn Movement** | Right-click a character Blueprint in the **Content Browser** → **Convai** | Configures pawn movement and navigation defaults for default movement actions. |
 
 ## UConvaiChatbotComponent — action-queue functions

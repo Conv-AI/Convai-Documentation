@@ -7,12 +7,13 @@ last_reviewed: "4.0.0-beta.21"
 Use this page to diagnose character actions that do not fire, stop mid-sequence, move to the wrong place, or receive empty parameters.
 
 {% hint style="info" %}
-Open the **Output Log** before debugging any action issue. `ConvaiChatbotComponentLog` reports session, queue, and dispatch messages, including missing-handler warnings. `ConvaiSubsystemLog` reports action config parsing and parameter-resolution messages. To increase verbosity, add the following to `DefaultEngine.ini`:
+Open the **Output Log** before debugging any action issue. `ConvaiChatbotComponentLog` reports session, queue, and dispatch messages, including missing-handler warnings. `ConvaiSubsystemLog` reports action config parsing and parameter-resolution messages. `ConvaiDefinitionsLog` reports goal-resolution and environment-entry warnings from `Resolve Goal Location`. To increase verbosity, add the following to `DefaultEngine.ini`:
 
 ```ini
 [Core.Log]
 ConvaiChatbotComponentLog=Verbose
 ConvaiSubsystemLog=Verbose
+ConvaiDefinitionsLog=Verbose
 ```
 {% endhint %}
 

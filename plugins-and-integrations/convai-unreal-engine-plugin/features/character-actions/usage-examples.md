@@ -15,7 +15,7 @@ Each example below is self-contained: it lists the Details panel configuration a
 In the NPC Actor's **Details** panel, under **Convai Chatbot > Environment**:
 
 1. **Enable Actions** is ticked.
-2. `Actions` array contains a `Move To` entry with a `destination` parameter of type `Reference` (this is the default).
+2. `Actions` array contains a `Move To` entry with a `destination` parameter of type **Actor Reference** (this is the default).
 3. `Objects` array contains an entry:
    - `Name`: `"SafetyValve"`
    - `Ref`: the valve Actor in the level
@@ -76,7 +76,7 @@ Always branch on `bOut Success` and `bOut Already There` before issuing `AI Move
 
 ### Configuration
 
-1. `Actions` array contains `Follow` (name: `"Follow"`, parameter: `character`, type `Reference`) and `Stop Moving` (name: `"Stop Moving"`, no parameters) — both are defaults.
+1. `Actions` array contains `Follow` (name: `"Follow"`, parameter: `character`, type **Actor Reference**) and `Stop Moving` (name: `"Stop Moving"`, no parameters) — both are defaults.
 2. `Characters` array contains:
    - `Name`: `"Player"` or matches the player's `PlayerName` field on the `Convai Player` component.
    - `Ref`: the player pawn Actor.
