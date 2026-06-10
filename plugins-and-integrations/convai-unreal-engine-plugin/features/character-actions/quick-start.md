@@ -6,6 +6,10 @@ last_reviewed: "4.0.0-beta.21"
 
 We will prepare an existing Convai NPC to run character actions. By the end, your NPC will have the default action handlers, movement setup, NavMesh coverage, and a registered object target so you can test `Move To`, `Follow`, `Stop Moving`, and `Wait For`.
 
+{% embed url="https://www.youtube.com/watch?v=yWqJQRttoEI" %}
+Character actions walkthrough
+{% endembed %}
+
 ## Prerequisites
 
 - The Convai Unreal Engine plugin is installed and the API key is configured. See [Install the Convai plugin](../../getting-started/installation.md) and [Configure your API key](../../getting-started/configure-api-key.md).

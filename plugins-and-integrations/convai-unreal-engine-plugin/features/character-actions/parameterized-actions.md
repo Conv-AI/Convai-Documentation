@@ -6,6 +6,10 @@ last_reviewed: "4.0.0-beta.21"
 
 Parameterized actions let Convai fill in typed values when it chooses an action. A `Move To` action needs a destination; a `Print` action can carry dynamic text; a `Dance` action can pick from a fixed list of animation styles. Parameters give Convai structured guidance and give your handler typed values to read.
 
+{% embed url="https://www.youtube.com/watch?v=cOiG863n3lA" %}
+Parameterized actions walkthrough
+{% endembed %}
+
 The following examples show the most common parameter patterns. The full field reference is at the end of this page.
 
 ## Prerequisites

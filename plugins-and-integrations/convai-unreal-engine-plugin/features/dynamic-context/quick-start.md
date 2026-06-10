@@ -6,6 +6,10 @@ last_reviewed: "4.0.0-beta.21"
 
 Push one **state** and one **event** to a Convai character from Blueprint, then confirm the update is stored locally before you test it in conversation.
 
+{% embed url="https://www.youtube.com/watch?v=zGIBCWSElXs" %}
+Dynamic context walkthrough
+{% endembed %}
+
 | Term | Meaning | Example |
 |---|---|---|
 | State | A current fact that can be replaced | `Health` is `50` |
