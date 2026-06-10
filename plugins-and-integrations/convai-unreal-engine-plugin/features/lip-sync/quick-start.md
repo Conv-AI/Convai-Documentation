@@ -6,18 +6,12 @@ last_reviewed: "4.0.0-beta.21"
 
 We will add lip sync to a MetaHuman character that already has a `Convai Chatbot` component attached. By the end, speaking to the character in Play mode will animate its mouth and face in sync with the response audio.
 
-## What we will build
-
-A MetaHuman Actor with a `Convai Face Sync` component configured for MetaHuman blendshapes, plus the Convai face and body animation classes assigned on the skeletal mesh components. After Play, you will hear the character speak and see the blendshapes animate.
-
 ## Prerequisites
 
 - The Convai Unreal Engine plugin is installed and an API key is configured.
 - A MetaHuman Actor is in your level with a working `Convai Chatbot` component (the character speaks but the face does not yet animate).
 
-{% hint style="info" %}
-If you are starting from scratch, complete [Set up a MetaHuman character](../../getting-started/set-up-a-metahuman-character.md) first, then return here. That guide covers the full MetaHuman import and Convai component setup.
-{% endhint %}
+If you are starting from scratch, complete [Set up a MetaHuman character](../../getting-started/set-up-a-metahuman-character.md) first — that guide covers the full MetaHuman import and Convai component setup.
 
 ## Add the Face Sync component
 
@@ -38,6 +32,8 @@ Click **Add** in the **Components** panel and search for `Convai Face Sync`. Sel
 ### Set the lip-sync mode
 
 With the `Convai Face Sync` component selected, open the **Details** panel. Under **Convai | LipSync**, set **Lip Sync Mode** to `MetaHuman Blendshapes`.
+
+Blendshapes are mesh shape targets for facial movement, such as jaw opening and lip curl. This setting tells the plugin to drive the MetaHuman curve set.
 {% endstep %}
 
 {% step %}
@@ -49,7 +45,11 @@ Click **Compile** and then **Save** in the Blueprint editor toolbar. The **Compo
 
 ## Assign the Convai animation classes
 
-The Convai plugin ships face and body animation classes for MetaHuman at `MetaHumans/Animations/` (`ConvAI > MetaHumans > Animations` in the **Content Browser**). Assign them on the MetaHuman skeletal mesh components.
+{% hint style="info" %}
+The Convai plugin ships two pre-built animation classes for MetaHuman characters. Assigning them wires the lip sync data from the `Convai Face Sync` component into the character's face and body meshes so the AnimGraph can apply it each tick.
+{% endhint %}
+
+These animation classes are located at `MetaHumans/Animations/` (`ConvAI > MetaHumans > Animations` in the **Content Browser**). Assign them on the MetaHuman skeletal mesh components.
 
 {% stepper %}
 {% step %}

@@ -1,12 +1,14 @@
 ---
 title: Lip sync usage examples
 description: "Configure lip sync for common scenarios: Add vs Override blending, tuning smoothing, mixing with body animation, and remapping blendshapes to a custom rig."
-last_reviewed: 2026-06-05
+last_reviewed: "4.0.0-beta.21"
 ---
 
 These examples cover the most common `FAnimNode_ConvaiFaceSync` configurations. Each example describes the scenario, the node or component settings to change, and the expected result.
 
 ## Add vs Override blending
+
+When multiple animation systems both write to the same facial curves — for example, an idle animation and Convai's lip sync — you need to decide how Convai's values combine with the existing animation.
 
 ### Layering lip sync on top of an idle animation
 
@@ -113,7 +115,7 @@ The curve is held at `0.0` regardless of incoming data.
 
 Use the recording API to capture a live lip-sync sequence during a conversation and replay it later — for example in a non-interactive cutscene or a pre-warmed response cache.
 
-The recording API is C++ only. `StartRecordingLipSync`, `FinishRecordingLipSync`, `PlayRecordedLipSync`, `IsPlaying`, and `GetCurrentFrame` are plain C++ methods on `UConvaiFaceSyncComponent` with no `UFUNCTION` decoration.
+The recording API is C++ only. `StartRecordingLipSync()`, `FinishRecordingLipSync()`, `PlayRecordedLipSync()`, `IsPlaying()`, and `GetCurrentFrame()` are plain C++ methods on `UConvaiFaceSyncComponent` with no `UFUNCTION` decoration.
 
 ```cpp
 // pseudocode

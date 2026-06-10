@@ -1,10 +1,10 @@
 ---
 title: Lip sync
 description: Animate a character's face in sync with Convai speech using precomputed blendshape data and the Convai Face Sync AnimGraph node.
-last_reviewed: 2026-06-05
+last_reviewed: "4.0.0-beta.21"
 ---
 
-The lip sync feature drives facial blendshapes on your character in time with audio streamed from Convai. Convai precomputes blendshape data and delivers it alongside the audio, so the animation matches speech without any runtime inference cost in Unreal Engine.
+Lip sync makes a character's mouth and face move in time with its voice. When the character speaks, Convai sends face animation data alongside the audio so the two stay in sync — with no extra processing cost in Unreal Engine.
 
 <table data-view="cards">
 <thead>
@@ -15,7 +15,7 @@ The lip sync feature drives facial blendshapes on your character in time with au
 </thead>
 <tbody>
 <tr>
-<td><strong>How lip sync works</strong><br>Understand the precomputed data pipeline, the six lip-sync modes, and AnimGraph integration.</td>
+<td><strong>How lip sync works</strong><br>Understand how Convai delivers face animation data alongside audio and how to choose the right mode for your character rig.</td>
 <td><a href="how-lip-sync-works.md">how-lip-sync-works.md</a></td>
 </tr>
 <tr>
@@ -35,7 +35,7 @@ The lip sync feature drives facial blendshapes on your character in time with au
 <td><a href="usage-examples.md">usage-examples.md</a></td>
 </tr>
 <tr>
-<td><strong>Record and replay lip sync</strong><br>Capture a live lip-sync sequence during a conversation and replay it later in cutscenes or offline previews. C++ API.</td>
+<td><strong>Record and replay lip sync</strong><br>Capture a live lip-sync sequence during a conversation and replay it later with the C++ recording API.</td>
 <td><a href="recording-lip-sync.md">recording-lip-sync.md</a></td>
 </tr>
 <tr>
@@ -47,4 +47,4 @@ The lip sync feature drives facial blendshapes on your character in time with au
 
 ## Next steps
 
-Start with [Lip sync quick start](quick-start.md) to get lip sync running on a MetaHuman character. Then read [How lip sync works](how-lip-sync-works.md) to understand the precomputed data pipeline and the six `EC_LipSyncMode` values before moving into the reference pages.
+Start with [Lip sync quick start](quick-start.md) to get lip sync running on a MetaHuman character. Then read [How lip sync works](how-lip-sync-works.md) to understand the data pipeline and the six lip-sync modes before moving into the reference pages.

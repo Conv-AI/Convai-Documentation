@@ -1,10 +1,10 @@
 ---
 title: Face Sync AnimGraph node reference
 description: Reference for all properties of the Convai Face Sync AnimGraph node — apply mode, face alphas, smoothing, starvation blending, and blendshape mapping.
-last_reviewed: 2026-06-05
+last_reviewed: "4.0.0-beta.21"
 ---
 
-The `Convai Face Sync` node (`FAnimNode_ConvaiFaceSync`) is an Animation Blueprint node placed in the AnimGraph between a pose source and the output. It resolves a `UConvaiChatbotComponent` on the owning Actor; the chatbot supplies blendshape values from its lip-sync component. The node applies upper/lower face alphas, optional smoothing, starvation blending, and an optional remapping table, then writes the resulting curve values into the output pose.
+The `Convai Face Sync` node (`FAnimNode_ConvaiFaceSync`) is an Animation Blueprint node placed in the AnimGraph between a pose source and the Output Pose. It reads facial data from the `Convai Chatbot` component on the same Actor, applies upper/lower face alphas, optional smoothing, starvation blending, and an optional remapping table, then writes the resulting curve values into the output pose.
 
 The node resolves its chatbot component automatically from the owning Actor when the `Convai Chatbot Component` pin is unset. All properties listed as "pin hidden by default" are accessible through the node's **Details** panel in the Animation Blueprint editor.
 
