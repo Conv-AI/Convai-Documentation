@@ -17,12 +17,12 @@ Use dynamic context when a fact changes during gameplay and the character should
 </thead>
 <tbody>
 <tr>
-<td><strong>Dynamic context quick start</strong><br>Push your first state and event in Blueprint, then verify the character can use the updated context.</td>
-<td><a href="quick-start.md">quick-start.md</a></td>
-</tr>
-<tr>
 <td><strong>How dynamic context works</strong><br>Understand state properties, events, debounce batching, and when the character may respond.</td>
 <td><a href="how-dynamic-context-works.md">how-dynamic-context-works.md</a></td>
+</tr>
+<tr>
+<td><strong>Dynamic context quick start</strong><br>Push your first state and event in Blueprint, then verify the character can use the updated context.</td>
+<td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
 <td><strong>Dynamic context usage examples</strong><br>Blueprint recipes for health tracking, zone changes, narrative events, and session resets.</td>
@@ -49,15 +49,15 @@ Use dynamic context when a fact changes during gameplay and the character should
 
 ## Recommended reading order
 
-1. [Dynamic context quick start](quick-start.md) — push and verify your first update.
-2. [How dynamic context works](how-dynamic-context-works.md) — learn the state and event model.
+1. [How dynamic context works](how-dynamic-context-works.md) — learn the state and event model.
+2. [Dynamic context quick start](quick-start.md) — push and verify your first update.
 3. [Dynamic context usage examples](usage-examples.md) — apply common gameplay patterns.
 4. Reference and troubleshooting pages — use when you need exact node behavior or a fix.
 
-{% content-ref url="quick-start.md" %}
-[Dynamic context quick start](quick-start.md)
-{% endcontent-ref %}
-
 {% content-ref url="how-dynamic-context-works.md" %}
 [How dynamic context works](how-dynamic-context-works.md)
+{% endcontent-ref %}
+
+{% content-ref url="quick-start.md" %}
+[Dynamic context quick start](quick-start.md)
 {% endcontent-ref %}
