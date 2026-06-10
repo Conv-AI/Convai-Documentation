@@ -622,4 +622,3 @@
   * [Interaction APIs](api-reference/core-api-reference/interaction-apis/README.md)
     * [Interaction API (Beta)](api-reference/core-api-reference/interaction-apis/interaction-api-beta.md)
     * [Interaction API](api-reference/core-api-reference/interaction-apis/interaction-api.md)
-  * [Temporary Access Tokens](api-reference/core-api-reference/temporary-access-tokens.md)
