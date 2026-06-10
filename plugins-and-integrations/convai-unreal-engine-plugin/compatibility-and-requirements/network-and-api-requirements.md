@@ -29,9 +29,9 @@ After Convai accepts the connect request, the native WebRTC client joins a LiveK
 | `*.livekit.cloud` | `443` | TCP | LiveKit WebSocket signaling |
 | `*.turn.livekit.cloud` | `443` | TCP | TURN/TLS fallback when UDP is blocked |
 
-### Recommended for best audio quality
+### Optional direct media paths
 
-Allow these rules when your network policy permits UDP. They reduce latency and improve voice quality in training simulations and interactive experiences.
+LiveKit documents these paths for direct WebRTC media and TCP fallback. Add them when your network policy permits UDP or when the LiveKit connection test shows that the minimum TCP rules are not enough.
 
 | Host | Port | Protocol | Purpose |
 | --- | --- | --- | --- |
@@ -123,6 +123,17 @@ Do not share LiveKit room tokens publicly. Although the Unreal plugin does not l
 
 For full diagnostic export steps, see [Diagnostics and log export](../troubleshooting/diagnostics-and-log-export.md).
 
+## Test the LiveKit connection
+
+Use the [LiveKit connection test](https://livekit.com/webrtc/connection-test) when you need to confirm whether a restricted network can reach a specific LiveKit room.
+
+| Connection test field | Value to use |
+| --- | --- |
+| **LiveKit URL** | `room_url` from the Convai connect response |
+| **Room Token** | `token` from the Convai connect response |
+
+The public Unreal plugin logs do not print `room_url` or `token`. If you receive these values from a support diagnostic, a custom diagnostic build, or another trusted internal source, paste `room_url` into **LiveKit URL**, paste `token` into **Room Token**, and select **Run test**. The test validates LiveKit signaling and WebRTC connectivity for that temporary room. It does not validate your Convai API key, `api.convai.com`, or `CharacterID` configuration.
+
 ## Firewall validation checklist
 
 Work through this checklist with your network or IT team before deploying to a restricted environment.
@@ -141,11 +152,11 @@ If step 5 or 6 fails, see [Connection and API key issues](../troubleshooting/con
 | Symptom | Likely cause | Fix | Verify |
 | --- | --- | --- | --- |
 | All requests time out | Convai endpoints blocked on TCP `443` | Allow `realtime-api.convai.com` and `api.convai.com` | **Get Chatbot Connection State** returns `Connected` |
-| `Failed to establish connection` with valid API key | LiveKit hosts blocked after connect | Add LiveKit minimum and recommended firewall rules from this page | `OnConnectedToServer` log appears; character responds in Play mode |
+| `Failed to establish connection` with valid API key | LiveKit hosts blocked after connect | Add the LiveKit minimum rules and optional direct media paths from this page | `OnConnectedToServer` log appears; character responds in Play mode |
 | `bot-ready not received within` timeout | Slow network or blocked WebRTC path | Confirm LiveKit firewall rules; verify `CharacterID` on the dashboard | Session becomes ready within the client-ready timeout |
 | No `OnConnectedToServer` log line | Session never reached the WebRTC layer | Confirm API key through the Convai editor window; verify `CharacterID` on the `Convai Chatbot` component | Log line appears after Play begins |
 | API key field empty in Project Settings | Key not saved through the Convai editor window | Open **Window > Open Convai Editor**, sign in, and save the key | `API Key` field is populated in Project Settings |
-| Audio is choppy in Play mode | UDP media range blocked | Allow UDP `50000`–`60000` and UDP `3478` to `*.host.livekit.cloud` | Voice quality improves on the same network |
+| LiveKit connection test fails with valid room details | UDP media or TURN fallback path blocked | Allow UDP `50000`–`60000`, UDP `3478` to `*.host.livekit.cloud`, and TCP `443` to `*.turn.livekit.cloud` | LiveKit connection test succeeds with the same room details |
 
 {% hint style="warning" %}
 Proxy servers that block or inspect HTTPS traffic can prevent session setup or REST API requests. Allow outbound HTTPS traffic to Convai endpoints and exclude LiveKit hostnames from TLS inspection when your environment uses a corporate proxy.

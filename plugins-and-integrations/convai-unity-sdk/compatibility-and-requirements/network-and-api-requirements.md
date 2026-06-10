@@ -14,10 +14,8 @@ Runtime sessions use two Convai endpoints plus LiveKit hosts returned in the con
 
 | Host | Port | Protocol | Purpose |
 | --- | --- | --- | --- |
-| `<code class="expression">space.vars.live_server_url</code>` | `443` | HTTPS | Connect API — session setup and room credentials |
+| <code class="expression">space.vars.live_server_url</code> | `443` | HTTPS | Connect API — session setup and room credentials |
 | `api.convai.com` | `443` | HTTPS | Character metadata, REST API, and WebGL emotion preflight |
-
-The default connect URL is `<code class="expression">space.vars.live_server_url</code>/connect`. Override the base URL in **Edit > Project Settings > Convai SDK > Core Server Base URL** when your deployment uses a custom Convai endpoint.
 
 ### LiveKit minimum requirements
 
@@ -29,9 +27,9 @@ After Convai accepts the connect request, the SDK joins a LiveKit room using the
 | `*.livekit.cloud` | `443` | TCP | LiveKit WebSocket signaling |
 | `*.turn.livekit.cloud` | `443` | TCP | TURN/TLS fallback when UDP is blocked |
 
-### Recommended for best audio quality
+### Optional direct media paths
 
-Allow these rules when your network policy permits UDP. They reduce latency and improve voice quality in training simulations and interactive experiences.
+LiveKit documents these paths for direct WebRTC media and TCP fallback. Add them when your network policy permits UDP or when the LiveKit connection test shows that the minimum TCP rules are not enough.
 
 | Host | Port | Protocol | Purpose |
 | --- | --- | --- | --- |
@@ -121,11 +119,27 @@ Do not share the room token publicly. It is temporary and grants access to the L
 
 Debug log calls compile out of non-development builds unless `CONVAI_DEBUG_LOGGING` is defined. Debug transport lines appear in the Unity Editor and Development Builds by default. See [Debug tools reference](../troubleshooting/debug-tools-reference.md) for logging configuration.
 
+## Test the LiveKit connection
+
+Use the [LiveKit connection test](https://livekit.com/webrtc/connection-test) when you need to confirm whether a restricted network can reach the room returned by Convai.
+
+1. Start a Unity session and find the `Token:` log line.
+2. Copy the `Room URL` value into **LiveKit URL**.
+3. Copy the `Token` value into **Room Token**.
+4. Select **Run test**.
+
+| Connection test field | Value from Convai logs |
+| --- | --- |
+| **LiveKit URL** | `room_url` / `Room URL` |
+| **Room Token** | `token` / `Token` |
+
+The test validates LiveKit signaling and WebRTC connectivity for that temporary room. It does not validate your Convai API key, `api.convai.com`, or character configuration.
+
 ## Firewall validation checklist
 
 Work through this checklist with your network or IT team before deploying to a restricted environment.
 
-1. Confirm outbound TCP `443` to `<code class="expression">space.vars.live_server_url</code>` and `api.convai.com`.
+1. Confirm outbound TCP `443` to <code class="expression">space.vars.live_server_url</code> and `api.convai.com`.
 2. Confirm outbound TCP `443` to `convai-technologies-lfslae7c.livekit.cloud`, `*.livekit.cloud`, and `*.turn.livekit.cloud`.
 3. When UDP is permitted, allow UDP `3478` to `*.host.livekit.cloud` and outbound UDP `50000`–`60000`.
 4. Exclude Convai and LiveKit hostnames from TLS inspection if your proxy performs man-in-the-middle decryption on HTTPS or WSS traffic.
@@ -138,11 +152,11 @@ If steps 5 or 6 fail with `transport.ice_failed` or `transport.signal_disconnect
 
 | Symptom | Likely cause | Fix | Verify |
 | --- | --- | --- | --- |
-| `connection.network_error` or `connection.timeout` | Convai endpoints blocked on TCP `443` | Allow `<code class="expression">space.vars.live_server_url</code>` and `api.convai.com` | Session reaches `Connected` state |
-| `transport.ice_failed` or `transport.peer_connection_failed` | LiveKit UDP or TURN hosts blocked | Add LiveKit minimum and recommended firewall rules from this page | `Room details received` log appears; character responds in Play mode |
+| `connection.network_error` or `connection.timeout` | Convai endpoints blocked on TCP `443` | Allow <code class="expression">space.vars.live_server_url</code> and `api.convai.com` | Session reaches `Connected` state |
+| `transport.ice_failed` or `transport.peer_connection_failed` | LiveKit UDP or TURN hosts blocked | Add the LiveKit minimum rules and optional direct media paths from this page | `Room details received` log appears; character responds in Play mode |
 | No `Room details received` log line | Transport logging below **Debug** | Open **Diagnostics** in Project Settings; set **Transport** category override to **Debug** | Readable `Token:` line appears in the Console |
-| Connect succeeds but audio is choppy | UDP media range blocked | Allow UDP `50000`–`60000` and UDP `3478` to `*.host.livekit.cloud` | Voice quality improves on the same network |
-| `connection.connect_invalid_api_key` | Invalid or revoked API key | Copy a fresh key from `<code class="expression">space.vars.dashboard_url</code>` into Project Settings | Connect error no longer fires |
+| LiveKit connection test fails after connect succeeds | UDP media or TURN fallback path blocked | Allow UDP `50000`–`60000`, UDP `3478` to `*.host.livekit.cloud`, and TCP `443` to `*.turn.livekit.cloud` | LiveKit connection test succeeds with the logged `Room URL` and `Token` |
+| `connection.connect_invalid_api_key` | Invalid or revoked API key | Copy a fresh key from <code class="expression">space.vars.dashboard_url</code> into Project Settings | Connect error no longer fires |
 | WebGL mic unavailable | Build served over HTTP | Serve the build over HTTPS or from `localhost` | Microphone permission prompt appears in the browser |
 
 {% hint style="warning" %}
