@@ -119,12 +119,6 @@ Check the [Convai Plugin Setup Guide](../guides-v2-under-development/getting-sta
 
 ***
 
-{% hint style="success" %}
-For optimal results, we recommend setting the **Foundation Model** to **Claude** in the **Core AI Settings** of your character on [Convai.com](https://convai.com)
-{% endhint %}
-
-***
-
 ## Conclusion
 
 Congratulations! :tada::sunglasses:

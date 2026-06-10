@@ -82,6 +82,40 @@ When enabled, session setup uses connection type `video` even if no vision compo
 
 When the chatbot reads a frame, it calls `GetImageTexture` on the active source. **Environment Webcam** always returns `RenderTarget2D` because it captures into a `UTextureRenderTarget2D`.
 
+## Using a webcam image
+
+The current Convai Unreal Engine plugin does not ship a component that reads directly from a physical webcam device. **Environment Webcam** captures whatever is visible to its `USceneCaptureComponent2D`.
+
+For beginner projects, use the webcam image as visible scene content:
+
+{% stepper %}
+{% step %}
+### Bring the webcam feed into Unreal
+
+Use Unreal Engine's media workflow to display the webcam feed in the level, for example on a plane, mesh, or widget. The important result is that the webcam image is visible in the rendered scene.
+{% endstep %}
+
+{% step %}
+### Point Environment Webcam at the feed
+
+Place **Environment Webcam** on the chatbot `Actor` and rotate it so its `+X` axis faces the surface showing the webcam feed.
+{% endstep %}
+
+{% step %}
+### Capture the scene into the Convai render target
+
+Assign **Convai Render Target** and call **Start** as described in [Vision quick start](quick-start.md). The chatbot receives frames of the webcam image because that image is now part of the captured scene.
+{% endstep %}
+
+{% step %}
+### Verify the captured image
+
+Open the render target asset during Play In Editor. If the preview shows the webcam surface, ask the character about what is visible in that feed.
+{% endstep %}
+{% endstepper %}
+
+For production projects that need to send webcam pixels without rendering them in the level, implement a custom C++ frame source that provides raw RGBA data through `IConvaiVisionInterface`. See [Custom vision components](custom-vision-components.md).
+
 ## Next steps
 
 {% content-ref url="usage-examples.md" %}
