@@ -4,7 +4,7 @@ description: End-to-end action recipes for navigating to a registered object, fo
 last_reviewed: "4.0.0-beta.21"
 ---
 
-These examples show complete action handler setups for the most common scenarios. Each example lists the configuration required in the Details panel and the Blueprint pseudocode for the NPC Actor. Pseudocode blocks describe the nodes and connections to build in the Blueprint Event Graph, using indentation to show execution flow.
+These examples follow the same progression as the quick start and parameterized-action guides: default navigation first, then custom actions with typed parameters. Each example lists Details panel configuration and Blueprint pseudocode for the NPC Actor.
 
 ## Example 1: Navigate to a registered object
 
@@ -206,7 +206,78 @@ Event Change Posture(ActionData: FConvaiResultAction)
 
 ---
 
-## Example 5: Start a sequence after speech begins
+## Example 5: Print with a dynamic string parameter
+
+**Scenario:** A training NPC prints Convai-supplied text to the screen when asked.
+
+### Configuration
+
+Add a custom action to the `Actions` array:
+
+- `Name`: `"Print"`
+- Parameters:
+  - `Name`: `"text"`
+  - `Type`: `String`
+  - `Description`: leave empty or use a short hint
+
+Compile the Blueprint, then scaffold the handler with **Create Convai Action Handler**.
+
+### Blueprint handler
+
+```text
+// Blueprint pseudocode
+Event Print(ActionData: FConvaiResultAction)
+    Message = GetParamAsString(ActionData, "text")
+    Print String(Message)
+    HandleActionCompletion(IsSuccessful = true, ShouldRespond = Never)
+```
+
+**Test prompt:** `"Print your name on the screen."`
+
+---
+
+## Example 6: Dance with Choices and a fallback
+
+**Scenario:** A character plays one of several dance montages from a single action.
+
+### Configuration
+
+1. Create an `Anim Montage` for each dance style. Tune blend in/out on each montage.
+2. Add action `Dance` with one parameter:
+   - `Name`: `"type"`
+   - `Type`: `String`
+   - `Choices`: `["groove", "disco", "g-style"]`
+
+### Blueprint handler
+
+```text
+// Blueprint pseudocode
+Event Dance(ActionData: FConvaiResultAction)
+    DanceType = GetParamAsString(ActionData, "type")
+
+    Switch on String(DanceType):
+        case "groove":  PlayMontage(GrooveMontage, onComplete, onInterrupted)
+        case "disco":   PlayMontage(DiscoMontage, onComplete, onInterrupted)
+        case "g-style": PlayMontage(GStyleMontage, onComplete, onInterrupted)
+        default:
+            HandleActionCompletion(
+                IsSuccessful = false,
+                bAutoReport = true,
+                ShouldRespond = Always,
+                AdditionalNote = "That dance style is not available",
+                Delay = 1.5
+            )
+            return
+
+    // Wire onComplete and onInterrupted to:
+    HandleActionCompletion(IsSuccessful = true, ShouldRespond = Never)
+```
+
+**Test prompts:** `"Show me the groove dance."` (plays montage), `"Do the ballet dance."` (fallback branch — character explains the style is unavailable).
+
+---
+
+## Example 7: Start a sequence after speech begins
 
 **Scenario:** A safety-drill NPC gestures toward an exit sign after its spoken warning begins, then walks to the sign.
 

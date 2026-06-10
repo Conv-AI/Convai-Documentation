@@ -4,7 +4,7 @@ description: Define the action set, enable character actions, and register envir
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The `Convai Chatbot` component exposes an `Environment` property that controls the full character actions configuration: action templates, scene-object registrations, character registrations, and attention state. Configure action templates before connecting the session; use Blueprint at runtime for object, character, and attention updates.
+The `Convai Chatbot` component exposes an `Environment` property that controls the full character actions configuration: action templates, scene-object registrations, character registrations, and attention state. Configure action templates in the editor before testing in Play mode, then compile the character Blueprint so changes are saved. Use Blueprint at runtime for object, character, and attention updates during a live session.
 
 ## The Environment property
 
@@ -57,9 +57,20 @@ You can rename, describe, or remove these as needed. To remove a default action,
 ### Adding a custom action
 
 1. Click **+** on the `Actions` array to add a new entry.
-2. Set **Name** to a unique, descriptive verb phrase, for example `"Open Door"` or `"Greet"`.
-3. Set **Description** if the action name alone is ambiguous.
+2. Set **Name** to a unique, descriptive verb phrase, for example `"Open Door"`, `"Print"`, or `"Dance"`.
+3. Set **Description** only when the action name alone is ambiguous. Keep descriptions short or leave the field empty to reduce LLM context.
 4. Add entries to **Parameters** if the action needs typed inputs. See [Parameterized actions](parameterized-actions.md).
+5. Click **Compile** on the character Blueprint, then scaffold the handler. See [Building custom action handlers](building-custom-action-handlers.md).
+
+### Authoring tips
+
+| Practice | Why it matters |
+|---|---|
+| Short, distinct action names | Convai matches templates by name. `"Dance"` is easier to target than `"Perform Dance Animation"`. |
+| Short or empty descriptions | Descriptions are sent in the action contract. Extra prose adds context without improving behavior. |
+| Distinct object names | Use `"cube"` and `"gun"` instead of `"cube"` and `"cube2"` so reference parameters resolve reliably. |
+| **Choices** for fixed variants | One `Dance` action with a `type` parameter and three **Choices** beats three separate dance templates with duplicated descriptions. |
+| Compile before Play | New or edited action templates are not available to handlers until the Blueprint compiles. |
 
 {% hint style="warning" %}
 Action names must match the Blueprint function or event name on the owning Actor, including spaces and punctuation. Unreal resolves handler names case-insensitively, but `"Stop Moving"` and `"StopMoving"` are different names.

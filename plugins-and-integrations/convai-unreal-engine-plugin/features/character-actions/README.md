@@ -21,7 +21,7 @@ Use this section to understand the pipeline, configure the environment contract,
 <td><a href="how-character-actions-work.md">how-character-actions-work.md</a></td>
 </tr>
 <tr>
-<td><strong>Character actions quick start</strong><br>Enable actions, register a scene object, configure AI navigation, and verify a built-in navigation action end to end.</td>
+<td><strong>Character actions quick start</strong><br>Enable actions, set up pawn movement and NavMesh, register scene objects, and test the four default movement actions.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>

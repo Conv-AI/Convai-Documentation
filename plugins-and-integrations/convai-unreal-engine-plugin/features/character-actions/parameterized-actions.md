@@ -1,114 +1,178 @@
 ---
 title: Parameterized actions
-description: Declare typed inputs for character actions and read resolved values in Blueprint handlers for movement, timing, choices, and custom behavior.
+description: Declare typed action parameters and read resolved values in Blueprint handlers for text, references, choices, and animations.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Parameterized actions let Convai fill in typed values when it chooses an action. A `Move To` action needs a destination; a `Wait For` action needs a duration; a `Set Emotion` action needs an emotion name. Parameters give Convai structured guidance on what to supply and how to interpret the response.
+Parameterized actions let Convai fill in typed values when it chooses an action. A `Move To` action needs a destination; a `Print` action can carry dynamic text; a `Dance` action can pick from a fixed list of animation styles. Parameters give Convai structured guidance and give your handler typed values to read.
 
-## FConvaiActionParam
+## Prerequisites
 
-Each parameter on an `FConvaiAction` template is an `FConvaiActionParam` struct with the following fields:
+- You completed [Building custom action handlers](building-custom-action-handlers.md) for a no-parameter action.
+- The action template is compiled on the character Blueprint before you test in Play mode.
+
+## FConvaiActionParam fields
+
+Each parameter on an `FConvaiAction` template is an `FConvaiActionParam` struct:
 
 | Field | Type | Purpose |
 |---|---|---|
-| `Name` | `FString` | Placeholder name rendered in the wire format, for example `"destination"` or `"time in seconds"`. |
-| `Description` | `FString` | Optional plain-language hint for Convai, for example `"The number of seconds to wait"`. |
-| `Type` | `EConvaiActionParamType` | The declared type. Controls both the prompt hint and how the parser interprets the response. |
-| `Connector` | `FString` | Optional joining text rendered before this parameter in the wire format, for example `"on"` for a `"Put ball on table"` action. |
-| `Choices` | `TArray<FString>` | Optional fixed-choice list. Rendered as `[choice1\|choice2\|...]` in the wire format. |
-| `EnumType` | `UEnum*` | Required when `Type == Enum`. The engine enum whose display names serve as the choice list. |
+| `Name` | `FString` | Placeholder name, for example `"destination"` or `"text"`. |
+| `Description` | `FString` | Optional hint for Convai. Keep short or leave empty to reduce context size. |
+| `Type` | `EConvaiActionParamType` | Declared type. Controls the wire-format hint and parser behavior. |
+| `Connector` | `FString` | Joining text before this parameter, for example `"on"` in `"Put ball on table"`. |
+| `Choices` | `TArray<FString>` | Fixed-choice list rendered as `[choice1\|choice2\|...]` in the wire format. |
+| `EnumType` | `UEnum*` | Required when `Type == Enum`. |
 
 ## Parameter types
 
-`EConvaiActionParamType` controls how the plugin interprets the LLM's filled-in response:
-
 | Enum value | Display name | How the value is parsed |
 |---|---|---|
-| `Auto` | Auto | Infer type at parse time: try exact Reference, then Number, then Bool; fall back to String. |
-| `Reference` | Actor Reference | Resolve the value against `Environment.Objects` and `Environment.Characters` by exact registered name. |
-| `String` | String | Treat the value as a raw string. |
-| `Number` | Number | Parse the value as a float. |
-| `Bool` | Bool | `"true"`, `"yes"`, or `"1"` → `true`; anything else → `false`. |
-| `Enum` | Enum | Match the value against the display names of `EnumType`. The matched enum value is stored in `ByteValue`. |
+| `Auto` | Auto | Infer: Reference, then Number, then Bool; fall back to String. |
+| `Reference` | Actor Reference | Resolve against registered `Objects` and `Characters` by exact name. |
+| `String` | String | Raw string. |
+| `Number` | Number | Parse as `float`. |
+| `Bool` | Bool | `"true"`, `"yes"`, or `"1"` → `true`; otherwise `false`. |
+| `Enum` | Enum | Match display names of `EnumType`; value stored in `ByteValue`. |
 
-Regardless of the declared type, the plugin populates all value fields (`StringValue`, `NumberValue`, `BoolValue`, `RefValue`) on a best-effort basis. The declared type signals which field is the intended slot.
+Regardless of declared type, all value fields on `FConvaiResultParam` are populated on a best-effort basis.
+
+## Example: Print with a string parameter
+
+Start from a no-parameter `Print` action and add one typed input so Convai can supply the message.
+
+### Declare the parameter
+
+On the `Print` action entry, expand **Parameters** and click **+**:
+
+| Field | Value |
+|---|---|
+| `Name` | `text` |
+| `Type` | `String` |
+| `Description` | Leave empty or use a short hint such as `"Text to print"`. |
+
+Compile the Blueprint.
+
+### Read the value in the handler
+
+```text
+// Blueprint pseudocode
+Event Print(ActionData: FConvaiResultAction)
+    Message = GetParamAsString(ActionData, "text")
+    Print String(Message)
+    HandleActionCompletion(IsSuccessful = true, ShouldRespond = Never)
+```
+
+Test in Play mode: `"Print your name on the screen"` or `"Print breathe"`. Convai fills the `text` parameter and the handler prints the resolved string.
+
+## Example: Dance with animation montages
+
+For actions that play skeletal animations, use an `Anim Montage` and call `Handle Action Completion` on both **On Completed** and **On Interrupted** montage pins.
+
+### Prepare montages
+
+1. Import or locate animation sequences in the **Content Browser**.
+2. Right-click an animation, select **Create > Create Anim Montage**.
+3. Open the montage and tune **Blend In** and **Blend Out** times (for example `1.0` seconds) so transitions look smooth.
+4. Repeat for each dance style you want to support.
+
+### Declare the action
+
+Add an action named `Dance` with no parameters for a single-style dance, or add a `type` parameter with **Choices** when multiple styles share one action (see the next section).
+
+### Handler with Play Montage
+
+```text
+// Blueprint pseudocode — single montage
+Event Dance(ActionData: FConvaiResultAction)
+    Play Montage(
+        Mesh = BodySkeletalMesh,
+        Montage = GrooveDanceMontage,
+        OnCompleted → HandleActionCompletion(IsSuccessful = true),
+        OnInterrupted → HandleActionCompletion(IsSuccessful = true)
+    )
+```
+
+{% hint style="warning" %}
+If `Handle Action Completion` is missing on the **On Interrupted** pin, a new montage or movement action can leave the queue stalled because the plugin still considers the dance action in progress.
+{% endhint %}
+
+## Example: Dance with Choices and a fallback
+
+When one action covers multiple animation variants, add a `String` parameter with a **Choices** array instead of duplicating the action template.
+
+### Declare
+
+Action `Dance`, one parameter:
+
+| Field | Value |
+|---|---|
+| `Name` | `type` |
+| `Type` | `String` |
+| `Choices` | `groove`, `disco`, `g-style` (one entry per supported montage) |
+
+The wire format includes `[groove|disco|g-style]` so Convai picks from the list.
+
+### Handler with Switch on String
+
+```text
+// Blueprint pseudocode
+Event Dance(ActionData: FConvaiResultAction)
+    DanceType = GetParamAsString(ActionData, "type")
+
+    Switch on String(DanceType):
+        case "groove":  PlayMontage(GrooveMontage, onComplete, onInterrupted)
+        case "disco":   PlayMontage(DiscoMontage, onComplete, onInterrupted)
+        case "g-style": PlayMontage(GStyleMontage, onComplete, onInterrupted)
+        default:
+            HandleActionCompletion(
+                IsSuccessful = false,
+                bAutoReport = true,
+                ShouldRespond = Always,
+                AdditionalNote = "That dance style is not available",
+                Delay = 1.5
+            )
+            return
+
+    // onComplete and onInterrupted both call:
+    HandleActionCompletion(IsSuccessful = true, ShouldRespond = Never)
+```
+
+When the player asks for a style outside **Choices** (for example `"ballet"`), the **default** branch reports failure. Convai can respond using the `AdditionalNote` context instead of playing an unsupported montage.
 
 ## Connectors
 
-The `Connector` field adds a preposition or conjunction that links a parameter to the preceding content. For example, to model the action `"Put <object> on <surface>"`:
+Use **Connector** to link a parameter to preceding text. For `"Put <object> on <surface>"`:
 
 - Parameter 1: `Name = "object"`, no connector.
 - Parameter 2: `Name = "surface"`, `Connector = "on"`.
 
-The wire format rendered to Convai becomes `Put {object} on {surface}`, and the response `"Put ball on table"` maps `ball` → `object` and `table` → `surface`.
+## Enum parameters
 
-## Choices and enums
-
-### String choices
-
-Set `Choices` to constrain the LLM to a fixed set of values:
-
-```text
-// Details panel values
-Name = "emotion"
-Type = String
-Choices = ["Happy", "Sad", "Angry", "Calm"]
-```
-
-The wire format includes `[Happy|Sad|Angry|Calm]` as a hint. Values not in the list still flow through with a warning logged.
-
-### Enum choices
-
-When you have an existing Unreal `UENUM` you want to mirror:
+When a `UENUM` already exists in your project:
 
 1. Set `Type` to `Enum`.
-2. Set `EnumType` to your `UEnum` asset (use the picker in the Details panel).
-3. Leave `Choices` empty. When parsing an enum parameter, the plugin uses the selected enum's display names instead of the `Choices` array.
+2. Set `EnumType` to the enum asset.
+3. Leave `Choices` empty — display names come from the enum.
 
-In your handler, read the matched enum value from `ByteValue` using **Byte to Enum** in Blueprint:
-
-```text
-// Blueprint pseudocode
-// In the action handler
-ParamByte = GetParamAsByte(ActionData, "emotion")
-Emotion = ByteToEnum<EMyEmotionEnum>(ParamByte)
-```
+Read the matched value with `Get Param As Byte`, then convert with **Byte to Enum**.
 
 ## Reading parameters in Blueprint
 
-Use the `UConvaiActions` function library (Blueprint category **Convai | Action API**) to read parameters from `FConvaiResultAction`:
+Use the `UConvaiActions` function library (**Convai | Action API**):
 
 | Node | Returns | Use when |
 |---|---|---|
-| **Get First Param** | `FConvaiResultParam` | You have exactly one parameter and want the full result struct. |
-| **Get Param** | `FConvaiResultParam` | You need the full result struct for a named parameter. |
-| **Get Param As String** | `FString` | The parameter type is `String` or `Auto`. |
-| **Get Param As Number** | `float` | The parameter type is `Number`. |
-| **Get Param As Bool** | `bool` | The parameter type is `Bool`. |
-| **Get Param As Ref** | `FConvaiObjectEntry` | The parameter type is `Reference` or `Auto`. |
-| **Get Param As Byte** | `uint8` | The parameter type is `Enum`. Convert with Byte to Enum after reading. |
-| **Has Param** | `bool` | Check whether a named parameter was filled in before reading it. |
-| **Get Param Type** | `EConvaiActionParamType` | Inspect the resolved type when using `Auto`. |
+| **Get First Param** | `FConvaiResultParam` | Exactly one parameter. |
+| **Get Param** | `FConvaiResultParam` | Full struct for a named parameter. |
+| **Get Param As String** | `FString` | `String` or `Auto`. |
+| **Get Param As Number** | `float` | `Number`. |
+| **Get Param As Bool** | `bool` | `Bool`. |
+| **Get Param As Ref** | `FConvaiObjectEntry` | `Reference` or `Auto`. |
+| **Get Param As Byte** | `uint8` | `Enum`. |
+| **Has Param** | `bool` | Guard before reading. |
 
-All named accessor nodes take the `FConvaiResultAction` struct and a `Name` string matching the parameter's `Name` field. `Get First Param` only takes the `FConvaiResultAction` struct.
-
-## FConvaiResultParam fields
-
-`FConvaiResultParam` has the following Blueprint-readable fields:
-
-| Field | Type | Description |
-|---|---|---|
-| `Type` | `EConvaiActionParamType` | The declared or inferred type. |
-| `StringValue` | `FString` | Raw value as a string. Always populated. |
-| `NumberValue` | `float` | `Atof(StringValue)`. `0` if not numeric. |
-| `BoolValue` | `bool` | `true` if `StringValue` is `"true"`, `"yes"`, or `"1"`. |
-| `RefValue` | `FConvaiObjectEntry` | Resolved from `Environment.Objects` / `Environment.Characters` by exact registered name. Empty when no match. |
-| `ByteValue` | `uint8` | Matched enum value when `Type == Enum` and `EnumType` was set; `0` otherwise. |
-
-## AbortActionSequence from a handler
-
-If a required parameter resolves to an empty value (for example a Reference that could not be matched), call `AbortActionSequence` with a descriptive message so Convai can try again:
+## Abort when a required parameter is empty
 
 ```text
 // Blueprint pseudocode

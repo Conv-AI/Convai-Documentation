@@ -1,125 +1,120 @@
 ---
 title: Building custom action handlers
-description: Write Blueprint action handlers that execute character behavior and report completion so the action queue can continue safely.
+description: Add a custom action template, scaffold a Blueprint handler with the editor utility, and report completion so the queue advances.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Custom action handlers are Blueprint functions or events on the NPC Actor, or on the chatbot component fallback, that the plugin calls when a matching action name arrives in the action queue. Write a handler, complete it with `Handle Action Completion`, and the queue advances to the next action automatically.
+Custom action handlers are Blueprint functions or events on the NPC Actor that the plugin calls when a matching action name arrives in the queue. Declare the action on the chatbot, scaffold a handler in the character Blueprint, run your logic, then call `Handle Action Completion` so the queue can advance.
 
-## How dispatch works
+## Prerequisites
 
-When the plugin's `TriggerNamedBlueprintAction` fires, it searches the owning Actor's Blueprint class for a function or event whose name matches the `Action` field of the incoming `FConvaiResultAction`. If the Actor has no matching handler, the plugin tries the chatbot component itself. Unreal resolves the name case-insensitively through `FName`, but spaces and punctuation must still match — `"Stop Moving"` and `"StopMoving"` are different handlers.
+- Character actions are enabled on the chatbot. See [Character actions quick start](quick-start.md).
+- You know the action name you want to add matches the handler name exactly, including spaces.
 
-The function must accept zero or one parameter of type `FConvaiResultAction`. If no matching function is found, the plugin logs a warning and the action is not invoked — the queue stalls until you call `HandleActionCompletion` or `AbortActionSequence`.
-
-## Creating a handler function
+## Declare the action template
 
 {% stepper %}
 {% step %}
-### Open the NPC Actor Blueprint
+### Add an entry to the Actions array
 
-Open the Blueprint class of the Actor that has the `Convai Chatbot` component.
+Select the NPC Actor. Under **Convai | Actions > Environment > Actions**, click **+**.
+
+Set **Name** to a unique verb phrase, for example `"Print"`.
+Set **Description** to a short hint for Convai, for example `"Print a debug message to the screen"`.
+Leave **Parameters** empty for a no-parameter action.
 {% endstep %}
 
 {% step %}
-### Add a custom event with the action name
+### Compile the Blueprint
 
-In the **Event Graph**, right-click and add a **Custom Event**. Name it exactly as you named the action in the `Actions` array — for example `"Open Door"`.
-
-Add one input parameter to the event:
-
-- **Type:** `FConvaiResultAction` (search for `Convai Result Action` in the pin type picker)
-- **Name:** any name you prefer, for example `ActionData`
-
-{% endstep %}
-
-{% step %}
-### Implement the handler logic
-
-Connect the event's execution pin to your handler logic. For a door-opening action you might:
-
-1. Play an open-door animation on the target Actor.
-2. Wait for the animation to finish (use a `Delay` or a sequence-complete event).
-3. Call `HandleActionCompletion` at the end.
-{% endstep %}
-
-{% step %}
-### Call HandleActionCompletion
-
-Drag off the `Convai Chatbot` component reference and call **Handle Action Completion**. This is the required closing call — without it, the queue stalls and no further actions fire.
-
-Set **Is Successful** to `true` on success, `false` on failure.
-
+Click **Compile** on the character Blueprint so the new action template is saved before you wire the handler.
 {% endstep %}
 {% endstepper %}
 
-## HandleActionCompletion parameters
+{% hint style="info" %}
+Keep action names and descriptions short. Long descriptions increase LLM context without improving behavior. Leave **Description** empty when the action name is self-explanatory.
+{% endhint %}
 
-`HandleActionCompletion` is a method on `UConvaiChatbotComponent` with the following Blueprint-visible parameters:
+## Scaffold the handler with Create Convai Action Handler
 
-| Parameter | Type | Default | Purpose |
-|---|---|---|---|
-| `IsSuccessful` | `bool` | `true` | `true` → dequeue the current action and start the next. `false` → clear the remaining queue. |
-| `bAutoReport` | `bool` | `true` | When `true`, the plugin sends a default outcome message to Convai: success sends `"you were able to <action> successfully"`, failure sends `"failed to <action>, try something else or consult with <player name>"`. |
-| `ShouldRespond` | `EC_RunLLMOption` | `Never` | Controls whether Convai reacts to the outcome with a spoken response. `Never` (default) silently updates context. `Auto` lets Convai decide. `Always` forces a spoken reply. |
-| `AdditionalNote` | `FString` | `""` | Optional text appended to the auto-generated message as `", note: <text>"`. With `bAutoReport = false` and a non-empty value, the note is sent on its own. |
-| `Delay` | `float` | `0.0` | Seconds to wait before the next action starts (on success) or before the failure event is sent. |
+The `ConvaiEditor` module adds a **Create Convai Action Handler** entry to the Blueprint graph context menu. Use it to generate a correctly named handler with the right parameter type.
 
-`AdditionalNote` and `Delay` are **Advanced** parameters and are hidden by default in the Blueprint node — expand **Advanced** to reveal them.
+{% stepper %}
+{% step %}
+### Open the character Blueprint Event Graph
 
-## AbortActionSequence
+Open the NPC Actor Blueprint that owns the `Convai Chatbot` component.
+{% endstep %}
 
-When a handler encounters an unrecoverable error — a target Actor was destroyed, preconditions failed, a path is completely blocked — call `AbortActionSequence` instead of `HandleActionCompletion`.
+{% step %}
+### Create the handler
 
-`AbortActionSequence` clears the entire queue without retrying any action. The optional `EventText` and `ShouldRespond` parameters let you tell Convai what went wrong so it can generate a fresh plan.
+Right-click in the **Event Graph** and search for **Create Convai Action Handler**.
 
-| Parameter | Type | Default | Purpose |
-|---|---|---|---|
-| `EventText` | `FString` | `""` | Optional description of what failed. Empty causes a silent abort. |
-| `ShouldRespond` | `EC_RunLLMOption` | `Auto` | How Convai should react. Use `Always` when you want the character to acknowledge the failure aloud. |
+Select the action you added (for example `Print`) and confirm creation. The utility adds a Custom Event named exactly like the action, with one `FConvaiResultAction` input, and wires a `Handle Action Completion` call at the end.
+{% endstep %}
 
-`EventText` and `ShouldRespond` are **Advanced** parameters on this node.
+{% step %}
+### Add handler logic between the event and completion
 
-## Example: Open Door handler
+Connect your behavior between the event pin and `Handle Action Completion`. For a `Print` action, add a **Print String** node with a literal message such as `"This is the print action"`.
+{% endstep %}
+{% endstepper %}
 
-The following pseudocode describes a complete handler for an `"Open Door"` action:
+You can also create handlers manually: add a **Custom Event** with the exact action name and one `FConvaiResultAction` parameter. The plugin dispatches by name — see [How character actions work](how-character-actions-work.md).
+
+## Handle Action Completion
+
+Every handler must call `Handle Action Completion` on the `Convai Chatbot` component when the action finishes, succeeds, fails, or is interrupted. Without this call, the queue stalls and later actions never run.
+
+| Parameter | Default | Purpose |
+|---|---|---|
+| `IsSuccessful` | `true` | `true` dequeues the current action and starts the next. `false` clears the remaining queue. |
+| `bAutoReport` | `true` | When `true`, sends a default outcome message to Convai. |
+| `ShouldRespond` | `Never` | Controls whether Convai speaks about the outcome. |
+| `AdditionalNote` | `""` | Optional text appended to the auto-generated message. Advanced pin. |
+| `Delay` | `0.0` | Seconds to wait before the next action starts. Advanced pin. |
+
+### When to change Auto Report
+
+For simple actions that need no spoken follow-up, leave `bAutoReport` at its default or set `ShouldRespond` to `Never`. The character still receives silent context about the outcome.
+
+Disable or tune `bAutoReport` when:
+
+- The action is a debug or UI-only step (for example `Print`).
+- You want Convai to acknowledge a failure aloud — set `ShouldRespond` to `Always` and provide an `AdditionalNote`.
+
+### Completion on every exit path
+
+Wire `Handle Action Completion` on all branches:
+
+- Success path after the action finishes.
+- Failure path when preconditions are not met.
+- Interrupted path when a latent action (animation montage, timer, move) is cancelled.
 
 ```text
-// Blueprint pseudocode
-// In the NPC Actor Blueprint — Custom Event named "Open Door"
-
-Event Open Door(ActionData: FConvaiResultAction)
-    // Read the target object from the action parameters
-    TargetEntry = GetParamAsRef(ActionData, "target")
-    DoorActor = TargetEntry.Ref
-
-    // Guard: target must be valid
-    if DoorActor is not valid:
-        AbortActionSequence(
-            EventText = "The door target is missing",
-            ShouldRespond = Always
-        )
-        return
-
-    // Play the open animation on the door
-    Call OpenAnimation on DoorActor
-
-    // Wait for animation to complete (use event or delay)
-    Delay 1.5 seconds
-
-    // Report success
-    GetConvaiChatbot().HandleActionCompletion(
+// Blueprint pseudocode — Print handler
+Event Print(ActionData: FConvaiResultAction)
+    Print String("This is the print action")
+    HandleActionCompletion(
         IsSuccessful = true,
         bAutoReport = true,
         ShouldRespond = Never
     )
 ```
 
-## Handling the On Actions Received event
+## AbortActionSequence
 
-You can also bind to the `On Actions Received` delegate on the chatbot component to observe the raw action sequence the plugin received. This is useful for logging and diagnostics.
+When a handler cannot recover — a target Actor was destroyed, a montage failed to play, preconditions are permanently unmet — call `AbortActionSequence` instead of retrying with `Handle Action Completion(false)`.
 
-The delegate signature:
+| Parameter | Default | Purpose |
+|---|---|---|
+| `EventText` | `""` | Description of what failed. Empty causes a silent abort. |
+| `ShouldRespond` | `Auto` | How Convai should react. Use `Always` when the character should acknowledge the failure aloud. |
+
+## Observe actions with On Actions Received
+
+Bind to **On Actions Received** on the chatbot component to log or debug the raw action sequence. This delegate does not replace name-based dispatch — the plugin still calls matching handlers automatically.
 
 ```text
 // Blueprint pseudocode
@@ -130,9 +125,32 @@ On Actions Received(
 )
 ```
 
-{% hint style="warning" %}
-Binding to `On Actions Received` does **not** bypass the name-dispatch mechanism. The plugin still dispatches each action to its matching Blueprint handler automatically, so use the delegate for observation rather than as a replacement for handlers.
-{% endhint %}
+Use this delegate for diagnostics, not as a replacement for per-action handlers.
+
+## Example: Open Door handler
+
+```text
+// Blueprint pseudocode
+Event Open Door(ActionData: FConvaiResultAction)
+    TargetEntry = GetParamAsRef(ActionData, "target")
+    DoorActor = TargetEntry.Ref
+
+    if DoorActor is not valid:
+        AbortActionSequence(
+            EventText = "The door target is missing",
+            ShouldRespond = Always
+        )
+        return
+
+    Call OpenAnimation on DoorActor
+    Delay 1.5 seconds
+
+    HandleActionCompletion(
+        IsSuccessful = true,
+        bAutoReport = true,
+        ShouldRespond = Never
+    )
+```
 
 ## Next steps
 

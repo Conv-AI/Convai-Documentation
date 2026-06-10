@@ -1,138 +1,156 @@
 ---
 title: Character actions quick start
-description: Enable character actions, register a scene object, configure AI navigation, and verify that built-in navigation works end to end.
+description: Enable character actions, set up pawn movement and navigation, register scene objects, and verify default movement actions in Play mode.
 last_reviewed: "4.0.0-beta.21"
 ---
 
-We will enable the character actions feature on an existing Convai character, register a scene object as a navigation target, configure the NPC Actor for AI-driven movement, and confirm that the built-in `Move To` action fires correctly.
+We will enable character actions on an existing Convai character, prepare the character for AI navigation, register a scene object as a target, and confirm that the four default actions (`Move To`, `Follow`, `Stop Moving`, `Wait For`) run correctly when you speak to the character.
 
 ## Prerequisites
 
-- The Convai Unreal Engine plugin is installed and the API key is configured.
-- A level contains an Actor with a `Convai Chatbot` component and a `Convai Player` component on the player pawn.
-- The level has a `Nav Mesh Bounds Volume` covering the walkable area and the navigation mesh is built (**Build > Build Paths** or **Build All**).
+- The Convai Unreal Engine plugin is installed and the API key is configured. See [Install the Convai plugin](../../getting-started/installation.md) and [Configure your API key](../../getting-started/configure-api-key.md).
+- A level contains an NPC Actor with a `Convai Chatbot` component and a `Convai Player` component on the player pawn. See [Add your first Convai character](../../getting-started/add-your-first-character.md).
+- Your character Blueprint is open or accessible from the **Content Browser**.
 
 ## Enable actions on the chatbot
 
 {% stepper %}
 {% step %}
-### Open the chatbot component
+### Select the character
 
-Select the NPC Actor in the level or in the Blueprint editor. In the **Details** panel, find the `Convai Chatbot` component and select it.
+Select the NPC Actor in the level. In the **Details** panel, select the `Convai Chatbot` component.
 {% endstep %}
 
 {% step %}
-### Verify Enable Actions is on
+### Confirm Enable Actions is on
 
-Under **Convai | Actions**, find the **Environment** property. Expand it and confirm **Enable Actions** is ticked. It defaults to `true` on every new `Convai Chatbot` component, so no change is needed unless it was previously turned off.
+Under **Convai | Actions**, expand **Environment** and confirm **Enable Actions** is ticked. It defaults to `true` on new `Convai Chatbot` components.
 
-The `Actions` array is pre-populated out of the box with `Move To`, `Follow`, `Stop Moving`, and `Wait For`. Leave these in place for this quick start.
-{% endstep %}
-
-{% step %}
-### Register a target object
-
-Click the **+** button on the **Objects** array to add an entry. Set:
-
-- **Name** — a unique label the character will use to refer to this object, for example `"Crate"`.
-- **Ref** — the Actor in the level the character should navigate to (use the eyedropper or type the Actor name).
-- **Description** — optional plain-language description, for example `"A wooden crate near the entrance"`.
-
-Leave **Move Target Mode** set to **Actor as goal** for this quick start.
+The **Actions** array is pre-populated with `Move To`, `Follow`, `Stop Moving`, and `Wait For`. Leave these entries in place for this quick start.
 {% endstep %}
 {% endstepper %}
 
-## Configure the NPC Actor for AI navigation
+## Set up pawn movement
 
-The default `Move To` action uses Unreal's `AI Move To` Blueprint node. For this to work, the NPC Actor needs an AI Controller and a movement component.
+Default movement actions require a pawn that can navigate. The plugin provides an editor utility that configures movement for common character setups.
 
 {% stepper %}
 {% step %}
-### Set the AI Controller Class
+### Open the character Blueprint in the Content Browser
 
-Open the NPC Actor Blueprint. In the **Class Defaults**, under **Pawn**, set **AI Controller Class** to an `AIController` subclass.
-
-You can use Unreal's built-in `AIController` class.
-
-{% hint style="warning" %}
-If **AI Controller Class** is `None`, the NPC has no navigation controller and `AI Move To` will silently fail regardless of the NavMesh setup.
-{% endhint %}
+In the **Content Browser**, locate your character Blueprint (for example a MetaHuman or `ConvaiBaseCharacter` derivative).
 {% endstep %}
 
 {% step %}
-### Add a movement component
+### Run Setup Convai Pawn Movement
 
-If the NPC Actor does not already have a `Character Movement` or `Floating Pawn Movement` component, add one in the **Components** panel. For a simple walking NPC, `Floating Pawn Movement` is sufficient.
+Right-click the Blueprint asset, select **Convai**, then **Setup Convai Pawn Movement**.
 
-Set **Max Speed** to a sensible value, for example `300` cm/s.
-{% endstep %}
+The utility adjusts the Blueprint based on its parent class:
 
-{% step %}
-### Add the Move To handler
+| Parent class | What the utility does |
+|---|---|
+| `Actor` (not a pawn) | Reparents to `APawn` and adds `Floating Pawn Movement` with Convai-tuned defaults. |
+| `APawn` (not `Character`) | Adds `Floating Pawn Movement` if missing and applies tuned defaults. |
+| `Character` | Tunes the existing `Character Movement` component (max walk speed, acceleration, braking). |
+| Other base classes | Logs a warning in the Output Log. Reparent to `APawn` or `Character`, then run the utility again. |
 
-In the NPC Actor Blueprint's **Event Graph**, right-click and add a **Custom Event**. Name it exactly `Move To`. Add one input parameter of type `FConvaiResultAction` (search `Convai Result Action` in the pin type picker), named `ActionData`.
-
-Wire the handler to read the destination, resolve the goal location, issue `AI Move To`, and call `Handle Action Completion` when the move finishes:
-
-```text
-// Blueprint pseudocode
-Event Move To(ActionData: FConvaiResultAction)
-    DestEntry = GetParamAsRef(ActionData, "destination")
-    ResolveGoalLocation(Entry=DestEntry, SourceActor=Self,
-        → OutGoalActor, OutGoalLocation, OutAcceptanceRadius, OutMode, bSuccess, bAlreadyThere, ...)
-
-    if not bSuccess:
-        AbortActionSequence(EventText="Target no longer exists", ShouldRespond=Always)
-        return
-
-    if bAlreadyThere:
-        HandleActionCompletion(IsSuccessful=true)
-        return
-
-    if OutMode == Actor:
-        AIMoveTo(Target=OutGoalActor, AcceptanceRadius=OutAcceptanceRadius)
-    else:
-        AIMoveTo(Destination=OutGoalLocation, AcceptanceRadius=OutAcceptanceRadius)
-
-    // On move completed:
-    HandleActionCompletion(IsSuccessful=true)
-```
-
-For the complete reference implementations of all four default actions (Move To, Follow, Stop Moving, Wait For), see [Built-in action handlers](built-in-action-handlers.md).
+If the utility reports a warning, open **Window > Output Log** and search for `ConvaiContentBrowserContextMenu` to read the message.
 {% endstep %}
 {% endstepper %}
 
-## Verify the setup
+## Add a navigation mesh
 
-Before testing, confirm the NPC Actor has:
+`Move To` and `Follow` use Unreal's navigation system. Cover the walkable floor with a built NavMesh before testing movement.
 
-- A `Convai Chatbot` component with **Enable Actions** ticked
-- An **AI Controller Class** assigned (not `None`)
-- A movement component (`Character Movement` or `Floating Pawn Movement`)
-- A `Move To` Custom Event or function that calls `Handle Action Completion`
-- A `Nav Mesh Bounds Volume` covering the NPC spawn point and the registered object
+{% stepper %}
+{% step %}
+### Place a Nav Mesh Bounds Volume
 
-## Test the actions
+Open **Window > Place Actors** (or use the level editor quick-add menu). Search for `Nav Mesh Bounds Volume` and drag it into the level.
+{% endstep %}
 
-Run the level in Play mode. Say something to the character such as `"Go to the Crate"`. The character should:
+{% step %}
+### Scale the volume and build paths
 
-1. Respond with a spoken reply acknowledging the instruction.
-2. Begin navigating toward the registered `"Crate"` object when the action sequence is received.
+Scale the volume so it covers every area the character should walk on. Select **Build > Build Paths** (or **Build All**).
+
+Press **P** in the viewport to toggle the green navigation overlay. Confirm green coverage under the character spawn point and any planned destinations.
+{% endstep %}
+{% endstepper %}
+
+## Test default movement actions
+
+Run the level in Play mode and wait for the session to connect. Try these spoken prompts:
+
+| Prompt | Expected behavior |
+|---|---|
+| `"Follow me"` | The character tracks the player. |
+| `"Stop"` or `"Stop following me"` | The character halts movement. |
+
+The player is registered automatically when `bAutoFillConversationPartnerFromPlayer` is `true` on the chatbot (the default), so `"me"` resolves to the conversation partner.
+
+{% hint style="warning" %}
+If the character speaks but does not move, the Blueprint may be missing handler functions for the default actions. Implement the four reference handlers in [Built-in action handlers](built-in-action-handlers.md), then test again.
+{% endhint %}
+
+## Register a scene object
+
+To navigate to props in the level, add them to the chatbot's environment.
+
+{% stepper %}
+{% step %}
+### Add an object entry
+
+With the NPC Actor selected, expand **Convai | Actions > Environment > Objects** and click **+**.
+
+Set:
+
+- **Name** — a short, distinct label Convai can return exactly, for example `"cube"` or `"Crate"`.
+- **Ref** — the target Actor (use the picker or eyedropper).
+- **Description** — optional plain-language hint, for example `"A blue cube on the floor"`.
+
+Leave **Move Target Mode** on **Actor as goal** for this quick start.
+{% endstep %}
+
+{% step %}
+### Add more objects if needed
+
+Repeat for each interactable prop. Use distinct names such as `"cube"` and `"gun"` rather than `"cube"` and `"cube2"` so Convai can choose the right target.
+{% endstep %}
+{% endstepper %}
+
+## Test navigation and action sequences
+
+In Play mode, try prompts that combine multiple default actions:
+
+- `"Go to the cube."` — the character walks to the registered object.
+- `"Go to the cube, wait for a few seconds, then go to the gun, then come back to me."` — the character runs a multi-step action sequence.
 
 {% hint style="success" %}
-When the NPC starts moving toward the registered object, the action pipeline is working correctly. Reference parameters resolve against the registered object or character name, so keep the entry name short and likely for Convai to return exactly, such as `"Crate"`.
+When the character moves to the named object and advances through a multi-action sequence, the action pipeline is working. Keep registered object names short and unambiguous so reference parameters resolve correctly.
 {% endhint %}
+
+## Verify the setup
+
+Before moving on, confirm:
+
+- **Enable Actions** is ticked on the `Convai Chatbot` component.
+- The character Blueprint has movement configured (via **Setup Convai Pawn Movement** or an equivalent manual setup).
+- A `Nav Mesh Bounds Volume` covers walkable areas and paths are built.
+- Default action handlers exist on the character Blueprint (or you implemented them from [Built-in action handlers](built-in-action-handlers.md)).
+- At least one object is registered in **Environment > Objects** with a valid **Ref**.
 
 ## Next steps
 
-{% content-ref url="built-in-action-handlers.md" %}
-[Built-in action handlers](built-in-action-handlers.md)
+{% content-ref url="building-custom-action-handlers.md" %}
+[Building custom action handlers](building-custom-action-handlers.md)
+{% endcontent-ref %}
+
+{% content-ref url="parameterized-actions.md" %}
+[Parameterized actions](parameterized-actions.md)
 {% endcontent-ref %}
 
 {% content-ref url="configuring-actions.md" %}
 [Configuring actions](configuring-actions.md)
-{% endcontent-ref %}
-
-{% content-ref url="building-custom-action-handlers.md" %}
-[Building custom action handlers](building-custom-action-handlers.md)
 {% endcontent-ref %}

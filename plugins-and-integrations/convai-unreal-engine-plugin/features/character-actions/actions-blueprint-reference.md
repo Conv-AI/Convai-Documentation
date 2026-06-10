@@ -150,6 +150,15 @@ Blueprint function library (category **Convai | Action API**). All functions tak
 | `GetParamAsByte` | Get Param As Byte | `uint8` |
 | `HasParam` | Has Param | `bool` |
 
+## Editor utilities
+
+These editor-only tools scaffold common action setup tasks. They are not Blueprint nodes.
+
+| Utility | Where to find it | Purpose |
+|---|---|---|
+| **Create Convai Action Handler** | Right-click in a character Blueprint **Event Graph** | Scaffolds a Custom Event named after a declared action, with an `FConvaiResultAction` input and a `Handle Action Completion` call. |
+| **Setup Convai Pawn Movement** | Right-click a character Blueprint in the **Content Browser** → **Convai** | Configures pawn movement and navigation defaults for default movement actions. |
+
 ## UConvaiChatbotComponent — action-queue functions
 
 All functions are in category **Convai | Actions**.

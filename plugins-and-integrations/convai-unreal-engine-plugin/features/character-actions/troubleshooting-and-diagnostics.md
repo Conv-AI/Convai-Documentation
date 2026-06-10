@@ -12,6 +12,34 @@ Use the Output Log while debugging. `ConvaiChatbotComponentLog` reports session,
 
 ## Actions not firing
 
+### Character speaks but does not move on Follow or Move To
+
+**Symptom:** Convai acknowledges the instruction, but the NPC stays in place.
+
+**Cause A:** Pawn movement is not configured.
+
+**Fix:** Right-click the character Blueprint in the **Content Browser**, select **Convai > Setup Convai Pawn Movement**, then compile and save. See [Character actions quick start](quick-start.md).
+
+**Verify:** The Blueprint has a movement component (`Floating Pawn Movement` or `Character Movement`) and an **AI Controller Class** assigned.
+
+---
+
+**Cause B:** The NavMesh does not cover the NPC or destination.
+
+**Fix:** Scale the `Nav Mesh Bounds Volume`, rebuild paths (**Build > Build Paths**), and press **P** to confirm green coverage.
+
+**Verify:** Green NavMesh appears under both the NPC spawn point and the target location.
+
+---
+
+**Cause C:** Default action handlers are missing from the character Blueprint.
+
+**Fix:** Implement the four reference handlers from [Built-in action handlers](built-in-action-handlers.md), or scaffold custom handlers with **Create Convai Action Handler**.
+
+**Verify:** A **Print String** at the top of each handler fires when you speak the matching command.
+
+---
+
 ### No action handler is called after the character responds
 
 **Symptom:** The character speaks but no Blueprint handler function runs. The action queue appears empty after the response.
@@ -50,8 +78,21 @@ Use the Output Log while debugging. `ConvaiChatbotComponentLog` reports session,
 
 - Early returns when a guard condition fails (call `AbortActionSequence` or `HandleActionCompletion(false)` here instead).
 - Asynchronous operations (delegate callbacks, timers) where the completion call is in an unreachable branch.
+- Animation montages where **On Interrupted** is not wired to `Handle Action Completion` alongside **On Completed**.
 
 **Verify:** Add a **Print String** node immediately before every `HandleActionCompletion` call. Confirm all paths reach a completion call.
+
+---
+
+### New custom action does not appear in Play mode
+
+**Symptom:** You added an action to the `Actions` array, but the handler never runs.
+
+**Cause:** The character Blueprint was not compiled after editing the action template.
+
+**Fix:** Click **Compile** and **Save** on the character Blueprint, then restart Play mode.
+
+**Verify:** The action name in **Environment > Actions** matches the Custom Event name in the Event Graph exactly.
 
 ---
 
@@ -136,6 +177,18 @@ Use the Output Log while debugging. `ConvaiChatbotComponentLog` reports session,
 **Fix:** Adjust the registered entry's `Name` to the exact label Convai is likely to return, and use `Description` to guide selection. For example, prefer `SafetyValve` over a long sentence-like name.
 
 **Verify:** Print `GetParamAsString` for the same parameter and compare it to the registered `Name`. They should match exactly.
+
+---
+
+### Choices parameter resolves to an unsupported value
+
+**Symptom:** The player asks for a variant that is not in the **Choices** array (for example `"ballet"` when only `"groove"`, `"disco"`, and `"g-style"` are listed). The handler runs the **default** branch or plays nothing.
+
+**Cause:** Convai returned a value outside the declared **Choices** list. The parser still passes the string through, but your handler must handle the fallback.
+
+**Fix:** Add a **Switch on String** default case that calls `HandleActionCompletion` with `IsSuccessful = false`, `bAutoReport = true`, and `ShouldRespond = Always` so Convai can explain the limitation. See [Parameterized actions](parameterized-actions.md).
+
+**Verify:** Ask for a supported choice (handler plays montage) and an unsupported choice (character responds without playing an animation).
 
 ---
 
