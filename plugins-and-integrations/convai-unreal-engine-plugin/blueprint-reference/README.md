@@ -52,8 +52,8 @@ Use these pages for feature-specific nodes that extend the core component APIs:
 | Character actions | [Actions Blueprint reference](../features/character-actions/actions-blueprint-reference.md) |
 | Dynamic context | [Dynamic context Blueprint reference](../features/dynamic-context/dynamic-context-blueprint-reference.md) |
 | Emotion | [Emotion Blueprint reference](../features/emotion/emotion-blueprint-reference.md) |
-| Long-term memory | [LTM Blueprint reference](../features/long-term-memory/ltm-blueprint-reference.md) |
 | Gaze attention | [Gaze attention reference](../features/gaze-attention/gaze-attention-reference.md) |
 | Lip sync | [Face Sync component reference](../features/lip-sync/face-sync-component-reference.md) |
+| Long-term memory | [LTM Blueprint reference](../features/long-term-memory/ltm-blueprint-reference.md) |
 | Narrative design | [Narrative design Blueprint reference](../features/narrative-design/narrative-design-blueprint-reference.md) |
 | Vision | [Vision Blueprint reference](../features/vision/vision-blueprint-reference.md) |
