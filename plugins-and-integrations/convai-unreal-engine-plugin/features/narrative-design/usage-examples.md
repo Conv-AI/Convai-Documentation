@@ -10,31 +10,59 @@ For trigger invocation basics, see [Narrative design quick start](quick-start.md
 
 ## Linear scene progression
 
-**Scenario:** a player enters a restricted zone in an industrial safety simulation. The character advances to the next narrative section when the player crosses the boundary.
+**Scenario:** a player enters a restricted zone in an industrial safety simulation. Entering the zone fires a dashboard trigger that activates the next narrative section.
 
 **Setup:**
 
 1. Add a `Box Collision` component to the zone Actor. Bind **On Component Begin Overlap**.
 2. In the overlap event, get the `UConvaiChatbotComponent` from the character Actor reference.
-3. Call **Invoke Narrative Design Trigger** with `TriggerName = "enter_zone"`.
-4. Bind **On Narrative Section Received** on the chatbot component. In the event body, forward `NarrativeSectionID` to a subtitle display function or your dialogue management system.
+3. In the Convai dashboard, copy the trigger name on the edge that leaves the current section.
+4. Call **Invoke Narrative Design Trigger** with that trigger name, such as `enter_zone`.
+5. Bind **On Narrative Section Received** on the chatbot component so your Blueprint can see when Convai confirms the destination section.
 
-**Expected outcome:** when the player enters the zone, Convai advances the story graph and the character's behavior shifts to the new section's objective. **On Narrative Section Received** fires with the destination `section_id`.
+**Expected outcome:** when the player enters the zone, Convai activates the destination section and the character follows the new section's objective. The player's answers can then satisfy that section's decisions and move the graph to later sections.
 
 ---
 
-## Dynamic context event during debrief
+## Run Blueprint logic for a specific section
 
-**Scenario:** a healthcare training simulation lets the player speak freely during a debrief phase. The instructor character responds to whatever the player says, and the narrative may advance if Convai determines a section change is appropriate.
+**Scenario:** a safety simulation should unlock an exit door only when the graph reaches the section named `Evacuation route open`.
+
+**Setup:**
+
+1. Open the character in the Convai dashboard and go to **Narrative Design**.
+2. Select the destination section and copy its `section_id`. Use the ID value, not the section name shown in the graph.
+3. In the character Blueprint, bind **On Narrative Section Received** on the `UConvaiChatbotComponent`.
+4. Store the copied ID in a Blueprint string variable such as `EvacuationRouteOpenSectionID`.
+5. Add an **Equal (String)** comparison between the incoming `NarrativeSectionID` and `EvacuationRouteOpenSectionID`.
+6. Connect the comparison result to a **Branch** node.
+7. On **True**, run the Blueprint logic for that section, such as opening the exit door, enabling an objective marker, or starting a timer.
+
+```text
+// Blueprint pseudocode
+On Narrative Section Received (NarrativeSectionID)
+  → Equal String (NarrativeSectionID == EvacuationRouteOpenSectionID)
+      True  → Open Exit Door
+      False → Do Nothing
+```
+
+**Expected outcome:** unrelated section changes do nothing. When Convai sends the copied `section_id`, your Blueprint runs the logic tied to that section.
+
+---
+
+## Runtime message or scripted speech
+
+**Scenario:** a healthcare training simulation lets the player speak freely during a debrief phase. The instructor character should respond to the player's answer, and the narrative may advance if the section decisions match that answer.
 
 **Setup:**
 
 1. Receive the player's speech-to-text string from your audio pipeline.
-2. Assemble a context string that combines the speech with relevant game state (for example `Player said: ` + `SpeechText` + `. Assessment score: ` + `ScoreString`).
+2. Assemble a context string that combines the speech with relevant game state, such as `Player said: ` + `SpeechText` + `. Assessment score: ` + `ScoreString`.
 3. Call **Invoke Speech** on the `UConvaiChatbotComponent` with the assembled string as `TriggerMessage`.
-4. **On Narrative Section Received** fires if Convai returns a `BTResponse` packet with a `narrative_section_id`.
+4. Use `<speak>` tags when the character should say a specific line instead of treating the message as general context, such as `<speak>Please proceed to the debrief station.</speak>`.
+5. Bind **On Narrative Section Received** if the response should trigger section-specific Blueprint logic.
 
-**Expected outcome:** the character responds to the staged context event. If the content satisfies conditions for a section transition in the narrative graph, the story advances and **On Narrative Section Received** fires.
+**Expected outcome:** the character processes the staged runtime message. If the content satisfies a decision in the active section, Convai advances the story graph and **On Narrative Section Received** fires with the new `section_id`.
 
 For when to choose **Invoke Speech** over **Invoke Narrative Design Trigger**, see [Narrative triggers](narrative-triggers.md).
 

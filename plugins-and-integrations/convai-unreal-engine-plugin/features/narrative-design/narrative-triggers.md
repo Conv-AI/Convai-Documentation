@@ -13,7 +13,7 @@ Narrative triggers advance a character's story graph from one section to the nex
 | Advance the graph using a dashboard trigger name | **Invoke Narrative Design Trigger** | `trigger-message` with `trigger_name` |
 | Stage a runtime message as conversational context | **Invoke Speech** | Dynamic context event through `AddContextEvent` |
 
-Use **Invoke Narrative Design Trigger** when the transition target is known at design time and the trigger name is a fixed string in the dashboard. Use **Invoke Speech** when the message is assembled at runtime — for example from player speech-to-text or a dynamic game-state string — and you want Convai to process it as context rather than match a dashboard trigger name.
+Use **Invoke Narrative Design Trigger** when the transition target is known at design time and the trigger name is a fixed string in the dashboard. Use **Invoke Speech** when the message is assembled at runtime, when the character should say a scripted line, or when you want Convai to process game-state text as conversational context rather than match a dashboard trigger name.
 
 **On Narrative Section Received** fires only after Convai confirms a section change through a `BTResponse` packet. It does not fire when either function is called.
 
@@ -43,6 +43,8 @@ Copy the trigger name from the dashboard character-for-character. A mismatch bet
 | `InGenerateActions` | `bool` | Present in the Blueprint signature. Not applied in the current plugin source. |
 | `InReplicateOnNetwork` | `bool` | Present in the Blueprint signature. Not applied in the current plugin source. |
 
+Use a plain `TriggerMessage` when the character should process the message as context, such as `Player completed the evacuation drill with 82 percent accuracy`. Wrap the message in `<speak>` tags when the character should say the text directly, such as `<speak>Attention: the evacuation route is now open.</speak>`.
+
 If Convai determines a section change is appropriate, **On Narrative Section Received** still fires through the same `BTResponse` path.
 
 If `TriggerMessage` is empty, the plugin logs `Invoke Speech: TriggerMessage is missing` and returns without staging an event.
@@ -57,6 +59,8 @@ Bind **On Narrative Section Received** (`OnNarrativeSectionReceivedEvent`) on th
 | `NarrativeSectionID` | `FString` | The `section_id` of the new active section. |
 
 To bind in Blueprint: drag the `UConvaiChatbotComponent` reference into the Event Graph, then select **Assign On Narrative Section Received** from the context menu.
+
+When a specific section should run custom Blueprint logic, copy that section's `section_id` from **Narrative Design** in the Convai dashboard. Use the ID value, not the section name shown in the graph. In the bound event, compare the incoming `NarrativeSectionID` with the copied value. If the strings match, run the Blueprint logic for that section, such as opening a door, enabling a widget, or starting an assessment timer.
 
 ## Pending named triggers
 

@@ -13,10 +13,10 @@ A narrative design graph has three building blocks you work with from Unreal Eng
 | Concept | What it is | Where you configure it |
 |---|---|---|
 | Section | A named story beat with an `objective` that shapes character behavior. Each section has a `section_id`. | Convai dashboard |
-| Trigger | A named edge between sections. When fired, Convai advances the active section. The `trigger_name` in your Blueprint must match the dashboard exactly. | Convai dashboard |
+| Trigger | A named edge that activates a destination section. The `trigger_name` in your Blueprint must match the dashboard exactly. | Convai dashboard |
 | Template key | A runtime key-value pair in `NarrativeTemplateKeys` on the chatbot component. The plugin sends the map to Convai through `update-template-keys`. Dashboard objectives can reference `{key}` placeholders. | Blueprint or **Details** panel |
 
-The character stays on the current section until a trigger advances the graph. Sections can also contain **decisions** — criteria-based rules that Convai evaluates from conversation — but most Unreal projects start with named triggers. See `FNarrativeDecision` in [Narrative design Blueprint reference](narrative-design-blueprint-reference.md) for the decision struct fields.
+The character stays on the current section until **Invoke Narrative Design Trigger** activates another section. After that section becomes active, the player's answers and the section's decisions guide the next transition through the graph. See `FNarrativeDecision` in [Narrative design Blueprint reference](narrative-design-blueprint-reference.md) for the decision struct fields.
 
 Author sections, triggers, and entry behavior in the Convai dashboard. See [Narrative Design | Playground](../../../convai-playground/character-customization/narrative-design.md) for graph authoring guidance.
 
@@ -26,9 +26,11 @@ The standard path from a named trigger call to a section change:
 
 1. Blueprint calls **Invoke Narrative Design Trigger** with a `TriggerName` string.
 2. If the session is connected, the component sends a `trigger-message` packet with `trigger_name` to Convai. If disconnected, the call queues in `PendingTriggers` and replays after connect.
-3. Convai evaluates the trigger against the current section's outbound triggers. On a match, Convai advances to the destination section.
-4. Convai returns a `BTResponse` packet with `narrative_section_id`.
-5. **On Narrative Section Received** fires on the chatbot component with `NarrativeSectionID`.
+3. Convai evaluates the trigger against the current section's outbound triggers. On a match, Convai activates the destination section.
+4. The active section's `objective` shapes the character's next behavior.
+5. The player's answers are evaluated against the section's `decisions` when the conversation continues.
+6. Convai returns a `BTResponse` packet with `narrative_section_id` when a section update is delivered.
+7. **On Narrative Section Received** fires on the chatbot component with `NarrativeSectionID`.
 
 ```mermaid
 graph TD
@@ -38,8 +40,11 @@ graph TD
     D --> E["Send trigger_name to Convai"]
     B -->|Yes| E
     E --> F["Convai evaluates trigger against current section"]
-    F --> G["Convai returns BTResponse with narrative_section_id"]
-    G --> H["On Narrative Section Received fires"]
+    F --> G["Destination section becomes active"]
+    G --> H["Section objective shapes the character response"]
+    H --> I["Player answer is evaluated against decisions"]
+    I --> J["Convai returns BTResponse with narrative_section_id"]
+    J --> K["On Narrative Section Received fires"]
 ```
 
 **On Narrative Section Received** fires only when Convai confirms a section change through `BTResponse`. It does not fire when the trigger function is called. For step-by-step trigger invocation, see [Narrative triggers](narrative-triggers.md).
