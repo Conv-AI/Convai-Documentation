@@ -65,8 +65,8 @@ Struct delivered to action handlers. One per dispatched action.
 | `Parameters` | `TMap<FString, FConvaiResultParam>` | Map of parameter name → resolved value. Access named parameters by key using `Get Param` / `Get Param As X`. |
 | `bWaitForBotSpeech` | `bool` | Copied from the matching template at parse time. |
 | `DelayAfterBotSpeechSec` | `float` | Copied from the matching template. |
-| `RelatedObjectOrCharacter` | `FConvaiObjectEntry` | **DEPRECATED** — mirrors the first Reference param. Use `Parameters` instead. |
-| `ConvaiExtraParams` | `FConvaiExtraParams` | **DEPRECATED** — mirrors first number/text/named-params. Use `Parameters` instead. |
+| `RelatedObjectOrCharacter` | `FConvaiObjectEntry` | **Deprecated.** Mirrors the first Reference-typed parameter. Use `GetParamAsRef` on the `Parameters` map instead. |
+| `ConvaiExtraParams` | `FConvaiExtraParams` | **Deprecated.** Mirrors first number/text/named-params. Use `GetParamAs*` on the `Parameters` map instead. |
 
 ## FConvaiResultParam
 
@@ -96,7 +96,7 @@ Describes a scene object or character in the environment.
 | `SocketOrBoneName` | `FName` | `None` | Socket or bone on the matched component. |
 | `bStepOntoBounds` | `bool` | `false` | Walk onto the top of the object instead of stopping at its edge. |
 | `ResolvedComponent` | `TWeakObjectPtr<USceneComponent>` | `null` | **Transient, read-only** — filled in by `ResolveGoalLocation`. |
-| `OptionalPositionVector` | `FVector` | `(0,0,0)` | **DEPRECATED** — use `Resolve Goal Location` output instead. |
+| `OptionalPositionVector` | `FVector` | `(0,0,0)` | **Deprecated.** Use the `Out Goal Location` output of `Resolve Goal Location` instead. |
 
 ## EConvaiMoveTarget
 
@@ -215,8 +215,24 @@ All functions are in category **Convai | Actions**.
 
 ## EC_RunLLMOption
 
+Controls whether `HandleActionCompletion` and `AbortActionSequence` trigger a spoken reply from the character.
+
 | Value | Display name | Effect on HandleActionCompletion / AbortActionSequence |
 |---|---|---|
 | `Auto` | Auto | Convai decides whether to react. |
 | `Always` | Always | Force a spoken reply. |
 | `Never` | Never | Silent context update only. |
+
+## Related pages
+
+{% content-ref url="building-custom-action-handlers.md" %}
+[Building custom action handlers](building-custom-action-handlers.md)
+{% endcontent-ref %}
+
+{% content-ref url="parameterized-actions.md" %}
+[Parameterized actions](parameterized-actions.md)
+{% endcontent-ref %}
+
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Troubleshoot character actions](troubleshooting-and-diagnostics.md)
+{% endcontent-ref %}

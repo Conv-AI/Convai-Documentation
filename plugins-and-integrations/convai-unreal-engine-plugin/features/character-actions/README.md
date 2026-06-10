@@ -4,9 +4,7 @@ description: Find guides, references, and examples for the Convai Unreal Engine 
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Character actions connect the conversational output of Convai to physical behavior in your Unreal Engine level. When a player speaks to a Convai character, the plugin can receive a structured sequence of named actions alongside the spoken response, then dispatch those actions to matching Blueprint handlers on the owning Actor or, as a fallback, on the chatbot component.
-
-Use this section to understand the pipeline, configure the environment contract, write Blueprint handlers, and work with parameters and attention grounding.
+When a player speaks to a Convai character, the plugin can make the character physically respond — walking to objects, following the player, or performing custom behaviors. Use this section to set up and configure character actions, write Blueprint handlers, and work with parameters and attention grounding.
 
 <table data-view="cards">
 <thead>
@@ -21,7 +19,7 @@ Use this section to understand the pipeline, configure the environment contract,
 <td><a href="how-character-actions-work.md">how-character-actions-work.md</a></td>
 </tr>
 <tr>
-<td><strong>Character actions quick start</strong><br>Enable actions, set up pawn movement and NavMesh, register scene objects, and test the four default movement actions.</td>
+<td><strong>Character actions quick start</strong><br>Enable actions, add the default handlers, set up pawn movement and NavMesh, register scene objects, and test movement.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>

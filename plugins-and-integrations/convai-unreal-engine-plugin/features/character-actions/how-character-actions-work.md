@@ -4,7 +4,7 @@ description: Understand how Convai character actions move from session setup to 
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Character actions allow Convai to instruct a character to perform physical behaviors — moving to a location, following a player, interacting with an object — as part of a normal conversation response. The plugin receives a structured sequence of named actions from Convai alongside the spoken reply, then dispatches those actions to matching Blueprint handlers on the owning Actor or, as a fallback, on the chatbot component.
+Character actions connect what Convai says to what the character does in the level. When a player speaks, Convai can return both a spoken reply and a sequence of named actions — moving to a location, following the player, interacting with an object. The plugin dispatches those actions to matching Blueprint handler events on the NPC Actor, running them one at a time in order.
 
 ## Required setup
 
@@ -20,18 +20,20 @@ For non-movement actions (custom behaviors, animations, state changes), only the
 
 ## Key concepts
 
+Six concepts underpin how the system works. Each section below covers one in detail, but here is a quick map:
+
 | Concept | What it means |
 |---|---|
-| **Action contract** (`action_config`) | The list of action templates, scene objects, and characters sent to Convai at session start. Defines what the character is allowed to do and what it can reference. |
-| **Action pipeline** | Two parallel lanes: a speech lane that plays audio and an action lane that stores a sequence of `FConvaiResultAction` structs in the queue. |
-| **Queue and dispatch** | The plugin maintains an `ActionsQueue`. On each `HandleActionCompletion(true)`, the queue advances by one. A name-based dispatcher calls the matching Blueprint function on the owning Actor or chatbot component. |
-| **Completion model** | Handlers are responsible for calling `HandleActionCompletion`. Without it, the queue stalls. `false` clears the remaining queue; `AbortActionSequence` discards everything and optionally asks Convai for a fresh plan. |
-| **Wait-for-speech gate** | A per-action `bWaitForBotSpeech` flag that delays firing until the character begins or finishes speaking, so movement and speech stay synchronized. |
-| **Runtime mutation** | Objects and characters can be added or removed at runtime; the local environment changes immediately, while scene-context updates are sent to the live session when applicable. |
+| **Action contract** | The list of actions, objects, and characters sent to Convai before a session starts — defines what the character is allowed to do and reference. |
+| **Action pipeline** | Two parallel lanes: one plays speech audio, the other stores and runs a sequence of actions in order. |
+| **Queue and dispatch** | The plugin keeps a queue of pending actions. Each time a handler reports completion, the queue advances by one and the next handler runs. |
+| **Completion model** | Every handler must call `HandleActionCompletion` when it finishes. Without that call, the queue stalls and later actions never run. |
+| **Wait-for-speech gate** | An optional per-action flag that delays the action from firing until the character begins or finishes speaking, so movement and speech stay in sync. |
+| **Runtime mutation** | Objects and characters can be added or removed while a session is live; the local environment updates immediately. |
 
-## The action_config contract
+## The action contract
 
-Before a session starts, the chatbot component serializes a description of the character's affordances into a JSON structure called `action_config`. This contract is sent to Convai at `/connect` time and tells Convai which actions the character can perform, which objects exist in the scene, and which characters are present.
+Before a session starts, the chatbot component reads the `Environment` property — its action templates, registered objects, and character list — and sends that information to Convai. Convai uses this to know which actions the character can perform and which objects it can reference when it chooses actions in response to player speech.
 
 The contract has three parts:
 
@@ -39,10 +41,10 @@ The contract has three parts:
 - **Objects** — an array of `FConvaiObjectEntry` values describing interactable scene objects. Each entry has a `Name`, an optional `Description`, and navigation targeting fields.
 - **Characters** — an array of `FConvaiObjectEntry` values describing other characters present in the scene.
 
-The `bEnableActions` flag on `FConvaiEnvironmentData` (shown as **Enable Actions** in the Details panel) acts as the master switch. It defaults to `true` on every new `Convai Chatbot` component, so the feature is on out of the box. When `bEnableActions` is `false`, no `action_config` is sent at `/connect` and the character behaves as a purely conversational NPC.
+The **Enable Actions** toggle on the `Convai Chatbot` component's `Environment` property acts as the master switch. It defaults to `true` on every new component, so the feature is on out of the box. When disabled, the contract is not sent at session start and the character behaves as a purely conversational NPC.
 
 {% hint style="info" %}
-The action set is fixed at `/connect` time. Adding or removing actions at runtime via `AddAction` / `RemoveAction` only affects the next session — the live session retains the set it was connected with.
+The action set is fixed when a session starts. Adding or removing actions at runtime via `AddAction` / `RemoveAction` only affects the next session — the live session retains the set it was connected with.
 {% endhint %}
 
 ## Action pipeline
@@ -81,6 +83,8 @@ When `bAutoReport` is `true` (the default), the plugin also sends a context even
 
 If a handler encounters an unrecoverable error and wants Convai to generate a completely fresh action plan, it calls `AbortActionSequence` instead, optionally passing a text description of what went wrong.
 
+The diagram below shows a single-action exchange from start to completion. When a sequence contains multiple actions, each `HandleActionCompletion(true)` call advances the queue by one step.
+
 ```mermaid
 sequenceDiagram
     participant Player
@@ -97,8 +101,6 @@ sequenceDiagram
     Plugin->>Plugin: Dequeue and start next action
     Plugin->>Convai: Context event (outcome)
 ```
-
-The diagram above shows a single action. When a sequence contains multiple actions, each `HandleActionCompletion(true)` advances the queue by one step.
 
 ## Runtime environment mutation
 

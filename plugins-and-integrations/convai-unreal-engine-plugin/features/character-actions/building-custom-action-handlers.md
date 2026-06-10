@@ -32,7 +32,7 @@ Click **Compile** on the character Blueprint so the new action template is saved
 {% endstepper %}
 
 {% hint style="info" %}
-Keep action names and descriptions short. Long descriptions increase LLM context without improving behavior. Leave **Description** empty when the action name is self-explanatory.
+Keep action names and descriptions short. Long descriptions increase the context sent to Convai without improving behavior. Leave **Description** empty when the action name is self-explanatory.
 {% endhint %}
 
 ## Scaffold the handler with Create Convai Action Handler
@@ -66,6 +66,10 @@ You can also create handlers manually: add a **Custom Event** with the exact act
 ## Handle Action Completion
 
 Every handler must call `Handle Action Completion` on the `Convai Chatbot` component when the action finishes, succeeds, fails, or is interrupted. Without this call, the queue stalls and later actions never run.
+
+{% hint style="info" %}
+For most handlers, only `IsSuccessful` needs to change. The remaining parameters are advanced — leave them at their defaults until you need spoken feedback from the character.
+{% endhint %}
 
 | Parameter | Default | Purpose |
 |---|---|---|

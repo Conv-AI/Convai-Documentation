@@ -4,13 +4,13 @@ description: Reference handler patterns for the four default Convai character ac
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Every new `Convai Chatbot` component includes four pre-configured action templates: `Move To`, `Follow`, `Stop Moving`, and `Wait For`. These actions are registered in the `Actions` array out of the box with the correct parameter definitions. This page documents the parameter structure of each action and provides a complete, copy-ready Blueprint handler implementation.
+Every new `Convai Chatbot` component includes four pre-configured action templates: `Move To`, `Follow`, `Stop Moving`, and `Wait For`. These templates define the action *names* and *parameters* — you still need to implement the corresponding Blueprint events in your NPC character Blueprint. This page provides a copy-ready handler pattern for each action.
 
 ## Choosing the right handler
 
 | Action | Parameters | Purpose | Completion model |
 |---|---|---|---|
-| `Move To` | `destination` (Reference) | Navigate to a registered object or position | Completes when movement ends |
+| `Move To` | `destination` (Reference) | Navigate to a registered object or character target | Completes when movement ends |
 | `Follow` | `character` (Reference) | Start continuously following a registered character | Completes after the follow loop starts |
 | `Stop Moving` | — | Cancel any in-progress movement | Completes immediately |
 | `Wait For` | `time in seconds` (Number) | Pause the action queue for a duration | Completes after the delay |
@@ -18,8 +18,6 @@ Every new `Convai Chatbot` component includes four pre-configured action templat
 {% hint style="info" %}
 The movement handler patterns use `AI Move To` and require an AI Controller and Nav Mesh Bounds Volume. `Wait For` does not require navigation. If your NPC does not use Unreal's navigation system, replace the movement logic with your own approach and keep the same `HandleActionCompletion` pattern.
 {% endhint %}
-
----
 
 ## Move To
 
@@ -29,9 +27,11 @@ Navigates the NPC to a registered object. The `destination` parameter is a `Refe
 
 | Name | Type | Description |
 |---|---|---|
-| `destination` | Reference (`FConvaiObjectEntry`) | The object the NPC should walk to. Resolved from the registered `Objects` list. |
+| `destination` | Reference (`FConvaiObjectEntry`) | The object the NPC should walk to. Resolved against the registered `Objects` and `Characters` lists (`Objects` searched first). |
 
 **Blueprint handler:**
+
+Use **Create Convai Action Handler** (right-click in the Event Graph) to scaffold this event automatically, then replace the placeholder logic with the pattern below.
 
 ```text
 // Blueprint pseudocode
@@ -79,8 +79,6 @@ Event Move To(ActionData: FConvaiResultAction)
 - `ResolveGoalLocation` with a live `Source Actor` also computes `bOut Reachable` and `Out Path Points`, which you can use to bail out early if no navmesh path exists.
 - `AcceptanceRadius` comes from the registered `FConvaiObjectEntry` (default `150` cm). Increase it for large objects or decrease it for precise sub-component targeting.
 
----
-
 ## Follow
 
 Starts a continuous follow behavior for a registered character. The follow timer or task can keep running after the action completes; call `HandleActionCompletion(true)` after the follow loop starts so future actions can dispatch.
@@ -89,9 +87,11 @@ Starts a continuous follow behavior for a registered character. The follow timer
 
 | Name | Type | Description |
 |---|---|---|
-| `character` | Reference (`FConvaiObjectEntry`) | The character to follow. Resolved from the registered `Characters` list. |
+| `character` | Reference (`FConvaiObjectEntry`) | The character to follow. Resolved against the registered `Objects` and `Characters` lists (`Objects` searched first). |
 
 **Blueprint handler:**
+
+Use **Create Convai Action Handler** (right-click in the Event Graph) to scaffold this event automatically, then replace the placeholder logic with the pattern below.
 
 ```text
 // Blueprint pseudocode
@@ -122,8 +122,6 @@ A common approach is a `Set Timer by Function Name` node that re-issues `AI Move
 
 Alternatively, implement a `BehaviorTree` task that loops until an external signal is set, and signal it from the `Stop Moving` handler.
 
----
-
 ## Stop Moving
 
 Cancels any in-progress movement behavior and completes the current action. If `Follow` started a timer or task, `Stop Moving` should clear that timer or task and then call `HandleActionCompletion(true)` for the stop action.
@@ -131,6 +129,8 @@ Cancels any in-progress movement behavior and completes the current action. If `
 **Parameters:** none
 
 **Blueprint handler:**
+
+Use **Create Convai Action Handler** (right-click in the Event Graph) to scaffold this event automatically, then replace the placeholder logic with the pattern below.
 
 ```text
 // Blueprint pseudocode
@@ -161,9 +161,11 @@ Pauses the action queue for a configurable number of seconds. After the delay, `
 
 | Name | Type | Description |
 |---|---|---|
-| `time in seconds` | Number (`float`) | The number of seconds to pause. The LLM fills this value; guide it with a clear parameter description such as `"A plain number of seconds, e.g. 3"`. |
+| `time in seconds` | Number (`float`) | The number of seconds to pause. Convai fills this value; guide it with a clear parameter description such as `"A plain number of seconds, e.g. 3"`. |
 
 **Blueprint handler:**
+
+Use **Create Convai Action Handler** (right-click in the Event Graph) to scaffold this event automatically, then replace the placeholder logic with the pattern below.
 
 ```text
 // Blueprint pseudocode

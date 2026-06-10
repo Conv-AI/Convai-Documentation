@@ -7,7 +7,13 @@ last_reviewed: "4.0.0-beta.21"
 Use this page to diagnose character actions that do not fire, stop mid-sequence, move to the wrong place, or receive empty parameters.
 
 {% hint style="info" %}
-Use the Output Log while debugging. `ConvaiChatbotComponentLog` reports session, queue, and dispatch messages, including missing handler warnings.
+Open the **Output Log** before debugging any action issue. `ConvaiChatbotComponentLog` reports session, queue, and dispatch messages, including missing-handler warnings. `ConvaiSubsystemLog` reports action config parsing and parameter-resolution messages. To increase verbosity, add the following to `DefaultEngine.ini`:
+
+```ini
+[Core.Log]
+ConvaiChatbotComponentLog=Verbose
+ConvaiSubsystemLog=Verbose
+```
 {% endhint %}
 
 ## Actions not firing
@@ -100,7 +106,7 @@ Use the Output Log while debugging. `ConvaiChatbotComponentLog` reports session,
 
 **Symptom:** The `On Actions Received` event fires and `SequenceOfActions` contains entries, but `IsActionsQueueEmpty` returns `true` immediately after.
 
-**Cause:** A previous action's `HandleActionCompletion(false)` or `AbortActionSequence` ran and cleared the queue before the new sequence was fully processed.
+**Cause:** A handler cleared the queue before you inspected it. This can be the current handler, because `On Actions Received` is broadcast after the plugin appends the queue and schedules first-action dispatch, or it can be a previous handler that called `HandleActionCompletion(false)` or `AbortActionSequence`.
 
 **Fix:** Check that no handler is calling `HandleActionCompletion(false)` or `AbortActionSequence` prematurely. Also check that `ClearActionQueue` is not called in an unintended location.
 
@@ -194,11 +200,11 @@ Use the Output Log while debugging. `ConvaiChatbotComponentLog` reports session,
 
 ### GetParamAsNumber returns 0 unexpectedly
 
-**Symptom:** A `Number`-typed parameter resolves to `0` even though the LLM should have provided a value.
+**Symptom:** A `Number`-typed parameter resolves to `0` even though Convai should have provided a value.
 
-**Cause:** The LLM returned text like `"five seconds"` rather than `"5"`. `NumberValue` is populated via `Atof`, which returns `0` for non-numeric strings.
+**Cause:** Convai returned text like `"five seconds"` rather than `"5"`. `NumberValue` is populated via `Atof`, which returns `0` for non-numeric strings.
 
-**Fix:** Use `GetParamAsString` to read the raw value and parse it manually, or improve the parameter description to guide the LLM toward numeric output: set `Description` to `"A plain integer number of seconds, e.g. 3"`.
+**Fix:** Use `GetParamAsString` to read the raw value and parse it manually, or improve the parameter description to guide Convai toward numeric output: set `Description` to `"A plain integer number of seconds, e.g. 3"`.
 
 **Verify:** Print both `GetParamAsString` and `GetParamAsNumber`. The string should start with a numeric value when automatic number parsing is expected.
 
@@ -229,21 +235,6 @@ Use the Output Log while debugging. `ConvaiChatbotComponentLog` reports session,
 **Verify:** Read `AttentionSource` after clearing. It should return to `None` before gaze updates it to `Gaze`.
 
 ---
-
-## General diagnostics
-
-Enable Convai log categories in **Output Log** to see detailed action pipeline messages:
-
-- `ConvaiChatbotComponentLog` — session, queue, and dispatch messages.
-- `ConvaiSubsystemLog` — action parsing and parameter constraint warnings.
-
-These categories are at `Log` verbosity by default. To increase verbosity, add the following to your project's `DefaultEngine.ini`:
-
-```ini
-[Core.Log]
-ConvaiChatbotComponentLog=Verbose
-ConvaiSubsystemLog=Verbose
-```
 
 ## Next steps
 

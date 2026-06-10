@@ -4,7 +4,7 @@ description: Define the action set, enable character actions, and register envir
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The `Convai Chatbot` component exposes an `Environment` property that controls the full character actions configuration: action templates, scene-object registrations, character registrations, and attention state. Configure action templates in the editor before testing in Play mode, then compile the character Blueprint so changes are saved. Use Blueprint at runtime for object, character, and attention updates during a live session.
+The `Convai Chatbot` component's `Environment` property controls every aspect of character actions: which actions the character can perform, which objects and characters it can reference, and whether actions are on at all. Set up action templates and register objects in the editor; compile the character Blueprint to save changes before entering Play mode.
 
 ## The Environment property
 
@@ -47,7 +47,7 @@ The `Actions` array is pre-populated with four entries out of the box:
 
 | Action name | Parameters | Description |
 |---|---|---|
-| `Move To` | `destination` (Reference) | Navigate to a registered object or location. |
+| `Move To` | `destination` (Reference) | Navigate to a registered object or character target. |
 | `Follow` | `character` (Reference) | Follow a registered character or the player. |
 | `Stop Moving` | — | Stop navigating. |
 | `Wait For` | `time in seconds` (Number) | Wait for a specified duration. |
@@ -56,11 +56,37 @@ You can rename, describe, or remove these as needed. To remove a default action,
 
 ### Adding a custom action
 
-1. Click **+** on the `Actions` array to add a new entry.
-2. Set **Name** to a unique, descriptive verb phrase, for example `"Open Door"`, `"Print"`, or `"Dance"`.
-3. Set **Description** only when the action name alone is ambiguous. Keep descriptions short or leave the field empty to reduce LLM context.
-4. Add entries to **Parameters** if the action needs typed inputs. See [Parameterized actions](parameterized-actions.md).
-5. Click **Compile** on the character Blueprint, then scaffold the handler. See [Building custom action handlers](building-custom-action-handlers.md).
+{% stepper %}
+{% step %}
+### Add a new entry
+
+Click **+** on the `Actions` array.
+{% endstep %}
+
+{% step %}
+### Name the action
+
+Set **Name** to a unique, descriptive verb phrase, for example `"Open Door"`, `"Print"`, or `"Dance"`.
+{% endstep %}
+
+{% step %}
+### Add a description (optional)
+
+Set **Description** only when the action name alone is ambiguous. Keep it short or leave it empty to reduce the context sent to Convai.
+{% endstep %}
+
+{% step %}
+### Add parameters (optional)
+
+Add entries to **Parameters** if the action needs typed inputs. See [Parameterized actions](parameterized-actions.md).
+{% endstep %}
+
+{% step %}
+### Compile and scaffold the handler
+
+Click **Compile** on the character Blueprint, then scaffold the handler. See [Building custom action handlers](building-custom-action-handlers.md).
+{% endstep %}
+{% endstepper %}
 
 ### Authoring tips
 
@@ -83,7 +109,7 @@ The `Objects` array contains `FConvaiObjectEntry` structs for interactable scene
 | Field | Type | Purpose |
 |---|---|---|
 | `Name` | `FString` | Unique label the character uses to identify this object. |
-| `Ref` | `AActor*` | The in-level Actor this entry represents. |
+| `Ref` | `TWeakObjectPtr<AActor>` | The in-level Actor this entry represents. |
 | `Description` | `FString` | Optional plain-language description for Convai. |
 | `MoveTargetMode` | `EConvaiMoveTarget` | `Actor as goal` (stop at actor bounds) or `Component as goal` (walk to a specific sub-component). |
 | `AcceptanceRadius` | `float` | How close the AI must get before the move is considered complete. Default `150` cm. |
@@ -113,6 +139,10 @@ At session start, the plugin can automatically add the player conversation partn
 
 ## Runtime mutation
 
+{% hint style="info" %}
+Runtime mutation is for advanced use cases — most projects only need the editor-time setup above.
+{% endhint %}
+
 You can add or remove entries at runtime using the methods on `UConvaiChatbotComponent`:
 
 | Method | Purpose |
@@ -130,9 +160,9 @@ You can add or remove entries at runtime using the methods on `UConvaiChatbotCom
 
 Runtime object and character changes update the local `EnvironmentData` mirror immediately. In live sessions, changes that are not already part of the connect-time scene metadata snapshot are batched and sent through `update-scene-metadata` so Convai receives updated scene context. Pass `bFlushImmediately = true` only when an immediate update is critical, as frequent flushes generate excess network traffic.
 
-### GatherEnvironmentExtras
+### Advanced: GatherEnvironmentExtras
 
-Override the `Gather Environment Extras` Blueprint native event on the NPC Actor to append additional actions, objects, or characters right before the session starts. The override runs once at `StartSession` time and is additive — it does not replace the Details panel defaults.
+Use this override only when the environment must change based on runtime state at session start. Override the `Gather Environment Extras` Blueprint native event on the NPC Actor to append additional actions, objects, or characters right before the session starts. The override runs once at `StartSession` time and is additive — it does not replace the Details panel defaults.
 
 ```text
 // Blueprint pseudocode

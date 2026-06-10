@@ -4,7 +4,7 @@ description: Enable character actions, set up pawn movement and navigation, regi
 last_reviewed: "4.0.0-beta.21"
 ---
 
-We will enable character actions on an existing Convai character, prepare the character for AI navigation, register a scene object as a target, and confirm that the four default actions (`Move To`, `Follow`, `Stop Moving`, `Wait For`) run correctly when you speak to the character.
+We will prepare an existing Convai NPC to run character actions. By the end, your NPC will have the default action handlers, movement setup, NavMesh coverage, and a registered object target so you can test `Move To`, `Follow`, `Stop Moving`, and `Wait For`.
 
 ## Prerequisites
 
@@ -50,10 +50,11 @@ The utility adjusts the Blueprint based on its parent class:
 
 | Parent class | What the utility does |
 |---|---|
-| `Actor` (not a pawn) | Reparents to `APawn` and adds `Floating Pawn Movement` with Convai-tuned defaults. |
+| Exact `AActor` parent | Reparents to `APawn` and adds `Floating Pawn Movement` with Convai-tuned defaults. |
 | `APawn` (not `Character`) | Adds `Floating Pawn Movement` if missing and applies tuned defaults. |
 | `Character` | Tunes the existing `Character Movement` component (max walk speed, acceleration, braking). |
-| Other base classes | Logs a warning in the Output Log. Reparent to `APawn` or `Character`, then run the utility again. |
+| Custom `Actor` subclass that is not a pawn | Logs a warning and leaves the parent class unchanged. Reparent to `APawn` or `Character`, then run the utility again. |
+| Non-Actor parent | Logs a warning in the Output Log. Use an Actor-based Blueprint for action movement. |
 
 If the utility reports a warning, open **Window > Output Log** and search for `ConvaiContentBrowserContextMenu` to read the message.
 {% endstep %}
@@ -61,7 +62,7 @@ If the utility reports a warning, open **Window > Output Log** and search for `C
 
 ## Add a navigation mesh
 
-`Move To` and `Follow` use Unreal's navigation system. Cover the walkable floor with a built NavMesh before testing movement.
+The `Move To` and `Follow` actions rely on Unreal's built-in navigation system to find a path to the destination. Without a built NavMesh, the character cannot calculate a route and will stay in place.
 
 {% stepper %}
 {% step %}
@@ -79,6 +80,24 @@ Press **P** in the viewport to toggle the green navigation overlay. Confirm gree
 {% endstep %}
 {% endstepper %}
 
+## Add the default action handlers
+
+The `Actions` array only declares what Convai can ask the NPC to do. The NPC still needs matching Blueprint events for `Move To`, `Follow`, `Stop Moving`, and `Wait For` before movement can run.
+
+{% stepper %}
+{% step %}
+### Add the handler events
+
+Open [Built-in action handlers](built-in-action-handlers.md) and add the four default handlers to the NPC Actor Blueprint. Use **Create Convai Action Handler** when it is available, or create Custom Events with the exact action names.
+{% endstep %}
+
+{% step %}
+### Compile the Blueprint
+
+Click **Compile** and **Save** after the handlers are added. If you are testing the pipeline for the first time, add a temporary **Print String** node at the start of each handler so you can confirm the event fires.
+{% endstep %}
+{% endstepper %}
+
 ## Test default movement actions
 
 Run the level in Play mode and wait for the session to connect. Try these spoken prompts:
@@ -91,7 +110,7 @@ Run the level in Play mode and wait for the session to connect. Try these spoken
 The player is registered automatically when `bAutoFillConversationPartnerFromPlayer` is `true` on the chatbot (the default), so `"me"` resolves to the conversation partner.
 
 {% hint style="warning" %}
-If the character speaks but does not move, the Blueprint may be missing handler functions for the default actions. Implement the four reference handlers in [Built-in action handlers](built-in-action-handlers.md), then test again.
+If the character speaks but does not move, the character Blueprint is missing the handler events for `Move To`, `Follow`, `Stop Moving`, and `Wait For`. See [Built-in action handlers](built-in-action-handlers.md) to add them, then test again.
 {% endhint %}
 
 ## Register a scene object

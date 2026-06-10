@@ -4,7 +4,7 @@ description: End-to-end action recipes for navigating to a registered object, fo
 last_reviewed: "4.0.0-beta.21"
 ---
 
-These examples follow the same progression as the quick start and parameterized-action guides: default navigation first, then custom actions with typed parameters. Each example lists Details panel configuration and Blueprint pseudocode for the NPC Actor.
+Each example below is self-contained: it lists the Details panel configuration and the Blueprint handler pseudocode needed to implement a working action. Start with Example 1 if you are new to character actions. The examples progress from default navigation to custom actions with typed parameters.
 
 ## Example 1: Navigate to a registered object
 

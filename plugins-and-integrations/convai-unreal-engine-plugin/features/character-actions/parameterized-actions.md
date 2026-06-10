@@ -6,36 +6,25 @@ last_reviewed: "4.0.0-beta.21"
 
 Parameterized actions let Convai fill in typed values when it chooses an action. A `Move To` action needs a destination; a `Print` action can carry dynamic text; a `Dance` action can pick from a fixed list of animation styles. Parameters give Convai structured guidance and give your handler typed values to read.
 
+The following examples show the most common parameter patterns. The full field reference is at the end of this page.
+
 ## Prerequisites
 
 - You completed [Building custom action handlers](building-custom-action-handlers.md) for a no-parameter action.
 - The action template is compiled on the character Blueprint before you test in Play mode.
 
-## FConvaiActionParam fields
+## Choosing a parameter type
 
-Each parameter on an `FConvaiAction` template is an `FConvaiActionParam` struct:
+Use `String` for free-form text, `Reference` for a registered object or character, `Number` for a numeric value, and `String` with **Choices** when only a few values are valid (for example a fixed list of dance styles). The full type list is in the reference table below.
 
-| Field | Type | Purpose |
-|---|---|---|
-| `Name` | `FString` | Placeholder name, for example `"destination"` or `"text"`. |
-| `Description` | `FString` | Optional hint for Convai. Keep short or leave empty to reduce context size. |
-| `Type` | `EConvaiActionParamType` | Declared type. Controls the wire-format hint and parser behavior. |
-| `Connector` | `FString` | Joining text before this parameter, for example `"on"` in `"Put ball on table"`. |
-| `Choices` | `TArray<FString>` | Fixed-choice list rendered as `[choice1\|choice2\|...]` in the wire format. |
-| `EnumType` | `UEnum*` | Required when `Type == Enum`. |
-
-## Parameter types
-
-| Enum value | Display name | How the value is parsed |
-|---|---|---|
-| `Auto` | Auto | Infer: Reference, then Number, then Bool; fall back to String. |
-| `Reference` | Actor Reference | Resolve against registered `Objects` and `Characters` by exact name. |
-| `String` | String | Raw string. |
-| `Number` | Number | Parse as `float`. |
-| `Bool` | Bool | `"true"`, `"yes"`, or `"1"` → `true`; otherwise `false`. |
-| `Enum` | Enum | Match display names of `EnumType`; value stored in `ByteValue`. |
-
-Regardless of declared type, all value fields on `FConvaiResultParam` are populated on a best-effort basis.
+| Type | Use when |
+|---|---|
+| `String` | The value is open-ended text. |
+| `Reference` | The value must resolve to a registered object or character in the scene. |
+| `Number` | The value is a number (distance, duration, count). |
+| `Bool` | The value is a true/false flag. |
+| `String` + Choices | The value must be one of a fixed list of options. |
+| `Enum` | A `UENUM` already exists in your project and you want Convai to match against its display names. |
 
 ## Example: Print with a string parameter
 
@@ -184,6 +173,32 @@ if RefEntry.Ref is None:
     )
     return
 ```
+
+## FConvaiActionParam fields reference
+
+Each parameter on an `FConvaiAction` template is an `FConvaiActionParam` struct:
+
+| Field | Type | Purpose |
+|---|---|---|
+| `Name` | `FString` | Placeholder name, for example `"destination"` or `"text"`. |
+| `Description` | `FString` | Optional hint for Convai. Keep short or leave empty to reduce context size. |
+| `Type` | `EConvaiActionParamType` | Declared type. Controls the wire-format hint and parser behavior. |
+| `Connector` | `FString` | Joining text before this parameter, for example `"on"` in `"Put ball on table"`. |
+| `Choices` | `TArray<FString>` | Fixed-choice list rendered as `[choice1\|choice2\|...]` in the wire format. |
+| `EnumType` | `UEnum*` | Required when `Type == Enum`. |
+
+Full type behavior:
+
+| Enum value | Display name | How the value is parsed |
+|---|---|---|
+| `Auto` | Auto | Infer: Reference, then Number, then Bool; fall back to String. |
+| `Reference` | Actor Reference | Resolve against registered `Objects` and `Characters` by exact name. |
+| `String` | String | Raw string. |
+| `Number` | Number | Parse as `float`. |
+| `Bool` | Bool | `"true"`, `"yes"`, or `"1"` → `true`; otherwise `false`. |
+| `Enum` | Enum | Match display names of `EnumType`; value stored in `ByteValue`. |
+
+Regardless of declared type, all value fields on `FConvaiResultParam` are populated on a best-effort basis.
 
 ## Next steps
 
