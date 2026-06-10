@@ -14,9 +14,9 @@ A Blueprint event handler that fires whenever `UConvaiChatbotComponent` receives
 
 Before starting, verify:
 
-- [ ] The Convai Unreal Engine plugin is installed and an API key is configured.
-- [ ] A character Actor is in your level with a working `Convai Chatbot` component (the character already speaks when you talk to it).
-- [ ] The character's Skeletal Mesh has morph targets for the emotions you want to drive — check the **Morph Targets** tab in the Skeletal Mesh asset editor and note the exact names.
+- The Convai Unreal Engine plugin is installed and an API key is configured.
+- A character Actor is in your level with a working `Convai Chatbot` component (the character already speaks when you talk to it).
+- The character's Skeletal Mesh has morph targets for the emotions you want to drive — check the **Morph Targets** tab in the Skeletal Mesh asset editor and note the exact names.
 
 {% hint style="info" %}
 If the character is not yet set up, complete [Add your first character](../../getting-started/add-your-first-character.md) first, then return here.
