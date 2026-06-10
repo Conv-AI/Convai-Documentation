@@ -4,88 +4,91 @@ description: Apply common Blueprint patterns for Unreal vision, including auto-s
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The examples below show practical Blueprint patterns for the Environment Webcam component. Each example includes the setup context, the nodes or fields to use, and the expected runtime behavior.
+These examples show practical Blueprint patterns for **Environment Webcam**. Complete [Vision quick start](quick-start.md) first if you have not added vision to a character yet.
+
+Each example includes a scenario, the setup to apply, the expected runtime behavior, and how to verify it.
 
 ## Auto-start vision on BeginPlay
 
-**Scenario:** An industrial safety trainer NPC stands at a fixed workstation. Vision should begin as soon as the level loads, with no manual trigger required.
+**Scenario:** A training NPC at a fixed workstation should begin scene capture as soon as the level loads.
 
-Set `bAutoStartVision = true` on the **Environment Webcam** component in the **Details** panel. No Event Graph wiring is needed. The component calls `Start` automatically during `BeginPlay`.
-
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the Details panel on the Environment Webcam component showing `bAutoStartVision` enabled under the **Convai | Vision** category.
-{% endhint %}
+**Setup:** Select **Environment Webcam** in the character Blueprint. In the **Details** panel under **Convai | Vision**, enable `bAutoStartVision`. Assign **Convai Render Target** before entering Play mode.
 
 <figure><img src="../../../../.gitbook/assets/TODO-vision-examples-auto-start.png" alt="Blueprint Details panel showing bAutoStartVision enabled on the Environment Webcam component"><figcaption><p>TODO: Replace with screenshot showing bAutoStartVision enabled in the Details panel.</p></figcaption></figure>
 
-**Expected behavior:** During `BeginPlay`, the component calls `Start()`. If `ConvaiRenderTarget` is assigned, `Get State` returns `Capturing` and the chatbot can send frames while the session is active.
+**Expected behavior:** During `BeginPlay`, the component calls **Start**. When **Convai Render Target** is assigned, **Get State** returns `Capturing` and the chatbot can send frames during an active session.
+
+**Verify:** Call **Supports Vision** on the chatbot and **Get State** on **Environment Webcam**. Both should report an active vision source in `Capturing` state.
 
 ## Manual start and stop
 
-**Scenario:** A medical training simulation has a character that only uses vision during a procedure phase. Vision should start when the procedure begins and stop when it ends.
+**Scenario:** A medical training simulation should use vision only during a procedure phase.
 
-Wire the **Event Graph** as follows:
+**Setup:**
 
-1. On your procedure-start event, get a reference to the **Environment Webcam** component and call **Start**.
+1. On your procedure-start event, get a reference to **Environment Webcam** and call **Start**.
 2. On your procedure-end event, call **Stop** on the same component.
-
-Check `Get State` before calling `Start` to avoid double-starts if your procedure events can fire more than once.
-
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the Event Graph showing a procedure-start custom event wired to the **Start** node and a procedure-end custom event wired to the **Stop** node on the Environment Webcam component reference.
-{% endhint %}
+3. Before calling **Start**, check **Get State** to avoid double-starts if the event can fire more than once.
 
 <figure><img src="../../../../.gitbook/assets/TODO-vision-examples-manual-start-stop.png" alt="Event Graph showing custom events wired to Start and Stop nodes on the Environment Webcam component"><figcaption><p>TODO: Replace with screenshot showing Start/Stop event wiring in the Event Graph.</p></figcaption></figure>
 
-**Expected behavior:** The component captures frames only during the active procedure phase. `Get State` returns `Capturing` after **Start** and `Stopped` after **Stop**.
+**Expected behavior:** The component captures frames only during the active procedure phase. **Get State** returns `Capturing` after **Start** and `Stopped` after **Stop**.
+
+**Verify:** Ask the character about a visible object only while the procedure is active. Outside that phase, responses should not reference scene content.
 
 ## Limiting capture FPS to reduce bandwidth
 
-**Scenario:** A corporate onboarding simulation runs on a constrained network. Dropping vision to 5 FPS is acceptable and reduces data sent per conversation.
+**Scenario:** A corporate onboarding simulation runs on a constrained network. Lower capture rate is acceptable.
 
-In the **Details** panel, set **Maximum FPS** (`m_MaxFPS`) to `5`. Alternatively, call **Set Max FPS** with value `5` from a Blueprint initialization function.
+**Setup:** In the **Details** panel, set **Maximum FPS** (`m_MaxFPS`) to `5`. Alternatively, call **Set Max FPS** with value `5` from a Blueprint initialization function.
 
-**Expected behavior:** The chatbot reads the component's `GetMaxFPS()` value and throttles frame sends to approximately one frame every `0.2` seconds.
+**Expected behavior:** The chatbot reads `GetMaxFPS()` and throttles frame upload to approximately one frame every `0.2` seconds.
+
+**Verify:** Compare response latency before and after the change. The **Output Log** should continue to show `SendImage: Sending raw image` at the reduced cadence.
 
 ## Checking whether a vision component is registered
 
-**Scenario:** A player-facing UI should show whether the chatbot has a valid vision source registered.
+**Scenario:** A UI indicator should show whether the chatbot has a valid frame source.
 
-In the Event Graph (or in a UI widget's tick function), call **Supports Vision** on the `UConvaiChatbotComponent`. Use the boolean return value to drive the indicator's visibility.
+**Setup:** In the Event Graph or a widget tick function, call **Supports Vision** on `UConvaiChatbotComponent`. Use the boolean return value to drive the indicator.
 
-**Expected behavior:** **Supports Vision** returns `true` when a component implementing `IConvaiVisionInterface` is registered or discoverable on the chatbot's Actor. To confirm the component is actually capturing, also call **Get State** on the Environment Webcam and check for `Capturing`.
+**Expected behavior:** **Supports Vision** returns `true` when a component implementing `UConvaiVisionInterface` is registered or discoverable on the chatbot `Actor`.
+
+**Verify:** Also call **Get State** on **Environment Webcam**. Registration alone is not enough for upload; the source must be in `Capturing` state.
 
 ## Triggering logic after capture starts
 
-**Scenario:** A character should run setup logic only after the Environment Webcam has entered the `Capturing` state.
+**Scenario:** A character should run setup logic only after **Environment Webcam** enters `Capturing`.
 
-Wire the **On Frame Ready** event on the **Environment Webcam** component to a custom event. **On Frame Ready** broadcasts during tick while the component is in the `Capturing` state, so use a boolean flag to ensure your logic runs only once.
+**Setup:** Bind **On Frame Ready** on **Environment Webcam** to a custom event. Use a boolean flag so the logic runs once.
 
 ```text
 // Blueprint pseudocode
-bool bGreetingFired = false
+bool bSetupComplete = false
 
 OnFrameReady →
-  if NOT bGreetingFired:
-    bGreetingFired = true
+  if NOT bSetupComplete:
+    bSetupComplete = true
     → trigger setup logic
 ```
 
-`FOnFirstFrameCaptured` exists on `IConvaiVisionInterface` but is a C++ delegate and is not Blueprint-assignable. Use the boolean-flag pattern for Blueprint graphs.
+**Expected behavior:** The setup logic runs once on the first tick that **On Frame Ready** fires while the component is capturing.
 
-**Expected behavior:** The setup logic runs once, on the first tick that **On Frame Ready** fires while the component is capturing.
+**Verify:** Confirm **Get State** returns `Capturing` before the custom logic runs.
 
 ## Switching the vision component at runtime
 
-**Scenario:** A military simulation has a drone character and a ground character sharing a level. Each has its own `UEnvironmentWebcam`. When the player switches control to the drone, the active chatbot should switch to the drone's vision component.
+**Scenario:** Two characters in the same level each have their own **Environment Webcam**. When control switches to a different character, the active chatbot should use that character's frame source.
 
-On the player-switch event:
+**Setup:** On the switch event:
 
 1. Get the target chatbot's `UConvaiChatbotComponent` reference.
-2. Get the desired `UEnvironmentWebcam` component reference.
-3. Call **Set Vision Component** on the chatbot, passing the webcam component.
+2. Get the desired **Environment Webcam** component reference on that character.
+3. Call **Set Vision Component** on the chatbot and pass the webcam component.
 
-**Expected behavior:** `Set Vision Component` returns `true` and replaces the previously registered vision component. The chatbot forwards frames from the new component on the next tick.
+**Expected behavior:** **Set Vision Component** returns `true` and replaces the previously registered source. The chatbot forwards frames from the new component on the next upload tick.
+
+**Verify:** Call **Supports Vision** on the target chatbot and **Get State** on the new webcam. Ask about an object visible only to the new source.
 
 ## Next steps
 

@@ -4,56 +4,66 @@ description: Implement a C++ frame source component for custom Unreal image pipe
 last_reviewed: "4.0.0-beta.21"
 ---
 
-The built-in `UEnvironmentWebcam` covers scene capture from a `USceneCaptureComponent2D`. When your project needs a different image source, create a custom `UActorComponent` that implements `IConvaiVisionInterface` so `UConvaiChatbotComponent` can discover or register it.
+This page is for advanced C++ projects. Most teams should use the built-in **Environment Webcam** component from [Vision quick start](quick-start.md).
+
+When your project needs a different image source, create a custom component that implements `IConvaiVisionInterface` so `UConvaiChatbotComponent` can discover or register it. When deriving from `UConvaiWebcamBase`, subclass `USceneComponent`.
+
+## Prerequisites
+
+- A C++ Unreal project with the Convai plugin enabled.
+- `ConvaiVisionBase` added to your module's `PublicDependencyModuleNames` in `Build.cs`.
+- A working chatbot setup from [Add your first Convai character](../../getting-started/add-your-first-character.md).
 
 ## When to implement a custom component
 
-`UEnvironmentWebcam` renders from a `USceneCaptureComponent2D` into a `UTextureRenderTarget2D`. This covers the vast majority of in-engine capture scenarios. A custom component is the right choice when:
+**Environment Webcam** renders from a `USceneCaptureComponent2D` into a `UTextureRenderTarget2D`. Use it for standard in-engine scene capture.
 
-- Your source is an external SDK (for example, a vendor's native webcam or depth-camera library) that produces raw pixel data outside of UE's texture pipeline.
-- Your pipeline already produces image bytes and you need full control over how those bytes are converted to the raw RGBA data sent by the chatbot.
-- You need to inject a procedural or AI-generated image feed into the conversation.
-- You are integrating a non-`UActorComponent` backend and need a component wrapper that exposes it to the chatbot.
+A custom component is appropriate when:
 
-For any use case that involves a standard UE camera rendering to a render target, use `UEnvironmentWebcam` instead and adjust its `CaptureComponent` properties.
+- Your source is an external SDK that produces raw pixel data outside Unreal's texture pipeline.
+- Your pipeline already produces image bytes and you need full control over RGBA conversion.
+- You need to inject a procedural or generated image feed into the conversation.
+- You are wrapping a non-component backend and need a component facade for the chatbot.
 
 ## Choose your base class
 
 | Option | When to use |
 |---|---|
-| Derive from `UConvaiWebcamBase` | You want a `UActorComponent` with Blueprint-accessible `OnFrameReady`, Inspector-visible `m_MaxFPS` and `bAutoStartVision`, and the `SetErrorCodeAndMessage` error-reporting helper. Covers the majority of custom-source needs. |
-| Implement `IConvaiVisionInterface` directly on a component | You need a component that does not inherit `UConvaiWebcamBase`, but still needs to register through `SetVisionComponent(UActorComponent*)` or Actor component discovery. |
+| Derive from `UConvaiWebcamBase` | You want Blueprint-accessible **Start**, **Stop**, **Get State**, **Set Max FPS**, error getters, and **On Frame Ready**. |
+| Implement `IConvaiVisionInterface` directly on `UActorComponent` | You need a component that does not inherit `UConvaiWebcamBase`, but still registers through **Set Vision Component** or actor discovery. |
 
-For most custom sources, derive from `UConvaiWebcamBase`. It handles the `Start`/`Stop` state machine, `m_MaxFPS` storage, error tracking, and the `OnFrameReady` Blueprint event, so you only override the methods specific to your image source.
+For most custom sources, derive from `UConvaiWebcamBase`. Override the capture methods your source needs and let the base class handle state, FPS storage, and error reporting.
+
+`bAutoStartVision` exists only on `UEnvironmentWebcam`. Custom subclasses must call **Start** from `BeginPlay` or expose their own auto-start property.
 
 ## Interface contract
 
-The table below lists all pure-virtual methods on `IConvaiVisionInterface`, declared in `VisionInterface.h`. When deriving from `UConvaiWebcamBase`, override `CanStart`, `CaptureRaw`, and optionally `GetImageTexture` or `CaptureCompressed` if your source needs them.
+The table below lists the pure-virtual methods on `IConvaiVisionInterface` in `VisionInterface.h`. When deriving from `UConvaiWebcamBase`, override `CanStart`, `CaptureRaw`, and optionally `GetImageTexture` or `CaptureCompressed`.
 
 | Method | Purpose | Notes |
 |---|---|---|
-| `void Start()` | Begin capturing. | Transitions state from `Stopped` or `Paused` to `Capturing`. |
-| `void Stop()` | End capturing. | Transitions state from `Capturing` or `Paused` to `Stopped`. |
-| `EVisionState GetState() const` | Return current lifecycle state. | Called by the chatbot each tick to gate `SendImage`. |
-| `void SetMaxFPS(int MaxFPS)` | Set maximum capture FPS. | `UConvaiWebcamBase` rejects values `<= 0`; default is `15`. |
-| `int GetMaxFPS() const` | Return current max FPS. | — |
-| `bool IsCompressedDataAvailable() const` | Return `true` if a pre-compressed frame is ready. | Part of the interface contract. The verified chatbot send path uses `CaptureRaw()`. |
-| `bool GetCompressedData(int& Width, int& Height, TArray<uint8>& Data)` | Retrieve a pre-compressed frame. | Part of the interface contract for integrations that use pre-compressed data. |
-| `bool CaptureCompressed(int& Width, int& Height, TArray<uint8>& Data, float ForceCompressionRatio)` | Capture and compress a frame on demand. | `UConvaiWebcamBase` returns `false` by default; override it only if your integration calls the compressed path. |
-| `bool CaptureRaw(int& Width, int& Height, TArray<uint8>& Data)` | Capture a raw RGBA frame. | This is the method used by `UConvaiChatbotComponent::SendImage()` in the verified source path. Fill `Data` with row-major RGBA bytes and return `true` on success. |
-| `UTexture* GetImageTexture(ETextureSourceType& TextureSourceType)` | Return the current frame texture. | Set `TextureSourceType` to `RenderTarget2D` or `Texture2D` to match your texture type. |
-| `FString GetLastErrorMessage() const` | Return the last human-readable error. | Return an empty string if no error has occurred. |
+| `void Start()` | Begin capturing. | Shipped base class sets state to `Capturing`. |
+| `void Stop()` | End capturing. | Shipped base class sets state to `Stopped`. |
+| `EVisionState GetState() const` | Return current lifecycle state. | Called by the chatbot each tick to gate upload. |
+| `void SetMaxFPS(int MaxFPS)` | Set maximum capture FPS. | `UConvaiWebcamBase` rejects values `<= 0`. Default is `15`. |
+| `int GetMaxFPS() const` | Return current max FPS. | Chatbot upload clamps effective send rate to `1`–`60`. |
+| `bool IsCompressedDataAvailable() const` | Return `true` if a pre-compressed frame is ready. | Part of the interface contract. Shipped chatbot path uses `CaptureRaw()`. |
+| `bool GetCompressedData(...)` | Retrieve a pre-compressed frame. | Optional for custom integrations. |
+| `bool CaptureCompressed(...)` | Capture and compress on demand. | Optional. Shipped chatbot path uses `CaptureRaw()`. |
+| `bool CaptureRaw(...)` | Capture a raw RGBA frame. | Required for chatbot upload. Fill row-major RGBA bytes and return `true` on success. |
+| `UTexture* GetImageTexture(...)` | Return the current frame texture. | Set `TextureSourceType` to match your texture type. |
+| `FString GetLastErrorMessage() const` | Return the last human-readable error. | Return an empty string if no error occurred. |
 | `int GetLastErrorCode() const` | Return the last numeric error code. | `UConvaiWebcamBase` initializes this value to `-1`. |
 
 ## Implement from UConvaiWebcamBase
 
-`UConvaiWebcamBase` is declared in `ConvaiWebcamBase.h` (module `ConvaiVisionBase`). Add `ConvaiVisionBase` to your module's `PublicDependencyModuleNames` in `Build.cs` before including it.
+`UConvaiWebcamBase` is declared in `ConvaiWebcamBase.h` in the `ConvaiVisionBase` module.
 
 {% stepper %}
 {% step %}
 ### Declare the class
 
-Create a `UActorComponent` subclass that derives from `UConvaiWebcamBase`. Mark it `BlueprintSpawnableComponent` so it appears in the Blueprint component picker.
+Create a `USceneComponent` subclass that derives from `UConvaiWebcamBase`. Mark it `BlueprintSpawnableComponent` if you want it in the component picker.
 
 ```cpp
 // MyCustomVisionComponent.h
@@ -73,7 +83,6 @@ protected:
     virtual bool CaptureRaw(int& Width, int& Height, TArray<uint8>& Data) override;
 
 private:
-    // Your image source handle — replace with whatever your SDK provides.
     TSharedPtr<FMyImageSource> MyImageSource;
 };
 ```
@@ -82,7 +91,7 @@ private:
 {% step %}
 ### Override CanStart
 
-`CanStart` is called by the base class `Start()` before it transitions state. Return `true` only when your source is initialized and ready to produce frames. Call `SetErrorCodeAndMessage` to record a diagnostic message if the source is not ready — this powers `GetLastErrorMessage()` and `GetLastErrorCode()` in Blueprint.
+`CanStart` runs before the base class transitions to `Capturing`. Return `true` only when your source is initialized. Call `SetErrorCodeAndMessage` when the source is not ready so **Get Last Error Message** and **Get Last Error Code** return useful values in Blueprint.
 
 ```cpp
 // MyCustomVisionComponent.cpp
@@ -97,14 +106,12 @@ bool UMyCustomVisionComponent::CanStart()
     return true;
 }
 ```
-
-`SetErrorCodeAndMessage(int ErrorCode, const FString& ErrorMessage, bool bPrintToLog)` is a protected helper declared on `UConvaiWebcamBase`. It stores both values so they can be retrieved from Blueprint via **Get Last Error Message** and **Get Last Error Code**.
 {% endstep %}
 
 {% step %}
 ### Override CaptureRaw
 
-`CaptureRaw` is called by the chatbot each time it needs a frame. Fill `Width`, `Height`, and `Data` with the raw RGBA pixel data from your source (row-major, 4 bytes per pixel). Return `true` on success and `false` if the frame could not be captured.
+`CaptureRaw` is called by the chatbot upload path. Fill `Width`, `Height`, and `Data` with row-major RGBA bytes. Return `true` on success.
 
 ```cpp
 // Pseudocode
@@ -118,39 +125,15 @@ bool UMyCustomVisionComponent::CaptureRaw(int& Width, int& Height, TArray<uint8>
 }
 ```
 {% endstep %}
-
-{% step %}
-### Override CaptureCompressed when needed
-
-Override `CaptureCompressed` only if another part of your integration calls the compressed capture path. The current chatbot send path uses `CaptureRaw()`, so most custom chatbot vision sources do not need this method.
-
-```cpp
-// Pseudocode
-bool UMyCustomVisionComponent::CaptureCompressed(
-    int& Width, int& Height, TArray<uint8>& Data, float ForceCompressionRatio)
-{
-    if (!MyImageSource.IsValid())
-        return false;
-
-    // Return pre-compressed JPEG directly from the source.
-    return MyImageSource->GetJPEGFrame(Width, Height, Data);
-}
-```
-
-If you do not override `CaptureCompressed`, `UConvaiWebcamBase::CaptureCompressed()` returns `false`.
-{% endstep %}
 {% endstepper %}
 
 ## Register the component with the chatbot
 
-Add the component to the same Actor as the `UConvaiChatbotComponent`. The chatbot calls `FindFirstVisionComponent()` at session start and auto-discovers any component on its Actor that implements `IConvaiVisionInterface`.
+Add the component to the same `Actor` as `UConvaiChatbotComponent`.
 
-- If only one vision component is present on the Actor, no explicit registration is needed.
-- If multiple vision components are present, call **Set Vision Component** on the chatbot in `BeginPlay` and pass the specific component you want to use.
-
-{% hint style="info" %}
-`bAutoStartVision` is inherited from `UConvaiWebcamBase` and works on custom components exactly as it does on `UEnvironmentWebcam`. Set it to `true` in the Inspector or call `Start()` from `BeginPlay` to begin capture automatically when the level starts.
-{% endhint %}
+- When only one vision component exists on the `Actor`, discovery during `BeginPlay` is enough.
+- When multiple vision components exist, call **Set Vision Component** in `BeginPlay` and pass the component you want to use.
+- Call **Start** from `BeginPlay`, or add your own auto-start property on the custom class.
 
 ## Next steps
 
