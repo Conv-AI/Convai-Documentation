@@ -4,11 +4,18 @@ description: Understand how dynamic context tracks runtime state, batches events
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Dynamic context is how `UConvaiChatbotComponent` keeps Convai informed of runtime information that was not available — or had not yet occurred — when the session started. The plugin maintains a client-side tracker (`FConvaiDynamicContextTracker`), stages changes in a debounce batch (`FConvaiPendingContextBatch`), and sends assembled payloads to Convai through `context-update` RTVI messages.
+Dynamic context is how a Convai character learns about runtime information that was not available — or had not yet occurred — when the session started. You push updates from Blueprint; the plugin stores them locally, batches rapid changes, and sends assembled payloads to Convai.
+
+Think of dynamic context as two channels:
+
+| Channel | What it represents | Blueprint node | Example |
+|---|---|---|---|
+| State | A current fact that can be replaced | `Set Context State` / `Set Context States` | `Health` is `80` |
+| Event | A one-time moment in the session | `Add Context Event` | `Alarm triggered in sector 4` |
 
 ## State properties and events
 
-A **state property** is a named key-value pair that represents a current, replaceable fact — `Health` is `80`, `Zone` is `Market District`, `QuestActive` is `true`. `Set Context State` and `Set Context States` write through to the tracker immediately; at flush time the plugin sends one `Replace`-mode `context-update` whose text is the canonical context, optionally followed by delta lines on the next line.
+A **state property** is a named key-value pair that represents a current, replaceable fact — `Health` is `80`, `Zone` is `Market District`, `QuestActive` is `true`. `Set Context State` and `Set Context States` write through to the local tracker immediately. At flush time the plugin sends one `Replace`-mode `context-update` whose text is the canonical context, optionally followed by delta lines on the next line.
 
 An **event** is a free-form chronological string — `Player picked up the red key`, `Alarm triggered in sector 4`. `Add Context Event` stages the text in the pending batch. At flush, the event is committed to the tracker's chronological event list and included in canonical context. Regular context events are not duplicated into a separate delta line.
 
@@ -17,9 +24,9 @@ An **event** is a free-form chronological string — `Player picked up the red k
 | State property | Yes — latest value only | Current health, zone, equipment loadout |
 | Event | No — append-only | Alarms, milestones, one-time narrative beats |
 
-## Canonical context format
+## What the character receives
 
-`FConvaiDynamicContextTracker::BuildCanonicalContext` assembles a newline-separated string from all active states and events:
+At flush time, the plugin assembles a newline-separated context string from all active states and events:
 
 ```text
 {StateName} is {Value}
@@ -50,7 +57,9 @@ You supply names, values, and event text. The plugin assembles and delivers the 
 
 ## Debounce batching
 
-Calls to `Set Context State`, `Set Context States`, and `Add Context Event` schedule a debounced flush rather than sending immediately. `Remove Context State` schedules a debounced flush only when the key exists in the local tracker. Two properties on `UConvaiChatbotComponent` control timing:
+Calls to `Set Context State`, `Set Context States`, and `Add Context Event` schedule a debounced flush rather than sending immediately. `Remove Context State` schedules a debounced flush only when the key exists in the local tracker.
+
+Rapid updates within a short window coalesce into one send. Two properties on `UConvaiChatbotComponent` control timing:
 
 | Property | Details panel label | Default | Meaning |
 |---|---|---|---|
@@ -61,7 +70,7 @@ The debounce timer starts when the first update in a burst arrives. Subsequent u
 
 Both properties are marked `Advanced Display` under `Convai > DynamicContext` in the Details panel.
 
-## Aggregate response behavior
+## When the character may respond
 
 Each staged state or event carries its own `ShouldRespond` value. The batch merges them into one aggregate rank: `Always` > `Auto` > `Never`. The flush sends a single `context-update` with that aggregate value as `run_llm`.
 

@@ -4,7 +4,12 @@ description: Push a state property and a context event to a connected Convai cha
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Push a player health state and a context event to a connected Convai character using the `Set Context State` and `Add Context Event` Blueprint nodes. Verify the local tracker accepted the value and that the plugin has time to flush the update before you test it in conversation.
+Push one **state** and one **event** to a Convai character from Blueprint, then confirm the update is stored locally before you test it in conversation.
+
+| Term | Meaning | Example |
+|---|---|---|
+| State | A current fact that can be replaced | `Health` is `50` |
+| Event | A one-time moment in the session | `Alarm triggered in sector 4` |
 
 ## Prerequisites
 
@@ -15,9 +20,9 @@ Before starting, verify:
 * [ ] The character can start a session: either `bAutoInitializeSession` is `true`, or your Actor calls `Start Session` on `BeginPlay`.
 * [ ] You are familiar with creating Blueprint graphs on an Actor.
 
-## Add the Set Context State node
+## Push a state update
 
-Track the player's health so the character can reference it in conversation.
+Track the player's health so the character can reference it when asked.
 
 {% stepper %}
 {% step %}
@@ -27,13 +32,13 @@ Open the Blueprint for the Actor that owns the `Convai Chatbot` component — fo
 {% endstep %}
 
 {% step %}
-### Add a custom event to test the update
+### Add a test entry point
 
-Right-click the graph and add a **Custom Event** node. Name it `TestHealthUpdate`. This gives you a callable entry point to trigger the state push from the Level Blueprint or another Actor.
+Right-click the graph and add a **Custom Event** node. Name it `TestHealthUpdate`. You can call this event from the Level Blueprint, a trigger volume, or another Actor to fire the update during Play In Editor.
 {% endstep %}
 
 {% step %}
-### Get a reference to the Convai Chatbot component
+### Get the Convai Chatbot component
 
 Drag the `Convai Chatbot` component from the **Components** panel into the graph to create a **Get** reference node.
 {% endstep %}
@@ -53,25 +58,25 @@ Set the node pins as follows:
 
 Leave `bFlushImmediately` at its default (`false`).
 
-The graph now stages a silent state update — `Health` is `50` — through the debounce pipeline whenever `TestHealthUpdate` fires.
+`Should Respond = Never` stores the value without requesting a spoken response on every health change.
 {% endstep %}
 
 {% step %}
-### Add a local tracker check
+### Confirm the local tracker accepted the value
 
-Drag from the output execution pin of **Set Context State** and add **Get Context State Value**. Set **Name** to `Health`, then print `OutValue` and the boolean return value with **Print String** or your usual Blueprint debug output.
+Drag from the output execution pin of **Set Context State** and add **Get Context State Value**. Set **Name** to `Health`, then print `OutValue` and the boolean return value with **Print String**.
 
-Compile the character Blueprint. At runtime, this confirms that the local tracker accepted `Health = 50` before the network flush.
+Compile the character Blueprint. At runtime, the return value should be `true` and `OutValue` should read `50`. This confirms the local tracker accepted the update before any network flush.
 {% endstep %}
 {% endstepper %}
 
-## Add the Add Context Event node
+## Push an event update
 
-Notify the character that an alarm has been triggered. This is a one-time event, not a replaceable state.
+Notify the character that an alarm has been triggered. Events record one-time moments; they are not replaced like state values.
 
 {% stepper %}
 {% step %}
-### Chain from Set Context State
+### Chain Add Context Event
 
 Drag from the output execution pin of the **Set Context State** node. Search for **Add Context Event** and connect it.
 {% endstep %}
@@ -79,13 +84,13 @@ Drag from the output execution pin of the **Set Context State** node. Search for
 {% step %}
 ### Configure the event
 
-Set the **Text** pin to `Alarm triggered in sector 4`. Set **Should Respond** to `Auto` so the update is sent with `run_llm` set to `"auto"`.
+Set the **Text** pin to `Alarm triggered in sector 4`. Set **Should Respond** to `Auto`.
 {% endstep %}
 {% endstepper %}
 
-## Call the event from your gameplay graph
+## Trigger the update from gameplay
 
-Call `TestHealthUpdate` from any Blueprint graph that already has access to the character Actor. The Level Blueprint is one common option, but an interaction Actor, trigger volume, or test controller works as well.
+Call `TestHealthUpdate` from any Blueprint graph that already has access to the character Actor.
 
 {% stepper %}
 {% step %}
@@ -98,8 +103,6 @@ Use your project's usual Blueprint pattern to reference the Actor that owns the 
 ### Call TestHealthUpdate during setup
 
 Call `TestHealthUpdate` after the character Actor reference is valid. For a basic test, call it from the same startup flow that prepares your level.
-
-This fires the state and event push before you begin the conversation test.
 {% endstep %}
 
 {% step %}
@@ -109,54 +112,50 @@ Compile the Blueprint that calls `TestHealthUpdate`.
 {% endstep %}
 {% endstepper %}
 
-## Test the update
+## Test in Play In Editor
 
 {% stepper %}
 {% step %}
-### Enter Play In Editor
+### Enter Play In Editor and wait for connection
 
-Run the level in Play In Editor. Wait for the character session to connect — the `Convai Chatbot` component's `bAutoInitializeSession` flag starts the session automatically when enabled.
+Run the level in Play In Editor. Wait for the character session to connect — when `bAutoInitializeSession` is enabled, the session starts automatically.
 
-Your gameplay graph fires `TestHealthUpdate`, queuing the state update and the context event through the debounce pipeline.
+Your gameplay graph fires `TestHealthUpdate`, staging the state update and the context event.
 {% endstep %}
 
 {% step %}
-### Wait for the debounce flush
+### Check local values and allow the debounce window
 
-Check the debug output from the local tracker check. The return value should be `true` and `OutValue` should read `50`.
+Check the debug output from **Get Context State Value**. The return value should be `true` and `OutValue` should read `50`.
 
-After the debounce window (`0.5` s by default), the plugin sends one `Replace` `context-update` with the assembled payload. Allow at least one debounce cycle before the runtime test that depends on this context.
+By default, the plugin waits `0.5` s (`ContextDebounceWindow`) after the last staged update before sending to Convai. Allow at least one debounce cycle before the conversation test that depends on this context.
 {% endstep %}
 
 {% step %}
 ### Verify in conversation
 
-Speak to the character or use text input. Ask `How is my health?` or `What is happening in the facility?` as an end-to-end runtime test after the SDK has flushed the context update. Exact response wording is outside the SDK source and depends on the character configuration.
+Speak to the character or use text input. Ask `How is my health?` or `What is happening in the facility?` as an end-to-end runtime test after the debounce window has elapsed. Exact response wording depends on the character configuration.
 
 If the character does not reference either value, see [Troubleshoot dynamic context](troubleshooting-and-diagnostics.md).
 {% endstep %}
 {% endstepper %}
 
 {% hint style="success" %}
-If the local tracker prints `Health = 50` and you allowed the debounce window to elapse before testing, the Blueprint side of the dynamic context pipeline is configured correctly.
-{% endhint %}
-
-{% hint style="info" %}
-Updates sent immediately before a dependent runtime test may still be waiting for the debounce window. They are not discarded, but they flush on the next debounce cycle. When timing is critical, set `bFlushImmediately = true` on the node after the session is connected.
+If **Get Context State Value** returns `Health = 50` and you allowed the debounce window to elapse before testing, the Blueprint side of the dynamic context pipeline is configured correctly.
 {% endhint %}
 
 ## Next steps
 
-Use the concept page for the mental model, the reference page for exact node behavior, and the examples page for more Blueprint patterns.
+Read [How dynamic context works](how-dynamic-context-works.md) for the mental model, then [Dynamic context usage examples](usage-examples.md) for more Blueprint patterns.
 
 {% content-ref url="how-dynamic-context-works.md" %}
 [How dynamic context works](how-dynamic-context-works.md)
 {% endcontent-ref %}
 
-{% content-ref url="dynamic-context-blueprint-reference.md" %}
-[Dynamic context Blueprint reference](dynamic-context-blueprint-reference.md)
-{% endcontent-ref %}
-
 {% content-ref url="usage-examples.md" %}
 [Dynamic context usage examples](usage-examples.md)
+{% endcontent-ref %}
+
+{% content-ref url="dynamic-context-blueprint-reference.md" %}
+[Dynamic context Blueprint reference](dynamic-context-blueprint-reference.md)
 {% endcontent-ref %}

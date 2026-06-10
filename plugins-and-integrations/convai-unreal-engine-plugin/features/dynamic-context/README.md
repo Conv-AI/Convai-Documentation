@@ -4,9 +4,13 @@ description: Find guides for pushing live state and events to Convai characters 
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Dynamic context lets a `Convai Chatbot` component (`UConvaiChatbotComponent`) tell Convai about runtime facts that were not known when the session started — trainee health, current zone, equipment status, alarms, and narrative beats. You push updates through the `Convai|DynamicContext` Blueprint node family; the plugin batches rapid changes, assembles a canonical context string, and sends one `Replace` `context-update` for normal staged state/event flushes. If a reset is pending, the flush drains staged updates first and then sends a `Reset` `context-update`.
+Dynamic context lets a Convai character know what is happening in your level right now — trainee health, current zone, equipment status, alarms, and narrative beats. You push updates from Blueprint through the `Convai|DynamicContext` node family on the `Convai Chatbot` component (`UConvaiChatbotComponent`).
 
-`DynamicEnvironmentInfo` is a separate lane. That property sends free-form text through `update-dynamic-info` when the session connects and when you change the value on a connected character. It is not tracked by the dynamic context batch system. For values that change during gameplay, use `Set Context State` or `Add Context Event` instead.
+Use dynamic context when a fact changes during gameplay and the character should be able to reference it in conversation. Use `Set Context State` for current conditions that can be replaced (for example, `Health` is `50`). Use `Add Context Event` for one-time moments (for example, `Alarm triggered in sector 4`).
+
+{% hint style="info" %}
+`DynamicEnvironmentInfo` is a separate path for session-level notes. It sends free-form text through `update-dynamic-info` at connect and when the property changes. For values that change during gameplay, use `Set Context State` or `Add Context Event` instead.
+{% endhint %}
 
 <table data-view="cards">
 <thead>
@@ -17,28 +21,28 @@ Dynamic context lets a `Convai Chatbot` component (`UConvaiChatbotComponent`) te
 </thead>
 <tbody>
 <tr>
-<td><strong>How dynamic context works</strong><br>Understand state properties, events, debounce batching, aggregate <code>ShouldRespond</code>, and reset ordering.</td>
-<td><a href="how-dynamic-context-works.md">how-dynamic-context-works.md</a></td>
-</tr>
-<tr>
-<td><strong>Sync behavior and timing</strong><br>Understand the <code>context-update</code> payload at each flush, offline queueing, and when <code>bFlushImmediately</code> bypasses debounce.</td>
-<td><a href="sync-behavior-and-timing.md">sync-behavior-and-timing.md</a></td>
-</tr>
-<tr>
-<td><strong>Static context at connection time</strong><br>Understand what data is fixed at session connect and how it differs from tracked dynamic context.</td>
-<td><a href="static-context-at-connection-time.md">static-context-at-connection-time.md</a></td>
-</tr>
-<tr>
-<td><strong>Dynamic context quick start</strong><br>Push a state property and an event at runtime and verify the character uses the updated context.</td>
+<td><strong>Dynamic context quick start</strong><br>Push your first state and event in Blueprint, then verify the character can use the updated context.</td>
 <td><a href="quick-start.md">quick-start.md</a></td>
 </tr>
 <tr>
-<td><strong>Dynamic context Blueprint reference</strong><br>Reference for every <code>Convai|DynamicContext</code> node, property, enum, and transport field.</td>
-<td><a href="dynamic-context-blueprint-reference.md">dynamic-context-blueprint-reference.md</a></td>
+<td><strong>How dynamic context works</strong><br>Understand state properties, events, debounce batching, and when the character may respond.</td>
+<td><a href="how-dynamic-context-works.md">how-dynamic-context-works.md</a></td>
 </tr>
 <tr>
 <td><strong>Dynamic context usage examples</strong><br>Blueprint recipes for health tracking, zone changes, narrative events, and session resets.</td>
 <td><a href="usage-examples.md">usage-examples.md</a></td>
+</tr>
+<tr>
+<td><strong>Sync behavior and timing</strong><br>Understand when updates flush, how offline queueing works, and when to use immediate flush.</td>
+<td><a href="sync-behavior-and-timing.md">sync-behavior-and-timing.md</a></td>
+</tr>
+<tr>
+<td><strong>Static context at connection time</strong><br>Understand what data is fixed at session start and how it differs from live dynamic context.</td>
+<td><a href="static-context-at-connection-time.md">static-context-at-connection-time.md</a></td>
+</tr>
+<tr>
+<td><strong>Dynamic context Blueprint reference</strong><br>Reference for every `Convai|DynamicContext` node, property, enum, and transport field.</td>
+<td><a href="dynamic-context-blueprint-reference.md">dynamic-context-blueprint-reference.md</a></td>
 </tr>
 <tr>
 <td><strong>Troubleshoot dynamic context</strong><br>Fix updates that arrive too late, trigger unexpected responses, or appear ignored after a flush.</td>
@@ -47,9 +51,12 @@ Dynamic context lets a `Convai Chatbot` component (`UConvaiChatbotComponent`) te
 </tbody>
 </table>
 
-## Next steps
+## Recommended reading order
 
-Start with [Dynamic context quick start](quick-start.md) to push your first context update, then read [How dynamic context works](how-dynamic-context-works.md) before moving into the reference pages.
+1. [Dynamic context quick start](quick-start.md) — push and verify your first update.
+2. [How dynamic context works](how-dynamic-context-works.md) — learn the state and event model.
+3. [Dynamic context usage examples](usage-examples.md) — apply common gameplay patterns.
+4. Reference and troubleshooting pages — use when you need exact node behavior or a fix.
 
 {% content-ref url="quick-start.md" %}
 [Dynamic context quick start](quick-start.md)

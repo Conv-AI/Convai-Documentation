@@ -14,6 +14,8 @@ Source of truth: `Source/Convai/Public/ConvaiChatbotComponent.h`, `Source/Convai
 
 Sets a single state property in the dynamic context. If a property with the same `Name` already exists, its value is replaced.
 
+**Use when:** One current fact changes during gameplay — health, zone, equipment status.
+
 **Blueprint category:** `Convai|DynamicContext`
 
 | Parameter | Type | Default | Description |
@@ -33,6 +35,8 @@ Sets a single state property in the dynamic context. If a property with the same
 
 Sets multiple state properties at once. All keys share one canonical rebuild and one flush.
 
+**Use when:** Several related facts change together — zone, equipment, and time of day after a scene transition.
+
 **Blueprint category:** `Convai|DynamicContext`
 
 | Parameter | Type | Default | Description |
@@ -51,6 +55,8 @@ Sets multiple state properties at once. All keys share one canonical rebuild and
 
 Appends a chronological event string to the dynamic context.
 
+**Use when:** Something happened once — an alarm, a milestone, a narrative beat.
+
 **Blueprint category:** `Convai|DynamicContext`
 
 | Parameter | Type | Default | Description |
@@ -68,6 +74,8 @@ Appends a chronological event string to the dynamic context.
 ### `Remove Context State`
 
 Removes a state property from the dynamic context and rebuilds canonical context without it.
+
+**Use when:** A condition no longer applies — an item was used, an alert was cleared.
 
 **Blueprint category:** `Convai|DynamicContext`
 
@@ -88,6 +96,8 @@ Removes a state property from the dynamic context and rebuilds canonical context
 
 Clears all tracked state properties and events and resets remote context.
 
+**Use when:** A simulation restarts or you need to discard all prior runtime context.
+
 **Blueprint category:** `Convai|DynamicContext`
 
 | Parameter | Type | Default | Description |
@@ -102,6 +112,8 @@ Clears all tracked state properties and events and resets remote context.
 
 Returns the current client-side value of a tracked state property. Reads from the local tracker — does not query Convai.
 
+**Use when:** A Blueprint condition needs the current local value before sending a redundant update.
+
 **Blueprint category:** `Convai|DynamicContext`
 
 | Parameter | Direction | Type | Default | Description |
@@ -115,6 +127,8 @@ Returns the current client-side value of a tracked state property. Reads from th
 ### `Update Context`
 
 Advanced direct node. Sends a raw `context-update` with explicit `Text`, `Mode`, and `ShouldRespond`. Staged state/event flushes use the same transport message type during `FlushDynamicContext()` without updating the tracker through this node. `Reset Dynamic Context` uses the same C++ `UpdateContext` send path for the reset message.
+
+**Use when:** The tracked node family does not cover your format requirements.
 
 **Blueprint category:** `Convai`
 

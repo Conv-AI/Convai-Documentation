@@ -4,7 +4,17 @@ description: Understand how dynamic context payloads flush after debounce, how o
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Every batched dynamic context flush in the Convai Unreal Engine plugin produces one `Replace`-mode `context-update` RTVI message per debounce cycle (unless the flush includes only a pending `Reset` with no staged work). This page documents the payload structure, per-operation behavior during an active session, offline queueing, and reset ordering.
+Dynamic context updates do not send to Convai on every Blueprint call. By default, the plugin waits briefly so rapid changes can merge into one send. This page explains when flushes happen, what each flush contains, and when to bypass the debounce timer.
+
+## When updates send
+
+| Situation | What happens |
+|---|---|
+| Default debounced call while connected | Updates stage locally; one `Replace` `context-update` sends after `ContextDebounceWindow` (default `0.5` s) with no new updates in the window |
+| Rapid burst of updates | All changes in the burst coalesce into one flush; timer resets on each call but cannot exceed `ContextMaxDebounceWindow` (default `3.0` s) from the first update |
+| `bFlushImmediately = true` after connect | `FlushDynamicContext()` runs in the current frame, bypassing debounce |
+| Updates before session connects | Changes accumulate in `PendingContextBatch`; first flush after connect and debounce deadline |
+| `Reset Dynamic Context` | Drains staged content first, then sends a `Reset` `context-update`, then clears the local tracker |
 
 ## Transport message shape
 

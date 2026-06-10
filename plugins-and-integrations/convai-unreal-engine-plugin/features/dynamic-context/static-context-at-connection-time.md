@@ -4,17 +4,19 @@ description: Understand which verified connection data is fixed at session start
 last_reviewed: "4.0.0-beta.21"
 ---
 
-When `Start Session` runs, `UConvaiChatbotComponent` opens a realtime session using connection parameters from the component and the active environment data. Runtime changes then travel through separate channels — tracked dynamic context, scene metadata updates, or `update-dynamic-info` — without rewriting the original connection payload.
+Some context is sent once when the session starts. Other context can change during gameplay through separate update paths. This page explains what is fixed at connect time and what you can update live.
 
 ## What is sent at connection time
 
-The source-verified realtime connection path includes the following data:
+When `Start Session` runs, `UConvaiChatbotComponent` opens a realtime session using connection parameters from the component and the active environment data. The source-verified realtime connection path includes the following data:
 
 | Data | Source on `UConvaiChatbotComponent` | Notes |
 |---|---|---|
 | Character ID | `CharacterID` | Determines which character configuration Convai loads. |
 | Action config | `EnvironmentData` when `bEnableActions` is `true` and at least one action is configured | Serialized as a JSON `action_config` block. Action set, object list, and character list are fixed until reconnect. |
 | End user identity | `EndUserID` and `EndUserMetadata` | Used by long-term memory. Changing them mid-session has no effect on the current session. |
+
+These values establish the session. They do not change when you push dynamic context during gameplay.
 
 ## What updates live
 
@@ -52,9 +54,10 @@ The wire payload shape is:
 
 `DynamicEnvironmentInfo` does not pass through the debounce batch. It does not use canonical state/event assembly. For values that change frequently during gameplay, use `Set Context State` instead.
 
-{% hint style="info" %}
-Use `DynamicEnvironmentInfo` for session-level notes that are set once or change infrequently — for example, a fixed scenario briefing. Use the dynamic context nodes for runtime state that must batch reliably and appear in canonical context.
-{% endhint %}
+| Use case | Recommended path |
+|---|---|
+| Session-level briefing set once or changed infrequently | `DynamicEnvironmentInfo` |
+| Runtime facts that change during gameplay | `Set Context State` or `Add Context Event` |
 
 ## Relationship between connection data and live updates
 

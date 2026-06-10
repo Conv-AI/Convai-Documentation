@@ -4,9 +4,18 @@ description: Fix dynamic context updates that arrive too late, trigger unexpecte
 last_reviewed: "4.0.0-beta.21"
 ---
 
-Use this page when dynamic context updates do not appear to reach the local tracker, arrive after the gameplay moment that should have staged them, or send an unexpected `run_llm` value.
+Use this page when a dynamic context update does not appear to work. Start with the four checks below, then follow the symptom sections if the issue persists.
 
-## First-line investigation
+## First-line checks
+
+Run these four checks before diving into detailed symptoms:
+
+| Check | How to verify | What it tells you |
+|---|---|---|
+| Session is connected | **Get Chatbot Connection State** returns `Connected` | Whether a network flush can reach Convai |
+| Local tracker accepted the value | **Get Context State Value** returns expected `OutValue` immediately after **Set Context State** | Whether the Blueprint wiring and `Name` pin are correct |
+| Flush completed before the conversation turn | Wait one debounce cycle (`ContextDebounceWindow`, default `0.5` s), or set `bFlushImmediately = true` after connect | Whether timing caused the character to respond before the update arrived |
+| `ShouldRespond` matches your intent | `Never` → `run_llm: "false"`; `Auto` → `run_llm: "auto"`; `Always` → `run_llm: "true"` | Whether the update was sent with the wire value you expected |
 
 {% stepper %}
 {% step %}
@@ -22,23 +31,19 @@ Default debounced updates staged before connect queue safely in `PendingContextB
 
 Call **Get Context State Value** immediately after **Set Context State** and print the `OutValue` pin. If `OutValue` returns the expected value, the local tracker accepted the update.
 
-If the local value is correct but the runtime conversation test does not reflect it, first confirm that the network flush completed before the test turn.
-{% endstep %}
-
-{% step %}
-### Check the ShouldRespond setting
-
-If the update reached Convai but the wire `run_llm` value was not what you intended, verify `ShouldRespond`:
-
-- `Never` — the update is sent with `run_llm` set to `"false"`.
-- `Auto` — the update is sent with `run_llm` set to `"auto"`.
-- `Always` — the update is sent with `run_llm` set to `"true"`.
+If the local value is correct but the runtime conversation test does not reflect it, confirm that the network flush completed before the test turn.
 {% endstep %}
 
 {% step %}
 ### Allow the debounce window to elapse
 
 Unless `bFlushImmediately` is `true`, the plugin waits `ContextDebounceWindow` seconds (default `0.5`) after the last staged update before flushing. Wait at least one full debounce cycle before starting a conversation turn that depends on the new context.
+{% endstep %}
+
+{% step %}
+### Check the ShouldRespond setting
+
+If the update reached Convai but the wire `run_llm` value was not what you intended, verify `ShouldRespond` on the node that staged the update.
 {% endstep %}
 {% endstepper %}
 
@@ -52,7 +57,7 @@ Unless `bFlushImmediately` is `true`, the plugin waits `ContextDebounceWindow` s
 
 **Fix:** Send the update earlier in the gameplay flow, or set `bFlushImmediately = true` when timing is critical.
 
-**Verify:** `Get Context State Value` returns the expected value locally. If it does and the character still omits the state, increase lead time before the conversation turn or use `bFlushImmediately = true`.
+**Verify:** **Get Context State Value** returns the expected value locally. If it does and the character still omits the state, increase lead time before the conversation turn or use `bFlushImmediately = true`.
 
 ---
 
@@ -78,9 +83,9 @@ Unless `bFlushImmediately` is `true`, the plugin waits `ContextDebounceWindow` s
 
 **Cause:** The removal was staged but not yet flushed when the conversation turn occurred, or the same fact exists outside the dynamic context tracker.
 
-**Fix:** Set `bFlushImmediately = true` on the `Remove Context State` call after the chatbot is connected. If the value is gone from the tracker after a confirmed flush, inspect other project-specific context sources outside this dynamic context page.
+**Fix:** Set `bFlushImmediately = true` on the **Remove Context State** call after the chatbot is connected. If the value is gone from the tracker after a confirmed flush, inspect other project-specific context sources outside this dynamic context page.
 
-**Verify:** `Get Context State Value` for the removed key returns `false` after the flush.
+**Verify:** **Get Context State Value** for the removed key returns `false` after the flush.
 
 ---
 
@@ -104,7 +109,7 @@ Unless `bFlushImmediately` is `true`, the plugin waits `ContextDebounceWindow` s
 
 **Cause:** The debounce window delayed the flush past the conversation turn.
 
-**Fix:** Set `bFlushImmediately = true` on the context update call, or push the update earlier (for example, at zone entry rather than at conversation start). For important events, `Add Context Event` with `ShouldRespond = Always` sends `run_llm: "true"`.
+**Fix:** Set `bFlushImmediately = true` on the context update call, or push the update earlier (for example, at zone entry rather than at conversation start). For important events, **Add Context Event** with `ShouldRespond = Always` sends `run_llm: "true"`.
 
 **Verify:** Confirm **Get Chatbot Connection State** is `Connected` and allow the flush to complete before the dependent conversation turn.
 
@@ -128,11 +133,11 @@ Unless `bFlushImmediately` is `true`, the plugin waits `ContextDebounceWindow` s
 
 **Symptom:** Each call to `Set Context State` for `PlayerHealth` is staged with `ShouldRespond = Auto` or `Always`.
 
-**Cause:** `ShouldRespond` is set to `Auto` or `Always` on the `Set Context State` node.
+**Cause:** `ShouldRespond` is set to `Auto` or `Always` on the **Set Context State** node.
 
 **Fix:** Use `ShouldRespond = Never` for background state. Reserve `Auto` or `Always` for updates where the wire `run_llm` value should be `"auto"` or `"true"`.
 
-**Verify:** The `Set Context State` node for `PlayerHealth` has `ShouldRespond` set to `Never`.
+**Verify:** The **Set Context State** node for `PlayerHealth` has `ShouldRespond` set to `Never`.
 
 ---
 
@@ -148,17 +153,17 @@ Unless `bFlushImmediately` is `true`, the plugin waits `ContextDebounceWindow` s
 
 ---
 
-## ResetDynamicContext and reconnect
+## Reset Dynamic Context and reconnect
 
 ### Local state still appears after Reset Dynamic Context
 
-**Symptom:** You called `Reset Dynamic Context`, but `Get Context State Value` still returns `true` for a key you expected to clear.
+**Symptom:** You called `Reset Dynamic Context`, but **Get Context State Value** still returns `true` for a key you expected to clear.
 
 **Cause:** The Reset has not flushed yet, or new state was staged after the Reset call.
 
 **Fix:** Allow the reset flush to complete before staging new state values when starting from empty dynamic context.
 
-**Verify:** `Get Context State Value` for cleared keys returns `false` after the Reset flush.
+**Verify:** **Get Context State Value** for cleared keys returns `false` after the Reset flush.
 
 ---
 
@@ -170,7 +175,7 @@ Unless `bFlushImmediately` is `true`, the plugin waits `ContextDebounceWindow` s
 
 **Fix:** Change `DynamicEnvironmentInfo` explicitly if that text also needs to change. Update action and scene metadata through their own environment metadata paths.
 
-**Verify:** `Get Context State Value` returns `false` for cleared keys, and any remaining data is handled through the relevant non-tracker update path.
+**Verify:** **Get Context State Value** returns `false` for cleared keys, and any remaining data is handled through the relevant non-tracker update path.
 
 {% hint style="warning" %}
 `Reset Dynamic Context` clears the local state tracker and sends a Reset `context-update`. It does not clear `DynamicEnvironmentInfo` or environment metadata.
@@ -184,15 +189,15 @@ Unless `bFlushImmediately` is `true`, the plugin waits `ContextDebounceWindow` s
 
 **Cause:** `Reset Dynamic Context` marks a pending `Reset` that fires **after** staged content at the first post-connect flush. This applies to staged updates in the same offline window whether they were staged before or after the Reset call.
 
-**Fix:** Let the reset flush complete after connect, then stage the new `Set Context State` or `Add Context Event` calls.
+**Fix:** Let the reset flush complete after connect, then stage the new **Set Context State** or **Add Context Event** calls.
 
-**Verify:** After the first post-connect flush, `Get Context State Value` returns `false` for keys that should have been cleared.
+**Verify:** After the first post-connect flush, **Get Context State Value** returns `false` for keys that should have been cleared.
 
 ---
 
 ## Context update diagnostic flow
 
-Use this flow after the first-line investigation. Follow the branches from local tracker state to connection state, flush timing, and the intended `run_llm` value.
+Use this flow after the first-line checks. Follow the branches from local tracker state to connection state, flush timing, and the intended `run_llm` value.
 
 ```mermaid
 flowchart TD
@@ -209,20 +214,6 @@ flowchart TD
     J -- No --> L[Inspect runtime context outside this tracker]
     H -- Always --> L
 ```
-
----
-
-## Diagnostic checklist
-
-| Check | How to verify |
-|---|---|
-| Session is connected | **Get Chatbot Connection State** returns `Connected` |
-| Local tracker accepted the value | **Get Context State Value** returns expected `OutValue` immediately after **Set Context State** |
-| Flush completed before the conversation turn | Wait one debounce cycle, or use `bFlushImmediately = true` |
-| `ShouldRespond` matches intended wire value | `Never` -> `run_llm: "false"`; `Auto` -> `run_llm: "auto"`; `Always` -> `run_llm: "true"` |
-| Debounce properties are accessible | Expand **Advanced** under **Convai > DynamicContext** and look for **Context Debounce Window (s)** and **Max Debounce Window (s)** |
-| Reset ordering is correct | Let **Reset Dynamic Context** flush before staging new updates when starting from empty context |
-| Character speaking status is known | **Is Talking** returns the component's local speaking state |
 
 ## Next steps
 
