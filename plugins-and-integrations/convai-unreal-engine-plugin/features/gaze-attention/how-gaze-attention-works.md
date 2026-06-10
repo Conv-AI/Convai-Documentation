@@ -6,6 +6,20 @@ last_reviewed: "2026-06-09"
 
 Gaze attention is a subsystem inside `UConvaiPlayerComponent` that translates where the player is looking into contextual focus for AI characters. When active, it runs every tick, manages visual feedback through a highlight actor and a cursor widget, and writes to the chatbot's "object in attention" slot after a configurable dwell period.
 
+If you have not enabled gaze attention yet, start with [Gaze attention quick start](quick-start.md). This page explains the mental model behind that setup.
+
+## Three core ideas
+
+Before the per-tick pipeline, keep these three stages in mind:
+
+| Stage | What happens | What the player sees |
+|---|---|---|
+| **Gaze detection** | A line trace (and optional angle fallback) finds a gazeable `UConvaiObjectComponent` under the crosshair. | Highlight and cursor turn active immediately. |
+| **Dwell promotion** | After `GazeAttentionDelay` seconds on the same target, the object is promoted to "in attention." | No new visual change; `OnAttentionGained` fires. |
+| **Attention ownership** | Each chatbot tracks who set its attention slot via `AttentionSource`. Gaze can update the slot only when it is `None` or already owned by gaze. | The character may speak or stay silent depending on `GazeShouldRespond`. |
+
+Tagged objects come from scene metadata — see [How scene metadata works](../scene-metadata/how-scene-metadata-works.md). Attention ownership and pronoun grounding overlap with [Attention and reference grounding](../character-actions/attention-and-reference-grounding.md).
+
 ## Tick pipeline
 
 Each tick, `UConvaiPlayerComponent` calls `TickGazeAttention` when `bEnableGazeAttention` is `true`. The diagram below shows the full decision path; the numbered list that follows describes each stage in detail.
@@ -145,4 +159,12 @@ The cursor is a pure C++ widget that uses Unreal's `FCoreStyle::WhiteBrush`. No 
 
 {% content-ref url="gaze-attention-reference.md" %}
 [Gaze attention reference](gaze-attention-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="usage-examples.md" %}
+[Gaze attention usage examples](usage-examples.md)
+{% endcontent-ref %}
+
+{% content-ref url="troubleshooting-and-diagnostics.md" %}
+[Troubleshoot gaze attention](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

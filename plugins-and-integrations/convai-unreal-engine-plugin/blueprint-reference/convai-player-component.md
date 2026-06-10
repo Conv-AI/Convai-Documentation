@@ -26,7 +26,7 @@ These properties identify the player to Convai and are used for long-term memory
 
 | Property | Type | Default | Category | Description |
 |---|---|---|---|---|
-| `bAutoInitializeSession` | `bool` | `true` | `Convai\|Session` | When `true`, calls `StartSession` automatically after the Convai server connection state reaches `Connected`. |
+| `bAutoInitializeSession` | `bool` | `true` | `Convai\|Session` | When `true`, calls `StartSession` automatically after the Convai connection state reaches `Connected`. |
 
 ### Session functions
 
@@ -109,7 +109,7 @@ Use recording to capture a complete utterance and obtain a `USoundWave`.
 
 ## Gaze attention
 
-Gaze attention lets the player component automatically promote in-scene objects to the chatbot's "object in attention" based on where the player is looking. Enable the system with `bEnableGazeAttention`.
+Gaze attention lets the player component automatically promote in-scene objects to the chatbot's "object in attention" based on where the player is looking. Enable the system with `bEnableGazeAttention`. For the full cross-component API, defaults, events, and version-specific highlight behavior, see [Gaze attention reference](../features/gaze-attention/gaze-attention-reference.md).
 
 ### Core settings
 
@@ -121,7 +121,7 @@ Gaze attention lets the player component automatically promote in-scene objects 
 | `GazeAttentionDelay` | `float` | `1.0` | `Convai\|Gaze Attention` | Sustained gaze duration in seconds before an object is promoted to "in attention". |
 | `GazeAttentionLossDelay` | `float` | `5.0` | `Convai\|Gaze Attention` | Look-away duration in seconds before the current attention slot is released. |
 | `GazeMaxDistance` | `float` | `5000.0` | `Convai\|Gaze Attention` (Advanced) | Maximum line-trace distance from the camera in world units (cm). |
-| `GazeAngleTolerance` | `float` | `5.0` | `Convai\|Gaze Attention` | Half-angle of a dot-product fallback cone (degrees) used when the strict line trace does not hit anything. `0` disables the fallback. |
+| `GazeAngleTolerance` | `float` | `5.0` | `Convai\|Gaze Attention` | Half-angle of a dot-product fallback cone (degrees) used when the strict line trace does not engage a valid gaze target and is not blocked by non-Convai geometry. `0` disables the fallback. |
 | `GazeTraceChannel` | `ECollisionChannel` | `ECC_Visibility` | `Convai\|Gaze Attention` (Advanced) | Collision channel used by the gaze line trace. |
 
 `GazeShouldRespond` accepts `EC_RunLLMOption` values (`Auto`, `Always`, `Never`). For value descriptions, see [Data types and enums](data-types-and-enums.md).
@@ -135,7 +135,7 @@ These settings control the silhouette overlay drawn over the gazed-at object.
 | `GazeHighlightActorClass` | `TSubclassOf<AConvaiGazeHighlightActor>` | Plugin default | `Convai\|Gaze Attention\|Highlight` | The actor class spawned to show the highlight. Subclass `AConvaiGazeHighlightActor` for a custom visual. |
 | `GazeHighlightColor` | `FLinearColor` | `(1.0, 0.9, 0.2, 1.0)` | `Convai\|Gaze Attention\|Highlight` | Tint applied to the silhouette or wireframe. |
 | `GazeOverlayMaterial` | `TSoftObjectPtr<UMaterialInterface>` | Unset | `Convai\|Gaze Attention\|Highlight` | Overlay material applied via `UMeshComponent::SetOverlayMaterial`. Leave unset to use the plugin's built-in Fresnel-rim material (`/ConvAI/Highlights/M_ConvaiGazeOverlay`). The material must expose an `EmissiveColor` vector parameter. |
-| `GazeHighlightEmissiveIntensity` | `float` | `2.5` | `Convai\|Gaze Attention\|Highlight` (Advanced) | Multiplier on `GazeHighlightColor` before it is passed to the `EmissiveColor` parameter. |
+| `GazeHighlightEmissiveIntensity` | `float` | `2.5` | `Convai\|Gaze Attention\|Highlight` (Advanced) | Forwarded to the highlight actor's `EmissiveIntensity` scalar parameter. The plugin overlay material multiplies `EmissiveColor` by this value internally. |
 
 ### Cursor settings
 
@@ -171,7 +171,7 @@ Most gaze events fire while `bEnableGazeAttention` is `true`; `OnAttentionLost` 
 |---|---|---|
 | `OnGazeBegin` | `Convai\|Gaze Attention\|Events` | The player's gaze first enters the bounds of a `UConvaiObjectComponent`. Fires before any attention threshold. |
 | `OnGazeEnd` | `Convai\|Gaze Attention\|Events` | The player's gaze leaves a `UConvaiObjectComponent`, regardless of whether it had been promoted to attention. |
-| `OnAttentionGained` | `Convai\|Gaze Attention\|Events` | A gazed-at object is promoted to "in attention" after the sustained-gaze period (`GazeAttentionDelay`). |
+| `OnAttentionGained` | `Convai\|Gaze Attention\|Events` | The sustained-gaze dwell threshold (`GazeAttentionDelay`) was reached and gaze promotion was attempted. Fires even when every chatbot rejects the update. |
 | `OnAttentionLost` | `Convai\|Gaze Attention\|Events` | The attention slot is released: the player looked away for longer than `GazeAttentionLossDelay`, another object took the slot, or the attention target was destroyed. |
 
 See [Event system](../core-concepts/event-system.md) for binding patterns and full parameter details. For microphone setup and gaze task flows, see [Configure the microphone](../getting-started/configure-microphone.md) and [Gaze attention reference](../features/gaze-attention/gaze-attention-reference.md).

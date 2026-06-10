@@ -6,6 +6,8 @@ last_reviewed: "2026-06-09"
 
 These Blueprint recipes show the most common `UConvaiPlayerComponent` and `UConvaiObjectComponent` gaze-attention patterns. Each example states its scenario, the setup required, and the expected runtime outcome.
 
+Complete [Gaze attention quick start](quick-start.md) first if gaze attention is not enabled yet or you have not tagged a world object.
+
 ## React to a gaze event in Blueprint
 
 **Scenario:** A safety-drill simulation highlights dangerous equipment when the player looks at it and plays a warning sound.
@@ -31,7 +33,7 @@ The `ObjectComponent` parameter on the event carries the `UConvaiObjectComponent
 
 **Scenario:** A corporate-onboarding experience uses a green highlight for safe-to-interact items and a red highlight for restricted areas.
 
-**Setup:** Bind to `OnGazeBegin` and set `GazeHighlightColor` on the player component before the highlight actor applies it.
+**Setup:** Bind to `OnGazeBegin` and set `GazeHighlightColor` on the player component before the next object is highlighted.
 
 ```text
 // Blueprint pseudocode
@@ -41,7 +43,7 @@ Event OnPlayerGazeBegin(PlayerComponent, ObjectComponent)
       False → Set GazeHighlightColor (0.1, 1.0, 0.1, 1.0)   // green
 ```
 
-`GazeHighlightColor` is `BlueprintReadWrite` on `UConvaiPlayerComponent`, so it can be changed at any time. The player component forwards the current value to the highlight actor each time a new target is highlighted.
+`GazeHighlightColor` is `BlueprintReadWrite` on `UConvaiPlayerComponent`. The player component applies the highlight before it broadcasts `OnGazeBegin`, so a color change in this event affects the next highlighted target unless you refresh the highlight through a custom highlight actor.
 
 **Outcome:** Each object type receives a distinct silhouette color with no additional assets required.
 
@@ -52,7 +54,7 @@ Event OnPlayerGazeBegin(PlayerComponent, ObjectComponent)
 **Setup:**
 
 1. In the Content Browser, create a new Blueprint class with parent `AConvaiGazeHighlightActor`. Name it `BP_PulsingGazeHighlight`.
-2. Override `Tick` in the Blueprint to animate `EmissiveIntensity` using a sine curve over time.
+2. In the Blueprint class defaults, enable **Can Ever Tick** (the base C++ class disables ticking on UE 5.3+). Override `Tick` to animate `EmissiveIntensity` using a sine curve over time.
 3. On `UConvaiPlayerComponent`, set `GazeHighlightActorClass` to `BP_PulsingGazeHighlight`.
 
 The player component spawns and destroys the highlight actor automatically. `GetTarget()` and `GetTargetComponent()` in the Blueprint subclass give read access to the current target if the custom effect needs to attach to it.
@@ -149,7 +151,7 @@ Both properties are `BlueprintReadWrite` and can be changed at runtime, for exam
 2. Configure `ConvaiObject_EmergencyStop` under **Convai | Object** → **Object Entry**:
    - **Name** — `"EmergencyStop"`
    - **Description** — `"A red mushroom button that cuts power to the whole line."`
-   - **Move Target Mode** — `Component as goal`
+   - **Move Target Mode** — `Component as goal` (required for sub-mesh scoping)
    - **Component Name** — `"SM_EmergencyStopButton"` (the exact Static Mesh component name on the actor)
 
 3. Configure `ConvaiObject_FuelGauge` under **Convai | Object** → **Object Entry**:
@@ -160,7 +162,7 @@ Both properties are `BlueprintReadWrite` and can be changed at runtime, for exam
 
 4. On `UConvaiPlayerComponent`, ensure **Gaze Attention Text** (`GazeAttentionText`) and **Gaze Should Respond** (`GazeShouldRespond`) are configured as needed.
 
-`ObjectEntry.ComponentName` matching is case-insensitive substring lookup and applies only when **Move Target Mode** is `Component as goal`. A value of `"EmergencyStop"` matches any component whose name contains that string. If the name cannot be resolved, the component is excluded from scoped gaze detection and a warning is logged on first component resolve, such as the first gaze check or a `GetResolvedComponent(true)` call. Call `GetResolvedComponent(true)` on the `UConvaiObjectComponent` at runtime to confirm the match.
+`ObjectEntry.ComponentName` matching is case-insensitive substring lookup and applies only when **Move Target Mode** is `Component as goal`. With the default **Actor as goal** mode, a non-empty **Component Name** does not scope gaze. If the name cannot be resolved, the component is excluded from scoped gaze detection and a warning is logged on first component resolve. Call `GetResolvedComponent(true)` on the `UConvaiObjectComponent` at runtime to confirm the match.
 
 **Outcome:** Looking at `SM_EmergencyStopButton` highlights only that mesh and promotes `"EmergencyStop"` to attention. Looking at `SM_FuelGaugeDial` highlights only that mesh and promotes `"FuelGauge"`. Looking at the panel frame does not promote either scoped object because no configured component scope matches that hit.
 

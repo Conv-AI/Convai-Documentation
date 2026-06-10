@@ -4,7 +4,17 @@ description: Understand how the Convai Unreal Engine plugin resolves pronoun ref
 last_reviewed: "4.0.0-beta.21"
 ---
 
-When a player says "Go to it" or "Pick that up," the word "it" or "that" must resolve to a specific object. The plugin solves this through two connected mechanisms: reference grounding (resolving object names from LLM output against the registered environment) and attention (tracking which object the character or player is currently focused on so pronoun references resolve predictably).
+Most character actions work without any attention setup — reference parameters resolve automatically from the registered object list. Read this page when you want the character to understand pronouns like "it", "that", and "there", or when you need to control which object a character is focused on.
+
+When a player says "Go to it" or "Pick that up," the word "it" or "that" must resolve to a specific object. The plugin solves this through two connected mechanisms: reference grounding (resolving object names from Convai's output against the registered environment) and attention (tracking which object the character or player is currently focused on so pronoun references resolve predictably).
+
+## Reference grounding
+
+When Convai returns an action with a `Reference`-typed parameter, the raw value is a name string chosen from the registered object and character names. The plugin resolves that string against `EnvironmentData.Objects` and `EnvironmentData.Characters` by exact registered name.
+
+The result is stored in `FConvaiResultParam.RefValue` as a populated `FConvaiObjectEntry` (including the live `Ref` Actor pointer). An unresolvable value produces an empty `FConvaiObjectEntry` with a null `Ref`.
+
+Reference grounding works against the live `FConvaiEnvironmentData` on the chatbot component. Objects added via `AddObject` at runtime update the local environment immediately, so later action parsing can resolve against the current local object and character lists. The action contract fixes which action templates the character can perform until the next reconnect, and mid-session scene-context updates refresh scene context rather than expanding the connect-time action target set.
 
 ## Attention source priority
 
@@ -17,14 +27,6 @@ The attention slot has an ownership model that determines which source can write
 | `Explicit` | High | Blueprint/C++ call to `SetObjectInAttention` | Only another Explicit call |
 
 **Explicit wins.** Once `SetObjectInAttention` sets the slot, gaze events cannot overwrite it until an explicit clear is issued.
-
-## Reference grounding
-
-When Convai returns an action with a `Reference`-typed parameter, the raw value is a name string chosen from the registered object and character names. The plugin resolves that string against `EnvironmentData.Objects` and `EnvironmentData.Characters` by exact registered name.
-
-The result is stored in `FConvaiResultParam.RefValue` as a populated `FConvaiObjectEntry` (including the live `Ref` Actor pointer). An unresolvable value produces an empty `FConvaiObjectEntry` with a null `Ref`.
-
-Reference grounding works against the live `FConvaiEnvironmentData` on the chatbot component. Objects added via `AddObject` at runtime update the local environment immediately, so later action parsing can resolve against the current local object and character lists. The `action_config` contract fixes which action templates the character can perform until the next reconnect, and mid-session `update-scene-metadata` messages refresh scene context rather than expanding the connect-time action target set.
 
 ## The attention slot
 
@@ -54,7 +56,7 @@ SetObjectInAttention(
 
 Pass an empty `FConvaiObjectEntry` (default-constructed, with an empty `Name`) to clear the slot.
 
-`SetObjectInAttention` has no effect when `EnvironmentData.bEnableActions` is `false` on the chatbot — the server only resolves attention when `action_config` was sent at `/connect`.
+`SetObjectInAttention` has no effect when `EnvironmentData.bEnableActions` is `false` on the chatbot — Convai only resolves attention when `action_config` was sent at `/connect`.
 
 ### Setting attention from gaze
 
@@ -63,7 +65,7 @@ The gaze pipeline uses `TrySetObjectInAttentionFromGaze` and `TryClearObjectInAt
 - `TrySetObjectInAttentionFromGaze` succeeds when `AttentionSource` is `None` or `Gaze`. It returns `false` when the slot is `Explicit`, leaving the explicit owner intact.
 - `TryClearObjectInAttentionFromGaze` clears the slot only when the chatbot still considers gaze the owner **and** the expected object matches the currently-attended object. This prevents stale "gaze lost" events from wiping a newer target.
 
-`UConvaiObjectComponent` drives these calls automatically via `NotifyGazeAttentionBegin` and `NotifyGazeAttentionEnd`. You typically do not need to call the gaze setters directly unless you are building a custom focus system.
+`UConvaiObjectComponent` drives these calls automatically via `NotifyGazeAttentionBegin` and `NotifyGazeAttentionEnd`. You typically do not need to call the gaze setters directly unless you are building a custom focus system. For the full trace pipeline, highlight behavior, and component-scoped targeting rules, see [How gaze attention works](../gaze-attention/how-gaze-attention-works.md).
 
 ### AttentionSource property
 
@@ -78,6 +80,8 @@ Source = ChatbotComponent.AttentionSource
 ```
 
 ## How gaze promotes an object to attention
+
+The gaze pipeline runs automatically through `UConvaiObjectComponent`. You typically only need to read `AttentionSource` or call `SetObjectInAttention` directly; the steps below document how the automatic path works.
 
 When `UConvaiObjectComponent` is added to a scene Actor and the player looks at it:
 

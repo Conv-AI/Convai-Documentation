@@ -4,9 +4,11 @@ description: Find guides, reference pages, and examples for giving Convai charac
 last_reviewed: "2026-06-05"
 ---
 
-Placing a `UConvaiObjectComponent` on a world `Actor` makes that object available to Convai characters in the level. Object identity is sent through the session's `action_config` snapshot and runtime environment updates; tracked live-state values use dynamic context state updates.
+Scene metadata is how you give Convai characters awareness of the objects in your level. Add a `UConvaiObjectComponent` to any Actor — a door, a crate, a terminal — and every character in the level will know that object exists, what it is called, and what it does. Characters use this information when players ask about the environment around them.
 
 For runtime mutations — adding objects, removing actors, setting conversation partners, and controlling attention — use the environment API on `UConvaiChatbotComponent`. See [Managing the environment at runtime](managing-the-environment-at-runtime.md) for the full method reference.
+
+When the player looks at tagged objects, the [Gaze attention](../gaze-attention/README.md) system can promote them to the chatbot's current focus automatically. Complete scene metadata setup first, then follow [Gaze attention quick start](../gaze-attention/quick-start.md).
 
 <table data-view="cards">
 <thead>

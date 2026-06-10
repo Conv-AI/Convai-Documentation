@@ -4,7 +4,9 @@ description: Complete property, event, method, and class reference for the gaze 
 last_reviewed: "2026-06-09"
 ---
 
-Reference for every property, event, method, and class that makes up the gaze attention system. Source of truth: `Source/Convai/Public/ConvaiPlayerComponent.h`, `Source/Convai/Public/ConvaiObjectComponent.h`, `Source/Convai/Public/Gaze/ConvaiGazeHighlightActor.h`, `Source/Convai/Public/Gaze/ConvaiGazeCursorWidget.h`, and `Source/Convai/Public/ConvaiChatbotComponent.h`.
+Canonical reference for every property, event, method, and class in the gaze attention system. The [Convai Player Component](../../blueprint-reference/convai-player-component.md) and [Convai Object Component](../../blueprint-reference/convai-object-component.md) pages summarize only their component-local gaze surface; use this page for the full cross-component API, defaults, and version-specific behavior.
+
+Source of truth: `Source/Convai/Public/ConvaiPlayerComponent.h`, `Source/Convai/Public/ConvaiObjectComponent.h`, `Source/Convai/Public/Gaze/ConvaiGazeHighlightActor.h`, `Source/Convai/Public/Gaze/ConvaiGazeCursorWidget.h`, and `Source/Convai/Public/ConvaiChatbotComponent.h`.
 
 ## `UConvaiPlayerComponent` — gaze attention properties
 
@@ -40,7 +42,7 @@ All properties are in the **Convai | Gaze Attention** category in the Details pa
 | `GazeHighlightActorClass` | `TSubclassOf<AConvaiGazeHighlightActor>` | Plugin default | Highlight actor class spawned over the gazed-at object. Assign a subclass for custom visuals. |
 | `GazeHighlightColor` | `FLinearColor` | `(1.0, 0.9, 0.2, 1.0)` (pale yellow) | Tint forwarded to the highlight actor's `HighlightColor` property before `SetTarget` is called. |
 | `GazeOverlayMaterial` | `TSoftObjectPtr<UMaterialInterface>` | Unset | Overlay material. When unset, the plugin uses `/ConvAI/Highlights/M_ConvaiGazeOverlay` (Fresnel rim silhouette). Swap in any material that exposes an `EmissiveColor` vector parameter. |
-| `GazeHighlightEmissiveIntensity` | `float` (AdvancedDisplay) | `2.5` | Multiplier on `GazeHighlightColor` before the result is written to the `EmissiveColor` parameter. |
+| `GazeHighlightEmissiveIntensity` | `float` (AdvancedDisplay) | `2.5` | Forwarded to the highlight actor's `EmissiveIntensity` scalar parameter. The plugin overlay material multiplies `EmissiveColor` by this value internally. |
 
 ### Cursor properties (category: Convai | Gaze Attention | Cursor)
 
@@ -65,8 +67,12 @@ All events are in the **Convai | Gaze Attention | Events** category and use the 
 |---|---|
 | `OnGazeBegin` | The instant the player's gaze enters a Convai object. Fires before any attention threshold is reached. |
 | `OnGazeEnd` | The instant the player's gaze leaves a Convai object, regardless of attention state. |
-| `OnAttentionGained` | When a gazed-at object is promoted to "in attention" after `GazeAttentionDelay` seconds. |
-| `OnAttentionLost` | When the in-attention slot is released — by the loss timer expiring, gaze switching to another object, or the target actor being destroyed. |
+| `OnAttentionGained` | When a gazed-at object is promoted to "in attention" after `GazeAttentionDelay` seconds. Fires even when every chatbot rejects the update (for example when **Enable Actions** is off or `AttentionSource` is `Explicit (Blueprint/C++)`). |
+| `OnAttentionLost` | When the in-attention slot is released — by the loss timer expiring, gaze switching to another object, or the target actor being destroyed. `ObjectComponent` may be `nullptr` when the attention target was destroyed. |
+
+{% hint style="warning" %}
+`OnAttentionGained` on the player component means the dwell threshold was reached, not that a chatbot accepted the update. Check `AttentionSource` on the chatbot and confirm **Enable Actions** is on when the character should respond.
+{% endhint %}
 
 ## `AConvaiGazeHighlightActor`
 
@@ -89,7 +95,7 @@ Lightweight actor spawned by `UConvaiPlayerComponent` to provide visual feedback
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `HighlightColor` | `FLinearColor` | `(1.0, 0.9, 0.2, 1.0)` | Tint for the overlay's `EmissiveColor` parameter. Forwarded from `UConvaiPlayerComponent::GazeHighlightColor`. |
-| `EmissiveIntensity` | `float` | `2.5` | Scalar multiplier applied to `HighlightColor` before writing the `EmissiveColor` parameter. |
+| `EmissiveIntensity` | `float` | `2.5` | Scalar written to the overlay material's `EmissiveIntensity` parameter. The plugin material multiplies `EmissiveColor` by this value internally. |
 | `OverlayMaterial` | `TSoftObjectPtr<UMaterialInterface>` | Unset | Overlay material. Defaults to `/ConvAI/Highlights/M_ConvaiGazeOverlay`. Falls back to `/Engine/EngineMaterials/EmissiveMeshMaterial` only if the plugin asset is missing from a cooked build (note: that fallback material has no parameters, so `HighlightColor` will not apply). |
 | `FallbackBoxThickness` | `float` (AdvancedDisplay) | `2.0` | Line thickness for the UE 5.0–5.2 wireframe box. |
 | `FallbackBoxPadding` | `float` (AdvancedDisplay) | `1.05` | Extent multiplier for the UE 5.0–5.2 wireframe box. |
@@ -150,7 +156,7 @@ Objects tagged with `UConvaiObjectComponent` expose gaze properties, methods, an
 | `OnGazedIn` | Fired the instant a player's gaze enters this object, before any attention threshold is reached. |
 | `OnGazedOut` | Fired the instant a player's gaze leaves this object. |
 | `OnAttentionGained` | Fired when the gaze system promotes this object after the sustained-gaze threshold. Chatbot acceptance is separate and can fail if **Enable Actions** is off or `AttentionSource` is `Explicit (Blueprint/C++)`. |
-| `OnAttentionLost` | Fired when this object is released from the in-attention slot. |
+| `OnAttentionLost` | Fired when this object is released from the in-attention slot. `PlayerComponent` may be `nullptr` on destroyed-target paths — null-check before use. |
 
 ## `UConvaiChatbotComponent` — attention API
 

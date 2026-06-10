@@ -4,7 +4,7 @@ description: Full property, function, and event reference for the Convai Object 
 last_reviewed: "2026-06-05"
 ---
 
-`UConvaiObjectComponent` is an `ActorComponent` (class group `Convai`) that registers the component with the `UConvaiSubsystem`, auto-binds `ObjectEntry.Ref` to the owning `Actor` when `Ref` is unset, and exposes object identity, live-state properties, and gaze events to Convai characters in the level.
+`UConvaiObjectComponent` is the component you add to any Actor in your level to make Convai characters aware of it. Internally, it is an `ActorComponent` (class group `Convai`) that registers with the `UConvaiSubsystem`, auto-binds `ObjectEntry.Ref` to the owning `Actor` when `Ref` is unset, and exposes object identity, live-state properties, and gaze events to every Convai character in the level.
 
 ## Object identity
 
@@ -21,7 +21,7 @@ These fields are part of `ObjectEntry`.
 
 ### Navigation targeting fields
 
-These fields are part of `ObjectEntry`. They control how AI movement actions navigate to this object.
+These fields control how a Convai character physically moves to this object when executing a movement action. For most objects, the defaults are fine — only configure these when you need precise movement targeting. They are part of `ObjectEntry`.
 
 | Property | Type | Default | Description |
 |---|---|---|---|
@@ -79,6 +79,8 @@ All gaze properties and events are in the `Convai|Object|Gaze` category.
 | `bGazeable` | `bool` property | `true` | When `false`, the gaze pipeline skips this object entirely — no highlight, no gaze events, no attention promotion. Set to `false` for background props that should exist in the AI's environment but should not draw player gaze. |
 | `OnGazedIn` / `OnGazedOut` | `BlueprintAssignable` delegate | — | Fires the instant a player's gaze enters or leaves this object (before the attention threshold is crossed). |
 | `OnAttentionGained` / `OnAttentionLost` | `BlueprintAssignable` delegate | — | Fires when the object component receives gaze-attention begin or end notifications after attempting chatbot fan-out. |
+
+For the full gaze pipeline, player-side settings, and troubleshooting, see [Gaze attention reference](../gaze-attention/gaze-attention-reference.md).
 
 ## Blueprint functions
 

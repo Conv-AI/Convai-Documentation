@@ -65,7 +65,7 @@ Proximity state uses Unreal's navigation system (partial paths allowed) and eval
 
 ## Gaze attention
 
-Controls whether this object participates in the player's gaze pipeline and provides notification functions for custom gaze integrations.
+Controls whether this object participates in the player's gaze pipeline and provides notification functions for custom gaze integrations. For the full gaze API across player, object, highlight, and chatbot components, see [Gaze attention reference](../features/gaze-attention/gaze-attention-reference.md).
 
 | Property | Type | Default | Category | Description |
 |---|---|---|---|---|
@@ -96,7 +96,7 @@ All four events share the `FConvaiObjectGazeEvent` delegate signature: `(ObjectC
 |---|---|---|---|
 | `OnGazedIn` | `On Gazed In` | `Convai\|Object\|Gaze` | A player's gaze enters this object's bounds (before any attention dwell threshold). |
 | `OnGazedOut` | `On Gazed Out` | `Convai\|Object\|Gaze` | A player's gaze leaves this object. |
-| `OnAttentionGained` | `On Attention Gained` | `Convai\|Object\|Gaze` | This object becomes a chatbot's current attention target after the gaze dwell threshold is met. |
+| `OnAttentionGained` | `On Attention Gained` | `Convai\|Object\|Gaze` | Gaze dwell threshold was met and attention promotion was attempted across chatbots. Chatbot acceptance is separate and can fail if **Enable Actions** is off or `AttentionSource` is `Explicit (Blueprint/C++)`. |
 | `OnAttentionLost` | `On Attention Lost` | `Convai\|Object\|Gaze` | This object is released from the chatbot's attention slot. `PlayerComponent` may be `nullptr` because `NotifyGazeAttentionEnd` accepts a nullable player parameter; always null-check before use. |
 
 ## Related reference

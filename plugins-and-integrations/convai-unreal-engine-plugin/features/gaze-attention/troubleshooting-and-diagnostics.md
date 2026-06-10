@@ -6,19 +6,28 @@ last_reviewed: "2026-06-09"
 
 Use this page to diagnose and fix the most common gaze attention problems. Each entry follows a symptom / cause / fix / verify structure.
 
+{% hint style="info" %}
+If you have not completed the baseline setup yet, start with [Gaze attention quick start](quick-start.md) and return here only when a specific symptom persists.
+{% endhint %}
+
 ## Objects do not highlight when gazed at
 
 **Symptom:** The player looks directly at a world actor but no silhouette or wireframe appears.
 
-**Cause (most likely):** The actor does not have a `UConvaiObjectComponent`, or `bEnableGazeAttention` is `false` on the player component.
+**Cause (most likely):** One of these conditions:
+
+- The actor does not have a `UConvaiObjectComponent`.
+- `bEnableGazeAttention` is `false` on the player component.
+- `bGazeable` is `false` on the object's `UConvaiObjectComponent` (under **Convai | Object | Gaze**).
 
 **Fix:**
 1. Select the actor in the level. In the **Details** panel, confirm a `UConvaiObjectComponent` is listed under **Components**.
-2. Select `UConvaiPlayerComponent` on the player pawn. Under **Convai | Gaze Attention**, confirm **Enable Gaze Attention** is checked.
-3. If the actor uses a custom mesh with **No Collision** set on the primitive, the line trace will pass through it. Set the collision channel to at least **Visibility** and confirm the trace channel on `UConvaiPlayerComponent` matches (`GazeTraceChannel`, default `ECC_Visibility`).
-4. If the actor is outside the trace range, increase `GazeMaxDistance` (default 5000 cm).
+2. On that object component, expand **Convai | Object | Gaze** and confirm **Gazeable** (`bGazeable`) is checked.
+3. Select `UConvaiPlayerComponent` on the player pawn. Under **Convai | Gaze Attention**, confirm **Enable Gaze Attention** is checked.
+4. If the actor uses a custom mesh with **No Collision** set on the primitive, the line trace will pass through it. Set the collision channel to at least **Visibility** and confirm the trace channel on `UConvaiPlayerComponent` matches (`GazeTraceChannel`, default `ECC_Visibility`).
+5. If the actor is outside the trace range, increase `GazeMaxDistance` (default 5000 cm).
 
-**Verify:** Enter Play mode. Point the crosshair at the actor. The pale-yellow silhouette should appear immediately, and the cursor dot should turn white.
+**Verify:** Enter Play mode. Point the crosshair at the actor. A highlight should appear immediately (pale-yellow overlay on UE 5.3+, wireframe box on UE 5.0–5.2), and the cursor dot should turn white.
 
 ---
 
@@ -27,6 +36,7 @@ Use this page to diagnose and fix the most common gaze attention problems. Each 
 **Symptom:** The silhouette appears when looking at the object, but `OnAttentionGained` never fires on `UConvaiPlayerComponent`.
 
 **Cause:** One of three conditions:
+
 - The player is not holding gaze on the same actor/primitive long enough to reach `GazeAttentionDelay`.
 - `GazeAttentionDelay` is set higher than expected.
 - The Blueprint event is bound to a different `UConvaiPlayerComponent` than the one running gaze attention.
@@ -44,18 +54,21 @@ Use this page to diagnose and fix the most common gaze attention problems. Each 
 
 **Symptom:** `OnAttentionGained` fires (verified via Blueprint print), but the character is silent.
 
-**Cause:** One of four conditions:
-- `GazeShouldRespond` is `Never`, so attention updates do not request a spoken response.
-- **Enable Actions** (`EnvironmentData.bEnableActions`) is `false` on the chatbot, so gaze cannot update the chatbot's attention slot.
-- `AttentionSource` is `Explicit (Blueprint/C++)`, so a direct `SetObjectInAttention` call is holding the slot and gaze updates are rejected.
-- The chatbot's microphone or session is not active.
+**Cause:** One of these conditions:
+
+| Cause | How to recognize it |
+|---|---|
+| `GazeShouldRespond` is `Never` | Attention updates silently; no LLM reply is requested. Default on a fresh player component. |
+| **Enable Actions** is off | `SetObjectInAttention` and gaze fan-out have no effect on the chatbot. |
+| `AttentionSource` is `Explicit (Blueprint/C++)` | A direct `SetObjectInAttention` call holds the slot; gaze updates are rejected. |
+| Session is not active | Local attention state may update but no request reaches Convai. |
 
 **Fix:**
 1. Set `GazeShouldRespond` to `Always` on `UConvaiPlayerComponent`.
 2. Fill in `GazeAttentionText` with a descriptive sentence. Without text, the attention event carries no narrative context and Convai may not generate a meaningful response even when `ShouldRespond` is `Always`.
-3. Confirm **Enable Actions** (`EnvironmentData.bEnableActions`) is `true` on the chatbot's **Convai | Action API** category.
-4. Open `UConvaiChatbotComponent` in the Details panel during Play mode. Read the `AttentionSource` property (under **Convai | Actions**). If it shows `Explicit (Blueprint/C++)`, find the Blueprint call that set `SetObjectInAttention` and clear the slot with an empty `FConvaiObjectEntry`.
-5. Confirm the chatbot is connected (session is active). If the session dropped, `SetObjectInAttention` succeeds locally but no request is sent to Convai. See [Session lifecycle](../../core-concepts/session-lifecycle.md) for how to diagnose connection state.
+3. On the chatbot, expand **Convai | Actions** → **Environment** and confirm **Enable Actions** (`EnvironmentData.bEnableActions`) is checked.
+4. During Play mode, read `AttentionSource` on `UConvaiChatbotComponent` (under **Convai | Actions**). If it shows `Explicit (Blueprint/C++)`, find the Blueprint call that set `SetObjectInAttention` and clear the slot with an empty `FConvaiObjectEntry`.
+5. Confirm the chatbot session is connected. See [Session lifecycle](../../core-concepts/session-lifecycle.md) for connection diagnostics.
 
 **Verify:** Set `GazeShouldRespond` to `Always`, enter Play mode, and look at the object for `GazeAttentionDelay` seconds. The character should begin speaking.
 
@@ -125,6 +138,7 @@ Use this page to diagnose and fix the most common gaze attention problems. Each 
 **Symptom:** A `UConvaiObjectComponent` with `ObjectEntry.ComponentName` set highlights the entire actor instead of only the named sub-mesh, or the highlight does not appear at all when looking at the intended part.
 
 **Cause:** One of four conditions:
+
 - `ObjectEntry.MoveTargetMode` is still `Actor as goal` (the default). Gaze ignores `ComponentName` until **Move Target Mode** is `Component as goal`.
 - The `ComponentName` value does not match any component on the actor (typo, renamed component, or substring mismatch).
 - The component tree changed at runtime and the cached resolve is stale.
@@ -143,10 +157,18 @@ Use this page to diagnose and fix the most common gaze attention problems. Each 
 
 ## Next steps
 
+{% content-ref url="quick-start.md" %}
+[Gaze attention quick start](quick-start.md)
+{% endcontent-ref %}
+
 {% content-ref url="how-gaze-attention-works.md" %}
 [How gaze attention works](how-gaze-attention-works.md)
 {% endcontent-ref %}
 
 {% content-ref url="gaze-attention-reference.md" %}
 [Gaze attention reference](gaze-attention-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="usage-examples.md" %}
+[Gaze attention usage examples](usage-examples.md)
 {% endcontent-ref %}
