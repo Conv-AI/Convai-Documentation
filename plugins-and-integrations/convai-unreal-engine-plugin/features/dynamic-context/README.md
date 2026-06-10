@@ -8,10 +8,6 @@ Dynamic context lets a Convai character know what is happening in your level rig
 
 Use dynamic context when a fact changes during gameplay and the character should be able to reference it in conversation. Use `Set Context State` for current conditions that can be replaced (for example, `Health` is `50`). Use `Add Context Event` for one-time moments (for example, `Alarm triggered in sector 4`).
 
-{% hint style="info" %}
-`DynamicEnvironmentInfo` is a separate path for session-level notes. It sends free-form text through `update-dynamic-info` at connect and when the property changes. For values that change during gameplay, use `Set Context State` or `Add Context Event` instead.
-{% endhint %}
-
 <table data-view="cards">
 <thead>
 <tr>
