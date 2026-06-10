@@ -128,12 +128,82 @@ Immediately invalidates the token. Call this on logout or whenever the token is 
 
 The plugin reads credentials through `UConvaiUtils::GetAuthHeaderAndKey()`. When `UConvaiSettings.API_Key` is **not empty**, the plugin uses the API key with the `CONVAI-API-KEY` header. When `API_Key` is empty and `AuthToken` is set, the plugin sends the token with the `API-AUTH-TOKEN` header instead.
 
-For production PAT flows, **clear the embedded API key** and set the token at runtime **before** `Start Session` runs on any Convai component.
+Production PAT flows require **two separate steps**: remove the API key from the project on disk **before packaging**, then set a fresh token at runtime **before** `Start Session`. Skipping the packaging step leaves `API_Key` inside the shipped build even if you clear it at runtime in the editor.
 
 | Component | When auto-init runs | When to set the token |
 |---|---|---|
 | `UConvaiChatbotComponent` | `BeginPlay` when **Auto Initialize Session** is enabled | Before that component's `BeginPlay` completes — for example from `GameMode` or an earlier startup Actor. |
 | `UConvaiPlayerComponent` | When the global connection reaches `Connected` | Before the subsystem reports `Connected` — not necessarily in `BeginPlay`. |
+
+## Clear the API key before packaging
+
+When you sign in through the Convai editor window, the plugin writes `API_Key` to `Config/DefaultEngine.ini`. Unreal Engine **includes that file in packaged builds**. If `API_Key` is still set when you package, the real key ships inside the build — a PAT at runtime cannot fix that exposure after the fact.
+
+Complete this step **before** you create a shipping build. Use one of the methods below.
+
+{% tabs %}
+{% tab title="Sign out (UE 5.2+)" %}
+
+{% stepper %}
+{% step %}
+### Open the account menu
+
+In the Convai editor window, click the account control in the top-right corner.
+{% endstep %}
+
+{% step %}
+### Sign out
+
+Select **Sign out**. The plugin clears `API_Key` and `AuthToken` from `Config/DefaultEngine.ini`.
+{% endstep %}
+
+{% step %}
+### Confirm the file is clear
+
+Open `Config/DefaultEngine.ini` and confirm the `API_Key` line under `[/Script/Convai.ConvaiSettings]` is empty or removed. The **API Key** field in **Edit > Project Settings > Plugins > Convai** should also be empty.
+{% endstep %}
+{% endstepper %}
+
+{% endtab %}
+
+{% tab title="Edit DefaultEngine.ini (all UE versions)" %}
+
+{% stepper %}
+{% step %}
+### Close the editor
+
+Close Unreal Editor before editing the file so your changes are not overwritten on shutdown.
+{% endstep %}
+
+{% step %}
+### Clear API_Key and AuthToken
+
+Open `Config/DefaultEngine.ini` in your project folder. Under `[/Script/Convai.ConvaiSettings]`, remove the `API_Key` line or set it to an empty value. Clear `AuthToken` the same way if it is present.
+
+{% code title="Config/DefaultEngine.ini" %}
+```ini
+[/Script/Convai.ConvaiSettings]
+API_Key=
+AuthToken=
+```
+{% endcode %}
+{% endstep %}
+
+{% step %}
+### Confirm before packaging
+
+Restart the editor and open **Edit > Project Settings > Plugins > Convai**. Confirm **API Key** is empty, then create your packaged build.
+{% endstep %}
+{% endstepper %}
+
+{% endtab %}
+{% endtabs %}
+
+See [Remove or clear the API key](../getting-started/configure-your-api-key.md#remove-or-clear-the-api-key) for the full reference on local credential storage.
+
+## Set the token at runtime
+
+After the packaged build contains no stored API key, fetch a fresh `apiAuthToken` from your backend on each launch and apply it before `Start Session`.
 
 {% tabs %}
 {% tab title="Blueprint" %}
@@ -148,11 +218,11 @@ Do not call `https://api.convai.com/user/connect` from Blueprint or from any cli
 {% endstep %}
 
 {% step %}
-### Clear the embedded API key
+### Clear any in-memory API key
 
-In the same Blueprint graph, call **Set API Key** (`Convai|Settings`) and pass an empty string. This ensures the plugin uses the auth token instead of a key stored in `DefaultEngine.ini` or the Convai editor window.
+In the same Blueprint graph, call **Set API Key** (`Convai|Settings`) and pass an empty string. This clears any key still loaded in memory at runtime.
 
-Skip this step only when you are certain the packaged build contains no stored API key.
+You must also complete [Clear the API key before packaging](#clear-the-api-key-before-packaging) so `API_Key` is not present in the shipped `DefaultEngine.ini`.
 {% endstep %}
 
 {% step %}
@@ -174,7 +244,9 @@ See [Session lifecycle](../core-concepts/session-lifecycle.md) for manual sessio
 
 {% tab title="C++" %}
 
-Include `ConvaiUtils.h` and set the token before the Convai session starts. Clear any embedded API key so the plugin selects the auth-token path.
+Include `ConvaiUtils.h` and set the token before the Convai session starts. Call `UConvaiUtils::SetAPI_Key(TEXT(""))` to clear any key loaded in memory at runtime.
+
+Complete [Clear the API key before packaging](#clear-the-api-key-before-packaging) first so the shipped `DefaultEngine.ini` does not contain `API_Key`.
 
 {% code title="Source/MyProject/Private/PatSessionBootstrap.cpp" %}
 ```cpp
