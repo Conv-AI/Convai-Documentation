@@ -63,7 +63,7 @@ In the Convai editor window, click the account control in the top-right corner. 
 {% step %}
 ### Sign out
 
-Select **Sign out**. The plugin clears the stored authentication for this project.
+Select **Sign out**. The plugin clears `API_Key`, `AuthToken`, and cached account details for this project and writes the empty values to `Config/DefaultEngine.ini`.
 {% endstep %}
 
 {% step %}

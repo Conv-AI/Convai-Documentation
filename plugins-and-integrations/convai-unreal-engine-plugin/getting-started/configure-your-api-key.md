@@ -40,6 +40,100 @@ Your API key is now stored. The Convai editor window shows your account dashboar
 
 If the Convai editor window did not open after restart, click the **Convai Editor** button in the toolbar, or select **Window > Convai > Open Convai Editor**.
 
+## Where the API key is stored locally
+
+Signing in through the Convai editor window does not keep the API key only in memory. The plugin saves it to your project on disk.
+
+| Item | Location |
+|---|---|
+| Config file | `Config/DefaultEngine.ini` in your Unreal project folder |
+| Config section | `[/Script/Convai.ConvaiSettings]` |
+| Field name | `API_Key` |
+| Runtime object | `UConvaiSettings.API_Key` (loaded from that config section) |
+
+After sign-in on UE 5.2+, the Convai editor window writes the key to `DefaultEngine.ini` automatically. The **API Key** field under **Edit > Project Settings > Plugins > Convai** is read-only — it displays the value saved in that file.
+
+Example of what appears in `Config/DefaultEngine.ini`:
+
+{% code title="Config/DefaultEngine.ini" %}
+```ini
+[/Script/Convai.ConvaiSettings]
+API_Key=your_api_key_here
+```
+{% endcode %}
+
+The same file and section are used when you add the key manually on UE 5.0 and 5.1. If you use an auth token later, the plugin can also persist `AuthToken` in this section.
+
+Do not commit `Config/DefaultEngine.ini` to a public repository when it contains your API key. See [Connection and API key issues](../troubleshooting/connection-and-api-key-issues.md) for version-control guidance.
+
+## Remove or clear the API key
+
+Clear the key when you switch Convai accounts, remove Convai from a shared project, or prepare a build that must not ship a stored API key.
+
+{% tabs %}
+{% tab title="Convai editor window (UE 5.2+)" %}
+
+{% stepper %}
+{% step %}
+### Open the account menu
+
+In the Convai editor window, click the account control in the top-right corner (two letters from your account name).
+{% endstep %}
+
+{% step %}
+### Sign out
+
+Select **Sign out**. The plugin clears `API_Key`, `AuthToken`, and cached account details for this project and writes the empty values back to `Config/DefaultEngine.ini`.
+{% endstep %}
+
+{% step %}
+### Confirm the key is gone
+
+Open **Edit > Project Settings > Plugins > Convai** and confirm the **API Key** field is empty. Sign in again when you need to reconnect a Convai account.
+{% endstep %}
+{% endstepper %}
+
+See [Sign in and manage your account](../editor-window/sign-in-and-manage-your-account.md) for the full sign-out flow.
+
+{% endtab %}
+
+{% tab title="DefaultEngine.ini (all UE versions)" %}
+
+{% stepper %}
+{% step %}
+### Close the editor
+
+Close Unreal Editor before editing `Config/DefaultEngine.ini` so the file is not overwritten on shutdown.
+{% endstep %}
+
+{% step %}
+### Clear the credential fields
+
+Open `Config/DefaultEngine.ini` in your project folder. Under `[/Script/Convai.ConvaiSettings]`, remove the `API_Key` line or set it to an empty value. If present, clear `AuthToken` the same way.
+
+{% code title="Config/DefaultEngine.ini" %}
+```ini
+[/Script/Convai.ConvaiSettings]
+API_Key=
+AuthToken=
+```
+{% endcode %}
+{% endstep %}
+
+{% step %}
+### Restart the editor
+
+Restart Unreal Editor. Open **Edit > Project Settings > Plugins > Convai** and confirm the **API Key** field is empty.
+{% endstep %}
+{% endstepper %}
+
+Use this method on UE 5.0 and 5.1, or when you need to remove a key without opening the Convai editor window.
+
+{% endtab %}
+{% endtabs %}
+
+For packaged applications, `DefaultEngine.ini` is included in the build. Clear `API_Key` before packaging if you use a [personal access token](../advanced-topics/personal-access-token.md) at runtime instead.
+
 ## Verify the key is active
 
 To confirm your API key is working, proceed to [Add your first Convai character](add-your-first-convai-character.md) and complete the conversation test.

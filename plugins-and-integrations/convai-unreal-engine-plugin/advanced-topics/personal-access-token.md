@@ -246,7 +246,7 @@ On logout, the backend can call `/user/revoke-token` so the PAT cannot be reused
 |---|---|---|
 | Connection fails immediately | `apiAuthToken` is null — backend fetch failed | Verify your backend URL, auth headers, and that the backend returns a non-empty token string. |
 | `401` auth error on connect | Token expired or revoked before **Start Session** | Fetch a fresh token immediately before starting the session. |
-| PAT ignored; API key still used | `UConvaiSettings.API_Key` is still populated | Call **Set API Key** with an empty string, or remove `API_Key` from the packaged `DefaultEngine.ini`. |
+| PAT ignored; API key still used | `UConvaiSettings.API_Key` is still populated in `Config/DefaultEngine.ini` | Sign out from the Convai editor window, call **Set API Key** with an empty string at runtime, or clear `API_Key` in `Config/DefaultEngine.ini` before packaging. See [Configure your API key](../getting-started/configure-your-api-key.md#remove-or-clear-the-api-key). |
 | Token works in editor but fails in packaged build | Packaged build still contains a stored API key, or no PAT is fetched at startup | Confirm runtime token fetch completes before auto-init; clear embedded keys from shipping config. |
 | `apiAuthToken` is null in backend response | Missing `CONVAI-API-KEY` header or malformed body on the backend call | Ensure the body is `{}` and the header is present. Log the raw backend response. |
 
