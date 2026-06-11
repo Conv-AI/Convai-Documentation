@@ -4,7 +4,7 @@ description: >-
   Build a working emotion pipeline on a Convai NPC — attach the Emotion
   Controller, assign the bundled sample profile, and verify expressions in Play
   Mode.
-last_reviewed: 4.2.0
+last_reviewed: "4.2.0"
 ---
 
 We will attach the Emotion Controller to an NPC, assign the bundled sample profile, and see the character's face react to live AI emotion signals in Play Mode. No custom assets are required for the initial setup.
@@ -80,7 +80,7 @@ Press **Play**. Talk to the character using your configured microphone. As the A
 
 ## How it works
 
-When you spoke to the character, `ConvaiCharacter` sent `emotion_config.provider = "llm"` on room connect. Convai then streamed `bot-emotion` messages during responses. `ConvaiEmotionController` received each emotion signal, resolved it through the taxonomy (mapping `"happy"` to `"joy"`), smoothed the intensity score over time, and wrote the score to the character's facial blendshapes every frame. For a full explanation of every stage, see [How the emotion system works](how-the-emotion-system-works.md).
+When you spoke to the character, `ConvaiCharacter` sent `emotion_config.provider = "llm"` on room connect. Convai then streamed `bot-emotion` messages during responses. `ConvaiEmotionController` received each emotion signal, resolved it through the taxonomy (mapping `"serenity"` to `"joy"`), smoothed the intensity score over time, and wrote the score to the character's facial blendshapes every frame. For a full explanation of every stage, see [How the emotion system works](how-the-emotion-system-works.md).
 
 The bundled profile is configured for Reallusion characters. For other rigs, duplicate the profile and update the blendshape names in each slot to match your character's shapes. See [Emotion profile](emotion-profile.md) and [Emotion output bindings](output-bindings.md) for how to configure slots for any rig.
 
@@ -89,17 +89,17 @@ The bundled profile is configured for Reallusion characters. For other rigs, dup
 The quick start runs end-to-end with the bundled profile. These pages cover tuning and extending the setup.
 
 {% content-ref url="how-the-emotion-system-works.md" %}
-[how-the-emotion-system-works.md](how-the-emotion-system-works.md)
+[How the emotion system works](how-the-emotion-system-works.md)
 {% endcontent-ref %}
 
 {% content-ref url="emotion-profile.md" %}
-[emotion-profile.md](emotion-profile.md)
+[Emotion profile](emotion-profile.md)
 {% endcontent-ref %}
 
 {% content-ref url="output-bindings.md" %}
-[output-bindings.md](output-bindings.md)
+[Emotion output bindings](output-bindings.md)
 {% endcontent-ref %}
 
 {% content-ref url="scripting-api.md" %}
-[scripting-api.md](scripting-api.md)
+[Emotion scripting API](scripting-api.md)
 {% endcontent-ref %}

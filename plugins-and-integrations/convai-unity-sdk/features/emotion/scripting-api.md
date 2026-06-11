@@ -1,7 +1,7 @@
 ---
 title: Emotion scripting API
 description: Configure emotion detection, read live emotion state, lock expressions, and react to character emotion events in a Unity scene setup.
-last_reviewed: 4.2.0
+last_reviewed: "4.2.0"
 ---
 
 The Emotion system exposes three scripting surfaces. `ConvaiCharacter` controls the connect-time `emotion_config` sent to Convai. `ConvaiCharacterEventRelay` and `ConvaiManager.Events` expose raw emotion events. `ConvaiEmotionController` exposes the resolved, smoothed state that drives the character's face.
@@ -52,7 +52,7 @@ public sealed class EmotionDetectionSetup : MonoBehaviour
 
 The setting is connect-time only. Change it before starting or reconnecting the character session.
 
-## Inspector path: `ConvaiCharacterEventRelay`
+## Inspector path — ConvaiCharacterEventRelay
 
 `ConvaiCharacterEventRelay` is a MonoBehaviour that bridges character callbacks to Unity Events, allowing designers to wire emotion reactions entirely in the Inspector without writing any code.
 
@@ -62,27 +62,29 @@ Place it on any GameObject in the scene. It automatically finds the `ConvaiChara
 
 ### Inspector fields
 
-| Field                    | Default  | Description                                                                             |
-| ------------------------ | -------- | --------------------------------------------------------------------------------------- |
-| `Character`              | _(none)_ | Optional explicit reference to a `ConvaiCharacter`. Leave empty to use auto-resolve.    |
-| `Auto Resolve Character` | `true`   | When enabled, the relay finds a `ConvaiCharacter` on the same GameObject automatically. |
+| Field | Default | Description |
+| --- | --- | --- |
+| `Character` | _(none)_ | Optional explicit reference to a `ConvaiCharacter`. Leave empty to use auto-resolve. |
+| `Auto Resolve Character` | `true` | When enabled, the relay finds a `ConvaiCharacter` on the same GameObject automatically. |
 
-### `OnEmotionChanged` event
+### OnEmotionChanged event
 
 The relay exposes an **On Emotion Changed** Unity Event that fires whenever the character's emotion signal changes. The event delivers a `CharacterEmotionRelayData` payload:
 
-| Property        | Type     | Description                                                        |
-| --------------- | -------- | ------------------------------------------------------------------ |
-| `CharacterId`   | `string` | Unique identifier of the character.                                |
+| Property | Type | Description |
+| --- | --- | --- |
+| `CharacterId` | `string` | Unique identifier of the character. |
 | `CharacterName` | `string` | Display name of the character (falls back to the GameObject name). |
-| `Emotion`       | `string` | The raw Convai label (e.g. `"happy"`).                             |
-| `Intensity`     | `int`    | Integer scale `1`-`3` as sent by Convai.                           |
+| `Emotion` | `string` | The raw Convai label (e.g. `"Serenity"`). |
+| `Intensity` | `int` | Integer scale `1`-`3` as sent by Convai. |
 
 **Example wiring:** Add a `ConvaiCharacterEventRelay` to your NPC's GameObject. In the **On Emotion Changed** list, click **+**, drag a UI Text component into the object field, and select `Text.text` — the label will update automatically on every emotion change.
 
+{% hint style="info" %}
 `ConvaiCharacterEventRelay` fires on the raw Convai label before taxonomy resolution or smoothing. Use it for UI display, audio cues, or simple branching logic. For smoothed, post-resolution state with scores and hold time, use `ConvaiEmotionController.Current` from script instead.
+{% endhint %}
 
-## Access the controller from script
+## Accessing the controller from script
 
 The `ConvaiEmotionController` component can be retrieved by its concrete type or through the `IEmotionStateSource` interface. Use the interface when you want to decouple your code from the specific component implementation:
 
@@ -98,7 +100,7 @@ var source = npcGameObject.GetComponent<IEmotionStateSource>();
 EmotionReading reading = source.Current;
 ```
 
-## Read raw and resolved emotion state
+## Reading current emotion state
 
 `ConvaiCharacter` exposes the latest raw emotion received from Convai. Use these fields for logging, UI, and diagnostics.
 
@@ -136,41 +138,41 @@ public sealed class EmotionLogger : MonoBehaviour
 | `CurrentResolvedEmotion` | `string` | Shortcut for `Current.DominantLabel`. |
 | `CurrentNormalizedIntensity` | `float` | Shortcut for `Current.DominantScore`. |
 
-### `EmotionReading` properties and methods
+### EmotionReading properties and methods
 
-| Member                                                 | Type                                 | Description                                                                                                                                          |
-| ------------------------------------------------------ | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DominantLabel`                                        | `string`                             | Canonical label of the highest-scoring emotion (e.g. `"joy"`, `"anger"`).                                                                            |
-| `DominantScore`                                        | `float`                              | Normalised score \[0–1] for the dominant emotion after smoothing and burst.                                                                          |
-| `AllScores`                                            | `IReadOnlyDictionary<string, float>` | Full score table keyed by canonical label. Every emotion in the taxonomy has an entry. Emotions with no contribution this frame have a score of `0`. |
-| `MouthInfluence`                                       | `float`                              | \[0–1] hint consumed by the LipSync compositor to blend mouth shapes during non-speaking frames.                                                     |
-| `DominantHoldSeconds`                                  | `float`                              | Wall-clock seconds the current dominant label has been held continuously.                                                                            |
-| `IsNeutral`                                            | `bool`                               | `true` when the dominant label is `"neutral"` or when `DominantScore ≤ 0`.                                                                           |
-| `NeutralLabel`                                         | `const string`                       | The string constant `"neutral"`.                                                                                                                     |
-| `GetScore(string canonicalLabel)`                      | `float`                              | Returns the smoothed score for the given canonical label, or `0` when absent.                                                                        |
-| `CopyScoresTo(IDictionary<string, float> destination)` | `void`                               | Copies the full score table into a caller-owned dictionary. Clears the destination before copying.                                                   |
+| Member | Type | Description |
+| --- | --- | --- |
+| `DominantLabel` | `string` | Canonical label of the highest-scoring emotion (e.g. `"joy"`, `"anger"`). |
+| `DominantScore` | `float` | Normalised score \[0–1] for the dominant emotion after smoothing and burst. |
+| `AllScores` | `IReadOnlyDictionary<string, float>` | Full score table keyed by canonical label. Every emotion in the taxonomy has an entry. Emotions with no contribution this frame have a score of `0`. |
+| `MouthInfluence` | `float` | \[0–1] hint consumed by the LipSync compositor to blend mouth shapes during non-speaking frames. |
+| `DominantHoldSeconds` | `float` | Wall-clock seconds the current dominant label has been held continuously. |
+| `IsNeutral` | `bool` | `true` when the dominant label is `"neutral"` or when `DominantScore ≤ 0`. |
+| `NeutralLabel` | `const string` | The string constant `"neutral"`. |
+| `GetScore(string canonicalLabel)` | `float` | Returns the smoothed score for the given canonical label, or `0` when absent. |
+| `CopyScoresTo(IDictionary<string, float> destination)` | `void` | Copies the full score table into a caller-owned dictionary. Clears the destination before copying. |
 
 ## Authoring-time lock
 
-The controller has three serialized fields that fix the expression to a specific emotion directly from the Inspector — useful during authoring and debugging, or to preview blendshape slot results in the Scene view without entering Play Mode.
+The controller has three serialised fields that fix the expression to a specific emotion directly from the Inspector — useful during authoring and debugging, or to preview blendshape slot results in the Scene view without entering Play Mode.
 
-| Field                | Type     | Default     | Description                                                                                              |
-| -------------------- | -------- | ----------- | -------------------------------------------------------------------------------------------------------- |
-| `lockEmotion`        | `bool`   | `false`     | When enabled, all incoming Convai emotion events are ignored and the character holds the locked emotion. |
-| `lockedEmotionLabel` | `string` | `"neutral"` | Canonical taxonomy label to hold while `lockEmotion` is active.                                          |
-| `lockedIntensity`    | `float`  | `1.0`       | Intensity \[0–1] of the locked emotion.                                                                  |
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `lockEmotion` | `bool` | `false` | When enabled, all incoming Convai emotion events are ignored and the character holds the locked emotion. |
+| `lockedEmotionLabel` | `string` | `"neutral"` | Canonical taxonomy label to hold while `lockEmotion` is active. |
+| `lockedIntensity` | `float` | `1.0` | Intensity \[0–1] of the locked emotion. |
 
 {% hint style="danger" %}
-`lockEmotion` is a **serialized field** — its value is saved with the scene or prefab. If you leave it enabled and forget to reset it, the character will silently ignore all live emotion signals in your production build with no runtime error or warning. Always disable it before building.
+`lockEmotion` is a **serialised field** — its value is saved with the scene or prefab. If you leave it enabled and forget to reset it, the character will silently ignore all live emotion signals in your production build with no runtime error or warning. Always disable it before building.
 {% endhint %}
 
 {% hint style="info" %}
 `ConvaiEmotionController` inherits `[ExecuteAlways]` from its base class. Setting `lockEmotion = true` in the Inspector updates blendshapes in the Scene view immediately, without entering Play Mode. This makes it a practical tool for verifying that slot mappings produce the correct visual result on your character mesh.
 {% endhint %}
 
-## `SetEmotionOverride` and `ClearEmotionOverride`
+## SetEmotionOverride and ClearEmotionOverride
 
-`SetEmotionOverride` injects an additional score into the accumulator on top of whatever Convai is sending. The override is still subject to smoothing — it blends in at `lerpSpeed`, not instantly. Use this when your application logic needs to amplify or steer emotion in response to in-scene events.
+`SetEmotionOverride` sets the accumulator target for a canonical label and score. The change blends in at `lerpSpeed`, not instantly. Later Convai emotion events can update the target again. Use this when your application logic needs to steer emotion in response to in-scene events.
 
 ```csharp
 using Convai.Modules.Emotion.Components;
@@ -194,9 +196,9 @@ public sealed class HazardZoneTrigger : MonoBehaviour
 }
 ```
 
-`ClearEmotionOverride` removes the override and returns the accumulator to Convai-driven state. The transition back is smoothed.
+`ClearEmotionOverride` resets the accumulator target to neutral. The transition back is smoothed.
 
-## `LockEmotion` and `UnlockEmotion`
+## LockEmotion and UnlockEmotion
 
 `LockEmotion` bypasses the accumulator entirely, snapping the character to a specific expression and holding it there regardless of what Convai sends. Use this when you need a guaranteed, stable expression during scripted sequences.
 
@@ -220,7 +222,7 @@ public sealed class WelcomeSequenceController : MonoBehaviour
 }
 ```
 
-`UnlockEmotion` releases the lock. The accumulator resumes from neutral and begins responding to Convai events again.
+`UnlockEmotion` releases the lock. The accumulator continues from its current state and responds to new Convai emotion events.
 
 **API signatures:**
 
@@ -231,7 +233,7 @@ void SetEmotionOverride(string label, float score);
 void ClearEmotionOverride();
 ```
 
-## Subscribe to emotion change events
+## Subscribing to emotion change events
 
 To react to each new emotion Convai sends — for logging, analytics, or adaptive scenario logic — subscribe to `OnCharacterEmotionChanged` on `ConvaiManager.Events`. This is a standard C# event; subscribe in `OnEnable` and unsubscribe in `OnDisable`.
 
@@ -256,27 +258,29 @@ public sealed class EmotionEventListener : MonoBehaviour
 
     private void HandleEmotionChanged(CharacterEmotionChanged e)
     {
-        Debug.Log($"[{e.CharacterId}] {e.Emotion} - intensity {e.Intensity} ({e.NormalizedIntensity:F2})");
+        Debug.Log($"[{e.CharacterId}] {e.Emotion} — intensity {e.Intensity} ({e.NormalizedIntensity:F2})");
     }
 }
 ```
 
-### `CharacterEmotionChanged` properties
+### CharacterEmotionChanged properties
 
-| Property              | Type       | Description                                                       |
-| --------------------- | ---------- | ----------------------------------------------------------------- |
-| `CharacterId`         | `string`   | Unique identifier of the character whose emotion changed.         |
-| `Emotion`             | `string`   | The raw Convai label (e.g. `"happy"`, not the canonical `"joy"`). |
-| `Intensity`           | `int`      | Integer scale `1`-`3` as sent by Convai (clamped).                |
-| `NormalizedIntensity` | `float`    | `(Intensity - 1) / 2f` maps the `1`-`3` range to `[0, 1]`.        |
-| `IsNeutral`           | `bool`     | `true` if the emotion string is `"neutral"`.                      |
-| `IsHighIntensity`     | `bool`     | `true` if `Intensity >= 3`.                                       |
-| `IsLowIntensity`      | `bool`     | `true` if `Intensity <= 1`.                                       |
-| `Timestamp`           | `DateTime` | UTC timestamp of when the event was created.                      |
+| Property | Type | Description |
+| --- | --- | --- |
+| `CharacterId` | `string` | Unique identifier of the character whose emotion changed. |
+| `Emotion` | `string` | The raw Convai label (e.g. `"Serenity"`, not the canonical `"joy"`). |
+| `Intensity` | `int` | Integer scale `1`-`3` as sent by Convai (clamped). |
+| `NormalizedIntensity` | `float` | `(Intensity - 1) / 2f` — maps the 1–3 range to \[0, 1]. |
+| `IsNeutral` | `bool` | `true` if the emotion string is `"neutral"`. |
+| `IsHighIntensity` | `bool` | `true` if `Intensity >= 3`. |
+| `IsLowIntensity` | `bool` | `true` if `Intensity <= 1`. |
+| `Timestamp` | `DateTime` | UTC timestamp of when the event was created. |
 
-`CharacterEmotionChanged.Emotion` contains the raw Convai label (e.g. `"happy"`), not the canonical taxonomy label (`"joy"`). If you need the canonical label — for example, to look up a score in `AllScores` — resolve it through the taxonomy: `taxonomy.TryResolve(e.Emotion, out EmotionDescriptor descriptor)`.
+{% hint style="warning" %}
+`CharacterEmotionChanged.Emotion` contains the **raw Convai label** (e.g. `"Serenity"`), not the canonical taxonomy label (`"joy"`). If you need the canonical label — for example, to look up a score in `AllScores` — resolve it through the taxonomy: `taxonomy.TryResolve(e.Emotion, out EmotionDescriptor descriptor)`.
+{% endhint %}
 
-## `IEmotionStateSource` interface
+## IEmotionStateSource interface
 
 Code that only needs to read emotion state — without controlling overrides or locks — should depend on `IEmotionStateSource` rather than the concrete `ConvaiEmotionController`. This keeps the dependency minimal and makes the consuming class easier to test.
 
