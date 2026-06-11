@@ -17,12 +17,6 @@ With built-in voice capture, speech detection, a ready-to-use chat widget, and f
 Build Browser-Based Conversational AI Avatars with the Convai Web SDK, Three.JS, and React
 {% endembed %}
 
-## Convai WebSDK Tutorial
-
-{% embed url="https://youtu.be/fK8R0SzuvNI" %}
-Integrate Conversational AI, Real-time LipSync and Facial Animations For Browser Based 3D Avatars Using Convai WebSDK
-{% endembed %}
-
 ## What’s New
 
 The Web SDK introduces a streamlined, high-performance interaction pipeline powered by Convai’s newest backend:
@@ -41,6 +35,10 @@ The Web SDK introduces a streamlined, high-performance interaction pipeline powe
   Build your own interface and behaviour logic with exposed hooks and state.
 * **Modern web integration**\
   Designed for Web-based frameworks and tooling.
+* Long-term memory\
+  Per-user memory that persists across sessions via the MemoryManager API.
+* Binary file transfer\
+  Send images and files directly to the character via uploadFile().
 
 {% include "../../../.gitbook/includes/separation-line.md" %}
 
@@ -65,6 +63,10 @@ At a high level, the SDK is organised into a few core pieces:
    Determines what's possible:
    * `"audio"` (default) – audio-only conversations
    * `"video"` – audio + video + screen share
+6. MemoryManager
+   * Per-user long-term memory. List, add, and delete memories tied to an endUserId.
+   * endUserId.\
+     Returned by client.memoryManager — null if no endUserId is set.
 
 ***
 
