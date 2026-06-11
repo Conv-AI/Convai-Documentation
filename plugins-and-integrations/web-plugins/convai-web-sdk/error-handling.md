@@ -8,13 +8,7 @@ icon: cloud-xmark
 
 # Error Handling
 
-| Channel                | Event            | When it fires                              |
-| ---------------------- | ---------------- | ------------------------------------------ |
-| Transport errors       | `error`          | Low-level WebRTC / WebSocket exceptions    |
-| Session end            | `disconnect`     | Every session end, with a reason code      |
-| Server acknowledgments | `serverResponse` | After every message you send               |
-| Silent LLM             | `llmNoResponse`  | LLM deliberately chose not to respond      |
-| Idle timeout           | `idleWarning`    | Server about to disconnect an idle session |
+<table><thead><tr><th>Channel</th><th>Event</th><th width="286.31640625">When it fires</th></tr></thead><tbody><tr><td>Transport errors</td><td><code>error</code></td><td>Low-level WebRTC / WebSocket exceptions</td></tr><tr><td>Session end</td><td><code>disconnect</code></td><td>Every session end, with a reason code</td></tr><tr><td>Server acknowledgments</td><td><code>serverResponse</code></td><td>After every message you send</td></tr><tr><td>Silent LLM</td><td><code>llmNoResponse</code></td><td>LLM deliberately chose not to respond</td></tr><tr><td>Idle timeout</td><td><code>idleWarning</code></td><td>Server about to disconnect an idle session</td></tr></tbody></table>
 
 ***
 
@@ -108,17 +102,19 @@ client.on('disconnect', (reason) => {
 
 #### Reason code reference
 
-| Code | Enum key              | Meaning                                   | Auto-retry?      |
-| ---- | --------------------- | ----------------------------------------- | ---------------- |
-| 0    | `UNKNOWN_REASON`      | Unknown                                   | Yes              |
-| 1    | `CLIENT_INITIATED`    | User called `disconnect()`                | No — intentional |
-| 2    | `DUPLICATE_IDENTITY`  | Another session with same identity joined | No — prompt user |
-| 3    | `SERVER_SHUTDOWN`     | Server restarting                         | Yes — with delay |
-| 4    | `PARTICIPANT_REMOVED` | Removed via server API                    | No               |
-| 5    | `ROOM_DELETED`        | Session closed server-side                | No               |
-| 6    | `STATE_MISMATCH`      | Client/server state diverged              | Yes              |
-| 7    | `JOIN_FAILURE`        | Failed to join — check config             | No — fix config  |
-| 9    | `SIGNAL_CLOSE`        | Network dropped                           | Yes              |
+| Code | Enum key              | Meaning                                                                                             | Auto-retry?      |
+| ---- | --------------------- | --------------------------------------------------------------------------------------------------- | ---------------- |
+| 0    | `UNKNOWN_REASON`      | Network unavailable or browser went offline — this is the most common reason for an unexpected drop | Yes              |
+| 1    | `CLIENT_INITIATED`    | User called `disconnect()`                                                                          | No — intentional |
+| 2    | `DUPLICATE_IDENTITY`  | Another session with same identity joined                                                           | No — prompt user |
+| 3    | `SERVER_SHUTDOWN`     | Server restarting                                                                                   | Yes — with delay |
+| 4    | `PARTICIPANT_REMOVED` | Removed via server API                                                                              | No               |
+| 5    | `ROOM_DELETED`        | Session closed server-side                                                                          | No               |
+| 6    | `STATE_MISMATCH`      | Client/server state diverged                                                                        | Yes              |
+| 7    | `JOIN_FAILURE`        | Failed to join — check config                                                                       | No — fix config  |
+| 9    | `SIGNAL_CLOSE`        | WebSocket signal channel closed cleanly                                                             | Yes              |
+
+**`UNKNOWN_REASON` vs `SIGNAL_CLOSE`:** Both indicate a network drop and both should trigger a retry. The difference is timing — when the browser goes fully offline (`n +avigator.onLine = false`), LiveKit fires `UNKNOWN_REASON (0)` immediately via its off +line detector before the WebSocket even closes. `SIGNAL_CLOSE (9)` fires when the sig +nal WebSocket itself closes, which requires the network to be partially reachable. In + practice, pulling WiFi or DevTools → Offline always produces `UNKNOWN_REASON`.
 
 The last reason is also available synchronously on `client.state.disconnectReason` — `null` when connected.
 
