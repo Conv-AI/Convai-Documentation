@@ -1,13 +1,16 @@
 ---
 title: Emotion examples
 description: Six complete scenarios covering hazard overrides, locked expressions, distress branching, analytics logging, no-code UI wiring, and Editor authoring.
+last_reviewed: "4.2.0"
 ---
 
 These scenarios show how the Emotion system's configuration and scripting API combine to serve realistic application requirements. Each scenario is self-contained: Inspector setup is described first, followed by any runtime code needed to complete the behavior. Profile and binding field references are in [Emotion profile](emotion-profile.md) and [Emotion output bindings](output-bindings.md); the full scripting surface is in [Emotion scripting API](scripting-api.md).
 
+Before running these scenarios in Play Mode, set **Detection Source** to **Llm** or **Nrclex** on each NPC's `ConvaiCharacter` component. See [Emotion quick start](quick-start.md).
+
 ## Scenario 1: Dynamic hazard response
 
-**Situation:** An instructor NPC guides trainees through a fire evacuation simulation. When a trainee enters a marked danger zone, the instructor's expression should shift sharply toward fear or urgency to reinforce the seriousness of the situation. When the trainee exits the zone, the expression returns to the server-driven state.
+**Situation:** An instructor NPC guides trainees through a fire evacuation simulation. When a trainee enters a marked danger zone, the instructor's expression should shift sharply toward fear or urgency to reinforce the seriousness of the situation. When the trainee exits the zone, the expression returns to Convai-driven state.
 
 ### Profile settings
 
@@ -49,13 +52,13 @@ public sealed class HazardZoneTrigger : MonoBehaviour
 }
 ```
 
-`SetEmotionOverride` adds the fear score on top of whatever the server is currently sending. The accumulator blends it in at the configured `lerpSpeed`, so the override arrives quickly but naturally. `ClearEmotionOverride` on trigger exit lets the server signal resume full control.
+`SetEmotionOverride` sets the target score for the given canonical label. The accumulator blends it in at the configured `lerpSpeed`, so the change arrives quickly but naturally. Later Convai emotion events can update the target again. `ClearEmotionOverride` removes the manual target and returns control to incoming Convai signals.
 
 ***
 
 ## Scenario 2: Locked welcome expression
 
-**Situation:** A greeter NPC stands at the entrance of an onboarding simulation. During the welcome sequence — before the trainee has started talking — the character should always appear warm and approachable, regardless of any emotion signals the backend might send during the connection handshake.
+**Situation:** A greeter NPC stands at the entrance of an onboarding simulation. During the welcome sequence — before the trainee has started talking — the character should always appear warm and approachable, regardless of any emotion signals Convai might send during the connection handshake.
 
 ### Runtime script
 
@@ -130,7 +133,7 @@ public sealed class EmotionBranchDirector : MonoBehaviour
 
 ## Scenario 4: Session analytics logging
 
-**Situation:** A training platform needs to record every emotional shift the AI character experiences during a session, including the raw server label and intensity, so instructors can review the emotional arc of the conversation in a post-session report.
+**Situation:** A training platform needs to record every emotional shift the AI character experiences during a session, including the raw Convai label and intensity, so instructors can review the emotional arc of the conversation in a post-session report.
 
 ### Runtime script
 
@@ -167,7 +170,7 @@ public sealed class EmotionSessionLogger : MonoBehaviour
 }
 ```
 
-`OnCharacterEmotionChanged` fires on every emotion signal from the backend, before the controller has smoothed or processed it. This gives analytics code access to the raw signal rather than the interpolated visual state, which is more meaningful for session review.
+`OnCharacterEmotionChanged` fires on every emotion signal from Convai, before the controller has smoothed or processed it. This gives analytics code access to the raw signal rather than the interpolated visual state, which is more meaningful for session review.
 
 ***
 
@@ -206,11 +209,11 @@ Now every time the character's emotion changes, the `Emotion` property from `Cha
 {% endstepper %}
 
 {% hint style="success" %}
-Enter Play Mode and speak to the character. The UI label updates automatically as the backend sends new emotion signals.
+Enter Play Mode and speak to the character. The UI label updates automatically as Convai sends new emotion signals.
 {% endhint %}
 
 {% hint style="info" %}
-`ConvaiCharacterEventRelay` delivers the raw server label (e.g. `"happy"`). If you need a friendlier display name (e.g. `"Joy"` rather than `"happy"`), add a small formatting script that maps raw labels to display strings, or post-process the string in a UnityEvent target method.
+`ConvaiCharacterEventRelay` delivers the raw Convai label (e.g. `"Serenity"`). If you need a friendlier display name (e.g. `"Joy"` rather than `"Serenity"`), add a small formatting script that maps raw labels to display strings, or post-process the string in a UnityEvent target method.
 {% endhint %}
 
 ***
@@ -227,7 +230,7 @@ Enter Play Mode and speak to the character. The UI label updates automatically a
 The Scene view updates immediately — blendshapes are applied in Edit Mode because `ConvaiEmotionController` inherits `[ExecuteAlways]` from its base class. Cycle through the labels in your taxonomy to verify each slot mapping visually.
 
 {% hint style="danger" %}
-Set **Lock Emotion** back to `false` before building for production. The field is serialised — if it remains enabled, the character will ignore all backend emotion signals in the shipped build with no runtime error or warning.
+Set **Lock Emotion** back to `false` before building for production. The field is serialised — if it remains enabled, the character will ignore all Convai emotion signals in the shipped build with no runtime error or warning.
 {% endhint %}
 
 ## Next steps
