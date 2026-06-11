@@ -1,6 +1,6 @@
 ---
 title: Session and character identifiers
-description: Reference for the identifiers that flow through a Realtime API session: what each is, who sets it, and when it is required.
+description: "Reference for the identifiers that flow through a Realtime API session: what each is, who sets it, and when it is required."
 last_reviewed: "2026-06-11"
 ---
 
