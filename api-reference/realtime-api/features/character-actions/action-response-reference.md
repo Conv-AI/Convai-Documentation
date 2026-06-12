@@ -1,6 +1,6 @@
 ---
 title: action-response reference
-description: Reference for the action-response server event: actions array fields, empty-array no-op behavior, multi-action sequencing, and the RTVI envelope.
+description: "Reference for the action-response server event: actions array fields, empty-array no-op behavior, multi-action sequencing, and the RTVI envelope."
 last_reviewed: "2026-06-11"
 ---
 

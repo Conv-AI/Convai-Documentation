@@ -1,6 +1,6 @@
 ---
 title: Character actions usage examples
-description: Two complete integration scenarios for character actions: an object-interaction training simulation and a session with attention tracking updates.
+description: "Two complete integration scenarios for character actions: an object-interaction training simulation and a session with attention tracking updates."
 last_reviewed: "2026-06-11"
 ---
 

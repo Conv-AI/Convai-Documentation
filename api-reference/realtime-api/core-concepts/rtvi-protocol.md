@@ -1,6 +1,6 @@
 ---
 title: RTVI message protocol
-description: Understand the RTVI message protocol: envelope structure for each transport, the direction model, and server-response status values.
+description: "Understand the RTVI message protocol: envelope structure for each transport, the direction model, and server-response status values."
 last_reviewed: "2026-06-11"
 ---
 

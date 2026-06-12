@@ -1,6 +1,6 @@
 ---
 title: WebSocket /chat
-description: Reference for WebSocket /chat: query parameter, one-connection-per-session constraint, close codes 1008 and 1011, and RTVI message flow.
+description: "Reference for WebSocket /chat: query parameter, one-connection-per-session constraint, close codes 1008 and 1011, and RTVI message flow."
 last_reviewed: "2026-06-11"
 ---
 

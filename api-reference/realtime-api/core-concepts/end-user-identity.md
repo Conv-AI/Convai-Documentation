@@ -1,6 +1,6 @@
 ---
 title: End-user identity
-description: Understand end-user identity fields in the Realtime API: when they are required, how the server processes them, and what they enable.
+description: "Understand end-user identity fields in the Realtime API: when they are required, how the server processes them, and what they enable."
 last_reviewed: "2026-06-11"
 ---
 

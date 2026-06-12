@@ -1,6 +1,6 @@
 ---
 title: Session lifecycle
-description: Understand the full lifecycle of a Realtime API session: how it starts, how the client joins a transport room, and how it ends cleanly.
+description: "Understand the full lifecycle of a Realtime API session: how it starts, how the client joins a transport room, and how it ends cleanly."
 last_reviewed: "2026-06-11"
 ---
 

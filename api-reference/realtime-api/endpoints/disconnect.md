@@ -1,6 +1,6 @@
 ---
 title: POST /disconnect
-description: Reference for POST /disconnect: query parameters, authentication requirements, response format, and the security risk of unauthenticated session teardown.
+description: "Reference for POST /disconnect: query parameters, authentication requirements, response format, and the security risk of unauthenticated session teardown."
 last_reviewed: "2026-06-11"
 ---
 

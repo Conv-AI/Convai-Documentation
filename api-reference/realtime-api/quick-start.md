@@ -1,6 +1,6 @@
 ---
 title: Connect your first character
-description: Build a live session with a Convai character: authenticate, join a room, send an RTVI message, and close the session using the Realtime API.
+description: "Build a live session with a Convai character: authenticate, join a room, send an RTVI message, and close the session using the Realtime API."
 last_reviewed: "2026-06-11"
 ---
 

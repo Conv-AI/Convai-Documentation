@@ -1,6 +1,6 @@
 ---
 title: Core concepts overview
-description: Understand the three foundational concepts of the Realtime API: session lifecycle, RTVI message protocol, and end-user identity.
+description: "Understand the three foundational concepts of the Realtime API: session lifecycle, RTVI message protocol, and end-user identity."
 ---
 
 The Realtime API is built on three interlocking concepts. Understanding each one lets you reason about session state, message exchange, and per-user personalization before reading endpoint or feature reference pages.

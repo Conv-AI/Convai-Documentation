@@ -1,6 +1,6 @@
 ---
 title: Audio output configuration
-description: Reference for audio output configuration fields: WAV header control, sample rate, maximum chunk duration, and routing mode values.
+description: "Reference for audio output configuration fields: WAV header control, sample rate, maximum chunk duration, and routing mode values."
 last_reviewed: "2026-06-11"
 ---
 

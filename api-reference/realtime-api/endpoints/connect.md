@@ -1,6 +1,6 @@
 ---
 title: POST /connect
-description: Reference for the realtime connect endpoint: method, URL, authentication headers, request and response shapes, and all HTTP status codes.
+description: "Reference for the realtime connect endpoint: method, URL, authentication headers, request and response shapes, and all HTTP status codes."
 last_reviewed: "2026-06-11"
 ---
 
