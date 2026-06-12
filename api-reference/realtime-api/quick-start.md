@@ -12,7 +12,7 @@ This tutorial walks through connecting to a Convai character using the Realtime 
 - A character UUID — obtain it from the Convai dashboard
 - The LiveKit client SDK installed in your environment (for step 2)
 
-This walkthrough uses the LiveKit transport, which is the default. See [Choose a transport](transports.md) if your integration requires Daily or WebSocket instead.
+This walkthrough uses the LiveKit transport, which is the default. See [Choose a transport](transports.md) if your integration requires WebSocket instead.
 
 {% stepper %}
 {% step %}

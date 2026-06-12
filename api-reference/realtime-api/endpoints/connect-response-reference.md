@@ -14,7 +14,7 @@ last_reviewed: "2026-06-11"
 | `request_trace_id` | `string` | Yes | Server-side trace identifier for this `/connect` request. Use this value when reporting issues to Convai support to correlate logs, telemetry, and session records. |
 | `character_session_id` | `string (UUID)` | Yes | Conversation session identifier. Persist this value and pass it back as `character_session_id` in a future `/connect` call to resume the conversation history. |
 | `room_url` | `string` | Yes | Transport-specific room URL. For LiveKit, this is the LiveKit server base URL. For WebSocket, this is the `wss://` URL to connect to directly. |
-| `room_name` | `string \| null` | LiveKit only | Room name within the LiveKit SFU. Pass this value to your LiveKit client SDK along with `token`. `null` for Daily and WebSocket transports. |
+| `room_name` | `string \| null` | LiveKit only | Room name within the LiveKit SFU. Pass this value to your LiveKit client SDK along with `token`. `null` for WebSocket transport. |
 | `token` | `string` | Yes | Participant authentication token for the room. For LiveKit, this is a signed JWT. For WebSocket, this field is an empty string (no token required). |
 | `end_user_id` | `string \| null` | No | The `end_user_id` provided in the request, echoed back. `null` when not provided. |
 | `end_user_metadata` | `object \| null` | No | The `end_user_metadata` provided in the request, echoed back. `null` when not provided or when `end_user_id` was absent. |
@@ -26,7 +26,6 @@ The `room_url`, `room_name`, and `token` fields behave differently depending on 
 | Transport | `room_url` | `room_name` | `token` |
 |---|---|---|---|
 | `livekit` | LiveKit server base URL | LiveKit room name | Signed LiveKit participant JWT |
-| `daily` | Daily room URL | `null` | Daily access token |
 | `websocket` | WebSocket URL (`wss://…/chat?session_id=…`) | `null` | Empty string |
 
 ## Connecting a LiveKit client

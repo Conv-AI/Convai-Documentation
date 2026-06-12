@@ -99,7 +99,6 @@ The client-to-server envelope encoding differs by transport. The server normaliz
 | LiveKit | `{"label": "rtvi-ai", "type": "<msg-type>", "data": {...}}` | Send on the `rtvi-ai` data channel. The `label` field is required. |
 | WebSocket (`/chat`) — direct | `{"type": "<msg-type>", "data": {...}}` | Standard format. Send as a JSON text frame. |
 | WebSocket (`/chat`) — wrapped | `{"type": "client-message", "data": {"t": "<msg-type>", "d": {...}}}` | Alternative format. The server automatically unwraps this to the direct format. |
-| Daily | Same as LiveKit | Send on the `rtvi-ai` data channel with the `label` field present. |
 
 ## Related concepts
 

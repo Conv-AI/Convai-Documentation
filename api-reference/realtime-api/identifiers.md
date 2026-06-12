@@ -29,7 +29,7 @@ sequenceDiagram
     Client->>Convai: POST /connect<br/>body: character_id<br/>optional: end_user_id, character_session_id
     Convai-->>Client: ConnectResponse<br/>session_id, character_session_id,<br/>request_trace_id, room_url, token
 
-    Client->>Convai: Join transport room<br/>(room_url + token via LiveKit/Daily SDK)
+    Client->>Convai: Join transport room<br/>(room_url + token via LiveKit SDK)
     Client->>Convai: RTVI message on data channel
 
     Client->>Convai: POST /disconnect?session_id=<session_id>

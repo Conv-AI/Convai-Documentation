@@ -11,7 +11,7 @@ last_reviewed: "2026-06-11"
 | Field | Type | Required | Default | Constraints | Description |
 |---|---|---|---|---|---|
 | `character_id` | `string (UUID)` | Yes | — | Valid UUID v4 | The character to connect to. The character must be owned by the API key's account or have public or unlisted visibility. |
-| `transport` | `string` | No | `"livekit"` | `"livekit"`, `"daily"`, `"websocket"` | Realtime transport protocol. See [Choose a transport](../transports.md). |
+| `transport` | `string` | No | `"livekit"` | `"livekit"`, `"websocket"` | Realtime transport protocol. See [Choose a transport](../transports.md). |
 | `connection_type` | `string` | No | `"audio"` | `"audio"` or `"video"` | Whether the session carries audio only or audio and video. |
 
 {% hint style="info" %}

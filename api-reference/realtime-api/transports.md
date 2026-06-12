@@ -1,17 +1,16 @@
 ---
 title: Choose a transport
-description: Understand how LiveKit, Daily, and WebSocket transport protocols differ, when to choose each, and how RTVI messages route over each connection.
+description: Understand how LiveKit and WebSocket transport protocols differ, when to choose each, and how RTVI messages route over each connection.
 last_reviewed: "2026-06-11"
 ---
 
-The Realtime API supports three transport protocols. You choose the transport at connect time by setting the `transport` field in your `POST /connect` request body. Once the session is established, the protocol is fixed for its lifetime.
+The Realtime API supports two transport protocols. You choose the transport at connect time by setting the `transport` field in your `POST /connect` request body. Once the session is established, the protocol is fixed for its lifetime.
 
 ## Available transports
 
 | Transport | Value in `transport` field | Protocol | Best for |
 |---|---|---|---|
 | LiveKit | `livekit`, `internal`, `external` | WebRTC via LiveKit SFU | Most integrations. Supports bidirectional audio, data channels, and optional video tracks. The `room_name` field in the `/connect` response identifies the specific room. |
-| Daily | `daily` | WebRTC via Daily | Integrations already built on Daily's infrastructure. Audio and data channels work the same way as LiveKit. |
 | WebSocket | `websocket` | WebSocket over the `/chat` endpoint | Server-side or constrained environments where a full WebRTC stack is unavailable. The `/connect` response returns a `room_url` containing the `wss://` endpoint and `?session_id=...` parameter to connect to. |
 
 The `transport` field defaults to `livekit` when omitted from the request body.
@@ -33,10 +32,9 @@ RTVI messages follow different paths depending on which transport you chose at c
 | Transport | How to send RTVI messages |
 |---|---|
 | LiveKit | Publish a UTF-8 JSON string on the LiveKit data channel after joining the room with `room_url` and `token`. |
-| Daily | Publish a UTF-8 JSON string on the Daily data channel after joining the room with `room_url` and `token`. |
 | WebSocket | Connect to the `room_url` from the `/connect` response (a `wss://` URL with `?session_id=...`) and send JSON frames directly over the WebSocket. |
 
-For LiveKit and Daily, RTVI messages flow through the shared WebRTC data channel alongside the audio tracks. For WebSocket, messages flow directly over the `/chat` connection without a separate room.
+For LiveKit, RTVI messages flow through the shared WebRTC data channel alongside the audio tracks. For WebSocket, messages flow directly over the `/chat` connection without a separate room.
 
 ## Next steps
 

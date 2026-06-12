@@ -44,34 +44,6 @@ A noisy industrial training environment requires a higher `min_volume` threshold
 }
 ```
 
-## GEMINI_CUSTOM_VAD_PARAMS per-character override
-
-The `GEMINI_CUSTOM_VAD_PARAMS` feature lets you store a persistent VAD configuration on a character. This configuration is applied to sessions that use a Gemini Live LLM provider.
-
-Set the per-character configuration by sending a `POST /character/custom-features` request:
-
-```bash
-curl -X POST $LIVE_SERVER_URL/character/custom-features \
-  -H 'X-API-Key: YOUR_API_KEY' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "character_id": "YOUR_CHARACTER_ID",
-    "feature_name": "GEMINI_CUSTOM_VAD_PARAMS",
-    "feature_value": {
-      "confidence": 0.85,
-      "start_secs": 0.25,
-      "stop_secs": 0.4,
-      "min_volume": 0.7
-    }
-  }'
-```
-
-The full `POST /character/custom-features` endpoint reference is covered in the Endpoints section.
-
-{% hint style="info" %}
-`GEMINI_CUSTOM_VAD_PARAMS` applies only to sessions using a Gemini Live LLM provider. Sessions using other providers use the per-request `vad_params` values as supplied.
-{% endhint %}
-
 ## Next steps
 
 {% content-ref url="connect-request-reference.md" %}

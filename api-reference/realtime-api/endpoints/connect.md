@@ -4,7 +4,7 @@ description: "Reference for the realtime connect endpoint: method, URL, authenti
 last_reviewed: "2026-06-11"
 ---
 
-`POST /connect` creates a new realtime session for a Convai character. Convai provisions a transport room, spawns a conversation agent, and returns the credentials the client uses to join. Call this endpoint once per conversation session before connecting a LiveKit, Daily, or WebSocket client.
+`POST /connect` creates a new realtime session for a Convai character. Convai provisions a transport room, spawns a conversation agent, and returns the credentials the client uses to join. Call this endpoint once per conversation session before connecting a LiveKit or WebSocket client.
 
 ## Endpoint
 

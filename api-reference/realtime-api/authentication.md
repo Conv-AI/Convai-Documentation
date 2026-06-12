@@ -25,7 +25,7 @@ When both headers are present, `X-API-Key` takes precedence and `API-AUTH-TOKEN`
 
 ## Endpoints that do not require authentication
 
-`POST /disconnect` and `GET /healthz` accept requests without any authentication header. The `/chat` WebSocket endpoint does not use authentication headers — it relies on the `session_id` query parameter that was issued by an authenticated `POST /connect` call.
+`POST /disconnect` accepts requests without any authentication header. The `/chat` WebSocket endpoint does not use authentication headers — it relies on the `session_id` query parameter that was issued by an authenticated `POST /connect` call.
 
 {% hint style="danger" %}
 Never expose your `X-API-Key` value in client-side JavaScript, public repositories, or any environment reachable by untrusted parties. An exposed API key grants access to your full Convai account. Treat it as a secret and rotate it immediately if it is compromised.

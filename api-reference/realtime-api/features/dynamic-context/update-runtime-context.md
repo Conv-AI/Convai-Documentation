@@ -9,7 +9,7 @@ Use `context-update` to inject new information into a running session or overwri
 ## Prerequisites
 
 - An active Realtime API session with a valid `SESSION_ID`.
-- A transport connection (LiveKit, Daily, or WebSocket) to deliver RTVI messages.
+- A transport connection (LiveKit or WebSocket) to deliver RTVI messages.
 
 {% hint style="info" %}
 `context-update` messages are sent over the established transport channel, not over HTTP. Authenticate the session on `/connect` first.

@@ -1,6 +1,6 @@
 ---
 title: Realtime API
-description: Connect your application to a Convai character in real time, send voice and text, and receive AI responses through LiveKit, WebSocket, or Daily.
+description: Connect your application to a Convai character in real time, send voice and text, and receive AI responses through LiveKit or WebSocket.
 last_reviewed: "2026-06-11"
 ---
 
@@ -23,7 +23,7 @@ The Realtime API gives your application a persistent, bidirectional session with
 <td><a href="authentication.md">authentication.md</a></td>
 </tr>
 <tr>
-<td><strong>Choose a transport</strong><br>LiveKit, Daily, and WebSocket — what each provides and when to use it.</td>
+<td><strong>Choose a transport</strong><br>LiveKit and WebSocket — what each provides and when to use it.</td>
 <td><a href="transports.md">transports.md</a></td>
 </tr>
 <tr>
@@ -44,7 +44,6 @@ You specify the transport in the `transport` field of the `POST /connect` reques
 | Transport | Accepted `transport` values | Protocol |
 |---|---|---|
 | LiveKit | `livekit`, `internal`, `external` | WebRTC via LiveKit SFU |
-| Daily | `daily` | WebRTC via Daily |
 | WebSocket | `websocket` | WebSocket over the `/chat` endpoint |
 
 The value `sse` is not accepted and the server returns a `422 Unprocessable Entity` error if you submit it. See [Choose a transport](transports.md) for guidance on selecting the right protocol for your product.

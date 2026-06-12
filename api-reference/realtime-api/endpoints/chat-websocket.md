@@ -12,7 +12,7 @@ last_reviewed: "2026-06-11"
 
 ## Connection requirements
 
-This endpoint only accepts sessions created with `transport="websocket"` in the `/connect` request. Connecting with a session that was created using a `daily` or `livekit` transport closes the connection immediately with close code `1008`.
+This endpoint only accepts sessions created with `transport="websocket"` in the `/connect` request. Connecting with a session that was created using a `livekit` transport closes the connection immediately with close code `1008`.
 
 Only one WebSocket connection per session is permitted at a time. Attempting a second connection while one is active closes the new connection with close code `1008` and the reason `"Session already has an active connection. Only one WebSocket per session allowed."`.
 
