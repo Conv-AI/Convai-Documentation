@@ -1,43 +1,39 @@
 ---
-description: >-
-  Explore Convai’s Core APIs, divided into Character Crafting and Interaction
-  APIs, to create, customize, and interact with intelligent AI characters.
+title: Core API Reference
+description: Create and configure AI characters, then connect users in real time using Convai's REST and Live APIs for voice and text interaction.
 ---
 
-# Core API Reference
-
-This section provides a detailed overview of Convai’s **Core APIs**, which serve as the foundation for building intelligent and interactive virtual characters. The Core APIs are divided into two main categories: **Character Crafting APIs** and **Interaction APIs**, each serving a distinct purpose in your development workflow.
-
-{% embed url="https://youtu.be/vwBzaQP0Bl4?si=tQ5LGv-F9nxwxv1u" %}
-
-### Understanding the Core API
-
-Convai’s Core API empowers developers to **create, customize, and deploy AI-driven characters** across various use cases — from immersive games to virtual assistants.
-
-The Core API is structured into two segments:
-
-{% content-ref url="character-crafting-apis/" %}
-[character-crafting-apis](character-crafting-apis/)
-{% endcontent-ref %}
-
-{% content-ref url="interaction-apis/" %}
-[interaction-apis](interaction-apis/)
-{% endcontent-ref %}
-
-***
+Convai's Core API lets you build, configure, and activate AI characters across any platform. Start by shaping a character's identity with the Character Crafting APIs, then engage users through the Interaction or Live APIs.
 
 {% hint style="danger" %}
-**Heads Up**
+**Heads up**
 
 Misuse of this API for unethical or malicious purposes will result in an automatic ban of the associated account and API key.
 {% endhint %}
 
+<table data-view="cards">
+<thead>
+<tr>
+<th></th>
+<th data-hidden data-card-target data-type="content-ref"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Character Crafting APIs</strong><br>Define a character's personality, backstory, knowledge bank, voice, and actions.</td>
+<td><a href="character-crafting-apis/">character-crafting-apis</a></td>
+</tr>
+<tr>
+<td><strong>Live APIs (Beta)</strong><br>Establish real-time WebRTC sessions for low-latency audio and text conversations.</td>
+<td><a href="live-apis-beta/">live-apis-beta</a></td>
+</tr>
+<tr>
+<td><strong>Interaction APIs</strong><br>Send text and audio inputs and receive streaming responses over REST and SSE.</td>
+<td><a href="interaction-apis/">interaction-apis</a></td>
+</tr>
+</tbody>
+</table>
+
 {% hint style="info" %}
-For additional resources, you can also explore our [Python Notebook](https://colab.research.google.com/drive/17Bazf92ZsXQmJZ91CbVAhiPmnapIuTgS?usp=sharing).&#x20;
-
-This notebook is a hands-on guide to using Convai’s Core APIs for creating responsive NPCs. It walks you through setting up a character, defining its narrative and backstory, and integrating voice capabilities effectively.
-{% endhint %}
-
-{% hint style="success" %}
-If you encounter any issues or have questions, please don’t hesitate to reach out to us through our [Convai Developer Forum](https://forum.convai.com).
+For a guided walkthrough, see the [Python Notebook](https://colab.research.google.com/drive/17Bazf92ZsXQmJZ91CbVAhiPmnapIuTgS?usp=sharing) that demonstrates character creation, backstory configuration, and voice integration using the Core APIs.
 {% endhint %}
