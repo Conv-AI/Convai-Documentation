@@ -1,5 +1,5 @@
 ---
-title: Server events overview
+title: RTVI server events
 description: Direction model, RTVI server-message envelope, transport routing rules, conditional events, and a complete reference index of every server-to-client event type.
 last_reviewed: "2026-06-11"
 ---

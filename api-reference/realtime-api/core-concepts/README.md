@@ -1,5 +1,5 @@
 ---
-title: Core concepts overview
+title: Core concepts
 description: "Understand the three foundational concepts of the Realtime API: session lifecycle, RTVI message protocol, and end-user identity."
 ---
 

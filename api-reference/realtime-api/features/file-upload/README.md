@@ -1,5 +1,5 @@
 ---
-title: File upload overview
+title: File upload
 description: Send images to Convai over a LiveKit byte-stream session, and find how-to guides, platform examples, and reference for the file upload feature.
 last_reviewed: "2026-06-11"
 ---

@@ -41,5 +41,13 @@ The endpoints section documents the public surface of the Realtime API in detail
 <td><strong>VAD parameters</strong><br>Voice activity detection fields, defaults, and per-character override behavior.</td>
 <td><a href="vad-params.md">vad-params.md</a></td>
 </tr>
+<tr>
+<td><strong>POST /disconnect</strong><br>Teardown endpoint: parameters, auth requirements, response format, and unauthenticated risk.</td>
+<td><a href="disconnect.md">disconnect.md</a></td>
+</tr>
+<tr>
+<td><strong>WebSocket /chat</strong><br>WebSocket transport endpoint: query parameter, one-connection constraint, and close codes.</td>
+<td><a href="chat-websocket.md">chat-websocket.md</a></td>
+</tr>
 </tbody>
 </table>

@@ -1,5 +1,5 @@
 ---
-title: Client messages overview
+title: RTVI client messages
 description: "Understand client messages in the Realtime API: the RTVI envelope format, server-response acknowledgments, and all 12 supported message types."
 last_reviewed: "2026-06-11"
 ---
