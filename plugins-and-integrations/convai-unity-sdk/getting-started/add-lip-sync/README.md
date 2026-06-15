@@ -1,8 +1,8 @@
 ---
 title: Add lip sync
 description: >-
-  Connect Convai audio output to your character's facial blendshapes to
-  synchronize mouth movement with speech.
+  Connect Convai audio output to your character's facial blendshapes,
+  synchronize mouth movement with speech, and tune playback latency.
 last_reviewed: "4.2.0"
 ---
 
@@ -99,6 +99,7 @@ If your character was rigged with non-standard blendshape names, create a custom
 | `_latencyMode`              | `Balanced` | —        | Preset that controls buffer depth vs. responsiveness |
 | `_maxBufferedSeconds`       | `3.0`      | 1–10     | Ring buffer capacity in seconds                      |
 | `_minResumeHeadroomSeconds` | `0.12`     | 0.05–0.3 | Buffer refill threshold after starvation             |
+| `_deliverChunksAhead`       | `false`    | —        | Preview opt-in for indexed NeuroSync chunks          |
 
 **Latency mode options:**
 
@@ -108,6 +109,14 @@ If your character was rigged with non-standard blendshape names, create a custom
 | `UltraLowLatency` | Minimal delay; susceptible to starvation on unstable connections |
 | `NetworkSafe`     | High buffering; best for unreliable or high-latency networks     |
 | `Custom`          | Unlocks manual control over buffer fields above                  |
+
+## Ahead chunk delivery preview
+
+**Ahead Chunk Delivery (Preview)** enables the SDK to request indexed NeuroSync chunks before their playback position. Leave it disabled for normal projects. Enable it only when you are testing the preview ahead-chunk path for a character that already uses `ConvaiLipSyncComponent`.
+
+When `_deliverChunksAhead` is enabled, the SDK sends `deliver_chunks_ahead=true` in the room connection lip sync configuration. The default request does not include this field, so existing lip sync behavior stays unchanged unless you turn on the preview option.
+
+The SDK buffers ahead chunks by their frame index and waits until frames are contiguous from the start of the response before it starts feeding them to the playback engine. Visual output still waits for the character audio playback signal, so the mouth does not start moving before audible speech begins. If Convai cancels the current NeuroSync timeline or the character turn ends because of an interruption, the SDK clears buffered mouth frames before the next response.
 
 ## Usage examples
 
