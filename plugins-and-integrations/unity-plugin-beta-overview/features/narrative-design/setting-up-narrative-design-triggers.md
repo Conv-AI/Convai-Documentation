@@ -1,18 +1,12 @@
 ---
-description: >-
-  ConvaiNarrativeDesignTrigger's four activation modes — Collision, Proximity,
-  TimeBased, Manual — examined in full, alongside the queue system,
-  TriggerStatus states, and per-trigger Unity Events.
+title: Setting Up Narrative Design Triggers
+description: Configure ConvaiNarrativeDesignTrigger activation modes, queue behavior, status states, and per-trigger Unity Events.
 ---
 
-# Setting Up Narrative Design Triggers
-
-## The ConvaiNarrativeDesignTrigger Component
-
-`ConvaiNarrativeDesignTrigger` sends a named signal to the Convai backend that advances the story graph from one section to the next. It is a world-space component: place it on any GameObject — a doorway, an exhibit, a UI button's event target — and choose how it should activate.
+`ConvaiNarrativeDesignTrigger` sends a saved trigger name to Convai so the narrative graph can advance from one section to the next. It is a world-space component: place it on any GameObject — a doorway, an exhibit, a UI button's event target — and choose how it should activate.
 
 {% hint style="info" %}
-A "narrative trigger" is not the same as a Unity Physics trigger, even though one activation mode uses `OnTriggerEnter`. The trigger sends a named signal to the Convai backend. The activation mode controls _when_ that signal is sent.
+A "narrative trigger" is not the same as a Unity Physics trigger, even though one activation mode uses `OnTriggerEnter`. The trigger sends a saved trigger name to Convai. The activation mode controls _when_ that signal is sent.
 {% endhint %}
 
 ## Adding the Component
@@ -199,7 +193,7 @@ See Troubleshooting & Diagnostics for a full resolution guide for each status.
 | ------------------- | ------- | ------------------------------------------------------------------------------------------------------ |
 | **Trigger ID**      | Empty   | Read-only after selection. Unique identifier from the dashboard.                                       |
 | **Trigger Name**    | Empty   | Display name of the selected trigger.                                                                  |
-| **Trigger Message** | Empty   | Optional message payload sent with the trigger. Can be set programmatically via `SetTriggerMessage()`. |
+| **Trigger Message** | Empty   | Read-only metadata fetched from Convai. It is not sent by `ConvaiNarrativeDesignTrigger`. |
 
 ### Activation Settings Header
 
@@ -228,6 +222,6 @@ See Troubleshooting & Diagnostics for a full resolution guide for each status.
 | **Enable Diagnostics** | `false` | Logs detailed state transitions to the Console.              |
 | **Validate On Start**  | `true`  | Runs `ValidateConfiguration()` at Start and logs any issues. |
 
-## Conclusion
+## Next steps
 
-`ConvaiNarrativeDesignTrigger` gives you four activation modes — Collision, Proximity, TimeBased, and Manual — covering every placement scenario from simple walk-through zones to UI-driven code flows. The built-in queue system, configurable timeout, and per-trigger events make it straightforward to handle edge cases without writing custom state management. Continue to [Template Keys: Dynamic Narrative Variables](template-keys-dynamic-narrative-variables.md) to learn how to inject runtime values such as the player's name or scenario parameters into the character's objectives.
+`ConvaiNarrativeDesignTrigger` gives you four activation modes — Collision, Proximity, TimeBased, and Manual — covering placement scenarios from walk-through zones to UI-driven code flows. Continue to [Template Keys: Dynamic Narrative Variables](template-keys-dynamic-narrative-variables.md) to inject runtime values such as the player's name or scenario parameters into the character's objectives.

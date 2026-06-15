@@ -1,6 +1,9 @@
-# Additional Feature Migration
+---
+title: Additional Feature Migration
+description: Migrate additional Unity beta features including session resume, dynamic info, Narrative Design, transcript UI, and action debug tools.
+---
 
-#### Additional Feature Migration
+Use this page when moving additional Unity beta feature code to the current SDK architecture. Each section maps a legacy surface to the current component or API.
 
 #### LTM (Session Resume)
 
@@ -50,8 +53,8 @@ Legacy setup reference: [Adding Narrative Design to your Character](https://docs
 * `ConvaiNPC` (old character component) -> `ConvaiCharacter`
 * `Narrative Design Manager` (legacy setup) -> `Convai Narrative Design Manager` (`ConvaiNarrativeDesignManager`)
 * `Narrative Design Trigger` (legacy setup) -> `Convai Narrative Design Trigger` (`ConvaiNarrativeDesignTrigger`)
-* `InvokeSelectedTrigger(message)` -> `SetTriggerMessage(message)` + `InvokeTrigger()`
-* Direct trigger call remains available on character via `SendTrigger(triggerName, message)`
+* `InvokeSelectedTrigger(message)` -> `InvokeTrigger()` for saved triggers, or `convaiCharacter.NarrativeDesign.InvokeEvent(message)` for inline event context
+* Direct saved-trigger calls are available through `convaiCharacter.NarrativeDesign.InvokeTrigger(triggerName)`
 
 #### Narrative minimal migration steps
 
@@ -106,17 +109,18 @@ if (convaiNPC.TryGetComponent(out NarrativeDesignTrigger narrativeDesignTrigger)
 // New
 if (convaiCharacter.TryGetComponent(out ConvaiNarrativeDesignTrigger narrativeDesignTrigger))
 {
-    string message = "Player has collected enough resources";
-    narrativeDesignTrigger.SetTriggerMessage(message);
     narrativeDesignTrigger.InvokeTrigger();
+
+    string message = "Player has collected enough resources";
+    convaiCharacter.NarrativeDesign.InvokeEvent(message);
 }
 ```
 
 #### Notes
 
 * Section/trigger lists are fetched per character ID, so always ensure the correct `ConvaiCharacter` is assigned before syncing/fetching.
-* `InvokeTrigger()` sends the currently configured trigger name + optional message.
-* For fully code-driven flows, you can call `convaiCharacter.SendTrigger(triggerName, message)` directly.
+* `InvokeTrigger()` sends only the configured saved trigger name.
+* For fully code-driven flows, call `convaiCharacter.NarrativeDesign.InvokeTrigger(triggerName)`, `InvokeEvent(message)`, or `InvokeSpeech(text)` based on intent.
 
 ***
 

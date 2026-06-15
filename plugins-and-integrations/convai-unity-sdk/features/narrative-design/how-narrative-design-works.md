@@ -14,13 +14,13 @@ sequenceDiagram
     participant Player
     participant Trigger as ConvaiNarrativeDesignTrigger
     participant Char as ConvaiCharacter (RTVI)
-    participant Backend as Convai Backend
+    participant Backend as Convai
     participant Manager as ConvaiNarrativeDesignManager
     participant Scene as Your scene
 
     Player->>Trigger: enters zone / calls InvokeTrigger()
-    Trigger->>Char: InvokeTrigger(triggerName, message)
-    Char->>Backend: trigger-message (RTVI)
+    Trigger->>Char: InvokeTrigger(triggerName)
+    Char->>Backend: trigger-message with trigger_name
     Backend-->>Char: behavior-tree-response (sectionId, btCode)
     Char-->>Manager: NarrativeSectionChanged event
     Manager->>Scene: UnitySectionEventConfig.OnSectionStart.Invoke()
@@ -32,7 +32,9 @@ Triggers queue automatically if the character's real-time session is not yet ope
 
 **Sections** are named story beats defined in the Convai dashboard. The character's objectives, knowledge, and conversational behavior adapt to whichever section is active. A single character can play a neutral receptionist in an opening section and a strict examiner in an assessment section — all within one session — because the active section shapes what the backend returns.
 
-**Triggers** are the directed edges in the story graph. Sending a trigger by name advances the graph from one section to the next along the matching edge. A trigger carries an optional message payload that provides context for the transition — for example, `"Player completed the safety checklist"` — which the character can incorporate into its next response.
+**Triggers** are the directed edges in the story graph. Sending a saved trigger by name advances the graph from one section to the next along the matching edge. Trigger metadata fetched from Convai is read-only in Unity; the runtime sends the saved trigger name only.
+
+Inline event messages are separate from saved triggers. Use `InvokeEvent("Player completed the safety checklist")` when application logic should add context and let Convai respond naturally. Use `InvokeSpeech("Proceed to checkpoint two")` when the character should say exact scripted text. Both send `trigger_message`, not `trigger_name`.
 
 Template keys are runtime key-value pairs that fill placeholders in the dashboard's narrative objectives. Set `{PlayerName}` to `"Alex"` and every section that references `{PlayerName}` will use the current value without any graph changes.
 

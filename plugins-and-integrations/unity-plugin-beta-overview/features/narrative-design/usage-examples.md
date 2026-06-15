@@ -1,13 +1,7 @@
 ---
-description: >-
-  Four worked examples at increasing complexity — from a single-trigger welcome
-  sequence to an adaptive multi-section scenario — showing how to compose
-  Narrative Design components in practice.
+title: Usage Examples
+description: Build Narrative Design flows from a single-trigger welcome sequence to adaptive scenarios with dynamic feedback.
 ---
-
-# Usage Examples
-
-## Building Complete Narrative Design Setups
 
 The following examples show how to compose `ConvaiNarrativeDesignManager`, `ConvaiNarrativeDesignTrigger`, and `IConvaiNarrativeDesign` into complete, working setups. They are ordered from simple to advanced and cover different domains to illustrate the breadth of what Narrative Design supports — from a single-button welcome kiosk to a fully adaptive multi-step scenario.
 
@@ -74,7 +68,7 @@ In the Manager's **Narrative Sections** list, find the welcome section entry and
 
 ## Example 2 — Intermediate: Branching Conversation
 
-**Complexity:** Intermediate | **Activation mode:** Manual (code-driven) | **Features used:** Manager, `IConvaiNarrativeDesign`, `InvokeSpeech`, multiple template keys
+**Complexity:** Intermediate | **Activation mode:** Manual (code-driven) | **Features used:** Manager, `IConvaiNarrativeDesign`, `InvokeEvent`, `InvokeSpeech`, multiple template keys
 
 **Scenario:** An orientation assistant can guide users through three independent topic areas (e.g., facilities, systems access, policies). Topic selection is driven by UI buttons, and the user can navigate freely between topics. Open-ended follow-up questions are supported after each topic.
 
@@ -104,17 +98,17 @@ public class OrientationController : MonoBehaviour
         _character.NarrativeDesign.InvokeTrigger(triggerName);
     }
 
-    // Called by a free-text input field's submit event — plain text context injection
+    // Called by a free-text input field's submit event — inline event context
     // The character responds naturally in its own words
     public void AskFollowUp(string userQuestion)
     {
-        _character.NarrativeDesign.InvokeSpeech(userQuestion);
+        _character.NarrativeDesign.InvokeEvent(userQuestion);
     }
 
     // Called when a scripted announcement is needed — character says this verbatim
     public void AnnounceToUser(string announcement)
     {
-        _character.NarrativeDesign.InvokeSpeech($"<speak>{announcement}</speak>");
+        _character.NarrativeDesign.InvokeSpeech(announcement);
     }
 
     private void OnSectionChanged(string previous, string next)
@@ -130,7 +124,7 @@ Assign trigger names to buttons in the Inspector: `"TopicFacilities"`, `"TopicSy
 
 Set `TriggerOnce = false` on all triggers so the user can revisit any topic. Send template keys (`UserName`, `Department`) from a form before the session opens using `UpdateTemplateKeys`.
 
-**`InvokeSpeech` has two modes:** plain text makes the character respond naturally in its own words (useful for free-text follow-up questions); wrapping the message in `<speak>` tags makes the character say that text verbatim (useful for scripted announcements or exact prompts). Neither mode advances the graph. See Controlling What the Character Says for the full reference.
+Use `InvokeEvent` when Convai should treat text as context and respond naturally. Use `InvokeSpeech` only when the character should say exact scripted text; the SDK adds `<speak>` tags internally. Neither method advances the graph. See Scripting Narrative Design for the full reference.
 
 ***
 
@@ -294,6 +288,6 @@ public class ScenarioController : MonoBehaviour
 
 ***
 
-## Conclusion
+## Next steps
 
 These four examples cover the full range of Narrative Design use cases — from a single-trigger welcome sequence wired entirely in the Inspector to a fully adaptive scenario where the character's behaviour changes dynamically based on performance data. Each pattern builds on the same three components: the Manager, the Trigger, and the `IConvaiNarrativeDesign` API. For help diagnosing issues in any of these setups, see Troubleshooting & Diagnostics.

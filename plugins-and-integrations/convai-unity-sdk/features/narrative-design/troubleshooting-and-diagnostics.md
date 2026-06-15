@@ -36,7 +36,7 @@ Open **Edit > Project Settings > Convai SDK** and confirm the API key is present
 {% step %}
 ### Dump full trigger state
 
-Call `PrintDiagnostics()` from a test script, or press the **Invoke** / **Reset** buttons visible on the component in Play Mode. The dump shows every field at once, making it easy to spot mismatches:
+Call `PrintDiagnostics()` from a test script, or press the **Invoke** / **Reset** buttons visible on the component in Play Mode. The dump shows every field at once, making mismatches easier to spot:
 
 ```csharp
 trigger.PrintDiagnostics();
@@ -105,7 +105,7 @@ trigger.PrintDiagnostics();
 
 `PrintDiagnostics()` logs:
 
-```
+```text
 [ConvaiNarrativeDesignTrigger] === DIAGNOSTICS ===
   GameObject: TriggerZone_Checkpoint1
   Status: QueuedWaitingForCharacter
@@ -141,7 +141,7 @@ if (!valid)
 `ValidateConfiguration()` runs four automatic checks:
 
 1. **Character reference check**: verifies a character is assigned and implements `IConvaiCharacterAgent`.
-2. **Trigger name check**: verifies at least one of **Trigger Name** or **Trigger Message** is non-empty.
+2. **Trigger name check**: verifies **Trigger Name** is non-empty.
 3. **Collider check** (Collision and TimeBased modes): verifies a `Collider` exists on the same GameObject and that **Is Trigger** is enabled.
 4. **Player detection check**: verifies the **Player Tag** is defined in Unity's Tag Manager, and warns if **Player Layer** is set to `Nothing` (0).
 
@@ -194,7 +194,7 @@ You can call `SetTemplateKey` or `InvokeTrigger` at any point in your scene's li
 
 When the timeout is reached, `OnTriggerFailed` fires with the message:
 
-```
+```text
 Timed out waiting for character to be ready after 30 seconds.
 ```
 

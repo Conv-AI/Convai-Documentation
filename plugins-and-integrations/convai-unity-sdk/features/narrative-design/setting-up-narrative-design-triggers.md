@@ -5,21 +5,19 @@ description: >-
   collision, proximity, time-based, or manual activation modes.
 ---
 
-# Configure narrative design triggers
-
 `ConvaiNarrativeDesignTrigger` sends a named signal to Convai that advances the story graph from one section to the next. Place it on any GameObject — a doorway, an exhibit, a UI button's event target — and choose how it should activate. A narrative trigger is distinct from a Unity Physics trigger: the activation mode controls _when_ the signal is sent, not what kind of Unity physics event fires.
 
-### Add the trigger component
+## Add the trigger component
 
 {% stepper %}
 {% step %}
-#### Create or select a GameObject
+### Create or select a GameObject
 
 For zone-based activation (Collision, Proximity, TimeBased), create an empty GameObject and position it in the scene where you want the trigger zone. For Manual activation, you can place the component anywhere.
 {% endstep %}
 
 {% step %}
-#### Add the component
+### Add the component
 
 Click **Add Component** and navigate to **Convai > Convai Narrative Design Trigger**.
 
@@ -27,33 +25,33 @@ Click **Add Component** and navigate to **Convai > Convai Narrative Design Trigg
 {% endstep %}
 
 {% step %}
-#### Assign the character
+### Assign the character
 
 Drag your `ConvaiCharacter` into the **Character** field. If you leave it blank, **Auto Find Character** searches the parent hierarchy and then the `ConvaiManager`'s character list automatically. If more than one character is in the scene, assign the target explicitly.
 {% endstep %}
 
 {% step %}
-#### Fetch and select a trigger
+### Fetch and select a trigger
 
 Click **Fetch** in the **Trigger Selection** section. The SDK calls `NarrativeDesignFetcher.FetchTriggersAsync` and populates the dropdown with all triggers defined for this character on the dashboard.
 
-Select the trigger you want this component to send. The **Trigger Name**, **Trigger ID**, and **Destination Section** fields populate automatically.
+Select the trigger you want this component to send. The **Trigger Name**, **Trigger ID**, and **Destination Section** fields populate automatically. **Trigger Message** is displayed only as fetched metadata from Convai; the component sends the saved trigger name only.
 
 <figure><img src="../../../../.gitbook/assets/image (483).png" alt="Trigger Selection dropdown showing fetched triggers from the Convai dashboard"><figcaption><p>Trigger dropdown populated from the Convai dashboard.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
-#### Choose an activation mode
+### Choose an activation mode
 
 Select one of the four activation modes described below and configure its settings.
 {% endstep %}
 {% endstepper %}
 
-### Activation modes
+## Activation modes
 
 <figure><img src="../../../../.gitbook/assets/image (490).png" alt="Activation Settings header in the Inspector showing all four activation mode options"><figcaption><p>Activation Settings header with mode selector.</p></figcaption></figure>
 
-#### Collision
+### Collision
 
 The default mode. The trigger fires when a tagged player GameObject enters the collider attached to the same GameObject.
 
@@ -73,7 +71,7 @@ If **Is Trigger** is not enabled on the collider, or if neither the trigger obje
 | **Player Tag**   | `"Player"` | Only GameObjects with this tag are recognized as the player.    |
 | **Player Layer** | All layers | Layer mask to further filter which objects count as the player. |
 
-#### Proximity
+### Proximity
 
 The trigger fires when the player's distance from the component's `Transform` falls within **Proximity Radius**. The check runs every frame in `Update`. A green sphere is drawn in the Scene view showing the detection radius.
 
@@ -85,7 +83,7 @@ The trigger fires when the player's distance from the component's `Transform` fa
 
 This mode does not require a collider.
 
-#### TimeBased
+### TimeBased
 
 The trigger fires after the player has been inside the collider zone for a set duration. If the player exits before the delay elapses, the countdown cancels and restarts the next time the player enters.
 
@@ -96,7 +94,7 @@ The trigger fires after the player has been inside the collider zone for a set d
 | **Time Delay** | `0`        | Seconds the player must remain in the zone before the trigger fires. |
 | **Player Tag** | `"Player"` | Tag used to identify the player.                                     |
 
-#### Manual
+### Manual
 
 The trigger does nothing automatically. Call `InvokeTrigger()` or `TryInvokeTrigger()` from your own code or a Unity Event to fire it. Use this mode when the activation condition is controlled entirely by your game logic — a UI button, a quest completion callback, or a scored interaction.
 
@@ -108,7 +106,7 @@ narrativeTrigger.InvokeTrigger();
 narrativeTrigger.TryInvokeTrigger();
 ```
 
-### Auto-recovery settings
+## Auto-recovery settings
 
 These settings make the trigger resilient to common runtime conditions where the character or player may not be ready immediately.
 
@@ -126,7 +124,7 @@ These settings make the trigger resilient to common runtime conditions where the
 Setting **Max Wait Time** to `0` in a production build where the session may never connect creates an indefinite coroutine. Always set a reasonable timeout unless you have explicit control over session lifetime.
 {% endhint %}
 
-### Control trigger frequency
+## Control trigger frequency
 
 **Trigger Once** (default `true`) prevents the trigger from firing more than once. After the first successful invocation, `HasTriggered` becomes `true`, `CurrentStatus` becomes `AlreadyFired`, and all subsequent calls return `false`.
 
@@ -140,7 +138,7 @@ narrativeTrigger.ResetTrigger();
 
 To allow the trigger to fire on every activation, disable **Trigger Once** in the Inspector.
 
-### Events reference
+## Events reference
 
 | Event                | Signature            | When it fires                                                                           |
 | -------------------- | -------------------- | --------------------------------------------------------------------------------------- |
@@ -150,7 +148,7 @@ To allow the trigger to fire on every activation, disable **Trigger Once** in th
 | `OnTriggerFailed`    | `UnityEvent<string>` | The trigger could not fire. The string argument contains the error message.             |
 | `OnTriggerQueued`    | `UnityEvent`         | The trigger was accepted but deferred because the character is not yet in conversation. |
 
-### Trigger status
+## Trigger status
 
 The `CurrentStatus` property tracks the trigger's state at all times:
 
@@ -170,24 +168,24 @@ stateDiagram-v2
 
 See [Troubleshoot narrative design](troubleshooting-and-diagnostics.md) for a full resolution guide for each status.
 
-### Inspector reference
+## Inspector reference
 
-#### Character Reference header
+### Character Reference header
 
 | Field                   | Default | Description                                                                               |
 | ----------------------- | ------- | ----------------------------------------------------------------------------------------- |
 | **Character**           | None    | The target `ConvaiCharacter`. Auto-found if blank and **Auto Find Character** is enabled. |
 | **Auto Find Character** | `true`  | Searches hierarchy and ConvaiManager if Character field is empty.                         |
 
-#### Trigger Selection header
+### Trigger Selection header
 
-| Field               | Default | Description                                                                                            |
-| ------------------- | ------- | ------------------------------------------------------------------------------------------------------ |
-| **Trigger ID**      | Empty   | Read-only after selection. Unique identifier from the dashboard.                                       |
-| **Trigger Name**    | Empty   | Display name of the selected trigger.                                                                  |
-| **Trigger Message** | Empty   | Optional message payload sent with the trigger. Can be set programmatically via `SetTriggerMessage()`. |
+| Field | Default | Description |
+| --- | --- | --- |
+| **Trigger ID** | Empty | Read-only after selection. Unique identifier from the dashboard. |
+| **Trigger Name** | Empty | Saved trigger name sent to Convai when this component fires. |
+| **Trigger Message** | Empty | Read-only metadata fetched from Convai. It is not sent by `ConvaiNarrativeDesignTrigger`. |
 
-#### Activation Settings header
+### Activation Settings header
 
 | Field                | Default     | Description                                                                    |
 | -------------------- | ----------- | ------------------------------------------------------------------------------ |
@@ -198,7 +196,7 @@ See [Troubleshoot narrative design](troubleshooting-and-diagnostics.md) for a fu
 | **Player Layer**     | All         | Layer mask for player detection.                                               |
 | **Player Tag**       | `"Player"`  | Tag used to identify the player GameObject.                                    |
 
-#### Auto-Recovery Settings header
+### Auto-Recovery Settings header
 
 | Field                   | Default | Description                                                 |
 | ----------------------- | ------- | ----------------------------------------------------------- |
@@ -207,14 +205,14 @@ See [Troubleshoot narrative design](troubleshooting-and-diagnostics.md) for a fu
 | **Max Wait Time**       | `30`    | Timeout in seconds for the queue. `0` = no timeout.         |
 | **Reset On Scene Load** | `true`  | Resets `HasTriggered` on scene load.                        |
 
-#### Diagnostics header
+### Diagnostics header
 
 | Field                  | Default | Description                                                  |
 | ---------------------- | ------- | ------------------------------------------------------------ |
 | **Enable Diagnostics** | `false` | Logs detailed state transitions to the Console.              |
 | **Validate On Start**  | `true`  | Runs `ValidateConfiguration()` at Start and logs any issues. |
 
-### Next steps
+## Next steps
 
 {% content-ref url="template-keys-dynamic-narrative-variables.md" %}
 [template-keys-dynamic-narrative-variables.md](template-keys-dynamic-narrative-variables.md)

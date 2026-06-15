@@ -62,7 +62,7 @@ In the Manager's **Narrative Sections** list, find the welcome section entry and
 
 ## Example 2: branching conversation
 
-**Complexity:** Intermediate | **Activation mode:** Manual (code-driven) | **Features used:** Manager, `IConvaiNarrativeDesign`, `InvokeSpeech`, multiple template keys
+**Complexity:** Intermediate | **Activation mode:** Manual (code-driven) | **Features used:** Manager, `IConvaiNarrativeDesign`, `InvokeEvent`, `InvokeSpeech`, multiple template keys
 
 **Scenario:** An orientation assistant can guide users through three independent topic areas (facilities, systems access, policies). Topic selection is driven by UI buttons, and the user can navigate freely between topics. Open-ended follow-up questions are supported after each topic.
 
@@ -93,17 +93,17 @@ public class OrientationController : MonoBehaviour
         _character.NarrativeDesign.InvokeTrigger(triggerName);
     }
 
-    // Called by a free-text input field's submit event — plain text context injection
+    // Called by a free-text input field's submit event — inline event context
     // The character responds naturally in its own words
     public void AskFollowUp(string userQuestion)
     {
-        _character.NarrativeDesign.InvokeSpeech(userQuestion);
+        _character.NarrativeDesign.InvokeEvent(userQuestion);
     }
 
     // Called when a scripted announcement is needed — character says this verbatim
     public void AnnounceToUser(string announcement)
     {
-        _character.NarrativeDesign.InvokeSpeech($"<speak>{announcement}</speak>");
+        _character.NarrativeDesign.InvokeSpeech(announcement);
     }
 
     private void OnSectionChanged(string previous, string next)
@@ -119,7 +119,7 @@ Assign trigger names to buttons in the Inspector: `"TopicFacilities"`, `"TopicSy
 
 Set `TriggerOnce = false` on all triggers so the user can revisit any topic. Send template keys (`UserName`, `Department`) from a form before the session opens using `UpdateTemplateKeys`.
 
-`InvokeSpeech` has two modes: plain text makes the character respond naturally in its own words (useful for free-text follow-up questions); wrapping the message in `<speak>` tags makes the character say that text verbatim (useful for scripted announcements or exact prompts). Neither mode advances the graph. See [Control character speech](scripting-narrative-design.md#control-character-speech) for the full reference.
+Use `InvokeEvent` when Convai should treat text as context and respond naturally. Use `InvokeSpeech` only when the character should say exact scripted text; the SDK adds `<speak>` tags internally. Neither method advances the graph. See [Control character speech](scripting-narrative-design.md#control-character-speech) for the full reference.
 
 ## Example 3: proximity-triggered exhibit tour
 
