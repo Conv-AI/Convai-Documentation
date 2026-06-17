@@ -594,11 +594,8 @@
       * [Installation](plugins-and-integrations/unreal-engine/guides-v2-under-development/getting-started/download-and-setup.md)
       * [Simple Talking Cube](plugins-and-integrations/unreal-engine/guides-v2-under-development/getting-started/simple-talking-cube.md)
       * [Adding Premade Chat and Settings UI](plugins-and-integrations/unreal-engine/guides-v2-under-development/getting-started/adding-premade-chat-and-settings-ui.md)
-
-***
-
-* [Asset Uploader](asset-uploader/README.md)
-  * [Migrate Your Unreal Engine 5.5 Convai Assets to 5.6](asset-uploader/migrate-your-unreal-engine-5.5-convai-assets-to-5.6.md)
+* [Asset Uploader](plugins-and-integrations/asset-uploader/README.md)
+  * [Migrate Your Unreal Engine 5.5 Convai Assets to 5.6](plugins-and-integrations/asset-uploader/migrate-your-unreal-engine-5.5-convai-assets-to-5.6.md)
 
 ## API Reference
 
