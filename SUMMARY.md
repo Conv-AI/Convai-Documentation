@@ -342,6 +342,14 @@
       * [Building a Custom UI (TypeScript)](plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/building-a-custom-ui-typescript.md)
       * [Best Practices & Type Definitions](plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/best-practices-and-type-definitions.md)
       * [Mappings Reference](plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/mappings-reference.md)
+    * [Actions](plugins-and-integrations/web-plugins/convai-web-sdk/actions.md)
+    * [Emotions](plugins-and-integrations/web-plugins/convai-web-sdk/emotions.md)
+    * [Dynamic Context](plugins-and-integrations/web-plugins/convai-web-sdk/dynamic-context.md)
+    * [Long Term Memory](plugins-and-integrations/web-plugins/convai-web-sdk/long-term-memory.md)
+    * [Auth Tokens](plugins-and-integrations/web-plugins/convai-web-sdk/auth-tokens.md)
+    * [Error Handling](plugins-and-integrations/web-plugins/convai-web-sdk/error-handling.md)
+    * [WebSocket Transport Layer](plugins-and-integrations/web-plugins/convai-web-sdk/websocket-transport-layer.md)
+    * [Event Reference](plugins-and-integrations/web-plugins/convai-web-sdk/event-reference.md)
   * [Convai Web SDK (Legacy)](plugins-and-integrations/web-plugins/convai-web-sdk-1/README.md)
     * [Getting Started](plugins-and-integrations/web-plugins/convai-web-sdk-1/getting-started.md)
     * [Facial Expressions](plugins-and-integrations/web-plugins/convai-web-sdk-1/facial-expressions.md)
@@ -586,11 +594,8 @@
       * [Installation](plugins-and-integrations/unreal-engine/guides-v2-under-development/getting-started/download-and-setup.md)
       * [Simple Talking Cube](plugins-and-integrations/unreal-engine/guides-v2-under-development/getting-started/simple-talking-cube.md)
       * [Adding Premade Chat and Settings UI](plugins-and-integrations/unreal-engine/guides-v2-under-development/getting-started/adding-premade-chat-and-settings-ui.md)
-
-***
-
-* [Asset Uploader](asset-uploader/README.md)
-  * [Migrate Your Unreal Engine 5.5 Convai Assets to 5.6](asset-uploader/migrate-your-unreal-engine-5.5-convai-assets-to-5.6.md)
+* [Asset Uploader](plugins-and-integrations/asset-uploader/README.md)
+  * [Migrate Your Unreal Engine 5.5 Convai Assets to 5.6](plugins-and-integrations/asset-uploader/migrate-your-unreal-engine-5.5-convai-assets-to-5.6.md)
 
 ## API Reference
 
