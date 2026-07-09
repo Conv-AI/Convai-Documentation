@@ -10,7 +10,9 @@ icon: person-running
 
 ### 1. Configure `actionConfig` at connect
 
-```ts
+
+
+```typescript
 const client = useConvaiClient({
   apiKey: '...',
   characterId: '...',
@@ -43,13 +45,19 @@ Rules:
 * `current_attention_object` must match an entry in `objects[].name`.
 * If the set of available actions or objects changes, reconnect with an updated `actionConfig`.
 
+***
+
 ### 2. Receive `actionResponse`
 
-Subscribe to `actionResponse` to get the character's action decisions after each turn.
 
-```ts
-client.on('actionResponse', ({ actions }) => {
-  // actions: Array<{ name: string; target?: string }>
+
+Subscribe to `actionResponse` to get the character's action decisions after each turn. The payload is typed — import `ConvaiAction` and `ActionResponseEvent` from the SDK.
+
+```typescript
+import type { ActionResponseEvent } from '@convai/web-sdk/core';
+
+client.on('actionResponse', ({ actions }: ActionResponseEvent) => {
+  // actions: ConvaiAction[] — Array<{ name: string; target?: string }>
   // Empty array is a valid no-action response
   for (const action of actions) {
     dispatch(action.name, action.target);
@@ -61,11 +69,58 @@ client.on('actionResponse', ({ actions }) => {
 * `target` is optional; some actions (e.g. `"Wave"`) have no target.
 * An empty `actions` array is not an error — the character simply chose not to act.
 
-### 3. Update attention at runtime
+***
+
+### 3. Parameterized actions
+
+
+
+An action with a `target` is _parameterized_: the character acts **on** a specific object or character rather than performing a bare gesture. The base action name comes from `actionConfig.actions[]`, and the target resolves to a name from `actionConfig.objects[]` or `actionConfig.characters[]`.
+
+```typescript
+import type { ConvaiAction } from '@convai/web-sdk/core';
+
+function handleAction(action: ConvaiAction) {
+  if (action.target) {
+    // Parameterized: "Move To" → "chest", "Follow" → "Player"
+    moveCharacterTo(action.name, action.target);
+  } else {
+    // Simple: "Wave", "Dance"
+    playAnimation(action.name);
+  }
+}
+
+client.on('actionResponse', ({ actions }) => actions.forEach(handleAction));
+```
+
+If the user says _"pick up the sword and give it to the guard"_, a single turn can emit:
+
+```typescript
+{ "actions": [
+  { "name": "Move To", "target": "sword" },
+  { "name": "Pick Up", "target": "sword" },
+  { "name": "Move To", "target": "Guard" },
+  { "name": "Drop",    "target": "Guard" }
+] }
+```
+
+#### Key points
+
+
+
+* `target` always matches a declared name from `actionConfig.objects[]` or `actionConfig.characters[]` — the character cannot invent targets, so it is safe to use as a lookup key into your scene graph.
+* The same base action can appear both parameterized and simple depending on what the character decides (`"Wave"` vs `"Wave" → "Player"`); branch on the presence of `target`, not on the action name.
+* Scene metadata from `updateSceneMetadata` is descriptive only and never appears as a `target` — promote anything actable into `actionConfig.objects`.
+
+***
+
+### 4. Update attention at runtime
+
+
 
 Tell the character which object the player is currently looking at using `updateContext`. The character uses this to resolve "it", "that", "here".
 
-```ts
+```typescript
 // Player moved focus to the chest — update silently
 client.updateContext({
   current_attention_object: 'chest',
@@ -90,11 +145,13 @@ client.updateContext({
 
 ***
 
-### 4. Update descriptive scene context
+### 5. Update descriptive scene context
+
+
 
 Use `updateSceneMetadata` for environment changes the character should know about. This is **descriptive only** — it does not add new action targets.
 
-```ts
+```typescript
 client.updateSceneMetadata([
   { name: 'fog',  description: 'A thick fog has rolled in, visibility is low' },
   { name: 'rain', description: 'Heavy rain is falling outside' },
@@ -105,11 +162,13 @@ If the character needs to act on something, it must be in `actionConfig.objects`
 
 ***
 
-### 5. Trigger actions programmatically
+### 6. Trigger actions programmatically
+
+
 
 Use `sendTriggerMessage` to make the character speak and act without user input — for scripted events or cinematics.
 
-```ts
+```typescript
 // Named trigger defined in the Convai dashboard
 client.sendTriggerMessage('greet_player');
 
@@ -121,7 +180,9 @@ client.sendTriggerMessage('pickup_item', 'Pick up the sword and hand it to the p
 
 ### Full example
 
-```ts
+
+
+```typescript
 const client = useConvaiClient({
   apiKey: '...',
   characterId: '...',
@@ -157,7 +218,11 @@ client.updateContext({
 
 ### API reference
 
+
+
 #### `actionConfig` (connect option)
+
+
 
 | Field                      | Type                      | Description                         |
 | -------------------------- | ------------------------- | ----------------------------------- |
@@ -168,12 +233,23 @@ client.updateContext({
 
 #### `actionResponse` event
 
-```ts
-client.on('actionResponse', ({ actions }) => { ... });
-// actions: Array<{ name: string; target?: string }>
+
+
+```
+import type { ConvaiAction, ActionResponseEvent } from '@convai/web-sdk/core';
+
+client.on('actionResponse', ({ actions }: ActionResponseEvent) => { ... });
 ```
 
+| Type                  | Field                     | Description                                                                                             |
+| --------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `ActionResponseEvent` | `actions: ConvaiAction[]` | Ordered actions for this turn; empty = no action                                                        |
+| `ConvaiAction`        | `name: string`            | Base action name from `actionConfig.actions[]`                                                          |
+| `ConvaiAction`        | `target?: string`         | Parameterized target — a name from `actionConfig.objects[]` / `characters[]`; absent for simple actions |
+
 #### `updateContext` (attention)
+
+
 
 | Field                      | Type                               | Description                        |
 | -------------------------- | ---------------------------------- | ---------------------------------- |
@@ -184,10 +260,14 @@ client.on('actionResponse', ({ actions }) => { ... });
 
 #### `updateSceneMetadata(items)`
 
+
+
 | Field   | Type                      | Description                |
 | ------- | ------------------------- | -------------------------- |
 | `items` | `{ name, description }[]` | Descriptive scene elements |
 
 #### `sendTriggerMessage(triggerName?, triggerMessage?)`
+
+
 
 Programmatically triggers a character response. Both arguments are optional.

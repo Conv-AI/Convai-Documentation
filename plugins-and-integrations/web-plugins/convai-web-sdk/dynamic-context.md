@@ -130,20 +130,76 @@ Use `updateContext` for full control; `updateDynamicInfo` for quick silent updat
 
 ***
 
-### Template keys
+### Narrative Design Template keys
 
-Template keys replace placeholders in the character's system prompt. Useful for personalizing a prompt that was configured in the Convai dashboard.
+Template keys personalize a Narrative Design graph per session. Section objectives and speak tags may contain placeholders such as `{player_name}` or `{quest_item}` (single curly braces); Convai replaces them with your values when the section is evaluated, so one narrative graph can serve many personalized sessions.
 
-If the dashboard prompt contains `{{player_name}}`:
+#### Dashboard setup (prerequisites)
+
+Template keys do nothing until the character's Narrative Design graph references them. In the dashboard:
+
+1. **Enable Narrative Design** on the character.
+2.  **Create a section** whose **objective** (and optionally **speak tag**) contains your placeholders:
+
+    > Greet the guest. Say this exact welcome: "{StartMessage}". Roleplay context: {Situation}.
+
+    Placeholders resolve **only** in section objectives and speak tags — a `{placeholder}` written into the character's base prompt, greeting, or a trigger message is spoken literally.
+3. **Create a named trigger** pointing at that section, with a **trigger message** (a required field — e.g. "A guest walks through the inn door. Greet them now."). The client fires it with `sendTriggerMessage('<trigger name>')` — the name must match exactly (case-sensitive). The message is what makes the bot respond on trigger; a trigger with a destination but an empty message (only possible via the REST API) changes the section _silently_ and the server acks _"Trigger processed but no context generated"_.
+4. Optionally set the graph's **start section** — it is entered automatically at session start, so keys passed in the config are applied to it on connect, before any trigger fires.
+
+For deterministic test output, put the placeholder in the section's speak tag — speak-tag content goes through the same substitution and is spoken verbatim.
+
+There is **one key map** with two ways to set it:
+
+#### Seed at session start: `narrativeTemplateKeys` config
+
+Sent as `narrative_template_keys` in the `/connect` request.
 
 ```ts
-client.updateTemplateKeys({
-  player_name: 'Aria',
-  current_quest: 'Find the lost artifact',
+const client = new ConvaiClient({
+  apiKey: 'your-api-key',
+  characterId: 'your-character-id',
+  narrativeTemplateKeys: {
+    player_name: 'Alex',
+    location: 'Engineering Deck',
+    quest_item: 'oxygen generator',
+  },
 });
 ```
 
-The character will use `Aria` and `Find the lost artifact` in its responses.
+If a section objective is `Greet {player_name}. Ask them to repair the {quest_item}.`, the bot receives `Greet Alex. Ask them to repair the oxygen generator.`
+
+#### Update mid-session: `updateTemplateKeys()`
+
+Replaces the same key map on the live session. Call it before firing the trigger that enters the section which uses the new values:
+
+```ts
+client.updateTemplateKeys({
+  player_name: 'Alex',
+  location: 'Medical Bay',        // player moved
+  quest_item: 'med kit',
+});
+client.sendTriggerMessage('NextObjective');
+```
+
+**This is a full replace, not a merge** — pass every key the graph still needs, or omitted keys will resolve to empty strings.
+
+#### Rules
+
+* Requires a character with **Narrative Design enabled**. Without it, `narrativeTemplateKeys` is ignored and `updateTemplateKeys()` is acked with `status: "error"` — `"Narrative design service not available"` (listen on `serverResponse` for the `update-template-keys` ack).
+* Placeholder syntax is single curly braces around a word: `{player_name}`. Keys are case-sensitive and must exactly match the placeholder names in the graph.
+* Substitution happens when the section objective / speak tag is _evaluated_, not when the keys are sent — keys just need to be in place before the trigger fires.
+* A placeholder with no matching key resolves to an **empty string** (it is not left as literal text). If the character _speaks_ a literal `{placeholder}`, the text never went through Narrative Design at all — check that it lives in a section objective or speak tag, not the base prompt or greeting.
+* **`trigger_name` and `trigger_message` are reserved.** On every named trigger the server injects them into the key map (overwriting yours), so don't use those names for your own keys — but you _can_ reference `{trigger_name}` / `{trigger_message}` in objectives for free.
+
+#### Troubleshooting
+
+| Symptom                                             | Cause                                                                                                                                                         |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ack: `"Narrative design service not available"`     | Character has no Narrative Design enabled                                                                                                                     |
+| Ack: `"Trigger processed but no context generated"` | Trigger name doesn't exist on the character, or the trigger has an empty trigger message and its destination section has no speak tag (silent section change) |
+| Bot speaks a literal `{placeholder}`                | Placeholder is outside Narrative Design (base prompt, greeting, trigger message) — move it into a section objective or speak tag                              |
+| Bot speaks an empty value                           | Key missing from the map — remember `updateTemplateKeys()` replaces the whole map, and keys are case-sensitive                                                |
 
 ***
 
