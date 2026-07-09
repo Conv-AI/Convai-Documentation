@@ -24,7 +24,7 @@ Update API can be used to change the LLM to be used for Character. Currently fol
 
 #### Google
 
-<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini 2.5 Flash Live (beta)</td><td>gemini-2.5-flash-live</td><td>false</td></tr><tr><td>Gemma 4 34B Fast (beta)</td><td>gemma-4-34b-fast</td><td>false</td></tr><tr><td>Gemma 4 26B A4B Fast (beta)</td><td>gemma-4-26b-a4b-fast</td><td>false</td></tr></tbody></table>
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini 2.5 Flash Live (beta)</td><td>gemini-2.5-flash-live</td><td>false</td></tr><tr><td>Gemma 4 31B Fast (beta)</td><td>realtime-gemma-4-31b-it</td><td>false</td></tr><tr><td>Gemma 4 26B A4B Fast (beta)</td><td>realtime-gemma-4-26b-a4b-it</td><td>false</td></tr></tbody></table>
 
 ### Standard Models
 
