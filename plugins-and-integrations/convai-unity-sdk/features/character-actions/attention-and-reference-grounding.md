@@ -1,18 +1,21 @@
 ---
 title: Attention and reference grounding
 description: Update NPC focus at runtime so Convai resolves vague player references such as "pick that up" or "go to it" to the correct registered scene object.
+last_reviewed: "4.4.0"
 ---
 
-Reference grounding is how Convai resolves vague player language — "grab that," "go to it," "look at the one on the left" — to a specific registered object or character. Two inputs drive grounding: the rich descriptions you write for each target in `ConvaiActionConfigSource`, and the current attention object you update at runtime as the player's focus changes.
+Reference grounding is how Convai resolves vague player language — "grab that," "go to it," "look at the one on the left" — to a specific registered object or character. Two inputs drive grounding: the rich descriptions you register for each target, and the current attention object you update at runtime as the player's focus changes.
 
 ## How grounding works
 
 When a player says "pick up that cylinder," Convai evaluates two things:
 
-1. **Object descriptions** — the Name and Description text you registered at connect time. Convai uses these to match "cylinder" to your registered object.
+1. **Object descriptions** — the Name and Description text registered for each actionable object and character. Convai uses these to match "cylinder" to your registered object.
 2. **Current attention object** — which object the NPC is currently "focused on." When set, Convai weighs it heavily for ambiguous references like "that" or "it."
 
-Descriptions are fixed at connect time and cannot be updated mid-session. The current attention object can be changed at any point during an active conversation.
+`ConvaiActionConfigSource` fixes descriptions at connect time, but an active session can replace the objects or characters list with a `ConvaiActionConfigPatch` — see [Configure character actions](configuring-actions.md) for patch semantics. The current attention object can be changed at any point during an active conversation.
+
+Once Convai returns an action whose target matched a registered name, Unity exposes the match on the enriched parameter's `ResolvedReference` field as a `ConvaiActionParameterReference` (`Convai.Shared.Types.ConvaiActionParameterReference`). Its `Kind` property is a `ConvaiActionTargetKind` value — `None`, `Object`, or `Character` — telling you whether grounding resolved to a registered object or a registered character. See [Character actions scripting reference](actions-scripting-reference.md) for the full parameter-value type.
 
 ## Write effective object descriptions
 
@@ -33,68 +36,69 @@ The `Description` field on each `ConvaiActionObjectDefinition` is the most impor
 Vague descriptions cause Convai to pick the wrong target or fail to resolve ambiguous references.
 
 {% hint style="warning" %}
-Descriptions are sent to Convai at connect time and cannot be changed while the session is active. If your scene changes at runtime (objects moved, replaced, or destroyed), end the session and reconnect with updated descriptions, or use `ActionConfigOverride` at connect time to build descriptions programmatically. See [Configure character actions — Dynamic configuration](configuring-actions.md#dynamic-configuration-at-connect-time).
+`ConvaiActionConfigSource` descriptions are fixed once a session connects. For scenes known in advance, build alternate descriptions with `RoomSessionConnectOptions.ActionConfigOverride` before connecting. For scenes that change during an active session — objects moved, spawned, or destroyed — send a `ConvaiActionConfigPatch` through `character.DynamicContext.Apply(...)` instead of reconnecting. See [Configure character actions](configuring-actions.md) for override and patch semantics.
 {% endhint %}
 
 ## Runtime attention API
 
-Update the NPC's current attention object at any point during an active conversation using methods on `ConvaiCharacter`:
+Update the NPC's current attention object at any point during an active conversation through `ConvaiCharacter.DynamicContext`:
 
 ```csharp
 // Set by object name
-character.SetCurrentAttentionObject("Extinguisher");
+character.DynamicContext.SetCurrentAttentionObject("Extinguisher");
 
 // Set by definition reference
-character.SetCurrentAttentionObject(myObjectDefinition);
+character.DynamicContext.SetCurrentAttentionObject(myObjectDefinition);
 
 // Clear — NPC has no specific focus
-character.ClearCurrentAttentionObject();
+character.DynamicContext.ClearCurrentAttentionObject();
 ```
 
 ### Method signatures
 
 ```csharp
-void SetCurrentAttentionObject(string objectName, string runLlm = "false")
-void SetCurrentAttentionObject(ConvaiActionObjectDefinition actionObject, string runLlm = "false")
-void ClearCurrentAttentionObject(string runLlm = "false")
+void SetCurrentAttentionObject(object currentAttentionObject, ConvaiRespondMode reaction = ConvaiRespondMode.Silent)
+void ClearCurrentAttentionObject(ConvaiRespondMode reaction = ConvaiRespondMode.Silent)
 ```
 
-### The runLlm parameter
+`currentAttentionObject` accepts a `string` object name or a `ConvaiActionObjectDefinition` reference. Any other type is rejected.
 
-The optional `runLlm` parameter controls whether the attention change immediately triggers a new LLM turn. The default `"false"` updates the grounding context silently. Pass `"true"` if you want Convai to react to the focus change with a natural language response.
+### The reaction parameter
+
+The optional `reaction` parameter (`ConvaiRespondMode`, namespace `Convai.Runtime`) controls whether the attention change triggers a new LLM turn. The default `ConvaiRespondMode.Silent` updates the grounding context without prompting a response. Pass `ConvaiRespondMode.MustRespond` if you want Convai to react to the focus change with a natural language response, or `ConvaiRespondMode.Auto` to let the model decide.
 
 ```csharp
 // Silent update — NPC does not react aloud
-character.SetCurrentAttentionObject("GasValve");
+character.DynamicContext.SetCurrentAttentionObject("GasValve");
 
 // NPC may react aloud to the change in focus
-character.SetCurrentAttentionObject("GasValve", runLlm: "true");
+character.DynamicContext.SetCurrentAttentionObject("GasValve", ConvaiRespondMode.MustRespond);
 ```
+
+Attention changes are staged locally and sent in the next dynamic-context batch (up to `ConvaiCharacter.DynamicContextBatchDelaySeconds`, 0.5 seconds by default), or immediately when you call `character.DynamicContext.Flush()`.
 
 ## Silent failure conditions
 
 {% hint style="warning" %}
-These calls are silently ignored if the precondition is not met. A warning is logged to the Console in each case.
+Invalid updates are rejected before they are staged. A warning is logged to the Console in each case.
 {% endhint %}
 
 | Condition | Result |
 | --- | --- |
-| Not in an active conversation | Call is ignored. Warning: `Cannot set attention object: not in conversation` |
-| Object name is empty or whitespace | Call is ignored. Warning: `Cannot set empty attention object` |
-| Object name not in active action-config | Call is ignored. Warning: `Cannot set attention object 'X': it is not present in the active action_config objects` |
+| `currentAttentionObject` is `null` | Rejected. Warning: `Dynamic context attention object cannot be null` |
+| Object name not in the active action-config objects | Rejected. Warning: `Dynamic context attention update rejected (invalid_attention): current_attention_object 'X' is not present in action_config.objects` |
+| Character not yet ready, or not in an active conversation | Staged locally and sent automatically once the character is ready. No warning is logged. |
 
 The object name must match an entry in `ConvaiActionConfigSource.Objects` (case-insensitive). It does not need to match the `GameObjectReference` name — it must match the `Name` field in the object definition.
 
 ## Attention scope
 
-{% hint style="info" %}
-The attention object affects **only the backend's reference resolution for future turns**. Setting the attention object does not:
+The attention object affects only the backend's reference resolution for future turns. Setting the attention object does not:
 
 * Create a new actionable target
 * Change which objects are in the action config
 * Cause the NPC to physically look at or move toward the object
 * Affect any active in-progress action step
-{% endhint %}
 
 ## Initial attention at connect time
 
@@ -121,12 +125,12 @@ public sealed class EquipmentFocusTracker : MonoBehaviour, IPointerEnterHandler,
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        _instructor.SetCurrentAttentionObject(_objectDefinition);
+        _instructor.DynamicContext.SetCurrentAttentionObject(_objectDefinition);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        _instructor.ClearCurrentAttentionObject();
+        _instructor.DynamicContext.ClearCurrentAttentionObject();
     }
 }
 ```
@@ -149,13 +153,13 @@ public sealed class ProximityAttentionTrigger : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        _instructor.SetCurrentAttentionObject(_objectName);
+        _instructor.DynamicContext.SetCurrentAttentionObject(_objectName);
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        _instructor.ClearCurrentAttentionObject();
+        _instructor.DynamicContext.ClearCurrentAttentionObject();
     }
 }
 ```
