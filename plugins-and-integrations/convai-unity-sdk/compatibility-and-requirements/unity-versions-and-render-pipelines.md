@@ -1,10 +1,10 @@
 ---
 title: Unity versions and render pipelines
 description: Reference for Convai Unity SDK environment requirements, including the minimum Unity version, required package dependencies, and render pipeline support.
-last_reviewed: "4.2.0"
+last_reviewed: "4.4.0"
 ---
 
-The Convai Unity SDK requires Unity 2023.1.1f1 or later. All three Unity render pipelines are supported with no additional configuration. Both installation methods — Package Manager and Asset Store — install required package dependencies automatically.
+The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code>. All three Unity render pipelines are supported with no additional configuration. Both installation methods — Package Manager and Asset Store — install required package dependencies automatically.
 
 ## Unity version requirements
 
@@ -14,7 +14,7 @@ The Convai Unity SDK requires Unity 2023.1.1f1 or later. All three Unity render 
 | Recommended for new projects | <code class="expression">space.vars.unity_recommended_version</code> |
 
 {% hint style="warning" %}
-The Convai Unity SDK does not support Unity versions earlier than 2023.1.1f1. If your project is on an older LTS release, upgrade before installing.
+The Convai Unity SDK does not support Unity versions earlier than <code class="expression">space.vars.unity_min_version</code>. If your project is on an older LTS release, upgrade before installing.
 {% endhint %}
 
 ## Required package dependencies
@@ -33,7 +33,7 @@ Do not downgrade these packages after installation. The SDK targets the versions
 
 ## Render pipeline support
 
-The SDK runtime contains no pipeline-specific conditionals. All three Unity render pipelines are fully supported with no additional configuration required.
+The SDK detects the active render pipeline at runtime and adapts automatically — for example, the Vision module's camera capture path switches between built-in render hooks and an explicit SRP-compatible path. All three Unity render pipelines are fully supported with no manual configuration required.
 
 | Render Pipeline                        | Supported |
 | -------------------------------------- | --------- |
@@ -42,7 +42,7 @@ The SDK runtime contains no pipeline-specific conditionals. All three Unity rend
 | High Definition Render Pipeline (HDRP) | ✅ Full    |
 
 {% hint style="info" %}
-The included sample scenes use URP materials. If your project uses the Built-in or HDRP pipeline, sample scene materials require reassignment. Optional depth-of-field camera scripts in `SamplesShared/Camera/` are also URP-specific and are not required for SDK functionality.
+The included sample scenes use URP materials. If your project uses the Built-in or HDRP pipeline, sample scene materials require reassignment. Optional depth-of-field camera scripts in `SamplesShared/Camera/` support URP and HDRP; on the Built-in pipeline they skip depth-of-field and log a warning instead. None of these scripts are required for SDK functionality.
 {% endhint %}
 
 ## Next steps
