@@ -32,7 +32,7 @@ Before getting started, ensure you have the following:
 * **Unreal Engine 5.5** [**Cross-Compile Toolchain**](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine?application_version=5.5) **-** [Download it here](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine#version-history)
 * **Download Linux Binaries for Unreal Engine 5.5 -** You can download it from Epic Games Launcher
 
-<figure><img src="../.gitbook/assets/image (433).png" alt=""><figcaption><p><strong>Linux Binaries for Unreal Engine 5.5</strong></p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (433).png" alt=""><figcaption><p><strong>Linux Binaries for Unreal Engine 5.5</strong></p></figcaption></figure>
 
 ***
 
@@ -128,8 +128,8 @@ If you encounter an error related to the .NET Runtime:
 
 Continue to one of the following guides:
 
-* [Uploading Metahuman Avatars](../no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/metahuman-avatars.md)
-* [Uploading Reallusion Avatars](../no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/reallusion-avatars.md)
+* [Uploading Metahuman Avatars](../../no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/metahuman-avatars.md)
+* [Uploading Reallusion Avatars](../../no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/reallusion-avatars.md)
 
 {% hint style="info" %}
 Currently, only Metahuman and Reallusion avatars are supported for upload.
@@ -139,4 +139,4 @@ Currently, only Metahuman and Reallusion avatars are supported for upload.
 
 ## Need Help?
 
-If you run into any issues or have questions, don’t hesitate to reach out via the [Convai Developer Forum](https://forum.convai.com/).&#x20;
+If you run into any issues or have questions, don’t hesitate to reach out via the [Convai Developer Forum](https://forum.convai.com/).
