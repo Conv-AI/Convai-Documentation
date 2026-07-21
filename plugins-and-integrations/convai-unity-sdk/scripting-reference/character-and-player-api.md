@@ -118,9 +118,8 @@ Per-character audio control lets you mute individual characters in multi-charact
 
 | Method                                                                                          | Returns                    | Description                                                                |
 | ----------------------------------------------------------------------------------------------- | -------------------------- | -------------------------------------------------------------------------- |
-| `SetCurrentAttentionObject(string objectName, string runLlm = "false")`                         | `void`                     | Sets the in-scene object the character is currently attending to, by name. |
-| `SetCurrentAttentionObject(ConvaiActionObjectDefinition actionObject, string runLlm = "false")` | `void`                     | Sets the in-scene attention object using a defined action object asset.    |
-| `ClearCurrentAttentionObject(string runLlm = "false")`                                          | `void`                     | Clears the current in-scene attention object.                              |
+| `DynamicContext.SetCurrentAttentionObject(object currentAttentionObject, ConvaiRespondMode reaction = ConvaiRespondMode.Silent)` | `void` | Sets the in-scene object the character is currently attending to, by name or action object asset. |
+| `DynamicContext.ClearCurrentAttentionObject(ConvaiRespondMode reaction = ConvaiRespondMode.Silent)` | `void` | Clears the current in-scene attention object. |
 | `GetActionConfigSource()`                                                                       | `ConvaiActionConfigSource` | Returns the action config source component for this character.             |
 
 ### `ConvaiCharacter` events

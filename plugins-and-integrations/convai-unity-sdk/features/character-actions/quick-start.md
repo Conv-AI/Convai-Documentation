@@ -1,27 +1,25 @@
 ---
 title: Character actions quick start
 description: >-
-  Add a working Move To action to your NPC using ConvaiActionConfigSource,
-  ConvaiActionDispatcher, and TransformMoveToActionExecutor without writing any
-  scripts.
+  Wire up a working Move To action for your NPC entirely through the
+  Inspector, with no scripting required, and confirm it runs in Play Mode.
+last_reviewed: "4.4.0"
 ---
 
-# Character actions quick start
+Connect a "Move To" action so your NPC navigates to a scene object when the player asks. By the end, your character responds to natural language requests like "go to the crate" by physically moving to it in the scene — no code required.
 
-This guide walks you through connecting a "Move To" action so your NPC navigates to a scene object when the player asks. By the end, your character responds to natural language requests like "go to the crate" by physically moving to it in the scene — no code required.
-
-### Prerequisites
+## Prerequisites
 
 Before starting, verify:
 
 * [ ] A `ConvaiCharacter` component is already on your NPC's `GameObject`
 * [ ] Your scene has at least one target object the NPC should be able to reach
 
-### Configure the action pipeline
+## Configure the action pipeline
 
 {% stepper %}
 {% step %}
-#### Add ConvaiActionConfigSource
+### Add ConvaiActionConfigSource
 
 Select your NPC's `GameObject`. In the Inspector, click **Add Component** and search for **Convai Action Config Source** (`Convai/Convai Action Config Source`).
 
@@ -31,7 +29,7 @@ You should see four new sections in the Inspector: **Action Definitions**, **Act
 {% endstep %}
 
 {% step %}
-#### Define the Move To action
+### Define the Move To action
 
 In the **Action Definitions** list, click the **+** button to add an entry, then fill in the three fields:
 
@@ -47,7 +45,7 @@ Leave **Timeout Seconds** at `0` (no timeout).
 {% endstep %}
 
 {% step %}
-#### Register a target object
+### Register a target object
 
 In the **Actionable Objects** list, click **+** and fill in:
 
@@ -63,7 +61,7 @@ The **Description** is sent to Convai and helps the backend resolve vague refere
 {% endstep %}
 
 {% step %}
-#### Add TransformMoveToActionExecutor
+### Add TransformMoveToActionExecutor
 
 On the same NPC `GameObject`, click **Add Component** and search for **Transform Move To Action Executor** (`Convai/Samples/Transform Move To Action Executor`).
 
@@ -79,7 +77,7 @@ Go back to the **Action Definitions** entry you created in the previous step. Dr
 {% endstep %}
 
 {% step %}
-#### Add ConvaiActionDispatcher
+### Add ConvaiActionDispatcher
 
 On the same NPC `GameObject`, click **Add Component** and search for **Convai Action Dispatcher** (`Convai/Convai Action Dispatcher`).
 
@@ -89,11 +87,11 @@ Leave **Batch Policy** at `Queue` and **Failure Policy** at `Stop Batch` — the
 {% endstep %}
 {% endstepper %}
 
-### Verify the setup
+## Verify the setup
 
 Your NPC's `GameObject` should now have these four components:
 
-```
+```text
 ConvaiCharacter
 ConvaiActionConfigSource   ← action definitions + target objects
 ConvaiActionDispatcher     ← receives and executes batches
@@ -104,19 +102,19 @@ Enter Play Mode and say "go to the crate" or "move to the crate." Your NPC shoul
 
 If you added `ConvaiActionDebugProbe` (optional — see [Troubleshoot character actions](debugging-and-troubleshooting.md)), you should also see this in the Console:
 
-```
+```text
 [ConvaiActionDebugProbe] Step succeeded #1: cmd='Move To crate', def='Move To', target=Object:Crate
 ```
 
 If the NPC does not move, check [Troubleshoot character actions](debugging-and-troubleshooting.md) for the diagnostic checklist.
 
-### Runtime behavior
+## Runtime behavior
 
 **Action names are case-insensitive.** `Move To`, `move to`, and `MOVE TO` all match the same definition. Spaces are preserved — `Move To` and `MoveTO` do not match.
 
 **Configuration is sent once at session start.** If you add, rename, or remove actions or targets while in Play Mode, end the session and reconnect for the changes to take effect.
 
-### Next steps
+## Next steps
 
 {% content-ref url="action-executors.md" %}
 [action-executors.md](action-executors.md)
