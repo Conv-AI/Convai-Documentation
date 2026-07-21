@@ -342,6 +342,8 @@
       * [Building a Custom UI (TypeScript)](plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/building-a-custom-ui-typescript.md)
       * [Best Practices & Type Definitions](plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/best-practices-and-type-definitions.md)
       * [Mappings Reference](plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/mappings-reference.md)
+    * [Quickstart](plugins-and-integrations/web-plugins/convai-web-sdk/quickstart.md)
+    * [Lipsync & Blendshape](plugins-and-integrations/web-plugins/convai-web-sdk/lipsync-and-blendshape.md)
     * [Actions](plugins-and-integrations/web-plugins/convai-web-sdk/actions.md)
     * [Emotions](plugins-and-integrations/web-plugins/convai-web-sdk/emotions.md)
     * [Dynamic Context](plugins-and-integrations/web-plugins/convai-web-sdk/dynamic-context.md)
