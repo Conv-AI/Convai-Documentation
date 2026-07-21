@@ -44,7 +44,7 @@ Choose from a variety of **Large Language Models (LLMs)** from leading providers
 <figure><img src="../../.gitbook/assets/image (31).png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
-&#x20;Model availability depends on whether the Moderation Filter is enabled.
+Model availability depends on whether the Moderation Filter is enabled.
 {% endhint %}
 
 ***
@@ -64,27 +64,41 @@ Models marked as ✅ _Flagship_ are the providers’ top-tier, most capable mode
 
 ***
 
-### OpenAI
+### Realtime / Live Models
 
-<table><thead><tr><th>Model</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>GPT-4.1</td><td>true</td></tr><tr><td>GPT-4o</td><td>true</td></tr><tr><td>GPT-4.1-mini</td><td>false</td></tr><tr><td>GPT-4.1-nano</td><td>false</td></tr><tr><td>GPT-4o-mini</td><td>false</td></tr></tbody></table>
+#### OpenAI
 
-***
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>GPT Realtime 1.5 (beta)</td><td>gpt-realtime-1.5</td><td>false</td></tr><tr><td>GPT Realtime Mini (beta)</td><td>gpt-realtime-mini</td><td>false</td></tr></tbody></table>
 
-### Anthropic
+#### Google
 
-<table><thead><tr><th>Model</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Claude-Opus-4.1</td><td>true</td></tr><tr><td>Claude-Opus-4</td><td>true</td></tr><tr><td>Claude-4-Sonnet</td><td>false</td></tr><tr><td>Claude-3.7-Sonnet</td><td>false</td></tr></tbody></table>
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini 2.5 Flash Live (beta)</td><td>gemini-2.5-flash-live</td><td>false</td></tr><tr><td>Gemma 4 31B Fast (beta)</td><td>realtime-gemma-4-31b-it</td><td>false</td></tr><tr><td>Gemma 4 26B A4B Fast (beta)</td><td>realtime-gemma-4-26b-a4b-it</td><td>false</td></tr></tbody></table>
 
-***
+### Standard Models
 
-### Google
+#### OpenAI
 
-<table><thead><tr><th>Model</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini-2.5-Flash</td><td>false</td></tr><tr><td>Gemini-2.5-Flash-Lite</td><td>false</td></tr><tr><td>Gemini-2.0-Flash</td><td>false</td></tr><tr><td>Gemma-3n-e4b</td><td>false</td></tr><tr><td>Gemma-3n-e2b</td><td>false</td></tr></tbody></table>
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>GPT-5.4</td><td>gpt-5.4</td><td>false</td></tr><tr><td>GPT-5.x (latest)</td><td>gpt-5.x</td><td>true</td></tr><tr><td>GPT-OSS-120B (beta)</td><td>gpt-oss-120b</td><td>false</td></tr><tr><td>GPT-5.1 (beta)</td><td>gpt-5.1</td><td>false</td></tr><tr><td>GPT-4.1</td><td>gpt-4.1</td><td>false</td></tr><tr><td>GPT-5.4-nano</td><td>gpt-5.4-nano</td><td>false</td></tr><tr><td>GPT-5.x-nano (latest)</td><td>gpt-5.x-nano</td><td>true</td></tr><tr><td>GPT-5.4-mini</td><td>gpt-5.4-mini</td><td>false</td></tr><tr><td>GPT-5.x-mini (latest)</td><td>gpt-5.x-mini</td><td>true</td></tr><tr><td>GPT-4.1-mini</td><td>gpt-4.1-mini</td><td>false</td></tr><tr><td>GPT-5.3 Instant</td><td>gpt-5.3-instant</td><td>false</td></tr><tr><td>GPT-4o</td><td>gpt-4o</td><td>false</td></tr><tr><td>GPT-4.1-nano</td><td>gpt-4.1-nano</td><td>false</td></tr><tr><td>GPT-4o-mini</td><td>gpt-4o-mini</td><td>false</td></tr></tbody></table>
 
-***
+#### Anthropic
+
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Claude 4.5 Sonnet (beta)</td><td>claude-4-5-sonnet</td><td>false</td></tr><tr><td>Claude 4.5 Haiku (beta)</td><td>claude-4-5-haiku</td><td>false</td></tr><tr><td>Claude Sonnet (latest)</td><td>claude-sonnet</td><td>true</td></tr><tr><td>Claude Haiku (latest)</td><td>claude-haiku</td><td>true</td></tr></tbody></table>
+
+#### Google
+
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini 3.5 Flash</td><td>gemini-3.5-flash</td><td>false</td></tr><tr><td>Gemini Flash (latest)</td><td>gemini-flash</td><td>true</td></tr><tr><td>Gemini 3.1 Flash Lite</td><td>gemini-3.1-flash-lite</td><td>false</td></tr><tr><td>Gemini Flash Lite (latest)</td><td>gemini-flash-lite</td><td>true</td></tr><tr><td>Gemini 2.5 Flash</td><td>gemini-2.5-flash</td><td>false</td></tr><tr><td>Gemini 2.5 Flash Lite</td><td>gemini-2.5-flash-lite</td><td>false</td></tr></tbody></table>
+
+#### Qwen
+
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Qwen3.6 27B (beta)</td><td>qwen3.6-27b</td><td>false</td></tr><tr><td>Qwen3.6 35B A3B (beta)</td><td>qwen3.6-35b-a3b</td><td>false</td></tr></tbody></table>
 
 #### Llama
 
-<table><thead><tr><th>Model</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Llama-4-Maverick</td><td>true</td></tr><tr><td>Llama-4-Scout</td><td>false</td></tr><tr><td>Llama-3.3-70B</td><td>false</td></tr></tbody></table>
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Llama 4 Maverick (beta)</td><td>llama-4-maverick</td><td>false</td></tr><tr><td>Llama 4 Scout (beta)</td><td>llama-4-scout</td><td>false</td></tr><tr><td>Llama3 70B</td><td>llama3-70b</td><td>false</td></tr></tbody></table>
+
+#### xAI
+
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Grok 4.3</td><td>grok-4.3</td><td>false</td></tr></tbody></table>
 
 ***
 
@@ -102,7 +116,7 @@ Models marked as ✅ _Flagship_ are the providers’ top-tier, most capable mode
 | **High (0.8–1.0)**   | Diverse, creative, sometimes unpredictable | Storytelling, brainstorming, roleplay          |
 
 {% hint style="info" %}
-Lower temperature sharpens the probability distribution for more predictable word choices.&#x20;
+Lower temperature sharpens the probability distribution for more predictable word choices.
 
 Higher temperature flattens the distribution, allowing less likely words to appear more frequently.
 {% endhint %}
