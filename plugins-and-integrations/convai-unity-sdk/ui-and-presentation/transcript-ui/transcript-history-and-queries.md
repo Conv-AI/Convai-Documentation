@@ -1,183 +1,31 @@
 ---
 title: Transcript history and queries
-last_reviewed: 4.2.0
 description: >-
-  Query the conversation turn timeline from code — read committed turns, detect
-  interruptions, and build post-session exports or live analytics.
+  Read the current conversation turn timeline from code, react to live turn
+  changes as they happen, and export session history as text, Markdown, or
+  JSON.
+last_reviewed: 4.4.0
 ---
 
-# Transcript history and queries
+`ConvaiManager.ActiveManager.Transcripts` gives your code structured access to every conversation turn in the current room session. Read the current state through `CurrentTimeline` and `GetTurns`, react to live changes through `Subscribe` and `SubscribeCommitted`, and export finished turns through `Export`. This facade does not control what appears on screen — see [Transcript UI](./) for that. For the full API reference, see [Transcript API](../../scripting-reference/transcript-api.md).
 
-`ConvaiManager.Transcripts` gives your code structured access to every conversation turn in the current session. Subscribe to `Changed` to react as turns arrive, or poll `CurrentTimeline` for a consistent snapshot of the full state at any moment. This API reflects the state managed by the runtime's `IRoomTranscriptEngine` — it does not control UI display and does not modify the transcript history.
+## Read the current transcript state
 
-For driving visual display from this data, see [Transcript UI](./).
+`ConvaiManager.ActiveManager.Transcripts.CurrentTimeline` returns an immutable `TranscriptTimeline` — a consistent view of every turn in the room at the moment you read it. Reading it repeatedly is cheap: it returns the same instance until the runtime publishes a change, and a new instance only when the timeline actually changes.
 
-### Access patterns
+{% hint style="info" %}
+`ConvaiManager.ActiveManager.Transcripts` throws `InvalidOperationException` if the SDK has not finished initializing. For code that runs early (`OnEnable`, `Awake`), use `ConvaiManager.ActiveManager.TryGetTranscripts(out ConvaiTranscripts transcripts)` instead, which returns `false` rather than throwing.
+{% endhint %}
 
-#### Subscribe to `Changed`
+| Member | Type | Description |
+| --- | --- | --- |
+| `Cursor` | `long` | Monotonically increasing counter. Changes whenever the runtime publishes an update |
+| `ActiveTurns` | `IReadOnlyList<TranscriptTurn>` | Turns still in progress — not yet committed or interrupted |
+| `CommittedTurns` | `IReadOnlyList<TranscriptTurn>` | Finalized turns (`Committed` or `Interrupted` state) |
+| `TurnsById` | `IReadOnlyDictionary<string, TranscriptTurn>` | Fast lookup by `TranscriptTurn.Id`, covering active and committed turns |
+| `Turns` | `IReadOnlyList<TranscriptTurn>` | Every turn (active and committed), ordered by `RoomSequence` |
 
-`ConvaiManager.Transcripts.Changed` fires every time the timeline updates. The `TranscriptUpdateBatch` payload tells you exactly what changed — new turns added, existing turns updated, turns completed, and turns interrupted — so you can react efficiently without diffing the full timeline.
-
-```csharp
-using Convai.Domain.Models;
-using Convai.Runtime.Components;
-using UnityEngine;
-
-public class TranscriptReactor : MonoBehaviour
-{
-    private void OnEnable()
-    {
-        ConvaiManager.ActiveManager.Transcripts.Changed += OnTranscriptChanged;
-    }
-
-    private void OnDisable()
-    {
-        ConvaiManager.ActiveManager.Transcripts.Changed -= OnTranscriptChanged;
-    }
-
-    private void OnTranscriptChanged(TranscriptUpdateBatch batch)
-    {
-        foreach (string turnId in batch.CompletedTurnIds)
-        {
-            TranscriptTurnSnapshot turn = batch.Timeline.TurnsById[turnId];
-            Debug.Log($"[{turn.Participant.DisplayName}] {turn.DisplayText}");
-        }
-    }
-}
-```
-
-#### Poll `CurrentTimeline`
-
-`ConvaiManager.Transcripts.CurrentTimeline` returns an immutable `TranscriptTimelineSnapshot` — a consistent view of the full turn state at the moment you call it. Use polling for post-session exports, debrief screens, or one-off reads triggered by game events.
-
-```csharp
-public string BuildSessionReport()
-{
-    var timeline = ConvaiManager.ActiveManager.Transcripts.CurrentTimeline;
-    var sb = new System.Text.StringBuilder();
-
-    foreach (TranscriptTurnSnapshot turn in timeline.CommittedTurns)
-        sb.AppendLine($"[{turn.StartedAtUtc:HH:mm:ss}] {turn.Participant.DisplayName}: {turn.DisplayText}");
-
-    return sb.ToString();
-}
-```
-
-### Core data structures
-
-#### `ConvaiTranscripts` — the facade
-
-Accessed via `ConvaiManager.Transcripts`. All members are available after `ConvaiManager` initializes.
-
-| Member                                    | Type                                    | Description                                            |
-| ----------------------------------------- | --------------------------------------- | ------------------------------------------------------ |
-| `CurrentTimeline`                         | `TranscriptTimelineSnapshot`            | Immutable snapshot of the full turn timeline right now |
-| `Changed`                                 | `event Action<TranscriptUpdateBatch>`   | Fired whenever the timeline changes                    |
-| `GetTurns(TranscriptQuery)`               | `IReadOnlyList<TranscriptTurnSnapshot>` | Query turns with optional filter                       |
-| `GetTurn(string turnId)`                  | `TranscriptTurnSnapshot`                | Fast lookup by turn ID                                 |
-| `GetLatestTurn(TranscriptParticipantRef)` | `TranscriptTurnSnapshot`                | Most recent turn for a specific participant            |
-
-#### `TranscriptTimelineSnapshot`
-
-An immutable room-wide snapshot. Every field is a collection; all are safe to iterate without null checks.
-
-| Property                  | Type                                                  | Description                                                                                       |
-| ------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `ActiveTurns`             | `IReadOnlyList<TranscriptTurnSnapshot>`               | Turns currently in progress (Streaming or Stable)                                                 |
-| `CommittedTurns`          | `IReadOnlyList<TranscriptTurnSnapshot>`               | Finalized turns in room sequence order                                                            |
-| `TurnsById`               | `IReadOnlyDictionary<string, TranscriptTurnSnapshot>` | Fast lookup by `TurnId` — covers active and committed                                             |
-| `LatestTurnByParticipant` | `IReadOnlyDictionary<string, TranscriptTurnSnapshot>` | Most recent turn keyed by `ParticipantId`                                                         |
-| `Cursor`                  | `long`                                                | Monotonically increasing counter. Use to detect whether the timeline changed since your last read |
-
-#### `TranscriptTurnSnapshot`
-
-Represents one continuous speech segment from a single participant. Immutable — a new snapshot is produced for every update.
-
-| Property                        | Type                                       | Description                                                             |
-| ------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------- |
-| `TurnId`                        | `string`                                   | Stable identifier for this turn. Also accessible as `MessageId`         |
-| `RoomSequence`                  | `long`                                     | Monotonic ordering position within the room session                     |
-| `Participant`                   | `TranscriptParticipantRef`                 | Who produced this turn (see below)                                      |
-| `StartedAtUtc`                  | `DateTime`                                 | UTC time the turn began                                                 |
-| `LastUpdatedAtUtc`              | `DateTime`                                 | UTC time of the most recent update to this turn                         |
-| `CompletedAtUtc`                | `DateTime?`                                | UTC time the turn finalized. `null` while still active                  |
-| `Lifecycle`                     | `TranscriptLifecycle`                      | Current stability state (Streaming / Stable / Completed)                |
-| `CommittedText`                 | `string`                                   | Final, confirmed portion of the transcript                              |
-| `InterimText`                   | `string`                                   | Current partial (not yet confirmed) portion                             |
-| `DisplayText`                   | `string`                                   | Concatenation of `CommittedText` + `InterimText` — use this for display |
-| `WasInterrupted`                | `bool`                                     | `true` if the turn was cut short by another speaker                     |
-| `HasText`                       | `bool`                                     | `true` if `DisplayText` contains non-whitespace content                 |
-| `ConversationTargetCharacterId` | `string`                                   | Character this player turn was directed at (player turns only)          |
-| `Segments`                      | `IReadOnlyList<TranscriptSegmentSnapshot>` | Ordered sub-segments within the turn (advanced use)                     |
-
-#### `TranscriptParticipantRef`
-
-Stable participant identity attached to every `TranscriptTurnSnapshot`.
-
-| Property              | Type                        | Description                                                     |
-| --------------------- | --------------------------- | --------------------------------------------------------------- |
-| `Kind`                | `TranscriptParticipantKind` | `Player` or `Character`                                         |
-| `PlayerOrCharacterId` | `string`                    | The player or character's stable SDK identifier                 |
-| `DisplayName`         | `string`                    | Human-readable name as it would appear in transcript UI         |
-| `ParticipantId`       | `string`                    | Room-scoped participant identifier (useful in multi-user rooms) |
-| `IsEmpty`             | `bool`                      | `true` if `PlayerOrCharacterId` is null or whitespace           |
-
-#### `TranscriptLifecycle`
-
-Describes how stable a turn's text is at a given point in time.
-
-| Value       | Description                                                             |
-| ----------- | ----------------------------------------------------------------------- |
-| `Streaming` | Text is actively changing — interim speech recognition results arriving |
-| `Stable`    | Text is locked for this point in the turn, but the turn is still open   |
-| `Completed` | Turn is fully finalized — no further updates will arrive                |
-
-#### `TranscriptUpdateBatch`
-
-The payload delivered to `Changed` subscribers. Describes what changed since the last batch.
-
-| Property             | Type                                    | Description                                    |
-| -------------------- | --------------------------------------- | ---------------------------------------------- |
-| `Timeline`           | `TranscriptTimelineSnapshot`            | Full timeline state after this batch           |
-| `Cursor`             | `long`                                  | Timeline cursor after this batch               |
-| `ChangedTurns`       | `IReadOnlyList<TranscriptTurnSnapshot>` | Full turn snapshots for all turns that changed |
-| `AddedTurnIds`       | `IReadOnlyList<string>`                 | Turn IDs that are new since the previous batch |
-| `UpdatedTurnIds`     | `IReadOnlyList<string>`                 | Turn IDs that were updated (text changed)      |
-| `CompletedTurnIds`   | `IReadOnlyList<string>`                 | Turn IDs that transitioned to `Completed`      |
-| `InterruptedTurnIds` | `IReadOnlyList<string>`                 | Turn IDs where `WasInterrupted` became `true`  |
-| `RemovedTurnIds`     | `IReadOnlyList<string>`                 | Turn IDs removed from the timeline             |
-
-### Filter turns with `TranscriptQuery`
-
-Pass a `TranscriptQuery` to `GetTurns()` to retrieve a subset of the timeline. All fields are optional — omitting a field disables that filter.
-
-| Field                   | Type                         | Default      | Description                                         |
-| ----------------------- | ---------------------------- | ------------ | --------------------------------------------------- |
-| `ParticipantKind`       | `TranscriptParticipantKind?` | `null` (any) | Restrict to `Player` or `Character` turns only      |
-| `PlayerOrCharacterId`   | `string`                     | `null` (any) | Restrict to a specific player or character by ID    |
-| `ParticipantId`         | `string`                     | `null` (any) | Restrict by room-scoped participant ID (multi-user) |
-| `IncludeActiveTurns`    | `bool`                       | `true`       | Include in-progress turns in results                |
-| `IncludeCommittedTurns` | `bool`                       | `true`       | Include finalized turns in results                  |
-
-**Example — all committed character turns:**
-
-```csharp
-var query = new TranscriptQuery
-{
-    ParticipantKind = TranscriptParticipantKind.Character,
-    IncludeActiveTurns = false,
-    IncludeCommittedTurns = true
-};
-
-IReadOnlyList<TranscriptTurnSnapshot> characterTurns =
-    ConvaiManager.ActiveManager.Transcripts.GetTurns(query);
-```
-
-### Usage examples
-
-#### Post-session report — export committed turns
-
-A corporate onboarding simulation generates a session transcript when the trainee completes the onboarding conversation:
+Each `TranscriptTurn` exposes `DisplayText` (committed text plus any in-progress interim text), `Speaker` (a `TranscriptSpeaker` with `Type`, `Id`, `DisplayName`, `ParticipantId`), `StartedAtUtc`, `WasInterrupted`, and `Revision` — an integer that increments every time the turn's stored data changes. Use `turn.IsCommitted` to check whether a turn is finished instead of comparing `State` directly.
 
 ```csharp
 using Convai.Domain.Models;
@@ -187,130 +35,199 @@ using UnityEngine;
 
 public class SessionReporter : MonoBehaviour
 {
-    public string GenerateReport()
+    public string BuildSessionReport()
     {
-        var timeline = ConvaiManager.ActiveManager.Transcripts.CurrentTimeline;
+        TranscriptTimeline timeline = ConvaiManager.ActiveManager.Transcripts.CurrentTimeline;
         var sb = new StringBuilder();
-        sb.AppendLine("=== Session Transcript ===");
 
-        foreach (TranscriptTurnSnapshot turn in timeline.CommittedTurns)
-        {
-            string speaker = turn.Participant.Kind == TranscriptParticipantKind.Character
-                ? $"[AI] {turn.Participant.DisplayName}"
-                : $"[Trainee] {turn.Participant.DisplayName}";
-
-            sb.AppendLine($"{turn.StartedAtUtc:HH:mm:ss}  {speaker}: {turn.DisplayText}");
-        }
+        foreach (TranscriptTurn turn in timeline.CommittedTurns)
+            sb.AppendLine($"[{turn.StartedAtUtc:HH:mm:ss}] {turn.Speaker.DisplayName}: {turn.DisplayText}");
 
         return sb.ToString();
     }
 }
 ```
 
-At runtime, call `GenerateReport()` after the session ends to produce a timestamped, ordered transcript the trainee or supervisor can review.
+### Look up a single turn
 
-#### Live analytics — track player word count
-
-A communication skills simulation tracks how many words the trainee speaks in real time, updating a live counter on the debrief HUD as the conversation progresses:
+Use `GetTurn(string turnId)` for an O(1) lookup by ID, or `GetLatestTurn(TranscriptParticipantRef)` for the most recent turn from a specific player or character.
 
 ```csharp
 using Convai.Domain.Models;
 using Convai.Runtime.Components;
-using UnityEngine;
+
+// Look up a turn by its stable ID
+TranscriptTurn turn = ConvaiManager.ActiveManager.Transcripts.GetTurn(turnId);
+
+// Look up the most recent turn from a specific character
+var characterRef = new TranscriptParticipantRef(
+    TranscriptParticipantKind.Character,
+    playerOrCharacterId: characterId,
+    displayName: characterName);
+
+TranscriptTurn latest = ConvaiManager.ActiveManager.Transcripts.GetLatestTurn(characterRef);
+```
+
+Both methods return `null` when no matching turn exists.
+
+## Filter turns with `TranscriptQuery`
+
+Pass a `TranscriptQuery` to `GetTurns(query)` to retrieve a subset of the timeline. Omitting the query, or leaving a field unset, disables that filter. Results are ordered by `RoomSequence`.
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ParticipantKind` | `TranscriptParticipantKind?` | `null` (any) | Restrict to `Player` or `Character` turns only |
+| `PlayerOrCharacterId` | `string` | `null` (any) | Restrict to a specific player or character by ID |
+| `ParticipantId` | `string` | `null` (any) | Restrict by room-scoped participant ID (multi-user rooms) |
+| `IncludeActiveTurns` | `bool` | `true` | Include in-progress turns in the results |
+| `IncludeCommittedTurns` | `bool` | `true` | Include finalized turns in the results |
+
+`TranscriptQuery.ParticipantKind` uses `TranscriptParticipantKind` (`Player` or `Character`). This is a separate enum from `TranscriptSpeakerType` (`Player`, `Character`, or `System`), which appears on `TranscriptSpeaker` and `TranscriptSubscriptionOptions` further down this page.
+
+```csharp
+using Convai.Domain.Models;
+using Convai.Runtime.Components;
+using System.Collections.Generic;
+
+var query = new TranscriptQuery
+{
+    ParticipantKind = TranscriptParticipantKind.Character,
+    IncludeActiveTurns = false,
+    IncludeCommittedTurns = true
+};
+
+IReadOnlyList<TranscriptTurn> characterTurns =
+    ConvaiManager.ActiveManager.Transcripts.GetTurns(query);
+```
+
+## React to live transcript changes
+
+Call `Subscribe(callback, options)` to receive a `TranscriptChange` every time a matching turn changes. `Subscribe` returns an `IDisposable` — dispose it to unsubscribe, typically in `OnDisable`.
+
+`TranscriptChange.Kind` tells you what happened; `TranscriptChange.Turn` is the updated turn, or `null` when `Kind` is `Removed` (read `TurnId` in that case).
+
+| `TranscriptChangeKind` | Meaning |
+| --- | --- |
+| `Added` | The turn appears in the timeline for the first time |
+| `Updated` | The turn's text changed while still active (streaming or stable) |
+| `Committed` | The turn finalized normally |
+| `Interrupted` | The turn finalized because another speaker cut it off |
+| `Corrected` | Previously delivered text for the turn was retroactively corrected |
+| `Removed` | The turn was removed from the timeline; `Turn` is `null` |
+
+`TranscriptSubscriptionOptions` controls which turns and change kinds reach your callback:
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ReplayExisting` | `bool` | `false` | Immediately invoke the callback for every currently matching turn before live updates begin |
+| `IncludeActive` | `bool` | `true` | Include changes to turns that are not yet finalized |
+| `IncludeTerminal` | `bool` | `true` | Include changes to turns that are committed, interrupted, or corrected |
+| `SpeakerType` | `TranscriptSpeakerType?` | `null` (any) | Restrict to `Player`, `Character`, or `System` turns only |
+| `SpeakerId` | `string` | `null` (any) | Restrict to a specific player or character by ID |
+| `ParticipantId` | `string` | `null` (any) | Restrict by room-scoped participant ID (multi-user rooms) |
+
+`SubscribeCommitted(callback, options)` is a convenience wrapper around `Subscribe` that forces `IncludeActive = false` and `IncludeTerminal = true`, so the callback only fires once a turn is finished — use it when you only care about finalized history, such as a chat log or a scoring system.
+
+```csharp
+using Convai.Domain.Models;
+using Convai.Runtime.Components;
+using Convai.Runtime.Facades;
+using System;
 using TMPro;
+using UnityEngine;
 
 public class WordCountTracker : MonoBehaviour
 {
     [SerializeField] private TMP_Text _wordCountLabel;
 
+    private ConvaiTranscripts _transcripts;
+    private IDisposable _subscription;
+    private int _wordCount;
+
     private void OnEnable()
     {
-        ConvaiManager.ActiveManager.Transcripts.Changed += OnTranscriptChanged;
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.TryGetTranscripts(out _transcripts)) return;
+
+        _subscription = _transcripts.SubscribeCommitted(
+            OnPlayerTurnCommitted,
+            new TranscriptSubscriptionOptions { SpeakerType = TranscriptSpeakerType.Player });
     }
 
     private void OnDisable()
     {
-        ConvaiManager.ActiveManager.Transcripts.Changed -= OnTranscriptChanged;
+        _subscription?.Dispose();
+        _subscription = null;
     }
 
-    private void OnTranscriptChanged(TranscriptUpdateBatch batch)
+    private void OnPlayerTurnCommitted(TranscriptChange change)
     {
-        bool playerTurnChanged = false;
-        foreach (TranscriptTurnSnapshot turn in batch.ChangedTurns)
-        {
-            if (turn.Participant.Kind == TranscriptParticipantKind.Player)
-            {
-                playerTurnChanged = true;
-                break;
-            }
-        }
+        if (change.Turn == null) return;
+        if (change.Kind != TranscriptChangeKind.Committed && change.Kind != TranscriptChangeKind.Interrupted) return;
 
-        if (!playerTurnChanged) return;
-
-        int wordCount = 0;
-        var query = new TranscriptQuery { ParticipantKind = TranscriptParticipantKind.Player };
-
-        foreach (TranscriptTurnSnapshot turn in ConvaiManager.ActiveManager.Transcripts.GetTurns(query))
-            wordCount += turn.DisplayText.Split(' ', System.StringSplitOptions.RemoveEmptyEntries).Length;
-
-        _wordCountLabel.text = $"Words spoken: {wordCount}";
+        _wordCount += change.Turn.DisplayText.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+        _wordCountLabel.text = $"Words spoken: {_wordCount}";
     }
 }
 ```
 
-#### Interruption detection — training scoring penalty
+For a late-joining viewer that needs to see prior turns immediately, set `ReplayExisting = true` on the options passed to `Subscribe` — matching turns are delivered to your callback once before live updates start.
 
-A customer service training simulation penalizes the trainee when the AI character's turn was interrupted — indicating the trainee spoke over the instructor:
+## Export and clear transcript history
+
+`Export(TranscriptExportFormat format)` serializes every committed turn, ordered by `RoomSequence`, into a single string. It reads from `CurrentTimeline.CommittedTurns` — active turns are never included.
+
+| `TranscriptExportFormat` | Output |
+| --- | --- |
+| `PlainText` | One line per turn: `"{speaker}: {turn.DisplayText}"` |
+| `Markdown` | One line per turn: `"**{speaker}:** {turn.DisplayText}"`, with a blank line between turns |
+| `Json` | An indented JSON array of `TranscriptTurn` objects |
+
+The `{speaker}` value is `turn.Speaker.DisplayName`, or `turn.Speaker.Type` when `DisplayName` is empty.
 
 ```csharp
 using Convai.Domain.Models;
 using Convai.Runtime.Components;
+using System.IO;
 using UnityEngine;
 
-public class InterruptionDetector : MonoBehaviour
+public class SessionExporter : MonoBehaviour
 {
-    [SerializeField] private string _instructorCharacterId;
-    private int _interruptionCount;
-
-    private void OnEnable()
+    public void ExportSessionToDisk(string filePath)
     {
-        ConvaiManager.ActiveManager.Transcripts.Changed += OnTranscriptChanged;
+        string json = ConvaiManager.ActiveManager.Transcripts.Export(TranscriptExportFormat.Json);
+        File.WriteAllText(filePath, json);
     }
-
-    private void OnDisable()
-    {
-        ConvaiManager.ActiveManager.Transcripts.Changed -= OnTranscriptChanged;
-    }
-
-    private void OnTranscriptChanged(TranscriptUpdateBatch batch)
-    {
-        foreach (string turnId in batch.InterruptedTurnIds)
-        {
-            if (!batch.Timeline.TurnsById.TryGetValue(turnId, out var turn)) continue;
-            if (turn.Participant.PlayerOrCharacterId != _instructorCharacterId) continue;
-
-            _interruptionCount++;
-            Debug.Log($"Interruption detected. Total: {_interruptionCount}");
-        }
-    }
-
-    public int GetInterruptionCount() => _interruptionCount;
 }
 ```
 
-### Troubleshooting
+Call `Clear()` to remove every turn from the canonical room history:
 
-| Symptom                                      | Likely cause                                                            | Fix                                                                                                            |
-| -------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `ConvaiManager.Transcripts` is `null`        | `ConvaiManager` not yet initialized                                     | Subscribe in `OnEnable` and check `ConvaiManager.IsBootstrapped` before accessing                              |
-| `Changed` never fires                        | Not subscribed, or subscribed after session ended                       | Subscribe in `OnEnable` before the room connects; unsubscribe in `OnDisable`                                   |
-| `CommittedTurns` is empty during session     | Session not yet started or all turns still active                       | Check `ActiveTurns` during an active conversation; `CommittedTurns` populates as turns complete                |
-| `GetTurns()` returns 0 results with a filter | `PlayerOrCharacterId` or `ParticipantId` does not match any participant | Log `turn.Participant.PlayerOrCharacterId` from a `Changed` handler to find the correct ID                     |
-| `WasInterrupted` never `true`                | Session does not use multi-speaker mode                                 | `WasInterrupted` is set by the runtime when one speaker overlaps another — confirm multi-speaker is configured |
+```csharp
+ConvaiManager.ActiveManager.Transcripts.Clear();
+```
 
-### Next steps
+{% hint style="warning" %}
+`Clear()` purges the canonical room history that `CurrentTimeline`, `GetTurns`, and `Export` all read from — it is not the same as clearing a chat panel's visual display, and it cannot be undone.
+{% endhint %}
 
-You now have full read access to the room transcript timeline. For displaying this data in your scene, see Transcript UI. For configuring which visual mode is active at runtime, see the Settings Panel.
+## Troubleshooting
+
+| Symptom | Likely cause | Fix | Verify |
+| --- | --- | --- | --- |
+| `ConvaiManager.ActiveManager.Transcripts` throws `InvalidOperationException` | Accessed before `ConvaiManager` finishes initializing | Use `ConvaiManager.ActiveManager.TryGetTranscripts(out var transcripts)`, or check `ConvaiManager.IsBootstrapped` first | `TryGetTranscripts` returns `true` and `transcripts` is non-null |
+| `Subscribe` callback never fires | Subscribed after the room session already ended, or the `TranscriptSubscriptionOptions` filters exclude every turn | Subscribe before or immediately after the room connects; confirm `SpeakerType`, `SpeakerId`, and `ParticipantId` match an actual participant | The callback fires on the next turn change after subscribing |
+| `GetTurns()` returns an empty list with a query set | `PlayerOrCharacterId` or `ParticipantId` does not match any participant, or both `IncludeActiveTurns` and `IncludeCommittedTurns` are `false` | Log `turn.Speaker.Id` and `turn.Speaker.ParticipantId` from an unfiltered `Subscribe` callback to find the correct value | `GetTurns()` with the corrected query returns a non-empty list |
+| `change.Turn` is `null` inside a `Subscribe` callback | `change.Kind` is `TranscriptChangeKind.Removed` | Read `change.TurnId` instead of `change.Turn` when `Kind` is `Removed` | The callback no longer throws a null-reference exception on removal |
+| `Export(TranscriptExportFormat.PlainText)` returns an empty string | No turns have committed yet | `Export` only reads `CurrentTimeline.CommittedTurns`; wait for turns to finalize, or check `CommittedTurns.Count` first | `CurrentTimeline.CommittedTurns.Count` is greater than zero before exporting |
+
+## Next steps
+
+You now have full read access to the room transcript timeline, live change notifications, and export support. For the complete API surface behind this page, see the Transcript API reference. For displaying this data in your scene, see Transcript UI. For configuring which visual mode is active at runtime, see the Settings Panel.
+
+{% content-ref url="../../scripting-reference/transcript-api.md" %}
+[transcript-api.md](../../scripting-reference/transcript-api.md)
+{% endcontent-ref %}
 
 {% content-ref url="./" %}
 [.](./)

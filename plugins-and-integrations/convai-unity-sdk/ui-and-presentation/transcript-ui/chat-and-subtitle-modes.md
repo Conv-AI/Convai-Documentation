@@ -1,218 +1,249 @@
 ---
 title: Chat and subtitle modes
-last_reviewed: 4.2.0
+last_reviewed: "4.4.0"
 description: >-
-  Configure Chat mode's scrollable message bubbles or Subtitle mode's
-  auto-hiding overlay, switch between them at runtime, and add per-response
-  feedback buttons to chat.
+  Add scrolling chat history, live subtitle captions, or both to a scene, and
+  configure how each transcript display looks and behaves.
 ---
 
-# Chat and subtitle modes
+`ConvaiManager.ActiveManager.Transcripts` (`ConvaiTranscripts`) exposes two independent views of a conversation: live speech-aligned captions and durable turn history. This page covers adding `SubtitleTranscriptUI` for captions, `ChatTranscriptUI` for history, or both — the two read from the same facade and update independently, so adding one does not remove or replace the other.
 
-The Convai Unity SDK ships two built-in transcript display modes. Chat mode accumulates a scrollable conversation history with sender-colored message bubbles and optional feedback buttons. Subtitle mode shows only the current speech segment at a fixed position and hides it automatically when the turn ends. Both modes are configurable, swappable at runtime, and replaceable with a custom `ITranscriptUI` implementation.
+## Choose the projections you need
 
-### Chat mode vs. subtitle mode at a glance
+| Projection | Facade members | Consumed by | Best for |
+| --- | --- | --- | --- |
+| Captions | `CurrentCaptions`, `CaptionsChanged`, `SubscribeCaptions(...)` | `SubtitleTranscriptUI` (reference script) | Low-latency, speech-aligned text. Ephemeral — not stored as chat history |
+| Timeline | `CurrentTimeline`, `Changed`, `Subscribe(...)`, `SubscribeCommitted(...)` | `ChatTranscriptUI` (shipped component) | Durable, scrollable conversation history for review, replay, or export |
 
-|                         | Chat                                                           | Subtitle                                               |
-| ----------------------- | -------------------------------------------------------------- | ------------------------------------------------------ |
-| **Layout**              | Scrollable list of message bubbles with sender labels          | Single centered text block with optional speaker label |
-| **History**             | Full conversation retained on screen                           | No history — each turn replaces the previous           |
-| **Auto-hide**           | Panel fades in/out with activity                               | Text disappears after a configurable delay             |
-| **Partial transcripts** | Bubble updates word-by-word while speaking                     | Text updates word-by-word while speaking               |
-| **Feedback buttons**    | Supported via `FeedbackButtons.prefab`                         | Not applicable                                         |
-| **Built-in prefab**     | `TranscriptUI_Chat.prefab` (SDK)                               | `SubtitleTranscriptUI` (SamplesShared)                 |
-| **Best for**            | Full conversation review, training debriefs, support scenarios | AR/VR overlays, kiosks, cinematic presentations        |
+There is no single mode switch that activates one projection at the expense of the other. A custom component can subscribe to either projection, or both, from `ConvaiManager.ActiveManager.Transcripts` directly:
 
-### Chat mode
+```csharp
+using System;
+using Convai.Domain.Models;
+using Convai.Runtime.Components;
+using UnityEngine;
 
-The chat panel renders each turn as a distinct message bubble in a vertically scrollable container. Character and player turns appear in separate bubble columns with sender-colored name labels. New bubbles update in real time during partial recognition and lock in when the turn completes.
+public class TranscriptProjectionExample : MonoBehaviour
+{
+    private IDisposable _captionSubscription;
+    private IDisposable _historySubscription;
 
-#### `ChatTranscriptUI` inspector fields
+    private void OnEnable()
+    {
+        if (!ConvaiManager.ActiveManager.TryGetTranscripts(out ConvaiTranscripts transcripts)) return;
 
-| Field                    | Description                                                        |
-| ------------------------ | ------------------------------------------------------------------ |
-| `scrollRect`             | `ScrollRect` containing the message list. Required for auto-scroll |
-| `chatContainer`          | `RectTransform` that message bubble GameObjects are parented to    |
-| `characterMessagePrefab` | Prefab instantiated for each character turn                        |
-| `playerMessagePrefab`    | Prefab instantiated for each player turn                           |
-| `chatInputField`         | Optional `TMP_InputField` for typed text input mode                |
-| `fadeDuration`           | Seconds for the panel's fade in/out animation (default `0.5`)      |
-| `canvasFader`            | `CanvasFader` driving the fade animation                           |
-| `canvasGroup`            | `CanvasGroup` controlling interactability during fades             |
+        // Low-latency captions for an on-screen subtitle
+        _captionSubscription = transcripts.SubscribeCaptions(OnCaption);
 
-#### `ChatMessageBubble` inspector fields
+        // Durable turn history for a scrollable chat log
+        _historySubscription = transcripts.Subscribe(
+            OnHistoryChange,
+            new TranscriptSubscriptionOptions { ReplayExisting = true });
+    }
 
-Each message bubble prefab must contain a `ChatMessageBubble` component at its root:
+    private void OnDisable()
+    {
+        _captionSubscription?.Dispose();
+        _historySubscription?.Dispose();
+    }
 
-| Field       | Description                                      |
-| ----------- | ------------------------------------------------ |
-| `senderUI`  | `TextMeshProUGUI` displaying the speaker's name  |
-| `messageUI` | `TextMeshProUGUI` displaying the transcript text |
+    private void OnCaption(TranscriptCaption caption) { /* update subtitle text */ }
+    private void OnHistoryChange(TranscriptChange change) { /* update chat bubble */ }
+}
+```
 
-The sender name is colored automatically from the character registry — each `ConvaiCharacter` in the scene receives a unique color assigned to its name tag. To override this in script: `bubble.SetSenderColor(Color)`.
+Both shipped display components also respect `ConvaiTranscripts.IsPresentationEnabled`. When the Settings Panel's `Transcript` toggle is off, or a `ConvaiRuntimeSettingsPatch` sets `TranscriptEnabled = false`, `ChatTranscriptUI` and `SubtitleTranscriptUI` both stop rendering — but `CurrentTimeline` keeps recording. Turning display off does not discard history.
 
-#### Clear the chat display
+## Add chat history display
 
-Call `ClearAll()` on `ChatTranscriptUI` to destroy all message bubbles and reset the panel. See [Transcript UI — Clear the transcript display](./#clear-the-transcript-display) for access patterns and important caveats about the underlying turn history.
-
-### Feedback on chat messages
-
-Chat bubbles can include thumbs-up / thumbs-down feedback buttons that let users rate individual AI responses. This is useful in corporate training and support scenarios where response quality tracking matters.
+`ChatTranscriptUI` renders each turn as a message bubble in a scrollable list, with character and player turns in separate columns. Bubbles update in real time while a turn streams and lock in once the turn commits.
 
 {% stepper %}
 {% step %}
-#### Add FeedbackButtons to your bubble prefab
+### Add the prefab to your scene
+
+Drag `TranscriptUI_Chat.prefab` into the scene. Find it at `Prefabs/TranscriptUI/TranscriptUI_Chat.prefab` in the <code class="expression">space.vars.sdk_package_id</code> package. The prefab includes its own `Canvas` — do not nest it inside an existing `Canvas`.
+
+`ChatTranscriptUI` looks up `ConvaiManager.ActiveManager` automatically and calls `Subscribe(...)` on `ConvaiManager.ActiveManager.Transcripts` once it is found. No manual registration is required.
+{% endstep %}
+
+{% step %}
+### Ensure an EventSystem exists
+
+The chat input field requires an `EventSystem` in the scene. If your scene does not have one, add it via **GameObject → UI → Event System**.
+{% endstep %}
+
+{% step %}
+### Run your scene
+
+Connect to a character and speak. Character speech appears in one bubble column, player speech in the other, and the panel auto-scrolls to the latest message.
+{% endstep %}
+{% endstepper %}
+
+### `ChatTranscriptUI` inspector fields
+
+| Field | Description |
+| --- | --- |
+| `scrollRect` | `ScrollRect` containing the message list. Required for auto-scroll |
+| `chatContainer` | `RectTransform` that message bubble GameObjects are parented to |
+| `characterMessagePrefab` | Prefab instantiated for each character turn |
+| `playerMessagePrefab` | Prefab instantiated for each player turn |
+| `chatInputField` | Optional `TMP_InputField` for typed text input |
+| `fadeDuration` | Seconds for the panel's fade in/out animation (default `0.5`) |
+| `canvasFader` | `CanvasFader` driving the fade animation |
+| `canvasGroup` | `CanvasGroup` controlling interactability during fades |
+
+### `ChatMessageBubble` inspector fields
+
+Each message bubble prefab must contain a `ChatMessageBubble` component at its root:
+
+| Field | Description |
+| --- | --- |
+| `senderUI` | `TextMeshProUGUI` displaying the speaker's name |
+| `messageUI` | `TextMeshProUGUI` displaying the transcript text |
+
+`ChatTranscriptUI` colors a character bubble's sender name using that character's configured `NameTagColor` (from `ConvaiCharacter` or its character config asset). To override this from script, call `bubble.SetSenderColor(Color)`.
+
+Call `ChatTranscriptUI.ClearAll()` to destroy all rendered message bubbles and reset the panel. This clears the visual display only — the underlying turn history in `ConvaiManager.ActiveManager.Transcripts.CurrentTimeline` is unaffected. See [Transcript UI — Clear the transcript display](./#clear-the-transcript-display) for the caveats.
+
+## Add subtitle captions
+
+`SubtitleTranscriptUI` shows a single block of text at a fixed position, driven by `SubscribeCaptions`. When a caption finalizes, the text auto-hides after a configurable delay.
+
+{% hint style="warning" %}
+`SubtitleTranscriptUI` ships as a script only — there is no companion prefab. It is a reference implementation in `SamplesShared`; copy it into your own assembly before modifying it, since `SamplesShared` scripts are overwritten on SDK updates.
+{% endhint %}
+
+{% stepper %}
+{% step %}
+### Add the script to a UI GameObject
+
+Add `SubtitleTranscriptUI` (from `Scripts/UI/Transcript/Subtitle/SubtitleTranscriptUI.cs` in `SamplesShared`) to a `GameObject` under a `Canvas`. Create or reuse two `TMP_Text` elements for the caption body and speaker name, plus a container `GameObject` to toggle visibility.
+{% endstep %}
+
+{% step %}
+### Wire the inspector fields
+
+Assign `subtitleText`, `speakerLabel`, and `subtitleContainer`. Add a `CanvasFader` and `CanvasGroup` if you want fade transitions.
+{% endstep %}
+
+{% step %}
+### Run your scene
+
+Speak, or have a character speak. The caption fades in, updates word-by-word while the turn streams, and hides `autoHideDelay` seconds after the turn finalizes.
+{% endstep %}
+{% endstepper %}
+
+### `SubtitleTranscriptUI` inspector fields
+
+| Field | Default | Description |
+| --- | --- | --- |
+| `subtitleText` | — | `TMP_Text` rendering the caption body |
+| `speakerLabel` | — | `TMP_Text` rendering the speaker's name |
+| `subtitleContainer` | — | `GameObject` wrapping both text elements, toggled on/off |
+| `fadeDuration` | `0.3` | Seconds for fade in/out animation |
+| `canvasFader` | — | `CanvasFader` driving the fade animation |
+| `canvasGroup` | — | `CanvasGroup` controlling interactability |
+| `autoHideDelay` | `3.0` | Seconds to wait after a caption finalizes before hiding |
+
+**Filters:**
+
+| Field | Default | Description |
+| --- | --- | --- |
+| `finalOnly` | `false` | When `true`, only finalized captions are shown; streaming text is skipped |
+| `filterBySpeakerType` | `false` | When `true`, restrict captions to `speakerType` |
+| `speakerType` | `Character` | `TranscriptSpeakerType` to filter by when `filterBySpeakerType` is on (`Player`, `Character`, or `System`) |
+| `speakerIdFilter` | — | Restrict captions to a specific speaker ID |
+| `participantIdFilter` | — | Restrict captions to a specific room participant ID (multi-user rooms) |
+
+**Speaker label colors:** Character speech — cyan; player speech — green.
+
+## Add feedback buttons to chat messages
+
+Chat bubbles can include thumbs-up / thumbs-down feedback buttons that let users rate individual AI responses.
+
+{% stepper %}
+{% step %}
+### Add FeedbackButtons to your bubble prefab
 
 Add `FeedbackButtons.prefab` as a child of your character message bubble prefab. Find it at `Prefabs/TranscriptUI/FeedbackButtons.prefab` in the <code class="expression">space.vars.sdk_package_id</code> package. The prefab contains the feedback button visuals and a `FeedbackHandler` component.
 {% endstep %}
 
 {% step %}
-#### Ensure the bubble sets the interaction ID
+### Set the interaction ID before the user can rate a message
 
-`ChatTranscriptUI` calls `ChatMessageBubble.SetInteractionID(string)` automatically when the character turn contains an interaction ID from Convai. Without a valid ID, feedback submissions return `false` and the visual state does not change.
+Call `ChatMessageBubble.SetInteractionID(string)` for the turn you want to make ratable. The interaction ID is available from `ConvaiManager.ActiveManager.Events.OnInteractionCreated` (`InteractionCreated.InteractionId`, keyed by `CharacterId`).
 {% endstep %}
 
 {% step %}
-#### Run your scene
+### Run your scene
 
 Rate a character response using the thumb buttons. The selected button highlights; the opposite button deactivates. `FeedbackHandler.ResetState()` resets both buttons to neutral when called.
 {% endstep %}
 {% endstepper %}
 
-#### `ChatMessageBubble` feedback API
-
-| Method                                           | Description                                                                                                                        |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `SetInteractionID(string interactionID)`         | Required before feedback can be sent. Set automatically by `ChatTranscriptUI`                                                      |
-| `SetAgentRegistry(IAgentRegistry agentRegistry)` | Required for character lookup. Injected automatically by `ChatTranscriptUI`                                                        |
-| `bool SendFeedback(bool isPositiveFeedback)`     | Returns `true` if feedback was sent successfully. Returns `false` if `interactionID` is empty or the agent registry is unavailable |
-
-`FeedbackHandler.ResetState()` deactivates both the positive and negative button fill visuals, returning the buttons to their neutral state.
-
-Feedback buttons are relevant only for character message bubbles — player bubbles do not receive interaction IDs. The visual state is local; feedback data is sent to Convai for response quality tracking.
-
-### Subtitle mode
-
-Subtitle mode shows a single block of text at a fixed screen position. When a turn completes, the text auto-hides after a configurable delay. Speaker name and color provide quick attribution without requiring a full bubble layout.
-
-#### `SubtitleTranscriptUI` inspector fields
-
-| Field               | Default | Description                                              |
-| ------------------- | ------- | -------------------------------------------------------- |
-| `subtitleText`      | —       | `TMP_Text` rendering the transcript content              |
-| `speakerLabel`      | —       | `TMP_Text` rendering the speaker's name                  |
-| `subtitleContainer` | —       | `GameObject` wrapping both text elements, toggled on/off |
-| `fadeDuration`      | `0.3`   | Seconds for fade in/out animation                        |
-| `canvasFader`       | —       | `CanvasFader` driving the fade animation                 |
-| `canvasGroup`       | —       | `CanvasGroup` controlling interactability                |
-| `autoHideDelay`     | `3.0`   | Seconds to wait after a turn completes before hiding     |
-
-**Speaker label colors:** Character speech — cyan; Player speech — green.
-
 {% hint style="warning" %}
-`SubtitleTranscriptUI` is in `SamplesShared` and is provided as a reference implementation. Copy it into your own assembly before modifying it — changes to `SamplesShared` scripts are overwritten on SDK updates.
+No shipped component calls `ChatMessageBubble.SetInteractionID(string)` automatically. Until your code calls it for a turn, `ChatMessageBubble.SendFeedback(bool)` returns `false` and the buttons never highlight for that message.
 {% endhint %}
 
-### Switch modes
+### `ChatMessageBubble` feedback API
 
-{% tabs %}
-{% tab title="Settings Panel" %}
-Users can switch between Chat and Subtitle at runtime using the built-in Settings Panel. The panel exposes a **Transcript Style** dropdown.
+| Method | Description |
+| --- | --- |
+| `SetInteractionID(string interactionID)` | Required before feedback can be sent for this bubble |
+| `SetAgentRegistry(IAgentRegistry agentRegistry)` | Required for character lookup. Injected automatically by `ChatTranscriptUI` |
+| `bool SendFeedback(bool isPositiveFeedback)` | Returns `true` if `interactionID` is set and the character is found in the agent registry. Returns `false` otherwise |
 
-{% hint style="info" %}
-The Settings Panel only exposes Chat mode in its dropdown by default. To activate Subtitle mode from the panel, switch it programmatically first (see the Scripting tab), then the panel will reflect the current state. See [Settings Panel](../settings-panel/) for setup.
-{% endhint %}
-{% endtab %}
+`FeedbackHandler.ResetState()` deactivates both the positive and negative button fill visuals, returning the buttons to their neutral state. Feedback buttons are relevant only for character message bubbles — player bubbles do not receive interaction IDs.
 
-{% tab title="Scripting" %}
-Switch modes through the runtime settings service. The `ConvaiRuntimeSettingsApplyResult` indicates whether the switch succeeded.
+## Usage examples
 
-```csharp
-using Convai.Runtime.Components;
-using Convai.Shared.Types;
-using UnityEngine;
+### Safety training — chat history for post-session review
 
-public class ModeSwitcher : MonoBehaviour
-{
-    public void SwitchToSubtitle()
-    {
-        if (ConvaiManager.ActiveManager.TryGetRuntimeSettingsService(out var settings))
-        {
-            var result = settings.Apply(new ConvaiRuntimeSettingsPatch
-            {
-                TranscriptMode = ConvaiTranscriptMode.Subtitle
-            });
+A workplace safety training simulation uses chat history so trainees can review the full AI instructor dialogue after completing a scenario:
 
-            if (!result.Success)
-                Debug.LogWarning($"Mode switch failed: {result.ValidationMessage}");
-        }
-    }
-
-    public void SwitchToChat()
-    {
-        if (ConvaiManager.ActiveManager.TryGetRuntimeSettingsService(out var settings))
-        {
-            settings.Apply(new ConvaiRuntimeSettingsPatch
-            {
-                TranscriptMode = ConvaiTranscriptMode.Chat
-            });
-        }
-    }
-}
-```
-
-The patch is applied atomically — any field left `null` remains unchanged.
-{% endtab %}
-{% endtabs %}
-
-### Usage examples
-
-#### Safety training — chat mode with post-session review
-
-A workplace safety training simulation uses Chat mode so trainees can review the full AI instructor dialogue after completing a scenario:
-
-* Use `TranscriptUI_Chat.prefab` in the scene Canvas
+* Drag `TranscriptUI_Chat.prefab` into the scene `Canvas`
 * Set `fadeDuration` to `0.3` for responsive transitions during active scenarios
-* After each scenario ends, pause the simulation so the trainee can scroll through the full conversation
-* Call `ClearAll()` on `ChatTranscriptUI` when starting a new scenario so stale messages do not carry over
+* Call `ChatTranscriptUI.ClearAll()` when a new scenario starts so stale messages do not carry over
 
-At runtime, the trainee sees a persistent record of everything the AI instructor said, which they scroll through during the debrief before advancing to the next module.
+At runtime, the trainee sees a persistent record of everything the AI instructor said and scrolls through it during the debrief before advancing to the next module.
 
-#### Customer service training — feedback buttons for response quality
+### Medical simulation — subtitle captions for a clean overlay
 
-A customer service training simulation enables feedback buttons on AI character message bubbles so supervisors can flag high-quality or low-quality AI responses during session review:
+A procedural medical simulation uses subtitle captions so the AI patient's speech appears as a clean overlay above the patient model without obscuring clinical readings on screen:
 
-* Add `FeedbackButtons.prefab` to the `characterMessagePrefab` used by `ChatTranscriptUI`
-* Feedback buttons appear on every character bubble automatically
-* `SetInteractionID` is set by the SDK — no additional code needed to enable the button behavior
-
-At runtime, each AI response has thumbs-up / thumbs-down buttons. Supervisor ratings feed back to Convai to improve response quality over time.
-
-#### Medical simulation — subtitle mode for clean overlay
-
-A procedural medical simulation uses Subtitle mode so the AI patient's speech appears as a clean overlay above the patient model without obscuring clinical readings on screen:
-
-* Place `SubtitleTranscriptUI` with `subtitleContainer` anchored bottom-center
+* Add `SubtitleTranscriptUI` with `subtitleContainer` anchored bottom-center
 * Set `autoHideDelay` to `2.0` — quick clearance between patient responses keeps the screen uncluttered
-* `speakerLabel` shows the patient's name when they speak; the container hides automatically between turns
+* Leave `filterBySpeakerType` off so both the patient's and the trainee's speech appear as captions
 
-At runtime, each patient response appears briefly as a subtitle and clears without accumulating history, keeping the simulation interface clean throughout the procedure.
+At runtime, each patient response appears briefly as a caption and clears without accumulating history, keeping the simulation interface clean throughout the procedure.
 
-### Troubleshooting
+### Museum kiosk — captions and history running together
 
-| Symptom                                                                                     | Likely cause                                                           | Fix                                                                                                                      |
-| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `"[ChatTranscriptUI] chatContainer is not assigned - messages will not display"`            | `chatContainer` not wired in Inspector                                 | Assign the `RectTransform` that message bubbles should parent to                                                         |
-| `"[ChatTranscriptUI] scrollRect is not assigned - auto-scroll will not work"`               | `scrollRect` not wired in Inspector                                    | Assign the `ScrollRect` component; auto-scroll absent but bubbles still appear                                           |
-| `"[ChatTranscriptUI] Dependencies not injected - ensure ConvaiManager is present in scene"` | `ConvaiManager` missing or not initialized when chat UI `Start()` runs | Add `ConvaiManager` to the scene; ensure it initializes before `ChatTranscriptUI.Start()`                                |
-| `"[ChatTranscriptUI] Cannot send message - dependencies not injected"`                      | Text typed in `chatInputField` but no player found                     | Ensure `ConvaiPlayer` is in the scene and `ConvaiManager` has initialized                                                |
-| Feedback buttons do not highlight                                                           | `interactionID` not set or registry unavailable                        | Both are set by `ChatTranscriptUI` automatically — ensure `ConvaiManager` is initialized and the character is registered |
-| Subtitle text not disappearing                                                              | `autoHideDelay` value too high                                         | Reduce `autoHideDelay` in the `SubtitleTranscriptUI` Inspector                                                           |
-| Subtitle mode not activating                                                                | No `SubtitleTranscriptUI` in scene with `Identifier == "Subtitle"`     | Add the sample or a custom `ITranscriptUI` with `Identifier = "Subtitle"`                                                |
+A natural history museum runs an exhibit screen for visitors and a separate docent review station, both driven by the same conversation:
 
-### Next steps
+* Add `SubtitleTranscriptUI` to the exhibit screen's `Canvas`, with `filterBySpeakerType` on and `speakerType` set to `Character`, so only the exhibit character's speech becomes a caption
+* Add `TranscriptUI_Chat.prefab` to the docent station's `Canvas`
+* Both read from the same `ConvaiManager.ActiveManager.Transcripts` and update independently — no per-mode configuration is required
 
-You have configured Chat or Subtitle display and can switch between them at runtime. For customizing the visual appearance of bubbles or building a fully custom transcript UI, see Customizing UI Components. To give users control over which mode is active, see the Settings Panel.
+At runtime, visitors see clean rolling captions at the exhibit while the docent station accumulates the full conversation for review, from a single session.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| `[ChatTranscriptUI] chatContainer is not assigned - messages will not display` | `chatContainer` not wired in Inspector | Assign the `RectTransform` that message bubbles should parent to |
+| `[ChatTranscriptUI] scrollRect is not assigned - auto-scroll will not work` | `scrollRect` not wired in Inspector | Assign the `ScrollRect` component; auto-scroll is absent but bubbles still appear |
+| `[ChatTranscriptUI] No active ConvaiManager found.` | `ConvaiManager` missing or not yet initialized | Add `ConvaiManager` to the scene and confirm it initializes before this component looks it up |
+| `[ChatTranscriptUI] Cannot send message - dependencies not injected` | Text typed in `chatInputField` before dependencies were injected | Ensure `ConvaiManager` and a `ConvaiPlayer` are present and initialized in the scene |
+| `[SubtitleTranscriptUI] No active ConvaiManager found.` | Same cause as above, for the subtitle script | Add `ConvaiManager` to the scene |
+| Captions never appear | No component is calling `SubscribeCaptions` in the scene, or the caption's speaker does not match the configured filters | Add `SubtitleTranscriptUI`, confirm its `TMP_Text` fields are assigned, and check `filterBySpeakerType`/`speakerIdFilter`/`participantIdFilter` |
+| Neither chat nor subtitle display updates | `ConvaiTranscripts.IsPresentationEnabled` is `false` | Check the Settings Panel's `Transcript` toggle, or apply `TranscriptEnabled = true` through a `ConvaiRuntimeSettingsPatch` |
+| Feedback buttons never highlight | `SendFeedback` is returning `false` | Confirm your code calls `ChatMessageBubble.SetInteractionID(string)` for that turn — no shipped component does this automatically |
+
+## Next steps
+
+You have added chat history display, subtitle captions, or both, and wired feedback buttons on chat messages. For customizing the visual appearance of bubbles or building a fully custom transcript display, see Customizing UI Components. For letting users show or hide transcript display at runtime, see the Settings Panel.
 
 {% content-ref url="../customizing-ui-components.md" %}
 [customizing-ui-components.md](../customizing-ui-components.md)
@@ -220,4 +251,8 @@ You have configured Chat or Subtitle display and can switch between them at runt
 
 {% content-ref url="../settings-panel/" %}
 [settings-panel](../settings-panel/)
+{% endcontent-ref %}
+
+{% content-ref url="transcript-history-and-queries.md" %}
+[transcript-history-and-queries.md](transcript-history-and-queries.md)
 {% endcontent-ref %}

@@ -1,7 +1,7 @@
 ---
 title: Event system
-description: Reference for Convai event relay components — available events, payload fields, subscription patterns, and the ConvaiNotificationEventBridge service.
-last_reviewed: "4.2.0"
+description: Reference for Convai event relay components, including available events, payload fields, and subscription patterns for scene logic.
+last_reviewed: "4.4.0"
 ---
 
 The Convai SDK communicates what happens during a session — connections, character speech, transcripts, emotions — through a set of relay components. Add one of these MonoBehaviours to a GameObject in your scene, wire up UnityEvents in the Inspector or subscribe in code, and your scene logic responds to whatever the SDK broadcasts.
@@ -96,7 +96,7 @@ If `ConvaiManager` initializes after the relay's `OnEnable` (for example, due to
 | `SessionId`                | `string`       | Current session identifier. Empty if no session is active.            |
 | `ErrorCode`                | `string`       | Error code if the transition was caused by an error. Empty otherwise. |
 | `IsError`                  | `bool`         | Computed: `NewState == Error`.                                        |
-| `IsReconnecting`           | `bool`         | Computed: `NewState == Reconnecting`.                                 |
+| `IsReconnecting`           | `bool`         | Computed: `OldState == Connected && NewState == Reconnecting`.       |
 | `IsConnectionEstablished`  | `bool`         | Computed: `OldState == Connecting && NewState == Connected`.          |
 | `IsReconnectionSuccessful` | `bool`         | Computed: `OldState == Reconnecting && NewState == Connected`.        |
 | `IsDisconnected`           | `bool`         | Computed: `NewState == Disconnected`.                                 |
@@ -169,12 +169,15 @@ Tracks events for a single `ConvaiCharacter`. Add one per character that needs t
 
 ### `CharacterTranscriptRelayData`
 
-| Property        | Type     | Description                                                    |
-| --------------- | -------- | -------------------------------------------------------------- |
-| `CharacterId`   | `string` | The character's ID.                                            |
-| `CharacterName` | `string` | The character's display name.                                  |
-| `Text`          | `string` | The transcript text. May be partial if `IsFinal` is false.     |
-| `IsFinal`       | `bool`   | Whether this is the committed final transcript for this chunk. |
+| Property        | Type     | Description                                                                      |
+| --------------- | -------- | ---------------------------------------------------------------------------------- |
+| `CharacterId`   | `string` | The character's ID.                                                              |
+| `CharacterName` | `string` | The character's display name.                                                    |
+| `Text`          | `string` | The transcript text. May be partial if `IsFinal` is false.                       |
+| `IsFinal`       | `bool`   | Whether the underlying transcript turn is committed, interrupted, or corrected.  |
+| `TurnId`        | `string` | Identifies the turn this transcript chunk belongs to.                            |
+| `MessageId`     | `string` | Unique identifier for this transcript message.                                   |
+| `ResponseId`    | `string` | Identifies the character response this turn is part of.                         |
 
 ### `CharacterTurnCompletedRelayData`
 
@@ -226,8 +229,8 @@ Provides a scene-wide transcript feed. Unlike `ConvaiCharacterEventRelay`, this 
 | ---------------------- | --------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Manager`              | `ConvaiManager` | —       | The `ConvaiManager` to monitor.                                                                                                                             |
 | `AutoResolveManager`   | `bool`          | —       | Find `ActiveManager` automatically.                                                                                                                         |
-| `FinalOnly`            | `bool`          | `false` | When enabled, only final (committed) transcripts raise events. Interim partial transcripts are suppressed.                                                  |
-| `IgnoreInterimUpdates` | `bool`          | `true`  | Suppress interim transcript updates. Final updates still pass through. Disable this field if your UI needs to display partial text as the character speaks. |
+| `FinalOnly`            | `bool`          | `false` | When enabled, only final transcripts (committed, interrupted, or corrected) raise events. Interim partial transcripts are suppressed.                       |
+| `IgnoreInterimUpdates` | `bool`          | `true`  | Drop turns still in the `Listening` or `Streaming` state. Stable and committed turns still pass through. Disable this field if your UI needs to display partial text as the character speaks. |
 | `CharacterIdFilter`    | `string`        | `""`    | If set, only transcripts from the character with this ID raise events. Leave empty for all characters.                                                      |
 
 **Events:**
@@ -251,7 +254,7 @@ Provides a scene-wide transcript feed. Unlike `ConvaiCharacterEventRelay`, this 
 | `TurnId`        | `string` | Identifies the turn this transcript chunk belongs to.                           |
 | `MessageId`     | `string` | Unique identifier for this transcript message.                                  |
 | `Text`          | `string` | Transcript text. May be partial if `IsFinal` is false.                          |
-| `IsFinal`       | `bool`   | Whether this is the committed final transcript.                                 |
+| `IsFinal`       | `bool`   | Whether the underlying transcript turn is committed, interrupted, or corrected. |
 
 **Code example — multi-character transcript feed for a training log:**
 
