@@ -1,16 +1,14 @@
 ---
 title: Dispatcher and batch policies
 description: >-
-  Configure ConvaiActionDispatcher's batch policy, failure policy, and lifecycle
-  events, and inject action batches programmatically for testing or scripted
-  sequences.
+  Configure the dispatcher's batch policy, failure policy, speech gate
+  timeout, and lifecycle events for character action execution.
+last_reviewed: "4.4.0"
 ---
 
-# Dispatcher and batch policies
+`ConvaiActionDispatcher` is the runtime execution layer of the action system. It listens for command batches from Convai, resolves each action and target against the current session's configuration, and calls the bound executor components one step at a time. Two policies control what happens when new batches arrive during execution and when a step fails. A speech gate can also hold the first action of a fresh batch until the character starts speaking.
 
-`ConvaiActionDispatcher` is the runtime execution layer of the action system. It listens for command batches from Convai, resolves each action and target against the current session's configuration, and calls the bound executor components one step at a time. Two policies control what happens when new batches arrive during execution and when a step fails.
-
-### Component overview
+## Component overview
 
 | Attribute       | Value                                                            |
 | --------------- | ---------------------------------------------------------------- |
@@ -20,25 +18,27 @@ description: >-
 
 The dispatcher must be on the same `GameObject` as `ConvaiCharacter`. Only one dispatcher is allowed per character.
 
-<figure><img src="../../../../.gitbook/assets/image (514).png" alt="Unity Inspector showing the ConvaiActionDispatcher component with Batch Policy, Failure Policy, and lifecycle UnityEvent fields visible"><figcaption><p>ConvaiActionDispatcher in the Inspector — two policy dropdowns control queue and failure behavior; seven lifecycle UnityEvent fields expose the full batch and step execution pipeline.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (514).png" alt="Unity Inspector showing the ConvaiActionDispatcher component with Batch Policy, Failure Policy, and lifecycle UnityEvent fields visible"><figcaption><p>ConvaiActionDispatcher in the Inspector — two policy dropdowns control queue and failure behavior; eight lifecycle UnityEvent fields expose the full batch and step execution pipeline.</p></figcaption></figure>
 
-### Inspector fields
+## Inspector fields
 
 | Field               | Type                               | Default     | Description                                                                |
 | ------------------- | ---------------------------------- | ----------- | -------------------------------------------------------------------------- |
 | `_batchPolicy`      | `ConvaiActionBatchPolicy`          | `Queue`     | How incoming batches behave while another batch is executing               |
 | `_failurePolicy`    | `ConvaiActionBatchFailurePolicy`   | `StopBatch` | Whether a step failure aborts the remaining batch or allows it to continue |
+| `_speechGateTimeoutSeconds` | `float`                     | `2`         | Maximum seconds the first action of a fresh batch waits for character speech before running anyway |
 | `_onBatchStarted`   | `UnityEvent`                       | —           | Fires when a batch begins executing                                        |
 | `_onStepStarted`    | `ConvaiActionInvocationUnityEvent` | —           | Fires at the start of each step                                            |
 | `_onStepSucceeded`  | `ConvaiActionInvocationUnityEvent` | —           | Fires when a step executor returns `Succeeded`                             |
 | `_onStepFailed`     | `ConvaiActionInvocationUnityEvent` | —           | Fires when a step fails for any reason                                     |
 | `_onStepUnhandled`  | `ConvaiActionInvocationUnityEvent` | —           | Fires when an executor returns `Unhandled`                                 |
+| `_onStepCompleted`  | `ConvaiActionStepReportUnityEvent` | —           | Fires once per step after the outcome event above, regardless of the result |
 | `_onBatchCompleted` | `UnityEvent`                       | —           | Fires when all steps finish without being aborted                          |
 | `_onBatchAborted`   | `UnityEvent`                       | —           | Fires when the batch is cut short by the failure policy                    |
 
-`ConvaiActionInvocationUnityEvent` is a serializable `UnityEvent<ConvaiActionInvocation>`. Wire it in the Inspector exactly like a standard `UnityEvent` — the event parameter carries the full invocation context (action name, target, character, batch and step index).
+`ConvaiActionInvocationUnityEvent` is a serializable `UnityEvent<ConvaiActionInvocation>`. Wire it in the Inspector exactly like a standard `UnityEvent` — the event parameter carries the full invocation context (action name, target, character, batch and step index). `ConvaiActionStepReportUnityEvent` is a serializable `UnityEvent<ConvaiActionStepReport>`, exposed via the public `OnStepCompleted` property — use it when you want a single subscription point for every step outcome instead of wiring `OnStepSucceeded`/`OnStepFailed`/`OnStepUnhandled` separately.
 
-### Batch policy
+## Batch policy
 
 Batch policy controls what happens when Convai returns a new action batch while the dispatcher is still executing a previous one.
 
@@ -54,7 +54,7 @@ Batch policy controls what happens when Convai returns a new action batch while 
 
 <figure><img src="../../../../.gitbook/assets/image (510).png" alt="Unity Inspector showing the Batch Policy dropdown on ConvaiActionDispatcher expanded with Queue, ReplaceCurrent, and DropIncoming options"><figcaption><p>Batch Policy dropdown — Queue is the default and suits most scenarios; ReplaceCurrent handles interrupt-driven NPC behavior; DropIncoming protects sequences that must run to completion.</p></figcaption></figure>
 
-### Failure policy
+## Failure policy
 
 Failure policy controls what happens when an executor returns a non-success result (`Failed`, `Unhandled`, `Canceled`, or `TimedOut`).
 
@@ -67,15 +67,34 @@ Use `ContinueBatch` when actions are independent — a failed "Point At" should 
 
 <figure><img src="../../../../.gitbook/assets/image (511).png" alt="Unity Inspector showing the Failure Policy dropdown on ConvaiActionDispatcher expanded with StopBatch and ContinueBatch options"><figcaption><p>Failure Policy dropdown — StopBatch (default) aborts the remaining steps and fires OnBatchAborted; ContinueBatch continues through failures and fires OnBatchCompleted at the end.</p></figcaption></figure>
 
-### Lifecycle events
+## Gate the first action on character speech
+
+Convai can mark an action so the dispatcher delays it until the character starts speaking. Two fields control this — one set by Convai on the command, one that can be authored locally on the matching action definition.
+
+| Field                         | Location                | Type    | Default | Description                                                                                  |
+| ------------------------------ | ------------------------ | ------- | ------- | ---------------------------------------------------------------------------------------------- |
+| `WaitForBotSpeech`             | `ConvaiActionCommand`    | `bool`  | `false` | Set by Convai on the backend command. `true` gates the first step of the batch.               |
+| `DelayAfterBotSpeechSeconds`   | `ConvaiActionCommand`    | `float` | `0`     | Extra delay applied after the gate releases. Used only when the command's `WaitForBotSpeech` is `true`. |
+| `WaitForBotSpeech`             | `ConvaiActionDefinition` | `bool`  | `false` | Local override authored on the action definition. Also gates the first step when `true`.      |
+| `DelayAfterBotSpeechSeconds`   | `ConvaiActionDefinition` | `float` | `0`     | Extra delay applied after the gate releases. Used only when the command's `WaitForBotSpeech` is `false` and the definition's is `true`. |
+
+The dispatcher checks these fields only on the first step of a batch (`stepIndex == 0`); later steps in the same batch never wait. Gating triggers when either the command's `WaitForBotSpeech` or the matched definition's `WaitForBotSpeech` is `true`. When neither is `true`, the step runs immediately with no gating.
+
+## Speech gate timeout
+
+`_speechGateTimeoutSeconds` caps how long a gated first step waits, in seconds. The default is `2`. This field has no public C# property — set it in the Inspector.
+
+While the gate is open, the dispatcher listens for `ConvaiCharacter.OnSpeechStarted`, `ConvaiCharacter.OnSpeechStopped`, and `ConvaiCharacter.OnTurnCompleted`. The gate releases on whichever of these fires first, or once `_speechGateTimeoutSeconds` elapses, whichever comes first. `OnStepStarted` fires only after the gate releases.
+
+## Lifecycle events
 
 The dispatcher fires events at every meaningful stage of batch and step execution. Subscribe in the Inspector via UnityEvent fields, or subscribe in C# via the properties.
 
-<figure><img src="../../../../.gitbook/assets/image (513).png" alt="Unity Inspector showing the ConvaiActionDispatcher lifecycle UnityEvent fields: OnBatchStarted, OnStepStarted, OnStepSucceeded, OnStepFailed, OnStepUnhandled, OnBatchCompleted, and OnBatchAborted"><figcaption><p>Dispatcher lifecycle UnityEvent fields — wire these in the Inspector to respond to batch and step transitions without writing dispatcher-side C# code.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/image (513).png" alt="Unity Inspector showing the ConvaiActionDispatcher lifecycle UnityEvent fields: OnBatchStarted, OnStepStarted, OnStepSucceeded, OnStepFailed, OnStepUnhandled, OnStepCompleted, OnBatchCompleted, and OnBatchAborted"><figcaption><p>Dispatcher lifecycle UnityEvent fields — wire these in the Inspector to respond to batch and step transitions without writing dispatcher-side C# code.</p></figcaption></figure>
 
-#### Event firing order
+### Event firing order
 
-```
+```text
 OnBatchStarted
   → OnStepStarted       (for each step)
   → OnStepSucceeded     (if executor returned Succeeded)
@@ -83,12 +102,13 @@ OnBatchStarted
   → OnStepFailed        (if executor returned Failed, Canceled, or TimedOut)
      or
   → OnStepUnhandled     (if executor returned Unhandled)
+  → OnStepCompleted     (always fires after the outcome event above, every step)
 OnBatchCompleted  (all steps finished, or ContinueBatch allowed failures through)
   or
 OnBatchAborted    (StopBatch policy cut the batch short after a failure)
 ```
 
-#### Subscribing in C\#
+### Subscribing in C\#
 
 ```csharp
 using Convai.Runtime.Actions;
@@ -126,7 +146,7 @@ public sealed class ActionFeedback : MonoBehaviour
 }
 ```
 
-### Manual batch injection
+## Manual batch injection
 
 `EnqueueActions(IReadOnlyList<ConvaiActionCommand> actions)` submits a batch to the dispatcher programmatically, respecting the active batch and failure policies. Use this for scripted demonstration sequences, automated test runs, or NPC behaviors triggered by game events rather than player speech.
 
@@ -154,7 +174,7 @@ public sealed class DemoTrigger : MonoBehaviour
 
 The dispatcher executes these steps sequentially. If the `BatchPolicy` is `Queue`, this batch waits behind any batch already in progress.
 
-### Bypassing the dispatcher
+## Bypassing the dispatcher
 
 If you want to react to raw action commands without the dispatcher's target resolution and execution pipeline, subscribe to `ConvaiCharacter.OnActionsReceived` directly:
 
@@ -186,7 +206,7 @@ public sealed class ManualActionHandler : MonoBehaviour
 Bypassing the dispatcher means no automatic target resolution, no batch/failure policies, and no lifecycle events. This is appropriate for read-only observation or custom dispatch pipelines, but not for typical gameplay where the SDK should drive the behavior.
 {% endhint %}
 
-### Dispatcher lifecycle behavior
+## Dispatcher lifecycle behavior
 
 | Situation                            | Dispatcher behavior                                                |
 | ------------------------------------ | ------------------------------------------------------------------ |
@@ -197,10 +217,11 @@ Bypassing the dispatcher means no automatic target resolution, no batch/failure 
 | Executor field not assigned          | Step fails: `OnStepFailed` fires                                   |
 | Target requirement not met           | Step fails: `OnStepFailed` fires                                   |
 | Executor returns `Unhandled`         | `OnStepUnhandled` fires; treated as failure for `StopBatch` policy |
+| First step of a batch has `WaitForBotSpeech` set (on the command or the definition) | `OnStepStarted` is delayed until character speech starts, stops, a turn completes, or `_speechGateTimeoutSeconds` elapses |
 
-### Usage examples
+## Usage examples
 
-#### Example 1 — Training checklist integration
+### Example 1 — Training checklist integration
 
 **Scenario:** A corporate onboarding simulation. A checklist UI advances when the NPC completes each equipment demonstration.
 
@@ -217,7 +238,7 @@ public void AdvanceStep()
 
 No additional code is required on the dispatcher side — wire the `OnBatchCompleted` UnityEvent in the Inspector.
 
-#### Example 2 — Fallback dialogue on navigation failure
+### Example 2 — Fallback dialogue on navigation failure
 
 **Scenario:** When the NPC cannot reach a target (NavMesh path blocked), it should speak a fallback line rather than silently stopping.
 
@@ -235,7 +256,7 @@ private void HandleStepFailed(ConvaiActionInvocation invocation)
 }
 ```
 
-### Next steps
+## Next steps
 
 {% content-ref url="writing-custom-executors.md" %}
 [writing-custom-executors.md](writing-custom-executors.md)

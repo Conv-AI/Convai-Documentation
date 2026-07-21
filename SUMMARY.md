@@ -90,6 +90,7 @@
       * [How character actions work](plugins-and-integrations/convai-unity-sdk/features/character-actions/how-character-actions-work.md)
       * [Character actions quick start](plugins-and-integrations/convai-unity-sdk/features/character-actions/quick-start.md)
       * [Configure character actions](plugins-and-integrations/convai-unity-sdk/features/character-actions/configuring-actions.md)
+      * [Update character actions at runtime](plugins-and-integrations/convai-unity-sdk/features/character-actions/update-actions-at-runtime.md)
       * [Action executors](plugins-and-integrations/convai-unity-sdk/features/character-actions/action-executors.md)
       * [Write a custom action executor](plugins-and-integrations/convai-unity-sdk/features/character-actions/writing-custom-executors.md)
       * [Dispatcher and batch policies](plugins-and-integrations/convai-unity-sdk/features/character-actions/dispatcher-and-batch-policies.md)

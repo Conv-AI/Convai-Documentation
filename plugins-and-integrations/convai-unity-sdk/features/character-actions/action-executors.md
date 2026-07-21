@@ -1,9 +1,10 @@
 ---
 title: Action executors
-description: Reference for all six action executor components — look-at, event, NavMesh movement, animation trigger, and compound pickup executors.
+description: Reference for all seven action executor components — look-at, event, NavMesh movement, animation trigger, and compound pickup/placement executors.
+last_reviewed: "4.4.0"
 ---
 
-Executors are the components that perform in-scene behavior when the dispatcher runs an action step. Six executor components ship with the Convai SDK. This page documents every Inspector field and explains when to use each executor.
+Executors are the components that perform in-scene behavior when the dispatcher runs an action step. Seven executor components ship with the Convai SDK. This page documents every Inspector field and explains when to use each executor.
 
 ### LookAtTargetActionExecutor
 
@@ -79,7 +80,7 @@ Drives a `NavMeshAgent` to the resolved target's position and waits until the ag
 | `_stoppingDistance` | `float` | `0.5` | Distance in world units at which the agent is considered to have arrived. |
 
 {% hint style="warning" %}
-The scene must have a baked NavMesh before this executor can navigate. Open **Window → AI → Navigation** and bake before entering Play Mode. If the agent starts off the NavMesh, `SetDestination` will fail silently and the executor will loop forever until the `TimeoutSeconds` expires.
+The scene must have a baked NavMesh before this executor can navigate. Open **Window → AI → Navigation** and bake before entering Play mode. The executor returns `Failed` immediately if the agent is disabled, is not on a NavMesh, or `SetDestination` fails — it does not wait for `TimeoutSeconds` to expire in these cases.
 {% endhint %}
 
 ### AnimatorTriggerActionExecutor
@@ -114,7 +115,7 @@ Maps backend action names to Animator trigger parameters via a configurable bind
 | `Salute` | `TriggerSalute` |
 | `Point At` | `TriggerPoint` |
 
-If no binding matches the incoming action name, the executor returns `Failed` with message `No binding for '<action name>'`.
+If no binding matches the incoming action name, the executor returns `Failed` with message `No binding for '<action name>'`. If no `Animator` was resolved, it returns `Failed` with message `Animator not assigned` instead.
 
 ### PickUpActionExecutor
 
@@ -131,22 +132,40 @@ Compound executor that chains three behaviors: navigate to the target → fire a
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
 | `_mover` | `NavMeshMoveToActionExecutor` | Required | Drives navigation to the target. Must be assigned — returns `Failed` if null. |
-| `_animator` | `Animator` | `null` | The Animator to drive. Optional — skipped if null. |
+| `_animator` | `Animator` | `null` | The Animator to drive. Optional — skipped if null or if `_pickUpTrigger` is empty. |
 | `_pickUpTrigger` | `string` | `"PickUp"` | The Animator trigger parameter to fire after arriving at the target. |
-| `_attachPoint` | `Transform` | `null` | The transform the picked-up object is reparented to (e.g., hand bone). Optional — object is not reparented if null. |
-| `_animationDuration` | `float` | `1.0` | Seconds to wait after firing the animation trigger before reparenting the object. |
+| `_attachPoint` | `Transform` | `null` | The transform the picked-up object is reparented to (e.g., hand bone). If a `HeldObjectActionState` is present and has no attach point set, this value is assigned to it; otherwise the target reparents to `_attachPoint` directly. Optional — object is not reparented if null and no `HeldObjectActionState` is present. |
+| `_animationDuration` | `float` | `1.0` | Seconds to wait after firing the animation trigger before reparenting the object. Skipped when `0` or less. |
 
 **Execution sequence:**
 
-1. `NavMeshMoveToActionExecutor.ExecuteAsync` navigates to the target. If it fails or is canceled, `PickUpActionExecutor` returns that result immediately.
-2. `_animator.SetTrigger(_pickUpTrigger)` is called.
-3. Waits `_animationDuration` seconds (cancellable).
-4. Target `GameObject` is reparented to `_attachPoint` at local position/rotation zero.
-5. Returns `Succeeded`.
+1. If no target is resolved, returns `Failed` with message `No target resolved`.
+2. If a `HeldObjectActionState` component is present on the same `GameObject`, checks whether it is already holding an object: returns `Succeeded` immediately if it already holds the target, or `Failed` if it holds a different object.
+3. `NavMeshMoveToActionExecutor.ExecuteAsync` navigates to the target. If it does not succeed, `PickUpActionExecutor` returns that result immediately.
+4. If `_animator` is assigned and `_pickUpTrigger` is not empty, `_animator.SetTrigger(_pickUpTrigger)` is called.
+5. Waits `_animationDuration` seconds (cancellable), skipped when `_animationDuration` is `0` or less.
+6. Attaches the target: if a `HeldObjectActionState` is present, `HeldObjectActionState.TryAttach` reparents it (using `_attachPoint` to set the state's attach point first, when the state has none). Otherwise the target reparents directly to `_attachPoint` at local position/rotation zero, skipped if `_attachPoint` is null.
+7. Returns `Succeeded`.
 
-{% hint style="info" %}
-`PickUpActionExecutor` calls into `NavMeshMoveToActionExecutor` directly via `ExecuteAsync`. Both components must be on the same `GameObject` and a baked NavMesh must be present in the scene.
-{% endhint %}
+`PickUpActionExecutor` calls into `NavMeshMoveToActionExecutor` directly via `ExecuteAsync`. Both components should be on the same `GameObject` — `_mover` is a plain Inspector reference, not resolved automatically — and a baked NavMesh must be present in the scene. Add an optional `HeldObjectActionState` component (`Add Component → Convai → Samples → Held Object Action State`) to the same `GameObject` to track the currently held object across pick-up and put-down actions and stop the NPC from picking up a second object while one is already held.
+
+### PutOnActionExecutor
+
+Places one resolved target object on another. Unlike the other executors, it does not resolve a single primary target — it binds two named parameters from the backend command, `Item` and `Container`, each resolved to a `ConvaiResolvedActionTarget`.
+
+| Attribute | Value |
+| --- | --- |
+| **Menu path** | `Add Component → Convai → Samples → Put On Action Executor` |
+| **Namespace** | `Convai.Sample.Behaviors` |
+| **Target required** | No single target — resolves `Item` and `Container` parameters instead |
+
+**Inspector fields:**
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `_placementOffset` | `Vector3` | `(0, 0.5, 0)` | World-space offset added to the container's position when placing the item. |
+
+If `Item` or `Container` does not resolve to a `GameObject`, the executor returns `Failed` with message `Item was not resolved.` or `Container was not resolved.` respectively. Otherwise it clears the item from any `HeldObjectActionState` on the same `GameObject` (if present), moves the item's transform to the container's position plus `_placementOffset`, and returns `Succeeded`.
 
 ## Choosing the right executor
 
@@ -158,6 +177,7 @@ Compound executor that chains three behaviors: navigate to the target → fire a
 | Production NPC movement with pathfinding | `NavMeshMoveToActionExecutor` |
 | Play different animations for different actions | `AnimatorTriggerActionExecutor` |
 | Navigate + pick up + attach in one command | `PickUpActionExecutor` |
+| Place one held or scene object onto another | `PutOnActionExecutor` |
 | Custom movement stack, inventory, UI, physics | [Write a custom action executor](writing-custom-executors.md) |
 
 ## Usage examples
