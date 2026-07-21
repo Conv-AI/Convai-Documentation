@@ -1,22 +1,21 @@
 ---
 title: Add chat UI
 description: >-
-  Add a transcript UI component to display conversation text on screen during
-  character interactions.
-last_reviewed: "4.2.0"
+  Add the shipped chat transcript prefab to display scrolling conversation
+  history on screen during character interactions.
+last_reviewed: "4.4.0"
 ---
 
-The Convai SDK for Unity includes a ready-made transcript UI prefab that displays conversation text in real time. The prefab includes its own Canvas — drag it into the scene, and the UI connects to the SDK automatically.
+The Convai SDK for Unity includes a ready-made `ChatTranscriptUI` prefab that displays scrolling chat history in real time. The prefab includes its own `Canvas` — drag it into the scene, and it connects to `ConvaiManager` automatically.
 
-## Transcript display modes
+## Chat history and captions
 
-The SDK supports three presentation modes for conversation text.
+`ConvaiManager.ActiveManager.Transcripts` (`ConvaiTranscripts`) exposes two independent, combinable projections of a conversation: durable chat history and live speech-aligned captions. This page adds chat history using the shipped `ChatTranscriptUI` prefab. Captions use a separate, sample-only script with no shipped prefab — see [Chat and subtitle modes](../ui-and-presentation/transcript-ui/chat-and-subtitle-modes.md) to add captions or combine both displays in the same scene.
 
-| Mode               | Identifier         | Description                                                                 |
-| ------------------ | ------------------ | --------------------------------------------------------------------------- |
-| **Chat**           | `"Chat"`           | Scrolling message bubbles — separate entries for player and character turns |
-| **Subtitle**       | `"Subtitle"`       | Single text line at the bottom of the screen, replaced each turn            |
-| **QuestionAnswer** | `"QuestionAnswer"` | Split display — question above, answer below                                |
+| Projection | Consumed by | Description |
+| --- | --- | --- |
+| Chat history | `ChatTranscriptUI` (shipped prefab, covered on this page) | Scrolling message bubbles — separate entries for player and character turns |
+| Captions | `SubtitleTranscriptUI` (reference script, no shipped prefab) | A single caption block that updates as each turn streams, then auto-hides |
 
 ## Add the chat UI prefab
 
@@ -26,7 +25,7 @@ The SDK supports three presentation modes for conversation text.
 
 In the Project window, navigate to:
 
-```
+```text
 Packages/Convai SDK for Unity/Prefabs/TranscriptUI/TranscriptUI_Chat.prefab
 ```
 {% endstep %}
@@ -34,16 +33,16 @@ Packages/Convai SDK for Unity/Prefabs/TranscriptUI/TranscriptUI_Chat.prefab
 {% step %}
 ### Drag the prefab into the scene
 
-Drag `TranscriptUI_Chat.prefab` into the Hierarchy. The prefab includes its own Canvas — no separate Canvas setup is required.
+Drag `TranscriptUI_Chat.prefab` into the Hierarchy. The prefab includes its own `Canvas` — no separate `Canvas` setup is required.
 
 The chat UI overlay appears in the Game view. The component finds `ConvaiManager` automatically when the scene starts — no manual wiring is needed.
 
 {% hint style="warning" %}
-The chat input field requires an **EventSystem** in the scene. If your scene does not already have one, add it via **GameObject > UI > Event System**.
+The chat input field requires an `EventSystem` in the scene. If your scene does not already have one, add it via **GameObject > UI > Event System**.
 {% endhint %}
 
 {% hint style="warning" %}
-If no `ConvaiManager` is found at startup, the Console logs: `[ChatTranscriptUI] Dependencies not injected - ensure ConvaiManager is present in scene`. Check that `ConvaiManager` is in the scene.
+If no `ConvaiManager` is found at startup, the Console logs: `[ChatTranscriptUI] No active ConvaiManager found.`. Check that `ConvaiManager` is in the scene.
 {% endhint %}
 {% endstep %}
 {% endstepper %}
