@@ -1,6 +1,7 @@
 ---
 title: Narrative design scripting reference
-description: Reference for IConvaiNarrativeDesign, including section events, trigger invocation, speech injection, template keys, and async fetch methods.
+description: Reference for controlling a character's narrative flow from code, covering section events, trigger invocation, scripted speech, and data fetching.
+last_reviewed: "4.4.0"
 ---
 
 The Inspector workflow covers the majority of use cases. This page documents the full C# surface for situations where you need programmatic control — dynamic character switching, async data fetching at runtime, runtime-generated narrative flows, or deep integration with your own game systems.
@@ -21,7 +22,7 @@ IConvaiNarrativeDesign narrative = character.NarrativeDesign;
 | Property | Type | Description |
 |---|---|---|
 | `TemplateKeys` | `IReadOnlyDictionary<string, string>` | Snapshot of all template keys currently tracked for this character. |
-| `CurrentSectionId` | `string` | The section ID most recently received from the backend. Empty string if no section has been received yet. |
+| `CurrentSectionId` | `string` | The section ID most recently received from Convai. Empty string if no section has been received yet. |
 | `CurrentSectionData` | `NarrativeSectionData` | Full section payload. Contains `SectionId`, `BehaviorTreeCode`, and `BehaviorTreeConstants`. `null` until the first section change is received. |
 
 ## Listen to section changes
@@ -61,7 +62,7 @@ These events are delivered via the SDK's internal `EventHub`. If your handler to
 |---|---|---|
 | `OnSectionChanged` | `Action<string, string>` | Fires on every section transition. Parameters: `previousId`, `newId`. |
 | `OnSectionDataReceived` | `Action<NarrativeSectionData>` | Fires on every section transition with the full payload. |
-| `OnTriggerInvoked` | `Action<ConvaiNarrativeTriggerInvocation>` | Fires after a trigger or speech request is accepted locally (before backend confirmation). |
+| `OnTriggerInvoked` | `Action<ConvaiNarrativeTriggerInvocation>` | Fires after a trigger or speech request is accepted locally (before confirmation from Convai). |
 
 ## Invoke triggers from code
 
@@ -91,7 +92,7 @@ character.NarrativeDesign.InvokeSpeech("Attention: the fire exit on level two is
 Do not include `<speak>` tags in Unity code. Use `InvokeEvent` for contextual events where Convai should decide the wording.
 
 | Method | Wire field | Runtime behavior |
-|---|---|
+|---|---|---|
 | `InvokeTrigger("TriggerName")` | `trigger_name` | Invokes a saved Narrative Design trigger and can advance the graph. |
 | `InvokeEvent("event text")` | `trigger_message` | Adds inline event context and lets Convai respond naturally. |
 | `InvokeSpeech("scripted text")` | `trigger_message` | Sends exact scripted speech; the SDK adds `<speak>` tags internally. |

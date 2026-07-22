@@ -3,6 +3,7 @@ title: Configure narrative design triggers
 description: >-
   Configure ConvaiNarrativeDesignTrigger to advance the narrative graph using
   collision, proximity, time-based, or manual activation modes.
+last_reviewed: "4.4.0"
 ---
 
 `ConvaiNarrativeDesignTrigger` sends a named signal to Convai that advances the story graph from one section to the next. Place it on any GameObject — a doorway, an exhibit, a UI button's event target — and choose how it should activate. A narrative trigger is distinct from a Unity Physics trigger: the activation mode controls _when_ the signal is sent, not what kind of Unity physics event fires.
@@ -106,6 +107,22 @@ narrativeTrigger.InvokeTrigger();
 narrativeTrigger.TryInvokeTrigger();
 ```
 
+## Trigger request mode
+
+Activation mode and trigger request mode are two independent settings. Activation mode (`Collision`, `Proximity`, `TimeBased`, `Manual`) controls _when_ `ConvaiNarrativeDesignTrigger` fires, as described above. Trigger request mode controls _what_ gets sent to Convai over RTVI once it fires.
+
+`ConvaiNarrativeDesignTrigger` always sends its configured trigger using `ConvaiNarrativeTriggerMode.SavedTrigger`. Internally it calls `convaiCharacter.NarrativeDesign.InvokeTrigger(_triggerName)`, which sends only the `trigger_name` field. This component has no Inspector option to switch to either of the other two trigger request modes.
+
+Two additional trigger request modes exist on `ConvaiNarrativeTriggerRequest` (namespace `Convai.Runtime.NarrativeDesign`):
+
+| Trigger request mode | Wire field | How to send it |
+| --- | --- | --- |
+| `SavedTrigger` | `trigger_name` | `ConvaiNarrativeDesignTrigger` (this component), or `IConvaiNarrativeDesign.InvokeTrigger(string)` from code |
+| `InlineEvent` | `trigger_message` | `IConvaiNarrativeDesign.InvokeEvent(string)` — code only, no Inspector equivalent |
+| `ScriptedSpeech` | `trigger_message` (wrapped in `<speak>` tags) | `IConvaiNarrativeDesign.InvokeSpeech(string)` — code only, no Inspector equivalent |
+
+`InlineEvent` and `ScriptedSpeech` are not reachable from this component's Inspector. Use `InvokeEvent` to send contextual event text that Convai responds to naturally, or `InvokeSpeech` to make the character say exact scripted text without advancing the narrative graph. See [Narrative design scripting reference](scripting-narrative-design.md) for the full code API.
+
 ## Auto-recovery settings
 
 These settings make the trigger resilient to common runtime conditions where the character or player may not be ready immediately.
@@ -161,7 +178,7 @@ stateDiagram-v2
     QueuedWaitingForCharacter --> AlreadyFired : character becomes ready
     QueuedWaitingForCharacter --> ConfigurationError : MaxWaitTime exceeded
     AlreadyFired --> Ready : ResetTrigger()
-    ConfigurationError --> Ready : fix issue + ResetTrigger()
+    ConfigurationError --> Ready : fix issue + ValidateConfiguration()
     Ready --> Disabled : component or GameObject disabled
     Disabled --> Ready : component or GameObject re-enabled
 ```
@@ -215,9 +232,9 @@ See [Troubleshoot narrative design](troubleshooting-and-diagnostics.md) for a fu
 ## Next steps
 
 {% content-ref url="template-keys-dynamic-narrative-variables.md" %}
-[template-keys-dynamic-narrative-variables.md](template-keys-dynamic-narrative-variables.md)
+[Configure narrative template keys](template-keys-dynamic-narrative-variables.md)
 {% endcontent-ref %}
 
 {% content-ref url="scripting-narrative-design.md" %}
-[scripting-narrative-design.md](scripting-narrative-design.md)
+[Narrative design scripting reference](scripting-narrative-design.md)
 {% endcontent-ref %}
