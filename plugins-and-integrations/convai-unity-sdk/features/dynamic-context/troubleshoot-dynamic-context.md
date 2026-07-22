@@ -1,12 +1,13 @@
 ---
 title: Troubleshoot dynamic context
 description: >-
-  Diagnose Dynamic Context issues with a five-step checklist, a symptom table, a
-  character-not-responding decision tree, and the full Console log reference.
-last_reviewed: "4.2.0"
+  Fix common dynamic context problems in the Convai Unity SDK, including
+  missed updates, delayed responses, and reset behavior that does not clear
+  everything.
+last_reviewed: "4.4.0"
 ---
 
-Most Dynamic Context problems fall into one of three categories: incorrect timing (calling `Apply()` before a conversation starts), a misconfigured component (missing `ConvaiCharacter` reference or empty required field), or a misunderstanding of what `Reset()` clears. Work through the first-line investigation checklist below — most issues resolve at step 2 or 3.
+Most Dynamic Context problems in the relay and tracker flow come from one of three categories: a call made before the character entered a conversation, a reaction mode that produced an unexpected response, or a `ConvaiDynamicContextRelay` that cannot resolve a `ConvaiCharacter`. Work through the first-line investigation checklist below — most issues resolve within the first two or three steps.
 
 ## First-line investigation
 
@@ -14,111 +15,82 @@ Most Dynamic Context problems fall into one of three categories: incorrect timin
 {% step %}
 ### Check the Unity Console for warnings
 
-`ConvaiDynamicContextCommand` logs a warning with the full validation message every time `Execute()` is skipped. Open the Console (**Window → General → Console**) and look for messages tagged `[ConvaiDynamicContextCommand]`.
+Dynamic Context warnings are logged by `ConvaiCharacter` — prefixed with the character's name — and by `ConvaiDynamicContextRelay`. Open the Console (**Window → General → Console**) and look for a warning mentioning `Dynamic context` or `Assign a ConvaiCharacter`.
 
 If you see a warning, find the exact message in the [Console log reference](#console-log-reference) table below and follow the listed fix.
 {% endstep %}
 
 {% step %}
-### Use the Sample UI to isolate the issue
+### Isolate the issue with the Sample Debug Hub
 
-Before debugging your own integration, verify that the Dynamic Context system itself is working by using the SDK's built-in test UI.
+Before debugging your own integration, confirm that Dynamic Context itself is working. Import the **LipSync Sample** from Package Manager and open its scene — the sample includes a **Sample Debug Hub** with a **Context** drawer that sends state, event, and attention-object updates to the scene's `ConvaiCharacter` without wiring your own UI.
 
-**Prefab path:** Packages/<code class="expression">space.vars.sdk_package_id</code>/Prefabs/SampleDynamicContextUI.prefab
-
-Drop it into your scene, assign your `ConvaiCharacter`, enter Play Mode, and use the **Set State** button to send a known value. If the character responds correctly through the Sample UI, the issue is in your integration code — not in the Dynamic Context system itself.
+If the character responds correctly through the Debug Hub, the issue is in your own relay or scripting setup — not in Dynamic Context itself.
 {% endstep %}
 
 {% step %}
 ### Verify the character reference is resolved
 
-Select the `ConvaiDynamicContextCommand` component in the Inspector. If the **Target** section shows a yellow warning, the component cannot find a `ConvaiCharacter`.
+Select the `ConvaiDynamicContextRelay` component in the Inspector.
 
-* **Auto Resolve Character enabled:** confirm that `ConvaiDynamicContextCommand` and `ConvaiCharacter` are on the **same GameObject**.
+* **Auto Resolve Character enabled:** confirm that `ConvaiDynamicContextRelay` and `ConvaiCharacter` are on the **same GameObject**.
 * **Auto Resolve Character disabled:** confirm that the **Character** field has a reference assigned.
+
+If neither resolves a character, every call fires **On Skipped** and logs `Assign a ConvaiCharacter or enable Auto Resolve Character.`
 {% endstep %}
 
 {% step %}
 ### Check whether the character was in a conversation
 
-Context updates sent via `Apply()` are discarded if the character is not in an active conversation. A warning is emitted through the Convai logger — enable Convai debug logging to see it in the Unity Console.
+Tracked calls — `SetState`, `SetStates`, `AddEvent`, `RemoveState`, `Reset`, `SetCurrentAttentionObject`, and `ClearCurrentAttentionObject` — stage locally right away, even before a conversation starts. The staged batch reaches Convai automatically once the character becomes ready, so a call made in `Awake()` or `Start()` needs no extra handling.
 
-If you are calling `Apply()` in `Awake()`, `Start()`, or before the session connects, switch to `SetState` or `AddEvent` instead. These methods queue automatically and flush when the conversation begins.
+`Apply()` is the exception: it does not stage. A call made while the character is not in conversation is discarded, and Convai logs `Cannot apply raw dynamic context update: not in conversation`.
 {% endstep %}
 
 {% step %}
-### Check the reaction mode
+### Check the batch window and reaction mode
 
-If a context update reached the character but it did not respond immediately, verify the **Reaction Mode** setting.
+After a tracked change is staged, the SDK waits `ConvaiCharacter.DynamicContextBatchDelaySeconds` — 0.5 seconds by default — before sending it, so multiple rapid changes collapse into one update. Call `Flush()` on `IConvaiDynamicContext`, or enable **Flush Immediately** on the relay, to send staged changes without waiting.
 
-* **`SyncOnly`** — context is stored silently. The character incorporates it into its next natural turn. No immediate response is generated. This is expected behavior.
-* **`Auto`** — Convai decides whether to respond. For guaranteed immediate response, use `ReactImmediately`.
-* **`ReactImmediately`** — always triggers an immediate LLM turn after the update.
+If the character responded when you expected `Silent` to suppress a reply, another change staged in the same batch window likely requested a stronger reaction — `MustRespond` outranks `Auto`, which outranks `Silent`, for the whole batch.
 {% endstep %}
 {% endstepper %}
 
 ## Common issues
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Character does not reference context updates at all | `Apply()` called before conversation started | Switch to `SetState` or `AddEvent` — they queue automatically |
-| Character does not respond immediately after update | Reaction mode is `SyncOnly` | Change **Reaction Mode** to `Auto` or `ReactImmediately` |
-| **On Execution Skipped** fires instead of **On Executed** | Validation failure — see Console warning | Check the [Console log reference](#console-log-reference) for the exact message and fix |
-| Inspector shows yellow warning on the component | No `ConvaiCharacter` resolved | Enable **Auto Resolve** and place both components on the same GameObject, or assign **Character** explicitly |
-| `TryGetStateValue` returns `false` after `Apply()` | `Apply()` bypasses the local tracker | Use `SetState` if the value needs to be queryable via `TryGetStateValue` |
-| Two `context-update` messages sent for one `SetState` call | Existing state was updated — expected behavior | Not a bug. See [Two messages for one update](#two-messages-for-one-update) |
-| Character still references facts after `Reset()` | Initial context or system prompt is not cleared by `Reset()` | See [Reset did not clear everything](#reset-did-not-clear-everything) |
-| Character references initial scenario facts only in the first response | `InitialDynamicInfoKeepInContext` is `false` (the default) | Enable **Initial Dynamic Info Keep In Context** on `ConvaiCharacter` |
-| Cannot add a second Command component to the same GameObject | `[DisallowMultipleComponent]` restriction | Place additional commands on child GameObjects |
-| `SetStates` list produces a validation warning | Duplicate state names or empty entries in list | Remove duplicates; ensure every entry has a non-empty name |
+| Symptom | Likely cause | Fix | Verify |
+|---|---|---|---|
+| Character never references a state sent via `SetState` | The new value equals the state's current value — `SetState` is a no-op when nothing changed | Confirm the value actually changed; read the current value with `TryGetStateValue` first | `TryGetStateValue` returns the new value after a call with a genuinely different value |
+| A call made in `Awake()` or `Start()` seems to have no effect | Expected behavior — tracked calls stage locally and flush automatically once the character becomes ready | No action needed for tracked methods; avoid `Apply()` before a conversation starts, since it does not stage | The state or event appears in the character's response shortly after the conversation begins |
+| `ConvaiDynamicContextRelay` fires **On Skipped** instead of **On Queued** | No `ConvaiCharacter` resolved — **Auto Resolve Character** is disabled with no **Character** assigned, or the relay is on the wrong GameObject | Enable **Auto Resolve Character** and place the relay on the NPC's GameObject, or assign **Character** explicitly | **On Queued** fires and the Console shows no `Assign a ConvaiCharacter` warning |
+| **On Queued** fires but the character never references the update | An empty state name or a `null` value failed validation after dispatch — **On Queued** confirms dispatch, not that the value was accepted | Check the Console for a validation warning; see the [Console log reference](#console-log-reference) | The update appears in the character's context with no validation warning logged |
+| Character does not respond immediately after an update | The reaction requested for that call resolved to `Silent` | Use `Auto` or `MustRespond` — on the relay's **Reaction Mode** field, or as the `reaction` argument on the scripting call | Character references the update in its next turn (`Auto`/`Silent`) or responds immediately (`MustRespond`) |
+| `AddEvent` sent through the relay does not use its scripting default of `Auto` | The relay always passes its own **Reaction Mode** field explicitly for every call, overriding the method's scripting default | Set the relay's **Reaction Mode** field to `Auto` or `MustRespond` if the event should trigger a reply | Character reaction matches the relay's configured **Reaction Mode**, not `AddEvent`'s scripting default |
+| Character responds even though the call used `Silent` | Another call staged in the same batch window requested `Auto` or `MustRespond` — the strongest reaction in a batch wins for the whole batch | Separate calls that need independent reactions by more than the batch window, or call `Flush()` between them | The batch sends with the reaction you expect |
+| `Apply()` appears to have no effect | `Apply()` bypasses the local tracker and does not stage; a call made outside an active conversation is discarded with a warning | Use `SetState`, `AddEvent`, or another tracked method — they stage automatically | The update appears in the character's next response |
+| `TryGetStateValue` returns `false` after `Apply()` | `Apply()` never updates the local tracker | Use `SetState` if the value must be readable via `TryGetStateValue` | `TryGetStateValue` returns `true` after switching to `SetState` |
+| Character still references initial scenario facts after `Reset()` | Default `Reset()` clears the runtime tracker only — Initial Dynamic Info Text, system prompt facts, and in-session LLM memory are untouched | Call `Reset(removeStatic: true)` to also ask Convai to remove the static initial context for the session | Character no longer references facts that were only present in the static initial context |
+| Cannot add a second `ConvaiDynamicContextRelay` to the same GameObject | `[DisallowMultipleComponent]` restriction | Place additional relays on child GameObjects, disable **Auto Resolve Character**, and assign **Character** explicitly | Each relay operates independently on its assigned character |
 
-## Character does not reference context updates
+## `Apply()` discarded my update
 
-When the character appears completely unaware of a state or event you sent, work through the following in order.
-
-**Verify the method used.** `Apply()` is discarded if the character is not in an active conversation. A warning is emitted through the Convai logger (visible in the Console when debug logging is enabled), but no queue is built. Substitute `SetState` or `AddEvent` instead — these queue automatically and flush when the session opens.
-
-**Verify `Execute()` was not skipped.** Wire the `ConvaiDynamicContextCommand` **On Execution Skipped** event to a temporary `Debug.Log` call during development. If it fires, the Console shows the exact validation message that caused the skip.
-
-**Verify the reaction mode.** If reaction mode is `SyncOnly`, the character received the update but will not generate an immediate response — it references the new state in its next natural turn. Switch to `Auto` or `ReactImmediately` if immediate acknowledgement is required.
-
-## `Apply()` has no effect
-
-`Apply()` has two behaviors that differ from every other `IConvaiDynamicContext` method:
-
-* **No pre-conversation queue.** If the character is not in an active conversation when `Apply()` is called, the update is discarded immediately. A warning is emitted through the Convai logger — enable Convai debug logging to see it in the Unity Console. No queue is built. Use `SetState`, `AddEvent`, or another tracked method if the call may happen before the session starts.
-* **No tracker update.** `Apply()` sends directly to transport without touching the local state tracker. A subsequent call to `TryGetStateValue` for a key sent via `Apply()` returns `false`. If the value needs to be readable via `TryGetStateValue`, use `SetState` instead.
+`Apply()` is the one Dynamic Context entry point that does not stage. Unlike `SetState`, `AddEvent`, and the other tracked methods, a call made while the character is not in an active conversation is dropped immediately — Convai logs `Cannot apply raw dynamic context update: not in conversation` and does not queue the update for delivery once the conversation starts.
 
 {% hint style="warning" %}
-`Apply()` is an advanced escape hatch for external systems that construct their own context text. For all standard context management, prefer the tracked methods — `SetState`, `SetStates`, `AddEvent`, `RemoveState`, and `Reset` — which queue automatically and keep the local tracker consistent.
+Use `Apply()` only for advanced cases that construct context text externally or combine a context update with an action-config patch. For anything that might run before a conversation starts, use `SetState`, `AddEvent`, or another tracked method — they stage automatically.
 {% endhint %}
 
-## Reset did not clear everything
+`Apply()` also bypasses the local tracker entirely: a value sent through `Apply()` does not update state that `TryGetStateValue` can read. See [`Apply`](dynamic-context-scripting-api.md#apply) in the scripting API reference for the full set of validation warnings.
 
-`Reset()` operates on the **runtime Dynamic Context layer only**. Three sources of character knowledge are outside its scope:
+## `Reset()` left facts in place
 
-**Initial Dynamic Info Text.** The content of **Initial Dynamic Info Text** on `ConvaiCharacter` is sent once at connection time as part of the session request. `Reset()` does not re-send it and cannot clear it. Ending and restarting the session is the only way to change what was sent at connection time.
+Calling `Reset()` with no arguments clears only the runtime Dynamic Context tracker — every tracked state and event. It does not touch three other sources of character knowledge:
 
-**System prompt.** Facts baked into the character's system prompt on the Convai dashboard are not part of the Dynamic Context layer. No SDK call affects them at runtime.
+* **Initial Dynamic Info Text**, sent once at connection time on `ConvaiCharacter`.
+* **System prompt facts** configured on the Convai dashboard.
+* **In-session LLM memory** retained by the model across turns.
 
-**In-session LLM memory.** The character's language model retains conversational context across turns within the same session. `Reset()` clears the Dynamic Context tracker and sends a Reset message to Convai, but it does not clear the model's in-session conversational memory.
-
-## Two messages for one update
-
-When you call `SetState` on a state that already exists with a different value, two `context-update` RTVI messages are sent in sequence:
-
-1. A **Replace** message carrying the full canonical context with the updated value in place.
-2. An **Append** message carrying the human-readable delta: `"{name} changed from {oldValue} to {newValue}"`.
-
-This is intentional and non-configurable. The Replace gives the character an authoritative complete picture; the Append gives it a natural way to reference the transition in dialogue. If you are monitoring network traffic during debugging, expect this pattern for every existing-state modification.
-
-See [Updating an existing state](sync-behavior-and-timing.md#updating-an-existing-state) in Sync behavior and timing for the full sequence.
-
-## Cannot add multiple command components to the same GameObject
-
-`ConvaiDynamicContextCommand` is marked `[DisallowMultipleComponent]`. Unity prevents a second instance from being added to the same GameObject.
-
-Place each additional command on a **child GameObject** of the NPC. In the **Target** section of each command, disable **Auto Resolve Character** and assign the NPC's `ConvaiCharacter` explicitly — auto-resolve only searches the same GameObject, not parents or children.
+Call `Reset(removeStatic: true)` to also ask Convai to remove the character's static initial dynamic context for the current session. System prompt facts and in-session memory are still unaffected — no runtime call clears either. See [Static context at connection time](static-context-at-connection-time.md) for how the static initial context is configured.
 
 ## Character not responding
 
@@ -126,43 +98,52 @@ The following decision tree covers the full troubleshooting surface for context 
 
 ```mermaid
 flowchart TD
-    A[Character not responding to context update] --> B{Which entry point?}
-    B -- ConvaiDynamicContextCommand --> C{Did OnExecuted fire?}
-    C -- No --> D[Check Console for\nvalidation warning\nSee Console Log Reference]
-    C -- Yes --> E{Reaction mode?}
-    B -- IConvaiDynamicContext script --> F{Which method?}
-    F -- Apply --> G{In active conversation?}
-    G -- No --> H[Apply discarded\nUse SetState or AddEvent]
-    G -- Yes --> E
-    F -- SetState / AddEvent / etc --> E
-    E -- SyncOnly --> I[Expected — no immediate response\nSwitch to Auto or ReactImmediately]
-    E -- Auto or ReactImmediately --> J{Did update reach backend?}
+    A[Character not responding to a context update] --> B{Which entry point?}
+    B -- ConvaiDynamicContextRelay --> C{Did On Queued fire?}
+    C -- No, On Skipped fired --> D[Check Console for\nAssign a ConvaiCharacter warning]
+    C -- Yes --> E{Which method?}
+    B -- IConvaiDynamicContext script --> E
+    E -- Apply --> F{In active conversation?}
+    F -- No --> G[Discarded with a warning\nUse SetState or AddEvent instead]
+    F -- Yes --> H{Reaction mode for this batch?}
+    E -- SetState / AddEvent / etc --> H
+    H -- Silent --> I[Expected: no immediate response\nCheck for a stronger reaction in the same batch]
+    H -- Auto or MustRespond --> J{Did the update reach Convai?}
     J -- Yes --> K[Check character system prompt\nand dashboard configuration]
-    J -- Unsure --> L[Use Sample UI prefab\nto verify delivery in isolation]
+    J -- Unsure --> L[Use the Sample Debug Hub\nto verify delivery in isolation]
 ```
 
 ## Console log reference
 
-The following messages appear in the Unity Console during Dynamic Context operations. All `ConvaiDynamicContextCommand` warnings are prefixed with `[ConvaiDynamicContextCommand]`.
+The following messages appear in the Unity Console during Dynamic Context operations.
 
-| Message | Source | Meaning | Fix |
-|---|---|---|---|
-| `No ConvaiCharacter found on this GameObject. Assign one or disable Auto Resolve Character.` | `Execute()` validation | **Auto Resolve** is on but no `ConvaiCharacter` is on the same GameObject. | Move the command to the NPC's GameObject, or disable **Auto Resolve** and assign **Character** explicitly. |
-| `Assign a ConvaiCharacter or enable Auto Resolve Character.` | `Execute()` validation | **Auto Resolve** is off and **Character** is not assigned. | Assign the `ConvaiCharacter` reference, or enable **Auto Resolve**. |
-| `Set State requires a non-empty state name.` | `Execute()` validation | **State Name** field is blank or whitespace. | Enter a non-empty state name. |
-| `Set States requires at least one state entry.` | `Execute()` validation | **State Entries** list is empty. | Add at least one Name / Value entry. |
-| `Each state entry requires a non-empty name.` | `Execute()` validation | One or more **State Entries** have a blank name. | Fill in all entry names. |
-| `State entries contain duplicate name '{name}'.` | `Execute()` validation | Two entries in **State Entries** share the same state name. The actual name replaces `{name}` in the Console. | Remove or rename the duplicate. |
-| `Add Event requires non-empty event text.` | `Execute()` validation | **Event Text** field is blank or whitespace. | Enter the event text. |
-| `Remove State requires a non-empty state name.` | `Execute()` validation | **State Name** field is blank or whitespace. | Enter the name of the state to remove. |
-| `Raw Update requires text unless mode is Reset.` | `Execute()` validation | **Raw Text** is empty and **Raw Mode** is not `Reset`. | Enter text, or set **Raw Mode** to `Reset`. |
+| Message | Source | Meaning | Fix | Verify |
+|---|---|---|---|---|
+| `Assign a ConvaiCharacter or enable Auto Resolve Character.` | `ConvaiDynamicContextRelay` | No `ConvaiCharacter` resolved for this call. | Enable **Auto Resolve Character** and place the relay on the character's GameObject, or assign **Character** explicitly. | The warning stops appearing and `On Queued` fires instead of `On Skipped`. |
+| `Dynamic context state name cannot be empty` | `ConvaiCharacter.DynamicContext` — `SetState`, `SetStates`, `RemoveState` | The state name is blank or whitespace. | Pass a non-empty, non-whitespace state name. | The call no longer logs a warning and the state appears in the character's context. |
+| `Dynamic context state '{name}' cannot use a null value` | `ConvaiCharacter.DynamicContext` — `SetState`, `SetStates` | The value passed for `{name}` is `null`. An empty string is allowed; `null` is not. | Pass an empty string instead of `null`, or supply an actual value. | The call no longer logs a warning and `{name}` updates to the intended value. |
+| `Cannot set empty dynamic context states` | `ConvaiCharacter.DynamicContext` — `SetStates` | The dictionary passed to `SetStates` is `null` or has no entries. | Pass a dictionary with at least one name/value pair. | The call no longer logs a warning and every passed state appears in the character's context. |
+| `Dynamic context event text cannot be empty` | `ConvaiCharacter.DynamicContext` — `AddEvent` | The event text is blank or whitespace. | Pass non-empty event text. | The call no longer logs a warning and the event line appears in the character's context. |
+| `Dynamic context attention object cannot be null` | `ConvaiCharacter.DynamicContext` — `SetCurrentAttentionObject` | The attention object argument is `null`. | Pass a `string` object name or a `ConvaiActionObjectDefinition` reference, or call `ClearCurrentAttentionObject` instead. | The call no longer logs a warning and the character references the intended object. |
+| `Cannot apply raw dynamic context update: not in conversation` | `ConvaiCharacter.DynamicContext` — `Apply` | The character was not in an active conversation when `Apply` was called. | Use `SetState`, `AddEvent`, or another tracked method for updates that may happen before a conversation starts. | The tracked method call succeeds and the update reaches the character once the conversation is ready. |
+| `Connection not ready for {purpose}` | `ConvaiCharacter.DynamicContext` — internal send path | The transport exists, but the connection was not ready when a staged batch, a `Reset`, or an `Apply` call tried to send. `{purpose}` names what was being sent, for example `dynamic context batch`. | Confirm the character is fully connected (`IsInConversation`) before relying on immediate delivery; retry after the connection stabilizes. | The message stops appearing and the batch, reset, or `Apply` call reaches Convai on the next attempt. |
+
+## Scene metadata not sending (fixed in SDK 4.3.0)
+
+{% hint style="info" %}
+SDK 4.3.0 fixed a bug in which pending scene metadata could fail to reach Convai — the CHANGELOG records it as "Fixed pending scene metadata not being flushed." If your project is on SDK 4.3.0 or later, this is not a live symptom. If scene metadata still appears not to reach a character, confirm the SDK package version before treating it as a new issue.
+{% endhint %}
 
 ## Next steps
 
-{% content-ref url="sync-behavior-and-timing.md" %}
-[Sync behavior and timing](sync-behavior-and-timing.md)
+{% content-ref url="relay-component-reference.md" %}
+[Relay component reference](relay-component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
 [Dynamic context scripting API](dynamic-context-scripting-api.md)
+{% endcontent-ref %}
+
+{% content-ref url="sync-behavior-and-timing.md" %}
+[Sync behavior and timing](sync-behavior-and-timing.md)
 {% endcontent-ref %}

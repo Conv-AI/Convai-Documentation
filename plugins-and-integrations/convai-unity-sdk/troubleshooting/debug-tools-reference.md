@@ -1,21 +1,40 @@
 ---
 title: Debug tools reference
 description: Reference for Convai SDK debug tools, including logging configuration, ConvaiActionDebugProbe, session diagnostics, and client latency metrics.
-last_reviewed: "4.2.0"
+last_reviewed: "4.4.0"
 ---
 
 The Convai Unity SDK ships with a layered set of diagnostic tools: a configurable logging system with per-subsystem verbosity control, a live Inspector probe for action debugging, real-time session diagnostics on `ConvaiRoomManager`, session metrics emitted to the Console, and client-side latency measurements for conversation pipeline profiling. This page is the complete reference for all of them.
 
-## Logging configuration
+## Diagnostics
+
+{% hint style="warning" %}
+SDK `4.4.0` removed the `Convai → Logger Settings` menu and window. Logging configuration now lives in the Diagnostics section, reachable from `Convai → Settings` and from `Edit → Project Settings → Convai SDK`.
+{% endhint %}
 
 ### Where to configure
 
-Open **Edit → Project Settings → Convai SDK → Logging**. The settings that control what appears in the Unity Console are:
+Open `Convai → Settings` or `Edit → Project Settings → Convai SDK` and scroll to the **Diagnostics** section. Both entry points render the same `DiagnosticsSectionView`, so a change made in one place shows up in the other. The settings that control what appears in the Unity Console are:
 
+* **Presets** — one-click buttons that set Global Log Level, Include Stack Traces, and Colored Console Output together; see [Logging presets](#logging-presets)
 * **Global Log Level** — minimum verbosity that applies to all log categories
-* **Category Overrides** — per-subsystem overrides that supersede the global level
 * **Include Stack Traces** — whether Warning and Error entries include a stack trace
-* **Colored Output** — whether log entries are color-coded in the Unity Console
+* **Colored Console Output** — whether log entries are color-coded in the Unity Console
+* **Category Overrides** — per-subsystem overrides that supersede the global level
+
+The Diagnostics section header also has its own **Reset** button, which applies the same configuration as the `Default` preset below.
+
+### Logging presets
+
+Three preset buttons sit above the Global Log Level field. Each preset sets the global level and both output flags together, then clears every category override.
+
+| Preset | Global Log Level | Include Stack Traces | Colored Console Output | Category Overrides |
+| --- | --- | --- | --- | --- |
+| `Verbose` | `Trace` | On | On | Cleared |
+| `Default` | `Info` | On | On | Cleared |
+| `Errors Only` | `Error` | On | On | Cleared |
+
+`Default` matches the SDK's default logging configuration. Applying any preset overwrites Global Log Level, Include Stack Traces, and Colored Console Output, and removes existing Category Overrides — reapply project-specific overrides after clicking a preset.
 
 ### Log levels
 
@@ -41,11 +60,10 @@ To enable Debug messages in a production build, add `CONVAI_DEBUG_LOGGING` to **
 
 Category overrides let you increase verbosity for one subsystem without flooding the Console with output from others. For example, to diagnose a transport issue without seeing audio, UI, and character logs:
 
-1. Go to **Edit → Project Settings → Convai SDK → Logging → Category Overrides**
-2. Click **+** to add an override
-3. Set **Category** to `Transport` and **Level** to `Debug`
+1. Open **Diagnostics** and expand the **Category Overrides** foldout — it lists every log category with a dropdown that defaults to `Inherit`
+2. Set the `Transport` dropdown to `Debug`
 
-All other categories remain at the global level.
+All other categories remain at the global level. The foldout title shows the active override count, for example **Category Overrides (1)**. Set a category's dropdown back to `Inherit` to remove that override.
 
 ### Log category reference
 
@@ -250,7 +268,7 @@ if (room?.DiagnosticsCoordinator != null)
 
 Latency entries appear automatically in the Console after each completed turn:
 
-```
+```text
 [ClientLatency] Player: stop→finalTranscript=120ms | Character: stop→firstTranscript=450ms stop→ttsStarted=520ms stop→firstLipSync=600ms stop→audioPlaying=650ms (audioHoldForLipSync=130ms)
 ```
 
@@ -278,16 +296,33 @@ Latency entries appear automatically in the Console after each completed turn:
 Latency measurements appear only in Editor and Development Builds — the `[ClientLatency]` log calls are conditionally compiled. They are not available in release builds unless `CONVAI_DEBUG_LOGGING` is defined.
 {% endhint %}
 
+## LipSync drift monitor
+
+SDK `4.4.0` removed the public `IBlendshapeSink` extension seam entirely — no type of that name remains in the SDK, and custom runtime sink injection is no longer supported. Drive lip sync through a supported map or profile on `ConvaiLipSyncComponent` instead. The related types `SkinnedMeshBlendshapeSink`, `LipSyncDriftMonitor`, `LipSyncDriftSample`, and `LipSyncDriftEvent` were not removed — they were internalized, so they still exist but are no longer part of the public API. The supported diagnostics surface for lip sync alignment is the `Convai → LipSync Drift Monitor` Editor window.
+
+Open the window from `Convai → LipSync Drift Monitor`. Monitoring is opt-in: enable the **Monitor** toggle, enter Play mode, and talk to a character to populate data. Select a character from the dropdown when more than one is registered — samples and events are tracked per character.
+
+The window shows:
+
+* The live drift error, in milliseconds, between the measured audio playhead and the visual (blendshape) clock; a positive value means the mouth is behind the audio
+* A chart plotting drift error and the monitor's cumulative correction over a configurable time window (3-30 seconds), with lifecycle event markers overlaid
+* Mean absolute error, max absolute error, and the correction rate, computed over the visible window
+* A live audio/visual offset override slider for calibrating perceived sync by eye
+* An event log listing lifecycle events (for example gate open, anchor, cancel) with timestamps
+
+Click **Export CSV** to save the current samples and events to a file. The save dialog title is **Export drift samples**, and the default file name is `lipsync-drift-<characterId>.csv`. The exported file contains a sample table with columns `time_s`, `error_ms`, `audio_target_s`, `visual_clock_s`, `cumulative_correction_ms`, `buffered_s`, `headroom_s`, `state`, and `audio_active`, followed by a blank line and an event table with columns `event_time_s` and `label`.
+
 ## Quick reference
 
 | Tool | What it diagnoses | How to access |
 | --- | --- | --- |
-| **Logging configuration** | All SDK subsystems — verbosity and filtering | Edit → Project Settings → Convai SDK → Logging |
+| **Diagnostics** | All SDK subsystems — verbosity and filtering | `Convai → Settings` or `Edit → Project Settings → Convai SDK` (Diagnostics section) |
 | **ConvaiActionDebugProbe** | Action dispatch, executor wiring, batch failures | Add Component → Convai/Debug/Convai Action Debug Probe |
 | **ConvaiRoomManager properties** | Session state, error codes, connect/reconnect counts | `FindFirstObjectByType<ConvaiRoomManager>()` — read properties directly |
 | **IRoomDiagnostics snapshot** | Connection attempt counts, uptime, last error, agent counts | `room.DiagnosticsCoordinator.GetDiagnostics()` |
 | **Session Metrics messages** | Reconnection success rate, session lifecycle, error timeline | Console filter `[SessionMetrics]`; requires Info or Debug level |
 | **Client Latency metrics** | End-to-end conversation pipeline latency | Console filter `[ClientLatency]`; Editor and Development Builds only |
+| **LipSync Drift Monitor** | Audio-vs-visual lip sync alignment, drift error, CSV export | `Convai → LipSync Drift Monitor` |
 | **Custom log sinks** | Route logs to files, telemetry, or overlays | `ConvaiLogger.RegisterSink(new YourSink())` |
 
 ## Next steps

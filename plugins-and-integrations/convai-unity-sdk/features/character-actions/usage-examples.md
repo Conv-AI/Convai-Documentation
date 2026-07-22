@@ -1,9 +1,10 @@
 ---
 title: Character actions examples
-description: Progressive examples for the Convai character actions system — Inspector setup, event subscriptions, scripted batch injection, and navigation error recovery.
+description: Progressive examples for the Convai character actions system — Inspector setup, event subscriptions, scripted batch injection, and speech-synced timing.
+last_reviewed: "4.4.0"
 ---
 
-These four examples progress from the simplest possible configuration to full scripting control. Each example is self-contained — you can follow any one of them without reading the others first.
+These five examples progress from the simplest possible configuration to full scripting control. Each example is self-contained — you can follow any one of them without reading the others first.
 
 ## Example 1 — Fire safety retrieval (Inspector setup, no code)
 
@@ -45,7 +46,7 @@ In `ConvaiActionConfigSource`:
 {% hint style="success" %}
 Open the Console and filter by `ConvaiActionDebugProbe` (if the probe is added). You should see:
 
-```
+```text
 [ConvaiActionDebugProbe] Step succeeded #1: cmd='Retrieve Extinguisher', def='Retrieve', target=Object:Extinguisher
 ```
 {% endhint %}
@@ -143,9 +144,7 @@ public sealed class ActionFailureHandler : MonoBehaviour
 
 **Expected outcome:** The NPC navigates toward the hazard zone, the `NavMeshAgent` fails to complete the path, the executor returns `Failed`, and `OnStepFailed` fires. The fallback event is injected, and the NPC says something like "I can't get to the chemical storage area — the path is blocked by the scaffolding."
 
-{% hint style="info" %}
 Set `FailurePolicy` to `StopBatch` (default) so subsequent steps in the same batch (e.g., "Demonstrate hazard") don't run when the navigation step failed.
-{% endhint %}
 
 ## Example 4 — Scripted demonstration sequence (programmatic injection)
 
@@ -186,6 +185,42 @@ Wire `RunDefibrillatorDemo` to a `UnityEngine.Timeline` signal, a UI button `OnC
 {% hint style="info" %}
 `BatchPolicy = Queue` ensures this scripted sequence waits politely if the trainee is mid-conversation with an active action batch. Switch to `BatchPolicy = ReplaceCurrent` if the demonstration should interrupt any ongoing action.
 {% endhint %}
+
+## Example 5 — Exhibit callout synced to speech (speech gate)
+
+**Scenario:** A museum tour simulation. When a visitor asks about an exhibit, the NPC answers verbally and then points at it. The point gesture must not start until the character's voice line actually begins playing, or the NPC appears to point at the exhibit before it says anything.
+
+### C# setup
+
+Set `WaitForBotSpeech` and `DelayAfterBotSpeechSeconds` on the command before enqueuing it:
+
+```csharp
+using System.Collections.Generic;
+using Convai.Runtime.Actions;
+using Convai.Shared.Types;
+using UnityEngine;
+
+public sealed class ExhibitPointerTrigger : MonoBehaviour
+{
+    [SerializeField] private ConvaiActionDispatcher _dispatcher;
+
+    // Call this once the NPC's spoken answer has been dispatched for this turn
+    public void PointAtExhibit(string exhibitName)
+    {
+        var pointAction = new ConvaiActionCommand("Point At", exhibitName)
+        {
+            WaitForBotSpeech = true,
+            DelayAfterBotSpeechSeconds = 0.3f
+        };
+
+        _dispatcher.EnqueueActions(new List<ConvaiActionCommand> { pointAction });
+    }
+}
+```
+
+**Expected outcome:** `pointAction` is the first step of a fresh batch, so `ConvaiActionDispatcher` holds it at the speech gate before running it. The gate releases as soon as the character's `OnSpeechStarted`, `OnSpeechStopped`, or `OnTurnCompleted` event fires — whichever happens first — then waits the additional 0.3 seconds set on `DelayAfterBotSpeechSeconds` before the point gesture executes.
+
+Only the batch's first step is gated this way. If none of those events fire, the dispatcher's `_speechGateTimeoutSeconds` field releases the step anyway (2 seconds by default, shown as "Speech Gate Timeout Seconds" under the Dispatch header in the Inspector), so a silent turn never stalls the batch.
 
 ## Next steps
 

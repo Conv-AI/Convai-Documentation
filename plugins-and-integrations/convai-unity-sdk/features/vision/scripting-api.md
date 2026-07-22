@@ -1,15 +1,16 @@
 ---
 title: Vision scripting API
-description: Reference for ConvaiVisionPublisher and the frame source interfaces, including properties, methods, domain events, and state monitoring patterns.
+description: Reference for the Convai Unity SDK vision scripting API, including publish control, runtime status queries, on-demand triggers, and respond-mode events.
+last_reviewed: "4.4.0"
 ---
 
-Vision scripting centers on `ConvaiVisionPublisher` for publish control and the frame source status interfaces for capture state. Domain events let you react to lifecycle changes without polling `IsPublishing` every frame.
+Vision scripting centers on `ConvaiVisionPublisher` for publish control, `ConvaiRoomManager` for on-demand vision status queries and triggers, and the frame source status interfaces for capture state. Domain events let you react to lifecycle changes and backend acknowledgements without polling `IsPublishing` every frame.
 
-## ConvaiVisionPublisher
+## `ConvaiVisionPublisher`
 
 `ConvaiVisionPublisher` is a `MonoBehaviour` that manages the WebRTC video track. Obtain a reference with `GetComponent` or a serialized field.
 
-#### Properties
+### Properties
 
 | Property | Type | Description |
 | --- | --- | --- |
@@ -18,14 +19,14 @@ Vision scripting centers on `ConvaiVisionPublisher` for publish control and the 
 | `PublishPolicy` | `VisionPublishPolicy` | The current publish policy. |
 | `VideoTrackName` | `string` | The name of the WebRTC track (default: `"unity-scene"`). |
 
-#### Methods
+### Methods
 
 | Method | Description |
 | --- | --- |
 | `SetPublishPolicy(VisionPublishPolicy policy)` | Changes the client-side transport budget. Takes effect on the next published frame. |
 | `EnablePublishing(bool enabled)` | Starts or stops publishing without changing the selected policy. Only meaningful when policy is `Manual`; ignored for auto-publishing policies. |
 
-#### Usage
+### Usage
 
 ```csharp
 using Convai.Modules.Vision;
@@ -53,7 +54,7 @@ public class VisionController : MonoBehaviour
 }
 ```
 
-## IVisionFrameSource
+## `IVisionFrameSource`
 
 Implemented by all built-in frame sources and any custom source.
 
@@ -70,7 +71,7 @@ Implemented by all built-in frame sources and any custom source.
 | `StartCapture()` | method | Begins frame capture. |
 | `StopCapture()` | method | Stops frame capture and releases resources. |
 
-## IVisionFrameSourceStatusProvider
+## `IVisionFrameSourceStatusProvider`
 
 Optional companion interface implemented by built-in sources. Provides richer state and error information.
 
@@ -130,7 +131,7 @@ public class FrameSourceMonitor : MonoBehaviour
 }
 ```
 
-## VisionSourceState reference
+## `VisionSourceState` reference
 
 | State | Meaning |
 | --- | --- |
@@ -142,38 +143,156 @@ public class FrameSourceMonitor : MonoBehaviour
 | `Stopped` | Capture was stopped normally. |
 | `Failed` | Capture failed and cannot continue. Check `ErrorKind` and `StatusMessage`. |
 
+## `ConvaiRoomManager` vision methods
+
+`ConvaiRoomManager` implements `IConvaiRoomConnectionService` and exposes three runtime methods, added in SDK 4.4.0, for querying and driving dynamic vision context mid-session without reconnecting. Access them through a serialized `ConvaiRoomManager` field, a custom `IConvaiRoomConnectionService` implementation, or `ConvaiManager.ActiveManager.TryGetRoomConnectionService(out IConvaiRoomConnectionService service)` when no scene reference is available.
+
+{% hint style="warning" %}
+**Breaking change in SDK 4.4.0.** `IConvaiRoomConnectionService` gained three members: `RequestVisionStatus(string updateId = null)`, `TriggerVision(ConvaiVisionTriggerRequest request)`, and `UpdateRespondMode(ConvaiRespondModeLane lane, ConvaiRespondMode mode, string updateId = null)`. Code that only consumes the interface through `ConvaiRoomManager` is unaffected. Any custom implementation of `IConvaiRoomConnectionService` must add all three methods — return `false` from each when vision is not supported by that implementation.
+{% endhint %}
+
+| Method | Returns | Description |
+| --- | --- | --- |
+| `RequestVisionStatus(string updateId = null)` | `bool` | Requests backend dynamic vision buffer/status diagnostics for the current session. The backend answers with [`VisionContextStatusReceived`](#visioncontextstatusreceived). |
+| `TriggerVision(ConvaiVisionTriggerRequest request)` | `bool` | Requests backend dynamic vision attachment/response behavior for the current session — asks the character to look at the buffered frames and, depending on the request, respond. The backend answers with [`VisionContextTriggerReceived`](#visioncontexttriggerreceived). |
+| `UpdateRespondMode(ConvaiRespondModeLane lane, ConvaiRespondMode mode, string updateId = null)` | `bool` | Changes one input lane's respond mode for the rest of the session, without reconnecting. The backend acknowledges with [`RespondModeUpdateResultReceived`](#respondmodeupdateresultreceived). |
+
+Each method returns `false` when no session transport is available (for example, before the room connects).
+
+```csharp
+using Convai.Runtime;
+using Convai.Runtime.Adapters.Networking;
+using Convai.Runtime.Vision.Context;
+using UnityEngine;
+
+public class VisionRuntimeQueries : MonoBehaviour
+{
+    [SerializeField] private ConvaiRoomManager _roomManager;
+
+    public void QueryVisionStatus()
+    {
+        // Answer arrives as VisionContextStatusReceived.
+        _roomManager.RequestVisionStatus();
+    }
+
+    public void TriggerVisionLook()
+    {
+        var request = new ConvaiVisionTriggerRequest
+        {
+            Text = "What changed on the table?",
+            RespondMode = ConvaiRespondMode.MustRespond
+        };
+        request.SetFrameWindow(-5, -1); // the five most recent buffered frames
+
+        // Answer arrives as VisionContextTriggerReceived.
+        _roomManager.TriggerVision(request);
+    }
+
+    public void SwitchVisionToAuto()
+    {
+        // Acknowledged by RespondModeUpdateResultReceived.
+        _roomManager.UpdateRespondMode(ConvaiRespondModeLane.Vision, ConvaiRespondMode.Auto);
+    }
+}
+```
+
+## `ConvaiVisionTriggerRequest`
+
+`Convai.Runtime.Vision.Context` — sealed class
+
+Parameters for an explicit dynamic vision trigger sent with `TriggerVision`. A trigger asks the backend to attach buffered vision frames to a turn and, depending on `RespondMode`, invoke the model. When no frame selection is set, the backend attaches the latest fresh frames up to its configured frames-per-turn.
+
+```csharp
+new ConvaiVisionTriggerRequest(string updateId = null)
+```
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `updateId` | `string` | `null` | Idempotency key echoed back in the acknowledgement's `update_id`. When omitted, a unique ID is generated. Reusing the same ID makes the request idempotent — the backend replays the original acknowledgement instead of triggering again, so retries are always safe. |
+
+### Properties
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `UpdateId` | `string` | Idempotency key for this request, set by the constructor. |
+| `Text` | `string` | Optional prompt accompanying the frames, e.g. `"What changed on the table?"`. When empty, the backend uses its generic inspect-the-frames prompt. |
+| `RespondMode` | `ConvaiRespondMode?` | How this trigger affects the character's speech. `null` uses the connect-time default for the trigger lane (`ConvaiVisionRespondModeSettings.Trigger`). |
+| `FrameWindowStart` | `int?` | Start of the relative frame window, set via `SetFrameWindow`. |
+| `FrameWindowEnd` | `int?` | End of the relative frame window, set via `SetFrameWindow`. |
+| `FramePtsIds` | `IReadOnlyList<long>` | Optional absolute frame selection by presentation timestamp (nanoseconds), as reported in acknowledgements (`attached_frame_pts`) and vision-status responses. Takes precedence over the frame window when both are set. |
+
+### Methods
+
+| Method | Description |
+| --- | --- |
+| `SetFrameWindow(int startIndex, int endIndex)` | Selects a relative window of buffered frames, e.g. `SetFrameWindow(-5, -1)` for the five most recent. Negative values count back from the newest buffered frame (`-1` = newest); non-negative values are zero-based offsets from the oldest retained frame. The backend clamps out-of-range indices to the oldest retained frame and reports what was actually attached in the acknowledgement. |
+| `ClearFrameWindow()` | Clears a previously set frame window, restoring the default latest-frames selection. |
+
+Frame selection on a trigger, in precedence order:
+
+1. `FramePtsIds` — absolute pinning by presentation timestamp. Exempt from the staleness window; a timestamp that already left the buffer fails the trigger with the `frame_id_evicted` outcome.
+2. `SetFrameWindow(startIndex, endIndex)` — relative window, as described above.
+3. Nothing set — the backend attaches the latest fresh frames up to its configured frames-per-turn.
+
+## `ConvaiRespondModeLane`
+
+`Convai.Runtime.Vision.Context` — enum
+
+Identifies which input lane's respond mode `UpdateRespondMode` changes. User text and voice always respond and cannot be changed.
+
+| Value | Wire modality | Description |
+| --- | --- | --- |
+| `Vision` | `vision` | Newly sampled vision frames. |
+| `ContextUpdate` | `context_update` | Dynamic-context text updates. |
+| `Trigger` | `trigger` | Explicit vision triggers without a per-request mode. |
+| `SceneMetadata` | `scene_metadata` | Scene-metadata updates. |
+
 ## Domain events
 
-Subscribe to domain events via `ConvaiManager.ActiveManager.EventHub` to react to Vision lifecycle changes without polling. All Vision events are value types (`readonly struct`) — allocate a handler once and hold a reference.
+Subscribe to domain events through the runtime `IEventHub` to react to Vision lifecycle changes and backend acknowledgements without polling `IsPublishing` every frame. Get the hub with `ConvaiManager.ActiveManager.TryGetEventHub(out IEventHub hub)`. All Vision events are value types (`readonly struct`) — allocate a handler once and hold a reference.
 
 ```csharp
 using Convai.Domain.DomainEvents.Vision;
-using Convai.Runtime.Core;
 using Convai.Domain.EventSystem;
+using Convai.Runtime.Components;
 using UnityEngine;
 
 public class VisionAnalytics : MonoBehaviour
 {
+    private SubscriptionToken _captureStartedToken;
+    private SubscriptionToken _captureStoppedToken;
+    private SubscriptionToken _trackPublishedToken;
+    private SubscriptionToken _trackUnpublishedToken;
+    private SubscriptionToken _visionStatusToken;
+    private SubscriptionToken _visionTriggerToken;
+    private SubscriptionToken _respondModeToken;
+
     void Start()
     {
-        var hub = ConvaiManager.ActiveManager?.EventHub;
-        if (hub == null) return;
+        if (ConvaiManager.ActiveManager == null) return;
+        if (!ConvaiManager.ActiveManager.TryGetEventHub(out IEventHub hub)) return;
 
-        hub.Subscribe<VisionCaptureStarted>(OnCaptureStarted, EventDeliveryPolicy.MainThread);
-        hub.Subscribe<VisionCaptureStopped>(OnCaptureStopped, EventDeliveryPolicy.MainThread);
-        hub.Subscribe<VideoTrackPublished>(OnTrackPublished, EventDeliveryPolicy.MainThread);
-        hub.Subscribe<VideoTrackUnpublished>(OnTrackUnpublished, EventDeliveryPolicy.MainThread);
+        _captureStartedToken = hub.Subscribe<VisionCaptureStarted>(OnCaptureStarted, EventDeliveryPolicy.MainThread);
+        _captureStoppedToken = hub.Subscribe<VisionCaptureStopped>(OnCaptureStopped, EventDeliveryPolicy.MainThread);
+        _trackPublishedToken = hub.Subscribe<VideoTrackPublished>(OnTrackPublished, EventDeliveryPolicy.MainThread);
+        _trackUnpublishedToken = hub.Subscribe<VideoTrackUnpublished>(OnTrackUnpublished, EventDeliveryPolicy.MainThread);
+        _visionStatusToken = hub.Subscribe<VisionContextStatusReceived>(OnVisionStatus, EventDeliveryPolicy.MainThread);
+        _visionTriggerToken = hub.Subscribe<VisionContextTriggerReceived>(OnVisionTrigger, EventDeliveryPolicy.MainThread);
+        _respondModeToken = hub.Subscribe<RespondModeUpdateResultReceived>(OnRespondModeUpdate, EventDeliveryPolicy.MainThread);
     }
 
     void OnDestroy()
     {
-        var hub = ConvaiManager.ActiveManager?.EventHub;
-        if (hub == null) return;
+        if (ConvaiManager.ActiveManager == null) return;
+        if (!ConvaiManager.ActiveManager.TryGetEventHub(out IEventHub hub)) return;
 
-        hub.Unsubscribe<VisionCaptureStarted>(OnCaptureStarted);
-        hub.Unsubscribe<VisionCaptureStopped>(OnCaptureStopped);
-        hub.Unsubscribe<VideoTrackPublished>(OnTrackPublished);
-        hub.Unsubscribe<VideoTrackUnpublished>(OnTrackUnpublished);
+        hub.Unsubscribe(_captureStartedToken);
+        hub.Unsubscribe(_captureStoppedToken);
+        hub.Unsubscribe(_trackPublishedToken);
+        hub.Unsubscribe(_trackUnpublishedToken);
+        hub.Unsubscribe(_visionStatusToken);
+        hub.Unsubscribe(_visionTriggerToken);
+        hub.Unsubscribe(_respondModeToken);
     }
 
     private void OnCaptureStarted(VisionCaptureStarted e)
@@ -191,10 +310,19 @@ public class VisionAnalytics : MonoBehaviour
 
     private void OnTrackUnpublished(VideoTrackUnpublished e)
         => Debug.Log($"[Vision] Track '{e.TrackName}' unpublished. Reason: {e.Reason}");
+
+    private void OnVisionStatus(VisionContextStatusReceived e)
+        => Debug.Log($"[Vision] Status: {e.Outcome} (source: {e.ActiveSourceLabel}, last frame age: {e.LastFrameAgeMs} ms)");
+
+    private void OnVisionTrigger(VisionContextTriggerReceived e)
+        => Debug.Log($"[Vision] Trigger: {e.Outcome}, attached {e.FramesAttached} frame(s), respond mode {e.ActualRespondMode}");
+
+    private void OnRespondModeUpdate(RespondModeUpdateResultReceived e)
+        => Debug.Log($"[Vision] Respond mode for '{e.Modality}' is now '{e.Mode}' (status: {e.Status})");
 }
 ```
 
-#### VisionCaptureStarted
+## `VisionCaptureStarted`
 
 Raised when a frame source begins producing frames.
 
@@ -208,13 +336,9 @@ Raised when a frame source begins producing frames.
 | `AspectRatio` | `float` | `Width / Height`. |
 | `TotalPixels` | `int` | `Width * Height`. |
 
-#### VisionFrameCaptured
+## `VisionFrameCaptured`
 
-Raised each time a frame is captured.
-
-{% hint style="warning" %}
-`VisionFrameCaptured` fires every captured frame. At 15 fps over a 60-second session this is 900 events. Use `EventDeliveryPolicy.Immediate` and keep the handler lightweight. For analytics, sample every N-th frame rather than subscribing to every event.
-{% endhint %}
+Raised each time a frame is captured. This event fires on every captured frame — at 15 fps over a 60-second session that is 900 events. Use `EventDeliveryPolicy.Immediate` and keep the handler lightweight; for analytics, sample every N-th frame rather than subscribing to every event.
 
 | Property | Type | Description |
 | --- | --- | --- |
@@ -225,7 +349,7 @@ Raised each time a frame is captured.
 | `Timestamp` | `DateTime` | UTC time the frame was captured. |
 | `SourceId` | `string` | Source identifier. |
 
-#### VisionCaptureStopped
+## `VisionCaptureStopped`
 
 Raised when a frame source stops producing frames.
 
@@ -241,7 +365,7 @@ Raised when a frame source stops producing frames.
 | `IsNormalStop` | `bool` | `true` when `Reason` is `UserRequested` or `SessionEnded`. |
 | `HasErrorCode` | `bool` | `true` when `ErrorCode` is non-empty. |
 
-#### VideoTrackPublished
+## `VideoTrackPublished`
 
 Raised when the WebRTC video track is successfully opened.
 
@@ -257,7 +381,7 @@ Raised when the WebRTC video track is successfully opened.
 | `RoomSessionId` | `string` | Room session ID. |
 | `IsVisionTrack` | `bool` | `true` when `TrackName == "vision"` (case-insensitive). |
 
-#### VideoTrackUnpublished
+## `VideoTrackUnpublished`
 
 Raised when the WebRTC video track is removed.
 
@@ -270,6 +394,60 @@ Raised when the WebRTC video track is removed.
 | `RoomSessionId` | `string` | Room session ID. |
 | `IsVisionTrack` | `bool` | `true` when `TrackName == "vision"` (same caveat as `VideoTrackPublished.IsVisionTrack`). |
 | `IsNormalUnpublish` | `bool` | `true` when `Reason` is `UserRequested` or `SessionEnded`. |
+
+## `VisionContextStatusReceived`
+
+Backend acknowledgement of a `vision-status` query, sent via `RequestVisionStatus`, describing the state of the session's dynamic vision frame buffer.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `Status` | `string` | Response status: `success`, `error`, `processing`, or `pending`. |
+| `Message` | `string` | Optional human-readable message accompanying the response. |
+| `UpdateId` | `string` | Echo of the request's idempotency key. |
+| `Outcome` | `string` | Buffer outcome: `frames_available`, `buffer_empty`, `no_active_video`, or `vision_not_enabled`. |
+| `ActiveSource` | `string` | Participant ID of the video source the backend selected for this session, if any. |
+| `ActiveSourceLabel` | `string` | Source label of the selected video publisher (e.g. webcam, canvas, screen). |
+| `LastFrameAgeMs` | `int` | Age of the newest buffered frame in milliseconds; `0` when unknown or no frames are buffered. |
+| `RawExtras` | `JObject` | Full extras payload, including the `vision_buffer` diagnostics object (retained frames, PTS window, drop counters) for fields without typed accessors. |
+| `Timestamp` | `DateTime` | UTC time this event was created on the client. |
+
+## `VisionContextTriggerReceived`
+
+Backend acknowledgement of a `vision-trigger` request, sent via `TriggerVision`, reporting how the trigger was resolved (respond mode, downgrades) and what frames were attached to the model turn.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `Status` | `string` | Response status: `success`, `error`, `processing`, or `pending`. |
+| `Message` | `string` | Optional human-readable message accompanying the response. |
+| `UpdateId` | `string` | Echo of the request's idempotency key. |
+| `Outcome` | `string` | Trigger outcome, e.g. `frames_available`, `buffer_empty`, `vision_not_enabled`, `invalid_respond_mode`, `invalid_frame_indices`, `frame_id_evicted`, or `rate_limited`. |
+| `RequestedRespondMode` | `string` | Respond mode the request asked for (`silent`/`auto`/`must_respond`). |
+| `ActualRespondMode` | `string` | Respond mode the backend actually applied after state-based downgrades. |
+| `RequestedRunLlm` | `string` | Requested LLM policy on the wire (`true`/`auto`/`false`). |
+| `ActualRunLlm` | `string` | LLM policy actually applied after downgrades. |
+| `LlmTriggered` | `bool` | `true` when the trigger caused an LLM invocation. |
+| `Downgraded` | `bool` | `true` when the backend lowered the requested respond mode (e.g. bot busy, user speaking). |
+| `DowngradeReason` | `string` | Why the request was downgraded, e.g. `bot_busy` or `user_speaking`; empty otherwise. |
+| `FramesAttached` | `int` | Number of image frames attached to the turn. |
+| `AttachOutcome` | `string` | Attach outcome: `attached`, `deduped_stub`, `stale_skipped`, or `none`. |
+| `ImageTokensEstimate` | `int` | Backend estimate of the image tokens the attached frames cost (attribution only, not billing). |
+| `AttachedFramePts` | `IReadOnlyList<long>` | Presentation timestamps (nanoseconds) of the exact frames the model saw. |
+| `RawExtras` | `JObject` | Full extras payload (including `vision_buffer` diagnostics) for fields without typed accessors. |
+| `Timestamp` | `DateTime` | UTC time this event was created on the client. |
+
+## `RespondModeUpdateResultReceived`
+
+Backend acknowledgement of a `respond-mode-update` request, sent via `UpdateRespondMode`, echoing the lane and the mode that was applied, or the rejection when a lane cannot be changed.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `Status` | `string` | Response status: `success` when applied, `error` when rejected. |
+| `Message` | `string` | Optional human-readable message (e.g. the rejection reason for a user-input lane). |
+| `UpdateId` | `string` | Echo of the request's idempotency key, when the backend returns one. |
+| `Modality` | `string` | The lane the update targeted, as a backend modality string (e.g. `vision`, `context_update`). |
+| `Mode` | `string` | The respond mode now in effect for the lane (`silent`/`auto`/`must_respond`). |
+| `RawExtras` | `JObject` | Full extras payload, including the backend's complete `respond_modes` lane snapshot. |
+| `Timestamp` | `DateTime` | UTC time this event was created on the client. |
 
 ## Next steps
 

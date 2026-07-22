@@ -1,6 +1,7 @@
 ---
 title: Write a custom action executor
-description: Implement IConvaiActionExecutor on a MonoBehaviour to connect custom movement, inventory, UI, or physics behaviors to the Convai action pipeline.
+description: Connect custom movement, inventory, UI, or physics behaviors to the Convai action pipeline by writing your own executor component.
+last_reviewed: "4.4.0"
 ---
 
 When the built-in executors don't match your project's movement system, interaction model, or gameplay rules, implement `IConvaiActionExecutor`. A custom executor is a standard C# `MonoBehaviour` with a single async method. The dispatcher treats it identically to any built-in executor — all policies, events, and cancellation behavior apply automatically.
@@ -58,10 +59,10 @@ Return one of these factory methods from `ExecuteAsync`:
 
 | Factory method | When to use |
 | --- | --- |
-| `ConvaiActionExecutionResult.Succeeded()` | The behavior completed successfully |
+| `ConvaiActionExecutionResult.Succeeded(string message = null)` | The behavior completed successfully |
 | `ConvaiActionExecutionResult.Failed(string message = null, Exception exception = null)` | A genuine error occurred (missing component, invalid state, gameplay failure) |
 | `ConvaiActionExecutionResult.Unhandled(string message = null)` | This executor intentionally declines to handle the invocation (wrong context or target type) |
-| `ConvaiActionExecutionResult.Canceled()` | The `CancellationToken` was signaled — return this when you observe cancellation in a loop |
+| `ConvaiActionExecutionResult.Canceled()` | Returned automatically by the dispatcher when it classifies an uncaught cancellation as non-timeout-driven. Do not return this manually — let the exception propagate (see Cancellation below) |
 
 {% hint style="danger" %}
 Do **not** return `ConvaiActionExecutionResult.TimedOut()` manually. The dispatcher returns `TimedOut` automatically when `TimeoutSeconds` expires and the `CancellationToken` is triggered. If you return it yourself, the result is ambiguous and the dispatcher's timeout tracking is bypassed.
@@ -88,20 +89,20 @@ while (!arrived)
 }
 ```
 
-If your code catches `OperationCanceledException`, return `ConvaiActionExecutionResult.Canceled()` immediately:
+Prefer letting `OperationCanceledException` propagate instead of catching it yourself. The dispatcher wraps your `ExecuteAsync` in a try/catch and classifies an uncaught `OperationCanceledException` for you: if the step's own `TimeoutSeconds` expired, it returns `TimedOut`; for any other cancellation (`ReplaceCurrent`, disable, destroy), it returns `Canceled`. If you catch the exception yourself and unconditionally return `ConvaiActionExecutionResult.Canceled()`, you misreport timeout-driven cancellations as `Canceled` instead of `TimedOut`.
+
+If you need to run cleanup on cancellation, use `finally` rather than `catch` so the exception still propagates for correct classification:
 
 ```csharp
 try
 {
     await SomeAsyncOperation(cancellationToken);
 }
-catch (OperationCanceledException)
+finally
 {
-    return ConvaiActionExecutionResult.Canceled();
+    // Cleanup that must run whether the operation succeeded or was canceled
 }
 ```
-
-Alternatively, let `ThrowIfCancellationRequested` propagate. The dispatcher wraps your `ExecuteAsync` in a try/catch and converts uncaught `OperationCanceledException` to `Canceled` automatically.
 
 ## Complete example: highlight object executor
 
@@ -143,19 +144,16 @@ public sealed class HighlightObjectExecutor : MonoBehaviour, IConvaiActionExecut
                 (int)(_highlightDuration * 1000),
                 cancellationToken);
         }
-        catch (OperationCanceledException)
+        finally
         {
-            // Clean up on cancellation
+            // Clean up whether the wait completed or was canceled
             if (outline != null)
                 outline.enabled = false;
-
-            return ConvaiActionExecutionResult.Canceled();
         }
 
-        // 5. Clean up and return success
-        if (outline != null)
-            outline.enabled = false;
-
+        // 5. Letting a cancellation propagate out of the try block above means the
+        // dispatcher classifies it correctly (TimedOut vs. Canceled) instead of this
+        // executor guessing — see "Cancellation" above.
         return ConvaiActionExecutionResult.Succeeded();
     }
 }
@@ -195,7 +193,7 @@ public async Task<ConvaiActionExecutionResult> ExecuteAsync(
 * **Use `invocation.ResolvedTarget`, not `invocation.Command.Target`.** The dispatcher has already resolved the name to a `GameObject` binding — don't re-parse the raw string.
 * **Return `Unhandled` when this executor is not appropriate.** A single executor component can be shared across multiple action definitions. Returning `Unhandled` signals the dispatcher to fire `OnStepUnhandled` without treating it as a hard failure.
 * **Set `TimeoutSeconds` in the action definition.** Use the timeout mechanism rather than implementing your own deadline logic inside the executor.
-* **Clean up on cancellation.** If your executor enables an effect, moves an object, or holds a resource, release it before returning `Canceled`.
+* **Clean up on cancellation.** If your executor enables an effect, moves an object, or holds a resource, release it in a `finally` block before the cancellation exception propagates.
 * **Do not hold state between invocations.** The same executor instance may be called for different targets across multiple batches. Do not assume the previous invocation's state is still valid.
 
 ## Next steps

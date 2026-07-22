@@ -35,7 +35,7 @@ These do not block connection but may affect functionality.
 
 | Warning                                      | Cause                                                                          | Fix                                                    |
 | -------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------ |
-| API key not configured                       | `ConvaiSettings.HasApiKey` returns false                                       | Open **Convai > Account** and enter your API key       |
+| API key not configured                       | `ConvaiSettings.HasApiKey` returns false                                       | Open **Convai > Settings > Credentials** and enter your API key       |
 | Video mode active but no vision source found | `_connectionType` is `AudioVideo` but no `IVisionFrameSource` component exists | Add a frame source component or switch to `Audio` mode |
 
 {% hint style="success" %}
@@ -70,7 +70,7 @@ void Start()
 | Symptom                                               | Likely cause                                                      | Fix                                                                                                                                                         |
 | ----------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `[ConvaiRuntime] Started successfully` not in Console | `ConvaiManager` missing or failed to bootstrap                    | Check that `ConvaiManager` is in the scene. Look for earlier errors in the Console.                                                                         |
-| Room never connects — no character-connected log      | API key invalid or missing; network issue                         | Verify your API key in **Convai > Account**. Check firewall rules allow WebSocket/HTTPS to `live.convai.com`.                                               |
+| Room never connects — no character-connected log      | API key invalid or missing; network issue                         | Verify your API key in **Convai > Settings > Credentials**. Check firewall rules allow WebSocket/HTTPS to `live.convai.com`.                                               |
 | `[ChatTranscriptUI] Dependencies not injected...`     | `ConvaiManager` not found at UI startup                           | Ensure `ConvaiManager` is in the scene. Its execution order (-1100) guarantees it runs first.                                                               |
 | Character `IsCharacterReady` stays `false`            | Character ID is wrong or character does not exist on your account | Verify the Character ID matches exactly what is shown on your Convai dashboard.                                                                             |
 | Mic never opens — character hears nothing             | Push-to-talk mode is on and mic starts muted                      | In `ConvaiRoomManager`, confirm **Mode** is `HandsFree`, or press **T** if using push-to-talk.                                                              |

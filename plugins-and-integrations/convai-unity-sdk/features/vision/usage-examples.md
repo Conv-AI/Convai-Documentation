@@ -1,6 +1,7 @@
 ---
 title: Vision usage examples
-description: Find code patterns for common Vision setups, including safety training, webcam selection, overhead cameras, look-at activation, and WebGL deployment.
+description: Find code patterns for common Vision setups, including safety training, webcam selection, look-at activation, on-demand triggers, and WebGL deployment.
+last_reviewed: "4.4.0"
 ---
 
 These examples cover the most common Vision integration patterns. Each example is self-contained — copy the relevant script, attach it to the appropriate GameObject, and configure the serialized fields in the Inspector.
@@ -190,7 +191,94 @@ public class WebGLVisionSetup : MonoBehaviour
 **HTTPS required on WebGL.** The `canvas.captureStream()` API is blocked by browsers on non-HTTPS origins. Deploy your WebGL build to an HTTPS host before testing Vision in production. `http://localhost` is the only exception.
 {% endhint %}
 
+## Trigger vision on demand and adjust respond mode
+
+The previous examples all publish frames continuously through `ConvaiVisionPublisher`. A separate, lower-level surface on `IConvaiRoomConnectionService` lets you ask the backend to inspect the buffered frames on demand — independent of the publisher's own cadence — and control whether that inspection makes the character speak. This pattern fits a "Look now" button, an inspection tool the player triggers manually, or a step in a scripted sequence that needs a vision check at a precise moment.
+
+`RequestVisionStatus()` asks the backend to report the state of the session's frame buffer. `TriggerVision(ConvaiVisionTriggerRequest)` asks the backend to attach buffered frames to the next turn and, depending on the request's respond mode, invoke the model. `UpdateRespondMode(ConvaiRespondModeLane, ConvaiRespondMode)` changes how an entire input lane affects the character's speech for the rest of the session. All three are acknowledged asynchronously through domain events rather than a return value — see [Vision scripting API](scripting-api.md) for the full method signatures, request fields, and event payloads.
+
+**Expected outcome:** Calling `RequestLookNow()` logs the buffer status, then the character describes what changed and speaks its answer. Calling `SilenceVisionUntilAsked()` stops the character from reacting to new vision frames until `RequestLookNow()` is called again.
+
+```csharp
+using Convai.Domain.DomainEvents.Vision;
+using Convai.Domain.EventSystem;
+using Convai.Runtime;
+using Convai.Runtime.Components;
+using Convai.Runtime.Room;
+using Convai.Runtime.Vision.Context;
+using UnityEngine;
+
+/// <summary>
+/// Requests an on-demand vision check outside the publisher's regular frame cadence,
+/// then reports the buffer status and the trigger outcome. Attach anywhere in the scene.
+/// </summary>
+public class OnDemandVisionInspector : MonoBehaviour
+{
+    private IConvaiRoomConnectionService _roomService;
+    private SubscriptionToken _statusToken;
+    private SubscriptionToken _triggerToken;
+
+    void OnEnable()
+    {
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.TryGetRoomConnectionService(out _roomService))
+            return;
+
+        if (!manager.TryGetEventHub(out IEventHub hub))
+            return;
+
+        _statusToken = hub.Subscribe<VisionContextStatusReceived>(OnVisionStatus, EventDeliveryPolicy.MainThread);
+        _triggerToken = hub.Subscribe<VisionContextTriggerReceived>(OnVisionTriggerAck, EventDeliveryPolicy.MainThread);
+    }
+
+    void OnDisable()
+    {
+        if (ConvaiManager.ActiveManager == null || !ConvaiManager.ActiveManager.TryGetEventHub(out IEventHub hub))
+            return;
+
+        hub.Unsubscribe(_statusToken);
+        hub.Unsubscribe(_triggerToken);
+    }
+
+    // Call from a "Look now" UI button
+    public void RequestLookNow()
+    {
+        _roomService?.RequestVisionStatus();
+        _roomService?.TriggerVision(new ConvaiVisionTriggerRequest
+        {
+            Text = "What changed on the workbench since I last looked?",
+            RespondMode = ConvaiRespondMode.MustRespond
+        });
+    }
+
+    // Call once, e.g. when the player enters an area where vision responses are a distraction
+    public void SilenceVisionUntilAsked()
+    {
+        _roomService?.UpdateRespondMode(ConvaiRespondModeLane.Vision, ConvaiRespondMode.Silent);
+    }
+
+    private void OnVisionStatus(VisionContextStatusReceived status)
+    {
+        Debug.Log($"[Vision] {status.Outcome} — last frame age: {status.LastFrameAgeMs} ms (source: {status.ActiveSourceLabel})");
+    }
+
+    private void OnVisionTriggerAck(VisionContextTriggerReceived ack)
+    {
+        if (ack.Downgraded)
+            Debug.Log($"[Vision] Trigger downgraded to {ack.ActualRespondMode}: {ack.DowngradeReason}");
+        else if (ack.LlmTriggered)
+            Debug.Log($"[Vision] Character responded using {ack.FramesAttached} frame(s).");
+    }
+}
+```
+
+`RequestLookNow()` above builds a new `ConvaiVisionTriggerRequest` with no explicit `UpdateId` on every call, so calling it again after a dropped acknowledgement sends a distinct trigger, not a safe replay — each call gets its own generated ID. To make a retry idempotent, generate one `UpdateId` up front, pass it to the constructor, and reuse the same value across retries; the backend then replays the original acknowledgement for that ID instead of triggering again. See [Vision scripting API](scripting-api.md#convaivisiontriggerrequest) for the constructor signature.
+
 ## Next steps
+
+{% content-ref url="scripting-api.md" %}
+[Vision scripting API](scripting-api.md)
+{% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
 [Troubleshoot vision](troubleshooting-and-diagnostics.md)
