@@ -3,13 +3,12 @@ title: Vision quick start
 description: >-
   Add Vision to an existing Convai scene so a character can see and respond to
   live camera input, using the SDK's automatic component setup.
+last_reviewed: "4.4.0"
 ---
-
-# Vision quick start
 
 Add Vision to an existing Convai scene in three steps. The SDK adds and wires the required components automatically when you set `ConvaiRoomManager` to Video mode.
 
-### Prerequisites
+## Prerequisites
 
 Before starting, verify:
 
@@ -17,7 +16,7 @@ Before starting, verify:
 
 {% stepper %}
 {% step %}
-#### Set Connection Type to Video
+### Set Connection Type to Video
 
 Select the `ConvaiRoomManager` GameObject in the Hierarchy. In the Inspector, set **Connection Type** to **Video**.
 
@@ -25,7 +24,7 @@ Select the `ConvaiRoomManager` GameObject in the Hierarchy. In the Inspector, se
 
 A dialog appears immediately:
 
-> **Convai Vision Setup** — Connection Type is set to Video, but required vision components are missing. Add `ConvaiVisionPublisher` and `CameraVisionFrameSource` under this ConvaiRoomManager?
+> **Convai Vision Setup** — Dynamic vision context requires a video publisher and frame source. Add `ConvaiVisionPublisher` and `CameraVisionFrameSource` under this ConvaiRoomManager?
 
 Click **Add Components**.
 
@@ -35,7 +34,7 @@ The SDK creates a child GameObject named **ConvaiVisionRoot** under `ConvaiRoomM
 {% endstep %}
 
 {% step %}
-#### Assign a camera
+### Assign a camera
 
 Select the **ConvaiVisionRoot** GameObject (child of `ConvaiRoomManager`). On the `CameraVisionFrameSource` component, locate the **Target Camera** field.
 
@@ -50,7 +49,7 @@ If **Target Camera** is blank and no camera in the scene is tagged **MainCamera*
 {% endstep %}
 
 {% step %}
-#### Verify with Debug Preview
+### Verify with Debug Preview
 
 On any scene GameObject, click **Add Component** → **Convai/Vision/Vision Debug Preview (Editor Only)**.
 
@@ -68,7 +67,7 @@ Press **Play**. An overlay appears in the Game view showing the live camera feed
 If the overlay stays blank or the FPS counter reads zero, verify that `ConvaiRoomManager.Connection Type` is set to **Video** and that the room has fully connected. See [Troubleshoot vision](troubleshooting-and-diagnostics.md) for a step-by-step diagnosis.
 {% endhint %}
 
-### Manual component setup
+## Manual component setup
 
 If you clicked **Later** on the dialog, or want to place the components on a specific GameObject, add them manually:
 
@@ -80,7 +79,7 @@ If you clicked **Later** on the dialog, or want to place the components on a spe
 
 <figure><img src="../../../../.gitbook/assets/image (492).png" alt="Manual vision setup showing ConvaiVisionPublisher and CameraVisionFrameSource components"><figcaption><p>Manual vision setup — publisher and frame source components.</p></figcaption></figure>
 
-### Next steps
+## Next steps
 
 {% content-ref url="how-vision-works.md" %}
 [how-vision-works.md](how-vision-works.md)

@@ -144,6 +144,7 @@
       * [Troubleshoot scene metadata](plugins-and-integrations/convai-unity-sdk/features/scene-metadata/troubleshooting-and-diagnostics.md)
     * [Vision](plugins-and-integrations/convai-unity-sdk/features/vision/README.md)
       * [How vision works](plugins-and-integrations/convai-unity-sdk/features/vision/how-vision-works.md)
+      * [Dynamic vision context](plugins-and-integrations/convai-unity-sdk/features/vision/dynamic-vision-context.md)
       * [Vision quick start](plugins-and-integrations/convai-unity-sdk/features/vision/quick-start.md)
       * [Vision frame sources](plugins-and-integrations/convai-unity-sdk/features/vision/frame-sources.md)
       * [Publish policies](plugins-and-integrations/convai-unity-sdk/features/vision/publishing-and-policies.md)
