@@ -3,7 +3,7 @@ title: Add lip sync
 description: >-
   Connect Convai audio output to your character's facial blendshapes,
   synchronize mouth movement with speech, and tune playback latency.
-last_reviewed: "4.2.0"
+last_reviewed: "4.4.0"
 ---
 
 The Convai SDK for Unity includes a real-time lip sync system that drives `SkinnedMeshRenderer` blendshapes in sync with the character's voice audio. It supports three industry-standard blendshape formats and handles playback buffering, smoothing, and fade-out automatically.
@@ -35,8 +35,8 @@ Add `ConvaiLipSyncComponent` to the same GameObject as your `ConvaiCharacter` (o
 In the Inspector, set **Locked Profile ID** to the transport format your character uses:
 
 * `arkit` — Apple ARKit (61 blendshapes)
-* `metahuman` — Unreal MetaHuman (275+ blendshapes)
-* `cc4extended` — Character Creator 4 Extended (240+ blendshapes)
+* `metahuman` — Unreal MetaHuman (251 blendshapes)
+* `cc4_extended` — Character Creator 4 Extended (170 blendshapes)
 {% endstep %}
 
 {% step %}
@@ -65,8 +65,8 @@ Choose the profile that matches the blendshape format your character was rigged 
 | Profile      | Locked Profile ID | Blendshapes | Typical character source                  |
 | ------------ | ----------------- | ----------- | ----------------------------------------- |
 | ARKit        | `arkit`           | 61          | Apple-rigged characters, some custom rigs |
-| MetaHuman    | `metahuman`       | 275+        | Unreal MetaHuman exported to Unity        |
-| CC4 Extended | `cc4extended`     | 240+        | Reallusion Character Creator 4 characters |
+| MetaHuman    | `metahuman`       | 251         | Unreal MetaHuman exported to Unity        |
+| CC4 Extended | `cc4_extended`    | 170         | Reallusion Character Creator 4 characters |
 
 If your character was rigged with non-standard blendshape names, create a custom map to route the SDK's output channels to your rig's actual names.
 
@@ -80,7 +80,7 @@ If your character was rigged with non-standard blendshape names, create a custom
 
 | Field              | Default        | Description                                                            |
 | ------------------ | -------------- | ---------------------------------------------------------------------- |
-| `_lockedProfileId` | `arkit`        | Transport format the SDK streams (`arkit`, `metahuman`, `cc4extended`) |
+| `_lockedProfileId` | `arkit`        | Transport format the SDK streams (`arkit`, `metahuman`, `cc4_extended`) |
 | `_mapping`         | _(none)_       | Optional custom mapping asset (leave empty to use bundled auto-map)    |
 | `_targetMeshes`    | _(empty list)_ | `SkinnedMeshRenderer` components to write blendshapes to               |
 
@@ -90,6 +90,7 @@ If your character was rigged with non-standard blendshape names, create a custom
 | ------------------ | ------- | -------- | -------------------------------------------------------------- |
 | `_smoothingFactor` | `0.5`   | 0–0.9    | Exponential smoothing per frame (higher = smoother but slower) |
 | `_fadeOutDuration` | `0.2`   | 0.05–2.0 | Seconds to fade all blendshapes to 0 after audio ends          |
+| `_fadeInDuration`  | `0.1`   | 0–0.5    | Seconds to blend from the pre-playback pose into the first sampled frames at the start of playback, removing the first-frame pop when a response begins (`0` disables it) |
 | `_timeOffset`      | `0.0`   | -0.5–0.5 | Shift playback timing relative to audio (negative = earlier)   |
 
 **Streaming & latency:**
