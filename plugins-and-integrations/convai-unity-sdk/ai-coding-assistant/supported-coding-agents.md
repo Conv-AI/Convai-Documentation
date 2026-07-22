@@ -26,7 +26,7 @@ The install logic is identical for all five agents. When you trigger an install 
 Installing, updating, or removing the managed block is a manual action — it does not run automatically. Trigger it from the Convai Editor's **AI Coding** section, or from **Convai > AI Coding Setup**.
 {% endhint %}
 
-The installed block instructs the agent to read `Packages/com.convai.convai-sdk-for-unity/AIAssistantSkills/convai-unity-sdk/SKILL.md` and its linked references for Convai-specific workflows, and to use Unity MCP tools for generic scene, GameObject, asset, script, console, and Play Mode operations.
+The installed block instructs the agent to read `Packages/com.convai.convai-sdk-for-unity/AIAssistantSkills/convai-unity-sdk/SKILL.md` and its linked references for Convai-specific workflows, and to use Unity MCP tools for generic scene, GameObject, asset, script, console, and Play Mode operations, reserving [Convai's own tools](mcp-tools-reference.md) for SDK-specific configuration and diagnosis.
 
 ## Agent-specific notes
 
@@ -38,10 +38,14 @@ The installed block instructs the agent to read `Packages/com.convai.convai-sdk-
 | Gemini | Created at the project root the first time you install. No additional directory is required. |
 | VS Code Copilot | The SDK creates the `.github/` directory if it does not exist. |
 
-## Related reference
+## Next steps
 
 {% content-ref url="README.md" %}
 [AI coding assistant](README.md)
+{% endcontent-ref %}
+
+{% content-ref url="quick-start.md" %}
+[AI coding assistant quick start](quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="mcp-tools-reference.md" %}
