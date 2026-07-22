@@ -296,6 +296,22 @@ Latency entries appear automatically in the Console after each completed turn:
 Latency measurements appear only in Editor and Development Builds — the `[ClientLatency]` log calls are conditionally compiled. They are not available in release builds unless `CONVAI_DEBUG_LOGGING` is defined.
 {% endhint %}
 
+## LipSync drift monitor
+
+SDK `4.4.0` removed the public `IBlendshapeSink` extension seam entirely — no type of that name remains in the SDK, and custom runtime sink injection is no longer supported. Drive lip sync through a supported map or profile on `ConvaiLipSyncComponent` instead. The related types `SkinnedMeshBlendshapeSink`, `LipSyncDriftMonitor`, `LipSyncDriftSample`, and `LipSyncDriftEvent` were not removed — they were internalized, so they still exist but are no longer part of the public API. The supported diagnostics surface for lip sync alignment is the `Convai → LipSync Drift Monitor` Editor window.
+
+Open the window from `Convai → LipSync Drift Monitor`. Monitoring is opt-in: enable the **Monitor** toggle, enter Play mode, and talk to a character to populate data. Select a character from the dropdown when more than one is registered — samples and events are tracked per character.
+
+The window shows:
+
+* The live drift error, in milliseconds, between the measured audio playhead and the visual (blendshape) clock; a positive value means the mouth is behind the audio
+* A chart plotting drift error and the monitor's cumulative correction over a configurable time window (3-30 seconds), with lifecycle event markers overlaid
+* Mean absolute error, max absolute error, and the correction rate, computed over the visible window
+* A live audio/visual offset override slider for calibrating perceived sync by eye
+* An event log listing lifecycle events (for example gate open, anchor, cancel) with timestamps
+
+Click **Export CSV** to save the current samples and events to a file. The save dialog title is **Export drift samples**, and the default file name is `lipsync-drift-<characterId>.csv`. The exported file contains a sample table with columns `time_s`, `error_ms`, `audio_target_s`, `visual_clock_s`, `cumulative_correction_ms`, `buffered_s`, `headroom_s`, `state`, and `audio_active`, followed by a blank line and an event table with columns `event_time_s` and `label`.
+
 ## Quick reference
 
 | Tool | What it diagnoses | How to access |
@@ -306,6 +322,7 @@ Latency measurements appear only in Editor and Development Builds — the `[Clie
 | **IRoomDiagnostics snapshot** | Connection attempt counts, uptime, last error, agent counts | `room.DiagnosticsCoordinator.GetDiagnostics()` |
 | **Session Metrics messages** | Reconnection success rate, session lifecycle, error timeline | Console filter `[SessionMetrics]`; requires Info or Debug level |
 | **Client Latency metrics** | End-to-end conversation pipeline latency | Console filter `[ClientLatency]`; Editor and Development Builds only |
+| **LipSync Drift Monitor** | Audio-vs-visual lip sync alignment, drift error, CSV export | `Convai → LipSync Drift Monitor` |
 | **Custom log sinks** | Route logs to files, telemetry, or overlays | `ConvaiLogger.RegisterSink(new YourSink())` |
 
 ## Next steps

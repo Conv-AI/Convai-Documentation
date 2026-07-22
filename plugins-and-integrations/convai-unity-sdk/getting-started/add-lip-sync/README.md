@@ -1,9 +1,9 @@
 ---
 title: Add lip sync
 description: >-
-  Connect Convai audio output to your character's facial blendshapes to
-  synchronize mouth movement with speech.
-last_reviewed: "4.2.0"
+  Connect Convai audio output to your character's facial blendshapes,
+  synchronize mouth movement with speech, and tune playback latency.
+last_reviewed: "4.4.0"
 ---
 
 The Convai SDK for Unity includes a real-time lip sync system that drives `SkinnedMeshRenderer` blendshapes in sync with the character's voice audio. It supports three industry-standard blendshape formats and handles playback buffering, smoothing, and fade-out automatically.
@@ -35,8 +35,8 @@ Add `ConvaiLipSyncComponent` to the same GameObject as your `ConvaiCharacter` (o
 In the Inspector, set **Locked Profile ID** to the transport format your character uses:
 
 * `arkit` — Apple ARKit (61 blendshapes)
-* `metahuman` — Unreal MetaHuman (275+ blendshapes)
-* `cc4extended` — Character Creator 4 Extended (240+ blendshapes)
+* `metahuman` — Unreal MetaHuman (251 blendshapes)
+* `cc4_extended` — Character Creator 4 Extended (170 blendshapes)
 {% endstep %}
 
 {% step %}
@@ -65,8 +65,8 @@ Choose the profile that matches the blendshape format your character was rigged 
 | Profile      | Locked Profile ID | Blendshapes | Typical character source                  |
 | ------------ | ----------------- | ----------- | ----------------------------------------- |
 | ARKit        | `arkit`           | 61          | Apple-rigged characters, some custom rigs |
-| MetaHuman    | `metahuman`       | 275+        | Unreal MetaHuman exported to Unity        |
-| CC4 Extended | `cc4extended`     | 240+        | Reallusion Character Creator 4 characters |
+| MetaHuman    | `metahuman`       | 251         | Unreal MetaHuman exported to Unity        |
+| CC4 Extended | `cc4_extended`    | 170         | Reallusion Character Creator 4 characters |
 
 If your character was rigged with non-standard blendshape names, create a custom map to route the SDK's output channels to your rig's actual names.
 
@@ -80,7 +80,7 @@ If your character was rigged with non-standard blendshape names, create a custom
 
 | Field              | Default        | Description                                                            |
 | ------------------ | -------------- | ---------------------------------------------------------------------- |
-| `_lockedProfileId` | `arkit`        | Transport format the SDK streams (`arkit`, `metahuman`, `cc4extended`) |
+| `_lockedProfileId` | `arkit`        | Transport format the SDK streams (`arkit`, `metahuman`, `cc4_extended`) |
 | `_mapping`         | _(none)_       | Optional custom mapping asset (leave empty to use bundled auto-map)    |
 | `_targetMeshes`    | _(empty list)_ | `SkinnedMeshRenderer` components to write blendshapes to               |
 
@@ -90,6 +90,7 @@ If your character was rigged with non-standard blendshape names, create a custom
 | ------------------ | ------- | -------- | -------------------------------------------------------------- |
 | `_smoothingFactor` | `0.5`   | 0–0.9    | Exponential smoothing per frame (higher = smoother but slower) |
 | `_fadeOutDuration` | `0.2`   | 0.05–2.0 | Seconds to fade all blendshapes to 0 after audio ends          |
+| `_fadeInDuration`  | `0.1`   | 0–0.5    | Seconds to blend from the pre-playback pose into the first sampled frames at the start of playback, removing the first-frame pop when a response begins (`0` disables it) |
 | `_timeOffset`      | `0.0`   | -0.5–0.5 | Shift playback timing relative to audio (negative = earlier)   |
 
 **Streaming & latency:**
@@ -99,6 +100,7 @@ If your character was rigged with non-standard blendshape names, create a custom
 | `_latencyMode`              | `Balanced` | —        | Preset that controls buffer depth vs. responsiveness |
 | `_maxBufferedSeconds`       | `3.0`      | 1–10     | Ring buffer capacity in seconds                      |
 | `_minResumeHeadroomSeconds` | `0.12`     | 0.05–0.3 | Buffer refill threshold after starvation             |
+| `_deliverChunksAhead`       | `false`    | —        | Preview opt-in for indexed NeuroSync chunks          |
 
 **Latency mode options:**
 
@@ -108,6 +110,14 @@ If your character was rigged with non-standard blendshape names, create a custom
 | `UltraLowLatency` | Minimal delay; susceptible to starvation on unstable connections |
 | `NetworkSafe`     | High buffering; best for unreliable or high-latency networks     |
 | `Custom`          | Unlocks manual control over buffer fields above                  |
+
+## Ahead chunk delivery preview
+
+**Ahead Chunk Delivery (Preview)** enables the SDK to request indexed NeuroSync chunks before their playback position. Leave it disabled for normal projects. Enable it only when you are testing the preview ahead-chunk path for a character that already uses `ConvaiLipSyncComponent`.
+
+When `_deliverChunksAhead` is enabled, the SDK sends `deliver_chunks_ahead=true` in the room connection lip sync configuration. The default request does not include this field, so existing lip sync behavior stays unchanged unless you turn on the preview option.
+
+The SDK buffers ahead chunks by their frame index and waits until frames are contiguous from the start of the response before it starts feeding them to the playback engine. Visual output still waits for the character audio playback signal, so the mouth does not start moving before audible speech begins. If Convai cancels the current NeuroSync timeline or the character turn ends because of an interruption, the SDK clears buffered mouth frames before the next response.
 
 ## Usage examples
 
