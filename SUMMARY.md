@@ -89,6 +89,7 @@
     * [Runtime architecture](plugins-and-integrations/convai-unity-sdk/core-concepts/runtime-architecture.md)
     * [Session lifecycle](plugins-and-integrations/convai-unity-sdk/core-concepts/session-lifecycle.md)
     * [Turn-taking modes](plugins-and-integrations/convai-unity-sdk/core-concepts/turn-taking-modes.md)
+    * [Voice activity detection](plugins-and-integrations/convai-unity-sdk/core-concepts/voice-activity-detection.md)
     * [Event system](plugins-and-integrations/convai-unity-sdk/core-concepts/event-system.md)
   * [Features](plugins-and-integrations/convai-unity-sdk/features/README.md)
     * [Character actions](plugins-and-integrations/convai-unity-sdk/features/character-actions/README.md)
