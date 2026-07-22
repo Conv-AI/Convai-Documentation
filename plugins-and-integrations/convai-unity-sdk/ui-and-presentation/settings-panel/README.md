@@ -21,6 +21,8 @@ The settings panel is an optional scene-level UI that lets users adjust key conv
 
 Changes apply when the user clicks **Save**. The panel closes automatically on save. Clicking **Close** discards unsaved changes.
 
+The **Player Display Name** field initializes from the project-wide `ConvaiSettings.DefaultPlayerDisplayName` setting, configured in the **Runtime Defaults** section of **Convai → Settings**. Once a player saves their own value, the saved override takes precedence on future opens.
+
 ## Add the settings panel to your scene
 
 {% stepper %}
