@@ -3,7 +3,7 @@ title: Install the Convai Unity SDK
 description: >-
   Add the Convai Unity SDK to your Unity 2023.1+ project via the Package Manager
   or Asset Store. Both methods install the identical package.
-last_reviewed: "4.2.0"
+last_reviewed: "4.4.0"
 ---
 
 The Convai Unity SDK is available through two channels. Use **Package Manager** for new projects or when you prefer not to manage Asset Store downloads — the package resolves directly from the Convai registry with no manual download. Use **Asset Store** if your project already sources packages from your Asset Store library or if your studio manages package versions through My Assets.
@@ -34,7 +34,7 @@ A text field appears prompting for the package name.
 
 Type or paste the following identifier into the Name field, then click **Add**:
 
-```
+```text
 com.convai.convai-sdk-for-unity
 ```
 
@@ -42,9 +42,9 @@ Unity contacts the registry, resolves the package, and begins downloading. Three
 
 | Package                           | Version |
 | --------------------------------- | ------- |
-| `com.unity.nuget.newtonsoft-json` | 3.2.2   |
-| `com.unity.ugui`                  | 2.0.0   |
-| `com.unity.inputsystem`           | 1.18.0  |
+| `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> |
+| `com.unity.ugui`                  | <code class="expression">space.vars.dep_ugui_version</code> |
+| `com.unity.inputsystem`           | <code class="expression">space.vars.dep_inputsystem_version</code> |
 
 Wait for the progress bar in the bottom-right of the Unity Editor to complete before continuing.
 {% endstep %}
@@ -92,9 +92,9 @@ Unity imports the package and installs three dependencies automatically:
 
 | Package                           | Version |
 | --------------------------------- | ------- |
-| `com.unity.nuget.newtonsoft-json` | 3.2.2   |
-| `com.unity.ugui`                  | 2.0.0   |
-| `com.unity.inputsystem`           | 1.18.0  |
+| `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> |
+| `com.unity.ugui`                  | <code class="expression">space.vars.dep_ugui_version</code> |
+| `com.unity.inputsystem`           | <code class="expression">space.vars.dep_inputsystem_version</code> |
 
 Wait for the progress bar in the bottom-right of the Unity Editor to complete before continuing.
 {% endstep %}
