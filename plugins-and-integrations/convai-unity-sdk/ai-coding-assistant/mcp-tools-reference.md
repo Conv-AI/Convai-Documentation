@@ -14,7 +14,7 @@ Unity's official MCP server exposes 20 Convai-specific tools under the `Convai.*
 | `Convai.GetProjectStatus` | Foundation | Yes | No |
 | `Convai.InspectScene` | Foundation | Yes | No |
 | `Convai.ValidateSetup` | Foundation | Yes | No |
-| `Convai.BootstrapScene` | Scene and conversation setup | No | Yes — `dryRun` defaults to `false` |
+| `Convai.BootstrapScene` | Scene and conversation setup | No | Yes — `dryRun` defaults differently by caller (see below) |
 | `Convai.ConfigureRoom` | Scene and conversation setup | Yes | Yes — `dryRun` defaults to `true` |
 | `Convai.ConfigurePlayer` | Scene and conversation setup | Yes | Yes — `dryRun` defaults to `true` |
 | `Convai.ConfigureCharacter` | Scene and conversation setup | Yes | Yes — `dryRun` defaults to `true` |
@@ -31,7 +31,7 @@ Unity's official MCP server exposes 20 Convai-specific tools under the `Convai.*
 | `Convai.DiagnoseNarrative` | Narrative | Yes | No |
 | `Convai.TraceRuntimeEvents` | Runtime diagnostics | Yes | No — manages an editor-only trace buffer only |
 
-Toggle any tool under **Project Settings > AI > Unity MCP Server**.
+Toggle any tool under **Edit > Project Settings > AI > Unity MCP Server**.
 
 ## `Convai.GetGuidance`
 
@@ -95,10 +95,10 @@ Idempotently adds the required `ConvaiManager` and `ConvaiRoomManager` to the ac
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `dryRun` | `bool` | `false` | Preview required changes without modifying the scene. |
+| `dryRun` | `bool` | `true` via Unity AI Assistant; `false` via the external MCP tool contract | Preview required changes without modifying the scene. |
 
 {% hint style="warning" %}
-`Convai.BootstrapScene` is the only one of the 20 tools disabled by default, and the only mutating tool whose `dryRun` parameter defaults to `false`. Calling it with no arguments applies the change immediately instead of previewing it. Prefer `Convai.SetupConversationScene` for end-to-end setup; use `Convai.BootstrapScene` only for manager/room-only work.
+`Convai.BootstrapScene` is the only one of the 20 tools disabled by default. Its `dryRun` default also depends on how the agent calls it: Unity AI Assistant's dot-named wrapper defaults `dryRun` to `true` like every other mutating tool, but the underlying MCP tool contract used by external MCP clients (the underscore-named `Convai_BootstrapScene`) defaults `dryRun` to `false` — those clients apply the change immediately unless they pass `dryRun: true` explicitly. Prefer `Convai.SetupConversationScene` for end-to-end setup; use `Convai.BootstrapScene` only for manager/room-only work.
 {% endhint %}
 
 ## `Convai.ConfigureRoom`
