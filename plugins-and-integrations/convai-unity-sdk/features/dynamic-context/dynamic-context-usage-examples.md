@@ -1,51 +1,67 @@
 ---
 title: Dynamic context usage examples
 description: >-
-  Four Dynamic Context examples covering a safety drill, an onboarding
-  walkthrough, a guided tour with timeline events, and a multi-state emergency
-  transition.
-last_reviewed: "4.2.0"
+  Five Dynamic Context examples show a relay-driven trigger, a batched update,
+  an event log, an emergency transition, and synced world-object context.
+last_reviewed: "4.4.0"
 ---
 
-The following examples progress from a single-state Inspector setup to multi-state scripting scenarios. Each example includes the scenario context, concrete setup, and the expected runtime outcome.
+The following examples progress from a single relay-driven trigger to scripted batch updates and synced world-object context. Each example lists the scenario context, the concrete Inspector or script setup, and the expected runtime outcome.
 
 {% hint style="info" %}
-All examples assume `ConvaiManager` is in the scene with a valid API key configured, and the target NPC has a `ConvaiCharacter` component with a Character ID assigned and is able to hold a conversation.
+All examples assume `ConvaiManager` is in the scene with a valid API key configured, and each NPC has a `ConvaiCharacter` component with a Character ID assigned and connected to Convai. The fifth example additionally assumes at least one `ConvaiCharacter` is connected when the tracked value changes, since world-object updates broadcast to every connected character.
 {% endhint %}
 
 ## Safety drill: station tracking
 
 **Context:** A fire suppression certification drill. A trainer NPC guides operators through suppression stations. The character must always know the operator's current station to give station-specific instructions and hazard warnings.
 
-### Setup (Inspector)
+### Setup (Relay + trigger script)
 
-1. Add `ConvaiDynamicContextCommand` to the trainer NPC's GameObject.
-2. Set **Command Type** to **Set State**.
-3. Set **State Name** to `Station`.
-4. Set **State Value** to `Fire Suppression Bay`.
-5. Set **Reaction Mode** to **React Immediately** — the character should acknowledge each station transition.
-6. Add a trigger collider to the Fire Suppression Bay zone. Wire its `OnTriggerEnter` event to the command's `Execute()` method.
+1. Add `ConvaiDynamicContextRelay` to the trainer NPC's GameObject (**Convai → Dynamic Context → Convai Dynamic Context Relay**).
+2. In the **Defaults** section, set **Reaction Mode** to `MustRespond` — the character should acknowledge every station change.
+3. Enable **Flush Immediately** so each station change is sent right away instead of waiting for the normal batch window.
+4. Add a small trigger script to each station's trigger volume, pointing every instance at the same relay:
 
-Repeat with a separate child-GameObject command for each additional station, each with the appropriate **State Value**. In each child command's **Target** section, disable **Auto Resolve Character** and assign the NPC's `ConvaiCharacter` explicitly — auto-resolve only searches the same GameObject.
+```csharp
+using Convai.Runtime.Presentation.DynamicContext;
+using UnityEngine;
+
+public class StationZoneTrigger : MonoBehaviour
+{
+    [SerializeField] private ConvaiDynamicContextRelay _relay;
+    [SerializeField] private string _stationName;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+            _relay.SetState("Station", _stationName);
+    }
+}
+```
+
+5. Set **Station Name** to the zone's label, for example `Fire Suppression Bay`, and repeat for each additional station.
+
+`ConvaiDynamicContextRelay.SetState` takes both a state name and a value, so it cannot be bound directly from a `UnityEvent` in the Inspector the way a single-parameter method can. The trigger script above supplies the name and per-zone value at runtime; the relay resolves the trainer's `ConvaiCharacter` and applies the configured reaction mode.
 
 ### Expected outcome
 
-When the operator enters the Fire Suppression Bay, `Execute()` fires. The character receives the updated `Station` state and immediately responds:
+When the operator enters the Fire Suppression Bay trigger, `StationZoneTrigger` calls `SetState("Station", "Fire Suppression Bay")` on the relay. The relay stages the state with `MustRespond` and flushes immediately:
 
-> _"You've arrived at the Fire Suppression Bay. With the current extreme hazard rating, confirm your PPE is on before touching any equipment."_
+> "You've arrived at the Fire Suppression Bay. With the current extreme hazard rating, confirm your PPE is on before touching any equipment."
 
-The `Station` state persists in the tracker. If the operator asks "Where am I?" at any point, the character answers with the current station value.
+The `Station` state persists in the local tracker. If the operator asks "Where am I?" at any point, the character answers with the current station value.
 
 ## Onboarding walkthrough: batch state update
 
-**Context:** A corporate onboarding simulation. An HR representative NPC adapts its guidance based on which items a new employee has collected and which checkpoints they have cleared. Two conditions are met simultaneously — they should be sent in one atomic update.
+**Context:** A corporate onboarding simulation. An HR representative NPC adapts its guidance based on which items a new employee has collected and which checkpoints they have cleared. Two conditions are met at the same moment — send them in one call so the character reacts to both together.
 
 ### Setup (Scripting)
 
 ```csharp
 using System.Collections.Generic;
+using Convai.Runtime;
 using Convai.Runtime.Components;
-using Convai.Runtime.DynamicContext;
 using UnityEngine;
 
 public class OnboardingProgressTracker : MonoBehaviour
@@ -54,20 +70,17 @@ public class OnboardingProgressTracker : MonoBehaviour
 
     public void OnAccessCardAndBriefingComplete()
     {
-        // Batch update — one canonical rebuild, one network round-trip
         _hrCharacter.DynamicContext.SetStates(
             new Dictionary<string, string>
             {
                 { "AccessCard", "Collected" },
                 { "SecurityBriefing", "Completed" }
             },
-            ConvaiContextReactionMode.ReactImmediately
-        );
+            ConvaiRespondMode.MustRespond);
     }
 
     public void CheckIfReadyForFloorAccess()
     {
-        // Read local tracker — no network call
         bool hasCard = _hrCharacter.DynamicContext.TryGetStateValue("AccessCard", out string cardState)
                        && cardState == "Collected";
         bool hasBriefing = _hrCharacter.DynamicContext.TryGetStateValue("SecurityBriefing", out string briefingState)
@@ -81,49 +94,39 @@ public class OnboardingProgressTracker : MonoBehaviour
 
 ### Expected outcome
 
-`OnAccessCardAndBriefingComplete()` sends one atomic update. The HR character responds immediately:
+`OnAccessCardAndBriefingComplete()` stages both states in one call. The SDK batches staged updates for up to `ConvaiCharacter.DynamicContextBatchDelaySeconds` (0.5 seconds by default) before sending one canonical rebuild to Convai. Because `MustRespond` was requested, the HR character responds once the batch flushes:
 
-> _"You've collected your access card and completed the security briefing — you're cleared for floor access. Head to Workstation 4B next."_
+> "You've collected your access card and completed the security briefing — you're cleared for floor access. Head to Workstation 4B next."
 
 `TryGetStateValue` reads from the local tracker with no network round-trip. It returns the current value if the state was set, or `false` if it was never set or has been removed.
 
-## Guided tour: multiple commands and timeline events
+## Guided tour: exhibit tracking and visitor events
 
-**Context:** A museum guided tour. A docent NPC tracks which exhibit is currently active and records visitor interactions as chronological events. The docent uses that history to give personalized recommendations.
+**Context:** A museum guided tour. A docent NPC tracks which exhibit is currently active and records visitor interactions as chronological events, then uses that history to give personalized recommendations.
 
-### Setup (Inspector — multiple child commands)
+### Setup (Two relay instances)
 
-Because `ConvaiDynamicContextCommand` allows only one instance per GameObject, each command lives on a child GameObject of the NPC.
+`ConvaiDynamicContextRelay` allows only one instance per GameObject, so each relay with a different default reaction mode lives on its own child GameObject of the docent NPC.
 
-**Child GameObject 1 — "SetActiveExhibit"**
+**Child GameObject 1 — "ExhibitRelay"**
 
-* Command Type: `Set State`
-* State Name: `ActiveExhibit`
-* State Value: `Ancient Rome Collection`
-* Reaction Mode: `SyncOnly` — the exhibit name updates silently; tour narrative drives pacing
-* Target → Auto Resolve Character: disabled; Character field: NPC's `ConvaiCharacter`
+* Add `ConvaiDynamicContextRelay`.
+* **Target → Auto Resolve Character:** disabled; **Character:** the docent's `ConvaiCharacter` — the relay is on a child GameObject, not the character's own GameObject.
+* **Defaults → Reaction Mode:** `Silent` — the exhibit name updates without an immediate response; tour narrative drives pacing.
+* Add a trigger script (the same pattern as `StationZoneTrigger` in the first example) to each exhibit's trigger volume, calling `_relay.SetState("ActiveExhibit", _exhibitName)` and pointing every instance at this relay.
 
-**Child GameObject 2 — "RecordVisitorQuestion"**
+**Child GameObject 2 — "EventRelay"**
 
-* Command Type: `Add Event`
-* Event Text: `Visitor asked about the Colosseum reconstruction`
-* Reaction Mode: `Auto`
-* Target → Auto Resolve Character: disabled; Character field: NPC's `ConvaiCharacter`
-
-**Child GameObject 3 — "RecordPhotoTaken"**
-
-* Command Type: `Add Event`
-* Event Text: `Visitor photographed the gladiator exhibit`
-* Reaction Mode: `Auto`
-* Target → Auto Resolve Character: disabled; Character field: NPC's `ConvaiCharacter`
-
-Wire each child command's `Execute()` to timeline markers, interaction zones, or UI buttons. Wire the **On Executed** event on each child to drive UI feedback — highlight exhibit cards, update tour progress — without additional scripting.
+* Add `ConvaiDynamicContextRelay`.
+* **Target → Auto Resolve Character:** disabled; **Character:** the docent's `ConvaiCharacter`.
+* **Defaults → Reaction Mode:** `Auto` — Convai decides whether a logged interaction is worth an immediate response.
+* Wire UI buttons directly to `AddEvent`. `AddEvent` takes a single string parameter, so it binds from a button's **On Click ()** with a static string argument — no script required. Bind one button to `EventRelay → AddEvent` with the argument `Visitor asked about the Colosseum reconstruction`, and a second button to `AddEvent` with `Visitor photographed the gladiator exhibit`.
 
 ### Expected outcome
 
 As the visitor progresses, the docent's canonical context accumulates:
 
-```
+```text
 ActiveExhibit is Ancient Rome Collection
 Visitor asked about the Colosseum reconstruction
 Visitor photographed the gladiator exhibit
@@ -131,18 +134,18 @@ Visitor photographed the gladiator exhibit
 
 The docent references both the current exhibit and the visitor's specific interactions:
 
-> _"Since you photographed the gladiator exhibit, you might enjoy the additional display on Roman military equipment in the next room."_
+> "Since you photographed the gladiator exhibit, you might enjoy the additional display on Roman military equipment in the next room."
 
-## Emergency response: multi-state transition
+## Emergency response: multi-state transition and reaction escalation
 
-**Context:** An industrial safety simulation. A supervisor NPC must respond to a simultaneous shift from routine inspection to emergency mode — three conditions change at once, and the character must acknowledge all of them immediately.
+**Context:** An industrial safety simulation. A supervisor NPC must respond to a simultaneous shift from routine inspection to emergency mode — three state changes and one logged event happen together, and the character must acknowledge all of them in a single response.
 
 ### Setup (Scripting)
 
 ```csharp
 using System.Collections.Generic;
+using Convai.Runtime;
 using Convai.Runtime.Components;
-using Convai.Runtime.DynamicContext;
 using UnityEngine;
 
 public class EmergencyResponseController : MonoBehaviour
@@ -151,35 +154,79 @@ public class EmergencyResponseController : MonoBehaviour
 
     public void TriggerChemicalLeak()
     {
-        // All three states change simultaneously — one atomic update, one canonical rebuild
         _supervisorCharacter.DynamicContext.SetStates(
             new Dictionary<string, string>
             {
                 { "OperationMode", "Emergency" },
-                { "HazardType", "Chemical Leak — Bay 7" },
+                { "HazardType", "Chemical Leak - Bay 7" },
                 { "EvacuationStatus", "In Progress" }
             },
-            ConvaiContextReactionMode.ReactImmediately
-        );
+            ConvaiRespondMode.MustRespond);
 
-        // Log the triggering event after the state batch
         _supervisorCharacter.DynamicContext.AddEvent(
-            "Chemical leak alarm triggered at Bay 7 — automated ventilation engaged",
-            ConvaiContextReactionMode.SyncOnly
-        );
+            "Chemical leak alarm triggered at Bay 7 - automated ventilation engaged",
+            ConvaiRespondMode.Silent);
     }
 }
 ```
 
 ### Expected outcome
 
-The supervisor character receives three state updates and one event. The `ReactImmediately` mode on `SetStates` triggers an immediate response acknowledging all simultaneous changes:
+Both calls stage inside the same debounce window — up to `ConvaiCharacter.DynamicContextBatchDelaySeconds` (0.5 seconds by default) after the first staged change. The tracker combines the three states and the event into one canonical rebuild and keeps the strongest reaction requested across the batch (`MustRespond` outranks `Silent`), so the character produces exactly one response covering all four changes:
 
-> _"Chemical leak at Bay 7 — all personnel evacuate the east wing immediately. Bay 7 ventilation is engaged. Do not re-enter until the all-clear is given."_
+> "Chemical leak at Bay 7 — all personnel evacuate the east wing immediately. Bay 7 ventilation is engaged. Do not re-enter until the all-clear is given."
 
-Using `SetStates` for three simultaneous transitions produces one canonical rebuild rather than three sequential ones, ensuring the character receives a coherent picture rather than three partial updates.
+Calling `SetStates` for the three simultaneous transitions, instead of three sequential `SetState` calls, keeps the changes together in the delta line the character uses to narrate the transition. The `AddEvent` call adds the alarm as a separate chronological line without lowering the reaction already requested for the batch.
+
+## Synced world-object context: shared equipment status
+
+**Context:** An industrial safety simulation with two NPCs on the factory floor — a supervisor and a safety instructor. Both characters must be aware of a pressure valve's open or closed state without either character's script polling the valve directly.
+
+### Setup (World object with a tracked property)
+
+1. Add `ConvaiObjectMetadata` to the valve's GameObject (**Convai → World Object**, or search "Convai World Object" in **Add Component**).
+2. Set **Object Name** to `PressureValve` and **Object Description** to a factual description of the valve's location.
+3. In **Tracked Properties**, add one `ConvaiTrackedContextProperty` entry:
+   * **Property Name:** `Status`
+   * **Source Component:** the valve's controller script
+   * **Source Member Name:** the name of the public property or field that reports the current state, for example `Status`
+   * **Initial Value:** `Closed` — used only if the reflection read fails
+   * **Reaction:** `Auto` — let Convai decide whether the state change is worth mentioning
+
+```csharp
+using UnityEngine;
+
+public class ValveController : MonoBehaviour
+{
+    [SerializeField] private bool _isOpen;
+
+    public string Status => _isOpen ? "Open" : "Closed";
+
+    public void SetOpen(bool isOpen) => _isOpen = isOpen;
+}
+```
+
+The SDK polls every tracked property that has a **Source Component** on a shared timer. When `ValveController.Status` changes, `ConvaiObjectMetadata` broadcasts the updated value to every connected character — not only one — using the state key `PressureValve.Status`.
+
+{% hint style="info" %}
+To push a value without a polled **Source Component**, call `SetTrackedPropertyValue("Status", "Open", ConvaiRespondMode.Auto)` on the `ConvaiObjectMetadata` component from your own script instead of wiring a reflection source. Use this when you already know exactly when the value changes and want to avoid a per-frame reflection read.
+{% endhint %}
+
+### Expected outcome
+
+Once the valve opens, both the supervisor and the safety instructor receive the same state update:
+
+```text
+PressureValve.Status is Open
+```
+
+Either NPC can now reference the valve without a dedicated script feeding it — for example, the supervisor: "The pressure valve is open — hold position until it's confirmed closed." Disabling or removing the `ConvaiObjectMetadata` component removes the `PressureValve.Status` state from every character that was tracking it.
 
 ## Next steps
+
+{% content-ref url="relay-component-reference.md" %}
+[Relay component reference](relay-component-reference.md)
+{% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
 [Dynamic context scripting API](dynamic-context-scripting-api.md)
@@ -187,4 +234,8 @@ Using `SetStates` for three simultaneous transitions produces one canonical rebu
 
 {% content-ref url="sync-behavior-and-timing.md" %}
 [Sync behavior and timing](sync-behavior-and-timing.md)
+{% endcontent-ref %}
+
+{% content-ref url="../scene-metadata/README.md" %}
+[Scene metadata](../scene-metadata/README.md)
 {% endcontent-ref %}

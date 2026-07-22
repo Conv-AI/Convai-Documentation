@@ -1,104 +1,86 @@
 ---
 title: Dynamic context scripting API
 description: >-
-  API reference for IConvaiDynamicContext — all seven method signatures, default
-  parameters, pre-conversation queueing behavior, and Apply() caveats.
-last_reviewed: "4.2.0"
+  Reference for the Convai Unity SDK dynamic context scripting interface,
+  including every method, the respond mode enum, and the attention object API.
+last_reviewed: "4.4.0"
 ---
 
-`IConvaiDynamicContext` is the C# surface for programmatic Dynamic Context control. Access it through the `DynamicContext` property on `ConvaiCharacter`:
+`ConvaiCharacter.DynamicContext` returns the `IConvaiDynamicContext` interface — the scripting surface for tracked state, chronological events, attention-object updates, and raw context sends. This page documents every interface member, the `ConvaiRespondMode` enum that controls whether an update triggers a spoken reply, and the `ConvaiDynamicContextUpdate` type used by `Apply`.
 
 ```csharp
-IConvaiDynamicContext context = _character.DynamicContext;
+using Convai.Runtime.Components;
+using Convai.Runtime.DynamicContext;
+
+IConvaiDynamicContext context = character.DynamicContext;
 ```
 
-The property is lazy-initialized and safe to cache for the lifetime of the component. No additional setup is required.
+`DynamicContext` is available on every `ConvaiCharacter` instance and requires no additional setup.
+
+{% hint style="warning" %}
+`ConvaiContextReactionMode` is removed as of SDK 4.3.0. Every method below takes a `ConvaiRespondMode` value instead. See [Migration from ConvaiContextReactionMode](#migration-from-convaicontextreactionmode) for the full migration table.
+{% endhint %}
 
 ## Method reference
+
+Every tracked method below stages its change in the local tracker; Convai receives the update in the next dynamic context batch — a background flush that fires after `ConvaiCharacter.DynamicContextBatchDelaySeconds` (0.5 seconds by default) or immediately when `Flush()` is called, capped at an internal maximum delay so staged changes are never held indefinitely. When more than one reaction is requested before a batch flushes, the strongest value wins for the whole batch, ranked `Silent` < `Auto` < `MustRespond`. See [Sync behavior and timing](sync-behavior-and-timing.md) for the exact batch window and message content.
 
 ### `SetState`
 
 ```csharp
 void SetState(string name, string value,
-    ConvaiContextReactionMode reaction = ConvaiContextReactionMode.SyncOnly)
+    ConvaiRespondMode reaction = ConvaiRespondMode.Silent)
 ```
 
-Sets or updates one tracked state entry. If the state does not exist, it is created and appended to the canonical context in the order it was first set. If the value is identical to the current value, the call is a no-op — no update is sent.
-
-**Parameters**
+Sets or updates one tracked state entry. If `name` has not been set before, Convai adds it to the [canonical context](how-dynamic-context-works.md#canonical-context-format) in the order it was first set. If `value` is identical to the current value, the call is a no-op — nothing is staged.
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `name` | `string` | — | State identifier. Must be non-empty and non-whitespace. Case-sensitive. |
-| `value` | `string` | — | State value. May be empty string. Cannot be `null`. |
-| `reaction` | `ConvaiContextReactionMode` | `SyncOnly` | Controls whether the character generates an immediate response. |
-
-**Network behavior**
-
-| Condition | Messages sent |
-|---|---|
-| New state | One Append: `"{name} is {value}"` |
-| Existing state, value changed | Replace (full canonical context) + Append: `"{name} changed from {old} to {value}"` |
-| Identical value | None — idempotent no-op |
-
-**Pre-conversation:** queues automatically; delivered as a single Replace at connection time.
+| `value` | `string` | — | State value. May be an empty string. Cannot be `null`. |
+| `reaction` | `ConvaiRespondMode` | `Silent` | Requested reaction for this change. |
 
 ### `SetStates`
 
 ```csharp
 void SetStates(IReadOnlyDictionary<string, string> states,
-    ConvaiContextReactionMode reaction = ConvaiContextReactionMode.SyncOnly)
+    ConvaiRespondMode reaction = ConvaiRespondMode.Silent)
 ```
 
-Sets or updates multiple tracked state entries atomically. Prefer over sequential `SetState` calls when several values change simultaneously — produces one canonical rebuild rather than multiple.
-
-**Parameters**
+Sets or updates multiple tracked state entries in one call, each staged with the same `reaction` value. Prefer `SetStates` over sequential `SetState` calls when several values change at the same moment.
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `states` | `IReadOnlyDictionary<string, string>` | — | Map of state names to values. Must have at least one entry. |
-| `reaction` | `ConvaiContextReactionMode` | `SyncOnly` | Controls whether the character generates an immediate response. |
+| `reaction` | `ConvaiRespondMode` | `Silent` | Requested reaction applied to every entry in this call. |
 
-**Network behavior**
-
-| Condition | Messages sent |
-|---|---|
-| All states are new | One Append listing all new state lines |
-| Any existing state changed | Replace (full canonical context) + Append (all changes summarized) |
-| All values identical to current | None — no-op |
-
-**Pre-conversation:** queues automatically.
+If `states` is `null` or empty, Convai logs a warning (`Cannot set empty dynamic context states`) and the call returns without staging anything. Individual invalid entries (empty name, `null` value) are skipped; the remaining valid entries in the same call still stage.
 
 ```csharp
-_character.DynamicContext.SetStates(
+character.DynamicContext.SetStates(
     new Dictionary<string, string>
     {
         { "Station", "Bay 7" },
         { "HazardLevel", "Extreme" }
     },
-    ConvaiContextReactionMode.ReactImmediately
+    ConvaiRespondMode.MustRespond
 );
 ```
 
 ### `AddEvent`
 
 ```csharp
-void AddEvent(string text,
-    ConvaiContextReactionMode reaction = ConvaiContextReactionMode.Auto)
+void AddEvent(string text, ConvaiRespondMode reaction = ConvaiRespondMode.Auto)
 ```
 
-Appends a chronological event entry. Events accumulate in call order after all states in the canonical context. Unlike states, events are never replaced or deduplicated — each call adds a new line.
-
-**Parameters**
+Appends a chronological event entry. Events accumulate after all states in the canonical context and are never replaced by a later call.
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `text` | `string` | — | Event description. Must be non-empty and non-whitespace. |
-| `reaction` | `ConvaiContextReactionMode` | `Auto` | Controls whether the character generates an immediate response. Default is `Auto` — note the difference from `SetState` and `SetStates`, which default to `SyncOnly`. |
+| `reaction` | `ConvaiRespondMode` | `Auto` | Requested reaction. Note the default differs from `SetState` and `SetStates`, which default to `Silent`. |
 
-**Network behavior:** One Append message containing the event text.
-
-**Pre-conversation:** queues automatically.
+Calling `AddEvent` with identical `text` more than once before the pending batch flushes stages only one entry. The dedup window resets after each flush — the same text staged in a later batch is added again.
 
 ### `RemoveState`
 
@@ -106,33 +88,63 @@ Appends a chronological event entry. Events accumulate in call order after all s
 void RemoveState(string name)
 ```
 
-Removes a tracked state by name and sends an updated canonical context to Convai. If the state is not present in the tracker, the call is a no-op — no message is sent and no warning is logged.
-
-**Parameters**
+Removes a tracked state by name and stages an updated canonical context for the next batch. If `name` is not currently tracked, the call is a no-op — nothing is staged and no warning is logged.
 
 | Parameter | Type | Description |
 |---|---|---|
-| `name` | `string` | Name of the state to remove. Must be non-empty. |
+| `name` | `string` | Name of the state to remove. Must be non-empty; an empty or whitespace value logs a warning (`Dynamic context state name cannot be empty`) and the call returns immediately. |
 
-**Network behavior:** One Replace message containing the canonical context with the state removed. `RemoveState` has no reaction mode — removal never triggers an immediate LLM response.
-
-**Pre-conversation:** queues automatically.
+`RemoveState` has no `reaction` parameter. The staged change always carries `ConvaiRespondMode.Silent` — removing a state never triggers an immediate reply on its own.
 
 ### `Reset`
 
 ```csharp
-void Reset()
+void Reset(bool removeStatic = false)
 ```
 
-Clears all tracked states and events and sends a Reset message to Convai. Takes no parameters.
+Clears every tracked state and event and stages a Reset message for Convai.
 
-**Network behavior:** One Reset-mode message. The character's Dynamic Context view on the Convai side is cleared.
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `removeStatic` | `bool` | `false` | When `true`, the reset also asks Convai to remove the character's static initial dynamic context for the current session. When `false`, only the runtime tracker is cleared. |
 
-**Pre-conversation:** queues automatically.
+`Reset` has no `reaction` parameter — the staged Reset message always carries `ConvaiRespondMode.Silent`. See [Static context at connection time](static-context-at-connection-time.md) for how the static initial dynamic context is set.
 
-{% hint style="warning" %}
-`Reset()` clears the runtime Dynamic Context layer only. It does not affect Initial Dynamic Info Text (sent once at connection time) or facts in the character's system prompt on the Convai dashboard. The character's in-session conversational memory is also not cleared. See [Static context at connection time](static-context-at-connection-time.md) for the full scope of what `Reset()` does and does not clear.
-{% endhint %}
+### `SetCurrentAttentionObject`
+
+```csharp
+void SetCurrentAttentionObject(object currentAttentionObject,
+    ConvaiRespondMode reaction = ConvaiRespondMode.Silent)
+```
+
+Stages the object Convai should treat as the character's current focus for reference grounding — resolving vague player language such as "pick that up" to a specific registered target.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `currentAttentionObject` | `object` | — | Accepts a `string` object name or a `ConvaiActionObjectDefinition` reference. Any other type, or `null`, is rejected. |
+| `reaction` | `ConvaiRespondMode` | `Silent` | Requested reaction for the focus change. |
+
+See [Attention and reference grounding](../character-actions/attention-and-reference-grounding.md) for the full grounding model, silent-failure conditions, and usage examples.
+
+### `ClearCurrentAttentionObject`
+
+```csharp
+void ClearCurrentAttentionObject(ConvaiRespondMode reaction = ConvaiRespondMode.Silent)
+```
+
+Stages a clear for the current attention object. Convai treats the character as having no specific focus until the next `SetCurrentAttentionObject` call.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `reaction` | `ConvaiRespondMode` | `Silent` | Requested reaction for the clear. |
+
+### `Flush`
+
+```csharp
+void Flush()
+```
+
+Sends any staged dynamic context (and pending scene-metadata) changes immediately, without waiting for the batch window. `Flush` is a no-op when the character is not in an active conversation — staged data remains pending and is included in the batch sent automatically once the character becomes ready.
 
 ### `TryGetStateValue`
 
@@ -142,17 +154,15 @@ bool TryGetStateValue(string name, out string value)
 
 Reads the current value of a tracked state from the local tracker. No network call is made.
 
-**Parameters**
-
 | Parameter | Type | Description |
 |---|---|---|
 | `name` | `string` | State name to look up. |
 | `value` | `out string` | Set to the current value if found; `null` if not found. |
 
-**Returns:** `true` if the state exists in the local tracker; `false` if it was never set, has been removed, or was sent via `Apply()` (which bypasses the tracker).
+**Returns:** `true` if the state exists in the local tracker; `false` if it was never set, has been removed, or was sent through `Apply` (which bypasses the tracker).
 
 ```csharp
-if (_character.DynamicContext.TryGetStateValue("HazardLevel", out string level))
+if (character.DynamicContext.TryGetStateValue("HazardLevel", out string level))
     Debug.Log($"Current hazard level: {level}");
 else
     Debug.Log("HazardLevel state not set.");
@@ -164,71 +174,93 @@ else
 void Apply(ConvaiDynamicContextUpdate update)
 ```
 
-Sends a raw typed update directly to the transport layer, bypassing the local tracker. For advanced use cases that construct context text externally — for example, integrating with an external state machine that produces its own canonical text.
-
-**Parameters**
+Sends a raw typed update directly to the transport layer, bypassing the local tracker and the batch queue. Use for advanced cases that construct context text externally, or that combine a context update with a runtime action-config patch or attention-object change in one message — see [`ConvaiActionConfigPatch`](../character-actions/actions-scripting-reference.md#convaiactionconfigpatch) in the character actions scripting reference.
 
 | Parameter | Type | Description |
 |---|---|---|
-| `update` | `ConvaiDynamicContextUpdate` | The update to send. |
+| `update` | `ConvaiDynamicContextUpdate` | The update to send. See [`ConvaiDynamicContextUpdate`](#convaidynamiccontextupdate) below. |
 
-**`ConvaiDynamicContextUpdate` constructor:**
+| Condition | Result |
+|---|---|
+| `update` is `null` | Warning: `Raw dynamic context update cannot be null`. Call returns without sending. |
+| `update.Mode` is not `Reset`, and `Text`, `ActionConfig`, and `CurrentAttentionObject` are all `null` | Warning: `Raw dynamic context updates require text, action_config, current_attention_object, or Reset mode`. Call returns without sending. |
+| Character is not in an active conversation | Warning: `Cannot apply raw dynamic context update: not in conversation`. Update discarded. |
+
+{% hint style="danger" %}
+**`Apply` does not queue or batch.** If the character is not in an active conversation, Convai discards the update and logs a warning — nothing is sent and nothing is retried. Values sent through `Apply` bypass the local tracker: `TryGetStateValue` returns `false` for keys sent this way. Use the tracked methods (`SetState`, `SetStates`, `AddEvent`, `RemoveState`, `Reset`) for all standard context management.
+{% endhint %}
+
+## `ConvaiDynamicContextUpdate`
+
+`Convai.Runtime.DynamicContext` — sealed class
+
+Advanced typed request used by `Apply` to send raw dynamic context updates without exposing transport strings.
 
 ```csharp
 new ConvaiDynamicContextUpdate(
     string text,
     ConvaiContextUpdateMode mode = ConvaiContextUpdateMode.Append,
-    ConvaiContextReactionMode reaction = ConvaiContextReactionMode.Auto)
+    ConvaiRespondMode reaction = ConvaiRespondMode.Auto,
+    bool removeStatic = false,
+    object currentAttentionObject = null,
+    string updateId = null,
+    ConvaiActionConfigPatch actionConfig = null)
 ```
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `text` | `string` | — | Context text to send. Required unless `mode` is `Reset`. |
+| `text` | `string` | — | Context text to send. At least one of `text`, `actionConfig`, or `currentAttentionObject` must be set, or `mode` must be `Reset`. |
 | `mode` | `ConvaiContextUpdateMode` | `Append` | How Convai applies the text. |
-| `reaction` | `ConvaiContextReactionMode` | `Auto` | Whether the character responds immediately. |
+| `reaction` | `ConvaiRespondMode` | `Auto` | Whether the update triggers a spoken reply. |
+| `removeStatic` | `bool` | `false` | When `mode` is `Reset` and this is `true`, also asks Convai to remove the character's static initial dynamic context for the session. |
+| `currentAttentionObject` | `object` | `null` | Attention object to set alongside this update. Accepts a `string` object name or a `ConvaiActionObjectDefinition` reference. |
+| `updateId` | `string` | `null` | Correlates this update with its backend acknowledgement. Auto-generated when omitted. |
+| `actionConfig` | `ConvaiActionConfigPatch` | `null` | Runtime action-config patch to apply alongside this context update. See [Character actions scripting reference](../character-actions/actions-scripting-reference.md#convaiactionconfigpatch). |
 
-{% hint style="danger" %}
-**`Apply()` does not queue.** If the character is not in an active conversation when `Apply()` is called, the update is discarded and a warning is emitted through the Convai logger. Enable Convai debug logging to see it in the Unity Console. No queue is built — the update is lost permanently.
+## `ConvaiContextUpdateMode`
 
-Values sent via `Apply()` are **not** recorded in the local tracker. `TryGetStateValue` returns `false` for keys sent this way.
-
-For all standard context management, use the tracked methods (`SetState`, `SetStates`, `AddEvent`, `RemoveState`, `Reset`). `Apply()` is an escape hatch for external systems, not the primary API.
-{% endhint %}
-
-## Enum reference
-
-### `ConvaiContextReactionMode`
-
-| Value | Description |
-|---|---|
-| `Auto` | Convai decides whether the update warrants an immediate character response. |
-| `ReactImmediately` | Always triggers an immediate LLM turn after the update. Use when the character must acknowledge the change. |
-| `SyncOnly` | Context is updated silently. The character incorporates it into the next natural turn. No immediate response is generated. |
-
-### `ConvaiContextUpdateMode`
-
-Used by `Apply()` and `ConvaiDynamicContextCommand` with **Raw Update** command type.
+Used by `Apply` and `ConvaiDynamicContextUpdate`.
 
 | Value | Description |
 |---|---|
 | `Append` | Adds the text to the existing Dynamic Context without replacing prior content. |
 | `Replace` | Replaces the entire Dynamic Context with the provided text. |
-| `Reset` | Clears all Dynamic Context. The `text` parameter is ignored when mode is `Reset`. |
+| `Reset` | Clears all Dynamic Context. The `text` parameter is ignored when `mode` is `Reset`. |
+
+## `ConvaiRespondMode`
+
+`Convai.Runtime` — the single respond-mode vocabulary shared by dynamic context and dynamic vision.
+
+| Value | Wire string | Description |
+|---|---|---|
+| `Silent` | `silent` | Absorbed into the character's awareness; never triggers a spoken reply on its own. |
+| `Auto` | `auto` | Convai decides whether the update warrants a spoken reply. |
+| `MustRespond` | `must_respond` | Always triggers a spoken reply after the update. |
+
+### Migration from `ConvaiContextReactionMode`
+
+`ConvaiContextReactionMode` is removed in SDK 4.3.0. Every dynamic-context method uses `ConvaiRespondMode` instead.
+
+| Old value (`ConvaiContextReactionMode`) | New value (`ConvaiRespondMode`) |
+|---|---|
+| `SyncOnly` | `Silent` |
+| `ReactImmediately` | `MustRespond` |
+| `Auto` | `Auto` (unchanged) |
+
+The enum was renumbered as part of the rename — `ConvaiRespondMode` declares `Silent = 0, Auto = 1, MustRespond = 2`, while the removed `ConvaiContextReactionMode` declared `Auto = 0, ReactImmediately = 1, SyncOnly = 2`. A scene or prefab saved with a serialized reaction override against an unreleased beta build changes meaning after upgrading: old `Auto` (`0`) deserializes as `Silent`, old `ReactImmediately` (`1`) as `Auto`, and old `SyncOnly` (`2`) as `MustRespond`. Shipped SDK assets carry no such serialized values — this only affects scenes saved against pre-release beta builds. Re-check any serialized reaction field after upgrading if that applies to your project.
 
 ## Default reaction mode reference
 
 | Method | Default reaction |
 |---|---|
-| `SetState` | `SyncOnly` |
-| `SetStates` | `SyncOnly` |
+| `SetState` | `Silent` |
+| `SetStates` | `Silent` |
 | `AddEvent` | `Auto` |
-| `RemoveState` | _(no reaction parameter)_ |
-| `Reset` | _(always `SyncOnly`)_ |
-| `Apply()` / `ConvaiDynamicContextUpdate` | `Auto` |
-
-{% hint style="warning" %}
-`ConvaiDynamicContextCommand` (the Inspector component) defaults **Reaction Mode** to `Auto` for all command types — including `SetState` and `SetStates`. This differs from the scripting API defaults above. When switching between Inspector and scripting, verify the reaction mode is what you expect.
-{% endhint %}
+| `RemoveState` | _(no `reaction` parameter; always `Silent`)_ |
+| `Reset` | _(no `reaction` parameter; always `Silent`)_ |
+| `SetCurrentAttentionObject` | `Silent` |
+| `ClearCurrentAttentionObject` | `Silent` |
+| `Apply` / `ConvaiDynamicContextUpdate` | `Auto` |
 
 ## Next steps
 
@@ -236,8 +268,12 @@ Used by `Apply()` and `ConvaiDynamicContextCommand` with **Raw Update** command 
 [Sync behavior and timing](sync-behavior-and-timing.md)
 {% endcontent-ref %}
 
-{% content-ref url="command-component-reference.md" %}
-[Command component reference](command-component-reference.md)
+{% content-ref url="relay-component-reference.md" %}
+[Relay component reference](relay-component-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="../character-actions/attention-and-reference-grounding.md" %}
+[Attention and reference grounding](../character-actions/attention-and-reference-grounding.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshoot-dynamic-context.md" %}
