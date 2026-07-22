@@ -1,6 +1,7 @@
 ---
 title: Troubleshoot vision
 description: Fix Vision publishing failures, blank feeds, permission errors, and platform-specific issues in Unity using a structured checklist and decision tree.
+last_reviewed: "4.4.0"
 ---
 
 Work through this page top to bottom. Most Vision failures fall into one of four categories: connection misconfiguration, frame source failure, platform-specific restrictions, or WebGL origin policy.
@@ -27,7 +28,7 @@ Select `ConvaiRoomManager` in the Hierarchy. Confirm **Connection Type** is set 
 
 On native platforms (not WebGL), `ConvaiVisionPublisher` requires a frame source. Confirm `CameraVisionFrameSource`, `WebcamVisionFrameSource`, or a custom `IVisionFrameSource` is on the same GameObject or a child. Check the Console for:
 
-```
+```text
 [ConvaiVisionPublisher] No IVisionFrameSource found.
 ```
 {% endstep %}
@@ -47,24 +48,26 @@ Add `VisionDebugPreview` to any scene GameObject. Press Play. If the overlay sho
 
 ## Common issues
 
-| Symptom | Likely cause | Fix |
-| --- | --- | --- |
-| `IsPublishing` stays `false` | Connection Type is `Audio` | Set **Connection Type** to **Video** on `ConvaiRoomManager`. |
-| `IsPublishing` stays `false` | Room not connected | Wait for connection or check API key / network. |
-| `IsPublishing` stays `false` | No frame source found | Add `CameraVisionFrameSource` to the same or child GameObject. |
-| Debug overlay blank, FPS = 0 | Frame source in `Failed` state | Check `ErrorKind` — see [Frame source issues](#frame-source-issues). |
-| Feed is black | Wrong `CameraCaptureMode` for render pipeline | See [Black feed](#black-feed). |
-| `SrpNative` selected | Unimplemented backend | `CameraVisionFrameSource` enters `Failed` immediately — use `ExplicitRenderCompatibility` on SRP/URP. |
-| Webcam not opening | Permission denied (Android / iOS) | Declare `android.permission.CAMERA` in manifest; add `NSCameraUsageDescription` in Info.plist. |
-| Quest feed not starting | Missing manifest permissions | Declare both `horizonos.permission.HEADSET_CAMERA` and `android.permission.CAMERA`. |
-| Quest feed not starting | Wrong hardware | `QuestVisionFrameSource` requires Quest 3 or 3S. Quest 2 and Quest Pro are not supported. |
-| WebGL feed not publishing | Non-HTTPS origin | Deploy to HTTPS. `http://localhost` is the only exception. |
-| WebGL feed not publishing | Frame source assigned | On WebGL the frame source is ignored — remove or leave blank; publisher uses `canvas.captureStream()`. |
-| Debug overlay blank on WebGL | Expected — no RenderTexture | `VisionDebugPreview` has no texture to display on WebGL. Verify via `IsPublishing` instead. |
+| Symptom | Likely cause | Fix | Verify |
+| --- | --- | --- | --- |
+| `IsPublishing` stays `false` | Connection Type is `Audio` | Set **Connection Type** to **Video** on `ConvaiRoomManager`. | Confirm `IsPublishing` becomes `true` after switching Connection Type to Video and reconnecting. |
+| `IsPublishing` stays `false` | Room not connected | Wait for connection or check API key / network. | Check the Console for `[ConvaiRoomManager]` connection logs and confirm `ConvaiManager.ActiveManager` is not `null`. |
+| `IsPublishing` stays `false` | No frame source found | Add `CameraVisionFrameSource` to the same or child GameObject. | Confirm the Console no longer logs `[ConvaiVisionPublisher] No IVisionFrameSource found.` |
+| Debug overlay blank, FPS = 0 | Frame source in `Failed` state | Check `ErrorKind` — see [Frame source issues](#frame-source-issues). | Confirm `State` on the frame source component moves off `Failed` after applying the matching fix below. |
+| Feed is black | Wrong `CameraCaptureMode` for render pipeline | See [Black feed](#black-feed). | Confirm the `VisionDebugPreview` overlay shows a non-black image after switching mode. |
+| `SrpNative` selected | Unimplemented backend | `CameraVisionFrameSource` enters `Failed` immediately — use `ExplicitRenderCompatibility` on SRP/URP. | Confirm `State` no longer reports `Failed` with `ErrorKind = UnsupportedPlatform`. |
+| Webcam not opening | Permission denied (Android / iOS) | Declare `android.permission.CAMERA` in manifest; add `NSCameraUsageDescription` in Info.plist. | Confirm `State` no longer reports `PermissionDenied` and the webcam preview appears after the permission dialog is granted. |
+| Quest feed not starting | Missing manifest permissions | Declare both `horizonos.permission.HEADSET_CAMERA` and `android.permission.CAMERA`. | Confirm passthrough capture starts and `State` reaches `Ready` after redeploying with both entries declared. |
+| Quest feed not starting | Wrong hardware | `QuestVisionFrameSource` requires Quest 3 or 3S. Quest 2 and Quest Pro are not supported. | Confirm the target device is Quest 3 or 3S — `State` cannot reach `Ready` on unsupported hardware regardless of permissions. |
+| WebGL feed not publishing | Non-HTTPS origin | Deploy to HTTPS. `http://localhost` is the only exception. | Confirm the deployed URL uses `https://` (or is `http://localhost`). |
+| WebGL feed not publishing | Frame source assigned | On WebGL the frame source is ignored — remove or leave blank; publisher uses `canvas.captureStream()`. | Confirm `IsPublishing` becomes `true` after removing the frame source reference. |
+| Debug overlay blank on WebGL | Expected — no RenderTexture | `VisionDebugPreview` has no texture to display on WebGL. Verify via `IsPublishing` instead. | Confirm `IsPublishing` is `true` even though the overlay stays blank. |
+| Sampling window has no effect on frame selection | A **Sampling Windows** entry has **Count** set but **Interval Ms** left at `0` (or the reverse) | Set both **Count** and **Interval Ms** to nonzero values for every entry under **Sampling Windows** on `ConvaiRoomManager` (or the `ConvaiRoomManagerProfile` asset). Remove entries you are not using instead of leaving one field at `0`. | Confirm both fields show nonzero values in the Inspector. A dropped window logs no Console warning — the SDK only warns when window counts exceed the **Frames Per Turn** budget — so silence does not confirm the window was sent. |
+| Respond mode change has no visible effect | `UpdateRespondMode` returned `false`, or the backend rejected the request | Check the `bool` return value of `UpdateRespondMode` before assuming it applied; call it only while `IsConnected` is `true`. Subscribe to `RespondModeUpdateResultReceived` and check `Status` and `Message`. | Confirm `RespondModeUpdateResultReceived.Status` is `"success"` and `Modality` / `Mode` match the requested lane and mode. See [Vision scripting API](scripting-api.md) for the event subscription pattern. |
 
 ## Frame source issues
 
-#### Black feed
+### Black feed
 
 A black feed (overlay visible but all pixels black) on `CameraVisionFrameSource` indicates the wrong capture backend for the active render pipeline.
 
@@ -78,22 +81,22 @@ A black feed (overlay visible but all pixels black) on `CameraVisionFrameSource`
 Do not select `SrpNative`. It is not implemented in this SDK build. Selecting it causes `CameraVisionFrameSource` to enter `Failed` state immediately with `ErrorKind = UnsupportedPlatform`.
 {% endhint %}
 
-#### Camera not assigned
+### Camera not assigned
 
 If **Target Camera** is blank and no camera in the scene is tagged **MainCamera**, `CameraVisionFrameSource` enters `Failed` state at startup:
 
-```
+```text
 ErrorKind = InvalidConfiguration
-StatusMessage = "No camera assigned and Camera.main is null."
+StatusMessage = "No camera was assigned and Camera.main is null"
 ```
 
 Fix: assign a camera to the **Target Camera** field, or tag one camera **MainCamera**.
 
-#### Webcam permission denied
+### Webcam permission denied
 
 On Android and iOS, `WebcamVisionFrameSource` requests camera permission on `StartCapture()`. If the user denies it:
 
-```
+```text
 State = Failed
 ErrorKind = PermissionDenied
 ```
@@ -103,7 +106,7 @@ ErrorKind = PermissionDenied
 
 If permission was previously denied by the user, the system will not show the dialog again. Direct the user to the device Settings app to re-enable it.
 
-#### Quest passthrough not starting
+### Quest passthrough not starting
 
 `QuestVisionFrameSource` requires both manifest permissions and the correct hardware.
 
@@ -114,7 +117,7 @@ Required manifest entries:
 <uses-permission android:name="android.permission.CAMERA" />
 ```
 
-Without both declarations, passthrough capture fails silently and the frame source enters `Failed` state. The device does not show a permission dialog — it simply denies access.
+Without both declarations, passthrough capture fails silently and the frame source enters `Failed` state. The device does not show a permission dialog — it denies access outright.
 
 Supported hardware: Meta Quest 3 and Quest 3S only. Quest 2 and Quest Pro do not expose `PassthroughCameraAccess`.
 
