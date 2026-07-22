@@ -1,10 +1,55 @@
 ---
 title: Scene metadata scripting API
-description: Reference for ConvaiMetadataRegistry and ConvaiSceneMetadataCollector, including static events, manual trigger patterns, and debug utilities.
-last_reviewed: "4.2.0"
+description: Complete C# reference for Scene Metadata's classes, covering object properties, tracked-property updates, registry queries, and manual send triggers.
+last_reviewed: "4.4.0"
 ---
 
-The Scene Metadata scripting surface has two parts. `ConvaiMetadataRegistry` is the static central registry — use it to query registration state and listen for changes. `ConvaiSceneMetadataCollector` is the runtime orchestrator — use it to trigger collection, check readiness, and audit all registered objects.
+The Scene Metadata scripting surface has three parts. `ConvaiObjectMetadata` is the component on each scene object — use it to read and update object properties and tracked properties at runtime. `ConvaiMetadataRegistry` is the static central registry — use it to query registration state and listen for changes. `ConvaiSceneMetadataCollector` is the runtime orchestrator — use it to trigger collection, check readiness, and audit all registered objects.
+
+## ConvaiObjectMetadata
+
+`ConvaiObjectMetadata` is a `MonoBehaviour` — access it through a serialized field or `GetComponent<ConvaiObjectMetadata>()`. For Inspector fields, lifecycle, and validation rules, see [Scene metadata component reference](component-reference.md).
+
+### Properties
+
+| Member              | Type     | Description                                                                                                                                                    |
+| ------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ObjectName`         | `string` | Get/set. The object's display name. Setting a new value while the object is registered re-syncs the change to every connected character.                     |
+| `ObjectDescription`  | `string` | Get/set. The object's description text. Setting a new value while the object is registered re-syncs the change to every connected character, same as `ObjectName`. |
+| `IncludeInMetadata`  | `bool`   | Get/set. Whether this object is included in the next metadata collection. Setting a new value while the object is registered re-syncs the change to every connected character, same as `ObjectName`. |
+| `IsRegistered`       | `bool`   | Read-only. `true` when this component is currently registered with `ConvaiMetadataRegistry`.                                                                  |
+| `IsValid`            | `bool`   | Read-only. `true` when `ObjectName` is non-empty and non-whitespace.                                                                                           |
+
+{% hint style="info" %}
+Setting `ObjectName`, `ObjectDescription`, or `IncludeInMetadata` while the object is registered automatically re-syncs the new value to every connected character — no manual send is required. The runtime object exclusion pattern later on this page still calls `CollectAndSendSceneMetadata()` explicitly after setting `IncludeInMetadata`; that call is now redundant for the property change itself, but it remains valid if you want to force an immediate, console-logged send.
+{% endhint %}
+
+### Methods
+
+| Method | Returns | Description |
+| ------ | ------- | ------------ |
+| `SetTrackedPropertyValue(string propertyName, string value, ConvaiRespondMode reaction = ConvaiRespondMode.Silent)` | `void` | Updates one tracked property and pushes the new value to every connected character immediately. This is the imperative counterpart to the tracked properties polled from the `Tracked Properties` list in the Inspector — call it when a value changes from code instead of relying on the automatic poll. `reaction` controls whether the update can make the character speak; defaults to `ConvaiRespondMode.Silent`. |
+| `BuildStateKey(string propertyName)` | `string` | Returns the dynamic-context state key for a tracked property on this object, in the format `"{ObjectName}.{propertyName}"`. |
+| `GetValidationErrors()` | `List<string>` | Returns validation error messages for `ObjectName` (required, max 50 characters) and `ObjectDescription` (max 200 characters). Empty when the metadata is valid. |
+| `ToSceneMetadata()` | `SceneMetadata` | Converts this component's `ObjectName` and `ObjectDescription` into the serializable payload type used internally for RTVI messaging. |
+
+**Push a tracked property update:**
+
+{% code title="Door.cs" %}
+```csharp
+public class Door : MonoBehaviour
+{
+    [SerializeField] private ConvaiObjectMetadata _metadata;
+    private bool _isOpen;
+
+    public void ToggleDoor()
+    {
+        _isOpen = !_isOpen;
+        _metadata.SetTrackedPropertyValue("State", _isOpen ? "open" : "closed");
+    }
+}
+```
+{% endcode %}
 
 ## ConvaiMetadataRegistry
 

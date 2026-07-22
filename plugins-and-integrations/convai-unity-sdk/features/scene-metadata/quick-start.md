@@ -1,7 +1,7 @@
 ---
 title: Scene metadata quick start
-description: Add ConvaiObjectMetadata to scene objects and configure ConvaiSceneMetadataCollector so a Convai character receives object awareness at session start.
-last_reviewed: "4.2.0"
+description: Add object awareness to a Unity scene so a Convai character can reference named objects in conversation from the moment it connects.
+last_reviewed: "4.4.0"
 ---
 
 Set up Scene Metadata to give a Convai character awareness of named objects in your scene. By the end, your character knows what objects exist and can reference them in conversation — entirely from the Inspector.
@@ -16,7 +16,7 @@ Before starting, verify:
 {% step %}
 ### Add ConvaiObjectMetadata to a scene object
 
-Select any GameObject in your scene that the AI character should know about — a piece of equipment, a fire extinguisher, a door, an exhibit. In the Inspector, click **Add Component** and search for `Convai Object Metadata`.
+Select any GameObject in your scene that the AI character should know about — a piece of equipment, a fire extinguisher, a door, an exhibit. In the Inspector, click **Add Component**, then browse to **Convai → World Object** or search for `Convai Object Metadata`.
 
 The **Object Name** field auto-fills from the GameObject's name. Edit it to a clear, human-readable label if the GameObject name is not descriptive — for example, change `Prop_FireExt_01` to `Fire Extinguisher`.
 
@@ -38,6 +38,8 @@ Each component registers itself with `ConvaiMetadataRegistry` automatically when
 {% step %}
 ### Add ConvaiSceneMetadataCollector and enable auto-collection
 
+Registered objects reach the character automatically as soon as it's ready, even without this component — `ConvaiSceneMetadataCollector` is optional. Add it now for the **Log Statistics** confirmation used in the next step, and for manual re-collection later; see [How scene metadata works](how-scene-metadata-works.md) for the full delivery flow.
+
 On any GameObject in your scene, click **Add Component** and search for `Convai Scene Metadata Collector`. Placing it on the same GameObject as `ConvaiManager` is a useful organizational convention.
 
 In the Inspector, enable **Collect On Start**. This tells the collector to send the full metadata payload automatically when the room session connects.
@@ -52,7 +54,7 @@ Leave **Log Statistics** enabled — it writes a Console entry on each collectio
 
 Press Play. When the room connects, the collector fires automatically. Check the Console for a debug entry similar to:
 
-```
+```text
 [ConvaiSceneMetadataCollector] Collected 4 metadata objects in 0.0010s. Registry stats: 4 total, 4 valid, 0 invalid
 ```
 
