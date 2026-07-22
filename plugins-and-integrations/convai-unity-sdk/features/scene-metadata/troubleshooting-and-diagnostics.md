@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot scene metadata
 description: Fix scene metadata problems including empty payloads, missing collection logs, dependency injection failures, and AI characters ignoring scene objects.
-last_reviewed: "4.2.0"
+last_reviewed: "4.4.0"
 ---
 
 Most Scene Metadata problems fall into one of three categories: the payload was never sent, the payload was sent but objects are excluded, or the descriptions are too vague for the AI to use effectively.
@@ -10,7 +10,7 @@ Most Scene Metadata problems fall into one of three categories: the payload was 
 
 Enable **Log Statistics** on `ConvaiSceneMetadataCollector` (it is on by default) and check the Console after entering Play Mode. A successful collection logs a debug entry similar to:
 
-```
+```text
 [ConvaiSceneMetadataCollector] Collected N metadata objects in X.XXXXs. Registry stats: Y total, Z valid, W invalid
 ```
 
@@ -36,6 +36,8 @@ void Start()
 | AI ignores objects despite confirmed send     | Descriptions are absent or too vague                                 | See [Improving descriptions](#improving-descriptions) below                                    |
 | Object present in registry but not in payload | `Include In Metadata` is unchecked, or component is disabled         | Check the field in Inspector; re-enable the component if needed                                |
 | `Is Registered` shows `false` in Inspector    | Component was added but `OnEnable` has not fired                     | Ensure the GameObject and component are both enabled                                           |
+| Tracked property never updates on the character | **Source Member Name** does not match a property, field, or zero-argument method on **Source Component** | Fix the member name; a mismatch fails silently and the entry keeps its last known value instead of erroring |
+| Static metadata edit does not reach a connected character | The session is not connected, or the character is not currently in a conversation | Live re-sync only flushes while the character is connected and in conversation — reconnect or wait for the next connect-time send |
 
 ## Empty payload
 
@@ -75,7 +77,7 @@ Guidelines:
 
 Use this tree when the AI does not respond to scene objects:
 
-```
+```text
 Is IsReadyToSendMetadata() returning true?
 ├── No → Is ConvaiManager in the scene? Is the room connected?
 │         Fix: Add ConvaiManager, ensure session reaches Connected state

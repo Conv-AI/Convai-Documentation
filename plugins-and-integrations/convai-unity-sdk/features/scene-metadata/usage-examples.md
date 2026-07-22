@@ -1,7 +1,7 @@
 ---
 title: Scene metadata usage examples
-description: Complete Scene Metadata setups for medical training, phase-based industrial drills, museum guides, and runtime object inclusion and exclusion.
-last_reviewed: "4.2.0"
+description: Complete Scene Metadata setups for medical training, industrial drills, museum guides, runtime object updates, and tracked property state.
+last_reviewed: "4.4.0"
 ---
 
 The examples below cover realistic setups for training simulations and interactive experiences. Each is self-contained: Inspector configuration is described first, followed by any scripting needed to complete the behavior. Start with whichever matches your current complexity level.
@@ -128,6 +128,72 @@ public void OnToolDelivered(GameObject toolObject, string toolName, string toolD
 {% hint style="info" %}
 Scene Metadata and Dynamic Context are complementary. Use Scene Metadata to tell the AI what exists in the scene. Use Dynamic Context to tell the AI what is happening at runtime. Pairing `CollectAndSendSceneMetadata()` with `SetState` calls on `IConvaiDynamicContext` gives the character both object awareness and event awareness simultaneously.
 {% endhint %}
+
+## Example 5: Warehouse loading bay — door status as a tracked property
+
+**Scenario:** A warehouse safety trainer NPC must always know whether the loading bay door is open or closed, and must react immediately if the door's sensor reports a jam. Re-sending an `Object Description` after every door movement would need a script that intercepts each state change and re-runs scene metadata collection. A tracked property keeps the character current without that extra step.
+
+### Setup (declarative — reflection-based polling)
+
+Add `ConvaiObjectMetadata` to the loading bay door's GameObject. Set **Object Name** to `LoadingBayDoor` and **Object Description** to a fixed description of the door's location and purpose. In **Tracked Properties**, add one `ConvaiTrackedContextProperty` entry:
+
+| Field | Value |
+| --- | --- |
+| Property Name | `DoorStatus` |
+| Source Component | The door's controller script |
+| Source Member Name | `Status` — the public property that reports the current state |
+| Initial Value | `Closed` — used only if the reflection read fails |
+| Reaction | `Auto` — let Convai decide whether the change is worth mentioning |
+
+```csharp
+using UnityEngine;
+
+public class LoadingBayDoorController : MonoBehaviour
+{
+    [SerializeField] private bool _isOpen;
+
+    public string Status => _isOpen ? "Open" : "Closed";
+
+    public void SetOpen(bool isOpen) => _isOpen = isOpen;
+}
+```
+
+`ConvaiObjectMetadata` polls every tracked property that has a **Source Component** on a shared 0.25-second timer. When `LoadingBayDoorController.Status` changes, the updated value broadcasts to every connected character under the state key `LoadingBayDoor.DoorStatus` — no manual re-send required.
+
+### Setup (imperative — pushed from a code event)
+
+A sensor jam is a discrete event, not a value read every frame, so push it directly instead of wiring a reflection source. Add a second **Tracked Properties** entry with **Property Name** set to `SensorFault`, **Initial Value** set to `None`, and **Source Component** left empty. Call `SetTrackedPropertyValue` from the sensor's own event handlers:
+
+```csharp
+using Convai.Runtime;
+using Convai.Runtime.SceneMetadata;
+using UnityEngine;
+
+public class DoorSensorMonitor : MonoBehaviour
+{
+    [SerializeField] private ConvaiObjectMetadata _doorMetadata;
+
+    public void OnSensorJamDetected()
+    {
+        _doorMetadata.SetTrackedPropertyValue("SensorFault", "Jammed", ConvaiRespondMode.MustRespond);
+    }
+
+    public void OnSensorCleared()
+    {
+        _doorMetadata.SetTrackedPropertyValue("SensorFault", "None", ConvaiRespondMode.Silent);
+    }
+}
+```
+
+`SetTrackedPropertyValue` builds the state key `LoadingBayDoor.SensorFault` and fans the new value out to every connected character immediately, bypassing the poll timer entirely.
+
+### Expected outcome
+
+When a trainee asks "Is the loading bay door open?", the trainer answers from the current `LoadingBayDoor.DoorStatus` value instead of a description written at session start. If `OnSensorJamDetected()` fires while the door is moving, the `MustRespond` reaction on `SensorFault` makes the trainer speak up immediately:
+
+> "Stop — the loading bay door sensor reported a jam. Do not proceed until maintenance clears it."
+
+If the component is disabled and re-enabled, `DoorStatus` re-reads `LoadingBayDoorController.Status` through its **Source Component** again, while `SensorFault` — which has no runtime source — resets to its **Initial Value** of `None`. Disabling or destroying `ConvaiObjectMetadata` removes both state keys from every character that was tracking them.
 
 ## Next steps
 
