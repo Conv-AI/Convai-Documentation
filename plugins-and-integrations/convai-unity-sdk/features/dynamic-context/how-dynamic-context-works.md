@@ -1,10 +1,10 @@
 ---
 title: How dynamic context works
-description: Understand the states and events model, canonical context format, and how updates queue and flush before and during conversations.
-last_reviewed: "4.2.0"
+description: Understand how Dynamic Context tracks scene state and events, batches updates, and reports acknowledgement and token feedback.
+last_reviewed: "4.4.0"
 ---
 
-Dynamic Context gives characters a live, structured view of what is happening in the scene. Instead of relying only on the static system prompt configured on the Convai dashboard, a character can reference a trainee's current location, the equipment they have collected, or an alarm that just triggered — because that information was injected directly into the session as it occurred. This page explains the underlying model: what the primitives are, how the SDK assembles them into a canonical context string, and why updates queue safely before a conversation starts.
+Dynamic Context gives characters a live, structured view of what is happening in the scene. Instead of relying only on the static system prompt configured on the Convai dashboard, a character can reference a trainee's current location, the equipment they have collected, or an alarm that recently triggered — because that information was injected directly into the session as it occurred. This page explains the underlying model: the two primitives the SDK tracks, how they assemble into a canonical context string, how updates batch and flush, and how the SDK reports back what happened to each update.
 
 ## States and events
 
@@ -18,9 +18,9 @@ Both primitives feed into the character's awareness simultaneously. States provi
 
 ## Canonical context format
 
-When the SDK sends an update to Convai, it assembles a canonical context string from all tracked states and events:
+Before an update reaches Convai, the SDK assembles a canonical context string from all tracked states and events:
 
-```
+```text
 {StateName} is {Value}
 {AnotherState} is {Value}
 Event text line one
@@ -42,7 +42,7 @@ context.SetState("Station", "Bay 7");       // updates value; position stays at 
 
 Canonical context after all four calls:
 
-```
+```text
 Station is Bay 7
 HazardLevel is High
 Operator bypassed interlock
@@ -50,22 +50,23 @@ Operator bypassed interlock
 
 You supply only names, values, and event text. The SDK assembles and delivers the canonical string automatically.
 
-## Two entry points
+## Two entry points to the same tracker
 
 Dynamic Context has two entry points that write to the same underlying tracker and produce identical network behavior.
 
-**Inspector — `ConvaiDynamicContextCommand`**
+**Inspector — `ConvaiDynamicContextRelay`**
 
-Add this `MonoBehaviour` to the NPC's GameObject and configure the command type, fields, and reaction mode in the Inspector. Call `Execute()` from a `UnityEvent`, trigger collider, timeline marker, or UI button. No scripting required. One component encapsulates one command; for multiple commands per NPC, place each on a child GameObject.
+`ConvaiDynamicContextRelay` is the Inspector entry point. It replaces the retired `ConvaiDynamicContextCommand` component. Add it via **Convai → Dynamic Context → Convai Dynamic Context Relay**, either on the same GameObject as `ConvaiCharacter` or on any GameObject with an explicit **Character** reference assigned. If **Character** is empty and **Auto Resolve Character** is enabled (the default), the relay looks for a `ConvaiCharacter` on its own GameObject at call time.
 
-Use this entry point when:
-- Context changes are tied to scene events that already fire `UnityEvent` callbacks
-- Non-programmers need to configure or modify context triggers
-- You want to prototype quickly without writing glue code
+Unlike `ConvaiDynamicContextCommand`, one relay does not encapsulate a single preconfigured operation, so you no longer need a child GameObject per command. The relay exposes public methods that call directly into `character.DynamicContext`: `SetState(name, value)`, `AddEvent(text)`, `SetCurrentAttentionObject(objectName)`, `ClearCurrentAttentionObject()`, `ResetContext()` / `ResetContext(removeStatic)`, and `Flush()`. Bind any of these to a `UnityEvent` — a trigger collider, a timeline marker, or a UI button — the same way you would bind any other public `MonoBehaviour` method. One relay component can serve several different `UnityEvent` callbacks on the same character.
+
+Two Inspector fields apply as defaults to every call made through that relay instance: **Reaction Mode** sets the `ConvaiRespondMode` passed with each call (default `Silent`), and **Flush Immediately**, when enabled, calls `Flush()` right after the operation so the update bypasses the batch delay. Because the relay always passes its configured **Reaction Mode** explicitly, a method's own scripting default does not apply when the call is routed through the relay — for example, `AddEvent`'s scripting default of `Auto` is overridden by whatever **Reaction Mode** the relay is set to.
+
+The relay's **Events** section exposes `OnQueued` and `OnSkipped`. `OnSkipped` fires when the relay cannot resolve a `ConvaiCharacter`. `OnQueued` fires once the relay resolves a character and dispatches the call — it confirms dispatch, not that the value was accepted. An empty state name or a null value still logs a Console warning even when `OnQueued` fires.
 
 **Scripting — `IConvaiDynamicContext`**
 
-Access `character.DynamicContext` to get the `IConvaiDynamicContext` interface and call methods directly from C#. This gives full control over timing, batching, and reaction mode.
+Access `character.DynamicContext` to get the `IConvaiDynamicContext` interface and call methods directly from C#. This gives full control over timing, batching, and respond mode.
 
 ```csharp
 IConvaiDynamicContext context = _character.DynamicContext;
@@ -79,38 +80,73 @@ Use this entry point when:
 - You need to read state values back (`TryGetStateValue`)
 - The update source is an external system such as a state machine or analytics pipeline
 
-## Pre-conversation queueing
+## Batching and delivery timing
 
-Updates made before a conversation begins are automatically queued by all tracked methods — `SetState`, `SetStates`, `AddEvent`, `RemoveState`, and `Reset`. When the session connects, the SDK delivers a single Replace message containing the full canonical context at that moment.
+Tracked calls — `SetState`, `SetStates`, `AddEvent`, `RemoveState`, `SetCurrentAttentionObject`, `ClearCurrentAttentionObject`, and `Reset` — never send a network message immediately. Each call updates the local tracked state right away, then stages a pending batch for delivery. This exists so that a burst of related changes fired within the same frame collapses into one canonical update, rather than one network message and one potential LLM turn per call.
 
-This means you can set initial context freely from `Awake` or `Start` without timing concerns. The SDK handles delivery.
+```mermaid
+graph TD
+    A["SetState / AddEvent / RemoveState call"] --> B["Staged locally; batch window opens or extends"]
+    B --> C{"Flush called, or window elapses?"}
+    C -->|No| B
+    C -->|Yes| D["One context-update sent to Convai"]
+    D --> E["DynamicContextUpdateResultReceived"]
+```
+
+While a conversation is active, the first staged change opens a batch window. Every subsequent staged change resets a countdown of `ConvaiCharacter.DynamicContextBatchDelaySeconds` — 0.5 seconds by default. The SDK also enforces an internal ceiling of 3 seconds measured from the first staged change in the window, so a steady stream of changes cannot postpone delivery indefinitely. Calling `Flush()` sends the pending batch immediately, bypassing whatever remains of the countdown.
+
+If a call happens before the character is in conversation, it stages locally only — no countdown starts. When the session's character-ready signal arrives, the SDK flushes the staged batch immediately, so calls made in `Awake` or `Start` are delivered without any extra timing code:
 
 ```csharp
 void Start()
 {
-    // Safe — all three queue and flush as one Replace when ConnectAsync fires
+    // Safe — stages locally, then flushes as soon as the character is ready
     _character.DynamicContext.SetState("Facility", "Offshore Platform Alpha");
     _character.DynamicContext.SetState("Scenario", "Fire Drill");
     _character.DynamicContext.AddEvent("Session initialized");
 }
 ```
 
-The reason this collapses into one Replace rather than replaying individual messages is efficiency: the character receives one authoritative snapshot rather than a stream of incremental updates that could arrive out of order or create redundant LLM turns.
+When the session disconnects, the SDK marks the tracked context for a full canonical resync, so the next reconnect rebuilds the same context even if nothing changed locally while offline.
+
+When multiple staged changes carry different respond modes, the strongest one wins for the whole batch: `MustRespond` outranks `Auto`, which outranks `Silent`.
 
 {% hint style="warning" %}
-`Apply()` is the one exception: it does not queue. If called before a conversation starts, the update is discarded. Use `SetState`, `AddEvent`, or other tracked methods for pre-conversation context. See [Dynamic context scripting API](dynamic-context-scripting-api.md) for details.
+**Renamed in SDK 4.4.0.** `ConvaiContextReactionMode` is removed. Dynamic context and dynamic vision context now share one respond-mode vocabulary, `ConvaiRespondMode` (namespace `Convai.Runtime`): `SyncOnly` maps to `Silent`, `ReactImmediately` maps to `MustRespond`, and `Auto` is unchanged.
 {% endhint %}
 
-## When to use which command type
+{% hint style="warning" %}
+`Apply()` is the one exception: it does not stage or queue. Calling it while the character is not in conversation discards the update. Use `SetState`, `AddEvent`, or the other tracked methods for context that must survive until a conversation starts.
+{% endhint %}
 
-| Goal | Use |
-|---|---|
-| Track one current condition | `SetState` |
-| Track several conditions that change at the same moment | `SetStates` (one canonical rebuild, one network round-trip) |
-| Record that something happened | `AddEvent` |
-| Remove a condition that no longer applies | `RemoveState` |
-| Clear all runtime context (for a new scenario phase) | `Reset` |
-| Send externally constructed context text | `Apply()` — advanced; does not queue |
+## Acknowledgement and token feedback
+
+Every dynamic context update the SDK sends — whether from a tracked batch, an explicit `Flush()`, or a raw `Apply()` call — is confirmed by `DynamicContextUpdateResultReceived`, delivered through `ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived`. Match an acknowledgement to the update you sent using `UpdateId`. Tracked batches always receive an SDK-generated ID; only `Apply()` lets you supply your own `updateId` for correlation.
+
+```csharp
+using Convai.Domain.DomainEvents.Runtime;
+using Convai.Runtime.Components;
+
+ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived += result =>
+{
+    Debug.Log($"{result.Status}: revision {result.ContextRevision}, {result.RemainingTokens} tokens remaining");
+};
+```
+
+| Property | Type | Meaning |
+|---|---|---|
+| `Status` | `string` | `"success"` when the update was applied; any other value means it was rejected. |
+| `Message` | `string` | Human-readable detail accompanying the status. |
+| `UpdateId` | `string` | Matches the ID assigned when the update was sent. |
+| `ContextRevision` | `int` | The backend's revision counter for this character's context. |
+| `TokenCount`, `StaticTokenCount`, `RuntimeTokenCount`, `RemainingTokens` | `int` | Token accounting for the character's context window after this update. |
+| `RequestedRunLlm`, `ActualRunLlm` | `string` | The respond mode requested versus what the backend actually honored. |
+| `DowngradeReason` | `string` | Explains why `ActualRunLlm` differs from `RequestedRunLlm`, when it does. |
+| `Interrupted` | `bool` | Whether this update interrupted an in-flight character turn. |
+| `LlmTriggered` | `bool` | Whether this update triggered a new character turn. |
+| `PromptRebuild`, `PromptRebuildStatus` | `bool`, `string` | Whether the backend rebuilt the character's prompt to include this update, and the outcome. |
+
+The same event also carries action-specific fields — `ActionConfigUpdated`, `ActionsCount`, `CurrentAttentionObject`, and related properties — when the update includes an action configuration patch. See [Update character actions at runtime](../character-actions/update-actions-at-runtime.md) for that acknowledgement flow.
 
 ## Next steps
 
@@ -118,8 +154,8 @@ The reason this collapses into one Replace rather than replaying individual mess
 [Dynamic context quick start](dynamic-context-quick-start.md)
 {% endcontent-ref %}
 
-{% content-ref url="command-component-reference.md" %}
-[Command component reference](command-component-reference.md)
+{% content-ref url="relay-component-reference.md" %}
+[Relay component reference](relay-component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="sync-behavior-and-timing.md" %}
