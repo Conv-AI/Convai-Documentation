@@ -6,24 +6,24 @@ description: >-
 last_reviewed: "4.4.0"
 ---
 
-Convai extends Unity's MCP server with SDK-aware tools so a coding agent such as Codex, Claude Code, or Cursor can configure Convai components directly in your project. Use this quick start the first time you connect an agent to a project that already has the Convai Unity SDK installed. At the end, your agent has managed instructions installed and the AI Coding Setup window reports every Convai tool as registered.
+Convai extends Unity's MCP server with SDK-aware tools so a coding agent such as Codex, Claude Code, or Cursor can configure Convai components directly in your project. Use this quick start the first time you connect an agent to a project that already has the Convai Unity SDK installed. At the end, your agent has managed instructions installed and the AI Coding section reports every Convai tool as registered.
 
 ## Prerequisites
 
 * Unity <code class="expression">space.vars.unity_recommended_version</code> or later — Convai's AI coding tools require Unity 6000 or newer.
 * The Convai Unity SDK installed in the project. See [Install the Convai Unity SDK](../getting-started/installation.md).
-* A compatible Unity AI Assistant package (`com.unity.ai.assistant`, version `2.13.0-pre.2` or later, below `3.0.0`). Install it manually, or install it from inside this walkthrough.
+* A compatible Unity AI Assistant package (`com.unity.ai.assistant`, version `2.13.0` or later and below `3.0.0` — a `2.13.0` build must carry prerelease tag `pre.2` or later, and a `3.0.0` build is accepted only as a prerelease, never the final release). Install it manually, or install it from inside this walkthrough.
 * A supported coding agent installed on your machine, such as Codex CLI, Claude Code, or Cursor. See [Supported coding agents](supported-coding-agents.md) for the full list.
 
 ## Open AI Coding Setup
 
 {% stepper %}
 {% step %}
-### Open the Convai AI Coding Setup window
+### Open the AI Coding section
 
-In the Unity Editor menu bar, select **Convai > AI Coding Setup**.
+In the Unity Editor menu bar, select **Convai > AI Coding Setup**. This opens the **AI Coding** section of the Convai Editor window.
 
-The window reports four readiness checks: **Unity 6000+**, **Unity AI Assistant**, **Packaged Convai skill**, and **Convai tools**. A checkmark next to a row means it is ready; an exclamation mark means it needs attention.
+The section's **Setup Health** card reports four readiness rows: **Unity 6000+**, **Unity AI Assistant**, **Packaged Convai Skill**, and **Convai MCP Tools**. Each row reads **Ready** or **Needs attention**.
 {% endstep %}
 
 {% step %}
@@ -35,12 +35,12 @@ Unity may prompt you to accept the Unity AI Assistant and MCP server terms of se
 {% step %}
 ### Resolve any row that shows a warning
 
-Each unready row has a **Fix** button. Click **Fix** next to **Unity AI Assistant** to install `com.unity.ai.assistant@2.14.0-pre.1` through Package Manager — Unity recompiles and the row updates automatically. Click **Fix** next to **Packaged Convai skill** or **Convai tools** to refresh package assets and re-register Convai's tools without reinstalling the Assistant package.
+Each unready row shows a **Fix** button. Click **Fix** next to **Unity AI Assistant** to install `com.unity.ai.assistant@2.14.0-pre.1` through Package Manager — Unity recompiles and the row updates automatically. Click **Fix** next to **Packaged Convai Skill** or **Convai MCP Tools** to refresh package assets and re-register Convai's tools without reinstalling the Assistant package.
 {% endstep %}
 {% endstepper %}
 
 {% hint style="warning" %}
-**Fix** buttons are disabled while Unity is compiling, updating packages, or in Play Mode. Exit Play Mode first — repair never exits Play Mode for you.
+Clicking **Fix** while Unity is compiling, updating packages, or in Play Mode shows a warning and does not start the repair — exit Play Mode first, since repair never exits Play Mode for you. A **Fix** button is only disabled outright while a repair it started is already running.
 {% endhint %}
 
 ## Install your coding agent's managed instructions
@@ -49,7 +49,7 @@ Each unready row has a **Fix** button. Click **Fix** next to **Unity AI Assistan
 {% step %}
 ### Choose your coding agent
 
-Scroll to **Managed project instructions**. Convai lists each supported agent with the file it manages — for example `AGENTS.md` for Codex, `CLAUDE.md` for Claude Code, and `.cursor/rules/convai-unity-sdk.mdc` for Cursor. See [Supported coding agents](supported-coding-agents.md) for the complete list and per-agent notes.
+Scroll to the **Managed Project Instructions** card. Convai lists each supported agent with the file it manages — for example `AGENTS.md` for Codex, `CLAUDE.md` for Claude Code, and `.cursor/rules/convai-unity-sdk.mdc` for Cursor. See [Supported coding agents](supported-coding-agents.md) for the complete list and per-agent notes.
 {% endstep %}
 
 {% step %}
@@ -63,10 +63,10 @@ The managed instructions direct your agent to read `Packages/com.convai.convai-s
 
 ## Verify the tool count
 
-The **Convai tools** row in the AI Coding Setup window reads `20/20 registered` once Unity's MCP registry has registered all twenty Convai tools under tool contract version 4. If the count is lower or the row lists a missing or unexpected tool name, click **Fix** next to **Convai tools** to refresh the registry and recompile.
+The **Convai MCP Tools** row reads `20/20 registered` once Unity's MCP registry has registered all twenty Convai tools under tool contract version 4. If the count is lower or the row lists a missing or unexpected tool name, click **Fix** next to **Convai MCP Tools** to refresh the registry and recompile.
 
 {% hint style="success" %}
-Setup is complete when all four rows show a checkmark and **Convai tools** reads `20/20 registered`.
+Setup is complete when all four rows read **Ready** and **Convai MCP Tools** reads `20/20 registered`.
 {% endhint %}
 
 ## Prompt the agent to build your scene
