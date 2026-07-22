@@ -7,7 +7,7 @@ description: >-
 last_reviewed: "4.4.0"
 ---
 
-The Convai Unity SDK's AI coding integration depends on three things staying in sync: a compatible Unity AI Assistant package, the packaged `convai-unity-sdk` skill, and an exact 20-tool catalog registered with Unity's MCP server. Open `Convai > AI Coding Setup` to open the AI Coding section of the Convai Editor window and see the health of all three, with per-row `Fix` buttons to repair them. This page covers what each repair step does, why it can fail, and how to verify a fix worked.
+The Convai Unity SDK's AI coding integration depends on three things staying in sync: a compatible Unity AI Assistant package, the packaged `convai-unity-sdk` skill, and an exact 20-tool catalog registered with Unity's MCP server. Open `Convai > AI Coding Setup` to open the AI Coding section of the Convai Editor window and see the health of all three, with per-row `Fix` buttons to repair them.
 
 {% hint style="info" %}
 `Convai > AI Coding Setup` never starts a repair or writes managed instruction files automatically. Each `Fix` button click runs one repair step, and a repair never exits Play Mode for you — exit Play Mode yourself before retrying.
@@ -22,6 +22,8 @@ The **Setup Health** card shows four status rows: `Unity 6000+`, `Unity AI Assis
 - `<count>/20; <issue>` — the Assistant is ready, but the registered tool set doesn't match the expected 20 tools; `<issue>` lists exactly what's wrong.
 
 A `Fix` button stays disabled only while a repair it started is already running. Clicking `Fix` while Unity is compiling, updating packages, or in Play Mode does not disable the button beforehand — it posts a status message naming the blocking condition and does not start the repair.
+
+A repair also posts its own summary message beneath the rows once it finishes — for example `AI coding setup ready. 20/20 Convai tools registered.` for a completed tool-registration repair. This summary message is separate from each row's own detail text described above.
 
 ## Unity MCP bridge doesn't reconnect after a tool repair
 
