@@ -1,6 +1,7 @@
 ---
 title: Narrative design scripting reference
-description: Reference for IConvaiNarrativeDesign, including section events, trigger invocation, speech injection, template keys, and async fetch methods.
+description: Reference for controlling a character's narrative flow from code, covering section events, trigger invocation, scripted speech, and data fetching.
+last_reviewed: "4.4.0"
 ---
 
 The Inspector workflow covers the majority of use cases. This page documents the full C# surface for situations where you need programmatic control — dynamic character switching, async data fetching at runtime, runtime-generated narrative flows, or deep integration with your own game systems.
@@ -21,7 +22,7 @@ IConvaiNarrativeDesign narrative = character.NarrativeDesign;
 | Property | Type | Description |
 |---|---|---|
 | `TemplateKeys` | `IReadOnlyDictionary<string, string>` | Snapshot of all template keys currently tracked for this character. |
-| `CurrentSectionId` | `string` | The section ID most recently received from the backend. Empty string if no section has been received yet. |
+| `CurrentSectionId` | `string` | The section ID most recently received from Convai. Empty string if no section has been received yet. |
 | `CurrentSectionData` | `NarrativeSectionData` | Full section payload. Contains `SectionId`, `BehaviorTreeCode`, and `BehaviorTreeConstants`. `null` until the first section change is received. |
 
 ## Listen to section changes
@@ -61,45 +62,43 @@ These events are delivered via the SDK's internal `EventHub`. If your handler to
 |---|---|---|
 | `OnSectionChanged` | `Action<string, string>` | Fires on every section transition. Parameters: `previousId`, `newId`. |
 | `OnSectionDataReceived` | `Action<NarrativeSectionData>` | Fires on every section transition with the full payload. |
-| `OnTriggerInvoked` | `Action<ConvaiNarrativeTriggerInvocation>` | Fires after a trigger or speech request is accepted locally (before backend confirmation). |
+| `OnTriggerInvoked` | `Action<ConvaiNarrativeTriggerInvocation>` | Fires after a trigger or speech request is accepted locally (before confirmation from Convai). |
 
 ## Invoke triggers from code
 
 ```csharp
-// Named trigger — advances the graph along a specific edge
+// Saved trigger — advances the graph along a specific edge
 bool accepted = character.NarrativeDesign.InvokeTrigger("CheckpointReached");
-
-// Named trigger with an optional message payload
-character.NarrativeDesign.InvokeTrigger("ItemInspected", "The fire extinguisher is missing its pin.");
 ```
 
-`InvokeTrigger` returns `false` if both `triggerName` and `triggerMessage` are empty, or if the trigger is rejected internally. Otherwise it returns `true` and queues the trigger if the session is not yet open.
+`InvokeTrigger` sends a saved Narrative Design trigger by name. The SDK trims whitespace, rejects an empty name, and sends only `trigger_name` over RTVI. It returns `true` when the request is accepted locally and queues the trigger if the session is not yet open.
+
+Use `InvokeEvent` when you want to send contextual event text instead of a saved graph trigger:
+
+```csharp
+character.NarrativeDesign.InvokeEvent("The fire extinguisher is missing its pin.");
+```
+
+`InvokeEvent` sends only `trigger_message` over RTVI. Convai treats the message as inline context and responds naturally; it does not select a saved trigger by name.
 
 ## Control character speech
 
-`InvokeSpeech` gives you direct control over the character's next utterance without advancing the narrative graph. It has two modes depending on whether you wrap the message in `<speak>` tags.
-
-**Context injection (plain text):** pass a plain string to make the character aware of a piece of information. The character absorbs the context and responds in its own words.
+`InvokeSpeech` sends exact scripted speech without advancing the narrative graph. Pass the text you want the character to say; the SDK wraps it in `<speak>...</speak>` internally before sending `trigger_message`.
 
 ```csharp
-// Character becomes aware of this fact and responds naturally
-character.NarrativeDesign.InvokeSpeech("The trainee just completed the evacuation drill.");
+character.NarrativeDesign.InvokeSpeech("Attention: the fire exit on level two is now unlocked.");
 ```
 
-**Verbatim speech (`<speak>` tags):** wrap the message in `<speak>` tags to make the character say that exact text word for word.
+Do not include `<speak>` tags in Unity code. Use `InvokeEvent` for contextual events where Convai should decide the wording.
 
-```csharp
-// Character says this sentence verbatim
-character.NarrativeDesign.InvokeSpeech("<speak>Attention: the fire exit on level two is now unlocked.</speak>");
-```
-
-| Pattern | What the character does |
-|---|---|
-| `InvokeSpeech("text")` | Becomes aware of the context, responds in its own words |
-| `InvokeSpeech("<speak>text</speak>")` | Says that exact text verbatim |
+| Method | Wire field | Runtime behavior |
+|---|---|---|
+| `InvokeTrigger("TriggerName")` | `trigger_name` | Invokes a saved Narrative Design trigger and can advance the graph. |
+| `InvokeEvent("event text")` | `trigger_message` | Adds inline event context and lets Convai respond naturally. |
+| `InvokeSpeech("scripted text")` | `trigger_message` | Sends exact scripted speech; the SDK adds `<speak>` tags internally. |
 
 {% hint style="info" %}
-`InvokeSpeech` does not advance the narrative graph regardless of which mode you use. To advance the graph at the same time as sending a message, use `InvokeTrigger` with a named trigger.
+Only saved triggers advance the graph by name. Inline events and scripted speech use `trigger_message` and do not send `trigger_name`.
 {% endhint %}
 
 ### Listen to trigger invocations
@@ -115,8 +114,9 @@ character.NarrativeDesign.OnTriggerInvoked += invocation =>
 
 | Field | Type | Description |
 |---|---|---|
-| `TriggerName` | `string` | The trigger name that was sent (empty for speech). |
-| `TriggerMessage` | `string` | The optional message payload. |
+| `Request` | `ConvaiNarrativeTriggerRequest` | Typed request accepted by the SDK. Includes the mode, wire field name, and wire field value. |
+| `TriggerName` | `string` | Saved trigger name. Empty for inline events and scripted speech. |
+| `TriggerMessage` | `string` | Inline event text or SDK-generated scripted speech payload. Empty for saved triggers. |
 | `Queued` | `bool` | `true` if the trigger was deferred because the session was not yet open. |
 
 ## Template keys via code
@@ -212,7 +212,7 @@ All Inspector-configurable settings have corresponding setter methods:
 ConvaiNarrativeDesignTrigger trigger = GetComponent<ConvaiNarrativeDesignTrigger>();
 
 // Override trigger selection
-trigger.SetTrigger("trigger-uuid", "CheckpointA", "Player reached checkpoint A");
+trigger.SetTrigger("trigger-uuid", "CheckpointA");
 
 // Change activation mode at runtime
 trigger.SetActivationMode(TriggerActivationMode.Proximity);
@@ -258,8 +258,9 @@ classDiagram
     }
     class IConvaiNarrativeDesign {
         +SetTemplateKey(key, value) bool
-        +InvokeTrigger(name, msg) bool
-        +InvokeSpeech(msg) bool
+        +InvokeTrigger(name) bool
+        +InvokeEvent(message) bool
+        +InvokeSpeech(text) bool
         +FetchSectionsAsync() Task
         +OnSectionChanged Action
     }
@@ -270,7 +271,7 @@ classDiagram
     }
     class ConnectionService {
         +UpdateTemplateKeys(keys)
-        +SendTrigger(name, msg)
+        +SendNarrativeTrigger(request)
     }
 
     ConvaiNarrativeDesignManager ..> IConvaiNarrativeDesign : delegates to
