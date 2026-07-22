@@ -1,15 +1,14 @@
 ---
 title: Static context at connection time
 description: >-
-  Configure InitialDynamicInfoText and InitialDynamicInfoKeepInContext on
-  ConvaiCharacter to send fixed scenario facts once at the start of each
-  conversation.
-last_reviewed: "4.2.0"
+  Configure fixed scenario facts a character receives once at the start of a
+  conversation, separate from updates sent while the conversation is running.
+last_reviewed: "4.4.0"
 ---
 
 Every Convai character has two fields — **Initial Dynamic Info Text** and **Initial Dynamic Info Keep In Context** — that inject a fixed block of context into the session request at the moment the conversation connects. This context is delivered to Convai once, before the first response, and is separate from runtime Dynamic Context updates.
 
-Use this mechanism for facts that are true before the conversation begins and will not change during the session: the facility name, the character's role, the training scenario type, or the starting conditions of a drill. Use runtime Dynamic Context (`ConvaiDynamicContextCommand` or `IConvaiDynamicContext`) for everything that evolves as the session progresses.
+Use this mechanism for facts that are true before the conversation begins and will not change during the session: the facility name, the character's role, the training scenario type, or the starting conditions of a drill. Use runtime Dynamic Context (`ConvaiDynamicContextRelay` or `IConvaiDynamicContext`) for everything that evolves as the session progresses.
 
 ## Inspector configuration
 
@@ -30,7 +29,7 @@ Both fields are on the `ConvaiCharacter` component under the **Dynamic Info (Con
 
 For a fire suppression certification drill, set **Initial Dynamic Info Text** to:
 
-```
+```text
 Facility: Offshore Platform Alpha
 Scenario: Fire Suppression Certification Drill
 Trainee role: Operator under assessment
@@ -60,11 +59,11 @@ _character.DynamicContext.SetState("HazardLevel", "Extreme");
 _character.DynamicContext.AddEvent("Trainee bypassed manual lockout procedure");
 ```
 
-## What `Reset()` does not clear
+## What `Reset()` does and does not clear
 
-Calling `Reset()` on the runtime Dynamic Context layer clears all tracked states and events. It does **not** affect initial dynamic info:
+Calling `Reset()` on the runtime Dynamic Context layer clears all tracked states and events. By default it leaves initial dynamic info in place:
 
-* **Initial Dynamic Info Text** was sent at connection time and cannot be recalled or re-sent by any runtime call.
+* **Initial Dynamic Info Text** was sent at connection time and is untouched by `Reset()` unless the caller opts in: `Reset(removeStatic: true)` also asks Convai to remove the static initial dynamic context for the current session. The default `Reset()` (equivalent to `Reset(removeStatic: false)`) does not touch it, and there is no way to re-send or replace it mid-session — only clear it.
 * **System prompt facts** on the Convai dashboard are not part of the Dynamic Context layer. No SDK call affects them at runtime.
 * **In-session LLM memory** — the character retains conversational context across turns within the same session. `Reset()` clears the Dynamic Context tracker and sends a Reset message to Convai, but it does not clear the model's in-session conversational memory.
 
@@ -85,8 +84,8 @@ These properties are read-only at runtime. Set the values in the Inspector befor
 
 ## Next steps
 
-{% content-ref url="command-component-reference.md" %}
-[Command component reference](command-component-reference.md)
+{% content-ref url="relay-component-reference.md" %}
+[Relay component reference](relay-component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}

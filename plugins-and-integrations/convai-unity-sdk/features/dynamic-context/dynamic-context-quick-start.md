@@ -1,90 +1,80 @@
 ---
 title: Dynamic context quick start
-last_reviewed: 4.2.0
 description: >-
-  Add ConvaiDynamicContextCommand to an NPC, configure a SetState command, and
-  confirm the character acknowledges live scene conditions.
+  Add a Dynamic Context Relay component to an NPC, send a tracked update from
+  a UI button, and confirm the character references it.
+last_reviewed: "4.4.0"
 ---
 
-# Dynamic context quick start
+This guide adds a `ConvaiDynamicContextRelay` component to an NPC, wires a UI button to send a tracked context update, and confirms the character references that update in conversation. Use it after a `ConvaiCharacter` already connects and responds to speech in Play mode.
 
-This guide walks you through the minimum setup to verify that your Convai character acknowledges live in-scene conditions. You will add the `ConvaiDynamicContextCommand` component, configure a `SetState` command, wire it to a UI button, and confirm the character references the state you sent.
-
-### Prerequisites
+## Prerequisites
 
 Before starting, verify:
 
-* [ ] A `ConvaiCharacter` is in the scene and responds to speech in Play Mode
+* [ ] A `ConvaiCharacter` is in the scene and responds to speech in Play mode
 
 {% stepper %}
 {% step %}
-#### Add the command component
+### Add the relay component
 
-Select the NPC's GameObject in the Hierarchy. In the Inspector, click **Add Component** and search for **Convai Dynamic Context Command**, or navigate to **Convai → Dynamic Context → Convai Dynamic Context Command**.
+Select the NPC's GameObject in the Hierarchy. In the Inspector, click **Add Component** and search for **Convai Dynamic Context Relay**, or navigate to **Convai → Dynamic Context → Convai Dynamic Context Relay**.
 
-The component appears with three sections: **Target**, **Command**, and **Events**.
-
-<figure><img src="../../../../.gitbook/assets/image (57).png" alt="Unity Inspector showing ConvaiDynamicContextCommand added to the NPC GameObject, with Target, Command, and Events sections visible"><figcaption><p>ConvaiDynamicContextCommand added to the NPC — three sections appear: Target resolves the character, Command defines the context operation, and Events exposes execution callbacks.</p></figcaption></figure>
+The component adds three sections: **Target** (which character it drives), **Defaults** (the reaction mode and flush behavior applied to every call), and **Events** (callbacks for queued and skipped calls).
 {% endstep %}
 
 {% step %}
-#### Verify character resolution
+### Verify character resolution
 
-In the **Target** section, confirm that **Auto Resolve Character** is enabled (the default). The component finds the `ConvaiCharacter` on the same GameObject automatically.
+In the **Target** section, confirm that **Auto Resolve Character** is enabled (the default). The relay looks for a `ConvaiCharacter` on the same GameObject at call time.
 
-If `ConvaiCharacter` is on a different GameObject, disable **Auto Resolve Character** and drag the correct `ConvaiCharacter` into the **Character** field.
+If `ConvaiCharacter` is on a different GameObject, disable **Auto Resolve Character** and drag the correct `ConvaiCharacter` into the **Character** field. An assigned **Character** always takes precedence over auto-resolve.
 {% endstep %}
 
 {% step %}
-#### Configure the command
+### Configure the defaults
 
-In the **Command** section:
+In the **Defaults** section:
 
-* Set **Command Type** to **Set State**
-* Set **State Name** to `Location`
-* Set **State Value** to `Fire Exit Corridor`
-* Leave **Reaction Mode** at **Auto** (the default)
-
-The component is now configured to set a tracked state named `Location` to `Fire Exit Corridor` whenever `Execute()` is called.
+* Leave **Reaction Mode** at **Silent** (the default). With **Silent**, the update is absorbed into the character's awareness but does not make it speak immediately — the character incorporates it into its next response instead.
+* Leave **Flush Immediately** disabled (the default). The character batches relay updates for roughly half a second before sending them; enable this field only when a call must reach Convai without waiting for the batch window.
 {% endstep %}
 
 {% step %}
-#### Wire the trigger
+### Wire the trigger
 
-In the **Events** section of a UI Button in your scene (create a temporary one if needed), locate **On Click ()**.
+Add a UI Button to your scene (a temporary one works). In its **Button** component, open **On Click ()**.
 
-Click **+** to add a listener, drag the NPC's GameObject into the object field, and select **ConvaiDynamicContextCommand → Execute ()** from the function dropdown.
+Click **+** to add a listener, drag the NPC's GameObject into the object field, and select **ConvaiDynamicContextRelay → AddEvent** from the function dropdown. A text field appears below the dropdown — enter the event text there, since `Button.onClick` carries no data of its own:
 
-<figure><img src="../../../../.gitbook/assets/image (505).png" alt="Unity Inspector showing a UI Button&#x27;s On Click event wired to ConvaiDynamicContextCommand.Execute() on the NPC GameObject"><figcaption><p>Execute() wired to the button's On Click event — pressing the button at runtime delivers the configured context update to Convai and triggers the character's reaction according to the configured Reaction Mode.</p></figcaption></figure>
+```text
+The player entered the fire exit corridor.
+```
 {% endstep %}
 
 {% step %}
-#### Test in Play Mode
+### Test in Play mode
 
-Enter Play Mode and start a conversation with the character. Click the button you wired in the previous step, then ask the character where you are.
+Enter Play mode and start a conversation with the character. Click the button you wired in the previous step, then ask the character something like "What's happening around here?"
 
-The character should reference the location — for example: _"You're at the Fire Exit Corridor. Make sure you know the evacuation procedure before proceeding."_
+The character should reference the event — for example: _"You entered the fire exit corridor a moment ago. Remember the evacuation procedure before you go further."_
 
-If the character does not respond with location awareness, open the Unity Console and check for a `[ConvaiDynamicContextCommand]` warning. See [Troubleshoot dynamic context](troubleshoot-dynamic-context.md) for a full diagnosis checklist.
+If the character does not reference the event, open the Unity Console and check for a warning from `ConvaiDynamicContextRelay` or `ConvaiCharacter`. See [Troubleshoot dynamic context](troubleshoot-dynamic-context.md) for a full diagnosis checklist.
 {% endstep %}
 {% endstepper %}
 
 {% hint style="success" %}
-Your character is now context-aware. The `Location` state is tracked locally and delivered to Convai when the conversation is active. Any future `SetState` call for the same name updates the value and notifies the character automatically.
+Your character is now context-aware. The event you sent is tracked on the character's `DynamicContext` and delivered to Convai once the batch window closes (or immediately, if **Flush Immediately** is enabled). Any further `AddEvent`, `SetState`, or attention-object call through the relay is delivered the same way.
 {% endhint %}
 
-### Test without custom code
+## Test without custom code
 
-The SDK includes a pre-built test UI for exploring the full Dynamic Context system without writing any integration code.
+Import the **LipSync Sample** from Package Manager and open its scene. The sample includes a **Sample Debug Hub** with a **Context** drawer that sends state, event, and attention-object updates to the scene's `ConvaiCharacter` without wiring your own UI. If the character responds correctly through the Debug Hub but not through your own relay setup, the issue is in your Inspector wiring — not in Dynamic Context itself.
 
-**Prefab path:** Packages/<code class="expression">space.vars.sdk_package_id</code>/Prefabs/SampleDynamicContextUI.prefab
+## Next steps
 
-Drop it into your scene, assign your `ConvaiCharacter`, enter Play Mode, and use the **Set State** button to send known values. If the character responds correctly through the Sample UI but not through your own integration, the issue is in your code — not in the Dynamic Context system itself.
-
-### Next steps
-
-{% content-ref url="command-component-reference.md" %}
-[command-component-reference.md](command-component-reference.md)
+{% content-ref url="relay-component-reference.md" %}
+[relay-component-reference.md](relay-component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
@@ -93,4 +83,8 @@ Drop it into your scene, assign your `ConvaiCharacter`, enter Play Mode, and use
 
 {% content-ref url="dynamic-context-usage-examples.md" %}
 [dynamic-context-usage-examples.md](dynamic-context-usage-examples.md)
+{% endcontent-ref %}
+
+{% content-ref url="sync-behavior-and-timing.md" %}
+[sync-behavior-and-timing.md](sync-behavior-and-timing.md)
 {% endcontent-ref %}
