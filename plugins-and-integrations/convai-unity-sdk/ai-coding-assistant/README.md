@@ -7,7 +7,7 @@ last_reviewed: "4.4.0"
 The Convai AI coding assistant integration adds Convai-specific tools to Unity's official MCP server, so a coding agent can inspect, configure, and diagnose Convai components in your project instead of you wiring them by hand. Use it if you already work with a supported coding agent and want that agent to understand Convai rooms, characters, actions, lip sync, transcripts, and vision. Once connected, you prompt the agent in natural language and review the resulting changes in the Unity Editor.
 
 {% hint style="info" %}
-**Before you begin:** The integration requires Unity 6000 or newer and a compatible `com.unity.ai.assistant` package. See [Set up your first coding agent](quick-start.md) for the full prerequisite check and setup walkthrough.
+**Before you begin:** The integration requires <code class="expression">space.vars.unity_recommended_version</code> or newer and a compatible `com.unity.ai.assistant` package. See [Set up your first coding agent](quick-start.md) for the full prerequisite check and setup walkthrough.
 {% endhint %}
 
 ## What the integration adds
@@ -20,7 +20,7 @@ The integration supports five coding agents: Codex, Claude Code, Cursor, Gemini,
 
 ## Connect a coding agent to your project
 
-Open **Convai > AI Coding Setup** in the Unity Editor menu to start. This opens the **AI Coding** section of the Convai Editor window, whose **Setup Health** card checks Unity 6000 or newer, a compatible `com.unity.ai.assistant` package, the packaged Convai skill, and the 20-tool contract, with inline **Fix** buttons for any check that fails. Open **Project Settings > AI > Unity MCP Server** — directly, or through the **Open Unity MCP Server Settings** button in the same section — to accept Unity's terms for the MCP Server feature and confirm which MCP clients are connected to your project. Then click **Install** next to a supported coding agent in the **Managed Project Instructions** card to write its managed instruction block. See [Set up your first coding agent](quick-start.md) for the full walkthrough.
+Open **Convai > AI Coding Setup** in the Unity Editor menu to start. This opens the **AI Coding** section of the Convai Editor window, whose **Setup Health** card checks <code class="expression">space.vars.unity_recommended_version</code> or newer, a compatible `com.unity.ai.assistant` package, the packaged Convai skill, and the 20-tool contract, with inline **Fix** buttons for any check that fails. Open **Project Settings > AI > Unity MCP Server** — directly, or through the **Open Unity MCP Server Settings** button in the same section — to accept Unity's terms for the MCP Server feature and confirm which MCP clients are connected to your project. Then click **Install** next to a supported coding agent in the **Managed Project Instructions** card to write its managed instruction block. See [Set up your first coding agent](quick-start.md) for the full walkthrough.
 
 ## What you can ask a connected agent to do
 
