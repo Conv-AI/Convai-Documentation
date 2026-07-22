@@ -77,7 +77,7 @@ A dialog appears listing errors, warnings, and recommended next steps.
 
 | Warning                | Fix                                          |
 | ---------------------- | -------------------------------------------- |
-| API key not configured | Open **Convai > Account** and enter your key |
+| API key not configured | Open **Convai > Settings > Credentials** and enter your key |
 
 When the validator reports no errors, the scene is ready for Play Mode.
 {% endstep %}

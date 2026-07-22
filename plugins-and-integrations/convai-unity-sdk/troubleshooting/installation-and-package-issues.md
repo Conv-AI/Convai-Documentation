@@ -1,16 +1,28 @@
 ---
 title: Installation and package issues
 description: Fix Convai Unity SDK import failures, missing dependencies, assembly errors, and bootstrapper startup warnings with step-by-step remediation.
-last_reviewed: "4.2.0"
+last_reviewed: "4.4.0"
 ---
 
-Package import and initial configuration problems account for the majority of first-run failures with the Convai Unity SDK. Most produce a clear message in the Unity Console the moment you enter Play Mode — or even before that, as compiler errors. Work through the first-line checks below before diving into specific issues.
+Package import and initial configuration problems account for the majority of first-run failures with the Convai Unity SDK. Most produce a clear message in the Unity Console the moment you enter Play Mode — or even before that, as compiler errors. Start with the Setup Health checks in Project Settings, then work through the remaining first-line checks below before diving into specific issues.
 
 ## First-line check
 
-Work through these three steps before diving into specific issues. They cover the most common root causes and take under two minutes.
+Work through these four steps before diving into specific issues. They cover the most common root causes and take under three minutes.
 
 {% stepper %}
+{% step %}
+### Run the Setup Health checks
+
+Go to **Edit → Project Settings → Convai SDK**. The **Setup Health** section opens first and runs a set of project-configuration checks automatically — each item shows a colored status badge, a title, and a message.
+
+The checks include `Settings Asset` (flags a missing `ConvaiSettings.asset`), `API Key` (flags a missing key), `iOS Microphone Usage Description` (flags an empty `Info.plist` description), `Android Microphone Permission` (informational), and a `Define Drift` check for each Convai feature-flag scripting define that differs across build target groups.
+
+Select **Fix** next to any flagged item to apply the automated correction — for example **Create** adds the missing `ConvaiSettings.asset`, and **Sync All** aligns a drifting scripting define across build target groups. Select **Refresh** in the section header to re-run every check after making changes manually.
+
+If every item shows a healthy (green) badge, the project-level setup is correct and the issue lies elsewhere — continue to the next check below.
+{% endstep %}
+
 {% step %}
 ### Open the Unity Console
 
@@ -37,10 +49,10 @@ If the file is missing, open **Edit → Project Settings → Convai SDK**. Openi
 {% step %}
 ### Confirm the settings window opens
 
-Go to **Edit → Project Settings → Convai SDK**. The window should open and show fields including **API Key**, **Server URL**, and **Logging**.
+Go to **Edit → Project Settings → Convai SDK**. The window opens with six sections: **Setup Health**, **Credentials**, **Runtime Defaults**, **Diagnostics**, **Advanced**, and **About**.
 
-* If the window is blank or shows no fields, there is a compiler error in the project. Fix all script errors first — the settings provider only renders when all editor scripts compile cleanly.
-* If the window opens but **API Key** is empty, paste your key from the [Convai developer dashboard](https://convai.com/).
+* If the window is blank or shows no sections, there is a compiler error in the project. Fix all script errors first — the settings provider only renders when all editor scripts compile cleanly.
+* If the window opens but the **Credentials** section shows no API key, select **Credentials**, paste your key from the [Convai developer dashboard](https://convai.com/), then select **Validate & Save**.
 
 When everything is configured correctly, pressing Play shows `Convai Bootstrapper: Initialization complete.` in the Console.
 {% endstep %}
@@ -100,14 +112,15 @@ Deleting the `Library/` folder forces Unity to reimport the entire project from 
 
 | Symptom | Likely cause | Fix | Verify |
 | --- | --- | --- | --- |
+| Setup Health section shows a **Warning** or **Blocked** item | A required project setting is missing or has drifted — settings asset, API key, iOS microphone usage description, or a scripting define | Open Edit → Project Settings → Convai SDK → Setup Health and select **Fix** next to the item, or correct it manually and select **Refresh** | The item's status badge turns healthy (green) |
 | `Convai Bootstrapper: ConvaiSettings not found!` in Console | `ConvaiSettings.asset` missing or deleted | Open Edit → Project Settings → Convai SDK to recreate it automatically | Re-enter Play Mode — `Convai Bootstrapper: Initialization complete.` appears |
-| `API key not configured` warning on Play | API key field is empty | Paste key from Convai dashboard into Edit → Project Settings → Convai SDK | Re-enter Play Mode — the `API key not configured` warning is gone |
+| `API key not configured` warning on Play | API key field is empty | Paste key from Convai dashboard into Edit → Project Settings → Convai SDK → Credentials, then select **Validate & Save** | Re-enter Play Mode — the `API key not configured` warning is gone |
 | `The type or namespace 'Newtonsoft' could not be found` | Newtonsoft.Json package missing | Install `com.unity.nuget.newtonsoft-json` via Package Manager | Project compiles without Newtonsoft namespace errors |
 | `The type or namespace 'InputSystem' could not be found` | Input System package missing or old version | Install `com.unity.inputsystem` <code class="expression">space.vars.dep_inputsystem_version</code>+ | Project compiles without InputSystem namespace errors |
 | Package not found when adding via UPM name | Scoped registry not configured | Follow the UPM installation guide to add the Convai scoped registry to `manifest.json` | SDK package appears in Package Manager |
 | Asset Store import fails with conflict errors | Files from a previous SDK version still present | Remove the old `Assets/Convai/` folder before reimporting | Package imports without conflict errors |
-| Project Settings → Convai SDK window is blank | Script compilation errors exist | Fix all CS errors in the Console; the settings UI only renders when editor scripts compile cleanly | Edit → Project Settings → Convai SDK displays all fields |
-| Settings asset exists but window shows no key | Asset is in wrong path | `ConvaiSettings.asset` must be at exactly `Assets/Resources/ConvaiSettings.asset` — no subfolders | Edit → Project Settings → Convai SDK shows the API Key field |
+| Project Settings → Convai SDK window is blank | Script compilation errors exist | Fix all CS errors in the Console; the settings UI only renders when editor scripts compile cleanly | Edit → Project Settings → Convai SDK displays all six sections |
+| Settings asset exists but window shows no key | Asset is in wrong path | `ConvaiSettings.asset` must be at exactly `Assets/Resources/ConvaiSettings.asset` — no subfolders | Edit → Project Settings → Convai SDK → Credentials shows the API Key field |
 | Errors about `UGUI` or `UI/Default` shader | `com.unity.ugui` missing or wrong version | Install `com.unity.ugui` <code class="expression">space.vars.dep_ugui_version</code>+ via Package Manager | Project compiles without UGUI shader errors |
 | Sample scene imports correctly but does not run | URP package missing | Sample scenes require URP; install `com.unity.render-pipelines.universal` and assign the URP asset in Project Settings → Graphics | Sample scene enters Play Mode without errors |
 

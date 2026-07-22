@@ -1,12 +1,12 @@
 ---
 title: Configure character audio
 description: >-
-  Set character voice volume, enable spatial audio, and control NPC playback
-  through the ConvaiAudio facade for scripted mute and unmute.
-last_reviewed: "4.2.0"
+  Configure per-character and project-wide voice volume, spatial audio, and
+  audio feedback, and control playback in script with mute and unmute calls.
+last_reviewed: "4.4.0"
 ---
 
-The `ConvaiAudioOutput` component controls how a character's voice plays back in the scene. Pair it with the `ConvaiAudio` facade on `ConvaiManager` for scripted runtime control of mute state, per-character volume, and audio events.
+The `ConvaiAudioOutput` component controls how a character's voice plays back in the scene, while `ConvaiSettings` sets the project-wide default volume and audio feedback behavior. Pair either with the `ConvaiAudio` facade on `ConvaiManager` for scripted runtime control of mute state, per-character volume, and audio events.
 
 ## Character audio output
 
@@ -23,6 +23,33 @@ Add `ConvaiAudioOutput` to the same GameObject as `ConvaiCharacter`. An `AudioSo
 | `_maxDistance` | `50`    | Distance at which audio falls to zero     |
 
 Disable `_use3DAudio` for non-positional scenarios — for example, a kiosk interface where the character always sounds "present" regardless of where the player stands.
+
+## Project-wide audio defaults
+
+`ConvaiSettings` exposes two project-wide defaults that apply until a script overrides them.
+
+| Field                   | Default | Description                                                         |
+| ----------------------- | ------- | -------------------------------------------------------------------- |
+| `CharacterAudioVolume`  | `1`     | Default master volume for character audio (`0`–`1`)                  |
+| `AudioFeedbackEnabled`  | `true`  | Plays feedback sounds, such as the listening indicator, by default   |
+
+Configure both fields in the Convai Editor window's **Runtime Defaults** section (**Convai > Settings > Runtime Defaults**), or the equivalent **Edit > Project Settings > Convai SDK > Runtime Defaults** page — both surface the same fields.
+
+These defaults seed `RuntimePreferences` when `ConvaiManager` builds its runtime. Read or change the effective value while a session is running through `ConvaiManager.ActiveManager.ConvaiRuntime.RuntimePreferences`:
+
+```csharp
+// Read the current project-wide defaults
+float volume = ConvaiManager.ActiveManager.ConvaiRuntime.RuntimePreferences.CharacterAudioVolume;
+bool audioFeedbackOn = ConvaiManager.ActiveManager.ConvaiRuntime.RuntimePreferences.AudioFeedbackEnabled;
+
+// Override at runtime — CharacterAudioVolume clamps to the 0-1 range
+ConvaiManager.ActiveManager.ConvaiRuntime.RuntimePreferences.CharacterAudioVolume = 0.5f;
+ConvaiManager.ActiveManager.ConvaiRuntime.RuntimePreferences.AudioFeedbackEnabled = false;
+```
+
+{% hint style="warning" %}
+`CharacterAudioVolume` does not change `ConvaiAudioOutput.Volume` on existing characters automatically. Read `RuntimePreferences.CharacterAudioVolume` in your own volume-control script and apply it to `ConvaiAudioOutput` or an audio mixer.
+{% endhint %}
 
 ## Audio facade
 

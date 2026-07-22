@@ -1,12 +1,12 @@
 ---
 title: Configure microphone
 description: >-
-  Select the active microphone device and configure platform-specific
-  permissions for Android, iOS, and WebGL builds.
-last_reviewed: "4.2.0"
+  Select an active microphone device at runtime, set a project-wide default, and
+  configure platform permissions for Android, iOS, and WebGL builds.
+last_reviewed: "4.4.0"
 ---
 
-The Convai SDK for Unity opens the system microphone automatically when a session starts. This page covers how to enumerate and select a specific device at runtime, and how to satisfy the platform-specific requirements for Android, iOS, and WebGL.
+The Convai SDK for Unity opens the system microphone automatically when a session starts. Enumerate and select a specific device at runtime, set a project-wide default device, and satisfy the platform-specific requirements for Android, iOS, and WebGL.
 
 ## Microphone device selection
 
@@ -31,9 +31,35 @@ if (ConvaiManager.ActiveManager.TryGetMicrophoneDeviceService(out IMicrophoneDev
 }
 ```
 
-{% hint style="warning" %}
 On WebGL, `GetAvailableDevices()` returns an empty list outside the Editor. Microphone access on WebGL goes through the browser's Web Audio API and does not support Unity's native device enumeration.
+
+## Set the project-wide default device
+
+`ConvaiSettings.DefaultMicrophoneDeviceId` sets the microphone the SDK uses before any script calls `StartListeningAsync` with a specific device index. An empty string resolves to the system default device.
+
+{% hint style="warning" %}
+`DefaultMicrophoneDeviceId` (string) replaced the integer-based `DefaultMicrophoneIndex` in SDK version <code class="expression">space.vars.unity_sdk_version</code>. Convai does not migrate the old index value automatically — if your project set a non-zero `DefaultMicrophoneIndex` before upgrading, open **Runtime Defaults** and re-pick the device.
 {% endhint %}
+
+{% stepper %}
+{% step %}
+### Open the Runtime Defaults section
+
+Open **Edit > Project Settings > Convai SDK**, or select **Convai > Settings** in the Unity Editor menu bar. Select the **Runtime Defaults** section.
+{% endstep %}
+
+{% step %}
+### Pick a device
+
+Use the **Microphone** dropdown to select a connected device by name, or leave it at **System Default** to follow the operating system's device order.
+{% endstep %}
+
+{% step %}
+### Refresh the device list if needed
+
+Select **Refresh** to re-enumerate connected microphones if you plugged in or removed a device after opening the window.
+{% endstep %}
+{% endstepper %}
 
 ## Platform-specific setup
 
@@ -53,7 +79,7 @@ When the SDK requests the permission, Android shows its standard permission dial
 
 Add a microphone usage description to your `Info.plist`. In Unity, set this via **Player Settings > iOS > Other Settings > Microphone Usage Description**:
 
-```
+```text
 "This app uses the microphone to support voice conversations with AI characters."
 ```
 
