@@ -1,6 +1,7 @@
 ---
 title: Publish policies
 description: Reference for Vision publish policies, including FPS and bitrate budgets, runtime control methods, auto-publish behavior, and WebGL-specific behavior.
+last_reviewed: "4.4.0"
 ---
 
 `ConvaiVisionPublisher` manages the WebRTC video track that carries the camera feed from Unity to Convai. A publish policy controls the client-side frame rate and bitrate budget; it does not configure any AI model or backend vision provider.
@@ -9,14 +10,14 @@ description: Reference for Vision publish policies, including FPS and bitrate bu
 
 The Inspector is divided into two collapsible sections: **FRAME SOURCE** and **PUBLISH POLICY**.
 
-#### FRAME SOURCE
+### Frame source
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
 | **Source** | `MonoBehaviour` | _(auto-discovered)_ | The `IVisionFrameSource` to publish. Leave blank to auto-discover from the same GameObject, children, or scene. Assign explicitly when multiple frame sources are present. |
 | **Track Name** | `string` | `"unity-scene"` | The name of the WebRTC track as it appears in the LiveKit room. Change only if your backend routing requires a specific name. |
 
-#### PUBLISH POLICY
+### Publish policy
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -64,9 +65,7 @@ publisher.SetPublishPolicy(VisionPublishPolicy.AutoCompatible);
 
 `Manual` policy is useful when visual context is only relevant during specific moments — for example, when the player is looking at a particular object.
 
-{% hint style="warning" %}
 `EnablePublishing` only has an effect when **Mode** is `Manual`. For other policies, publishing starts and stops with the room connection. Call `SetPublishPolicy(VisionPublishPolicy.Manual)` before calling `EnablePublishing` if you need on-demand control.
-{% endhint %}
 
 ```csharp
 ConvaiVisionPublisher publisher = GetComponent<ConvaiVisionPublisher>();
@@ -110,6 +109,16 @@ The sequence on room connect:
 3. The frame source starts capture and signals `Ready`.
 4. The coordinator opens a WebRTC video track named `videoTrackName`.
 5. `IsPublishing` becomes `true` and the `VideoTrackPublished` domain event fires.
+
+## Raw RenderTexture bypass orientation
+
+`ConvaiVisionPublisher` normally reads frames through an `IVisionFrameSource` — `CameraVisionFrameSource`, `WebcamVisionFrameSource`, `QuestVisionFrameSource`, or a custom implementation. The interface contract requires every `IVisionFrameSource` to expose a `RenderTexture` that is already top-down (Y-flipped from Unity's default bottom-up orientation), because that is what the WebRTC video track requires.
+
+{% hint style="warning" %}
+**v4.4.0 removes a double vertical flip.** Before v4.4.0, the LiveKit texture readback path applied a second vertical flip on top of the orientation the frame source already applied. Advanced setups that bypass every `IVisionFrameSource` and assign a raw `RenderTexture` directly to the LiveKit `TextureVideoSource` had to pre-flip that texture to cancel out the extra flip and keep the published frame upright. In v4.4.0 the readback no longer flips a second time, so a texture that was pre-flipped to compensate for the old bug now arrives upside down. Remove that workaround: supply a `RenderTexture` that is already top-down, using `Graphics.Blit` with `scale: Vector2(1, -1)` and `offset: Vector2(0, 1)`, or route the frame through a Convai `IVisionFrameSource` implementation instead.
+{% endhint %}
+
+This migration note covers only setups that skip `IVisionFrameSource` entirely and publish a `RenderTexture` straight to `TextureVideoSource`. Scenes that use `ConvaiVisionPublisher` with a `CameraVisionFrameSource`, `WebcamVisionFrameSource`, or `QuestVisionFrameSource` assigned to **Source** need no changes — the fix is internal to the SDK and frames now arrive upright automatically. Custom `IVisionFrameSource` implementations were also affected by the same double flip; see [Custom frame sources](custom-frame-sources.md) for that migration note.
 
 ## WebGL
 
