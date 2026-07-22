@@ -25,8 +25,6 @@ The component has four Inspector sections:
 | **Actionable Characters** | Other characters the backend may reference as action targets    |
 | **Initial Attention**     | The object name the NPC focuses on at the start of each session |
 
-<figure><img src="../../../../.gitbook/assets/image (473).png" alt="ConvaiActionConfigSource in the Unity Inspector showing all four sections: Action Definitions, Actionable Objects, Actionable Characters, and Initial Attention"><figcaption><p>ConvaiActionConfigSource Inspector — all four sections visible. Each section maps to a distinct part of the connect-time payload sent to Convai.</p></figcaption></figure>
-
 ## Action definitions
 
 Each entry in the **Action Definitions** list binds one backend action name to a Unity executor component.
@@ -53,8 +51,6 @@ One executor component can serve multiple action definitions. Add separate entri
 
 Duplicate `ActionName` values in the same list are silently deduplicated at runtime. The first entry is kept; subsequent duplicates are discarded with a console warning. Names are compared case-insensitively.
 
-<figure><img src="../../../../.gitbook/assets/image (493).png" alt="Unity Inspector showing a ConvaiActionConfigSource action definition entry with Action Name, Target Requirement, Executor, and Timeout Seconds fields filled in"><figcaption><p>A configured action definition — Action Name binds to the backend command string; Executor points to the Unity component that performs the behavior at runtime.</p></figcaption></figure>
-
 ## Actionable objects
 
 Each entry in **Actionable Objects** registers a scene object as a valid target for the backend.
@@ -79,8 +75,6 @@ Each entry in **Actionable Objects** registers a scene object as a valid target 
 
 Descriptions are fixed at connect time. If a scene object's state changes mid-session (moved, replaced), the description Convai has does not update automatically. For dynamic scenes, use connect-time overrides or a runtime patch (see below).
 
-<figure><img src="../../../../.gitbook/assets/image (495).png" alt="Unity Inspector showing the Actionable Objects list on ConvaiActionConfigSource with a registered scene object entry including Name, Description, and GameObject Reference fields"><figcaption><p>Actionable Objects list with a registered target — only Name and Description are serialized into the connect payload; GameObject Reference is local only and never sent to Convai.</p></figcaption></figure>
-
 ## Actionable characters
 
 Each entry in **Actionable Characters** registers another NPC as a valid target for the backend.
@@ -92,8 +86,6 @@ Each entry in **Actionable Characters** registers another NPC as a valid target 
 | `Name`                | `string`     | The identifier Convai uses to reference this character.                                                                                                                        |
 | `Bio`                 | `string`     | Short description sent to Convai. Helps the backend understand who the character is for targeting decisions (e.g., "Site safety supervisor responsible for equipment checks"). |
 | `GameObjectReference` | `GameObject` | The character's `GameObject`. **Local-only — never sent to Convai.**                                                                                                           |
-
-<figure><img src="../../../../.gitbook/assets/image (496).png" alt="Unity Inspector showing the Actionable Characters list on ConvaiActionConfigSource with a registered NPC entry including Name, Bio, and GameObject Reference fields"><figcaption><p>Actionable Characters list with a registered NPC — the Bio field helps the backend resolve natural-language character references such as "the supervisor" or "the engineer near the exit."</p></figcaption></figure>
 
 ## Initial attention
 
