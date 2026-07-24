@@ -1,142 +1,112 @@
 ---
-description: >-
-  Upload Metahumans, Reallusion characters, and Scenes from Unreal Engine to
-  Convai Sim and Avatar Studio with ease.
+title: Asset Uploader
+description: Upload Metahumans, Reallusion characters, and scenes from Unreal Engine to Convai Sim and Avatar Studio using the Convai Asset Uploader tool.
+last_reviewed: "5.8"
 ---
 
-# Asset Uploader
+The Convai Asset Uploader uploads Metahumans, Reallusion characters, and scenes from Unreal Engine directly to Avatar Studio and Convai Sim. The tool automates project creation, plugin integration, and asset packaging through a command-line interface. Use this page to install the tool, run it against an Unreal Engine <code class="expression">space.vars.asset_uploader_unreal_version</code> project, and upload your first asset.
 
 {% hint style="danger" %}
-The Asset Uploader is currently available only on the Professional Plan and above.
+The Asset Uploader is available only on the Professional Plan and above.
 {% endhint %}
 
-## Introduction
-
-The **Convai Asset Uploader** enables developers to upload their custom avatars and levels directly from **Unreal Engine** to **Avatar Studio** and **Convai Sim**. It automates project creation, plugin integration, and asset packaging through a command-line interface, making the entire process simple and reliable.
-
-Whether you're uploading a scene, a Metahuman, or a custom Reallusion character, this tool ensures your assets are packaged and transferred in a compatible and Convai-ready format.
-
 {% embed url="https://youtu.be/eFK9RFHDdco" %}
-Convai Asset Uploader Tool Walkthrough
+Convai Asset Uploader tool walkthrough
 {% endembed %}
 
 ***
 
 ## Prerequisites
 
-Before getting started, ensure you have the following:
+Before running the Asset Uploader, confirm the following:
 
-* **Unreal Engine 5.5**
-* **Convai API Key** – You can get it from the [Convai Dashboard](https://convai.com/)
-* **.NET 6.0 Runtime (Console Applications)** – [Download it here](https://dotnet.microsoft.com/en-us/download/dotnet/6.0/runtime?cid=getdotnetcore\&os=windows\&arch=x64)
-* **Unreal Engine 5.5** [**Cross-Compile Toolchain**](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine?application_version=5.5) **-** [Download it here](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine#version-history)
-* **Download Linux Binaries for Unreal Engine 5.5 -** You can download it from Epic Games Launcher
-
-<figure><img src="../../.gitbook/assets/image (433).png" alt=""><figcaption><p><strong>Linux Binaries for Unreal Engine 5.5</strong></p></figcaption></figure>
+* Unreal Engine <code class="expression">space.vars.asset_uploader_unreal_version</code>
+* A Convai API key from the [Convai Dashboard](https://convai.com/)
+* .NET 6.0 Runtime (Console Applications) — [download the .NET 6.0 console runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0/runtime?cid=getdotnetcore\&os=windows\&arch=x64)
+* The Unreal Engine <code class="expression">space.vars.asset_uploader_unreal_version</code> [cross-compile toolchain requirements](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine?application_version=5.8), including the [toolchain version history](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine#version-history)
+* The Linux binaries for Unreal Engine <code class="expression">space.vars.asset_uploader_unreal_version</code>, available from the Epic Games Launcher
 
 ***
 
-## Getting Started
+## Download and run the tool
 
-### Step 1: Download the Asset Uploader
+{% stepper %}
+{% step %}
+### Download the Asset Uploader
 
-Download the latest version of `AssetUploaderTool.exe` from our [GitHub Releases](https://github.com/Conv-AI/Convai-UnrealEngine-ModdingTool/releases).
+Download the latest `AssetUploaderTool.exe` from the [Convai Asset Uploader GitHub Releases](https://github.com/Conv-AI/Convai-UnrealEngine-ModdingTool/releases). Move the file to the directory where you want your new Unreal Engine project to be created — the tool creates and configures the Convai Unreal Engine project automatically.
+{% endstep %}
 
-{% hint style="info" %}
-Asset Uploader Tool will create and configure your Convai Unreal project automatically.
-{% endhint %}
+{% step %}
+### Run the uploader tool
 
-***
+Double-click `AssetUploaderTool.exe` to run it. If Windows shows a "Windows protected your PC" screen, select **More info > Run anyway**. The tool is safe to run — the warning appears because the tool is currently in beta and not digitally signed.
+{% endstep %}
 
-### Step 2: Run the Uploader Tool
+{% step %}
+### Follow the prompts
 
-1. Move the downloaded `AssetUploaderTool.exe` file to the directory where you want your new Unreal project to be created.
-2. Double-click to run the `.exe`.
-3. If you see a “Windows protected your PC” screen, click **More Info** > **Run Anyway**.
+The tool opens in a terminal window and walks through:
 
-{% hint style="success" %}
-Don’t worry! The executable is safe to use. The warning appears because the tool is currently in beta and not digitally signed.
-{% endhint %}
-
-***
-
-### Step 3: Follow the Prompts
-
-The Asset Uploader will open in a terminal window. You’ll go through the following steps:
-
-1. **Unreal Engine Path Detection**\
-   You'll see a message like:\
-   `Found Valid Unreal Engine Path: C:/Program Files/Epic Games/UE_5.5`
-   * Confirm with `Y` if correct
-   * Enter `N` to provide a different path manually
-2. **Project Configuration**
-   * **Enter the Project Name** (this will be your new Unreal project)
-   * **Enter your Convai API Key** from your Convai account
-3. **Select Asset Type**
-   * Press `1` for uploading a **Scene**
-   * Press `2` for uploading an **Avatar**
-4. **Choose Avatar Type** If you selected Avatar:
-   * You’ll be asked: `Are you using a Metahuman for your Avatar?`
-     * Press `Y` for Metahuman setup
-     * Press `N` for Reallusion setup
+1. **Unreal Engine path detection** — confirm a message such as `Found Valid Unreal Engine Path: C:/Program Files/Epic Games/UE_5.8`. Enter `Y` to confirm the path or `N` to provide a different path.
+2. **Project configuration** — enter the project name and your Convai API key.
+3. **Asset type selection** — press `1` to upload a scene or `2` to upload an avatar.
+4. **Avatar type selection** (avatars only) — respond to `Are you using a Metahuman for your Avatar?` with `Y` for a MetaHuman setup or `N` for a Reallusion setup.
+{% endstep %}
+{% endstepper %}
 
 ***
 
-## What Happens Next
+## Verify the upload
 
-Once your configuration is complete, the tool will:
+Once configuration is complete, the tool generates a new Unreal Engine project, installs and configures the Convai plugins, and begins compiling the project. The upload is complete once the terminal shows:
 
-* Generate a new Unreal Engine project
-* Automatically install and configure all necessary **Convai Plugins**
-* Begin compiling the project
-
-When you see the message:
-
-```
+```text
 Unreal Compilation completed successfully
 ```
 
-your setup is complete. Press `Enter` to exit.
+Press `Enter` to exit.
+
+The new project is created in the same directory as `AssetUploaderTool.exe`. For example, if the tool is placed in `Downloads`, the project is generated inside `Downloads`.
 
 ***
 
-## Project Location
+## Troubleshooting
 
-Your new project will be created in the same directory as the `.exe`.
+### .NET Runtime error appears when running the tool
 
-> Example: If the tool is placed in `Downloads`, your project will be generated inside `Downloads`.
+**Symptom:** The tool reports a missing .NET Runtime error.
 
-***
+**Cause:** The .NET 6.0 Runtime for console applications is not installed.
 
-## .NET Runtime Errors
+**Fix:** Install the [.NET 6.0 Runtime for console apps](https://dotnet.microsoft.com/en-us/download/dotnet/6.0/runtime?cid=getdotnetcore\&os=windows\&arch=x64).
 
-If you encounter an error related to the .NET Runtime:
-
-* Install the **.NET 6.0 Runtime for Console Apps** from [this link](https://dotnet.microsoft.com/en-us/download/dotnet/6.0/runtime?cid=getdotnetcore\&os=windows\&arch=x64).
+**Verify:** Rerun `AssetUploaderTool.exe` — the tool starts without the runtime error.
 
 ***
 
-## Important Notes
+## Project and plugin constraints
 
-* Do **not** delete or rename the `ConvaiEssentials` folder.
-* Do **not** change global project settings outside the plugin folder.
+* Do not delete or rename the `ConvaiEssentials` folder.
+* Do not change global project settings outside the plugin folder.
 * Support for other Unreal Engine versions is in development.
 
 ***
 
-## Next Steps
+## Next steps
 
-Continue to one of the following guides:
+Only MetaHuman and Reallusion avatars are supported for upload.
 
-* [Uploading Metahuman Avatars](../../no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/metahuman-avatars.md)
-* [Uploading Reallusion Avatars](../../no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/reallusion-avatars.md)
+{% content-ref url="../../no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/metahuman-avatars.md" %}
+[Uploading MetaHuman avatars](../../no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/metahuman-avatars.md)
+{% endcontent-ref %}
 
-{% hint style="info" %}
-Currently, only Metahuman and Reallusion avatars are supported for upload.
-{% endhint %}
+{% content-ref url="../../no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/reallusion-avatars.md" %}
+[Uploading Reallusion avatars](../../no-code-experiences/avatar-studio-experiences/customizing-your-avatar/configure-avatar/uploading-avatars/reallusion-avatars.md)
+{% endcontent-ref %}
 
 ***
 
-## Need Help?
+## Need help?
 
-If you run into any issues or have questions, don’t hesitate to reach out via the [Convai Developer Forum](https://forum.convai.com/).
+If you run into issues or have questions, reach out through the [Convai Developer Forum](https://forum.convai.com/).
