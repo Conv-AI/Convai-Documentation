@@ -26,12 +26,6 @@ Before running the Asset Uploader, confirm the following:
 * The Unreal Engine <code class="expression">space.vars.asset_uploader_unreal_version</code> [cross-compile toolchain requirements](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine?application_version=5.8), including the [toolchain version history](https://dev.epicgames.com/documentation/en-us/unreal-engine/linux-development-requirements-for-unreal-engine#version-history)
 * The Linux binaries for Unreal Engine <code class="expression">space.vars.asset_uploader_unreal_version</code>, available from the Epic Games Launcher
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the Epic Games Launcher engine options screen showing the Linux binaries entry for Unreal Engine 5.8 selected for installation. The image must show the exact UI label for the Linux binaries option in the 5.8 engine options list.
-{% endhint %}
-
-<figure><img src="../../.gitbook/assets/TODO-linux-binaries-unreal-5-8.png" alt="Epic Games Launcher engine options showing the Linux binaries entry for Unreal Engine 5.8"><figcaption><p>TODO: Replace with a screenshot of the Linux binaries option for Unreal Engine 5.8 in the Epic Games Launcher.</p></figcaption></figure>
-
 ***
 
 ## Download and run the tool
