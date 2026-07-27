@@ -255,6 +255,7 @@
       * [Actions Blueprint reference](plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/actions-blueprint-reference.md)
       * [Character actions examples](plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/character-actions-examples.md)
       * [Troubleshoot character actions](plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/troubleshoot-character-actions.md)
+      * [Stack O Bot tutorial setup](plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/stack-o-bot-tutorial-setup.md)
     * [Dynamic context](plugins-and-integrations/convai-unreal-engine-plugin/features/dynamic-context/README.md)
       * [How dynamic context works](plugins-and-integrations/convai-unreal-engine-plugin/features/dynamic-context/how-dynamic-context-works.md)
       * [Dynamic context quick start](plugins-and-integrations/convai-unreal-engine-plugin/features/dynamic-context/dynamic-context-quick-start.md)
