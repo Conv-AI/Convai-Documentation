@@ -248,6 +248,7 @@
       * [How character actions work](plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/how-character-actions-work.md)
       * [Character actions quick start](plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/character-actions-quick-start.md)
       * [Configuring actions](plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/configuring-actions.md)
+      * [Writing clear action names and descriptions](plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/writing-clear-action-names-and-descriptions.md)
       * [Built-in action handlers](plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/built-in-action-handlers.md)
       * [Building custom action handlers](plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/building-custom-action-handlers.md)
       * [Parameterized actions](plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/parameterized-actions.md)
