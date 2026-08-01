@@ -133,6 +133,24 @@ To delete a previously uploaded asset, open AssetUploader and click **Delete**.
 
 ***
 
+## Performance considerations and limitations
+
+{% hint style="warning" %}
+Avatar Studio has a fixed real-time CPU, GPU, and memory budget. Convai's sample avatars are optimized for this environment, but custom MetaHumans are uploaded with the assets and logic you provide. A successful upload does not guarantee smooth hosted performance.
+{% endhint %}
+
+There is no single asset limit that suits every character. Performance depends on the combined cost of the avatar, animation, background, and custom behavior. Review the complete experience:
+
+* **Hair and grooms:** Hair and facial grooms can be expensive to render. Keep strand, curve, point, and group complexity only as high as the intended look requires. Remove unused groom components, disable simulation where it is not needed, and use shadow and material features carefully. See Epic's [groom performance guidance](https://dev.epicgames.com/documentation/unreal-engine/groom-scalability-and-performance-with-unreal-engine).
+* **Geometry and accessories:** Remove hidden, duplicate, or unused geometry and components. Keep custom clothing, accessories, cloth, and deformation complexity appropriate for what the learner will actually see.
+* **Textures and materials:** Use texture resolutions appropriate for the intended framing, and remove unnecessary material slots or expensive shader features. Do not rely on ray tracing- or Lumen-specific appearance; review hair and skin materials under the hosted lighting and rendering setup.
+* **Blueprints and animation:** Prefer event-driven Blueprint behavior. Avoid unnecessary work on **Event Tick**, per-frame searches or allocations, and components that keep ticking when they are not in use. Limit simultaneous animation, physics, control-rig, and procedural systems to those needed for the current interaction.
+* **Check the hosted experience:** After uploading, use the experience through Avatar Studio on the website. Check loading and interaction responsiveness, animation smoothness, lip-sync and audio timing, and visual consistency.
+
+If performance is lower than expected, simplify one costly feature at a time and upload again. Start with the groom, followed by geometry, materials, textures, and custom Blueprint effects.
+
+***
+
 ## Accessing the Avatar
 
 1. Go to [Avatar Studio](https://convai.com/)
