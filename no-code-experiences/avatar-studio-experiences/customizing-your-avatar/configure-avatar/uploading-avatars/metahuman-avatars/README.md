@@ -14,7 +14,7 @@ This guide walks you through uploading **custom Metahuman avatars** to **Avatar 
 
 Before you begin:
 
-* Create your project using the [**Convai Asset Uploader**](../../../../../plugins-and-integrations/asset-uploader/), and answer **`Y`** when asked if you’re using a Metahuman.
+* Create your project using the [**Convai Asset Uploader**](../../../../../../plugins-and-integrations/asset-uploader/), and answer **`Y`** when asked if you’re using a Metahuman.
 * Ensure you have a downloadable Metahuman available via **Quixel Bridge**.
 
 ***
@@ -54,7 +54,7 @@ If you see compile errors:
 
 * In the bottom-right, click **Enable Missing** under any **Missing Plugins** or **Missing Project Settings** notices.
 
-<figure><img src="../../../../../.gitbook/assets/Screenshot 2025-04-18 224336.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/Screenshot 2025-04-18 224336.png" alt=""><figcaption></figcaption></figure>
 
 * Click **Restart Now** when prompted.
 * Reopen the Blueprint and ensure it compiles successfully.
@@ -70,7 +70,7 @@ If you see compile errors:
    * Use **Move Here** to complete the action.
    * The final structure should mirror what’s shown in the screenshot.
 
-<figure><img src="../../../../../.gitbook/assets/Screenshot 2025-04-18 231010.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../../../../.gitbook/assets/Screenshot 2025-04-18 231010.png" alt=""><figcaption></figcaption></figure>
 
 {% hint style="info" %}
 This folder determines what gets packaged and uploaded. Make sure everything is placed correctly.
@@ -108,6 +108,10 @@ This folder determines what gets packaged and uploaded. Make sure everything is 
    * Animations are working
    * Lip sync is functional
    * Character behaves as expected
+
+{% hint style="info" %}
+Before uploading, review the [MetaHuman hair and skin appearance guidelines](metahuman-hair-and-skin-appearance-guidelines.md) to check the groom and materials in Avatar Studio's target rendering profile.
+{% endhint %}
 
 ***
 
