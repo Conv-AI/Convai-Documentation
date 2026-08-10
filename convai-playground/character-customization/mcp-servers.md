@@ -6,10 +6,6 @@ description: >-
 
 # MCP Servers
 
-##
-
-
-
 The [Model Context Protocol (MCP)](https://modelcontextprotocol.io) integration lets your character use tools from MCP servers during conversations. Your character can:
 
 * Connect to any MCP-compatible server you host or subscribe to
