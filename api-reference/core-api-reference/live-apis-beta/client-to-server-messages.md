@@ -215,6 +215,11 @@ Updates the bot's runtime dynamic context with full control over mode, token bud
     "mode": "append",
     "run_llm": "auto",
     "current_attention_object": "torch",
+    "action_config": {
+      "objects": [
+        { "name": "torch", "description": "A flaming torch on the wall" }
+      ]
+    },
     "remove_static": false
   }
 }
@@ -226,7 +231,16 @@ Updates the bot's runtime dynamic context with full control over mode, token bud
 | `mode` | string | No | `"append"` | How to apply the context. |
 | `run_llm` | string | No | `"auto"` | Whether to trigger an LLM response after the update. |
 | `current_attention_object` | string or object | No | — | Updates the active attention object for action-reference grounding. |
+| `action_config` | object | No | — | Replaces the provided action affordance lists for the active session. See below. |
 | `remove_static` | boolean | No | `false` | For `"reset"` mode only: when `true`, also clears the static context. |
+
+**Updating action affordances mid-session**
+
+`action_config` accepts the same structure as the [Connect API](connect-api.md#request-body). Only the lists you provide are replaced — sending just `objects` leaves `actions` and `characters` untouched. Use this when the scene changes and the character's affordances change with it.
+
+{% hint style="warning" %}
+Adding an object to `scene_description` or to `text` does **not** make it targetable. Only `action_config` grants affordances. See [Response contract and parsing](response-contract-and-parsing.md#how-actions-are-separated).
+{% endhint %}
 
 **Mode values**
 
@@ -317,6 +331,78 @@ When a token limit is exceeded, the server returns a `server-response` with `"st
 - Validation checks apply to the static, runtime, and combined estimated-token limits independently.
 - When combined dynamic context exceeds 40,000 estimated tokens, Convai logs a server-side warning.
 - Error messages include the estimated-token breakdown for both partitions.
+
+---
+
+## Vision
+
+### vision-frame
+
+Publishes a single visual frame into the session's vision buffer. The frame is **silent by itself** — it does not trigger a response. The buffered frames are consumed by the next user turn, or by an explicit trigger.
+
+```json
+{
+  "type": "vision-frame",
+  "data": {
+    "image": "data:image/jpeg;base64,...",
+    "source_label": "canvas",
+    "capture_pts_ns": 123456789
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `image` | string | Yes | JPEG, PNG, or WebP data URL, or base64 image bytes accompanied by `mime_type`. |
+| `source_label` | string | No | `"webcam"`, `"canvas"`, `"screen"`, or `"custom"`. Unrecognised labels are treated as `"custom"`. |
+| `mime_type` | string | No | Required when `image` is raw base64 rather than a data URL. |
+| `capture_pts_ns` | number | No | Client-side capture timestamp in nanoseconds, for diagnostics. |
+
+The same message may also be sent through the Pipecat client-message wrapper:
+
+```json
+{
+  "type": "client-message",
+  "data": { "t": "vision-frame", "d": { "image": "data:image/png;base64,...", "source_label": "webcam" } }
+}
+```
+
+{% hint style="warning" %}
+A successful local send is **not** proof that the backend attached the frame to an LLM turn. Query vision status if you need confirmation that frames are available.
+{% endhint %}
+
+**Use cases:**
+
+- Send canvas or screen captures for the character to comment on.
+- Feed webcam frames in a WebSocket session where no video track is present.
+
+---
+
+### vision-source-state
+
+Declares the lifecycle of a visual source. Send `active: false` when a camera, canvas, screen share, or custom source is turned off, so the server clears it and does not reuse stale visual context.
+
+```json
+{
+  "type": "vision-source-state",
+  "data": {
+    "active": false,
+    "source_label": "canvas"
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `active` | boolean | No | `true` marks the source active; `false` clears it. |
+| `source_label` | string | No | `"webcam"`, `"canvas"`, `"screen"`, or `"custom"`. |
+
+After a clear, vision status reports `no_active_video` until a new `vision-frame` arrives.
+
+**Use cases:**
+
+- Stop a screen share and prevent the character referring to what it last saw.
+- Switch between webcam and canvas sources cleanly.
 
 ---
 
@@ -440,6 +526,53 @@ No `data` payload is required. The server ignores any `data` content.
 - Reset the timer when the user performs a UI action such as a click or keypress.
 - Detect user activity outside of voice interaction (for example, mouse movement) and prevent idle timeout.
 - Keep a session alive during extended non-voice interactions.
+
+---
+
+### usage-toggle
+
+Enables or disables streaming of informational `usage-update` messages to this client.
+
+```json
+{
+  "type": "usage-toggle",
+  "data": {
+    "enabled": true
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `enabled` | boolean | Yes | `true` resumes `usage-update` streaming, `false` stops it. |
+
+{% hint style="info" %}
+This only controls whether the server **pushes** usage messages to your client. It never affects server-side usage tracking, aggregation, or billing, which continue unconditionally. `usage-update` messages are only available when the session is running in debug mode with usage tracking enabled.
+{% endhint %}
+
+**Use cases:**
+
+- Stop the real-time cost stream when a debug usage panel is hidden.
+- Reduce data-channel traffic for clients that do not render live usage.
+
+---
+
+### kill-pipeline
+
+Terminates the session and closes the connection.
+
+```json
+{
+  "type": "kill-pipeline"
+}
+```
+
+No `data` payload is required.
+
+**Use cases:**
+
+- Cleanly end a session when the user exits the experience.
+- Release resources without waiting for an idle timeout.
 
 ---
 
