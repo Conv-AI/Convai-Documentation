@@ -213,3 +213,131 @@ curl -X POST "https://api.convai.com/character/update" \
 {% endcode %}
 {% endtab %}
 {% endtabs %}
+
+***
+
+## Reasoning Level Setting
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/update`
+
+Controls how much internal reasoning the model performs before answering. More reasoning generally improves multi-step questions and instruction following, at the cost of higher latency and token usage.
+
+Support is per model. Query [`/character/getSupportedModel`](#discovering-supported-reasoning-levels) to find out which levels a model accepts before setting one — a value the model does not support is rejected.
+
+#### Headers
+
+| Name                                             | Type   | Description                                                                                                |
+| ------------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------- |
+| CONVAI-API-KEY<mark style="color:red;">\*</mark> | String | The unique api-key provided for every user. Found under the Key icon when logged into your Convai account. |
+
+#### Request Body
+
+| Name             | Type   | Description                                                                                     |
+| ---------------- | ------ | ----------------------------------------------------------------------------------------------- |
+| charID           | String | Id of your character.                                                                           |
+| reasoning\_effort | String | A level the selected model supports, or `"auto"`. Send an empty string to clear the setting.    |
+
+#### Values
+
+| Value | Behavior |
+| ----- | -------- |
+| *(not set)* | The character inherits whatever the model is configured with. This is the state of every character that has never had a level set. |
+| `"auto"` | No reasoning parameter is sent to the provider, so the model applies its own adaptive default — reasoning more on hard requests and less on easy ones. |
+| A supported level | Sent to the provider explicitly. Common values are `none`, `minimal`, `low`, `medium`, `high`, `xhigh` and `max`, but the accepted set is model-specific. |
+
+{% hint style="warning" %}
+**Not set and `"auto"` are different.** Not set preserves the model's configured behavior. `"auto"` actively suppresses it so the provider's own adaptive default applies. Sending an empty string clears the setting and returns the character to the not-set state.
+{% endhint %}
+
+{% tabs %}
+{% tab title="200: OK Reasoning level successfully updated" %}
+```json
+{"STATUS": "SUCCESS"}
+```
+{% endtab %}
+
+{% tab title="400 Unsupported level for this model" %}
+```json
+{
+    "ERROR": "Invalid reasoning_effort 'xhigh' for model 'gemini-3.6-flash'. Supported values: minimal, low, medium, high, auto."
+}
+```
+{% endtab %}
+
+{% tab title="401 API Key validation has failed" %}
+```json
+{
+    "API_ERROR": "Invalid API key provided."
+}
+```
+{% endtab %}
+{% endtabs %}
+
+{% tabs %}
+{% tab title="Python" %}
+{% code overflow="wrap" %}
+```python
+import requests
+import json
+
+url = "https://api.convai.com/character/update"
+
+headers = {
+    'CONVAI-API-KEY': '<Your-API-Key>',
+    'Content-Type': 'application/json'
+}
+
+payload = {
+    "charID": "<Your-Character-Id>",
+    "reasoning_effort": "auto"
+}
+
+response = requests.post(url, headers=headers, data=json.dumps(payload))
+
+print(response.text)
+```
+{% endcode %}
+{% endtab %}
+
+{% tab title="cURL" %}
+{% code overflow="wrap" %}
+```shell
+curl -X POST "https://api.convai.com/character/update" \
+     -H "CONVAI-API-KEY: <Your-API-Key>" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "charID": "<Your-Character-Id>",
+           "reasoning_effort": "auto"
+         }'
+```
+{% endcode %}
+{% endtab %}
+{% endtabs %}
+
+### Discovering supported reasoning levels
+
+<mark style="color:green;">`POST`</mark> `https://api.convai.com/character/getSupportedModel`
+
+Models that support reasoning control carry a `reasoning` block in their entry. Models without one do not support the setting.
+
+```json
+{
+  "model_group_name": "gpt-5.6-luna-none",
+  "display_name": "GPT-5.6 Luna",
+  "reasoning": {
+    "levels": ["none", "low", "medium", "high"],
+    "supports_auto": true,
+    "default": "medium"
+  }
+}
+```
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| levels | String\[] | The levels this model accepts, ordered from least to most reasoning. |
+| supports\_auto | Boolean | Whether `"auto"` is a valid value for this model. |
+| default | String | The provider's own default level, when known. Applies when `"auto"` is selected. |
+
+{% hint style="info" %}
+Build any level picker from this block rather than hardcoding a list. Providers add and rename levels over time, and the accepted set differs between model families — Gemini's lowest level is `minimal` while OpenAI's is `none`.
+{% endhint %}
