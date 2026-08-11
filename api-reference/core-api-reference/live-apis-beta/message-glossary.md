@@ -39,7 +39,7 @@ Messages sent from the client to the server use this structure:
 
 ### Server → Client Messages
 
-Messages sent from the server to the client are wrapped in an RTVI envelope:
+Most messages sent from the server to the client are wrapped in an RTVI envelope:
 
 ```json
 {
@@ -56,9 +56,33 @@ Messages sent from the server to the client are wrapped in an RTVI envelope:
 - `type` _(string)_: Always `"server-message"` for custom server messages
 - `data` _(object)_: Contains the actual message with its own `type` and payload fields
 
+There are **three envelope shapes** in total, and a client must handle all of them:
+
+| Shape | Where the event type lives | Used by |
+|---|---|---|
+| Server-message wrapped | `data.type` | Most messages |
+| Bot output stream | top-level `type` | `bot-llm-started`, `bot-llm-text`, `bot-llm-stopped`, `bot-tts-started` |
+| Direct (legacy) | top-level `type`, fields flat | `server-response` |
+
+Resolve the effective event type like this:
+
+```javascript
+function eventType(message) {
+  return message.type === "server-message" && message.data?.type
+    ? message.data.type
+    : message.type;
+}
+```
+
 {% hint style="info" %}
 In the detailed message documentation pages, examples show only the inner `data` payload for clarity.
 {% endhint %}
+
+### Field presence
+
+Field presence is **not uniform** across message types. Some optional fields are emitted as `null`; others are omitted from the JSON entirely; nested optional fields such as `action-response.actions[].target` are dropped when unset.
+
+Write clients defensively — use optional access rather than null checks. The full rules are in [Field presence rules](turn-lifecycle-and-message-ordering.md#field-presence-rules).
 
 ---
 
@@ -108,11 +132,15 @@ For every client-to-server message, the server automatically sends a `server-res
 | `update-scene-metadata`       | Update scene objects                       | [client-to-server-messages.md](client-to-server-messages.md#update-scene-metadata)       |
 | `update-dynamic-info`         | Update dynamic context (basic)             | [client-to-server-messages.md](client-to-server-messages.md#update-dynamic-info)         |
 | `context-update`              | Update runtime context (with mode control) | [client-to-server-messages.md](client-to-server-messages.md#context-update)              |
+| `vision-status`               | Query vision buffer state                  | [client-to-server-messages.md](client-to-server-messages.md#vision-status)               |
+| `vision-trigger`              | Attach buffered frames / trigger vision    | [client-to-server-messages.md](client-to-server-messages.md#vision-trigger)              |
 | `tts-toggle`                  | Enable/disable bot audio                   | [client-to-server-messages.md](client-to-server-messages.md#tts-toggle)                  |
 | `stt-toggle`                  | Mute/unmute speech recognition             | [client-to-server-messages.md](client-to-server-messages.md#stt-toggle)                  |
 | `interrupt-bot`               | Stop bot speech immediately                | [client-to-server-messages.md](client-to-server-messages.md#interrupt-bot)               |
 | `force-user-stopped-speaking` | Signal end of user speech (push-to-talk)   | [client-to-server-messages.md](client-to-server-messages.md#force-user-stopped-speaking) |
 | `reset-idle-timer`            | Reset idle timeout monitoring              | [client-to-server-messages.md](client-to-server-messages.md#reset-idle-timer)            |
+| `usage-toggle`                | Enable/disable the client usage stream     | [client-to-server-messages.md](client-to-server-messages.md#usage-toggle)                |
+| `kill-pipeline`               | End the session                            | [client-to-server-messages.md](client-to-server-messages.md#kill-pipeline)               |
 
 ---
 
@@ -120,6 +148,12 @@ For every client-to-server message, the server automatically sends a `server-res
 
 | Message Type                    | Purpose                                     | Format                 | Details Page                                                                               |
 | ------------------------------- | ------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------ |
+| `bot-llm-started`               | Model generation began                      | Bot output stream      | [server-to-client-messages.md](server-to-client-messages.md#bot-llm-started-bot-llm-stopped) |
+| `bot-llm-text`                  | **The bot's spoken response text**          | Bot output stream      | [server-to-client-messages.md](server-to-client-messages.md#bot-llm-text)                  |
+| `bot-llm-stopped`               | Model generation finished                   | Bot output stream      | [server-to-client-messages.md](server-to-client-messages.md#bot-llm-started-bot-llm-stopped) |
+| `bot-tts-started`               | Speech synthesis began                      | Bot output stream      | [server-to-client-messages.md](server-to-client-messages.md#bot-tts-started)               |
+| `bot-started-speaking`          | Bot audio began                             | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#bot-started-speaking-bot-stopped-speaking) |
+| `bot-stopped-speaking`          | Bot audio ended                             | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#bot-started-speaking-bot-stopped-speaking) |
 | `server-response`               | Response for every client message           | Direct (legacy)        | [server-to-client-messages.md](server-to-client-messages.md#server-response)               |
 | `interaction-created`           | Interaction ID created                      | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#interaction-created)           |
 | `usage-limit-reached`           | Quota exceeded notification                 | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#usage-limit-reached)           |
@@ -132,9 +166,16 @@ For every client-to-server message, the server automatically sends a `server-res
 | `visemes`                       | Lip-sync data                               | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#visemes)                       |
 | `neurosync-blendshapes`         | Facial animation data                       | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#neurosync-blendshapes)         |
 | `chunked-neurosync-blendshapes` | Batched facial animation                    | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#chunked-neurosync-blendshapes) |
+| `neurosync-blendshapes-cancel`  | Drop buffered ahead-delivered visuals        | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#neurosync-blendshapes-cancel)  |
 | `blendshape-turn-stats`         | Turn statistics                             | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#blendshape-turn-stats)         |
 | `user-idle-warning`             | Idle timeout warning                        | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#user-idle-warning)             |
 | `llm-no-response`               | LLM chose not to respond                    | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#llm-no-response)               |
+| `vad-stt-started`               | STT started transcribing                    | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#vad-stt-started)               |
+| `vad-stt-stopped`               | STT stopped transcribing                    | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#vad-stt-stopped)               |
+| `vad-stt-debug`                 | VAD debug events (debug sessions only)      | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#vad-stt-debug)                 |
+| `turn-trace`                    | Per-turn timing trace (debug sessions only) | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#diagnostics)                   |
+| `server-log`                    | Server log lines (debug sessions only)      | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#diagnostics)                   |
+| `usage-update`                  | Per-turn usage and cost (debug sessions only) | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#diagnostics)                 |
 | `audio-data`                    | Audio chunks via data channel (custom mode) | Server-message wrapped | See [Audio Data via Data Channel](audio-data-via-data-channel.md)                          |
 
 **Format Key:**
@@ -204,14 +245,31 @@ When you receive a `server-response` message, the `extras` field may contain eve
 
 ## Message Categories
 
+### Bot Response
+
+The character's own output:
+
+- `bot-llm-started` / `bot-llm-stopped` - Model generation boundaries
+- `bot-llm-text` - The spoken response text
+- `bot-tts-started` - Speech synthesis began
+- `bot-started-speaking` / `bot-stopped-speaking` - Audio boundaries
+- `bot-turn-completed` - Server-side terminal state for the turn
+
 ### Context & State Management
 
 Messages for managing conversation context and bot state:
 
-- `context-update` - Unified context updates with mode control
+- `context-update` - Unified context updates with mode control, including action affordances
 - `update-dynamic-info` - Basic dynamic context updates
 - `update-template-keys` - Update prompt template variables
 - `update-scene-metadata` - Update scene object descriptions
+
+### Vision
+
+Messages for querying and consuming the vision buffer:
+
+- `vision-status` - Query whether frames are available and inspect buffer state
+- `vision-trigger` - Attach buffered frames and optionally trigger a bot turn
 
 ### Audio Control
 
@@ -275,6 +333,8 @@ Messages from the VAD-based STT gating system:
 ## Related Documentation
 
 - [Connect API](connect-api.md) - Establish a live session
+- [Turn lifecycle and message ordering](turn-lifecycle-and-message-ordering.md) - How a turn is delivered, and what ordering you can rely on
+- [Response contract and parsing](response-contract-and-parsing.md) - How speech, actions, and emotion are separated, and what the server removes
 - [Client to Server Messages](client-to-server-messages.md) - Detailed client message reference
 - [Server to Client Messages](server-to-client-messages.md) - Detailed server message reference
 - [Audio Data via Data Channel](audio-data-via-data-channel.md) - Custom audio handling

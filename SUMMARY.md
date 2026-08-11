@@ -639,6 +639,8 @@
     * [Message Glossary](api-reference/core-api-reference/live-apis-beta/message-glossary.md)
     * [Client-to-server messages](api-reference/core-api-reference/live-apis-beta/client-to-server-messages.md)
     * [Server-to-client messages](api-reference/core-api-reference/live-apis-beta/server-to-client-messages.md)
+    * [Turn lifecycle and message ordering](api-reference/core-api-reference/live-apis-beta/turn-lifecycle-and-message-ordering.md)
+    * [Response contract and parsing](api-reference/core-api-reference/live-apis-beta/response-contract-and-parsing.md)
   * [Interaction APIs](api-reference/core-api-reference/interaction-apis/README.md)
     * [Interaction API (Beta)](api-reference/core-api-reference/interaction-apis/interaction-api-beta.md)
     * [Interaction API](api-reference/core-api-reference/interaction-apis/interaction-api.md)

@@ -215,6 +215,11 @@ Updates the bot's runtime dynamic context with full control over mode, token bud
     "mode": "append",
     "run_llm": "auto",
     "current_attention_object": "torch",
+    "action_config": {
+      "objects": [
+        { "name": "torch", "description": "A flaming torch on the wall" }
+      ]
+    },
     "remove_static": false
   }
 }
@@ -226,7 +231,16 @@ Updates the bot's runtime dynamic context with full control over mode, token bud
 | `mode` | string | No | `"append"` | How to apply the context. |
 | `run_llm` | string | No | `"auto"` | Whether to trigger an LLM response after the update. |
 | `current_attention_object` | string or object | No | — | Updates the active attention object for action-reference grounding. |
+| `action_config` | object | No | — | Replaces the provided action affordance lists for the active session. See below. |
 | `remove_static` | boolean | No | `false` | For `"reset"` mode only: when `true`, also clears the static context. |
+
+**Updating action affordances mid-session**
+
+`action_config` accepts the same structure as the [Connect API](connect-api.md#request-body). Only the lists you provide are replaced — sending just `objects` leaves `actions` and `characters` untouched. Use this when the scene changes and the character's affordances change with it.
+
+{% hint style="warning" %}
+Adding an object to `scene_description` or to `text` does **not** make it targetable. Only `action_config` grants affordances. See [Response contract and parsing](response-contract-and-parsing.md#how-actions-are-separated).
+{% endhint %}
 
 **Mode values**
 
@@ -317,6 +331,207 @@ When a token limit is exceeded, the server returns a `server-response` with `"st
 - Validation checks apply to the static, runtime, and combined estimated-token limits independently.
 - When combined dynamic context exceeds 40,000 estimated tokens, Convai logs a server-side warning.
 - Error messages include the estimated-token breakdown for both partitions.
+
+---
+
+## Vision
+
+Vision messages query or consume the session's vision ring buffer. Frames enter that buffer from the WebRTC video track (LiveKit) once `vision_input_config` is set on [`/connect`](connect-api.md). These RTVI control messages do not publish image bytes themselves.
+
+### vision-status
+
+Queries the current vision buffer state without attaching frames or triggering the LLM. Use this after enabling vision, after camera-off, or whenever you need confirmation that frames are available before calling `vision-trigger`.
+
+```json
+{
+  "type": "vision-status",
+  "data": {
+    "update_id": "vision-status-1"
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `update_id` | string | No | Client correlation id. Echoed in the ack and used for duplicate replay. If omitted, a top-level message `id` is used when present. |
+
+**Success response**
+
+```json
+{
+  "type": "server-response",
+  "event_type": "vision-status",
+  "status": "success",
+  "message": "Vision status",
+  "extras": {
+    "vision_status_outcome": "frames_available",
+    "active_source": "participant-id",
+    "active_source_label": "webcam",
+    "last_frame_age_ms": 120,
+    "update_id": "vision-status-1",
+    "duplicate": false,
+    "vision_buffer": {
+      "enabled": true,
+      "status": "frames_available",
+      "retained_frames": 3,
+      "buffer_frames": 8,
+      "frames_per_turn": 5,
+      "first_frame_pts": 1001,
+      "last_frame_pts": 1003,
+      "last_frame_age_ms": 120,
+      "first_frame_index": -3,
+      "source_active": true,
+      "source_label": "webcam",
+      "selected_participant": "participant-id",
+      "sampling_windows": [
+        { "count": 3, "interval_ms": 300 },
+        { "count": 2, "interval_ms": 1500 }
+      ]
+    }
+  }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `vision_status_outcome` | string | High-level buffer outcome. |
+| `active_source` | string \| null | Selected participant id, when a source is active. |
+| `active_source_label` | string \| null | Human-readable source label, when known. |
+| `last_frame_age_ms` | integer \| null | Age of the newest retained frame in milliseconds. |
+| `vision_buffer` | object | Client-safe ring-buffer snapshot. Never includes image bytes. |
+| `update_id` | string | Echoed when supplied on the request. |
+| `duplicate` | boolean | `true` when this ack is a replay of a previous `update_id`. |
+
+**`vision_status_outcome` / `vision_buffer.status` values**
+
+| Value | Meaning |
+|---|---|
+| `frames_available` | Source is active and the buffer has retained frames. |
+| `buffer_empty` | Source is active, but no frames are retained yet. |
+| `no_active_video` | No active visual source is selected. |
+| `vision_not_enabled` | Vision is not enabled for this session. |
+
+**Use cases:**
+
+- Confirm frames landed after the user enabled camera or screen share.
+- Inspect buffer depth / sampling windows before issuing a `vision-trigger`.
+- Detect camera-off / stale feed without attaching frames.
+
+---
+
+### vision-trigger
+
+Attaches buffered vision frames into LLM context and optionally triggers a bot turn. Frames are never auto-attached by this message alone when vision is disabled or the buffer is empty with no text.
+
+```json
+{
+  "type": "vision-trigger",
+  "data": {
+    "respond_mode": "auto",
+    "text": "What changed on screen?",
+    "frame_indices": [-1, -1],
+    "update_id": "vision-trigger-1"
+  }
+}
+```
+
+| Field | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `respond_mode` | string | No | Session default for `vision` | `"silent"`, `"auto"`, or `"must_respond"`. Invalid explicit values return an error ack. |
+| `text` | string | No | Default vision prompt when LLM runs | Optional instruction attached with the frames. When present, text-only triggers can still proceed even if the buffer is empty. |
+| `frame_indices` | integer[] | No | Default dual-horizon selection | Relative indices into the retained buffer. `-1` is the newest frame. Duplicate indices collapse to one frame. |
+| `frame_ids` | integer[] | No | — | Absolute frame presentation timestamps (`attached_frame_pts` / `vision-status` pts values). Takes precedence over `frame_indices` when both are set. |
+| `update_id` | string | No | — | Client correlation id. Echoed in the ack and used for duplicate replay. If omitted, a top-level message `id` is used when present. |
+
+**`respond_mode` values**
+
+| Value | Behavior |
+|---|---|
+| `"silent"` | Attach frames only. Does not invoke the LLM. |
+| `"auto"` | Attach frames and invoke the LLM only when the bot is idle and the user is not speaking. Otherwise the request is downgraded silently without attaching. |
+| `"must_respond"` | Attach frames and invoke the LLM. If the bot is busy, Convai interrupts first. If the user is speaking, attach/reserve frames and respond after the user turn. |
+
+Connect-time `respond_modes.vision` seeds the default when `respond_mode` is omitted.
+
+**Success response**
+
+```json
+{
+  "type": "server-response",
+  "event_type": "vision-trigger",
+  "status": "success",
+  "message": "Vision trigger invoked LLM",
+  "extras": {
+    "requested_respond_mode": "auto",
+    "actual_respond_mode": "auto",
+    "requested_run_llm": "auto",
+    "actual_run_llm": "auto",
+    "llm_triggered": true,
+    "downgraded": false,
+    "downgrade_reason": null,
+    "interrupted": false,
+    "vision_trigger_outcome": "attached",
+    "vision_attach_outcome": "attached",
+    "vision_frames_attached": 1,
+    "vision_image_tokens_est": 258,
+    "attached_frame_pts": [42],
+    "frame_binding": "frame_indices",
+    "requested_frame_indices": [-1, -1],
+    "active_source": "participant-id",
+    "active_source_label": "webcam",
+    "last_frame_age_ms": 80,
+    "update_id": "vision-trigger-1",
+    "duplicate": false,
+    "vision_buffer": {
+      "enabled": true,
+      "status": "frames_available",
+      "retained_frames": 1
+    }
+  }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `requested_respond_mode` | string | Resolved request mode, or `"invalid"`. |
+| `actual_respond_mode` | string | Mode actually applied after idle/busy gates. |
+| `requested_run_llm` / `actual_run_llm` | string | `"true"`, `"false"`, or `"auto"`. |
+| `llm_triggered` | boolean | Whether an LLM turn was started. |
+| `downgraded` | boolean | Whether the request was reduced (busy bot, empty buffer, etc.). |
+| `downgrade_reason` | string \| null | Why the request was downgraded, when applicable. |
+| `interrupted` | boolean | `true` when `must_respond` interrupted an in-progress bot turn. |
+| `vision_trigger_outcome` | string | Final outcome for the trigger. |
+| `vision_attach_outcome` | string | Attach result when frames were selected. |
+| `vision_frames_attached` | integer | Number of frames attached. |
+| `vision_image_tokens_est` | integer | Estimated image tokens for the attach. |
+| `attached_frame_pts` | integer[] | PTS values of attached frames. |
+| `frame_binding` | string | How frames were chosen (`default`, `frame_indices`, `frame_ids`). |
+| `requested_frame_indices` / `requested_frame_ids` | array \| null | Echo of the request selection fields. |
+| `vision_buffer` | object | Buffer snapshot after handling the trigger. |
+
+**Common `vision_trigger_outcome` values**
+
+| Value | Meaning |
+|---|---|
+| `attached` | Frames were attached. |
+| `deduped_stub` | Frames matched the previous attach and were stubbed. |
+| `stale_skipped` | Buffer was considered stale and no text was supplied. |
+| `frames_available` | Buffer has frames, but the trigger did not attach (for example `auto` while bot is busy). |
+| `buffer_empty` | Source active, no retained frames, and no text. |
+| `no_active_video` | No active visual source, and no text. |
+| `vision_not_enabled` | Vision is not enabled for the session. |
+| `invalid_respond_mode` | Explicit `respond_mode` was not one of the allowed values. |
+| `frame_id_evicted` / `invalid_frame_ids` / `invalid_frame_indices` / `invalid_frame_indices_range` / `rate_limited` | Frame binding failed. |
+
+{% hint style="info" %}
+`update_id` makes retries safe: a repeated `vision-status` or `vision-trigger` with the same id replays the prior ack with `"duplicate": true` and does not attach or trigger again.
+{% endhint %}
+
+**Use cases:**
+
+- Ask the character to comment on the current camera or screen feed.
+- Silently prime vision context (`respond_mode: "silent"`) ahead of a later user turn.
+- Re-attach specific recent frames via `frame_indices` or `frame_ids`.
 
 ---
 
@@ -440,6 +655,53 @@ No `data` payload is required. The server ignores any `data` content.
 - Reset the timer when the user performs a UI action such as a click or keypress.
 - Detect user activity outside of voice interaction (for example, mouse movement) and prevent idle timeout.
 - Keep a session alive during extended non-voice interactions.
+
+---
+
+### usage-toggle
+
+Enables or disables streaming of informational `usage-update` messages to this client.
+
+```json
+{
+  "type": "usage-toggle",
+  "data": {
+    "enabled": true
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `enabled` | boolean | Yes | `true` resumes `usage-update` streaming, `false` stops it. |
+
+{% hint style="info" %}
+This only controls whether the server **pushes** usage messages to your client. It never affects server-side usage tracking, aggregation, or billing, which continue unconditionally. `usage-update` messages are only available when the session is running in debug mode with usage tracking enabled.
+{% endhint %}
+
+**Use cases:**
+
+- Stop the real-time cost stream when a debug usage panel is hidden.
+- Reduce data-channel traffic for clients that do not render live usage.
+
+---
+
+### kill-pipeline
+
+Terminates the session and closes the connection.
+
+```json
+{
+  "type": "kill-pipeline"
+}
+```
+
+No `data` payload is required.
+
+**Use cases:**
+
+- Cleanly end a session when the user exits the experience.
+- Release resources without waiting for an idle timeout.
 
 ---
 

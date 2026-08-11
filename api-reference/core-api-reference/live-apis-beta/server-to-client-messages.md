@@ -6,8 +6,95 @@ description: Complete reference for all messages Convai sends to the client over
 The Convai Live API server sends these messages over the WebRTC data channel during an active session. Each message type signals a distinct event — an acknowledgment, a bot state change, animation data, or a session limit. See the [Message Glossary](message-glossary.md) for a summary of all message types and their envelope formats.
 
 {% hint style="info" %}
-All server messages except `server-response` use the RTVI envelope format shown under [`interaction-created`](#interaction-created). Subsequent examples in this page show only the inner `data` payload for clarity.
+Most server messages use the RTVI envelope format shown under [`interaction-created`](#interaction-created). Subsequent examples in this page show only the inner `data` payload for clarity.
+
+Two families are exceptions: `server-response` uses a flat legacy shape, and the [bot output stream](#bot-output-stream) puts the event type at the top level. See [Turn lifecycle and message ordering](turn-lifecycle-and-message-ordering.md#two-envelope-forms) for the demux logic that handles all three.
 {% endhint %}
+
+{% hint style="warning" %}
+**Field presence is not uniform.** Some optional fields are emitted as `null`, others are omitted from the JSON entirely. Read [Field presence rules](turn-lifecycle-and-message-ordering.md#field-presence-rules) before writing a client that assumes a key exists, and prefer optional access over null checks.
+{% endhint %}
+
+---
+
+## Bot output stream
+
+These messages carry the character's response text and its speech-state transitions. Unlike the rest of this page, they place the event type at the **top level** of the message rather than nesting it under `data`.
+
+### bot-llm-text
+
+The bot's spoken response, streamed in chunks. Concatenate `data.text` in arrival order to rebuild the full reply.
+
+**Full message**
+
+```json
+{ "label": "rtvi-ai", "type": "bot-llm-text", "data": { "text": "Sure, on my way." } }
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `text` | string | An incremental chunk of the bot's response |
+
+{% hint style="info" %}
+This is the **spoken response only**. Actions, emotion, and internal control syntax have already been removed — see [Response contract and parsing](response-contract-and-parsing.md#what-the-server-removes-from-the-spoken-response). What you concatenate here is exactly what the character says, which is what you should render in a chat transcript.
+{% endhint %}
+
+**Recommended action:** Append to the in-progress bot message in your transcript UI.
+
+---
+
+### bot-llm-started / bot-llm-stopped
+
+Bracket the model generation phase for a turn. Both carry an empty `data` object.
+
+```json
+{ "label": "rtvi-ai", "type": "bot-llm-started", "data": {} }
+{ "label": "rtvi-ai", "type": "bot-llm-stopped", "data": {} }
+```
+
+**Recommended action:** Show and hide a "thinking" indicator. Do not use `bot-llm-stopped` to gate action execution — see [Ordering guarantees](turn-lifecycle-and-message-ordering.md#ordering-guarantees).
+
+---
+
+### bot-tts-started
+
+Speech synthesis has begun for this turn. Carries an empty `data` object.
+
+```json
+{ "label": "rtvi-ai", "type": "bot-tts-started", "data": {} }
+```
+
+---
+
+### bot-started-speaking / bot-stopped-speaking
+
+Mark the audio boundaries of the bot's turn. These use the `server-message` envelope, and additionally repeat `label` inside `data`.
+
+**Full message**
+
+```json
+{
+  "label": "rtvi-ai",
+  "type": "server-message",
+  "data": {
+    "label": "rtvi-ai",
+    "type": "bot-started-speaking",
+    "response_id": "session-id:r4",
+    "epoch": 1,
+    "sequence": 3
+  }
+}
+```
+
+| Field | Type | Presence | Description |
+|---|---|---|---|
+| `label` | string | Always | Always `"rtvi-ai"` |
+| `response_id` | string | Only when set | Identifier for this bot response |
+| `neurosync_turn_id` | integer | Only when set | NeuroSync turn identifier |
+| `epoch` | integer | Only when set | NeuroSync connection/session epoch |
+| `sequence` | integer | Only when set | Per-turn message sequence number |
+
+**Recommended action:** Drive an `isSpeaking` indicator. Use `response_id` to correlate blendshape and cancel messages with the turn that produced them.
 
 ---
 
@@ -50,11 +137,36 @@ All server messages except `server-response` use the RTVI envelope format shown 
 
 | `event_type` | `extras` fields |
 |---|---|
-| `context-update` | `token_count`, `static_token_count`, `runtime_token_count`, `max_tokens`, `static_max_tokens`, `runtime_max_tokens`, `remaining_tokens`, `content` |
+| `context-update` | `token_count`, `static_token_count`, `runtime_token_count`, `max_tokens`, `static_max_tokens`, `runtime_max_tokens`, `remaining_tokens`, `content`, `update_id`, `revision`, `duplicate` |
 | `tts-toggle` | `enabled` |
 | `stt-toggle` | `muted` |
+| `usage-toggle` | `enabled` |
 | `trigger-message` | `trigger_name`, `has_speak_tag` |
 | `user_text_message` | `text` |
+
+**About the `message` field**
+
+`message` is a **human-readable diagnostic string intended for developers and logs**. It is not a stable identifier.
+
+{% hint style="danger" %}
+Do not branch application logic on the text of `message`. It is not versioned and its wording may change between releases. Branch on `status`, and on the fields in `extras`.
+{% endhint %}
+
+Representative values, to give a sense of what you will see:
+
+| Situation | Example `message` |
+|---|---|
+| Context applied normally | `Context updated successfully (append mode, run_llm=auto)` |
+| Context applied, response withheld because the user is talking | `Context updated silently (requested run_llm=true, but user is speaking - bot will respond after user finishes)` |
+| Context applied, response withheld due to bot state | `Context updated silently (requested run_llm=true, downgraded due to bot state: speaking)` |
+| Context applied and the bot was interrupted to respond | `Context updated with INTERRUPTION (run_llm=true interrupted bot speaking, triggering new response)` |
+| Toggles | `TTS enabled`, `STT muted`, `Usage-update streaming enabled` |
+| Debounced duplicates | `TTS toggle debounced (duplicate enable within window)`, `Bot interrupt debounced (duplicate within window)` |
+| Successful no-ops | `Trigger message processed without response`, `Trigger processed but no context generated` |
+| Failures | `Narrative design service not available`, `No text provided in dynamic info`, `Usage limit exceeded` |
+| Unhandled server error | `Failed to process <event_type>: <error detail>` |
+
+When a handler succeeds with nothing to report, `message` is **omitted entirely** rather than sent as an empty string or `null`.
 
 **Error example**
 
@@ -460,6 +572,39 @@ Sent with multiple frames of blendshape data batched into a single message. Use 
 
 ---
 
+### neurosync-blendshapes-cancel
+
+Sent when an ahead-delivered NeuroSync turn is truncated — by an interruption, a forced turn end, or a superseded output session. Clean completion does **not** emit this message. Only sent to clients that opt in to ahead-delivered chunks.
+
+```json
+{
+  "type": "neurosync-blendshapes-cancel",
+  "response_id": "session-id:r4",
+  "neurosync_turn_id": 4,
+  "epoch": 1,
+  "sequence": 18,
+  "valid_through_frame_index": 179,
+  "reason": "interruption"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `response_id` | string | Lifecycle response identifier to cancel |
+| `neurosync_turn_id` | integer | NeuroSync turn identifier to cancel |
+| `epoch` | integer | NeuroSync connection/session epoch |
+| `sequence` | integer | Per-turn message sequence |
+| `valid_through_frame_index` | integer \| null | Inclusive last frame index backed by released audio. When omitted or `null`, hard-discard the owner |
+| `reason` | string | Cancellation reason, for example `"interruption"` |
+
+**Recommended action:** Retire buffered blendshapes for the owner identified in the message.
+
+* If `valid_through_frame_index` is present, keep frames up to and including that index and drop everything after it.
+* If it is omitted or `null`, hard-discard the owner's buffered frames immediately. This happens on active interruptions and completed-owner supersessions, where keeping a visual tail would leave lips moving after the audio has stopped.
+* Do **not** apply the cancel to the currently active owner unless it matches the owner in the message.
+
+---
+
 ### blendshape-turn-stats
 
 Sent at the end of a bot turn with statistics about the blendshape generation for that turn. Use this for debugging or analytics.
@@ -515,6 +660,77 @@ Sent when audio is routed through the data channel instead of (or in addition to
 | `includes_wav_header` | boolean | `true` if the audio payload includes a 44-byte WAV header; `false` for raw PCM |
 
 For complete decoding steps, playback implementation, and configuration options see [Audio Data via Data Channel](audio-data-via-data-channel.md).
+
+---
+
+## Voice activity detection
+
+These messages come from the VAD-based speech-to-text gating system, which activates the STT service only when speech is detected. Use them to drive listening indicators.
+
+### vad-stt-started
+
+The STT service has been unmuted and is processing audio after detecting confirmed speech.
+
+```json
+{
+  "type": "vad-stt-started",
+  "timestamp": "2026-08-10T10:30:45.123Z",
+  "pre_roll_ms": 1500
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `timestamp` | string | ISO 8601 timestamp when STT was unmuted |
+| `pre_roll_ms` | integer | Amount of audio captured *before* speech detection that was prepended to the stream, so nothing is missed |
+
+**Recommended action:** Show a "listening" or "transcribing" indicator.
+
+---
+
+### vad-stt-stopped
+
+The STT service has been muted after the hangover period expired.
+
+```json
+{
+  "type": "vad-stt-stopped",
+  "timestamp": "2026-08-10T10:30:48.456Z",
+  "reason": "hangover_elapsed",
+  "audio_duration_ms": 3200
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `timestamp` | string | ISO 8601 timestamp when STT was muted |
+| `reason` | string | Why transcription stopped, for example `"hangover_elapsed"` |
+| `audio_duration_ms` | integer \| null | Total audio processed in this segment |
+
+**Recommended action:** Remove the listening indicator.
+
+---
+
+### vad-stt-debug
+
+Detailed VAD state-change, speech-detection, and silence-detection events. Only emitted when the session is connected with `debug: true` and debug events are enabled. The payload shape varies by event and is intended for diagnostics rather than application logic.
+
+---
+
+## Diagnostics
+
+These messages are only emitted when the session is connected with `debug: true`.
+
+| Message | Purpose |
+|---|---|
+| `turn-trace` | Per-turn timing and stage-transition trace |
+| `server-log` | Server-side log lines surfaced to the client |
+| `usage-update` | Per-turn usage and cost information. Streaming can be toggled with [`usage-toggle`](client-to-server-messages.md#usage-toggle) |
+| `metrics` | Pipeline performance metrics. See [Metrics](metrics.md) |
+
+{% hint style="warning" %}
+Diagnostic message payloads are not part of the stable API surface and may change without notice. Do not build application logic on them.
+{% endhint %}
 
 ---
 

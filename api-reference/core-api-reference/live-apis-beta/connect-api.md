@@ -24,11 +24,107 @@ Optionally, scene descriptions or dynamic information can be included to tailor 
 
 ### Request Body
 
-<table><thead><tr><th width="203.6666259765625">Name</th><th width="104">Type</th><th>Description</th></tr></thead><tbody><tr><td>character_id<mark style="color:red;">*</mark></td><td>String</td><td>Unique ID of the character to connect with.</td></tr><tr><td>connection_type</td><td>String</td><td><p>Connection mode for the session. </p><p>Supported values: <code>"audio"</code> (default) or <code>"video"</code>.</p></td></tr><tr><td>character_session_id</td><td>String</td><td>Existing session ID for maintaining conversation continuity. If omitted, a new one is generated.</td></tr><tr><td>dynamic_info</td><td><a href="connect-api.md#dynamic-info">JSON</a></td><td>Real-time contextual data to influence the conversation flow.</td></tr><tr><td>scene_description</td><td><a href="connect-api.md#scene_description">JSON</a></td><td>Descriptions of the current scene or environment context.</td></tr><tr><td>end_user_id</td><td>String</td><td>User managed unique identifier to tag sessions and use Long Term Memory</td></tr><tr><td>debug</td><td>Bool</td><td>Enables RTVI metrics on data channel.</td></tr><tr><td>audio_config</td><td><a href="connect-api.md#audio_config">JSON</a></td><td>Configuration for audio output behaviour. Only supported with LiveKit transport (default).</td></tr></tbody></table>
+Only `character_id` is required. Every other field has a server-side default.
 
+#### Session identity
 
+| Name | Type | Description |
+|---|---|---|
+| `character_id` <mark style="color:red;">\*</mark> | String | Unique ID of the character to connect with. |
+| `connection_type` | String | Connection mode. `"audio"` (default) or `"video"`. |
+| `character_session_id` | String | Existing session ID for conversation continuity. If omitted, a new one is generated. |
+| `end_user_id` | String | Your own unique identifier for the end user. Tags sessions and enables Long Term Memory. |
+| `end_user_metadata` | JSON | Arbitrary metadata associated with the end user. Echoed back in the response. |
+
+#### Character behavior and context
+
+| Name | Type | Description |
+|---|---|---|
+| `action_config` | [JSON](connect-api.md#action_config) | The authoritative action contract for the session — which actions the character may perform and on what. See [Response contract and parsing](response-contract-and-parsing.md#how-actions-are-separated). |
+| `dynamic_info` | [JSON](connect-api.md#dynamic-info) | Real-time contextual data to influence the conversation flow. |
+| `scene_description` | [JSON](connect-api.md#scene_description) | Descriptions of the current scene or environment. Descriptive context only — **does not grant action affordances**. |
+| `narrative_template_keys` | JSON | Key/value pairs substituted into the character's prompt templates. |
+| `emotion_config` | JSON | Configuration for emotion detection and expression. |
+| `thinking_mode` | Bool | Enables extended model reasoning before responding. Default `false`. |
+| `respond_modes` | JSON | Per-modality control over when the character is required to respond. |
+
+#### Models and providers
+
+| Name | Type | Description |
+|---|---|---|
+| `llm_provider` | String | `"dynamic"` (default), `"gemini-live"`, `"gemini-live-beta"`, or `"gemini-baml"`. |
+| `stt_provider` | String | Override the speech-to-text provider for this session. |
+| `disable_live_fallback` | Bool | Prevents falling back to a non-realtime model. Default `true`. |
+
+#### Audio, speech and turn-taking
+
+| Name | Type | Description |
+|---|---|---|
+| `audio_config` | [JSON](connect-api.md#audio_config) | Audio output behaviour. LiveKit transport (default) only. |
+| `default_tts_enabled` | Bool | Whether bot audio starts enabled. Default `true`. Toggle later with [`tts-toggle`](client-to-server-messages.md#tts-toggle). |
+| `default_stt_enabled` | Bool | Whether microphone input starts enabled. Default `true`. Toggle later with [`stt-toggle`](client-to-server-messages.md#stt-toggle). |
+| `vad_params` | JSON | Voice activity detection tuning: `confidence`, `start_secs`, `stop_secs`, `min_volume`. |
+| `turn_detection_config` | JSON | Turn-detection strategy overrides. |
+
+#### Avatar and vision
+
+| Name | Type | Description |
+|---|---|---|
+| `blendshape_provider` | String | `"not_provided"` (default), `"ovr"`, or `"neurosync"`. Determines which facial animation messages you receive. |
+| `blendshape_config` | JSON | Provider-specific blendshape configuration. |
+| `vision_input_config` | JSON | Vision input configuration, including sampling window. Enables the vision ring buffer consumed by [`vision-status`](client-to-server-messages.md#vision-status) and [`vision-trigger`](client-to-server-messages.md#vision-trigger). |
+| `video_track_name` | String | Name of the incoming video track. Default `"camera"`. |
+
+#### Multi-participant sessions
+
+| Name | Type | Description |
+|---|---|---|
+| `max_num_participants` | Integer | Maximum participants in the session. Default `1`. |
+| `shared_session_key` | String | Grouping key that deterministically places participants into the same room. 1–128 characters, alphanumeric plus `-` and `_`. |
+| `mode` | String | `"create"` (default) or `"join"`. |
+| `room_name` | String | Explicit room name to create or join. |
+
+#### Diagnostics
+
+| Name | Type | Description |
+|---|---|---|
+| `debug` | Bool | Enables RTVI metrics, `turn-trace`, and `server-log` messages on the data channel. |
+| `debug_row_cap` | Integer | Overrides the per-session diagnostic row cap. Only has effect when `debug` is `true`. |
+| `invocation_metadata` | JSON | Caller-supplied metadata for attribution and analytics. |
 
 {% tabs %}
+{% tab title="action_config" %}
+```json
+{
+  "actions": ["Move To", "Pick Up", "Drop", "Follow"],
+  "objects": [
+    { "name": "cube",  "description": "A red cube on the table" },
+    { "name": "lever", "description": "A metal lever on the wall" }
+  ],
+  "characters": [
+    { "name": "Player", "bio": "The current user" },
+    { "name": "Guard",  "bio": "A nearby guard" }
+  ],
+  "current_attention_object": "cube"
+}
+```
+
+#### Fields
+
+**`actions`** — The exact action names the character may emit. Accepts an array of strings, or an array of `{ "value": "..." }` objects. Returned verbatim in [`action-response`](server-to-client-messages.md#action-response), so these should match the identifiers your client dispatches on.
+
+**`objects`** — `{ name, description }` entries. The only objects the character may target.
+
+**`characters`** — `{ name, bio }` entries. The only characters the character may target.
+
+**`current_attention_object`** — Name of the object the user is currently looking at or referring to. Grounds pronouns like *"this"*, *"that"*, and *"it"*. Must match one of the `objects[].name` values. Accepts a string or a full object.
+
+{% hint style="warning" %}
+`actions`, `objects`, and `characters` are the **complete** set of affordances for the session. Objects mentioned only in `scene_description` cannot be targeted — the character is explicitly instructed that scene description does not expand its affordances.
+{% endhint %}
+
+The whole contract can be replaced mid-session with [`context-update`](client-to-server-messages.md#context-update).
+{% endtab %}
 {% tab title="dynamic info" %}
 ```json
 {
@@ -88,13 +184,26 @@ Optionally, scene descriptions or dynamic information can be included to tailor 
 ```json
 {
   "session_id": "<your temporary session id for the live session>",
+  "request_trace_id": "<server-side trace id for this /connect request>",
   "character_session_id": "<your session id. In case of a new session, it returns a newly generated value or returns the old one>",
   "room_url": "<url of the room your client needs to join>",
   "room_name": "<name of the room to join>",
   "token": "<token for the client to join the room>",
-  "end_user_id": "<end_user_id of the user in the session, null if not sent in request>"
+  "end_user_id": "<end_user_id of the user in the session, null if not sent in request>",
+  "end_user_metadata": "<metadata associated with the end user, null if not sent in request>"
 }
 ```
+
+| Field | Type | Description |
+|---|---|---|
+| `session_id` | String | Temporary token for this live session. |
+| `request_trace_id` | String | Server-side trace ID. Include it in support requests — it correlates your session with server logs, telemetry, and session records. |
+| `character_session_id` | String | Conversation session ID. Reuse it on a later `/connect` to continue the same conversation. |
+| `room_url` | String | URL of the room your client joins. |
+| `room_name` | String | Room name. LiveKit transport only. |
+| `token` | String | Authentication token for joining the room. |
+| `end_user_id` | String \| null | Echoed from the request. |
+| `end_user_metadata` | Object \| null | Echoed from the request. |
 {% endtab %}
 
 {% tab title="404: Not Found Response generation failed for the request" %}
@@ -205,6 +314,17 @@ curl --location 'https://live.convai.com/connect' \
 {% endtabs %}
 
 ***
+
+## After connecting
+
+Join the room using `room_url` and `token`. From that point the session is driven entirely by messages on the WebRTC data channel, plus the audio track.
+
+* [Turn lifecycle and message ordering](turn-lifecycle-and-message-ordering.md) — how a bot turn is delivered, and what ordering you can rely on
+* [Response contract and parsing](response-contract-and-parsing.md) — how speech, actions and emotion are separated
+* [Client-to-server messages](client-to-server-messages.md) — updating context, toggling audio, sending text
+* [Server-to-client messages](server-to-client-messages.md) — full field reference for everything you receive
+
+---
 
 ## Conclusion
 
