@@ -72,7 +72,7 @@ Only `character_id` is required. Every other field has a server-side default.
 |---|---|---|
 | `blendshape_provider` | String | `"not_provided"` (default), `"ovr"`, or `"neurosync"`. Determines which facial animation messages you receive. |
 | `blendshape_config` | JSON | Provider-specific blendshape configuration. |
-| `vision_input_config` | JSON | Vision input configuration, including sampling window. Required for [`vision-frame`](client-to-server-messages.md#vision-frame) usage. |
+| `vision_input_config` | JSON | Vision input configuration, including sampling window. Enables the vision ring buffer consumed by [`vision-status`](client-to-server-messages.md#vision-status) and [`vision-trigger`](client-to-server-messages.md#vision-trigger). |
 | `video_track_name` | String | Name of the incoming video track. Default `"camera"`. |
 
 #### Multi-participant sessions
