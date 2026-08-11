@@ -132,8 +132,8 @@ For every client-to-server message, the server automatically sends a `server-res
 | `update-scene-metadata`       | Update scene objects                       | [client-to-server-messages.md](client-to-server-messages.md#update-scene-metadata)       |
 | `update-dynamic-info`         | Update dynamic context (basic)             | [client-to-server-messages.md](client-to-server-messages.md#update-dynamic-info)         |
 | `context-update`              | Update runtime context (with mode control) | [client-to-server-messages.md](client-to-server-messages.md#context-update)              |
-| `vision-frame`                | Publish a visual frame                     | [client-to-server-messages.md](client-to-server-messages.md#vision-frame)                |
-| `vision-source-state`         | Mark a visual source active or cleared     | [client-to-server-messages.md](client-to-server-messages.md#vision-source-state)         |
+| `vision-status`               | Query vision buffer state                  | [client-to-server-messages.md](client-to-server-messages.md#vision-status)               |
+| `vision-trigger`              | Attach buffered frames / trigger vision    | [client-to-server-messages.md](client-to-server-messages.md#vision-trigger)              |
 | `tts-toggle`                  | Enable/disable bot audio                   | [client-to-server-messages.md](client-to-server-messages.md#tts-toggle)                  |
 | `stt-toggle`                  | Mute/unmute speech recognition             | [client-to-server-messages.md](client-to-server-messages.md#stt-toggle)                  |
 | `interrupt-bot`               | Stop bot speech immediately                | [client-to-server-messages.md](client-to-server-messages.md#interrupt-bot)               |
@@ -266,10 +266,10 @@ Messages for managing conversation context and bot state:
 
 ### Vision
 
-Messages for supplying visual input:
+Messages for querying and consuming the vision buffer:
 
-- `vision-frame` - Publish a visual frame into the vision buffer
-- `vision-source-state` - Mark a visual source active or cleared
+- `vision-status` - Query whether frames are available and inspect buffer state
+- `vision-trigger` - Attach buffered frames and optionally trigger a bot turn
 
 ### Audio Control
 
