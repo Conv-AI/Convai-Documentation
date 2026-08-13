@@ -7,6 +7,10 @@ description: >-
 
 # Knowledge Bank
 
+{% embed url="https://www.youtube.com/watch?v=MCbBHA2BKLM" %}
+
+{% endembed %}
+
 ## Introduction
 
 The **Knowledge Bank** is where you store and manage information that your AI character can access during conversations. By uploading documents or adding text directly, you can give your character specific domain knowledge, enabling more accurate, relevant, and context-aware responses.
