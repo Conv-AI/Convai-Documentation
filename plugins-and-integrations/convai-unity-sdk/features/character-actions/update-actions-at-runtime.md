@@ -3,7 +3,7 @@ title: Update character actions at runtime
 description: >-
   Send an action configuration patch mid-session, track its update ID, and
   confirm the backend's acknowledgement before assuming the change applied.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Use `ConvaiActionConfigPatch` with `ConvaiCharacter.DynamicContext.Apply` to replace a connected character's actions, objects, characters, or attention target without disconnecting the session. Use this when scene state changes after connect — a new object appears, a target becomes unavailable — and the character's affordances need to catch up. The patch only takes effect after Convai returns a successful acknowledgement for its update ID.
@@ -11,7 +11,7 @@ Use `ConvaiActionConfigPatch` with `ConvaiCharacter.DynamicContext.Apply` to rep
 ## Prerequisites
 
 - A `ConvaiCharacter` already connected (`IsInConversation` returns `true`).
-- Local `ConvaiActionDefinition` entries already registered for any action names the patch adds — patched action names must match a locally executable definition or the entire update is rejected before it sends.
+- Local `ConvaiActionDefinition` entries already registered for any action names the patch adds — patched action names must match a locally executable definition, whether it comes from an inline definition or a reusable Action Set (see [Configure character actions](configuring-actions.md)), or the entire update is rejected before it sends.
 - Familiarity with [Configure character actions](configuring-actions.md).
 
 ## Send a runtime action patch
@@ -147,7 +147,7 @@ To preview a patch's predicted outcome before sending it in code, use the runtim
 ## Next steps
 
 {% content-ref url="attention-and-reference-grounding.md" %}
-[attention-and-reference-grounding.md](attention-and-reference-grounding.md)
+[How action target resolution works](attention-and-reference-grounding.md)
 {% endcontent-ref %}
 
 {% content-ref url="debugging-and-troubleshooting.md" %}

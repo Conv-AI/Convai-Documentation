@@ -20,12 +20,12 @@ Problems that occur after a successful connection — where the SDK is running b
 
 | Feature | Troubleshooting page |
 | --- | --- |
-| Actions | `features/actions/troubleshooting.md` |
+| Actions | `features/character-actions/debugging-and-troubleshooting.md` |
 | Emotion | `embodiment/emotion/troubleshooting-and-diagnostics.md` |
-| Long-Term Memory | `features/long-term-memory/troubleshooting.md` |
-| Dynamic Context | `features/dynamic-context/troubleshooting.md` |
-| Narrative Design | `features/narrative-design/troubleshooting.md` |
-| Vision | `features/vision/troubleshooting.md` |
+| Long-Term Memory | `features/long-term-memory/troubleshooting-and-diagnostics.md` |
+| Dynamic Context | `features/dynamic-context/troubleshoot-dynamic-context.md` |
+| Narrative Design | `features/narrative-design/troubleshooting-and-diagnostics.md` |
+| Vision | `features/vision/troubleshooting-and-diagnostics.md` |
 | Scene Metadata | `features/scene-metadata/troubleshooting-and-diagnostics.md` |
 | Embodiment | `embodiment/troubleshooting.md` |
 | Gaze | `embodiment/gaze/troubleshooting.md` |
