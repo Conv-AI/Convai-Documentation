@@ -30,7 +30,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Let my character execute in-scene commands (trigger animations, open doors, move objects) | Actions          | [Actions](../features/character-actions/)         |
 | Inject runtime state or events into the character's knowledge                             | Dynamic Context  | [Dynamic Context](../features/dynamic-context/)   |
 | Let the character automatically read information about scene objects                      | Scene Metadata   | [Scene Metadata](../features/scene-metadata/)     |
-| Show facial emotion on my character driven by the AI response                             | Emotion          | [Emotion](../features/emotion/)                   |
+| Show facial emotion on my character driven by the AI response                             | Emotion          | [Emotion](../embodiment/emotion/)                 |
 | Make the character remember players between sessions                                      | Long-Term Memory | [Long-Term Memory](../features/long-term-memory/) |
 | Build branching story sections triggered by conversation                                  | Narrative Design | [Narrative Design](../features/narrative-design/) |
 | Give my character vision through a camera or webcam                                       | Vision           | [Vision](../features/vision/)                     |

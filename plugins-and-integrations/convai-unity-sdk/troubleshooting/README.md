@@ -21,7 +21,7 @@ Problems that occur after a successful connection — where the SDK is running b
 | Feature | Troubleshooting page |
 | --- | --- |
 | Actions | `features/actions/troubleshooting.md` |
-| Emotion | `features/emotion/troubleshooting.md` |
+| Emotion | `embodiment/emotion/troubleshooting-and-diagnostics.md` |
 | Long-Term Memory | `features/long-term-memory/troubleshooting.md` |
 | Dynamic Context | `features/dynamic-context/troubleshooting.md` |
 | Narrative Design | `features/narrative-design/troubleshooting.md` |
