@@ -6,8 +6,6 @@ description: >-
   trigger key or button for your project.
 ---
 
-# Configure conversation input mode
-
 The Convai SDK for Unity supports two conversation input modes: **Hands Free** (the player speaks naturally, the SDK detects when they stop) and **Push to Talk** (the player holds a key to speak). Both modes are configured on `ConvaiRoomManager` in the Inspector.
 
 ### Where to find the settings

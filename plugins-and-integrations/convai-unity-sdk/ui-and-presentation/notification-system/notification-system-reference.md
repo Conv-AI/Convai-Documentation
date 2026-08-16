@@ -6,8 +6,6 @@ description: >-
   and SONotificationErrorMap — fields, methods, and configuration options.
 ---
 
-# Notification system reference
-
 Reference for the ScriptableObject assets and the controller component that make up the notification system. For setup instructions and triggering notifications from code, see [Notification system](./).
 
 ### `SONotification`

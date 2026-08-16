@@ -5,8 +5,6 @@ description: >-
   and confirm a section change in Play Mode — no code required.
 ---
 
-# Narrative design quick start
-
 This guide walks you through the fastest path to a working Narrative Design setup. By the end, a character reacts to a section change when the player walks through a trigger zone — entirely through the Inspector, no code required.
 
 ### Prerequisites

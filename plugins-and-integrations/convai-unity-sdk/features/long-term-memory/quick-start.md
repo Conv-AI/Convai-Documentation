@@ -6,8 +6,6 @@ description: >-
   in the Unity Editor in three steps.
 ---
 
-# Long-term memory quick start
-
 Long-term memory works automatically once two conditions are met: memory is enabled for your character on the Convai dashboard, and the SDK is sending a stable user identifier. This guide walks through both conditions and shows you how to confirm they are working.
 
 ### Prerequisites

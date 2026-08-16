@@ -1,4 +1,7 @@
-# Features
+---
+title: Features
+description: Index of the Convai Unity SDK feature modules, covering character actions, dynamic context, scene metadata, emotion, long-term memory, narrative design, and vision.
+---
 
 Features are the SDK's AI-powered capability modules. Each feature connects to Convai for a specific purpose — executing in-scene behaviors, expressing emotions, remembering users across sessions, following narrative graphs, or seeing the world through a camera. Features have dedicated module systems, ScriptableObject profiles, and backend integration.
 

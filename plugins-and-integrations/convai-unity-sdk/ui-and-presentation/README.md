@@ -5,8 +5,6 @@ description: >-
   and giving users a runtime settings panel — add only what your project needs.
 ---
 
-# UI and Presentation
-
 The Convai Unity SDK ships a set of optional, scene-level UI components. These components consume data already produced by the runtime and render it locally in your scene — none of them send data to Convai or require an active connection to display.
 
 Each component is independent. Add only what your training simulation, interactive experience, or game requires.

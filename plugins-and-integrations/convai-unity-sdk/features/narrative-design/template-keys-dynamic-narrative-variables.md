@@ -5,8 +5,6 @@ description: >-
   — player name, scenario parameters, or session state — in its objectives.
 ---
 
-# Configure narrative template keys
-
 Template keys are runtime key-value pairs that fill placeholders in your character's narrative objectives. Define placeholders in the [Convai dashboard](https://convai.com) using curly-brace syntax — for example, `{PlayerName}` or `{CurrentTask}` — and the SDK sends the actual values from Unity at runtime, so the character can reference them naturally in conversation. A single narrative graph can then serve many sessions with different participants or dynamic state without editing the graph each time.
 
 ### Define keys in the Inspector

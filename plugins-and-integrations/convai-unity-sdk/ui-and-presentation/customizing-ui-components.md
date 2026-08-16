@@ -6,8 +6,6 @@ description: >-
   using character visibility filters or prefab swapping.
 ---
 
-# Customizing UI components
-
 Two extension paths let you customize the SDK's scene-level UI without replacing its data pipeline. Character visibility filtering controls which characters' transcripts reach the active display. Visual customization swaps the prefabs that render those transcripts, notifications, and settings controls.
 
 For lightweight transcript callbacks without a custom UI, use `ITranscriptListener`. For a complete custom transcript display replacing the built-in chat or subtitle panel, use `ITranscriptUI`. Both interfaces are documented in [Transcript UI](transcript-ui/).

@@ -7,8 +7,6 @@ description: >-
   notification assets.
 ---
 
-# Notification system
-
 The notification system displays transient, toast-style popups in your scene. It handles session error alerts automatically — when Convai reports a connection or authentication error, the system maps the error code to a notification asset and queues it for display. You can also trigger custom notifications from code at any point during a session.
 
 Up to three notifications appear on screen simultaneously. Additional notifications queue internally and display as space becomes available.

@@ -5,8 +5,6 @@ description: >-
   from Convai, and wire per-section Unity Events in the Inspector.
 ---
 
-# Configure the narrative design manager
-
 `ConvaiNarrativeDesignManager` is the permanent listening post on your character. It subscribes to section-change signals from Convai and forwards them to the Unity Events you configure in the Inspector. One Manager per character is the standard setup; it lives on the character GameObject for the lifetime of the scene.
 
 ### Add the component

@@ -6,8 +6,6 @@ description: >-
   Components command and configure your first character.
 ---
 
-# Build a custom scene
-
 This page walks you through setting up a new scene with a Convai AI character from scratch. By the end, your scene will have the minimum required components for a character to receive voice input and respond.
 
 ### Minimum required hierarchy

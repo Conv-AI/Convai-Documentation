@@ -7,8 +7,6 @@ description: >-
   known lip-sync drift defect.
 ---
 
-# WebGL
-
 The Convai Unity SDK supports voice conversation, lip sync, actions, dynamic context, emotion, Vision, and long-term memory on WebGL. The browser introduces three constraints that do not exist on native platforms: a mandatory HTTPS origin for microphone access, a user-gesture requirement before audio playback or microphone capture can begin, and a canvas-based Vision capture path instead of Unity `RenderTexture`. All three are covered on this page.
 
 {% embed url="https://youtu.be/SbQ-Kfi7yg4" %}

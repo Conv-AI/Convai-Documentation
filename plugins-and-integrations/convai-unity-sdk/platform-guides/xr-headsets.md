@@ -6,8 +6,6 @@ description: >-
   Quest Vision passthrough setup and custom XR frame source implementation.
 ---
 
-# XR headsets
-
 The Convai Unity SDK runs on Android-based XR headsets (Meta Quest, Horizon OS, Android XR) and Windows XR headsets without extra configuration for core features. Voice conversation, lip sync, actions, emotion, and long-term memory work the same as on any other supported platform. Vision is the only feature that requires XR-specific integration work — and only when you want the AI character to see the real world through the headset's cameras.
 
 {% embed url="https://youtu.be/CGPAG_CWGJw" %}

@@ -7,8 +7,6 @@ description: >-
   and pagination.
 ---
 
-# Manage end-user records
-
 The Convai Unity SDK tracks every user who connects with a memory-enabled character as an **end-user record**. Each record stores the user's stable identifier, last activity timestamps, and any metadata you sent during connection. You can browse and delete these records from the Unity editor or manage them programmatically with `client.EndUsers`.
 
 {% hint style="warning" %}

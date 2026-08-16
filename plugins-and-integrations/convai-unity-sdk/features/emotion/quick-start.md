@@ -6,8 +6,6 @@ description: >-
   Mode.
 ---
 
-# Emotion quick start
-
 We will attach the Emotion Controller to an NPC, assign the bundled sample profile, and see the character's face react to live AI emotion signals in Play Mode. No custom assets are required for the initial setup.
 
 ### Prerequisites
