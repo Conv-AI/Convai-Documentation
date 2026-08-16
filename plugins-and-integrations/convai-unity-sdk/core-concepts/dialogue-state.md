@@ -44,7 +44,9 @@ A reading always describes a blend between two states rather than a hard cut, so
 
 ## When the controller is auto-added
 
-A `ConvaiConversationFlowController` does not have to be added by hand. Gaze, Body Animation, and Body Language all need a dialogue state to react to, so if a character has any of those modules but no authored `ConvaiConversationFlowController`, Convai adds one automatically and logs once, naming the character and why. The auto-added controller behaves exactly like one you add yourself — configure it afterward if the shipped timing does not fit your character.
+A `ConvaiConversationFlowController` does not always have to be added by hand. `ConvaiBodyAnimationController` asks for one, so a character with body animation and no authored controller gets one automatically, and Convai logs once naming the character and why. The auto-added controller behaves exactly like one you add yourself — configure it afterward if the shipped timing does not fit your character.
+
+The other modules do not ask for one. Gaze, Body Language, and Emotion read the dialogue state if it is there and fall back to `Idle` if it is not. A character with only those modules and no body animation therefore never leaves `Idle`, and its behavior stays flat and unresponsive to the conversation. If that is what you are seeing, add a `ConvaiConversationFlowController` yourself.
 
 {% hint style="info" %}
 The contract behind this reading, `IConversationFlowSource`, is `internal` to the package. Read `ConvaiConversationFlowController.Current` and subscribe to `Changed` — do not implement the interface yourself.

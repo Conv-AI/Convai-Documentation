@@ -35,6 +35,16 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Build branching story sections triggered by conversation                                  | Narrative Design | [Narrative Design](../features/narrative-design/) |
 | Give my character vision through a camera or webcam                                       | Vision           | [Vision](../features/vision/)                     |
 
+## Embodiment
+
+| I want to...                                                                | Module            | Documentation                                                                   |
+| --------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------- |
+| Make my character look at the player, at objects, or around the scene       | Gaze              | [Gaze](../embodiment/gaze/)                                                     |
+| Time a character's behavior to the phase of the conversation                | Conversation Flow | [Conversation flow](../embodiment/conversation-flow/)                           |
+| Share one set of behavior settings across several characters                | Presets           | [Embodiment presets](../embodiment/embodiment-presets.md)                       |
+| Decide how much of the face emotion and lip sync each control while speaking | Facial composition | [Facial composition](../embodiment/facial-composition.md)                      |
+| Move from the retired Attention module to Convai Gaze                       | Migration         | [Migrate from Attention](../embodiment/gaze/migrate-from-attention.md)          |
+
 ## UI and presentation
 
 | I want to...                                                         | Component           | Documentation                                                                                            |

@@ -27,6 +27,9 @@ Problems that occur after a successful connection — where the SDK is running b
 | Narrative Design | `features/narrative-design/troubleshooting.md` |
 | Vision | `features/vision/troubleshooting.md` |
 | Scene Metadata | `features/scene-metadata/troubleshooting-and-diagnostics.md` |
+| Embodiment | `embodiment/troubleshooting.md` |
+| Gaze | `embodiment/gaze/troubleshooting.md` |
+| Conversation Flow | `embodiment/conversation-flow/troubleshooting.md` |
 
 ## Next steps
 
