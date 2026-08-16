@@ -1,7 +1,7 @@
 ---
 title: Voice activity detection
 description: Understand how the Convai Unity SDK resolves user voice activity detection settings once, at connect time, using either Convai's defaults or your custom values.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Voice activity detection (VAD) is how Convai decides whether the audio arriving from a user's microphone contains speech. The Convai Unity SDK exposes `UserVadSettings` so a scene can tune that decision — confidence, timing, and volume thresholds — instead of always relying on Convai's built-in defaults. The SDK resolves these settings once, at the moment a session connects, and sends them as part of the connect request.

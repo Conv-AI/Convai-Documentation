@@ -1,7 +1,7 @@
 ---
 title: Runtime architecture
-description: Understand the four-layer Convai Unity SDK runtime — what each layer owns, which components are replaceable, and how RuntimeState transitions are managed.
-last_reviewed: "4.2.0"
+description: Understand the layered Convai Unity SDK runtime — what each layer owns, the per-character embodiment layer, and how the runtime's lifecycle states are managed.
+last_reviewed: "4.5.0"
 ---
 
 The Convai Unity SDK is built in layers. Each layer has a defined responsibility and communicates inward — outer layers depend on inner ones, never the reverse. Understanding this structure tells you which parts of the SDK are developer-facing, which are replaceable, and which are internal implementation details you do not need to touch.
@@ -10,7 +10,7 @@ The Convai Unity SDK is built in layers. Each layer has a defined responsibility
 
 ## System layers
 
-The diagram below shows the four main layers and how they relate. `ConvaiRuntime` holds four direct sub-systems at the second tier — `IRoomRuntime`, `IEventHub`, `IAgentRegistry`, and the module list. Characters and players surface beneath `IRoomRuntime` and `IAgentRegistry`, and all modules share a common context layer.
+The diagram below shows the main layers and how they relate. `ConvaiRuntime` holds four direct sub-systems at the second tier — `IRoomRuntime`, `IEventHub`, `IAgentRegistry`, and the module list. Characters and players surface beneath `IRoomRuntime` and `IAgentRegistry`. Runtime-level feature modules share a common module context; a character that carries embodiment modules also gets its own per-character composition root.
 
 ```mermaid
 graph TD
@@ -20,8 +20,10 @@ graph TD
     A --> E[IReadOnlyList&lt;IConvaiModule&gt;<br/>Feature modules]
     B --> F[ConvaiCharacter<br/>per-character session + state]
     B --> G[ConvaiPlayer<br/>local participant identity]
-    F --> H[Module Context<br/>LipSync · Emotion · Actions · …]
+    F --> H[Module Context<br/>LipSync · Vision · Narrative]
     G --> H
+    F --> I[EmbodimentContext<br/>per-character composition root]
+    I --> J[Embodiment modules<br/>Gaze · Body Animation · Body Language · Conversation Flow · Emotion]
 ```
 
 **`ConvaiRuntime` (top layer)** — owns every sub-system and coordinates the full lifecycle. Created once per application lifetime via `ConvaiRuntimeBuilder`. Exposes start, pause, resume, and stop operations that propagate to all registered modules. It holds four direct sub-systems:
@@ -31,9 +33,9 @@ graph TD
 * **`IAgentRegistry`** — registry of all active `ConvaiCharacter` and `ConvaiPlayer` instances.
 * **`IReadOnlyList<IConvaiModule>`** — the set of registered feature modules.
 
-**Character / Player layer** — `ConvaiCharacter` and `ConvaiPlayer` register with `IAgentRegistry` and receive their per-session context through `IRoomRuntime`. Each character maintains its own session state.
+**Character / Player layer** — `ConvaiCharacter` and `ConvaiPlayer` register with `IAgentRegistry` and receive their per-session context through `IRoomRuntime`. Each character maintains its own session state. A character that carries embodiment modules — Gaze, Body Animation, Body Language, Conversation Flow, or Emotion — also gets its own `EmbodimentContext`; see Embodiment layer below.
 
-**Module context layer** — feature modules (`IConvaiModule`) share an `IModuleContext` that provides access to runtime services. Modules are isolated: they do not call each other directly.
+**Module context layer** — runtime-level feature modules (`IConvaiModule`, such as LipSync, Vision, and Narrative) share an `IModuleContext` that provides access to runtime services. Modules can declare dependencies on each other's module IDs and services, but interact through `IEventHub` or a service registered on `IModuleContext` rather than holding direct references to each other's concrete types.
 
 ***
 
@@ -49,7 +51,7 @@ graph TD
 | `Agents`             | `IAgentRegistry`                | Registry of all active characters and players |
 | `Modules`            | `IReadOnlyList<IConvaiModule>`  | All registered feature modules                |
 | `Transport`          | `ITransportProvider`            | Platform-specific real-time transport         |
-| `Conversation`       | `IConversationProvider`         | AI backend communication                      |
+| `Conversation`       | `IConversationProvider`         | Communication with Convai                     |
 | `Config`             | `ConvaiBootstrapConfigSnapshot` | Immutable bootstrap configuration             |
 | `RuntimePreferences` | `IRuntimePreferences`           | Mutable runtime preferences                   |
 | `FeatureVariants`    | `IFeatureVariantProvider`       | Feature variant / A-B selection               |
@@ -78,7 +80,7 @@ The table below lists what is replaceable vs. internal-only.
 | Component                | Replaceable via Builder          | Default                                |
 | ------------------------ | -------------------------------- | -------------------------------------- |
 | Transport provider       | `UseTransport()`                 | Platform-default (WebSocket / LiveKit) |
-| Conversation provider    | `UseConversation()`              | Convai RTVI conversation backend       |
+| Conversation provider    | `UseConversation()`              | Convai RTVI conversation provider      |
 | Persistence provider     | `UsePersistence()`               | `PlayerPrefs`-backed key-value store   |
 | Telemetry provider       | `UseTelemetry()`                 | No-op telemetry                        |
 | Feature variant provider | `WithFeatureVariants()`          | Static feature flags                   |
@@ -124,11 +126,38 @@ new ConvaiRuntimeBuilder()
     .Build();
 ```
 
-Modules are started, paused, resumed, and stopped alongside the runtime. The `IConvaiModule` interface defines these lifecycle hooks. See [Extending the SDK](../advanced-topics/extending-the-sdk.md) for the full module authoring reference.
+Modules are started, paused, resumed, and stopped alongside the runtime. The `IConvaiModule` interface defines these lifecycle hooks. Declare a dependency with `RequiredModules`, and the runtime starts modules in dependency order and stops them in reverse — but a module still reaches another module's data through `IEventHub` or `IModuleContext.TryGetModuleService`, never through a direct reference to the other module's concrete type. See [Extending the SDK](../advanced-topics/extending-the-sdk.md) for the full module authoring reference.
 
-{% hint style="warning" %}
-Modules cannot depend on each other directly. If two modules need to share data, use the `IEventHub` or a shared service registered via `IModuleContext`.
-{% endhint %}
+***
+
+## Embodiment layer
+
+A `ConvaiCharacter` that carries an embodiment module — Gaze, Body Animation, Body Language, Conversation Flow, or Emotion — gets its own `EmbodimentContext`. Convai adds this component automatically the first time an embodiment module resolves it on that character; you never add it from the Add Component menu, and it carries no menu entry of its own.
+
+`EmbodimentContext` is a per-character composition root, not a feature module registered with `ConvaiRuntimeBuilder`. It exposes the shared infrastructure every embodiment module plugs into:
+
+| Property | Type | What it owns |
+| -------- | ---- | ------------- |
+| `CharacterRoot` | `Transform` | The character's root transform |
+| `EventHub` | `IEventHub` | The same event bus exposed by `IConvaiRuntime.Events` |
+| `Logger` | `ILogger` | Structured diagnostics for embodiment modules |
+| `RigBinding` | `IStandardRigBinding` | Semantic bone and blendshape lookup for the detected rig |
+| `Character` | `ConvaiCharacter` | The owning character |
+
+Embodiment modules — `ConvaiGazeController`, `ConvaiBodyAnimationController`, `ConvaiBodyLanguageController`, `ConvaiConversationFlowController`, and `ConvaiEmotionController` — resolve the context on `OnEnable` and publish their own contract to it instead of holding direct references to each other. `EmbodimentContext` raises `RigBindingChanged`, `EmbodimentConfigurationChanged`, and `DependenciesPopulated` so a module can react when the rig is rebuilt, a preset is swapped, or runtime dependencies first become available. A project's own component can join the same tick as these modules through `RegisterTickable`/`UnregisterTickable`.
+
+### Deterministic tick
+
+Embodiment modules do not run on Unity's per-component `Update()` order. Each one registers with the context's tick scheduler, which ticks every registered module exactly once per frame in a declared `cognition → expression → finalize` order — ties within a phase are broken by registration order, not by hierarchy position or which module happened to enable first. The scheduler itself ticks from `Update`; the animator conductor and the facial compositor that consume its output run afterward from `LateUpdate`, once the Animator has posed the skeleton for the frame.
+
+### Single-writer Animator and facial blendshapes
+
+Two infrastructure components enforce single-writer access so two embodiment modules can never fight over the same output:
+
+* The **animator conductor** is the only component that calls `Animator.SetFloat` and related methods for embodiment-driven parameters. Modules submit named parameter writes through it instead of touching the `Animator` directly, and a second module registering an already-owned parameter is rejected rather than silently overwriting the first.
+* The **facial blendshape compositor** is the only component that writes to `SkinnedMeshRenderer` blendshapes for embodiment output. Modules submit per-region layer weights during the frame, and the compositor composes and writes the final result once, from `LateUpdate`.
+
+Both components are auto-provisioned by `EmbodimentContext` alongside it — treat them, and `EmbodimentContext` itself, as infrastructure Convai adds for a character rather than something you configure directly.
 
 ***
 
