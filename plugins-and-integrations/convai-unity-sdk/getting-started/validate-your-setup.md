@@ -1,16 +1,26 @@
 ---
 title: Validate your setup
 description: >-
-  Run the scene validation tool to confirm all required components are present,
-  connected, and configured correctly.
-last_reviewed: "4.2.0"
+  Check a Convai character with the Troubleshooter window and confirm required
+  components are present before entering Play Mode.
+last_reviewed: "4.5.0"
 ---
 
-Before deploying or sharing your scene, run the SDK's built-in validator and verify the Play Mode startup sequence. This page covers every check the validator performs, the expected console output on success, and a troubleshooting table for common failures.
+Before entering Play Mode, check your character with the Convai Troubleshooter and the scene-wide validator. The two answer different questions: the Troubleshooter reports what would stop a module from working on the selected character, while the validator confirms the basic scene wiring — `ConvaiManager`, `ConvaiCharacter`, `ConvaiPlayer`, and the Character ID field — is in place. Run both.
+
+## Check a character with the Troubleshooter
+
+Open **Convai > Troubleshooter**. The window arrives with your currently selected character loaded, or lists every `ConvaiCharacter` in the scene when you switch to **This Scene** mode.
+
+For the selected character, the Troubleshooter reports findings one row per module. Each finding shows a severity and, when there is something to do about it, a fix button, a **Show Me** button that selects the object it is about, or an **Open** button that opens the relevant editor window. Use **Re-check** after making a change, or **Fix Everything That Can Be Fixed** to apply every one-click fix at once.
+
+In this release the Troubleshooter reports on `Actions`. Actions applies to every `ConvaiCharacter`, so even a freshly wired character with no other modules shows an Actions row — on a character with no actions configured yet, this is informational. It tells you the character will talk but not act, not that something is broken. The window is built to take a row from any module that supplies one, so expect its coverage to widen in later releases; for the other modules, use each module's own editor window.
+
+The Troubleshooter checks module setup, not the raw scene wiring. Missing `ConvaiManager` or an empty Character ID are caught by the scene validator below.
 
 ## Run the scene validator
 
-The Scene Validator inspects your scene for missing components, empty required fields, and common misconfigurations. Run it at any point during development — not just at the end.
+The Scene Validator inspects your scene for missing components, empty required fields, and common misconfigurations. Run it at any point during development, not only at the end.
 
 In the Unity Editor menu bar, select **GameObject > Convai > Validate Scene Setup**.
 
@@ -48,7 +58,7 @@ After the validator passes, enter Play Mode and watch the Console for these log 
 
 * [ ] `[ConvaiRuntime] Started successfully` — SDK initialized all internal services
 * [ ] `[RoomConnectionRuntimeAdapter] Character <character-id> connected successfully (mode=create).` — character connected to Convai
-* [ ] `[ChatTranscriptUI] Dependencies injected via explicit initialization` — transcript UI connected (if present)
+* [ ] If a chat transcript UI is present, it starts showing messages once the conversation starts — it logs nothing on a successful connection, so watch the UI itself rather than the Console
 * [ ] Character `IsCharacterReady` becomes `true` within 30 seconds — Convai has acknowledged the character
 
 {% hint style="info" %}
@@ -71,7 +81,7 @@ void Start()
 | ----------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `[ConvaiRuntime] Started successfully` not in Console | `ConvaiManager` missing or failed to bootstrap                    | Check that `ConvaiManager` is in the scene. Look for earlier errors in the Console.                                                                         |
 | Room never connects — no character-connected log      | API key invalid or missing; network issue                         | Verify your API key in **Convai > Settings > Credentials**. Check firewall rules allow WebSocket/HTTPS to `live.convai.com`.                                               |
-| `[ChatTranscriptUI] Dependencies not injected...`     | `ConvaiManager` not found at UI startup                           | Ensure `ConvaiManager` is in the scene. Its execution order (-1100) guarantees it runs first.                                                               |
+| Chat transcript UI shows no messages                  | Required UI references are not assigned on `ChatTranscriptUI`     | Check the Console for `chatContainer is not assigned - messages will not display` or `scrollRect is not assigned - auto-scroll will not work`, and assign the missing reference in the Inspector. |
 | Character `IsCharacterReady` stays `false`            | Character ID is wrong or character does not exist on your account | Verify the Character ID matches exactly what is shown on your Convai dashboard.                                                                             |
 | Mic never opens — character hears nothing             | Push-to-talk mode is on and mic starts muted                      | In `ConvaiRoomManager`, confirm **Mode** is `HandsFree`, or press **T** if using push-to-talk.                                                              |
 | Character voice plays but blendshapes do not animate  | `ConvaiLipSyncComponent` not configured or profile ID mismatch    | Add `ConvaiLipSyncComponent` to the character. Verify `_lockedProfileId` matches your character's transport format. Assign target `SkinnedMeshRenderer`(s). |
@@ -83,7 +93,7 @@ Your scene now has:
 
 * The SDK installed and connected to Convai with a valid API key
 * A scene with `ConvaiManager`, `ConvaiRoomManager`, `ConvaiCharacter`, and `ConvaiPlayer`
-* Validator passing with zero errors
+* The scene validator and the Troubleshooter both reporting zero errors
 * A character that connects, becomes ready, and responds to voice input
 
 ## Next steps

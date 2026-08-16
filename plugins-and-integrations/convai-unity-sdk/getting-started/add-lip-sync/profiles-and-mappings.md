@@ -3,7 +3,7 @@ title: Profiles and mappings
 description: >-
   Reference for the profile and map assets that control how Convai blendshape
   data reaches your character's face mesh, and when to create custom ones.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 The lip sync system uses two `ScriptableObject` types to describe how blendshape data flows from Convai to your character's mesh: **profiles** and **maps**. Most setups work with the bundled assets — create custom ones only when your rig uses non-standard blendshape names or a transport format not covered by the built-in profiles.
@@ -14,11 +14,13 @@ A **profile** defines the transport format — it tells the SDK which blendshape
 
 **Three profiles are bundled:**
 
-| Profile asset                      | ID              | Format                            |
-| ----------------------------------- | --------------- | --------------------------------- |
-| `ConvaiLipSyncProfile_ARKit`       | `arkit`         | 61 standard ARKit channels        |
-| `ConvaiLipSyncProfile_MetaHuman`   | `metahuman`     | 251 MetaHuman CTRL expressions    |
-| `ConvaiLipSyncProfile_CC4Extended` | `cc4_extended`  | 170 Character Creator 4 channels  |
+| ID             | Display name | Format                           |
+| -------------- | ------------ | --------------------------------- |
+| `arkit`        | ARKit        | 61 standard ARKit channels        |
+| `metahuman`    | MetaHuman    | 251 MetaHuman CTRL expressions    |
+| `cc4_extended` | CC4 Extended | 170 Character Creator 4 channels  |
+
+The three bundled profiles are built into the SDK — there is no `.asset` file to find in the Project window for them, and nothing to import. Type the ID directly into `_lockedProfileId`.
 
 Create a custom profile only if your character uses a proprietary blendshape format that Convai streams under a custom ID. In practice, this is rare — most pipelines use one of the three bundled formats.
 

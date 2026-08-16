@@ -3,7 +3,7 @@ title: Configure character audio
 description: >-
   Configure per-character and project-wide voice volume, spatial audio, and
   audio feedback, and control playback in script with mute and unmute calls.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 The `ConvaiAudioOutput` component controls how a character's voice plays back in the scene, while `ConvaiSettings` sets the project-wide default volume and audio feedback behavior. Pair either with the `ConvaiAudio` facade on `ConvaiManager` for scripted runtime control of mute state, per-character volume, and audio events.

@@ -3,15 +3,15 @@ title: Import and run sample scenes
 description: >-
   Import the bundled sample scenes and verify the SDK is installed and connected
   correctly before building your own scene.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai SDK for Unity ships with two sample scenes. Running one is the fastest way to confirm your installation, API key, and audio setup are working before you build your own scene.
 
 | Sample | Description |
 | --- | --- |
-| **Basic Sample** | Basic conversation with a robot character |
-| **LipSync Sample** | High-quality character with real-time lip sync |
+| **Basic Sample** | Core setup and interaction flow with `Convai_Char_Robot`, a non-humanoid character |
+| **LipSync Sample** | High-quality character `Sofia` with real-time lip sync, plus a debug hub for inspecting emotion, dynamic context, and vision state during Play mode |
 
 The steps for locating the samples differ depending on how you installed the SDK.
 
@@ -47,7 +47,7 @@ In the Project window, navigate to the imported sample folder and open its `.uni
 
 When installed via the Asset Store, all sample scenes are imported into your project automatically. In the Project window, navigate to:
 
-```
+```text
 Assets/Convai SDK For Unity/Samples/
 ```
 
@@ -79,6 +79,8 @@ Speak into your microphone. The character responds with voice and text output.
 If no response appears and the Console shows warnings, check [Validate your setup](validate-your-setup.md) for a diagnostic checklist.
 {% endstep %}
 {% endstepper %}
+
+In the LipSync Sample, the **Sample Debug Hub** panel is already in the scene. Click its Emotion, Context, or Vision buttons in the Game view to open a drawer showing live state while the character talks.
 
 ## Sample render pipeline notes
 

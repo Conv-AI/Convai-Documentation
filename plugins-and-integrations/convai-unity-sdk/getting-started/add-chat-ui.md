@@ -3,7 +3,7 @@ title: Add chat UI
 description: >-
   Add the shipped chat transcript prefab to display scrolling conversation
   history on screen during character interactions.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai SDK for Unity includes a ready-made `ChatTranscriptUI` prefab that displays scrolling chat history in real time. The prefab includes its own `Canvas` — drag it into the scene, and it connects to `ConvaiManager` automatically.
@@ -37,9 +37,7 @@ Drag `TranscriptUI_Chat.prefab` into the Hierarchy. The prefab includes its own 
 
 The chat UI overlay appears in the Game view. The component finds `ConvaiManager` automatically when the scene starts — no manual wiring is needed.
 
-{% hint style="warning" %}
 The chat input field requires an `EventSystem` in the scene. If your scene does not already have one, add it via **GameObject > UI > Event System**.
-{% endhint %}
 
 {% hint style="warning" %}
 If no `ConvaiManager` is found at startup, the Console logs: `[ChatTranscriptUI] No active ConvaiManager found.`. Check that `ConvaiManager` is in the scene.

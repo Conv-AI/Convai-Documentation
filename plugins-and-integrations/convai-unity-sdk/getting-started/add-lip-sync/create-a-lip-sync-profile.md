@@ -3,7 +3,7 @@ title: Create a lip sync profile
 description: >-
   Create a ConvaiLipSyncProfile asset to define a custom transport format
   identifier for blendshape formats beyond the three bundled profiles.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 A lip sync profile defines the transport format identifier — it tells the SDK which blendshape channel names to expect from Convai.

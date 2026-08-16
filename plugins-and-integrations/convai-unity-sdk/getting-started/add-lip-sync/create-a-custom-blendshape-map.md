@@ -3,7 +3,7 @@ title: Create a custom lip sync map
 description: >-
   Create a lip sync map that routes incoming blendshape channels to your
   character's mesh, with per-channel weight and clamp tuning.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 A lip sync map routes source blendshape channels (from the transport stream) to the actual blendshape names on your character's `SkinnedMeshRenderer`. Create a custom map when your rig uses different blendshape names than the bundled passthrough maps expect, or when you need to tune weights for your specific character.
