@@ -3,18 +3,18 @@ title: Convai Unity SDK
 description: >-
   Add real-time AI characters to Unity training simulations, interactive
   experiences, and games — with speech, emotion, actions, and persistent memory.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai Unity SDK connects Unity projects to Convai, bringing conversational AI into training simulations, interactive experiences, and games. Characters process speech in real time, respond with natural language, and synchronize lip movement, facial emotion, and body animation — all configurable per project. Each feature is a self-contained module: add only what your project needs, in the order that fits your workflow.
 
 {% hint style="info" %}
-**New to the SDK?** Follow [Getting Started](getting-started/) to install the package, configure your API key, and run your first AI character.
+**New to the SDK?** Follow [Getting started](getting-started/) to install the package, configure your API key, and run your first AI character.
 {% endhint %}
 
 ## Learn the SDK
 
-<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Overview</strong><br>What the SDK is, how it is structured, and when to use each module.</td><td><a href="overview/">overview</a></td></tr><tr><td><strong>Compatibility and requirements</strong><br>Unity versions, render pipelines, platform support, and network requirements.</td><td><a href="compatibility-and-requirements/">compatibility-and-requirements</a></td></tr><tr><td><strong>Core concepts</strong><br>Session lifecycle, turn-taking modes, and the SDK event system.</td><td><a href="core-concepts/">core-concepts</a></td></tr><tr><td><strong>AI coding assistant</strong><br>Unity MCP integration that lets AI coding agents build Convai scenes from prompts.</td><td><a href="ai-coding-assistant/">ai-coding-assistant</a></td></tr></tbody></table>
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Overview</strong><br>What the SDK is, how it is structured, and when to use each module.</td><td><a href="overview/">overview</a></td></tr><tr><td><strong>Compatibility and requirements</strong><br>Unity versions, render pipelines, platform support, and network requirements.</td><td><a href="compatibility-and-requirements/">compatibility-and-requirements</a></td></tr><tr><td><strong>Core concepts</strong><br>Session lifecycle, turn-taking modes, and the SDK event system.</td><td><a href="core-concepts/">core-concepts</a></td></tr><tr><td><strong>Embodiment</strong><br>Gaze, body animation, body language, conversation flow, and emotion modules for character behavior.</td><td><a href="embodiment/README.md">embodiment</a></td></tr><tr><td><strong>AI coding assistant</strong><br>Unity MCP integration that lets AI coding agents build Convai scenes from prompts.</td><td><a href="ai-coding-assistant/">ai-coding-assistant</a></td></tr></tbody></table>
 
 ## Features
 
@@ -22,23 +22,17 @@ Each feature is a self-contained module you opt into.
 
 <table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Actions</strong><br>Characters execute structured in-scene commands dispatched by Convai.</td><td><a href="features/character-actions/">character-actions</a></td></tr><tr><td><strong>Emotion</strong><br>Map Convai emotion signals to facial blendshapes or Animator parameters.</td><td><a href="features/emotion/">emotion</a></td></tr><tr><td><strong>Long-term memory</strong><br>Characters remember each player across separate sessions.</td><td><a href="features/long-term-memory/">long-term-memory</a></td></tr><tr><td><strong>Vision</strong><br>Characters see through a Unity camera, webcam, or Meta Quest passthrough.</td><td><a href="features/vision/">vision</a></td></tr><tr><td><strong>Dynamic context</strong><br>Inject runtime state and events into character knowledge at any time.</td><td><a href="features/dynamic-context/">dynamic-context</a></td></tr><tr><td><strong>Narrative design</strong><br>Trigger-based story section progression tied to conversation flow.</td><td><a href="features/narrative-design/">narrative-design</a></td></tr><tr><td><strong>Scene metadata</strong><br>Characters automatically read contextual information about scene objects.</td><td><a href="features/scene-metadata/">scene-metadata</a></td></tr></tbody></table>
 
-## Utilities
-
-Helper modules that run entirely within Unity — no Convai communication required.
-
-<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Dialogue animation</strong><br>Four-layer animator stack driving body and head movement during speech.</td><td><a href="utilities/dialogue-animation/">dialogue-animation</a></td></tr><tr><td><strong>Gaze and attention</strong><br>Eye and head gaze blended toward focus targets and conversation partners.</td><td><a href="utilities/gaze-and-attention/">gaze-and-attention</a></td></tr></tbody></table>
-
 ## Reference and guides
 
 <table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>UI and presentation</strong><br>Transcript UI, subtitle modes, notification system, and settings panel.</td><td><a href="ui-and-presentation/">ui-and-presentation</a></td></tr><tr><td><strong>Scripting reference</strong><br>Full API reference for session events, character events, and the transcript system.</td><td><a href="scripting-reference/">scripting-reference</a></td></tr><tr><td><strong>Platform guides</strong><br>WebGL, Android, iOS, and Meta Quest deployment guides.</td><td><a href="platform-guides/">platform-guides</a></td></tr><tr><td><strong>Advanced topics</strong><br>Custom providers, performance, and SDK extension points.</td><td><a href="advanced-topics/">advanced-topics</a></td></tr><tr><td><strong>Troubleshooting</strong><br>Common failure modes, diagnostic steps, and known issues.</td><td><a href="troubleshooting/">troubleshooting</a></td></tr></tbody></table>
 
 ## Latest release
 
-v<code class="expression">space.vars.unity_sdk_version</code> introduces a canonical room-scoped transcript timeline exposed through `ConvaiManager.Transcripts`, active-session Actions updates through `ConvaiActionConfigPatch`, dynamic vision context for backend frame sampling on `ConvaiRoomManager`, and a rebuilt SDK settings experience in the Convai Editor window. It also adds an AI coding assistant integration built on Unity MCP, letting agents such as Codex, Claude Code, and Cursor build Convai scenes from prompts. See [Release notes](overview/release-notes.md) for the complete changelog.
+v<code class="expression">space.vars.unity_sdk_version</code> introduces the embodiment family of character-behavior modules: Gaze, Body Animation, Body Language, Conversation Flow, and Emotion. The five modules share one per-character setup and read the same dialogue state, so a character looks, moves, and reacts as one behavior rather than five independent ones. This release also adds an Auth Token authentication mode that resolves a short-lived credential before each connection, so a player build ships without an account API key. The Actions Editor is rebuilt around a curated catalog of 21 built-in actions and provisions an action's executor and its character-side components in a single undoable operation. A new `Convai > Troubleshooter` window reports setup problems per module. The SDK requires Unity <code class="expression">space.vars.unity_min_version</code>. See [Release notes](overview/release-notes.md) for the complete changelog.
 
 ## Next steps
 
-Install the Convai Unity SDK and connect your first AI character using the Getting Started section. If you are evaluating the SDK before installing, review [Compatibility and requirements](compatibility-and-requirements/) to confirm platform and Unity version support.
+Install the Convai Unity SDK and connect your first AI character using the Getting started section. If you are evaluating the SDK before installing, review [Compatibility and requirements](compatibility-and-requirements/) to confirm platform and Unity version support.
 
 {% content-ref url="getting-started/" %}
 [getting-started](getting-started/)
