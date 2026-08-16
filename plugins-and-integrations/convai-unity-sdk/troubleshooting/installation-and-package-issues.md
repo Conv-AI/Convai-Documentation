@@ -1,22 +1,30 @@
 ---
 title: Installation and package issues
-description: Fix Convai Unity SDK import failures, missing dependencies, assembly errors, and bootstrapper startup warnings with step-by-step remediation.
-last_reviewed: "4.4.0"
+description: Fix Convai Unity SDK import failures, unsupported Unity versions, missing package dependencies, and bootstrapper startup warnings.
+last_reviewed: "4.5.0"
 ---
 
-Package import and initial configuration problems account for the majority of first-run failures with the Convai Unity SDK. Most produce a clear message in the Unity Console the moment you enter Play Mode — or even before that, as compiler errors. Start with the Setup Health checks in Project Settings, then work through the remaining first-line checks below before diving into specific issues.
+Package import and initial configuration problems account for the majority of first-run failures with the Convai Unity SDK. Most produce a clear message in the Unity Console the moment you enter Play Mode — or even before that, as compiler errors. An unsupported Unity version is the single most common root cause and produces no clear message at all, so confirm it first, then work through the Setup Health checks and the remaining first-line checks below.
 
 ## First-line check
 
-Work through these four steps before diving into specific issues. They cover the most common root causes and take under three minutes.
+Work through these steps before diving into specific issues. They cover the most common root causes and take under three minutes.
 
 {% stepper %}
+{% step %}
+### Confirm the Unity version
+
+Open `Help → About Unity` (Windows) or `Unity → About Unity` (macOS) and read the exact build number. The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code> — this is a hard floor on the exact patch, not a rounded version: an earlier `6000.0` patch such as `6000.0.20f1` is refused, and there is no supported configuration on Unity 2023 or earlier. Every `6000.0` through `6000.5` stream is supported once the editor is at or above the minimum patch.
+
+If the editor is older, upgrade before installing the SDK — the package depends on packages that only exist on Unity 6.
+{% endstep %}
+
 {% step %}
 ### Run the Setup Health checks
 
 Go to **Edit → Project Settings → Convai SDK**. The **Setup Health** section opens first and runs a set of project-configuration checks automatically — each item shows a colored status badge, a title, and a message.
 
-The checks include `Settings Asset` (flags a missing `ConvaiSettings.asset`), `API Key` (flags a missing key), `iOS Microphone Usage Description` (flags an empty `Info.plist` description), `Android Microphone Permission` (informational), and a `Define Drift` check for each Convai feature-flag scripting define that differs across build target groups.
+The checks include `Settings Asset` (flags a missing `ConvaiSettings.asset`), `API Key` (flags a missing key), `iOS Microphone Usage Description` (flags an empty `Info.plist` description), `Prepare iOS for Recording` (flags the iOS audio session setting used for Convai microphone recording and speaker playback), `Android Microphone Permission` (informational), and a `Define Drift` check for each Convai feature-flag scripting define that differs across build target groups.
 
 Select **Fix** next to any flagged item to apply the automated correction — for example **Create** adds the missing `ConvaiSettings.asset`, and **Sync All** aligns a drifting scripting define across build target groups. Select **Refresh** in the section header to re-run every check after making changes manually.
 
@@ -68,13 +76,16 @@ When everything is configured correctly, pressing Play shows `Convai Bootstrappe
 
 ### Required dependencies
 
-All three dependencies are pulled in automatically by UPM when you install the Convai SDK package. If any is missing or at the wrong version, assembly compilation fails.
+All six dependencies are pulled in automatically by UPM when you install the Convai SDK package. If any is missing or at the wrong version, assembly compilation fails.
 
 | Dependency | Minimum version | Notes |
 | --- | --- | --- |
 | `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> | JSON serialization — required by all SDK communication |
 | `com.unity.ugui` | <code class="expression">space.vars.dep_ugui_version</code> | UI Toolkit module — required by all UI components |
 | `com.unity.inputsystem` | <code class="expression">space.vars.dep_inputsystem_version</code> | New Input System — required by conversation input |
+| `com.unity.ai.navigation` | <code class="expression">space.vars.dep_ai_navigation_version</code> | NavMesh authoring package — resolved automatically with the SDK package |
+| `com.unity.collections` | <code class="expression">space.vars.dep_collections_version</code> | Native collections — required by the vendored LiveKit transport's audio and video sources |
+| `com.unity.modules.xr` | <code class="expression">space.vars.dep_modules_xr_version</code> | Built-in XR input module — required by XR push-to-talk input |
 
 To verify installed versions: **Window → Package Manager → In Project**.
 
@@ -98,6 +109,30 @@ Assembly definition errors prevent the project from entering Play Mode. The Cons
 
 **Verify:** Open the Console. InputSystem namespace errors are gone. Accept the backend switch prompt if Unity shows it.
 
+### Collections missing or downgraded
+
+**Error:** `The type or namespace name 'Collections' does not exist in the namespace 'Unity'`
+
+**Fix:** Install `com.unity.collections` version <code class="expression">space.vars.dep_collections_version</code> or higher via Package Manager. Do not downgrade below this version: SDK `4.4.1` pins `com.unity.collections` to <code class="expression">space.vars.dep_collections_version</code> specifically to avoid a known regression in Collections `2.6.7` that conflicts with the Unity AI Assistant package's `xxHash3`/`Unsafe` compiled code on Unity 6.0 projects.
+
+**Verify:** Open the Console. Unity.Collections namespace errors are gone and the project compiles cleanly.
+
+### XR module missing
+
+**Error:** `The type or namespace name 'XR' does not exist in the namespace 'UnityEngine'`
+
+**Fix:** `com.unity.modules.xr` is a built-in Unity module rather than a registry package. It ships enabled by default; if a project's `Packages/manifest.json` explicitly excludes it, remove the exclusion, or add `com.unity.modules.xr` at version <code class="expression">space.vars.dep_modules_xr_version</code> to its `dependencies` block directly and let Unity reimport.
+
+**Verify:** Open the Console. UnityEngine.XR namespace errors are gone and the project compiles cleanly.
+
+### AI Navigation missing or fails to resolve
+
+**Symptom:** Package Manager reports the Convai SDK package itself as unresolved, or lists `com.unity.ai.navigation` with a resolution error — the SDK's own compiled code does not reference this package's API directly, so a missing copy does not raise a C# namespace error the way the other dependencies do.
+
+**Fix:** Open **Window → Package Manager**. Click **+** → **Add package by name**. Enter `com.unity.ai.navigation` and confirm.
+
+**Verify:** Package Manager shows `com.unity.ai.navigation` installed and the Convai SDK package resolves without errors.
+
 ### Assembly recompile loop
 
 If Unity enters an infinite recompile loop after installing the package, close Unity and delete the `Library/` folder, then reopen the project.
@@ -112,11 +147,15 @@ Deleting the `Library/` folder forces Unity to reimport the entire project from 
 
 | Symptom | Likely cause | Fix | Verify |
 | --- | --- | --- | --- |
-| Setup Health section shows a **Warning** or **Blocked** item | A required project setting is missing or has drifted — settings asset, API key, iOS microphone usage description, or a scripting define | Open Edit → Project Settings → Convai SDK → Setup Health and select **Fix** next to the item, or correct it manually and select **Refresh** | The item's status badge turns healthy (green) |
+| Unity refuses to open the project, or Package Manager reports an incompatible editor version | Editor is below the Unity <code class="expression">space.vars.unity_min_version</code> floor | Upgrade to Unity <code class="expression">space.vars.unity_min_version</code> or newer — any `6000.0` through `6000.5` build at or above the minimum patch is supported | `Help → About Unity` reports a build at or above the floor |
+| Setup Health section shows a **Warning** or **Blocked** item | A required project setting is missing or has drifted — settings asset, API key, iOS microphone usage description, iOS recording preparation, or a scripting define | Open Edit → Project Settings → Convai SDK → Setup Health and select **Fix** next to the item, or correct it manually and select **Refresh** | The item's status badge turns healthy (green) |
 | `Convai Bootstrapper: ConvaiSettings not found!` in Console | `ConvaiSettings.asset` missing or deleted | Open Edit → Project Settings → Convai SDK to recreate it automatically | Re-enter Play Mode — `Convai Bootstrapper: Initialization complete.` appears |
 | `API key not configured` warning on Play | API key field is empty | Paste key from Convai dashboard into Edit → Project Settings → Convai SDK → Credentials, then select **Validate & Save** | Re-enter Play Mode — the `API key not configured` warning is gone |
 | `The type or namespace 'Newtonsoft' could not be found` | Newtonsoft.Json package missing | Install `com.unity.nuget.newtonsoft-json` via Package Manager | Project compiles without Newtonsoft namespace errors |
 | `The type or namespace 'InputSystem' could not be found` | Input System package missing or old version | Install `com.unity.inputsystem` <code class="expression">space.vars.dep_inputsystem_version</code>+ | Project compiles without InputSystem namespace errors |
+| `The type or namespace 'Collections' does not exist in the namespace 'Unity'` | `com.unity.collections` missing, or downgraded below <code class="expression">space.vars.dep_collections_version</code> | Install `com.unity.collections` <code class="expression">space.vars.dep_collections_version</code>+ via Package Manager; do not downgrade to `2.6.7` | Project compiles without Unity.Collections namespace errors |
+| `The type or namespace 'XR' does not exist in the namespace 'UnityEngine'` | `com.unity.modules.xr` excluded from `Packages/manifest.json` | Restore `com.unity.modules.xr` in `Packages/manifest.json` | Project compiles without UnityEngine.XR namespace errors |
+| Convai SDK package fails to resolve, or Package Manager flags `com.unity.ai.navigation` | AI Navigation dependency missing | Install `com.unity.ai.navigation` <code class="expression">space.vars.dep_ai_navigation_version</code>+ via Package Manager | Convai SDK package resolves without errors in Package Manager |
 | Package not found when adding via UPM name | Scoped registry not configured | Follow the UPM installation guide to add the Convai scoped registry to `manifest.json` | SDK package appears in Package Manager |
 | Asset Store import fails with conflict errors | Files from a previous SDK version still present | Remove the old `Assets/Convai/` folder before reimporting | Package imports without conflict errors |
 | Project Settings → Convai SDK window is blank | Script compilation errors exist | Fix all CS errors in the Console; the settings UI only renders when editor scripts compile cleanly | Edit → Project Settings → Convai SDK displays all six sections |

@@ -14,7 +14,9 @@ Open **Convai > Troubleshooter**. The window arrives with your currently selecte
 
 For the selected character, the Troubleshooter reports findings one row per module. Each finding shows a severity and, when there is something to do about it, a fix button, a **Show Me** button that selects the object it is about, or an **Open** button that opens the relevant editor window. Use **Re-check** after making a change, or **Fix Everything That Can Be Fixed** to apply every one-click fix at once.
 
-In this release the Troubleshooter reports on `Actions`. Actions applies to every `ConvaiCharacter`, so even a freshly wired character with no other modules shows an Actions row — on a character with no actions configured yet, this is informational. It tells you the character will talk but not act, not that something is broken. The window is built to take a row from any module that supplies one, so expect its coverage to widen in later releases; for the other modules, use each module's own editor window.
+Not every row offers the same help. Actions rows come with fixes you can apply from the window. Rows for the embodiment modules — Gaze, Body Animation, Body Language, Emotion, and the embodiment setup itself — report what they find but carry no fix or locate button, so act on those in each module's own editor window. A row appears only when the module has something to say about the character, so a character without a module contributes no row for it.
+
+Actions applies to every `ConvaiCharacter`, so even a freshly wired character with no other modules shows an Actions row. On a character with no actions configured yet, that row is informational: it tells you the character will talk but not act, not that something is broken.
 
 The Troubleshooter checks module setup, not the raw scene wiring. Missing `ConvaiManager` or an empty Character ID are caught by the scene validator below.
 

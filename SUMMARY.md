@@ -253,6 +253,7 @@
     * [Implement a custom module](plugins-and-integrations/convai-unity-sdk/advanced-topics/implement-a-custom-module.md)
     * [Logging, metrics, and retry policy](plugins-and-integrations/convai-unity-sdk/advanced-topics/performance-and-optimization.md)
   * [Troubleshooting](plugins-and-integrations/convai-unity-sdk/troubleshooting/README.md)
+    * [Convai Troubleshooter](plugins-and-integrations/convai-unity-sdk/troubleshooting/convai-troubleshooter.md)
     * [Installation and package issues](plugins-and-integrations/convai-unity-sdk/troubleshooting/installation-and-package-issues.md)
     * [Connection and API issues](plugins-and-integrations/convai-unity-sdk/troubleshooting/connection-and-api-issues.md)
     * [Audio and microphone issues](plugins-and-integrations/convai-unity-sdk/troubleshooting/audio-and-microphone-issues.md)
