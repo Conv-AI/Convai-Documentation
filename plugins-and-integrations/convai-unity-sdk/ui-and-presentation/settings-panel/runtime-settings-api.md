@@ -155,6 +155,16 @@ public class SettingsChangeReactor : MonoBehaviour
             UpdatePlayerNameDisplay(changed.Current.PlayerDisplayName);
         }
     }
+
+    private void ApplyMicrophoneChange(string deviceId)
+    {
+        // Apply the selected device through the application's microphone flow.
+    }
+
+    private void UpdatePlayerNameDisplay(string displayName)
+    {
+        // Update application-owned UI with the new display name.
+    }
 }
 ```
 

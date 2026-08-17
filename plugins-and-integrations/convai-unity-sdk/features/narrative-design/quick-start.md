@@ -6,7 +6,7 @@ description: >-
 last_reviewed: "4.5.0"
 ---
 
-This guide walks you through the fastest path to a working Narrative Design setup. By the end, a character reacts to a section change when the player walks through a trigger zone — entirely through the Inspector, no code required.
+This guide walks you through the fastest path to a Narrative Design setup. By the end, walking through a trigger zone submits a saved trigger, and a backend-confirmed section change fires the matching Unity event. The configuration itself requires no custom runtime code.
 
 ## Prerequisites
 
@@ -118,7 +118,7 @@ Missing any of these is the most common reason the trigger appears to do nothing
 Enter Play Mode and move the player through the collider zone.
 
 {% hint style="success" %}
-The section ID appears in the Console when the player enters the zone. The character's next response reflects the new section's objectives.
+Confirm two separate outcomes: the trigger is accepted locally, then the Console reports the expected section ID from a later backend event. Ask a section-specific question to validate the new objectives; exact dialogue and timing depend on the deployed backend and character configuration.
 {% endhint %}
 {% endstep %}
 {% endstepper %}
@@ -127,7 +127,7 @@ The section ID appears in the Console when the player enters the zone. The chara
 
 Walking through the collider zone activated the full Narrative Design pipeline:
 
-The `ConvaiNarrativeDesignTrigger` detected the player via `OnTriggerEnter` and called `InvokeTrigger()` with the trigger name you selected. The SDK queued the trigger until the character's real-time session was open, then sent a `trigger-message` over the RTVI connection to Convai. Convai advanced the narrative graph along the matching edge and responded with a `behavior-tree-response` containing the new section ID. `ConvaiNarrativeDesignManager` matched that section ID against its local list and fired `OnSectionStart` on the matching entry.
+The `ConvaiNarrativeDesignTrigger` detected the player via `OnTriggerEnter` and called `InvokeTrigger()` with the selected name. If needed, the component waited for the character to become ready, then submitted a `trigger-message` containing `trigger_name`. Local activation is not a backend acknowledgement. When the backend later returned a `behavior-tree-response` with a different section ID, `ConvaiNarrativeDesignManager` matched that ID and fired `OnSectionStart` on the local entry.
 
 For a full explanation of this pipeline, see [How narrative design works](how-narrative-design-works.md).
 

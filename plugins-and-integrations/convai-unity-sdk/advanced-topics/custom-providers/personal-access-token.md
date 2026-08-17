@@ -7,169 +7,218 @@ title: Personal access token
 last_reviewed: "4.5.0"
 ---
 
-By default, the Convai Unity SDK reads your API key from `ConvaiSettings.asset`, which is compiled into your build. Anyone who extracts the build can retrieve the key and use it against your Convai account. Personal Access Tokens (PATs) eliminate that exposure entirely. Your real API key lives on your **backend** — a server-side application you control (Node.js, Python, .NET, etc.) that your users never interact with directly. The backend generates a short-lived token — valid for one hour — and hands it to the Unity app. The app connects to Convai using that token. If the token is intercepted, it expires within the hour and cannot be used to access your account settings, characters, or billing. PATs require a server that holds the real API key and calls Convai's token endpoint on behalf of your users. A lightweight function (AWS Lambda, Azure Function, Cloudflare Worker, etc.) is sufficient — it only needs to make one HTTP request per session.
+By default, the Convai Unity SDK can read an API key from `ConvaiSettings.asset`, which is included in a distributed build. For client applications, keep the real API key on a backend you control and return a short-lived Convai auth token to Unity at runtime. Token lifetime, refresh, and server-side issuance behavior are backend contracts; verify them against the current Convai service before release.
 
 ```text
-Your Backend  ──holds──►  Real API Key
+Your backend  ──holds──►  Real Convai API key
       │
-      │  POST /user/connect  (server-side, never from client)
+      │  obtains a short-lived token server-side
       ▼
-   Convai API  ──returns──►  apiAuthToken  (1 hour)
+Unity app  ──receives──►  apiAuthToken at runtime
       │
-      │  delivered to Unity app at runtime
-      ▼
-Unity App  ──uses──►  apiAuthToken  as credential
-                      (real API key never in build)
+      └──connects with an auth-token provider or
+         ConnectWithAuthTokenAsync(...)
 ```
 
 ***
 
-## Token endpoints
+## Define your backend response
 
-All three endpoints target `https://api.convai.com` and require your real API key in the `CONVAI-API-KEY` header. **These calls are made from your backend, not from the Unity app.**
-
-### Generate a token
-
-```http
-POST https://api.convai.com/user/connect
-```
-
-| Header           | Value               |
-| ---------------- | ------------------- |
-| `Content-Type`   | `application/json`  |
-| `CONVAI-API-KEY` | Your Convai API key |
-
-**Request body:** `{}`
-
-**Response:**
+The Unity app should call an authenticated endpoint on **your backend**, not a Convai administrative token endpoint. Your backend owns the API key and follows the current server-side Convai authentication contract. A minimal response from your backend can look like this:
 
 ```json
 {
   "apiAuthToken": "eyJhbGciOi...",
-  "expirationTime": "2024-01-15T14:30:00Z"
+  "expirationTime": "2030-01-15T14:30:00Z"
 }
 ```
 
-| Field            | Description                                                     |
-| ---------------- | --------------------------------------------------------------- |
-| `apiAuthToken`   | The short-lived token to deliver to the Unity app.              |
-| `expirationTime` | UTC timestamp of expiry — approximately 1 hour from generation. |
+| Field | Description |
+| --- | --- |
+| `apiAuthToken` | Required short-lived token delivered to the Unity app. |
+| `expirationTime` | Optional UTC expiry reported by your backend. Treat it as informational and obtain a fresh token for a new connection. |
 
-You can generate a new token while the current one is still active. Generating a new token does not invalidate the previous one.
-
-### Extend a token
-
-```http
-POST https://api.convai.com/user/extend-token
-```
-
-Headers: same as Generate.
-
-```json
-{
-  "apiAuthToken": "eyJhbGciOi..."
-}
-```
-
-Resets the expiry clock on an existing token without invalidating it.
-
-### Revoke a token
-
-```http
-POST https://api.convai.com/user/revoke-token
-```
-
-Headers: same as Generate.
-
-```json
-{
-  "apiAuthToken": "eyJhbGciOi..."
-}
-```
-
-Immediately invalidates the token. Call this on logout or whenever the token is no longer needed.
+The JSON shape above is an application-owned contract, not a Unity SDK response type. Do not send the real Convai API key, an API-key header, or administrative token operations to the Unity client.
 
 ***
 
 ## Integration with the Unity SDK
 
-Pass the `apiAuthToken` value as the `apiKey` parameter in `ConvaiBootstrapConfigSnapshot`. The SDK sends it as the `CONVAI-API-KEY` credential header — the same slot the API key would occupy.
+In **Project Settings → Convai**, select **Auth Token** mode. You can register a provider for normal `ConnectAsync()` calls or pass a fetched token directly to `ConnectWithAuthTokenAsync(...)`.
 
-**Do not set an API key in `ConvaiSettings.asset` for production builds.** Leave the field empty and supply the PAT at runtime via `CreateRuntimeBuilder()`.
+**Do not set an API key in `ConvaiSettings.asset` for production builds.** The token is supplied only for the current connection attempt and is not persisted by this API.
+
+### Register an auth-token provider
+
+The runtime resolves the registered provider lazily when a connection begins. Registering it from an ordinary scene `Awake()` callback is supported in SDK 4.5.
 
 ```csharp
-// PatConvaiManager.cs
+// BackendAuthTokenRegistration.cs
+using System;
+using System.Threading;
 using System.Threading.Tasks;
-using Convai.Runtime.Components;
-using Convai.Runtime.Core;
 using Convai.Runtime.Core.Configuration;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class PatConvaiManager : ConvaiManager
+// Application-owned adapter for your login/session system.
+public abstract class AuthTokenSessionCredentialSource : MonoBehaviour
 {
+    public abstract string CurrentBearer { get; }
+}
+
+public sealed class BackendAuthTokenRegistration : MonoBehaviour
+{
+    [SerializeField] private string _tokenEndpoint =
+        "https://your-backend.com/session/convai-token";
+    [SerializeField] private AuthTokenSessionCredentialSource _sessionCredentials;
+
+    private IConvaiAuthTokenProvider _provider;
+
+    private void Awake()
+    {
+        _provider = new DelegateAuthTokenProvider(FetchTokenFromBackendAsync);
+        ConvaiAuthTokenProviderRegistry.Register(_provider);
+    }
+
+    private void OnDestroy()
+    {
+        ConvaiAuthTokenProviderRegistry.Unregister(_provider);
+    }
+
+    private async Task<string> FetchTokenFromBackendAsync(
+        CancellationToken cancellationToken)
+    {
+        if (_sessionCredentials == null ||
+            string.IsNullOrWhiteSpace(_sessionCredentials.CurrentBearer))
+            throw new InvalidOperationException(
+                "An authenticated application session is required.");
+
+        using var request = UnityWebRequest.PostWwwForm(_tokenEndpoint, string.Empty);
+        request.SetRequestHeader(
+            "Authorization",
+            $"Bearer {_sessionCredentials.CurrentBearer}");
+
+        UnityWebRequestAsyncOperation operation = request.SendWebRequest();
+        while (!operation.isDone)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                request.Abort();
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
+            await Task.Yield();
+        }
+
+        if (request.result != UnityWebRequest.Result.Success)
+            throw new InvalidOperationException(
+                $"Backend token request failed: {request.error}");
+
+        var response = JsonUtility.FromJson<TokenResponse>(
+            request.downloadHandler.text);
+        return response?.apiAuthToken;
+    }
+
+    [Serializable]
+    private sealed class TokenResponse
+    {
+        public string apiAuthToken;
+    }
+}
+```
+
+`AuthTokenSessionCredentialSource` is an application-owned sample contract. Adapt it to your login system. After registration, call the manager's normal `ConnectAsync()` path; Auth Token mode asks the provider for a fresh token for that attempt.
+
+### Pass a token directly
+
+Use `ConnectWithAuthTokenAsync(...)` when your login flow already returned the Convai token and you want to supply the user identity explicitly for that connection.
+
+```csharp
+// PatSessionConnector.cs
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Convai.Runtime.Components;
+using UnityEngine;
+using UnityEngine.Networking;
+
+public sealed class PatSessionConnector : MonoBehaviour
+{
+    [SerializeField] private ConvaiManager _manager;
     [SerializeField] private string _tokenEndpoint = "https://your-backend.com/session/convai-token";
+    [SerializeField] private AppSessionCredentialSource _sessionCredentials;
 
-    private string _accessToken;
-
-    protected override async void Awake()
+    public async Task<bool> ConnectAsync(
+        string endUserId,
+        string endUserName,
+        CancellationToken cancellationToken = default)
     {
-        _accessToken = await FetchTokenFromBackendAsync();
-        base.Awake();
-    }
+        if (_manager == null)
+            _manager = ConvaiManager.ActiveManager;
+        if (_manager == null)
+            throw new InvalidOperationException("No ConvaiManager is available.");
 
-    protected override ConvaiRuntimeBuilder CreateRuntimeBuilder()
-    {
-        ConvaiRuntimeBuilder builder = base.CreateRuntimeBuilder();
-
-        if (!string.IsNullOrEmpty(_accessToken))
+        string authToken = await FetchTokenFromBackendAsync(cancellationToken);
+        if (string.IsNullOrWhiteSpace(authToken))
         {
-            builder.UseConfig(new ConvaiBootstrapConfigSnapshot(
-                apiKey:    _accessToken,
-                serverUrl: "https://live.convai.com"
-            ));
-        }
-        else
-        {
-            Debug.LogError("[PatConvaiManager] No access token — connection will fail. " +
+            Debug.LogError("[PatSessionConnector] No auth token — connection was not attempted. " +
                            "Ensure your backend token endpoint is reachable.");
+            return false;
         }
 
-        return builder;
+        await _manager.ConnectWithAuthTokenAsync(
+            authToken,
+            endUserId,
+            endUserName,
+            cancellationToken);
+        return true;
     }
 
-    private async Task<string> FetchTokenFromBackendAsync()
+    private async Task<string> FetchTokenFromBackendAsync(CancellationToken cancellationToken)
     {
         using var request = UnityWebRequest.PostWwwForm(_tokenEndpoint, string.Empty);
 
-        // Authenticate with your own backend using your app's session credential.
-        // The backend uses the real Convai API key (never sent here) to call /user/connect.
-        request.SetRequestHeader("Authorization", $"Bearer {GetSessionBearer()}");
+        if (_sessionCredentials == null ||
+            string.IsNullOrWhiteSpace(_sessionCredentials.CurrentBearer))
+            throw new InvalidOperationException(
+                "An authenticated application session is required.");
 
-        var operation = request.SendWebRequest();
-        while (!operation.isDone) await Task.Yield();
+        // Authenticate only to your own backend. The Convai API key never reaches Unity.
+        request.SetRequestHeader(
+            "Authorization",
+            $"Bearer {_sessionCredentials.CurrentBearer}");
+
+        UnityWebRequestAsyncOperation operation = request.SendWebRequest();
+        while (!operation.isDone)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await Task.Yield();
+        }
 
         if (request.result != UnityWebRequest.Result.Success)
         {
-            Debug.LogError($"[PatConvaiManager] Token fetch failed: {request.error}");
+            Debug.LogError($"[PatSessionConnector] Token fetch failed: {request.error}");
             return null;
         }
 
         var response = JsonUtility.FromJson<TokenResponse>(request.downloadHandler.text);
-        return response?.token;
+        return response?.apiAuthToken;
     }
 
-    // Replace with however your app stores its own session credential (e.g., from login).
-    private static string GetSessionBearer()
-        => PlayerPrefs.GetString("session_bearer", string.Empty);
-
     [System.Serializable]
-    private class TokenResponse { public string token; }
+    private class TokenResponse { public string apiAuthToken; }
+}
+
+// Application-owned adapter for your login/session system.
+public abstract class AppSessionCredentialSource : MonoBehaviour
+{
+    public abstract string CurrentBearer { get; }
 }
 ```
 
 {% hint style="danger" %}
-Never call `https://api.convai.com/user/connect` directly from the Unity app. Doing so requires the real API key to be in the build — which is what PATs exist to prevent. Always call it from your backend.
+Never call a Convai administrative token endpoint directly from the Unity app. Doing so would require privileged server credentials in the build. Unity should call only your authenticated backend endpoint.
 {% endhint %}
 
 {% hint style="danger" %}
@@ -178,15 +227,16 @@ Do not persist `apiAuthToken` to disk (e.g., `PlayerPrefs`). A cached token is a
 
 ***
 
-## Token expiry and session length
+## Token lifetime and reconnects
 
-Once a Convai session starts, the token is no longer checked for the duration of that session — a token that expires mid-session does not disconnect the user. The PAT is only consumed at connect time.
+Treat token lifetime as a backend contract. The Unity SDK requests or accepts a token when a connection begins, but SDK 4.5 source does not prove the service's expiry, refresh, or active-session enforcement policy. Validate those behaviors with live sessions in your target environment.
 
-| Scenario                                        | Behavior                                                                                              |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Token expires before `ConnectAsync()` is called | Connection fails — fetch a fresh token from your backend and retry.                                   |
-| Token expires during an active session          | Session is unaffected — the token is only checked at connect time, not held for the session duration. |
-| App restarts after token expiry                 | Always fetch a fresh token at startup — do not cache tokens across launches.                          |
+| Scenario | Client action |
+| --- | --- |
+| A new connection is about to start | Ask your backend for a fresh token immediately before connecting. |
+| The service rejects a token | Surface the connection failure and obtain a new token through your backend; do not retry a cached value indefinitely. |
+| An active session crosses the reported expiry | Observe and test the live service behavior; do not promise that the session will remain connected. |
+| The app restarts | Fetch a fresh token; do not persist Convai auth tokens across launches. |
 
 ***
 
@@ -194,52 +244,68 @@ Once a Convai session starts, the token is no longer checked for the duration of
 
 ### Example 1: LMS platform with per-session tokens
 
-A corporate safety training platform issues a Convai PAT as part of the LMS login response. The token is generated server-side when the learner authenticates and is delivered alongside the LMS session data.
+A corporate safety training platform can return a Convai auth token as part of its LMS login response. The token is obtained server-side when the learner authenticates and is delivered alongside the application session data.
 
 ```csharp
+// pseudocode: LmsAuthService, LmsSession, and LmsIdentityProvider are application-owned.
 // LmsSessionBootstrapper.cs
+using Convai.Runtime.Components;
+using UnityEngine;
+
 public class LmsSessionBootstrapper : MonoBehaviour
 {
     private async void Start()
     {
         // LmsAuthService.LoginAsync() calls your backend.
-        // Your backend generates a Convai PAT and returns it with the session.
+        // Your backend obtains a Convai auth token and returns it with the session.
         LmsSession session = await LmsAuthService.LoginAsync();
 
         ConvaiManager manager = ConvaiManager.ActiveManager;
         if (manager == null) return;
 
-        // Identity tied to the learner record — long-term memory follows the learner.
+        // Optional when ConnectWithAuthTokenAsync receives the same learner ID below.
         manager.SetEndUserIdentityProvider(new LmsIdentityProvider(session));
 
-        // PatConvaiManager.Awake() already loaded the PAT via FetchTokenFromBackendAsync().
-        await manager.ConnectAsync();
+        await manager.ConnectWithAuthTokenAsync(
+            session.ConvaiAuthToken,
+            session.LearnerId,
+            session.LearnerName);
     }
 }
 ```
 
 ### Example 2: Shared kiosk with per-resident token rotation
 
-Each resident logs into a shared training kiosk, receives a fresh PAT from the backend, interacts with the simulation, then logs out. On logout, the token is explicitly revoked so it cannot be reused.
+Each resident logs into a shared training kiosk, receives a fresh auth token from the backend, interacts with the simulation, then logs out. The Unity client disconnects and clears its in-memory token. Any server-side session policy remains the responsibility of your backend.
 
 ```csharp
 // KioskSessionManager.cs
-using System.Text;
 using System.Threading.Tasks;
+using Convai.Runtime.Components;
 using UnityEngine;
 using UnityEngine.Networking;
 
 public class KioskSessionManager : MonoBehaviour
 {
-    private const string RevokeUrl = "https://api.convai.com/user/revoke-token";
-
-    // The backend endpoint that returns a fresh PAT for the authenticated resident.
+    // The backend endpoint that returns a fresh auth token for the resident.
     [SerializeField] private string _backendTokenEndpoint = "https://your-backend.com/kiosk/convai-token";
+    [SerializeField] private ConvaiManager _manager;
 
     private string _currentToken;
 
-    public async void OnResidentLogin(string residentSessionBearer)
+    public async void OnResidentLogin(
+        string residentSessionBearer,
+        string residentId,
+        string residentName)
     {
+        if (_manager == null)
+            _manager = ConvaiManager.ActiveManager;
+        if (_manager == null)
+        {
+            Debug.LogError("[KioskSessionManager] ConvaiManager not found.");
+            return;
+        }
+
         _currentToken = await FetchTokenAsync(residentSessionBearer);
 
         if (string.IsNullOrEmpty(_currentToken))
@@ -248,18 +314,18 @@ public class KioskSessionManager : MonoBehaviour
             return;
         }
 
-        await ConvaiManager.ActiveManager.ConnectAsync();
+        await _manager.ConnectWithAuthTokenAsync(
+            _currentToken,
+            residentId,
+            residentName);
     }
 
     public async void OnResidentLogout()
     {
-        await ConvaiManager.ActiveManager.DisconnectAsync();
+        if (_manager != null && _manager.IsConnected)
+            await _manager.DisconnectAsync();
 
-        if (!string.IsNullOrEmpty(_currentToken))
-        {
-            await RevokeTokenAsync(_currentToken);
-            _currentToken = null;
-        }
+        _currentToken = null;
     }
 
     private async Task<string> FetchTokenAsync(string residentBearer)
@@ -267,58 +333,48 @@ public class KioskSessionManager : MonoBehaviour
         using var request = UnityWebRequest.PostWwwForm(_backendTokenEndpoint, string.Empty);
         request.SetRequestHeader("Authorization", $"Bearer {residentBearer}");
 
-        var operation = request.SendWebRequest();
+        UnityWebRequestAsyncOperation operation = request.SendWebRequest();
         while (!operation.isDone) await Task.Yield();
 
         if (request.result != UnityWebRequest.Result.Success) return null;
 
         var response = JsonUtility.FromJson<TokenResponse>(request.downloadHandler.text);
-        return response?.token;
+        return response?.apiAuthToken;
     }
 
-    private static async Task RevokeTokenAsync(string token)
-    {
-        // NOTE: Revocation requires the real API key — this call should also be
-        // proxied through your backend for maximum security.
-        // Shown here as a direct call for clarity; move to backend in production.
-        string body = JsonUtility.ToJson(new RevokeBody { apiAuthToken = token });
-
-        using var request = new UnityWebRequest(RevokeUrl, "POST");
-        request.uploadHandler   = new UploadHandlerRaw(Encoding.UTF8.GetBytes(body));
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type",   "application/json");
-        request.SetRequestHeader("CONVAI-API-KEY", ""); // Supply via backend proxy in production.
-
-        var operation = request.SendWebRequest();
-        while (!operation.isDone) await Task.Yield();
-    }
-
-    [System.Serializable] private class TokenResponse { public string token; }
-    [System.Serializable] private class RevokeBody    { public string apiAuthToken; }
+    [System.Serializable] private class TokenResponse { public string apiAuthToken; }
 }
 ```
 
 ### Example 3: On-demand token refresh for long-running applications
 
-Industrial training simulations can run for multiple hours. While an active session is unaffected by token expiry, a new session started after expiry needs a fresh token. Use your backend's extend or re-generate endpoint before reconnecting.
+Industrial training simulations can run for multiple hours. Obtain a fresh token from your backend before each new connection rather than trying to extend or reuse a client-held token.
 
 ```csharp
 // LongRunningSessionManager.cs
+using Convai.Runtime.Components;
+using UnityEngine;
+
 public class LongRunningSessionManager : MonoBehaviour
 {
-    [SerializeField] private PatConvaiManager _patManager;
+    [SerializeField] private ConvaiManager _manager;
+    [SerializeField] private PatSessionConnector _patConnector;
+    [SerializeField] private string _endUserId;
+    [SerializeField] private string _endUserName;
 
     // Call this before starting a new session, e.g., after scene reload or character swap.
     public async void StartNewSession()
     {
-        // Disconnect any existing session.
-        await ConvaiManager.ActiveManager.DisconnectAsync();
+        if (_manager == null || _patConnector == null)
+        {
+            Debug.LogError("Assign the ConvaiManager and PatSessionConnector.");
+            return;
+        }
 
-        // PatConvaiManager.FetchTokenFromBackendAsync() is called again on re-Awake,
-        // or implement a public RefreshToken() method that calls your backend endpoint.
-        // Your backend can call /user/extend-token or generate a fresh token — either works.
+        if (_manager.IsConnected)
+            await _manager.DisconnectAsync();
 
-        await ConvaiManager.ActiveManager.ConnectAsync();
+        await _patConnector.ConnectAsync(_endUserId, _endUserName);
     }
 }
 ```
@@ -330,10 +386,10 @@ public class LongRunningSessionManager : MonoBehaviour
 | Symptom                                                  | Likely cause                                                                  | Fix                                                                                                          |
 | -------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | Connect fails immediately                                | `apiAuthToken` is null — backend fetch failed                                 | Check Console for the `Token fetch failed` log; verify your backend endpoint URL and auth headers.           |
-| `401` auth error from Convai on connect                  | Token was already expired or revoked before `ConnectAsync()`                  | Always fetch a fresh token immediately before connecting — never reuse a cached token across sessions.       |
-| Session disconnects instantly after connecting           | `serverUrl` is wrong in `ConvaiBootstrapConfigSnapshot`                       | Set `serverUrl` to <code class="expression">space.vars.live_server_url</code> — the PAT is scoped to this endpoint. |
-| `apiAuthToken` is null in the backend response           | Malformed request body or missing `CONVAI-API-KEY` header on the backend call | Ensure the body is `{}` and the header is present. Log the raw response on the backend to inspect the error. |
-| Token works in development but fails in production build | `ConvaiSettings.asset` API key field is empty and no PAT is fetched           | Confirm `PatConvaiManager.Awake()` runs and completes the backend fetch before `base.Awake()` is called.     |
+| `401` auth error from Convai on connect                  | The service rejected the supplied token                                        | Fetch a fresh token through your backend and inspect server-side issuance logs; do not reuse a cached token.  |
+| Connection reports the wrong authentication mode         | Project Settings is still configured for API-key authentication               | Select **Auth Token** mode in **Project Settings → Convai**, then reconnect with `ConnectWithAuthTokenAsync`. |
+| `apiAuthToken` is null in the backend response           | Your backend did not return the application-defined token field                | Inspect backend issuance logs and validate its response contract without logging the token value.            |
+| Token works in development but fails in production build | The backend token request is skipped or returns a malformed payload           | Confirm `PatSessionConnector.ConnectAsync` receives `apiAuthToken`, `endUserId`, and `endUserName` before connecting. |
 
 ***
 

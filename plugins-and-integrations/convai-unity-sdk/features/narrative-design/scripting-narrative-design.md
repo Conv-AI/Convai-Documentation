@@ -6,7 +6,7 @@ last_reviewed: "4.5.0"
 
 The Inspector workflow covers the majority of use cases. This page documents the full C# surface for situations where you need programmatic control — dynamic character switching, async data fetching at runtime, runtime-generated narrative flows, or deep integration with your own game systems.
 
-All capabilities described here are available through `IConvaiNarrativeDesign`, exposed on every `ConvaiCharacter` via the `NarrativeDesign` property. `ConvaiNarrativeDesignManager` and `ConvaiNarrativeDesignTrigger` both delegate to this interface internally, so everything you configure in the Inspector is also reachable from code.
+The character-scoped surface is `IConvaiNarrativeDesign`, exposed on every `ConvaiCharacter` via `NarrativeDesign`. `ConvaiNarrativeDesignManager` and `ConvaiNarrativeDesignTrigger` delegate to parts of this interface, while also exposing their own component APIs. Not every serialized Inspector setting has a public runtime setter.
 
 ## Access the character API
 
@@ -21,7 +21,7 @@ IConvaiNarrativeDesign narrative = character.NarrativeDesign;
 
 | Property | Type | Description |
 |---|---|---|
-| `TemplateKeys` | `IReadOnlyDictionary<string, string>` | Snapshot of all template keys currently tracked for this character. |
+| `TemplateKeys` | `IReadOnlyDictionary<string, string>` | Live read-only view of the character facade's backing dictionary. Later `SetTemplateKey(s)` calls are visible through an existing reference; this is not a copied snapshot. |
 | `CurrentSectionId` | `string` | The section ID most recently received from Convai. Empty string if no section has been received yet. |
 | `CurrentSectionData` | `NarrativeSectionData` | Full section payload. Contains `SectionId`, `BehaviorTreeCode`, and `BehaviorTreeConstants`. `null` until the first section change is received. |
 
@@ -54,51 +54,53 @@ private void HandleSectionData(NarrativeSectionData data)
 }
 ```
 
-These events are delivered via the SDK's internal `EventHub`. If your handler touches Unity API (e.g., `GameObject.SetActive`), use `ConvaiNarrativeDesignManager` in the scene — it performs main-thread delivery automatically. Raw subscriptions to `IConvaiNarrativeDesign` events may arrive on a background thread depending on configuration.
+`OnSectionChanged` and `OnSectionDataReceived` originate from the character's `NarrativeSectionChanged` EventHub subscription, which uses the default `MainThread` policy in Unity SDK 4.5.0. Their handlers are therefore scheduled on Unity's main thread, but the source does not promise same-frame delivery. `OnTriggerInvoked` is different: it runs synchronously on the thread that calls `InvokeTrigger`, `InvokeEvent`, or `InvokeSpeech`; call those APIs from Unity's main thread if the handler touches Unity objects.
 
 ### Events
 
 | Event | Signature | Description |
 |---|---|---|
-| `OnSectionChanged` | `Action<string, string>` | Fires on every section transition. Parameters: `previousId`, `newId`. |
-| `OnSectionDataReceived` | `Action<NarrativeSectionData>` | Fires on every section transition with the full payload. |
+| `OnSectionChanged` | `Action<string, string>` | Fires only when the received section ID differs from the current ID. Parameters: `previousId`, `newId`. |
+| `OnSectionDataReceived` | `Action<NarrativeSectionData>` | Fires for every matching section-data event, including a repeated section ID. |
 | `OnTriggerInvoked` | `Action<ConvaiNarrativeTriggerInvocation>` | Fires after a trigger or speech request is accepted locally (before confirmation from Convai). |
 
 ## Invoke triggers from code
 
 ```csharp
-// Saved trigger — advances the graph along a specific edge
+// Saved trigger — submits a named graph edge
 bool accepted = character.NarrativeDesign.InvokeTrigger("CheckpointReached");
 ```
 
-`InvokeTrigger` sends a saved Narrative Design trigger by name. The SDK trims whitespace, rejects an empty name, and sends only `trigger_name` over RTVI. It returns `true` when the request is accepted locally and queues the trigger if the session is not yet open.
+`InvokeTrigger` sends a saved Narrative Design trigger by name. The SDK trims whitespace, rejects an empty name, and sends only `trigger_name` over RTVI. It returns `true` when the request is accepted by the local client path or queued before readiness. If an immediate transport attempt fails, the SDK requeues the request but returns `false`. None of these return values acknowledges a backend graph transition; wait for the corresponding section event.
 
 Use `InvokeEvent` when you want to send contextual event text instead of a saved graph trigger:
 
 ```csharp
-character.NarrativeDesign.InvokeEvent("The fire extinguisher is missing its pin.");
+bool accepted = character.NarrativeDesign.InvokeEvent(
+    "The fire extinguisher is missing its pin.");
 ```
 
-`InvokeEvent` sends only `trigger_message` over RTVI. Convai treats the message as inline context and responds naturally; it does not select a saved trigger by name.
+`InvokeEvent` sends only `trigger_message` over RTVI. It does not select a saved trigger by name. The Unity source proves the wire field and local queue behavior, not whether the backend produces a response or how it phrases one.
 
 ## Control character speech
 
-`InvokeSpeech` sends exact scripted speech without advancing the narrative graph. Pass the text you want the character to say; the SDK wraps it in `<speak>...</speak>` internally before sending `trigger_message`.
+`InvokeSpeech` requests scripted speech without sending a saved trigger name. The SDK trims the input, wraps it once as `<speak>...</speak>`, and sends that value in `trigger_message`.
 
 ```csharp
-character.NarrativeDesign.InvokeSpeech("Attention: the fire exit on level two is now unlocked.");
+bool accepted = character.NarrativeDesign.InvokeSpeech(
+    "Attention: the fire exit on level two is now unlocked.");
 ```
 
-Do not include `<speak>` tags in Unity code. Use `InvokeEvent` for contextual events where Convai should decide the wording.
+Pass plain text and do not include your own `<speak>` root—the SDK would nest it. The 4.5.0 client does not escape or validate arbitrary SSML markup; this API only guarantees the outer wrapper. Exact backend speech and playback must be tested in a live room. Use `InvokeEvent` for contextual events where the backend should decide the wording.
 
 | Method | Wire field | Runtime behavior |
 |---|---|---|
 | `InvokeTrigger("TriggerName")` | `trigger_name` | Invokes a saved Narrative Design trigger and can advance the graph. |
-| `InvokeEvent("event text")` | `trigger_message` | Adds inline event context and lets Convai respond naturally. |
-| `InvokeSpeech("scripted text")` | `trigger_message` | Sends exact scripted speech; the SDK adds `<speak>` tags internally. |
+| `InvokeEvent("event text")` | `trigger_message` | Submits inline contextual text. |
+| `InvokeSpeech("scripted text")` | `trigger_message` | Submits `<speak>scripted text</speak>` as a scripted-speech request. |
 
 {% hint style="info" %}
-Only saved triggers advance the graph by name. Inline events and scripted speech use `trigger_message` and do not send `trigger_name`.
+Only `InvokeTrigger` sends a saved graph edge through `trigger_name`. Inline events and scripted speech use `trigger_message`; backend handling remains a live-service behavior.
 {% endhint %}
 
 ### Listen to trigger invocations
@@ -117,23 +119,24 @@ character.NarrativeDesign.OnTriggerInvoked += invocation =>
 | `Request` | `ConvaiNarrativeTriggerRequest` | Typed request accepted by the SDK. Includes the mode, wire field name, and wire field value. |
 | `TriggerName` | `string` | Saved trigger name. Empty for inline events and scripted speech. |
 | `TriggerMessage` | `string` | Inline event text or SDK-generated scripted speech payload. Empty for saved triggers. |
-| `Queued` | `bool` | `true` if the trigger was deferred because the session was not yet open. |
+| `Queued` | `bool` | `true` if the request was deferred before readiness or requeued after a transport send returned `false`. |
 
 ## Template keys via code
 
 ```csharp
-// Set a single key
-character.NarrativeDesign.SetTemplateKey("PlayerName", "Alex");
+// Set a single key and check local acceptance/queueing
+bool accepted = character.NarrativeDesign.SetTemplateKey("PlayerName", "Alex");
 
 // Set multiple keys
-character.NarrativeDesign.SetTemplateKeys(new Dictionary<string, string>
+bool batchAccepted = character.NarrativeDesign.SetTemplateKeys(
+    new Dictionary<string, string>
 {
     { "PlayerName",  "Alex" },
     { "ScoreLevel",  "Intermediate" }
 });
 ```
 
-Both methods send immediately if the session is open, or queue for the next connection if it is not.
+Both methods update the live local dictionary. If the session is open, they attempt to send the full current key snapshot immediately. Before readiness they mark that snapshot pending; after a failed live send they also keep it pending, but return `false`. Transport acceptance is not a backend acknowledgement.
 
 The character-level API and `ConvaiNarrativeDesignManager`'s methods converge on the same transport internally. Use the Manager's methods when you want the keys visible and editable in the Inspector; use the character API for purely code-driven flows where Inspector visibility is not needed.
 
@@ -145,7 +148,7 @@ The character-level API and `ConvaiNarrativeDesignManager`'s methods converge on
 NarrativeFetchResult<List<NarrativeSectionInfo>> result =
     await character.NarrativeDesign.FetchSectionsAsync();
 
-if (result.Success)
+if (result.Success && result.Data != null)
 {
     foreach (NarrativeSectionInfo section in result.Data)
         Debug.Log($"{section.SectionId}: {section.SectionName}");
@@ -160,8 +163,15 @@ else
 NarrativeFetchResult<List<NarrativeTriggerInfo>> result =
     await character.NarrativeDesign.FetchTriggersAsync();
 
-foreach (NarrativeTriggerInfo trigger in result.Data)
-    Debug.Log($"{trigger.TriggerName} → {trigger.DestinationSection}");
+if (result.Success && result.Data != null)
+{
+    foreach (NarrativeTriggerInfo trigger in result.Data)
+        Debug.Log($"{trigger.TriggerName} → {trigger.DestinationSection}");
+}
+else
+{
+    Debug.LogError(result.Error);
+}
 ```
 
 `NarrativeSectionInfo` fields: `SectionId`, `SectionName`.
@@ -170,7 +180,7 @@ foreach (NarrativeTriggerInfo trigger in result.Data)
 
 ### Via the static fetcher
 
-`NarrativeDesignFetcher` provides the same data without needing a character component reference — useful in Editor tooling or loading screens:
+`NarrativeDesignFetcher` provides the transport DTOs without needing a character component reference—useful in Editor tooling or loading screens. Check each `FetchResult.Success` before reading `Data`:
 
 ```csharp
 // Fetch sections
@@ -184,6 +194,11 @@ FetchResult<List<TriggerData>> triggers =
 // Fetch both in parallel
 var (sectionsResult, triggersResult) =
     await NarrativeDesignFetcher.FetchAllAsync(characterId);
+
+if (!sectionsResult.Success)
+    Debug.LogError(sectionsResult.Error);
+if (!triggersResult.Success)
+    Debug.LogError(triggersResult.Error);
 ```
 
 `FetchResult<T>` fields:
@@ -206,7 +221,7 @@ narrativeManager.ResetController();
 
 ### Reconfigure ConvaiNarrativeDesignTrigger from code
 
-All Inspector-configurable settings have corresponding setter methods:
+The component exposes setters for character, trigger selection/name, activation mode, proximity radius, time delay, player transform, and diagnostics. Other serialized settings—including **Trigger Once**, player tag/layer, queue controls, and scene-load reset—have no public setter in Unity SDK 4.5.0.
 
 ```csharp
 ConvaiNarrativeDesignTrigger trigger = GetComponent<ConvaiNarrativeDesignTrigger>();
@@ -221,8 +236,8 @@ trigger.SetProximityRadius(5f);
 // Provide a known player transform (useful when auto-find is insufficient)
 trigger.SetPlayerTransform(playerController.transform);
 
-// Switch the target character
-trigger.SetCharacter(otherCharacter.GetComponent<IConvaiCharacterAgent>());
+// Switch the target character (ConvaiCharacter implements IConvaiCharacterAgent)
+trigger.SetCharacter(otherCharacter);
 
 // Validate before a critical trigger
 if (!trigger.ValidateConfiguration())

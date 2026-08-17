@@ -1,10 +1,12 @@
 ---
 title: Runtime architecture
-description: Understand the layered Convai Unity SDK runtime — what each layer owns, the per-character embodiment layer, and how the runtime's lifecycle states are managed.
-last_reviewed: "4.5.0"
+description: Understand the layered Convai Unity SDK runtime, what each layer owns, how one room coordinates several characters, and how lifecycle states are managed.
+last_reviewed: "4.6.0"
 ---
 
 The Convai Unity SDK is built in layers. Each layer has a defined responsibility and communicates inward — outer layers depend on inner ones, never the reverse. Understanding this structure tells you which parts of the SDK are developer-facing, which are replaceable, and which are internal implementation details you do not need to touch.
+
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** Shared-roster membership and live interaction-target details on this page are staged ahead of the current <code class="expression">space.vars.unity_sdk_version</code> Asset Store release. The general runtime layering also applies to the stable release.
 
 ***
 
@@ -18,7 +20,7 @@ graph TD
     A --> C[IEventHub<br/>Decoupled pub/sub]
     A --> D[IAgentRegistry<br/>Characters · Players]
     A --> E[IReadOnlyList&lt;IConvaiModule&gt;<br/>Feature modules]
-    B --> F[ConvaiCharacter<br/>per-character session + state]
+    B --> F[ConvaiCharacter<br/>room membership + character state]
     B --> G[ConvaiPlayer<br/>local participant identity]
     F --> H[Module Context<br/>LipSync · Vision · Narrative]
     G --> H
@@ -33,7 +35,7 @@ graph TD
 * **`IAgentRegistry`** — registry of all active `ConvaiCharacter` and `ConvaiPlayer` instances.
 * **`IReadOnlyList<IConvaiModule>`** — the set of registered feature modules.
 
-**Character / Player layer** — `ConvaiCharacter` and `ConvaiPlayer` register with `IAgentRegistry` and receive their per-session context through `IRoomRuntime`. Each character maintains its own session state. A character that carries embodiment modules — Gaze, Body Animation, Body Language, Conversation Flow, or Emotion — also gets its own `EmbodimentContext`; see Embodiment layer below.
+**Character / Player layer** — `ConvaiCharacter` and `ConvaiPlayer` register with `IAgentRegistry` and receive room context through `IRoomRuntime`. All characters in a multi-character roster share the room's connection state, while each character retains its own membership, readiness, identity, audio, transcript, and embodiment state. A character that carries embodiment modules — Gaze, Body Animation, Body Language, Conversation Flow, or Emotion — also gets its own `EmbodimentContext`; see Embodiment layer below.
 
 **Module context layer** — runtime-level feature modules (`IConvaiModule`, such as LipSync, Vision, and Narrative) share an `IModuleContext` that provides access to runtime services. Modules can declare dependencies on each other's module IDs and services, but interact through `IEventHub` or a service registered on `IModuleContext` rather than holding direct references to each other's concrete types.
 
@@ -106,10 +108,12 @@ The room layer is itself composed of four coordinators, all accessible via `ICon
 | ------------- | ---------------------------- | --------------------------------------------- |
 | `Connection`  | `IRoomConnectionCoordinator` | Connect, disconnect, session state            |
 | `Audio`       | `IRoomAudioCoordinator`      | Microphone capture, remote audio playback     |
-| `Ownership`   | `IRoomOwnershipCoordinator`  | Which characters this client owns and focuses |
+| `Ownership`   | `IRoomOwnershipCoordinator`  | Startup roster ownership and authored initial target |
 | `Diagnostics` | `IRoomDiagnostics`           | Session metrics, health monitoring            |
 
-Connection and audio are the coordinators you are most likely to call from scripting. Ownership is managed automatically when you have multiple characters in the scene. Diagnostics are used for performance monitoring and debugging.
+Connection and audio are the coordinators you are most likely to call from scripting. Ownership determines which enabled characters enter the startup roster and which one is initial. After the room connects, application logic changes the acknowledged interaction target through `IConvaiRoomConnectionService.SetInteractionTargetAsync(...)`; the SDK does not choose a target from gaze, proximity, or speech. Diagnostics are used for performance monitoring and debugging.
+
+`ConvaiManager.TryGetRoomConnectionService(...)` exposes the Unity-facing room service. In the Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview, its `CurrentMultiCharacterSession` property is the canonical client projection of the server roster. It carries the room session ID, active membership ID, route and roster epochs, initial character, per-character memberships, and readiness state.
 
 ***
 
@@ -201,7 +205,7 @@ All state transitions are async operations wrapped in `IConvaiOperation<Unit>`. 
 
 ## Next steps
 
-You now understand how the Convai runtime is composed and which parts are replaceable at each layer. Read Session lifecycle next to understand how each character's session is created, persisted, and recovered, then continue through Turn-taking modes and Event system.
+You now understand how the Convai runtime is composed and which parts are replaceable at each layer. Read Session lifecycle next to understand shared room state, character-session continuity, and reconnection, then continue through Turn-taking modes and Event system.
 
 {% content-ref url="session-lifecycle.md" %}
 [Session lifecycle](session-lifecycle.md)

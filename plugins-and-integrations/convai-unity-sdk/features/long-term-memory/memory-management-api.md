@@ -6,6 +6,8 @@ last_reviewed: "4.5.0"
 
 The Memory Management API lets you read and write memory records directly — without waiting for a conversation to generate them. Use it to audit what a character knows about a user, seed facts before a first session, or remove specific memories that are no longer accurate.
 
+**Validation boundary:** Unity SDK 4.5 source verifies these methods, request parameters, and response models. Deduplication, conversational recall, and deletion completion are backend behavior. Inspect responses and follow up with live list/get calls before relying on those outcomes.
+
 {% hint style="warning" %}
 **Beta API.** Method signatures are stable but may change in future SDK updates. Pin your SDK version in production environments and review the changelog before upgrading.
 {% endhint %}
@@ -19,13 +21,17 @@ All memory operations are available on `ConvaiRestClient.Memory`. The `ConvaiRes
 Initialize `ConvaiRestClient` with your API key. The client is `IDisposable` — always use a `using` statement or call `Dispose()` when finished.
 
 ```csharp
+// API usage excerpt: place inside an application-owned method.
+using Convai.RestAPI;
+using Convai.Runtime;
+
 using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
 ```
 
 Every memory operation requires two identifiers:
 
 - **`characterId`** — the character ID from the `ConvaiCharacter` Inspector
-- **`endUserId`** — the identifier returned by your `IEndUserIdentityProvider` (or the GUID from `PlayerPrefs` if using the default `DeviceEndUserIdProvider`)
+- **`endUserId`** — the identifier returned by your `IEndUserIdentityProvider`; the default provider uses a PlayerPrefs GUID in the Editor, prefers `SystemInfo.deviceUniqueIdentifier` in player builds, and falls back to a PlayerPrefs GUID when that player value is invalid
 
 ***
 
@@ -56,6 +62,7 @@ Retrieve all stored memory records for a user–character pair. Results are pagi
 ```csharp
 using Convai.RestAPI;
 using Convai.RestAPI.Internal;
+using Convai.Runtime;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -106,6 +113,7 @@ public class MemoryInspector : MonoBehaviour
 Retrieve one specific record by its ID.
 
 ```csharp
+// API usage excerpt: assumes initialized client and identifier variables.
 var record = await client.Memory.GetAsync(characterId, endUserId, memoryId);
 Debug.Log($"Memory: {record.Memory}");
 ```
@@ -114,9 +122,10 @@ Debug.Log($"Memory: {record.Memory}");
 
 ### Add memories
 
-Inject one or more facts as natural-language strings. Convai deduplicates overlapping facts — adding a fact that is semantically equivalent to an existing one updates the existing record rather than creating a duplicate.
+Submit one or more natural-language facts. The response exposes a server-reported `Event` for each result. Test overlapping facts in staging to establish the current backend deduplication behavior.
 
 ```csharp
+// API usage excerpt: assumes initialized client and identifier variables.
 var facts = new List<string>
 {
     "Jordan is a night-shift safety officer at the Northfield facility.",
@@ -139,8 +148,8 @@ foreach (var result in response.Memories)
 | Property | Type | Description |
 |---|---|---|
 | `Id` | `string` | ID of the created or updated record |
-| `Event` | `string` | `"add"` for new records, `"update"` for deduplicated updates |
-| `Memory` | `string` | The normalized fact text stored by Convai |
+| `Event` | `string` | Server-reported operation label, commonly `"add"` or `"update"` |
+| `Memory` | `string` | Fact text returned by the backend |
 
 ***
 
@@ -149,6 +158,7 @@ foreach (var result in response.Memories)
 Remove one specific record by its ID.
 
 ```csharp
+// API usage excerpt: assumes initialized client and identifier variables.
 var result = await client.Memory.DeleteAsync(characterId, endUserId, memoryId);
 Debug.Log($"Deleted: {result.Deleted}");
 ```
@@ -158,12 +168,13 @@ Debug.Log($"Deleted: {result.Deleted}");
 ### Delete all memories
 
 {% hint style="danger" %}
-`DeleteAllAsync` permanently removes **all** memory records for the specified user–character pair. This cannot be undone. Always implement a confirmation step before calling this in any user-facing flow.
+`DeleteAllAsync` sends a destructive deletion request for the specified user-character pair. Always require confirmation, inspect the response, and follow with `ListAsync` to verify the live backend scope and completion before reporting success.
 {% endhint %}
 
 ```csharp
+// API usage excerpt: assumes initialized client and identifier variables.
 var result = await client.Memory.DeleteAllAsync(characterId, endUserId);
-Debug.Log($"All memories deleted for user {result.EndUserId} on character {result.CharacterId}.");
+Debug.Log($"Deletion request completed for user {result.EndUserId} on character {result.CharacterId}.");
 ```
 
 ***
@@ -173,6 +184,7 @@ Debug.Log($"All memories deleted for user {result.EndUserId} on character {resul
 Wrap all async memory calls in `try/catch`. Failed operations throw `ConvaiRestException` with an HTTP status code.
 
 ```csharp
+// API usage excerpt: assumes initialized client and identifier variables.
 try
 {
     var response = await client.Memory.ListAsync(characterId, endUserId);

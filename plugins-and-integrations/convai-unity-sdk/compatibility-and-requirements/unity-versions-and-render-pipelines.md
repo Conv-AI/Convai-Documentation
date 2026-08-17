@@ -4,7 +4,7 @@ description: Reference for Convai Unity SDK environment requirements, including 
 last_reviewed: "4.5.0"
 ---
 
-The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code>. There is no supported configuration on an earlier Unity release. All three Unity render pipelines are supported with no additional configuration, and both installation methods — Package Manager and Asset Store — resolve the required package dependencies automatically.
+The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code>. There is no supported configuration on an earlier Unity release. The package contains paths for the Built-in Render Pipeline, URP, and HDRP; validate the pipeline, sample materials, and Vision capture path in the Unity version and build target you ship.
 
 ## Unity version requirements
 
@@ -19,7 +19,7 @@ The minimum is a hard floor. Convai supports no configuration below Unity <code 
 
 ## Required package dependencies
 
-The SDK depends on six Unity packages. Both installation methods install these automatically — you do not need to add them manually unless you encounter a version conflict.
+The SDK manifest declares six Unity package dependencies. Unity Package Manager normally resolves them during installation. After importing through either supported installation path, confirm that Package Manager resolved the versions below and address any project-level version conflict before continuing.
 
 | Package                           | Version |
 | --------------------------------- | ------- |
@@ -36,13 +36,13 @@ Do not downgrade these packages after installation. The SDK targets the versions
 
 ## Render pipeline support
 
-The SDK detects the active render pipeline at runtime and adapts automatically. The Vision module's camera capture path, for example, uses built-in render hooks when no render pipeline asset is assigned and an explicit render path on URP and HDRP. All three Unity render pipelines are fully supported with no manual configuration required.
+The SDK detects the active render pipeline at runtime. The Vision module uses built-in render hooks when no render-pipeline asset is assigned; in URP and HDRP, `Auto` uses the explicit render-compatibility path and performs a bounded extra `Camera.Render()` at the configured capture rate. `SrpNative` is not a production backend in <code class="expression">space.vars.unity_sdk_version</code>.
 
-| Render Pipeline                        | Supported |
-| -------------------------------------- | --------- |
-| Built-in Render Pipeline               | ✅ Full    |
-| Universal Render Pipeline (URP)        | ✅ Full    |
-| High Definition Render Pipeline (HDRP) | ✅ Full    |
+| Render pipeline | SDK path in <code class="expression">space.vars.unity_sdk_version</code> | Project validation |
+| --- | --- | --- |
+| Built-in Render Pipeline | Built-in render hooks | Verify the target camera and captured frame in Play Mode and in the target build |
+| Universal Render Pipeline (URP) | Explicit render compatibility | Verify frame content and account for the extra render at the configured capture rate |
+| High Definition Render Pipeline (HDRP) | Explicit render compatibility | Verify frame content and account for the extra render at the configured capture rate |
 
 The included sample scenes use URP materials. If your project uses the Built-in or HDRP pipeline, sample scene materials require reassignment. The optional depth-of-field camera scripts in `SamplesShared/Camera/` support URP and HDRP; on the Built-in pipeline they skip depth-of-field and log a warning instead. None of these scripts are required for SDK functionality.
 

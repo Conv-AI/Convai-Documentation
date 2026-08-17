@@ -37,7 +37,7 @@ Two components make up the Scene Metadata system. `ConvaiObjectMetadata` goes on
 
 GameObjects that are deactivated at runtime will not appear in the next metadata collection, even if **Include In Metadata** is still checked.
 
-Changing **Object Name**, **Object Description**, or **Include In Metadata** through the public `ObjectName`, `ObjectDescription`, or `IncludeInMetadata` properties marks the metadata dirty and re-syncs all connected characters immediately if a session is active — the change is not deferred to the next connection.
+Changing **Object Name**, **Object Description**, or **Include In Metadata** through the public `ObjectName`, `ObjectDescription`, or `IncludeInMetadata` properties marks the metadata dirty for every registered character. An active character submits the refreshed payload on its next shared Dynamic Context flush (0.5-second debounce, capped at 3 seconds), or sooner if you call `Flush()`. The change is not deferred to the next connection, but the property setter does not send synchronously.
 
 ### Validation rules
 
@@ -57,7 +57,7 @@ Each entry in **Tracked Properties** is a `ConvaiTrackedContextProperty` — a s
 | -------------------------- | ------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | **Property Name**          | `string`             | `""`     | Required to enable this entry. Combined with **Object Name** to form the dynamic context state key.                                       |
 | **Reaction**                | `ConvaiRespondMode`  | `Silent` | The reaction applied to characters when this property's value changes. See [`ConvaiRespondMode`](../dynamic-context/relay-component-reference.md#convairespondmode). |
-| **Initial Value**          | `string`             | `""`     | The value sent when the object registers, and the value used for entries that have no **Source Component** configured.                    |
+| **Initial Value**          | `string`             | `""`     | Seeds the tracked state when the object registers or a character becomes ready, and is used when no runtime source value is available.   |
 | **Source Component**       | `Component`          | `None`   | Optional. The component to read the live value from on each poll. Leave unset for a fixed value.                                          |
 | **Source Member Name**     | `string`             | `""`     | Optional. The name of the property, field, or zero-argument method on **Source Component** to read.                                       |
 
@@ -65,7 +65,7 @@ The state key for each entry is built as `"{ObjectName}.{PropertyName}"` via `Co
 
 When both **Source Component** and **Source Member Name** are set, `ConvaiTrackedContextProperty` reads the value live on each poll through reflection, checking in order: a matching property, then a field, then a zero-argument method (including non-public members). When either field is unset, the entry stays fixed at **Initial Value** until changed by code.
 
-Polling and delivery to connected characters are handled automatically by an internal `ConvaiWorldObjectPollDriver` — there is no user-facing component to add. It is created on the `ConvaiManager` GameObject when the first `ConvaiObjectMetadata` component registers, evaluates tracked properties on all registered objects every `0.25` seconds, and is destroyed when the last `ConvaiObjectMetadata` component unregisters.
+Polling and staging are handled automatically by an internal `ConvaiWorldObjectPollDriver` — there is no user-facing component to add. It is created on the `ConvaiManager` GameObject when the first `ConvaiObjectMetadata` component registers, evaluates tracked properties on all registered objects every `0.25` seconds, and is destroyed when the last `ConvaiObjectMetadata` component unregisters. A changed value is staged with `DynamicContext.SetState`; transport still follows the shared batch window.
 
 ## ConvaiSceneMetadataCollector
 
@@ -75,7 +75,7 @@ Polling and delivery to connected characters are handled automatically by an int
 
 | Field                                  | Type    | Default | Description                                                                                                                                                                                                 |
 | -------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Collect On Start**                   | `bool`  | `false` | When enabled, the collector automatically sends the full metadata payload the moment the room session reaches `SessionState.Connected`. Disable this if you need manual control over when metadata is sent. |
+| **Collect On Start**                   | `bool`  | `false` | When enabled, the collector calls `CollectAndSendSceneMetadata()` when the room session reaches `SessionState.Connected`. Disable this if you need manual control over that client submission. |
 | **Log Statistics**                     | `bool`  | `true`  | Writes a Console entry on each collection showing the object count, collection duration, and registry breakdown. Useful for verifying that all expected objects were captured.                              |
 | **Last Collected Count** _(read-only)_ | `int`   | —       | Shows the number of objects included in the most recent collection. Visible in Play Mode.                                                                                                                   |
 | **Last Collection Time** _(read-only)_ | `float` | —       | Shows the duration in seconds of the most recent collection operation. Visible in Play Mode.                                                                                                                |
@@ -87,12 +87,12 @@ Polling and delivery to connected characters are handled automatically by an int
 If the dependencies are not injected (for example, if `ConvaiManager` is missing from the scene), the collector logs an error and all collection calls become no-ops.
 
 {% hint style="danger" %}
-Do not add `ConvaiSceneMetadataCollector` to a scene without `ConvaiManager`. When `ConvaiManager` is missing, the component logs `"[ConvaiSceneMetadataCollector] Dependencies not injected. Add ConvaiManager to scene."` as an **error** in the Console and disables itself.
+Do not add `ConvaiSceneMetadataCollector` to a scene without `ConvaiManager`. When dependency resolution fails, the component logs an error containing `Dependencies not injected. Add ConvaiManager to scene.` and disables itself. Logger formatting can add its own prefix.
 {% endhint %}
 
 ### Manual trigger
 
-When **Collect On Start** is disabled, call `CollectAndSendSceneMetadata()` from a script to trigger collection at the moment your application needs it. The method is a no-op if the room is not connected — use `IsReadyToSendMetadata()` to check readiness first.
+When **Collect On Start** is disabled, call `CollectAndSendSceneMetadata()` from a script to trigger collection at the moment your application needs it. The method is a no-op if the room is not connected — use `IsReadyToSendMetadata()` to check readiness first. A successful return is not exposed, and the method does not await a backend acknowledgement; use the `Sent ... to RTVI service` client log plus live-room validation for end-to-end evidence.
 
 ```csharp
 if (_collector.IsReadyToSendMetadata())

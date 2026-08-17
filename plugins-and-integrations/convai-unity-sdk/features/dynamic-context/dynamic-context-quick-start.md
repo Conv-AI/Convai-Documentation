@@ -2,11 +2,11 @@
 title: Dynamic context quick start
 description: >-
   Add a Dynamic Context Relay component to an NPC, send a tracked update from
-  a UI button, and confirm the character references it.
+  a UI button, and verify that the update reaches a live conversation.
 last_reviewed: "4.5.0"
 ---
 
-This guide adds a `ConvaiDynamicContextRelay` component to an NPC, wires a UI button to send a tracked context update, and confirms the character references that update in conversation. Use it after a `ConvaiCharacter` already connects and responds to speech in Play mode.
+This guide adds a `ConvaiDynamicContextRelay` component to an NPC, wires a UI button to send a tracked context update, and verifies the result in a live conversation. Use it after a `ConvaiCharacter` already connects and responds to speech in Play mode.
 
 ## Prerequisites
 
@@ -36,8 +36,8 @@ If `ConvaiCharacter` is on a different GameObject, disable **Auto Resolve Charac
 
 In the **Defaults** section:
 
-* Leave **Reaction Mode** at **Silent** (the default). With **Silent**, the update is absorbed into the character's awareness but does not make it speak immediately — the character incorporates it into its next response instead.
-* Leave **Flush Immediately** disabled (the default). The character batches relay updates for roughly half a second before sending them; enable this field only when a call must reach Convai without waiting for the batch window.
+* Leave **Reaction Mode** at **Silent** (the default). This requests no immediate LLM run for the update. It does not guarantee that the model will mention the new context on its next turn.
+* Leave **Flush Immediately** disabled (the default). The character batches relay updates for roughly half a second before submitting them; enable this field when the client should attempt the flush without waiting for the batch window.
 {% endstep %}
 
 {% step %}
@@ -57,19 +57,19 @@ The player entered the fire exit corridor.
 
 Enter Play mode and start a conversation with the character. Click the button you wired in the previous step, then ask the character something like "What's happening around here?"
 
-The character should reference the event — for example: _"You entered the fire exit corridor a moment ago. Remember the evacuation procedure before you go further."_
+Ask a question whose answer depends on the event and confirm that the character can use it. The exact wording and whether the model chooses to mention the event depend on the character configuration, current conversation, and backend behavior.
 
 If the character does not reference the event, open the Unity Console and check for a warning from `ConvaiDynamicContextRelay` or `ConvaiCharacter`. See [Troubleshoot dynamic context](troubleshoot-dynamic-context.md) for a full diagnosis checklist.
 {% endstep %}
 {% endstepper %}
 
 {% hint style="success" %}
-Your character is now context-aware. The event you sent is tracked on the character's `DynamicContext` and delivered to Convai once the batch window closes (or immediately, if **Flush Immediately** is enabled). Any further `AddEvent`, `SetState`, or attention-object call through the relay is delivered the same way.
+The event is now tracked on the character's `DynamicContext` and submitted once the batch window closes (or when **Flush Immediately** calls `Flush()`). Any further `AddEvent`, `SetState`, or attention-object call through the relay follows the same client path. The relay's `OnQueued` event confirms method invocation only; use a live room and backend result/log evidence when you need end-to-end proof.
 {% endhint %}
 
 ## Test without custom code
 
-Import the **LipSync Sample** from Package Manager and open its scene. The sample includes a **Sample Debug Hub** with a **Context** drawer that sends state, event, and attention-object updates to the scene's `ConvaiCharacter` without wiring your own UI. If the character responds correctly through the Debug Hub but not through your own relay setup, the issue is in your Inspector wiring — not in Dynamic Context itself.
+Import the **LipSync Sample** from Package Manager and open its scene. The sample includes a **Sample Debug Hub** with a **Context** drawer that sends state, event, and attention-object updates to the scene's `ConvaiCharacter` without wiring your own UI. If the same live-room test works through the Debug Hub but not through your relay, inspect the relay's character resolution, argument, and reaction settings first.
 
 ## Next steps
 

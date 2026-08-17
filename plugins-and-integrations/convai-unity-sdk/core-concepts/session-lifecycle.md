@@ -1,16 +1,20 @@
 ---
 title: Session lifecycle
-description: Understand how ConvaiCharacter sessions transition through states, persist session IDs, and support explicit pause, resume, and background policy controls.
-last_reviewed: "4.5.0"
+description: Understand how a Convai room transitions through states, how character session IDs preserve continuity, and how pause, resume, and background policies work.
+last_reviewed: "4.6.0"
 ---
 
-Every `ConvaiCharacter` in your scene maintains an independent session with Convai. That session tracks whether the character is connected, what its current state is, and — when persistence is enabled — what conversation it was in the last time you connected. Understanding how sessions are created, persisted, and recovered lets you build reliable, resumable character interactions across training simulations, interactive experiences, and games.
+`ConvaiManager` maintains one room connection with Convai. A single-character scene places one character in that room; a multi-character scene places an ordered character roster in the same room. All roster members therefore observe the same `SessionState`, while each character keeps its own readiness, membership identity, audio, transcript events, and `character_session_id` for conversation continuity.
+
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** The multi-character lifecycle on this page is staged ahead of the current <code class="expression">space.vars.unity_sdk_version</code> Asset Store release. Stable single-character lifecycle guidance remains unchanged.
+
+This distinction matters when you build UI or recovery logic: `OnSessionStateChanged` reports the shared room lifecycle, while `OnCharacterReady` reports that one character can interact.
 
 ***
 
 ## Session state machine
 
-Each character session moves through the following states.
+The room session moves through the following states.
 
 ```mermaid
 stateDiagram-v2
@@ -41,11 +45,13 @@ You receive state transitions as `SessionStateChangedRelayData` events via `Conv
 
 ***
 
-## Per-character sessions
+## Room session and character memberships
 
-Each `ConvaiCharacter` has its own independent session. Sessions are not shared between characters. In multi-character scenes, each character connects and disconnects independently — session IDs are keyed to the character's ID string set in the Inspector (not the scene or object name), reconnect policy applies per character, and a session error on one character does not affect others.
+Characters in a multi-character roster connect and disconnect with one room. The authored startup character becomes the initial membership and gates room readiness. Secondary memberships can still be starting or can fail while the room remains connected; inspect `CurrentMultiCharacterSession.PartialDispatch` and each `CharacterRoomMembership.Status` instead of treating a connected room as proof that every character is ready.
 
-`ConvaiSessionData` is the persistent session store that maps each character to its current session identifier. It loads from disk automatically at startup and writes to `{Application.persistentDataPath}/Convai/sessions.json` on every change — session IDs survive application restarts without any additional setup.
+Each membership has its own `character_session_id`. The runtime's default `ISessionPersistence` implementation maps those IDs by Character ID through `PlayerPrefs`, so reconnecting the shared room can restore continuity for each character independently. The client rejects duplicate character object references and duplicate non-empty character-session IDs in the startup roster. Use distinct Character IDs as well when application behavior depends on Character-ID-keyed audio, registry, or event APIs.
+
+`ConvaiSessionData` is a separate JSON-backed store available to application code. It loads from disk on first access and writes to `{Application.persistentDataPath}/Convai/sessions.json` when you call one of its mutation methods. It is not the default `ISessionPersistence` backend.
 
 | Method                                   | Description                                                                 |
 | ---------------------------------------- | --------------------------------------------------------------------------- |
@@ -56,20 +62,20 @@ Each `ConvaiCharacter` has its own independent session. Sessions are not shared 
 | `GetAllSessionIds()`                     | Returns a read-only snapshot of all current character→sessionId mappings.   |
 
 {% hint style="info" %}
-`ConvaiSessionData` is a singleton. Data is stored at `{Application.persistentDataPath}/Convai/sessions.json` and persists across application restarts. Call `ClearAllSessionIds()` explicitly if you need a clean slate.
+`ConvaiSessionData` is a singleton for projects that use its API directly. Its JSON values do not replace the standard room host's automatic resume store.
 {% endhint %}
 
 ***
 
 ## Session persistence
 
-When a session ID is persisted, the SDK can resume a previous conversation on the next connect — the character remembers context from prior interactions.
+When a character session ID is persisted, the SDK can resume that character's previous conversation on the next room connect.
 
 ### What persists vs. what resets
 
 | On Reconnect                 | Behavior                                            |
 | ---------------------------- | --------------------------------------------------- |
-| Session ID                   | Persisted via `ConvaiSessionData` — enables resume  |
+| Character session ID         | Persisted via `ISessionPersistence` — enables resume |
 | Conversation history         | Managed by Convai; resumed when session ID is valid |
 | In-flight audio              | Reset — any audio mid-stream is discarded           |
 | Active turn state            | Reset — the turn restarts clean                     |
@@ -77,7 +83,7 @@ When a session ID is persisted, the SDK can resume a previous conversation on th
 
 ### Default persistence stack
 
-The SDK exposes a pluggable persistence layer via `ISessionPersistence` for projects that need a custom backing store (encrypted storage, cloud saves, a database). The default stack is:
+The standard `ConvaiManager` host uses this session-persistence stack:
 
 ```text
 ISessionPersistence
@@ -88,38 +94,7 @@ ISessionPersistence
 
 Session IDs are stored under keys formatted as `convai.session.<characterId>`.
 
-### Replacing the persistence store
-
-Implement `IKeyValueStore` to use any backing store — a database, encrypted storage, a cloud save system. `PlayerPrefsKeyValueStore` marshals all reads and writes to the Unity main thread internally; apply the same thread-safety pattern if your backing store has thread restrictions.
-
-```csharp
-public sealed class SecureKeyValueStore : IKeyValueStore
-{
-    public string GetString(string key, string defaultValue = null)
-    {
-        return SecureStorage.GetValue(key) ?? defaultValue;
-    }
-
-    public void SetString(string key, string value)
-    {
-        SecureStorage.SetValue(key, value);
-    }
-
-    public bool HasKey(string key) => SecureStorage.HasKey(key);
-
-    public void DeleteKey(string key) => SecureStorage.DeleteKey(key);
-
-    public void Save() => SecureStorage.Flush();
-}
-```
-
-Register it via `ConvaiRuntimeBuilder`:
-
-```csharp
-var runtime = new ConvaiRuntimeBuilder()
-    .UsePersistence(new MyPersistenceProvider(new SecureKeyValueStore()))
-    .Build();
-```
+`ConvaiRuntimeBuilder.UsePersistence(IPersistenceProvider)` configures the runtime's general key-value provider; in SDK <code class="expression">space.vars.unity_sdk_preview_version</code> it does not replace the standard room host's `ISessionPersistence`. Use the built-in resume store, or keep session IDs in your own protected storage and call `SetCharacterSessionId(...)` before connecting when your application needs a different persistence policy.
 
 ***
 
@@ -131,7 +106,7 @@ var runtime = new ConvaiRuntimeBuilder()
 | -------------------------- | -------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `RoomRejoinTtlSeconds`     | `double`       | `60`               | Window in seconds during which the SDK can rejoin an existing room after a drop. After this window, a new room is created instead. |
 | `ResumePolicy`             | `ResumePolicy` | `ResumeIfPossible` | Controls whether the SDK attempts to resume the previous conversation via `character_session_id`.                                  |
-| `MaxReconnectAttempts`     | `int`          | `3`                | Maximum number of automatic reconnect attempts before the session moves to `Error` state.                                          |
+| `MaxReconnectAttempts`     | `int`          | `3`                | Maximum number of automatic reconnect attempts before the room moves to `Error` state.                                             |
 | `SpawnAgentOnRejoin`       | `bool`         | `true`             | Whether to re-spawn the AI agent when rejoining an existing room.                                                                  |
 | `StartWaitTimeoutMs`       | `int`          | `5000`             | Timeout in milliseconds for the connection `Start()` phase before the attempt is considered failed.                                |
 | `AutoMicStartDelaySeconds` | `float`        | `0.5`              | Seconds to wait after connection before starting the microphone. Prevents audio capture before the session is fully ready.         |
@@ -272,13 +247,16 @@ var policy = ReconnectPolicy.AlwaysCreateNew;
 To guarantee previous user data is removed before the next session starts:
 
 ```csharp
+using Convai.Runtime.Components;
+using UnityEngine;
+
 public class KioskSessionReset : MonoBehaviour
 {
-    [SerializeField] private string _characterId;
+    [SerializeField] private ConvaiCharacter _character;
 
     public void OnUserLogOut()
     {
-        ConvaiSessionData.Instance.ClearSessionId(_characterId);
+        _character.ClearCharacterSessionId();
     }
 }
 ```
@@ -289,9 +267,13 @@ public class KioskSessionReset : MonoBehaviour
 
 ### Example 3: Handling the error state in a training simulation
 
-When all reconnect attempts are exhausted, the session enters `Error` state. Surface this to the facilitator and allow manual retry rather than silently hanging.
+When all reconnect attempts are exhausted, the shared room enters `Error` state. Surface this to the facilitator and allow manual retry rather than silently hanging.
 
 ```csharp
+using Convai.Runtime.Components;
+using Convai.Runtime.Presentation.Events;
+using UnityEngine;
+
 public class SessionErrorHandler : MonoBehaviour
 {
     [SerializeField] private ConvaiSessionEventRelay _relay;
@@ -323,11 +305,11 @@ public class SessionErrorHandler : MonoBehaviour
 
 | Symptom                                                                          | Likely Cause                                                                                            | Fix                                                                                                                                                 |
 | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Session stays in `Error` state after a drop                                      | `AlwaysResume` could not resume the session because it already expired                                  | Switch to `ResumeIfPossible`; call `ClearSessionId(characterId)` to remove the stale session ID, then reconnect                                     |
-| Character starts a fresh conversation on every launch despite `ResumeIfPossible` | A previous `ClearAllSessionIds()` call wiped the session file, or the character ID changed between runs | Verify the `characterId` string is stable across runs; check `{persistentDataPath}/Convai/sessions.json`                                            |
+| Session stays in `Error` state after a drop                                      | `AlwaysResume` could not resume the character session because it already expired                         | Switch to `ResumeIfPossible`; call `ClearCharacterSessionId()` on the affected `ConvaiCharacter`, then reconnect                                    |
+| Character starts a fresh conversation on every launch despite `ResumeIfPossible` | The Character ID changed, resume is disabled, or the explicit character session ID was cleared          | Keep the Character ID stable, enable session resume, and inspect `CharacterSessionId` after a successful connection                                |
 | Session stuck in `Connecting` forever                                            | `StartWaitTimeoutMs` not configured for slow network; or firewall blocking the transport                | Increase `StartWaitTimeoutMs` in `ReconnectPolicy`; verify network access to Convai endpoints                                                       |
 | Reconnect loop never succeeds; session eventually reaches `Error`                | `MaxReconnectAttempts` exhausted                                                                        | Subscribe to `ConvaiSessionEventRelay.OnSessionStateChanged` and surface the error to the user; call reconnect manually after the user acknowledges |
-| Two characters share a session ID                                                | Character ID strings are identical in the Inspector                                                     | Assign unique character IDs to each `ConvaiCharacter` in the scene                                                                                  |
+| Multi-character connect reports duplicate character session IDs                  | Two roster members were configured with the same non-empty `character_session_id`                        | Assign unique character and character-session IDs, or clear the duplicated session ID before connecting                                             |
 | `ResumeAsync()` does not restore audio                                           | The application is still backgrounded, so the background policy keeps the manual pause reason active    | Wait for the application to return to the foreground, or check `IsBackgrounded` on the latest `OnRuntimeBackgroundStateChanged` payload             |
 | `ReconnectAsync()` throws `InvalidOperationException`                            | Called while `SessionState` was already `Connecting` or `Disconnecting`                                  | Check `SessionState` before calling, or wait for the in-flight transition to finish                                                                 |
 | Idle warning never fires                                                         | No listener is subscribed, or activity keeps resetting Convai's idle tracking                             | Subscribe to `OnUserIdleWarningReceived` or `OnUserIdleWarning`; note that voice, text, trigger, and dynamic-context activity all reset idle tracking |
@@ -336,7 +318,7 @@ public class SessionErrorHandler : MonoBehaviour
 
 ## Next steps
 
-You now know how character sessions are created, how state transitions work, how session IDs are persisted across restarts, and how to configure reconnection behavior. Read Turn-taking modes next to configure how the SDK detects speech input, then Event system to learn how to subscribe to session and character events from your scene scripts.
+You now know how the shared room is created, how its state transitions work, how character session IDs persist across restarts, and how to configure reconnection behavior. Read Turn-taking modes next to configure how the SDK detects speech input, then Event system to distinguish room-wide and character-filtered events in your scene scripts.
 
 {% content-ref url="turn-taking-modes.md" %}
 [Turn-taking modes](turn-taking-modes.md)

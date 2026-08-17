@@ -1,6 +1,6 @@
 ---
 title: Async patterns
-description: Consume IConvaiOperation<T> and IConvaiStream<T> using async/await, coroutines, chaining, progress tracking, cancellation, and streams.
+description: Learn how to await SDK work, bridge operations into Unity coroutines, track progress, cancel safely, and consume continuous streams.
 last_reviewed: "4.5.0"
 ---
 
@@ -10,11 +10,12 @@ last_reviewed: "4.5.0"
 
 ## Async/await
 
-The most direct pattern. Works in any `async` method. Faulted operations throw `ConvaiOperationException`.
+The most direct pattern works in any `async` method. Most SDK validation and service failures throw `ConvaiOperationException`; cancellation throws `OperationCanceledException`, and an underlying dependency can surface its own exception type.
 
 ```csharp
 using Convai.Runtime.Core.Async;
-using Convai.Runtime.Facades;
+using Convai.Runtime.Components;
+using System;
 using System.Threading;
 using UnityEngine;
 
@@ -44,7 +45,7 @@ public class AsyncConnectExample : MonoBehaviour
 
 ### `await operation` vs. `await operation.AsTask()`
 
-Both produce the same result. Prefer `await operation` directly — it uses `GetAwaiter()` and avoids an extra allocation. Use `AsTask()` only when you need to pass the operation to a method that requires `Task<T>`, such as `Task.WhenAll`.
+Both await the same underlying task and produce the same result. Prefer `await operation` directly for readability. Use `AsTask()` when you need to pass the operation to an API that requires `Task<T>`, such as `Task.WhenAll`.
 
 ```csharp
 // Direct await — preferred
@@ -65,7 +66,7 @@ Use coroutines when your script cannot use `async` (e.g., on Unity event callbac
 
 ```csharp
 using Convai.Runtime.Core.Async;
-using Convai.Runtime.Facades;
+using Convai.Runtime.Components;
 using System.Collections;
 using UnityEngine;
 
@@ -82,16 +83,16 @@ public class CoroutineConnectExample : MonoBehaviour
 }
 ```
 
-`ToCoroutine` yields until the operation completes. Both `onSuccess` and `onError` are optional — pass `null` for either if you do not need the callback.
+`ToCoroutine` yields until the operation completes. Both callbacks are optional. A fault without `onError` is logged by the SDK; cancellation is sent to `onError` with the code `"canceled"` when the callback is present.
 
 {% hint style="warning" %}
-In coroutines, faulted operations do **not** throw. If you omit the `onError` callback, failures are silent.
+In coroutines, faulted operations do **not** throw into the calling method. Provide `onError` when your application needs to show a failure or distinguish cancellation from other outcomes.
 
 ```csharp
-// WRONG — silent failure
+// Logs through the SDK, but the application does not receive the error
 yield return op.ToCoroutine(onSuccess: result => Use(result));
 
-// CORRECT
+// The application receives both faults and cancellation
 yield return op.ToCoroutine(
     onSuccess: result => Use(result),
     onError:   err    => Debug.LogError(err.Message));
@@ -131,7 +132,7 @@ IConvaiOperation<string> nameOp = manager
 Poll `operation.Progress` to drive a UI progress indicator. The value advances from `0.0` to `1.0` as the operation completes. Not all operations report granular progress — check `Status` for definitive completion.
 
 ```csharp
-using Convai.Runtime.Facades;
+using Convai.Runtime.Components;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -164,7 +165,7 @@ public class ConnectProgressBar : MonoBehaviour
 
 ### Using `CancellationToken`
 
-Pass a `CancellationToken` to any SDK method. The operation transitions to `Canceled` when the token is signaled.
+Pass a `CancellationToken` to SDK methods that expose one. Cancellation is cooperative: the operation reaches `Canceled` only when the underlying work observes the request.
 
 ```csharp
 private CancellationTokenSource _cts;
@@ -200,7 +201,7 @@ private async void Start()
 
 ### Using `operation.Cancel()`
 
-Call `Cancel()` on the operation handle directly for manual cancellation independent of a `CancellationToken`.
+Call `Cancel()` on the operation handle to request manual cancellation. The call is a no-op when that operation was created without a cancellation source or has already completed.
 
 ```csharp
 var op = manager.ConnectAsync();
@@ -211,10 +212,10 @@ op.Cancel();
 
 ### `CancellationToken` vs. `operation.Cancel()`
 
-|                          | `CancellationToken`                              | `operation.Cancel()`                           |
+| Comparison               | `CancellationToken`                              | `operation.Cancel()`                           |
 | ------------------------ | ------------------------------------------------ | ---------------------------------------------- |
 | **Source**               | External (`CancellationTokenSource`)             | The operation handle                           |
-| **Use case**             | Component lifetime, timeout, linked cancellation | Single operation cancel from a button or event |
+| **Use case**             | Component lifetime, timeout, linked cancellation | Single cancelable operation from a button or event |
 | **Coroutine compatible** | Pass at operation creation                       | Call on the handle at any time                 |
 
 ***
@@ -235,7 +236,7 @@ await foreach (var token in stream.ReadAllAsync(destroyCancellationToken))
 `ReadAllAsync` returns `IAsyncEnumerable<T>`. The loop exits when the stream reaches `Completed`, `Faulted`, or `Canceled`. Always wrap in `await using` so `DisposeAsync()` is called even if the loop exits early.
 
 {% hint style="danger" %}
-Never block the Unity main thread with `.Result` — it deadlocks.
+Do not block the Unity main thread with `.Result`. It can stall the frame and can deadlock when the awaited work needs to resume on that thread.
 
 ```csharp
 // WRONG — deadlocks on the main thread
@@ -245,7 +246,7 @@ var session = manager.ConnectAsync().AsTask().Result;
 Use `await` or `ToCoroutine()` instead.
 {% endhint %}
 
-Always dispose streams. Failing to `await using` a stream leaks the underlying resources.
+Always dispose streams. Failing to `await using` a stream can retain the underlying resources.
 
 ```csharp
 // WRONG — no disposal
@@ -282,7 +283,8 @@ A medical training simulation shows a loading overlay while the session connects
 {% code title="SessionLoadingOverlay.cs" %}
 ```csharp
 using Convai.Runtime.Core.Async;
-using Convai.Runtime.Facades;
+using Convai.Runtime.Core.Coordinators;
+using Convai.Runtime.Components;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -335,7 +337,7 @@ A corporate onboarding simulation streams individual transcript tokens from Conv
 
 {% code title="StreamingTranscriptLog.cs" %}
 ```csharp
-using Convai.Runtime.Facades;
+using Convai.Runtime.Core.Async;
 using TMPro;
 using UnityEngine;
 
@@ -372,7 +374,7 @@ public class StreamingTranscriptLog : MonoBehaviour
 | Symptom                                                            | Likely Cause                                                                     | Fix                                                                                                     |
 | ------------------------------------------------------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | Operation stays in `Running` indefinitely                          | SDK method awaiting a response that never arrives (network timeout)              | Set a `CancellationToken` with a timeout: `new CancellationTokenSource(TimeSpan.FromSeconds(15)).Token` |
-| `HasError` is `true` but `ConvaiOperationException` is not thrown  | Using coroutine path — errors are delivered to `onError` callback, not thrown    | Add an `onError` callback to `ToCoroutine()`                                                            |
+| `HasError` is `true` but no exception reaches the caller          | Coroutine consumption reports faults through `onError` instead of throwing       | Add an `onError` callback to `ToCoroutine()`                                                            |
 | `catch (ConvaiOperationException)` block never hit on cancellation | Cancellation throws `OperationCanceledException`, not `ConvaiOperationException` | Add a separate `catch (OperationCanceledException)` block                                               |
 | Cancellation has no effect after `operation.Cancel()`              | Operation already completed before cancel was called                             | Check `IsCompleted` before calling `Cancel()`                                                           |
 | Stream hangs on scene unload                                       | `ReadAllAsync` loop not passing a `CancellationToken`                            | Pass `destroyCancellationToken` to `ReadAllAsync`                                                       |

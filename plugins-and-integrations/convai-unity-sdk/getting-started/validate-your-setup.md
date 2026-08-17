@@ -3,10 +3,10 @@ title: Validate your setup
 description: >-
   Check a Convai character with the Troubleshooter window and confirm required
   components are present before entering Play Mode.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
-Before entering Play Mode, check your character with the Convai Troubleshooter and the scene-wide validator. The two answer different questions: the Troubleshooter reports what would stop a module from working on the selected character, while the validator confirms the basic scene wiring — `ConvaiManager`, `ConvaiCharacter`, `ConvaiPlayer`, and the Character ID field — is in place. Run both.
+Before entering Play Mode, check your character with the Convai Troubleshooter and the scene-wide validator. The two answer different questions: the Troubleshooter reports what would stop a module from working on the selected character, while the validator checks project resources and the basic scene wiring. Run both.
 
 ## Check a character with the Troubleshooter
 
@@ -18,7 +18,7 @@ Not every row offers the same help. Actions rows come with fixes you can apply f
 
 Actions applies to every `ConvaiCharacter`, so even a freshly wired character with no other modules shows an Actions row. On a character with no actions configured yet, that row is informational: it tells you the character will talk but not act, not that something is broken.
 
-The Troubleshooter checks module setup, not the raw scene wiring. Missing `ConvaiManager` or an empty Character ID are caught by the scene validator below.
+The Troubleshooter checks module setup, not the raw scene wiring. Missing manager, room, character, or player components and empty Character IDs are caught by the scene validator below.
 
 ## Run the scene validator
 
@@ -34,24 +34,28 @@ A dialog appears with a list of **Errors** (must fix), **Warnings** (recommended
 
 These prevent the scene from connecting to Convai.
 
-| Error                                 | Cause                    | Fix                                                     |
-| ------------------------------------- | ------------------------ | ------------------------------------------------------- |
-| No `ConvaiManager` found in scene     | SDK is not initialized   | Run **GameObject > Convai > Setup Required Components** |
-| No `ConvaiCharacter` found in scene   | No characters registered | Add `ConvaiCharacter` to your NPC GameObject            |
-| `ConvaiCharacter` has no Character ID | Required field is empty  | Enter the Character ID from your Convai dashboard       |
-| No `ConvaiPlayer` found in scene      | Player component missing | Run **GameObject > Convai > Setup Required Components** |
+| Error | Cause | Fix |
+| --- | --- | --- |
+| Missing `ConvaiManager` | SDK entry point is absent | Run **GameObject > Convai > Setup Required Components** |
+| Missing `ConvaiRoomManager` | Room service component is absent | Run **GameObject > Convai > Setup Required Components** |
+| TextMesh Pro Essential Resources are not imported | Shipped Convai UI fonts and shaders cannot resolve | Accept the import prompt, or use **Window > TextMeshPro > Import TMP Essential Resources** |
+| No `ConvaiCharacter` components found | No characters are registered | Add `ConvaiCharacter` to an NPC GameObject |
+| A `ConvaiCharacter` has no Character ID | A required character field is empty | Enter the Character ID from your Convai dashboard |
+| No `ConvaiPlayer` component found | The local player is not registered | Add `ConvaiPlayer` to an explicit player GameObject |
 
 ### Warnings — recommended
 
 These do not block connection but may affect functionality.
 
-| Warning                                      | Cause                                                                          | Fix                                                    |
-| -------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------ |
-| API key not configured                       | `ConvaiSettings.HasApiKey` returns false                                       | Open **Convai > Settings > Credentials** and enter your API key       |
-| Video mode active but no vision source found | `_connectionType` is `AudioVideo` but no `IVisionFrameSource` component exists | Add a frame source component or switch to `Audio` mode |
+| Warning | Cause | Fix |
+| --- | --- | --- |
+| API key not configured | `ConvaiSettings.HasApiKey` is `false` | Open **Convai > Settings > Credentials** and enter your API key |
+| Video mode lacks its vision pipeline | `ConvaiRoomManager.EffectiveConnectionType` is `Video`, but its hierarchy lacks an `IVisionPublisher`, an `IVisionFrameSource`, or both | Configure the Vision module under the room manager, or switch the connection type to `Audio` |
 
-{% hint style="success" %}
-When the validator shows zero errors and zero warnings, your scene is ready for Play Mode.
+**Ready for Play Mode:** The validator shows zero errors, and you have reviewed each warning.
+
+{% hint style="warning" %}
+The SDK <code class="expression">space.vars.unity_sdk_version</code> scene validator checks `ConvaiSettings.HasApiKey` without considering Auth Token mode. A correctly configured Auth Token project can therefore retain the **API key not configured** warning. For that mode, verify the auth-token provider or endpoint manually and do not treat this warning alone as a failed setup.
 {% endhint %}
 
 ## Play mode startup checklist
@@ -64,12 +68,15 @@ After the validator passes, enter Play Mode and watch the Console for these log 
 * [ ] Character `IsCharacterReady` becomes `true` within 30 seconds — Convai has acknowledged the character
 
 {% hint style="info" %}
-The character-ready signal may arrive 2–10 seconds after the room connects, depending on server load. If it does not arrive within `_characterReadyTimeoutSeconds` (default: 30s), the SDK logs a timeout warning.
+Readiness can arrive after the room transport connects. If it does not arrive within `CharacterReadyTimeoutSeconds` (default: 30 seconds), the SDK reports a timeout. In a multi-character preview room, the initial membership gates connection while secondary memberships can remain `Starting` or become `Failed`.
 {% endhint %}
 
 To check `IsCharacterReady` at runtime:
 
 ```csharp
+using Convai.Runtime.Components;
+using UnityEngine;
+
 void Start()
 {
     var character = FindFirstObjectByType<ConvaiCharacter>();
@@ -83,7 +90,7 @@ void Start()
 | ----------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `[ConvaiRuntime] Started successfully` not in Console | `ConvaiManager` missing or failed to bootstrap                    | Check that `ConvaiManager` is in the scene. Look for earlier errors in the Console.                                                                         |
 | Room never connects — no character-connected log      | API key invalid or missing; network issue                         | Verify your API key in **Convai > Settings > Credentials**. Check firewall rules allow WebSocket/HTTPS to `live.convai.com`.                                               |
-| Chat transcript UI shows no messages                  | Required UI references are not assigned on `ChatTranscriptUI`     | Check the Console for `chatContainer is not assigned - messages will not display` or `scrollRect is not assigned - auto-scroll will not work`, and assign the missing reference in the Inspector. |
+| Chat transcript UI shows no messages                  | Required UI references are not assigned on `ChatTranscriptUI`     | Assign its chat container and scroll view references in the Inspector, then check the Console for the component's exact diagnostic. |
 | Character `IsCharacterReady` stays `false`            | Character ID is wrong or character does not exist on your account | Verify the Character ID matches exactly what is shown on your Convai dashboard.                                                                             |
 | Mic never opens — character hears nothing             | Push-to-talk mode is on and mic starts muted                      | In `ConvaiRoomManager`, confirm **Mode** is `HandsFree`, or press **T** if using push-to-talk.                                                              |
 | Character voice plays but blendshapes do not animate  | `ConvaiLipSyncComponent` not configured or profile ID mismatch    | Add `ConvaiLipSyncComponent` to the character. Verify `_lockedProfileId` matches your character's transport format. Assign target `SkinnedMeshRenderer`(s). |
@@ -93,9 +100,9 @@ void Start()
 
 Your scene now has:
 
-* The SDK installed and connected to Convai with a valid API key
+* The SDK installed and connected to Convai with a valid API key or configured Auth Token flow
 * A scene with `ConvaiManager`, `ConvaiRoomManager`, `ConvaiCharacter`, and `ConvaiPlayer`
-* The scene validator and the Troubleshooter both reporting zero errors
+* The scene validator and the Troubleshooter both reporting zero errors, with any remaining warnings reviewed for the selected authentication mode
 * A character that connects, becomes ready, and responds to voice input
 
 ## Next steps

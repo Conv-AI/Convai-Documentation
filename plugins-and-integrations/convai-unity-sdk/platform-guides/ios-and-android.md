@@ -6,23 +6,25 @@ description: >-
 last_reviewed: "4.5.0"
 ---
 
-iOS and Android builds use the native transport path. All core SDK features — voice conversation, lip sync, actions, emotion, spatial audio, and Vision — work identically on both platforms. The only required implementation work is declaring OS-level permissions for microphone and camera access before your build goes to a device or an app store.
+iOS and Android builds use the native transport path. SDK 4.5.0 contains mobile paths for conversation, embodiment, audio, and Vision, but source support is not device proof. Configure the required usage descriptions and permissions, then validate the distributed package on every OS version and device class you ship.
 
 ## Feature support
 
 | Feature                            | iOS             | Android         |
 | ---------------------------------- | --------------- | --------------- |
-| Voice conversation                 | ✅ Full          | ✅ Full          |
-| Lip sync                           | ✅ Full          | ✅ Full          |
-| Actions                            | ✅ Full          | ✅ Full          |
-| Emotion                            | ✅ Full          | ✅ Full          |
-| Long-Term Memory                   | ✅ Full          | ✅ Full          |
-| Narrative Design                   | ✅ Full          | ✅ Full          |
-| Vision (`WebcamVisionFrameSource`) | ✅ Full          | ✅ Full          |
-| Spatial audio                      | ✅ Full          | ✅ Full          |
-| Unity `AudioSource` playback       | ✅ Full          | ✅ Full          |
-| Microphone device selection        | ✅ Full          | ✅ Full          |
+| Voice conversation                 | SDK path*        | SDK path*        |
+| Lip sync                           | SDK path*        | SDK path*        |
+| Actions                            | SDK path*        | SDK path*        |
+| Emotion                            | SDK path*        | SDK path*        |
+| Long-Term Memory                   | SDK path*        | SDK path*        |
+| Narrative Design                   | SDK path*        | SDK path*        |
+| Vision (`WebcamVisionFrameSource`) | SDK path*        | SDK path*        |
+| Spatial audio                      | SDK path*        | SDK path*        |
+| Unity `AudioSource` playback       | SDK path*        | SDK path*        |
+| Microphone device selection        | SDK path*        | SDK path*        |
 | Screen share                       | ❌ Not supported | ❌ Not supported |
+
+`SDK path*` means the 4.5.0 source and platform adapters contain the integration path. It does not replace physical-device or distributed-package validation.
 
 | Platform | Supported architectures             |
 | -------- | ----------------------------------- |
@@ -44,7 +46,7 @@ iOS requires usage description strings before your app can request microphone or
 
 ### Runtime permission handling
 
-The SDK does not request microphone permission automatically. Before starting a conversation, your app must have microphone permission granted — if permission is absent when the SDK starts the microphone, it throws `InvalidOperationException`. Request permission during app initialization, before the first conversation attempt. iOS displays the permission prompt once per permission type — subsequent launches skip the prompt if permission was already granted or denied.
+The iOS native audio path accesses the microphone when recording starts, which causes the operating system permission flow. You can request `UserAuthorization.Microphone` earlier to control when the prompt appears and to present denial guidance before connecting. iOS displays the system prompt once per permission type; later launches retain the user's decision.
 
 {% hint style="warning" %}
 **iOS one-time prompts cannot be re-triggered.** If a user denies microphone permission, iOS will not show the prompt again. Your app must guide the user to **Settings → Privacy & Security → Microphone** to re-enable access manually. Add in-app messaging for this case — for example, detect denied permission via `Application.HasUserAuthorization(UserAuthorization.Microphone)` and display instructions before attempting to start a session.
@@ -53,6 +55,7 @@ The SDK does not request microphone permission automatically. Before starting a 
 Request permission and check the result before starting a session:
 
 ```csharp
+using System.Collections;
 using UnityEngine;
 
 public class MicPermissionCheck : MonoBehaviour
@@ -93,11 +96,11 @@ A medical school deploys a patient consultation training app on iPad Pros. Resid
 2. Add `WebcamVisionFrameSource` to a scene GameObject and assign a `ConvaiVisionPublisher`.
 3. Standard SDK configuration for voice conversation.
 
-**Outcome:** On first launch, iOS displays the microphone permission prompt followed by the camera permission prompt. After both are granted, the resident speaks with the character and holds up physical props in view of the iPad camera. The character acknowledges what it sees and responds with clinically appropriate dialogue.
+**Validate on device:** Confirm the expected microphone and camera prompts, successful capture after both grants, and your denial/recovery UI. Character interpretation and dialogue are backend outcomes and must be tested with the deployed character configuration.
 
 ## Android setup
 
-Declare required permissions in a custom `AndroidManifest.xml` at `Assets/Plugins/Android/AndroidManifest.xml`. If this file does not exist in your project, create it — Unity merges it with the generated manifest at build time.
+Build once and inspect the merged Android manifest in the exported APK or AAB. Unity's normal microphone and camera packaging should supply the permissions used by those APIs. If your build pipeline omits either required entry, add it in `Assets/Plugins/Android/AndroidManifest.xml` so Unity merges it into the final manifest.
 
 ```xml
 <!-- Required for all voice interactions -->
@@ -111,7 +114,7 @@ After building, verify that the permissions appear in the exported `AndroidManif
 
 ### Runtime permission handling
 
-The SDK does not request microphone permission automatically. Before starting a conversation, your app must have the `RECORD_AUDIO` runtime permission granted — if permission is absent when the SDK starts the microphone, it throws `InvalidOperationException`. Call `Permission.RequestUserPermission(Permission.Microphone, callbacks)` during app initialization and wait for the callback before starting a session. Unlike iOS, Android permits repeated permission requests. After two denials, Android may present a "Don't ask again" option, after which `Permission.RequestUserPermission` has no effect. Handle this case with in-app guidance directing the user to device Settings.
+The SDK's native audio path checks `Permission.Microphone` and requests it before recording when access is missing. An application can still preflight the same permission to control onboarding and denial UI. If Android reports a permanent denial, direct the user to device Settings rather than repeatedly requesting it.
 
 ### Example: Field safety compliance drill on Android
 
@@ -119,11 +122,11 @@ A manufacturing company deploys a safety inspector training app on Android table
 
 **Setup:**
 
-1. Add `<uses-permission android:name="android.permission.RECORD_AUDIO" />` to `Assets/Plugins/Android/AndroidManifest.xml`.
+1. Verify `<uses-permission android:name="android.permission.RECORD_AUDIO" />` exists in the merged manifest; add a custom manifest entry only if it is absent.
 2. Standard SDK configuration — no Vision, no camera permission required.
 3. After building, verify `RECORD_AUDIO` appears in the exported manifest.
 
-**Outcome:** On first launch, Android displays the microphone permission prompt. After the user grants access, the Convai character begins the inspection dialogue. Subsequent launches skip the prompt. The app guides users to device Settings if permission was previously denied.
+**Validate on device:** Confirm the runtime prompt, successful recording after a grant, retained permission behavior on relaunch, and your permanent-denial path.
 
 ## Vision on mobile
 
@@ -131,7 +134,7 @@ A manufacturing company deploys a safety inspector training app on Android table
 
 On iOS, Vision requires `NSCameraUsageDescription` in Player Settings — the component calls `Application.RequestUserAuthorization(UserAuthorization.WebCam)` automatically at runtime to request the permission. On Android, Vision requires `android.permission.CAMERA` in the manifest — the component calls `Permission.RequestUserPermission(Permission.Camera)` automatically at runtime. You do not need to request camera permission manually; declaring it in Player Settings (iOS) or the manifest (Android) is sufficient.
 
-When the app moves to the background, the OS suspends microphone capture automatically. Upon returning to the foreground, the SDK resumes capture without developer intervention. Session state follows the reconnection rules defined in your lifecycle configuration.
+Mobile operating systems can suspend capture or networking while an app is backgrounded. Observe the SDK runtime-background and session events, then verify foreground recovery on each target device. If the room reconnects, reacquire connection-scoped state and subscriptions rather than assuming capture resumed in place.
 
 ## Troubleshooting
 
@@ -141,7 +144,7 @@ When the app moves to the background, the OS suspends microphone capture automat
 | App crashes when Vision starts (iOS)                       | `NSCameraUsageDescription` missing from Player Settings     | Add the key in **Project Settings → Player → iOS → Other Settings → Usage Descriptions**.                                                                                                                |
 | Microphone permission prompt never appears (Android)       | `RECORD_AUDIO` missing from `AndroidManifest.xml`           | Add `<uses-permission android:name="android.permission.RECORD_AUDIO" />` to your manifest and verify it appears in the exported APK.                                                                     |
 | Camera permission prompt never appears on Android (Vision) | `CAMERA` missing from `AndroidManifest.xml`                 | Add `<uses-permission android:name="android.permission.CAMERA" />` to your manifest.                                                                                                                     |
-| Microphone stops working after app is backgrounded         | OS suspended capture — expected behavior                    | The SDK resumes capture automatically on foreground return. No action needed.                                                                                                                            |
+| Microphone stops working after app is backgrounded         | OS suspended capture or the room reconnected                | Observe runtime-background/session events; restore the intended input mode after connection recovery and test on the target device.                                                                       |
 | iOS prompt does not appear on second launch                | User denied on first launch — iOS does not re-prompt        | Add in-app messaging directing the user to **Settings → Privacy & Security → Microphone** to re-enable. Use `Application.HasUserAuthorization(UserAuthorization.Microphone)` to detect the denied state. |
 
 ## Next steps

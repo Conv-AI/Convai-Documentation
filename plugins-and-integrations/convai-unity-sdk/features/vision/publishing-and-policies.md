@@ -14,7 +14,7 @@ The Inspector is divided into two collapsible sections: **FRAME SOURCE** and **P
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| **Source** | `MonoBehaviour` | _(auto-discovered)_ | The `IVisionFrameSource` to publish. Leave blank to auto-discover from the same GameObject, children, or scene. Assign explicitly when multiple frame sources are present. |
+| **Source** | `MonoBehaviour` | _(auto-discovered)_ | The `IVisionFrameSource` to publish. Leave blank to check for `CameraVisionFrameSource` on the same GameObject and then other frame sources on that GameObject or its children. Assign explicitly when the source is elsewhere or multiple local sources are present. |
 | **Track Name** | `string` | `"unity-scene"` | The name of the WebRTC track as it appears in the LiveKit room. Change only if your backend routing requires a specific name. |
 
 ### Publish policy
@@ -131,7 +131,7 @@ On WebGL, no frame source component is required or used. `ConvaiVisionPublisher`
 | Behavior | Detail |
 | --- | --- |
 | Frame source | None required. Assigned frame source is ignored on WebGL. |
-| Frame rate | Clamped to 15 fps regardless of selected policy. |
+| Frame rate | Built-in policy defaults are 5, 10, or 15 fps, and WebGL policy defaults do not exceed 15 fps. A positive **Max Publish FPS** override replaces that default. |
 | Bitrate | Policy bitrate applies (no additional clamping). |
 | HTTPS | Required in production. `http://localhost` is the only exception. |
 

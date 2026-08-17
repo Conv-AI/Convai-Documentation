@@ -1,13 +1,15 @@
 ---
 title: Character events
-description: Reference for character events — speech, emotion, transcripts, turn lifecycle, and actions — via relay component or the `ConvaiEvents` C# hub.
-last_reviewed: "4.5.0"
+description: >-
+  Subscribe to speech, emotion, transcript, turn, and action events through
+  Inspector relays or the shared typed event hub in Unity scenes.
+last_reviewed: "4.6.0"
 ---
 
 Character events let you drive UI, animation, gameplay, and assessment logic in response to what AI characters say, feel, and do. The SDK provides two Inspector relay components for no-code wiring and a typed C# event hub for scripted reactions. Both approaches observe the same underlying events.
 
 {% hint style="info" %}
-**Relay vs. C# subscription:** The relay components fire a curated set of events. For `OnRemoteAudioEnabledChanged` and `OnSessionStateChanged` (per-character), subscribe to `ConvaiCharacter` directly in C# — these are not exposed on the relay.
+**Relay vs. C# subscription:** The relay components fire a curated set of events. Subscribe to `ConvaiCharacter` directly for `OnRemoteAudioEnabledChanged` and its convenience copy of the shared room's `OnSessionStateChanged` event.
 {% endhint %}
 
 ***
@@ -26,27 +28,33 @@ Add the component and wire callbacks to any of the six UnityEvents in the Inspec
 {% tab title="Scripting" %}
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
+using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using UnityEngine;
 
 public class CharacterReactionHandler : MonoBehaviour
 {
-    private void OnEnable()
-    {
-        var events = ConvaiManager.ActiveManager?.Events;
-        if (events == null) return;
+    private ConvaiEvents _events;
 
-        events.OnCharacterSpeechStateChanged += HandleSpeech;
-        events.OnCharacterEmotionChanged     += HandleEmotion;
+    private void LateUpdate()
+    {
+        if (_events != null) return;
+
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.IsInitialized) return;
+
+        _events = manager.Events;
+        _events.OnCharacterSpeechStateChanged += HandleSpeech;
+        _events.OnCharacterEmotionChanged     += HandleEmotion;
     }
 
     private void OnDisable()
     {
-        var events = ConvaiManager.ActiveManager?.Events;
-        if (events == null) return;
+        if (_events == null) return;
 
-        events.OnCharacterSpeechStateChanged -= HandleSpeech;
-        events.OnCharacterEmotionChanged     -= HandleEmotion;
+        _events.OnCharacterSpeechStateChanged -= HandleSpeech;
+        _events.OnCharacterEmotionChanged     -= HandleEmotion;
+        _events = null;
     }
 
     private void HandleSpeech(CharacterSpeechStateChanged e)
@@ -59,6 +67,8 @@ public class CharacterReactionHandler : MonoBehaviour
         Debug.Log($"{e.CharacterId}: {e.Emotion} ({e.NormalizedIntensity:P0})");
 }
 ```
+
+The `LateUpdate` gate retries until the manager is initialized, then subscribes once. Cache the facade, as shown, so cleanup always targets the same subscription source.
 {% endtab %}
 {% endtabs %}
 
@@ -80,7 +90,12 @@ public class CharacterReactionHandler : MonoBehaviour
 | `CharacterId`   | `string` | Identifier of the character                                 |
 | `CharacterName` | `string` | Display name of the character                               |
 | `Text`          | `string` | Current transcript text (may be interim)                    |
-| `IsFinal`       | `bool`   | True when no further updates will arrive for this utterance |
+| `IsFinal`       | `bool`   | True for a terminal local update                            |
+| `TurnId`        | `string` | Empty on this local character relay                         |
+| `MessageId`     | `string` | Empty on this local character relay                         |
+| `ResponseId`    | `string` | Empty on this local character relay                         |
+
+Use `ConvaiTranscriptEventRelay` when turn, message, or response identity is required. Its room-wide payload populates those identifiers.
 
 ### `CharacterEmotionRelayData` fields
 
@@ -91,7 +106,7 @@ public class CharacterReactionHandler : MonoBehaviour
 | `Emotion`       | `string` | Emotion label, e.g. `"Joy"`, `"Sadness"`                           |
 | `Intensity`     | `int`    | Raw intensity value; range **1–3** (1 = low, 2 = medium, 3 = high) |
 
-The relay exposes the raw `Intensity` integer (1–3). To normalize to 0.0–1.0, compute `(Intensity - 1) / 2f`. For the normalized value and boolean helpers (`IsNeutral`, `IsHighIntensity`), subscribe to `ConvaiEvents.OnCharacterEmotionChanged` in C# — the domain event payload includes these fields.
+The relay exposes the raw `Intensity` integer (1–3). To map that full range onto an animator parameter from 0.0 to 1.0, compute `(Intensity - 1) / 2f`. The domain event's `NormalizedIntensity` follows the SDK emotion pipeline instead: `Intensity / 3f`, which maps the same values to about 0.33, 0.67, and 1.0. Subscribe to `ConvaiEvents.OnCharacterEmotionChanged` when you need that pipeline value or the `IsNeutral` and `IsHighIntensity` helpers.
 
 ### `CharacterTurnCompletedRelayData` fields
 
@@ -113,12 +128,12 @@ Use this relay when you need to react to both character and player transcript st
 
 | Property               | Default | Description                                                                                              |
 | ---------------------- | ------- | -------------------------------------------------------------------------------------------------------- |
-| `FinalOnly`            | `false` | When `true`, only final transcripts reach the callbacks. Non-final updates are dropped entirely.         |
+| `FinalOnly`            | `false` | When `true`, only terminal committed, interrupted, or corrected updates reach the callbacks. Non-terminal updates are dropped. |
 | `IgnoreInterimUpdates` | `true`  | When `true`, interim updates are filtered out. Non-final, non-interim stable updates still pass through. |
 | `CharacterIdFilter`    | `""`    | When non-empty, only character transcripts matching this ID reach the character callbacks.               |
 
 {% hint style="info" %}
-`FinalOnly` and `IgnoreInterimUpdates` are distinct filters. `FinalOnly = true` is the strictest — it drops everything except confirmed final transcripts. `IgnoreInterimUpdates = true` (the default) drops in-progress partial words but allows stable intermediate updates to pass, giving smoother subtitle rendering.
+`FinalOnly` and `IgnoreInterimUpdates` are distinct filters. `FinalOnly = true` is the strictest — it drops everything except terminal transcript updates. A later correction is also terminal, so the same `TurnId` can be emitted again with corrected text. `IgnoreInterimUpdates = true` (the default) drops in-progress partial words but allows stable intermediate updates to pass, giving smoother subtitle rendering.
 {% endhint %}
 
 ### Events
@@ -127,8 +142,8 @@ Use this relay when you need to react to both character and player transcript st
 | ------------------------------------ | ------------------------------ | ----------------------------------------------- |
 | `OnCharacterTranscriptReceived`      | `CharacterTranscriptRelayData` | Character transcript arrives (respects filters) |
 | `OnPlayerTranscriptReceived`         | `PlayerTranscriptRelayData`    | Player transcript arrives (respects filters)    |
-| `OnFinalCharacterTranscriptReceived` | `CharacterTranscriptRelayData` | Character transcript is finalized               |
-| `OnFinalPlayerTranscriptReceived`    | `PlayerTranscriptRelayData`    | Player transcript is finalized                  |
+| `OnFinalCharacterTranscriptReceived` | `CharacterTranscriptRelayData` | Character receives a terminal update; can fire again for a correction |
+| `OnFinalPlayerTranscriptReceived`    | `PlayerTranscriptRelayData`    | Player receives a terminal update; can fire again for a correction    |
 
 ### `PlayerTranscriptRelayData` fields
 
@@ -142,13 +157,15 @@ Use this relay when you need to react to both character and player transcript st
 | `TurnId`        | `string` | Identifier for this conversational turn             |
 | `MessageId`     | `string` | Identifier for this transcript message              |
 | `Text`          | `string` | Transcript text (may be interim)                    |
-| `IsFinal`       | `bool`   | True when this is the final transcript for the turn |
+| `IsFinal`       | `bool`   | True for a terminal update; a corrected terminal update can arrive later |
 
 ***
 
 ## C# event hub — character-scoped events
 
-Access via `ConvaiManager.ActiveManager.Events`. These events fire room-wide — when multiple characters are present, filter by `CharacterId` to scope reactions to a specific character.
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** The multi-character membership fields and shared-roster guidance from this section onward are staged ahead of the current <code class="expression">space.vars.unity_sdk_version</code> Asset Store release. The established character-event APIs remain available in the current release.
+
+After `ConvaiManager.IsInitialized` is true, access the facade through `ConvaiManager.ActiveManager.Events`. These events fire room-wide — when multiple characters are present, filter by `CharacterId` to scope reactions to a specific character.
 
 ### Character events
 
@@ -188,12 +205,12 @@ Access via `ConvaiManager.ActiveManager.Events`. These events fire room-wide —
 
 ## Direct `ConvaiCharacter` C# events
 
-These events are on the `ConvaiCharacter` component itself — not on `ConvaiEvents`. Subscribe directly on the character instance. Use these for per-character audio and per-character session state that are not exposed on the relay or hub.
+These events are on the `ConvaiCharacter` component itself, not on `ConvaiEvents`. Remote-audio changes are character-scoped. Session-state changes mirror the shared room lifecycle.
 
 | Event                         | Signature              | Fires When                                                                         |
 | ----------------------------- | ---------------------- | ---------------------------------------------------------------------------------- |
 | `OnRemoteAudioEnabledChanged` | `Action<bool>`         | Character's remote audio output is enabled or disabled                             |
-| `OnSessionStateChanged`       | `Action<SessionState>` | This individual character's session state changes (distinct from room-level state) |
+| `OnSessionStateChanged`       | `Action<SessionState>` | The shared room connection state changes                                             |
 
 ```csharp
 using Convai.Runtime.Components;
@@ -221,7 +238,7 @@ public class CharacterAudioIndicator : MonoBehaviour
 }
 ```
 
-`OnSessionStateChanged` on `ConvaiCharacter` reflects this character's individual session, not the room-level state. In multi-character scenes, each character has its own session state. Use `ConvaiManager.ActiveManager.Events.OnSessionStateChanged` for the room-level state.
+`OnSessionStateChanged` does not report membership readiness. Read `CharacterRoomMembership.Status` or subscribe to `MultiCharacterRoomSession.CharacterStatusChanged` for a specific character's `Starting`, `Ready`, or `Failed` state.
 
 ***
 
@@ -234,10 +251,18 @@ public class CharacterAudioIndicator : MonoBehaviour
 | `CharacterId`   | `string`            | Character identifier                         |
 | `CharacterName` | `string`            | Character display name                       |
 | `Text`          | `string`            | Transcript text                              |
-| `IsFinal`       | `bool`              | True when no further updates will arrive     |
+| `IsFinal`       | `bool`              | True for a terminal transcript update        |
 | `IsInterim`     | `bool`              | True for in-progress partial transcripts     |
 | `Timestamp`     | `DateTime`          | UTC time of the event                        |
 | `Message`       | `TranscriptMessage` | Full message object with additional metadata |
+| `TurnId`        | `string`            | Conversation turn identifier                 |
+| `MessageId`     | `string`            | Transcript message identifier                |
+| `ResponseId`    | `string`            | Character response identifier                |
+| `SourceKind`    | `TranscriptSegmentSourceKind` | Normalized source of the update     |
+| `Lifecycle`     | `TranscriptLifecycle` | Streaming or stable lifecycle              |
+| `UpdateId`      | `string`            | Inbound idempotency identifier                |
+| `IsSpoken`      | `bool`              | Whether the response is intended to be spoken |
+| `AggregatedBy`  | `string`            | Aggregation mode supplied by Convai            |
 
 ### `CharacterSpeechStateChanged`
 
@@ -258,7 +283,7 @@ public class CharacterAudioIndicator : MonoBehaviour
 | `CharacterId`         | `string`   | Character identifier                               |
 | `Emotion`             | `string`   | Emotion label from Convai's taxonomy, e.g. `"Joy"` |
 | `Intensity`           | `int`      | Raw intensity value; range 1–3                     |
-| `NormalizedIntensity` | `float`    | Intensity normalized to 0.0–1.0                    |
+| `NormalizedIntensity` | `float`    | Pipeline intensity (`Intensity / 3f`), from about 0.33 to 1.0 |
 | `IsNeutral`           | `bool`     | True when the character returns to a neutral state |
 | `IsHighIntensity`     | `bool`     | True for high-intensity emotions                   |
 | `IsLowIntensity`      | `bool`     | True for low-intensity emotions                    |
@@ -266,11 +291,14 @@ public class CharacterAudioIndicator : MonoBehaviour
 
 ### `CharacterReady`
 
-| Field           | Type       | Description                                    |
-| --------------- | ---------- | ---------------------------------------------- |
-| `CharacterId`   | `string`   | Character identifier                           |
-| `ParticipantId` | `string`   | Room participant identifier for this character |
-| `Timestamp`     | `DateTime` | UTC time the character became ready            |
+| Field                 | Type       | Description                                                        |
+| --------------------- | ---------- | ------------------------------------------------------------------ |
+| `CharacterId`         | `string`   | Convai character identifier                                        |
+| `ParticipantId`       | `string`   | Transport participant identifier                                   |
+| `MembershipId`        | `string`   | Multi-character room membership identifier; empty for legacy rooms |
+| `CharacterSessionId`  | `string`   | Character-session identity used to disambiguate repeated IDs        |
+| `ParticipantIdentity` | `string`   | LiveKit participant identity for this membership in the current connection |
+| `Timestamp`           | `DateTime` | UTC time the character became ready                                 |
 
 ### `CharacterTurnCompleted`
 
@@ -370,7 +398,7 @@ Use **C# subscriptions** via `ConvaiEvents` when:
 
 Use **direct `ConvaiCharacter` subscription** when:
 
-* Reacting to `OnRemoteAudioEnabledChanged` or per-character `OnSessionStateChanged`
+* Reacting to `OnRemoteAudioEnabledChanged` or the component-level copy of shared room state
 * These events are not available on the relay component
 
 ***
@@ -383,6 +411,7 @@ A military training simulation shows a subtitle bar at the bottom of the screen 
 
 ```csharp
 using Convai.Domain.DomainEvents.Transcript;
+using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using TMPro;
 using UnityEngine;
@@ -392,8 +421,25 @@ public class SubtitleDisplay : MonoBehaviour
     [SerializeField] private TMP_Text _label;
     [SerializeField] private string   _targetCharacterId;
 
-    private void OnEnable()  => ConvaiManager.ActiveManager?.Events.OnCharacterTranscriptReceived += OnTranscript;
-    private void OnDisable() => ConvaiManager.ActiveManager?.Events.OnCharacterTranscriptReceived -= OnTranscript;
+    private ConvaiEvents _events;
+
+    private void LateUpdate()
+    {
+        if (_events != null) return;
+
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.IsInitialized) return;
+
+        _events = manager.Events;
+        _events.OnCharacterTranscriptReceived += OnTranscript;
+    }
+
+    private void OnDisable()
+    {
+        if (_events != null)
+            _events.OnCharacterTranscriptReceived -= OnTranscript;
+        _events = null;
+    }
 
     private void OnTranscript(CharacterTranscriptReceived e)
     {
@@ -409,6 +455,7 @@ An interactive experience changes a character's emissive material color based on
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
+using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using UnityEngine;
 
@@ -422,8 +469,25 @@ public class EmotionMaterialDriver : MonoBehaviour
 
     private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
 
-    private void OnEnable()  => ConvaiManager.ActiveManager?.Events.OnCharacterEmotionChanged += OnEmotion;
-    private void OnDisable() => ConvaiManager.ActiveManager?.Events.OnCharacterEmotionChanged -= OnEmotion;
+    private ConvaiEvents _events;
+
+    private void LateUpdate()
+    {
+        if (_events != null) return;
+
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.IsInitialized) return;
+
+        _events = manager.Events;
+        _events.OnCharacterEmotionChanged += OnEmotion;
+    }
+
+    private void OnDisable()
+    {
+        if (_events != null)
+            _events.OnCharacterEmotionChanged -= OnEmotion;
+        _events = null;
+    }
 
     private void OnEmotion(CharacterEmotionChanged e)
     {
@@ -444,6 +508,7 @@ A corporate onboarding simulation shows a spinner when the AI character receives
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
+using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using UnityEngine;
 
@@ -451,21 +516,27 @@ public class ThinkingSpinner : MonoBehaviour
 {
     [SerializeField] private GameObject _spinnerRoot;
     [SerializeField] private string     _targetCharacterId;
+    private ConvaiEvents _events;
 
-    private void OnEnable()
+    private void LateUpdate()
     {
-        var events = ConvaiManager.ActiveManager?.Events;
-        if (events == null) return;
-        events.OnLlmNoResponseReceived       += ShowSpinner;
-        events.OnCharacterSpeechStateChanged += HideSpinnerOnSpeech;
+        if (_events != null) return;
+
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.IsInitialized) return;
+
+        _events = manager.Events;
+        _events.OnLlmNoResponseReceived       += ShowSpinner;
+        _events.OnCharacterSpeechStateChanged += HideSpinnerOnSpeech;
     }
 
     private void OnDisable()
     {
-        var events = ConvaiManager.ActiveManager?.Events;
-        if (events == null) return;
-        events.OnLlmNoResponseReceived       -= ShowSpinner;
-        events.OnCharacterSpeechStateChanged -= HideSpinnerOnSpeech;
+        if (_events == null) return;
+
+        _events.OnLlmNoResponseReceived       -= ShowSpinner;
+        _events.OnCharacterSpeechStateChanged -= HideSpinnerOnSpeech;
+        _events = null;
     }
 
     private void ShowSpinner(LlmNoResponseReceived e)

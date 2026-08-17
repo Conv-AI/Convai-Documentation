@@ -18,11 +18,11 @@ graph TD
     end
 
     subgraph RM_TIER["Room Tier"]
-        RM["ConvaiRoomManager\n(connection · audio · turn-taking)"]
+        RM["ConvaiRoomManager\n(connection · audio · turn-taking · transcripts · events)"]
     end
 
     subgraph AG["Agent Tier"]
-        CC["ConvaiCharacter × N\n(session · transcripts · events)"]
+        CC["ConvaiCharacter × N\n(identity · readiness · audio · actions)"]
         CP["ConvaiPlayer\n(identity · text input)"]
     end
 
@@ -32,10 +32,9 @@ graph TD
         EM[Emotion]
         VI[Vision]
         NA[Narrative]
-        DA[DialogueAnimation]
-        FA[FacialAnimation]
+        BA[BodyAnimation]
+        BL[BodyLanguage]
         GA[Gaze]
-        AT[Attention]
         CF[ConversationFlow]
         EB[Embodiment]
     end
@@ -77,7 +76,7 @@ It is responsible for:
 * **Dynamic context transport** — sending state updates and events to Convai at runtime
 * **Audio playback coordination** — enabling remote character audio, WebGL user-gesture handling
 
-`ConvaiRoomManager` exposes coordinators for diagnostics, audio, ownership, and connection management. These are accessible via `ConvaiManager.ActiveManager.TryGetRoomConnectionService()` for advanced scripting.
+`ConvaiRoomManager` exposes coordinators for diagnostics, audio, ownership, and connection management. For advanced scripting, retrieve the public connection service with `ConvaiManager.ActiveManager.TryGetRoomConnectionService(out IConvaiRoomConnectionService service)`.
 
 ## Agent tier
 
@@ -85,13 +84,14 @@ The Agent tier contains the components you place on scene GameObjects.
 
 ### ConvaiCharacter
 
-Add `ConvaiCharacter` to each NPC or agent GameObject. One component per character. It owns:
+Add `ConvaiCharacter` to each NPC or agent GameObject. One component per character. It provides:
 
 * Character ID — the unique ID from your Convai dashboard
-* Session state — `Disconnected`, `Connecting`, `Connected`, `Reconnecting`, `Disconnecting`, `Error`
-* Conversation lifecycle — `StartConversationAsync()`, `StopConversationAsync()`, `ToggleSpeech()`
-* Transcript and event callbacks — `OnTranscriptReceived`, `OnEmotionChanged`, `OnActionsReceived`, `OnSpeechStarted`, `OnSpeechStopped`, `OnCharacterReady`
+* Character readiness — `IsCharacterReady` and `WaitForCharacterReadyAsync()`
+* Character-scoped callbacks — `OnTranscriptReceived`, `OnEmotionChanged`, `OnActionsReceived`, `OnSpeechStarted`, `OnSpeechStopped`, `OnCharacterReady`
 * Action configuration — via `ConvaiActionConfigSource` component
+
+`ConvaiCharacter.SessionState`, `OnSessionStateChanged`, `StartConversationAsync()`, `StopConversationAsync()`, and `ToggleSpeech()` are character-facing convenience surfaces over the shared room connection. They do not create an independent session or transcript timeline for each character. Use `ConvaiManager.Transcripts` for canonical room transcript history and `ConvaiManager.Events` for room-wide events.
 
 `ConvaiCharacter` can be configured inline in the Inspector or via a reusable `ConvaiCharacterProfile` ScriptableObject asset.
 
@@ -117,18 +117,17 @@ Modules are optional Unity components you add to the same GameObject as `ConvaiC
 | Emotion             | Receives Convai emotion signals, smooths them, and dispatches to blend shape or Animator parameter bindings      |
 | Vision              | Publishes camera, webcam, or Meta Quest passthrough frames to Convai for multimodal awareness                    |
 | Narrative           | Manages story section progression through trigger-based events tied to conversation flow                         |
-| DialogueAnimation   | Drives a four-layer animator stack (base idle, masked overlays, body talk, head talk) during dialogue            |
-| FacialAnimation     | Plays facial animation clips at runtime, composited against lip sync and emotion outputs                         |
+| BodyAnimation       | Drives idle, speaking, listening, gesture, action, and optional locomotion animation                              |
+| BodyLanguage        | Chooses context-sensitive physical reactions from a configured personality and animation content                |
 | Gaze                | Blends eye and head actuators toward conversation partners and attention targets                                  |
-| Attention           | Resolves weighted focus targets, providing gaze direction to the Gaze module                                     |
 | ConversationFlow    | Bridges the conversation event stream to per-frame dialogue state (Idle, Speaking, Reacting, etc.)               |
-| Embodiment          | Foundational behavior profile and lifecycle management for physical presence and behavioral modules              |
+| Embodiment          | Resolves the character rig and can assign shared settings to expressive feature components through a preset       |
 
-`ConversationFlow` is provisioned automatically at runtime when a `ConvaiCharacter` initializes. All other modules — `LipSync`, `Emotion`, `Vision`, `Narrative`, `DialogueAnimation`, `FacialAnimation`, `Gaze`, `Attention`, and `Embodiment` — are opt-in.
+`ConversationFlow` is provisioned automatically only when another embodiment component requests dialogue-state input. Add it yourself when you need to configure its profile. `LipSync`, `Emotion`, `Vision`, `Narrative`, `BodyAnimation`, `BodyLanguage`, `Gaze`, and embodiment presets remain opt-in.
 
 ## Configuration model
 
-Every major component supports two configuration modes, selectable in the Inspector.
+The core `ConvaiCharacter` and `ConvaiRoomManager` components support two configuration modes, selectable in the Inspector.
 
 {% tabs %}
 {% tab title="Inline" %}

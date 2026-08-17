@@ -21,6 +21,7 @@ There is no single mode switch that activates one projection at the expense of t
 using System;
 using Convai.Domain.Models;
 using Convai.Runtime.Components;
+using Convai.Runtime.Facades;
 using UnityEngine;
 
 public class TranscriptProjectionExample : MonoBehaviour
@@ -30,7 +31,8 @@ public class TranscriptProjectionExample : MonoBehaviour
 
     private void OnEnable()
     {
-        if (!ConvaiManager.ActiveManager.TryGetTranscripts(out ConvaiTranscripts transcripts)) return;
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.TryGetTranscripts(out ConvaiTranscripts transcripts)) return;
 
         // Low-latency captions for an on-screen subtitle
         _captionSubscription = transcripts.SubscribeCaptions(OnCaption);
@@ -51,6 +53,8 @@ public class TranscriptProjectionExample : MonoBehaviour
     private void OnHistoryChange(TranscriptChange change) { /* update chat bubble */ }
 }
 ```
+
+This custom component performs one lookup each time it is enabled. It does not retry if the manager is unavailable during that call, so enable it after bootstrap or add your own retry policy. The shipped `ChatTranscriptUI` and `SubtitleTranscriptUI` components retry their facade lookup while enabled.
 
 Both shipped display components also respect `ConvaiTranscripts.IsPresentationEnabled`. When the Settings Panel's `Transcript` toggle is off, or a `ConvaiRuntimeSettingsPatch` sets `TranscriptEnabled = false`, `ChatTranscriptUI` and `SubtitleTranscriptUI` both stop rendering — but `CurrentTimeline` keeps recording. Turning display off does not discard history.
 
@@ -104,7 +108,7 @@ Each message bubble prefab must contain a `ChatMessageBubble` component at its r
 
 `ChatTranscriptUI` colors a character bubble's sender name using that character's configured `NameTagColor` (from `ConvaiCharacter` or its character config asset). To override this from script, call `bubble.SetSenderColor(Color)`.
 
-Call `ChatTranscriptUI.ClearAll()` to destroy all rendered message bubbles and reset the panel. This clears the visual display only — the underlying turn history in `ConvaiManager.ActiveManager.Transcripts.CurrentTimeline` is unaffected. See [Transcript UI — Clear the transcript display](./#clear-the-transcript-display) for the caveats.
+Call `ChatTranscriptUI.ClearAll()` to destroy all rendered message bubbles and reset the panel. This clears the visual display only — the underlying turn history in `ConvaiManager.ActiveManager.Transcripts.CurrentTimeline` is unaffected. To remove canonical history instead, see [Export and clear transcript history](transcript-history-and-queries.md#export-and-clear-transcript-history).
 
 ## Add subtitle captions
 
@@ -158,9 +162,9 @@ Speak, or have a character speak. The caption fades in, updates word-by-word whi
 
 **Speaker label colors:** Character speech — cyan; player speech — green.
 
-## Add feedback buttons to chat messages
+## Prototype local feedback selection
 
-Chat bubbles can include thumbs-up / thumbs-down feedback buttons that let users rate individual AI responses.
+Chat bubbles can include thumbs-up / thumbs-down controls as a starting point for an application-owned feedback flow. The shipped scripts validate that a bubble has an interaction ID and character, then update the button fills locally. They do not send feedback to Convai, persist a rating, or expose a transport callback.
 
 {% stepper %}
 {% step %}
@@ -170,31 +174,37 @@ Add `FeedbackButtons.prefab` as a child of your character message bubble prefab.
 {% endstep %}
 
 {% step %}
-### Set the interaction ID before the user can rate a message
+### Set the interaction ID before the user can select a button
 
-Call `ChatMessageBubble.SetInteractionID(string)` for the turn you want to make ratable. The interaction ID is available from `ConvaiManager.ActiveManager.Events.OnInteractionCreated` (`InteractionCreated.InteractionId`, keyed by `CharacterId`).
+Call `ChatMessageBubble.SetInteractionID(string)` for the turn you want to make selectable. The interaction ID is available from `ConvaiManager.ActiveManager.Events.OnInteractionCreated` (`InteractionCreated.InteractionId`, keyed by `CharacterId`).
+{% endstep %}
+
+{% step %}
+### Add your feedback transport
+
+Copy or replace the reference `FeedbackHandler` in your own assembly, then call your analytics, assessment, or feedback service from the positive and negative button handlers. Keep the local fill update only after your application accepts the selection.
 {% endstep %}
 
 {% step %}
 ### Run your scene
 
-Rate a character response using the thumb buttons. The selected button highlights; the opposite button deactivates. `FeedbackHandler.ResetState()` resets both buttons to neutral when called.
+Select a thumb button. The selected button highlights and the opposite button deactivates. Verify your application-owned handler separately if you added persistence or transport. `FeedbackHandler.ResetState()` resets both fills to neutral.
 {% endstep %}
 {% endstepper %}
 
 {% hint style="warning" %}
-No shipped component calls `ChatMessageBubble.SetInteractionID(string)` automatically. Until your code calls it for a turn, `ChatMessageBubble.SendFeedback(bool)` returns `false` and the buttons never highlight for that message.
+No shipped component calls `ChatMessageBubble.SetInteractionID(string)` automatically, and `SendFeedback(bool)` does not transmit a rating. Until your code sets the ID, `SendFeedback(bool)` returns `false` and the buttons do not highlight.
 {% endhint %}
 
 ### `ChatMessageBubble` feedback API
 
 | Method | Description |
 | --- | --- |
-| `SetInteractionID(string interactionID)` | Required before feedback can be sent for this bubble |
-| `SetAgentRegistry(IAgentRegistry agentRegistry)` | Required for character lookup. Injected automatically by `ChatTranscriptUI` |
-| `bool SendFeedback(bool isPositiveFeedback)` | Returns `true` if `interactionID` is set and the character is found in the agent registry. Returns `false` otherwise |
+| `SetInteractionID(string interactionID)` | Supplies the local validation key required before a selection is accepted |
+| `SetAgentRegistry(IAgentRegistry agentRegistry)` | Supplies the character lookup used for local validation. Injected automatically by `ChatTranscriptUI` |
+| `bool SendFeedback(bool isPositiveFeedback)` | Returns `true` if the interaction ID is set and the character is found. It does not send or persist the selection |
 
-`FeedbackHandler.ResetState()` deactivates both the positive and negative button fill visuals, returning the buttons to their neutral state. Feedback buttons are relevant only for character message bubbles — player bubbles do not receive interaction IDs.
+`FeedbackHandler.ResetState()` deactivates both button-fill visuals, returning them to their neutral state. These placeholder controls are relevant only for character message bubbles — player bubbles do not receive interaction IDs.
 
 ## Usage examples
 
@@ -239,11 +249,11 @@ At runtime, visitors see clean rolling captions at the exhibit while the docent 
 | `[SubtitleTranscriptUI] No active ConvaiManager found.` | Same cause as above, for the subtitle script | Add `ConvaiManager` to the scene |
 | Captions never appear | No component is calling `SubscribeCaptions` in the scene, or the caption's speaker does not match the configured filters | Add `SubtitleTranscriptUI`, confirm its `TMP_Text` fields are assigned, and check `filterBySpeakerType`/`speakerIdFilter`/`participantIdFilter` |
 | Neither chat nor subtitle display updates | `ConvaiTranscripts.IsPresentationEnabled` is `false` | Check the Settings Panel's `Transcript` toggle, or apply `TranscriptEnabled = true` through a `ConvaiRuntimeSettingsPatch` |
-| Feedback buttons never highlight | `SendFeedback` is returning `false` | Confirm your code calls `ChatMessageBubble.SetInteractionID(string)` for that turn — no shipped component does this automatically |
+| Feedback buttons never highlight | Local validation in `SendFeedback` is returning `false` | Set the bubble's interaction ID and confirm its character exists in the injected registry; add a separate application service if the selection must be sent or persisted |
 
 ## Next steps
 
-You have added chat history display, subtitle captions, or both, and wired feedback buttons on chat messages. For customizing the visual appearance of bubbles or building a fully custom transcript display, see Customizing UI Components. For letting users show or hide transcript display at runtime, see the Settings Panel.
+You have added chat history display, subtitle captions, or both, and optionally wired local feedback controls on chat messages. For customizing the visual appearance of bubbles or building a fully custom transcript display, see Customizing UI Components. For letting users show or hide transcript display at runtime, see the Settings Panel.
 
 {% content-ref url="../customizing-ui-components.md" %}
 [customizing-ui-components.md](../customizing-ui-components.md)

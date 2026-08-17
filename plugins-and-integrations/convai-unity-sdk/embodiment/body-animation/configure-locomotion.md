@@ -89,7 +89,7 @@ public sealed class WalkToButton : MonoBehaviour
 
 `Stop()` and `StopGracefully()` end a move differently:
 
-| | Use it when | What the character does |
+| Method | Use it when | What the character does |
 |---|---|---|
 | `Stop()` | The walk is interrupted — a new order arrives, the component is disabled, something else takes over. | Halts where it stands, this frame. Path cleared and velocity zeroed together. |
 | `StopGracefully()` | The character decided to stop — waiting for someone to catch up, closing on a follow distance. | Keeps walking to a braking point ahead on its current path, decelerates, and lands a planted stop. Returns `false` only when there was no way to run out at all, in which case the move is cancelled outright via `Stop()`. |

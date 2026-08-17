@@ -88,12 +88,12 @@ Manages the pool of reusable `UINotification` elements and controls the slide an
 | `deactivatedNotificationPos` | `Vector2`        | —       | Anchored position where hidden notifications wait off-screen |
 | `activeDuration`             | `float`          | `4.0`   | Seconds a notification remains visible before sliding out    |
 | `slipDuration`               | `float`          | `0.3`   | Seconds for slide-in and slide-out animations                |
-| `delay`                      | `float`          | `0.3`   | Delay seconds before the slide animation begins              |
+| `delay`                      | `float`          | `0.3`   | Extra hold after each slide-in or slide-out movement reaches its target |
 | `slipAnimationCurve`         | `AnimationCurve` | —       | Easing curve for the slide animation                         |
 
 **Concurrency and queuing:** Up to 3 notifications display simultaneously. When a 4th notification is requested while 3 are active, it queues and displays as soon as one of the active notifications dismisses.
 
-**Animation sequence per notification:** slide in (`slipDuration`) → visible for `activeDuration` → delay (`delay`) → slide out (`slipDuration`) → next queued notification starts.
+**Animation sequence per notification:** slide in (`slipDuration`) → trailing hold (`delay`) → visible for `activeDuration` → slide out (`slipDuration`) → trailing hold (`delay`) → deactivate and start the next queued notification.
 
 ## `SONotificationErrorMap`
 
@@ -123,9 +123,9 @@ Rules are evaluated top-to-bottom. Place more specific rules above broader prefi
 
 | ErrorPattern  | MatchType | Notification                   |
 | ------------- | --------- | ------------------------------ |
-| `AUTH_FAILED` | `Exact`   | `Notification_AuthError`       |
-| `CONNECTION_` | `Prefix`  | `Notification_ConnectionError` |
-| `RATE_LIMIT`  | `Exact`   | `Notification_RateLimit`       |
+| `connection.auth_failed` | `Exact`   | `Notification_AuthError`       |
+| `connection.rate_limited` | `Exact`  | `Notification_RateLimit`       |
+| `connection.`            | `Prefix`  | `Notification_ConnectionError` |
 
 ## Next steps
 

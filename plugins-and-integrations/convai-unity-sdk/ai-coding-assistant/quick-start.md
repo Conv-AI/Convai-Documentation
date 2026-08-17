@@ -12,7 +12,7 @@ Convai extends Unity's MCP server with SDK-aware tools so a coding agent such as
 
 * <code class="expression">space.vars.unity_recommended_version</code> or later — Convai's AI coding tools require Unity 6000 or newer.
 * The Convai Unity SDK installed in the project. See [Install the Convai Unity SDK](../getting-started/installation.md).
-* A compatible Unity AI Assistant package (`com.unity.ai.assistant`, version `2.13.0` or later and below `3.0.0` — a `2.13.0` build must carry prerelease tag `pre.2` or later, and a `3.0.0` build is accepted only as a prerelease, never the final release). Install it manually, or install it from inside this walkthrough.
+* A compatible Unity AI Assistant package (`com.unity.ai.assistant`): final `2.13.0`, `2.13.0-pre.2` or later prereleases, any version newer than `2.13.0` and older than `3.0.0`, or a `3.0.0` prerelease. Final `3.0.0` is not accepted. Install it manually, or install it from inside this walkthrough.
 * A supported coding agent installed on your machine, such as Codex CLI, Claude Code, or Cursor. See [Supported coding agents](supported-coding-agents.md) for the full list.
 
 ## Open the AI Coding section
@@ -81,7 +81,7 @@ With managed instructions installed and the tool count verified, prompt your age
 | Add objects | "Add a red fire extinguisher GameObject next to the workbench." |
 | Enable vision | "Turn on vision for the Instructor character so it can see the workbench." |
 
-Vision setup is not among Convai's 37 tools, so your agent configures it by editing `ConvaiRoomManager` and adding `ConvaiVisionPublisher` directly. See [Vision quick start](../features/vision/quick-start.md) for the exact fields it sets.
+The catalog does not expose a dedicated `Convai.ConfigureVision` tool. Your agent configures Vision with Unity's generic scene and component tools by editing `ConvaiRoomManager` and adding `ConvaiVisionPublisher`. See [Vision quick start](../features/vision/quick-start.md) for the exact fields it sets.
 
 ## What to try next
 

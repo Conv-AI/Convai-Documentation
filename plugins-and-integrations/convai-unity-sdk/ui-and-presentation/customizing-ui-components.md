@@ -1,62 +1,102 @@
 ---
 title: Customizing UI components
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 description: >-
   Restyle or replace the built-in transcript, notification, and settings UI
-  using character visibility filters or prefab swapping.
+  using the room transcript facade, speaker filters, or prefab swapping.
 ---
 
-Two extension paths let you customize the SDK's scene-level UI without replacing its data pipeline. Character visibility filtering controls which characters' transcripts reach the active display. Visual customization swaps the prefabs that render those transcripts, notifications, and settings controls.
+Two extension paths let you customize the SDK's scene-level UI without replacing its data pipeline. Transcript subscriptions control which room turns reach your display. Visual customization swaps the prefabs that render those turns, notifications, and settings controls.
 
-For lightweight transcript callbacks without a custom UI, use `ITranscriptListener`. For a complete custom transcript display replacing the built-in chat or subtitle panel, use `ITranscriptUI`. Both interfaces are documented in [Transcript UI](transcript-ui/).
+For a custom transcript display, obtain `ConvaiTranscripts` with `ConvaiManager.TryGetTranscripts(...)`. The facade exposes the canonical room timeline, committed-turn and live-update subscriptions, captions, and export. The `ITranscriptListener`, `ITranscriptUI`, `TranscriptUIController`, and `TranscriptFilterBase` names referenced by earlier documentation were removed in SDK 4.4 and are not part of the current <code class="expression">space.vars.unity_sdk_version</code> presentation API.
 
-## Character visibility filtering
+## Filter room transcripts
 
-Controls which characters' transcripts the `TranscriptUIController` routes to active UI — essential for multi-character scenes where simultaneous transcripts create confusion.
+Incoming transcript turns are room-wide. They can include the player and any character in the roster, whether or not that character is the current interaction target. Filter a custom display with `TranscriptSubscriptionOptions`:
 
-**Base class:** `TranscriptFilterBase` (SDK-provided, at `SDK/Runtime/Presentation/Services/Utilities/`)
+| Option | Use |
+| --- | --- |
+| `SpeakerType` | Include only character or player turns. |
+| `SpeakerId` | Match `TranscriptTurn.Speaker.Id`; use a known local Character ID for one character. |
+| `ParticipantId` | Match the room participant ID when transport identity is the stable key you have. |
+| `ReplayExisting` | Replay matching turns already present in the room timeline. |
+| `IncludeActive` | Include turns that are still streaming. |
+| `IncludeTerminal` | Include committed, interrupted, or corrected turns. |
 
-* Automatically adds a `SphereCollider` (radius `5f`, trigger mode) if none is present on the `GameObject`
-* Maintains `CharactersInsideColliderList` via `OnTriggerEnter` / `OnTriggerExit` callbacks
-* Integrates with `IVisibleCharacterService` — auto-resolved from `ConvaiManager` on startup
-* Place on the player `GameObject` or a child
+Use `SubscribeCommitted(...)` for logs or chat history that should not redraw partial text. Use `Subscribe(...)` when subtitles need streaming updates. Dispose the returned subscription before changing filters or destroying the view.
 
-**Two ready-to-use implementations** (located in `SamplesShared/Scripts/UI/Utilities/` — copy before modifying):
-
-### `SingleCharacterFilter`
-
-Tracks the **nearest character within the player's vision cone**.
-
-* Best for subtitle mode with multiple characters
-* Player sees only the transcript of the character they face
-* Default vision cone: 90° total (any character within 45° of forward)
-* Override the cone angle by implementing `IVisionConeProvider` on your player agent. The interface is defined in `ProximityCharacterFilter.cs` (namespace `Convai.Sample.UI.Utilities`, SamplesShared layer):
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** The transcript APIs in this example are available in <code class="expression">space.vars.unity_sdk_version</code>, but `SetInteractionTargetAsync(...)` and shared-room target routing are staged preview APIs that are not in the current Asset Store release.
 
 ```csharp
-// Defined in ProximityCharacterFilter.cs — namespace Convai.Sample.UI.Utilities
-public interface IVisionConeProvider
+using System;
+using Convai.Domain.Models;
+using Convai.Runtime.Components;
+using Convai.Runtime.Facades;
+using Convai.Runtime.Room;
+using TMPro;
+using UnityEngine;
+
+public sealed class FocusedCharacterSubtitle : MonoBehaviour
 {
-    float VisionConeAngle { get; }
+    [SerializeField] private ConvaiManager _manager;
+    [SerializeField] private TMP_Text _label;
+
+    private ConvaiTranscripts _transcripts;
+    private IConvaiRoomConnectionService _room;
+    private IDisposable _subscription;
+
+    private void OnEnable() => TryBindServices();
+
+    private bool TryBindServices()
+    {
+        if (_manager == null)
+            _manager = ConvaiManager.ActiveManager;
+
+        if (_manager == null || !_manager.IsInitialized)
+            return false;
+
+        return _manager.TryGetTranscripts(out _transcripts)
+               && _manager.TryGetRoomConnectionService(out _room);
+    }
+
+    public async void Focus(ConvaiCharacter character)
+    {
+        if (character == null || !TryBindServices())
+            return;
+
+        try
+        {
+            // Completes after Convai acknowledges the new interaction target.
+            await _room.SetInteractionTargetAsync(character);
+
+            _subscription?.Dispose();
+            _subscription = _transcripts.Subscribe(
+                change => _label.text = change.Turn?.DisplayText ?? string.Empty,
+                new TranscriptSubscriptionOptions
+                {
+                    ReplayExisting = false,
+                    SpeakerType = TranscriptSpeakerType.Character,
+                    SpeakerId = character.CharacterId
+                });
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError($"Could not change the interaction target: {exception.Message}");
+        }
+    }
+
+    private void OnDisable()
+    {
+        _subscription?.Dispose();
+        _subscription = null;
+    }
 }
 ```
 
-### `ProximityCharacterFilter`
-
-Tracks **all characters within radius and vision cone**.
-
-* Best for chat mode with group conversations
-* Multiple characters' transcripts visible simultaneously
-* Same vision cone behavior as `SingleCharacterFilter`
-
-**Scene setup checklist:**
-
-* [ ] Add `SingleCharacterFilter` or `ProximityCharacterFilter` to the player `GameObject`
-* [ ] Ensure a `Rigidbody` exists on the player or the characters (required for trigger callbacks)
-* [ ] `ConvaiManager` auto-resolves `IVisibleCharacterService` on filter startup
-* [ ] Test in Play Mode by walking toward and away from characters
+`Focus(...)` can be called by a raycast, a proximity trigger, a UI button, or any application-specific selector. Target routing and transcript filtering are separate responsibilities: `SetInteractionTargetAsync(...)` controls where subsequent player input goes, while `TranscriptSubscriptionOptions` controls what this local view renders.
 
 {% hint style="warning" %}
-`SingleCharacterFilter` and `ProximityCharacterFilter` are reference implementations in `SamplesShared`. Copy them into your own assembly before modifying — changes to `SamplesShared` scripts are overwritten on SDK updates.
+Do not update target-dependent UI only because a raycast or button selected a character. Await `SetInteractionTargetAsync(...)` first. A failed, cancelled, stale, or timed-out route command must leave the UI aligned with the last server-acknowledged target. After a timeout, stop routing new input until you reread `CurrentMultiCharacterSession` or reconnect because the outcome is unknown.
 {% endhint %}
 
 ## Visual customization
@@ -118,7 +158,7 @@ settingsPanelPresenter.Unbind();
 
 ### Multi-character subtitle focus
 
-A medical simulation with multiple AI characters (doctor, nurse, patient) uses `SingleCharacterFilter` on the trainee so subtitle display automatically switches to the AI character they face. Add the component to the player `GameObject`, verify a `Rigidbody` is present, and leave the default 90° vision cone. At runtime, as the trainee turns between characters, the active subtitle switches to the character in front of them without manual intervention.
+A medical simulation with doctor, nurse, and patient characters casts from the trainee's camera. When the hit character changes, it awaits `SetInteractionTargetAsync(character)` and then replaces the subtitle subscription with a `SpeakerId` filter for that Character ID. The selector is application code; the SDK does not automatically infer focus from the camera or collider state.
 
 ### Custom notification skin
 
@@ -128,8 +168,8 @@ A military training simulation replaces the default notification prefab with a H
 
 | Symptom                                                  | Likely cause                                                                 | Fix                                                                                            |
 | -------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `TranscriptFilterBase` not tracking characters           | No `Rigidbody` on player or characters                                       | Add a `Rigidbody` to at least one side of each character–player pair                           |
-| `SingleCharacterFilter` tracks wrong character           | Player `GameObject` not found via `GetComponentInParent<ConvaiPlayer>()`     | Place the filter on the player `GameObject` or inject the `IPlayerInputService` via `Inject()` |
+| Focused subtitle shows other characters                  | Subscription has no `SpeakerId` or `ParticipantId` filter                    | Dispose the old subscription and create a filtered `TranscriptSubscriptionOptions` subscription |
+| Target highlight changes but player input reaches the previous character | UI changed before the route command was acknowledged | Await `SetInteractionTargetAsync(...)`; update the highlight only after it completes |
 | Custom `ISettingsPanelView` not receiving save callbacks | View not bound to the presenter                                              | Call `settingsPanelPresenter.Bind(myCustomView)` after the presenter is available              |
 | Replacement bubble prefab shows no text                  | `senderUI` or `messageUI` not assigned on `ChatMessageBubble`                | Wire both `TextMeshProUGUI` references in the prefab Inspector                                 |
 | Custom notification prefab not appearing                 | `uiNotificationPrefab` on `UINotificationController` still points to default | Assign your restyled prefab to the `uiNotificationPrefab` field                                |

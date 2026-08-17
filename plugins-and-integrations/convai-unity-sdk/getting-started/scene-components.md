@@ -3,7 +3,7 @@ title: Scene components reference
 description: >-
   Understand the role of each core Convai scene component — manager, room
   manager, character, and player — and how they depend on each other.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Every Convai-powered scene is built from four core components. Understanding what each one does and how they relate to each other makes building and debugging your setup straightforward.
@@ -45,11 +45,11 @@ graph TD
 | `IsConnected`                 | `bool`                           | Room connection is active              |
 | `Characters`                  | `IReadOnlyList<ConvaiCharacter>` | All characters owned by this manager   |
 | `Player`                      | `ConvaiPlayer`                   | The player component in this scene     |
-| `ActiveConversationCharacter` | `ConvaiCharacter`                | Currently active conversation target   |
+| `ActiveConversationCharacter` | `ConvaiCharacter`                | Authored startup character for the room |
 
 ## ConvaiRoomManager
 
-`ConvaiRoomManager` manages the connection lifecycle between your scene and Convai. It handles connecting, disconnecting, and reconnecting the audio session. It lives on the same GameObject as `ConvaiManager`.
+`ConvaiRoomManager` manages the connection lifecycle between your scene and Convai. It handles connecting, disconnecting, and reconnecting the shared room session. It lives on the same GameObject as `ConvaiManager`.
 
 **Key behavior:**
 
@@ -62,7 +62,7 @@ graph TD
 | Field                       | Default     | Description                                                      |
 | --------------------------- | ----------- | ---------------------------------------------------------------- |
 | `ConnectOnStart`            | `true`      | Connect to Convai automatically when the scene starts            |
-| `_connectionType`           | `Audio`     | `Audio` for voice-only; `AudioVideo` to also send camera frames  |
+| `_connectionType`           | `Audio`     | `Audio` for voice-only; `Video` to also send camera frames       |
 | `_pushToTalkKey`            | `KeyCode.T` | Keyboard key used for push-to-talk input mode                    |
 | `_maxReconnectAttempts`     | `3`         | Attempts before giving up on reconnection                        |
 | `_autoMicStartDelaySeconds` | `0.5`       | Seconds to wait after connection before opening the microphone   |
@@ -70,9 +70,17 @@ graph TD
 
 Turn-taking settings are also configured here. See [Configure conversation input mode](configure-conversation-input-mode.md).
 
+**Core Server URL:** In the current Unity SDK <code class="expression">space.vars.unity_sdk_version</code>, a non-empty serialized `CoreServerBaseURL` overrides the value under **Edit > Project Settings > Convai SDK**. In the staged <code class="expression">space.vars.unity_sdk_preview_version</code> preview, that scene field is deprecated and ignored; Project Settings (or per-connect runtime credentials) supply the URL.
+
 ## ConvaiCharacter
 
-`ConvaiCharacter` represents one AI character in your scene. Each NPC or virtual instructor that talks to players needs its own `ConvaiCharacter` component. Multiple characters are fully supported. The SDK connects to one character at a time — when the player addresses a different character, the session switches to that character automatically.
+`ConvaiCharacter` represents one AI character in your scene. Each NPC or virtual instructor that talks to players needs its own `ConvaiCharacter` component.
+
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** When more than one enabled, manager-owned character is present, the preview sends them as one ordered roster and connects them to one shared room. It does not infer whom the player is addressing. This behavior is not part of the current <code class="expression">space.vars.unity_sdk_version</code> Asset Store release.
+
+Choose an explicit startup character before the room connects. `ConvaiManager.ActiveConversationCharacter` identifies that authored startup character; it is not a live mirror of the server's routing target. After connection, use `IConvaiRoomConnectionService.SetInteractionTargetAsync(...)` from your own raycast, proximity, button, or UI selection logic. Read the acknowledged runtime target from `CurrentMultiCharacterSession.ActiveMembershipId`.
+
+**Startup roster:** All enabled characters owned by the manager are included. Inactive or disabled characters are excluded. If the room started in multi-character mode, activate an excluded character and call `AddCharacterAsync(...)` after connection when you want it to join. A one-character legacy room cannot be converted later with `AddCharacterAsync(...)`. A scene with multiple startup characters must resolve an explicit startup character before connecting.
 
 **The Character ID field is required.** Get this value from your character's profile on the [Convai dashboard](https://convai.com).
 
@@ -83,9 +91,9 @@ Turn-taking settings are also configured here. See [Configure conversation input
 | `_characterId`                  | _(empty)_ | **Required.** Unique ID from your Convai dashboard              |
 | `_characterName`                | _(empty)_ | Display name shown in transcripts and logs                      |
 | `_nameTagColor`                 | White     | Color used to identify this character in the transcript UI      |
-| `_autoConnect`                  | `false`   | Start a conversation immediately after the scene loads          |
+| `_autoConnect`                  | `false`   | Ask the room manager to connect after this character initializes |
 | `_enableRemoteAudio`            | `true`    | Play back the character's voice audio                           |
-| `_enableSessionResume`          | `false`   | Resume the previous session on reconnect                        |
+| `_enableSessionResume`          | `false`   | Reuse this character's conversation session ID on reconnect      |
 | `_characterReadyTimeoutSeconds` | `30`      | Seconds to wait for the character-ready signal (0 = no timeout) |
 
 **Useful properties at runtime:**
@@ -93,10 +101,10 @@ Turn-taking settings are also configured here. See [Configure conversation input
 | Property             | Type           | Description                                                   |
 | -------------------- | -------------- | ------------------------------------------------------------- |
 | `IsCharacterReady`   | `bool`         | Character has received the ready signal from Convai           |
-| `IsSessionConnected` | `bool`         | Connected to the room (ready signal may not have arrived yet) |
-| `IsInConversation`   | `bool`         | Connected and ready — true conversation state                 |
+| `IsSessionConnected` | `bool`         | Shared room is connected (this character may not be ready yet) |
+| `IsInConversation`   | `bool`         | Shared room is connected and this character is ready           |
 | `IsSpeaking`         | `bool`         | Character is currently outputting audio                       |
-| `SessionState`       | `SessionState` | Full connection state enum                                    |
+| `SessionState`       | `SessionState` | Shared room connection state mirrored on this character       |
 
 **Component dependencies:** `ConvaiAudioOutput` (handles audio playback for this character) must be on the same GameObject. `ConvaiAudioOutput` requires an `AudioSource` on the same GameObject.
 

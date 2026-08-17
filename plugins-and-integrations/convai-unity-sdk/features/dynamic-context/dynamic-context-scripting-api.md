@@ -6,7 +6,7 @@ description: >-
 last_reviewed: "4.5.0"
 ---
 
-`ConvaiCharacter.DynamicContext` returns the `IConvaiDynamicContext` interface — the scripting surface for tracked state, chronological events, attention-object updates, and raw context sends. This page documents every interface member, the `ConvaiRespondMode` enum that controls whether an update triggers a spoken reply, and the `ConvaiDynamicContextUpdate` type used by `Apply`.
+`ConvaiCharacter.DynamicContext` returns the `IConvaiDynamicContext` interface — the scripting surface for tracked state, chronological events, attention-object updates, and raw context sends. This page documents every interface member, the `ConvaiRespondMode` enum that requests how the backend should react, and the `ConvaiDynamicContextUpdate` type used by `Apply`.
 
 ```csharp
 using Convai.Runtime.Components;
@@ -23,7 +23,7 @@ IConvaiDynamicContext context = character.DynamicContext;
 
 ## Method reference
 
-Every tracked method below stages its change in the local tracker; Convai receives the update in the next dynamic context batch — a background flush that fires after `ConvaiCharacter.DynamicContextBatchDelaySeconds` (0.5 seconds by default) or immediately when `Flush()` is called, capped at an internal maximum delay so staged changes are never held indefinitely. When more than one reaction is requested before a batch flushes, the strongest value wins for the whole batch, ranked `Silent` < `Auto` < `MustRespond`. See [Sync behavior and timing](sync-behavior-and-timing.md) for the exact batch window and message content.
+Every tracked method below stages its change in the local tracker; the SDK submits the update in the next dynamic context batch — a scheduled flush after `ConvaiCharacter.DynamicContextBatchDelaySeconds` (0.5 seconds by default) or when `Flush()` is called, capped at an internal maximum delay so staged changes are never held indefinitely. When more than one reaction is requested before a batch flushes, the strongest value wins for the whole batch, ranked `Silent` < `Auto` < `MustRespond`. See [Sync behavior and timing](sync-behavior-and-timing.md) for the exact batch window and message content.
 
 ### `SetState`
 
@@ -32,7 +32,7 @@ void SetState(string name, string value,
     ConvaiRespondMode reaction = ConvaiRespondMode.Silent)
 ```
 
-Sets or updates one tracked state entry. If `name` has not been set before, Convai adds it to the [canonical context](how-dynamic-context-works.md#canonical-context-format) in the order it was first set. If `value` is identical to the current value, the call is a no-op — nothing is staged.
+Sets or updates one tracked state entry. If `name` has not been set before, the local tracker adds it to the [canonical context](how-dynamic-context-works.md#canonical-context-format) in the order it was first set. If `value` is identical to the current value, the call is a no-op — nothing is staged.
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
@@ -94,7 +94,7 @@ Removes a tracked state by name and stages an updated canonical context for the 
 |---|---|---|
 | `name` | `string` | Name of the state to remove. Must be non-empty; an empty or whitespace value logs a warning (`Dynamic context state name cannot be empty`) and the call returns immediately. |
 
-`RemoveState` has no `reaction` parameter. The staged change always carries `ConvaiRespondMode.Silent` — removing a state never triggers an immediate reply on its own.
+`RemoveState` has no `reaction` parameter. The staged change always carries `ConvaiRespondMode.Silent`, requesting no immediate LLM run for the removal itself.
 
 ### `Reset`
 
@@ -132,7 +132,7 @@ See [Attention and reference grounding](../character-actions/attention-and-refer
 void ClearCurrentAttentionObject(ConvaiRespondMode reaction = ConvaiRespondMode.Silent)
 ```
 
-Stages a clear for the current attention object. Convai treats the character as having no specific focus until the next `SetCurrentAttentionObject` call.
+Stages a request to clear the current attention object. The character's resolved local attention state is updated only after the acknowledgement path succeeds.
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
@@ -187,7 +187,7 @@ Sends a raw typed update directly to the transport layer, bypassing the local tr
 | Character is not in an active conversation | Warning: `Cannot apply raw dynamic context update: not in conversation`. Update discarded. |
 
 {% hint style="danger" %}
-**`Apply` does not queue or batch.** If the character is not in an active conversation, Convai discards the update and logs a warning — nothing is sent and nothing is retried. Values sent through `Apply` bypass the local tracker: `TryGetStateValue` returns `false` for keys sent this way. Use the tracked methods (`SetState`, `SetStates`, `AddEvent`, `RemoveState`, `Reset`) for all standard context management.
+**`Apply` does not queue or batch.** If the character is not in an active conversation, the client discards the update and logs a warning — nothing is sent and nothing is retried. Values sent through `Apply` bypass the local tracker: `TryGetStateValue` returns `false` for keys sent this way. Use the tracked methods (`SetState`, `SetStates`, `AddEvent`, `RemoveState`, `Reset`) for all standard context management.
 {% endhint %}
 
 ## `ConvaiDynamicContextUpdate`
@@ -214,8 +214,10 @@ new ConvaiDynamicContextUpdate(
 | `reaction` | `ConvaiRespondMode` | `Auto` | Whether the update triggers a spoken reply. |
 | `removeStatic` | `bool` | `false` | When `mode` is `Reset` and this is `true`, also asks Convai to remove the character's static initial dynamic context for the session. |
 | `currentAttentionObject` | `object` | `null` | Attention object to set alongside this update. Accepts a `string` object name or a `ConvaiActionObjectDefinition` reference. |
-| `updateId` | `string` | `null` | Correlates this update with its backend acknowledgement. Auto-generated when omitted. |
+| `updateId` | `string` | `null` | Forwarded for backend-result correlation when supplied. If omitted, the SDK generates one only when `actionConfig` or `currentAttentionObject` requires acknowledgement tracking. A text-only raw update can be sent without an ID. |
 | `actionConfig` | `ConvaiActionConfigPatch` | `null` | Runtime action-config patch to apply alongside this context update. See [Character actions scripting reference](../character-actions/actions-scripting-reference.md#convaiactionconfigpatch). |
+
+Plain text is fire-and-forget after the transport accepts the request. An update containing an action-config patch or current attention object joins the SDK's ordered acknowledgement queue. A successful public result event is not, by itself, proof that the corresponding action-state mutation has committed locally; action-config updates also validate returned metadata before commit.
 
 ## `ConvaiContextUpdateMode`
 
@@ -233,9 +235,9 @@ Used by `Apply` and `ConvaiDynamicContextUpdate`.
 
 | Value | Wire string | Description |
 |---|---|---|
-| `Silent` | `silent` | Absorbed into the character's awareness; never triggers a spoken reply on its own. |
-| `Auto` | `auto` | Convai decides whether the update warrants a spoken reply. |
-| `MustRespond` | `must_respond` | Always triggers a spoken reply after the update. |
+| `Silent` | `silent` | Requests no immediate LLM run for the update. |
+| `Auto` | `auto` | Lets the backend decide whether to run the LLM for the update. |
+| `MustRespond` | `must_respond` | Requests an LLM run after the update. Inspect the result's actual mode and downgrade reason rather than assuming spoken output. |
 
 ### Migration from `ConvaiContextReactionMode`
 

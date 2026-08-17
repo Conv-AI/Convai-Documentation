@@ -1,7 +1,7 @@
 ---
 title: Vision scripting API
 description: Reference for the Convai Unity SDK vision scripting API, including publish control, runtime status queries, on-demand triggers, and respond-mode events.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Vision scripting centers on `ConvaiVisionPublisher` for publish control, `ConvaiRoomManager` for on-demand vision status queries and triggers, and the frame source status interfaces for capture state. Domain events let you react to lifecycle changes and backend acknowledgements without polling `IsPublishing` every frame.
@@ -148,14 +148,14 @@ public class FrameSourceMonitor : MonoBehaviour
 `ConvaiRoomManager` implements `IConvaiRoomConnectionService` and exposes three runtime methods, added in SDK 4.4.0, for querying and driving dynamic vision context mid-session without reconnecting. Access them through a serialized `ConvaiRoomManager` field, a custom `IConvaiRoomConnectionService` implementation, or `ConvaiManager.ActiveManager.TryGetRoomConnectionService(out IConvaiRoomConnectionService service)` when no scene reference is available.
 
 {% hint style="warning" %}
-**Breaking change in SDK 4.4.0.** `IConvaiRoomConnectionService` gained three members: `RequestVisionStatus(string updateId = null)`, `TriggerVision(ConvaiVisionTriggerRequest request)`, and `UpdateRespondMode(ConvaiRespondModeLane lane, ConvaiRespondMode mode, string updateId = null)`. Code that only consumes the interface through `ConvaiRoomManager` is unaffected. Any custom implementation of `IConvaiRoomConnectionService` must add all three methods — return `false` from each when vision is not supported by that implementation.
+`IConvaiRoomConnectionService` is a versioned interface. SDK 4.4.0 added `RequestVisionStatus(...)`, `TriggerVision(...)`, and `UpdateRespondMode(...)`; return `false` from these methods when a custom implementation does not support Vision. The staged Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview also adds `CurrentMultiCharacterSession`, `JoinMultiCharacterRoomAsync(...)`, both `SetInteractionTargetAsync(...)` overloads, `ClearInteractionTargetAsync(...)`, `AddCharacterAsync(...)`, and both `RemoveCharacterAsync(...)` overloads. Those multi-character members are not in the current <code class="expression">space.vars.unity_sdk_version</code> Asset Store release. A custom implementation targeting the preview must implement the full preview interface. Code that only consumes it through `ConvaiRoomManager` is unaffected.
 {% endhint %}
 
 | Method | Returns | Description |
 | --- | --- | --- |
-| `RequestVisionStatus(string updateId = null)` | `bool` | Requests backend dynamic vision buffer/status diagnostics for the current session. The backend answers with [`VisionContextStatusReceived`](#visioncontextstatusreceived). |
-| `TriggerVision(ConvaiVisionTriggerRequest request)` | `bool` | Requests backend dynamic vision attachment/response behavior for the current session — asks the character to look at the buffered frames and, depending on the request, respond. The backend answers with [`VisionContextTriggerReceived`](#visioncontexttriggerreceived). |
-| `UpdateRespondMode(ConvaiRespondModeLane lane, ConvaiRespondMode mode, string updateId = null)` | `bool` | Changes one input lane's respond mode for the rest of the session, without reconnecting. The backend acknowledges with [`RespondModeUpdateResultReceived`](#respondmodeupdateresultreceived). |
+| `RequestVisionStatus(string updateId = null)` | `bool` | Requests backend dynamic vision buffer/status diagnostics for the current room. The backend answers with [`VisionContextStatusReceived`](#visioncontextstatusreceived). |
+| `TriggerVision(ConvaiVisionTriggerRequest request)` | `bool` | Requests backend dynamic vision attachment/response behavior for the current room — asks the active interaction target to inspect buffered frames and, depending on the request, respond. The backend answers with [`VisionContextTriggerReceived`](#visioncontexttriggerreceived). |
+| `UpdateRespondMode(ConvaiRespondModeLane lane, ConvaiRespondMode mode, string updateId = null)` | `bool` | Changes one input lane's respond mode for the rest of the room session, without reconnecting. The backend acknowledges with [`RespondModeUpdateResultReceived`](#respondmodeupdateresultreceived). |
 
 Each method returns `false` when no session transport is available (for example, before the room connects).
 

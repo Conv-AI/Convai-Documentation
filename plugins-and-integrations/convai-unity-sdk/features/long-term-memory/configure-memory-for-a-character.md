@@ -4,10 +4,10 @@ description: Toggle Long-Term Memory on or off per character via the Convai dash
 last_reviewed: "4.5.0"
 ---
 
-Long-term memory is disabled by default (`MemorySettings.IsEnabled = false`). No facts are extracted or stored until you explicitly enable it. You can enable or disable memory through the Convai dashboard or programmatically via `client.Characters`.
+The Unity 4.5 response model defaults `MemorySettings.IsEnabled` to `false`, and `CharacterService` exposes methods to read or change the service-side setting. You can use the Convai dashboard or `client.Characters`. Whether and when the backend extracts, recalls, retains, or deletes data must be verified with live service calls.
 
 {% hint style="danger" %}
-**Memory settings apply globally to the character.** Enabling LTM for a character affects every application, SDK version, and deployment that connects to that character ID. If you share a character across development, staging, and production environments, enabling memory in one environment enables it in all of them. Coordinate with your team before enabling on a shared character.
+The request is keyed by character ID rather than by Unity scene. Treat the setting as shared across applications that use that character, coordinate before changing a shared character, and confirm the effective scope against the live backend environment.
 {% endhint %}
 
 ***
@@ -34,6 +34,7 @@ Use `client.Characters` when you need programmatic control — for example, in a
 
 ```csharp
 using Convai.RestAPI;
+using Convai.Runtime;
 using UnityEngine;
 
 public class MemoryAdmin : MonoBehaviour
@@ -52,6 +53,7 @@ public class MemoryAdmin : MonoBehaviour
 
 ```csharp
 using Convai.RestAPI;
+using Convai.Runtime;
 using UnityEngine;
 
 public class MemoryAdmin : MonoBehaviour
@@ -69,6 +71,7 @@ public class MemoryAdmin : MonoBehaviour
 **Disable memory**
 
 ```csharp
+// API usage excerpt: assumes an initialized client from the examples above.
 await client.Characters.SetMemoryEnabledAsync("your-character-id", false);
 ```
 {% endtab %}
@@ -79,12 +82,12 @@ await client.Characters.SetMemoryEnabledAsync("your-character-id", false);
 ## Disable memory without deleting records
 
 {% hint style="warning" %}
-Disabling LTM stops new memories from being extracted, but **does not delete existing memory records**. The stored facts remain on Convai and will be re-injected if you re-enable LTM later.
+`SetMemoryEnabledAsync(..., false)` and the deletion methods are separate client requests. Unity SDK source does not prove how existing records are retained or later recalled after disabling. Verify that backend behavior in staging before relying on it.
 
-If you want to disable LTM and remove all stored memories, delete the memories first, then disable.
+If your workflow also requests deletion, send that request first, verify the live result, and then disable the character setting.
 {% endhint %}
 
-To purge all memories for a user–character pair before disabling, use `client.Memory.DeleteAllAsync` followed by `SetMemoryEnabledAsync`. `DeleteAllAsync` removes memories for one specific user–character pair. To remove all end-user records across all characters instead, use `client.EndUsers.DeleteAsync(endUserId)`. See [Manage end-user records](end-user-management.md).
+To request deletion for a user-character pair before disabling, call `client.Memory.DeleteAllAsync` and inspect the response, then call `SetMemoryEnabledAsync`. `client.EndUsers.DeleteAsync(endUserId)` addresses an end-user record instead. The request shapes are source-verified; confirm deletion scope and completion with a follow-up live query. See [Manage end-user records](end-user-management.md).
 
 See [Long-term memory usage examples](usage-examples.md) for a complete reset pattern.
 

@@ -1,10 +1,10 @@
 ---
 title: Event system
 description: Reference for Convai event relay components, including available events, payload fields, and subscription patterns for scene logic.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
-The Convai SDK communicates what happens during a session — connections, character speech, transcripts, emotions — through a set of relay components. Add one of these MonoBehaviours to a GameObject in your scene, wire up UnityEvents in the Inspector or subscribe in code, and your scene logic responds to whatever the SDK broadcasts.
+The Convai SDK communicates what happens in a room — connection changes, character readiness and speech, transcripts, and emotions — through a set of relay components. Add one of these MonoBehaviours to a GameObject in your scene, wire up UnityEvents in the Inspector or subscribe in code, and your scene logic responds to whatever the SDK broadcasts.
 
 ***
 
@@ -23,6 +23,9 @@ Best for: connection indicators, animation triggers, UI visibility toggles — a
 Subscribe to relay component events from code:
 
 ```csharp
+using Convai.Runtime.Presentation.Events;
+using UnityEngine;
+
 public class MyHandler : MonoBehaviour
 {
     [SerializeField] private ConvaiCharacterEventRelay _relay;
@@ -54,7 +57,7 @@ Best for: conditional logic, multi-event coordination, data routing across multi
 
 | Component                    | Inspector Menu Path                         | Use When                                                                    |
 | ---------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
-| `ConvaiSessionEventRelay`    | Convai/Events/Convai Session Event Relay    | Tracking session connection state, handling errors, driving connection UI   |
+| `ConvaiSessionEventRelay`    | Convai/Events/Convai Session Event Relay    | Tracking shared room state, handling errors, driving connection UI          |
 | `ConvaiCharacterEventRelay`  | Convai/Events/Convai Character Event Relay  | Reacting to a specific character's speech, transcript, turn, and emotion    |
 | `ConvaiTranscriptEventRelay` | Convai/Events/Convai Transcript Event Relay | Scene-wide transcript feed with optional filtering by character or finality |
 
@@ -62,7 +65,13 @@ Best for: conditional logic, multi-event coordination, data routing across multi
 
 ## `ConvaiSessionEventRelay`
 
-Tracks the session lifecycle for the entire scene. Add one per scene — it monitors the session managed by `ConvaiManager`.
+Tracks the shared room lifecycle for the entire scene. Add one per scene — it monitors the room managed by `ConvaiManager`, not an individual character membership.
+
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** The multi-character readiness and shared-room semantics below are staged ahead of the current <code class="expression">space.vars.unity_sdk_version</code> Asset Store release. The relay's stable single-character events remain available in the current release.
+
+In a multi-character room, one `OnConnected` event means the room connected and the initial character became ready. It does not guarantee every secondary membership is ready. Use character readiness callbacks or inspect `CurrentMultiCharacterSession.Characters` when UI depends on a particular roster member.
+
+On the typed C# event hub, `CharacterReady.ParticipantIdentity` is the LiveKit participant identity for that membership in the current connection. Treat it as connection-scoped and reacquire it after reconnecting.
 
 {% hint style="info" %}
 If `ConvaiManager` initializes after the relay's `OnEnable` (for example, due to script execution order), the relay retries its subscription automatically in `LateUpdate()` while enabled. No manual retry logic is needed.
@@ -147,6 +156,9 @@ If `ConvaiManager` initializes after the relay's `OnEnable` (for example, due to
 **Code example — show a connection status indicator:**
 
 ```csharp
+using Convai.Runtime.Presentation.Events;
+using UnityEngine;
+
 public class ConnectionIndicator : MonoBehaviour
 {
     [SerializeField] private ConvaiSessionEventRelay _relay;
@@ -193,7 +205,7 @@ Tracks events for a single `ConvaiCharacter`. Add one per character that needs t
 | `OnSpeechStarted`      | —                                 | The character begins speaking (audio starts playing).             |
 | `OnSpeechStopped`      | —                                 | The character stops speaking (audio ends).                        |
 | `OnTurnCompleted`      | `CharacterTurnCompletedRelayData` | The character's full response for one turn is complete.           |
-| `OnCharacterReady`     | —                                 | The character is fully initialized and connected to the session.  |
+| `OnCharacterReady`     | —                                 | This character membership is ready to interact in the shared room. |
 | `OnEmotionChanged`     | `CharacterEmotionRelayData`       | A new emotion signal is received from Convai.                     |
 
 ### `CharacterTranscriptRelayData`
@@ -204,9 +216,9 @@ Tracks events for a single `ConvaiCharacter`. Add one per character that needs t
 | `CharacterName` | `string` | The character's display name.                                                    |
 | `Text`          | `string` | The transcript text. May be partial if `IsFinal` is false.                       |
 | `IsFinal`       | `bool`   | Whether the underlying transcript turn is committed, interrupted, or corrected.  |
-| `TurnId`        | `string` | Identifies the turn this transcript chunk belongs to.                            |
-| `MessageId`     | `string` | Unique identifier for this transcript message.                                   |
-| `ResponseId`    | `string` | Identifies the character response this turn is part of.                         |
+| `TurnId`        | `string` | Empty on `ConvaiCharacterEventRelay`; use the room transcript relay when turn identity is required. |
+| `MessageId`     | `string` | Empty on `ConvaiCharacterEventRelay`; use the room transcript relay when message identity is required. |
+| `ResponseId`    | `string` | Empty on `ConvaiCharacterEventRelay`; use the room transcript relay when response identity is required. |
 
 ### `CharacterTurnCompletedRelayData`
 
@@ -223,11 +235,14 @@ Tracks events for a single `ConvaiCharacter`. Add one per character that needs t
 | `CharacterId`   | `string` | The character's ID.                                                                         |
 | `CharacterName` | `string` | The character's display name.                                                               |
 | `Emotion`       | `string` | The emotion name (e.g., `"joy"`, `"fear"`, `"sadness"`). See the Emotion feature reference. |
-| `Intensity`     | `int`    | Emotion intensity (0–100).                                                                  |
+| `Intensity`     | `int`    | Raw emotion intensity from 1 (low) to 3 (high).                                             |
 
 **Code example — trigger an animation on emotion change:**
 
 ```csharp
+using Convai.Runtime.Presentation.Events;
+using UnityEngine;
+
 public class CharacterEmotionAnimator : MonoBehaviour
 {
     [SerializeField] private ConvaiCharacterEventRelay _relay;
@@ -241,7 +256,7 @@ public class CharacterEmotionAnimator : MonoBehaviour
     private void HandleEmotion(CharacterEmotionRelayData data)
     {
         _animator.SetTrigger(data.Emotion);
-        _animator.SetFloat("EmotionIntensity", data.Intensity / 100f);
+        _animator.SetFloat("EmotionIntensity", (data.Intensity - 1) / 2f);
     }
 }
 ```
@@ -250,7 +265,7 @@ public class CharacterEmotionAnimator : MonoBehaviour
 
 ## `ConvaiTranscriptEventRelay`
 
-Provides a scene-wide transcript feed. Unlike `ConvaiCharacterEventRelay`, this relay monitors all characters and the player through a single component. Use it to drive subtitle UI, session logs, or assessment systems.
+Provides a room-wide transcript feed. Unlike `ConvaiCharacterEventRelay`, this relay monitors all characters and the player through a single component. Incoming transcript turns are not limited to the current interaction target, so use its character filter or inspect speaker identity when your UI should display only one character. Use the unfiltered feed for complete logs and assessment systems.
 
 **Inspector fields:**
 
@@ -261,6 +276,8 @@ Provides a scene-wide transcript feed. Unlike `ConvaiCharacterEventRelay`, this 
 | `FinalOnly`            | `bool`          | `false` | When enabled, only final transcripts (committed, interrupted, or corrected) raise events. Interim partial transcripts are suppressed.                       |
 | `IgnoreInterimUpdates` | `bool`          | `true`  | Drop turns still in the `Listening` or `Streaming` state. Stable and committed turns still pass through. Disable this field if your UI needs to display partial text as the character speaks. |
 | `CharacterIdFilter`    | `string`        | `""`    | If set, only transcripts from the character with this ID raise events. Leave empty for all characters.                                                      |
+
+A terminal transcript callback is not necessarily the last callback for that turn. A later correction is also terminal, so `FinalOnly` and the two `OnFinal*` events can emit the same turn again with corrected text. Key application state by `TurnId` and update the existing entry instead of assuming each callback is a new turn.
 
 **Events:**
 
@@ -307,6 +324,10 @@ Use this payload when a scene needs one event and one data shape for both charac
 **Code example — multi-character transcript feed for a training log:**
 
 ```csharp
+using Convai.Runtime.Presentation.Events;
+using TMPro;
+using UnityEngine;
+
 public class TrainingTranscriptLog : MonoBehaviour
 {
     [SerializeField] private ConvaiTranscriptEventRelay _relay;
@@ -417,7 +438,7 @@ private void OnDisable() => _patientRelay.OnEmotionChanged.RemoveListener(ApplyE
 
 private void ApplyEmotion(CharacterEmotionRelayData data)
 {
-    _expressionController.SetExpression(data.Emotion, data.Intensity / 100f);
+    _expressionController.SetExpression(data.Emotion, (data.Intensity - 1) / 2f);
 }
 ```
 
