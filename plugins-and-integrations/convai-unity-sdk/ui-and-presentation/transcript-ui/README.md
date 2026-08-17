@@ -1,6 +1,6 @@
 ---
 title: Transcript UI
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 description: >-
   Understand how the Convai Unity SDK separates durable chat history from
   speech-aligned captions, and which built-in component displays each.

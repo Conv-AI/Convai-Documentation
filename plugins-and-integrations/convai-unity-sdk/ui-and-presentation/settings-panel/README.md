@@ -1,6 +1,6 @@
 ---
 title: Settings panel
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 description: >-
   Add a runtime settings panel so users can adjust microphone, transcript
   visibility, and notification preferences, or access the same settings

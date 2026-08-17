@@ -3,7 +3,7 @@ title: Dynamic context usage examples
 description: >-
   Five Dynamic Context examples show a relay-driven trigger, a batched update,
   an event log, an emergency transition, and synced world-object context.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 The following examples progress from a single relay-driven trigger to scripted batch updates and synced world-object context. Each example lists the scenario context, the concrete Inspector or script setup, and the expected runtime outcome.

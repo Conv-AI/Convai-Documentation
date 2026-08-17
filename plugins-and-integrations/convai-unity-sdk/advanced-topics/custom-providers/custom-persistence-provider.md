@@ -1,10 +1,7 @@
 ---
-description: >-
-  Replace PlayerPrefs session storage with a cloud backend, encrypted file
-  store, or in-memory implementation by implementing IKeyValueStore or
-  IPersistenceProvider.
+description: Replace the default session storage with your own remote service, an encrypted file store, or an in-memory implementation for tests.
 title: Custom persistence provider
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai Unity SDK stores session data — connection state, session IDs, resume tokens, and the editor end-user GUID — in `PlayerPrefs` by default via `PlayerPrefsKeyValueStore`. If `PlayerPrefs` works for your deployment, you do not need this page. Replace the persistence provider when you need cloud save, encrypted storage, server-side session management, or isolated storage for automated testing and CI.

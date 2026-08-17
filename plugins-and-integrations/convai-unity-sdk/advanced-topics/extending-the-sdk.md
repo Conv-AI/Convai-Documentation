@@ -1,7 +1,7 @@
 ---
 title: Runtime module system
 description: Understand the Convai runtime module system, including when to use custom modules, the module lifecycle states, and which SDK extension points are safe to use.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai Unity SDK is built around a module system that gives optional features — lip sync, emotion, vision, narrative design — a defined place in the runtime lifecycle. You can add your own modules using the same system: they receive the same startup sequence, access the same services, and can share interfaces with other modules.

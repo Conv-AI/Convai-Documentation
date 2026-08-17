@@ -3,6 +3,7 @@ title: Feature map
 description: >-
   Find the right Convai Unity SDK feature, module, guide, or reference page for
   any development goal, indexed by use case.
+last_reviewed: "4.5.0"
 ---
 
 Use this table when you know the outcome you want but are not sure which SDK feature, module, or guide covers it.

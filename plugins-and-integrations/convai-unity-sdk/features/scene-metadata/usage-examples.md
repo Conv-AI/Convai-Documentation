@@ -1,7 +1,7 @@
 ---
 title: Scene metadata usage examples
 description: Complete Scene Metadata setups for medical training, industrial drills, museum guides, runtime object updates, and tracked property state.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 The examples below cover realistic setups for training simulations and interactive experiences. Each is self-contained: Inspector configuration is described first, followed by any scripting needed to complete the behavior. Start with whichever matches your current complexity level.

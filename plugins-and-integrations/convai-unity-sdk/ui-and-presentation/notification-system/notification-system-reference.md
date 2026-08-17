@@ -1,6 +1,6 @@
 ---
 title: Notification system reference
-last_reviewed: 4.2.0
+last_reviewed: "4.5.0"
 description: >-
   Reference for SONotification, SONotificationGroup, UINotificationController,
   and SONotificationErrorMap — fields, methods, and configuration options.
@@ -8,7 +8,7 @@ description: >-
 
 Reference for the ScriptableObject assets and the controller component that make up the notification system. For setup instructions and triggering notifications from code, see [Notification system](./).
 
-### `SONotification`
+## `SONotification`
 
 Each notification is a `ScriptableObject` asset containing the content to display.
 
@@ -41,7 +41,7 @@ notification
     .SetIcon(successIcon);
 ```
 
-### `SONotificationGroup`
+## `SONotificationGroup`
 
 `SONotificationGroup` registers all `SONotification` assets the scene recognizes. `NotificationHandler` resolves notification IDs against this group at runtime.
 
@@ -74,7 +74,7 @@ if (SONotificationGroup.GetGroup(out SONotificationGroup group))
 The group asset must be saved to `Assets/Resources/SONotificationGroup.asset`. The path string used at runtime is `"SONotificationGroup"` — no file extension, no subdirectory. If the asset is missing, `NotificationHandler` logs `"[NotificationHandler] SONotificationGroup asset could not be resolved."` and no notifications display.
 {% endhint %}
 
-### `UINotificationController`
+## `UINotificationController`
 
 Manages the pool of reusable `UINotification` elements and controls the slide animation for each notification.
 
@@ -95,7 +95,7 @@ Manages the pool of reusable `UINotification` elements and controls the slide an
 
 **Animation sequence per notification:** slide in (`slipDuration`) → visible for `activeDuration` → delay (`delay`) → slide out (`slipDuration`) → next queued notification starts.
 
-### `SONotificationErrorMap`
+## `SONotificationErrorMap`
 
 Maps session error code strings to `SONotification` assets using an ordered rule list. Load from `Resources/SONotificationErrorMap` automatically, or assign manually.
 
@@ -109,7 +109,7 @@ Save to `Assets/Resources/SONotificationErrorMap.asset` for automatic loading.
 | ------- | ------------------------------------ | ------------------------------------------------------------------------- |
 | `Rules` | `List<SessionErrorNotificationRule>` | Ordered list of error-to-notification rules. The first matching rule wins |
 
-#### `SessionErrorNotificationRule`
+### `SessionErrorNotificationRule`
 
 | Field          | Type                    | Description                                                                    |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------ |
@@ -127,7 +127,7 @@ Rules are evaluated top-to-bottom. Place more specific rules above broader prefi
 | `CONNECTION_` | `Prefix`  | `Notification_ConnectionError` |
 | `RATE_LIMIT`  | `Exact`   | `Notification_RateLimit`       |
 
-### Next steps
+## Next steps
 
 {% content-ref url="./" %}
 [.](./)

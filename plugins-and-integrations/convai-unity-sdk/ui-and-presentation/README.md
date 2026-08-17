@@ -3,6 +3,7 @@ title: UI and Presentation
 description: >-
   Optional, scene-level UI for displaying transcripts, surfacing notifications,
   and giving users a runtime settings panel — add only what your project needs.
+last_reviewed: "4.5.0"
 ---
 
 The Convai Unity SDK ships a set of optional, scene-level UI components. These components consume data already produced by the runtime and render it locally in your scene — none of them send data to Convai or require an active connection to display.

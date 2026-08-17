@@ -3,11 +3,12 @@ title: Narrative design quick start
 description: >-
   Add a Narrative Design Manager and a collision trigger to a Convai character
   and confirm a section change in Play Mode — no code required.
+last_reviewed: "4.5.0"
 ---
 
 This guide walks you through the fastest path to a working Narrative Design setup. By the end, a character reacts to a section change when the player walks through a trigger zone — entirely through the Inspector, no code required.
 
-### Prerequisites
+## Prerequisites
 
 Before starting, verify:
 
@@ -16,7 +17,7 @@ Before starting, verify:
 
 {% stepper %}
 {% step %}
-#### Add the Narrative Design Manager
+### Add the Narrative Design Manager
 
 Select the GameObject that has your `ConvaiCharacter` component. In the Inspector, click **Add Component** and search for **Narrative Design Manager** (path: **Convai > Narrative Design Manager**).
 
@@ -26,7 +27,7 @@ The Manager auto-detects the `ConvaiCharacter` on the same GameObject. If your c
 {% endstep %}
 
 {% step %}
-#### Sync sections from the dashboard
+### Sync sections from the dashboard
 
 In the Manager's Inspector, click **Sync with Backend**. The SDK fetches your narrative sections and populates the **Narrative Sections** list. Each entry shows the section's name from the dashboard.
 
@@ -36,7 +37,7 @@ If the list stays empty, confirm that the character ID is set on `ConvaiCharacte
 {% endstep %}
 
 {% step %}
-#### Wire a section event
+### Wire a section event
 
 Expand the first section entry in the **Narrative Sections** list. You will see two Unity Events: **On Section Start** and **On Section End**.
 
@@ -74,7 +75,7 @@ public class NarrativeDesignDebugLogger : MonoBehaviour
 {% endstep %}
 
 {% step %}
-#### Add the Narrative Design Trigger
+### Add the Narrative Design Trigger
 
 Create a new empty GameObject in your scene and position it where the player will walk. Click **Add Component** and search for **Convai Narrative Design Trigger** (path: **Convai > Convai Narrative Design Trigger**).
 
@@ -84,7 +85,7 @@ Drag your `ConvaiCharacter` into the **Character** field, or leave it blank to l
 {% endstep %}
 
 {% step %}
-#### Fetch and select a trigger
+### Fetch and select a trigger
 
 In the Trigger component's Inspector, click **Fetch** to load the named triggers from the dashboard. A dropdown appears — select the trigger that should advance the graph to your first section.
 
@@ -92,7 +93,7 @@ In the Trigger component's Inspector, click **Fetch** to load the named triggers
 {% endstep %}
 
 {% step %}
-#### Add a collider
+### Add a collider
 
 The default activation mode is **Collision**, which uses Unity's `OnTriggerEnter`. On the same trigger GameObject, click **Add Component > Box Collider**. In the Box Collider's settings, enable **Is Trigger**.
 
@@ -102,7 +103,7 @@ Size the collider to cover the zone where you want the trigger to fire. In the S
 {% endstep %}
 
 {% step %}
-#### Press Play and walk through
+### Press Play and walk through
 
 {% hint style="warning" %}
 **Player setup checklist — verify all three before pressing Play:**
@@ -122,7 +123,7 @@ The section ID appears in the Console when the player enters the zone. The chara
 {% endstep %}
 {% endstepper %}
 
-### What just happened
+## What the setup produced
 
 Walking through the collider zone activated the full Narrative Design pipeline:
 
@@ -130,7 +131,7 @@ The `ConvaiNarrativeDesignTrigger` detected the player via `OnTriggerEnter` and 
 
 For a full explanation of this pipeline, see [How narrative design works](how-narrative-design-works.md).
 
-### Next steps
+## Next steps
 
 {% content-ref url="setting-up-the-narrative-design-manager.md" %}
 [setting-up-the-narrative-design-manager.md](setting-up-the-narrative-design-manager.md)

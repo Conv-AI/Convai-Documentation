@@ -1,7 +1,7 @@
 ---
 title: Dynamic vision context
 description: Reference for the dynamic vision context types that configure backend-driven camera frame sampling and per-lane respond-mode defaults.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Field-level reference for the three types that configure dynamic vision context: `ConvaiVisionContextMode` enables it per room, `ConvaiVisionInputSettings` tunes backend frame sampling, and `ConvaiVisionRespondModeSettings` sets per-lane respond-mode defaults. See [How vision works](how-vision-works.md#dynamic-vision-context) for what dynamic vision context is, why it exists, and how to enable it on a room.

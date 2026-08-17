@@ -1,10 +1,9 @@
 ---
 title: WebGL
-last_reviewed: 4.2.0
+last_reviewed: "4.5.0"
 description: >-
-  Configure and validate the Convai Unity SDK for WebGL — covers HTTPS
-  requirements, browser audio gesture handling, Vision canvas capture, and the
-  known lip-sync drift defect.
+  Deploy the Convai Unity SDK to WebGL, covering HTTPS, browser audio
+  gestures, Vision canvas capture, and the known lip-sync drift issue.
 ---
 
 The Convai Unity SDK supports voice conversation, lip sync, actions, dynamic context, emotion, Vision, and long-term memory on WebGL. The browser introduces three constraints that do not exist on native platforms: a mandatory HTTPS origin for microphone access, a user-gesture requirement before audio playback or microphone capture can begin, and a canvas-based Vision capture path instead of Unity `RenderTexture`. All three are covered on this page.
@@ -13,7 +12,7 @@ The Convai Unity SDK supports voice conversation, lip sync, actions, dynamic con
 Convai-Powered Unity 6 Web Projects (previously referred to as WebGL builds)
 {% endembed %}
 
-### Feature support
+## Feature support
 
 | Feature                      | WebGL                                               |
 | ---------------------------- | --------------------------------------------------- |
@@ -30,7 +29,7 @@ Convai-Powered Unity 6 Web Projects (previously referred to as WebGL builds)
 | Unity `AudioSource` playback | ❌ Not supported — browser audio path only           |
 | Microphone test / pre-check  | ❌ Not supported                                     |
 
-### Browser requirements
+## Browser requirements
 
 {% hint style="danger" %}
 **HTTPS is required for microphone access.** Browsers block microphone capture on non-secure origins. Serve your WebGL build over HTTPS. The only exception is `localhost`, which browsers treat as a secure origin. Deploying to `http://` causes the browser to silently deny microphone permission — no error is shown to the user and voice conversation will not start.
@@ -44,7 +43,7 @@ Convai-Powered Unity 6 Web Projects (previously referred to as WebGL builds)
 
 **Microphone device selection:** The browser controls all microphone device selection. When conversation starts, the browser displays its own permission prompt and allows the user to select a microphone device. The SDK returns an empty device list on WebGL — the Settings Panel microphone dropdown will show no entries. This is expected behavior, not an error. The microphone test functionality available on native platforms is not supported on WebGL.
 
-#### Example: LMS iframe embed
+### Example: LMS iframe embed
 
 A manufacturing company embeds a safety compliance drill in their Learning Management System. The LMS iframe loads the WebGL build from `https://sim.company.com/safety-drill`. The Convai character plays a site safety officer who tests operator responses to in-scene hazard scenarios.
 
@@ -60,7 +59,7 @@ A manufacturing company embeds a safety compliance drill in their Learning Manag
 
 **Outcome:** Operators click **Begin Drill**, grant microphone permission in the browser prompt, and begin the verbal compliance assessment.
 
-### Audio gesture handling
+## Audio gesture handling
 
 Browsers require a user interaction before allowing audio playback or microphone capture. The SDK handles this in two ways:
 
@@ -68,7 +67,7 @@ Browsers require a user interaction before allowing audio playback or microphone
 
 **Explicit Start button (recommended for UI-heavy scenes):** For scenes with full-screen overlays, loading screens, or any UI that covers the view on load, automatic detection may not fire reliably. Add an explicit Start button and wire it to `ConvaiManager.EnableAudioAndStartListening()`.
 
-The automatic gesture detection and the explicit Start button are not mutually exclusive — both can be active at the same time. The Start button approach is simply more reliable when UI covers the scene on load.
+The automatic gesture detection and the explicit Start button are not mutually exclusive — both can be active at the same time. The Start button approach is more reliable when UI covers the scene on load.
 
 {% tabs %}
 {% tab title="Inspector" %}
@@ -104,7 +103,7 @@ public class WebGLStartButton : MonoBehaviour
 {% endtab %}
 {% endtabs %}
 
-#### Example: Corporate onboarding training
+### Example: Corporate onboarding training
 
 An enterprise L\&D team hosts a company policy training simulation on their corporate intranet at `https://training.company.internal/onboarding`. A Convai character plays an HR representative who guides new hires through policy scenarios.
 
@@ -116,7 +115,7 @@ An enterprise L\&D team hosts a company policy training simulation on their corp
 
 **Outcome:** Employees click **Start Conversation** on the welcome screen. The browser displays a microphone permission prompt. After granting permission, the Convai character begins the onboarding dialogue. The welcome screen hides automatically after the button is clicked.
 
-### Vision on WebGL
+## Vision on WebGL
 
 On WebGL, Vision captures the Unity game view as rendered in the browser canvas. The SDK uses an internal `WebGLCanvasVideoSource` to publish the browser canvas as the vision frame source — standard `CameraVisionFrameSource` components are not used on this platform.
 
@@ -131,7 +130,7 @@ Key differences from native Vision:
 
 WebGL Vision captures what the player sees in the browser — the game view. For scenarios where the character needs to see the learner's physical environment via webcam, use a desktop or mobile build with `WebcamVisionFrameSource` instead.
 
-### Build validation checklist
+## Build validation checklist
 
 Before shipping a WebGL build, verify each item:
 
@@ -144,7 +143,7 @@ Before shipping a WebGL build, verify each item:
 * [ ] Lip-sync timing evaluated visually in-browser across a full conversation turn
 * [ ] Vision response validated if Vision is enabled (canvas capture path)
 
-### Troubleshooting
+## Troubleshooting
 
 | Symptom                                                       | Likely cause                                             | Fix                                                                                   |
 | ------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -155,7 +154,7 @@ Before shipping a WebGL build, verify each item:
 | Microphone test fails or is unavailable                       | Not supported on WebGL                                   | Expected behavior — inform users that mic testing is unavailable on browser builds.   |
 | No spatial audio; voices lack 3D positioning                  | Spatial audio not supported on WebGL                     | Expected. Consider communicating this in UI (e.g., headphone prompt).                 |
 
-#### Lip-sync timing drift
+### Lip-sync timing drift
 
 {% hint style="warning" %}
 **Lip-sync timing drift is a known defect on WebGL.** No workaround currently exists. Validate your WebGL build visually in a browser before shipping and account for this limitation in your production timeline.
@@ -169,7 +168,7 @@ Before shipping a WebGL build, verify each item:
 
 **Verify:** Evaluate lip-sync timing visually in a browser across a full conversation turn before shipping.
 
-### Next steps
+## Next steps
 
 Your WebGL build is ready once HTTPS is confirmed, the gesture requirement is handled, and the validation checklist passes. If you are also deploying to iOS, Android, or XR headsets, those platforms have their own permission requirements.
 

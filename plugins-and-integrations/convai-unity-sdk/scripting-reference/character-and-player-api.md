@@ -3,7 +3,7 @@ title: Character and Player API
 description: >-
   Reference for ConvaiCharacter and ConvaiPlayer, including properties, methods,
   and events for session control, speech, audio, and attention.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 `ConvaiCharacter` controls a single AI character's session, speech, remote audio, dynamic context, and attention targeting. `ConvaiPlayer` represents the local human participant and provides text message sending and identity configuration. Both components are owned and tracked by `ConvaiManager`.

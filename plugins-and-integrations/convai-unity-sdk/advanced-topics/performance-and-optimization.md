@@ -3,7 +3,7 @@ description: >-
   Configure SDK log verbosity per subsystem, route logs to custom sinks, read
   RTVI pipeline latency metrics, and tune the connection retry policy.
 title: Logging, metrics, and retry policy
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai Unity SDK ships with defaults that work across training simulations, interactive experiences, and games. When you need to diagnose latency, reduce log noise in production, understand the AI pipeline's timing, or tune reconnection behavior — this page covers the available controls.

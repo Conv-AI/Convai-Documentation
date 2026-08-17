@@ -1,6 +1,6 @@
 ---
 title: Relay component reference
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 description: >-
   Reference for the Dynamic Context relay component, covering its Inspector
   fields, public methods, events, and character resolution behavior.

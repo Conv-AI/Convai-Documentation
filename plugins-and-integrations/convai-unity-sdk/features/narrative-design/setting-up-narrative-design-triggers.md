@@ -3,7 +3,7 @@ title: Configure narrative design triggers
 description: >-
   Configure ConvaiNarrativeDesignTrigger to advance the narrative graph using
   collision, proximity, time-based, or manual activation modes.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 `ConvaiNarrativeDesignTrigger` sends a named signal to Convai that advances the story graph from one section to the next. Place it on any GameObject — a doorway, an exhibit, a UI button's event target — and choose how it should activate. A narrative trigger is distinct from a Unity Physics trigger: the activation mode controls _when_ the signal is sent, not what kind of Unity physics event fires.

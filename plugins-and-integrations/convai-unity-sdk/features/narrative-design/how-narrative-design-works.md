@@ -1,6 +1,7 @@
 ---
 title: How narrative design works
 description: Understand the Narrative Design pipeline — how sections, triggers, and template keys connect at runtime to advance a story graph.
+last_reviewed: "4.5.0"
 ---
 
 Narrative Design gives a Convai character a structured story to follow. You author a graph of sections and triggers in the Convai dashboard; at runtime, the SDK listens for section-change signals from Convai and fires the Unity Events you configured — no polling, no custom state machines. This page explains the underlying model: what the primitives are, how a trigger advances the graph, and which SDK component handles each part of the pipeline.

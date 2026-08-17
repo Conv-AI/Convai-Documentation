@@ -1,6 +1,7 @@
 ---
 title: Narrative design
 description: Find guides for setting up, configuring, scripting, and troubleshooting the Narrative Design system in the Convai Unity SDK.
+last_reviewed: "4.5.0"
 ---
 
 Narrative Design gives Convai characters a structured story graph of sections and triggers. This section covers everything from understanding the runtime model to the complete scripting API.

@@ -1,14 +1,12 @@
 ---
 title: Long-term memory quick start
-last_reviewed: 4.2.0
-description: >-
-  Enable Long-Term Memory for a Convai character and verify cross-session recall
-  in the Unity Editor in three steps.
+last_reviewed: "4.5.0"
+description: Enable long-term memory for a Convai character in three steps and verify that recall survives across separate sessions in the Unity Editor.
 ---
 
 Long-term memory works automatically once two conditions are met: memory is enabled for your character on the Convai dashboard, and the SDK is sending a stable user identifier. This guide walks through both conditions and shows you how to confirm they are working.
 
-### Prerequisites
+## Prerequisites
 
 Before starting, verify:
 
@@ -19,11 +17,11 @@ You do not need to write any code for the default LTM experience. The SDK's `Dev
 
 ***
 
-### Enable memory for a character
+## Enable memory for a character
 
 {% stepper %}
 {% step %}
-#### Enable memory on the dashboard
+### Enable memory on the dashboard
 
 1. Sign in to [convai.com](https://convai.com) and open the character you want to use.
 2. Select the **Memory** tab in the character's settings sidebar.
@@ -38,7 +36,7 @@ This setting applies globally to the character. Every application, SDK version, 
 {% endstep %}
 
 {% step %}
-#### Start a conversation in Play Mode
+### Start a conversation in Play Mode
 
 Run your scene in the Unity Editor. Start a conversation with the character and share information the character should remember — for example:
 
@@ -48,7 +46,7 @@ Let the conversation complete naturally, then **stop Play Mode**. The session en
 {% endstep %}
 
 {% step %}
-#### Re-enter Play Mode and verify recall
+### Re-enter Play Mode and verify recall
 
 Enter Play Mode again and ask the character to reference what it learned:
 
@@ -64,7 +62,7 @@ If the character references details from the previous session, long-term memory 
 
 ***
 
-### How identity works in the editor
+## How identity works in the editor
 
 The SDK's default `DeviceEndUserIdProvider` handles identity automatically. In Play Mode, it reads or creates a persistent GUID stored in `PlayerPrefs` under the key `"convai.end_user_id"`. Every Play Mode session on the same machine uses the same GUID, so memories accumulate across sessions exactly as they would for a real user. When you stop Play Mode, Convai processes the conversation and extracts facts as `MemoryRecord` entries. On the next session, those records are injected into the character's context before it generates its first response.
 
@@ -72,7 +70,7 @@ The GUID persists as long as `PlayerPrefs` is not cleared. Clearing `PlayerPrefs
 
 ***
 
-### Identity in player builds
+## Identity in player builds
 
 In a player build, `DeviceEndUserIdProvider` first tries `SystemInfo.deviceUniqueIdentifier`. If that value is unavailable or invalid, it falls back to the same `PlayerPrefs` GUID approach used in the editor.
 
@@ -86,7 +84,7 @@ For applications where users log in with accounts, replace `DeviceEndUserIdProvi
 
 ***
 
-### Next steps
+## Next steps
 
 {% content-ref url="end-user-identity.md" %}
 [end-user-identity.md](end-user-identity.md)

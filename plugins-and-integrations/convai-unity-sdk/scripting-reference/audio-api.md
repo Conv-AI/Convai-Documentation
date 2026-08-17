@@ -1,7 +1,7 @@
 ---
 title: Audio API
 description: Scripting reference for ConvaiAudio — microphone muting, per-character audio control, audio playback unlock, and listening state management.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 `ConvaiAudio` is the audio facade on `ConvaiManager`, providing scripted control over microphone capture, per-character remote audio output, and audio playback unlock. It separates concerns cleanly: microphone input (what you send to Convai), character audio output (what you hear from characters), and the WebGL audio playback gate.
@@ -35,9 +35,7 @@ if (audio == null) return; // manager not yet bootstrapped
 | `StartListeningAsync(int microphoneIndex = 0, CancellationToken ct = default)` | `IConvaiOperation<Unit>` | Starts microphone capture on the specified device index |
 | `StopListeningAsync(CancellationToken ct = default)`                           | `IConvaiOperation<Unit>` | Stops microphone capture                                |
 
-{% hint style="info" %}
 The `microphoneIndex` parameter in `StartListeningAsync` corresponds to an index into the list returned by `IMicrophoneDeviceService.GetAvailableDevices()`. Use `ConvaiManager.ActiveManager.TryGetMicrophoneDeviceService(out var svc)` to enumerate devices by name before selecting an index. Index `0` uses the system default microphone.
-{% endhint %}
 
 ### Events
 

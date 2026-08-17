@@ -1,6 +1,6 @@
 ---
 title: XR headsets
-last_reviewed: 4.2.0
+last_reviewed: "4.5.0"
 description: >-
   Find guides for deploying the Convai Unity SDK on XR headsets, including Meta
   Quest Vision passthrough setup and custom XR frame source implementation.
@@ -12,7 +12,7 @@ The Convai Unity SDK runs on Android-based XR headsets (Meta Quest, Horizon OS, 
 Convai Unity VR setup for Meta Quest
 {% endembed %}
 
-### Core feature support
+## Core feature support
 
 | Feature              | Android XR (Meta Quest, Horizon OS)            | Windows XR                              |
 | -------------------- | ---------------------------------------------- | --------------------------------------- |
@@ -31,6 +31,10 @@ For Android-based XR headsets, all core setup follows the Android platform guide
 [ios-and-android.md](ios-and-android.md)
 {% endcontent-ref %}
 
+## Push-to-talk on Meta Quest
+
+On Meta Quest, push-to-talk reads the controller's A, B, X, and Y buttons through Unity's XR input API instead of a keyboard key. If the active XR controller cannot be read, or disconnects mid-press, the SDK fails closed and stops microphone capture rather than leaving it open. Keyboard and non-XR joystick input are unaffected. See [Configure conversation input mode](../getting-started/configure-conversation-input-mode.md) for the full button mapping.
+
 Vision is the only feature that varies between XR platforms. The decision tree below shows when extra setup is needed:
 
 ```mermaid
@@ -45,7 +49,7 @@ graph TD
     H --> I[See Vision on other XR platforms below]
 ```
 
-### Vision on Meta Quest
+## Vision on Meta Quest
 
 `QuestVisionFrameSource` streams the passthrough camera feed from a Meta Quest 3 or 3S headset to Convai, enabling the AI character to see and respond to the real world the learner is looking at. The component uses reflection to bind to the Meta XR SDK's `PassthroughCameraAccess` at runtime — the Convai SDK has no hard compile-time dependency on any Meta SDK package.
 
@@ -53,7 +57,7 @@ For the complete setup guide, Inspector reference, and troubleshooting steps, se
 
 <table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Meta Quest Vision setup</strong><br>Configure QuestVisionFrameSource, declare required manifest permissions, and validate passthrough Vision on Quest 3 and 3S.</td><td><a href="meta-quest-vision.md">meta-quest-vision.md</a></td></tr></tbody></table>
 
-### Vision on other XR platforms
+## Vision on other XR platforms
 
 No built-in frame source exists for non-Meta XR headsets — OpenXR-only devices, Windows Mixed Reality, HoloLens, or Android XR platforms that do not expose a passthrough camera through the Meta XR SDK.
 
@@ -102,7 +106,7 @@ public class CustomXRVisionFrameSource : MonoBehaviour, IVisionFrameSource
 
 Assign your custom source to `ConvaiVisionPublisher` via its Inspector field. See the Vision feature documentation for the full `IVisionFrameSource` contract, publishing policies, and debug preview setup.
 
-### Next steps
+## Next steps
 
 {% content-ref url="meta-quest-vision.md" %}
 [meta-quest-vision.md](meta-quest-vision.md)

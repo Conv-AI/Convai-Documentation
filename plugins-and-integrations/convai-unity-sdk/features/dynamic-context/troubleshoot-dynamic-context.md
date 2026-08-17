@@ -4,7 +4,7 @@ description: >-
   Fix common dynamic context problems in the Convai Unity SDK, including
   missed updates, delayed responses, and reset behavior that does not clear
   everything.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Most Dynamic Context problems in the relay and tracker flow come from one of three categories: a call made before the character entered a conversation, a reaction mode that produced an unexpected response, or a `ConvaiDynamicContextRelay` that cannot resolve a `ConvaiCharacter`. Work through the first-line investigation checklist below — most issues resolve within the first two or three steps.

@@ -1,7 +1,7 @@
 ---
 title: How scene metadata works
 description: Understand the registration and delivery flow for scene object metadata, and learn when to use Scene Metadata versus Dynamic Context.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 `ConvaiObjectMetadata` and `ConvaiMetadataRegistry` form the core pipeline that collects object descriptions from your scene and delivers them to Convai as each character becomes ready. That pipeline also keeps a connected character's object awareness current afterward — a registered object can re-sync its static description on change, or report changing runtime state through tracked properties. `ConvaiSceneMetadataCollector` is an optional companion component for manual control, statistics, and auditing — it is not required for the automatic delivery described below. Understanding both paths helps you configure the system correctly and debug it when objects are not reaching the character.

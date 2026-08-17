@@ -1,7 +1,7 @@
 ---
 title: Scene metadata quick start
 description: Add object awareness to a Unity scene so a Convai character can reference named objects in conversation from the moment it connects.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Set up Scene Metadata to give a Convai character awareness of named objects in your scene. By the end, your character knows what objects exist and can reference them in conversation — entirely from the Inspector.

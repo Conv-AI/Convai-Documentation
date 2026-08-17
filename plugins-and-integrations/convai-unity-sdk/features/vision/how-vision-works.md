@@ -1,7 +1,7 @@
 ---
 title: How vision works
 description: Understand the Vision pipeline architecture, including frame sources, publish policy, the WebRTC track to Convai, and how dynamic vision context fits in.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Vision streams a live camera feed from Unity to Convai, where it is processed alongside the audio conversation. This page explains the pipeline architecture, the role of each component, and what the SDK does at runtime when Vision starts.
@@ -76,7 +76,7 @@ Dynamic vision context is an additive, opt-in alternative to processing every pu
 
 Dynamic vision context does not replace the frame-source pipeline described in Architecture — it depends on it. A frame source and `ConvaiVisionPublisher` must still publish a WebRTC video track for Convai to sample; dynamic vision context only changes how Convai decides which sampled frames reach the model and when a frame update should make the character respond.
 
-The reason this exists is token cost, not network transport. An attached frame costs image tokens on every model turn a character produces — including ordinary voice and text turns, since silently absorbed vision frames still ride along. At a provider's default downscale (Gemini's 384 px admission costs roughly 258 image tokens per frame), the default five-frame attach adds roughly 1,290 tokens to every turn while dynamic vision context is enabled. Dynamic vision context exists to make that cost an explicit, tunable choice instead of an implicit one.
+The reason this exists is token cost, not network transport. An attached frame costs image tokens on every model turn a character produces — including ordinary voice and text turns, since silently absorbed vision frames still ride along. Token accounting and provider resolution are backend behavior, not a stable SDK contract, so treat the acknowledgement metadata (`ImageTokensEstimate` on `VisionContextTriggerReceived`) and current Convai service documentation as the source of truth when estimating cost, rather than a fixed per-frame figure. Dynamic vision context exists to make that cost an explicit, tunable choice instead of an implicit one.
 
 `ConvaiVisionContextMode` on `ConvaiRoomManager` controls whether this backend sampling is requested at connect time:
 

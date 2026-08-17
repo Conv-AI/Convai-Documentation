@@ -1,6 +1,6 @@
 ---
 title: Chat and subtitle modes
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 description: >-
   Add scrolling chat history, live subtitle captions, or both to a scene, and
   configure how each transcript display looks and behaves.

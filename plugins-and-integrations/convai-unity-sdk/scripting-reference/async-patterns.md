@@ -1,7 +1,7 @@
 ---
 title: Async patterns
 description: Consume IConvaiOperation<T> and IConvaiStream<T> using async/await, coroutines, chaining, progress tracking, cancellation, and streams.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 `IConvaiOperation<T>` and `IConvaiStream<T>` support multiple consumption patterns so you can use the style that fits your codebase — pure async/await, Unity coroutines, or a mix of both. For type definitions and member references, see [Operation & Stream Types](operation-and-stream-types.md).
@@ -245,7 +245,6 @@ var session = manager.ConnectAsync().AsTask().Result;
 Use `await` or `ToCoroutine()` instead.
 {% endhint %}
 
-{% hint style="warning" %}
 Always dispose streams. Failing to `await using` a stream leaks the underlying resources.
 
 ```csharp
@@ -257,7 +256,6 @@ await foreach (var item in stream.ReadAllAsync()) { ... }
 await using var stream = GetTokenStream();
 await foreach (var item in stream.ReadAllAsync()) { ... }
 ```
-{% endhint %}
 
 ***
 

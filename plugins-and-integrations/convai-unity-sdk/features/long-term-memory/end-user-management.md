@@ -1,10 +1,7 @@
 ---
 title: Manage end-user records
-last_reviewed: 4.2.0
-description: >-
-  Browse and manage end-user records from the Convai Configuration Window or via
-  the EndUsersService scripting API — covers the editor tool, all four methods,
-  and pagination.
+last_reviewed: "4.5.0"
+description: Browse and manage end-user records from the Convai Editor window or from a script, covering the editor tool, every method, and pagination.
 ---
 
 The Convai Unity SDK tracks every user who connects with a memory-enabled character as an **end-user record**. Each record stores the user's stable identifier, last activity timestamps, and any metadata you sent during connection. You can browse and delete these records from the Unity editor or manage them programmatically with `client.EndUsers`.
@@ -50,7 +47,7 @@ See each method below for full examples.
 
 ***
 
-### `EndUserDetails` fields
+## `EndUserDetails` fields
 
 Each end-user record is represented by `EndUserDetails`:
 
@@ -67,9 +64,9 @@ Each end-user record is represented by `EndUserDetails`:
 
 ***
 
-### Scripting API
+## Scripting API
 
-#### List end users
+### List end users
 
 Retrieve all end-user records with cursor-based pagination. The default limit is 50 records per page.
 
@@ -131,7 +128,7 @@ var response = await client.EndUsers.ListAsync(
 
 ***
 
-#### Get a single end user
+### Get a single end user
 
 Retrieve details for one specific user by their `endUserId`.
 
@@ -143,7 +140,7 @@ Debug.Log($"Display name: {user.DisplayName}");
 
 ***
 
-#### Update user metadata
+### Update user metadata
 
 Update one or more metadata keys for a user. The patch operation preserves keys you do not include — it does not replace the entire metadata object.
 
@@ -160,7 +157,7 @@ Debug.Log($"Updated metadata for {updated.EndUserId}.");
 
 ***
 
-#### Delete an end user
+### Delete an end user
 
 {% hint style="danger" %}
 `DeleteAsync` removes the end-user record **and all memory records for that user across all characters**. Unlike `MemoryService.DeleteAllAsync`, which is scoped to one character, this operation removes the user globally. This cannot be undone.
@@ -177,7 +174,7 @@ else
 
 ***
 
-### `DeleteAllAsync` vs. `DeleteAsync`
+## `DeleteAllAsync` vs. `DeleteAsync`
 
 | Operation                                              | Scope                     | What is removed                                         |
 | ------------------------------------------------------ | ------------------------- | ------------------------------------------------------- |
@@ -188,7 +185,7 @@ Use `DeleteAllAsync` when you want to reset a user's memory for a specific chara
 
 ***
 
-### Next steps
+## Next steps
 
 {% content-ref url="memory-management-api.md" %}
 [memory-management-api.md](memory-management-api.md)

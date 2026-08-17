@@ -1,7 +1,7 @@
 ---
 title: Narrative design scripting reference
 description: Reference for controlling a character's narrative flow from code, covering section events, trigger invocation, scripted speech, and data fetching.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 The Inspector workflow covers the majority of use cases. This page documents the full C# surface for situations where you need programmatic control — dynamic character switching, async data fetching at runtime, runtime-generated narrative flows, or deep integration with your own game systems.

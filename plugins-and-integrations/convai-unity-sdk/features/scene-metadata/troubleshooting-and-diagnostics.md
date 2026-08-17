@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot scene metadata
 description: Fix scene metadata problems including empty payloads, missing collection logs, dependency injection failures, and AI characters ignoring scene objects.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Most Scene Metadata problems fall into one of three categories: the payload was never sent, the payload was sent but objects are excluded, or the descriptions are too vague for the AI to use effectively.
@@ -27,17 +27,17 @@ void Start()
 
 ## Symptom reference
 
-| Symptom                                       | Likely Cause                                                         | Fix                                                                                            |
-| --------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| No collection log in Console                  | `Collect On Start` disabled and no manual call                       | Enable **Collect On Start** or call `CollectAndSendSceneMetadata()` after the session connects |
-| `"Dependencies not injected"` error           | `ConvaiSceneMetadataCollector` is in a scene without `ConvaiManager` | Add `ConvaiManager` to the scene; the collector resolves it automatically                      |
-| `Collected 0 metadata objects` in the log    | All objects excluded from the payload                                | See [Empty payload](#empty-payload) below                                                      |
-| Object Name validation warning in Editor      | Name is empty or exceeds 50 characters                               | Set a non-empty name under 50 characters                                                       |
-| AI ignores objects despite confirmed send     | Descriptions are absent or too vague                                 | See [Improving descriptions](#improving-descriptions) below                                    |
-| Object present in registry but not in payload | `Include In Metadata` is unchecked, or component is disabled         | Check the field in Inspector; re-enable the component if needed                                |
-| `Is Registered` shows `false` in Inspector    | Component was added but `OnEnable` has not fired                     | Ensure the GameObject and component are both enabled                                           |
-| Tracked property never updates on the character | **Source Member Name** does not match a property, field, or zero-argument method on **Source Component** | Fix the member name; a mismatch fails silently and the entry keeps its last known value instead of erroring |
-| Static metadata edit does not reach a connected character | The session is not connected, or the character is not currently in a conversation | Live re-sync only flushes while the character is connected and in conversation — reconnect or wait for the next connect-time send |
+| Symptom                                       | Likely Cause                                                         | Fix                                                                                            | Verify |
+| --------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------ |
+| No collection log in Console                  | `Collect On Start` disabled and no manual call                       | Enable **Collect On Start** or call `CollectAndSendSceneMetadata()` after the session connects | Re-enter Play Mode and confirm the `[ConvaiSceneMetadataCollector] Collected N metadata objects...` entry appears in the Console |
+| `"Dependencies not injected"` error           | `ConvaiSceneMetadataCollector` is in a scene without `ConvaiManager` | Add `ConvaiManager` to the scene; the collector resolves it automatically                      | The error no longer appears on entering Play Mode |
+| `Collected 0 metadata objects` in the log    | All objects excluded from the payload                                | See [Empty payload](#empty-payload) below                                                      | `GetMetadataCount()` returns a value greater than `0` |
+| Object Name validation warning in Editor      | Name is empty or exceeds 50 characters                               | Set a non-empty name under 50 characters                                                       | The Console warning clears after the next `OnValidate` pass (deselect and reselect the GameObject) |
+| AI ignores objects despite confirmed send     | Descriptions are absent or too vague                                 | See [Improving descriptions](#improving-descriptions) below                                    | Ask the character a question that requires the rewritten detail and confirm it appears in the reply |
+| Object present in registry but not in payload | `Include In Metadata` is unchecked, or component is disabled         | Check the field in Inspector; re-enable the component if needed                                | The object appears in `GetValidMetadata()` or the next `ValidateAllMetadata()` pass |
+| `Is Registered` shows `false` in Inspector    | Component was added but `OnEnable` has not fired                     | Ensure the GameObject and component are both enabled                                           | `Is Registered` shows `true` in Play Mode |
+| Tracked property never updates on the character | **Source Member Name** does not match a property, field, or zero-argument method on **Source Component** | Fix the member name; a mismatch fails silently and the entry keeps its last known value instead of erroring | The character's response reflects the new value within one 0.25-second poll interval |
+| Static metadata edit does not reach a connected character | The session is not connected, or the character is not currently in a conversation | Live re-sync only flushes while the character is connected and in conversation — reconnect or wait for the next connect-time send | Ask the character about the edited object after reconnecting and confirm the updated text is used |
 
 ## Empty payload
 

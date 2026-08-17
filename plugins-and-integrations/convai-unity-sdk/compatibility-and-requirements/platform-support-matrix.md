@@ -1,7 +1,7 @@
 ---
 title: Platform support matrix
 description: Reference for Convai Unity SDK platform support, including feature availability across Windows, macOS, Android, iOS, Meta Quest, and WebGL.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai Unity SDK runs on all major Unity deployment targets. Feature availability varies by platform — use the matrix below to confirm support before building for a specific target.

@@ -3,21 +3,22 @@ title: Configure the narrative design manager
 description: >-
   Add and configure ConvaiNarrativeDesignManager on a character, sync sections
   from Convai, and wire per-section Unity Events in the Inspector.
+last_reviewed: "4.5.0"
 ---
 
 `ConvaiNarrativeDesignManager` is the permanent listening post on your character. It subscribes to section-change signals from Convai and forwards them to the Unity Events you configure in the Inspector. One Manager per character is the standard setup; it lives on the character GameObject for the lifetime of the scene.
 
-### Add the component
+## Add the component
 
 {% stepper %}
 {% step %}
-#### Select the character GameObject
+### Select the character GameObject
 
 Choose the GameObject that has your `ConvaiCharacter` component. The Manager auto-detects the character if both components are on the same GameObject.
 {% endstep %}
 
 {% step %}
-#### Add the component
+### Add the component
 
 In the Inspector, click **Add Component** and navigate to **Convai > Narrative Design Manager**.
 
@@ -27,7 +28,7 @@ The **Character** field is populated automatically if a `ConvaiCharacter` is on 
 {% endstep %}
 
 {% step %}
-#### Sync with the backend
+### Sync with the backend
 
 Click the **Sync with Backend** button in the Inspector. The Manager calls `FetchAndSyncFromBackend()`, which fetches your character's sections from the Convai dashboard and populates the **Narrative Sections** list.
 
@@ -48,7 +49,7 @@ flowchart TD
     G --> H[Error displayed in Inspector]
 ```
 
-### Sync status
+## Sync status
 
 The **Sync Status** header in the Inspector shows the current state of the last fetch operation. All fields are read-only.
 
@@ -72,7 +73,7 @@ The sync result is also reported via the `OnSectionsSynced` event (see Global ev
 | `SectionsOrphaned`    | Sections removed from the dashboard since the last sync.             |
 | `SectionsReactivated` | Sections that were orphaned but have been restored on the dashboard. |
 
-### Narrative sections
+## Narrative sections
 
 After syncing, each dashboard section appears as an entry in the **Narrative Sections** list. Every entry is a `UnitySectionEventConfig` with the following fields:
 
@@ -84,7 +85,7 @@ After syncing, each dashboard section appears as an entry in the **Narrative Sec
 | **On Section Start** | `UnityEvent`         | Invoked when the character transitions **into** this section.                                                                    |
 | **On Section End**   | `UnityEvent`         | Invoked when the character transitions **out of** this section.                                                                  |
 
-#### Wire section events
+### Wire section events
 
 Click the **+** button on **On Section Start** or **On Section End** to add a listener. You can call any public method on any GameObject in the scene — Animator parameters, AudioSource playback, UI panel activation, and so on.
 
@@ -92,7 +93,7 @@ Click the **+** button on **On Section Start** or **On Section End** to add a li
 
 <figure><img src="../../../../.gitbook/assets/image (487).png" alt="On Section Start Unity Event wired to a DoorController Unlock method"><figcaption><p>On Section Start wired to a DoorController component.</p></figcaption></figure>
 
-#### Orphaned sections
+### Orphaned sections
 
 A section becomes orphaned when it is deleted from the dashboard but still exists in your local list. Orphaned entries are preserved so you do not lose your Unity Event wiring. Their `OnSectionStart` and `OnSectionEnd` events will never fire at runtime. If you restore the section on the dashboard, click **Sync with Backend** again to reactivate it.
 
@@ -102,7 +103,7 @@ A section becomes orphaned when it is deleted from the dashboard but still exist
 **Clear All Sections** permanently removes all `UnitySectionEventConfig` entries, including all `OnSectionStart` / `OnSectionEnd` wiring. This action cannot be undone. Use it only when switching to a different character and no longer need the existing wiring. The equivalent runtime call is `ClearAllSectionConfigs()`.
 {% endhint %}
 
-### Global events
+## Global events
 
 The **Events** foldout exposes three global Unity Events that fire regardless of which specific section is active.
 
@@ -116,15 +117,15 @@ The **Events** foldout exposes three global Unity Events that fire regardless of
 
 `OnSectionDataReceived` provides the raw behavior-tree payload. Most projects do not need this directly; it is intended for advanced integrations that interpret `BehaviorTreeCode` or `BehaviorTreeConstants`.
 
-### Inspector reference
+## Inspector reference
 
-#### Character Reference header
+### Character Reference header
 
 | Field         | Default       | Description                                                                                                           |
 | ------------- | ------------- | --------------------------------------------------------------------------------------------------------------------- |
 | **Character** | Auto-detected | The `ConvaiCharacter` (or any `IConvaiCharacterAgent`) to listen to. Auto-found on the same GameObject if left blank. |
 
-#### Narrative Sections header
+### Narrative Sections header
 
 | Field                      | Default  | Description                                                                    |
 | -------------------------- | -------- | ------------------------------------------------------------------------------ |
@@ -132,13 +133,13 @@ The **Events** foldout exposes three global Unity Events that fire regardless of
 | **Active Section Count**   | Computed | Number of non-orphaned entries (read-only, shown in Inspector header).         |
 | **Orphaned Section Count** | Computed | Number of orphaned entries (read-only, shown in Inspector header).             |
 
-#### Template Keys header
+### Template Keys header
 
 | Field             | Default | Description                                                                                                                                                                 |
 | ----------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Template Keys** | Empty   | List of `UnityTemplateKeyConfig` entries (Key / Value pairs). See [Configure narrative template keys](template-keys-dynamic-narrative-variables.md) for full documentation. |
 
-#### Sync Status header
+### Sync Status header
 
 | Field                        | Default | Description                                      |
 | ---------------------------- | ------- | ------------------------------------------------ |
@@ -149,7 +150,7 @@ The **Events** foldout exposes three global Unity Events that fire regardless of
 
 <figure><img src="../../../../.gitbook/assets/image (488).png" alt="ConvaiNarrativeDesignManager Inspector showing all header sections"><figcaption><p>Full Inspector view of ConvaiNarrativeDesignManager.</p></figcaption></figure>
 
-### Next steps
+## Next steps
 
 {% content-ref url="setting-up-narrative-design-triggers.md" %}
 [setting-up-narrative-design-triggers.md](setting-up-narrative-design-triggers.md)

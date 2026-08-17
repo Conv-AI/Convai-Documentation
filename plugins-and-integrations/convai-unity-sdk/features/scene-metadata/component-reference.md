@@ -1,6 +1,6 @@
 ---
 title: Scene metadata component reference
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 description: >-
   Reference for the two components that describe scene objects to Convai and
   expose their live tracked state, including Inspector fields and lifecycle.
@@ -8,13 +8,13 @@ description: >-
 
 Two components make up the Scene Metadata system. `ConvaiObjectMetadata` goes on each object the AI should know about. `ConvaiSceneMetadataCollector` goes on the `ConvaiManager` GameObject and handles collection and transmission.
 
-### ConvaiObjectMetadata
+## ConvaiObjectMetadata
 
 **Add Component path:** `Convai → World Object`
 
 `ConvaiObjectMetadata` is a `MonoBehaviour` that describes a single GameObject to Convai. When enabled, it registers itself with `ConvaiMetadataRegistry`. When disabled or destroyed, it unregisters automatically — no manual cleanup is needed.
 
-#### Inspector fields
+### Inspector fields
 
 | Field                           | Type     | Default             | Constraint                    | Description                                                                                                                                                                                  |
 | ------------------------------- | -------- | ------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -24,7 +24,7 @@ Two components make up the Scene Metadata system. `ConvaiObjectMetadata` goes on
 | **Tracked Properties**          | `List<ConvaiTrackedContextProperty>` | _(empty)_ | Optional. | Per-entry runtime properties exposed to all connected characters as dynamic context state keys. See [Tracked properties](#tracked-properties) below.                                          |
 | **Is Registered** _(read-only)_ | `bool`   | —                   | Read-only                     | Debug indicator. Shows `true` when the component is currently registered in `ConvaiMetadataRegistry`. Visible in Play Mode.                                                                  |
 
-#### Lifecycle
+### Lifecycle
 
 `ConvaiObjectMetadata` manages its own registration:
 
@@ -39,7 +39,7 @@ GameObjects that are deactivated at runtime will not appear in the next metadata
 
 Changing **Object Name**, **Object Description**, or **Include In Metadata** through the public `ObjectName`, `ObjectDescription`, or `IncludeInMetadata` properties marks the metadata dirty and re-syncs all connected characters immediately if a session is active — the change is not deferred to the next connection.
 
-#### Validation rules
+### Validation rules
 
 `ConvaiObjectMetadata.IsValid` returns `true` when **Object Name** is non-empty and non-whitespace. The 50-character limit is enforced only as an editor warning via `GetValidationErrors()` — objects with names over 50 characters still pass `IsValid` and are included in the payload.
 
@@ -49,7 +49,7 @@ Objects with an empty **Object Name** fail `IsValid` and are excluded from `GetV
 `OnValidate` logs a warning in the Editor when validation fails, but it does not prevent the component from being added. Check the Console after adding components to catch configuration errors before entering Play Mode.
 {% endhint %}
 
-#### Tracked properties
+### Tracked properties
 
 Each entry in **Tracked Properties** is a `ConvaiTrackedContextProperty` — a serializable, per-entry definition that exposes one runtime value to every connected character as a dynamic context state key.
 
@@ -67,11 +67,11 @@ When both **Source Component** and **Source Member Name** are set, `ConvaiTracke
 
 Polling and delivery to connected characters are handled automatically by an internal `ConvaiWorldObjectPollDriver` — there is no user-facing component to add. It is created on the `ConvaiManager` GameObject when the first `ConvaiObjectMetadata` component registers, evaluates tracked properties on all registered objects every `0.25` seconds, and is destroyed when the last `ConvaiObjectMetadata` component unregisters.
 
-### ConvaiSceneMetadataCollector
+## ConvaiSceneMetadataCollector
 
 `ConvaiSceneMetadataCollector` is the orchestrator. It watches for room connection events, reads all valid metadata from `ConvaiMetadataRegistry`, and sends the payload to Convai. In the Inspector, click **Add Component** and search for `Convai Scene Metadata Collector`. Place it on any GameObject in the same scene as `ConvaiManager` — its required dependencies are resolved automatically at startup via `ConvaiManager.ActiveManager`.
 
-#### Inspector fields
+### Inspector fields
 
 | Field                                  | Type    | Default | Description                                                                                                                                                                                                 |
 | -------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -80,7 +80,7 @@ Polling and delivery to connected characters are handled automatically by an int
 | **Last Collected Count** _(read-only)_ | `int`   | —       | Shows the number of objects included in the most recent collection. Visible in Play Mode.                                                                                                                   |
 | **Last Collection Time** _(read-only)_ | `float` | —       | Shows the duration in seconds of the most recent collection operation. Visible in Play Mode.                                                                                                                |
 
-#### Dependencies and injection
+### Dependencies and injection
 
 `ConvaiSceneMetadataCollector` requires two injected dependencies — `IEventHub` and `IConvaiRoomConnectionService` — provided by `ConvaiManager` automatically at startup. No manual wiring is needed.
 
@@ -90,7 +90,7 @@ If the dependencies are not injected (for example, if `ConvaiManager` is missing
 Do not add `ConvaiSceneMetadataCollector` to a scene without `ConvaiManager`. When `ConvaiManager` is missing, the component logs `"[ConvaiSceneMetadataCollector] Dependencies not injected. Add ConvaiManager to scene."` as an **error** in the Console and disables itself.
 {% endhint %}
 
-#### Manual trigger
+### Manual trigger
 
 When **Collect On Start** is disabled, call `CollectAndSendSceneMetadata()` from a script to trigger collection at the moment your application needs it. The method is a no-op if the room is not connected — use `IsReadyToSendMetadata()` to check readiness first.
 
@@ -101,7 +101,7 @@ if (_collector.IsReadyToSendMetadata())
 
 For the full public method list, see [Scene metadata scripting API](scripting-api-reference.md).
 
-### Next steps
+## Next steps
 
 {% content-ref url="scripting-api-reference.md" %}
 [Scene metadata scripting API](scripting-api-reference.md)

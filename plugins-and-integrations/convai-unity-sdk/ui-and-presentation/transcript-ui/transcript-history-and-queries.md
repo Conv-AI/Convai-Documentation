@@ -4,7 +4,7 @@ description: >-
   Read the current conversation turn timeline from code, react to live turn
   changes as they happen, and export session history as text, Markdown, or
   JSON.
-last_reviewed: 4.4.0
+last_reviewed: "4.5.0"
 ---
 
 `ConvaiManager.ActiveManager.Transcripts` gives your code structured access to every conversation turn in the current room session. Read the current state through `CurrentTimeline` and `GetTurns`, react to live changes through `Subscribe` and `SubscribeCommitted`, and export finished turns through `Export`. This facade does not control what appears on screen — see [Transcript UI](./) for that. For the full API reference, see [Transcript API](../../scripting-reference/transcript-api.md).

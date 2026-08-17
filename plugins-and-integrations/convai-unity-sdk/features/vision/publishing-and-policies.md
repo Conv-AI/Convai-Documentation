@@ -1,7 +1,7 @@
 ---
 title: Publish policies
 description: Reference for Vision publish policies, including FPS and bitrate budgets, runtime control methods, auto-publish behavior, and WebGL-specific behavior.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 `ConvaiVisionPublisher` manages the WebRTC video track that carries the camera feed from Unity to Convai. A publish policy controls the client-side frame rate and bitrate budget; it does not configure any AI model or backend vision provider.

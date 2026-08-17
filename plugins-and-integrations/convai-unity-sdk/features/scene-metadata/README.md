@@ -1,7 +1,7 @@
 ---
 title: Scene metadata
 description: Find guides, component reference, and examples for Scene Metadata — the feature that gives Convai characters awareness of objects in your Unity scene.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Scene Metadata gives Convai characters awareness of the objects in your Unity scene. Add a `ConvaiObjectMetadata` component to any GameObject to describe what it is — that static name, description, and include flag send automatically when a session connects, and re-sync live to every connected character if you edit them afterward, no scripting required. The same component can also expose optional tracked properties that report an object's live runtime state to characters while a session is active.

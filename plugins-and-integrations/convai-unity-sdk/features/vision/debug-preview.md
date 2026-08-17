@@ -3,7 +3,7 @@ title: Vision debug preview
 description: >-
   Verify the vision camera feed and confirm that vision status requests and
   triggers reach Convai using Unity Editor debug tools.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 `VisionDebugPreview` is an Editor-only component that renders the live camera feed as a screen overlay and displays a capture statistics panel. Use it to answer "What does the AI actually see?" during development before shipping. The Sample Debug Hub's **Vision** panel complements it by confirming that vision status requests and triggers actually reach Convai.

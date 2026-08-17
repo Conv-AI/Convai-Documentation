@@ -3,7 +3,7 @@ title: Vision quick start
 description: >-
   Add Vision to an existing Convai scene so a character can see and respond to
   live camera input, using the SDK's automatic component setup.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Add Vision to an existing Convai scene in three steps. The SDK adds and wires the required components automatically when you set `ConvaiRoomManager` to Video mode.

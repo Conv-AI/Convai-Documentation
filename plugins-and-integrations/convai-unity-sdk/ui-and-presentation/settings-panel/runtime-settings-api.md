@@ -1,6 +1,6 @@
 ---
 title: Runtime settings API
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 description: >-
   Reference for IConvaiRuntimeSettingsService — read current settings, apply
   patches, react to changes, and reset to defaults from code.

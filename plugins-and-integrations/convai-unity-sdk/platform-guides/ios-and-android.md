@@ -3,7 +3,7 @@ title: iOS and Android
 description: >-
   Declare microphone and camera permissions for iOS and Android builds —
   omitting them causes crashes on iOS and silent failures on Android.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 iOS and Android builds use the native transport path. All core SDK features — voice conversation, lip sync, actions, emotion, spatial audio, and Vision — work identically on both platforms. The only required implementation work is declaring OS-level permissions for microphone and camera access before your build goes to a device or an app store.

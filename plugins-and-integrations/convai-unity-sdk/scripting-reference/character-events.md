@@ -1,7 +1,7 @@
 ---
 title: Character events
 description: Reference for character events — speech, emotion, transcripts, turn lifecycle, and actions — via relay component or the `ConvaiEvents` C# hub.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 Character events let you drive UI, animation, gameplay, and assessment logic in response to what AI characters say, feel, and do. The SDK provides two Inspector relay components for no-code wiring and a typed C# event hub for scripted reactions. Both approaches observe the same underlying events.
@@ -91,9 +91,7 @@ public class CharacterReactionHandler : MonoBehaviour
 | `Emotion`       | `string` | Emotion label, e.g. `"Joy"`, `"Sadness"`                           |
 | `Intensity`     | `int`    | Raw intensity value; range **1–3** (1 = low, 2 = medium, 3 = high) |
 
-{% hint style="info" %}
 The relay exposes the raw `Intensity` integer (1–3). To normalize to 0.0–1.0, compute `(Intensity - 1) / 2f`. For the normalized value and boolean helpers (`IsNeutral`, `IsHighIntensity`), subscribe to `ConvaiEvents.OnCharacterEmotionChanged` in C# — the domain event payload includes these fields.
-{% endhint %}
 
 ### `CharacterTurnCompletedRelayData` fields
 
@@ -223,9 +221,7 @@ public class CharacterAudioIndicator : MonoBehaviour
 }
 ```
 
-{% hint style="info" %}
 `OnSessionStateChanged` on `ConvaiCharacter` reflects this character's individual session, not the room-level state. In multi-character scenes, each character has its own session state. Use `ConvaiManager.ActiveManager.Events.OnSessionStateChanged` for the room-level state.
-{% endhint %}
 
 ***
 

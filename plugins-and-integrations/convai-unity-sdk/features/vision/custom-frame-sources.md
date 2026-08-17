@@ -1,7 +1,7 @@
 ---
 title: Custom frame sources
 description: Implement IVisionFrameSource to publish a custom video pipeline to Convai, including the Y-flip requirement, lifecycle state pattern, and auto-discovery rules.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Implement `IVisionFrameSource` to publish any custom video pipeline — a video file, a custom render texture, or a screen capture utility — without modifying the publishing layer. Once your component is on the scene, `ConvaiVisionPublisher` discovers and streams it automatically.
@@ -183,6 +183,14 @@ public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource, IVisionFra
     // ... rest of IVisionFrameSource implementation
 }
 ```
+
+## Custom Inspectors
+
+`IVisionFrameSource` is the only supported extension point for a custom video pipeline. The SDK's own frame source inspectors are internal implementation detail, not an extension surface.
+
+{% hint style="warning" %}
+**Breaking in SDK 4.5.0.** `ConvaiVisionBaseEditor` — the shared base class behind the built-in `CameraVisionFrameSource`, `WebcamVisionFrameSource`, and `QuestVisionFrameSource` inspectors — changed from `public` to `internal`. A project that derived a custom Inspector from it no longer compiles. Write a standalone `CustomEditor` for your `IVisionFrameSource` component instead of subclassing the SDK's editor base.
+{% endhint %}
 
 ## Auto-discovery
 

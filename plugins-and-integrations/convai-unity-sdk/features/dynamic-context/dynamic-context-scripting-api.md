@@ -3,7 +3,7 @@ title: Dynamic context scripting API
 description: >-
   Reference for the Convai Unity SDK dynamic context scripting interface,
   including every method, the respond mode enum, and the attention object API.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 `ConvaiCharacter.DynamicContext` returns the `IConvaiDynamicContext` interface — the scripting surface for tracked state, chronological events, attention-object updates, and raw context sends. This page documents every interface member, the `ConvaiRespondMode` enum that controls whether an update triggers a spoken reply, and the `ConvaiDynamicContextUpdate` type used by `Apply`.
@@ -18,7 +18,7 @@ IConvaiDynamicContext context = character.DynamicContext;
 `DynamicContext` is available on every `ConvaiCharacter` instance and requires no additional setup.
 
 {% hint style="warning" %}
-`ConvaiContextReactionMode` is removed as of SDK 4.3.0. Every method below takes a `ConvaiRespondMode` value instead. See [Migration from ConvaiContextReactionMode](#migration-from-convaicontextreactionmode) for the full migration table.
+`ConvaiContextReactionMode` is removed as of SDK 4.4.0. Every method below takes a `ConvaiRespondMode` value instead. See [Migration from ConvaiContextReactionMode](#migration-from-convaicontextreactionmode) for the full migration table.
 {% endhint %}
 
 ## Method reference
@@ -239,7 +239,7 @@ Used by `Apply` and `ConvaiDynamicContextUpdate`.
 
 ### Migration from `ConvaiContextReactionMode`
 
-`ConvaiContextReactionMode` is removed in SDK 4.3.0. Every dynamic-context method uses `ConvaiRespondMode` instead.
+`ConvaiContextReactionMode` is removed in SDK 4.4.0. Every dynamic-context method uses `ConvaiRespondMode` instead.
 
 | Old value (`ConvaiContextReactionMode`) | New value (`ConvaiRespondMode`) |
 |---|---|

@@ -4,7 +4,7 @@ description: >-
   Windows, macOS, and Linux builds require no extra SDK configuration — all
   features including Vision, spatial audio, and screen share work after standard
   setup.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 Desktop builds have no platform-specific configuration requirements. All SDK features work without additional setup — no permission declarations, no manifest changes, no gesture handling. Microphone access, audio playback, spatial audio, Vision, and screen share all function immediately after the standard SDK setup.

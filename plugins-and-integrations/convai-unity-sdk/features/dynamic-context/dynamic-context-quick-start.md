@@ -3,7 +3,7 @@ title: Dynamic context quick start
 description: >-
   Add a Dynamic Context Relay component to an NPC, send a tracked update from
   a UI button, and confirm the character references it.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 This guide adds a `ConvaiDynamicContextRelay` component to an NPC, wires a UI button to send a tracked context update, and confirms the character references that update in conversation. Use it after a `ConvaiCharacter` already connects and responds to speech in Play mode.

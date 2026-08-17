@@ -1,7 +1,7 @@
 ---
 title: Long-term memory
 description: Find all long-term memory guides — enable memory on characters, manage user identity, use the memory API, and access the scripting reference.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 Long-term memory (LTM) lets Convai characters retain facts about individual users across separate conversation sessions. This section covers how the system works, how to enable it, how to manage user identity and records, and the complete scripting API.
