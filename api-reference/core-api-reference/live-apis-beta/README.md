@@ -31,6 +31,7 @@ The **Live APIs** act as the bridge between your AI characters and users, enabli
 | Page | What it covers |
 | ---- | -------------- |
 | [Connect API](connect-api.md) | Opening a session and every option you can configure on it |
+| [Use multi-character sessions](multi-character-sessions.md) | Creating a shared room with multiple character instances, routing turns, and updating the roster |
 | [Turn lifecycle and message ordering](turn-lifecycle-and-message-ordering.md) | How a bot turn is delivered, which ordering you can rely on, and field presence rules |
 | [Response contract and parsing](response-contract-and-parsing.md) | How speech, actions, and emotion are separated — and exactly what the server removes from the spoken response |
 | [Message Glossary](message-glossary.md) | Every message type at a glance |
