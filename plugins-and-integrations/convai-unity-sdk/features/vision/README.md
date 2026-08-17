@@ -6,14 +6,16 @@ last_reviewed: "4.5.0"
 
 Vision gives Convai characters the ability to see what is happening inside your Unity scene. A frame source captures images from a Unity camera, physical webcam, or Meta Quest passthrough feed, and the SDK streams them to Convai over WebRTC alongside the audio conversation.
 
-## Platform support
+## Platform paths
 
-| Platform | Supported frame sources | Notes |
+| Platform | SDK frame path | Runtime requirements |
 | --- | --- | --- |
-| PC / Mac / Console | `CameraVisionFrameSource`, `WebcamVisionFrameSource` | Full RenderTexture pipeline; max 30 fps |
-| Android / iOS | `CameraVisionFrameSource`, `WebcamVisionFrameSource` | Webcam source requests camera permission at startup |
-| WebGL | _(Canvas, automatic)_ | `canvas.captureStream()` path — no frame source component needed; frame rate capped at 15 fps; **HTTPS required** |
+| Windows / macOS / Linux | `CameraVisionFrameSource`, `WebcamVisionFrameSource` | Validate the selected camera, native build, and target render pipeline; max policy rate is 30 fps |
+| Android / iOS | `CameraVisionFrameSource`, `WebcamVisionFrameSource` | Webcam source requires device camera permission |
+| WebGL | _(Canvas, automatic)_ | `canvas.captureStream()` path — no frame source component needed; built-in policy defaults are at most 15 fps; **HTTPS required** |
 | Meta Quest 3 / 3S | `QuestVisionFrameSource` | Requires Meta XR SDK and `horizonos.permission.HEADSET_CAMERA` |
+
+This table inventories SDK paths. It does not replace validation on the target device, render pipeline, browser, or distributed package.
 
 {% hint style="info" %}
 Vision requires `ConvaiRoomManager.Connection Type` set to **Video**. If it is set to `Audio`, `ConvaiVisionPublisher` remains idle regardless of how other components are configured.
@@ -27,7 +29,7 @@ Vision requires `ConvaiRoomManager.Connection Type` set to **Video**. If it is s
 <tr><td><strong>How vision works</strong><br>Understand the pipeline architecture, key concepts, component placement, and the startup sequence.</td><td><a href="how-vision-works.md">how-vision-works.md</a></td></tr>
 <tr><td><strong>Dynamic vision context</strong><br>Turn on frame sampling so a character reasons over buffered frames instead of every incoming one, using the same respond-mode vocabulary as dynamic context.</td><td><a href="dynamic-vision-context.md">dynamic-vision-context.md</a></td></tr>
 <tr><td><strong>Vision quick start</strong><br>Get a character receiving a live camera feed with a step-by-step Inspector walkthrough — no code required.</td><td><a href="quick-start.md">quick-start.md</a></td></tr>
-<tr><td><strong>Vision frame sources</strong><br>Configure CameraVisionFrameSource, WebcamVisionFrameSource, and QuestVisionFrameSource for every platform and use case.</td><td><a href="frame-sources.md">frame-sources.md</a></td></tr>
+<tr><td><strong>Vision frame sources</strong><br>Choose and configure CameraVisionFrameSource, WebcamVisionFrameSource, or QuestVisionFrameSource for the applicable platform.</td><td><a href="frame-sources.md">frame-sources.md</a></td></tr>
 <tr><td><strong>Publish policies</strong><br>Choose a publish policy, tune frame rate and bitrate, and understand platform-specific behavior including WebGL.</td><td><a href="publishing-and-policies.md">publishing-and-policies.md</a></td></tr>
 <tr><td><strong>Vision debug preview</strong><br>Visualize the active frame source as an on-screen overlay and monitor capture health in the Editor.</td><td><a href="debug-preview.md">debug-preview.md</a></td></tr>
 <tr><td><strong>Custom frame sources</strong><br>Implement IVisionFrameSource to publish any custom video pipeline — interface contract, Y-flip requirement, and minimal implementation.</td><td><a href="custom-frame-sources.md">custom-frame-sources.md</a></td></tr>

@@ -4,7 +4,7 @@ description: Understand the registration and delivery flow for scene object meta
 last_reviewed: "4.5.0"
 ---
 
-`ConvaiObjectMetadata` and `ConvaiMetadataRegistry` form the core pipeline that collects object descriptions from your scene and delivers them to Convai as each character becomes ready. That pipeline also keeps a connected character's object awareness current afterward — a registered object can re-sync its static description on change, or report changing runtime state through tracked properties. `ConvaiSceneMetadataCollector` is an optional companion component for manual control, statistics, and auditing — it is not required for the automatic delivery described below. Understanding both paths helps you configure the system correctly and debug it when objects are not reaching the character.
+`ConvaiObjectMetadata` and `ConvaiMetadataRegistry` form the core pipeline that collects object descriptions from your scene and submits them as each character becomes ready. That pipeline also stages refreshed metadata after a registered object's public properties change, and can report runtime state through tracked properties. `ConvaiSceneMetadataCollector` is an optional companion component for manual control, statistics, and auditing — it is not required for the automatic client submission described below.
 
 ## Connect-time delivery flow
 
@@ -21,7 +21,7 @@ flowchart TD
     E --> F([Convai])
 ```
 
-Objects register and unregister themselves as they are enabled and disabled — no manual cleanup is needed. Convai receives the current state of all registered objects once the character is ready, with no `ConvaiSceneMetadataCollector` required. Any change made after that point is delivered through the live re-sync path described below.
+Objects register and unregister themselves as they are enabled and disabled — no manual cleanup is needed. The client submits the current valid, included objects once the character is ready, with no `ConvaiSceneMetadataCollector` required. Any later public-property change uses the live re-sync path described below.
 
 `ConvaiSceneMetadataCollector`'s **Collect On Start** option also sends the full payload on connect if enabled — this duplicates the automatic send above and is redundant for basic setups. Use the collector when you want the statistics logging, a manual trigger point (`CollectAndSendSceneMetadata()`), or a pre-send audit (`ValidateAllMetadata()`), not because it is required for objects to reach the character. See [Scene metadata component reference](component-reference.md) for its full field list.
 
@@ -31,7 +31,7 @@ Two mechanisms keep a character's object awareness current after the initial con
 
 ### Live re-sync of static metadata
 
-Setting `ObjectName`, `ObjectDescription`, or `IncludeInMetadata` from script on a `ConvaiObjectMetadata` that is currently registered marks `ConvaiMetadataRegistry` dirty and notifies every connected character. Registering or unregistering a `ConvaiObjectMetadata` component while a session is connected — for example enabling or disabling its `GameObject`, or adding the component at runtime — has the same effect. Each notified character automatically sends a follow-up `update-scene-metadata` message on its next flush, without a manual `CollectAndSendSceneMetadata()` call.
+Setting `ObjectName`, `ObjectDescription`, or `IncludeInMetadata` from script on a `ConvaiObjectMetadata` that is currently registered marks `ConvaiMetadataRegistry` dirty and notifies every character. Registering or unregistering a `ConvaiObjectMetadata` component has the same effect. A character submits the follow-up `update-scene-metadata` payload only while connected and in conversation, on its next shared Dynamic Context flush (0.5-second debounce, capped at 3 seconds). If transport is not ready, the pending flag remains for a later flush. No manual `CollectAndSendSceneMetadata()` call is required.
 
 ### Tracked properties
 
@@ -41,10 +41,11 @@ Setting `ObjectName`, `ObjectDescription`, or `IncludeInMetadata` from script on
 flowchart TD
     A[ConvaiWorldObjectPollDriver\nevery 0.25s] -->|EvaluateTrackedProperties| B[ConvaiTrackedContextProperty\nread runtime source]
     B -->|value changed| C[DynamicContext.SetState\nObjectName.PropertyName]
-    C --> D([Convai])
+    C --> D[Shared Dynamic Context batch]
+    D --> E([Convai transport])
 ```
 
-Tracked properties do not travel as an `update-scene-metadata` message. They use the same dynamic-context transport as a manual `SetState` call, keeping a scene object's own state in sync without any polling code in your own scripts.
+Tracked properties do not travel as an `update-scene-metadata` message. They use the same staged dynamic-context transport as a manual `SetState` call, keeping a scene object's state in sync without polling code in your own scripts.
 
 {% hint style="info" %}
 Tracked properties ride the Dynamic Context channel, but they are authored declaratively on the world object in the Inspector rather than pushed imperatively from a script. Use them when an object's own state should stay in sync with the character automatically. Use a manual `SetState` call for events and state that do not belong to any single scene object.
@@ -54,14 +55,16 @@ Tracked properties ride the Dynamic Context channel, but they are authored decla
 
 Both systems inject information into a character's context, but they serve different purposes:
 
-|                       | Scene Metadata                                   | Dynamic Context                           |
+| Comparison            | Scene Metadata                                   | Dynamic Context                           |
 | --------------------- | ------------------------------------------------ | ----------------------------------------- |
 | **Who populates it**  | SDK auto-discovers objects                       | Developer manually injects state          |
 | **What it describes** | Physical objects and entities in the scene       | Runtime state, events, player actions     |
-| **When it's sent**    | At room connection, then re-sent automatically whenever a registered object's name, description, or inclusion changes | Anytime, on demand — including continuously for tracked properties, which poll every 0.25 s |
+| **When it's sent**    | Submitted at character readiness, then staged again when registration or a public metadata property changes | Staged on demand — including for tracked properties, which poll every 0.25 s |
 | **Typical use**       | "There is a fire extinguisher on the south wall" | "The trainee failed the valve check" |
 
 Use both together for the most context-rich AI experience.
+
+The source-backed flow above establishes client collection, batching, and transport calls. It does not by itself prove backend ingestion or a particular line of dialogue; verify those outcomes in Play Mode with a live room.
 
 {% hint style="info" %}
 Scene Metadata describes the static world — what exists. Dynamic Context describes the dynamic world — what is happening. They are complementary, not competing.

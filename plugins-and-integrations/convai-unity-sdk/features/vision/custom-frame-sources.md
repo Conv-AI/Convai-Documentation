@@ -11,6 +11,7 @@ Implement `IVisionFrameSource` to publish any custom video pipeline — a video 
 `IVisionFrameSource` is the minimal contract required for video streaming via `ConvaiVisionPublisher` and live feed display via `VisionDebugPreview`.
 
 ```csharp
+// API excerpt: declaration from Convai.Runtime.Vision.Sources.
 public interface IVisionFrameSource
 {
     bool IsCapturing { get; }
@@ -149,6 +150,7 @@ public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource
 Implement `IVisionFrameSourceStatusProvider` alongside `IVisionFrameSource` to expose richer lifecycle state — permission flow, delayed initialization, or structured error information. The publisher can then react to readiness changes without polling.
 
 ```csharp
+// pseudocode: add these members to the complete MyCustomFrameSource sample above.
 public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource, IVisionFrameSourceStatusProvider
 {
     // --- IVisionFrameSourceStatusProvider ---

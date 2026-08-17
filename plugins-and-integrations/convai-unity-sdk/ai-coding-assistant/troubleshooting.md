@@ -46,7 +46,7 @@ Fixing the `Unity AI Assistant` row installs a specific pinned package version t
 - Package Manager reports success, but the resulting installed version still falls outside Convai's accepted range — after the 60-second repair window elapses, the section reports that the Assistant is still unavailable and asks you to check Package Manager and the Editor log.
 
 {% hint style="warning" %}
-Convai only accepts a Unity AI Assistant version between `2.13.0` and `3.0.0`. A `2.13.0` pre-release build must be `pre.2` or later to count as compatible; any version strictly between `2.13.0` and `3.0.0` is accepted regardless of pre-release tag; and `3.0.0` itself is accepted only as a pre-release, never the final release.
+Convai accepts final `2.13.0`, `2.13.0-pre.2` or later prereleases, any version newer than `2.13.0` and older than `3.0.0`, and `3.0.0` prereleases. It does not accept prereleases older than `2.13.0-pre.2` or final `3.0.0`.
 {% endhint %}
 
 ## Troubleshooting table

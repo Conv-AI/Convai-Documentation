@@ -27,7 +27,7 @@ Add `ConvaiBodyLanguageController` to a character through **Convai > Embodiment 
 
 Body Animation and Body Language both move the character's skeleton, but they solve different problems and never fight over the same motion:
 
-| | Body Animation | Body Language |
+| Comparison | Body Animation | Body Language |
 | --- | --- | --- |
 | What it plays | Authored clips: idles, walk cycles, talk overlays, actions, pointing | No clips at all — continuous procedural motion computed every tick |
 | What it owns | The character's locomotion and any deliberate, recognizable motion | Ambient life layered on top: breathing, weight shift, posture, small gestures |

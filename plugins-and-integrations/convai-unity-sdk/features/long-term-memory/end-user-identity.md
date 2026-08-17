@@ -4,7 +4,7 @@ description: Understand how the SDK identifies users for long-term memory scopin
 last_reviewed: "4.5.0"
 ---
 
-Every long-term memory session requires a stable `end_user_id` — a string the SDK sends to Convai on every connection. Convai uses it to scope stored memories: facts extracted from a conversation are stored under the combination of `end_user_id` and `character_id`. If the identifier changes between sessions, the server treats the user as a new person and no memories carry over.
+The Unity SDK resolves an `end_user_id` for each connection and sends it with the character ID. Use a stable identifier when your application expects continuity. Memory scoping and cross-session carryover are backend outcomes, so validate them with live sessions for the same and different IDs.
 
 The SDK provides `DeviceEndUserIdProvider` as a zero-config default. For applications with user authentication, you can replace it with a custom provider that returns your account IDs.
 
@@ -14,13 +14,13 @@ The SDK provides `DeviceEndUserIdProvider` as a zero-config default. For applica
 
 `DeviceEndUserIdProvider` implements both `IEndUserIdProvider` and `IEndUserIdentityProvider`. It is registered automatically — no configuration required.
 
-**In the Unity Editor:** Always reads or creates a GUID stored in `PlayerPrefs` under the key `"convai.end_user_id"`. Every Play Mode session on the same machine shares this GUID, so memories accumulate as expected during development and testing.
+**In the Unity Editor:** Always reads or creates a GUID stored in `PlayerPrefs` under the key `"convai.end_user_id"`. Play Mode sessions in that project/editor environment reuse the GUID until the preference is cleared.
 
 **In player builds:** First attempts `SystemInfo.deviceUniqueIdentifier`. If that value is unavailable, empty, equals `SystemInfo.unsupportedIdentifier`, or consists entirely of zeros, it falls back to a `PlayerPrefs` GUID — generated once and reused across all subsequent sessions on that device.
 
 The GUID is formatted as a 32-character hex string without hyphens (e.g., `a1b2c3d4e5f6789012345678abcdef01`). You will see this format in console logs and when inspecting `EndUserDetails.EndUserId`.
 
-`PlayerPrefs` does not survive reinstalls. Clearing `PlayerPrefs` or reinstalling the application generates a new GUID. Convai treats the new GUID as a new user — all previously stored memories become inaccessible under the new ID (though they remain on the server under the old ID). For applications where data continuity across reinstalls matters, use a server-assigned account ID via a custom provider. See [Implement a custom identity provider](#implement-a-custom-identity-provider) below.
+The PlayerPrefs fallback does not survive a preference clear or reinstall. After that, the provider generates a different GUID. Use a server-assigned account ID when your application needs identity continuity across reinstalls, and live-test the backend's treatment of old and new IDs. See [Implement a custom identity provider](#implement-a-custom-identity-provider) below.
 
 ***
 
@@ -32,7 +32,7 @@ The GUID is formatted as a 32-character hex string without hyphens (e.g., `a1b2c
 
 ## Implement a custom identity provider
 
-If your application authenticates users, implement `IEndUserIdentityProvider` to return a stable, server-assigned account identifier. This ensures memories follow a user across devices and reinstalls.
+If your application authenticates users, implement `IEndUserIdentityProvider` to return a stable, server-assigned account identifier. This makes the same ID available across devices and reinstalls; verify memory continuity separately with the live backend.
 
 ### Implement the interface
 
@@ -59,7 +59,7 @@ Use your backend-assigned account ID as the identifier. Do not use email address
 
 ### Optionally attach metadata
 
-Implement `IEndUserMetadataProvider` to send display information alongside the identity. Convai stores this metadata in `EndUserDetails.Metadata` and uses the `"name"` key to populate the display name in the editor's Long-Term Memory panel.
+Implement `IEndUserMetadataProvider` to send display information alongside the identity. SDK 4.5 drops blank keys, trims non-blank keys, and lets a non-blank `ConvaiPlayer` name override the `"name"` entry. The editor computes `EndUserDetails.DisplayName` from `Metadata["name"]` when the backend returns it; verify metadata persistence with a live query.
 
 ```csharp
 using System.Collections.Generic;
@@ -89,7 +89,7 @@ public class AccountMetadataProvider : IEndUserMetadataProvider
 
 ### Register before the first connection
 
-Call `SetEndUserIdentityProvider` and `SetEndUserMetadataProvider` on `ConvaiManager` **before the first session connects**. If `ConvaiCharacter` has **Auto Connect** enabled, the connection starts immediately after `ConvaiRoomManager.Start()` completes — register your provider in `Awake()`, not `Start()`, to guarantee correct ordering.
+Call `SetEndUserIdentityProvider` and `SetEndUserMetadataProvider` on `ConvaiManager` **before the first connection starts**. `ConnectOnStart` is owned by `ConvaiRoomManager`. For already available account data, a normal `Awake()` registrar with a serialized manager reference runs after `ConvaiManager`'s earlier execution order and before the room manager's `Start()` auto-connect.
 
 ```csharp
 using Convai.Runtime.Components;
@@ -98,22 +98,30 @@ using UnityEngine;
 public class IdentityRegistrar : MonoBehaviour
 {
     [SerializeField] private ConvaiManager _convaiManager;
+    [SerializeField] private string _accountId;
+    [SerializeField] private string _displayName;
+    [SerializeField] private string _department;
 
     private void Awake()
     {
-        // Called before ConvaiRoomManager.Start() — safe for Auto Connect characters
-        string accountId = AuthService.CurrentUser.AccountId;
-        string displayName = AuthService.CurrentUser.DisplayName;
-        string department = AuthService.CurrentUser.Department;
+        if (_convaiManager == null || string.IsNullOrWhiteSpace(_accountId))
+        {
+            Debug.LogError("Assign a ConvaiManager and stable account ID.");
+            return;
+        }
 
-        _convaiManager.SetEndUserIdentityProvider(new AccountIdentityProvider(accountId));
-        _convaiManager.SetEndUserMetadataProvider(new AccountMetadataProvider(displayName, department));
+        _convaiManager.SetEndUserIdentityProvider(
+            new AccountIdentityProvider(_accountId));
+        _convaiManager.SetEndUserMetadataProvider(
+            new AccountMetadataProvider(_displayName, _department));
     }
 }
 ```
 
+This registrar uses Inspector values so the example is complete. Replace those fields with account data that is already available synchronously in `Awake()`. If login is asynchronous, disable **Connect On Start** on `ConvaiRoomManager`, await login in `Start()`, register both providers, and call `ConnectAsync()` manually.
+
 {% hint style="danger" %}
-If you call `SetEndUserIdentityProvider` after `ConnectAsync` has already been called for the current session, the provider change has no effect on the active connection. The new provider is used starting with the next `ConnectAsync` call. Always register before connecting.
+If you call `SetEndUserIdentityProvider` after `ConnectAsync` has already captured the current request, it does not rewrite that active connection. Register before connecting, or disconnect and start a new connection after changing providers.
 {% endhint %}
 
 ***
@@ -121,7 +129,7 @@ If you call `SetEndUserIdentityProvider` after `ConnectAsync` has already been c
 ## Empty or whitespace end-user ID
 
 {% hint style="danger" %}
-If `GetEndUserId()` returns an empty string, a whitespace-only string, or `null`, the SDK normalizes it to `null` before sending. Convai treats `null` as an anonymous session — **no memories are stored or retrieved**. Always ensure your identity source returns a non-empty, non-whitespace value.
+If `GetEndUserId()` returns an empty string, a whitespace-only string, or `null`, SDK 4.5 normalizes it to `null` in the connection request; the client does not fail the connection solely for that reason. Backend behavior for a missing identity is not established by Unity source. Return a non-empty value and live-test the expected memory and accounting behavior.
 {% endhint %}
 
 ***

@@ -10,6 +10,8 @@ The following examples progress from a single relay-driven trigger to scripted b
 
 {% hint style="info" %}
 All examples assume `ConvaiManager` is in the scene with a valid API key configured, and each NPC has a `ConvaiCharacter` component with a Character ID assigned and connected to Convai. The fifth example additionally assumes at least one `ConvaiCharacter` is connected when the tracked value changes, since world-object updates broadcast to every connected character.
+
+The quoted dialogue is illustrative, not a guaranteed backend response. The Unity client source establishes how values are staged and submitted; validate exact dialogue, timing, and respond-mode behavior in Play Mode against a live room.
 {% endhint %}
 
 ## Safety drill: station tracking
@@ -19,8 +21,8 @@ All examples assume `ConvaiManager` is in the scene with a valid API key configu
 ### Setup (Relay + trigger script)
 
 1. Add `ConvaiDynamicContextRelay` to the trainer NPC's GameObject (**Convai → Dynamic Context → Convai Dynamic Context Relay**).
-2. In the **Defaults** section, set **Reaction Mode** to `MustRespond` — the character should acknowledge every station change.
-3. Enable **Flush Immediately** so each station change is sent right away instead of waiting for the normal batch window.
+2. In the **Defaults** section, set **Reaction Mode** to `MustRespond` so each station change requests an LLM run.
+3. Enable **Flush Immediately** so each station change calls `Flush()` without waiting for the normal batch window. The send still requires an active conversation and pending data.
 4. Add a small trigger script to each station's trigger volume, pointing every instance at the same relay:
 
 ```csharp
@@ -46,11 +48,11 @@ public class StationZoneTrigger : MonoBehaviour
 
 ### Expected outcome
 
-When the operator enters the Fire Suppression Bay trigger, `StationZoneTrigger` calls `SetState("Station", "Fire Suppression Bay")` on the relay. The relay stages the state with `MustRespond` and flushes immediately:
+When the operator enters the Fire Suppression Bay trigger, `StationZoneTrigger` calls `SetState("Station", "Fire Suppression Bay")` on the relay. The relay stages the state with `MustRespond` and calls `Flush()` immediately. A possible response is:
 
 > "You've arrived at the Fire Suppression Bay. With the current extreme hazard rating, confirm your PPE is on before touching any equipment."
 
-The `Station` state persists in the local tracker. If the operator asks "Where am I?" at any point, the character answers with the current station value.
+The `Station` state persists in the local tracker. A later question such as "Where am I?" gives you a useful live-room check that the character can use the current value.
 
 ## Onboarding walkthrough: batch state update
 
@@ -94,7 +96,7 @@ public class OnboardingProgressTracker : MonoBehaviour
 
 ### Expected outcome
 
-`OnAccessCardAndBriefingComplete()` stages both states in one call. The SDK batches staged updates for up to `ConvaiCharacter.DynamicContextBatchDelaySeconds` (0.5 seconds by default) before sending one canonical rebuild to Convai. Because `MustRespond` was requested, the HR character responds once the batch flushes:
+`OnAccessCardAndBriefingComplete()` stages both states in one call. The SDK batches staged updates for `ConvaiCharacter.DynamicContextBatchDelaySeconds` (0.5 seconds by default, with a 3-second maximum window) before submitting one canonical rebuild. Because `MustRespond` was requested, that rebuild requests an LLM run. A possible response is:
 
 > "You've collected your access card and completed the security briefing — you're cleared for floor access. Head to Workstation 4B next."
 
@@ -120,7 +122,7 @@ public class OnboardingProgressTracker : MonoBehaviour
 * Add `ConvaiDynamicContextRelay`.
 * **Target → Auto Resolve Character:** disabled; **Character:** the docent's `ConvaiCharacter`.
 * **Defaults → Reaction Mode:** `Auto` — Convai decides whether a logged interaction is worth an immediate response.
-* Wire UI buttons directly to `AddEvent`. `AddEvent` takes a single string parameter, so it binds from a button's **On Click ()** with a static string argument — no script required. Bind one button to `EventRelay → AddEvent` with the argument `Visitor asked about the Colosseum reconstruction`, and a second button to `AddEvent` with `Visitor photographed the gladiator exhibit`.
+* Wire UI buttons directly to `AddEvent`. `AddEvent` takes a single string parameter, so it binds from a button's **On Click ()** with a static string argument — no script required. Bind one button to `EventRelay → AddEvent` with the argument `Visitor asked about the Colosseum reconstruction`, and a second button to `AddEvent` with `Visitor photographed the gladiator exhibit`. Identical text repeated before the current batch flushes creates only one event line; the same text in a later batch is recorded again.
 
 ### Expected outcome
 
@@ -132,7 +134,7 @@ Visitor asked about the Colosseum reconstruction
 Visitor photographed the gladiator exhibit
 ```
 
-The docent references both the current exhibit and the visitor's specific interactions:
+The resulting context makes both the current exhibit and the visitor's interactions available. A possible response is:
 
 > "Since you photographed the gladiator exhibit, you might enjoy the additional display on Roman military equipment in the next room."
 
@@ -172,7 +174,7 @@ public class EmergencyResponseController : MonoBehaviour
 
 ### Expected outcome
 
-Both calls stage inside the same debounce window — up to `ConvaiCharacter.DynamicContextBatchDelaySeconds` (0.5 seconds by default) after the first staged change. The tracker combines the three states and the event into one canonical rebuild and keeps the strongest reaction requested across the batch (`MustRespond` outranks `Silent`), so the character produces exactly one response covering all four changes:
+Both calls stage inside the same debounce window. The tracker combines the three states and the event into one canonical rebuild and keeps the strongest reaction requested across the batch (`MustRespond` outranks `Silent`). This produces one client `context-update` that requests an LLM run; it does not guarantee a particular response count or wording. A possible response is:
 
 > "Chemical leak at Bay 7 — all personnel evacuate the east wing immediately. Bay 7 ventilation is engaged. Do not re-enter until the all-clear is given."
 
@@ -209,7 +211,7 @@ public class ValveController : MonoBehaviour
 The SDK polls every tracked property that has a **Source Component** on a shared timer. When `ValveController.Status` changes, `ConvaiObjectMetadata` broadcasts the updated value to every connected character — not only one — using the state key `PressureValve.Status`.
 
 {% hint style="info" %}
-To push a value without a polled **Source Component**, call `SetTrackedPropertyValue("Status", "Open", ConvaiRespondMode.Auto)` on the `ConvaiObjectMetadata` component from your own script instead of wiring a reflection source. Use this when you already know exactly when the value changes and want to avoid a per-frame reflection read.
+To push a value without a polled **Source Component**, call `SetTrackedPropertyValue("Status", "Open", ConvaiRespondMode.Auto)` on the `ConvaiObjectMetadata` component from your own script instead of wiring a reflection source. Use this when you already know when the value changes and want to bypass the 0.25-second poll; the resulting Dynamic Context state still uses the shared batch window before transport.
 {% endhint %}
 
 ### Expected outcome
@@ -220,7 +222,7 @@ Once the valve opens, both the supervisor and the safety instructor receive the 
 PressureValve.Status is Open
 ```
 
-Either NPC can now reference the valve without a dedicated script feeding it — for example, the supervisor: "The pressure valve is open — hold position until it's confirmed closed." Disabling or removing the `ConvaiObjectMetadata` component removes the `PressureValve.Status` state from every character that was tracking it.
+The state is now available to either NPC without a dedicated character script feeding it. Whether either character mentions it depends on the prompt and conversation. Disabling or removing the `ConvaiObjectMetadata` component stages removal of the `PressureValve.Status` state from every character that was tracking it.
 
 ## Next steps
 

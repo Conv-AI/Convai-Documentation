@@ -6,7 +6,11 @@ description: >-
 last_reviewed: "4.5.0"
 ---
 
-Most LTM issues fall into three categories: memories not persisting between sessions, the wrong user receiving memories, and API calls failing with HTTP errors. Work through the diagnostic flow below before consulting the reference tables.
+Most LTM issues fall into three categories: identity changes, unexpected live backend behavior, and REST calls failing with HTTP errors. Work through the diagnostic flow below before consulting the reference tables.
+
+{% hint style="warning" %}
+Unity SDK source can confirm which IDs and requests the client produces. Extraction, recall, deduplication, MAU accounting, and deletion are backend behavior; reproduce them with live staging sessions and record IDs and timestamps for support.
+{% endhint %}
 
 ***
 
@@ -37,7 +41,7 @@ public class EndUserIdDebug : MonoBehaviour
 }
 ```
 
-If the ID changes between sessions, memories cannot accumulate — the server treats each new ID as a new user.
+If the ID changes between sessions, the client sends a different identity key. Keep it stable and compare live backend results for the two values.
 
 **3. Confirm the session connected successfully**
 
@@ -68,12 +72,12 @@ graph TD
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | Character never references previous sessions | LTM not enabled on character | Enable it in the character's Memory tab at [convai.com](https://convai.com) |
-| Memory works in editor, not in build | `DeviceEndUserIdProvider` returns different values in editor vs. build | Expected behavior — editor uses `PlayerPrefs` GUID; build uses device ID. Ensure the build's device ID is stable. For cross-context consistency, implement a custom `IEndUserIdentityProvider`. |
-| Memory lost after reinstall | `PlayerPrefs` cleared on reinstall | Use a server-assigned account ID via a custom provider. Device-based and GUID-based IDs do not survive reinstalls. |
+| Memory works in editor, not in build | `DeviceEndUserIdProvider` uses different sources | The Editor uses a PlayerPrefs GUID. A player prefers `SystemInfo.deviceUniqueIdentifier` and falls back to a PlayerPrefs GUID only when invalid. Log the value in both contexts or use an account provider. |
+| Identity changes after reinstall | Platform identity or the PlayerPrefs fallback changed | Use a server-assigned account ID. Device-ID stability is platform-dependent, and a fallback GUID does not survive preference deletion. |
 | Different users on the same device share memories | Multiple users sharing one device | Each user must receive a unique `end_user_id`. If `DeviceEndUserIdProvider` is in use, the device-scoped GUID is shared. Implement a custom provider that returns a per-user account ID. |
-| Custom provider not taking effect | Provider registered after `ConnectAsync` | Register in `Awake()`, before `ConvaiRoomManager.Start()` completes. If `ConvaiCharacter` has **Auto Connect** enabled, `Start()` may be too late. |
-| Memory facts look wrong or outdated | Stale records from testing | Use `client.Memory.DeleteAllAsync` to clear test data before starting a fresh evaluation. |
-| `GetEndUserId()` returns empty string | Custom provider returning null or whitespace | The SDK normalizes null/whitespace to `null` before sending, resulting in anonymous sessions. Ensure your provider always returns a non-empty value. |
+| Custom provider not taking effect | Provider registered after `ConnectAsync` | For synchronous identity, register in `Awake()` before `ConvaiRoomManager.Start()`. For async login, disable **Connect On Start** on `ConvaiRoomManager`, then register and connect manually. |
+| Memory facts look wrong or outdated | Staging may contain records from earlier tests | Use list/get calls to inspect records. If you send a deletion request, verify completion with a follow-up live query before retesting. |
+| `GetEndUserId()` returns empty string | Custom provider returning null or whitespace | SDK 4.5 normalizes the value to `null`; it does not reject the connection solely for that reason. Return a non-empty ID and verify backend behavior live. |
 
 ***
 
@@ -86,6 +90,7 @@ Use this script to confirm what the server has stored. Run it from the Inspector
 ```csharp
 using Convai.RestAPI;
 using Convai.RestAPI.Internal;
+using Convai.Runtime;
 using Convai.Runtime.Identity;
 using UnityEngine;
 
@@ -105,6 +110,7 @@ public class MemoryDiagnostic : MonoBehaviour
 
         int page = 1;
         bool hasMore = true;
+        int recordCount = 0;
 
         while (hasMore)
         {
@@ -115,11 +121,12 @@ public class MemoryDiagnostic : MonoBehaviour
             foreach (MemoryRecord record in response.Memories)
                 Debug.Log($"  [{record.Id}] {record.Memory}");
 
+            recordCount += response.Memories.Count;
             hasMore = response.HasMore;
             page++;
         }
 
-        if (page == 1)
+        if (recordCount == 0)
             Debug.Log("[LTM] No memory records found for this user–character pair.");
     }
 }
@@ -130,6 +137,7 @@ public class MemoryDiagnostic : MonoBehaviour
 Confirm programmatically whether LTM is currently enabled for a character.
 
 ```csharp
+// API usage excerpt: member of MemoryDiagnostic above.
 [ContextMenu("Check Memory Enabled")]
 private async void CheckMemoryEnabled()
 {
@@ -159,6 +167,7 @@ All Memory Management API errors throw `ConvaiRestException`. The `StatusCode` p
 
 ```csharp
 using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Convai.RestAPI;
@@ -176,7 +185,9 @@ public static class MemoryRetryHelper
             {
                 return await operation();
             }
-            catch (ConvaiRestException ex) when (ex.StatusCode == 429 || ex.StatusCode == 500)
+            catch (ConvaiRestException ex) when (
+                ex.StatusCode == HttpStatusCode.TooManyRequests ||
+                ex.StatusCode == HttpStatusCode.InternalServerError)
             {
                 if (attempt == maxAttempts - 1) throw;
 

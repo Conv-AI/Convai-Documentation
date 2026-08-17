@@ -33,7 +33,7 @@ flowchart LR
     E -->|WebRTC video track| F
 ```
 
-On WebGL, `ConvaiVisionPublisher` bypasses the frame source entirely and publishes the browser canvas directly via `canvas.captureStream()`. The WebRTC and Convai processing layers are identical across all platforms.
+On WebGL, `ConvaiVisionPublisher` bypasses the Unity frame source and uses the browser canvas through `canvas.captureStream()`. The browser still publishes a WebRTC video track to Convai, but capture, playback, permissions, and timing follow the WebGL-specific path and require hosted-browser validation.
 
 ## Key concepts
 

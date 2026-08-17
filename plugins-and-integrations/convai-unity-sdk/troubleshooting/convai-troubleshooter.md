@@ -61,7 +61,7 @@ A finding row shows up to four actions, depending on what the module that raised
 
 ## Re-check and fix everything
 
-The footer shows how long ago the report was built (`Checked just now`, `Checked N seconds ago`, or `Checked N min ago`) and a **Re-check** button that reruns every check immediately, ignoring the cached report.
+The footer shows how long ago the report was built (a fresh-result label, `Checked N seconds ago`, or `Checked N min ago`) and a **Re-check** button that reruns every check immediately, ignoring the cached report.
 
 A **Fix All** button appears in the footer whenever more than one finding across the whole report has a one-click fix. Pressing it opens a confirmation dialog listing every fix it is about to apply, then applies all of them as a single Undo step — `Ctrl+Z` reverts every one of them together. A module's own section shows a smaller **Fix These (N)** button under the same rule, scoped to the fixable findings visible in that section.
 

@@ -6,7 +6,7 @@ description: >-
 last_reviewed: "4.5.0"
 ---
 
-Add Vision to an existing Convai scene in three steps. The SDK adds and wires the required components automatically when you set `ConvaiRoomManager` to Video mode.
+Add Vision to an existing Convai scene in three steps. When `ConvaiRoomManager` is in Video mode, its Inspector identifies missing components and can add them to the Room Manager GameObject.
 
 ## Prerequisites
 
@@ -22,21 +22,13 @@ Select the `ConvaiRoomManager` GameObject in the Hierarchy. In the Inspector, se
 
 <figure><img src="../../../../.gitbook/assets/Screenshot 2026-05-13 225029 (1).png" alt="Connection Type set to Video on ConvaiRoomManager in the Inspector"><figcaption><p>Connection Type set to Video on ConvaiRoomManager.</p></figcaption></figure>
 
-A dialog appears immediately:
-
-> **Convai Vision Setup** — Dynamic vision context requires a video publisher and frame source. Add `ConvaiVisionPublisher` and `CameraVisionFrameSource` under this ConvaiRoomManager?
-
-Click **Add Components**.
-
-<figure><img src="../../../../.gitbook/assets/Screenshot 2026-05-13 225326 (1).png" alt="Convai Vision Setup dialog prompt"><figcaption><p>Convai Vision Setup dialog prompt.</p></figcaption></figure>
-
-The SDK creates a child GameObject named **ConvaiVisionRoot** under `ConvaiRoomManager` and adds both `ConvaiVisionPublisher` and `CameraVisionFrameSource` to it.
+The Inspector shows an inline **Video needs a camera feed** warning when either required component is missing. Click **Add Missing Components**. The SDK adds `ConvaiVisionPublisher` and `CameraVisionFrameSource` directly to the `ConvaiRoomManager` GameObject in one undoable Editor action.
 {% endstep %}
 
 {% step %}
 ### Assign a camera
 
-Select the **ConvaiVisionRoot** GameObject (child of `ConvaiRoomManager`). On the `CameraVisionFrameSource` component, locate the **Target Camera** field.
+Keep the `ConvaiRoomManager` GameObject selected. On its new `CameraVisionFrameSource` component, locate the **Target Camera** field.
 
 * If your scene has a `Camera` tagged **MainCamera**, leave the field blank — the component resolves it automatically at runtime.
 * To capture a specific camera (an overhead view, a security camera), drag that camera into the **Target Camera** field.
@@ -69,13 +61,13 @@ If the overlay stays blank or the FPS counter reads zero, verify that `ConvaiRoo
 
 ## Manual component setup
 
-If you clicked **Later** on the dialog, or want to place the components on a specific GameObject, add them manually:
+If you prefer to place the components manually, use this setup:
 
 1. Select the target GameObject (any persistent scene object — typically on or near your NPC).
 2. **Add Component** → search for **Convai Vision Publisher**.
 3. On the same GameObject (or a child), **Add Component** → **Convai/Vision/Camera Vision Frame Source**.
 4. Assign the **Target Camera** if not using `Camera.main`.
-5. Leave the **Source** field on `ConvaiVisionPublisher` blank — the publisher auto-discovers `CameraVisionFrameSource` on the same GameObject at runtime. Assign it explicitly only if you have multiple frame sources in the scene.
+5. Leave the **Source** field on `ConvaiVisionPublisher` blank when the frame source is on the same GameObject or one of its children. Assign it explicitly when the source is elsewhere or when multiple local frame sources are present.
 
 <figure><img src="../../../../.gitbook/assets/image (492).png" alt="Manual vision setup showing ConvaiVisionPublisher and CameraVisionFrameSource components"><figcaption><p>Manual vision setup — publisher and frame source components.</p></figcaption></figure>
 

@@ -126,13 +126,14 @@ Call `Subscribe(callback, options)` to receive a `TranscriptChange` every time a
 | `SpeakerId` | `string` | `null` (any) | Restrict to a specific player or character by ID |
 | `ParticipantId` | `string` | `null` (any) | Restrict by room-scoped participant ID (multi-user rooms) |
 
-`SubscribeCommitted(callback, options)` is a convenience wrapper around `Subscribe` that forces `IncludeActive = false` and `IncludeTerminal = true`, so the callback only fires once a turn is finished — use it when you only care about finalized history, such as a chat log or a scoring system.
+`SubscribeCommitted(callback, options)` is a convenience wrapper around `Subscribe` that forces `IncludeActive = false` and `IncludeTerminal = true`. It fires when a turn is committed or interrupted and can fire again if that terminal turn is corrected. Key application state by `Turn.Id` and replace the prior revision instead of assuming one callback per turn.
 
 ```csharp
 using Convai.Domain.Models;
 using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -142,6 +143,7 @@ public class WordCountTracker : MonoBehaviour
 
     private ConvaiTranscripts _transcripts;
     private IDisposable _subscription;
+    private readonly Dictionary<string, int> _wordsByTurn = new();
     private int _wordCount;
 
     private void OnEnable()
@@ -163,9 +165,12 @@ public class WordCountTracker : MonoBehaviour
     private void OnPlayerTurnCommitted(TranscriptChange change)
     {
         if (change.Turn == null) return;
-        if (change.Kind != TranscriptChangeKind.Committed && change.Kind != TranscriptChangeKind.Interrupted) return;
 
-        _wordCount += change.Turn.DisplayText.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+        int revisedCount = change.Turn.DisplayText.Split(
+            ' ', StringSplitOptions.RemoveEmptyEntries).Length;
+        _wordsByTurn.TryGetValue(change.Turn.Id, out int previousCount);
+        _wordsByTurn[change.Turn.Id] = revisedCount;
+        _wordCount += revisedCount - previousCount;
         _wordCountLabel.text = $"Words spoken: {_wordCount}";
     }
 }

@@ -66,8 +66,8 @@ Or enable **Validate On Start** in the Inspector so this runs automatically at t
 | Status | Cause | Resolution |
 |---|---|---|
 | `Ready` | Normal — waiting for the activation condition. | No action needed. |
-| `AlreadyFired` | `TriggerOnce` is enabled and the trigger has fired. | Call `ResetTrigger()` to re-arm it, or disable **Trigger Once** in the Inspector. |
-| `QueuedWaitingForCharacter` | The trigger was accepted but the character is not yet in an active conversation. | Wait for the session to open. The trigger fires automatically. Call `CancelQueuedTrigger()` to abort the queue. |
+| `AlreadyFired` | `TriggerOnce` is enabled and the component locally accepted an invocation. | Call `ResetTrigger()` to re-arm it, or disable **Trigger Once** in the Inspector. This status is not proof of a backend transition. |
+| `QueuedWaitingForCharacter` | The component accepted the local activation but the character is not yet in an active conversation. | Wait for readiness so the component can attempt submission. Call `CancelQueuedTrigger()` to abort the component queue. |
 | `ConfigurationError` | `ValidateConfiguration()` detected one or more issues. | Read `ValidationWarnings` (see Validate configuration programmatically) and fix each issue. |
 | `Disabled` | The component or its parent GameObject is disabled. | Enable the component or GameObject. |
 
@@ -77,7 +77,7 @@ Or enable **Validate On Start** in the Inspector so this runs automatically at t
 |---|---|---|
 | Sections list empty after **Sync with Backend** | API key missing or invalid | Verify your API key — see [Configure the API key](../../getting-started/configure-api-key.md); check **Last Fetch Error** on the Manager |
 | Sections list empty after **Sync with Backend** | Character ID not set | Set **Character ID** on the `ConvaiCharacter` component |
-| `OnTriggerActivated` fires but section never changes | Trigger name does not exactly match the dashboard edge (case-sensitive) | Click **Fetch** on the Trigger, re-select the correct trigger from the dropdown |
+| `OnTriggerActivated` fires but section never changes | `OnTriggerActivated` confirms local acceptance only; the name may be invalid for the backend's current section, or the backend event may not arrive | Fetch and re-select the trigger, then inspect connection/backend logs and wait for `NarrativeSectionChanged` |
 | `OnSectionStart` never fires despite section changing | Local section ID out of sync with dashboard | Click **Sync with Backend** on the Manager; if still broken, call `ClearAllSectionConfigs()` and re-sync |
 | `OnPlayerEnterZone` never fires (Collision mode) | **Is Trigger** disabled on the Collider | Enable **Is Trigger** on the Collider component |
 | `OnPlayerEnterZone` never fires (Collision mode) | No `Rigidbody` on either object | Add a `Rigidbody` to the trigger GameObject or the player |
@@ -85,8 +85,8 @@ Or enable **Validate On Start** in the Inspector so this runs automatically at t
 | Wrong objects activate the trigger | **Player Layer** mask set to `Nothing` (0) | Set **Player Layer** to the layer your player is on |
 | Player tag not recognized | Tag not defined in Unity's Tag Manager | Add the tag in **Edit > Project Settings > Tags and Layers** |
 | "Multiple ConvaiCharacters found" warning | `Auto Find Character` can't resolve ambiguity | Assign the target character explicitly in the **Character** field |
-| Section shows **orphaned** badge | Section deleted from dashboard after local sync | If intentional: remove entry manually. If accidental: restore on dashboard, click **Sync with Backend** |
-| Template key has no effect on character dialogue | Key name case mismatch with dashboard placeholder | Compare key exactly: `{playerName}` on dashboard → key `playerName`, not `PlayerName` |
+| Section shows **orphaned** badge | Section was absent from the latest backend sync | Restore and re-sync to clear the badge. Until then, the config remains in runtime lookup and can still fire if that ID is received |
+| Template key has no effect on character dialogue | Manager value was updated but never sent, or the key name does not exactly match the dashboard placeholder | Call `SendTemplateKeysUpdate()`, then compare the key exactly: `{playerName}` → `playerName` |
 
 ## Enable diagnostics
 
@@ -104,7 +104,7 @@ To dump the full current state of a trigger to the Console at any time:
 trigger.PrintDiagnostics();
 ```
 
-`PrintDiagnostics()` logs:
+`PrintDiagnostics()` logs a block containing:
 
 ```text
 [ConvaiNarrativeDesignTrigger] === DIAGNOSTICS ===
@@ -142,7 +142,7 @@ if (!valid)
 `ValidateConfiguration()` runs four automatic checks:
 
 1. **Character reference check**: verifies a character is assigned and implements `IConvaiCharacterAgent`.
-2. **Trigger name check**: verifies at least one of **Trigger Name** or **Trigger Message** is non-empty.
+2. **Trigger name check**: verifies **Trigger Name** is non-empty. The fetched Trigger Message is display-only and cannot satisfy this check.
 3. **Collider check** (Collision and TimeBased modes): verifies a `Collider` exists on the same GameObject and that **Is Trigger** is enabled.
 4. **Player detection check**: verifies the **Player Tag** is defined in Unity's Tag Manager, and warns if **Player Layer** is set to `Nothing` (0).
 
@@ -178,15 +178,15 @@ if (!result.Success)
 
 ## Pending state
 
-When template keys or triggers are sent before the character's session is open, the SDK holds them in an internal queue. Delivery is automatic — you do not need to re-send anything manually.
+Character-level template-key and narrative requests made before readiness are held by the character facade. Manager keys are not part of this queue until `SendTemplateKeysUpdate()` explicitly copies them into that facade. `ConvaiNarrativeDesignTrigger` also has its own coroutine queue and timeout before it calls the character API.
 
 | Event | What happens |
 |---|---|
-| Session opens | `FlushPending()` is called internally; all queued keys and triggers are sent in order. |
-| Session disconnects and reconnects | `MarkPendingReplayAfterDisconnect()` is called internally; the latest template key snapshot is re-sent on the next connection. |
+| Character becomes ready | `FlushPending()` attempts a pending template-key snapshot, then queued narrative requests in FIFO order. A template-key failure remains pending; a failed narrative send stops that trigger drain for a later retry. |
+| Session disconnects and reconnects | The character facade marks its current non-empty template-key dictionary for replay. Unsaved Manager-only edits are not included. Runtime trigger history is not replayed unless a request was still queued. |
 
 {% hint style="info" %}
-You can call `SetTemplateKey` or `InvokeTrigger` at any point in your scene's lifecycle — including in `Awake` or before Play Mode is fully running — and the SDK will deliver those values correctly once the connection is ready.
+You can call character-level `SetTemplateKey` or `InvokeTrigger` before readiness. The SDK keeps valid requests pending and attempts them when the character becomes ready. This is a client transport guarantee, not proof that the backend applied a key or graph transition.
 {% endhint %}
 
 ## Queue timeout
@@ -215,14 +215,14 @@ The following log messages appear when **Enable Diagnostics** is on or when erro
 
 | Log message | Component | Meaning |
 |---|---|---|
-| `Trigger '<name>' invoked successfully on character '<character>'.` | `ConvaiNarrativeDesignTrigger` | Trigger was accepted and sent to the backend successfully. |
+| `Trigger '<name>' invoked successfully on character '<character>'.` | `ConvaiNarrativeDesignTrigger` | The character API returned local acceptance. Despite the log wording, no backend acknowledgement is implied. |
 | `Trigger '<name>' queued. Waiting for character to be ready (max <N>s).` | `ConvaiNarrativeDesignTrigger` | Character session not yet open. Trigger will fire automatically on connect. |
 | `Character became ready after <N>s, sending queued trigger` | `ConvaiNarrativeDesignTrigger` | Session opened; the deferred trigger is being sent now. Appears only when **Enable Diagnostics** is on. |
 | `Timed out waiting for character to be ready after <N> seconds.` | `ConvaiNarrativeDesignTrigger` | `MaxWaitTime` elapsed. Handle `OnTriggerFailed` and increase the timeout or check session connectivity. |
 | `Trigger already fired and TriggerOnce is enabled. Call ResetTrigger() to allow it to fire again.` | `ConvaiNarrativeDesignTrigger` | `TriggerOnce` is `true` and the trigger has already fired. |
 | `[ConvaiNarrativeDesignTrigger] Validation: <detail>` | `ConvaiNarrativeDesignTrigger` | A configuration issue was detected at Start. Read the detail string for the specific field. |
 | `Multiple ConvaiCharacters found (<N>). Cannot auto-assign. Please assign one explicitly.` | `ConvaiNarrativeDesignTrigger` | Auto-find is ambiguous. Drag the correct character into the **Character** field. |
-| `Section transition: Previous=<id> → New=<id>` | `ConvaiNarrativeDesignManager` | Section transition received. If `OnSectionStart` did not fire, the section ID is not in the local config list — re-sync. |
+| `Section transition: Previous=<id> → New=<id>` | `ConvaiNarrativeDesignManager` | A different section ID was processed. If `OnSectionStart` did not fire, the ID was not in the local config list; orphaned entries are still eligible. |
 | `Sync complete: <N> added, <N> updated, <N> orphaned, <N> reactivated` | `ConvaiNarrativeDesignManager` | Summary of the last **Sync with Backend** call. Non-zero orphaned count means dashboard sections were removed. |
 | `Fetch failed: <error>` | `ConvaiNarrativeDesignManager` | API key, character ID, or network issue. Check **Last Fetch Error** in the Inspector. |
 
@@ -246,6 +246,8 @@ flowchart TD
 ```
 
 Use `CurrentStatus` for an instant diagnosis, enable `EnableDiagnostics` to trace the full event chain, and use the Common issues table to resolve the most frequent misconfigurations.
+
+Unity client status, events, and logs distinguish local acceptance from a later section event, but they do not provide a trigger-specific backend acknowledgement. Validate graph movement and scripted-speech behavior in Play Mode with a live room.
 
 ## Next steps
 

@@ -51,7 +51,7 @@ Drag the `PassthroughCameraAccess` component into the **Passthrough Camera Acces
 {% step %}
 ### Add a vision publisher
 
-Add `ConvaiVisionPublisher` to the same GameObject. It auto-discovers `QuestVisionFrameSource` in the scene, or you can assign the frame source reference in the publisher's Inspector field.
+Add `ConvaiVisionPublisher` to the same GameObject as `QuestVisionFrameSource`, place the source in one of the publisher's children, or assign the source explicitly. The publisher does not search arbitrary scene objects.
 {% endstep %}
 
 {% step %}
@@ -86,7 +86,7 @@ A surgical resident training application on Quest 3 places learners in a simulat
 
 **Setup:** `QuestVisionFrameSource` on a scene GameObject with **Passthrough Camera Access** auto-discovered. `ConvaiVisionPublisher` on the same object. Both permissions declared in the manifest. The character's Convai configuration includes a vision-aware system prompt instructing it to acknowledge and respond to what it sees in the passthrough feed.
 
-**Outcome:** The character responds to visual context alongside conversation — "I can see you are preparing the scalpel — let's review the incision depth for this procedure." The resident practices both verbal interaction and physical task execution without any object detection code in the Unity project.
+**Validate on device:** Confirm the source reaches `Ready`, frames advance, the publisher opens a video track, and the deployed character responds appropriately to controlled visual prompts. The exact interpretation and dialogue are backend outcomes, not guarantees of the Unity component.
 
 ### Industrial safety inspection with environmental object recognition
 
@@ -94,7 +94,7 @@ A factory safety training application on Quest 3S guides equipment operators thr
 
 **Setup:** Same configuration as the medical training example. **Target Frame Rate** is set to 10 (reduced from 15) to accommodate an industrial network environment with limited bandwidth. **Max Output Width** is set to 960 to reduce per-frame payload size without meaningful quality loss for object recognition tasks.
 
-**Outcome:** The character identifies machinery in the passthrough view and provides component-specific safety instructions — no hardcoded object detection, no custom computer vision pipeline. The SDK streams passthrough frames to Convai, which handles scene understanding and generates contextually appropriate guidance.
+**Validate on device:** Confirm the 10 fps and 960-pixel settings produce readable frames within the deployment's bandwidth budget, then test recognition and response quality with the production character configuration.
 
 ## Troubleshooting
 

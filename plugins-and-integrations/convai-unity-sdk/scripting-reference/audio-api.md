@@ -1,7 +1,7 @@
 ---
 title: Audio API
-description: Scripting reference for ConvaiAudio — microphone muting, per-character audio control, audio playback unlock, and listening state management.
-last_reviewed: "4.5.0"
+description: Control microphone input, character and participant audio output, browser playback unlock, and listening state from Unity scripts.
+last_reviewed: "4.6.0"
 ---
 
 `ConvaiAudio` is the audio facade on `ConvaiManager`, providing scripted control over microphone capture, per-character remote audio output, and audio playback unlock. It separates concerns cleanly: microphone input (what you send to Convai), character audio output (what you hear from characters), and the WebGL audio playback gate.
@@ -9,8 +9,10 @@ last_reviewed: "4.5.0"
 **Access:** `ConvaiManager.ActiveManager.Audio`
 
 ```csharp
-var audio = ConvaiManager.ActiveManager?.Audio;
-if (audio == null) return; // manager not yet bootstrapped
+ConvaiManager manager = ConvaiManager.ActiveManager;
+if (manager == null || !manager.TryGetRoomAudioService(out _)) return;
+
+ConvaiAudio audio = manager.Audio;
 ```
 
 ***
@@ -44,6 +46,7 @@ The `microphoneIndex` parameter in `StartListeningAsync` corresponds to an index
 | `OnMicMuteChanged` | `Action<bool>` | Microphone mute state changes. Parameter: new mute state (true = muted). |
 
 ```csharp
+using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using UnityEngine;
 
@@ -85,15 +88,31 @@ These methods control whether a specific character's audio output plays locally.
 | `SetRemoteAudioEnabled(string characterId, bool enabled)` | `bool`  | Enables or disables remote audio output for a character. Returns `true` if applied. |
 | `IsRemoteAudioEnabled(string characterId)`                | `bool`  | Returns `true` if this character's remote audio output is enabled.                  |
 
-{% hint style="info" %}
 **Mute vs. remote audio enabled:** These are separate controls. Remote audio enabled/disabled controls whether the SDK streams audio output for the character at all. Muting controls whether the locally received audio plays through your audio output device. Disabling remote audio saves bandwidth; muting is a local-only volume control.
-{% endhint %}
+
+Character-ID methods are ambiguous when separate room memberships reuse the same character ID. Use distinct character IDs in normal integrations, or use participant-identity controls when instance-specific routing matters.
 
 ### Events
 
 | Event                         | Signature              | Fires When                                                                            |
 | ----------------------------- | ---------------------- | ------------------------------------------------------------------------------------- |
 | `OnRemoteAudioEnabledChanged` | `Action<string, bool>` | A character's remote audio enabled state changes. Parameters: characterId, isEnabled. |
+
+## Room audio service
+
+Resolve `IConvaiRoomAudioService` through `ConvaiManager.TryGetRoomAudioService`. It contains the facade operations plus participant-level routing and character playhead access.
+
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** `BindParticipantAudioOutput(...)` and `SetParticipantAudioEnabled(...)` are staged ahead of the current <code class="expression">space.vars.unity_sdk_version</code> release. The character playhead and service events in this table are available in <code class="expression">space.vars.unity_sdk_version</code>.
+
+| Member | Returns | Availability | Description |
+| --- | --- | --- | --- |
+| `BindParticipantAudioOutput(string participantIdentity, AudioSource audioSource)` | `bool` | <code class="expression">space.vars.unity_sdk_preview_version</code> preview | Binds a character or human participant identity to an application-owned `AudioSource` |
+| `SetParticipantAudioEnabled(string participantIdentity, bool enabled)` | `bool` | <code class="expression">space.vars.unity_sdk_preview_version</code> preview | Enables or silences a bound participant identity |
+| `TryGetCharacterAudioPlayhead(string characterId, out double playedSeconds)` | `bool` | <code class="expression">space.vars.unity_sdk_version</code> | Reads rendered source-audio seconds when the platform exposes a measured playhead |
+| `MicMuteChanged` | `event Action<bool>` | <code class="expression">space.vars.unity_sdk_version</code> | Service-level microphone mute event used by `ConvaiAudio.OnMicMuteChanged` |
+| `RemoteAudioEnabledChanged` | `event Action<string, bool>` | <code class="expression">space.vars.unity_sdk_version</code> | Service-level character subscription event used by `ConvaiAudio.OnRemoteAudioEnabledChanged` |
+
+`BindParticipantAudioOutput` uses the membership's `ParticipantIdentity`, not its transport `ParticipantId`. See [Audio and media API](../features/multi-character-conversations/audio-and-media-api.md) for multi-character identity and WebGL constraints.
 
 ***
 
@@ -113,6 +132,7 @@ On WebGL, calling `EnableAudioPlayback()` outside of a user gesture handler (e.g
 {% endhint %}
 
 ```csharp
+using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using UnityEngine;
 using UnityEngine.UI;
@@ -151,6 +171,7 @@ public class WebGLStartButton : MonoBehaviour
 A military training simulation provides a push-button microphone mute in the HUD so trainees can mute themselves before speaking to the observer, without disconnecting.
 
 ```csharp
+using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using TMPro;
 using UnityEngine;
@@ -228,6 +249,7 @@ public class AssessmentAudioManager : MonoBehaviour
 An interactive experience lets users pick their preferred microphone from a dropdown before the session starts, then starts listening on the selected device.
 
 ```csharp
+using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using System.Collections.Generic;
 using TMPro;
@@ -275,7 +297,7 @@ public class MicrophoneSelector : MonoBehaviour
 | Symptom                                                            | Likely Cause                                                                                         | Fix                                                                                                                                      |
 | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | No audio output on WebGL                                           | `EnableAudioPlayback()` not called inside a user gesture                                             | Wire `EnableAudioPlayback()` to a button's `onClick`; do not call in `Start()` or `Awake()`                                              |
-| `ToggleMicMuted()` returns `true` but character still hears player | `IsMicMuted` controls SDK mute — verify character session is connected and audio pipeline is running | Check `IsSessionConnected` on the active character; mute only takes effect mid-session                                                   |
+| `ToggleMicMuted()` returns `true` but a later response still reflects player speech | Microphone mute is room-scoped and does not retract audio already sent before the mute acknowledgement | Confirm `ConvaiManager.IsConnected` and `Audio.IsMicMuted`; test with speech that begins only after the mute state changes |
 | `MuteCharacter()` returns `false`                                  | Character ID not recognized — character may not be registered                                        | Verify the ID matches `ConvaiCharacter.CharacterId`; the character must be in `ConvaiManager.Characters`                                 |
 | `StartListeningAsync` fails on mobile                              | Platform microphone permission not granted                                                           | Use `TryGetPermissionService` to request microphone permission before calling `StartListeningAsync`                                      |
 | `IsRemoteAudioEnabled` returns `false` after connect               | `EnableRemoteAudioOnStart` on the character is `false`                                               | Set `ConvaiCharacter.EnableRemoteAudioOnStart = true` in the Inspector, or call `character.EnableRemoteAudio()` after the session starts |

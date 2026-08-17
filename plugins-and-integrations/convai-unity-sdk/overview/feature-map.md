@@ -3,10 +3,12 @@ title: Feature map
 description: >-
   Find the right Convai Unity SDK feature, module, guide, or reference page for
   any development goal, indexed by use case.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Use this table when you know the outcome you want but are not sure which SDK feature, module, or guide covers it.
+
+Rows labeled **Multi-character** point to staging documentation planned for Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code>. That feature is not included in the current <code class="expression">space.vars.unity_sdk_version</code> Asset Store release.
 
 ## Getting started
 
@@ -23,6 +25,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Add a chat or subtitle transcript display            | Transcript UI       | [Add chat UI](../getting-started/add-chat-ui.md)                                             |
 | Add real-time lip sync to my character               | Lip sync            | [Add lip sync](../getting-started/add-lip-sync/)                                             |
 | Verify my scene is set up correctly before shipping  | Scene Validator     | [Validate your setup](../getting-started/validate-your-setup.md)                             |
+| Connect two or more owned characters in one room     | Multi-character     | [Multi-character quick start](../features/multi-character-conversations/quick-start.md)      |
 
 ## Features
 
@@ -35,6 +38,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Make the character remember players between sessions                                      | Long-Term Memory | [Long-Term Memory](../features/long-term-memory/) |
 | Build branching story sections triggered by conversation                                  | Narrative Design | [Narrative Design](../features/narrative-design/) |
 | Give my character vision through a camera or webcam                                       | Vision           | [Vision](../features/vision/)                     |
+| Route one player between several characters in a shared room                              | Multi-character  | [Multi-character conversations](../features/multi-character-conversations/) |
 
 ## Embodiment
 
@@ -66,6 +70,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Understand session states, reconnection, and persistence | Session lifecycle | [Session lifecycle](../core-concepts/session-lifecycle.md)        |
 | Compare hands-free, push-to-talk turn-taking             | Turn-taking modes | [Turn-taking modes](../core-concepts/turn-taking-modes.md)        |
 | Subscribe to conversation events from C# or Inspector    | Event system      | [Event System](../core-concepts/event-system.md)                  |
+| Understand shared-room readiness, identity, and routing   | Multi-character  | [How multi-character conversations work](../features/multi-character-conversations/how-it-works.md) |
 
 ## Scripting reference
 
@@ -74,8 +79,11 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Subscribe to session connected / disconnected / error events | Session events       | [Session Events](../scripting-reference/session-events.md)       |
 | Subscribe to transcript, emotion, and turn events            | Character events     | [Character Events](../scripting-reference/character-events.md)   |
 | Read and clear transcript history at runtime                 | Transcript API       | [Transcript API](../scripting-reference/transcript-api.md)       |
-| Use the `ConvaiSDK` and `ConvaiAudio` static facades         | Conversation facades | [ConvaiManager API](../scripting-reference/convaimanager-api.md) |
+| Use manager and audio facades                                | Conversation facades | [ConvaiManager API](../scripting-reference/convaimanager-api.md) |
 | Understand `IConvaiOperation<T>` and async patterns          | Async patterns       | [Async Patterns](../scripting-reference/async-patterns.md)       |
+| Change the acknowledged interaction target or room roster   | Room connection API  | [Multi-character room connection API](../features/multi-character-conversations/room-connection-api.md) |
+| Observe membership readiness, results, epochs, and events    | Session and roster   | [Multi-character session and roster API](../features/multi-character-conversations/session-and-roster-api.md) |
+| Attribute room transcripts and route participant audio      | Transcript and audio | [Multi-character transcripts and events](../features/multi-character-conversations/transcripts-and-events.md) |
 
 ## Platform guides
 

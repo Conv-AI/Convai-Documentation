@@ -1,12 +1,14 @@
 ---
 title: Character and Player API
 description: >-
-  Reference for ConvaiCharacter and ConvaiPlayer, including properties, methods,
-  and events for session control, speech, audio, and attention.
-last_reviewed: "4.5.0"
+  Control character readiness, speech, audio, attention, and player text input
+  through Unity's public character and player scripting surfaces.
+last_reviewed: "4.6.0"
 ---
 
-`ConvaiCharacter` controls a single AI character's session, speech, remote audio, dynamic context, and attention targeting. `ConvaiPlayer` represents the local human participant and provides text message sending and identity configuration. Both components are owned and tracked by `ConvaiManager`.
+`ConvaiCharacter` is the character-local facade for readiness, speech, remote audio, dynamic context, and narrative behavior. Room connection state is shared by every owned character. `ConvaiPlayer` represents the local human participant and provides text message sending and identity configuration.
+
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** Multi-character membership, routing, and participant-audio notes on this page are staged ahead of the current <code class="expression">space.vars.unity_sdk_version</code> Asset Store release.
 
 ***
 
@@ -19,7 +21,7 @@ last_reviewed: "4.5.0"
 // Via manager ownership list
 var character = ConvaiManager.ActiveManager?.Characters[0];
 
-// Via manager active conversation target
+// Via manager startup conversation target
 var active = ConvaiManager.ActiveManager?.ActiveConversationCharacter;
 
 // Player
@@ -37,10 +39,10 @@ var player = ConvaiManager.ActiveManager?.Player;
 | `CharacterId`                     | `string`                 | Read       | Convai character identifier                                         |
 | `CharacterName`                   | `string`                 | Read       | Display name of the character                                       |
 | `OwnerId`                         | `string`                 | Read       | Owner account identifier                                            |
-| `SessionState`                    | `SessionState`           | Read       | Current session state for this individual character                 |
+| `SessionState`                    | `SessionState`           | Read       | Current shared room connection state                                |
 | `IsCharacterReady`                | `bool`                   | Read       | True when the character has completed its ready handshake           |
-| `IsSessionConnected`              | `bool`                   | Read       | True when this character's session is in `Connected` state          |
-| `IsInConversation`                | `bool`                   | Read       | True when this character is the active conversation target          |
+| `IsSessionConnected`              | `bool`                   | Read       | `true` when the shared room is in `Connected` state                  |
+| `IsInConversation`                | `bool`                   | Read       | `true` when the room is connected and this character is ready; it does not indicate the active interaction target |
 | `IsSpeaking`                      | `bool`                   | Read       | True when the character is actively producing audio output          |
 | `IsRemoteAudioEnabled`            | `bool`                   | Read       | True when this character's remote audio output is enabled           |
 | `CurrentEmotion`                  | `string`                 | Read       | Most recent emotion label received from Convai                      |
@@ -69,20 +71,30 @@ var player = ConvaiManager.ActiveManager?.Player;
 
 | Method                                                                                     | Returns                  | Description                                                                                                       |
 | ------------------------------------------------------------------------------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `StartConversationAsync(CancellationToken ct = default)`                                   | `IConvaiOperation<Unit>` | Starts a conversation session for this character                                                                  |
-| `StopConversationAsync(CancellationToken ct = default)`                                    | `IConvaiOperation<Unit>` | Stops the conversation session for this character                                                                 |
+| `StartConversationAsync(CancellationToken ct = default)`                                   | `IConvaiOperation<Unit>` | Connects the shared room and waits for this character when starting disconnected; returns immediately if the room is already connected |
+| `StopConversationAsync(CancellationToken ct = default)`                                    | `IConvaiOperation<Unit>` | Disconnects the shared room for every character                                                                   |
 | `WaitForCharacterReadyAsync(float? timeoutSeconds = null, CancellationToken ct = default)` | `IConvaiOperation<Unit>` | Waits until the character completes its ready handshake. Use after `StartConversationAsync` before sending input. |
 | `ResetAndRetryAsync(CancellationToken ct = default)`                                       | `IConvaiOperation<Unit>` | Resets the character's session state and retries initialization. Use after an error.                              |
 | `Reset()`                                                                                  | `bool`                   | Synchronously resets local session state. Returns `true` if the reset was applied.                                |
 
+These character-shaped methods remain for compatibility. In a multi-character room, connection and disconnection are room-scoped. Use `ConvaiManager.ConnectAsync` and `DisconnectAsync` when your code controls the room as a whole.
+
 ```csharp
 // Connect and wait for character ready before sending input
-var startOp = character.StartConversationAsync(destroyCancellationToken);
-await startOp;
-if (startOp.IsSuccessful)
+try
 {
+    await character.StartConversationAsync(destroyCancellationToken);
+    // Required when the shared room was already connected and this membership was still starting.
     await character.WaitForCharacterReadyAsync(timeoutSeconds: 10f, destroyCancellationToken);
     Debug.Log("Character is ready for input.");
+}
+catch (OperationCanceledException)
+{
+    // The component or caller canceled the operation.
+}
+catch (ConvaiOperationException exception)
+{
+    Debug.LogError($"Character startup failed [{exception.Code}]: {exception.Message}");
 }
 ```
 
@@ -106,13 +118,19 @@ if (startOp.IsSuccessful)
 Per-character audio control lets you mute individual characters in multi-character scenes — for example, muting a secondary instructor while the primary one speaks. For microphone muting (your input), use `ConvaiManager.ActiveManager.Audio`.
 {% endhint %}
 
+These methods are keyed by `CharacterId`. If a room contains multiple local instances with the same character ID, use participant-identity audio controls on `IConvaiRoomAudioService` instead of assuming each clone can be controlled independently.
+
 ### Dynamic context and narrative
 
-| Method                                                          | Returns | Description                                                                                                                   |
-| --------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `SendDynamicInfo(string contextText)`                           | `void`  | Sends a dynamic context update to Convai for this character. Updates the character's in-session context without reconnecting. |
-| `SendTrigger(string triggerName, string triggerMessage = null)` | `void`  | Sends a Narrative Design trigger by name. `triggerMessage` overrides the trigger's configured message if provided.            |
-| `UpdateTemplateKeys(Dictionary<string, string> templateKeys)`   | `void`  | Updates Narrative Design template key values for dynamic narrative variable substitution.                                     |
+| Method                                                               | Returns | Description                                                                                         |
+| -------------------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------- |
+| `DynamicContext.SetState(string name, string value, ConvaiRespondMode reaction = ConvaiRespondMode.Silent)` | `void` | Stages one tracked state value for the next dynamic-context batch                                   |
+| `DynamicContext.AddEvent(string text, ConvaiRespondMode reaction = ConvaiRespondMode.Auto)` | `void` | Stages one chronological event for the next dynamic-context batch                                   |
+| `DynamicContext.Flush()`                                             | `void`  | Sends staged context immediately when the character is ready                                        |
+| `SendTrigger(string triggerName)`                                    | `void`  | Queues or sends a Narrative Design trigger by name                                                   |
+| `SendNarrativeEvent(string eventMessage)`                            | `void`  | Queues or sends a Narrative Design event message                                                     |
+| `SendNarrativeSpeech(string speechText)`                             | `void`  | Queues or sends a Narrative Design speech request                                                     |
+| `UpdateTemplateKeys(Dictionary<string, string> templateKeys)`        | `void`  | Updates Narrative Design template key values                                                         |
 
 ### Attention and actions
 
@@ -133,12 +151,13 @@ Subscribe in `OnEnable`, unsubscribe in `OnDisable`.
 | `OnSpeechStopped`             | `Action`                                     | Character stops producing audio output                           |
 | `OnTurnCompleted`             | `Action<bool>`                               | Character's conversational turn ends. Parameter: wasInterrupted. |
 | `OnCharacterReady`            | `Action`                                     | Character completes its ready handshake                          |
-| `OnSessionStateChanged`       | `Action<SessionState>`                       | This character's individual session state changes                |
+| `OnSessionStateChanged`       | `Action<SessionState>`                       | The shared room connection state changes                         |
 | `OnEmotionChanged`            | `Action<string, int>`                        | Emotion changes. Parameters: emotion label, raw intensity (1–3). |
 | `OnActionsReceived`           | `Action<IReadOnlyList<ConvaiActionCommand>>` | Convai sends in-scene action commands for this character         |
 | `OnRemoteAudioEnabledChanged` | `Action<bool>`                               | This character's remote audio output is enabled or disabled      |
 
 ```csharp
+using Convai.Domain.DomainEvents.Session;
 using Convai.Runtime.Components;
 using UnityEngine;
 
@@ -161,7 +180,7 @@ public class CharacterSessionMonitor : MonoBehaviour
     }
 
     private void OnStateChanged(SessionState state) =>
-        Debug.Log($"[{_character.CharacterName}] session state: {state}");
+        Debug.Log($"Room state observed by {_character.CharacterName}: {state}");
 
     private void OnAudioChanged(bool enabled) =>
         Debug.Log($"[{_character.CharacterName}] audio output: {(enabled ? "on" : "off")}");
@@ -200,7 +219,7 @@ public class CharacterSessionMonitor : MonoBehaviour
 | `OnTextMessageSent` | `Action<string>` | A text message is sent via `SendTextMessage` |
 
 ```csharp
-using Convai.Runtime.Facades;
+using Convai.Runtime.Components;
 using TMPro;
 using UnityEngine;
 
@@ -228,6 +247,7 @@ public class TextInputController : MonoBehaviour
 A medical training simulation ensures the AI physician character is fully ready before the assessment begins, preventing learners from speaking to an uninitialized character.
 
 ```csharp
+using System;
 using Convai.Runtime.Components;
 using Convai.Runtime.Core.Async;
 using UnityEngine;
@@ -241,22 +261,28 @@ public class AssessmentStarter : MonoBehaviour
     {
         _startPanel.SetActive(false);
 
-        var startOp = _physician.StartConversationAsync(destroyCancellationToken);
-        await startOp;
-        if (!startOp.IsSuccessful)
+        try
         {
-            Debug.LogError($"Character connect failed: {startOp.Error.Message}");
-            return;
-        }
+            await _physician.StartConversationAsync(destroyCancellationToken);
+            await _physician.WaitForCharacterReadyAsync(
+                timeoutSeconds: 15f, destroyCancellationToken);
 
-        var readyOp = _physician.WaitForCharacterReadyAsync(
-            timeoutSeconds: 15f, destroyCancellationToken);
-        await readyOp;
-
-        if (readyOp.IsSuccessful)
             _startPanel.SetActive(true);
-        else
-            Debug.LogWarning("Character ready timeout — check your API key and network.");
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when this component is destroyed during startup.
+        }
+        catch (ConvaiOperationException exception)
+        {
+            Debug.LogError(
+                $"Character startup failed [{exception.Code}]: {exception.Message}",
+                this);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception, this);
+        }
     }
 }
 ```
@@ -306,7 +332,7 @@ public class AdvisorMuteButton : MonoBehaviour
 An industrial safety simulation provides a text input fallback for environments where microphone access is unavailable or restricted.
 
 ```csharp
-using Convai.Runtime.Facades;
+using Convai.Runtime.Components;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -341,9 +367,9 @@ public class AccessibilityTextInput : MonoBehaviour
 | Symptom                                                   | Likely Cause                                                      | Fix                                                                                                 |
 | --------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `WaitForCharacterReadyAsync` times out                    | Character never receives ready confirmation from Convai           | Verify API key, check network; call after `StartConversationAsync` succeeds, not before             |
-| `SendDynamicInfo` has no visible effect                   | Called before character session is connected                      | Call after `WaitForCharacterReadyAsync` resolves successfully                                       |
+| `DynamicContext.Flush()` has no visible effect            | Called before this character is ready                             | Call after `WaitForCharacterReadyAsync` resolves successfully                                       |
 | `ToggleRemoteAudio()` has no effect                       | `EnableRemoteAudioOnStart` is `false` and audio was never enabled | Call `EnableRemoteAudio()` first to activate audio, then toggle                                     |
-| `SendTextMessage` sends but character does not respond    | Session not in `Connected` state                                  | Check `character.IsSessionConnected` before sending                                                 |
+| `SendTextMessage` sends but the intended character does not respond | No acknowledged interaction target is active             | Read `CurrentMultiCharacterSession.ActiveMembershipId`, then call and await `SetInteractionTargetAsync` when needed |
 | `OnActionsReceived` fires but no in-scene actions execute | `ConvaiActionDispatcher` not in scene or action names don't match | Verify dispatcher is present; action names are case-insensitive but must match the configured names |
 
 ***

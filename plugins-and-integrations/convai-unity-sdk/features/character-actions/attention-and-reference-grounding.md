@@ -28,7 +28,7 @@ The `Description` field on each `ConvaiActionObjectDefinition` is the most impor
 * **Location** — where it is relative to landmarks in the scene
 * **Purpose** — what it is used for
 
-| | Example |
+| Description quality | Example |
 | --- | --- |
 | **Too vague — avoid** | `An object in the scene` |
 | **No location — avoid** | `A fire extinguisher` |

@@ -1,7 +1,9 @@
 ---
 title: ConvaiManager API
-description: Scripting reference for ConvaiManager — the SDK entry point for connection control, facade access, conversation ownership, and service discovery.
-last_reviewed: "4.5.0"
+description: >-
+  Connect and disconnect rooms, inspect runtime state, configure conversation
+  ownership, and discover Unity services from the primary manager.
+last_reviewed: "4.6.0"
 ---
 
 `ConvaiManager` is the primary scripting entry point for the Convai Unity SDK. It initializes the runtime, manages room connections, owns the `Events`, `Audio`, and `Transcripts` facades, and grants access to lower-level services through typed accessors. Every scripted interaction begins here.
@@ -12,13 +14,13 @@ last_reviewed: "4.5.0"
 var manager = ConvaiManager.ActiveManager;
 if (manager == null)
 {
-    Debug.LogError("ConvaiManager not found in scene. Add it via Convai → Create Manager.");
+    Debug.LogError("ConvaiManager not found. Run GameObject > Convai > Setup Required Components.");
     return;
 }
 ```
 
 {% hint style="warning" %}
-`ActiveManager` returns `null` if no `ConvaiManager` exists in the scene or if it has not yet bootstrapped. Always null-check before use, especially in components that may `OnEnable` before the manager initializes.
+`ActiveManager` returns `null` when no active `ConvaiManager` exists. Its `Events`, `Audio`, and `Transcripts` properties can throw until bootstrap completes, so null-check the manager and use the corresponding `TryGet*` accessor during initialization or teardown.
 {% endhint %}
 
 ***
@@ -45,11 +47,13 @@ if (manager == null)
 
 ## Ownership properties
 
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** Multi-character ownership, shared-room connect options, and live routing guidance on this page are staged ahead of the current <code class="expression">space.vars.unity_sdk_version</code> Asset Store release. The stable manager properties and room operations remain available in the current release.
+
 | Property                      | Type                             | Description                                                           |
 | ----------------------------- | -------------------------------- | --------------------------------------------------------------------- |
 | `Characters`                  | `IReadOnlyList<ConvaiCharacter>` | All `ConvaiCharacter` instances currently owned by this manager       |
 | `Player`                      | `ConvaiPlayer`                   | The `ConvaiPlayer` instance owned by this manager                     |
-| `ActiveConversationCharacter` | `ConvaiCharacter`                | The character currently set as the conversation target; may be `null` |
+| `ActiveConversationCharacter` | `ConvaiCharacter`                | The configured startup conversation target; may be `null`. In a multi-character room, read `CurrentMultiCharacterSession.ActiveMembershipId` for the acknowledged live target |
 | `ConversationMode`            | `ConvaiManagerConversationMode`  | The configured conversation mode for this manager                     |
 | `ActiveConversationInputMode` | `ConversationInputMode`          | The runtime conversation input mode currently in effect               |
 | `PushToTalkKey`               | `KeyCode`                        | The key code used for push-to-talk, when mode is `PushToTalk`         |
@@ -70,10 +74,10 @@ if (manager == null)
 
 ```csharp
 // Simple connect — uses scene configuration
-IConvaiOperation<RoomSession> ConnectAsync(CancellationToken ct = default)
+IConvaiOperation<RoomSession> ConnectAsync(CancellationToken cancellationToken = default)
 
 // Connect with runtime overrides
-IConvaiOperation<RoomSession> ConnectAsync(RoomSessionConnectOptions options, CancellationToken ct = default)
+IConvaiOperation<RoomSession> ConnectAsync(RoomSessionConnectOptions options, CancellationToken cancellationToken = default)
 ```
 
 Returns a `RoomSession` on success. See [Operation & Stream Types](operation-and-stream-types.md) and [Async Patterns](async-patterns.md) for consumption patterns.
@@ -86,6 +90,10 @@ Pass this to the second overload to override runtime behavior at connect time.
 | --------------------------- | ------------------------------------- | -------------------------------------------------------------------- |
 | `TurnTaking`                | `TurnTakingOptions`                   | Override the turn-taking configuration for this session. See [Turn-taking modes](../core-concepts/turn-taking-modes.md) for the full field reference. |
 | `EndUserId`                 | `string`                              | Override the end-user ID for this session (used by Long-Term Memory) |
+| `SharedSessionKey`          | `string`                              | Optional developer-controlled locator for a shared room |
+| `RoomSessionId`             | `string`                              | Existing multi-character room identifier. Normal human joins should use `MultiCharacterJoinOptions` instead |
+| `JoinExistingMultiCharacterRoom` | `bool`                          | When `true`, joins an existing room as a human participant without submitting a character roster |
+| `MaxNumParticipants`        | `int`                                 | Optional participant limit sent with shared-session connection options |
 | `EndUserMetadata`           | `IReadOnlyDictionary<string, object>` | Additional metadata for the end user                                 |
 | `ActionConfigOverride`      | `ConvaiActionConfig`                  | Override the action configuration for this session                   |
 | `ActionDefinitionsOverride` | `List<ConvaiActionDefinition>`        | Override the action definitions registered for this session          |
@@ -106,10 +114,24 @@ if (!result.IsSuccessful)
     Debug.LogError($"Connect failed: {result.Error.Message}");
 ```
 
-## `DisconnectAsync`
+Use `JoinMultiCharacterRoomAsync(MultiCharacterJoinOptions, CancellationToken)` for the normal human-participant join path. See [Room connection API](../features/multi-character-conversations/room-connection-api.md) for the complete multi-character connection surface.
+
+### `ConnectWithAuthTokenAsync`
 
 ```csharp
-IConvaiOperation<Unit> DisconnectAsync(CancellationToken ct = default)
+IConvaiOperation<RoomSession> ConnectWithAuthTokenAsync(
+    string authToken,
+    string endUserId,
+    string endUserName,
+    CancellationToken cancellationToken = default)
+```
+
+Connects with a caller-supplied short-lived auth token and stable end-user identity. The SDK does not persist the token. Select **Auth Token** mode in Convai Project Settings before calling this overload. See [Connect with an auth token](../authentication/connect-with-auth-token.md).
+
+### `DisconnectAsync`
+
+```csharp
+IConvaiOperation<Unit> DisconnectAsync(CancellationToken cancellationToken = default)
 ```
 
 Gracefully disconnects the room session. Resolves when the session reaches `Disconnected`.
@@ -120,7 +142,7 @@ Gracefully disconnects the room session. Resolves when the session reaches `Disc
 
 | Method                                                                                      | Returns                  | Description                                                                                                |
 | ------------------------------------------------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `SetConversationInputModeAsync(ConversationInputMode mode, CancellationToken ct = default)` | `IConvaiOperation<Unit>` | Switches the room's conversation input mode at runtime                                                     |
+| `SetConversationInputModeAsync(ConversationInputMode mode, CancellationToken cancellationToken = default)` | `IConvaiOperation<Unit>` | Switches the room's conversation input mode at runtime                                                     |
 | `StartListening()`                                                                          | `void`                   | Starts microphone capture. Shortcut for `Audio.StartListeningAsync()` with default device.                 |
 | `ToggleMicMute()`                                                                           | `bool`                   | Toggles microphone mute. Returns the new mute state.                                                       |
 | `EnableAudioAndStartListening()`                                                            | `void`                   | Calls `Audio.EnableAudioPlayback()` then starts listening. Required on WebGL before any audio interaction. |
@@ -143,14 +165,16 @@ For richer session state data (transition context, participant changes, idle war
 
 ## Ownership management
 
-Use these methods to control which characters and player the manager owns, and which character is the active conversation target.
+Use these methods to configure which characters and player the manager owns before connecting. With multiple owned characters, the explicit conversation target is required and becomes the initial character.
 
 | Method                                                           | Description                                                                                     |
 | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `SetExplicitConversationTarget(ConvaiCharacter character)`       | Sets the active conversation target character. Pass `null` to clear.                            |
+| `SetExplicitConversationTarget(ConvaiCharacter character)`       | Sets the startup ownership target. Calling it while connected records a pending ownership change that requires reconnecting; it does not change live interaction routing |
 | `SetExplicitPlayer(ConvaiPlayer player)`                         | Assigns a specific `ConvaiPlayer` instance as the managed player                                |
 | `SetExplicitCharacters(IEnumerable<ConvaiCharacter> characters)` | Replaces the managed character list with the provided set                                       |
-| `RefreshReferences()`                                            | Rescans the scene for `ConvaiCharacter` and `ConvaiPlayer` instances to rebuild the managed set |
+| `RefreshReferences()`                                            | Rebuilds manager ownership from the configured scene installer, explicit references, and runtime-owned characters |
+
+Use `IConvaiRoomConnectionService.SetInteractionTargetAsync` to change the acknowledged target while connected. `ActiveConversationCharacter` remains the startup ownership target and does not follow these live changes.
 
 ### Characters spawned at runtime
 
@@ -192,7 +216,7 @@ The SDK ships this pattern as `RuntimeCharacterSpawner` in the shared samples.
 
 ## Service accessor pattern
 
-For advanced scenarios that require direct access to internal services, `ConvaiManager` exposes 12 typed `TryGet*` accessors. Each returns `true` and sets the `out` parameter on success, or returns `false` if the service is unavailable.
+For advanced scenarios that require direct access to runtime services, `ConvaiManager` exposes typed `TryGet*` accessors. Each returns `true` and sets the `out` parameter on success, or returns `false` if the service is unavailable.
 
 {% hint style="info" %}
 Prefer the `Events`, `Audio`, and `Transcripts` facade properties for common tasks. The `TryGet*` accessors are intended for advanced integrations and custom tooling.
@@ -208,6 +232,7 @@ if (manager.TryGetMicrophoneDeviceService(out var micService))
 
 | Method                                                              | Service Type                     | Common Use Case                                                         |
 | ------------------------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------- |
+| `TryGetTranscripts(out ConvaiTranscripts)`                          | `ConvaiTranscripts`              | Resolve transcript history safely during initialization or teardown     |
 | `TryGetEventHub(out IEventHub)`                                     | `IEventHub`                      | Raw event bus access via `ConvaiEvents.Raw`; advanced subscriptions     |
 | `TryGetRoomConnectionService(out IConvaiRoomConnectionService)`     | `IConvaiRoomConnectionService`   | Low-level connection lifecycle control                                  |
 | `TryGetRoomAudioService(out IConvaiRoomAudioService)`               | `IConvaiRoomAudioService`        | Direct audio service access (bypasses `ConvaiAudio` facade)             |
@@ -218,7 +243,7 @@ if (manager.TryGetMicrophoneDeviceService(out var micService))
 | `TryGetPermissionService(out IConvaiPermissionService)`             | `IConvaiPermissionService`       | Request platform microphone permissions (Android, iOS)                  |
 | `TryGetNotificationService(out IConvaiNotificationService)`         | `IConvaiNotificationService`     | Trigger SDK notifications from your own scripts                         |
 | `TryGetPlayerInputService(out IPlayerInputService)`                 | `IPlayerInputService`            | Access player input state and text message routing                      |
-| `TryGetVisibleCharacterService(out IVisibleCharacterService)`       | `IVisibleCharacterService`       | Query which characters are visible in the camera frustum                |
+| `TryGetVisibleCharacterService(out IVisibleCharacterService)`       | `IVisibleCharacterService`       | Read or update the application-maintained set of character IDs considered visible; it does not perform camera-frustum detection |
 | `TryGetTransportProvider(out ITransportProvider)`                   | `ITransportProvider`             | Access the transport layer for diagnostic or custom transport scenarios |
 
 ***
@@ -230,12 +255,7 @@ The `ConvaiSDK` static class exposes the SDK version for conditional feature che
 ```csharp
 using Convai.Application;
 
-Debug.Log($"Convai SDK {ConvaiSDK.Version}"); // e.g. "4.2.0"
-
-if (ConvaiSDK.Version >= new System.Version(4, 2, 0))
-{
-    // Use a feature introduced in 4.2
-}
+Debug.Log($"Convai SDK {ConvaiSDK.Version}");
 ```
 
 ***
@@ -249,7 +269,8 @@ An industrial safety simulation connects to Convai when the scene loads, tied to
 {% code title="SceneConnector.cs" %}
 ```csharp
 using Convai.Runtime.Core.Async;
-using Convai.Runtime.Facades;
+using Convai.Runtime.Components;
+using Convai.Runtime.Room;
 using UnityEngine;
 
 public class SceneConnector : MonoBehaviour
@@ -274,30 +295,56 @@ public class SceneConnector : MonoBehaviour
 ```
 {% endcode %}
 
-## Example 2 — Swap conversation target on trigger zone entry
+### Example 2 — Change the interaction target from a trigger zone
 
 A corporate onboarding simulation has multiple AI advisors in a room. When a learner walks into an advisor's zone, that advisor becomes the active conversation target.
 
 {% code title="AdvisorZone.cs" %}
 ```csharp
 using Convai.Runtime.Components;
-using Convai.Runtime.Facades;
+using Convai.Runtime.Room;
 using UnityEngine;
 
-public class AdvisorZone : MonoBehaviour
+public sealed class AdvisorZone : MonoBehaviour
 {
     [SerializeField] private ConvaiCharacter _advisor;
+    private IConvaiRoomConnectionService _room;
 
-    private void OnTriggerEnter(Collider other)
+    private void Awake()
     {
-        if (!other.CompareTag("Player")) return;
-        ConvaiManager.ActiveManager?.SetExplicitConversationTarget(_advisor);
+        ConvaiManager.ActiveManager?.TryGetRoomConnectionService(out _room);
     }
 
-    private void OnTriggerExit(Collider other)
+    private async void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player")) return;
-        ConvaiManager.ActiveManager?.SetExplicitConversationTarget(null);
+        if (!other.CompareTag("Player") || _room == null) return;
+
+        try
+        {
+            await _room.SetInteractionTargetAsync(_advisor, destroyCancellationToken);
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogWarning($"Target change failed: {exception.Message}");
+        }
+    }
+
+    private async void OnTriggerExit(Collider other)
+    {
+        if (!other.CompareTag("Player") || _room == null) return;
+
+        MultiCharacterRoomSession session = _room.CurrentMultiCharacterSession;
+        CharacterRoomMembership membership = session?.FindByCharacter(_advisor);
+        if (membership == null || membership.MembershipId != session.ActiveMembershipId) return;
+
+        try
+        {
+            await _room.ClearInteractionTargetAsync(destroyCancellationToken);
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogWarning($"Target clear failed: {exception.Message}");
+        }
     }
 }
 ```
@@ -309,7 +356,7 @@ An interactive experience lets users choose their preferred microphone before a 
 
 {% code title="MicrophonePicker.cs" %}
 ```csharp
-using Convai.Runtime.Facades;
+using Convai.Runtime.Components;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -338,10 +385,11 @@ public class MicrophonePicker : MonoBehaviour
 
 | Symptom | Likely Cause | Fix |
 | ------- | ------------ | --- |
-| `ActiveManager` returns `null` at runtime | `ConvaiManager` not in scene, or accessed before bootstrap completes | Add via **Convai → Create Manager**; null-check before use; subscribe to `OnConnected` instead of reading state in `Awake` or `OnEnable` |
+| `ActiveManager` returns `null` at runtime | `ConvaiManager` not in scene, or accessed before bootstrap completes | Run **GameObject → Convai → Setup Required Components**; null-check before use; subscribe to `OnConnected` instead of reading state in `Awake` or `OnEnable` |
 | `TryGet*` returns `false` | Service unavailable or manager not fully bootstrapped | Check `IsBootstrapped` before calling; call after `OnConnected` fires |
 | `ConnectAsync` stays `Running` indefinitely | Invalid API key, network unreachable, or `ConvaiSettings` asset missing | Verify API key in **Convai → Settings**; use a timeout `CancellationToken` to surface the failure |
 | `RefreshReferences` does not find a dynamically spawned character | Characters instantiated after scene load are not auto-discovered | Call `RefreshReferences()` after instantiation, or use `SetExplicitCharacters()` to register them directly |
+| `SetExplicitConversationTarget` does not switch the connected character | The method configures startup ownership and sets `HasPendingOwnershipReconnect` while connected | Call `IConvaiRoomConnectionService.SetInteractionTargetAsync` and wait for its acknowledgement |
 
 ***
 

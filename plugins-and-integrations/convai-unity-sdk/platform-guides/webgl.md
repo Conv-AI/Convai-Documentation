@@ -25,7 +25,7 @@ Convai-Powered Unity 6 Web Projects (previously referred to as WebGL builds)
 | Long-Term Memory             | ✅ Full                                              |
 | Spatial audio                | ❌ Not supported                                     |
 | Screen share                 | ❌ Not supported                                     |
-| Microphone device selection  | ❌ Not available — browser controls device selection |
+| Microphone device selection  | ⚠️ Browser-controlled; SDK exposes one `Default Microphone` placeholder |
 | Unity `AudioSource` playback | ❌ Not supported — browser audio path only           |
 | Microphone test / pre-check  | ❌ Not supported                                     |
 
@@ -41,7 +41,7 @@ Convai-Powered Unity 6 Web Projects (previously referred to as WebGL builds)
 <iframe src="https://your-host.com/build/" allow="microphone" width="960" height="600"></iframe>
 ```
 
-**Microphone device selection:** The browser controls all microphone device selection. When conversation starts, the browser displays its own permission prompt and allows the user to select a microphone device. The SDK returns an empty device list on WebGL — the Settings Panel microphone dropdown will show no entries. This is expected behavior, not an error. The microphone test functionality available on native platforms is not supported on WebGL.
+**Microphone device selection:** The browser controls the physical device used by `getUserMedia`. The SDK cannot enumerate those devices like a native build, so `GetAvailableDevices()` returns one placeholder named `Default Microphone`. The Settings Panel can show that single entry, but choosing it does not select a particular hardware device. The microphone test functionality available on native platforms is not supported on WebGL.
 
 ### Example: LMS iframe embed
 
@@ -124,7 +124,7 @@ Key differences from native Vision:
 | Behavior                   | Native                                                 | WebGL                 |
 | -------------------------- | ------------------------------------------------------ | --------------------- |
 | Frame source               | `CameraVisionFrameSource` or `WebcamVisionFrameSource` | Browser canvas        |
-| Max frame rate             | Configurable                                           | 15 fps (fixed)        |
+| Built-in policy frame rate | Configurable                                           | 5, 10, or 15 fps; an explicit per-instance override replaces the policy default |
 | Webcam access              | Supported                                              | Not available via SDK |
 | `RenderTexture` publishing | Supported                                              | Not used              |
 
@@ -139,7 +139,7 @@ Before shipping a WebGL build, verify each item:
 * [ ] Explicit Start button present (especially for UI-heavy scenes)
 * [ ] Microphone permission prompt tested in Chrome, Firefox, and Safari
 * [ ] Character audio confirmed playing (browser audio path — not `AudioSource`)
-* [ ] Microphone dropdown empty in Settings Panel — confirm this is expected, not an error
+* [ ] Settings Panel shows the `Default Microphone` placeholder; physical device selection remains browser-controlled
 * [ ] Lip-sync timing evaluated visually in-browser across a full conversation turn
 * [ ] Vision response validated if Vision is enabled (canvas capture path)
 
@@ -150,7 +150,7 @@ Before shipping a WebGL build, verify each item:
 | Microphone never activates; character does not hear input     | Build is served over HTTP, not HTTPS                     | Serve the build over HTTPS. `localhost` is exempt.                                    |
 | Microphone blocked in iframe; permission prompt never appears | Missing `allow="microphone"` on the `<iframe>` element   | Add `allow="microphone"` to the iframe tag on the embedding page.                     |
 | Character audio is silent; no playback                        | No user gesture received before audio playback attempted | Add an explicit Start button wired to `ConvaiManager.EnableAudioAndStartListening()`. |
-| Microphone dropdown is empty in Settings Panel                | Expected — browser controls device selection on WebGL    | No fix needed. The browser permission prompt handles device selection.                |
+| Only `Default Microphone` appears in Settings Panel            | Expected — browser controls physical device selection on WebGL | No fix needed. The browser permission flow controls the underlying device.        |
 | Microphone test fails or is unavailable                       | Not supported on WebGL                                   | Expected behavior — inform users that mic testing is unavailable on browser builds.   |
 | No spatial audio; voices lack 3D positioning                  | Spatial audio not supported on WebGL                     | Expected. Consider communicating this in UI (e.g., headphone prompt).                 |
 

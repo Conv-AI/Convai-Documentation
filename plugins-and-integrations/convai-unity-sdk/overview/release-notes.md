@@ -3,12 +3,32 @@ title: Release notes
 description: >-
   Release notes for the Convai Unity SDK — current version highlights,
   previous release notes, bug fixes, and migration guidance for each release.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Track changes to the Convai Unity SDK across releases, including new features, bug fixes, and configuration changes. The current release is <code class="expression">space.vars.unity_sdk_version</code>.
 
 {% updates format="full" %}
+{% update date="2026-08-17" tags="v4.6.0,Preview" %}
+## v4.6.0 preview
+
+{% hint style="warning" %}
+This staging entry describes the planned Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> surface at feature commit `76ea3e6b`. It is not included in the current Asset Store or UPM release, and the API can change before release.
+{% endhint %}
+
+**Multi-character conversations**
+
+* Multiple active, enabled, owned `ConvaiCharacter` components can connect to one shared room. Multi-character startup requires an explicit initial character, which gates the room's connected state while secondary memberships continue toward `Ready` or `Failed`
+* `IConvaiRoomConnectionService` exposes the connection-scoped `MultiCharacterRoomSession`, acknowledged interaction-target changes, target clearing, and acknowledged add/remove roster operations
+* `CharacterRoomMembership` separates character, membership, character-session, and transport-participant identity and reports `Starting`, `Ready`, or `Failed` status. Target and roster results include the acknowledged membership and Convai epoch
+* `ConvaiTranscripts` remains one room-wide timeline. Character turns retain speaker and participant attribution; applications that need the target of a player turn must record the acknowledged active membership when speech begins
+* `IConvaiRoomAudioService` adds participant-output binding and participant enablement. Character subscription and mute controls, browser playback enablement, and character audio playheads remain available from the existing audio surface
+* Startup roster construction rejects more than 50 characters. Runtime add operations at this preview commit rely on backend, deployment, and application limits and must be revalidated at the release candidate
+* Reconnect hardening treats memberships, epochs, roster mutations, active target, and subscriptions as connection-scoped state that applications reacquire after reconnect
+
+The [multi-character conversations](../features/multi-character-conversations/) section documents setup, routing policies, runtime roster changes, transcripts, audio, limits, and the complete public service surface.
+{% endupdate %}
+
 {% update date="2026-08-14" tags="v4.5.0,Current" %}
 ## v4.5.0
 

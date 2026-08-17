@@ -64,7 +64,7 @@ The **Sync Status** header in the Inspector shows the current state of the last 
 If **Last Fetch Error** is not empty, the most common causes are a missing or invalid API key — see [Configure the API key](../../getting-started/configure-api-key.md) or a blank character ID on the `ConvaiCharacter` component.
 {% endhint %}
 
-The sync result is also reported via the `OnSectionsSynced` event (see Global events below). The `SectionSyncResult` it carries tells you exactly what changed:
+After a successful sync, `OnSectionsSynced` reports a `SectionSyncResult` (see Global events below). A failed fetch does not invoke this event; inspect **Last Fetch Error**, or await `FetchAndSyncFromBackendAsync()` and check `Success` before reading its counts.
 
 | Field                 | Description                                                          |
 | --------------------- | -------------------------------------------------------------------- |
@@ -81,7 +81,7 @@ After syncing, each dashboard section appears as an entry in the **Narrative Sec
 | -------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | **Section ID**       | `string` (read-only) | Unique identifier matching the section on the dashboard. Never edit this manually.                                               |
 | **Section Name**     | `string` (read-only) | Display name from the dashboard. Updated automatically on the next sync if the name changes.                                     |
-| **Is Orphaned**      | `bool` (read-only)   | `true` if this section no longer exists on the dashboard. Orphaned sections show a warning badge and their events will not fire. |
+| **Is Orphaned**      | `bool` (read-only)   | `true` if this section was absent from the latest backend sync. It remains in the runtime lookup so its event wiring is preserved. |
 | **On Section Start** | `UnityEvent`         | Invoked when the character transitions **into** this section.                                                                    |
 | **On Section End**   | `UnityEvent`         | Invoked when the character transitions **out of** this section.                                                                  |
 
@@ -95,7 +95,7 @@ Click the **+** button on **On Section Start** or **On Section End** to add a li
 
 ### Orphaned sections
 
-A section becomes orphaned when it is deleted from the dashboard but still exists in your local list. Orphaned entries are preserved so you do not lose your Unity Event wiring. Their `OnSectionStart` and `OnSectionEnd` events will never fire at runtime. If you restore the section on the dashboard, click **Sync with Backend** again to reactivate it.
+A section becomes orphaned when it is absent from the latest backend list but still exists locally. Orphaned entries are preserved so you do not lose Unity Event wiring. In Unity SDK 4.5.0, `IsOrphaned` changes Inspector status and active/orphan counts; it does not filter runtime section lookup. If the backend later emits that section ID, the preserved `OnSectionStart` or `OnSectionEnd` listener can still fire. Restore the section and sync again to clear the orphaned flag.
 
 <figure><img src="../../../../.gitbook/assets/image (486).png" alt="Inspector showing an orphaned section entry with a warning badge"><figcaption><p>An orphaned section entry in the Narrative Sections list.</p></figcaption></figure>
 
@@ -105,15 +105,15 @@ A section becomes orphaned when it is deleted from the dashboard but still exist
 
 ## Global events
 
-The **Events** foldout exposes three global Unity Events that fire regardless of which specific section is active.
+The **Events** foldout exposes three global Unity Events. The Manager subscribes to `NarrativeSectionChanged` with the EventHub's default `MainThread` delivery policy, so these Unity-facing callbacks are scheduled on Unity's main thread. The source does not promise delivery in the same frame as the network message.
 
 | Event                   | Signature                          | When it fires                                                                                                                       |
 | ----------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `OnAnySectionChanged`   | `UnityEvent<string>`               | Every time the active section changes. Receives the new section ID as a string.                                                     |
-| `OnSectionDataReceived` | `UnityEvent<NarrativeSectionData>` | Every section transition. Carries the full `NarrativeSectionData` payload including `BehaviorTreeCode` and `BehaviorTreeConstants`. |
+| `OnAnySectionChanged`   | `UnityEvent<string>`               | Every matching backend section event processed by the Manager, including a repeated ID. Receives the event's section ID.            |
+| `OnSectionDataReceived` | `UnityEvent<NarrativeSectionData>` | Every matching backend section event. Carries `SectionId` plus optional `BehaviorTreeCode` and `BehaviorTreeConstants`.              |
 | `OnSectionsSynced`      | `UnityEvent<SectionSyncResult>`    | After each successful call to `FetchAndSyncFromBackend()` or `FetchAndSyncFromBackendAsync()`.                                      |
 
-`OnAnySectionChanged` is useful for UI that needs to reflect the current story state without knowing section IDs in advance — for example, a progress indicator that increments each time the section changes.
+`OnAnySectionChanged` is useful for UI that needs to reflect the latest story state without knowing section IDs in advance. Because repeated section IDs also invoke this event, compare the received ID with your previous ID before incrementing a progress indicator.
 
 `OnSectionDataReceived` provides the raw behavior-tree payload. Most projects do not need this directly; it is intended for advanced integrations that interpret `BehaviorTreeCode` or `BehaviorTreeConstants`.
 

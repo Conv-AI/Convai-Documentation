@@ -38,7 +38,7 @@ These values correspond to the `Convai.Domain.Logging.LogLevel` enum.
 
 ### Configuring in the Inspector
 
-Open **Project Settings → Convai** (or select the `ConvaiSettings` asset at `Assets/Resources/ConvaiSettings.asset`). Under the **Logging** section:
+Open **Edit > Project Settings > Convai SDK > Diagnostics**. Under the logging controls:
 
 | Field                  | Description                                                                                       |
 | ---------------------- | ------------------------------------------------------------------------------------------------- |
@@ -52,13 +52,17 @@ Open **Project Settings → Convai** (or select the `ConvaiSettings` asset at `A
 | Category     | Subsystem                                   |
 | ------------ | ------------------------------------------- |
 | `SDK`        | General operations                          |
-| `Character`  | Per-character session lifecycle             |
+| `Character`  | Character membership, readiness, and activity |
 | `Audio`      | Microphone capture, playback, audio device  |
 | `Transport`  | WebRTC / WebSocket connection layer         |
 | `Events`     | Internal event bus                          |
 | `Transcript` | Transcript processing and routing           |
 | `Narrative`  | Narrative design system                     |
 | `LipSync`    | Lip sync processing and blendshape playback |
+| `Animation`  | Body animation, layers, and locomotion      |
+| `Gaze`       | Gaze targeting and solver behavior          |
+| `BodyLanguage` | Gestures, posture, breathing, and fidgets |
+| `Actions`    | Action commands, filtering, and target resolution |
 | `Vision`     | Camera capture and video publishing         |
 | `Bootstrap`  | SDK startup and initialization              |
 | `UI`         | UI component lifecycle                      |

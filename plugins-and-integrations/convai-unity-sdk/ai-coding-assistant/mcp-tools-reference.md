@@ -29,30 +29,40 @@ Unity's official MCP server exposes 37 Convai-specific tools under the `Convai.*
 | `Convai.DiagnoseTranscripts` | Transcripts | Yes | No |
 | `Convai.ConfigureNarrative` | Narrative | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
 | `Convai.DiagnoseNarrative` | Narrative | Yes | No |
-| `Convai.TraceRuntimeEvents` | Runtime diagnostics | Yes | No — manages an editor-only trace buffer only |
-| `Convai.ConfigureEmbodiment` | Embodiment | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
+| `Convai.ConfigureEmbodiment` | Embodiment | Yes | Yes — `dryRun` defaults to `true` |
 | `Convai.DiagnoseEmbodiment` | Embodiment | Yes | No |
 | `Convai.InspectEmbodimentPresets` | Embodiment | Yes | No |
-| `Convai.ConfigureGaze` | Gaze | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
-| `Convai.DiagnoseGaze` | Gaze | Yes | No |
-| `Convai.MarkGazeTarget` | Gaze | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
-| `Convai.ConfigureBodyAnimation` | Body animation | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
+| `Convai.ConfigureBodyAnimation` | Body animation | Yes | Yes — `dryRun` defaults to `true` |
 | `Convai.DiagnoseBodyAnimation` | Body animation | Yes | No |
 | `Convai.InspectBodyAnimationContent` | Body animation | Yes | No |
-| `Convai.TuneBodyAnimationPersonality` | Body animation | Yes | Yes — Edit Mode only; also duplicates a shared config asset, gated behind `makeConfigUnique` |
-| `Convai.ConfigureBodyLanguage` | Body language | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
+| `Convai.TuneBodyAnimationPersonality` | Body animation | Yes | Yes — `dryRun` defaults to `true` |
+| `Convai.ConfigureBodyLanguage` | Body language | Yes | Yes — `dryRun` defaults to `true` |
 | `Convai.DiagnoseBodyLanguage` | Body language | Yes | No |
 | `Convai.InspectBodyLanguagePersonalities` | Body language | Yes | No |
-| `Convai.ConfigureEmotion` | Emotion | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
+| `Convai.ConfigureEmotion` | Emotion | Yes | Yes — `dryRun` defaults to `true` |
 | `Convai.DiagnoseEmotion` | Emotion | Yes | No |
 | `Convai.InspectEmotionPersonalities` | Emotion | Yes | No |
-| `Convai.TuneEmotionPersonality` | Emotion | Yes | Yes — Edit Mode only; also duplicates a shared personality asset, gated behind `makePersonalityUnique` |
+| `Convai.TuneEmotionPersonality` | Emotion | Yes | Yes — `dryRun` defaults to `true` |
+| `Convai.ConfigureGaze` | Gaze | Yes | Yes — `dryRun` defaults to `true` |
+| `Convai.DiagnoseGaze` | Gaze | Yes | No |
+| `Convai.MarkGazeTarget` | Gaze | Yes | Yes — `dryRun` defaults to `true` |
+| `Convai.TraceRuntimeEvents` | Runtime diagnostics | Yes | No — manages an editor-only trace buffer only |
 
 Toggle any tool under **Edit > Project Settings > AI > Unity MCP Server**.
 
-## Guidance
+### Caller-specific parameter exposure
 
-### `Convai.GetGuidance`
+The parameter tables describe the full external MCP JSON schema. Unity AI Assistant's dot-named wrappers expose the same inputs except for the advanced fields below; external clients can use those fields through the underscore-normalized tool.
+
+| Tool | Additional external-MCP inputs |
+|---|---|
+| `Convai.ConfigureBodyAnimation` | `autoJogDistanceMeters`, `minJogDistanceMeters`, `accelerationMetersPerSecondSquared`, `rotationDegreesPerSecond` |
+| `Convai.TuneBodyAnimationPersonality` | `howExpressive`, `howCalm`, `keepsBusyWhenAlone`, `howOftenSeconds` |
+| `Convai.TuneEmotionPersonality` | `howStronglyItShows`, `howQuicklyItReacts`, `neverSitsPerfectlyStill`, `moodFollowsConversation`, `showsMoreThanOneEmotion`, `picksUpOtherCharactersMoods` |
+| `Convai.ConfigureGaze` | `playerAnchorAimMode`, `playerAnchorAimOffset`, `allowScriptedOverrides`, `lockBlocksGlances`, `autoCreatePlayerAnchor` |
+| `Convai.MarkGazeTarget` | `priority`, `baseRelevance`, `maxDistance`, `fullRelevanceDistance`, `aimOffset` |
+
+## `Convai.GetGuidance`
 
 **Area:** Guidance · **Enabled by default:** Yes · **Mutates:** No
 

@@ -6,7 +6,7 @@ description: >-
 last_reviewed: "4.5.0"
 ---
 
-The Convai Unity SDK ships a set of optional, scene-level UI components. These components consume data already produced by the runtime and render it locally in your scene — none of them send data to Convai or require an active connection to display.
+The Convai Unity SDK ships a set of optional, scene-level UI components. Transcript history and notifications render runtime data locally, but interactive controls can affect the live room: `ChatTranscriptUI` can send typed player messages, and the settings panel can apply runtime settings. Existing history and local configuration can be displayed while disconnected; sending a message or changing a connected-room setting requires the corresponding runtime service to be available.
 
 Each component is independent. Add only what your training simulation, interactive experience, or game requires.
 

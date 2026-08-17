@@ -4,10 +4,12 @@ last_reviewed: "4.5.0"
 description: Browse and manage end-user records from the Convai Editor window or from a script, covering the editor tool, every method, and pagination.
 ---
 
-The Convai Unity SDK tracks every user who connects with a memory-enabled character as an **end-user record**. Each record stores the user's stable identifier, last activity timestamps, and any metadata you sent during connection. You can browse and delete these records from the Unity editor or manage them programmatically with `client.EndUsers`.
+The Convai REST models expose **end-user records** with an identifier, activity timestamps, and metadata. You can browse, update, and request deletion of records from the Unity editor or through `client.EndUsers`.
+
+**Validation boundary:** The Unity 4.5 client proves the request and response shapes on this page. Record creation, metadata merge semantics, and deletion scope are backend behavior. Verify them with live get/list calls before and after each operation.
 
 {% hint style="warning" %}
-**Beta API.** Method signatures are stable but may change in future SDK updates. Pin your SDK version in production and review the changelog before upgrading.
+**Beta API.** These methods use the beta service path and may change in future SDK updates. Pin your SDK version and review the changelog before upgrading.
 {% endhint %}
 
 ***
@@ -29,7 +31,7 @@ The panel shows all end-user records associated with your API key. It loads reco
 
 <figure><img src="../../../../.gitbook/assets/image (472).png" alt="Unity menu bar showing Convai → Long Term Memory navigation path"><figcaption><p>Open the end-user management panel from the Unity menu bar: Convai → Long Term Memory.</p></figcaption></figure>
 
-Deleting an end-user record from the editor removes **the record and all memory records for that user across every character**. This cannot be undone. A confirmation dialog appears before deletion proceeds.
+The editor sends the same destructive end-user deletion request documented below and shows a confirmation dialog first. Confirm its current backend scope with follow-up live queries; do not infer cross-character deletion solely from the Unity client method name.
 
 <figure><img src="../../../../.gitbook/assets/image (471).png" alt="End-user records with name and session count"><figcaption><p>End-user records with name and session count.</p></figcaption></figure>
 {% endtab %}
@@ -38,6 +40,10 @@ Deleting an end-user record from the editor removes **the record and all memory 
 Access end-user operations through `client.EndUsers` on a `ConvaiRestClient` instance.
 
 ```csharp
+// API usage excerpt: place inside an application-owned method.
+using Convai.RestAPI;
+using Convai.Runtime;
+
 using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
 ```
 
@@ -73,6 +79,7 @@ Retrieve all end-user records with cursor-based pagination. The default limit is
 ```csharp
 using Convai.RestAPI;
 using Convai.RestAPI.Internal;
+using Convai.Runtime;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -120,6 +127,7 @@ public class EndUserLister : MonoBehaviour
 You can also filter by activity date using `activeAfter` and `activeBefore` (ISO 8601 strings):
 
 ```csharp
+// API usage excerpt: assumes an initialized client.
 var response = await client.EndUsers.ListAsync(
     limit: 50,
     activeAfter: "2025-01-01T00:00:00Z",
@@ -133,6 +141,7 @@ var response = await client.EndUsers.ListAsync(
 Retrieve details for one specific user by their `endUserId`.
 
 ```csharp
+// API usage excerpt: assumes an initialized client.
 var user = await client.EndUsers.GetAsync("target-end-user-id");
 Debug.Log($"Last active: {user.LastActiveTs}");
 Debug.Log($"Display name: {user.DisplayName}");
@@ -142,9 +151,10 @@ Debug.Log($"Display name: {user.DisplayName}");
 
 ### Update user metadata
 
-Update one or more metadata keys for a user. The patch operation preserves keys you do not include — it does not replace the entire metadata object.
+Submit one or more metadata keys for a user. The client sends an `end_user_metadata` object; verify the backend's merge behavior by fetching the record afterward.
 
 ```csharp
+// API usage excerpt: assumes an initialized client.
 var patch = new Dictionary<string, object>
 {
     { "name", "Jordan Kim" },
@@ -160,10 +170,11 @@ Debug.Log($"Updated metadata for {updated.EndUserId}.");
 ### Delete an end user
 
 {% hint style="danger" %}
-`DeleteAsync` removes the end-user record **and all memory records for that user across all characters**. Unlike `MemoryService.DeleteAllAsync`, which is scoped to one character, this operation removes the user globally. This cannot be undone.
+`DeleteAsync` sends a destructive request keyed by `endUserId`. Require confirmation, inspect `Deleted`, and query the affected user and character records afterward. Unity source does not prove the backend's cross-character deletion scope.
 {% endhint %}
 
 ```csharp
+// API usage excerpt: assumes an initialized client.
 var result = await client.EndUsers.DeleteAsync("target-end-user-id");
 
 if (result.Deleted)
@@ -176,12 +187,12 @@ else
 
 ## `DeleteAllAsync` vs. `DeleteAsync`
 
-| Operation                                              | Scope                     | What is removed                                         |
-| ------------------------------------------------------ | ------------------------- | ------------------------------------------------------- |
-| `client.Memory.DeleteAllAsync(characterId, endUserId)` | One user + one character  | All memory records for that user–character pair         |
-| `client.EndUsers.DeleteAsync(endUserId)`               | One user + all characters | The user record and all memories across every character |
+| Operation | Request key | Live verification |
+| --- | --- | --- |
+| `client.Memory.DeleteAllAsync(characterId, endUserId)` | Character ID + end-user ID | List that pair after the request |
+| `client.EndUsers.DeleteAsync(endUserId)` | End-user ID | Get/list the user and inspect relevant character records afterward |
 
-Use `DeleteAllAsync` when you want to reset a user's memory for a specific character while keeping their records for other characters intact. Use `EndUsers.DeleteAsync` when you need to fully remove a user from the system.
+Choose the method whose request keys match your intent, then verify the live result. For compliance-sensitive deletion, do not report completion until the backend queries confirm the required scope.
 
 ***
 

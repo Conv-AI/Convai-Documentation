@@ -17,9 +17,9 @@ A custom module is the right tool when you need behavior that:
 
 You do not need a custom module for:
 
-* Reacting to SDK events in a MonoBehaviour — subscribe directly via `context.Events` from an `IInjectable` component, or use the public events on `ConvaiCharacter`
+* Reacting to SDK events in a MonoBehaviour — implement `IInjectable<IConvaiCharacterDependencies>` and subscribe through the injected `dependencies.EventHub`, use `ConvaiManager.Events`, or use the public events on `ConvaiCharacter`
 * Simple custom behavior on a character — add a MonoBehaviour to the character's GameObject
-* Calling the Convai REST API from your own scripts — use `ConvaiManager.ActiveManager` directly
+* Calling the Convai REST API from your own scripts — create a `ConvaiRestClient` with `ConvaiRestClientOptions`; `ConvaiManager.ActiveManager` owns the room runtime, not the REST API client
 
 If in doubt, start with a `MonoBehaviour` and only escalate to `IConvaiModule` when you need lifecycle integration.
 

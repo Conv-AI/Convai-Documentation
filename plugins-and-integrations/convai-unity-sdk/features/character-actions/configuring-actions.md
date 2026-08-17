@@ -84,7 +84,7 @@ Each entry in **Actionable Objects** registers a scene object as a valid target 
 
 **Writing effective descriptions:**
 
-|               | Example                                                                                      |
+| Description quality | Example                                                                                      |
 | ------------- | ---------------------------------------------------------------------------------------------- |
 | **Too vague** | `An object in the scene`                                                                     |
 | **Good**      | `A red portable CO2 fire extinguisher mounted on the wall to the left of the main workbench` |
@@ -142,7 +142,9 @@ Use when both the backend affordances and the local executor bindings should dif
 
 ```csharp
 using System.Collections.Generic;
+using Convai.Modules.BodyAnimation.Executors;
 using Convai.Runtime.Actions;
+using Convai.Runtime.Components;
 using Convai.Runtime.Room;
 using Convai.Shared.Actions;
 using UnityEngine;

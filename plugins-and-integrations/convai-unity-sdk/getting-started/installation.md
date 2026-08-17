@@ -106,13 +106,9 @@ Wait for the progress bar in the bottom-right of the Unity Editor to complete be
 {% endstep %}
 {% endstepper %}
 
-{% hint style="info" %}
-To update the SDK to a newer version, return to **My Assets** in the Package Manager, select the SDK, and click **Update**.
-{% endhint %}
+**Updating:** To update the SDK to a newer version, return to **My Assets** in the Package Manager, select the SDK, and click **Update**.
 
-{% hint style="success" %}
 **Installation complete** when the Convai SDK for Unity entry appears in the Package Manager list with version <code class="expression">space.vars.unity_sdk_version</code>. You will also see a new **Convai** menu item in the Unity menu bar.
-{% endhint %}
 {% endtab %}
 {% endtabs %}
 
