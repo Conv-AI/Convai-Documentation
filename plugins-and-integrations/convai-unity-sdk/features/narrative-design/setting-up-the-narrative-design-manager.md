@@ -153,9 +153,9 @@ The **Events** foldout exposes three global Unity Events that fire regardless of
 ## Next steps
 
 {% content-ref url="setting-up-narrative-design-triggers.md" %}
-[setting-up-narrative-design-triggers.md](setting-up-narrative-design-triggers.md)
+[Configure narrative design triggers](setting-up-narrative-design-triggers.md)
 {% endcontent-ref %}
 
 {% content-ref url="template-keys-dynamic-narrative-variables.md" %}
-[template-keys-dynamic-narrative-variables.md](template-keys-dynamic-narrative-variables.md)
+[Configure narrative template keys](template-keys-dynamic-narrative-variables.md)
 {% endcontent-ref %}

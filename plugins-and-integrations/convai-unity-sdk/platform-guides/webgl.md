@@ -173,9 +173,9 @@ Before shipping a WebGL build, verify each item:
 Your WebGL build is ready once HTTPS is confirmed, the gesture requirement is handled, and the validation checklist passes. If you are also deploying to iOS, Android, or XR headsets, those platforms have their own permission requirements.
 
 {% content-ref url="ios-and-android.md" %}
-[ios-and-android.md](ios-and-android.md)
+[iOS and Android](ios-and-android.md)
 {% endcontent-ref %}
 
 {% content-ref url="xr-headsets.md" %}
-[xr-headsets.md](xr-headsets.md)
+[XR headsets](xr-headsets.md)
 {% endcontent-ref %}

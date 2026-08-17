@@ -134,5 +134,5 @@ Rules are evaluated top-to-bottom. Place more specific rules above broader prefi
 {% endcontent-ref %}
 
 {% content-ref url="../customizing-ui-components.md" %}
-[customizing-ui-components.md](../customizing-ui-components.md)
+[Customizing UI components](../customizing-ui-components.md)
 {% endcontent-ref %}

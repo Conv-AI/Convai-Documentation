@@ -82,17 +82,17 @@ If you clicked **Later** on the dialog, or want to place the components on a spe
 ## Next steps
 
 {% content-ref url="how-vision-works.md" %}
-[how-vision-works.md](how-vision-works.md)
+[How vision works](how-vision-works.md)
 {% endcontent-ref %}
 
 {% content-ref url="frame-sources.md" %}
-[frame-sources.md](frame-sources.md)
+[Vision frame sources](frame-sources.md)
 {% endcontent-ref %}
 
 {% content-ref url="publishing-and-policies.md" %}
-[publishing-and-policies.md](publishing-and-policies.md)
+[Publish policies](publishing-and-policies.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[troubleshooting-and-diagnostics.md](troubleshooting-and-diagnostics.md)
+[Troubleshoot vision](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

@@ -131,13 +131,13 @@ public sealed class ReadGaugeActionExecutor : ConvaiActionExecutorBase
 ## Next steps
 
 {% content-ref url="scripted-gaze.md" %}
-[scripted-gaze.md](scripted-gaze.md)
+[Scripted gaze](scripted-gaze.md)
 {% endcontent-ref %}
 
 {% content-ref url="targets-and-providers.md" %}
-[targets-and-providers.md](targets-and-providers.md)
+[Gaze targets and providers](targets-and-providers.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting.md" %}
-[troubleshooting.md](troubleshooting.md)
+[Troubleshoot gaze](troubleshooting.md)
 {% endcontent-ref %}

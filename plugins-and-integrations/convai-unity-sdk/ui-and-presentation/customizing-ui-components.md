@@ -141,5 +141,5 @@ A military training simulation replaces the default notification prefab with a H
 {% endcontent-ref %}
 
 {% content-ref url="transcript-ui/chat-and-subtitle-modes.md" %}
-[chat-and-subtitle-modes.md](transcript-ui/chat-and-subtitle-modes.md)
+[Chat and subtitle modes](transcript-ui/chat-and-subtitle-modes.md)
 {% endcontent-ref %}

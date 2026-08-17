@@ -76,13 +76,13 @@ The `Live` tab refreshes automatically about ten times per second while it is th
 ## Next steps
 
 {% content-ref url="character-rig-setup.md" %}
-[character-rig-setup.md](character-rig-setup.md)
+[Character rig setup](character-rig-setup.md)
 {% endcontent-ref %}
 
 {% content-ref url="embodiment-presets.md" %}
-[embodiment-presets.md](embodiment-presets.md)
+[Embodiment presets](embodiment-presets.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting.md" %}
-[troubleshooting.md](troubleshooting.md)
+[Troubleshoot embodiment](troubleshooting.md)
 {% endcontent-ref %}

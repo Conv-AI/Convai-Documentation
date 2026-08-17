@@ -53,11 +53,11 @@ The SDK reads the key from `ConvaiSettings` via the `ICredentialProvider` interf
 API Key mode has no equivalent of a server-issued, short-lived credential — the same account key that unlocks your Convai project sits in the build. For any build distributed to testers, players, or end users, switch to Auth Token mode instead, where a build processor strips the account key before the build and a server you control issues short-lived tokens at connect time.
 
 {% content-ref url="../authentication/README.md" %}
-[README.md](../authentication/README.md)
+[Authentication](../authentication/README.md)
 {% endcontent-ref %}
 
 {% content-ref url="../advanced-topics/custom-providers/custom-credential-provider.md" %}
-[custom-credential-provider.md](../advanced-topics/custom-providers/custom-credential-provider.md)
+[Custom credential provider](../advanced-topics/custom-providers/custom-credential-provider.md)
 {% endcontent-ref %}
 
 ## Next steps
@@ -65,5 +65,5 @@ API Key mode has no equivalent of a server-issued, short-lived credential — th
 With your API key in place, import a sample scene to verify the SDK is working before you build your own scene.
 
 {% content-ref url="import-and-run-sample-scenes.md" %}
-[import-and-run-sample-scenes.md](import-and-run-sample-scenes.md)
+[Import and run sample scenes](import-and-run-sample-scenes.md)
 {% endcontent-ref %}

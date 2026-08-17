@@ -74,17 +74,17 @@ Import the **LipSync Sample** from Package Manager and open its scene. The sampl
 ## Next steps
 
 {% content-ref url="relay-component-reference.md" %}
-[relay-component-reference.md](relay-component-reference.md)
+[Relay component reference](relay-component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[dynamic-context-scripting-api.md](dynamic-context-scripting-api.md)
+[Dynamic context scripting API](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-usage-examples.md" %}
-[dynamic-context-usage-examples.md](dynamic-context-usage-examples.md)
+[Dynamic context usage examples](dynamic-context-usage-examples.md)
 {% endcontent-ref %}
 
 {% content-ref url="sync-behavior-and-timing.md" %}
-[sync-behavior-and-timing.md](sync-behavior-and-timing.md)
+[Sync behavior and timing](sync-behavior-and-timing.md)
 {% endcontent-ref %}

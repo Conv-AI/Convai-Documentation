@@ -188,9 +188,9 @@ Use `DeleteAllAsync` when you want to reset a user's memory for a specific chara
 ## Next steps
 
 {% content-ref url="memory-management-api.md" %}
-[memory-management-api.md](memory-management-api.md)
+[Memory management API](memory-management-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="long-term-memory-scripting-reference.md" %}
-[long-term-memory-scripting-reference.md](long-term-memory-scripting-reference.md)
+[Long-term memory scripting reference](long-term-memory-scripting-reference.md)
 {% endcontent-ref %}

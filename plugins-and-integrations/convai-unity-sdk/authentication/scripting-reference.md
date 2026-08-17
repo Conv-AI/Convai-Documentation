@@ -154,18 +154,20 @@ public IConvaiOperation<RoomSession> ConnectWithAuthTokenAsync(
 
 Returns `IConvaiOperation<RoomSession>`.
 
-Argument validation and connection failures reach you by different routes, and the distinction decides how you write the calling code. Empty arguments throw `ConvaiOperationException` before any network work starts, so a `try`/`catch` around the call catches them. A project left in `ConvaiAuthMode.ApiKey`, or a token Convai rejects, fails during the connection attempt instead — the operation completes as a failure carrying an error code rather than throwing at the call site.
+Every failure below carries a `ConvaiOperationException`, and how you receive it depends on how you call the method. Awaiting the operation rethrows the exception, so a `try`/`catch` around the `await` handles every case. If you would rather not catch, hold the operation instead of awaiting it and read `IsSuccessful`, `HasError`, and `Error` once `IsCompleted` is true — `Error` carries the same code and message.
 
 ### Errors
 
-| Error code | Message | Cause | Surfaces as |
-| --- | --- | --- | --- |
-| `ConnectionInvalidToken` | `A non-empty Convai auth token is required.` | `authToken` was empty or whitespace-only. | Thrown |
-| `ConnectionBadRequest` | `A non-empty end-user ID is required.` | `endUserId` was empty or whitespace-only. | Thrown |
-| `ConnectionBadRequest` | `A non-empty end-user name is required.` | `endUserName` was empty or whitespace-only. | Thrown |
-| `ConnectionFailed` | `ConvaiRoomManager not available.` | No room manager is present on the manager object. | Thrown |
-| `ConfigAuthTokenModeRequired` | `Explicit auth-token connections require Auth Token mode in Convai Project Settings.` | The project's authentication mode is `ConvaiAuthMode.ApiKey`. | Connection failure |
-| `ConnectionInvalidToken` | `Connection token is invalid` | Convai rejected the supplied token. | Connection failure |
+| Error code | Message | Cause |
+| --- | --- | --- |
+| `ConnectionInvalidToken` | `A non-empty Convai auth token is required.` | `authToken` was empty or whitespace-only. |
+| `ConnectionBadRequest` | `A non-empty end-user ID is required.` | `endUserId` was empty or whitespace-only. |
+| `ConnectionBadRequest` | `A non-empty end-user name is required.` | `endUserName` was empty or whitespace-only. |
+| `ConnectionFailed` | `ConvaiRoomManager not available.` | No room manager is present on the manager object. |
+| `ConfigAuthTokenModeRequired` | `Explicit auth-token connections require Auth Token mode in Convai Project Settings.` | The project's authentication mode is `ConvaiAuthMode.ApiKey`. |
+| `ConnectionInvalidToken` | `Connection token is invalid` | Convai rejected the supplied token. |
+
+The first four are raised before any network work starts; the last two during the connection attempt. Both reach the caller the same way.
 
 ## `ConvaiSettings` authentication accessors
 

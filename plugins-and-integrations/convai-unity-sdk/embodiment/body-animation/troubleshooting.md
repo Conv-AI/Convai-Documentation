@@ -105,13 +105,13 @@ A pointing gesture that plays but aims at the wrong spot is not a failure — it
 ## Next steps
 
 {% content-ref url="play-actions-and-gestures.md" %}
-[play-actions-and-gestures.md](play-actions-and-gestures.md)
+[Play actions and gestures](play-actions-and-gestures.md)
 {% endcontent-ref %}
 
 {% content-ref url="config-reference.md" %}
-[config-reference.md](config-reference.md)
+[Body animation config reference](config-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="../../overview/release-notes.md" %}
-[release-notes.md](../../overview/release-notes.md)
+[Release notes](../../overview/release-notes.md)
 {% endcontent-ref %}

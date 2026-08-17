@@ -186,11 +186,11 @@ Travel is resolved from three sources, best first: an explicit report through `R
 ## Related reference
 
 {% content-ref url="how-embodiment-works.md" %}
-[how-embodiment-works.md](how-embodiment-works.md)
+[How embodiment works](how-embodiment-works.md)
 {% endcontent-ref %}
 
 {% content-ref url="character-rig-setup.md" %}
-[character-rig-setup.md](character-rig-setup.md)
+[Character rig setup](character-rig-setup.md)
 {% endcontent-ref %}
 
 {% content-ref url="../core-concepts/character-embodiment.md" %}

@@ -50,13 +50,13 @@ A full-body turn is the last stage of the Head & Body ladder — feet only activ
 ## Next steps
 
 {% content-ref url="README.md" %}
-[README.md](README.md)
+[Gaze](README.md)
 {% endcontent-ref %}
 
 {% content-ref url="targets-and-providers.md" %}
-[targets-and-providers.md](targets-and-providers.md)
+[Gaze targets and providers](targets-and-providers.md)
 {% endcontent-ref %}
 
 {% content-ref url="scripted-gaze.md" %}
-[scripted-gaze.md](scripted-gaze.md)
+[Scripted gaze](scripted-gaze.md)
 {% endcontent-ref %}

@@ -11,7 +11,7 @@ Add the Gaze module to an existing Convai character and confirm that the charact
 ## Prerequisites
 
 - A `ConvaiCharacter` in your scene that already connects and responds — complete [Validate your setup](../getting-started/validate-your-setup.md) first if you have not.
-- A **Humanoid** rig on the character. Gaze needs it for head and eye aiming; a Generic rig still works for Emotion and lip sync if the face has blendshapes.
+- An `Animator` on the character. A **Humanoid** rig lets Convai map the head and eyes automatically; a **Generic** rig works too once a `Character Rig` binding assigns at least the head.
 
 {% hint style="info" %}
 You do not need to author a settings asset before trying a module. Every module runs on built-in defaults tuned to look right — a profile is for reshaping the behavior later, not for turning the module on.

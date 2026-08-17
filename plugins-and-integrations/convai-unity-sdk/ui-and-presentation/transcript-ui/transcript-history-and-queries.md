@@ -226,7 +226,7 @@ ConvaiManager.ActiveManager.Transcripts.Clear();
 You now have full read access to the room transcript timeline, live change notifications, and export support. For the complete API surface behind this page, see the Transcript API reference. For displaying this data in your scene, see Transcript UI. For configuring which visual mode is active at runtime, see the Settings Panel.
 
 {% content-ref url="../../scripting-reference/transcript-api.md" %}
-[transcript-api.md](../../scripting-reference/transcript-api.md)
+[Transcript API](../../scripting-reference/transcript-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="./" %}

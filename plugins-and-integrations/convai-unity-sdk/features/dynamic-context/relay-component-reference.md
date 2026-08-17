@@ -94,13 +94,13 @@ When character resolution fails, `ConvaiDynamicContextRelay` logs a warning to t
 ## Next steps
 
 {% content-ref url="dynamic-context-usage-examples.md" %}
-[dynamic-context-usage-examples.md](dynamic-context-usage-examples.md)
+[Dynamic context usage examples](dynamic-context-usage-examples.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[dynamic-context-scripting-api.md](dynamic-context-scripting-api.md)
+[Dynamic context scripting API](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="sync-behavior-and-timing.md" %}
-[sync-behavior-and-timing.md](sync-behavior-and-timing.md)
+[Sync behavior and timing](sync-behavior-and-timing.md)
 {% endcontent-ref %}

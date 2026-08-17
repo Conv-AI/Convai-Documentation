@@ -15,7 +15,7 @@ Who or what is worth looking at, and how long the character stays interested.
 | `PlayerMaxDistance` | `float` | `8` (meters) | `>= 0` | Distance beyond which the player anchor loses relevance entirely. |
 | `PlayerFullRelevanceDistance` | `float` | `4` (meters) | `>= 0` | Distance below which the player anchor is fully relevant. |
 | `PlayerLineOfSight` | `bool` | `false` | — | Auto-created player anchor only: require an unobstructed line of sight to the player. |
-| `PlayerObstructionMask` | `LayerMask` | `Physics.DefaultRaycastLayers` | — | Auto-created player anchor only: layers treated as vision obstructions. |
+| `PlayerObstructionMask` | `int` | `Physics.DefaultRaycastLayers` | — | Auto-created player anchor only: layers treated as vision obstructions. |
 | `TargetTeleportThreshold` | `float` | `1.25` (meters/frame) | `>= 0.05` | Target displacement treated as a camera cut/teleport: gaze re-acquires with a saccade instead of dragging. |
 | `CommitmentAcquireSeconds` | `float` | `0.35` | `>= 0.01` | Seconds for engagement to ramp in after a target is acquired. |
 | `CommitmentReleaseSeconds` | `float` | `0.9` | `>= 0.01` | Seconds for engagement to ramp out after a target is lost or released. |

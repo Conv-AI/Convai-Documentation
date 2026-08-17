@@ -246,7 +246,7 @@ At runtime, visitors see clean rolling captions at the exhibit while the docent 
 You have added chat history display, subtitle captions, or both, and wired feedback buttons on chat messages. For customizing the visual appearance of bubbles or building a fully custom transcript display, see Customizing UI Components. For letting users show or hide transcript display at runtime, see the Settings Panel.
 
 {% content-ref url="../customizing-ui-components.md" %}
-[customizing-ui-components.md](../customizing-ui-components.md)
+[Customizing UI components](../customizing-ui-components.md)
 {% endcontent-ref %}
 
 {% content-ref url="../settings-panel/" %}
@@ -254,5 +254,5 @@ You have added chat history display, subtitle captions, or both, and wired feedb
 {% endcontent-ref %}
 
 {% content-ref url="transcript-history-and-queries.md" %}
-[transcript-history-and-queries.md](transcript-history-and-queries.md)
+[Transcript history and queries](transcript-history-and-queries.md)
 {% endcontent-ref %}

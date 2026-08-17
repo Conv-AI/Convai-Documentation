@@ -197,11 +197,11 @@ Select **Clear** on the Action Monitor between test runs to keep its Activity se
 ## Next steps
 
 {% content-ref url="update-actions-at-runtime.md" %}
-[update-actions-at-runtime.md](update-actions-at-runtime.md)
+[Update character actions at runtime](update-actions-at-runtime.md)
 {% endcontent-ref %}
 
 {% content-ref url="actions-scripting-reference.md" %}
-[actions-scripting-reference.md](actions-scripting-reference.md)
+[Character actions scripting reference](actions-scripting-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="migrate-to-v4-5.md" %}

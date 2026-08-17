@@ -41,11 +41,11 @@ Obfuscation is not encryption. Anyone with the SDK source can reverse the stored
 If you are configuring your first project, start with the API key.
 
 {% content-ref url="../getting-started/configure-api-key.md" %}
-[configure-api-key.md](../getting-started/configure-api-key.md)
+[Configure the API key](../getting-started/configure-api-key.md)
 {% endcontent-ref %}
 
 When you are ready to ship a build, read how credential resolution works before configuring Auth Token mode.
 
 {% content-ref url="how-authentication-works.md" %}
-[how-authentication-works.md](how-authentication-works.md)
+[How authentication works](how-authentication-works.md)
 {% endcontent-ref %}

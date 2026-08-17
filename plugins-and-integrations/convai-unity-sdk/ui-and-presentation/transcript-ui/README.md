@@ -54,11 +54,11 @@ Neither component is the only option. Any script can call `Subscribe`, `Subscrib
 You have covered how the durable and caption paths split and which shipped component reads each. Continue to querying the durable timeline from code, configuring the two built-in display modes, or controlling transcript visibility from the settings panel.
 
 {% content-ref url="transcript-history-and-queries.md" %}
-[transcript-history-and-queries.md](transcript-history-and-queries.md)
+[Transcript history and queries](transcript-history-and-queries.md)
 {% endcontent-ref %}
 
 {% content-ref url="chat-and-subtitle-modes.md" %}
-[chat-and-subtitle-modes.md](chat-and-subtitle-modes.md)
+[Chat and subtitle modes](chat-and-subtitle-modes.md)
 {% endcontent-ref %}
 
 {% content-ref url="../settings-panel/" %}

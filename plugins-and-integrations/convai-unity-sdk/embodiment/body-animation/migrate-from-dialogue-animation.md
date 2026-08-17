@@ -56,13 +56,13 @@ If a character used `AnimationRiggingGazeBridge` to drive Unity Animation Riggin
 ## Next steps
 
 {% content-ref url="quick-start.md" %}
-[quick-start.md](quick-start.md)
+[Body animation quick start](quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="build-an-animation-set.md" %}
-[build-an-animation-set.md](build-an-animation-set.md)
+[Build an animation set](build-an-animation-set.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting.md" %}
-[troubleshooting.md](troubleshooting.md)
+[Troubleshoot body animation](troubleshooting.md)
 {% endcontent-ref %}

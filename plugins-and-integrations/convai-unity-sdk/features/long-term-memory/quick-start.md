@@ -87,13 +87,13 @@ For applications where users log in with accounts, replace `DeviceEndUserIdProvi
 ## Next steps
 
 {% content-ref url="end-user-identity.md" %}
-[end-user-identity.md](end-user-identity.md)
+[End-user identity](end-user-identity.md)
 {% endcontent-ref %}
 
 {% content-ref url="configure-memory-for-a-character.md" %}
-[configure-memory-for-a-character.md](configure-memory-for-a-character.md)
+[Configure memory for a character](configure-memory-for-a-character.md)
 {% endcontent-ref %}
 
 {% content-ref url="how-long-term-memory-works.md" %}
-[how-long-term-memory-works.md](how-long-term-memory-works.md)
+[How long-term memory works](how-long-term-memory-works.md)
 {% endcontent-ref %}

@@ -196,9 +196,9 @@ With the notification system in place, you can surface connection errors, scenar
 {% endcontent-ref %}
 
 {% content-ref url="../customizing-ui-components.md" %}
-[customizing-ui-components.md](../customizing-ui-components.md)
+[Customizing UI components](../customizing-ui-components.md)
 {% endcontent-ref %}
 
 {% content-ref url="notification-system-reference.md" %}
-[notification-system-reference.md](notification-system-reference.md)
+[Notification system reference](notification-system-reference.md)
 {% endcontent-ref %}

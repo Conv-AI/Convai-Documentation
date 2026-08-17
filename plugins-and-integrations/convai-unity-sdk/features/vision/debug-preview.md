@@ -124,9 +124,9 @@ For a scene-only check without the hub, add `DynamicVisionContextSceneTool` to a
 ## Next steps
 
 {% content-ref url="publishing-and-policies.md" %}
-[publishing-and-policies.md](publishing-and-policies.md)
+[Publish policies](publishing-and-policies.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
-[troubleshooting-and-diagnostics.md](troubleshooting-and-diagnostics.md)
+[Troubleshoot vision](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

@@ -28,7 +28,7 @@ Convai Unity VR setup for Meta Quest
 For Android-based XR headsets, all core setup follows the Android platform guide — including the `RECORD_AUDIO` manifest declaration and runtime permission flow.
 
 {% content-ref url="ios-and-android.md" %}
-[ios-and-android.md](ios-and-android.md)
+[iOS and Android](ios-and-android.md)
 {% endcontent-ref %}
 
 ## Push-to-talk on Meta Quest
@@ -109,9 +109,9 @@ Assign your custom source to `ConvaiVisionPublisher` via its Inspector field. Se
 ## Next steps
 
 {% content-ref url="meta-quest-vision.md" %}
-[meta-quest-vision.md](meta-quest-vision.md)
+[Meta Quest Vision setup](meta-quest-vision.md)
 {% endcontent-ref %}
 
 {% content-ref url="ios-and-android.md" %}
-[ios-and-android.md](ios-and-android.md)
+[iOS and Android](ios-and-android.md)
 {% endcontent-ref %}

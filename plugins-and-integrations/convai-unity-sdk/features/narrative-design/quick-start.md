@@ -134,13 +134,13 @@ For a full explanation of this pipeline, see [How narrative design works](how-na
 ## Next steps
 
 {% content-ref url="setting-up-the-narrative-design-manager.md" %}
-[setting-up-the-narrative-design-manager.md](setting-up-the-narrative-design-manager.md)
+[Configure the narrative design manager](setting-up-the-narrative-design-manager.md)
 {% endcontent-ref %}
 
 {% content-ref url="setting-up-narrative-design-triggers.md" %}
-[setting-up-narrative-design-triggers.md](setting-up-narrative-design-triggers.md)
+[Configure narrative design triggers](setting-up-narrative-design-triggers.md)
 {% endcontent-ref %}
 
 {% content-ref url="template-keys-dynamic-narrative-variables.md" %}
-[template-keys-dynamic-narrative-variables.md](template-keys-dynamic-narrative-variables.md)
+[Configure narrative template keys](template-keys-dynamic-narrative-variables.md)
 {% endcontent-ref %}

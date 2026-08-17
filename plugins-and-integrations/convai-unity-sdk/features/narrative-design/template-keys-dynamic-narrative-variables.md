@@ -130,5 +130,5 @@ The character API and the Manager API both converge on the same `ConnectionServi
 ### Next steps
 
 {% content-ref url="scripting-narrative-design.md" %}
-[scripting-narrative-design.md](scripting-narrative-design.md)
+[Narrative design scripting reference](scripting-narrative-design.md)
 {% endcontent-ref %}

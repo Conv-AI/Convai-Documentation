@@ -29,6 +29,8 @@ Problems that occur after a successful connection — where the SDK is running b
 | Scene Metadata | `features/scene-metadata/troubleshooting-and-diagnostics.md` |
 | Embodiment | `embodiment/troubleshooting.md` |
 | Gaze | `embodiment/gaze/troubleshooting.md` |
+| Body Animation | `embodiment/body-animation/troubleshooting.md` |
+| Body Language | `embodiment/body-language/troubleshooting.md` |
 | Conversation Flow | `embodiment/conversation-flow/troubleshooting.md` |
 
 ## Next steps

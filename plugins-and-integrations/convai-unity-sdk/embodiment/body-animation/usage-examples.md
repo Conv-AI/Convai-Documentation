@@ -158,13 +158,13 @@ public sealed class TweenMover : MonoBehaviour
 ## Next steps
 
 {% content-ref url="play-actions-and-gestures.md" %}
-[play-actions-and-gestures.md](play-actions-and-gestures.md)
+[Play actions and gestures](play-actions-and-gestures.md)
 {% endcontent-ref %}
 
 {% content-ref url="configure-locomotion.md" %}
-[configure-locomotion.md](configure-locomotion.md)
+[Configure locomotion](configure-locomotion.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting.md" %}
-[troubleshooting.md](troubleshooting.md)
+[Troubleshoot body animation](troubleshooting.md)
 {% endcontent-ref %}

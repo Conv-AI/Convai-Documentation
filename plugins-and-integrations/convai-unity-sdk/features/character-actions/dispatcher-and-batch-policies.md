@@ -293,9 +293,9 @@ private void HandleStepFailed(ConvaiActionInvocation invocation)
 ## Next steps
 
 {% content-ref url="writing-custom-executors.md" %}
-[writing-custom-executors.md](writing-custom-executors.md)
+[Write a custom action executor](writing-custom-executors.md)
 {% endcontent-ref %}
 
 {% content-ref url="actions-scripting-reference.md" %}
-[actions-scripting-reference.md](actions-scripting-reference.md)
+[Character actions scripting reference](actions-scripting-reference.md)
 {% endcontent-ref %}

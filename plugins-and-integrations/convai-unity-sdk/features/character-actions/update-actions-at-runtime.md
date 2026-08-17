@@ -151,5 +151,5 @@ To preview a patch's predicted outcome before sending it in code, use the runtim
 {% endcontent-ref %}
 
 {% content-ref url="debugging-and-troubleshooting.md" %}
-[debugging-and-troubleshooting.md](debugging-and-troubleshooting.md)
+[Troubleshoot character actions](debugging-and-troubleshooting.md)
 {% endcontent-ref %}

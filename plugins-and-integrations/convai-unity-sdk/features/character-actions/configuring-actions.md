@@ -212,7 +212,7 @@ See [Update character actions at runtime](update-actions-at-runtime.md) for the 
 ## Next steps
 
 {% content-ref url="update-actions-at-runtime.md" %}
-[update-actions-at-runtime.md](update-actions-at-runtime.md)
+[Update character actions at runtime](update-actions-at-runtime.md)
 {% endcontent-ref %}
 
 {% content-ref url="attention-and-reference-grounding.md" %}
@@ -220,13 +220,13 @@ See [Update character actions at runtime](update-actions-at-runtime.md) for the 
 {% endcontent-ref %}
 
 {% content-ref url="action-executors.md" %}
-[action-executors.md](action-executors.md)
+[Action executors](action-executors.md)
 {% endcontent-ref %}
 
 {% content-ref url="dispatcher-and-batch-policies.md" %}
-[dispatcher-and-batch-policies.md](dispatcher-and-batch-policies.md)
+[Dispatcher and batch policies](dispatcher-and-batch-policies.md)
 {% endcontent-ref %}
 
 {% content-ref url="usage-examples.md" %}
-[usage-examples.md](usage-examples.md)
+[Character actions examples](usage-examples.md)
 {% endcontent-ref %}

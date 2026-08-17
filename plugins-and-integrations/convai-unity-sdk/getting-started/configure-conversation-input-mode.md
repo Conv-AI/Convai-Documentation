@@ -181,5 +181,5 @@ public async void OnCinematicEnd()
 With input mode configured, tune character voice volume and audio playback settings.
 
 {% content-ref url="configure-character-audio.md" %}
-[configure-character-audio.md](configure-character-audio.md)
+[Configure character audio](configure-character-audio.md)
 {% endcontent-ref %}

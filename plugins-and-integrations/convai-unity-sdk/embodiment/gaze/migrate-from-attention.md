@@ -88,13 +88,13 @@ None of this is configurable back to the old behavior beyond re-tuning the Gaze 
 ## Next steps
 
 {% content-ref url="quick-start.md" %}
-[quick-start.md](quick-start.md)
+[Gaze quick start](quick-start.md)
 {% endcontent-ref %}
 
 {% content-ref url="how-gaze-works.md" %}
-[how-gaze-works.md](how-gaze-works.md)
+[How gaze works](how-gaze-works.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting.md" %}
-[troubleshooting.md](troubleshooting.md)
+[Troubleshoot gaze](troubleshooting.md)
 {% endcontent-ref %}

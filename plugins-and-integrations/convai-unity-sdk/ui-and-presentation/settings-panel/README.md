@@ -184,13 +184,13 @@ At runtime, the trainee's real name appears in transcript bubbles immediately, a
 With the settings panel in place, your users can adjust their session preferences at runtime. For customizing the visual style of the panel itself, see Customizing UI Components. The panel only shows or hides transcript presentation — for adding and configuring the chat and subtitle transcript UIs themselves, see Chat and Subtitle Modes.
 
 {% content-ref url="../customizing-ui-components.md" %}
-[customizing-ui-components.md](../customizing-ui-components.md)
+[Customizing UI components](../customizing-ui-components.md)
 {% endcontent-ref %}
 
 {% content-ref url="runtime-settings-api.md" %}
-[runtime-settings-api.md](runtime-settings-api.md)
+[Runtime settings API](runtime-settings-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="../transcript-ui/chat-and-subtitle-modes.md" %}
-[chat-and-subtitle-modes.md](../transcript-ui/chat-and-subtitle-modes.md)
+[Chat and subtitle modes](../transcript-ui/chat-and-subtitle-modes.md)
 {% endcontent-ref %}

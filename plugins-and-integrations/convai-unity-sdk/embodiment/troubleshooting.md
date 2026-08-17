@@ -113,13 +113,13 @@ Visible fighting — an expression that flickers or overshoots instead of settli
 ## Next steps
 
 {% content-ref url="embodiment-editor.md" %}
-[embodiment-editor.md](embodiment-editor.md)
+[Embodiment Editor window](embodiment-editor.md)
 {% endcontent-ref %}
 
 {% content-ref url="character-rig-setup.md" %}
-[character-rig-setup.md](character-rig-setup.md)
+[Character rig setup](character-rig-setup.md)
 {% endcontent-ref %}
 
 {% content-ref url="embodiment-presets.md" %}
-[embodiment-presets.md](embodiment-presets.md)
+[Embodiment presets](embodiment-presets.md)
 {% endcontent-ref %}
