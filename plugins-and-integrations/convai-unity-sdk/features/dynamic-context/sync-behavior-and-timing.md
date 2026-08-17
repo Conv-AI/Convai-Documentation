@@ -12,7 +12,7 @@ Dynamic Context updates do not reach Convai the instant you call `SetState`, `Ad
 
 A single gameplay frame can call several tracked methods at once — a hazard state, a location change, and an event firing together in one physics update. Sending an individual `context-update` message per call would multiply network traffic and could let Convai react to an intermediate state before the rest of the frame's changes land. Instead, `ConvaiCharacter` stages every call to `SetState`, `SetStates`, `AddEvent`, `RemoveState`, `SetCurrentAttentionObject`, and `ClearCurrentAttentionObject` into one pending batch and flushes that batch as a single message.
 
-The reason a shared batch also needs a shared reaction decision is that Convai only sees one message, so it can only apply one respond mode. When several calls in the same window request different `ConvaiRespondMode` values, the strongest request wins for the whole batch: `MustRespond` beats `Auto`, and `Auto` beats `Silent`. A single `MustRespond` call in a batch of otherwise-silent updates is enough to make the character react.
+The reason a shared batch also needs a shared reaction decision is that Convai only sees one message, so it can only apply one respond mode. When several calls in the same window request different `ConvaiRespondMode` values, the strongest request wins for the whole batch: `MustRespond` beats `Auto`, and `Auto` beats `Silent`. A single `MustRespond` call in a batch of otherwise-silent updates makes the whole batch request an LLM run.
 
 ```csharp
 using Convai.Runtime;
@@ -33,7 +33,7 @@ public sealed class HazardZoneContext : MonoBehaviour
 }
 ```
 
-**Expected outcome:** all three calls land in the same batch and produce one `context-update` message. Because `HazardLevel` requested `MustRespond`, the whole batch is sent with `MustRespond`, even though `SetState("Station", ...)` and `AddEvent(...)` default to weaker modes.
+**Expected client outcome:** all three calls land in the same batch and produce one `context-update` message. Because `HazardLevel` requested `MustRespond`, the whole batch is sent with `MustRespond`, even though `SetState("Station", ...)` and `AddEvent(...)` default to weaker modes. Whether that request produces a character turn is reported by the backend result and must be verified in a live session.
 
 ## The batch window and its ceiling
 
@@ -75,7 +75,7 @@ This mirrors the single-call behavior documented on the [dynamic context scripti
 
 ## Forcing a flush before the window closes
 
-Call `Flush()` on `IConvaiDynamicContext` to send the pending batch immediately instead of waiting out the debounce window. Use it when a change must reach Convai before the next line of scripted dialogue plays, rather than trusting the up-to-3-second window to settle in time.
+Call `Flush()` on `IConvaiDynamicContext` to attempt the pending send without waiting out the debounce window. Use it when client ordering matters, while remembering that `Flush()` does not await backend application or a character turn.
 
 ```csharp
 character.DynamicContext.SetState("Player location", "market square");
@@ -94,13 +94,13 @@ When the character receives its ready signal — on initial connect or after a r
 
 ## Acknowledgement timing for action and attention updates
 
-Plain state and event updates are fire-and-forget once flushed — the SDK does not wait for Convai to confirm them, because a text update only needs to reflect the latest value. Updates that carry an action config patch or an attention object are different: they change what the character can actually reference and act on, so the SDK does not commit them to `ConvaiCharacter`'s resolved action state until Convai confirms them.
+Plain state and event updates are fire-and-forget once flushed — the SDK updates the tracker immediately and does not wait for a backend result before keeping that text locally. Updates that carry an action config patch or an attention object are different: they change resolved runtime action state, so the SDK does not commit those mutations locally until their acknowledgement path succeeds.
 
-Each such update is sent with an `update_id` and tracked while waiting for a matching `DynamicContextUpdateResultReceived` event. The SDK checks for a match once per second and gives up on any single update after 30 seconds without a matching acknowledgement, discarding the pending mutation and logging a warning rather than retrying it. Pending updates are committed in the order they were sent — an older update waiting on its acknowledgement blocks newer ones from committing, even if a newer update's acknowledgement arrives first.
+Each action-config or attention update is sent with an `update_id` and tracked while waiting for a matching `DynamicContextUpdateResultReceived` event. The SDK checks for a match once per second and gives up on any single update after 30 seconds without a matching acknowledgement, discarding the pending mutation and logging a warning rather than retrying it. Pending updates are committed in the order they were sent — an older update waiting on its acknowledgement blocks newer ones from committing, even if a newer update's acknowledgement arrives first.
 
-An acknowledgement only commits when its status is `success` and its reported action, object, and character counts and current attention object match what the SDK expected. A mismatched or malformed acknowledgement is discarded the same way a timeout is, with a warning logged instead of an update applied.
+Every tracked action/attention mutation requires a matching result whose status is `success`. For an action-config patch, the SDK additionally validates the returned action-config flag, action/object/character counts, and expected attention metadata before commit. An attention-only update does not run those action-config count checks. A failed, mismatched, malformed, or timed-out result is discarded with a warning instead of committing the pending mutation.
 
-Subscribe to the event to observe acknowledgement outcomes directly:
+Subscribe to the event to observe backend results. Do not use this event alone as proof of local action-state commit, because the ordered queue and action-config validation run separately:
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
@@ -117,7 +117,7 @@ If an acknowledgement reports its action generation strategy status as `requires
 
 ## Apply() bypasses batching
 
-`Apply()` sends its update directly to the transport, skipping the tracker and the debounce window described above. It does not bypass acknowledgement tracking: an `Apply()` call that carries an action-config patch or a current attention object still joins the same pending-update queue, with the same 30-second timeout and 1-second poll interval described in "Acknowledgement timing" above.
+`Apply()` sends its update directly to the transport, skipping the tracker and the debounce window described above. It does not bypass acknowledgement tracking: an `Apply()` call that carries an action-config patch or a current attention object still joins the same pending-update queue, with the same 30-second timeout and 1-second poll interval described in "Acknowledgement timing" above. A text-only `Apply()` forwards `updateId` only when you supply one; it does not need or generate an ID solely for local commit because it never enters that queue.
 
 {% hint style="danger" %}
 If the character is not in an active conversation when `Apply()` is called, the update is discarded immediately — it is not staged, and it does not flush later when the character becomes ready. Use `SetState`, `SetStates`, `AddEvent`, `RemoveState`, `SetCurrentAttentionObject`, or `ClearCurrentAttentionObject` for anything that must survive being called before a conversation starts.

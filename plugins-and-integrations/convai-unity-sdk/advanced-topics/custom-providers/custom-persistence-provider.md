@@ -1,26 +1,34 @@
 ---
-description: Replace the default session storage with your own remote service, an encrypted file store, or an in-memory implementation for tests.
+description: >-
+  Provide encrypted, remote, versioned, or in-memory storage that custom runtime
+  modules can access through the general persistence extension point.
 title: Custom persistence provider
 last_reviewed: "4.5.0"
 ---
 
-The Convai Unity SDK stores session data — connection state, session IDs, resume tokens, and the editor end-user GUID — in `PlayerPrefs` by default via `PlayerPrefsKeyValueStore`. If `PlayerPrefs` works for your deployment, you do not need this page. Replace the persistence provider when you need cloud save, encrypted storage, server-side session management, or isolated storage for automated testing and CI.
+Use `ConvaiRuntimeBuilder.UsePersistence(...)` to attach a general-purpose `IPersistenceProvider` to `ConvaiRuntime.Persistence`. Custom modules can use that provider for encrypted, remote, versioned, or test storage.
 
-## What the SDK writes to storage
+{% hint style="warning" %}
+This extension point does not replace the standard Unity host's room-session store, runtime-settings store, or device end-user identity provider. Room-session and settings data use separate PlayerPrefs-backed stores in SDK 4.5. Device identity prefers `SystemInfo.deviceUniqueIdentifier` in player builds and uses a PlayerPrefs GUID only in the Editor or as a player fallback. Use a custom identity provider to replace end-user identity. The public builder does not currently expose a replacement for the standard room-session store.
+{% endhint %}
 
-| Key prefix | Contents | Why it matters |
-| -------------------- | ------------------------------------ | ------------------------------------------------------------------------------------- |
-| `convai.session.*` | Session ID and resume token | Allows the SDK to resume a disconnected session without restarting the AI turn |
-| `convai.end_user_id` | Editor-only device GUID (fallback) | Used by `DeviceEndUserIdProvider` in the Unity Editor when hardware ID is unavailable |
-| `convai.prefs.*` | User preferences (e.g., muted state) | Persists SDK-level settings across app launches |
+## What this extension point controls
 
-Replacing the persistence provider replaces where all of these are written and read. Your implementation must handle every key the SDK touches — the adapter pattern below ensures nothing is missed.
+| Storage area | Controlled by `UsePersistence(...)`? | Current owner |
+| --- | --- | --- |
+| `ConvaiRuntime.Persistence` | Yes | The provider passed to the runtime builder |
+| Character session IDs and resume state | No | A separate `ISessionPersistence` backed by `PlayerPrefsKeyValueStore` |
+| Runtime settings and preferences | No | A separate settings store backed by `PlayerPrefsKeyValueStore` |
+| Default device end-user ID | No | `DeviceEndUserIdProvider`, which prefers the player device ID and otherwise uses a PlayerPrefs GUID |
+
+Choose this provider when your own modules need a shared persistence surface or when an alternate composition root consumes `ConvaiRuntime.Persistence`. Do not use it as proof that standard room resume or settings have moved away from PlayerPrefs.
 
 ## Persistence interfaces
 
 ### IKeyValueStore — simple storage
 
 ```csharp
+// API excerpt: declaration from Convai.Domain.Abstractions.
 namespace Convai.Domain.Abstractions
 {
     public interface IKeyValueStore
@@ -34,11 +42,12 @@ namespace Convai.Domain.Abstractions
 }
 ```
 
-`Save()` is called after write operations. For in-memory stores it is a no-op; for file-backed stores it flushes to disk. Implement this interface for local storage scenarios where async operations are not needed.
+`IKeyValueStore` does not define automatic flush timing. The caller or adapter must invoke `Save()` after a mutation when immediate durability is required. For in-memory stores it can be a no-op; for file-backed stores it normally flushes buffered data to disk.
 
 ### IPersistenceProvider — full-featured storage
 
 ```csharp
+// API excerpt: declaration from Convai.Runtime.Core.Providers.
 namespace Convai.Runtime.Core.Providers
 {
     public interface IPersistenceProvider
@@ -109,6 +118,7 @@ Used by `SaveVersionedAsync` to resolve write conflicts in async/cloud scenarios
 ### PersistenceOptions
 
 ```csharp
+// API usage excerpt. Supply this value to an IPersistenceProvider write method.
 var options = new PersistenceOptions(
     conflictPolicy:  ConflictResolutionPolicy.LastWriteWins,
     createIfMissing: true,
@@ -120,7 +130,7 @@ var options = new PersistenceOptions(
 
 ### In-memory store (testing / CI)
 
-Useful for automated tests and CI runs where persistent state between runs would corrupt results.
+Useful for custom-module tests and CI runs where persistent state between runs would corrupt results.
 
 ```csharp
 // InMemoryKeyValueStore.cs
@@ -149,9 +159,10 @@ public class InMemoryKeyValueStore : IKeyValueStore
 
 ### Encrypted file store
 
-Satisfies compliance requirements that prohibit plain `PlayerPrefs` for session data.
+Use this pattern when custom-module data must not be stored as plain text. It is an integration excerpt: provide an audited `IEncryptionService` and a Unity-serializable dictionary implementation that meet your application's security and data-format requirements.
 
 ```csharp
+// pseudocode: IEncryptionService and SerializableDictionary are application-owned.
 // EncryptedFileKeyValueStore.cs
 using System.Collections.Generic;
 using System.IO;
@@ -205,6 +216,7 @@ Call `Save()` after every write, or flush periodically. Writes are buffered in m
 
 ```csharp
 // KeyValueStorePersistenceAdapter.cs
+using System;
 using System.Threading;
 using Convai.Domain.Abstractions;
 using Convai.Runtime.Core.Async;
@@ -240,50 +252,63 @@ public class KeyValueStorePersistenceAdapter : IPersistenceProvider
     public bool HasKey(string key) => _store.HasKey(key);
 
     public PersistenceResult SetString(string key, string value, PersistenceOptions options = default)
-    { _store.SetString(key, value); return PersistenceResult.Succeeded(); }
+        => Persist(() => _store.SetString(key, value));
 
     public PersistenceResult SetInt(string key, int value, PersistenceOptions options = default)
-    { _store.SetString(key, value.ToString()); return PersistenceResult.Succeeded(); }
+        => Persist(() => _store.SetString(key, value.ToString()));
 
     public PersistenceResult SetFloat(string key, float value, PersistenceOptions options = default)
-    { _store.SetString(key, value.ToString("G")); return PersistenceResult.Succeeded(); }
+        => Persist(() => _store.SetString(key, value.ToString("G")));
 
     public PersistenceResult SetBool(string key, bool value, PersistenceOptions options = default)
-    { _store.SetString(key, value.ToString()); return PersistenceResult.Succeeded(); }
+        => Persist(() => _store.SetString(key, value.ToString()));
 
     public PersistenceResult Delete(string key)
-    { _store.DeleteKey(key); return PersistenceResult.Succeeded(); }
+        => Persist(() => _store.DeleteKey(key));
 
     public PersistenceResult DeleteAll(string prefix)
         => PersistenceResult.Failed("DeleteAll not supported by this backend.");
 
     public void Save() => _store.Save();
 
+    // This adapter chooses immediate durability: every supported mutation flushes.
+    private PersistenceResult Persist(Action mutation)
+    {
+        mutation();
+        _store.Save();
+        return PersistenceResult.Succeeded();
+    }
+
     // Async stubs — synchronous backends return immediate results.
     public IConvaiOperation<PersistenceResult> SyncAsync(CancellationToken ct = default)
-        => ConvaiOperation.Succeeded(PersistenceResult.Succeeded());
+        => ConvaiOperation<PersistenceResult>.Succeeded(PersistenceResult.Succeeded());
 
     public IConvaiOperation<PersistenceResult> SaveVersionedAsync<T>(VersionedKey key, T value,
         ConflictResolutionStrategy strategy = ConflictResolutionStrategy.LastWriteWins,
         CancellationToken ct = default)
-        => ConvaiOperation.Succeeded(PersistenceResult.Failed("Versioned ops not supported by this backend."));
+        => ConvaiOperation<PersistenceResult>.Succeeded(
+            PersistenceResult.Failed("Versioned ops not supported by this backend."));
 
     public IConvaiOperation<VersionedValue<T>> LoadVersionedAsync<T>(string ns, string key, CancellationToken ct = default)
-        => ConvaiOperation.Succeeded(VersionedValue<T>.NotFound);
+        => ConvaiOperation<VersionedValue<T>>.Succeeded(VersionedValue<T>.NotFound);
 
     public IConvaiOperation<PersistenceResult> MigrateAsync(int fromVersion, int toVersion, CancellationToken ct = default)
-        => ConvaiOperation.Succeeded(PersistenceResult.Succeeded());
+        => ConvaiOperation<PersistenceResult>.Succeeded(PersistenceResult.Succeeded());
 }
 ```
 
-`DeleteAll(string prefix)` returns a failed result in this adapter. The SDK calls `DeleteAll` during session reset operations. If your deployment requires full session resets, implement `DeleteAll` by iterating your store's keys and removing those that match the prefix.
+This adapter calls `Save()` after each supported set or delete operation. `DeleteAll(string prefix)` returns a failed result because `IKeyValueStore` does not expose key enumeration. If your own modules require prefix-based resets, extend your application-owned store with key enumeration, remove matching keys, and flush after the mutation.
 
 ## Register the provider
 
+The following composition excerpt assumes the application-owned encryption types from the preceding pattern.
+
 ```csharp
+// pseudocode: AesEncryptionService is an application-owned encryption implementation.
 // CustomPersistenceManager.cs
 using Convai.Runtime.Components;
 using Convai.Runtime.Core;
+using UnityEngine;
 
 public class CustomPersistenceManager : ConvaiManager
 {
@@ -305,14 +330,16 @@ public class CustomPersistenceManager : ConvaiManager
 }
 ```
 
+After the runtime is built, the supplied provider is available as `ConvaiRuntime.Persistence`. It remains separate from the standard room-session and settings stores described above.
+
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
 | --------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Session does not resume after restart | `GetString` returns `null` for session keys on reload | Ensure `Save()` is called synchronously before the application quits. Subscribe to `Application.quitting` if needed. |
+| Room session still uses PlayerPrefs | `UsePersistence(...)` does not replace the standard `ISessionPersistence` store | Treat this provider as custom runtime storage; the public builder has no room-session persistence override in SDK 4.5. |
 | `NullReferenceException` inside `IPersistenceProvider` implementation | Async methods are called before the store is initialized | Initialize the backing store in the provider's constructor, before `UsePersistence()` is called. |
-| Data loss on crash | `SetString` writes are buffered in memory and `Save()` is not called | Call `Save()` after every write, or flush on a periodic timer. |
-| Session reset does not clear all SDK data | `DeleteAll(prefix)` returns a failed result in the adapter | Implement `DeleteAll` by iterating your store's key collection and removing prefix-matching entries. |
+| Data loss on crash in a custom adapter | The adapter mutates a buffered store without calling `Save()` | Use the immediate-flush adapter above or document and test your own periodic flush policy. |
+| Custom-module reset does not clear matching data | `DeleteAll(prefix)` returns a failed result in the adapter | Implement `DeleteAll` by iterating your store's key collection and removing prefix-matching entries. |
 
 ## Next steps
 

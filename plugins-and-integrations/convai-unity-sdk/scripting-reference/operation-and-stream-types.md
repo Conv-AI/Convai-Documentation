@@ -1,10 +1,10 @@
 ---
 title: Operation and stream types
-description: Type reference for IConvaiOperation<T>, IConvaiStream<T>, ConvaiError, and Unit — the async primitives used across all Convai SDK scripting APIs.
+description: Reference the operation, stream, error, status, and unit-value types used for asynchronous work throughout the Convai Unity SDK.
 last_reviewed: "4.5.0"
 ---
 
-Most SDK methods that perform async work return `IConvaiOperation<T>` instead of `Task<T>`. Methods that produce a continuous sequence of values return `IConvaiStream<T>`. These types are designed to work across Unity's coroutine system, C# async/await, and progress-driven flows — without forcing a dependency on `Task` throughout your codebase. For usage patterns and code examples, see [Async Patterns](async-patterns.md).
+Most SDK methods that perform async work return `IConvaiOperation<T>` instead of `Task<T>`. Low-level providers can return `IConvaiStream<T>` for a continuous sequence. These types work with Unity coroutines, C# async/await, and progress-driven flows. For usage patterns and code examples, see [Async Patterns](async-patterns.md).
 
 ***
 
@@ -40,7 +40,7 @@ The result handle for any SDK async operation. Returned by `ConnectAsync`, `Disc
 
 | Member         | Description                                                                                                   |
 | -------------- | ------------------------------------------------------------------------------------------------------------- |
-| `GetAwaiter()` | Returns a `TaskAwaiter<T>`. Enables `await operation` directly. Throws `ConvaiOperationException` on failure. |
+| `GetAwaiter()` | Returns the underlying task's `TaskAwaiter<T>`, enabling `await operation` directly. A fault rethrows that task's underlying exception. |
 | `AsTask()`     | Returns the underlying `Task<T>`. Use when you need to pass to Task-based APIs such as `Task.WhenAll`.        |
 
 ### Coroutines
@@ -62,7 +62,7 @@ The result handle for any SDK async operation. Returned by `ConnectAsync`, `Disc
 
 | Member     | Description                                                                                                       |
 | ---------- | ----------------------------------------------------------------------------------------------------------------- |
-| `Cancel()` | Requests cooperative cancellation. The operation transitions to `Canceled` when the SDK acknowledges the request. |
+| `Cancel()` | Requests cooperative cancellation. It is a no-op when the operation has no cancellation source or has already completed. |
 
 ***
 
@@ -105,7 +105,7 @@ Creates a `ConvaiError` from an exception. Use in custom error paths when constr
 
 ## `ConvaiOperationException`
 
-Thrown when you `await` an `IConvaiOperation<T>` that faulted. Extends `Exception`.
+Used by SDK operations to report a structured failure when awaited. It extends `Exception`. An operation backed by another dependency can instead surface that dependency's exception.
 
 | Property  | Type     | Description                                                                   |
 | --------- | -------- | ----------------------------------------------------------------------------- |
@@ -115,7 +115,7 @@ Thrown when you `await` an `IConvaiOperation<T>` that faulted. Extends `Exceptio
 **`HasError` vs. thrown exception:**
 
 * **Coroutines** (`ToCoroutine`): errors are delivered to the `onError` callback. No exception is thrown.
-* **Async/await**: a faulted operation throws `ConvaiOperationException`. Catch it with `try/catch`.
+* **Async/await**: a faulted operation throws its underlying exception. SDK validation and service failures commonly use `ConvaiOperationException`.
 * `HasError` is `true` in both cases — you can poll it at any time regardless of consumption pattern.
 
 {% hint style="warning" %}
@@ -135,7 +135,7 @@ catch (OperationCanceledException)  { /* canceled   */ }
 
 ## `IConvaiStream<T>`
 
-Returned by methods that produce a continuous sequence of values over time, such as streaming transcript tokens or streaming audio frames. Implements `IAsyncDisposable`.
+Returned by low-level providers that produce a continuous sequence of values over time, such as `IConversationProvider.OpenResponseStream`. It implements `IAsyncDisposable`.
 
 ### Properties
 

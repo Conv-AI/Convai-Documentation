@@ -31,7 +31,7 @@ Both paths read from the same room session, so a character's speech always appea
 
 ## Durable chat history vs. speech-aligned captions
 
-`CurrentTimeline`, `Subscribe`, and `SubscribeCommitted` give you the durable side of the transcript: a timeline of committed conversation turns that persists for the life of the room, suitable for scroll-back chat panels, post-session review, and export. `ChatTranscriptUI` is built on this path.
+`CurrentTimeline` and `Subscribe` give you the durable side of the transcript: a room-lifetime timeline containing active and terminal turns. `SubscribeCommitted` narrows callbacks to committed, interrupted, and corrected terminal changes. Use this path for scroll-back chat panels, post-session review, and export. `ChatTranscriptUI` is built on it.
 
 `CurrentCaptions` and `SubscribeCaptions` give you the ephemeral side: text aligned to what is currently being spoken, replaced as soon as the next segment starts. Caption text is never written into the durable chat history — it exists only to drive a subtitle-style overlay. `SubtitleTranscriptUI` is built on this path.
 

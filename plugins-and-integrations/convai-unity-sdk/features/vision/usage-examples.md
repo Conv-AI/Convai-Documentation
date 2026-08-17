@@ -100,24 +100,20 @@ using UnityEngine;
 
 /// <summary>
 /// Configures vision with a specific overhead camera and low-overhead transport policy.
-/// Attach to the ConvaiVisionRoot GameObject.
+/// Attach beside the ConvaiVisionPublisher on the Room Manager GameObject.
 /// </summary>
 public class SecurityCameraVisionSetup : MonoBehaviour
 {
     [SerializeField] private ConvaiVisionPublisher _publisher;
-    [SerializeField] private CameraVisionFrameSource _frameSource;
-    [SerializeField] private Camera _overheadCamera;
-
     void Awake()
     {
-        // Point the frame source at the overhead security camera
-        _frameSource.TargetCamera = _overheadCamera;
-
         // Low-overhead policy: 5 fps, 350 kbps — suitable for slow-moving scene
         _publisher.SetPublishPolicy(VisionPublishPolicy.LowOverhead);
     }
 }
 ```
+
+Assign the overhead camera to `CameraVisionFrameSource.Target Camera` in the Inspector. `TargetCamera` is readable at runtime, but its setter is private in SDK 4.5.0; application scripts cannot assign it directly.
 
 ## Activate publishing on player look-at
 
@@ -181,7 +177,7 @@ public class WebGLVisionSetup : MonoBehaviour
 
     void Awake()
     {
-        // LowOverhead is appropriate for WebGL — canvas capture is capped at 15 fps
+        // LowOverhead requests the built-in 5 fps policy budget on WebGL.
         _publisher.SetPublishPolicy(VisionPublishPolicy.LowOverhead);
     }
 }

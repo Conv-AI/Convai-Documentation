@@ -4,40 +4,42 @@ description: Reference for Convai Unity SDK platform support, including feature 
 last_reviewed: "4.5.0"
 ---
 
-The Convai Unity SDK runs on all major Unity deployment targets. Feature availability varies by platform — use the matrix below to confirm support before building for a specific target.
+SDK 4.5.0 contains integration paths for the targets below. This matrix is a source-level inventory, not proof that every feature passed on every device, browser, operating system, native architecture, or distributed package. Use it to choose the expected path, then run the linked platform validation before release.
 
 ## Feature × platform matrix
 
 | Feature                    | Windows / macOS / Linux | Android                        | iOS                                    | Meta Quest            | WebGL                                  |
 | -------------------------- | ----------------------- | ------------------------------ | -------------------------------------- | --------------------- | -------------------------------------- |
-| Voice conversation         | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full                                 |
-| Microphone capture         | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full — HTTPS + user gesture required |
-| Remote audio playback      | ✅ Unity `AudioSource`   | ✅ Unity `AudioSource`          | ✅ Unity `AudioSource`                  | ✅ Unity `AudioSource` | ⚠️ Browser-routed                      |
-| Lip sync                   | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ⚠️ Known timing drift                  |
-| Spatial audio              | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ❌ Not supported                        |
-| Actions                    | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full                                 |
-| Emotion                    | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full                                 |
-| Long-Term Memory           | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full                                 |
-| Narrative Design           | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full                                 |
-| Dynamic Context            | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full                                 |
-| Vision — Camera            | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ⚠️ Canvas capture                      |
-| Vision — Webcam            | ✅ Full                  | ⚠️ Runtime permission required | ⚠️ `NSCameraUsageDescription` required | ❌ Not applicable      | ❌ Not supported                        |
-| Vision — Quest passthrough | ❌ Not supported         | ❌ Not supported                | ❌ Not supported                        | ✅ Full                | ❌ Not supported                        |
+| Voice conversation         | Source path*             | Source path*                    | Source path*                            | Source path*           | Source path*                            |
+| Microphone capture         | Source path*             | Runtime permission             | Usage description and OS permission     | Runtime permission    | HTTPS and user gesture                 |
+| Remote audio playback      | Unity `AudioSource` path | Unity `AudioSource` path        | Unity `AudioSource` path                | Unity `AudioSource` path | Browser-routed path                  |
+| Lip sync                   | Source path*             | Source path*                    | Source path*                            | Source path*           | Browser timing validation required     |
+| Spatial audio              | `AudioSource` path       | `AudioSource` path              | `AudioSource` path                      | `AudioSource` path     | No Unity spatial-output path           |
+| Actions                    | Shared runtime path      | Shared runtime path            | Shared runtime path                     | Shared runtime path    | Shared runtime path                    |
+| Emotion                    | Shared runtime path      | Shared runtime path            | Shared runtime path                     | Shared runtime path    | Shared runtime path                    |
+| Long-Term Memory           | REST/service path        | REST/service path              | REST/service path                       | REST/service path      | REST/service path                      |
+| Narrative Design           | Shared runtime path      | Shared runtime path            | Shared runtime path                     | Shared runtime path    | Shared runtime path                    |
+| Dynamic Context            | Shared runtime path      | Shared runtime path            | Shared runtime path                     | Shared runtime path    | Shared runtime path                    |
+| Vision — Camera            | Camera frame source      | Camera frame source            | Camera frame source                     | Camera frame source    | Browser canvas capture                 |
+| Vision — Webcam            | Webcam frame source      | Runtime camera permission      | `NSCameraUsageDescription`              | Not the Quest path     | Not exposed by the SDK                 |
+| Vision — Quest passthrough | Not applicable           | Not applicable                 | Not applicable                          | Quest 3/3S source path | Not applicable                         |
+
+`Source path*` means the SDK contains the relevant adapter or runtime surface. It still requires artifact and runtime validation on the target.
 
 ## Platform-specific requirements
 
 {% tabs %}
 {% tab title="WebGL" %}
-WebGL is fully supported with the following constraints imposed by browser security policies:
+WebGL uses dedicated browser transport paths with the following constraints:
 
 * **Microphone capture** requires HTTPS or `localhost`. HTTP deployments cannot access the microphone. Call `ConvaiManager.EnableAudioAndStartListening()` from a user gesture (button click) — do not start audio automatically on scene load.
 * **Remote audio playback** is routed through the browser's audio system, not Unity's `AudioSource`. Volume and spatialization controls on `AudioSource` components have no effect on WebGL.
-* **Vision — Camera** uses browser canvas capture (`CameraVisionFrameSource` is supported).
+* **Vision — Camera** uses browser canvas capture. `CameraVisionFrameSource` and other Unity `RenderTexture` sources are not used on WebGL.
 * **Vision — Webcam** (`WebcamVisionFrameSource`) is not supported on WebGL — `AsyncGPUReadback` is unavailable in the browser runtime. Use `CameraVisionFrameSource` to stream the game canvas instead.
 * **Spatial audio** is not supported on WebGL.
 
 {% hint style="warning" %}
-WebGL has a known audio/lip-sync timing drift defect — audio and lip-sync data arrive correctly, but playback timing can drift in browser builds. This is a tracked defect, not a missing feature. Validate in your target browser before shipping.
+WebGL lip sync uses a browser-compatible realtime playback clock rather than the native hardware DSP clock. Validate timing across long utterances in every target browser and hosting environment.
 {% endhint %}
 
 {% hint style="info" %}
@@ -52,7 +54,7 @@ For detailed WebGL setup, browser compatibility, and deployment steps, see the W
 {% endtab %}
 
 {% tab title="Android" %}
-* **Microphone:** The SDK requests `RECORD_AUDIO` permission at runtime via `ConvaiPermissionService`. Declare the permission in your `AndroidManifest.xml` and handle both grant and denial cases in your app flow.
+* **Microphone:** The native audio path requests `Permission.Microphone` before recording when access is missing. Verify `RECORD_AUDIO` in the merged build manifest and handle both grant and denial cases in your app flow.
 * **Vision — Webcam:** `android.permission.CAMERA` is requested at runtime by `WebcamVisionFrameSource`. Handle permission grant and denial in your app flow.
 
 For Android build configuration, permission handling, and microphone setup, see the iOS and Android platform guide.
@@ -82,7 +84,7 @@ Quest passthrough vision (`QuestVisionFrameSource`) is supported on **Quest 3 an
 * Meta XR SDK imported into your project
 * `PassthroughCameraAccess` component present in the scene
 
-The required passthrough camera permissions are declared automatically when Meta XR SDK is imported.
+Declare and verify `horizonos.permission.HEADSET_CAMERA` and `android.permission.CAMERA` in the merged application manifest.
 
 On other Quest hardware or non-Quest platforms, `QuestVisionFrameSource` produces no frames. Use `CameraVisionFrameSource` or `WebcamVisionFrameSource` instead.
 

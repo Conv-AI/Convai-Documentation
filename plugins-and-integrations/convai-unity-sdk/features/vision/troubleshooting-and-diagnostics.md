@@ -74,7 +74,7 @@ A black feed (overlay visible but all pixels black) on `CameraVisionFrameSource`
 | Render pipeline | Recommended mode | Why |
 | --- | --- | --- |
 | Built-in Render Pipeline | `Auto` (uses `BuiltInHooks`) | `Camera.onPreRender` / `Camera.onPostRender` hooks work correctly. |
-| URP / SRP | `Auto` (uses `ExplicitRenderCompatibility`) | Explicit `Camera.Render()` in `LateUpdate` — works on all SRP versions. |
+| URP / HDRP | `Auto` (uses `ExplicitRenderCompatibility`) | Uses an explicit `Camera.Render()` in `LateUpdate`; validate the captured frame and cost in the target pipeline version. |
 | URP / SRP with black feed on Auto | `ExplicitRenderCompatibility` | Forces explicit render path; resolves black feeds on custom SRP configurations. |
 
 {% hint style="danger" %}
@@ -146,7 +146,7 @@ flowchart TD
 
 For persistent blank or black frames that do not produce a `Failed` state, enable the diagnostic probe on `CameraVisionFrameSource`:
 
-1. Select the **ConvaiVisionRoot** GameObject.
+1. Select the GameObject that contains `CameraVisionFrameSource`.
 2. On `CameraVisionFrameSource`, enable **Enable Diagnostic Frame Health Probe**.
 3. Press Play and watch the Console.
 
@@ -158,7 +158,7 @@ Disable **Enable Diagnostic Frame Health Probe** before shipping. It performs a 
 
 ## Logging
 
-All Vision log messages use `LogCategory.Vision`. Set the log level to `Verbose` in **Tools → Convai → Configuration → Logging** to see all state transitions, frame source discovery, and publishing events.
+Vision messages use `LogCategory.Vision`. Open **Convai > Settings**, then use the SDK diagnostics and logging controls to enable verbose Vision output while reproducing the issue.
 
 | Prefix | Component |
 | --- | --- |

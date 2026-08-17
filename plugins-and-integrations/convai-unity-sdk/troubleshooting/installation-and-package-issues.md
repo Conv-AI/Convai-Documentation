@@ -1,6 +1,6 @@
 ---
 title: Installation and package issues
-description: Fix Convai Unity SDK import failures, unsupported Unity versions, missing package dependencies, and bootstrapper startup warnings.
+description: Fix Convai Unity SDK import failures, missing dependencies, assembly errors, and bootstrapper startup warnings with step-by-step remediation.
 last_reviewed: "4.5.0"
 ---
 
@@ -8,7 +8,7 @@ Package import and initial configuration problems account for the majority of fi
 
 ## First-line check
 
-Work through these steps before diving into specific issues. They cover the most common root causes and take under three minutes.
+Work through these five steps before diving into specific issues. They cover the most common project-configuration and package problems.
 
 {% stepper %}
 {% step %}
@@ -24,7 +24,7 @@ If the editor is older, upgrade before installing the SDK — the package depend
 
 Go to **Edit → Project Settings → Convai SDK**. The **Setup Health** section opens first and runs a set of project-configuration checks automatically — each item shows a colored status badge, a title, and a message.
 
-The checks include `Settings Asset` (flags a missing `ConvaiSettings.asset`), `API Key` (flags a missing key), `iOS Microphone Usage Description` (flags an empty `Info.plist` description), `Prepare iOS for Recording` (flags the iOS audio session setting used for Convai microphone recording and speaker playback), `Android Microphone Permission` (informational), and a `Define Drift` check for each Convai feature-flag scripting define that differs across build target groups.
+The checks include `Settings Asset` (flags a missing `ConvaiSettings.asset`), an authentication check named `API Key` or `Auth Token` for the selected authentication mode, `iOS Microphone Usage Description`, `Prepare iOS for Recording`, `Android Microphone Permission` (informational), and a `Define Drift` check for each Convai feature-flag scripting define that differs across build target groups. WebGL projects also receive a platform caveat.
 
 Select **Fix** next to any flagged item to apply the automated correction — for example **Create** adds the missing `ConvaiSettings.asset`, and **Sync All** aligns a drifting scripting define across build target groups. Select **Refresh** in the section header to re-run every check after making changes manually.
 
@@ -60,9 +60,9 @@ If the file is missing, open **Edit → Project Settings → Convai SDK**. Openi
 Go to **Edit → Project Settings → Convai SDK**. The window opens with six sections: **Setup Health**, **Credentials**, **Runtime Defaults**, **Diagnostics**, **Advanced**, and **About**.
 
 * If the window is blank or shows no sections, there is a compiler error in the project. Fix all script errors first — the settings provider only renders when all editor scripts compile cleanly.
-* If the window opens but the **Credentials** section shows no API key, select **Credentials**, paste your key from the [Convai developer dashboard](https://convai.com/), then select **Validate & Save**.
+* If **API Key** authentication is selected and the **Credentials** section shows no key, paste your key from the [Convai developer dashboard](https://convai.com/), then select **Validate & Save**. If **Auth Token** is selected, configure its endpoint or register a provider instead.
 
-When everything is configured correctly, pressing Play shows `Convai Bootstrapper: Initialization complete.` in the Console.
+Pressing Play shows `Convai Bootstrapper: Initialization complete.` after the startup initializer runs. Resolve any earlier bootstrapper warning or error before treating the project as ready to connect.
 {% endstep %}
 {% endstepper %}
 
@@ -76,18 +76,20 @@ When everything is configured correctly, pressing Play shows `Convai Bootstrappe
 
 ### Required dependencies
 
-All six dependencies are pulled in automatically by UPM when you install the Convai SDK package. If any is missing or at the wrong version, assembly compilation fails.
+UPM resolves the six dependencies declared by the Convai SDK package manifest. If one is missing or cannot be resolved, dependent assemblies may fail to compile.
 
-| Dependency | Minimum version | Notes |
+| Dependency | Manifest version | Notes |
 | --- | --- | --- |
 | `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> | JSON serialization — required by all SDK communication |
-| `com.unity.ugui` | <code class="expression">space.vars.dep_ugui_version</code> | UI Toolkit module — required by all UI components |
+| `com.unity.ugui` | <code class="expression">space.vars.dep_ugui_version</code> | Unity UI (uGUI) — used by the shipped runtime UI components |
 | `com.unity.inputsystem` | <code class="expression">space.vars.dep_inputsystem_version</code> | New Input System — required by conversation input |
-| `com.unity.ai.navigation` | <code class="expression">space.vars.dep_ai_navigation_version</code> | NavMesh authoring package — resolved automatically with the SDK package |
-| `com.unity.collections` | <code class="expression">space.vars.dep_collections_version</code> | Native collections — required by the vendored LiveKit transport's audio and video sources |
-| `com.unity.modules.xr` | <code class="expression">space.vars.dep_modules_xr_version</code> | Built-in XR input module — required by XR push-to-talk input |
+| `com.unity.ai.navigation` | <code class="expression">space.vars.dep_ai_navigation_version</code> | AI Navigation — used by navigation-aware character behavior |
+| `com.unity.collections` | <code class="expression">space.vars.dep_collections_version</code> | Native collection types used by runtime systems |
+| `com.unity.modules.xr` | <code class="expression">space.vars.dep_modules_xr_version</code> | Unity XR module used by XR-aware integrations |
 
 To verify installed versions: **Window → Package Manager → In Project**.
+
+**Verification boundary:** These package names and versions are verified against the Unity SDK 4.5.0 manifest. This source review does not replace a clean Asset Store or UPM import on every supported Unity editor and target platform.
 
 ## Missing or broken assemblies
 
@@ -148,7 +150,7 @@ Deleting the `Library/` folder forces Unity to reimport the entire project from 
 | Symptom | Likely cause | Fix | Verify |
 | --- | --- | --- | --- |
 | Unity refuses to open the project, or Package Manager reports an incompatible editor version | Editor is below the Unity <code class="expression">space.vars.unity_min_version</code> floor | Upgrade to Unity <code class="expression">space.vars.unity_min_version</code> or newer — any `6000.0` through `6000.5` build at or above the minimum patch is supported | `Help → About Unity` reports a build at or above the floor |
-| Setup Health section shows a **Warning** or **Blocked** item | A required project setting is missing or has drifted — settings asset, API key, iOS microphone usage description, iOS recording preparation, or a scripting define | Open Edit → Project Settings → Convai SDK → Setup Health and select **Fix** next to the item, or correct it manually and select **Refresh** | The item's status badge turns healthy (green) |
+| Setup Health section shows a **Warning** or **Blocked** item | A project setting is missing, invalid, or has drifted — settings asset, selected authentication mode, iOS recording settings, or a scripting define | Open Edit → Project Settings → Convai SDK → Setup Health and select **Fix** when offered, or correct the reported setting manually and select **Refresh** | The item's status badge turns healthy (green), or an informational platform caveat remains understood |
 | `Convai Bootstrapper: ConvaiSettings not found!` in Console | `ConvaiSettings.asset` missing or deleted | Open Edit → Project Settings → Convai SDK to recreate it automatically | Re-enter Play Mode — `Convai Bootstrapper: Initialization complete.` appears |
 | `API key not configured` warning on Play | API key field is empty | Paste key from Convai dashboard into Edit → Project Settings → Convai SDK → Credentials, then select **Validate & Save** | Re-enter Play Mode — the `API key not configured` warning is gone |
 | `The type or namespace 'Newtonsoft' could not be found` | Newtonsoft.Json package missing | Install `com.unity.nuget.newtonsoft-json` via Package Manager | Project compiles without Newtonsoft namespace errors |
@@ -172,15 +174,16 @@ These are the exact messages the SDK bootstrapper emits during initialization. T
 | `Convai Bootstrapper: Initializing...` | Info | SDK initialization has started |
 | `Convai Bootstrapper: ConvaiSettings not found! Please configure settings via Edit > Project Settings > Convai SDK.` | **Error** | `ConvaiSettings.asset` not found at `Assets/Resources/ConvaiSettings.asset` |
 | `Convai Bootstrapper: API key not configured. Please set your API key in Edit > Project Settings > Convai SDK.` | Warning | Settings asset found but API key field is empty |
-| `Convai Bootstrapper: Initialization complete.` | Info | All settings loaded successfully; SDK is ready |
+| `Convai Bootstrapper: Auth Token mode is awaiting a registered provider or a valid endpoint before the first connection.` | Info | Auth Token mode has no provider or valid endpoint at bootstrap time; a code provider may still register during `Awake` |
+| `Convai Bootstrapper: Initialization complete.` | Info | The before-scene-load initializer finished; earlier warnings and errors still apply |
 
 {% hint style="warning" %}
-The `ConvaiSettings not found` error is non-blocking — the SDK logs it and continues. Your scene will load, but any connection attempt will immediately fail with `config.api_key_missing`. Always resolve bootstrapper errors before testing conversations.
+The `ConvaiSettings not found` error does not stop the scene from loading, but the room cannot obtain project defaults or valid credentials from that asset. Resolve bootstrapper errors before testing a connection.
 {% endhint %}
 
 ## Next steps
 
-Once the SDK initializes cleanly and the bootstrapper logs `Convai Bootstrapper: Initialization complete.`, the next issue category to check is connection and API key validation.
+Once the bootstrapper finishes without an earlier warning or error, the next issue category to check is connection and credential validation.
 
 {% content-ref url="connection-and-api-issues.md" %}
 [Connection and API issues](connection-and-api-issues.md)

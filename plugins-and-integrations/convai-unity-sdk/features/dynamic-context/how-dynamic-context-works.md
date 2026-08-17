@@ -4,7 +4,7 @@ description: Understand how Dynamic Context tracks scene state and events, batch
 last_reviewed: "4.5.0"
 ---
 
-Dynamic Context gives characters a live, structured view of what is happening in the scene. Instead of relying only on the static system prompt configured on the Convai dashboard, a character can reference a trainee's current location, the equipment they have collected, or an alarm that recently triggered — because that information was injected directly into the session as it occurred. This page explains the underlying model: the two primitives the SDK tracks, how they assemble into a canonical context string, how updates batch and flush, and how the SDK reports back what happened to each update.
+Dynamic Context gives characters a live, structured view of what is happening in the scene. Instead of relying only on the static system prompt configured on the Convai dashboard, a character can use a trainee's current location, the equipment they have collected, or an alarm that recently triggered as additional conversation context. This page explains the underlying model: the two primitives the SDK tracks, how they assemble into a canonical context string, how updates batch and flush, and how the SDK reports backend results when they arrive.
 
 ## States and events
 
@@ -12,7 +12,7 @@ Dynamic Context is built on two primitive types.
 
 **States** are persistent, named key-value pairs. Each state has a name and a value. When you set a state, any previous value for that name is replaced. States are suitable for facts that change over time but have exactly one current value: the operator's current station, the hazard level in a zone, or whether a checklist item has been completed.
 
-**Events** are chronological, one-time occurrences. Unlike states, events accumulate in sequence and are never replaced or deduplicated. Each call to `AddEvent` appends a new line to the character's context. Events are suitable for things that happened during a session and that the character should be able to reference in order: "Trainee bypassed the manual lockout procedure", "Chemical alarm triggered at Bay 7".
+**Events** are chronological, one-time occurrences. Unlike states, events accumulate in sequence and are never replaced. Identical event text is deduplicated only inside the current pending batch: repeated `AddEvent` calls before that batch flushes create one event line. The same text added in a later batch creates another line. Events are suitable for things that happened during a session and that the character should be able to reference in order: "Trainee bypassed the manual lockout procedure", "Chemical alarm triggered at Bay 7".
 
 Both primitives feed into the character's awareness simultaneously. States provide a stable, queryable snapshot of current conditions; events provide a chronological record of what has happened.
 
@@ -58,11 +58,11 @@ Dynamic Context has two entry points that write to the same underlying tracker a
 
 `ConvaiDynamicContextRelay` is the Inspector entry point. It replaces the retired `ConvaiDynamicContextCommand` component. Add it via **Convai → Dynamic Context → Convai Dynamic Context Relay**, either on the same GameObject as `ConvaiCharacter` or on any GameObject with an explicit **Character** reference assigned. If **Character** is empty and **Auto Resolve Character** is enabled (the default), the relay looks for a `ConvaiCharacter` on its own GameObject at call time.
 
-Unlike `ConvaiDynamicContextCommand`, one relay does not encapsulate a single preconfigured operation, so you no longer need a child GameObject per command. The relay exposes public methods that call directly into `character.DynamicContext`: `SetState(name, value)`, `AddEvent(text)`, `SetCurrentAttentionObject(objectName)`, `ClearCurrentAttentionObject()`, `ResetContext()` / `ResetContext(removeStatic)`, and `Flush()`. Bind any of these to a `UnityEvent` — a trigger collider, a timeline marker, or a UI button — the same way you would bind any other public `MonoBehaviour` method. One relay component can serve several different `UnityEvent` callbacks on the same character.
+Unlike `ConvaiDynamicContextCommand`, one relay does not encapsulate a single preconfigured operation, so you no longer need a child GameObject per command. The relay exposes public methods that call directly into `character.DynamicContext`: `SetState(name, value)`, `AddEvent(text)`, `SetCurrentAttentionObject(objectName)`, `ClearCurrentAttentionObject()`, `ResetContext()` / `ResetContext(removeStatic)`, and `Flush()`. Unity persistent listeners can bind the zero-argument methods and the one-argument methods with a static value. `SetState` takes two arguments, so call it from a script instead. One relay component can serve several different callbacks on the same character.
 
 Two Inspector fields apply as defaults to every call made through that relay instance: **Reaction Mode** sets the `ConvaiRespondMode` passed with each call (default `Silent`), and **Flush Immediately**, when enabled, calls `Flush()` right after the operation so the update bypasses the batch delay. Because the relay always passes its configured **Reaction Mode** explicitly, a method's own scripting default does not apply when the call is routed through the relay — for example, `AddEvent`'s scripting default of `Auto` is overridden by whatever **Reaction Mode** the relay is set to.
 
-The relay's **Events** section exposes `OnQueued` and `OnSkipped`. `OnSkipped` fires when the relay cannot resolve a `ConvaiCharacter`. `OnQueued` fires once the relay resolves a character and dispatches the call — it confirms dispatch, not that the value was accepted. An empty state name or a null value still logs a Console warning even when `OnQueued` fires.
+The relay's **Events** section exposes `OnQueued` and `OnSkipped`. `OnSkipped` fires when the relay cannot resolve a `ConvaiCharacter`. `OnQueued` fires once the relay resolves a character and invokes the requested method. It can therefore fire for a no-op, a validation failure, or a `Flush()` that has nothing to send. It is not evidence of a transport send or backend acknowledgement.
 
 **Scripting — `IConvaiDynamicContext`**
 
@@ -90,12 +90,12 @@ graph TD
     B --> C{"Flush called, or window elapses?"}
     C -->|No| B
     C -->|Yes| D["One context-update sent to Convai"]
-    D --> E["DynamicContextUpdateResultReceived"]
+    D -. backend result, when received .-> E["DynamicContextUpdateResultReceived"]
 ```
 
 While a conversation is active, the first staged change opens a batch window. Every subsequent staged change resets a countdown of `ConvaiCharacter.DynamicContextBatchDelaySeconds` — 0.5 seconds by default. The SDK also enforces an internal ceiling of 3 seconds measured from the first staged change in the window, so a steady stream of changes cannot postpone delivery indefinitely. Calling `Flush()` sends the pending batch immediately, bypassing whatever remains of the countdown.
 
-If a call happens before the character is in conversation, it stages locally only — no countdown starts. When the session's character-ready signal arrives, the SDK flushes the staged batch immediately, so calls made in `Awake` or `Start` are delivered without any extra timing code:
+If a call happens before the character is in conversation, it stages locally only—no countdown starts. When the session's character-ready signal arrives, the SDK attempts the staged flush without waiting for a fresh timer, so calls made in `Awake` or `Start` need no extra client retry code:
 
 ```csharp
 void Start()
@@ -119,9 +119,11 @@ When multiple staged changes carry different respond modes, the strongest one wi
 `Apply()` is the one exception: it does not stage or queue. Calling it while the character is not in conversation discards the update. Use `SetState`, `AddEvent`, or the other tracked methods for context that must survive until a conversation starts.
 {% endhint %}
 
-## Acknowledgement and token feedback
+## Result events and acknowledgement scope
 
-Every dynamic context update the SDK sends — whether from a tracked batch, an explicit `Flush()`, or a raw `Apply()` call — is confirmed by `DynamicContextUpdateResultReceived`, delivered through `ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived`. Match an acknowledgement to the update you sent using `UpdateId`. Tracked batches always receive an SDK-generated ID; only `Apply()` lets you supply your own `updateId` for correlation.
+When the backend returns a dynamic-context result, the SDK publishes `DynamicContextUpdateResultReceived` through `ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived`. Tracked batches and resets carry SDK-generated update IDs. A raw `Apply()` request forwards an `updateId` when you provide one; the SDK generates a missing ID only when the request includes an action-config patch or current attention object that needs acknowledgement tracking. A text-only `Apply()` request can therefore have no update ID.
+
+Plain state and event text is committed to the local tracker immediately and is fire-and-forget after the transport accepts the flush. The SDK does not wait for a backend result before keeping that text locally. Action-config and attention-object mutations are different: they enter an ordered acknowledgement queue and are committed to the character's resolved runtime action state only after the required successful result and validation. Observing the public result event alone does not prove that an action-state mutation has committed locally.
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
@@ -146,7 +148,7 @@ ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived += resul
 | `LlmTriggered` | `bool` | Whether this update triggered a new character turn. |
 | `PromptRebuild`, `PromptRebuildStatus` | `bool`, `string` | Whether the backend rebuilt the character's prompt to include this update, and the outcome. |
 
-The same event also carries action-specific fields — `ActionConfigUpdated`, `ActionsCount`, `CurrentAttentionObject`, and related properties — when the update includes an action configuration patch. See [Update character actions at runtime](../character-actions/update-actions-at-runtime.md) for that acknowledgement flow.
+The same event also carries action-specific fields — `ActionConfigUpdated`, `ActionsCount`, `CurrentAttentionObject`, and related properties — when the backend includes them. Action-config patches validate their acknowledgement metadata before local commit; an attention-only update does not use the action/object/character count checks. See [Update character actions at runtime](../character-actions/update-actions-at-runtime.md) for that acknowledgement flow.
 
 ## Next steps
 

@@ -4,7 +4,7 @@ description: Four complete long-term memory patterns for Unity — zero-config p
 last_reviewed: "4.5.0"
 ---
 
-These examples cover the four most common long-term memory integration patterns. Each example is self-contained and shows the full setup, the relevant code, and the expected runtime outcome.
+These examples cover four common long-term memory integration patterns. The code is source-checked against Unity SDK 4.5. Extraction, recall, deduplication, and deletion outcomes still require live backend verification.
 
 ## Pattern 1 — Zero-config persistence
 
@@ -12,18 +12,18 @@ Use `DeviceEndUserIdProvider` (the SDK default) when you do not need per-account
 
 **When to use:** Consumer applications without user accounts, rapid prototypes, or editor-based testing.
 
-**Limitations:** Memory is scoped to the device. Clearing `PlayerPrefs` or reinstalling the application generates a new identity — no memories carry over.
+**Limitations:** The default identity is environment-specific. The Editor uses a PlayerPrefs GUID. A player build prefers `SystemInfo.deviceUniqueIdentifier` and falls back to a PlayerPrefs GUID only when that value is invalid. Device-ID stability is platform-dependent, so use account identity for cross-device or reinstall continuity.
 
 **Setup:**
 
 1. Sign in at [convai.com](https://convai.com), open the character, and toggle **Long-Term Memory** to **On** in the **Memory** tab.
 2. Add `ConvaiManager` and `ConvaiCharacter` to your scene with the character ID configured.
-3. Enter Play Mode and have a conversation. Stop Play Mode to trigger memory extraction.
-4. Re-enter Play Mode and verify the character recalls what was shared.
+3. Enter Play Mode and have a conversation, then stop Play Mode to end the client session.
+4. Re-enter Play Mode and run a live recall check after the backend's expected processing window.
 
 No `IEndUserIdentityProvider` registration is needed. The SDK uses `DeviceEndUserIdProvider` by default.
 
-**Expected outcome:** The character references facts from previous sessions automatically. The same GUID in `PlayerPrefs["convai.end_user_id"]` is used each session on the same machine.
+**Live validation:** In the Editor, confirm that `PlayerPrefs["convai.end_user_id"]` stays unchanged between runs, then check whether the second session recalls the expected fact.
 
 ***
 
@@ -52,7 +52,7 @@ public class AccountIdentityProvider : IEndUserIdentityProvider
 }
 ```
 
-Register the provider in `Awake()` before `ConvaiRoomManager.Start()` completes:
+Disable automatic connection, then register the provider in `Start()` before your application calls `ConnectAsync()`:
 
 ```csharp
 using Convai.Runtime.Components;
@@ -61,11 +61,21 @@ using UnityEngine;
 public class IdentityRegistrar : MonoBehaviour
 {
     [SerializeField] private ConvaiManager _convaiManager;
+    [SerializeField] private string _accountId;
+    [SerializeField] private string _displayName;
 
-    private void Awake()
+    private void Start()
     {
-        string accountId = AuthService.CurrentUser.AccountId;
-        _convaiManager.SetEndUserIdentityProvider(new AccountIdentityProvider(accountId));
+        if (_convaiManager == null || string.IsNullOrWhiteSpace(_accountId))
+        {
+            Debug.LogError("Assign a ConvaiManager and a stable account ID.");
+            return;
+        }
+
+        _convaiManager.SetEndUserIdentityProvider(
+            new AccountIdentityProvider(_accountId));
+        _convaiManager.SetEndUserMetadataProvider(
+            new AccountMetadataProvider(_displayName));
     }
 }
 ```
@@ -92,12 +102,7 @@ public class AccountMetadataProvider : IEndUserMetadataProvider
 }
 ```
 
-```csharp
-_convaiManager.SetEndUserMetadataProvider(
-    new AccountMetadataProvider(AuthService.CurrentUser.DisplayName));
-```
-
-**Expected outcome:** Each user's memories are stored under their account ID. Memories persist across devices and reinstalls. The editor panel shows the user's display name.
+**Live validation:** Confirm that both devices send the same account ID, then query the end-user record and run a second-session recall check. Confirm that the backend returns the `"name"` metadata before relying on the editor label.
 
 ***
 
@@ -111,6 +116,7 @@ Pre-load facts for a user before their first conversation so the character can r
 
 ```csharp
 using Convai.RestAPI;
+using Convai.Runtime;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -138,7 +144,7 @@ public class OnboardingMemorySeeder : MonoBehaviour
 }
 ```
 
-**Expected outcome:** On the employee's first conversation with the onboarding assistant, the character already knows their certification status and guides them to the next required module.
+**Live validation:** Query the records returned by `AddAsync`, then start a staging conversation and check whether the service recalls the seeded facts. Deduplication and conversational use are backend behavior.
 
 ***
 
@@ -148,6 +154,7 @@ Clear all stored facts for a user–character pair, then optionally disable LTM.
 
 ```csharp
 using Convai.RestAPI;
+using Convai.Runtime;
 using UnityEngine;
 
 public class MemoryReset : MonoBehaviour
@@ -160,9 +167,9 @@ public class MemoryReset : MonoBehaviour
 
         using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
 
-        // Step 1: Delete all memories for this user–character pair
+        // Step 1: Request deletion for this user-character pair
         await client.Memory.DeleteAllAsync(characterId, endUserId);
-        Debug.Log("Memories purged.");
+        Debug.Log("Memory deletion request completed.");
 
         // Step 2: Disable LTM on the character
         await client.Characters.SetMemoryEnabledAsync(characterId, false);
@@ -171,9 +178,9 @@ public class MemoryReset : MonoBehaviour
 }
 ```
 
-To remove only the memories while keeping LTM enabled, call `DeleteAllAsync` and skip the `SetMemoryEnabledAsync` step. To remove a user's records across every character rather than one, use `client.EndUsers.DeleteAsync(endUserId)` instead. See [Manage end-user records](end-user-management.md).
+To request deletion for the user-character pair while keeping LTM enabled, call `DeleteAllAsync` without `SetMemoryEnabledAsync`. `client.EndUsers.DeleteAsync(endUserId)` addresses an end-user record instead. Verify actual deletion scope and completion with follow-up live queries. See [Manage end-user records](end-user-management.md).
 
-**Expected outcome:** The next session for this user–character pair starts with no stored context. The character treats the user as a new contact.
+**Live validation:** List records after the request and start another staging session. Do not promise an empty conversational context until both checks confirm the backend outcome.
 
 ***
 

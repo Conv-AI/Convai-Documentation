@@ -25,6 +25,7 @@ If you have not set up a scene yet, see [Getting Started](../../getting-started/
 When the runtime builds, `ConvaiBootstrapConfigSnapshot` captures the API key and server URL as an immutable pair. Once built, these values are exposed to modules and internal services via `ICredentialProvider`:
 
 ```csharp
+// API excerpt: declaration from Convai.Domain.Abstractions.
 public interface ICredentialProvider
 {
     bool HasValidCredentials { get; }
@@ -47,6 +48,7 @@ Override `CreateRuntimeBuilder()` on a `ConvaiManager` subclass and call `builde
 using Convai.Runtime.Components;
 using Convai.Runtime.Core;
 using Convai.Runtime.Core.Configuration;
+using Convai.Runtime;
 using UnityEngine;
 
 public class EnvironmentCredentialManager : ConvaiManager
@@ -122,98 +124,106 @@ Shown above in [Provide custom credentials](#provide-custom-credentials). Best f
 
 ### Example 2: Secrets vault fetch before startup
 
-Some deployments pull credentials from a secrets service at launch. Because `ConvaiBootstrapConfigSnapshot` must be ready before `ConvaiManager.Awake()` calls `BuildRuntime()`, credentials must be fetched asynchronously before `base.Awake()` runs.
+Some deployments pull credentials from a secrets service at launch. `ConvaiManager.Awake()` is not a public extension point in SDK 4.5, and the runtime is built from that callback. Resolve credentials in an application-owned bootstrap scene or launcher, then load the scene that contains the custom manager.
 
 ```csharp
-// VaultCredentialManager.cs
-using System.Threading.Tasks;
+// ResolvedConvaiCredentials.cs and VaultCredentialManager.cs
+using System;
 using Convai.Runtime.Components;
 using Convai.Runtime.Core;
 using Convai.Runtime.Core.Configuration;
-using UnityEngine;
 
-public class VaultCredentialManager : ConvaiManager
+// Application-owned handoff populated before the Convai scene loads.
+public static class ResolvedConvaiCredentials
 {
-    [SerializeField] private string _vaultEndpoint = "https://vault.internal/v1/convai";
+    public static string ApiKey { get; private set; } = string.Empty;
+    public static string ServerUrl { get; private set; } = string.Empty;
+    public static bool IsReady =>
+        !string.IsNullOrWhiteSpace(ApiKey) && !string.IsNullOrWhiteSpace(ServerUrl);
 
-    private string _resolvedApiKey;
-    private string _resolvedServerUrl = "https://live.convai.com";
-
-    protected override async void Awake()
+    public static void Set(string apiKey, string serverUrl)
     {
-        await FetchCredentialsAsync();
-        base.Awake(); // Triggers BuildRuntime() → CreateRuntimeBuilder() with resolved credentials.
-    }
+        if (string.IsNullOrWhiteSpace(apiKey))
+            throw new ArgumentException("API key is required.", nameof(apiKey));
+        if (string.IsNullOrWhiteSpace(serverUrl))
+            throw new ArgumentException("Server URL is required.", nameof(serverUrl));
 
-    private async Task FetchCredentialsAsync()
-    {
-        using var client = new System.Net.Http.HttpClient();
-        try
-        {
-            string json = await client.GetStringAsync(_vaultEndpoint);
-            var response = JsonUtility.FromJson<VaultResponse>(json);
-            _resolvedApiKey = response.ApiKey;
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"[VaultCredentialManager] Failed to fetch credentials: {ex.Message}");
-        }
+        ApiKey = apiKey.Trim();
+        ServerUrl = serverUrl.Trim();
     }
+}
 
+public sealed class VaultCredentialManager : ConvaiManager
+{
     protected override ConvaiRuntimeBuilder CreateRuntimeBuilder()
     {
+        if (!ResolvedConvaiCredentials.IsReady)
+            throw new InvalidOperationException(
+                "Resolve Convai credentials before loading this scene.");
+
         ConvaiRuntimeBuilder builder = base.CreateRuntimeBuilder();
-        builder.UseConfig(new ConvaiBootstrapConfigSnapshot(_resolvedApiKey, _resolvedServerUrl));
+        builder.UseConfig(new ConvaiBootstrapConfigSnapshot(
+            ResolvedConvaiCredentials.ApiKey,
+            ResolvedConvaiCredentials.ServerUrl));
         return builder;
     }
-
-    [System.Serializable]
-    private class VaultResponse { public string ApiKey; }
 }
 ```
 
-`base.Awake()` is called explicitly after the credential fetch. Any code in other `Awake()` methods that depends on `ConvaiManager.ActiveManager` being ready must use `Start()` or later instead.
+Your bootstrap code is application-owned. It should authenticate to the vault, call `ResolvedConvaiCredentials.Set(...)`, and load the Convai scene only after that call succeeds. Do not keep the Convai scene loaded while waiting for the fetch: its manager would build before the handoff is ready.
 
 ### Example 3: Per-tenant credentials from a config service
 
-Multi-tenant deployments where each customer has a different API key can resolve credentials from a tenant config endpoint loaded at scene start.
+Multi-tenant deployments where each customer has a different API key follow the same ordering rule. Resolve the tenant before loading the Convai scene, then hand the selected values to the manager's `CreateRuntimeBuilder()` override.
 
 ```csharp
 // TenantCredentialManager.cs
+using System;
 using Convai.Runtime.Components;
 using Convai.Runtime.Core;
 using Convai.Runtime.Core.Configuration;
-using UnityEngine;
 
-public class TenantCredentialManager : ConvaiManager
+// Application-owned state set by the login or tenant-selection flow.
+public static class TenantConvaiCredentials
 {
-    [SerializeField] private TenantConfigService _configService;
+    public static string ApiKey { get; private set; } = string.Empty;
+    public static string ServerUrl { get; private set; } = string.Empty;
 
-    private string _apiKey;
-    private string _serverUrl = "https://live.convai.com";
-
-    protected override async void Awake()
+    public static void Select(string apiKey, string serverUrl)
     {
-        TenantConfig config = await _configService.LoadAsync();
-        _apiKey    = config.ConvaiApiKey;
-        _serverUrl = config.ConvaiServerUrl ?? _serverUrl;
-        base.Awake();
-    }
+        if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(serverUrl))
+            throw new ArgumentException("Tenant credentials are incomplete.");
 
+        ApiKey = apiKey.Trim();
+        ServerUrl = serverUrl.Trim();
+    }
+}
+
+public sealed class TenantCredentialManager : ConvaiManager
+{
     protected override ConvaiRuntimeBuilder CreateRuntimeBuilder()
     {
+        if (string.IsNullOrWhiteSpace(TenantConvaiCredentials.ApiKey) ||
+            string.IsNullOrWhiteSpace(TenantConvaiCredentials.ServerUrl))
+            throw new InvalidOperationException(
+                "Select a tenant before loading this scene.");
+
         ConvaiRuntimeBuilder builder = base.CreateRuntimeBuilder();
-        builder.UseConfig(new ConvaiBootstrapConfigSnapshot(_apiKey, _serverUrl));
+        builder.UseConfig(new ConvaiBootstrapConfigSnapshot(
+            TenantConvaiCredentials.ApiKey,
+            TenantConvaiCredentials.ServerUrl));
         return builder;
     }
 }
 ```
+
+`TenantConvaiCredentials` is a minimal application-owned handoff type. Replace it with your own authenticated tenant configuration store; it is not part of the Convai SDK.
 
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
 | ------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `[ConvaiManager] Cannot start: adapter not initialized.` in Console | `BuildRuntime()` ran before credentials were resolved | Ensure credential fetch completes before `base.Awake()` is called. |
+| Manager throws `Resolve Convai credentials before loading this scene.` | The Convai scene loaded before the bootstrap fetch completed | Keep the manager in a later scene and load it only after the credential handoff is populated. |
 | Session connects but Convai returns auth error immediately | Empty or incorrect API key passed to snapshot | Log the resolved key **length** (not the value) to confirm it was populated before build. |
 | `IsValid` returns `false` on config snapshot | `apiKey` or `serverUrl` is null or empty | Add a null check and fallback in your resolve methods. |
 | `ConvaiSettings.Instance` is null in builds | `ConvaiSettings.asset` not present in `Assets/Resources/` | Only use `ConvaiSettings.Instance` as a fallback in editor/dev; never as the sole source in production builds. |

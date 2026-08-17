@@ -38,7 +38,7 @@ The status badge next to the button reports the result: **Key valid** when Conva
 
 Run **GameObject > Convai > Validate Scene Setup**. A missing API key appears as a warning in the validator dialog. If no API key warning appears, your key is configured correctly.
 
-<figure><img src="../../../.gitbook/assets/image (14).png" alt="Scene validator dialog with no missing-API-key warning"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (14).png" alt="Scene validator dialog with no missing-API-key warning"><figcaption>A successful scene validation with no API key warning.</figcaption></figure>
 {% endstep %}
 {% endstepper %}
 

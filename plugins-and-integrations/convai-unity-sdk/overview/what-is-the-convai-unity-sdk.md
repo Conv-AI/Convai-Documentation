@@ -34,14 +34,15 @@ Opt-in, each added as a Unity component:
 
 ### Utilities
 
-Optional helpers that run entirely in Unity without Convai communication:
+Optional presentation and embodiment helpers that run locally in Unity:
 
-* **Dialogue animation** — four-layer animator stack driving body and head movement during speech
-* **Gaze and attention** — eye and head gaze blended toward focus targets and conversation partners
+* **Body animation** — drives idle, speaking, listening, gesture, action, and optional locomotion animation
+* **Body language** — chooses context-sensitive physical reactions from configured personality and animation content
+* **Gaze** — blends eye, head, and optional body movement toward the player, scripted targets, and marked scene objects
 
 ### Editor tooling
 
-Project Settings API key configuration, scene setup menu, Scene Validator, and custom Inspectors for every SDK component.
+Project Settings credential configuration, scene setup menus, validation tools, and custom Inspectors for core and feature components.
 
 ## Voice → Convai → Character flow
 
@@ -67,7 +68,7 @@ graph LR
 | API key         | Free account at [convai.com](https://www.convai.com/)  |
 
 {% hint style="info" %}
-The sample scenes use URP. If your project uses the Built-in render pipeline, the samples require minor material reassignment. The SDK itself works with all three pipelines.
+The sample scenes use URP. If your project uses the Built-in render pipeline, the samples require minor material reassignment. The SDK package defines support for all three pipelines and the platforms above; validate the final build on your target device and network because a source and manifest review does not prove device permissions, hosted WebGL behavior, or production connectivity.
 {% endhint %}
 
 The Convai Unity SDK is available on the [Unity Asset Store](https://assetstore.unity.com/packages/tools/behavior-ai/npc-ai-engine-dialog-actions-voice-and-lipsync-convai-235621).

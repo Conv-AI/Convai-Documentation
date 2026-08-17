@@ -12,11 +12,11 @@ The Convai SDK for Unity supports two conversation input modes: **Hands Free** (
 
 Select the `ConvaiManager` GameObject in the Hierarchy. In the Inspector, find `ConvaiRoomManager`. The **Turn-Taking Options** section contains all input mode settings.
 
-<figure><img src="../../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (6).png" alt="Convai Manager Inspector with How The Player Talks set to Hands Free"><figcaption>Conversation input mode in the Convai Room Manager Inspector.</figcaption></figure>
 
 ## Input mode comparison
 
-|                   | Hands Free                                  | Push to Talk                                     |
+| Comparison        | Hands Free                                  | Push to Talk                                     |
 | ----------------- | ------------------------------------------- | ------------------------------------------------ |
 | **How it works**  | SDK detects end-of-speech automatically     | Player holds a key to speak, releases to send    |
 | **Best for**      | Natural conversation, kiosk experiences, VR | Noisy environments, multiplayer, precise control |

@@ -57,11 +57,11 @@ Also check `ConvaiAudioOutput` own fields on the NPC Inspector:
 {% endstep %}
 
 {% step %}
-### Confirm a user gesture triggers the connection (WebGL)
+### Unlock audio after connecting (WebGL)
 
-Browsers block microphone access until the user has interacted with the page. In WebGL builds, `ConvaiManager.ConnectAsync()` must be called from within a user gesture handler (e.g., a button `onClick` event), not automatically on scene load.
+Browsers block microphone capture and audio playback until the user interacts with the page. The room can connect before that gesture. After it reaches `Connected`, call `ConvaiManager.EnableAudioAndStartListening()` from a button click or tap, or let the SDK consume its optional first non-UI scene click.
 
-If the SDK connects before a gesture, mic publishing is aborted with:
+If capture is attempted before the gesture gate is released, the SDK can report:
 
 `[RoomAudioRuntimeAdapter] Microphone publish aborted because audio playback requires a user gesture.`
 {% endstep %}
@@ -71,7 +71,7 @@ If the SDK connects before a gesture, mic publishing is aborted with:
 
 | Error code | Description | Common cause |
 | --- | --- | --- |
-| `audio.mic_unavailable` | No microphone device was found | No microphone connected; WebGL platform (always returns no devices) |
+| `audio.mic_unavailable` | No microphone device was found | No usable microphone is available on the current platform |
 | `audio.mic_permission_denied` | Permission to access the microphone was denied | User rejected the system permission dialog; WebGL called before user gesture |
 | `audio.mic_publish_failed` | Microphone track could not be published to the LiveKit room | Room not connected; internal factory not registered |
 
@@ -93,15 +93,15 @@ If the SDK connects before a gesture, mic publishing is aborted with:
 {% tab title="Android" %}
 Android requires the `RECORD_AUDIO` permission. Without it, the microphone is unavailable and `audio.mic_permission_denied` fires.
 
-**Step 1 — Add the permission to AndroidManifest.xml:**
+**Step 1 — Verify the generated Android manifest:**
 
-If you do not have a custom `AndroidManifest.xml`, create one at `Assets/Plugins/Android/AndroidManifest.xml`. Add the following line inside the `<manifest>` tag:
+Unity's normal microphone packaging should include `RECORD_AUDIO`. Inspect the exported manifest in the APK or AAB. Add a custom `Assets/Plugins/Android/AndroidManifest.xml` entry only if your build pipeline removed it:
 
 ```xml
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
 ```
 
-**Step 2 — Set the Microphone Usage Description in Player Settings:**
+**Runtime behavior:** The native audio path checks `Permission.Microphone` and calls `Permission.RequestUserPermission` before recording when access is missing. If the user denies it, recording fails and the application should explain how to grant access in device Settings. There is no Android **Microphone Usage Description** Player setting in this workflow.
 
 Open **Edit → Project Settings → Player → Android → Other Settings**. Set **Microphone Usage Description** to a user-facing explanation, for example: `"Used for voice interaction with AI characters."`
 
@@ -121,31 +121,29 @@ Unity writes this value to `Info.plist` during the build.
 
 **Runtime behavior:** iOS shows a system permission dialog on first mic access. If the user denies it, `audio.mic_permission_denied` fires. The SDK does not re-request the permission — direct the user to iOS **Settings → Privacy & Security → Microphone** to re-enable it.
 
-{% hint style="danger" %}
-Submitting an iOS build to the App Store without `NSMicrophoneUsageDescription` causes an automatic rejection. Set this field even if microphone access is optional in your training simulation or experience.
-{% endhint %}
+**iOS submission requirement:** Submitting an iOS build to the App Store without `NSMicrophoneUsageDescription` causes an automatic rejection. Set this field even if microphone access is optional in your training simulation or experience.
 {% endtab %}
 
 {% tab title="WebGL" %}
 WebGL has two constraints that affect microphone access:
 
-**1. No device enumeration.** `MicrophoneDeviceService.GetAvailableDevices()` always returns an empty list on WebGL. The SDK uses the browser's default input device — device selection at the SDK level is not supported on this platform.
+**1. Placeholder device enumeration.** WebGL cannot enumerate physical microphones through the native service. `GetAvailableDevices()` returns one `Default Microphone` placeholder while the browser controls the underlying device.
 
-**2. User gesture required.** Browsers enforce a policy that microphone access can only be requested within a user gesture handler (a button click, key press, etc.). Calling connect automatically on scene load — without a prior user interaction — results in:
+**2. User gesture required.** Browsers enforce a policy before microphone capture or playback can start. Connecting the room on scene load is supported, but starting audio before a gesture can result in:
 
 `[RoomAudioRuntimeAdapter] Microphone publish aborted because audio playback requires a user gesture.`
 
 **Recommended pattern for WebGL:**
 
-Add a **Start Conversation** button to your scene. Wire its `onClick` to call your connect logic. Do not connect on `Start()` or `Awake()`.
+Connect the room normally, then show a **Start Conversation** button after the session reaches `Connected`. Wire its `onClick` to release the browser audio gate:
 
 ```csharp
-// Called from a UI Button onClick event — this IS a user gesture
+// Called from a UI Button onClick event after the room is connected.
 [SerializeField] private ConvaiManager _convaiManager;
 
 public void OnStartButtonClicked()
 {
-    _ = _convaiManager.ConnectAsync();
+    _convaiManager.EnableAudioAndStartListening();
 }
 ```
 
@@ -159,11 +157,11 @@ public void OnStartButtonClicked()
 
 | Symptom | Likely cause | Fix | Verify |
 | --- | --- | --- | --- |
-| `audio.mic_permission_denied` on Android | `RECORD_AUDIO` missing in `AndroidManifest.xml` | Add the permission; rebuild | App requests mic permission on launch; voice reaches character |
+| `audio.mic_permission_denied` on Android | Runtime access was denied, or the exported manifest lacks `RECORD_AUDIO` | Guide the user to grant access; verify the exported manifest and add a custom entry only if absent | Native recording starts after permission is granted |
 | `audio.mic_permission_denied` on iOS | `NSMicrophoneUsageDescription` missing in Player Settings | Set the description; rebuild | App requests mic permission on first launch; voice reaches character |
-| `audio.mic_permission_denied` on WebGL | No user gesture before connect | Trigger connect from a UI button click | `audio.mic_permission_denied` no longer fires; mic input active |
+| `audio.mic_permission_denied` on WebGL | Audio capture started before a user gesture | After connection, call `EnableAudioAndStartListening` from a button or tap | Mic input starts after the gesture |
 | `audio.mic_unavailable` | No microphone connected to the machine | Connect a microphone; check OS audio devices | `audio.mic_unavailable` no longer fires on connect |
-| `audio.mic_unavailable` on WebGL | Platform always returns empty device list | Expected — SDK uses browser default device | No action needed; mic publishes via browser default |
+| Only `Default Microphone` appears on WebGL | Physical device enumeration is browser-controlled | Expected — keep the placeholder selected | Browser permission flow selects the underlying microphone |
 | `[ConvaiAudioOutput] ConvaiCharacter component not found on X` | `ConvaiAudioOutput` on wrong GameObject | Move it to the same GameObject as `ConvaiCharacter` | Error no longer appears in Console on Play |
 | Character transcript appears but no audio plays | `AudioSource` muted, volume 0, or mixer at −80 dB | Inspect the `AudioSource` component on the NPC | Character voice plays through NPC `AudioSource` |
 | Character audio plays on one ear only in 3D | `AudioSource.spatialBlend` set to 1 with camera too far | Reduce Max Distance on AudioSource or bring camera closer | Audio plays in both ears at appropriate distance |

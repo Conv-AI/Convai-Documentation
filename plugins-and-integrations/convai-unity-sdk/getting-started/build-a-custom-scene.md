@@ -1,6 +1,6 @@
 ---
 title: Build a custom scene
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 description: >-
   Add required Convai components to a new Unity scene using the Setup Required
   Components command and configure your first character.
@@ -117,6 +117,8 @@ The copy is created next to the character's prefab when it has one, or under `As
 
 ### Example 2: Multiple characters in one scene
 
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** This shared-room example is staged ahead of the current <code class="expression">space.vars.unity_sdk_version</code> Asset Store release.
+
 **Scenario:** A medical training simulation with two characters — a supervising doctor and a nurse.
 
 **Setup:**
@@ -124,10 +126,49 @@ The copy is created next to the character's prefab when it has one, or under `As
 * Two separate NPC GameObjects, each with `ConvaiCharacter`, `ConvaiAudioOutput`, `AudioSource`
 * Each `ConvaiCharacter` has its own unique Character ID
 * Only one `ConvaiManager` and one `ConvaiPlayer` in the scene
+* One character is assigned as the explicit startup character before `ConvaiRoomManager` connects
 
-**Expected outcome:** Both characters are discovered and registered automatically. Conversation switches between them based on which character the player addresses.
+The startup character becomes both the initial roster entry and the first interaction target. Set it during `Awake`, before the room manager's `Start` connection:
 
-Character A and Character B do not share conversation context unless your Convai character configuration explicitly links them.
+```csharp
+using System;
+using Convai.Runtime.Components;
+using Convai.Runtime.Room;
+using UnityEngine;
+
+public sealed class MedicalConversationRouter : MonoBehaviour
+{
+    [SerializeField] private ConvaiManager _manager;
+    [SerializeField] private ConvaiCharacter _doctor;
+    [SerializeField] private ConvaiCharacter _nurse;
+
+    private void Awake()
+    {
+        _manager.SetExplicitConversationTarget(_doctor);
+    }
+
+    // Call from a UI button, raycast hit, proximity trigger, or your own selection system.
+    public async void SelectNurse()
+    {
+        if (!_manager.TryGetRoomConnectionService(out IConvaiRoomConnectionService room))
+            return;
+
+        try
+        {
+            await room.SetInteractionTargetAsync(_nurse);
+            Debug.Log("Nurse is the acknowledged interaction target.");
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError($"Interaction target did not change: {exception.Message}");
+        }
+    }
+}
+```
+
+Call `SetInteractionTargetAsync(...)` only after the shared room is connected and the selected character is ready in its roster. The operation completes after the backend acknowledges the route change. Keep routing-sensitive UI on the last acknowledged target when the operation fails, is cancelled, or times out; after a timeout, treat the result as unknown until you reread the session or reconnect.
+
+**Expected outcome:** Both enabled characters join one shared room and retain distinct character identities and `character_session_id` values. Player and character transcript updates arrive on the room-wide transcript timeline. The SDK keeps the current target until your application changes or clears it; it does not switch targets automatically based on gaze, proximity, or speech.
 
 ## Next steps
 

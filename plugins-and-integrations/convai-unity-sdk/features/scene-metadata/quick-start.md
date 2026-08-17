@@ -1,10 +1,10 @@
 ---
 title: Scene metadata quick start
-description: Add object awareness to a Unity scene so a Convai character can reference named objects in conversation from the moment it connects.
+description: Add scene-object metadata in Unity, inspect the collected payload, and verify the client submits it when a Convai room connects.
 last_reviewed: "4.5.0"
 ---
 
-Set up Scene Metadata to give a Convai character awareness of named objects in your scene. By the end, your character knows what objects exist and can reference them in conversation — entirely from the Inspector.
+Set up Scene Metadata so the Unity client submits named objects and descriptions for a Convai character. The configuration is Inspector-only; final backend ingestion and dialogue behavior require a live Play Mode check.
 
 ## Prerequisites
 
@@ -52,18 +52,18 @@ Leave **Log Statistics** enabled — it writes a Console entry on each collectio
 {% step %}
 ### Enter Play Mode and verify
 
-Press Play. When the room connects, the collector fires automatically. Check the Console for a debug entry similar to:
+Press Play. When the room connects, the collector fires automatically. Check the Console for a line containing:
 
 ```text
-[ConvaiSceneMetadataCollector] Collected 4 metadata objects in 0.0010s. Registry stats: 4 total, 4 valid, 0 invalid
+Collected 4 metadata objects in 0.0010s. Registry stats: 4 total, 4 valid, 0 invalid
 ```
 
-This confirms the payload was assembled and sent to Convai. Test the character by asking a question that requires scene awareness — for example: "What equipment is available on this floor?" or "Can you describe what's near the exit?"
+This confirms that the client assembled the payload. A separate line containing `Sent 4 metadata objects to RTVI service` confirms that the room service accepted the client send call; neither log is a backend acknowledgement. Test end to end by asking a question that requires scene awareness — for example: "What equipment is available on this floor?" or "Can you describe what's near the exit?"
 {% endstep %}
 {% endstepper %}
 
 {% hint style="success" %}
-The character responds with information that reflects the names and descriptions you entered. Scene Metadata is working.
+If the live response can use the names and descriptions you entered, you have end-to-end evidence for this room. Exact wording remains model- and character-dependent.
 {% endhint %}
 
 ## Next steps

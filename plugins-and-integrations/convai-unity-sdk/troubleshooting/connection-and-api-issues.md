@@ -1,10 +1,12 @@
 ---
 title: Connection and API issues
-description: Interpret Convai session error codes, read ConvaiRoomManager diagnostics, and resolve authentication, transport, and rate-limit failures.
-last_reviewed: "4.5.0"
+description: >-
+  Diagnose authentication, transport, timeout, reconnect, and rate-limit
+  failures by using public session errors and room diagnostics.
+last_reviewed: "4.6.0"
 ---
 
-All session errors surface through `ConvaiSessionEventRelay.OnSessionError`. The event payload carries an `ErrorCode` string and a human-readable `Message`. Error codes follow a hierarchical dot-notation format: `{category}.{detail}`. The category prefix tells you which layer of the system failed.
+Room lifecycle errors surface through `ConvaiSessionEventRelay.OnSessionError`. The event payload carries an `ErrorCode` string and a human-readable `Message`. Error codes follow a hierarchical dot-notation format: `{category}.{detail}`. The category prefix tells you which layer of the system failed.
 
 | Category prefix | What failed |
 | --- | --- |
@@ -63,10 +65,13 @@ Configuration errors fire immediately on connect — before any network traffic.
 | Error code | Description | Fix |
 | --- | --- | --- |
 | `config.api_key_missing` | API key field is empty in `ConvaiSettings` | Open Edit → Project Settings → Convai SDK and paste your API key |
-| `config.character_id_missing` | `CharacterId` field on `ConvaiCharacter` is empty | Set the Character ID in the `ConvaiCharacter` Inspector field |
+| `config.auth_token_provider_missing` | Auth Token mode has no registered provider or configured endpoint | Register an auth-token provider or configure the endpoint in Convai Project Settings |
+| `config.auth_token_endpoint_invalid` | The configured auth-token endpoint is neither HTTPS nor an allowed HTTP loopback URL | Use an HTTPS endpoint; use HTTP only for a loopback development endpoint |
+| `config.auth_token_mode_required` | `ConnectWithAuthTokenAsync(...)` was called while another authentication mode is selected | Select Auth Token mode before using the explicit auth-token connection API |
+| `config.character_id_missing` | A startup-roster `ConvaiCharacter` has an empty `CharacterId` | Set a non-empty Character ID on every enabled character owned by the manager; use distinct IDs when character-keyed controls must be unambiguous |
 
 {% hint style="warning" %}
-The SDK emits a warning before any connect attempt if the API key is empty: `Convai Bootstrapper: API key not configured. Please set your API key in Edit > Project Settings > Convai SDK.` This fires on Play — fix it before testing connections.
+In API Key mode, the SDK emits a warning before a connect attempt if the API key is empty: `Convai Bootstrapper: API key not configured. Please set your API key in Edit > Project Settings > Convai SDK.` Auth Token mode does not require an API key; validate its provider or endpoint instead.
 {% endhint %}
 
 ## Connection errors
@@ -76,13 +81,14 @@ These codes appear when Convai rejects or cannot fulfill the connect request. Mo
 | Error code | Description | Retried automatically | Fix |
 | --- | --- | --- | --- |
 | `connection.connect_invalid_api_key` | The API key was rejected by Convai | No | Copy a fresh key from the Convai dashboard; check for trailing spaces |
-| `connection.auth_failed` | Authentication failed (revoked token or bad credentials) | No | Re-enter your API key; check if the key has been revoked on the dashboard |
-| `connection.invalid_token` | The connection token provided is invalid | No | Tokens are generated internally — if this appears, reconnect to generate a fresh token |
-| `connection.connect_invalid_session_id` | Connect request used an invalid session identifier | No | Session IDs are generated internally — reconnect to reset the session |
+| `connection.auth_failed` | Authentication failed (revoked token, API key, or other credential) | No | Verify the credential source for the configured authentication mode and request a fresh credential |
+| `connection.invalid_token` | The connection token supplied by the application or connection flow is invalid | No | Request a fresh token and reconnect; check custom token-provider output when the application supplies it |
+| `connection.auth_token_fetch_failed` | The configured provider or endpoint did not return a usable short-lived auth token | Yes | Check endpoint reachability, provider exceptions, and response format; retry with backoff |
+| `connection.connect_invalid_session_id` | Connect request used an invalid character-session identifier | No | Clear or replace an application-supplied value set with `SetCharacterSessionId(...)`, then reconnect |
 | `connection.connect_character_not_found` | The Character ID does not exist on your account | No | Verify the Character ID in the Convai dashboard matches exactly |
 | `connection.connect_realtime_not_allowed` | Realtime access is not enabled for this account | No | Upgrade your Convai plan or contact support |
-| `connection.connect_concurrency_limit_reached` | Your plan's simultaneous session limit is reached | Yes | Disconnect idle characters; upgrade plan for higher limits |
-| `connection.connect_speaker_limit_reached` | Backend speaker limit reached for this account | Yes | Reduce concurrent active characters |
+| `connection.connect_concurrency_limit_reached` | Your plan's simultaneous room-session limit is reached | Yes | Disconnect idle room sessions; upgrade the plan for higher limits |
+| `connection.connect_speaker_limit_reached` | Backend could not create or resolve another speaker because a limit was reached | No | Reduce the room roster or other active speakers; contact Convai support if the expected limit is unclear |
 | `connection.connect_bot_start_failed` | Convai pipeline failed to start (transient backend issue) | Yes | SDK retries automatically; if persistent, contact support |
 | `connection.connect_unhandled_server_exception` | Unhandled exception on Convai during connect | Yes | SDK retries automatically; check Convai status page if persistent |
 | `connection.timeout` | Connect did not complete within the timeout window | Yes | Check internet connection; increase **Connection Timeout** in settings (default 30 s, max 120 s) |
@@ -94,6 +100,22 @@ These codes appear when Convai rejects or cannot fulfill the connect request. Mo
 | `connection.bad_request` | Invalid parameters in the connect request | No | Check that CharacterId and other connection parameters contain no invalid characters |
 | `connection.connect_validation_error` | Connect request failed API validation (HTTP 422) | No | Inspect error message for which field failed validation |
 | `connection.failed` | Generic connection failure not covered by a specific code | Depends | Check `LastSessionErrorMessage` for details |
+
+## Multi-character room failures
+
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** The shared-room failures and APIs in this section are staged ahead of the current <code class="expression">space.vars.unity_sdk_version</code> Asset Store release.
+
+A room connection and a character membership have different failure scopes:
+
+| Symptom | Meaning | What to inspect |
+| --- | --- | --- |
+| Room never reaches `Connected` | The connect request, transport, or required initial character failed | `OnSessionError`, `LastSessionErrorCode`, and the initial character's ID and session ID |
+| Room connects but one character never becomes ready | A secondary membership can still be starting or failed | `CurrentMultiCharacterSession.PartialDispatch`, then each membership's `Status`, `ProvisioningStatus`, and `FailureCode` |
+| Raycast or button selects a character but input still reaches the old target | Local selection did not complete a server route change | Await `SetInteractionTargetAsync(...)` and read `ActiveMembershipId` after completion |
+| Target or roster mutation fails without disconnecting the room | The operation was rejected, cancelled, or raced a newer route/roster epoch | Observe the returned `IConvaiOperation`; keep UI on the last acknowledged `RouteEpoch` or `RosterEpoch` |
+| Inactive character is missing from the initial roster | Disabled characters are intentionally excluded from startup topology | If the room started in multi-character mode, activate it and call `AddCharacterAsync(...)`; a legacy one-character room cannot be converted at runtime |
+
+The initial character gates room readiness. A failed secondary character does not necessarily disconnect an otherwise usable room, so do not turn every membership failure into a global reconnect.
 
 ## Transport errors
 
@@ -148,6 +170,7 @@ The following error codes trigger automatic retries:
 * `connection.server_error`
 * `connection.service_unavailable`
 * `connection.rate_limited`
+* `connection.auth_token_fetch_failed`
 * `connection.connect_concurrency_limit_reached`
 * `connection.connect_bot_start_failed`
 * `connection.connect_unhandled_server_exception`
@@ -174,7 +197,8 @@ Read `ConvaiRoomManager` state properties to narrow down a connection failure. T
 | `connection.timeout` every time | Firewall blocking connections | Whitelist Convai domains; try on a different network | Session connects within the timeout window |
 | `transport.ice_failed` repeatedly | Strict firewall blocking UDP | Allow UDP; request TURN relay from network admin | Session connects; WebRTC negotiation completes |
 | `server.usage_limit_reached` | Quota exceeded | Check Convai dashboard usage page | Session connects after usage resets or plan upgrades |
-| Character connects once then never reconnects | `ReconnectPolicy` maxed out | SDK stops after 3 reconnect attempts (default `MaxReconnectAttempts`); call `ConnectAsync` again to retry | `ConnectAsync` call succeeds; character connects |
+| Room connects once then never reconnects | `ReconnectPolicy` maxed out | SDK stops after 3 reconnect attempts (default `MaxReconnectAttempts`); call `ConnectAsync` again to retry | `ConnectAsync` call succeeds; room reconnects |
+| Changing `CoreServerBaseURL` behaves differently across SDK versions | <code class="expression">space.vars.unity_sdk_version</code> honors a non-empty scene override; the <code class="expression">space.vars.unity_sdk_preview_version</code> preview ignores the deprecated field | On stable, inspect both the scene field and **Edit > Project Settings > Convai SDK**. On preview, change Project Settings or per-connect runtime credentials | `CoreServerURL` resolves from the source expected for the installed SDK version |
 | `connection.rate_limited` | Too many connects in short time | Add a minimum delay between connect calls in your application logic | `connection.rate_limited` no longer fires |
 | `CurrentState` stuck at `Error` | Unrecoverable session failure | Call `DisconnectAsync()` then `ConnectAsync()` to reset | Session transitions to `Connected` |
 

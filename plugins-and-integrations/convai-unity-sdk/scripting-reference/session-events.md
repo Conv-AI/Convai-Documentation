@@ -1,10 +1,12 @@
 ---
 title: Session events
-description: Reference for session events — connection state, errors, idle warnings, and participant changes — via relay component or the `ConvaiEvents` C# hub.
-last_reviewed: "4.5.0"
+description: >-
+  React to connection changes, errors, idle warnings, and participant updates
+  through Inspector relays or the shared typed event hub.
+last_reviewed: "4.6.0"
 ---
 
-The SDK exposes session-level events through two wiring approaches that you can use independently or together. `ConvaiSessionEventRelay` is a MonoBehaviour that wires events to Inspector-assigned `UnityEvent` callbacks with no code required. `ConvaiEvents` is a C# typed event hub accessible from any script via `ConvaiManager.ActiveManager.Events`. Both approaches fire on the same underlying SDK events — choose based on what your code needs. For a conceptual overview of relay components and when to choose each approach, see [Event System](../core-concepts/event-system.md).
+The SDK exposes session-level events through two wiring approaches that you can use independently or together. `ConvaiSessionEventRelay` is a MonoBehaviour that wires events to Inspector-assigned `UnityEvent` callbacks with no code required. `ConvaiEvents` is a C# typed event hub available through `ConvaiManager.ActiveManager.Events` after the manager initializes. Both approaches fire on the same underlying SDK events — choose based on what your code needs. For a conceptual overview of relay components and when to choose each approach, see [Event System](../core-concepts/event-system.md).
 
 ***
 
@@ -25,29 +27,36 @@ The SDK exposes session-level events through two wiring approaches that you can 
 
 {% tab title="Scripting" %}
 ```csharp
+using Convai.Domain.DomainEvents.Session;
+using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using UnityEngine;
 
 public class SessionStatusMonitor : MonoBehaviour
 {
-    private void OnEnable()
-    {
-        var manager = ConvaiManager.ActiveManager;
-        if (manager == null) return;
+    private ConvaiEvents _events;
 
-        manager.Events.OnConnected    += HandleConnected;
-        manager.Events.OnDisconnected += HandleDisconnected;
-        manager.Events.OnSessionError += HandleError;
+    private void LateUpdate()
+    {
+        if (_events != null) return;
+
+        var manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.IsInitialized) return;
+
+        _events = manager.Events;
+        _events.OnConnected    += HandleConnected;
+        _events.OnDisconnected += HandleDisconnected;
+        _events.OnSessionError += HandleError;
     }
 
     private void OnDisable()
     {
-        var manager = ConvaiManager.ActiveManager;
-        if (manager == null) return;
+        if (_events == null) return;
 
-        manager.Events.OnConnected    -= HandleConnected;
-        manager.Events.OnDisconnected -= HandleDisconnected;
-        manager.Events.OnSessionError -= HandleError;
+        _events.OnConnected    -= HandleConnected;
+        _events.OnDisconnected -= HandleDisconnected;
+        _events.OnSessionError -= HandleError;
+        _events = null;
     }
 
     private void HandleConnected()             => Debug.Log("Session connected.");
@@ -62,18 +71,18 @@ public class SessionStatusMonitor : MonoBehaviour
 
 ## `ConvaiSessionEventRelay` events
 
-| Event                              | Argument                          | Fires When                                                             |
-| ----------------------------------- | ---------------------------------- | ------------------------------------------------------------------------ |
-| `OnConnected`                      | —                                 | Session transitions to `Connected`                                     |
-| `OnDisconnected`                   | —                                 | Session transitions to `Disconnected`                                  |
-| `OnReconnecting`                   | —                                 | Session transitions to `Reconnecting`                                  |
-| `OnReconnected`                    | —                                 | Reconnection succeeds (transitions from `Reconnecting` to `Connected`) |
-| `OnUsageLimitReached`              | —                                 | Convai reports quota exhausted                                         |
-| `OnUserIdleWarning`                | `UserIdleWarningRelayData`        | Convai warns the session will close due to inactivity                  |
-| `OnUserIdleTimeout`                | `UserIdleTimeoutRelayData`        | The client-side idle deadline elapses after a warning                  |
-| `OnRuntimeBackgroundStateChanged`  | `RuntimeBackgroundStateRelayData` | The application background/foreground state or background policy changes |
-| `OnSessionStateChanged`            | `SessionStateChangedRelayData`    | Any `SessionState` transition                                          |
-| `OnSessionError`                   | `SessionErrorRelayData`           | Session encounters an error                                            |
+| Event                   | Argument                       | Fires When                                                             |
+| ----------------------- | ------------------------------ | ---------------------------------------------------------------------- |
+| `OnConnected`           | —                              | Session transitions to `Connected`                                     |
+| `OnDisconnected`        | —                              | Session transitions to `Disconnected`                                  |
+| `OnReconnecting`        | —                              | Session transitions to `Reconnecting`                                  |
+| `OnReconnected`         | —                              | Reconnection succeeds (transitions from `Reconnecting` to `Connected`) |
+| `OnUsageLimitReached`   | —                              | Convai reports quota exhausted                                         |
+| `OnUserIdleWarning`     | `UserIdleWarningRelayData`     | Backend warns that the session is approaching its inactivity deadline  |
+| `OnUserIdleTimeout`     | `UserIdleTimeoutRelayData`     | The client-side idle deadline elapses; this does not prove transport disconnection |
+| `OnRuntimeBackgroundStateChanged` | `RuntimeBackgroundStateRelayData` | The application background policy is applied or removed       |
+| `OnSessionStateChanged` | `SessionStateChangedRelayData` | Any `SessionState` transition                                          |
+| `OnSessionError`        | `SessionErrorRelayData`        | Session encounters an error                                            |
 
 ## `SessionStateChangedRelayData` fields
 
@@ -133,7 +142,7 @@ For the background policy values themselves, see [Application background policy]
 
 ## C# event hub — `ConvaiEvents`
 
-Access via `ConvaiManager.ActiveManager.Events`. Subscribe in `OnEnable`, unsubscribe in `OnDisable`.
+Access the facade only after `ConvaiManager.IsInitialized` is true. Cache the exact `ConvaiEvents` instance, subscribe once, and unsubscribe from that cached instance in `OnDisable`. The examples use `LateUpdate` as a small initialization gate so they also work when the manager finishes bootstrap after the component becomes enabled.
 
 ## Session-scoped events
 
@@ -146,15 +155,15 @@ Access via `ConvaiManager.ActiveManager.Events`. Subscribe in `OnEnable`, unsubs
 | `OnPipelineError`                   | `SessionError`                    | Processing pipeline encounters an error (distinct from session-level errors) |
 | `OnUsageLimitReached`               | `UsageLimitReached`               | Convai reports quota exhausted                                               |
 | `OnUserIdleWarningReceived`         | `UserIdleWarningReceived`         | Convai warns the session will close due to inactivity                        |
-| `OnUserIdleTimeoutElapsed`          | `UserIdleTimeoutElapsed`          | The client-side idle deadline elapses after a warning                        |
-| `OnRuntimeBackgroundStateChanged`   | `RuntimeBackgroundStateChanged`   | The application background/foreground state or background policy changes    |
+| `OnUserIdleTimeoutElapsed`          | `UserIdleTimeoutElapsed`          | The client-side deadline from the latest idle warning elapses; transport may still be connected |
+| `OnRuntimeBackgroundStateChanged`   | `RuntimeBackgroundStateChanged`   | An application background policy is applied or removed                       |
 | `OnParticipantJoined`               | `ParticipantInfo`                 | A participant joins the room                                                 |
 | `OnParticipantLeft`                 | `ParticipantInfo`                 | A participant leaves the room                                                |
-| `OnRoomOwnershipRebindStateChanged` | `RoomOwnershipRebindStateChanged` | Active character ownership rebinding changes state                           |
+| `OnRoomOwnershipRebindStateChanged` | `RoomOwnershipRebindStateChanged` | Startup ownership rebinding changes state; this does not acknowledge a live multi-character interaction-target change |
 
-The domain event payload types below back both the C# hub events above and, where noted, the relay data types earlier on this page.
+## Domain event payload types
 
-## `SessionStateChanged`
+### `SessionStateChanged`
 
 | Field       | Type            | Description                                         |
 | ----------- | --------------- | --------------------------------------------------- |
@@ -165,7 +174,7 @@ The domain event payload types below back both the C# hub events above and, wher
 | `Error`     | `SessionError?` | Present when `NewState == Error`                    |
 | `ErrorCode` | `string`        | Shortcut to `Error?.ErrorCode`; empty when no error |
 
-## `UsageLimitReached`
+### `UsageLimitReached`
 
 | Field       | Type       | Description                                          |
 | ----------- | ---------- | ---------------------------------------------------- |
@@ -173,7 +182,7 @@ The domain event payload types below back both the C# hub events above and, wher
 | `Message`   | `string`   | Human-readable description from Convai               |
 | `Timestamp` | `DateTime` | UTC time of the event                                |
 
-## `UserIdleWarningReceived`
+### `UserIdleWarningReceived`
 
 | Field              | Type       | Description                                               |
 | ------------------ | ---------- | --------------------------------------------------------- |
@@ -181,7 +190,7 @@ The domain event payload types below back both the C# hub events above and, wher
 | `Message`          | `string`   | Human-readable warning message                            |
 | `Timestamp`        | `DateTime` | UTC time of the event                                     |
 
-## `UserIdleTimeoutElapsed`
+### `UserIdleTimeoutElapsed`
 
 Backs `UserIdleTimeoutRelayData` on the relay. See [Idle warnings and timeouts](../core-concepts/session-lifecycle.md#idle-warnings-and-timeouts) in Session lifecycle for how this relates to `UserIdleWarningReceived`.
 
@@ -191,7 +200,7 @@ Backs `UserIdleTimeoutRelayData` on the relay. See [Idle warnings and timeouts](
 | `DeadlineUtc`        | `DateTime` | UTC time of the client-side idle deadline                    |
 | `Timestamp`          | `DateTime` | UTC time the client observed that the deadline elapsed        |
 
-## `RuntimeBackgroundStateChanged`
+### `RuntimeBackgroundStateChanged`
 
 Backs `RuntimeBackgroundStateRelayData` on the relay. See [Application background policy](../core-concepts/session-lifecycle.md#application-background-policy) in Session lifecycle for the policy values.
 
@@ -203,7 +212,7 @@ Backs `RuntimeBackgroundStateRelayData` on the relay. See [Application backgroun
 | `Reason`           | `RuntimePauseReason`      | Why the background transition occurred                              |
 | `Timestamp`        | `DateTime`                | UTC time of the transition                                          |
 
-## `ParticipantInfo`
+### `ParticipantInfo`
 
 | Field             | Type              | Description                                                            |
 | ----------------- | ----------------- | ---------------------------------------------------------------------- |
@@ -214,7 +223,7 @@ Backs `RuntimeBackgroundStateRelayData` on the relay. See [Application backgroun
 | `IsLocal`         | `bool`            | True for the local player participant                                  |
 | `IsMuted`         | `bool`            | True when this participant's audio is muted                            |
 
-## `RoomOwnershipRebindStateChanged`
+### `RoomOwnershipRebindStateChanged`
 
 | Field                  | Type                        | Description                                              |
 | ---------------------- | --------------------------- | -------------------------------------------------------- |
@@ -225,6 +234,23 @@ Backs `RuntimeBackgroundStateRelayData` on the relay. See [Application backgroun
 | `RequestedCharacterId` | `string`                    | Character ID that was requested for rebind               |
 | `Timestamp`            | `DateTime`                  | UTC time of the event                                    |
 | `ReconnectRequired`    | `bool`                      | True when ownership change requires session reconnection |
+
+`RoomOwnershipRebindStateChanged` reports changes made through manager ownership configuration. Use `IConvaiRoomConnectionService.SetInteractionTargetAsync` and `MultiCharacterRoomSession.InteractionTargetChanged` for live multi-character routing.
+
+## Multi-character room events
+
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** The session object and events in this section are staged ahead of the current <code class="expression">space.vars.unity_sdk_version</code> Asset Store release.
+
+`IConvaiRoomConnectionService.CurrentMultiCharacterSession` exposes connection-scoped membership and routing events.
+
+| Event | Argument | Fires when |
+| --- | --- | --- |
+| `CharacterStatusChanged` | `CharacterRoomMembership` | A membership moves between `Starting`, `Ready`, and `Failed` |
+| `CharacterAdded` | `CharacterRoomMembership` | An acknowledged membership is added to the local session roster |
+| `CharacterRemoved` | `CharacterRoomMembership` | An acknowledged membership is removed from the local session roster |
+| `InteractionTargetChanged` | `CharacterRoomMembership, CharacterRoomMembership` | Convai acknowledges a new active target or clears the current target |
+
+Reacquire `CurrentMultiCharacterSession` and resubscribe after reconnecting. See [Session and roster API](../features/multi-character-conversations/session-and-roster-api.md) for membership identities, result types, and readiness behavior.
 
 ***
 
@@ -316,25 +342,31 @@ The raw hub uses a token-based subscription model. **Losing the token causes a m
 ```csharp
 using Convai.Domain.DomainEvents.Session;
 using Convai.Domain.EventSystem;
+using Convai.Runtime.Components;
 using UnityEngine;
 
 public class RawHubExample : MonoBehaviour
 {
+    private IEventHub _hub;
     private SubscriptionToken _token;
 
-    private void OnEnable()
+    private void LateUpdate()
     {
-        var hub = ConvaiManager.ActiveManager?.Events?.Raw;
-        if (hub == null) return;
+        if (_hub != null) return;
 
-        _token = hub.Subscribe<SessionStateChanged>(
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.IsInitialized) return;
+
+        _hub = manager.Events.Raw;
+        _token = _hub.Subscribe<SessionStateChanged>(
             e => Debug.Log($"Raw hub: {e.OldState} → {e.NewState}"),
             EventDeliveryPolicy.MainThread);
     }
 
     private void OnDisable()
     {
-        ConvaiManager.ActiveManager?.Events?.Raw?.Unsubscribe(_token);
+        _hub?.Unsubscribe(_token);
+        _hub = null;
         _token = default;
     }
 }
@@ -358,29 +390,36 @@ A training simulation shows a proctor overlay that dims when the session drops, 
 
 ```csharp
 using Convai.Domain.DomainEvents.Session;
+using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using UnityEngine;
 
 public class ProctorHUD : MonoBehaviour
 {
     [SerializeField] private CanvasGroup _overlay;
+    private ConvaiEvents _events;
 
-    private void OnEnable()
+    private void LateUpdate()
     {
-        var mgr = ConvaiManager.ActiveManager;
-        if (mgr == null) return;
-        mgr.Events.OnConnected           += OnConnected;
-        mgr.Events.OnDisconnected        += OnDisconnected;
-        mgr.Events.OnSessionStateChanged += OnSessionStateChanged;
+        if (_events != null) return;
+
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.IsInitialized) return;
+
+        _events = manager.Events;
+        _events.OnConnected           += OnConnected;
+        _events.OnDisconnected        += OnDisconnected;
+        _events.OnSessionStateChanged += OnSessionStateChanged;
     }
 
     private void OnDisable()
     {
-        var mgr = ConvaiManager.ActiveManager;
-        if (mgr == null) return;
-        mgr.Events.OnConnected           -= OnConnected;
-        mgr.Events.OnDisconnected        -= OnDisconnected;
-        mgr.Events.OnSessionStateChanged -= OnSessionStateChanged;
+        if (_events == null) return;
+
+        _events.OnConnected           -= OnConnected;
+        _events.OnDisconnected        -= OnDisconnected;
+        _events.OnSessionStateChanged -= OnSessionStateChanged;
+        _events = null;
     }
 
     private void OnConnected()    => SetAlpha(1f);
@@ -402,6 +441,7 @@ A corporate onboarding simulation displays a dismissible error banner. Recoverab
 
 ```csharp
 using Convai.Domain.DomainEvents.Session;
+using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using TMPro;
 using UnityEngine;
@@ -412,8 +452,25 @@ public class ErrorBanner : MonoBehaviour
     [SerializeField] private TMP_Text   _messageLabel;
     [SerializeField] private GameObject _reloadButton;
 
-    private void OnEnable()  => ConvaiManager.ActiveManager?.Events.OnSessionError += ShowError;
-    private void OnDisable() => ConvaiManager.ActiveManager?.Events.OnSessionError -= ShowError;
+    private ConvaiEvents _events;
+
+    private void LateUpdate()
+    {
+        if (_events != null) return;
+
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.IsInitialized) return;
+
+        _events = manager.Events;
+        _events.OnSessionError += ShowError;
+    }
+
+    private void OnDisable()
+    {
+        if (_events != null)
+            _events.OnSessionError -= ShowError;
+        _events = null;
+    }
 
     private void ShowError(SessionError err)
     {
@@ -432,6 +489,7 @@ A medical training simulation shows a countdown when Convai warns the session wi
 
 ```csharp
 using Convai.Domain.DomainEvents.Session;
+using Convai.Runtime.Components;
 using Convai.Runtime.Facades;
 using System.Collections;
 using TMPro;
@@ -442,9 +500,25 @@ public class IdleCountdown : MonoBehaviour
     [SerializeField] private TMP_Text _countdownLabel;
 
     private Coroutine _countdown;
+    private ConvaiEvents _events;
 
-    private void OnEnable()  => ConvaiManager.ActiveManager?.Events.OnUserIdleWarningReceived += StartCountdown;
-    private void OnDisable() => ConvaiManager.ActiveManager?.Events.OnUserIdleWarningReceived -= StartCountdown;
+    private void LateUpdate()
+    {
+        if (_events != null) return;
+
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.IsInitialized) return;
+
+        _events = manager.Events;
+        _events.OnUserIdleWarningReceived += StartCountdown;
+    }
+
+    private void OnDisable()
+    {
+        if (_events != null)
+            _events.OnUserIdleWarningReceived -= StartCountdown;
+        _events = null;
+    }
 
     private void StartCountdown(UserIdleWarningReceived e)
     {
@@ -471,7 +545,7 @@ public class IdleCountdown : MonoBehaviour
 
 | Symptom                                                    | Likely Cause                                         | Fix                                                                                                |
 | ---------------------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `OnSessionError` never fires                               | Subscribed after connect attempt; missed the event   | Subscribe in `OnEnable`, ensure `OnEnable` runs before `ConnectAsync`                              |
+| `OnSessionError` never fires                               | Listener bound after the connect attempt or never retried manager initialization | Start the initialization-gated binding before `ConnectAsync`, and keep retrying until `IsInitialized` is true |
 | `ConvaiSessionEventRelay` callbacks not invoked            | Manager not assigned and `AutoResolveManager` is off | Enable **Auto Resolve Manager** or assign the `ConvaiManager` field                                |
 | Session stuck in `Reconnecting` indefinitely               | Server unreachable or retry limit hit                | Check network; listen to `OnSessionError` with `IsRecoverable == false` to detect terminal failure |
 | `OnConnected` fires but `CanAcceptInput()` returns `false` | State check called during a transition               | Evaluate `CanAcceptInput()` inside the `OnConnected` handler, not in `Update`                      |

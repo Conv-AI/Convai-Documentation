@@ -8,13 +8,13 @@ Most Scene Metadata problems fall into one of three categories: the payload was 
 
 ## First-line investigation
 
-Enable **Log Statistics** on `ConvaiSceneMetadataCollector` (it is on by default) and check the Console after entering Play Mode. A successful collection logs a debug entry similar to:
+Enable **Log Statistics** on `ConvaiSceneMetadataCollector` (it is on by default) and check the Console after entering Play Mode. A collection logs a debug entry containing:
 
 ```text
-[ConvaiSceneMetadataCollector] Collected N metadata objects in X.XXXXs. Registry stats: Y total, Z valid, W invalid
+Collected N metadata objects in X.XXXXs. Registry stats: Y total, Z valid, W invalid
 ```
 
-If this log does not appear, collection did not run. If it appears with `Collected 0 metadata objects`, the payload is empty.
+Logger formatting may add a prefix. If this text does not appear, the collector did not run with statistics enabled; the character-owned automatic readiness path can still submit metadata independently. If it appears with `Collected 0 metadata objects`, the collector payload is empty.
 
 Call `ValidateAllMetadata()` from a temporary debug script to get a per-object breakdown:
 
@@ -27,17 +27,17 @@ void Start()
 
 ## Symptom reference
 
-| Symptom                                       | Likely Cause                                                         | Fix                                                                                            | Verify |
-| --------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------ |
-| No collection log in Console                  | `Collect On Start` disabled and no manual call                       | Enable **Collect On Start** or call `CollectAndSendSceneMetadata()` after the session connects | Re-enter Play Mode and confirm the `[ConvaiSceneMetadataCollector] Collected N metadata objects...` entry appears in the Console |
-| `"Dependencies not injected"` error           | `ConvaiSceneMetadataCollector` is in a scene without `ConvaiManager` | Add `ConvaiManager` to the scene; the collector resolves it automatically                      | The error no longer appears on entering Play Mode |
-| `Collected 0 metadata objects` in the log    | All objects excluded from the payload                                | See [Empty payload](#empty-payload) below                                                      | `GetMetadataCount()` returns a value greater than `0` |
-| Object Name validation warning in Editor      | Name is empty or exceeds 50 characters                               | Set a non-empty name under 50 characters                                                       | The Console warning clears after the next `OnValidate` pass (deselect and reselect the GameObject) |
-| AI ignores objects despite confirmed send     | Descriptions are absent or too vague                                 | See [Improving descriptions](#improving-descriptions) below                                    | Ask the character a question that requires the rewritten detail and confirm it appears in the reply |
-| Object present in registry but not in payload | `Include In Metadata` is unchecked, or component is disabled         | Check the field in Inspector; re-enable the component if needed                                | The object appears in `GetValidMetadata()` or the next `ValidateAllMetadata()` pass |
-| `Is Registered` shows `false` in Inspector    | Component was added but `OnEnable` has not fired                     | Ensure the GameObject and component are both enabled                                           | `Is Registered` shows `true` in Play Mode |
-| Tracked property never updates on the character | **Source Member Name** does not match a property, field, or zero-argument method on **Source Component** | Fix the member name; a mismatch fails silently and the entry keeps its last known value instead of erroring | The character's response reflects the new value within one 0.25-second poll interval |
-| Static metadata edit does not reach a connected character | The session is not connected, or the character is not currently in a conversation | Live re-sync only flushes while the character is connected and in conversation — reconnect or wait for the next connect-time send | Ask the character about the edited object after reconnecting and confirm the updated text is used |
+| Symptom                                       | Likely Cause                                                         | Fix                                                                                            |
+| --------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| No collection log in Console                  | `Collect On Start` disabled and no manual call                       | Enable **Collect On Start** or call `CollectAndSendSceneMetadata()` after the session connects |
+| `"Dependencies not injected"` error           | `ConvaiSceneMetadataCollector` is in a scene without `ConvaiManager` | Add `ConvaiManager` to the scene; the collector resolves it automatically                      |
+| `Collected 0 metadata objects` in the log    | All objects excluded from the payload                                | See [Empty payload](#empty-payload) below                                                      |
+| Object Name validation warning in Editor      | Name is empty or exceeds 50 characters                               | Set a non-empty name under 50 characters                                                       |
+| AI ignores objects after the client send log  | Backend ingestion is unverified, or descriptions are absent or vague | Validate in a live room, then see [Improving descriptions](#improving-descriptions) below       |
+| Object present in registry but not in payload | `Include In Metadata` is unchecked, or component is disabled         | Check the field in Inspector; re-enable the component if needed                                |
+| `Is Registered` shows `false` in Inspector    | Component was added but `OnEnable` has not fired                     | Ensure the GameObject and component are both enabled                                           |
+| Tracked property never updates on the character | **Source Member Name** does not match a property, field, or zero-argument method on **Source Component** | Fix the member name; a mismatch fails silently and the entry keeps its last known value instead of erroring |
+| Static metadata edit does not reach a connected character | The session is not connected/in conversation, or the shared batch has not flushed yet | Wait for the 0.5-second debounce (up to the 3-second ceiling), call `character.DynamicContext.Flush()`, or reconnect for a fresh readiness send |
 
 ## Empty payload
 
@@ -58,7 +58,7 @@ foreach (var kv in stats)
 
 ## Improving descriptions
 
-The AI uses the `Object Description` field as ground truth. Vague descriptions produce vague responses.
+The client supplies `Object Description` as grounding text. Clear, factual descriptions make live-room validation easier; generated wording still depends on the backend and character configuration.
 
 | Avoid                   | Use instead                                                                                                   |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------- |
@@ -75,7 +75,7 @@ Guidelines:
 
 ## Decision tree
 
-Use this tree when the AI does not respond to scene objects:
+Use this tree when a character does not use scene-object context:
 
 ```text
 Is IsReadyToSendMetadata() returning true?
@@ -85,8 +85,10 @@ Is IsReadyToSendMetadata() returning true?
           ├── No → Run ValidateAllMetadata(). Check Include In Metadata and Object Name fields
           └── Yes → Are descriptions factual and specific?
                     ├── No → Rewrite with location and key attributes
-                    └── Yes → Check Convai dashboard character settings
+                    └── Yes → Confirm the client "Sent ... to RTVI service" log, then validate backend and character settings
 ```
+
+`Collected ...` proves local assembly, and `Sent ... to RTVI service` proves that the room service accepted the client call. Neither is a backend acknowledgement. Reproduce against a live room before concluding that the deployed backend ingested the payload.
 
 ## Next steps
 

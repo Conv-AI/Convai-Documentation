@@ -6,7 +6,7 @@ description: >-
 last_reviewed: "4.5.0"
 ---
 
-`ConvaiNarrativeDesignTrigger` sends a named signal to Convai that advances the story graph from one section to the next. Place it on any GameObject — a doorway, an exhibit, a UI button's event target — and choose how it should activate. A narrative trigger is distinct from a Unity Physics trigger: the activation mode controls _when_ the signal is sent, not what kind of Unity physics event fires.
+`ConvaiNarrativeDesignTrigger` submits a saved trigger name to Convai. If that name is valid for the backend's current section, a later backend event can advance the local section state. Place the component on any GameObject — a doorway, an exhibit, or a UI event target — and choose how it should activate.
 
 ## Add the trigger component
 
@@ -36,7 +36,7 @@ Drag your `ConvaiCharacter` into the **Character** field. If you leave it blank,
 
 Click **Fetch** in the **Trigger Selection** section. The SDK calls `NarrativeDesignFetcher.FetchTriggersAsync` and populates the dropdown with all triggers defined for this character on the dashboard.
 
-Select the trigger you want this component to send. The **Trigger Name**, **Trigger ID**, and **Destination Section** fields populate automatically. **Trigger Message** is displayed only as fetched metadata from Convai; the component sends the saved trigger name only.
+Select the trigger you want this component to send. The component stores the selected **Trigger Name** and **Trigger ID**. The Inspector's read-only details can also show the fetched message and destination; those details are not sent by this component, and its runtime `TriggerMessage` property is cleared when a selection is applied.
 
 <figure><img src="../../../../.gitbook/assets/image (483).png" alt="Trigger Selection dropdown showing fetched triggers from the Convai dashboard"><figcaption><p>Trigger dropdown populated from the Convai dashboard.</p></figcaption></figure>
 {% endstep %}
@@ -100,11 +100,11 @@ The trigger fires after the player has been inside the collider zone for a set d
 The trigger does nothing automatically. Call `InvokeTrigger()` or `TryInvokeTrigger()` from your own code or a Unity Event to fire it. Use this mode when the activation condition is controlled entirely by your game logic — a UI button, a quest completion callback, or a scored interaction.
 
 ```csharp
-// Fire the trigger from code
-narrativeTrigger.InvokeTrigger();
+// Fire the trigger from code and check local acceptance/queueing
+bool accepted = narrativeTrigger.InvokeTrigger();
 
 // Attempt silently — skips without warning if TriggerOnce already fired
-narrativeTrigger.TryInvokeTrigger();
+bool attempted = narrativeTrigger.TryInvokeTrigger();
 ```
 
 ## Trigger request mode
@@ -119,9 +119,9 @@ Two additional trigger request modes exist on `ConvaiNarrativeTriggerRequest` (n
 | --- | --- | --- |
 | `SavedTrigger` | `trigger_name` | `ConvaiNarrativeDesignTrigger` (this component), or `IConvaiNarrativeDesign.InvokeTrigger(string)` from code |
 | `InlineEvent` | `trigger_message` | `IConvaiNarrativeDesign.InvokeEvent(string)` — code only, no Inspector equivalent |
-| `ScriptedSpeech` | `trigger_message` (wrapped in `<speak>` tags) | `IConvaiNarrativeDesign.InvokeSpeech(string)` — code only, no Inspector equivalent |
+| `ScriptedSpeech` | `trigger_message` (the SDK wraps input in one `<speak>` root) | `IConvaiNarrativeDesign.InvokeSpeech(string)` — code only, no Inspector equivalent |
 
-`InlineEvent` and `ScriptedSpeech` are not reachable from this component's Inspector. Use `InvokeEvent` to send contextual event text that Convai responds to naturally, or `InvokeSpeech` to make the character say exact scripted text without advancing the narrative graph. See [Narrative design scripting reference](scripting-narrative-design.md) for the full code API.
+`InlineEvent` and `ScriptedSpeech` are not reachable from this component's Inspector. Use `InvokeEvent` to submit contextual text, or `InvokeSpeech` to request scripted speech without sending a saved trigger name. Pass plain text to `InvokeSpeech`; do not add your own `<speak>` root, because the SDK adds it without SSML validation or escaping. Backend playback and exact speech still require live-room validation.
 
 ## Auto-recovery settings
 
@@ -133,7 +133,7 @@ These settings make the trigger resilient to common runtime conditions where the
 | ----------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Auto Find Character** | `true`  | Searches the parent hierarchy, then `ConvaiManager.Characters`. Assigns automatically if only one character exists; logs a warning if multiple characters are found.                                                                                            |
 | **Auto Find Player**    | `true`  | Searches by Player Tag, then by common name list, then via `Camera.main.parent`.                                                                                                                                                                                |
-| **Queue Until Ready**   | `true`  | If the character is not yet in an active conversation (`IsInConversation` is `false`), the trigger is queued and fires automatically when the connection is established. You do not need to check `IsInConversation` manually before calling `InvokeTrigger()`. |
+| **Queue Until Ready**   | `true`  | If the character is not yet in an active conversation (`IsInConversation` is `false`), the component waits and submits when readiness is detected. This is local queue behavior, not a backend acknowledgement. |
 | **Max Wait Time**       | `30`    | Maximum seconds to wait for the character to become ready. Set to `0` for no timeout.                                                                                                                                                                           |
 | **Reset On Scene Load** | `true`  | Calls `ResetTrigger()` whenever a scene is loaded, so the trigger can fire again in reloaded scenes.                                                                                                                                                            |
 
@@ -143,7 +143,7 @@ Setting **Max Wait Time** to `0` in a production build where the session may nev
 
 ## Control trigger frequency
 
-**Trigger Once** (default `true`) prevents the trigger from firing more than once. After the first successful invocation, `HasTriggered` becomes `true`, `CurrentStatus` becomes `AlreadyFired`, and all subsequent calls return `false`.
+**Trigger Once** (default `true`) prevents the component from accepting more than one invocation. After the first locally accepted send, `HasTriggered` becomes `true`, `CurrentStatus` becomes `AlreadyFired`, and subsequent calls return `false`. This state does not prove a backend graph transition.
 
 To allow the trigger to fire again, call `ResetTrigger()`:
 
@@ -159,7 +159,7 @@ To allow the trigger to fire on every activation, disable **Trigger Once** in th
 
 | Event                | Signature            | When it fires                                                                           |
 | -------------------- | -------------------- | --------------------------------------------------------------------------------------- |
-| `OnTriggerActivated` | `UnityEvent`         | The trigger was successfully sent to the backend.                                       |
+| `OnTriggerActivated` | `UnityEvent`         | The character API accepted the request locally after readiness. No backend acknowledgement is implied. |
 | `OnPlayerEnterZone`  | `UnityEvent`         | The player entered the collider or proximity zone (before the trigger fires).           |
 | `OnPlayerExitZone`   | `UnityEvent`         | The player exited the collider or proximity zone.                                       |
 | `OnTriggerFailed`    | `UnityEvent<string>` | The trigger could not fire. The string argument contains the error message.             |
@@ -172,7 +172,7 @@ The `CurrentStatus` property tracks the trigger's state at all times:
 ```mermaid
 stateDiagram-v2
     [*] --> Ready
-    Ready --> AlreadyFired : InvokeTrigger() succeeds\n(TriggerOnce = true)
+    Ready --> AlreadyFired : InvokeTrigger() accepted locally\n(TriggerOnce = true)
     Ready --> QueuedWaitingForCharacter : InvokeTrigger() called\ncharacter not ready\nQueueUntilReady = true
     Ready --> ConfigurationError : ValidateConfiguration() fails
     QueuedWaitingForCharacter --> AlreadyFired : character becomes ready
@@ -200,7 +200,7 @@ See [Troubleshoot narrative design](troubleshooting-and-diagnostics.md) for a fu
 | --- | --- | --- |
 | **Trigger ID** | Empty | Read-only after selection. Unique identifier from the dashboard. |
 | **Trigger Name** | Empty | Saved trigger name sent to Convai when this component fires. |
-| **Trigger Message** | Empty | Read-only metadata fetched from Convai. It is not sent by `ConvaiNarrativeDesignTrigger`. |
+| **Trigger Message** | Empty | The runtime property remains empty after trigger selection. Fetched message text is shown only in the Inspector's trigger details and is not sent. |
 
 ### Activation Settings header
 

@@ -4,11 +4,11 @@ description: Understand the Narrative Design pipeline — how sections, triggers
 last_reviewed: "4.5.0"
 ---
 
-Narrative Design gives a Convai character a structured story to follow. You author a graph of sections and triggers in the Convai dashboard; at runtime, the SDK listens for section-change signals from Convai and fires the Unity Events you configured — no polling, no custom state machines. This page explains the underlying model: what the primitives are, how a trigger advances the graph, and which SDK component handles each part of the pipeline.
+Narrative Design gives a Convai character a structured story to follow. You author a graph of sections and triggers in the Convai dashboard; at runtime, the SDK can submit trigger requests, listen for section-change signals, and fire the Unity Events you configured. This page explains the client-side model and the boundary where deployed backend behavior must be verified.
 
 ## How the runtime pipeline works
 
-When the player activates a trigger, the SDK sends a named signal to the Convai backend. The backend advances the story graph and responds with a `behavior-tree-response` message that carries the new section ID. The SDK translates this into a `NarrativeSectionChanged` domain event and delivers it to `ConvaiNarrativeDesignManager`, which fires the per-section Unity Events you wired in the Inspector.
+When the player activates a saved trigger, the SDK submits its name in the `trigger_name` field. Local acceptance does not acknowledge a backend graph transition. If the backend applies a transition and later sends a `behavior-tree-response` with a section ID, the SDK publishes `NarrativeSectionChanged`. `ConvaiNarrativeDesignManager` then matches that ID and fires the configured per-section Unity Events.
 
 ```mermaid
 sequenceDiagram
@@ -20,22 +20,22 @@ sequenceDiagram
     participant Scene as Your scene
 
     Player->>Trigger: enters zone / calls InvokeTrigger()
-    Trigger->>Char: InvokeTrigger(triggerName, message)
+    Trigger->>Char: InvokeTrigger(triggerName)
     Char->>Backend: trigger-message (RTVI)
     Backend-->>Char: behavior-tree-response (sectionId, btCode)
     Char-->>Manager: NarrativeSectionChanged event
     Manager->>Scene: UnitySectionEventConfig.OnSectionStart.Invoke()
 ```
 
-Triggers queue automatically if the character's real-time session is not yet open and are flushed when the connection is established. You do not need to check session state before calling `InvokeTrigger()`.
+The character API queues a valid trigger request if the real-time session is not open and flushes the queue when the character becomes ready. `ConvaiNarrativeDesignTrigger` has a separate **Queue Until Ready** option and timeout. In both cases, a `true` return or local activation event means the client accepted or queued the request—not that the backend advanced the graph.
 
 ## Sections and triggers
 
 **Sections** are named story beats defined in the Convai dashboard. The character's objectives, knowledge, and conversational behavior adapt to whichever section is active. A single character can play a neutral receptionist in an opening section and a strict examiner in an assessment section — all within one session — because the active section shapes what the backend returns.
 
-**Triggers** are the directed edges in the story graph. Sending a trigger by name advances the graph from one section to the next along the matching edge. A trigger carries an optional message payload that provides context for the transition — for example, `"Player completed the safety checklist"` — which the character can incorporate into its next response.
+**Saved triggers** are named edges in the story graph. `InvokeTrigger(name)` submits only `trigger_name`; the backend decides whether that name is valid for the current section and whether to transition. Contextual text uses the separate `InvokeEvent(message)` API and `trigger_message` wire field. Scripted speech also uses `trigger_message`, after the SDK wraps plain input in one `<speak>...</speak>` element.
 
-Template keys are runtime key-value pairs that fill placeholders in the dashboard's narrative objectives. Set `{PlayerName}` to `"Alex"` and every section that references `{PlayerName}` will use the current value without any graph changes.
+Template keys are runtime key-value pairs submitted for placeholder resolution in the dashboard's narrative objectives. For example, set `{PlayerName}` to `"Alex"` before the relevant narrative turn. The SDK source verifies the client-side send lifecycle; confirm placeholder substitution against a live backend narrative before relying on it in production.
 
 ## The three SDK components
 
@@ -52,9 +52,9 @@ You can use any combination. Most projects use all three. Simple linear narrativ
 | Term | Definition |
 |---|---|
 | **Section** | A named story beat in the Convai dashboard. The character's objectives and behavior adapt to the active section. |
-| **Trigger** | A named edge in the story graph. Sending a trigger advances the graph from one section to the next. |
+| **Trigger** | A named edge in the story graph. Unity submits the name; a later section-change event is evidence that the backend advanced the graph. |
 | **Template key** | A runtime key-value pair (e.g., `PlayerName = "Alex"`) that fills `{placeholder}` text in the dashboard's narrative objectives. |
-| **Orphaned section** | A section deleted from the dashboard after it was synced locally. Its Unity Events are preserved but will never fire until the section is restored and re-synced. |
+| **Orphaned section** | A locally preserved section config that was absent from the latest backend sync. `IsOrphaned` affects counts and Inspector status only; the runtime lookup does not suppress its Unity Events if the backend later emits that section ID. |
 | **Behavior Tree Response** | The server message that carries the new `SectionId` plus optional `BehaviorTreeCode` and `BehaviorTreeConstants` used by advanced integrations. |
 
 ## Component placement

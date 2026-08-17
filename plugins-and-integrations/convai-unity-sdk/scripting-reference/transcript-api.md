@@ -1,7 +1,7 @@
 ---
 title: Transcript API
 description: Query transcript turns, subscribe to live changes, read captions, and export session history from Unity scripts using the transcript facade.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 `ConvaiTranscripts` is the Convai Unity SDK's canonical transcript facade: a live, in-memory timeline of every player and character turn in the room, with pull-based queries, push-based change events, live captions, and a session export helper. Use this page when scripting custom chat UI, transcript export, or turn-level conversation logic. Access the facade through `ConvaiManager.ActiveManager.Transcripts`.
@@ -14,7 +14,7 @@ last_reviewed: "4.5.0"
 
 ## Push vs. pull
 
-|               | Event relays (`ConvaiTranscriptEventRelay`, `ConvaiEvents`) | `ConvaiTranscripts`                                                   |
+| Comparison    | Event relays (`ConvaiTranscriptEventRelay`, `ConvaiEvents`) | `ConvaiTranscripts`                                                   |
 | ------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------- |
 | **Delivery**  | Push — Inspector `UnityEvent`s or C# events fire per update  | Pull (`CurrentTimeline`, `GetTurns`) and push (`Changed`, `Subscribe`) |
 | **History**   | Only the current update                                      | Full history: active turns, committed turns, and live captions        |
@@ -61,11 +61,11 @@ if (manager == null || !manager.TryGetTranscripts(out ConvaiTranscripts transcri
 | `GetTurn(string turnId)`                                                                         | `TranscriptTurn`                 | Retrieves a specific turn by ID. Returns `null` if not found.                                            |
 | `GetLatestTurn(TranscriptParticipantRef participant)`                                            | `TranscriptTurn`                 | Returns the most recent turn for the given participant. Returns `null` if none.                          |
 | `Subscribe(Action<TranscriptChange> callback, TranscriptSubscriptionOptions options = null)`     | `IDisposable`                    | Registers a callback for matching turn changes. Dispose the return value to unsubscribe.                |
-| `SubscribeCommitted(Action<TranscriptChange> callback, TranscriptSubscriptionOptions options = null)` | `IDisposable`                | Shortcut for `Subscribe` with `IncludeActive = false` and `IncludeTerminal = true` — committed and interrupted turns only. |
+| `SubscribeCommitted(Action<TranscriptChange> callback, TranscriptSubscriptionOptions options = null)` | `IDisposable`                | Shortcut for `Subscribe` with `IncludeActive = false` and `IncludeTerminal = true` — committed, interrupted, and later corrected terminal changes. |
 | `SubscribeCaptions(Action<TranscriptCaption> callback, TranscriptCaptionSubscriptionOptions options = null)` | `IDisposable`             | Registers a callback for live caption updates.                                                           |
 | `Clear()`                                                                                         | `void`                           | Clears the canonical transcript history.                                                                 |
 | `Export(TranscriptExportFormat format)`                                                          | `string`                         | Serializes every committed turn to plain text, Markdown, or JSON.                                        |
-| `Dispose()`                                                                                       | `void`                           | Unsubscribes from internal engine events. Call when the owning component is destroyed.                  |
+| `Dispose()`                                                                                       | `void`                           | Tears down the manager-owned facade, its engine wiring, and all consumer subscriptions. Application components should dispose only the handles returned by `Subscribe*`; do not call this method on `ConvaiManager.Transcripts`. |
 
 ```csharp
 transcripts.Changed += OnTranscriptChanged;
@@ -108,7 +108,7 @@ private void OnTranscriptChanged(TranscriptChangeBatch batch)
 | `Speaker`             | `TranscriptSpeaker`              | Who produced this turn                                                 |
 | `State`               | `TranscriptTurnState`            | Current lifecycle state of this turn                                   |
 | `PrimaryTextSource`   | `TranscriptTextSource`           | Dominant text source backing this turn's display text                  |
-| `StableText`          | `string`                         | Finalized text that will not change on further updates                 |
+| `StableText`          | `string`                         | Current non-interim portion of the turn. It can grow before commit and can be replaced by a later correction |
 | `InterimText`         | `string`                         | In-progress text from the current streaming segment                    |
 | `DisplayText`         | `string`                         | Text to render for this turn — combines `StableText` and `InterimText` |
 | `StartedAtUtc`        | `DateTime`                       | UTC time the turn began                                                |
@@ -130,7 +130,7 @@ Use `DisplayText` for real-time rendering. It combines `StableText` and `Interim
 | `Listening` (0)    | Turn is open and waiting for speech or text input; no text captured yet               |
 | `Streaming` (1)    | Turn is actively receiving text; `InterimText` is updating                            |
 | `Stable` (2)       | Streaming has paused; text is stable but the turn is not yet committed                |
-| `Committed` (4)    | Turn is fully committed; `StableText` is final                                        |
+| `Committed` (4)    | Turn is terminal at this revision; a later `Corrected` change can replace its text    |
 | `Interrupted` (5)  | Turn ended because it was interrupted (`WasInterrupted` is `true`)                     |
 | `Discarded` (6)    | Turn was closed with no text and excluded from both `ActiveTurns` and `CommittedTurns` |
 
@@ -143,7 +143,7 @@ Use `DisplayText` for real-time rendering. It combines `StableText` and `Interim
 | `Id`             | `string`                | Unique identifier for this segment            |
 | `TurnId`         | `string`                | ID of the parent `TranscriptTurn`             |
 | `Speaker`        | `TranscriptSpeaker`     | Who produced this segment                     |
-| `StableText`     | `string`                | Finalized text for this segment               |
+| `StableText`     | `string`                | Current non-interim text for this segment; later updates or corrections can replace it |
 | `InterimText`    | `string`                | In-progress text for this segment             |
 | `DisplayText`    | `string`                | Text to render for this segment               |
 | `State`          | `TranscriptTurnState`   | Lifecycle state of this segment               |
@@ -183,6 +183,16 @@ Use `DisplayText` for real-time rendering. It combines `StableText` and `Interim
 | `Player` (0)       | A human player participant                                       |
 | `Character` (1)    | An AI character participant                                       |
 | `System` (2)       | A system-originated speaker, not tied to a player or character   |
+
+## Multi-character attribution
+
+The transcript facade maintains one room-wide timeline. For a character turn, `TranscriptTurn.Speaker.Id` is the Convai character ID and `TranscriptTurn.Speaker.ParticipantId` is the transport participant ID. Match `ParticipantId` to `CharacterRoomMembership.ParticipantId` when separate memberships reuse the same character ID.
+
+Filter history with `TranscriptQuery.PlayerOrCharacterId` or `TranscriptQuery.ParticipantId`. Apply the equivalent `SpeakerId` and `ParticipantId` filters on `TranscriptSubscriptionOptions` and `TranscriptCaptionSubscriptionOptions` for live updates.
+
+`TranscriptTurn` does not expose the character or membership targeted by a player utterance. Do not infer that target from whichever membership is active when the transcript arrives. Applications that need this association must snapshot the acknowledged `MultiCharacterRoomSession.ActiveMembershipId` when player speech begins and store it with their own turn or message record.
+
+See [Transcripts and events](../features/multi-character-conversations/transcripts-and-events.md) for the full multi-character integration pattern.
 
 ***
 
@@ -476,7 +486,7 @@ public class LiveChatAndSubtitleUI : MonoBehaviour
 | `ConvaiManager.ActiveManager.Transcripts` throws `InvalidOperationException` | Accessed before the SDK finished bootstrapping | Use `manager.TryGetTranscripts(out var transcripts)` instead of the `Transcripts` property during early `OnEnable` or `Awake` |
 | `GetTurns()` returns an empty list | No turns exist yet, or the query's `IncludeActiveTurns` is `false` while every current turn is still active | Omit the `TranscriptQuery`, or set `IncludeActiveTurns = true` to include in-progress turns |
 | `Subscribe` callback never fires | Subscribed too late, or `IncludeActive`/`IncludeTerminal` exclude every matching turn | Subscribe before or immediately after `ConnectAsync`; set `ReplayExisting = true` to receive existing turns immediately |
-| `TranscriptTurn.StableText` is empty | Turn is still `Streaming` or `Stable` — text is not stable until the turn commits | Use `DisplayText` for in-progress rendering, or subscribe with `SubscribeCommitted` |
+| `TranscriptTurn.StableText` is empty or changes later | The turn can still be active, or a terminal correction replaced its text | Render `DisplayText`; treat each turn revision as current state and handle `Corrected` callbacks from terminal subscriptions |
 | `SubscribeCaptions` callback never fires | `IncludeStreaming`/`IncludeFinal` or the speaker filters exclude every matching caption, or `ReplayLatest` is `false` and no new caption has arrived yet | Check `IncludeStreaming`, `IncludeFinal`, `SpeakerType`, `SpeakerId`, and `ParticipantId` on `TranscriptCaptionSubscriptionOptions`; set `ReplayLatest = true` to receive the current caption immediately |
 
 ***

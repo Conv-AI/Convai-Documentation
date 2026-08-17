@@ -6,7 +6,7 @@ description: >-
   Quest Vision passthrough setup and custom XR frame source implementation.
 ---
 
-The Convai Unity SDK runs on Android-based XR headsets (Meta Quest, Horizon OS, Android XR) and Windows XR headsets without extra configuration for core features. Voice conversation, lip sync, actions, emotion, and long-term memory work the same as on any other supported platform. Vision is the only feature that requires XR-specific integration work — and only when you want the AI character to see the real world through the headset's cameras.
+SDK 4.5.0 uses the Android native path on Android-based XR headsets and the Windows native path on Windows XR. Those source paths still require headset, controller, microphone, audio, backgrounding, and packaged-library validation. Passthrough Vision additionally needs a headset-specific camera integration.
 
 {% embed url="https://youtu.be/CGPAG_CWGJw" %}
 Convai Unity VR setup for Meta Quest
@@ -16,14 +16,16 @@ Convai Unity VR setup for Meta Quest
 
 | Feature              | Android XR (Meta Quest, Horizon OS)            | Windows XR                              |
 | -------------------- | ---------------------------------------------- | --------------------------------------- |
-| Voice conversation   | ✅ Full                                         | ✅ Full                                  |
-| Lip sync             | ✅ Full                                         | ✅ Full                                  |
-| Actions              | ✅ Full                                         | ✅ Full                                  |
-| Emotion              | ✅ Full                                         | ✅ Full                                  |
-| Long-Term Memory     | ✅ Full                                         | ✅ Full                                  |
-| Narrative Design     | ✅ Full                                         | ✅ Full                                  |
-| Vision (passthrough) | ✅ `QuestVisionFrameSource` (Quest 3 / 3S only) | ⚠️ Custom `IVisionFrameSource` required |
-| Spatial audio        | ✅ Full                                         | ✅ Full                                  |
+| Voice conversation   | Android source path*                            | Windows source path*                     |
+| Lip sync             | Shared runtime path*                           | Shared runtime path*                     |
+| Actions              | Shared runtime path*                           | Shared runtime path*                     |
+| Emotion              | Shared runtime path*                           | Shared runtime path*                     |
+| Long-Term Memory     | REST/service path*                             | REST/service path*                       |
+| Narrative Design     | Shared runtime path*                           | Shared runtime path*                     |
+| Vision (passthrough) | `QuestVisionFrameSource` (Quest 3 / 3S only)*  | Custom `IVisionFrameSource` required     |
+| Spatial audio        | Unity `AudioSource` path*                      | Unity `AudioSource` path*                |
+
+`*` Source presence is not device or distributed-artifact proof. Run the relevant scenario on each headset before release.
 
 For Android-based XR headsets, all core setup follows the Android platform guide — including the `RECORD_AUDIO` manifest declaration and runtime permission flow.
 
@@ -41,7 +43,7 @@ Vision is the only feature that varies between XR platforms. The decision tree b
 graph TD
     A[XR Deployment] --> B{Vision needed?}
     B -->|No| C[Follow Android or Windows guide for permissions]
-    C --> D[Done — all core features work]
+    C --> D[Run headset audio and interaction validation]
     B -->|Yes| E{Meta Quest 3 or 3S?}
     E -->|Yes| F[Use QuestVisionFrameSource]
     F --> G[Import Meta XR SDK + declare manifest permissions]

@@ -19,10 +19,10 @@ Both fields are on the `ConvaiCharacter` component under the **Dynamic Info (Con
 | Field | Type | Default | Description |
 |---|---|---|---|
 | Initial Dynamic Info Text | `string` | _(empty)_ | Free-text block sent as part of the session connection request. No format constraints — write plain sentences or key-value lines. |
-| Initial Dynamic Info Keep In Context | `bool` | `false` | When `true`, Convai retains this text across all LLM turns for the duration of the session. When `false`, the text informs only the first response. |
+| Initial Dynamic Info Keep In Context | `bool` | `false` | Requests that Convai retain this text across LLM turns for the session. When `false`, the connection request does not ask for ongoing retention. |
 
 {% hint style="warning" %}
-**Initial Dynamic Info Keep In Context defaults to `false`.** When disabled, Convai uses the initial context text to inform the character's first response only — it is not retained across turns. If you expect the character to reference initial facts throughout a long session, enable this field. Leaving it disabled is a common cause of characters appearing to "forget" scenario context after the first exchange.
+**Initial Dynamic Info Keep In Context defaults to `false`.** Enable it when the backend should retain the initial text across turns. The Unity client places the text and flag in the connection request; exact use in generated dialogue must be validated with the deployed backend and character configuration.
 {% endhint %}
 
 ### Example configuration
@@ -37,13 +37,13 @@ Trainee role: Operator under assessment
 
 Enable **Initial Dynamic Info Keep In Context**.
 
-The character will reference these facts throughout the conversation. You do not need to re-send them via runtime Dynamic Context — they persist for the life of the session.
+The backend can use these facts throughout the conversation without a runtime Dynamic Context re-send. Confirm the behavior in a live session; the model is not required to mention every retained fact.
 
 ## Relationship to runtime Dynamic Context
 
 Initial context and runtime Dynamic Context are complementary — not alternatives.
 
-| | Initial Dynamic Info | Runtime Dynamic Context |
+| Comparison | Initial Dynamic Info | Runtime Dynamic Context |
 |---|---|---|
 | **When sent** | Once, at `ConnectAsync` | During the session, on demand |
 | **Content** | Fixed facts set at design time | Live state and events set at runtime |

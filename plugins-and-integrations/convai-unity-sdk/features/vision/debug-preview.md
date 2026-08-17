@@ -59,7 +59,7 @@ When **Show Stats** is enabled, a text box is drawn adjacent to the preview. The
 ```text
 Vision Capture Debug
 Status: Capturing
-Source: ConvaiVisionRoot/ConvaiVisionRoot [camera] (CameraVisionFrameSource)
+Source: ConvaiManager [camera] (CameraVisionFrameSource)
 Resolution: 1280x720
 FPS: 14.9 (target: 15)
 Frames: 447

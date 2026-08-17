@@ -1,7 +1,9 @@
 ---
 title: Notification system
 last_reviewed: "4.5.0"
-description: Add toast-style alerts that surface session errors automatically, and raise your own in-scene alerts from code using notification assets.
+description: >-
+  Show session errors and application alerts as reusable toast notifications,
+  then customize their timing, appearance, and code-driven triggers.
 ---
 
 The notification system displays transient, toast-style popups in your scene. It handles session error alerts automatically — when Convai reports a connection or authentication error, the system maps the error code to a notification asset and queues it for display. You can also trigger custom notifications from code at any point during a session.
@@ -95,7 +97,7 @@ public class ScenarioNotifier : MonoBehaviour
 `DismissNotification()` clears all currently displayed notifications immediately, including any animations in progress.
 
 {% hint style="info" %}
-The notification service enforces a **10-second cooldown** per notification `Id`. Duplicate requests within 10 seconds are silently discarded. This prevents error floods from filling the screen. The cooldown resets automatically after 10 seconds.
+The runtime's `ConvaiNotificationEventBridge` applies a default **10-second cooldown** per notification `Id` to mapped session errors and calls routed through `RequestNotificationIfEnabled(...)`. Direct `IConvaiNotificationService.RequestNotification(...)` calls do not apply that cooldown; debounce application-triggered notifications yourself when needed.
 {% endhint %}
 
 ## Automatic error-to-notification mapping
@@ -112,9 +114,9 @@ For the complete `SessionErrorNotificationRule` field reference, see [Notificati
 
 | ErrorPattern  | MatchType | Notification                   |
 | ------------- | --------- | ------------------------------ |
-| `AUTH_FAILED` | `Exact`   | `Notification_AuthError`       |
-| `CONNECTION_` | `Prefix`  | `Notification_ConnectionError` |
-| `RATE_LIMIT`  | `Exact`   | `Notification_RateLimit`       |
+| `connection.auth_failed` | `Exact`   | `Notification_AuthError`       |
+| `connection.rate_limited` | `Exact`  | `Notification_RateLimit`       |
+| `connection.`            | `Prefix`  | `Notification_ConnectionError` |
 
 Rules are evaluated top-to-bottom. Place more specific rules above broader prefix matches.
 
@@ -129,6 +131,8 @@ The notification system respects the **Notifications** toggle in the built-in Se
 To toggle notifications from script:
 
 ```csharp
+using Convai.Shared.Types;
+
 if (ConvaiManager.ActiveManager.TryGetRuntimeSettingsService(out var settings))
 {
     settings.Apply(new ConvaiRuntimeSettingsPatch { NotificationsEnabled = false });
@@ -144,7 +148,7 @@ A corporate onboarding simulation notifies the trainee each time they complete a
 * Create an `SONotification` asset with `Id = "checkpoint-complete"`, a checkmark icon, and the message "Checkpoint complete. Move to the next topic."
 * Call `service.RequestNotification(checkpointNotification)` from the checkpoint evaluation handler
 * The notification appears for 4 seconds and dismisses without interrupting the ongoing conversation
-* The 10-second cooldown prevents duplicate notifications if the evaluation logic fires multiple times
+* Debounce the checkpoint handler in application code if the evaluation logic can fire repeatedly; direct service calls do not use the bridge cooldown
 
 At runtime, each checkpoint completion produces a brief confirmation that appears and clears without pausing the dialogue.
 
@@ -152,9 +156,9 @@ At runtime, each checkpoint completion produces a brief confirmation that appear
 
 A training simulation running on a corporate network requires informative error messages when the connection fails:
 
-* Create an `SONotificationErrorMap` with a rule: `ErrorPattern = "CONNECTION_"`, `MatchType = Prefix`
+* Create an `SONotificationErrorMap` with a rule: `ErrorPattern = "connection."`, `MatchType = Prefix`
 * Set `Notification` to an asset with the message "Connection failed. Please contact IT support at ext. 4400."
-* The error map fires automatically on any `CONNECTION_` prefixed error — no additional code required
+* The error map fires automatically on any canonical `connection.*` error — no additional code required
 
 At runtime, any connection failure produces a clear, actionable notification instead of a silent failure.
 
@@ -183,7 +187,7 @@ At runtime, calling `DismissNotification()` immediately clears the screen before
 | Console shows `"[NotificationHandler] Notification service not available; notifications will be deferred until services initialize."` | Notification triggered before `ConvaiManager` finishes initialization                   | Delay notification calls until `ConvaiManager.IsInitialized` is `true`                                                                |
 | Console shows `"[NotificationHandler] No notification registered in the notification group for id: {id}"`                             | Notification `Id` in script does not match any asset in `SONotificationGroup`           | Check the `Id` field on the `SONotification` asset and update the group                                                               |
 | Console shows `"[NotificationHandler] UINotificationController is null, cannot display notification."`                                | Controller reference lost or not found in scene                                         | Verify `NotificationSystem.prefab` is in the scene                                                                                    |
-| Notification requested but not shown; no console errors                                                                               | 10-second cooldown active for this notification                                         | Wait 10 seconds or use a different notification asset with a unique `Id`                                                              |
+| Mapped error notification requested but not shown; no console errors                                                                  | The event bridge's 10-second cooldown is active for this notification                    | Wait 10 seconds or use a different mapped notification asset with a unique `Id`; direct service calls are not cooldown-gated           |
 | Notifications disabled after Settings Panel interaction                                                                               | User toggled **Notifications** off                                                      | Re-enable via Settings Panel or `IConvaiRuntimeSettingsService.Apply(new ConvaiRuntimeSettingsPatch { NotificationsEnabled = true })` |
 | 4th notification not showing immediately                                                                                              | Max 3 concurrent — 4th is queued                                                        | Expected behavior — it displays as soon as an active notification dismisses                                                           |
 

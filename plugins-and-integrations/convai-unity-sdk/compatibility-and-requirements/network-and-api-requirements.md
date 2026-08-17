@@ -1,7 +1,7 @@
 ---
 title: Network and API requirements
 description: Reference for Convai Unity SDK network access, including Convai and LiveKit hosts, firewall rules, authentication, and log-based connection checks.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 The Convai Unity SDK requires outbound internet access during runtime. Speech, language understanding, and text-to-speech run through Convai over HTTPS and LiveKit WebRTC — there is no offline or LAN mode. Use this page when preparing a corporate network, validating a firewall allowlist, or confirming that a Play mode session reached the correct LiveKit room.
@@ -9,6 +9,10 @@ The Convai Unity SDK requires outbound internet access during runtime. Speech, l
 ## Required outbound access
 
 Runtime sessions use two Convai endpoints plus LiveKit hosts returned in the connect response. Allow outbound traffic from the machine running Unity to the hosts below.
+
+In the current Unity SDK <code class="expression">space.vars.unity_sdk_version</code>, a non-empty serialized `ConvaiRoomManager.CoreServerBaseURL` overrides the URL in **Edit > Project Settings > Convai SDK**. Check both locations when diagnosing an existing scene.
+
+**Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code> preview:** The serialized scene override is deprecated and ignored in the staged preview. Preview projects resolve the Core Server URL from Convai Project Settings (or per-connect runtime credentials) instead.
 
 ### Convai endpoints
 
@@ -41,7 +45,9 @@ No inbound ports are required on the client machine. For the full LiveKit firewa
 
 ## How realtime sessions connect
 
-Each character session follows this sequence:
+Each room session follows this sequence. A multi-character create request sends an ordered `characters` roster instead of a single `character_id`; the first roster entry is the required initial character.
+
+**Preview boundary:** The multi-character request and response fields below are planned for Unity SDK <code class="expression">space.vars.unity_sdk_preview_version</code>; the current <code class="expression">space.vars.unity_sdk_version</code> release uses the single-character compatibility fields.
 
 ```mermaid
 sequenceDiagram
@@ -49,16 +55,22 @@ sequenceDiagram
     participant Convai as Convai
     participant LiveKit as LiveKit room
 
-    Unity->>Convai: POST /connect with API key
-    Convai-->>Unity: session_id, room_url, room_name, token
+    Unity->>Convai: POST /connect with API key and character topology
+    Convai-->>Unity: room details, roster, and temporary token
     Unity->>LiveKit: Join room at room_url with token
     LiveKit-->>Unity: Audio, video, and data streams
 ```
 
 | Connect response field | Runtime use |
 | --- | --- |
-| `session_id` | Convai session ID for the live session |
-| `character_session_id` | Conversation continuity across reconnects |
+| `session_id` | Compatibility session ID for the live connection |
+| `character_session_id` | Single-character compatibility field for conversation continuity |
+| `room_session_id` | Durable identifier for the shared multi-character room |
+| `active_membership_id` | Server-acknowledged interaction target |
+| `route_epoch` | Monotonic version for interaction-target changes |
+| `roster_epoch` | Monotonic version for roster mutations |
+| `partial_dispatch` | Whether one or more secondary characters failed to start |
+| `characters` | Per-character membership records, including each `membership_id`, `session_id`, `character_session_id`, provisioning data, and participant identity |
 | `room_url` | LiveKit WebSocket endpoint — for example `wss://convai-technologies-lfslae7c.livekit.cloud` |
 | `room_name` | LiveKit room name the client joins |
 | `token` | Temporary LiveKit room token used to join the room |
