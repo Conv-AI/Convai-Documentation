@@ -1,7 +1,7 @@
 ---
 title: Blueprint reference
 description: Find verified Blueprint component, utility, audio, and shared data references for the Convai Unreal Engine plugin runtime workflow.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 The Blueprint reference documents the core runtime Blueprint surface for the Convai Unreal Engine plugin: the chatbot, player, and object components; shared structs and enums; microphone capture; and cross-cutting utility libraries. Use these pages when you need exact property names, function signatures, defaults, categories, and constraints.
@@ -25,7 +25,7 @@ Feature-specific Blueprint nodes — actions parameter accessors, dynamic contex
 <td><a href="convai-player-component.md">convai-player-component.md</a></td>
 </tr>
 <tr>
-<td><strong>Convai Object Component</strong><br>Properties, functions, and events for the world object tagging component, including tracked properties, proximity state, and gaze callbacks.</td>
+<td><strong>Convai Object Component</strong><br>Properties, functions, and events for the world object tagging component, including tracked properties, movement awareness, and gaze callbacks.</td>
 <td><a href="convai-object-component.md">convai-object-component.md</a></td>
 </tr>
 <tr>

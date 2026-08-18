@@ -1,7 +1,7 @@
 ---
 title: How scene metadata works
 description: Understand how scene object metadata reaches Convai at connect time, through live updates, and via tracked property changes.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Scene metadata is how you give a Convai character knowledge of the objects in your level. Add a `UConvaiObjectComponent` to any `Actor` — a door, a machine, a piece of equipment — and every character in the level will know that object exists, what it is called, and what it does. When a player asks "What's in this room?" or "Is the north gate open?", the character uses this information to answer.
@@ -66,13 +66,24 @@ At session start the current value of every tracked property is seeded into the 
 
 The key the chatbot sees for a tracked property is `"<ObjectName>.<PropertyPath>"` — for example `"FrontDoor.bIsLocked"`.
 
-## Proximity state
+## Where distance and direction come from
 
-When `bAutoGenerateProximityState` is `true` (the default), the plugin computes a synthetic state key `"<ObjectName>.ProximityToYou"` for each chatbot by querying the Unreal Engine navigation system. Partial paths are accepted, so the proximity description is meaningful even when the chatbot cannot reach the object along a complete nav route.
+Scene metadata registers an object's identity — its name and description. It does not compute where that object sits relative to a chatbot; that job belongs to the [spatial awareness](../spatial-awareness/README.md) subsystem, which runs across every registered `UConvaiObjectComponent`, other character, and the player, and delivers a distance-and-direction sentence to each chatbot every poll.
 
-The value combines reachability and relative direction in phrases such as `"close by, in front"`, `"some distance away, to the left"`, or `"no walking path, behind"`. The evaluation is deferred while either the object or the chatbot is actively moving (a stability gate) and is forced through after several consecutive deferred ticks. Because proximity is spatial context rather than conversational content, `ShouldRespond` for proximity is always `EC_RunLLMOption::Never`; Convai is informed silently.
+If you have earlier notes or Blueprints describing a per-object `bAutoGenerateProximityState` flag or a synthesized `"<ObjectName>.ProximityToYou"` state key, that mechanism was retired in `4.0.0-beta.22`. Spatial awareness replaced it project-wide — see [How spatial awareness works](../spatial-awareness/how-spatial-awareness-works.md) for the current model, and [Spatial awareness settings reference](../spatial-awareness/spatial-awareness-reference.md) for every setting.
 
-`bDebugDrawProximityPaths` draws the navigation paths from each chatbot to this object in the editor viewport while `bAutoGenerateProximityState` is on. Disable this flag before shipping.
+The `Convai Object Component` still ships a debug helper for this pipeline: `bDebugDrawProximityPaths` draws the navigation path from each subscribed chatbot to the object in the editor viewport — green when reachable, red when not, cyan when the chatbot is already there. It is not gated on any other setting and works whenever spatial awareness needs a nav path to the object. Disable it before shipping.
+
+## Movement state
+
+A `UConvaiObjectComponent` can also detect whether the `Actor` it is attached to is moving. `MovementAwareness` (`FConvaiObjectMovementSettings`) samples the object's translation and rotation each poll and folds a moving/stopped verdict into the spatial-awareness sentence — a moving crate reads as moving toward or away from the chatbot without any further configuration.
+
+Turning on `bExposeMovementState` (Blueprint display name **Add Movement State**) additionally publishes a durable `"<ObjectName>.Movement"` state that a chatbot can be asked about directly, and makes a confirmed stop explicit in the description. Two response settings decide whether a transition should also prompt the character to react:
+
+- `StartedMovingResponse` (**When Movement Starts**) — how the chatbot responds when the object begins moving.
+- `StoppedMovingResponse` (**When Movement Stops**) — how the chatbot responds when the object comes to a confirmed stop.
+
+Both use `EC_RunLLMOption`: `Never` (the default) updates the state silently, `Auto` lets Convai decide whether to react, and `Always` requests a response on every transition. See [Scene metadata component reference](scene-metadata-component-reference.md#movement-awareness) for the full field table.
 
 ## What gets sent at session start vs during gameplay
 
@@ -94,6 +105,10 @@ When you call multiple add or remove methods in quick succession, the plugin coa
 
 {% content-ref url="scene-metadata-component-reference.md" %}
 [Scene metadata component reference](scene-metadata-component-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="../spatial-awareness/README.md" %}
+[Spatial awareness](../spatial-awareness/README.md)
 {% endcontent-ref %}
 
 {% content-ref url="managing-the-environment-at-runtime.md" %}

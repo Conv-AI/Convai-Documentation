@@ -1,7 +1,7 @@
 ---
 title: Managing the environment at runtime
 description: Reference for chatbot environment methods that add, remove, and update objects and characters during an active gameplay session.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Use these methods to update a chatbot's world knowledge while the game is running — for example, when a new room loads, a prop spawns, or a new NPC enters the scene. `UConvaiChatbotComponent` exposes mutation methods for objects, characters, the active conversation partner, the in-attention object, and the connect-time environment extras. Runtime mutation methods are `BlueprintCallable` in the `Convai|Actions` category; `GatherEnvironmentExtras` is `BlueprintCallable` in the `Convai|Session` category.
@@ -95,9 +95,9 @@ See [Scene metadata usage examples](scene-metadata-usage-examples.md) for a work
 
 `EnsureObjectComponentsForEnvironmentObjects()` iterates over `EnvironmentData.Objects`. For each entry with a valid `Ref` actor, it spawns a matching `UConvaiObjectComponent` when one does not already cover the same target. It returns the count of newly spawned components and is safe to call multiple times (idempotent).
 
-Auto-spawned components register with the subsystem-wide object pool, so every chatbot in the level can see them through the same proximity, tracked-property, and gaze pipeline as manually placed object components.
+Auto-spawned components register with the subsystem-wide object pool, so every chatbot in the level can see them through the same spatial-awareness, tracked-property, and gaze pipeline as manually placed object components.
 
-Call it at `BeginPlay` after populating `EnvironmentData.Objects` from code, or after calling `AddObject` / `AddObjects` when you want the proximity and gaze systems to track dynamically added actors.
+Call it at `BeginPlay` after populating `EnvironmentData.Objects` from code, or after calling `AddObject` / `AddObjects` when you want [spatial awareness](../spatial-awareness/README.md) and the gaze system to track dynamically added actors.
 
 ## Debounce and flush
 
