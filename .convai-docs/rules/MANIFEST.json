@@ -47,7 +47,7 @@
     "templates/release-notes.md": "9674a2c86d832cdcc015260c9d4e51dfd1517aaf413c23f5e35815c5cd09bafa",
     "templates/troubleshooting.md": "ecde6f2df14d69e91528e0efb0f253860aa4ad9bcab350c2eb6a61f2526db8d3",
     "templates/tutorial.md": "d3346c8b4d2771ab8453e0a96c1ddb73d2d254961c6590b4085adaf464d638f3",
-    "tools/build_index.py": "a5095884422ee050cd3ff4261018e74262ae311d68fbbd8586cdbdac131d22e0",
+    "tools/build_index.py": "78135f778d9b5661ba5927861a4401b4264b4df9627426921222ba6e8783e510",
     "tools/check_coverage.py": "04acd87ee70006aa4a074454677db0c7feb6513ee3758d81675df685f5284818",
     "tools/check_gold_standards.py": "b4d17283695461b0f21c1a033c3222cab445e55856c516573a4ad41f2ec58d84",
     "tools/check_pack.py": "ce29ec62ecf99911de30e97de76ff40aba75546e7ef1f9d38cba39be3cc629df",
