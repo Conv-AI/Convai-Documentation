@@ -123,6 +123,7 @@ Users can update some of the existing details of a character that has been previ
 | voiceType                                | String         | New voice type of the character \[For the list of supported voices, please refer to the [Voice List API](voice-list-api.md).]                                  |
 | action                                   | String         | New list of actions for the character                                                                                                                          |
 | languageCodes                            | List \<String> | The list of language codes, the character needs to support \[Please refer to the list of available languages in the [Language List API](language-list-api.md)] |
+| functions                                | Array          | Link or unlink External API functions on this character. Each item is `{ "id": "<function uuid>", "status": "active" \| "inactive" }`. See [Link](external-api.md#link-functions-to-a-character) and [Unlink](external-api.md#unlink-functions-from-a-character). |
 
 {% tabs %}
 {% tab title="200: OK The details have been updated successfully" %}
