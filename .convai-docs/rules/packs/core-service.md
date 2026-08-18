@@ -140,6 +140,11 @@ Greenfield only — no legacy page reuse.
 product name, folder path, or sidebar label. All public-facing names and the final page tree are
 decided after inspecting the source and running `/plan-docs core-service`.
 
+Last audited: 2026-08-18 against the documentation repository only. The API facts below were written
+from a source audit of both backend repositories in an earlier pass, but that audit predates this line
+and its commit was not recorded, so its age is unknown. **Run `/audit-pack core-service` against both
+backend repositories before writing a batch of API pages**, and record the commits here.
+
 ---
 
 ## Product naming
@@ -339,6 +344,48 @@ use these tiers; `/verify-doc` rejects anything documented above its approved ti
 - Rate-limit registry (`rate_limit/registry.py`) is supporting evidence only, not publication approval.
 - No checked-in OpenAPI exists in either repo. Pydantic models, handler routes, and
   `docs/rtvi.md` are verification sources until an OpenAPI artifact is published.
+
+### When an OpenAPI artifact does exist
+
+Every hand-written endpoint page is a copy of something the code already knows, and a copy drifts.
+The moment either repository publishes a spec, the reference pages should be generated from it rather
+than maintained, which removes this entire page class from the human pipeline and makes it correct by
+construction.
+
+GitBook takes the spec directly. Add this to the repository that owns the spec:
+
+{% code title=".github/workflows/gitbook-openapi.yml" %}
+```yaml
+name: Publish the OpenAPI spec to GitBook
+
+on:
+  push:
+    branches: [main]
+    paths: ["**/openapi.yaml", "**/openapi.json"]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish
+        env:
+          GITBOOK_TOKEN: ${{ secrets.GITBOOK_TOKEN }}
+        run: |
+          npx -y @gitbook/cli@latest openapi publish \
+            --spec "${{ vars.GITBOOK_SPEC_NAME }}" \
+            --organization "${{ vars.GITBOOK_ORGANIZATION_ID }}" \
+            path/to/openapi.yaml
+```
+{% endcode %}
+
+`GITBOOK_TOKEN` is a repository secret; the spec name and organization id are repository variables.
+Once it runs, the pages using OpenAPI blocks refresh from the spec on every merge.
+
+Two rules follow, and CV-73 states them: a page backed by a spec is never hand-edited, and when a fact
+on one is wrong the fix belongs in the spec. Editing the page instead produces a correction that the
+next publish silently discards, which is worse than the original error because nobody sees it go.
 - When proto files and REST/realtime handlers differ, treat REST/realtime handlers as the current
   source of truth unless a maintainer explicitly says a deprecated gRPC contract must be preserved.
 - When auth header casing differs between repos, document the header required by that specific surface.
