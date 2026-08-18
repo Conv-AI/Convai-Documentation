@@ -1,6 +1,6 @@
 ---
 title: Long-term memory scripting reference
-description: Complete memory and end-user API reference: method signatures, parameters, return types, identity interfaces, and the data models each one returns.
+description: "Complete memory and end-user API reference: method signatures, parameters, return types, identity interfaces, and the data models each one returns."
 last_reviewed: "4.5.0"
 ---
 

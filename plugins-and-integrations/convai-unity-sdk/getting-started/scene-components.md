@@ -3,7 +3,7 @@ title: Scene components reference
 description: >-
   Understand the role of each core Convai scene component — manager, room
   manager, character, and player — and how they depend on each other.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Every Convai-powered scene is built from four core components. Understanding what each one does and how they relate to each other makes building and debugging your setup straightforward.
@@ -72,7 +72,7 @@ Turn-taking settings are also configured here. See [Configure conversation input
 
 ## ConvaiCharacter
 
-`ConvaiCharacter` represents one AI character in your scene. Each NPC or virtual instructor that talks to players needs its own `ConvaiCharacter` component. Multiple characters are fully supported. The SDK connects to one character at a time — when the player addresses a different character, the session switches to that character automatically.
+`ConvaiCharacter` represents one AI character in your scene. Each NPC or virtual instructor that talks to players needs its own `ConvaiCharacter` component. Multiple characters are fully supported: a scene with two or more registered characters connects as one shared multi-character session, and a scene with exactly one connects as a single-character session. See [Multi-character sessions](../features/multi-character-sessions/README.md) for how the room is built and how player input is routed to one character at a time.
 
 **The Character ID field is required.** Get this value from your character's profile on the [Convai dashboard](https://convai.com).
 

@@ -206,6 +206,10 @@ Use a unique `id` for each new command. If delivery is uncertain, retry the same
 
 ## Next steps
 
+{% content-ref url="../../../plugins-and-integrations/convai-unity-sdk/features/multi-character-sessions/README.md" %}
+[Multi-character sessions](../../../plugins-and-integrations/convai-unity-sdk/features/multi-character-sessions/README.md)
+{% endcontent-ref %}
+
 {% content-ref url="connect-api.md" %}
 [Connect API](connect-api.md)
 {% endcontent-ref %}

@@ -1,12 +1,14 @@
 ---
 title: Turn-taking modes
 description: Configure hands-free and push-to-talk conversation modes, including turn detection, release timing, and barge-in interruption behavior.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Turn-taking determines who speaks, when a turn ends, and how the SDK handles the transition between the user speaking and the character responding. The SDK supports two modes: hands-free automatic detection and explicit push-to-talk. Choosing the right mode — and tuning it correctly — directly affects how natural and reliable the conversation feels in your training simulation, interactive experience, or game.
 
 For the Inspector-based setup steps, see [Configure conversation input mode](../getting-started/configure-conversation-input-mode.md). This page is the full field reference.
+
+`TurnTakingOptions` configures the room, not one character. In a multi-character session every membership shares the same turn-taking configuration, and the current interaction target decides which membership receives the next turn. See [Switch the interaction target](../features/multi-character-sessions/switch-the-interaction-target.md).
 
 ***
 
