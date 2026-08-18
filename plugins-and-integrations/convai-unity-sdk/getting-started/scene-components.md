@@ -62,7 +62,7 @@ graph TD
 | Field                       | Default     | Description                                                      |
 | --------------------------- | ----------- | ---------------------------------------------------------------- |
 | `ConnectOnStart`            | `true`      | Connect to Convai automatically when the scene starts            |
-| `_connectionType`           | `Audio`     | `Audio` for voice-only; `AudioVideo` to also send camera frames  |
+| `_connectionType`           | `Audio`     | `Audio` for voice-only; `Video` to also send camera frames       |
 | `_pushToTalkKey`            | `KeyCode.T` | Keyboard key used for push-to-talk input mode                    |
 | `_maxReconnectAttempts`     | `3`         | Attempts before giving up on reconnection                        |
 | `_autoMicStartDelaySeconds` | `0.5`       | Seconds to wait after connection before opening the microphone   |

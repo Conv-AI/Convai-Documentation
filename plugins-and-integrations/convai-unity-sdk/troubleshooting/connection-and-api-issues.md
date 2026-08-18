@@ -8,7 +8,7 @@ All session errors surface through `ConvaiSessionEventRelay.OnSessionError`. The
 
 | Category prefix | What failed |
 | --- | --- |
-| `config.*` | SDK configuration — missing API key or Character ID |
+| `config.*` | SDK configuration — missing API key, Character ID, or Auth Token mode setup |
 | `connection.*` | Convai API or network — authentication, routing, limits |
 | `transport.*` | WebRTC / LiveKit layer — ICE, peer connection, signal |
 | `server.*` | Convai backend pipeline — quota, fatal errors |
@@ -64,6 +64,9 @@ Configuration errors fire immediately on connect — before any network traffic.
 | --- | --- | --- |
 | `config.api_key_missing` | API key field is empty in `ConvaiSettings` | Open Edit → Project Settings → Convai SDK and paste your API key |
 | `config.character_id_missing` | `CharacterId` field on `ConvaiCharacter` is empty | Set the Character ID in the `ConvaiCharacter` Inspector field |
+| `config.auth_token_provider_missing` | Auth Mode is Auth Token, but no `IConvaiAuthTokenProvider` is registered and no Token Endpoint URL is configured | Register a provider or configure a Token Endpoint URL — see [Troubleshoot authentication](../authentication/troubleshooting.md) |
+| `config.auth_token_endpoint_invalid` | The configured Token Endpoint URL is not HTTPS and is not a loopback development address | Use `https://`, or `http://localhost` / `http://127.0.0.1` for local development — see [Troubleshoot authentication](../authentication/troubleshooting.md) |
+| `config.auth_token_mode_required` | `ConnectWithAuthTokenAsync` was called while Auth Mode is still API Key | Set Auth Mode to Auth Token in Convai Project Settings before calling `ConnectWithAuthTokenAsync` — see [Troubleshoot authentication](../authentication/troubleshooting.md) |
 
 {% hint style="warning" %}
 The SDK emits a warning before any connect attempt if the API key is empty: `Convai Bootstrapper: API key not configured. Please set your API key in Edit > Project Settings > Convai SDK.` This fires on Play — fix it before testing connections.
@@ -76,6 +79,7 @@ These codes appear when Convai rejects or cannot fulfill the connect request. Mo
 | Error code | Description | Retried automatically | Fix |
 | --- | --- | --- | --- |
 | `connection.connect_invalid_api_key` | The API key was rejected by Convai | No | Copy a fresh key from the Convai dashboard; check for trailing spaces |
+| `connection.auth_token_fetch_failed` | Auth Token mode failed to resolve a token before connecting (provider exception, empty token, or endpoint failure) | Yes | See [Troubleshoot authentication](../authentication/troubleshooting.md) for the exact console message and cause |
 | `connection.auth_failed` | Authentication failed (revoked token or bad credentials) | No | Re-enter your API key; check if the key has been revoked on the dashboard |
 | `connection.invalid_token` | The connection token provided is invalid | No | Tokens are generated internally — if this appears, reconnect to generate a fresh token |
 | `connection.connect_invalid_session_id` | Connect request used an invalid session identifier | No | Session IDs are generated internally — reconnect to reset the session |
@@ -151,6 +155,7 @@ The following error codes trigger automatic retries:
 * `connection.connect_concurrency_limit_reached`
 * `connection.connect_bot_start_failed`
 * `connection.connect_unhandled_server_exception`
+* `connection.auth_token_fetch_failed`
 * `transport.ice_failed`
 * `transport.signal_disconnected`
 * `server.error`

@@ -56,17 +56,18 @@ Three preset buttons sit above the Global Log Level field. Each preset sets the 
 
 ### Log levels
 
-The SDK uses five log levels. Higher numeric value means more verbose.
+The SDK uses six log levels. Higher numeric value means more verbose.
 
 | Level | Value | What appears in the Console |
 | --- | --- | --- |
+| **Off** | 0 | Nothing — silences all SDK logging |
 | **Error** | 1 | Errors only |
 | **Warning** | 2 | Errors and Warnings |
 | **Info** | 3 | Errors, Warnings, and Info messages _(default)_ |
 | **Debug** | 4 | All of the above plus Debug messages |
 | **Trace** | 5 | Everything, including fine-grained internal traces |
 
-The default is **Info**. Switching to **Debug** during an investigation produces significantly more output — disable it before releasing to production.
+The default is **Info**. Switching to **Debug** during an investigation produces significantly more output — disable it before releasing to production. Set **Global Log Level** to **Off** to silence all SDK logging.
 
 {% hint style="warning" %}
 `Debug`-level calls in the SDK source are decorated with `[Conditional("UNITY_EDITOR")]`, `[Conditional("DEVELOPMENT_BUILD")]`, and `[Conditional("CONVAI_DEBUG_LOGGING")]`. This means **Debug log calls are compiled out of non-development builds** unless you add `CONVAI_DEBUG_LOGGING` to your scripting define symbols. Setting `GlobalLogLevel` to `Debug` in a release build will not produce Debug messages because the call sites do not exist in the compiled code. Debug messages remain active in the Unity Editor and in Development Builds without any additional defines. This is also why `[SessionMetrics]` Debug-tagged lines and `[ClientLatency]` entries, both covered further down this page, only appear in the Editor and Development Builds.

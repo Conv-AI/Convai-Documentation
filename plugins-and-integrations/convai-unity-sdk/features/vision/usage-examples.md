@@ -93,27 +93,25 @@ An architectural walkthrough where an overhead security camera monitors the enti
 
 **Expected outcome:** The character describes what is visible in the top-down view — furniture layout, occupancy, or hazards — when asked.
 
+Assign the overhead camera to the **Target Camera** field on the `CameraVisionFrameSource` component in the Inspector. `CameraVisionFrameSource.TargetCamera` has a private setter, so a script cannot repoint the frame source to a different camera at runtime — the Inspector field is the only supported way to choose which camera it reads.
+
 ```csharp
 using Convai.Modules.Vision;
 using Convai.Runtime.Vision.Publishing;
 using UnityEngine;
 
 /// <summary>
-/// Configures vision with a specific overhead camera and low-overhead transport policy.
+/// Configures the publish policy for a scene where the overhead security camera is
+/// already assigned to CameraVisionFrameSource's Target Camera field in the Inspector.
 /// Attach to the ConvaiVisionRoot GameObject.
 /// </summary>
 public class SecurityCameraVisionSetup : MonoBehaviour
 {
     [SerializeField] private ConvaiVisionPublisher _publisher;
-    [SerializeField] private CameraVisionFrameSource _frameSource;
-    [SerializeField] private Camera _overheadCamera;
 
     void Awake()
     {
-        // Point the frame source at the overhead security camera
-        _frameSource.TargetCamera = _overheadCamera;
-
-        // Low-overhead policy: 5 fps, 350 kbps — suitable for slow-moving scene
+        // Low-overhead policy: 5 fps, 350 kbps — suitable for slow-moving scenes
         _publisher.SetPublishPolicy(VisionPublishPolicy.LowOverhead);
     }
 }
