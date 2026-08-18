@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Convai.Domain.DomainEvents.Runtime;
+using Convai.Domain.EventSystem;
 using Convai.Runtime.Components;
 using Convai.Runtime.Core.Modules;
 using UnityEngine;
@@ -36,13 +37,17 @@ public class MinimalModule : MonoBehaviour, IConvaiModule
     public IReadOnlyList<Type>   ProvidedServices => Array.Empty<Type>();
     public bool IsActive { get; private set; }
 
-    private IDisposable _sub;
+    private IEventHub _events;
+    private SubscriptionToken _sub;
 
     private void Awake() => ConvaiManager.ActiveManager?.RegisterModule(this);
     private void OnDestroy() => ConvaiManager.ActiveManager?.UnregisterModule(this);
 
     public System.Threading.Tasks.ValueTask RegisterAsync(IModuleContext ctx, CancellationToken ct = default)
-        => System.Threading.Tasks.ValueTask.CompletedTask;
+    {
+        _events = ctx.Events;
+        return System.Threading.Tasks.ValueTask.CompletedTask;
+    }
 
     public System.Threading.Tasks.ValueTask StartAsync(IModuleContext ctx, CancellationToken ct = default)
     {
@@ -61,7 +66,7 @@ public class MinimalModule : MonoBehaviour, IConvaiModule
     { IsActive = true; return System.Threading.Tasks.ValueTask.CompletedTask; }
 
     public System.Threading.Tasks.ValueTask StopAsync(CancellationToken ct = default)
-    { _sub?.Dispose(); IsActive = false; return System.Threading.Tasks.ValueTask.CompletedTask; }
+    { _events?.Unsubscribe(_sub); IsActive = false; return System.Threading.Tasks.ValueTask.CompletedTask; }
 }
 ```
 
@@ -144,12 +149,14 @@ public class HapticFeedbackModule : IConvaiModule
 
     public bool IsActive { get; private set; }
 
-    private ILogger      _logger;
-    private IDisposable  _subscription;
+    private ILogger            _logger;
+    private IEventHub          _events;
+    private SubscriptionToken  _subscription;
 
     public ValueTask RegisterAsync(IModuleContext context, CancellationToken ct = default)
     {
         _logger = context.Logger;
+        _events = context.Events;
         return ValueTask.CompletedTask;
     }
 
@@ -175,7 +182,7 @@ public class HapticFeedbackModule : IConvaiModule
 
     public ValueTask StopAsync(CancellationToken ct = default)
     {
-        _subscription?.Dispose();
+        _events?.Unsubscribe(_subscription);
         IsActive = false;
         _logger?.Debug("[HapticFeedbackModule] Stopped.", LogCategory.SDK);
         return ValueTask.CompletedTask;
@@ -356,12 +363,13 @@ public class CharacterHealthIndicator : MonoBehaviour,
 
     private IEventHub _events;
     private ILogger   _logger;
+    private SubscriptionToken _turnCompletedToken;
 
     public void InjectDependencies(IConvaiCharacterDependencies dependencies)
     {
         _events = dependencies.EventHub;
         _logger = dependencies.Logger;
-        _events.Subscribe<CharacterTurnCompleted>(OnTurnCompleted);
+        _turnCompletedToken = _events.Subscribe<CharacterTurnCompleted>(OnTurnCompleted);
     }
 
     private void OnTurnCompleted(CharacterTurnCompleted e)
@@ -372,7 +380,7 @@ public class CharacterHealthIndicator : MonoBehaviour,
 
     private void OnDestroy()
     {
-        _events?.Unsubscribe<CharacterTurnCompleted>(OnTurnCompleted);
+        _events?.Unsubscribe(_turnCompletedToken);
     }
 }
 ```
@@ -387,6 +395,7 @@ Records character emotion data alongside biometric sensor readings for post-sess
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
+using Convai.Domain.EventSystem;
 
 public class BiometricCorrelationModule : IConvaiModule
 {
@@ -397,12 +406,14 @@ public class BiometricCorrelationModule : IConvaiModule
     public IReadOnlyList<Type>   ProvidedServices => Array.Empty<Type>();
     public bool IsActive { get; private set; }
 
-    private IDisposable    _emotionSubscription;
-    private BiometricLogger _bioLogger;
+    private IEventHub          _events;
+    private SubscriptionToken  _emotionSubscription;
+    private BiometricLogger    _bioLogger;
 
     public ValueTask RegisterAsync(IModuleContext context, CancellationToken ct = default)
     {
         _bioLogger = BiometricLogger.Instance;
+        _events = context.Events;
         return ValueTask.CompletedTask;
     }
 
@@ -421,7 +432,7 @@ public class BiometricCorrelationModule : IConvaiModule
 
     public ValueTask StopAsync(CancellationToken ct = default)
     {
-        _emotionSubscription?.Dispose();
+        _events?.Unsubscribe(_emotionSubscription);
         IsActive = false;
         return ValueTask.CompletedTask;
     }
@@ -440,6 +451,7 @@ Tracks character-triggered actions against a scoring rubric and exposes the scor
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
+using Convai.Domain.EventSystem;
 
 public class ScoringModule : IConvaiModule
 {
@@ -451,12 +463,14 @@ public class ScoringModule : IConvaiModule
     public bool IsActive { get; private set; }
 
     private AssessmentScoreService _scoreService;
-    private IDisposable            _actionSubscription;
+    private IEventHub              _events;
+    private SubscriptionToken      _actionSubscription;
 
     public ValueTask RegisterAsync(IModuleContext context, CancellationToken ct = default)
     {
         _scoreService = new AssessmentScoreService();
         context.ProvideModuleService<IAssessmentScoreService>(_scoreService);
+        _events = context.Events;
         return ValueTask.CompletedTask;
     }
 
@@ -475,7 +489,7 @@ public class ScoringModule : IConvaiModule
 
     public ValueTask StopAsync(CancellationToken ct = default)
     {
-        _actionSubscription?.Dispose();
+        _events?.Unsubscribe(_actionSubscription);
         IsActive = false;
         return ValueTask.CompletedTask;
     }

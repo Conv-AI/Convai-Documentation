@@ -16,7 +16,7 @@ If what you need is short-lived credentials resolved from your own server before
 ## Prerequisites
 
 * A working Convai scene with a `ConvaiManager` component on a GameObject
-* All examples create a subclass of `ConvaiManager` — add the new component to that same GameObject and remove the original `ConvaiManager` component
+* The synchronous example (below) creates a subclass of `ConvaiManager` — add the new component to that same GameObject and remove the original `ConvaiManager` component. The asynchronous examples call `ConvaiManager.ActiveManager` from a plain component instead and need no subclass.
 
 If you have not set up a scene yet, see [Getting Started](../../getting-started/README.md) first.
 
@@ -37,6 +37,8 @@ public interface ICredentialProvider
 `GetApiKey()` and `GetServerUrl()` are called at connect time — not on every frame. `HasValidCredentials` gates connection attempts: if it returns `false`, the SDK will not attempt to connect. `Refresh()` is called when the SDK detects a credential-related error and wants the provider to reload from its source.
 
 You do not implement `ICredentialProvider` directly. You supply credential values when building the runtime, and the SDK creates the provider internally from those values.
+
+When a credential must be resolved asynchronously — a token fetched from your backend right before a connection attempt — the SDK resolves it through a second, additive interface, `IAsyncCredentialProvider`. Its `EnsureCredentialsAsync(CancellationToken)` method is awaited on the connect path, before `GetApiKey()` is read, so the SDK never needs an async `ConvaiManager` lifecycle hook for this case. You do not implement this interface directly either — see the asynchronous examples below and [Write a custom token provider](../../authentication/custom-token-provider.md) for the supported ways to supply a credential that must be fetched at connect time.
 
 ## Provide custom credentials
 
@@ -122,49 +124,54 @@ Shown above in [Provide custom credentials](#provide-custom-credentials). Best f
 
 ### Example 2: Secrets vault fetch before startup
 
-Some deployments pull credentials from a secrets service at launch. Because `ConvaiBootstrapConfigSnapshot` must be ready before `ConvaiManager.Awake()` calls `BuildRuntime()`, credentials must be fetched asynchronously before `base.Awake()` runs.
+Some deployments pull credentials from a secrets service at launch. `CreateRuntimeBuilder()` runs synchronously inside `ConvaiManager.Awake()`, before any `async` code can complete, so a `ConvaiManager` subclass cannot await the vault call there. Resolve the credential asynchronously in a plain component instead, then pass the resolved value straight to `ConvaiManager.ActiveManager.ConnectWithAuthTokenAsync()` — the same explicit-credential connect path documented in [Connect with an existing auth token](../../authentication/connect-with-auth-token.md). This requires Auth Token mode selected in Project Settings; see [Configure Auth Token mode](../../authentication/configure-auth-token-mode.md).
 
 ```csharp
-// VaultCredentialManager.cs
+// VaultSessionBootstrapper.cs
+using System.Threading;
 using System.Threading.Tasks;
 using Convai.Runtime.Components;
-using Convai.Runtime.Core;
-using Convai.Runtime.Core.Configuration;
+using Convai.Runtime.Core.Async;
 using UnityEngine;
 
-public class VaultCredentialManager : ConvaiManager
+public class VaultSessionBootstrapper : MonoBehaviour
 {
     [SerializeField] private string _vaultEndpoint = "https://vault.internal/v1/convai";
 
-    private string _resolvedApiKey;
-    private string _resolvedServerUrl = "https://live.convai.com";
-
-    protected override async void Awake()
+    public async Task ConnectAsync(string endUserId, string endUserName, CancellationToken cancellationToken = default)
     {
-        await FetchCredentialsAsync();
-        base.Awake(); // Triggers BuildRuntime() → CreateRuntimeBuilder() with resolved credentials.
+        string credential = await FetchCredentialFromVaultAsync();
+        if (string.IsNullOrEmpty(credential))
+        {
+            Debug.LogError("[VaultSessionBootstrapper] Vault returned no credential — connection aborted.");
+            return;
+        }
+
+        try
+        {
+            await ConvaiManager.ActiveManager.ConnectWithAuthTokenAsync(
+                credential, endUserId, endUserName, cancellationToken);
+        }
+        catch (ConvaiOperationException exception)
+        {
+            Debug.LogError($"[VaultSessionBootstrapper] Connection failed: {exception.Message}");
+        }
     }
 
-    private async Task FetchCredentialsAsync()
+    private async Task<string> FetchCredentialFromVaultAsync()
     {
         using var client = new System.Net.Http.HttpClient();
         try
         {
             string json = await client.GetStringAsync(_vaultEndpoint);
             var response = JsonUtility.FromJson<VaultResponse>(json);
-            _resolvedApiKey = response.ApiKey;
+            return response.ApiKey;
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[VaultCredentialManager] Failed to fetch credentials: {ex.Message}");
+            Debug.LogError($"[VaultSessionBootstrapper] Failed to fetch credential: {ex.Message}");
+            return null;
         }
-    }
-
-    protected override ConvaiRuntimeBuilder CreateRuntimeBuilder()
-    {
-        ConvaiRuntimeBuilder builder = base.CreateRuntimeBuilder();
-        builder.UseConfig(new ConvaiBootstrapConfigSnapshot(_resolvedApiKey, _resolvedServerUrl));
-        return builder;
     }
 
     [System.Serializable]
@@ -172,48 +179,48 @@ public class VaultCredentialManager : ConvaiManager
 }
 ```
 
-`base.Awake()` is called explicitly after the credential fetch. Any code in other `Awake()` methods that depends on `ConvaiManager.ActiveManager` being ready must use `Start()` or later instead.
+No `ConvaiManager` subclass is required — `ConnectWithAuthTokenAsync` accepts the resolved credential directly for that one connection attempt.
 
 ### Example 3: Per-tenant credentials from a config service
 
-Multi-tenant deployments where each customer has a different API key can resolve credentials from a tenant config endpoint loaded at scene start.
+Multi-tenant deployments where each customer has a different credential can resolve it from a tenant config endpoint before connecting, then pass the resolved value straight to `ConnectWithAuthTokenAsync()`.
 
 ```csharp
-// TenantCredentialManager.cs
+// TenantSessionBootstrapper.cs
+using System.Threading;
+using System.Threading.Tasks;
 using Convai.Runtime.Components;
-using Convai.Runtime.Core;
-using Convai.Runtime.Core.Configuration;
+using Convai.Runtime.Core.Async;
 using UnityEngine;
 
-public class TenantCredentialManager : ConvaiManager
+public class TenantSessionBootstrapper : MonoBehaviour
 {
     [SerializeField] private TenantConfigService _configService;
 
-    private string _apiKey;
-    private string _serverUrl = "https://live.convai.com";
-
-    protected override async void Awake()
+    public async Task ConnectAsync(string endUserId, string endUserName, CancellationToken cancellationToken = default)
     {
         TenantConfig config = await _configService.LoadAsync();
-        _apiKey    = config.ConvaiApiKey;
-        _serverUrl = config.ConvaiServerUrl ?? _serverUrl;
-        base.Awake();
-    }
 
-    protected override ConvaiRuntimeBuilder CreateRuntimeBuilder()
-    {
-        ConvaiRuntimeBuilder builder = base.CreateRuntimeBuilder();
-        builder.UseConfig(new ConvaiBootstrapConfigSnapshot(_apiKey, _serverUrl));
-        return builder;
+        try
+        {
+            await ConvaiManager.ActiveManager.ConnectWithAuthTokenAsync(
+                config.ConvaiCredential, endUserId, endUserName, cancellationToken);
+        }
+        catch (ConvaiOperationException exception)
+        {
+            Debug.LogError($"[TenantSessionBootstrapper] Connection failed: {exception.Message}");
+        }
     }
 }
 ```
+
+As with the vault example, this requires Auth Token mode selected in Project Settings. If every connection in the scene should resolve the tenant credential automatically without touching call sites, register an `IConvaiAuthTokenProvider` instead — see [Write a custom token provider](../../authentication/custom-token-provider.md).
 
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
 | ------------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `[ConvaiManager] Cannot start: adapter not initialized.` in Console | `BuildRuntime()` ran before credentials were resolved | Ensure credential fetch completes before `base.Awake()` is called. |
+| `Cannot start: adapter not initialized.` in Console | `StartRuntimeAsync()` was called before `ConvaiManager.Awake()` finished building the runtime and adapter — for example, a custom script called it directly | Let `ConvaiManager`'s built-in lifecycle call `StartRuntimeAsync()`. Do not invoke it manually before `Start()`. |
 | Session connects but Convai returns auth error immediately | Empty or incorrect API key passed to snapshot | Log the resolved key **length** (not the value) to confirm it was populated before build. |
 | `IsValid` returns `false` on config snapshot | `apiKey` or `serverUrl` is null or empty | Add a null check and fallback in your resolve methods. |
 | `ConvaiSettings.Instance` is null in builds | `ConvaiSettings.asset` not present in `Assets/Resources/` | Only use `ConvaiSettings.Instance` as a fallback in editor/dev; never as the sole source in production builds. |

@@ -218,7 +218,7 @@ if (manager.TryGetMicrophoneDeviceService(out var micService))
 | `TryGetPermissionService(out IConvaiPermissionService)`             | `IConvaiPermissionService`       | Request platform microphone permissions (Android, iOS)                  |
 | `TryGetNotificationService(out IConvaiNotificationService)`         | `IConvaiNotificationService`     | Trigger SDK notifications from your own scripts                         |
 | `TryGetPlayerInputService(out IPlayerInputService)`                 | `IPlayerInputService`            | Access player input state and text message routing                      |
-| `TryGetVisibleCharacterService(out IVisibleCharacterService)`       | `IVisibleCharacterService`       | Query which characters are visible in the camera frustum                |
+| `TryGetVisibleCharacterService(out IVisibleCharacterService)`       | `IVisibleCharacterService`       | Maintain the set of character IDs your own visibility logic has added via `AddCharacter`/`RemoveCharacter`; used by transcript UIs for filtering and fading |
 | `TryGetTransportProvider(out ITransportProvider)`                   | `ITransportProvider`             | Access the transport layer for diagnostic or custom transport scenarios |
 
 ***

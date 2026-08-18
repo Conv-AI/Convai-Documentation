@@ -223,7 +223,7 @@ Tracks events for a single `ConvaiCharacter`. Add one per character that needs t
 | `CharacterId`   | `string` | The character's ID.                                                                         |
 | `CharacterName` | `string` | The character's display name.                                                               |
 | `Emotion`       | `string` | The emotion name (e.g., `"joy"`, `"fear"`, `"sadness"`). See the Emotion feature reference. |
-| `Intensity`     | `int`    | Emotion intensity (0–100).                                                                  |
+| `Intensity`     | `int`    | Emotion intensity on a `1`–`3` scale, where `1` is subtle and `3` is intense.               |
 
 **Code example — trigger an animation on emotion change:**
 
@@ -241,7 +241,7 @@ public class CharacterEmotionAnimator : MonoBehaviour
     private void HandleEmotion(CharacterEmotionRelayData data)
     {
         _animator.SetTrigger(data.Emotion);
-        _animator.SetFloat("EmotionIntensity", data.Intensity / 100f);
+        _animator.SetFloat("EmotionIntensity", data.Intensity / 3f);
     }
 }
 ```
@@ -417,7 +417,7 @@ private void OnDisable() => _patientRelay.OnEmotionChanged.RemoveListener(ApplyE
 
 private void ApplyEmotion(CharacterEmotionRelayData data)
 {
-    _expressionController.SetExpression(data.Emotion, data.Intensity / 100f);
+    _expressionController.SetExpression(data.Emotion, data.Intensity / 3f);
 }
 ```
 
