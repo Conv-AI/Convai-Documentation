@@ -8,6 +8,11 @@ This is a **topic pack**, not an SDK pack. There is no package to install and no
 read, so every claim about an interface is verified against that interface. Read "Source of truth and
 verification" before writing anything.
 
+Last audited: 2026-08-18 against the documentation repository only. **No source repository has been
+identified for Avatar Studio, Convai Sim, or the XR Animation Capture App**, so nothing in this pack
+has been checked against code. Treat every interface claim here as needing the owner's confirmation
+until a repository is named, and name one in this line when it is.
+
 ---
 
 ## What this pack covers
@@ -18,7 +23,7 @@ Pages under `no-code-experiences/`:
 |---|---|---|
 | Avatar Studio | `avatar-studio-experiences/` | Browser tool for creating and customizing an avatar, including MetaHuman and Reallusion avatars, face filters, environment, and lighting |
 | Convai Sim | `convai-sim-experiences/` | Interactive 3D simulation experiences built without code |
-| Convai XR Animation Capture App | `convai-xr-animation-capture-app/` | Meta Quest application for capturing animation for AI avatars |
+| Convai XR Animation Capture App | `convai-xr-animation-capture-app/` | Meta Quest application for capturing animation for AI avatars. **Not in active use as of 2026-08-18 (confirmed by the pack owner). Do not write or plan pages for it** — the existing pages stay for anyone who still has it. Re-check before spending effort here. |
 
 Out of scope, with the pack that owns each:
 

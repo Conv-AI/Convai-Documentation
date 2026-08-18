@@ -1,0 +1,306 @@
+{
+  "CV-1": {
+    "summary": "No marketing language. Banned outright: simply, just (as a minimizer), easy, easily, power",
+    "first_seen": "2026-08-18"
+  },
+  "CV-2": {
+    "summary": "No hedging in instructions. Banned: you may want to, you could try, you might want to, you",
+    "first_seen": "2026-08-18"
+  },
+  "CV-3": {
+    "summary": "No filler openers. Banned: In this guide, we will, In this section, we will, We will explo",
+    "first_seen": "2026-08-18"
+  },
+  "CV-4": {
+    "summary": "No exclamation points in body text",
+    "first_seen": "2026-08-18"
+  },
+  "CV-5": {
+    "summary": "Address the reader as \"you\". Never \"the user\" for the reader. Exception: \"the user\" is cor",
+    "first_seen": "2026-08-18"
+  },
+  "CV-6": {
+    "summary": "Present tense. ✅ \"The component streams audio to Convai.\" ❌ \"The component will stream aud",
+    "first_seen": "2026-08-18"
+  },
+  "CV-7": {
+    "summary": "Active voice. ✅ \"ConvaiRoomManager opens the connection.\" ❌ \"The connection is opened by C",
+    "first_seen": "2026-08-18"
+  },
+  "CV-8": {
+    "summary": "One claim per sentence. Split compound claims — an AI assistant quoting half a sentence mu",
+    "first_seen": "2026-08-18"
+  },
+  "CV-9": {
+    "summary": "No time-anchored words that go stale: \"currently\", \"at present\", \"new\", \"now available\", \"",
+    "first_seen": "2026-08-18"
+  },
+  "CV-10": {
+    "summary": "Write \"streams audio to Convai\", \"Convai responds\"",
+    "first_seen": "2026-08-18"
+  },
+  "CV-11": {
+    "summary": "Legacy plugin sections are a separate, older surface",
+    "first_seen": "2026-08-18"
+  },
+  "CV-12": {
+    "summary": "Product names, UI labels, and menu paths match the product character for character, includ",
+    "first_seen": "2026-08-18"
+  },
+  "CV-13": {
+    "summary": "Explain or link a technical term the first time it appears on a page",
+    "first_seen": "2026-08-18"
+  },
+  "CV-14": {
+    "summary": "Serial comma",
+    "first_seen": "2026-08-18"
+  },
+  "CV-15": {
+    "summary": "Spell out one through nine; numerals for 10 and above",
+    "first_seen": "2026-08-18"
+  },
+  "CV-16": {
+    "summary": "Em dashes take no surrounding spaces",
+    "first_seen": "2026-08-18"
+  },
+  "CV-17": {
+    "summary": "Sentence case everywhere: titles, headings, table headers, card labels",
+    "first_seen": "2026-08-18"
+  },
+  "CV-18": {
+    "summary": "Inline code",
+    "first_seen": "2026-08-18"
+  },
+  "CV-19": {
+    "summary": "UI elements",
+    "first_seen": "2026-08-18"
+  },
+  "CV-20": {
+    "summary": "Link text",
+    "first_seen": "2026-08-18"
+  },
+  "CV-21": {
+    "summary": "Lead-ins",
+    "first_seen": "2026-08-18"
+  },
+  "CV-22": {
+    "summary": "Code fences",
+    "first_seen": "2026-08-18"
+  },
+  "CV-23": {
+    "summary": "Code correctness",
+    "first_seen": "2026-08-18"
+  },
+  "CV-24": {
+    "summary": "Synchronized values",
+    "first_seen": "2026-08-18"
+  },
+  "CV-25": {
+    "summary": "The GitBook page title is the only H1. Never add a body # heading",
+    "first_seen": "2026-08-18"
+  },
+  "CV-26": {
+    "summary": "The body starts with a headingless lead paragraph that states what the page is for and who",
+    "first_seen": "2026-08-18"
+  },
+  "CV-27": {
+    "summary": "No ## Overview, ## Introduction, ## Conclusion, or ## Summary heading at any level. The le",
+    "first_seen": "2026-08-18"
+  },
+  "CV-28": {
+    "summary": "No vague headings: More information, Miscellaneous, Basics, Tips, Notes",
+    "first_seen": "2026-08-18"
+  },
+  "CV-29": {
+    "summary": "No Step 1 / Step 2 headings. Use an action title that names the outcome",
+    "first_seen": "2026-08-18"
+  },
+  "CV-30": {
+    "summary": "Do not use #### on task or concept pages. If a fourth level is needed, restructure or spli",
+    "first_seen": "2026-08-18"
+  },
+  "CV-31": {
+    "summary": "Do not skip heading levels",
+    "first_seen": "2026-08-18"
+  },
+  "CV-32": {
+    "summary": "Every page has a useful ending: a verification step, next steps, or a complete reference t",
+    "first_seen": "2026-08-18"
+  },
+  "CV-33": {
+    "summary": "title is specific, keyword-first, and at most 60 characters",
+    "first_seen": "2026-08-18"
+  },
+  "CV-34": {
+    "summary": "description is one plain-English sentence stating the page outcome, 120–160 characters, ha",
+    "first_seen": "2026-08-18"
+  },
+  "CV-35": {
+    "summary": "Set lastreviewed on any page whose accuracy depends on a specific SDK, engine, or API vers",
+    "first_seen": "2026-08-18"
+  },
+  "CV-36": {
+    "summary": "One primary mode per page. A how-to page does not become a reference page by growing a tab",
+    "first_seen": "2026-08-18"
+  },
+  "CV-37": {
+    "summary": "Every page is reachable — from the sidebar, a hub page, or a related-page link. No orphan ",
+    "first_seen": "2026-08-18"
+  },
+  "CV-38": {
+    "summary": "A sidebar label matches that page's title exactly, in the same wording and case",
+    "first_seen": "2026-08-18"
+  },
+  "CV-39": {
+    "summary": "At most two hints on a task or concept page. A page of hints has no emphasis left",
+    "first_seen": "2026-08-18"
+  },
+  "CV-40": {
+    "summary": "Tabs contain equivalent alternatives, never unrelated topics",
+    "first_seen": "2026-08-18"
+  },
+  "CV-41": {
+    "summary": "Expandable sections hide optional detail only — never prerequisites, warnings, or required",
+    "first_seen": "2026-08-18"
+  },
+  "CV-42": {
+    "summary": "Updates blocks appear only on changelog and release-notes pages",
+    "first_seen": "2026-08-18"
+  },
+  "CV-43": {
+    "summary": "Quote blocks are not a substitute for hints",
+    "first_seen": "2026-08-18"
+  },
+  "CV-44": {
+    "summary": "Tables carry tabular information, with real headers. Never use a table for visual layout",
+    "first_seen": "2026-08-18"
+  },
+  "CV-45": {
+    "summary": "A Mermaid diagram always has explanatory text around it. A diagram nobody explains is deco",
+    "first_seen": "2026-08-18"
+  },
+  "CV-46": {
+    "summary": "Deprecated content carries a warning hint at the top naming the replacement and the versio",
+    "first_seen": "2026-08-18"
+  },
+  "CV-47": {
+    "summary": "Never use a screenshot for code, terminal output, log messages, console messages, or confi",
+    "first_seen": "2026-08-18"
+  },
+  "CV-48": {
+    "summary": "Every image has alt text that describes what the image shows, not what it is called",
+    "first_seen": "2026-08-18"
+  },
+  "CV-49": {
+    "summary": "A screenshot must not expose an API key, token, private project name, local username, inte",
+    "first_seen": "2026-08-18"
+  },
+  "CV-50": {
+    "summary": "A page does not publish with a placeholder image path or an unresolved screenshot marker",
+    "first_seen": "2026-08-18"
+  },
+  "CV-51": {
+    "summary": "On SDK pages a screenshot is a last resort, used where Inspector state, scene hierarchy, o",
+    "first_seen": "2026-08-18"
+  },
+  "CV-52": {
+    "summary": "Never invent an API name, component, field, default value, limit, behavior, requirement, o",
+    "first_seen": "2026-08-18"
+  },
+  "CV-53": {
+    "summary": "Every technical claim is verified against the product's source of truth before it is writt",
+    "first_seen": "2026-08-18"
+  },
+  "CV-54": {
+    "summary": "A repository's own README.md, docs/, or CHANGELOG.md is a lead, not proof. Find the defini",
+    "first_seen": "2026-08-18"
+  },
+  "CV-55": {
+    "summary": "Never fabricate a changelog or release-notes entry. Every entry traces to real source hist",
+    "first_seen": "2026-08-18"
+  },
+  "CV-56": {
+    "summary": "State the prerequisites a page depends on: required SDK version, engine version, plan tier",
+    "first_seen": "2026-08-18"
+  },
+  "CV-57": {
+    "summary": "Document the known failure modes. Each troubleshooting entry gives symptom, cause, fix, an",
+    "first_seen": "2026-08-18"
+  },
+  "CV-58": {
+    "summary": "Do not convey meaning by colour, position, or direction alone. Name the element instead of",
+    "first_seen": "2026-08-18"
+  },
+  "CV-59": {
+    "summary": "Essential information is never available only inside an image",
+    "first_seen": "2026-08-18"
+  },
+  "CV-60": {
+    "summary": "Gender-neutral language. Singular \"they\" when gender is unknown or irrelevant — never \"he ",
+    "first_seen": "2026-08-18"
+  },
+  "CV-61": {
+    "summary": "Replace ableist and violent idioms: \"confirmation check\" not \"sanity check\"; \"stop the pro",
+    "first_seen": "2026-08-18"
+  },
+  "CV-62": {
+    "summary": "Documentation changes are prepared on the staging branch and reviewed in the Staging space",
+    "first_seen": "2026-08-18"
+  },
+  "CV-63": {
+    "summary": "A change request description names the source of truth used for technical claims and any a",
+    "first_seen": "2026-08-18"
+  },
+  "CV-64": {
+    "summary": "A human, not an agent, gives the final approval on any change request",
+    "first_seen": "2026-08-18"
+  },
+  "CV-65": {
+    "summary": "When a page moves or is renamed, add a redirect in the same change, and update its SUMMARY",
+    "first_seen": "2026-08-18"
+  },
+  "CV-66": {
+    "summary": "Task lists are for prerequisites and pre-flight checks the reader ticks off. Never use one",
+    "first_seen": "2026-08-18"
+  },
+  "CV-67": {
+    "summary": "A downloadable asset uses a file block, not a link to an external host. An external host c",
+    "first_seen": "2026-08-18"
+  },
+  "CV-68": {
+    "summary": "Embed a URL only when the resource renders for a reader who is not logged in to anything. ",
+    "first_seen": "2026-08-18"
+  },
+  "CV-69": {
+    "summary": "Do not use drawings. A Mermaid diagram is text: it diffs in a pull request, it is searchab",
+    "first_seen": "2026-08-18"
+  },
+  "CV-70": {
+    "summary": "Use Math and TeX only where a formula is genuinely the clearest expression, and state what",
+    "first_seen": "2026-08-18"
+  },
+  "CV-71": {
+    "summary": "Use a prompt block only where the reader's next real action is an AI task — a troubleshoot",
+    "first_seen": "2026-08-18"
+  },
+  "CV-72": {
+    "summary": "Use columns only for two genuinely parallel pieces of content, such as an explanation besi",
+    "first_seen": "2026-08-18"
+  },
+  "CV-73": {
+    "summary": "An API reference page is generated from the OpenAPI specification, never hand-written. Use",
+    "first_seen": "2026-08-18"
+  },
+  "CV-74": {
+    "summary": "Wide layout is a deliberate choice for content that needs the width, not a page default. W",
+    "first_seen": "2026-08-18"
+  },
+  "CV-75": {
+    "summary": "A hidden page is still a real page: it has a title, a description, and an owner. If nothin",
+    "first_seen": "2026-08-18"
+  },
+  "CV-76": {
+    "summary": "Every paired GitBook block is closed. An unclosed hint, tabs, stepper, columns, or expanda",
+    "first_seen": "2026-08-18"
+  }
+}

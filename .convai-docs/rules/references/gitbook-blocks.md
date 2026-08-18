@@ -27,6 +27,10 @@ hoc HTML.
 | Side-by-side comparison | Columns, only when mobile readability remains acceptable | Use for compact comparisons. | Columns for required linear reading. |
 | Optional detail that interrupts the main flow | Expandable section/details | Hide non-required detail only. | Hiding prerequisites, warnings, or required steps. |
 | External URL with a rich preview (video, repo, tool) | Embed block | Use for demo videos, repository links, or tool pages. | Embedding URLs that add no context or become stale quickly. |
+| Prerequisite or pre-flight checklist the reader ticks off | Task list | Use for things that must be true before starting. | Using a checklist for a procedure the reader performs in order. |
+| Freehand sketch of a system | Mermaid diagram | Keep diagrams as text so they diff, search, and survive edits. | Drawing blocks — they go stale invisibly. |
+| A relationship prose cannot express cleanly | Math and TeX block | Add the meaning in prose alongside the formula. | A rendered formula as the only explanation. |
+| A reusable AI prompt the reader runs | Prompt block | Use when the reader's next action really is an AI task. | Prompt blocks added as decoration. |
 | Content identical on multiple pages | Reusable content (Snippet) | Sync one source block across all pages. | Copy-pasting the same content to multiple pages manually. |
 | Downloadable file (sample project, config template, script) | File block | Attach the file directly to the page. | Linking to an external host that may go offline. |
 | Changelog or versioned release notes | Updates block | Add timestamped entries with optional tags. | Long bullet-list changelogs in normal prose. |
@@ -289,10 +293,57 @@ Use embed blocks for content the reader needs to watch or interact with, not for
 Plain inline links are better for URLs that require no preview. Do not embed URLs that are likely to
 change, go offline, or require authentication.
 
+## Task lists
+
+Use a task list for a checklist the reader ticks off as they work — prerequisites before a setup page,
+or a pre-flight check before a build. It is not a procedure. A procedure carries order and a checklist
+does not, so anything the reader performs in sequence belongs in a stepper instead.
+
+```md
+* [ ] Unity project set to the Android build target
+* [ ] Convai API key configured in `ConvaiSettings`
+* [ ] Microphone permission granted in Player Settings
+```
+
+Never use a task list as a substitute for real prose about what each item means. If an item needs
+explaining, it needs a section, not a checkbox.
+
+## Drawings
+
+Do not use drawing blocks in Convai documentation. Use a Mermaid diagram instead.
+
+A Mermaid diagram is text: it diffs in a pull request, it is searchable, an AI assistant can read it,
+and the next person can edit it without redrawing it. A drawing is none of those, so it becomes stale
+the moment the thing it depicts changes, and nobody can tell that it has.
+
+## Math and TeX
+
+Use a math block only where a formula is genuinely the clearest expression of a relationship — a
+sample-rate conversion, a blend weight, a coordinate transform. It is rare in this documentation.
+
+Always state what the formula means in prose as well. A reader using a screen reader, and an AI
+assistant answering a question, get nothing from the rendered formula alone.
+
+## Prompt blocks
+
+A prompt block holds a reusable AI prompt. The reader copies it in one click or opens it directly in a
+supported AI tool.
+
+Use one only where the reader's next real action is an AI task: a troubleshooting prompt that collects
+the right diagnostic information, an integration scaffold, a migration analysis over their own project.
+Do not add one as a novelty, and do not use one where a code block or a procedure is what the reader
+actually needs.
+
+Write the prompt the way you want it used: state the task, define the output format, and name the
+constraints, exactly as the writing standards require of any instruction.
+
 ## Page options and rendering
 
 | GitBook feature | Standard |
 |---|---|
+| Page icon | Set one on hub and section index pages so cards and the sidebar read at a glance. Keep icon use consistent within a section rather than per page. |
+| Cover image | Use only on a section landing page, and only when the image carries meaning. A decorative cover pushes the lead paragraph below the fold. |
+| Tags | Apply the tags the section already uses. Do not invent a new tag vocabulary for one page. |
 | Page title | Treat as the only page H1. Keep it specific, unique, and sentence case. |
 | Page description | Target 120–160 characters; hard max 200. One outcome-focused sentence. |
 | Page outline | Make the `##` and `###` structure useful enough to navigate from the outline alone. |
