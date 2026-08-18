@@ -123,6 +123,45 @@ Higher temperature flattens the distribution, allowing less likely words to appe
 
 ***
 
+### 4. Reasoning Level
+
+Found under **Advanced Settings**, next to Temperature.
+
+* **Function:** Controls how much internal reasoning the model does before answering.
+* **Availability:** Only shown for models that support it. Models without reasoning control — such as the Gemma, Llama, Qwen and GLM families — do not display this setting.
+
+Reasoning trades latency for answer quality. More reasoning generally produces better handling of multi-step questions and instructions, at the cost of a slower first response.
+
+#### Available options
+
+The exact list depends on the selected model, because each provider exposes a different scale.
+
+| Option | Behavior |
+| ------ | -------- |
+| **Auto** | No level is sent. The model applies its own adaptive default, reasoning more on hard requests and less on easy ones. |
+| **Off** / **Minimal** | The lowest setting the model offers. Fastest first response. |
+| **Low** | A small amount of reasoning. |
+| **Medium** | Balanced. Most providers' own default. |
+| **High** and above | Maximum reasoning. Slowest, best on complex multi-step requests. |
+
+{% hint style="info" %}
+**Auto is usually the right starting point.** Current models already adapt their own reasoning to the difficulty of each request, so Auto typically keeps easy turns fast while still allowing the model to think when a request genuinely needs it. Pin an explicit level when you need predictable latency, or when you have measured that a specific level performs better for your use case.
+{% endhint %}
+
+{% hint style="warning" %}
+Higher reasoning levels increase both response latency and token consumption. If your experience is latency-sensitive — a live voice agent, for example — measure the effect before raising the level.
+{% endhint %}
+
+#### Switching models
+
+If you change the foundation model, your reasoning level is kept when the new model also supports it. When it does not, the setting falls back to **Auto**, so the character never sends a value its model would reject.
+
+#### Characters created before this setting existed
+
+Characters that have never had a reasoning level set show **Model default** and keep the behavior they have always had. Editing and saving other settings will not change this. Selecting any other option opts the character in, and there is no way back to **Model default** afterwards — choose **Auto** if you want the model to decide.
+
+***
+
 ## Conclusion
 
 The Core AI Settings give you precise control over your character’s foundation model, safety filters, and response style. By adjusting these parameters, you can create an AI that balances safety, reliability, and creativity to suit your specific application.
