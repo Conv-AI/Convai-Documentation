@@ -53,12 +53,12 @@
     "tools/check_pack.py": "ce29ec62ecf99911de30e97de76ff40aba75546e7ef1f9d38cba39be3cc629df",
     "tools/check_page.py": "326c8135c5f79e158d81b9a87d7dcabb51915a976ad8ab2cf928d03e59c284c7",
     "tools/check_rules.py": "94b56f583866e2f47e295d772416c90fc2a1b535a0be3fe70bc0c3b2d5a9e940",
-    "tools/check_site.py": "0a624dd3bfe716d39aa9e391d81ab4cc09f32c03c877d2f5e29a29fa4744ee31",
+    "tools/check_site.py": "19f255a2203202e7a76ca1fb10b1ca680785e650ebbee672ac0003f9631242af",
     "tools/collect_findings.py": "72e1204939077b798092fecad9cf0c661017f23b6edf6f8d678133e4fc215194",
     "tools/diff_surface.py": "4ed127c8e1deb7d83ad794cb7723c6e9f5dde7aaaea4ba45092ce9ba4f8c9e51",
     "tools/extract_surface.py": "4e8ace134e65f3d38e0c8f816209e8cd62572a03608dd2145820f5df6af42cd1",
     "tools/rules.py": "943d5762295389729eec6de372f49c91e28ee1b7776164bb16a0e7273dd1421e"
   },
   "generated_by": "convai-docs-tools/scripts/sync_agent_rules.py",
-  "plugin_version": "2.3.2"
+  "plugin_version": "2.4.0"
 }
