@@ -1,7 +1,7 @@
 ---
 title: Troubleshooting
 description: Find fixes for installation, API key, audio, lip sync, and connection problems in the Convai Unreal Engine plugin, plus log export and diagnostic guidance.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 This section covers problems that occur at the plugin level: installation, authentication, session startup, microphone capture, general lip sync setup, and diagnostics. If the Convai Unreal Engine plugin connects successfully but one feature behaves incorrectly, start with that feature's troubleshooting page.
@@ -39,6 +39,14 @@ This section covers problems that occur at the plugin level: installation, authe
 <tr>
 <td><strong>Diagnostics and log export</strong><br>Log categories, verbosity control, configuration defaults, Blueprint diagnostic nodes, and log file export for support.</td>
 <td><a href="diagnostics-and-log-export.md">diagnostics-and-log-export.md</a></td>
+</tr>
+<tr>
+<td><strong>Inspect a character with the Convai Debug Overlay</strong><br>See what a character actually knows at runtime: its context states, facts, surroundings sentences, and action queue.</td>
+<td><a href="convai-debug-overlay.md">convai-debug-overlay.md</a></td>
+</tr>
+<tr>
+<td><strong>Convai Debug Overlay reference</strong><br>Every panel, glyph, and key the overlay responds to, and the settings that control it.</td>
+<td><a href="convai-debug-overlay-reference.md">convai-debug-overlay-reference.md</a></td>
 </tr>
 </tbody>
 </table>

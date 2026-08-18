@@ -1,7 +1,7 @@
 ---
 title: Scene metadata usage examples
 description: Complete scene metadata setups for training simulations, industrial drills, military bases, and runtime environment updates in Unreal Engine.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 The examples below cover realistic setups for training simulations and interactive experiences. Each example describes the scenario, the required Details panel or Blueprint configuration, and the expected runtime outcome. Start with the example that matches your current complexity level.
@@ -122,9 +122,9 @@ For each Actor in GetAllActorsWithComponent(UConvaiObjectComponent):
 
 `OutExtraObjects` is merged with the configured `EnvironmentData.Objects` list before `action_config` is sent. Entries with the same name replace earlier entries in the merged environment.
 
-## Example 6: Disabling proximity state for background props
+## Example 6: Disabling movement awareness for a fixed background prop
 
-**Scenario:** A museum guide simulation uses a large painted mural that spans the back wall of every gallery room. The mural is contextually useful for conversation, but generating per-chatbot proximity values for a fixed backdrop produces unnecessary network traffic.
+**Scenario:** A museum guide simulation uses a large painted mural that spans the back wall of every gallery room. The mural is contextually useful for conversation, but it never moves, so there is no reason to spend a poll each cycle sampling its transform.
 
 ### Setup
 
@@ -132,9 +132,9 @@ Add a `UConvaiObjectComponent` to the mural `Actor` and set:
 
 - **`Name`**: `"HistoryMural"`
 - **`Description`**: `"A large painted mural depicting the history of the institution, spanning the full back wall of each gallery."`
-- **Auto Generate Proximity State** (`bAutoGenerateProximityState`): disabled.
+- **Enable Movement Awareness** (`bEnableMovementAwareness`, under `MovementAwareness`): disabled.
 
-The guide can receive the mural's object description, but the plugin does not compute or broadcast proximity data for it. Use this pattern for any large fixed prop whose spatial relationship to the chatbot is not meaningful.
+The guide still receives the mural's identity and its position and reachability through spatial awareness — see [Spatial awareness](../spatial-awareness/README.md) — but the plugin no longer samples the mural's transform each poll or produces movement wording for it. Use this pattern for any large fixed prop that never moves.
 
 ## Next steps
 

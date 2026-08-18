@@ -1,7 +1,7 @@
 ---
 title: Features
 description: Find guides for all Convai Unreal Engine plugin features — lip sync, character actions, narrative design, long-term memory, vision, and more.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Features are the plugin's AI-powered capability modules. Each feature connects to Convai for a specific purpose — executing in-scene behaviors, expressing emotions, remembering players across sessions, following authored narrative graphs, or perceiving the world through a camera. Every section includes a conceptual overview, a quick start, Blueprint property references, usage examples, and troubleshooting guidance.
@@ -19,6 +19,14 @@ Select a feature to get started:
 <tr>
 <td><strong>Character actions</strong><br>Let Convai return structured action sequences your Blueprint event handlers execute — move to objects, follow the player, or run any custom behavior.</td>
 <td><a href="character-actions/README.md">character-actions/README.md</a></td>
+</tr>
+<tr>
+<td><strong>Character movement</strong><br>Send a character to an object or have it escort someone, with designer-authored destinations and reachability the character understands.</td>
+<td><a href="character-movement/README.md">character-movement/README.md</a></td>
+</tr>
+<tr>
+<td><strong>Spatial awareness</strong><br>Give every character a continuous sense of what is around it — distance, direction, line of sight, and how nearby things relate to each other.</td>
+<td><a href="spatial-awareness/README.md">spatial-awareness/README.md</a></td>
 </tr>
 <tr>
 <td><strong>Dynamic context</strong><br>Push live runtime state — health, inventory, zone, events — into the character's context window mid-session without restarting the connection.</td>

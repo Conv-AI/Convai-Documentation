@@ -1,7 +1,7 @@
 ---
 title: Data types and enums
 description: Reference for Blueprint-exposed structs and enums in the Convai Unreal Engine plugin, including object entries, action types, emotions, and connection states.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Every struct and enum that appears as a parameter or return type across the Convai Blueprint API is documented here. Use this page as a lookup when a pin asks for an `FConvaiObjectEntry`, a `EC_RunLLMOption`, or any other shared type.
@@ -20,25 +20,47 @@ An `Actor` reference that carries identity, description, and navigation targetin
 | `OptionalPositionVector` | `FVector` | `(0, 0, 0)` | **Deprecated.** Auto-written snapshot of a resolved goal position. Do not set manually. Use `Resolve Goal Location`'s `Out Goal Location` output for a live world point instead. |
 | `Name` | `FString` | `""` | Display name sent to Convai. Must be unique across all objects and characters in the chatbot's environment. |
 | `Description` | `FString` | `""` | Natural language description of the `Actor` — what the AI should understand about it. |
-| `MoveTargetMode` | `EConvaiMoveTarget` | `Actor` | Whether an AI movement action heads toward the whole `Actor` or a specific component or socket on it. |
-| `AcceptanceRadius` | `float` (cm) | `150.0` | Distance at which `AI Move To` considers the move complete. Smaller for precise targets (door handle), larger for wide objects (vehicle). |
-| `ComponentName` | `FString` | `""` | Case-insensitive substring matched against the `Actor`'s components when `MoveTargetMode` is `Vector` (Blueprint display name `Component as goal`). Leave empty to target the `Actor`'s origin. |
-| `SocketOrBoneName` | `FName` | `None` | Socket or bone on the matched component to use as the goal point. Falls back to component origin when not found. Active only when `MoveTargetMode` is `Vector` (`Component as goal`). |
-| `bStepOntoBounds` | `bool` | `false` | When `true`, the goal point is projected to the top of the target's bounding box so the AI walks onto a platform or surface rather than stopping at its edge. Works in both move target modes. |
+| `ObjectReference` (Blueprint display name `Object Is`) | `EConvaiObjectReference` | `Whole Actor` | Which part of the `Actor` counts as this object — the whole thing, or one specific component inside it. Controls where a character looks when it pays attention to the object, and where it walks when `MovementPoints` is empty. |
+| `ComponentName` | `FString` | `""` | Case-insensitive substring matched against the `Actor`'s components when `ObjectReference` is `Specific Component`. Leave empty to use the `Actor`'s own position. |
+| `SocketOrBoneName` | `FName` | `None` | Socket or bone on the matched component to use as the goal point. Falls back to the component's origin when not found. Active only when `ObjectReference` is `Specific Component`. |
+| `AcceptanceRadius` | `float` (cm) | `150.0` | How close the character must get, in centimeters, to count as arrived. Smaller for precise targets (door handle), larger for wide objects (vehicle). |
+| `MovementPoints` | `TArray<FConvaiMovementPoint>` | `[]` | Designer-authored destinations for this object — for example, one point on each side of a door. When empty, characters walk to the object itself, resolved through `ObjectReference`. |
+| `Use Object as Fallback` (`bFallbackToObjectWhenPointsUnreachable`) | `bool` | `false` | When every `MovementPoints` entry is unreachable, walk to the object itself instead of reporting the object unreachable. Off by default. |
 | `ResolvedComponent` | `TWeakObjectPtr<USceneComponent>` | — | **Output only.** The component Convai resolved using `ComponentName`. Populated by the plugin when an action arrives. Do not set this field manually. |
 
 {% hint style="info" %}
 `ResolvedComponent` is populated at runtime by the plugin and cleared if the component is destroyed. Read it from Blueprint after an action is received to access the resolved component directly (for attaching effects, reading its transform, etc.).
 {% endhint %}
 
-### EConvaiMoveTarget
+### EConvaiObjectReference
 
-Controls what an `AI Move To` action uses as its navigation goal when this entry is a movement target.
+What an `FConvaiObjectEntry`'s reference points at — the object itself. Used for gaze/attention scoping, vision tagging, and as the movement fallback when no `MovementPoints` are authored. When `MovementPoints` are authored on the entry, they become the movement target and `ObjectReference` only defines what the object is.
 
 | Value | Display name | Description |
 |---|---|---|
-| `Actor` | `Actor as goal` | The AI navigates to the referenced `Actor`'s bounds. Best for `"go to the car"`, `"follow the player"`. |
-| `Vector` | `Component as goal` | The AI navigates to a computed world point — the `Actor`'s origin, a named sub-component, or a socket/bone, refined by `bStepOntoBounds`. Best for `"stand at the door handle"`, `"step onto the platform"`. In Blueprint pickers, select `Component as goal`; the underlying enum value is `Vector`. |
+| `WholeActor` | `Whole Actor` | The whole `Actor` is the object. Gaze matches any of its primitives; the movement fallback stops at the actor's bounds. |
+| `SpecificComponent` | `Specific Component` | A sub-component on the `Actor` is the object (set `ComponentName`, optionally a socket or bone). Gaze matches only that component; the movement fallback targets its world location. |
+
+### EConvaiMovementPointAttachment
+
+How a `FConvaiMovementPoint`'s transform is interpreted.
+
+| Value | Display name | Description |
+|---|---|---|
+| `RelativeToObject` | `Relative To Object` | The point's transform is relative to the object — it moves with the goal `Actor`, or with the specific component when `ObjectReference` is component-scoped. Default. |
+| `KeepWorldPosition` | `Keep World Position` | The point's transform is absolute world space — it stays put even if the object moves. |
+
+### FConvaiMovementPoint
+
+A designer-authored access point for movement — where a character should stand when moving to an object, for example one point on each side of a door. Pure data, edited via the viewport visualizer on `UConvaiObjectComponent` or directly in the Details panel. The resolver picks the reachable point with the shortest walking path.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `Transform` | `FTransform` | — | Where the character stands when this point is chosen. Only the location drives movement; rotation is stored and editable but reserved for future facing control. |
+| `Attachment` | `EConvaiMovementPointAttachment` | `Relative To Object` | Whether the point travels with the object or stays fixed in the world. |
+| `bEnabled` (Blueprint display name `Enabled`) | `bool` | `true` | Untick to take this point out of play without deleting it. If every point on the object is disabled, the object behaves as if it had none — characters walk up to the object itself. |
+| `bCreatesSeparateDestination` (Blueprint display name `Create Separate Destination`) | `bool` | `false` | When on, the point becomes its own destination the AI can be sent to, addressed as `"<Object> <Destination Name>"`. When off, the point is one of the places to stand when the AI goes to the object itself. |
+| `Name` (Blueprint display name `Destination Name`) | `FString` | `""` | What the separate destination is called. Only used while `bCreatesSeparateDestination` is on. |
 
 ### FConvaiEnvironmentData
 

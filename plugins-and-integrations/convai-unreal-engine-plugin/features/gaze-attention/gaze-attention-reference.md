@@ -1,7 +1,7 @@
 ---
 title: Gaze attention reference
 description: Complete property, event, method, and class reference for the gaze attention system, including all defaults and version-specific behavior.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Canonical reference for every property, event, method, and class in the gaze attention system. The [Convai Player Component](../../blueprint-reference/convai-player-component.md) and [Convai Object Component](../../blueprint-reference/convai-object-component.md) pages summarize only their component-local gaze surface; use this page for the full cross-component API, defaults, and version-specific behavior.
@@ -135,13 +135,13 @@ Objects tagged with `UConvaiObjectComponent` expose gaze properties, methods, an
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `bGazeable` | `bool` | `true` | Whether this object participates in gaze detection. When `false`, the object is excluded from both the line-trace match and the dot-product fallback. |
-| `ObjectEntry` | `FConvaiObjectEntry` | — | Identity and targeting data for this object. Gaze-scoped sub-mesh filtering uses `ObjectEntry.ComponentName` when `ObjectEntry.MoveTargetMode` is `Component as goal` (`Vector`). See [Component-scoped gaze](how-gaze-attention-works.md#component-scoped-gaze) and [`FConvaiObjectEntry`](#fconvaiobjectentry). |
+| `ObjectEntry` | `FConvaiObjectEntry` | — | Identity and targeting data for this object. Gaze-scoped sub-mesh filtering uses `ObjectEntry.ComponentName` when `ObjectEntry.ObjectReference` (Details panel label **Object Is**) is `Specific Component`. See [Component-scoped gaze](how-gaze-attention-works.md#component-scoped-gaze) and [`FConvaiObjectEntry`](#fconvaiobjectentry). |
 
 ### Blueprint methods
 
 | Method | Signature | Description |
 |---|---|---|
-| `GetResolvedComponent` | `(bool bForceRefresh = false) → USceneComponent*` | Returns the cached sub-component resolved from `ObjectEntry.ComponentName`. Pass `true` to force a fresh lookup, for example after the actor's component tree changes at runtime. Returns `nullptr` when `ObjectEntry.MoveTargetMode` is not `Component as goal`, when `ObjectEntry.ComponentName` is empty, or when the name cannot be resolved. |
+| `GetResolvedComponent` | `() → USceneComponent*` | Returns the sub-component resolved from `ObjectEntry.ComponentName`. Revalidates the cached match on every call — if the cached component's owner or name no longer fits the filter, it rescans the actor's component tree automatically, so no manual refresh call exists. Returns `nullptr` when `ObjectEntry.ObjectReference` is not `Specific Component`, when `ObjectEntry.ComponentName` is empty, or when the name cannot be resolved. |
 | `NotifyGazeBegin` | `(UConvaiPlayerComponent* Player)` | Called by `UConvaiPlayerComponent` when the player's gaze enters this object. Also fires `OnGazedIn`. Can be called from Blueprint to simulate a gaze-enter event on this component. |
 | `NotifyGazeEnd` | `(UConvaiPlayerComponent* Player)` | Called by `UConvaiPlayerComponent` when the player's gaze leaves this object. Also fires `OnGazedOut`. Can be called from Blueprint to simulate a gaze-leave event. |
 | `NotifyGazeAttentionBegin` | `(UConvaiPlayerComponent* Player, const FString& Text, EC_RunLLMOption ShouldRespond)` | Called by `UConvaiPlayerComponent` when this object is promoted to "in attention". Also fires `OnAttentionGained`. Can be called from Blueprint to manually promote this object to attention on any chatbot. |
@@ -162,7 +162,7 @@ Objects tagged with `UConvaiObjectComponent` expose gaze properties, methods, an
 
 | Member | Signature | Description |
 |---|---|---|
-| `SetObjectInAttention` | `(FConvaiObjectEntry AttentionObject, FString Text = "", EC_RunLLMOption ShouldRespond = Auto, bool bFlushImmediately = false) → void` | Sets the chatbot's current object in attention, with optional narrative context text and LLM response option. Has no effect when `EnvironmentData.bEnableActions` is `false` (**Enable Actions** in the Details panel). Stamps `AttentionSource` to `Explicit`. `bFlushImmediately` sends the update immediately instead of batching it. |
+| `SetObjectInAttention` | `(FConvaiObjectEntry AttentionObject, FString Text = "", EC_RunLLMOption ShouldRespond = Auto, EConvaiContextDelivery Delivery = Send Normally, bool bAddAttentionEvent = true, bool bFlushImmediately = false) → void` | Sets the chatbot's current object in attention, with optional narrative context text and LLM response option. Stamps `AttentionSource` to `Explicit` (or `None` when `AttentionObject.Name` is empty, releasing the slot). When `ShouldRespond` is `Auto` or `Always` and `bAddAttentionEvent` is `true` (the default), stages a one-flush ephemeral event reading `"<observer> is paying attention to <object name>"` — never persisted, fires once per call. Has no effect when `EnvironmentData.bEnableActions` is `false` (**Enable Actions** in the Details panel), or when the object is not yet on the chatbot's environment list or not among the objects sent at connect time; each of these logs a warning naming the object and the reason. `bFlushImmediately` sends the update immediately instead of batching it. |
 | `AttentionSource` | `EConvaiAttentionSource` (BlueprintReadOnly, Transient) | Who last set the attention slot. `None`, `Gaze`, or `Explicit (Blueprint/C++)`. Read this property to diagnose attention locking. |
 
 ### Gaze-gated methods
@@ -171,7 +171,7 @@ The following methods are called internally by the gaze system but are also Blue
 
 | Method | Signature | Returns | Description |
 |---|---|---|---|
-| `TrySetObjectInAttentionFromGaze` | `(FConvaiObjectEntry AttentionObject, FString Text = "", EC_RunLLMOption ShouldRespond = Auto, bool bFlushImmediately = false) → bool` | `true` if accepted, `false` if rejected | Sets the attention slot only when `EnvironmentData.bEnableActions` is `true` and `AttentionSource` is `None` or `Gaze`. On success, stamps `AttentionSource = Gaze`. Silently returns `false` when actions are disabled or the slot is locked by an `Explicit` caller. Used internally by `UConvaiPlayerComponent`; exposed to Blueprint for custom gaze integrations that must respect the ownership protocol. |
+| `TrySetObjectInAttentionFromGaze` | `(FConvaiObjectEntry AttentionObject, FString Text = "", EC_RunLLMOption ShouldRespond = Auto, EConvaiContextDelivery Delivery = Send Normally, bool bAddAttentionEvent = true, bool bFlushImmediately = false) → bool` | `true` if accepted, `false` if rejected | Sets the attention slot only when `EnvironmentData.bEnableActions` is `true` and `AttentionSource` is `None` or `Gaze`. On success, stamps `AttentionSource = Gaze`. Returns `false` and logs a warning naming the object when actions are disabled or the slot is locked by an `Explicit` caller — the call is rejected, not silent. Used internally by `UConvaiPlayerComponent`; exposed to Blueprint for custom gaze integrations that must respect the ownership protocol. |
 | `TryClearObjectInAttentionFromGaze` | `(FConvaiObjectEntry ExpectedObject) → bool` | `true` if cleared, `false` if skipped | Clears the attention slot only when `AttentionSource == Gaze` AND the currently attended object matches `ExpectedObject`. Prevents a stale or late gaze-lost call from clearing an attention slot that was already claimed by a different player or system. |
 
 ### `EConvaiAttentionSource`
@@ -199,10 +199,10 @@ Struct carried on `UConvaiObjectComponent::ObjectEntry`. Gaze attention reads th
 | `Ref` | `TWeakObjectPtr<AActor>` | `nullptr` | Actor reference for this object entry. |
 | `Name` | `FString` | `""` | Object name sent to Convai as `current_attention_object`. Must be non-empty for the object to register. |
 | `Description` | `FString` | `""` | Natural-language description Convai uses to understand the object. |
-| `MoveTargetMode` | `EConvaiMoveTarget` | `Actor as goal` | Must be `Component as goal` (`Vector`) for `ComponentName` to scope gaze to a sub-mesh. With the default `Actor as goal`, gaze treats the entry as whole-actor scope regardless of `ComponentName`. |
-| `ComponentName` | `FString` | `""` | Case-insensitive substring filter on a sub-component name. Gaze uses this field only when `MoveTargetMode` is `Component as goal` and the name resolves to a component on `Ref`. |
+| `ObjectReference` | `EConvaiObjectReference` | `Whole Actor` | Details panel label **Object Is**. Must be `Specific Component` for `ComponentName` to scope gaze to a sub-mesh. With the default `Whole Actor`, gaze matches any of the actor's primitives regardless of `ComponentName`. |
+| `ComponentName` | `FString` | `""` | Case-insensitive substring filter on a sub-component name. Gaze uses this field only when `ObjectReference` is `Specific Component` and the name resolves to a component on `Ref`. |
 
-Movement-only fields (`AcceptanceRadius`, `SocketOrBoneName`, `bStepOntoBounds`, and related outputs) are documented in the [Character actions reference](../character-actions/actions-blueprint-reference.md).
+Movement-only fields (`AcceptanceRadius`, `SocketOrBoneName`, and related outputs) are documented in the [Character actions reference](../character-actions/actions-blueprint-reference.md).
 
 ## Next steps
 

@@ -1,7 +1,7 @@
 ---
 title: Gaze attention usage examples
 description: Blueprint recipes for gaze events, custom highlight visuals, component-scoped targeting, manual attention locking, and building a custom cursor widget.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 These Blueprint recipes show the most common `UConvaiPlayerComponent` and `UConvaiObjectComponent` gaze-attention patterns. Each example states its scenario, the setup required, and the expected runtime outcome.
@@ -82,7 +82,7 @@ Event NarrativeBriefingStart
       bFlushImmediately: false
 ```
 
-After this call, `AttentionSource` on the chatbot becomes `Explicit (Blueprint/C++)`. Gaze-driven attention updates are silently rejected until the lock is cleared.
+After this call, `AttentionSource` on the chatbot becomes `Explicit (Blueprint/C++)`. Gaze-driven attention updates are rejected until the lock is cleared — the rejection logs a warning on the gaze player component naming the object and the reason.
 
 To release the lock at the end of the narrative beat:
 
@@ -151,18 +151,18 @@ Both properties are `BlueprintReadWrite` and can be changed at runtime, for exam
 2. Configure `ConvaiObject_EmergencyStop` under **Convai | Object** → **Object Entry**:
    - **Name** — `"EmergencyStop"`
    - **Description** — `"A red mushroom button that cuts power to the whole line."`
-   - **Move Target Mode** — `Component as goal` (required for sub-mesh scoping)
+   - **Object Is** — `Specific Component` (required for sub-mesh scoping)
    - **Component Name** — `"SM_EmergencyStopButton"` (the exact Static Mesh component name on the actor)
 
 3. Configure `ConvaiObject_FuelGauge` under **Convai | Object** → **Object Entry**:
    - **Name** — `"FuelGauge"`
    - **Description** — `"A dial showing current fuel pressure in bar."`
-   - **Move Target Mode** — `Component as goal`
+   - **Object Is** — `Specific Component`
    - **Component Name** — `"SM_FuelGaugeDial"`
 
 4. On `UConvaiPlayerComponent`, ensure **Gaze Attention Text** (`GazeAttentionText`) and **Gaze Should Respond** (`GazeShouldRespond`) are configured as needed.
 
-`ObjectEntry.ComponentName` matching is case-insensitive substring lookup and applies only when **Move Target Mode** is `Component as goal`. With the default **Actor as goal** mode, a non-empty **Component Name** does not scope gaze. If the name cannot be resolved, the component is excluded from scoped gaze detection and a warning is logged on first component resolve. Call `GetResolvedComponent(true)` on the `UConvaiObjectComponent` at runtime to confirm the match.
+`ObjectEntry.ComponentName` matching is case-insensitive substring lookup and applies only when **Object Is** is `Specific Component`. With the default **Whole Actor** mode, a non-empty **Component Name** does not scope gaze. If the name cannot be resolved, the component is excluded from scoped gaze detection and a warning is logged on first resolve attempt. Call `GetResolvedComponent()` on the `UConvaiObjectComponent` at runtime to confirm the match — it revalidates automatically, so no separate refresh call exists.
 
 **Outcome:** Looking at `SM_EmergencyStopButton` highlights only that mesh and promotes `"EmergencyStop"` to attention. Looking at `SM_FuelGaugeDial` highlights only that mesh and promotes `"FuelGauge"`. Looking at the panel frame does not promote either scoped object because no configured component scope matches that hit.
 

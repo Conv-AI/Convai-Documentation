@@ -1,7 +1,7 @@
 ---
 title: Convai Chatbot Component
 description: Reference for the AI character component — every Blueprint-visible property, function, and event exposed by the Convai Chatbot Component.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 `UConvaiChatbotComponent` (Blueprint display name **Convai Chatbot**) is the primary component added to an AI character `Actor`. It manages the character's session with Convai, receives audio and face data, dispatches actions and emotion updates, and exposes a complete Blueprint API for conversation and environment control.
@@ -206,8 +206,8 @@ Action mutations apply on the **next** session start, not to the live session �
 
 | Function | Inputs | Returns | Category | Description |
 |---|---|---|---|---|
-| `SetObjectInAttention` | `AttentionObject (FConvaiObjectEntry)`, `Text (FString)`, `ShouldRespond (EC_RunLLMOption)`, `bFlushImmediately (bool)` | — | `Convai\|Actions` | Sets the object the chatbot is focusing on and optionally sends a context event. Has no effect when `EnvironmentData.bEnableActions` is `false`. |
-| `TrySetObjectInAttentionFromGaze` | Same as `SetObjectInAttention` | `bool` | `Convai\|Actions` | Sets attention only when `AttentionSource` is `None` or `Gaze`. Returns `false` when the slot is `Explicit`-owned. |
+| `SetObjectInAttention` | `AttentionObject (FConvaiObjectEntry)`, `Text (FString)`, `ShouldRespond (EC_RunLLMOption)`, `Delivery (EConvaiContextDelivery)`, `bAddAttentionEvent (bool)`, `bFlushImmediately (bool)` | — | `Convai\|Actions` | Sets the object the chatbot is focusing on. `bAddAttentionEvent` is on by default and emits a one-flush announce event; turn it off to set the slot silently. `Delivery` can defer that cue until the conversation pauses. Logs a warning and has no effect when `EnvironmentData.bEnableActions` is `false`, when the object is not in the environment list, or when it was not sent at connect time. |
+| `TrySetObjectInAttentionFromGaze` | Same as `SetObjectInAttention` | `bool` | `Convai\|Actions` | Sets attention only when `AttentionSource` is `None` or `Gaze`. Returns `false` when the slot is `Explicit`-owned, and logs a warning explaining why the call had no effect. |
 | `TryClearObjectInAttentionFromGaze` | `ExpectedObject (FConvaiObjectEntry)` | `bool` | `Convai\|Actions` | Clears the gaze-owned attention slot only when it still matches `ExpectedObject`. Returns `false` when the slot has changed. |
 | `EnsureObjectComponentsForEnvironmentObjects` | — | `int32` (components spawned) | `Convai\|Actions` | Auto-spawns `UConvaiObjectComponent` on each `EnvironmentData.Objects` actor that does not already have one. Idempotent. |
 

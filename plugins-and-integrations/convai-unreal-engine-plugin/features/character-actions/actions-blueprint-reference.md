@@ -1,7 +1,7 @@
 ---
 title: Actions Blueprint reference
 description: Reference for the Blueprint structs, enums, events, and queue functions that power Convai character actions in Unreal Engine.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 This page is the complete reference for the structs, enums, events, and functions that make up the character actions API in the Convai Unreal Engine plugin. All items are Blueprint-accessible unless noted otherwise.
@@ -90,49 +90,126 @@ Describes a scene object or character in the environment.
 | `Name` | `FString` | `""` | Unique label. Must be unique across all registered objects. |
 | `Ref` | `TWeakObjectPtr<AActor>` | `null` | The live Actor. If the Actor is destroyed, the entry can still keep its name while `Resolve Goal Location` reports failure. |
 | `Description` | `FString` | `""` | Plain-language description for Convai. |
-| `MoveTargetMode` | `EConvaiMoveTarget` | `Actor` | `Actor as goal` or `Component as goal`. |
+| `ObjectReference` | `EConvaiObjectReference` | `Whole Actor` | Display name **Object Is**. `Whole Actor` or `Specific Component`. Controls gaze/attention scope and the movement fallback used when `MovementPoints` is empty. |
+| `ComponentName` | `FString` | `""` | Sub-component filter. Used when `ObjectReference` is `Specific Component`. |
+| `SocketOrBoneName` | `FName` | `None` | Optional socket or bone on the matched component. |
 | `AcceptanceRadius` | `float` | `150.0` | Stop distance in cm. |
-| `ComponentName` | `FString` | `""` | Sub-component filter. Used in `Component as goal` mode. |
-| `SocketOrBoneName` | `FName` | `None` | Socket or bone on the matched component. |
-| `bStepOntoBounds` | `bool` | `false` | Walk onto the top of the object instead of stopping at its edge. |
+| `MovementPoints` | `TArray<FConvaiMovementPoint>` | `[]` | Named designer-authored destinations. When one or more points are enabled, they replace `ObjectReference` as the movement target; the resolver picks the reachable point with the shortest path. |
+| `bFallbackToObjectWhenPointsUnreachable` | `bool` | `false` | Display name **Use Object as Fallback**. Walk to the object itself when every `MovementPoints` entry is unreachable. |
 | `ResolvedComponent` | `TWeakObjectPtr<USceneComponent>` | `null` | **Transient, read-only** — filled in by `ResolveGoalLocation`. |
-| `OptionalPositionVector` | `FVector` | `(0,0,0)` | **Deprecated.** Use the `Out Goal Location` output of `Resolve Goal Location` instead. |
+| `OptionalPositionVector` | `FVector` | `(0,0,0)` | **Deprecated.** Use the `Destination` output of `Resolve Goal Location` instead. |
 
-## EConvaiMoveTarget
+{% hint style="info" %}
+`ObjectReference` replaces the movement-target enum and bounds flag an earlier beta used: `Whole Actor` already implies stopping at the object's bounds, so no separate flag is needed. Upgrading a project that still reads the old field is covered in [Migrate to 4.0.0-beta.27](../../overview/migrate-to-4-0-0-beta-27.md).
+{% endhint %}
+
+## EConvaiObjectReference
+
+Source: `ConvaiDefinitions.h:36`.
 
 | Value | Display name | Behavior |
 |---|---|---|
-| `Actor` | Actor as goal | AI stops at the actor's bounds. |
-| `Vector` | Component as goal | AI walks to a computed world point on or near the actor. |
+| `WholeActor` | Whole Actor | Gaze matches any of the actor's primitives. Movement fallback: `AI Move To` uses `Ref` directly and stops at the actor's bounds. |
+| `SpecificComponent` | Specific Component | Gaze matches only the named component. Movement fallback targets that component's (or socket's) world location. |
 
 ## Resolve Goal Location
 
 Blueprint function in `UConvaiActions` (category **Convai | Action API**).
 
-Resolves an `FConvaiObjectEntry` into the inputs an `AI Move To` node needs, and optionally runs a NavMesh path query.
+Resolves an `FConvaiObjectEntry` into the inputs an `AI Move To` node needs, and optionally runs a NavMesh path query. Source: `ConvaiActionUtils.h:262-280`.
+
+{% hint style="info" %}
+Wire **Target Actor** and **Destination** straight into one `AI Move To` node — no branch needed. `Target Actor` is `null` exactly when the goal is a fixed location (a Movement Point won, or the entry references a component), so `AI Move To` falls through to `Destination` automatically.
+{% endhint %}
 
 **Inputs:**
 
 | Pin | Type | Notes |
 |---|---|---|
 | `Entry` | `FConvaiObjectEntry` (ref) | The object to resolve. |
-| `Source Actor` | `AActor*` | Optional. When provided, also computes reachability. |
-| `bForce Refresh` | `bool` | Bypass the cached resolution. Advanced pin. |
+| `Source Actor` | `AActor*` | Optional. When provided, also computes reachability, arrival, and path outputs. |
 
 **Outputs:**
 
 | Pin | Type | Notes |
 |---|---|---|
-| `Out Goal Actor` | `AActor*` | The `Ref` actor. Wire to AI Move To only in Actor mode. |
-| `Out Goal Component` | `USceneComponent*` | Resolved sub-component (Vector mode + Component Name matched). |
-| `Out Goal Location` | `FVector` | Resolved world position. Wire to AI Move To only in Vector mode. |
-| `Out Acceptance Radius` | `float` | Mirrors `Entry.AcceptanceRadius`. |
-| `Out Mode` | `EConvaiMoveTarget` | Effective mode after Step Onto Bounds promotion. **Branch on this** before AI Move To. |
-| `bOut Success` | `bool` | `true` when `Ref` is alive. Always check before issuing AI Move To. |
-| `bOut Already There` | `bool` | `true` when Source Actor is already at the goal. Skip AI Move To when `true`. |
-| `bOut Reachable` | `bool` | `true` when a NavMesh path reaches the goal bounds. |
+| `Target Actor` | `AActor*` | Wire to `AI Move To`'s **Target Actor** pin. `null` when the goal is a location or resolution failed. |
+| `Object Actor` (advanced) | `AActor*` | `Entry.Ref`, always populated while alive. For non-movement use (attaching effects, queries) — do not wire this to `AI Move To`. |
+| `Out Goal Component` | `USceneComponent*` | The resolved sub-component when `ObjectReference` is `Specific Component` and `Component Name` matched. |
+| `Destination` | `FVector` | Wire to `AI Move To`'s **Destination** pin. The winning Movement Point, or the component/socket location, or `Ref`'s origin. |
+| `Out Acceptance Radius` | `float` | Mirrors `Entry.AcceptanceRadius`. Forward to `AI Move To`. |
+| `Uses Destination` (advanced) | `bool` | `true` when the goal is a location — i.e. exactly when `Target Actor` is `null`. Only needed for graphs that branch explicitly. |
+| `bOut Success` | `bool` | `true` when `Ref` is alive and resolution succeeded. Always branch on this before calling `AI Move To`. |
+| `bOut Already There` | `bool` | `true` when `Source Actor` is already at the goal. Skip `AI Move To` when `true`. |
+| `bOut Reachable` | `bool` | `true` when a NavMesh path from `Source Actor` reaches the goal within tolerance. |
 | `Out Path End Point` | `FVector` | Final navpoint of the path query. |
 | `Out Path Points` | `TArray<FVector>` | Full nav path for debug visualization. |
+| `Out Goal Travel Distance` | `float` | Nav path length in Unreal units to the selected goal; `0` when no path was computed or already there. |
+| `Out Movement Point Index` | `int32` | Which `MovementPoints` entry won; `-1` when `ObjectReference` resolved the goal instead. |
+
+## Convai Move To
+
+Async Blueprint node (latent). `UConvaiMoveToProxy::ConvaiMoveTo`, category **Convai | Movement**. Source: `Actions/ConvaiMoveToTask.h:244,263`.
+
+Moves an Actor to an `FConvaiObjectEntry` destination — a whole actor, a component/socket, or authored Movement Points — without the manual `Resolve Goal Location` → `AI Move To` wiring.
+
+| Pin | Type | Notes |
+|---|---|---|
+| `Moving Actor` | `AActor*` | The actor to move. |
+| `Destination` | `FConvaiObjectEntry` | The target entry. |
+| `bLockAILogic` (advanced) | `bool` | Default `false`. |
+| `Succeeded` (exec) | — | Fires on `Reached` or `Already At Destination`. |
+| `Failed` (exec) | — | Fires on any other `EConvaiMoveToResultCode`. |
+| `Result Code` | `EConvaiMoveToResultCode` | See below. |
+| `Additional Note` | `FString` | Safe to pass to `Handle Action Completion` or speak back to the player. |
+
+### EConvaiMoveToResultCode
+
+Source: `Actions/ConvaiMoveToTask.h:18`.
+
+| Value | Display name |
+|---|---|
+| `Reached` | Reached |
+| `AlreadyAtDestination` | Already At Destination |
+| `UnknownDestination` | Unknown Destination |
+| `Unreachable` | Unreachable |
+| `InvalidCharacter` | Invalid Character |
+| `MissingController` | Missing AI Controller |
+| `MissingMovementComponent` | Missing Movement Component |
+| `MissingPathFollowingComponent` | Missing Path Following Component |
+| `MissingNavigationData` | Missing Navigation Data |
+| `MoveFailed` | Move Failed |
+
+## Convai Escort
+
+Async Blueprint node (latent). `UConvaiEscortProxy::ConvaiEscort`, category **Convai | Movement**. Source: `Actions/ConvaiEscortToTask.h:221,239`.
+
+Moves an escorting Actor to a destination while an escorted character follows, pausing to let the escorted character catch up when it lags behind.
+
+| Pin | Type | Notes |
+|---|---|---|
+| `Escorting Actor` | `AActor*` | The actor that leads the escort and owns the `Convai Chatbot` used for the follow cue. |
+| `Escorted Character` | `FConvaiObjectEntry` | The character being escorted. |
+| `Destination` | `FConvaiObjectEntry` | The target entry. |
+| `Succeeded` (exec) | — | Fires on `Reached` or `Already At Destination`. |
+| `Failed` (exec) | — | Fires on any other `EConvaiEscortResultCode`. |
+| `Result Code` | `EConvaiEscortResultCode` | See below. |
+| `Additional Note` | `FString` | Safe to pass to `Handle Action Completion`. |
+
+The bundled `BP_ConvaiChatbotComponent` convenience Blueprint ships with an `Escort` action ready to use out of the box.
+
+### EConvaiEscortResultCode
+
+Source: `Actions/ConvaiEscortToTask.h:21`.
+
+| Value | Display name |
+|---|---|
+| `Reached` | Reached |
+| `AlreadyAtDestination` | Already At Destination |
+| `EscorteeUnavailable` | Character Unavailable |
+| `DestinationUnavailable` | Destination Unavailable |
+| `InvalidGuideSetup` | Invalid Escort Setup |
+| `MovementFailed` | Movement Failed |
 
 ## UConvaiActions — parameter accessors
 
@@ -167,6 +244,7 @@ All functions are in category **Convai | Actions**.
 |---|---|---|---|
 | `HandleActionCompletion` | `IsSuccessful`, `bAutoReport`, `ShouldRespond`, `AdditionalNote`, `Delay` | `void` | Reports outcome; advances or clears queue. |
 | `AbortActionSequence` | `EventText`, `ShouldRespond` | `void` | Clears queue and optionally notifies Convai. |
+| `CancelCurrentActionPlan` | — | `void` | Display name **Cancel Current Action Plan**. Cooperatively cancels the current plan: discards queued actions and offers the active Blueprint handler an optional event named exactly `Cancel <Action Name>` with the original `FConvaiResultAction`. Repeated calls request cancellation only once. |
 | `IsActionsQueueEmpty` | — | `bool` | `true` when no actions are queued. BlueprintPure. |
 | `ClearActionQueue` | — | `void` | Discards all queued actions without reporting. |
 | `FetchFirstAction` | `out ConvaiResultAction` | `bool` | Reads (but does not remove) the front of the queue. BlueprintPure. |
@@ -198,12 +276,22 @@ All functions are in category **Convai | Actions**.
 | Event | Display name | Signature |
 |---|---|---|
 | `OnActionReceivedEvent_V2` | On Actions Received | `(ChatbotComponent, InteractingPlayerComponent, SequenceOfActions: TArray<FConvaiResultAction>)` |
+| `OnBotTurnCompletedEvent` | On Bot Turn Completed | `(ChatbotComponent, ResponseId: FString, bWasInterrupted: bool, bWasAborted: bool, ErrorReason: FString)` |
+
+`On Bot Turn Completed` is the authoritative response-lifecycle terminal reported by Convai — local audio and facial animation may still be draining when it fires. Category `Convai`. Use it to know when a turn is truly over before deciding whether to advance action-dependent logic, rather than relying on local speech-finished events alone.
 
 ## UConvaiChatbotComponent — session properties (action-related)
 
 | Property | Type | Category | Notes |
 |---|---|---|---|
 | `bAutoFillConversationPartnerFromPlayer` | `bool` | `Convai\|Session` | When `true` (default), the plugin auto-registers the conversation partner in the `Characters` list at session start. Disable when registering the partner manually to avoid duplicate entries. |
+| `bEnableCancelActionPlanAction` | `bool` | `Convai\|Actions\|Experimental` | Display name **Enable Cancel Action Plan**. Default `false`. Adds the reserved `Cancel Action Plan` control action, letting Convai call `Cancel Current Action Plan` when the player redirects or abandons an in-progress plan. Takes effect on the next session start; requires **Enable Actions**. |
+
+## UConvaiPlayerComponent — Is Speaking
+
+`IsSpeaking` — `UFUNCTION(BlueprintPure, BlueprintCallable, Category = "Convai", meta = (DisplayName = "Is Speaking"))`, returns `bool`. Source: `ConvaiPlayerComponent.h:246`.
+
+`true` while the player is speaking. The server's voice-activity events are the primary signal; non-empty partial or final transcriptions repair missing edges, and a short real-time stop grace absorbs premature or duplicated stop packets. This is local session state — not replicated. Use it in an action handler to avoid talking over the player while a movement or interaction action is still resolving.
 
 ## EConvaiAttentionSource
 

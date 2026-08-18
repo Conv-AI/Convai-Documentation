@@ -1,7 +1,7 @@
 ---
 title: Character actions examples
 description: End-to-end action recipes for navigating to a registered object, following a character, and using parameterized actions in the Convai Unreal Engine plugin.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Each example below is self-contained: it lists the Details panel configuration and the Blueprint handler pseudocode needed to implement a working action. Start with Example 1 if you are new to character actions. The examples progress from default navigation to custom actions with typed parameters.
@@ -19,7 +19,7 @@ In the NPC Actor's **Details** panel, under **Convai Chatbot > Environment**:
 3. `Objects` array contains an entry:
    - `Name`: `"SafetyValve"`
    - `Ref`: the valve Actor in the level
-   - `MoveTargetMode`: `Actor as goal`
+   - `Object Is`: `Whole Actor`
    - `AcceptanceRadius`: `100.0`
 
 ### Blueprint handler — Move To
@@ -37,9 +37,10 @@ Event Move To(ActionData: FConvaiResultAction)
         Entry = DestEntry,
         SourceActor = Self,
         // outputs:
-        OutGoalActor, OutGoalComponent, OutGoalLocation,
-        OutAcceptanceRadius, OutMode,
-        bSuccess, bAlreadyThere, bReachable, PathEnd, PathPoints
+        TargetActor, ObjectActor, ObjectComponent, Destination,
+        OutAcceptanceRadius, bUsesDestination,
+        bSuccess, bAlreadyThere, bReachable, PathEnd, PathPoints,
+        GoalTravelDistance, MovementPointIndex
     )
 
     if not bSuccess:
@@ -53,11 +54,9 @@ Event Move To(ActionData: FConvaiResultAction)
         HandleActionCompletion(IsSuccessful = true)
         return
 
-    // Branch on Out Mode — wire the correct pin to AI Move To
-    if OutMode == Actor:
-        AIMoveTo(Target = OutGoalActor, AcceptanceRadius = OutAcceptanceRadius)
-    else:
-        AIMoveTo(Destination = OutGoalLocation, AcceptanceRadius = OutAcceptanceRadius)
+    // Wire both pins straight into one AI Move To — no branch needed.
+    // Target Actor is null exactly when Destination should win.
+    AIMoveTo(Target = TargetActor, Destination = Destination, AcceptanceRadius = OutAcceptanceRadius)
 
     // Wait for AIMoveTo to complete via OnMoveCompleted
     // Then call:
@@ -65,8 +64,10 @@ Event Move To(ActionData: FConvaiResultAction)
 ```
 
 {% hint style="info" %}
-Always branch on `bOut Success` and `bOut Already There` before issuing `AI Move To`. Passing a destroyed Actor to `AI Move To` silently no-ops in Actor mode, or sends the pawn to a stale location in Vector mode.
+Always branch on `bOut Success` and `bOut Already There` before issuing `AI Move To`. On a failed resolution, `Destination` holds a stale snapshot and `Target Actor` is `null` — issuing `AI Move To` anyway sends the pawn to a stale location.
 {% endhint %}
+
+The `Convai Move To` async node wraps this same resolution and issues the move internally — see [Actions Blueprint reference](actions-blueprint-reference.md) for a simpler alternative to wiring `Resolve Goal Location` and `AI Move To` by hand.
 
 ---
 

@@ -1,10 +1,10 @@
 ---
 title: Microphone and audio capture
-description: Reference for microphone device enumeration, selection, and volume on the Convai Player Component, the audio capture component, and Android permissions.
-last_reviewed: "4.0.0-beta.21"
+description: Reference for microphone device enumeration, selection, volume, and persisted settings on the Convai Player Component and the microphone subsystem.
+last_reviewed: "4.0.0-beta.27"
 ---
 
-`UConvaiPlayerComponent` exposes all Blueprint-callable microphone functions under the `Convai|Microphone` category. Internally it drives a `UConvaiAudioCaptureComponent` instance that wraps the Unreal `AudioCapture` engine plugin. On Android, the `AndroidPermission` plugin handles the runtime microphone permission.
+`UConvaiPlayerComponent` exposes all Blueprint-callable microphone functions under the `Convai|Microphone` category. Internally it drives a `UConvaiAudioCaptureComponent` instance that wraps the Unreal `AudioCapture` engine plugin, and persists the player's chosen device and gain across sessions through `UConvaiMicrophoneSubsystem`. On Android, the `AndroidPermission` plugin handles the runtime microphone permission.
 
 For the complete `UConvaiPlayerComponent` property set — identity, session, gaze attention, and audio processing — see [Convai Player Component](convai-player-component.md).
 
@@ -61,6 +61,41 @@ Both selection functions can be called before or during gameplay. After a succes
 | `GetIsRecording` (display name **Is Recording**) | `Convai|Microphone` | `bool` | `BlueprintPure`. `true` while a recording session started with `StartRecording` is in progress. |
 
 `StartRecording`, `FinishRecording`, `UnmuteStreamingAudio`, and `MuteStreamingAudio` are documented under the **Audio streaming and recording** section of [Convai Player Component](convai-player-component.md).
+
+### Persisted settings
+
+| Function | Parameters | Returns | Description |
+|---|---|---|---|
+| `SaveMicrophoneSettings` | — | `bool` | Snapshots the player component's current capture device and gain, then persists them through `UConvaiMicrophoneSubsystem`. Call this after the player commits a device choice — selecting a device only applies it for the current session until this is called. Returns `false` when the subsystem is not available. |
+| `ApplySavedMicrophoneSettings` | — | `bool` | Re-applies the persisted device (skipping it if no longer plugged in) and gain to the player component. Called automatically during `BeginPlay`; call it again from a UI that needs to revert unsaved changes. Returns `false` when the subsystem is not available. |
+
+Both functions delegate to `UConvaiMicrophoneSubsystem`, documented below.
+
+## UConvaiMicrophoneSubsystem
+
+`UConvaiMicrophoneSubsystem` (Blueprint display name **Convai Microphone Subsystem**) is a `UGameInstanceSubsystem` that owns the player's microphone device and gain preference across sessions, so the selection no longer resets to the system default at every launch. Every Blueprint-exposed member on it uses `Category = "Convai|Microphone"`.
+
+| Node | Kind | Parameters | Returns | Description |
+|---|---|---|---|---|
+| `Get` (display name **Get**, derived — no explicit `DisplayName` meta) | `BlueprintPure`, static | `WorldContextObject` | `UConvaiMicrophoneSubsystem*` | Returns the subsystem instance for the current game instance. |
+| `GetMicrophoneSettings` (display name **Get Microphone Settings**) | `BlueprintPure` | — | `FConvaiMicrophoneSettings` | Returns the settings currently held by the subsystem. |
+| `HasSavedMicrophoneSettings` (display name **Has Saved Microphone Settings**) | `BlueprintPure` | — | `bool` | `true` when a saved record was found on disk this session, as opposed to falling back to defaults. |
+| `SaveMicrophoneSettings` (display name **Save Microphone Settings**) | `BlueprintCallable` | `InSettings (FConvaiMicrophoneSettings)` | — | Replaces the held settings and writes them to the shared record. Broadcasts `OnMicrophoneSettingsChanged`. Takes an explicit settings value — distinct from the identically named node on `UConvaiPlayerComponent`, which reads the component's live device and gain instead. |
+| `SaveMicrophoneSettingsFromPlayerComponent` (display name **Save Microphone Settings From Player Component**) | `BlueprintCallable` | `PlayerComponent (UConvaiPlayerComponent)` | `bool` | Snapshots `PlayerComponent`'s live capture device and gain, then persists them. This is what `UConvaiPlayerComponent::SaveMicrophoneSettings` calls internally. |
+| `ResetMicrophoneSettingsToDefaults` (display name **Reset Microphone Settings To Defaults**) | `BlueprintCallable` | — | — | Forgets the saved choice and deletes the shared record. |
+| `GetAvailableMicrophoneNames` (display name **Get Available Microphone Names**) | `BlueprintCallable` | — | `TArray<FString>` | Device names present right now, with the same naming as `UConvaiPlayerComponent::GetAvailableCaptureDeviceNames`. |
+| `IsSavedMicrophoneAvailable` (display name **Is Saved Microphone Available**) | `BlueprintCallable` | — | `bool` | `true` when a device is saved and it is plugged in right now. `false` with nothing saved is the normal "follow the system default" case, not an error. |
+| `ApplySavedSettingsToPlayerComponent` (display name **Apply Saved Settings To Player Component**) | `BlueprintCallable` | `PlayerComponent (UConvaiPlayerComponent)` | `bool` | Applies the saved gain, plus the saved device if it is still available, to `PlayerComponent`. Returns `true` only when a saved device was resolved and selected. |
+| `OnMicrophoneSettingsChanged` (display name **On Microphone Settings Changed**) | `BlueprintAssignable` event | `NewSettings (FConvaiMicrophoneSettings)` | — | Broadcast whenever `SaveMicrophoneSettings` runs on the subsystem. |
+
+## FConvaiMicrophoneSettings
+
+`FConvaiMicrophoneSettings` (`BlueprintType`, `Category = "Convai|Microphone"`) is the struct `UConvaiMicrophoneSubsystem` persists.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `InputDeviceName` | `FString` | `""` | Empty means the system default device. Otherwise a `DeviceName` value from `UConvaiPlayerComponent::GetAvailableCaptureDeviceNames`. |
+| `InputGain` | `float` | `1.0` | Multiplier applied to microphone input gain. `1.0` is unchanged; the editor UI clamps the field to the `0.0`–`2.0` range. |
 
 ## ConvaiAudioCaptureComponent
 

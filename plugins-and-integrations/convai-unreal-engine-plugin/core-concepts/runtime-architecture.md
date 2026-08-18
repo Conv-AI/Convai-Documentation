@@ -1,7 +1,7 @@
 ---
 title: Runtime architecture
 description: Understand the roles, ownership, and relationships between the Convai Chatbot, Player, Object, Face Sync components, and the Convai Subsystem.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 The Convai Unreal Engine plugin partitions responsibility across five distinct types: a chatbot component, a player component, an object component, a face sync component, and a game-instance subsystem. Each type owns a narrow slice of the system; none duplicates the responsibility of another.
@@ -56,7 +56,7 @@ The player component implements two interfaces: `IConvaiConnectionInterface` (sa
 
 `UConvaiObjectComponent` registers any `Actor` in the level as a named object that all chatbots can reference. Drop it on a door, lever, room, or prop and fill in `ObjectEntry` (name and description). The component registers itself with the subsystem at `BeginPlay`. Every chatbot that starts a session after that automatically receives the object in its environment; chatbots already connected receive the object via `AddOrUpdateObjectFromComponent`.
 
-Optionally, `TrackedProperties` lets designers bind `UPROPERTY` fields on the owning actor to the AI context. All object components share a polling clock (approximately every `0.25` seconds). On each poll, the subsystem evaluates every tracked property and pushes a `SetContextState` update to registered chatbots only when the value has changed — not on every tick. With `bAutoGenerateProximityState` enabled (the default), the component also synthesizes a per-chatbot proximity description — for example, "close by, in front and to the right" — and maintains it as a state key that updates as the chatbot or object moves.
+Optionally, `TrackedProperties` lets designers bind `UPROPERTY` fields on the owning actor to the AI context. All object components share a polling clock (approximately every `0.25` seconds). On each poll, the subsystem evaluates every tracked property and pushes a `SetContextState` update to registered chatbots only when the value has changed — not on every tick. The component no longer synthesizes its own per-chatbot proximity description; since `4.0.0-beta.22`, distance and direction for every registered object — for example, "close by, in front and to the right" — are computed centrally by the [spatial awareness](../features/spatial-awareness/README.md) subsystem and delivered to each chatbot alongside its other context.
 
 The component exposes four gaze events (`OnGazedIn`, `OnGazedOut`, `OnAttentionGained`, `OnAttentionLost`) so Blueprint can react to player focus independently of the chatbot.
 

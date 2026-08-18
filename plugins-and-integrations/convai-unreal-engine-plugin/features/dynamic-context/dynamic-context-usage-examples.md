@@ -1,7 +1,7 @@
 ---
 title: Dynamic context usage examples
-description: Blueprint recipes for health tracking, context events, zone transitions, state removal, and dynamic context resets in training simulations.
-last_reviewed: "4.0.0-beta.21"
+description: Blueprint recipes for health tracking, context events, ephemeral cues, zone transitions, state removal, and dynamic context resets in training simulations.
+last_reviewed: "4.0.0-beta.27"
 ---
 
 These examples show common ways to use dynamic context in Blueprint. All examples assume an Actor with a `Convai Chatbot` component (`UConvaiChatbotComponent`) that can reach a connected session.
@@ -76,6 +76,40 @@ Event AlarmActivated
 After the debounce window elapses (default `0.5` s), the plugin flushes the `context-update` with `run_llm` set to `"true"`. For a faster flush after the session is connected, set `bFlushImmediately = true` on the **Add Context Event** node.
 
 **Verify locally:** The event is included in canonical context after the flush. Use a conversation turn to test the resulting runtime behavior for your character configuration.
+
+## Nudge a character once without it piling up
+
+**Scenario:** A puzzle room where a hint prop flickers, and the character should notice it once the next time context flushes, but the flicker itself is not part of the world's permanent state.
+
+Set `bEphemeral = true` on **Add Context Event**. The character sees the event exactly once, on the next update, and it is never committed to the persisted context — it does not reappear on later updates, and does not need a matching **Remove Context State** call to clean it up.
+
+```text
+// Blueprint pseudocode
+Event HintPropFlickered
+  → ConvaiBotComponent → Add Context Event
+      Text:        "The wall panel flickered briefly"
+      ShouldRespond: Auto
+      bEphemeral:  true
+```
+
+**Verify locally:** Trigger the event twice in separate debounce windows and confirm the character reacts each time — a persistent `Add Context Event` would only add the second occurrence to a growing history, while the ephemeral one lands and clears the same way both times.
+
+## Set attention on an object with a one-time cue
+
+**Scenario:** A tour-guide character should turn to focus on whichever exhibit the player highlights, and briefly acknowledge the new focus without repeating that acknowledgment every time attention is queried.
+
+`SetObjectInAttention` (category `Convai|Actions`) emits a one-flush attention cue by default — `bAddAttentionEvent = true` — so the character reacts to the new focus once, the same way an ephemeral context event does. Set `bAddAttentionEvent = false` to change the focus silently.
+
+```text
+// Blueprint pseudocode
+Event PlayerHighlightedExhibit (Exhibit: FConvaiObjectEntry)
+  → ConvaiBotComponent → SetObjectInAttention
+      AttentionObject:    Exhibit
+      ShouldRespond:       Auto
+      bAddAttentionEvent:  true   // default — omit to keep it
+```
+
+**Verify locally:** After the flush, the character's next response references the exhibit once. A second highlight on a different exhibit produces one new cue for that object, not a growing history of every object the player has focused on.
 
 ## Update multiple states after a scene transition
 

@@ -1,7 +1,7 @@
 ---
 title: Scene metadata component reference
 description: Full property, function, and event reference for the Convai Object Component, including object identity, tracked properties, proximity state, and gaze events.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 `UConvaiObjectComponent` is the component you add to any `Actor` in your level to make Convai characters aware of it. Internally, it is an `ActorComponent` (class group `Convai`) that registers with the `UConvaiSubsystem`, auto-binds `ObjectEntry.Ref` to the owning `Actor` when `Ref` is unset, and exposes object identity, live-state properties, and gaze events to every Convai character in the level.
@@ -25,18 +25,29 @@ These fields control how a Convai character physically moves to this object when
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `MoveTargetMode` | `EConvaiMoveTarget` | `Actor as goal` | How the AI navigates to this object. |
+| `ObjectReference` (Blueprint display name `Object Is`) | `EConvaiObjectReference` | `Whole Actor` | Which part of the actor counts as this object — the whole actor, or one specific component. Controls how the AI navigates to it when no `MovementPoints` are authored. |
 | `AcceptanceRadius` | `float` (cm) | `150` | Distance in centimeters at which a move-to action is considered complete. |
-| `ComponentName` | `FString` | — | Sub-component target for `Component as goal` mode. Leave empty to target the actor's origin. |
-| `SocketOrBoneName` | `FName` | — | Socket or bone on the matched component (`Component as goal` mode only). |
-| `Step Onto Bounds` (`bStepOntoBounds`) | `bool` | `false` | When `true`, the AI navigates to the top surface of the target bounds rather than stopping at the edge. Works in both `Actor as goal` mode (uses the whole `Actor` bounds) and `Component as goal` mode (uses the resolved component bounds). |
+| `ComponentName` | `FString` | — | Sub-component target for `Specific Component` scope. Leave empty to target the actor's origin. |
+| `SocketOrBoneName` | `FName` | — | Socket or bone on the matched component (`Specific Component` scope only). |
+| `MovementPoints` | `TArray<FConvaiMovementPoint>` | `[]` | Designer-authored destinations for this object. See [Movement points](#movement-points) below. |
+| `Use Object as Fallback` (`bFallbackToObjectWhenPointsUnreachable`) | `bool` | `false` | When every `MovementPoints` entry is unreachable, walk to the object itself instead of reporting the object unreachable. |
 
-### Movement target modes
+### Object reference
 
-`EConvaiMoveTarget` controls how Convai instructs AI navigation for this object:
+`EConvaiObjectReference` controls how Convai instructs AI navigation for this object when no `MovementPoints` are authored:
 
-- `Actor as goal` — the AI stops at the `Actor` collision bounds. Use for wide or ambient objects: `"go to the car"`, `"follow the player"`.
-- `Component as goal` — the AI walks to a specific sub-component point, optionally a named socket or bone. Use for precise targets: `"stand at the door handle"`, `"step onto the platform"`.
+- `Whole Actor` — the AI stops at the `Actor`'s collision bounds. Use for wide or ambient objects: `"go to the car"`, `"follow the player"`.
+- `Specific Component` — the AI walks to a specific sub-component's location, optionally a named socket or bone. Use for precise targets: `"stand at the door handle"`.
+
+When `MovementPoints` are authored, they take over as the movement target and `ObjectReference` only defines what the object is for gaze and vision purposes.
+
+### Movement points
+
+Each entry in `MovementPoints` (`FConvaiMovementPoint`) marks a spot where a character stands when it walks to this object — for a door, author one on each side. Edit them in the Details panel, or drag the grab handles the viewport visualizer adds while the object is selected. The resolver picks the reachable point with the shortest walking path; if every point is disabled, the character walks up to the object itself instead.
+
+Tick `bCreatesSeparateDestination` (Blueprint display name `Create Separate Destination`) on a point to make it its own named destination — an elevator landing named `Upper Landing` lets the AI be sent to `Elevator Upper Landing`, separate from the platform.
+
+For the full `FConvaiMovementPoint` field table, see [Data types and enums](../../blueprint-reference/data-types-and-enums.md).
 
 ## Tracked properties
 
@@ -61,14 +72,29 @@ These fields control how a Convai character physically moves to this object when
 
 The initial seed at session start is always `EC_RunLLMOption::Never` regardless of what `ShouldRespond` is set to — the chatbot learns the starting value without reacting.
 
-## Proximity state
+## Movement awareness
+
+The `MovementAwareness` property (`FConvaiObjectMovementSettings`, category `Convai\|Object\|Movement Awareness`) detects this object's translation and rotation and feeds a compact movement direction into spatial context.
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `bEnableMovementAwareness` (Blueprint display name `Enable Movement Awareness`) | `bool` | `true` | Master switch. Turning it off removes movement wording and the `Movement` state, but leaves ordinary position and reachability awareness unchanged. |
+| `MovementSensitivity` (`Sensitivity`) | `EConvaiMovementSensitivity` | `Medium` | How much coherent translation or rotation counts as movement. Higher detects subtler motion; lower filters more physics drift and collision jitter. |
+| `bExposeMovementState` (`Add Movement State`) | `bool` | `false` | Adds `<ObjectName>.Movement` to context and makes it available to the Watch Property action. Also reports a confirmed stop. Moving-direction wording in spatial facts works without this option. |
+| `StartedMovingResponse` (`When Movement Starts`) | `EC_RunLLMOption` | `Never` | Whether a confirmed start should request a response. Active only when `bExposeMovementState` is on. |
+| `StoppedMovingResponse` (`When Movement Stops`) | `EC_RunLLMOption` | `Never` | Whether a confirmed stop should request a response. Active only when `bExposeMovementState` is on. |
+| `Delivery` | `EConvaiContextDelivery` | `Send Normally` | When a responsive transition reaches the chatbot. Active only when `bExposeMovementState` is on and at least one of the two response fields above is not `Never`. |
+| `bFlushImmediately` (`Flush Immediately`) | `bool` | `false` | Bypasses normal context batching for a responsive movement transition. Active under the same condition as `Delivery`. |
+
+`EConvaiMovementSensitivity` values, from least to most sensitive: `Very Low`, `Low`, `Medium`, `High`, `Very High`.
+
+## Distance and direction
+
+The Convai Object Component no longer computes its own per-chatbot proximity value. `4.0.0-beta.22` retired the per-object proximity mechanism (`bAutoGenerateProximityState` and the synthesized `"<ObjectName>.ProximityToYou"` state key); neither exists in the current plugin. Distance, direction, reachability, and line of sight for every registered object are now computed centrally by the [spatial awareness](../spatial-awareness/README.md) subsystem and delivered to each chatbot as part of its regular context. See [Spatial awareness settings reference](../spatial-awareness/spatial-awareness-reference.md) for the project settings that control this, and [How spatial awareness works](../spatial-awareness/how-spatial-awareness-works.md) for the sentence model.
 
 | Property | Type | Category | Default | Description |
 |---|---|---|---|---|
-| `bAutoGenerateProximityState` | `bool` | `Convai\|Object` | `true` | When `true`, the plugin computes a `"<ObjectName>.ProximityToYou"` state key per chatbot using the UE navigation system. |
-| `bDebugDrawProximityPaths` | `bool` | `Convai\|Object\|Debug` | `false` | Draws navigation paths from each chatbot to this object in the editor viewport. Appears under the **Debug** sub-category in the Details panel. Disable before shipping. |
-
-Proximity state always uses `EC_RunLLMOption::Never`; the chatbot is informed of the spatial relationship without reacting. The evaluation is deferred while the chatbot or object is moving, or while chatbot rotation is unstable, and forced through after several consecutive deferred ticks.
+| `bDebugDrawProximityPaths` | `bool` | `Convai\|Object\|Debug` | `false` | Draws navigation paths from each subscribed chatbot to this object in the editor viewport — green when reachable, red when not, cyan when the chatbot is already there. Not gated on any other setting. Disable before shipping. |
 
 ## Gaze
 
@@ -88,7 +114,7 @@ For the full gaze pipeline, player-side settings, and troubleshooting, see [Gaze
 
 | Function | Returns | Description |
 |---|---|---|
-| `GetResolvedComponent(bForceRefresh)` | `USceneComponent*` | Returns the targeted scene component, or `nullptr` when the whole `Actor` is the scope. |
+| `GetResolvedComponent` | `USceneComponent*` | Returns the targeted scene component, or `nullptr` when the whole `Actor` is the scope. Takes no arguments; the result is cached and revalidated automatically. |
 | `AddTrackedProperty(InProperty)` | `bool` | Adds a tracked property at runtime. Returns `false` if the path does not exist on the `Actor`, the type is unsupported, or the path is already tracked. |
 | `RemoveTrackedProperty(PropertyPath)` | `bool` | Stops tracking a property. Returns `true` if the property was removed. |
 | `UpdateTrackedProperty(PropertyPath, NewSettings)` | `bool` | Updates `Description`, `StateValueDescriptions`, or `ShouldRespond` for an existing entry. The path is the key; to change the path, remove and re-add. |
@@ -119,4 +145,8 @@ Removing a tracked property with `RemoveTrackedProperty` does not erase its last
 
 {% content-ref url="scene-metadata-usage-examples.md" %}
 [Scene metadata usage examples](scene-metadata-usage-examples.md)
+{% endcontent-ref %}
+
+{% content-ref url="../spatial-awareness/README.md" %}
+[Spatial awareness](../spatial-awareness/README.md)
 {% endcontent-ref %}

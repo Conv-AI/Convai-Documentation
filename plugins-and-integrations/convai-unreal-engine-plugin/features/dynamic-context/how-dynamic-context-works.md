@@ -6,6 +6,10 @@ last_reviewed: "4.0.0-beta.21"
 
 Dynamic context is how a Convai character learns about runtime information that was not available — or had not yet occurred — when the session started. You push updates from Blueprint; the plugin stores them locally, batches rapid changes, and sends assembled payloads to Convai.
 
+{% embed url="https://www.youtube.com/watch?v=MPbr3b6r9bo" %}
+Dynamic context in Unreal Engine, walked through end to end
+{% endembed %}
+
 Think of dynamic context as two channels:
 
 | Channel | What it represents | Blueprint node | Example |

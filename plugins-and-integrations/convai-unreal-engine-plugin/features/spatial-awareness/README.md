@@ -1,0 +1,13 @@
+---
+title: Spatial awareness
+last_reviewed: "4.0.0-beta.27"
+description: Give Convai characters a plain-language sense of where objects, other characters, and the player are around them, and why it matters.
+---
+
+Spatial awareness tells each Convai character where the objects, other characters, and the player are around it — how far away, in what direction, whether it can actually see them, and how nearby things relate to one another. The system computes this once per poll, in plain language, and delivers it to every chatbot as a set of context facts the AI reads alongside the conversation.
+
+Spatial awareness replaced the older per-object proximity mechanism in `4.0.0-beta.22`. If you have existing pages, Blueprints, or notes that describe per-object proximity, treat this section as the current model.
+
+Use this section to understand the model, turn the feature on, and tune it for your project.
+
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>How spatial awareness works</strong><br>Understand distance bands, direction, facing, line of sight, relations, and how facts become the sentences a character receives.</td><td><a href="how-spatial-awareness-works.md">how-spatial-awareness-works.md</a></td></tr><tr><td><strong>Spatial awareness quick start</strong><br>Turn on spatial awareness, tune the distance bands, and confirm what a character receives in the debug overlay.</td><td><a href="spatial-awareness-quick-start.md">spatial-awareness-quick-start.md</a></td></tr><tr><td><strong>Describe objects from the player's view</strong><br>Make a character give directions from the player's own camera frame.</td><td><a href="describe-from-player-perspective.md">describe-from-player-perspective.md</a></td></tr><tr><td><strong>Merge same-named objects</strong><br>Merge same-named Convai Object Components into one logical object instead of leaving them as separate, numbered duplicates.</td><td><a href="merge-same-named-objects.md">merge-same-named-objects.md</a></td></tr><tr><td><strong>Spatial awareness settings reference</strong><br>Look up every spatial awareness and object-naming project setting, its default, and its edit condition.</td><td><a href="spatial-awareness-reference.md">spatial-awareness-reference.md</a></td></tr><tr><td><strong>Troubleshoot spatial awareness</strong><br>Fix a character that describes nothing, gets distances or directions wrong, hides objects behind walls, or mixes up duplicate names.</td><td><a href="troubleshoot-spatial-awareness.md">troubleshoot-spatial-awareness.md</a></td></tr></tbody></table>

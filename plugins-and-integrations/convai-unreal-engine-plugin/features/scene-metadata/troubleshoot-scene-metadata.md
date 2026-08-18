@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot scene metadata
 description: Diagnose and fix common problems with scene objects not being recognized, stale environment data, and tracked properties failing to update.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Use this page to diagnose the most common problems with scene metadata in the Convai Unreal Engine plugin. Each section describes a symptom, its likely cause, and the fix.
@@ -128,13 +128,15 @@ The initial seed at session start always uses `EC_RunLLMOption::Never`. Later ch
 
 **Verify:** After reconnecting, ask about the object and check whether the response uses the updated description.
 
-## Proximity state shows wrong description
+## A chatbot's distance, direction, or reachability is wrong
 
-**Symptom:** The chatbot receives unexpected or missing proximity information for an `Actor`.
+**Symptom:** The chatbot describes an `Actor` as being at the wrong distance, in the wrong direction, or unreachable when it should not be.
+
+Scene metadata no longer computes this itself — since `4.0.0-beta.22`, distance, direction, and reachability for every registered object are computed centrally by the [spatial awareness](../spatial-awareness/README.md) subsystem, not by the individual `UConvaiObjectComponent`. See [Troubleshoot spatial awareness](../spatial-awareness/troubleshoot-spatial-awareness.md) for the full set of symptoms and fixes, including empty descriptions, wrong distance bands, and objects wrongly hidden behind walls.
 
 ### No NavMesh
 
-**Cause:** The proximity computation uses the Unreal Engine navigation system. If no NavMesh covers the area, reachability is marked as no walking path or unreachable.
+**Cause:** Reachability relies on the Unreal Engine navigation system. If no NavMesh covers the area, a `UConvaiObjectComponent` is reported as having no walking path or as unreachable.
 
 **Fix:** Add a `NavMeshBoundsVolume` to the level and rebuild navigation (or enable dynamic navigation). Confirm the chatbot `Actor` has a nav agent configured.
 
@@ -144,7 +146,7 @@ The initial seed at session start always uses `EC_RunLLMOption::Never`. Later ch
 
 **Cause:** Reachability problems are difficult to diagnose without seeing the navigation path query result.
 
-**Fix:** Temporarily enable `bDebugDrawProximityPaths` on the `UConvaiObjectComponent` and enter Play mode. The plugin draws the navigation paths from each chatbot to this object. Disable the flag before shipping.
+**Fix:** Temporarily enable `bDebugDrawProximityPaths` on the `UConvaiObjectComponent` and enter Play mode. The plugin draws the navigation path from each subscribed chatbot to this object. Disable the flag before shipping.
 
 **Verify:** Green paths confirm reachability, cyan indicates the chatbot is already at the target, and red means the current query has no valid walking path.
 
@@ -201,4 +203,8 @@ Is ObjectEntry.Name non-empty on the UConvaiObjectComponent?
 
 {% content-ref url="scene-metadata-component-reference.md" %}
 [Scene metadata component reference](scene-metadata-component-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="../spatial-awareness/troubleshoot-spatial-awareness.md" %}
+[Troubleshoot spatial awareness](../spatial-awareness/troubleshoot-spatial-awareness.md)
 {% endcontent-ref %}
