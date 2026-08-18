@@ -1,6 +1,6 @@
 ---
 title: Features
-description: Index of the Convai Unity SDK feature modules: character actions, dynamic context, scene metadata, long-term memory, narrative design, and vision.
+description: "Index of the Convai Unity SDK feature modules: character actions, dynamic context, scene metadata, long-term memory, narrative design, and vision."
 last_reviewed: "4.5.0"
 ---
 
