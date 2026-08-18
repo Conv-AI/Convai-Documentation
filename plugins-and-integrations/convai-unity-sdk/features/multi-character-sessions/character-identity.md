@@ -55,6 +55,32 @@ The same surface covers other humans in the room. Human participants use the ide
 
 ***
 
+## Attributing transcript turns
+
+The transcript timeline is room-wide. `ConvaiManager.Transcripts` maintains one timeline covering the player and every character in the room, not one timeline per membership, so a multi-character transcript UI reads the same source a single-character one does and attributes each turn itself.
+
+Each `TranscriptTurn` identifies its speaker with a `TranscriptSpeaker`, not with a membership. `Type` separates player turns from character turns, `Id` holds the speaking character's `CharacterId`, `DisplayName` holds the name to render, and `ParticipantId` holds the transport participant the turn arrived on. See [Transcript API](../../scripting-reference/transcript-api.md) for the full type.
+
+That list has no membership ID in it, which is what makes clones the interesting case. Two memberships sharing one `CharacterId` produce turns with identical `Speaker.Id` values, and the only field that separates them is `ParticipantId`. Match it against the roster to recover the membership, or filter a query down to one instance with `TranscriptQuery.ParticipantId`.
+
+```csharp
+CharacterRoomMembership speaker = null;
+foreach (CharacterRoomMembership membership in session.Characters)
+{
+    if (membership.ParticipantId == turn.Speaker.ParticipantId)
+    {
+        speaker = membership;
+        break;
+    }
+}
+```
+
+{% hint style="warning" %}
+`ParticipantId` defaults to an empty string and stays empty until the SDK binds the membership to its participant. A turn that arrives without one leaves `Speaker.Id` as the only identity, and two clones of one character become indistinguishable in the transcript. Render such a turn against the character definition rather than guessing an instance, and never assume `Speaker.Id` is unique while clones are in the room.
+{% endhint %}
+
+***
+
 ## Identity in character events
 
 The `CharacterReady` event carries the membership identifiers alongside the character ID it always had: `MembershipId`, `CharacterSessionId`, and `ParticipantIdentity`. Each of the three is an empty string for events raised in a single-character room, which is what lets one handler serve both room shapes — read `MembershipId` when it is non-empty, and fall back to `CharacterId` when it is not.
