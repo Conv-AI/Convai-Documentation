@@ -50,7 +50,7 @@ These do not block connection but may affect functionality.
 | Warning                                      | Cause                                                                          | Fix                                                    |
 | -------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------ |
 | API key not configured                       | `ConvaiSettings.HasApiKey` returns false                                       | Open **Convai > Settings > Credentials** and enter your API key       |
-| Video mode active but no vision source found | The room's `ConvaiRoomManager` hierarchy has no `IVisionPublisher` component, no `IVisionFrameSource` component, or both, while `_connectionType` is `Video` | Add a vision publisher and a frame source component, or switch to `Audio` mode |
+| Video mode active but no vision source found | The room's `ConvaiRoomManager` hierarchy has no `IVisionPublisher` component, no `IVisionFrameSource` component, or both, while the room's effective connection type is `Video` | Add a vision publisher and a frame source component, or switch to `Audio` mode |
 
 The validator derives **API key not configured** from `ConvaiSettings.HasApiKey` alone; it does not check `ConvaiSettings.HasValidAuthConfig`, which accounts for the project's `AuthMode`. A project running in Auth Token mode is not required to have an API key, so this warning can appear even when authentication is correctly configured. If your project uses Auth Token mode, treat this warning as expected and verify your setup on the [Authentication](../authentication/README.md) pages instead of adding an API key.
 

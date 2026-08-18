@@ -86,7 +86,7 @@ These codes appear when Convai rejects or cannot fulfill the connect request. Mo
 | `connection.connect_character_not_found` | The Character ID does not exist on your account | No | Verify the Character ID in the Convai dashboard matches exactly |
 | `connection.connect_realtime_not_allowed` | Realtime access is not enabled for this account | No | Upgrade your Convai plan or contact support |
 | `connection.connect_concurrency_limit_reached` | Your plan's simultaneous session limit is reached | Yes | Disconnect idle characters; upgrade plan for higher limits |
-| `connection.connect_speaker_limit_reached` | Backend speaker limit reached for this account | Yes | Reduce concurrent active characters |
+| `connection.connect_speaker_limit_reached` | Backend speaker limit reached for this account | No | Reduce the number of concurrently active characters, or raise the limit on your account. The SDK does not retry this one — unlike the concurrency limit, it is treated as a hard limit rather than a transient condition. |
 | `connection.connect_bot_start_failed` | Convai pipeline failed to start (transient backend issue) | Yes | SDK retries automatically; if persistent, contact support |
 | `connection.connect_unhandled_server_exception` | Unhandled exception on Convai during connect | Yes | SDK retries automatically; check Convai status page if persistent |
 | `connection.timeout` | Connect did not complete within the timeout window | Yes | Check internet connection; increase **Connection Timeout** in settings (default 30 s, max 120 s) |
