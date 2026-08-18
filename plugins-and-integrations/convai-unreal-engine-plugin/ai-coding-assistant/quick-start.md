@@ -6,6 +6,10 @@ last_reviewed: "4.0.0-beta.27"
 
 Connect a supported coding agent to an Unreal project that already has the Convai plugin installed, so the agent can call Convai's editor actions and read its skill documents. Use this quick start the first time you set up AI coding on a project. At the end, your agent's context file carries the Convai primer if you chose one, and the agent can reach Convai's tools through the engine's MCP server.
 
+{% embed url="https://youtu.be/dQgOzt8BNIk" %}
+Setting up MCP and driving the editor with a coding agent
+{% endembed %}
+
 ## Prerequisites
 
 - Unreal Engine **5.8 or later**. On UE 5.0–5.7 the `ConvaiToolset` module compiles empty and the **Set Up AI Coding (MCP)** menu item does not appear.

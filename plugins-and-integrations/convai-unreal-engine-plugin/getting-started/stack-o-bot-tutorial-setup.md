@@ -4,7 +4,11 @@ description: Build the sample project used by the Convai character actions tutor
 last_reviewed: "4.0.0-beta.27"
 ---
 
-The Convai character actions tutorial is filmed in Epic Games' free Stack O Bot sample with a set of Convai files applied on top. This page builds that project from scratch so your editor matches the tutorial. You need it only if you want to follow the tutorial in the same scene; the character actions guides work in any project.
+Convai's AI player tutorial series is filmed in Epic Games' free Stack O Bot sample with a set of Convai files applied on top. In it, a human player and a Convai-powered teammate solve a two-player puzzle that neither can finish alone. This page builds that project from scratch so your editor matches the video. You need it only if you want to follow along in the same scene; every feature the series covers works in any project.
+
+{% embed url="https://youtu.be/KcJETVhI7KM" %}
+Part one of the AI player series, filmed in this project
+{% endembed %}
 
 ## Before you start
 
@@ -98,7 +102,7 @@ If the map is missing, the delta was copied one level too deep — check that `C
 
 ## Next steps
 
-With the sample project running, follow the character actions tutorial in the scene it was filmed in.
+With the sample project running, follow the series in the scene it was filmed in. Part one brings the AI teammate into the level, enables actions, and tags the pressure plates and the moving platform; part two adds the custom pickup and drop actions for the crate. The pages below cover the same ground in written form.
 
 {% content-ref url="../features/character-actions/character-actions-quick-start.md" %}
 [Character actions quick start](../features/character-actions/character-actions-quick-start.md)
