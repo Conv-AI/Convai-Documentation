@@ -16,6 +16,7 @@ With these APIs, you can:
 * **Build and maintain Knowledge Banks** — upload, update, and organize documents that form the character’s domain knowledge.
 * **Develop backstories** using the **Backstory API**, providing depth and continuity to your characters.
 * **Design narrative elements** via the **Narrative Design API** to create immersive storylines and world-building connections.
+* **Create External API functions** — Python handlers characters can call as tools (weather, tickets, live data) via the **External API**.
 * **Define and manage actions** (gestures, movements, or environment-specific behaviors) using the **Action API**.
 * **Access language and voice options** via the **Language List** and **Voice List APIs**, allowing multilingual and voice-customized character experiences.
 * **Retrieve and manage character lists and versions** through the **Character List API**, ensuring your production characters stay organized and versioned properly.
@@ -45,6 +46,10 @@ Together, these APIs let you shape a character’s **core intelligence, emotiona
 
 {% content-ref url="knowledge-bank-api.md" %}
 [knowledge-bank-api.md](knowledge-bank-api.md)
+{% endcontent-ref %}
+
+{% content-ref url="external-api.md" %}
+[external-api.md](external-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="action-api.md" %}
