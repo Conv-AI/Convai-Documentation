@@ -51,5 +51,5 @@
     "tools/rules.py": "943d5762295389729eec6de372f49c91e28ee1b7776164bb16a0e7273dd1421e"
   },
   "generated_by": "convai-docs-tools/scripts/sync_agent_rules.py",
-  "plugin_version": "2.2.0"
+  "plugin_version": "2.2.1"
 }
