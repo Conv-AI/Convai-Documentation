@@ -1,10 +1,10 @@
 ---
 title: Configure the microphone
-description: Select a capture device, adjust volume, and handle Android microphone permissions so player speech reaches the Convai character correctly.
-last_reviewed: "4.0.0-beta.21"
+description: Select a capture device, adjust volume, test the microphone, and handle Android permissions so player speech reaches the Convai character.
+last_reviewed: "4.0.0-beta.27"
 ---
 
-`UConvaiPlayerComponent` captures microphone audio through `UConvaiAudioCaptureComponent`. By default it opens the system's default capture device at initialization. Use the Blueprint functions on `UConvaiPlayerComponent` to enumerate, select, and adjust the capture device at runtime.
+`UConvaiPlayerComponent` captures microphone audio through `UConvaiAudioCaptureComponent`. By default it opens the system's default capture device at initialization, then re-applies whichever device and gain the player last saved. Use the Blueprint functions on `UConvaiPlayerComponent` to enumerate, select, and adjust the capture device at runtime.
 
 ## Default behavior
 
@@ -42,6 +42,25 @@ To switch from the default device, call one of these functions on `UConvaiPlayer
 | `SetCaptureDeviceByName(DeviceName)` | Device name string. | `bool` — `true` if the switch succeeded. |
 
 Call either function while audio capture is active (for example, during an active push-to-talk or VAD session). A common pattern is to build a settings menu that lists `GetAvailableCaptureDeviceNames()` and calls `SetCaptureDeviceByIndex()` when the player picks a device. Device selection before capture starts may not take effect until the next capture session.
+
+## Save the choice across sessions
+
+Since `4.0.0-beta.27`, the device and gain a player selects persist across sessions instead of resetting to the system default on every launch. `UConvaiPlayerComponent` reads and writes this preference through `UConvaiMicrophoneSubsystem`.
+
+Call `ApplySavedMicrophoneSettings()` after a device change if you need to revert unsaved changes — the component already calls it automatically during `BeginPlay`, so a project that never calls `SaveMicrophoneSettings()` behaves exactly as before. Call `SaveMicrophoneSettings()` on `UConvaiPlayerComponent` once the player confirms their choice, for example from a **Save** button in a settings menu:
+
+| Function | Returns | Description |
+|---|---|---|
+| `SaveMicrophoneSettings()` | `bool` | Persists the component's current capture device and gain so they are restored on the next launch. |
+| `ApplySavedMicrophoneSettings()` | `bool` | Re-applies the persisted device and gain, skipping the device if it is no longer plugged in. |
+
+For the full persisted-settings Blueprint surface, see [Microphone and audio capture](../blueprint-reference/microphone-and-audio-capture.md).
+
+## Test the microphone
+
+`StartRecording()` and `FinishRecording()` on `UConvaiPlayerComponent` record a short sample and return it as a `USoundWave`, so a settings menu can play back what the selected device captures.
+
+Since `4.0.0-beta.27`, this test recording also works while a conversation stream is already open — previously, calling `StartRecording()` during an open stream produced no audio. While the test is recording, the character does not hear it: the stream stays open, but the recording is not forwarded to it. `FinishRecording()` restores the project's mute setting (the `bMute` value on `UConvaiPlayerComponent`) to what it was before the test started, rather than clearing it.
 
 ## Adjust the microphone volume
 
