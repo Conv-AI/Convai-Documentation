@@ -13,6 +13,8 @@ The **External API** feature empowers your characters to interact intelligently 
 
 {% embed url="https://www.youtube.com/watch?v=Ep1yUeu91FE" %}
 
+Before you write methods, skim [External API limitations](external-api-limitations.md) — supported models, Python runtime, allowed libraries, input schema, and per-character caps. Same page is linked from the API reference.
+
 ***
 
 ## Configuration and Usage
@@ -281,7 +283,7 @@ As seen in the screenshot below, the character successfully created a Jira ticke
 {% endhint %}
 
 {% hint style="warning" %}
-**Python Version**: 3.12
+**Python Version**: 3.11
 {% endhint %}
 
 {% hint style="warning" %}

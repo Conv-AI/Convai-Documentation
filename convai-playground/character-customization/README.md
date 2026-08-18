@@ -46,7 +46,7 @@ The **Character Customization** section in Convai Playground is where you transf
     Continue to: [_Narrative Design_](narrative-design.md)
 11. **External API**\
     Connect your character to external systems or APIs to retrieve live data or perform actions.\
-    Continue to: [_External API_](external-api.md)
+    Continue to: [_External API_](external-api.md) · [_Limitations_](external-api-limitations.md)
 12. **Publish**\
     Share your character with others or embed it into your website.\
     Continue to: [_Publish_](publish.md)

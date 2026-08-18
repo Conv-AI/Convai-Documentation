@@ -24,6 +24,7 @@
   * [Mindview](convai-playground/character-customization/mindview.md)
   * [Narrative Design | Playground](convai-playground/character-customization/narrative-design.md)
   * [External API](convai-playground/character-customization/external-api.md)
+  * [External API limitations](convai-playground/character-customization/external-api-limitations.md)
   * [Publish](convai-playground/character-customization/publish.md)
   * [MCP Servers](convai-playground/character-customization/mcp-servers.md)
 
