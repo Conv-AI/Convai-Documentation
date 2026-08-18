@@ -23,8 +23,8 @@ to stop reading it.
 
 ## Structure
 
-- [ ] Markdown body does not contain a duplicate `#` H1 **(CV-25)**
-- [ ] Body starts with a headingless lead paragraph **(CV-26)**
+- [ ] The page has exactly one title: frontmatter `title` or a leading `#` heading, never both, and no second `#` **(CV-25, CV-33)**
+- [ ] The lead paragraph comes first and carries no heading — on a page titled by a leading `#`, immediately after it **(CV-26)**
 - [ ] No `## Overview` or `## Introduction` **(CV-27)**
 - [ ] Main sections use `##`; subsections use `###` **(CV-26)**
 - [ ] Heading levels are not skipped **(CV-31)**

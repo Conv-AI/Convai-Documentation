@@ -17,6 +17,20 @@ the prose against it.
 The contract is JSON, not YAML, for the same reason nothing here imports a third-party
 package: the linter has to run on any machine on the team with nothing installed.
 
+Capture kinds, one per way a language names its public surface:
+
+    csharp_type       C# class/struct/interface/enum
+    attributed_type   the C# type an attribute decorates, e.g. [AddComponentMenu]
+    cpp_type          C++ class/struct/enum class, with or without an EXPORT_API macro
+    ts_export         a TypeScript `export class|interface|type|enum|function|const`
+    python_class      a top-level Python class
+    http_route        a route as a web framework declares it, e.g. @app.get("/healthz")
+    key_value_string  a quoted value on a named key, e.g. DisplayName = "Convai Chatbot"
+    json_field        a value or key read from a JSON manifest
+    dir_name          the folder name itself, for directory-per-feature layouts
+    file_name         the file name without its extension
+    attribute         the quoted argument of an attribute, e.g. the menu path itself
+
 Contract shape:
 
     {
@@ -25,7 +39,8 @@ Contract shape:
       "package_root": "Packages/com.convai.convai-sdk-for-unity/",
       "version": {"file": "package.json", "field": "version"},
       "extract": {
-        "components": {"glob": "SDK/Runtime/Components/*.cs", "capture": "csharp_type"},
+        "components": {"glob": "SDK/Runtime/Components/*.cs", "capture": "csharp_type",
+                       "name_pattern": "^Convai"},
         "modules":    {"glob": "SDK/Modules/*/",              "capture": "dir_name"},
         "assemblies": {"glob": "SDK/Modules/*/*.asmdef",      "capture": "json_field",
                        "field": "name"},
@@ -56,6 +71,38 @@ CSHARP_TYPE = re.compile(
     r"(?:public|internal|protected|private)?\s*"
     r"(?:static\s+|sealed\s+|abstract\s+|partial\s+|readonly\s+|unsafe\s+)*"
     r"(class|struct|interface|enum)\s+([A-Za-z_]\w*)")
+
+# Unreal: `class CONVAI_API UConvaiChatbotComponent : public ...`, `struct FConvaiObjectEntry`,
+# `enum class EConvaiPlayerAction`. The API macro is optional and its name varies per module,
+# so it is matched by shape rather than listed.
+CPP_TYPE = re.compile(
+    r"(?m)^\s*(?:template\s*<[^>]*>\s*)?"
+    r"(class|struct)\s+(?:[A-Z][A-Z0-9_]*_API\s+)?([A-Za-z_]\w*)"
+    r"\s*(?::|\{|;|$)")
+CPP_ENUM = re.compile(r"(?m)^\s*enum\s+class\s+([A-Za-z_]\w*)")
+
+# TypeScript: what a consumer can import. A name that is not exported is not surface, however
+# public it looks, so the `export` keyword is required rather than optional.
+TS_EXPORT = re.compile(
+    r"(?m)^export\s+(?:declare\s+)?(?:default\s+)?"
+    r"(?:abstract\s+)?(class|interface|type|enum|function|const)\s+([A-Za-z_$][\w$]*)")
+
+TS_REEXPORT = re.compile(r"(?m)^export\s*\{([^}]*)\}")
+
+# Python: a class is the unit an API page names. Nested classes are excluded by requiring
+# column zero; private ones by the leading underscore, checked at the call site.
+PYTHON_CLASS = re.compile(r"(?m)^class\s+([A-Za-z_]\w*)")
+
+# A quoted value on a named key: `DisplayName = "Convai Chatbot"` in an Unreal macro. This is
+# how a Blueprint node's label is found, and a label guessed from a type name is a click path
+# that does not exist.
+# Two shapes, because two ecosystems write it differently: `DisplayName = "Convai Chatbot"`
+# in an Unreal macro, and `label: 'Core Description'` in a TypeScript object literal.
+KEY_VALUE_STRING_TEMPLATE = r'\b%s\s*[:=]\s*["\']([^"\']+)["\']'
+
+# An HTTP route as a web framework declares it: `@app.get("/healthz")`, `@router.post("/x")`.
+HTTP_ROUTE = re.compile(
+    r"""@\w+\.(get|post|put|patch|delete|websocket)\(\s*["']([^"']+)["']""")
 
 # Unity ignores these; so must we, or every type is reported twice.
 IGNORED_SUFFIXES = (".meta",)
@@ -145,6 +192,19 @@ def _json_field(data, field):
 
 
 def capture_from(path, rel, spec):
+    values = _capture_raw(path, rel, spec)
+    # A glob says where a kind of thing lives; `name_pattern` says which of the things in
+    # there it actually is. C++ puts a component, its state enum and three helper structs in
+    # one header, and reporting all five as components is the sort of noise that teaches
+    # people to stop reading the report.
+    pattern = spec.get("name_pattern")
+    if pattern:
+        matcher = re.compile(pattern)
+        values = [v for v in values if v and matcher.search(str(v))]
+    return values
+
+
+def _capture_raw(path, rel, spec):
     kind = spec.get("capture", "file_name")
 
     if kind == "dir_name":
@@ -157,6 +217,50 @@ def capture_from(path, rel, spec):
         # A partial class spread over several files must be counted once, and the file name
         # is not the type name: `ConvaiCharacter.Actions.cs` declares `ConvaiCharacter`.
         return [m.group(2) for m in CSHARP_TYPE.finditer(read(path))]
+
+    if kind == "cpp_type":
+        text = read(path)
+        names = [m.group(2) for m in CPP_TYPE.finditer(text)]
+        names += [m.group(1) for m in CPP_ENUM.finditer(text)]
+        # A forward declaration and a definition look the same here. Keeping both is the safe
+        # direction: a name declared and never defined is not surface either way, and the
+        # contract's must_exist list is what catches a real disappearance.
+        return names
+
+    if kind == "ts_export":
+        text = read(path)
+        names = [m.group(2) for m in TS_EXPORT.finditer(text)]
+        # `export { A, B as C } from './x'` is how a barrel file decides what a consumer can
+        # import. Reading only declaration sites misses those, and a barrel file is the
+        # package's actual public contract.
+        for m in TS_REEXPORT.finditer(text):
+            for part in m.group(1).split(","):
+                part = part.strip()
+                if not part or part == "default":
+                    continue
+                # `A as B` publishes B; the local name A is not what a reader imports.
+                name = part.split(" as ")[-1].strip()
+                name = name.replace("type ", "").strip()
+                if name and name[0].isalpha() or name[:1] in ("_", "$"):
+                    names.append(name)
+        return names
+
+    if kind == "python_class":
+        return [m.group(1) for m in PYTHON_CLASS.finditer(read(path))
+                if not m.group(1).startswith("_")]
+
+    if kind == "http_route":
+        methods = spec.get("methods")
+        out = []
+        for m in HTTP_ROUTE.finditer(read(path)):
+            if methods and m.group(1) not in methods:
+                continue
+            out.append("%s %s" % (m.group(1).upper(), m.group(2)))
+        return out
+
+    if kind == "key_value_string":
+        pattern = re.compile(KEY_VALUE_STRING_TEMPLATE % re.escape(spec["key"]))
+        return [m.group(1) for m in pattern.finditer(read(path))]
 
     if kind == "attributed_type":
         # The type an attribute decorates. `[AddComponentMenu(...)]` is the only mechanical
