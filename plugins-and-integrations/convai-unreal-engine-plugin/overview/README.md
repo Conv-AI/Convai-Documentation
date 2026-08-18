@@ -1,7 +1,7 @@
 ---
 title: Convai Unreal Engine plugin overview
-description: Find explanations of what the Convai Unreal Engine plugin is, how its four modules and runtime components are structured, and what changed in each release.
-last_reviewed: "4.0.0-beta.21"
+description: Find explanations of what the Convai Unreal Engine plugin is, how its five modules and runtime components are structured, and what changed in each release.
+last_reviewed: "4.0.0-beta.27"
 ---
 
 New to the plugin? Start with what it is and how it is built, then use the feature map to find the right guide for your goal. These pages are orientation only — installation and setup live in Getting started.
@@ -29,6 +29,10 @@ New to the plugin? Start with what it is and how it is built, then use the featu
 <tr>
 <td><strong>Release notes</strong><br>Version history and notable changes for the Convai Unreal Engine plugin.</td>
 <td><a href="release-notes.md">release-notes.md</a></td>
+</tr>
+<tr>
+<td><strong>Migrate to 4.0.0-beta.27</strong><br>Every removed pin, retired enum, and renamed field an existing project has to fix when upgrading from the previous beta.</td>
+<td><a href="migrate-to-4-0-0-beta-27.md">migrate-to-4-0-0-beta-27.md</a></td>
 </tr>
 </tbody>
 </table>

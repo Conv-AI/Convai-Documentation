@@ -1,7 +1,7 @@
 ---
 title: Getting started
 description: Install the Convai Unreal Engine plugin, configure your API key, and place your first talking character — follow the core path in order for the fastest result.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 By the end of this section, your project contains a working Convai character in Unreal Engine. Follow the core path pages in order — each step builds directly on the previous one. Character rig and configuration pages are optional branches you can complete in any order after the first conversation is working.
@@ -123,6 +123,10 @@ Tune audio, input, and UI after the first conversation is working. Each page is 
 <tr>
 <td><strong>Validate your setup</strong><br>Run through a checklist to confirm that every part of your setup is working before adding features.</td>
 <td><a href="validate-your-setup.md">validate-your-setup.md</a></td>
+</tr>
+<tr>
+<td><strong>Stack O Bot tutorial setup</strong><br>Build the sample project the character actions tutorial is filmed in, from Epic's free Stack O Bot plus the Convai tutorial files.</td>
+<td><a href="stack-o-bot-tutorial-setup.md">stack-o-bot-tutorial-setup.md</a></td>
 </tr>
 </tbody>
 </table>
