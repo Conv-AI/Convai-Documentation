@@ -49,22 +49,26 @@ Open **Project Settings → Convai** (or select the `ConvaiSettings` asset at `A
 
 ### Log categories
 
-| Category     | Subsystem                                   |
-| ------------ | ------------------------------------------- |
-| `SDK`        | General operations                          |
-| `Character`  | Per-character session lifecycle             |
-| `Audio`      | Microphone capture, playback, audio device  |
-| `Transport`  | WebRTC / WebSocket connection layer         |
-| `Events`     | Internal event bus                          |
-| `Transcript` | Transcript processing and routing           |
-| `Narrative`  | Narrative design system                     |
-| `LipSync`    | Lip sync processing and blendshape playback |
-| `Vision`     | Camera capture and video publishing         |
-| `Bootstrap`  | SDK startup and initialization              |
-| `UI`         | UI component lifecycle                      |
-| `REST`       | REST API communication                      |
-| `Player`     | Player identity and input                   |
-| `Editor`     | Editor-only operations                      |
+| Category       | Subsystem                                                                             |
+| -------------- | -------------------------------------------------------------------------------------- |
+| `SDK`          | General operations                                                                    |
+| `Character`    | Per-character session lifecycle                                                       |
+| `Audio`        | Microphone capture, playback, audio device                                            |
+| `UI`           | UI component lifecycle                                                                |
+| `REST`         | REST API communication                                                                |
+| `Transport`    | WebRTC / WebSocket connection layer                                                   |
+| `Events`       | Internal event bus                                                                    |
+| `Player`       | Player identity and input                                                             |
+| `Editor`       | Editor-only operations                                                                |
+| `Vision`       | Camera capture and video publishing                                                   |
+| `Bootstrap`    | SDK startup and initialization                                                         |
+| `Transcript`   | Transcript processing and routing                                                     |
+| `Narrative`    | Narrative design system                                                               |
+| `LipSync`      | Lip sync processing and blendshape playback                                           |
+| `Animation`    | Body animation system — layers, transitions, and locomotion                           |
+| `Gaze`         | Gaze system — targeting, policy, and eye/head/body solvers                            |
+| `BodyLanguage` | Body language system — gesticulation, posture, breathing, and fidgets                 |
+| `Actions`      | Action system — which commands arrived, which were dropped, and how targets resolved  |
 
 These values correspond to the `Convai.Domain.Logging.LogCategory` enum.
 
