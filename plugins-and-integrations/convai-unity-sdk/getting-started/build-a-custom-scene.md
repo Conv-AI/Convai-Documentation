@@ -125,7 +125,7 @@ The copy is created next to the character's prefab when it has one, or under `As
 * Each `ConvaiCharacter` has its own unique Character ID
 * Only one `ConvaiManager` and one `ConvaiPlayer` in the scene
 
-**Expected outcome:** Both characters are discovered and registered automatically. Conversation switches between them based on which character the player addresses.
+**Expected outcome:** Both characters are discovered and registered automatically, but with more than one character in the scene `ActiveConversationCharacter` stays unset until you call `ConvaiManager.SetExplicitConversationTarget` to choose which character receives the player's speech.
 
 Character A and Character B do not share conversation context unless your Convai character configuration explicitly links them.
 

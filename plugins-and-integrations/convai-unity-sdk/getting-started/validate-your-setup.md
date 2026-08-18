@@ -34,12 +34,14 @@ A dialog appears with a list of **Errors** (must fix), **Warnings** (recommended
 
 These prevent the scene from connecting to Convai.
 
-| Error                                 | Cause                    | Fix                                                     |
-| ------------------------------------- | ------------------------ | ------------------------------------------------------- |
-| No `ConvaiManager` found in scene     | SDK is not initialized   | Run **GameObject > Convai > Setup Required Components** |
-| No `ConvaiCharacter` found in scene   | No characters registered | Add `ConvaiCharacter` to your NPC GameObject            |
-| `ConvaiCharacter` has no Character ID | Required field is empty  | Enter the Character ID from your Convai dashboard       |
-| No `ConvaiPlayer` found in scene      | Player component missing | Run **GameObject > Convai > Setup Required Components** |
+| Error                                          | Cause                                                                                                                         | Fix                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| No `ConvaiManager` found in scene              | SDK is not initialized                                                                                                        | Run **GameObject > Convai > Setup Required Components**               |
+| No `ConvaiRoomManager` found in scene          | Room connection component missing                                                                                            | Run **GameObject > Convai > Setup Required Components**               |
+| TextMesh Pro Essential Resources not imported  | Convai's UI prefabs and fonts reference TextMesh Pro's runtime shader and default font, which Unity imports per project rather than shipping in the package. A scene containing Convai UI throws on open without them. | Select **Window > TextMeshPro > Import TMP Essential Resources**      |
+| No `ConvaiCharacter` found in scene            | No characters registered                                                                                                     | Add `ConvaiCharacter` to your NPC GameObject                          |
+| `ConvaiCharacter` has no Character ID          | Required field is empty                                                                                                       | Enter the Character ID from your Convai dashboard                     |
+| No `ConvaiPlayer` found in scene               | Player component missing                                                                                                     | Run **GameObject > Convai > Setup Required Components**               |
 
 ### Warnings — recommended
 
@@ -48,7 +50,9 @@ These do not block connection but may affect functionality.
 | Warning                                      | Cause                                                                          | Fix                                                    |
 | -------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------ |
 | API key not configured                       | `ConvaiSettings.HasApiKey` returns false                                       | Open **Convai > Settings > Credentials** and enter your API key       |
-| Video mode active but no vision source found | `_connectionType` is `AudioVideo` but no `IVisionFrameSource` component exists | Add a frame source component or switch to `Audio` mode |
+| Video mode active but no vision source found | The room's `ConvaiRoomManager` hierarchy has no `IVisionPublisher` component, no `IVisionFrameSource` component, or both, while the room's effective connection type is `Video` | Add a vision publisher and a frame source component, or switch to `Audio` mode |
+
+The validator derives **API key not configured** from `ConvaiSettings.HasApiKey` alone; it does not check `ConvaiSettings.HasValidAuthConfig`, which accounts for the project's `AuthMode`. A project running in Auth Token mode is not required to have an API key, so this warning can appear even when authentication is correctly configured. If your project uses Auth Token mode, treat this warning as expected and verify your setup on the [Authentication](../authentication/README.md) pages instead of adding an API key.
 
 {% hint style="success" %}
 When the validator shows zero errors and zero warnings, your scene is ready for Play Mode.

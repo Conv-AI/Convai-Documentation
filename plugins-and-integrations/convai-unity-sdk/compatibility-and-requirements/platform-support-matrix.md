@@ -81,8 +81,9 @@ Quest passthrough vision (`QuestVisionFrameSource`) is supported on **Quest 3 an
 
 * Meta XR SDK imported into your project
 * `PassthroughCameraAccess` component present in the scene
+* The `horizonos.permission.HEADSET_CAMERA` and `android.permission.CAMERA` permissions granted to the app
 
-The required passthrough camera permissions are declared automatically when Meta XR SDK is imported.
+The Convai Unity SDK does not ship an `AndroidManifest.xml` and does not declare or request these permissions itself — `QuestVisionFrameSource` requires both to already be granted. Declare them in your project's manifest and confirm they are granted before relying on passthrough capture.
 
 On other Quest hardware or non-Quest platforms, `QuestVisionFrameSource` produces no frames. Use `CameraVisionFrameSource` or `WebcamVisionFrameSource` instead.
 

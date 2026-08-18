@@ -1,7 +1,7 @@
 ---
 title: Character events
 description: Reference for character events — speech, emotion, transcripts, turn lifecycle, and actions — via relay component or the `ConvaiEvents` C# hub.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Character events let you drive UI, animation, gameplay, and assessment logic in response to what AI characters say, feel, and do. The SDK provides two Inspector relay components for no-code wiring and a typed C# event hub for scripted reactions. Both approaches observe the same underlying events.
@@ -266,11 +266,16 @@ public class CharacterAudioIndicator : MonoBehaviour
 
 ### `CharacterReady`
 
-| Field           | Type       | Description                                    |
-| --------------- | ---------- | ---------------------------------------------- |
-| `CharacterId`   | `string`   | Character identifier                           |
-| `ParticipantId` | `string`   | Room participant identifier for this character |
-| `Timestamp`     | `DateTime` | UTC time the character became ready            |
+| Field               | Type       | Description                                    |
+| ------------------- | ---------- | ---------------------------------------------- |
+| `CharacterId`       | `string`   | Character identifier                           |
+| `ParticipantId`     | `string`   | Room participant identifier for this character |
+| `MembershipId`      | `string`   | The membership this ready signal belongs to in a multi-character room. Empty string in a single-character session. |
+| `CharacterSessionId`| `string`   | The membership's character-session identifier in a multi-character room. Empty string in a single-character session. |
+| `ParticipantIdentity` | `string` | The membership's transport participant identity in a multi-character room. Empty string in a single-character session. |
+| `Timestamp`         | `DateTime` | UTC time the character became ready            |
+
+See [Character identity and addressing](../features/multi-character-sessions/character-identity.md) for how these fields address a membership in a shared room.
 
 ### `CharacterTurnCompleted`
 

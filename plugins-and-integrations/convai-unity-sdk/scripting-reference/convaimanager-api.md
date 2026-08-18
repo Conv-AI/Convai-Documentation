@@ -1,7 +1,7 @@
 ---
 title: ConvaiManager API
 description: Scripting reference for ConvaiManager — the SDK entry point for connection control, facade access, conversation ownership, and service discovery.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 `ConvaiManager` is the primary scripting entry point for the Convai Unity SDK. It initializes the runtime, manages room connections, owns the `Events`, `Audio`, and `Transcripts` facades, and grants access to lower-level services through typed accessors. Every scripted interaction begins here.
@@ -89,6 +89,10 @@ Pass this to the second overload to override runtime behavior at connect time.
 | `EndUserMetadata`           | `IReadOnlyDictionary<string, object>` | Additional metadata for the end user                                 |
 | `ActionConfigOverride`      | `ConvaiActionConfig`                  | Override the action configuration for this session                   |
 | `ActionDefinitionsOverride` | `List<ConvaiActionDefinition>`        | Override the action definitions registered for this session          |
+| `SharedSessionKey`          | `string`                              | Optional shared session key used to group multiplayer participants into the same room. See [Multi-character connection API reference](../features/multi-character-sessions/connection-api-reference.md). |
+| `RoomSessionId`             | `string`                              | Durable multi-character room identifier used when joining an existing room. Set through `MultiCharacterJoinOptions` for normal use rather than directly. |
+| `JoinExistingMultiCharacterRoom` | `bool`                           | Selects a topology-free human join rather than building and sending a roster. |
+| `MaxNumParticipants`        | `int`                                 | Optional maximum number of participants for the shared session.      |
 
 ```csharp
 var options = new RoomSessionConnectOptions
@@ -209,7 +213,7 @@ if (manager.TryGetMicrophoneDeviceService(out var micService))
 | Method                                                              | Service Type                     | Common Use Case                                                         |
 | ------------------------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------- |
 | `TryGetEventHub(out IEventHub)`                                     | `IEventHub`                      | Raw event bus access via `ConvaiEvents.Raw`; advanced subscriptions     |
-| `TryGetRoomConnectionService(out IConvaiRoomConnectionService)`     | `IConvaiRoomConnectionService`   | Low-level connection lifecycle control                                  |
+| `TryGetRoomConnectionService(out IConvaiRoomConnectionService)`     | `IConvaiRoomConnectionService`   | Low-level connection lifecycle control, including [multi-character session operations](../features/multi-character-sessions/connection-api-reference.md) |
 | `TryGetRoomAudioService(out IConvaiRoomAudioService)`               | `IConvaiRoomAudioService`        | Direct audio service access (bypasses `ConvaiAudio` facade)             |
 | `TryGetAgentRegistry(out IAgentRegistry)`                           | `IAgentRegistry`                 | Query registered characters and players                                 |
 | `TryGetSettingsPanelController(out IConvaiSettingsPanelController)` | `IConvaiSettingsPanelController` | Programmatically open/close the settings panel                          |
@@ -218,7 +222,7 @@ if (manager.TryGetMicrophoneDeviceService(out var micService))
 | `TryGetPermissionService(out IConvaiPermissionService)`             | `IConvaiPermissionService`       | Request platform microphone permissions (Android, iOS)                  |
 | `TryGetNotificationService(out IConvaiNotificationService)`         | `IConvaiNotificationService`     | Trigger SDK notifications from your own scripts                         |
 | `TryGetPlayerInputService(out IPlayerInputService)`                 | `IPlayerInputService`            | Access player input state and text message routing                      |
-| `TryGetVisibleCharacterService(out IVisibleCharacterService)`       | `IVisibleCharacterService`       | Query which characters are visible in the camera frustum                |
+| `TryGetVisibleCharacterService(out IVisibleCharacterService)`       | `IVisibleCharacterService`       | Maintain the set of character IDs your own visibility logic has added via `AddCharacter`/`RemoveCharacter`; used by transcript UIs for filtering and fading |
 | `TryGetTransportProvider(out ITransportProvider)`                   | `ITransportProvider`             | Access the transport layer for diagnostic or custom transport scenarios |
 
 ***
