@@ -16,6 +16,8 @@ Add a character to a running multi-character session with `AddCharacterAsync`, a
 
 Call `AddCharacterAsync(IConvaiCharacterAgent character, string characterSessionId = null, CancellationToken cancellationToken = default)`. The optional `characterSessionId` resumes that character instance's earlier conversation instead of starting a new one.
 
+This is also the path for a character that was inactive or disabled when the room connected. An inactive `ConvaiCharacter` is excluded from the startup roster without an error, but it stays owned — activate its `GameObject` and component, then call `AddCharacterAsync` with that instance to bring it into the room.
+
 Adding the same local character instance twice throws an `ArgumentException` with the message `This local character instance is already a member of the current room. Use another instance when adding a clone.`. To add a clone of a character already in the room, instantiate a second `ConvaiCharacter` component and add that instance instead — it becomes an independently addressable membership even though it shares a `CharacterId` with the original.
 
 The command shares a roster-mutation gate with `RemoveCharacterAsync`, so only one roster change is in flight at a time, and it faults with a `TimeoutException` carrying `Timed out waiting for the character-roster-update acknowledgement.` if no acknowledgement arrives within 15 seconds.

@@ -4,30 +4,59 @@ description: Understand how a Unity scene with several characters becomes one sh
 last_reviewed: "4.6.0"
 ---
 
-A multi-character session is one room that holds several character memberships at once, instead of one room per character. The SDK decides which shape to use at connect time, builds the roster from the characters registered in the scene, and then keeps a local projection of that roster in step with Convai using an acknowledged, epoch-guarded command model. This page explains that machinery so the behavior of `MultiCharacterRoomSession` is predictable rather than surprising.
+A multi-character session is one room that holds several character memberships at once, instead of one room per character. The SDK decides which shape to use at connect time, builds the roster from the characters it owns and that are active and enabled, and then keeps a local projection of that roster in step with Convai using an acknowledged, epoch-guarded command model. This page explains that machinery so the behavior of `MultiCharacterRoomSession` is predictable rather than surprising.
+
+***
+
+## Which characters count as owned
+
+`ConvaiManager` resolves the characters it owns before it resolves a roster, and it prefers an explicit list over scene discovery. Ownership checks these sources in order and uses the first one that is not empty:
+
+1. The characters passed to `ConvaiManager.SetExplicitCharacters`.
+2. A `ConvaiSceneInstaller` in the scene — first its `OwnedCharacters` list, then its `Characters` list when `OwnedCharacters` is empty.
+3. The single character passed to `ConvaiManager.SetExplicitConversationTarget`, when nothing above supplied any character.
+4. Every `ConvaiCharacter` found in the loaded scenes, including inactive ones, ordered by scene hierarchy position.
+
+`ConvaiManager.Characters` returns this full owned list, and it is **not** filtered by activation state — an inactive or disabled character stays in it. The active-only filter described below runs later, only when the SDK builds the roster it sends to Convai.
+
+A multi-character scene can therefore expose three different character lists, and they answer different questions:
+
+| Surface | What it lists | Includes an inactive character |
+| --- | --- | --- |
+| `ConvaiManager.Characters` | Every character the manager currently owns, resolved as above. | Yes |
+| `IAgentRegistry.Characters`, from `ConvaiManager.TryGetAgentRegistry` | Every character currently registered — registration happens in `OnEnable` and is undone in `OnDisable`. | No |
+| `MultiCharacterRoomSession.Characters` | Every membership currently in the connected room's roster. | No — an inactive character was excluded before the roster was built. |
+
+Use `ConvaiManager.Characters` to inspect what the scene owns before connecting, `IAgentRegistry.Characters` to see what is registered right now, and `MultiCharacterRoomSession.Characters` to see what the connected room actually contains.
 
 ***
 
 ## Roster creation at connect
 
-The SDK builds a roster when two or more `ConvaiCharacter` components are registered with the manager at connect time. With one registered character, the connect path is unchanged and no roster is sent — the room is a single-character room and `CurrentMultiCharacterSession` stays `null`. With two or more, the SDK assembles a roster and submits the whole cast in the connect request.
+The SDK builds a roster from the owned characters that are active and enabled when `ConnectAsync` runs. With one such character, the connect path is unchanged and no roster is sent — the room is a single-character room and `CurrentMultiCharacterSession` stays `null`. With two or more, the SDK assembles a roster and submits the whole cast in the connect request.
 
-The roster is built in a fixed order. The active conversation target is placed first, and every other registered character follows in registration order. This is why the conversation target decides which character becomes the room's initial character, and why changing it changes the shape of the room rather than merely the input routing.
+The roster is built in a fixed order. The active conversation target is placed first, and every other active, enabled character follows in registration order. This is why the conversation target decides which character becomes the room's initial character, and why changing it changes the shape of the room rather than merely the input routing.
+
+{% hint style="warning" %}
+An inactive or disabled `ConvaiCharacter` is silently excluded from the roster. It does not trigger the missing-Character-ID validation below, because it never reaches validation — the real symptom is that the character is missing from `session.Characters`, not a connect failure. A scene with two characters where only one is active and enabled connects as a single-character room, so `CurrentMultiCharacterSession` stays `null`. Activate the character and add it with `AddCharacterAsync` once the room is connected; see [Add and remove characters at runtime](update-the-roster.md).
+{% endhint %}
 
 Before the request leaves the client, the SDK rejects rosters it knows Convai will not accept. Each of these failures faults the connect operation with a `ConvaiOperationException` rather than producing a partially-connected room.
 
 | Condition | Message |
 | --- | --- |
-| More than 50 characters registered | `Multi-character rooms support at most 50 characters.` |
+| More than 50 active, enabled characters registered | `Multi-character rooms support at most 50 characters.` |
 | A null or repeated character reference | `Multi-character roster contains null or duplicate character references.` |
 | A character with no Character ID | `Every character in a multi-character room requires a Character ID.` |
 | Two characters resolving to the same character-session ID | `Character session IDs must be unique within a multi-character roster.` |
+
+A separate, earlier check can also fault the connect attempt regardless of character count: if no active character is resolved at all when `ConnectAsync` runs, the SDK throws a `ConvaiOperationException` with `Cannot connect because no active character is available.` before it attempts to build a roster. This check does not apply to `JoinMultiCharacterRoomAsync`, which needs no active character because it joins a room another client already created.
 
 A multi-character room also requires a non-empty end-user ID. The SDK takes that value from the configured identity provider, so the default device-based provider satisfies the requirement without extra work. See [Custom identity provider](../../advanced-topics/custom-providers/custom-identity-provider.md) when you need a stable ID tied to your own accounts.
 
 ```mermaid
 graph TD
-    A["Registered ConvaiCharacter components"] --> B{"Two or more?"}
+    A["Owned characters that are active and enabled"] --> B{"Two or more?"}
     B -- "No" --> C["Single-character room"]
     B -- "Yes" --> D["Ordered roster: active target first"]
     D --> E["Roster validation"]
@@ -90,9 +119,11 @@ Removing the active membership produces two events in a fixed order: `Interactio
 
 ## What stays the same in a single-character room
 
-A scene with one registered character connects exactly as it did before multi-character rooms existed. `CurrentMultiCharacterSession` returns `null`, per-character event matching falls back to character ID and participant ID, and the multi-character operations on `IConvaiRoomConnectionService` throw `InvalidOperationException` with `No multi-character room session is active.` because there is no roster to act on.
+A scene with one active, enabled character connects exactly as it did before multi-character rooms existed. `CurrentMultiCharacterSession` returns `null`, per-character event matching falls back to character ID and participant ID, and the multi-character operations on `IConvaiRoomConnectionService` throw `InvalidOperationException` with `No multi-character room session is active.` because there is no roster to act on.
 
 This is also why adding a second `ConvaiCharacter` to an existing scene changes how the whole scene connects. Nothing about the first character's configuration changes, but the connect request now carries a roster, and the session gains a membership layer that per-character resolution goes through first. See [Character identity and addressing](character-identity.md) for what that means for code that matches events to characters.
+
+A scene can also fall back into this single-character shape unintentionally: owning two characters where only one is active and enabled produces exactly the same room, because the inactive character never reaches the roster. See [Which characters count as owned](#which-characters-count-as-owned) above.
 
 ***
 

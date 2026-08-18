@@ -73,6 +73,10 @@ public class MultiCharacterEventLogger : MonoBehaviour
 
 Removing the membership that currently holds the interaction target produces two events in a fixed order: `InteractionTargetChanged` fires first, with the removed membership as `previous` and `null` as `current`, and `CharacterRemoved` fires second. Code that reacts to `CharacterRemoved` can rely on the interaction target already being cleared by the time it runs — no separate check of `ActiveMembershipId` is needed to avoid a stale read.
 
+{% hint style="warning" %}
+This cleared-target `InteractionTargetChanged` does not advance `RouteEpoch`. Removal clears `ActiveMembershipId` directly instead of going through the epoch-guarded target update, so a subscriber that reacts to target changes only by comparing `RouteEpoch` misses this event. Key any such logic off the event itself, not off a `RouteEpoch` change, if it must also react to a target cleared by removal.
+{% endhint %}
+
 Passing a replacement target does not suppress that first event. The SDK applies the removal before it applies the new target, so a removal with a replacement fires `InteractionTargetChanged` twice: once with `null` as `current`, then again with the replacement membership. Treat a `null` current target as a transition rather than a terminal state.
 
 A related ordering guarantee applies to additions: when a new membership is inserted, `CharacterAdded` fires before `CharacterStatusChanged` for that same membership. `CharacterAdded` also fires exactly once for a given membership even when Convai's lifecycle message for it arrives before the roster-update acknowledgement does — the SDK deduplicates the two paths rather than raising the event twice.

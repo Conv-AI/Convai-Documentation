@@ -81,6 +81,44 @@ foreach (CharacterRoomMembership membership in session.Characters)
 
 ***
 
+## Attributing a player turn to a membership
+
+A player turn carries no record of which membership the player was addressing when they spoke. `TranscriptSpeaker.Type` is `TranscriptSpeakerType.Player` on that turn, and none of its fields — `Id`, `DisplayName`, `ParticipantId` — identify a character. `MultiCharacterRoomSession` keeps no history of past interaction targets either; it exposes only the current `ActiveMembershipId`, not a log of what it was for earlier turns.
+
+An application that needs to know who the player was addressing in a given turn has to capture `ActiveMembershipId` itself, at the moment the turn starts. Subscribe to `ConvaiManager.Transcripts` and record the target as soon as a player turn is added to the timeline:
+
+```csharp
+using System.Collections.Generic;
+using Convai.Domain.Models;
+using Convai.Runtime.Components;
+using Convai.Runtime.Room;
+using UnityEngine;
+
+public class PlayerTurnTargetRecorder : MonoBehaviour
+{
+    private readonly Dictionary<string, string> _playerTurnTargets = new();
+    private MultiCharacterRoomSession _session;
+
+    public void Attach(MultiCharacterRoomSession session)
+    {
+        _session = session;
+        ConvaiManager.ActiveManager.Transcripts.Subscribe(
+            HandleTranscriptChange,
+            new TranscriptSubscriptionOptions { SpeakerType = TranscriptSpeakerType.Player });
+    }
+
+    private void HandleTranscriptChange(TranscriptChange change)
+    {
+        if (change.Kind != TranscriptChangeKind.Added || _session == null) return;
+        _playerTurnTargets[change.Turn.Id] = _session.ActiveMembershipId;
+    }
+}
+```
+
+Look up `_playerTurnTargets[turn.Id]` later to recover which membership a specific turn addressed. Nothing in the SDK backfills this after the fact — capture it live, or the information is gone once the room moves on.
+
+***
+
 ## Identity in character events
 
 The `CharacterReady` event carries the membership identifiers alongside the character ID it always had: `MembershipId`, `CharacterSessionId`, and `ParticipantIdentity`. Each of the three is an empty string for events raised in a single-character room, which is what lets one handler serve both room shapes — read `MembershipId` when it is non-empty, and fall back to `CharacterId` when it is not.

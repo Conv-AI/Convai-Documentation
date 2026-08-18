@@ -155,10 +155,12 @@ Speaking to the room now reaches the initial character. Routing input to any oth
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | The Console reports `Room ownership did not resolve an active conversation target.` | The scene owns two or more characters and none was named as the target. | Call `SetExplicitConversationTarget` before connecting, as the script above does. |
-| Connect fails with `Every character in a multi-character room requires a Character ID.` | One `ConvaiCharacter` has an empty **Character ID**. | Set the field on every character in the scene, including inactive ones that still register. |
+| Connect fails with `Cannot connect because no active character is available.` | No active character was resolved when `ConnectAsync` ran — for example, every owned character is inactive or disabled. | Activate at least one `ConvaiCharacter` in the scene, or call `SetExplicitConversationTarget` with an active character, before connecting. |
+| Connect fails with `Every character in a multi-character room requires a Character ID.` | One active, enabled `ConvaiCharacter` has an empty **Character ID**. An inactive character with no ID does not trigger this — it never reaches roster validation. | Set the **Character ID** field on every active character in the scene, and on any inactive character before you activate and add it later with `AddCharacterAsync`. |
 | Connect fails with `Multi-character roster contains null or duplicate character references.` | The same `ConvaiCharacter` component was registered twice. | Register each component once. Use a second component instance to add a clone of the same character. |
-| Connect fails with `Multi-character rooms support at most 50 characters.` | More than 50 characters are registered with the manager. | Reduce the registered cast to 50 or fewer before connecting. |
-| The script logs the single-character warning | Only one character was registered when the manager connected. | Confirm both `GameObject` instances are active in the scene before the connect call runs. |
+| Connect fails with `Multi-character rooms support at most 50 characters.` | More than 50 active, enabled characters are registered with the manager. | Reduce the active cast to 50 or fewer before connecting. |
+| A character is missing from `session.Characters` even though it is in the scene | That character's `GameObject` or `ConvaiCharacter` component was inactive or disabled when the room connected. The SDK excludes inactive characters from the startup roster without raising an error. | Activate the character before connecting, or add it after connecting with [Add and remove characters at runtime](update-the-roster.md#add-a-character-to-the-roster). |
+| The script logs the single-character warning | Only one character was active and enabled when the manager connected — commonly because a second `ConvaiCharacter` (or its `GameObject`) was inactive. | Confirm both `GameObject` instances are active in the scene before the connect call runs. |
 
 ## Next steps
 
