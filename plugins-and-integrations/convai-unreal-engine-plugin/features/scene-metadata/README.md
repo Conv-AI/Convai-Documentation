@@ -1,7 +1,7 @@
 ---
 title: Scene metadata
 description: Find guides, reference pages, and examples for giving Convai characters awareness of objects in your Unreal Engine level.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Scene metadata is how you give Convai characters awareness of the objects in your level. Add a `UConvaiObjectComponent` to any `Actor` — a door, a crate, a terminal — and every character in the level will know that object exists, what it is called, and what it does. Characters use this information when players ask about the environment around them.
@@ -19,7 +19,7 @@ When the player looks at tagged objects, the [Gaze attention](../gaze-attention/
 </thead>
 <tbody>
 <tr>
-<td><strong>How scene metadata works</strong><br>Understand object identity, tracked properties, proximity state, and the runtime sync pipeline.</td>
+<td><strong>How scene metadata works</strong><br>Understand object identity, tracked properties, movement awareness, and the runtime sync pipeline.</td>
 <td><a href="how-scene-metadata-works.md">how-scene-metadata-works.md</a></td>
 </tr>
 <tr>

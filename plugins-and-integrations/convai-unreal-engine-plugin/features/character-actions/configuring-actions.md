@@ -1,7 +1,7 @@
 ---
 title: Configuring actions
 description: Define the action set, enable character actions, and register environment objects and characters so Convai can reference them.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 The `Convai Chatbot` component's `Environment` property controls every aspect of character actions: which actions the character can perform, which objects and characters it can reference, and whether actions are on at all. Set up action templates and register objects in the editor; compile the character Blueprint to save changes before entering Play mode.
@@ -54,6 +54,8 @@ The `Actions` array is pre-populated with four entries out of the box:
 
 Default **Description** values on these templates are empty except `Follow`, which ships with `"Follow a character"`. You can rename, describe, or remove any default action as needed. To remove a default action, select it in the array and click the delete button.
 
+These four defaults apply to any fresh `Convai Chatbot` component. The bundled `BP_ConvaiChatbotComponent` convenience Blueprint ships with an additional `Escort` action ready to use, and its `Wait for Action` entry is present but disabled by default.
+
 ### Adding a custom action
 
 {% stepper %}
@@ -102,6 +104,21 @@ Click **Compile** on the character Blueprint, then scaffold the handler. See [Bu
 Action names must match the Blueprint function or event name on the owning Actor, including spaces and punctuation. Unreal resolves handler names case-insensitively, but `"Stop Moving"` and `"StopMoving"` are different names.
 {% endhint %}
 
+## Experimental built-in actions
+
+Two further toggles on `Convai Chatbot`, category `Convai|Actions|Experimental`, add built-in actions that never appear in the `Actions` array. Enabling one adds the action to what is sent to Convai at the next connect; the handler runs inside the component itself, so no Blueprint handler needs to be scaffolded for it.
+
+| Property | Type | Default | Purpose |
+|---|---|---|---|
+| `bEnableRemindSelfAction` | `bool` | `false` | Display name **Enable Remind Self Action**. Adds the built-in **Remind Self** action: the character can queue it after another action (for example `Move To`) to remind itself what to consider or say once that action finishes, such as walking to a painting and then describing it. The reminder is delivered at the next pause in the conversation and never talks over an ongoing exchange. |
+| `bEnableWatchPropertyAction` | `bool` | `false` | Display name **Enable Watch Property Action**. Adds the built-in **Watch Property** action: the character can arm a one-shot watch on a tracked property by its exact context key (for example `"FrontDoor.DoorState"`) and gets notified on its next genuine change, or wait for a specific value to be reached (for example `"Platform.Movement = Stopped"`). This works even when the property's own **Should Respond** is `Never` or `Auto`, and the watch disarms after firing once. |
+
+Both toggles take effect on the next session start and require **Enable Actions**.
+
+{% hint style="warning" %}
+`Enable Remind Self Action` and `Enable Watch Property Action` are experimental (category `Convai|Actions|Experimental`). Their behavior may change in a future release.
+{% endhint %}
+
 ## Registering objects
 
 The `Objects` array contains `FConvaiObjectEntry` structs for interactable scene objects. Each entry has:
@@ -111,11 +128,13 @@ The `Objects` array contains `FConvaiObjectEntry` structs for interactable scene
 | `Name` | `FString` | Unique label the character uses to identify this object. |
 | `Ref` | `TWeakObjectPtr<AActor>` | The in-level Actor this entry represents. |
 | `Description` | `FString` | Optional plain-language description for Convai. |
-| `MoveTargetMode` | `EConvaiMoveTarget` | `Actor as goal` (stop at actor bounds) or `Component as goal` (walk to a specific sub-component). |
+| `ObjectReference` | `EConvaiObjectReference` | Display name **Object Is**. `Whole Actor` (stop at actor bounds — this implies stepping onto the object's footprint) or `Specific Component` (walk to a specific sub-component). |
 | `AcceptanceRadius` | `float` | How close the AI must get before the move is considered complete. Default `150` cm. |
-| `ComponentName` | `FString` | Optional sub-component name for `Component as goal` mode. |
+| `ComponentName` | `FString` | Optional sub-component name for `Specific Component` mode. |
 | `SocketOrBoneName` | `FName` | Optional socket or bone name on the matched component. |
-| `bStepOntoBounds` | `bool` | When `true`, the AI walks onto the top of the object rather than stopping at its edge. |
+| `MovementPoints` | `TArray<FConvaiMovementPoint>` | Optional named designer-authored destinations. When any are enabled, they replace `ObjectReference` as the movement target. |
+
+`ObjectReference` replaces the movement-target enum and bounds flag an earlier beta used: `Whole Actor` already implies stopping at the object's bounds, so no separate flag is needed. Upgrading a project that still reads the old field is covered in [Migrate to 4.0.0-beta.27](../../overview/migrate-to-4-0-0-beta-27.md).
 
 **To add an object:**
 
@@ -123,7 +142,7 @@ The `Objects` array contains `FConvaiObjectEntry` structs for interactable scene
 2. Set `Name` to a short unique label.
 3. Assign `Ref` to the target Actor using the eyedropper.
 4. Set `Description` if helpful.
-5. Adjust `MoveTargetMode` and `AcceptanceRadius` for navigation precision.
+5. Adjust `ObjectReference` and `AcceptanceRadius` for navigation precision.
 
 ### Using `UConvaiObjectComponent` for automatic registration
 
@@ -139,9 +158,7 @@ At session start, the plugin can automatically add the player conversation partn
 
 ## Runtime mutation
 
-{% hint style="info" %}
-Runtime mutation is for advanced use cases — most projects only need the editor-time setup above.
-{% endhint %}
+Runtime mutation is for advanced use cases. Most projects only need the editor-time setup above.
 
 You can add or remove entries at runtime using the methods on `UConvaiChatbotComponent`:
 

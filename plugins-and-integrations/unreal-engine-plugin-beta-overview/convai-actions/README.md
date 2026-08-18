@@ -1,3 +1,7 @@
+---
+hidden: true
+---
+
 # Convai Actions
 
 Convai characters can do more than talk: they can **perform physical actions** in your scene. The action system lets the LLM that drives a Convai character emit structured commands (move to a target, pick up an object, wait, run a custom animation, etc.) which your gameplay code then executes.

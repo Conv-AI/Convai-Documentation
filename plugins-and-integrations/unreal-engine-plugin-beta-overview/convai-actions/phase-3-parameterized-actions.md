@@ -1,3 +1,7 @@
+---
+hidden: true
+---
+
 # Phase 3: Parameterized Actions
 
 Phase 2 added a no-parameter custom action. Most real actions need to carry data — _"wait 5 seconds"_, _"pick up the cube"_, _"put the ball on the table"_. This phase walks through:

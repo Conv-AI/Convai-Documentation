@@ -1,3 +1,7 @@
+---
+hidden: true
+---
+
 # Phase 1: Default Actions
 
 {% embed url="https://youtu.be/yWqJQRttoEI" %}

@@ -1,12 +1,12 @@
 ---
 title: Dynamic context Blueprint reference
-description: Reference the Blueprint controls that send runtime state, event, reset, and timing updates from an Unreal character to Convai during a live session.
-last_reviewed: "4.0.0-beta.21"
+description: Reference the Blueprint controls that send runtime state, event, reset, timing, and delivery updates from an Unreal character to Convai during a live session.
+last_reviewed: "4.0.0-beta.27"
 ---
 
-Most dynamic context functions are exposed on `UConvaiChatbotComponent` (Blueprint display name **Convai Chatbot**) under the `Convai|DynamicContext` category. `Update Context` is an advanced direct `context-update` node in the `Convai` category; it bypasses the tracked state/event helper API. Properties appear under **Convai > DynamicContext** (debounce settings) and **Convai** (`DynamicEnvironmentInfo`) in the Details panel.
+Most dynamic context functions are exposed on `UConvaiChatbotComponent` (Blueprint display name **Convai Chatbot**) under the `Convai|DynamicContext` category. `Update Context` is an advanced direct `context-update` node in the `Convai` category; it bypasses the tracked state/event helper API. Properties appear under **Convai > DynamicContext** (debounce and delivery-timing settings) and **Convai** (`DynamicEnvironmentInfo`) in the Details panel.
 
-Source of truth: `Source/Convai/Public/ConvaiChatbotComponent.h`, `Source/Convai/Private/ConvaiChatbotComponent.cpp`, `Source/Convai/Public/DynamicContext/`, and `Source/Convai/Private/ConvaiSubsystem.cpp`.
+Source of truth: `Source/Convai/Public/ConvaiChatbotComponent.h`, `Source/Convai/Private/ConvaiChatbotComponent.cpp`, `Source/Convai/Public/DynamicContext/ConvaiPendingContextBatch.h`, `Source/Convai/Public/DynamicContext/`, and `Source/Convai/Private/ConvaiSubsystem.cpp`.
 
 ## Functions
 
@@ -23,7 +23,8 @@ Sets a single state property in the dynamic context. If a property with the same
 | `Name` | `FString` | — | Key identifying this state property. Case-sensitive. |
 | `Value` | `FString` | — | Current value of the state property. |
 | `ShouldRespond` | `EC_RunLLMOption` | `Never` | Contributes to batch aggregate `run_llm`. |
-| `bFlushImmediately` | `bool` | `false` | **Advanced.** Bypass debounce and run the flush path in the current frame. Use after connection for data that must be delivered. |
+| `Delivery` | `EConvaiContextDelivery` | `Send Normally` | **Advanced.** `Wait Until Conversation Is Idle` holds the update until the conversation pauses, so it can't make the character interrupt itself. Applies only when the batch's aggregate `ShouldRespond` is `Auto`/`Always`. |
+| `bFlushImmediately` | `bool` | `false` | **Advanced.** Bypass debounce and run the flush path in the current frame. With `Delivery` set to `Wait Until Conversation Is Idle`, the update still waits for a quiet moment but skips the full `Quiet Time Before Delivery (s)` window. Use after connection for data that must be delivered. |
 
 **Flush behavior:** One Replace `context-update`. New keys enter canonical when aggregate is `Never`; otherwise new keys are deferred to delta lines on first flush. Updated keys always appear in canonical; delta lines describe the transition when aggregate is not `Never`.
 
@@ -43,7 +44,8 @@ Sets multiple state properties at once. All keys share one canonical rebuild and
 |---|---|---|---|
 | `States` | `TMap<FString, FString>` | — | Map of key-value state properties to set or update. |
 | `ShouldRespond` | `EC_RunLLMOption` | `Never` | Contributes to batch aggregate `run_llm` for all supplied keys. |
-| `bFlushImmediately` | `bool` | `false` | **Advanced.** Bypass debounce and run the flush path in the current frame. Use after connection for data that must be delivered. |
+| `Delivery` | `EConvaiContextDelivery` | `Send Normally` | **Advanced.** `Wait Until Conversation Is Idle` holds the updates until the conversation pauses, so it can't make the character interrupt itself. Applies only when the batch's aggregate `ShouldRespond` is `Auto`/`Always`. |
+| `bFlushImmediately` | `bool` | `false` | **Advanced.** Bypass debounce and run the flush path in the current frame. With `Delivery` set to `Wait Until Conversation Is Idle`, the update still waits for a quiet moment but skips the full `Quiet Time Before Delivery (s)` window. Use after connection for data that must be delivered. |
 
 **Behavior:** Empty maps are ignored. Aggregate `ShouldRespond` merges with any other staged items in the same debounce window (`Always` > `Auto` > `Never`).
 
@@ -63,9 +65,11 @@ Appends a chronological event string to the dynamic context.
 |---|---|---|---|
 | `Text` | `FString` | — | Event description to append. |
 | `ShouldRespond` | `EC_RunLLMOption` | `Auto` | Contributes to batch aggregate `run_llm`. |
-| `bFlushImmediately` | `bool` | `false` | **Advanced.** Bypass debounce and run the flush path in the current frame. Use after connection for data that must be delivered. |
+| `Delivery` | `EConvaiContextDelivery` | `Send Normally` | **Advanced.** `Wait Until Conversation Is Idle` holds the event until the conversation pauses, so it can't make the character interrupt itself. Held events land at the end of the event history when finally sent. Applies only when `ShouldRespond` is `Auto`/`Always`. |
+| `bEphemeral` | `bool` | `false` | **Advanced.** When `true`, the character sees the event exactly once, on the next update, and it is never committed to the persisted context — it never reappears on later updates. When `false` (default), the event stays in the running context. |
+| `bFlushImmediately` | `bool` | `false` | **Advanced.** Bypass debounce and run the flush path in the current frame. With `Delivery` set to `Wait Until Conversation Is Idle`, the event still waits for a quiet moment but skips the full `Quiet Time Before Delivery (s)` window. Use after connection for data that must be delivered. |
 
-**Behavior:** Identical `Text` values staged multiple times in the same debounce window are deduplicated. At flush, the event is committed to the tracker and included in canonical. Regular context events are not duplicated into a separate delta line.
+**Behavior:** Identical `Text` values staged multiple times in the same debounce window are deduplicated (ephemeral and persistent events are tracked separately, so an ephemeral event with the same text as a persistent one is not deduplicated against it). At flush, a non-ephemeral event is committed to the tracker and included in canonical. An ephemeral event is appended once to the outgoing flush text and dropped afterward — it is never written to the tracker, so it does not appear in canonical context on later updates. Regular (non-ephemeral) context events are not duplicated into a separate delta line.
 
 **Pre-session:** With default debounce, stages safely and flushes after the session connects and the debounce deadline elapses. Do not use `bFlushImmediately = true` before connection for data that must be delivered.
 
@@ -142,14 +146,14 @@ Use `Update Context` only when the tracked node family does not cover your forma
 
 ## Default ShouldRespond reference
 
-| Function | Default `ShouldRespond` |
-|---|---|
-| `Set Context State` | `Never` |
-| `Set Context States` | `Never` |
-| `Add Context Event` | `Auto` |
-| `Remove Context State` | _(no `ShouldRespond` parameter)_ |
-| `Reset Dynamic Context` | _(Reset always uses `Never` on the wire)_ |
-| `Update Context` | `Auto` |
+| Function | Default `ShouldRespond` | Default `Delivery` |
+|---|---|---|
+| `Set Context State` | `Never` | `Send Normally` |
+| `Set Context States` | `Never` | `Send Normally` |
+| `Add Context Event` | `Auto` | `Send Normally` |
+| `Remove Context State` | _(no `ShouldRespond` parameter)_ | _(no `Delivery` parameter)_ |
+| `Reset Dynamic Context` | _(Reset always uses `Never` on the wire)_ | _(no `Delivery` parameter)_ |
+| `Update Context` | `Auto` | _(no `Delivery` parameter)_ |
 
 ## Properties
 
@@ -176,6 +180,19 @@ Seconds to wait after the most recent staged context update before flushing. Eac
 | Category | `Convai|DynamicContext` (Advanced Display) |
 
 Upper bound on how long the first update in a debounce burst can be delayed. Must be ≥ `ContextDebounceWindow`; smaller values are clamped at flush time.
+
+---
+
+### `ConversationIdleSettleSeconds`
+
+| Details panel label | Quiet Time Before Delivery (s) |
+|---|---|
+| Type | `float` |
+| Default | `2.0` |
+| Clamp | ≥ `0.0` |
+| Category | `Convai|DynamicContext` (Advanced Display) |
+
+How long the conversation must stay continuously quiet before an update whose `Delivery` is `Wait Until Conversation Is Idle` is delivered. Any conversation activity restarts the wait — there is deliberately no upper bound on the total hold, so a waiting update never interrupts an ongoing exchange. Set to `0` to deliver as soon as idle is detected.
 
 ---
 
@@ -212,6 +229,19 @@ Controls how a context string is applied when calling `Update Context` directly.
 | `EC_ContextUpdateMode::Append` | Append | `append` | Text is appended to existing context. |
 | `EC_ContextUpdateMode::Replace` | Replace | `replace` | Full context is replaced with the supplied text. |
 | `EC_ContextUpdateMode::Reset` | Reset | `reset` | Context is cleared. Pass empty `Text` for the standard Reset payload. |
+
+---
+
+### `EConvaiContextDelivery`
+
+Controls **when** a state, event, or fact update reaches the character, separately from the debounce batching described in [Sync behavior and timing](sync-behavior-and-timing.md).
+
+| Enumerator | Blueprint display name | Behavior |
+|---|---|---|
+| `EConvaiContextDelivery::SendNormally` | Send Normally | Default. Batched into the next scheduled send — the same behavior as before this option existed. |
+| `EConvaiContextDelivery::WaitUntilConversationIsIdle` | Wait Until Conversation Is Idle | Held back until the conversation has stayed quiet for `Quiet Time Before Delivery (s)`, so the update can't make the character interrupt itself or talk over the user. There is deliberately no time limit on the wait. |
+
+Waiting only applies when `ShouldRespond` is `Auto`/`Always` — a silent (`Never`) update has nothing to interrupt with, so it is always sent normally regardless of `Delivery`.
 
 ## Transport messages
 

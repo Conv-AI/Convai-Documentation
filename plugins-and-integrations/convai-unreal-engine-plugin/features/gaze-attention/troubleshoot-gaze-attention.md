@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot gaze attention
 description: Diagnose and fix gaze attention issues — objects not highlighting, attention never promoting, cursor not appearing, and component-scoped gaze not matching.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Use this page to diagnose and fix the most common gaze attention problems. Each entry follows a symptom / cause / fix / verify structure.
@@ -74,6 +74,28 @@ If you have not completed the baseline setup yet, start with [Gaze attention qui
 
 ---
 
+## Diagnose a "no effect" warning from SetObjectInAttention
+
+**Symptom:** A gaze promotion or a direct `SetObjectInAttention` call does not change the character's attention, and the Output Log shows a `Warning`-level message starting with `SetObjectInAttention('<name>')` (or, for gaze, `[Gaze] TrySetObjectInAttentionFromGaze rejected on '<name>'`).
+
+**Cause:** The warning names the exact reason the call had no effect. It is always one of three:
+
+| Cause | How to recognize it |
+|---|---|
+| Actions disabled | Warning text: `this chatbot's Environment has bEnableActions = false`. Attention is resolved server-side from `action_config`, which is only sent when actions are enabled. |
+| Object not in the chatbot's environment list | Warning text: `object was not in this chatbot's environment object list — auto-registered it now`. The call still auto-registers the object for next time, but this attempt could not resolve it. |
+| Object not sent at connect time | Warning text: `object was not among the objects sent to the server at connect time`. A mid-session `AddObject` call reaches the server as a descriptive scene-metadata update only — it becomes a resolvable attention target after the next reconnect. |
+
+**Fix:**
+1. Read the full warning text in the Output Log — it names which of the three conditions applies.
+2. For disabled actions, expand **Convai | Actions** → **Environment** on the chatbot and check **Enable Actions** (`EnvironmentData.bEnableActions`).
+3. For a missing or not-yet-connected object, register the object (via the chatbot's `AddObject` or a `UConvaiObjectComponent` in the level) before the session starts, so it is included in the `action_config` sent at connect.
+4. For a mid-session addition, reconnect the session once, or accept that the object becomes an attention target only after the reconnect.
+
+**Verify:** Fix the reported condition, enter Play mode, and repeat the call that previously logged the warning. The Output Log should show no `SetObjectInAttention` or `TrySetObjectInAttentionFromGaze` warning, and the attention change should take effect.
+
+---
+
 ## Cursor does not appear
 
 **Symptom:** No center-of-screen dot is visible when gaze tracking is on.
@@ -139,19 +161,19 @@ If you have not completed the baseline setup yet, start with [Gaze attention qui
 
 **Cause:** One of four conditions:
 
-- `ObjectEntry.MoveTargetMode` is still `Actor as goal` (the default). Gaze ignores `ComponentName` until **Move Target Mode** is `Component as goal`.
+- `ObjectEntry.ObjectReference` (Details panel label **Object Is**) is still `Whole Actor` (the default). Gaze ignores `ComponentName` until **Object Is** is `Specific Component`.
 - The `ComponentName` value does not match any component on the actor (typo, renamed component, or substring mismatch).
-- The component tree changed at runtime and the cached resolve is stale.
+- The component tree changed at runtime and the cached resolve no longer fits (rare — `GetResolvedComponent()` revalidates the cache on every call and rescans automatically when it fails).
 - The target sub-mesh has no collision on `GazeTraceChannel`, so the line trace never hits it.
 
 **Fix:**
-1. On the `UConvaiObjectComponent`, expand **Object Entry** and set **Move Target Mode** to `Component as goal`.
-2. In Play mode, call `GetResolvedComponent(true)` on the `UConvaiObjectComponent` from Blueprint and print the return value. A `nullptr` result means the name did not resolve — check the exact component name in the Details panel hierarchy.
+1. On the `UConvaiObjectComponent`, expand **Object Entry** and set **Object Is** to `Specific Component`.
+2. In Play mode, call `GetResolvedComponent()` on the `UConvaiObjectComponent` from Blueprint and print the return value. A `nullptr` result means the name did not resolve — check the exact component name in the Details panel hierarchy.
 3. Confirm that `ObjectEntry.ComponentName` is a substring of the target component's label as shown in the **Components** panel (for example, `"Handle"` matches `SM_DoorHandle` but not `SM_Knob`).
-4. If the actor's component tree is built at runtime (procedural generation, dynamic attachment), call `GetResolvedComponent(true)` after the tree is fully constructed rather than relying on the cached result from load time.
+4. If the actor's component tree is built at runtime (procedural generation, dynamic attachment), call `GetResolvedComponent()` again after the tree is fully constructed — it always re-checks the cached match against the live component tree, so a stale result from load time is corrected on the next call.
 5. Confirm the target component has collision enabled on the `GazeTraceChannel`. A component with no collision will never be hit by the line trace, so the scoped match cannot fire even if the name resolves correctly.
 
-**Verify:** After correcting **Move Target Mode** and `ComponentName`, enter Play mode and aim the crosshair at the specific sub-mesh. Only that mesh should highlight; other parts of the actor should remain unaffected. `GetResolvedComponent(false)` should return the correct component reference.
+**Verify:** After correcting **Object Is** and `ComponentName`, enter Play mode and aim the crosshair at the specific sub-mesh. Only that mesh should highlight; other parts of the actor should remain unaffected. `GetResolvedComponent()` should return the correct component reference.
 
 ---
 
