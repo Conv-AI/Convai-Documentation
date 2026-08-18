@@ -1,7 +1,7 @@
 ---
 title: Built-in action handlers
 description: Reference handler patterns for the four default Convai character actions, including parameters, completion rules, and Blueprint flow.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Every new `Convai Chatbot` component includes four pre-configured action templates: `Move To`, `Follow`, `Stop Moving`, and `Wait For`. These templates define the action *names* and *parameters* — you still need to implement the corresponding Blueprint events in your NPC character Blueprint. This page provides a copy-ready handler pattern for each action.
@@ -44,9 +44,10 @@ Event Move To(ActionData: FConvaiResultAction)
         Entry = DestEntry,
         SourceActor = Self,
         // outputs:
-        OutGoalActor, OutGoalComponent, OutGoalLocation,
-        OutAcceptanceRadius, OutMode,
-        bSuccess, bAlreadyThere, bReachable, PathEnd, PathPoints
+        TargetActor, ObjectActor, OutGoalComponent, Destination,
+        OutAcceptanceRadius, UsesDestination,
+        bSuccess, bAlreadyThere, bReachable,
+        PathEnd, PathPoints, GoalTravelDistance, MovementPointIndex
     )
 
     // Guard: destination Actor must be alive
@@ -62,11 +63,12 @@ Event Move To(ActionData: FConvaiResultAction)
         HandleActionCompletion(IsSuccessful = true)
         return
 
-    // Branch on the resolved mode and issue AI Move To with the correct pin
-    if OutMode == Actor:
-        AIMoveTo(Target = OutGoalActor, AcceptanceRadius = OutAcceptanceRadius)
-    else:
-        AIMoveTo(Destination = OutGoalLocation, AcceptanceRadius = OutAcceptanceRadius)
+    // Wire both pins into one AI Move To — no branch needed
+    AIMoveTo(
+        Target = TargetActor,
+        Destination = Destination,
+        AcceptanceRadius = OutAcceptanceRadius
+    )
 
     // Wait for OnMoveCompleted (bind to AIController.ReceiveMoveCompleted or use
     // a task/latent action), then call:
@@ -75,8 +77,8 @@ Event Move To(ActionData: FConvaiResultAction)
 
 **Key points:**
 
-- Always branch on `Out Mode` before wiring `AI Move To` — `Actor` mode uses the actor pin, `Vector` mode uses the location pin. Wiring the wrong pin makes the movement use the wrong goal interpretation.
-- `ResolveGoalLocation` with a live `Source Actor` also computes `bOut Reachable` and `Out Path Points`, which you can use to bail out early if no navmesh path exists.
+- Wire `Target Actor` and `Destination` straight into one `AI Move To` node. No branch is needed: `Target Actor` is `null` exactly when the goal is a fixed location — a Movement Point won, or the entry references a component — so `AI Move To` falls through to `Destination` on its own.
+- `Resolve Goal Location` with a live `Source Actor` also computes `bOut Reachable`, `Out Path Points`, and `Out Goal Travel Distance`, which you can use to bail out early when no NavMesh path exists. `Out Movement Point Index` reports which `Movement Points` entry won, or `-1` when the object reference resolved the goal instead.
 - `AcceptanceRadius` comes from the registered `FConvaiObjectEntry` (default `150` cm). Increase it for large objects or decrease it for precise sub-component targeting.
 
 ## Follow

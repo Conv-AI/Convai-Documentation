@@ -6,8 +6,6 @@ description: >-
   for text, references, choices, and animations.
 ---
 
-# Parameterized actions
-
 Parameterized actions let Convai fill in typed values when it chooses an action. A `Move To` action needs a destination; a `Print` action can carry dynamic text; a `Dance` action can pick from a fixed list of animation styles. Parameters give Convai structured guidance and give your handler typed values to read.
 
 The following examples show the most common parameter patterns. The full field reference is at the end of this page.
@@ -16,12 +14,12 @@ The following examples show the most common parameter patterns. The full field r
 Custom and Parameterized Actions Walkthrough
 {% endembed %}
 
-### Prerequisites
+## Prerequisites
 
 * You completed [Building custom action handlers](building-custom-action-handlers.md) for a no-parameter action.
 * The action template is compiled on the character Blueprint before you test in Play mode.
 
-### Choosing a parameter type
+## Choosing a parameter type
 
 Use `String` for free-form text, **Actor Reference** for a registered object or character, `Number` for a numeric value, and `String` with **Choices** when only a few values are valid (for example a fixed list of dance styles). The full type list is in the reference table below.
 
@@ -34,11 +32,11 @@ Use `String` for free-form text, **Actor Reference** for a registered object or 
 | `String` + Choices | The value must be one of a fixed list of options.                                                |
 | `Enum`             | A `UENUM` already exists in your project and you want Convai to match against its display names. |
 
-### Example: Print with a string parameter
+## Example: Print with a string parameter
 
 Start from a no-parameter `Print` action and add one typed input so Convai can supply the message.
 
-#### Declare the parameter
+### Declare the parameter
 
 On the `Print` action entry, expand **Parameters** and click **+**:
 
@@ -50,9 +48,9 @@ On the `Print` action entry, expand **Parameters** and click **+**:
 
 Compile the Blueprint.
 
-#### Read the value in the handler
+### Read the value in the handler
 
-```
+```cpp
 // Blueprint pseudocode
 Event Print(ActionData: FConvaiResultAction)
     Message = GetParamAsString(ActionData, "text")
@@ -62,24 +60,24 @@ Event Print(ActionData: FConvaiResultAction)
 
 Test in Play mode: `"Print your name on the screen"` or `"Print breathe"`. Convai fills the `text` parameter and the handler prints the resolved string.
 
-### Example: Dance with animation montages
+## Example: Dance with animation montages
 
 For actions that play skeletal animations, use an `Anim Montage` and call `Handle Action Completion` on both **On Completed** and **On Interrupted** montage pins.
 
-#### Prepare montages
+### Prepare montages
 
 1. Import or locate animation sequences in the **Content Browser**.
 2. Right-click an animation, select **Create > Create Anim Montage**.
 3. Open the montage and tune **Blend In** and **Blend Out** times (for example `1.0` seconds) so transitions look smooth.
 4. Repeat for each dance style you want to support.
 
-#### Declare the action
+### Declare the action
 
 Add an action named `Dance` with no parameters for a single-style dance, or add a `type` parameter with **Choices** when multiple styles share one action (see the next section).
 
-#### Handler with Play Montage
+### Handler with Play Montage
 
-```
+```cpp
 // Blueprint pseudocode — single montage
 Event Dance(ActionData: FConvaiResultAction)
     Play Montage(
@@ -94,11 +92,11 @@ Event Dance(ActionData: FConvaiResultAction)
 If `Handle Action Completion` is missing on the **On Interrupted** pin, a new montage or movement action can leave the queue stalled because the plugin still considers the dance action in progress.
 {% endhint %}
 
-### Example: Dance with Choices and a fallback
+## Example: Dance with Choices and a fallback
 
 When one action covers multiple animation variants, add a `String` parameter with a **Choices** array instead of duplicating the action template.
 
-#### Declare
+### Declare
 
 Action `Dance`, one parameter:
 
@@ -110,9 +108,9 @@ Action `Dance`, one parameter:
 
 The wire format includes `[groove|disco|g-style]` so Convai picks from the list.
 
-#### Handler with Switch on String
+### Handler with Switch on String
 
-```
+```cpp
 // Blueprint pseudocode
 Event Dance(ActionData: FConvaiResultAction)
     DanceType = GetParamAsString(ActionData, "type")
@@ -137,14 +135,14 @@ Event Dance(ActionData: FConvaiResultAction)
 
 When the player asks for a style outside **Choices** (for example `"ballet"`), the **default** branch reports failure. Convai can respond using the `AdditionalNote` context instead of playing an unsupported montage.
 
-### Connectors
+## Connectors
 
 Use **Connector** to link a parameter to preceding text. For `"Put <object> on <surface>"`:
 
 * Parameter 1: `Name = "object"`, no connector.
 * Parameter 2: `Name = "surface"`, `Connector = "on"`.
 
-### Enum parameters
+## Enum parameters
 
 When a `UENUM` already exists in your project:
 
@@ -154,7 +152,7 @@ When a `UENUM` already exists in your project:
 
 Read the matched value with `Get Param As Byte`, then convert with **Byte to Enum**.
 
-### Reading parameters in Blueprint
+## Reading parameters in Blueprint
 
 Use the `UConvaiActions` function library (**Convai | Action API**):
 
@@ -169,9 +167,9 @@ Use the `UConvaiActions` function library (**Convai | Action API**):
 | **Get Param As Byte**   | `uint8`              | `Enum`.                            |
 | **Has Param**           | `bool`               | Guard before reading.              |
 
-### Abort when a required parameter is empty
+## Abort when a required parameter is empty
 
-```
+```cpp
 // Blueprint pseudocode
 RefEntry = GetParamAsRef(ActionData, "destination")
 if RefEntry.Ref is None:
@@ -182,7 +180,7 @@ if RefEntry.Ref is None:
     return
 ```
 
-### FConvaiActionParam fields reference
+## FConvaiActionParam fields reference
 
 Each parameter on an `FConvaiAction` template is an `FConvaiActionParam` struct:
 
@@ -208,7 +206,7 @@ Full type behavior:
 
 Regardless of declared type, all value fields on `FConvaiResultParam` are populated on a best-effort basis.
 
-### Next steps
+## Next steps
 
 {% content-ref url="actions-blueprint-reference.md" %}
 [actions-blueprint-reference.md](actions-blueprint-reference.md)

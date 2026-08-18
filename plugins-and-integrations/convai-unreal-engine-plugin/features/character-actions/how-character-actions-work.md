@@ -1,7 +1,7 @@
 ---
 title: How character actions work
 description: Understand how Convai character actions move from session setup to queued Blueprint handler execution and completion reporting.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Character actions connect what Convai says to what the character does in the level. When a player speaks, Convai can return both a spoken reply and a sequence of named actions — moving to a location, following the player, interacting with an object. The plugin dispatches those actions to matching Blueprint handler events on the NPC Actor, running them one at a time in order.
@@ -65,6 +65,14 @@ The plugin maintains a queue of `FConvaiResultAction` items in `ActionsQueue`. W
 3. `TriggerNamedBlueprintAction` looks for a Blueprint function or event whose name matches the `Action` field of the result. It checks the owning Actor first, then the chatbot component. The handler may accept one `FConvaiResultAction` parameter or no parameters.
 
 The dispatcher is name-based. Unreal resolves handler names case-insensitively, but spaces and punctuation must still match. If no matching function is found on either target, the plugin logs a warning, the handler is not invoked, and the queue stalls until `HandleActionCompletion` or `AbortActionSequence` is called.
+
+## Cancelling an action plan
+
+A character can change course while an action is still running — the player redirects it, or a new situation makes the current plan pointless. `CancelCurrentActionPlan` on `UConvaiChatbotComponent` (Blueprint display name **Cancel Current Action Plan**) cancels cooperatively rather than yanking the queue out from under the running handler: queued actions are discarded immediately, but the active handler is offered an optional Blueprint event named exactly `Cancel <Action Name>`, carrying the original `FConvaiResultAction`, so it can stop its timers, delegates, or latent tasks cleanly before a replacement plan begins. Repeated calls request cancellation only once and wait for a single terminal acknowledgement.
+
+A handler that implements the optional cancel event must call `HandleActionCancellation` once it has fully quiesced — after its timers, delegates, tasks, and callbacks have stopped. That call reports no success or failure and releases the held replacement plan so the queue can advance. A handler that does not implement the cancel event is left to finish on its own; either way, a custom cancellation handler must call exactly one terminal API — `HandleActionCancellation` or its existing completion path — never both.
+
+Enabling `bEnableCancelActionPlanAction` (Blueprint display name **Enable Cancel Action Plan**, category `Convai|Actions|Experimental`) on the chatbot component adds a reserved `Cancel Action Plan` control action to the contract sent to Convai, so the character itself can decide to invoke cancellation when the player redirects or abandons what it was doing. See [Configuring actions](configuring-actions.md#experimental-built-in-actions) for the toggle and [Actions Blueprint reference](actions-blueprint-reference.md) for the full function and event list.
 
 ## The wait-for-speech gate
 

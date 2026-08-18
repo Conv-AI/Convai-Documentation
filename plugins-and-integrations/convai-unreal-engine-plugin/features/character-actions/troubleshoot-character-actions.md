@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot character actions
 description: Fix character actions that do not fire, movement failures, reference issues, and queue stalls in the Convai Unreal Engine plugin.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Use this page to diagnose character actions that do not fire, stop mid-sequence, move to the wrong place, or receive empty parameters.
@@ -16,6 +16,16 @@ ConvaiSubsystemLog=Verbose
 ConvaiDefinitionsLog=Verbose
 ```
 {% endhint %}
+
+## Blueprint fails to compile after upgrading
+
+**Symptom:** After updating the plugin, a Blueprint that calls `Invoke Speech` or `Invoke Narrative Design Trigger` shows a compile error or is missing input pins it used to have, or a node that reads an object entry's movement-target field no longer resolves.
+
+**Cause:** The upgrade removed pins from both nodes and retired the old movement-target enum. Every affected node needs a one-time refresh.
+
+**Fix:** Work through [Migrate to 4.0.0-beta.27](../../overview/migrate-to-4-0-0-beta-27.md), which lists every removed pin and renamed field with the edit to apply.
+
+**Verify:** Every Convai Blueprint compiles with no errors, and each refreshed node shows only the current pin set.
 
 ## Actions not firing
 
@@ -139,7 +149,7 @@ ConvaiDefinitionsLog=Verbose
 
 **Cause C:** `bOut Success` from `Resolve Goal Location` was `false` but the handler called `AI Move To` anyway.
 
-**Fix:** Always branch on `bOut Success`. When `false`, the `Ref` Actor is null or destroyed and AI Move To will no-op (Actor mode) or send the pawn to a stale position (Vector mode). Call `AbortActionSequence` with an informative message instead.
+**Fix:** Always branch on `bOut Success`. When `false`, the `Ref` Actor is null or destroyed: `Target Actor` is `null` and `Destination` holds a stale snapshot, so `AI Move To` will either no-op or send the pawn to a stale position. Call `AbortActionSequence` with an informative message instead.
 
 **Verify:** Print `bOut Success` before `AI Move To`. It must be `true` before the movement node runs.
 
@@ -147,7 +157,7 @@ ConvaiDefinitionsLog=Verbose
 
 **Cause D:** The `AcceptanceRadius` is smaller than the AI can physically achieve given the navmesh resolution.
 
-**Fix:** Increase `AcceptanceRadius` on the `FConvaiObjectEntry` (default is `150` cm). For small objects like buttons or levers, use `Component as goal` mode to target a specific point rather than the whole-actor bounds.
+**Fix:** Increase `AcceptanceRadius` on the `FConvaiObjectEntry` (default is `150` cm). For small objects like buttons or levers, set **Object Is** to `Specific Component` to target a specific point rather than the whole-actor bounds.
 
 **Verify:** Print the `AI Move To` result or completion callback. The move should complete successfully once the radius is reachable.
 
@@ -157,11 +167,11 @@ ConvaiDefinitionsLog=Verbose
 
 **Symptom:** The NPC navigates to a position that is near but not at the registered object.
 
-**Cause:** `bOut Mode` from `Resolve Goal Location` is `Vector` (for example, `bStepOntoBounds` is set) but the handler wired `OutGoalActor` to `AI Move To · Target Actor` instead of `OutGoalLocation` to `AI Move To · Destination`.
+**Cause:** The handler wired `Object Actor` (an advanced pin meant for non-movement use, such as attaching effects) into `AI Move To`'s **Target Actor** pin instead of `Target Actor`.
 
-**Fix:** Always branch on `Out Mode`. In `Actor` mode, wire `OutGoalActor` to the actor pin. In `Vector` mode, wire `OutGoalLocation` to the destination pin.
+**Fix:** Wire `Resolve Goal Location`'s `Target Actor` and `Destination` outputs straight into `AI Move To`'s matching pins — no branch is needed. `Target Actor` is `null` exactly when the goal is a fixed location (a Movement Point won, or the entry references a `Specific Component`), so `AI Move To` falls through to `Destination` automatically.
 
-**Verify:** Print `Out Mode` and confirm the corresponding `AI Move To` pin is the only goal pin wired for that branch.
+**Verify:** Print `Target Actor` and `Destination`. Only one of them should be non-null/non-zero for a given resolution.
 
 ---
 
