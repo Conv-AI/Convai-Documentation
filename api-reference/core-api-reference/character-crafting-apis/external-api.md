@@ -67,11 +67,53 @@ def handle_event(inputs):
     }
 ```
 
-### Input description
+### Input description schema
 
-`input_description` tells the model which arguments it can (and must) pass into `handle_event`. On create it is sent as a **JSON string**, not a nested object. Schema rules are on [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md#input-description).
+`input_description` tells the model which arguments it can (and must) pass into `handle_event`. On create/update it is sent as a **JSON string**, not a nested object. The decoded JSON must match this schema:
 
-Example as an object (stringify it before sending):
+```json
+{
+  "type": "object",
+  "properties": {
+    "parameters": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["string", "integer", "boolean", "object", "array"]
+            },
+            "description": { "type": "string" }
+          },
+          "required": ["type", "description"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "required": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["parameters", "required"]
+}
+```
+
+What that means in practice:
+
+| Field | Rules |
+| ----- | ----- |
+| `parameters` | Object whose keys are parameter names. Extra keys outside this map are rejected (`additionalProperties: false`). |
+| Parameter name | Must match `^[a-zA-Z_][a-zA-Z0-9_]*$` (letter or `_` first, then letters, digits, or `_`). |
+| `parameters.<name>.type` | One of: `string`, `integer`, `boolean`, `object`, `array`. |
+| `parameters.<name>.description` | Non-empty string the model uses to decide what value to pass. |
+| `required` | Array of parameter names that must be present. Names listed here should also exist under `parameters`. |
+
+The same rules are summarized on [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md#input-description).
+
+Example `input_description` (as an object — stringify it before sending in the request body):
 
 ```json
 {
@@ -130,7 +172,7 @@ Creates a new External API function on your account. The function is not attache
 | description<mark style="color:red;">\*</mark>             | String | When the character should call this function. Used by the model for tool selection.                  |
 | language<mark style="color:red;">\*</mark>                | String | Implementation language. Only `python` is supported.                                                 |
 | source\_code<mark style="color:red;">\*</mark>            | String | Full Python 3.11 source, including `handle_event`. Max 400 lines. Stdlib + `requests` only. See [Writing functions](#writing-functions) and [limitations](../../../convai-playground/character-customization/external-api-limitations.md#runtime). |
-| input\_description<mark style="color:red;">\*</mark>      | String | JSON **string** describing parameters. See [Input description](#input-description) and the schema on [limitations](../../../convai-playground/character-customization/external-api-limitations.md#input-description). |
+| input\_description<mark style="color:red;">\*</mark>      | String | JSON **string** describing parameters. See [Input description schema](#input-description-schema) and [limitations](../../../convai-playground/character-customization/external-api-limitations.md#input-description). |
 
 #### Example payload
 
