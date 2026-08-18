@@ -1,7 +1,7 @@
 ---
 title: How gaze attention works
 description: Understand the gaze trace pipeline, attention promotion timers, component-scoped targeting, highlight rendering, and the attention-source locking rule.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Gaze attention is a subsystem inside `UConvaiPlayerComponent` that translates where the player is looking into contextual focus for AI characters. When active, it runs every tick, manages visual feedback through a highlight actor and a cursor widget, and writes to the chatbot's "object in attention" slot after a configurable dwell period.
@@ -89,7 +89,7 @@ stateDiagram-v2
 | `Gaze` | Slot was last set by the gaze system. |
 | `Explicit (Blueprint/C++)` | Slot was last set by a direct `SetObjectInAttention` call. |
 
-Gaze-driven updates only succeed when `AttentionSource` is `None` or `Gaze`. A direct call to `SetObjectInAttention` from Blueprint or C++ sets `AttentionSource` to `Explicit`, locking the slot. Gaze calls are silently rejected while the slot is locked. To release an explicit lock, call `SetObjectInAttention` with an empty `FConvaiObjectEntry`.
+Gaze-driven updates only succeed when `AttentionSource` is `None` or `Gaze`. A direct call to `SetObjectInAttention` from Blueprint or C++ sets `AttentionSource` to `Explicit`, locking the slot. Gaze calls are rejected while the slot is locked, and the rejection logs a warning naming the object and the reason. To release an explicit lock, call `SetObjectInAttention` with an empty `FConvaiObjectEntry`.
 
 {% hint style="warning" %}
 If a character's attention slot stays on one object regardless of where the player looks, check whether a Blueprint graph is calling `SetObjectInAttention` and never clearing it. The `AttentionSource` read-only property on the chatbot shows which system currently owns the slot.
@@ -97,18 +97,25 @@ If a character's attention slot stays on one object regardless of where the play
 
 ## Attention and the actions system
 
-`SetObjectInAttention` has no effect when `Enable Actions` (`bEnableActions`) is `false` on the chatbot. Convai only resolves object attention when the `action_config` block was included at session connect — which requires actions to be enabled. Gaze attention therefore requires the actions system to be active on the chatbot.
+`SetObjectInAttention` has no effect when `Enable Actions` (`bEnableActions`) is `false` on the chatbot. Convai only resolves object attention when the `action_config` block was included at session connect — which requires actions to be enabled. Gaze attention therefore requires the actions system to be active on the chatbot. A call that has no effect for this reason, or because the target object is not yet on the chatbot's environment list or was not part of the objects sent at connect time, logs a warning naming the object and the specific reason — see [Diagnose a "no effect" warning from SetObjectInAttention](troubleshoot-gaze-attention.md#diagnose-a-no-effect-warning-from-setobjectinattention).
+
+## The one-flush attention cue
+
+When a gaze promotion (or an explicit `SetObjectInAttention` call) succeeds and `GazeShouldRespond`/`ShouldRespond` is `Auto` or `Always`, the chatbot stages a single ephemeral event reading `"<observer> is paying attention to <object name>"` — `<observer>` is the conversation partner's name, or "The user" when none is set. This cue is never persisted in context and fires once per promotion; it does not repeat while attention stays on the same object. It is on by default and can be turned off per call by passing `bAddAttentionEvent = false` to `SetObjectInAttention`. Setting `ShouldRespond`/`GazeShouldRespond` to `Never` also suppresses it — the slot still updates, silently.
 
 ## Component-scoped gaze
 
-By default, every `UConvaiObjectComponent` on an actor represents the whole actor — the gaze system highlights all meshes and promotes the actor as a unit. To scope gaze to a sub-mesh, set `ObjectEntry.MoveTargetMode` to **Component as goal** (`Vector`) and set `ObjectEntry.ComponentName` to a case-insensitive substring of the target component's name. With the default **Actor as goal** mode, a non-empty `ComponentName` does not affect gaze.
+`ObjectEntry.ObjectReference` (`EConvaiObjectReference`, Details panel label **Object Is**) says what the object *is* for every system that reads `FConvaiObjectEntry` — gaze, movement fallback, and vision tagging alike. It has two values:
+
+- **Whole Actor** (default) — the whole actor is the object. Gaze matches any of the actor's primitives.
+- **Specific Component** — one named sub-component is the object. Gaze matches only that component. Set `ObjectEntry.ComponentName` to a case-insensitive substring of the target component's name; a non-empty `ComponentName` has no effect while `ObjectReference` is still **Whole Actor**.
 
 `GatherMatchingObjects` divides `UConvaiObjectComponent` instances on a hit actor into two groups:
 
 | Group | Condition | Fires when |
 |---|---|---|
-| Whole-actor | `MoveTargetMode` is `Actor as goal`, or `ComponentName` is empty | Any hit on the actor when the actor has no resolved component-scoped objects. If a component-scoped object on the same actor matches, whole-actor objects fire as piggyback. |
-| Component-scoped | `MoveTargetMode` is `Component as goal` and `ComponentName` resolves to a mesh on the actor | Hit primitive matches (or is attached to) the resolved component |
+| Whole-actor | `ObjectReference` is `Whole Actor`, or `ObjectReference` is `Specific Component` with an empty `ComponentName` | Any hit on the actor when the actor has no resolved component-scoped objects. If a component-scoped object on the same actor matches, whole-actor objects fire as piggyback. |
+| Component-scoped | `ObjectReference` is `Specific Component` and `ComponentName` resolves to a component on the actor | Hit primitive matches (or is attached to) the resolved component |
 
 When a component-scoped component matches, any whole-actor component on the same actor also fires ("piggyback" rule). If the actor has resolved component-scoped objects but the hit primitive does not match any of them, no gaze object fires for that hit.
 
@@ -116,15 +123,15 @@ When a component-scoped component matches, any whole-actor component on the same
 
 ```text
 BP_Door
-├── ConvaiObjectComponent "Door"        → MoveTargetMode: Actor as goal
-└── ConvaiObjectComponent "DoorHandle"  → MoveTargetMode: Component as goal, ComponentName: "Handle"
+├── ConvaiObjectComponent "Door"        → Object Is: Whole Actor
+└── ConvaiObjectComponent "DoorHandle"  → Object Is: Specific Component, Component Name: "Handle"
     └── targets SM_Handle on the actor
 ```
 
 - Player looks at door frame → no gaze object fires, because the actor has a resolved component-scoped object and the hit primitive does not match it.
 - Player looks at handle → `ConvaiObjectComponent "DoorHandle"` fires; `ConvaiObjectComponent "Door"` also fires (piggyback). The highlight actor scopes to `SM_Handle` only.
 
-`ComponentName` matching is case-insensitive substring lookup, resolved once and cached. Call `GetResolvedComponent(true)` to force a refresh if the component tree changes at runtime. An unresolved `ComponentName` logs a warning on first component resolve and that component is excluded from scoped gaze passes.
+`ComponentName` matching is case-insensitive substring lookup. `GetResolvedComponent()` revalidates the cached match on every call — if the cached component's owner or name no longer fits the filter, it rescans automatically, so no manual refresh call is needed even after the actor's component tree changes at runtime. An unresolved `ComponentName` logs a warning the first time resolution is attempted, and that component is excluded from scoped gaze passes until the name resolves.
 
 {% hint style="info" %}
 Use component-scoped `UConvaiObjectComponent` instances to let a single complex prop expose multiple independent interaction points — each with its own `Name`, `Description`, and gaze events — without duplicating the parent actor.
