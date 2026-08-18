@@ -1,6 +1,6 @@
 {
-  "note": "Findings already present when this check was adopted. They are real and still need fixing; they are recorded here so that new problems stand out. Remove entries as you fix them - never regenerate this file to make a run green.",
-  "count": 70,
+  "note": "Findings already present when this check was adopted. They are real and still need fixing; they are recorded here so that new problems stand out. Remove entries as you fix them - never regenerate this file to make a run green. Six entries added on 2026-08-18 are EConvaiMoveTarget on live Unreal reference pages: the type was removed in the Movement Points rework and the field MoveTargetMode no longer exists either. They are baselined only so a tooling update is not blocked by a content defect - they are wrong today and tracked separately.",
+  "count": 76,
   "known": [
     "broken-link|plugins-and-integrations/other-integrations/discord/README.md|/broken/pages/Q5SplR81qembnni7lWul",
     "broken-link|plugins-and-integrations/unity-plugin/convai-ui-prefabs.md|utilities/dynamic-ui-system.md",
@@ -69,6 +69,12 @@
     "duplicate-title|plugins-and-integrations/convai-unity-sdk/overview/release-notes.md|'Release notes' also used by plugins-and-integrations/convai-unreal-engine-plugin/overview/release-notes.md",
     "duplicate-title|plugins-and-integrations/convai-unity-sdk/troubleshooting/README.md|'Troubleshooting' also used by plugins-and-integrations/convai-unreal-engine-plugin/troubleshooting/README.md",
     "duplicate-title|plugins-and-integrations/convai-unity-sdk/troubleshooting/audio-and-microphone-issues.md|'Audio and microphone issues' also used by plugins-and-integrations/convai-unreal-engine-plugin/troubleshooting/audio-and-microphone-issues.md",
+    "forbidden-symbol|plugins-and-integrations/convai-unreal-engine-plugin/blueprint-reference/convai-object-component.md|EConvaiMoveTarget",
+    "forbidden-symbol|plugins-and-integrations/convai-unreal-engine-plugin/blueprint-reference/data-types-and-enums.md|EConvaiMoveTarget",
+    "forbidden-symbol|plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/actions-blueprint-reference.md|EConvaiMoveTarget",
+    "forbidden-symbol|plugins-and-integrations/convai-unreal-engine-plugin/features/character-actions/configuring-actions.md|EConvaiMoveTarget",
+    "forbidden-symbol|plugins-and-integrations/convai-unreal-engine-plugin/features/gaze-attention/gaze-attention-reference.md|EConvaiMoveTarget",
+    "forbidden-symbol|plugins-and-integrations/convai-unreal-engine-plugin/features/scene-metadata/scene-metadata-component-reference.md|EConvaiMoveTarget",
     "forbidden-symbol|plugins-and-integrations/unity-plugin-beta-overview/installation-and-setup.md|ConvaiNPC",
     "forbidden-symbol|plugins-and-integrations/unity-plugin-beta-overview/migration-guide/additional-feature-migration.md|ConvaiNPC",
     "orphan|plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters-1/change-the-parent-class-for-player-rpm.md|not in SUMMARY.md and nothing links to it"
