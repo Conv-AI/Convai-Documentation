@@ -1,7 +1,7 @@
 ---
 title: Unreal Engine platform support matrix
 description: Reference for Convai Unreal Engine plugin platform support, including build targets, engine plugin dependencies, and Android microphone access.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
 Use this reference to confirm which build targets the Convai Unreal Engine plugin supports, which engine plugin dependencies it enables, and what Android microphone access requires before packaging.
@@ -24,6 +24,7 @@ The Convai plugin declares the following engine plugin dependencies. These are e
 
 | Dependency | Enabled by default | Required for |
 |---|---|---|
+| `ToolsetRegistry` | Yes (optional) | Backs the Convai Toolset and MCP tooling on UE 5.8 and later; the Convai plugin still loads without it |
 | `AudioCapture` | Yes | Microphone input on Win64 and Android |
 | `AndroidPermission` | Yes | Requesting microphone permission at runtime on Android |
 | `EditorScriptingUtilities` | Yes | Editor tooling dependency; no user configuration required |
