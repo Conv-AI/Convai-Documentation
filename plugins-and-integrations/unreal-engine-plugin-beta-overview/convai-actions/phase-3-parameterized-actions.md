@@ -1,4 +1,7 @@
 ---
+description: >-
+  Give a custom action typed inputs — numbers, actor references, and constrained choices — and
+  read the resolved values in a Blueprint handler.
 hidden: true
 ---
 

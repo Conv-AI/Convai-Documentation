@@ -8,8 +8,6 @@ hidden: true
 
 # Installation and Setup | Unreal Engine
 
-## Introduction
-
 The **Convai Unreal Engine Plugin (Beta)** brings powerful, real-time conversational AI directly into **Unreal Engine**.\
 Rebuilt from the ground up, offering low-latency dialogue, environment-aware interactions, and hands-free communication.
 

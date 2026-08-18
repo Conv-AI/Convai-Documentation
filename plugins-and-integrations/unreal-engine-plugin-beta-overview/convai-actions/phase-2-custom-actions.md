@@ -1,4 +1,7 @@
 ---
+description: >-
+  Declare your own action with no parameters, bind a Blueprint handler to it, dispatch by
+  action name, and confirm the character runs your code on request.
 hidden: true
 ---
 

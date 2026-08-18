@@ -1,4 +1,7 @@
 ---
+description: >-
+  Understand the three phases of the Convai action system in Unreal Engine, from the four
+  shipped default actions through to fully parameterized custom actions.
 hidden: true
 ---
 

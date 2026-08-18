@@ -1,4 +1,7 @@
 ---
+description: >-
+  Enable the four default actions on a Convai chatbot, register an object, make the character
+  movable, and play test the result with no Blueprint scripting.
 hidden: true
 ---
 
