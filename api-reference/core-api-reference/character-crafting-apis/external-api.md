@@ -21,7 +21,93 @@ Typical flow:
 
 For the Playground UI walkthrough and example handlers (weather, sports scores, Jira), see [External API](../../../convai-playground/character-customization/external-api.md).
 
-Limits that apply here and in the Playground — supported models, Python 3.11 runtime, `requests`-only third-party packages, `handle_event`, input schema, and the 128-function cap — live on [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md).
+Hard limits (supported models, Python runtime, libraries, schema, caps) are documented once on [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md).
+
+## Writing functions
+
+Functions run in a sandboxed **Python 3.11** runtime. Write plain Python, keep the surface area small, and return JSON-serializable data the model can read back into the conversation.
+
+For the full limit list (allowed libraries, line cap, model support, character caps), see [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md).
+
+### Entry point: `handle_event`
+
+Every function **must** define a top-level function named `handle_event` that takes one argument. That argument is a dict of the values the model filled in from your `input_description`.
+
+```python
+def handle_event(inputs):
+    # `inputs` is a dict of the parameters defined in input_description.
+    # Call your external API here and return a JSON-serializable dict.
+    return {"result": "ok"}
+```
+
+Requirements:
+
+* The name must be exactly `handle_event`
+* It must accept a single parameter (commonly named `inputs` or `data`)
+* Return a **JSON-serializable** value, almost always a `dict`
+* Do not rely on global mutable state across calls — each invocation is independent
+
+Minimal example that reads one parameter and hits an external API:
+
+```python
+import requests
+
+API_KEY = "<your-api-key>"
+
+def handle_event(inputs):
+    city = inputs.get("city")
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}"
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+    weather = response.json()
+    return {
+        "city": city,
+        "description": weather["weather"][0]["description"],
+        "temp_k": weather["main"]["temp"],
+    }
+```
+
+### Input description
+
+`input_description` tells the model which arguments it can (and must) pass into `handle_event`. On create it is sent as a **JSON string**, not a nested object. Schema rules are on [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md#input-description).
+
+Example as an object (stringify it before sending):
+
+```json
+{
+  "parameters": {
+    "city": {
+      "type": "string",
+      "description": "Name of the city to get weather for (e.g. 'London', 'Tokyo')"
+    },
+    "units": {
+      "type": "string",
+      "description": "Optional unit system, such as 'metric' or 'imperial'"
+    }
+  },
+  "required": ["city"]
+}
+```
+
+In Python when calling create:
+
+```python
+input_description = json.dumps({
+    "parameters": {
+        "city": {
+            "type": "string",
+            "description": "Name of the city to get weather for"
+        }
+    },
+    "required": ["city"]
+})
+```
+
+{% hint style="info" %}
+Keep parameter descriptions concrete. The model picks arguments from those descriptions, so vague text like `"a value"` leads to bad calls. Prefer examples and units in the description string.
+{% endhint %}
+
+***
 
 ## Create a function
 
@@ -43,8 +129,8 @@ Creates a new External API function on your account. The function is not attache
 | name<mark style="color:red;">\*</mark>                    | String | Display name of the function. Prefer a clear verb phrase the model can match (for example `Get Weather`). |
 | description<mark style="color:red;">\*</mark>             | String | When the character should call this function. Used by the model for tool selection.                  |
 | language<mark style="color:red;">\*</mark>                | String | Implementation language. Only `python` is supported.                                                 |
-| source\_code<mark style="color:red;">\*</mark>            | String | Full Python 3.11 source, including `handle_event`. Max 400 lines. Stdlib + `requests` only. See [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md#runtime). |
-| input\_description<mark style="color:red;">\*</mark>      | String | JSON **string** describing parameters. Must match the schema in [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md#input-description). |
+| source\_code<mark style="color:red;">\*</mark>            | String | Full Python 3.11 source, including `handle_event`. Max 400 lines. Stdlib + `requests` only. See [Writing functions](#writing-functions) and [limitations](../../../convai-playground/character-customization/external-api-limitations.md#runtime). |
+| input\_description<mark style="color:red;">\*</mark>      | String | JSON **string** describing parameters. See [Input description](#input-description) and the schema on [limitations](../../../convai-playground/character-customization/external-api-limitations.md#input-description). |
 
 #### Example payload
 
