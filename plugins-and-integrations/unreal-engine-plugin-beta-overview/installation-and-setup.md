@@ -3,6 +3,7 @@ description: >-
   Learn how to install, configure, and integrate the Convai Unreal Plugin Beta
   to bring conversational AI and real-time vision into your Unreal Engine
   projects.
+hidden: true
 ---
 
 # Installation and Setup | Unreal Engine

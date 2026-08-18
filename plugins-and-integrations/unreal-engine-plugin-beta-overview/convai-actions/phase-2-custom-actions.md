@@ -1,3 +1,7 @@
+---
+hidden: true
+---
+
 # Phase 2: Custom Actions
 
 Phase 1 used the four shipped default actions. Now you'll add your **own action** with no parameters and wire it to a Blueprint event. By the end of this phase, asking the bot _"print hello"_ will run your Blueprint code.

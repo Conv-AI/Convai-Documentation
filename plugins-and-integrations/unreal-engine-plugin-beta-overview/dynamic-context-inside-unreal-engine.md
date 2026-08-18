@@ -2,6 +2,7 @@
 description: >-
   Give AI characters real-time awareness of game state, player actions, and
   environment using Dynamic Context.
+hidden: true
 ---
 
 # Dynamic Context inside Unreal Engine
