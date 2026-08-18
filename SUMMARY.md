@@ -678,6 +678,7 @@
     * [Core AI Settings API](api-reference/core-api-reference/character-crafting-apis/core-ai-settings-api.md)
     * [Narrative Design API](api-reference/core-api-reference/character-crafting-apis/narrative-design-api.md)
     * [Knowledge Bank API](api-reference/core-api-reference/character-crafting-apis/knowledge-bank-api.md)
+    * [External API](api-reference/core-api-reference/character-crafting-apis/external-api.md)
     * [Action API](api-reference/core-api-reference/character-crafting-apis/action-api.md)
     * [Chat History API](api-reference/core-api-reference/character-crafting-apis/chat-history-api.md)
     * [Chat History Delete API](api-reference/core-api-reference/character-crafting-apis/chat-history-delete-api.md)
