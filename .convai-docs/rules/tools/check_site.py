@@ -37,6 +37,7 @@ only with --strict.
 """
 
 import argparse
+import fnmatch
 import io
 import json
 import os
@@ -87,6 +88,34 @@ def forbidden_from_contracts(directory):
     return names
 
 
+def historical_from_contracts(directory):
+    """Collect the `historical_pages` globs the pack contracts declare.
+
+    A subject can override the defaults - a repository that keeps its migration guides under
+    `upgrading/` rather than `migrate-*.md` says so once, in the contract, instead of teaching
+    every tool separately. When no contract declares any, the defaults stand."""
+    patterns = set()
+    directory = os.path.normpath(directory)
+    if os.path.isdir(directory):
+        for fn in sorted(os.listdir(directory)):
+            if not fn.endswith(".json"):
+                continue
+            try:
+                with io.open(os.path.join(directory, fn), encoding="utf-8-sig") as f:
+                    patterns.update(json.load(f).get("historical_pages", []))
+            except (OSError, ValueError):
+                continue
+    return sorted(patterns) or list(DEFAULT_HISTORICAL_PAGES)
+
+
+def is_historical(page_path, patterns):
+    """Match the way diff_surface.py matches, including the leading-slash form, so the two
+    tools agree on which pages are allowed to name a retired symbol."""
+    path = page_path.split(":")[0].replace("\\", "/")
+    return any(fnmatch.fnmatch(path, pattern) or fnmatch.fnmatch("/" + path, pattern)
+               for pattern in patterns)
+
+
 class Finding(object):
     def __init__(self, kind, page, detail, line=0):
         self.kind = kind
@@ -105,6 +134,20 @@ class Finding(object):
         return {"kind": self.kind, "level": self.level, "rule": self.rule,
                 "page": self.page, "line": self.line, "detail": self.detail}
 
+
+# Pages whose job is to say what a release changed. A retired name on one of these is the
+# point of the page, not drift: a migration table that cannot name the symbol it is telling
+# you to replace is useless. `diff_surface.py` has always honoured this; this checker did not,
+# so a correct migration guide failed CV-12 with no legitimate way to record the exception.
+# Kept identical to diff_surface.py's list so one subject cannot mean two different things.
+DEFAULT_HISTORICAL_PAGES = [
+    "**/release-notes.md",
+    "**/changelog.md",
+    "**/migrate-*.md",
+    "**/migration-*.md",
+    "**/migration-guide/**",
+    "**/upgrade-*.md",
+]
 
 RETIRING_FILE = ".convai-docs/retiring-sections.txt"
 
@@ -159,7 +202,7 @@ def existing_files(root):
     return out
 
 
-def check(index, root, forbidden=(), retiring=()):
+def check(index, root, forbidden=(), retiring=(), historical=()):
     findings = []
     pages = index["pages"]
     files = existing_files(root)
@@ -262,6 +305,14 @@ def check(index, root, forbidden=(), retiring=()):
                 f.kind = "retiring:" + f.kind
                 f.level = "INFO"
 
+    # Only forbidden-symbol is exempt on a historical page. A broken link on a migration
+    # guide is still broken; naming the symbol the guide exists to retire is not.
+    if historical:
+        for f in findings:
+            if f.kind == "forbidden-symbol" and is_historical(f.page, historical):
+                f.kind = "historical:forbidden-symbol"
+                f.level = "INFO"
+
     return findings
 
 
@@ -316,7 +367,9 @@ def main():
 
     forbidden = sorted(set(args.forbidden) | forbidden_from_contracts(args.contracts))
     retiring = retiring_prefixes(args.root)
-    findings = check(index, os.path.abspath(args.root), forbidden=forbidden, retiring=retiring)
+    historical = historical_from_contracts(args.contracts)
+    findings = check(index, os.path.abspath(args.root), forbidden=forbidden,
+                     retiring=retiring, historical=historical)
 
     if args.write_baseline:
         if not args.baseline:
@@ -334,7 +387,8 @@ def main():
 
     errors = [f for f in shown if f.level == "ERROR"]
     warns = [f for f in shown if f.level == "WARN"]
-    retiring_findings = [f for f in findings if f.level == "INFO"]
+    retiring_findings = [f for f in findings if f.kind.startswith("retiring:")]
+    historical_findings = [f for f in findings if f.kind.startswith("historical:")]
 
     if args.json:
         json.dump({
@@ -365,6 +419,9 @@ def main():
             print("%d finding(s) in sections awaiting deletion, not counted. If those sections "
                   "are still here in six months, they are not being retired and this number is "
                   "real work." % len(retiring_findings))
+        if historical_findings:
+            print("%d retired name(s) left alone on migration and release pages, where naming "
+                  "them is the point of the page." % len(historical_findings))
         if baselined and not args.show_baseline:
             print("%d known finding(s) held in the baseline. Run --show-baseline to see them."
                   % len(baselined))
