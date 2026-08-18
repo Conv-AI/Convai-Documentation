@@ -1,7 +1,7 @@
 ---
 title: How long-term memory works
 description: Understand the long-term memory session lifecycle, how memory is scoped by user and character, and how facts are extracted, deduplicated, and injected.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 Long-term memory (LTM) gives Convai characters a persistent, per-user knowledge store that survives across separate conversation sessions. A safety instructor remembers that a trainee passed module 3 last week. A corporate onboarding assistant knows which policies an employee has already reviewed. A medical training guide recalls that a user prefers detailed explanations over summaries. This page explains the underlying mechanism — what LTM stores, how it scopes memory per user, and when facts flow in and out of a session.
@@ -37,7 +37,7 @@ sequenceDiagram
 
 Every memory record is scoped to exactly one user–character pair.
 
-```
+```text
 end_user_id  +  character_id  →  set of MemoryRecord entries
 ```
 

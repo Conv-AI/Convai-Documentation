@@ -1,7 +1,7 @@
 ---
 title: Long-term memory usage examples
 description: Four complete long-term memory patterns for Unity — zero-config persistence, authenticated identity, memory seeding, and memory reset.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 These examples cover the four most common long-term memory integration patterns. Each example is self-contained and shows the full setup, the relevant code, and the expected runtime outcome.
@@ -171,7 +171,7 @@ public class MemoryReset : MonoBehaviour
 }
 ```
 
-To remove only the memories while keeping LTM enabled, call `DeleteAllAsync` without the `SetMemoryEnabledAsync` step. To remove a user's records across all characters (not just one), use `client.EndUsers.DeleteAsync(endUserId)` instead. See [Manage end-user records](end-user-management.md).
+To remove only the memories while keeping LTM enabled, call `DeleteAllAsync` and skip the `SetMemoryEnabledAsync` step. To remove a user's records across every character rather than one, use `client.EndUsers.DeleteAsync(endUserId)` instead. See [Manage end-user records](end-user-management.md).
 
 **Expected outcome:** The next session for this user–character pair starts with no stored context. The character treats the user as a new contact.
 

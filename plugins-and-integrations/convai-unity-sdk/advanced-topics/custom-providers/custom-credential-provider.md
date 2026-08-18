@@ -4,10 +4,14 @@ description: >-
   environment variables, a secrets vault, or any runtime-resolved credential
   store.
 title: Custom credential provider
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
-By default, the Convai Unity SDK reads the API key and server URL from `ConvaiSettings.asset`, stored in `Assets/Resources/`. Some deployment contexts require credentials to come from elsewhere — a CI environment variable, a secrets manager, a per-tenant configuration service, or a backend that vends short-lived tokens.
+By default, the Convai Unity SDK reads the API key and server URL from `ConvaiSettings.asset`, stored in `Assets/Resources/`. Some deployment contexts require credentials to come from elsewhere — a CI environment variable, a secrets manager, or a per-tenant configuration service.
+
+{% hint style="info" %}
+If what you need is short-lived credentials resolved from your own server before each connection, the SDK has a built-in path for that and you do not need a custom credential provider. See [Authentication](../../authentication/README.md), and [Write a custom token provider](../../authentication/custom-token-provider.md) for the extension point it offers. Use the interface on this page for the cases that path does not cover — supplying a project API key from somewhere other than the settings asset.
+{% endhint %}
 
 ## Prerequisites
 
@@ -104,9 +108,7 @@ In your Hierarchy, find the GameObject that has `ConvaiManager` on it. Add `Envi
 | `enableSessionResume` | `bool` | `true` | Whether the SDK should attempt to resume previous sessions. |
 | `maxRetryAttempts` | `int` | `3` | Maximum reconnection attempts before giving up. |
 
-{% hint style="danger" %}
 `ConvaiBootstrapConfigSnapshot` is captured at startup. If your credential source issues short-lived tokens, the SDK cannot automatically rotate them mid-session. Design your token lifetime to exceed the longest expected session, or disconnect and reconnect to apply a refreshed token.
-{% endhint %}
 
 {% hint style="danger" %}
 Never log or serialize your API key to Unity's Console or a log file. `ConvaiBootstrapConfigSnapshot` intentionally omits the API key from its `ToString()` output.

@@ -1,22 +1,20 @@
 ---
 title: Configure conversation input mode
-last_reviewed: 4.2.0
+last_reviewed: "4.5.0"
 description: >-
-  Choose between hands-free voice activation and push-to-talk, and configure the
-  trigger key or button for your project.
+  Choose between hands-free voice activation and push-to-talk, configure the
+  trigger key or controller button, and switch between the two modes at runtime.
 ---
-
-# Configure conversation input mode
 
 The Convai SDK for Unity supports two conversation input modes: **Hands Free** (the player speaks naturally, the SDK detects when they stop) and **Push to Talk** (the player holds a key to speak). Both modes are configured on `ConvaiRoomManager` in the Inspector.
 
-### Where to find the settings
+## Where to find the settings
 
 Select the `ConvaiManager` GameObject in the Hierarchy. In the Inspector, find `ConvaiRoomManager`. The **Turn-Taking Options** section contains all input mode settings.
 
 <figure><img src="../../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
 
-### Input mode comparison
+## Input mode comparison
 
 |                   | Hands Free                                  | Push to Talk                                     |
 | ----------------- | ------------------------------------------- | ------------------------------------------------ |
@@ -25,11 +23,11 @@ Select the `ConvaiManager` GameObject in the Hierarchy. In the Inspector, find `
 | **Latency**       | Slightly higher (silence detection delay)   | Lower (send on key release)                      |
 | **Player effort** | None                                        | Must hold a key                                  |
 
-### Hands free mode
+## Hands free mode
 
 Hands Free is the default. Set **Mode** to `HandsFree`.
 
-#### Turn detection
+### Turn detection
 
 Control how the SDK decides the player has finished speaking.
 
@@ -49,11 +47,13 @@ When `TurnDetection` is set to `Custom`, the **Smart Turn Settings** appear:
 Increasing `StopSecs` gives players more time to pause mid-sentence without triggering a turn end. Useful for training simulations where learners think before answering.
 {% endhint %}
 
-### Push to talk mode
+## Push to talk mode
 
 Set **Mode** to `PushToTalk`. The default key is **T** — change it via `_pushToTalkKey` on `ConvaiRoomManager`.
 
-#### Local audio policy
+On Meta Quest, push-to-talk reads the A, B, X, and Y buttons through Unity's XR input API instead of a keyboard key. If the active XR controller cannot be read, or disconnects mid-press, the SDK fails closed and stops microphone capture rather than leaving it open. Keyboard and non-XR joystick behavior is unchanged.
+
+### Local audio policy
 
 Controls microphone behavior on the player's device.
 
@@ -63,7 +63,7 @@ Controls microphone behavior on the player's device.
 | `EnableAcousticEchoCancellation` | `false`        | Enable AEC for speakerphone use (Android/iOS)                                                                 |
 | `PushToTalkStartupMode`          | `PrewarmMuted` | `PrewarmMuted` = mic open but muted from start; `OpenOnFirstPress` = mic opens only when key is first pressed |
 
-#### Push to talk policy
+### Push to talk policy
 
 Controls what happens when the player presses and releases the push-to-talk key.
 
@@ -75,7 +75,7 @@ Controls what happens when the player presses and releases the push-to-talk key.
 | `TurnCompletionTimeoutMs`                    | `5000`  | Fallback timeout (ms) to unlock push-to-talk if the completion event never arrives                                                                                            |
 | `AllowSpeechStoppedFallbackAfterSpeechStart` | `false` | Allow a speech-stopped event to clear the waiting state after speech has started                                                                                              |
 
-### Runtime mode switching
+## Runtime mode switching
 
 `SetConversationInputModeAsync()` switches the active input mode for the current connected session — **no reconnection required**. The switch takes effect immediately on the live session and does not mutate configured defaults or room profile assets.
 
@@ -130,9 +130,9 @@ void OnModeChanged(ConversationInputMode newMode)
 
 Connect-time `TurnTakingOptions` define the session's baseline policy (custom turn detection thresholds, push-to-talk startup behavior, AEC preference). Runtime switching changes only the active mode — all other options carry over from the connected session's configuration.
 
-### Usage examples
+## Usage examples
 
-#### Example 1: Medical training — hands free with extended silence
+### Example 1: Medical training — hands free with extended silence
 
 **Scenario:** Nursing students answer scenario questions. They often pause while thinking, so the default 3-second silence threshold causes premature turn ends.
 
@@ -145,7 +145,7 @@ Connect-time `TurnTakingOptions` define the session's baseline policy (custom tu
 
 **Expected outcome:** Students can pause for up to 5 seconds mid-answer without the turn ending. The character waits until the student finishes.
 
-#### Example 2: Industrial site inspection — push to talk
+### Example 2: Industrial site inspection — push to talk
 
 **Scenario:** Workers in a noisy manufacturing environment use push-to-talk to avoid accidental voice activation. They press **T** to ask questions about equipment status.
 
@@ -158,7 +158,7 @@ Connect-time `TurnTakingOptions` define the session's baseline policy (custom tu
 
 **Expected outcome:** Only intentional key presses send audio to Convai. Background noise does not trigger responses. Workers can interrupt long answers with a new press.
 
-#### Example 3: Cinematic to gameplay mode switch
+### Example 3: Cinematic to gameplay mode switch
 
 **Scenario:** An onboarding cinematic uses Hands Free. When gameplay starts, the game switches to Push to Talk without reloading the scene.
 
@@ -176,10 +176,10 @@ public async void OnCinematicEnd()
 
 **Expected outcome:** Mode switches seamlessly mid-session. The character continues without interruption. Push-to-talk controls become active immediately.
 
-### Next steps
+## Next steps
 
 With input mode configured, tune character voice volume and audio playback settings.
 
 {% content-ref url="configure-character-audio.md" %}
-[configure-character-audio.md](configure-character-audio.md)
+[Configure character audio](configure-character-audio.md)
 {% endcontent-ref %}

@@ -1,10 +1,10 @@
 ---
 title: Character actions examples
-description: Progressive examples for the Convai character actions system — Inspector setup, event subscriptions, scripted batch injection, and speech-synced timing.
-last_reviewed: "4.4.0"
+description: Progressive examples for the Convai character actions system — Inspector setup, event subscriptions, scripted batch injection, and an observation action.
+last_reviewed: "4.5.0"
 ---
 
-These five examples progress from the simplest possible configuration to full scripting control. Each example is self-contained — you can follow any one of them without reading the others first.
+These six examples progress from the simplest possible configuration to full scripting control. Each example is self-contained — you can follow any one of them without reading the others first.
 
 ## Example 1 — Fire safety retrieval (Inspector setup, no code)
 
@@ -19,7 +19,7 @@ On the instructor NPC's `GameObject`, add these components:
 * `ConvaiCharacter`
 * `ConvaiActionConfigSource`
 * `ConvaiActionDispatcher` (leave both policies at defaults: Queue, StopBatch)
-* `NavMeshMoveToActionExecutor` — `_stoppingDistance = 0.6`
+* `ConvaiWalkToActionExecutor` — `_arriveDistance = 0.6`
 
 In `ConvaiActionConfigSource`:
 
@@ -27,7 +27,7 @@ In `ConvaiActionConfigSource`:
 
 | Action name | Target requirement | Executor |
 | --- | --- | --- |
-| `Retrieve` | `Object` | `NavMeshMoveToActionExecutor` |
+| `Retrieve` | `Object` | `ConvaiWalkToActionExecutor` |
 | `Point At` | `Either` | `LookAtTargetActionExecutor` |
 
 **Actionable objects:**
@@ -97,7 +97,7 @@ public sealed class OnboardingTourController : MonoBehaviour
 
 | Action name | Target requirement | Executor |
 | --- | --- | --- |
-| `Walk To` | `Object` | `NavMeshMoveToActionExecutor` |
+| `Walk To` | `Object` | `ConvaiWalkToActionExecutor` |
 | `Demonstrate` | `Object` | `LookAtTargetActionExecutor` |
 
 **Actionable objects:** Each workstation registered with its name and location description.
@@ -222,6 +222,33 @@ public sealed class ExhibitPointerTrigger : MonoBehaviour
 
 Only the batch's first step is gated this way. If none of those events fire, the dispatcher's `_speechGateTimeoutSeconds` field releases the step anyway (2 seconds by default, shown as "Speech Gate Timeout Seconds" under the Dispatch header in the Inspector), so a silent turn never stalls the batch.
 
+## Example 6 — Distance check for a museum exhibit (observation action)
+
+**Scenario:** A museum tour simulation. A visitor asks how far away an exhibit is, and the NPC answers with a distance instead of performing a motion. This is a different shape of action from the first five examples: the executor's job is to compose an answer, not to move or gesture.
+
+### Inspector configuration
+
+On the instructor NPC's `GameObject`, add `ConvaiMeasureDistanceActionExecutor` (`Add Component > Convai > Actions > Measure Distance`). It requires no peer component — with no target resolved, it measures the distance to the player instead.
+
+In `ConvaiActionConfigSource`:
+
+**Action definitions:**
+
+| Action name | Target requirement | Executor |
+| --- | --- | --- |
+| `Measure Distance` | `Either` | `ConvaiMeasureDistanceActionExecutor` |
+
+Leave the executor's **Distance Bands** fields at their defaults (`Within Reach` `1.2`, `A Few Steps` `3.5`, `Across The Area` `9`), and leave **Include Metres** checked so the spoken answer includes the measured value.
+
+On the action definition, set **Answer Delivery** to `Tell The Player` — the setting the SDK recommends for any action that answers a question, such as reading a gauge, counting things, or measuring a distance.
+
+**Expected outcome:**
+
+* "How far is the dinosaur skeleton?" → the executor resolves the target, measures the ground-plane distance, and returns an answered result such as `The Dinosaur Skeleton is a few steps away. About 2.8 metres.` — Convai speaks the answer back to the visitor.
+* "How far away am I?" → with no target resolved, the executor measures the distance to the player instead and answers `You are within reach. About 0.9 metres.`
+
+`ConvaiMeasureDistanceActionExecutor` returns `ConvaiActionExecutionResult.Answered(...)` rather than `Succeeded(...)`. An answered result carries the sentence Convai is allowed to say; nothing else about the result reaches the character's model of the world. `ConvaiCountTargetGroupActionExecutor` (`Convai/Actions/Count Target Group`) follows the same pattern for counting the available members of a `ConvaiActionTargetGroup`.
+
 ## Next steps
 
 {% content-ref url="debugging-and-troubleshooting.md" %}
@@ -230,4 +257,8 @@ Only the batch's first step is gated this way. If none of those events fire, the
 
 {% content-ref url="actions-scripting-reference.md" %}
 [Character actions scripting reference](actions-scripting-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="migrate-to-v4-5.md" %}
+[Migrate actions to v4.5.0](migrate-to-v4-5.md)
 {% endcontent-ref %}

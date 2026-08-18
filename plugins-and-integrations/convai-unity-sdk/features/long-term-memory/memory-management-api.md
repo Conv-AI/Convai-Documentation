@@ -1,7 +1,7 @@
 ---
 title: Memory management API
-description: Use ConvaiRestClient.Memory to list, add, retrieve, and delete memory records for a user–character pair — includes setup, all five methods, response types, and error handling.
-last_reviewed: "4.2.0"
+description: List, add, retrieve, and delete a character's memory records for one player, with setup, every method, response types, and error handling.
+last_reviewed: "4.5.0"
 ---
 
 The Memory Management API lets you read and write memory records directly — without waiting for a conversation to generate them. Use it to audit what a character knows about a user, seed facts before a first session, or remove specific memories that are no longer accurate.

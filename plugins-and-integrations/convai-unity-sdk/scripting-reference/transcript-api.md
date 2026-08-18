@@ -1,7 +1,7 @@
 ---
 title: Transcript API
 description: Query transcript turns, subscribe to live changes, read captions, and export session history from Unity scripts using the transcript facade.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 `ConvaiTranscripts` is the Convai Unity SDK's canonical transcript facade: a live, in-memory timeline of every player and character turn in the room, with pull-based queries, push-based change events, live captions, and a session export helper. Use this page when scripting custom chat UI, transcript export, or turn-level conversation logic. Access the facade through `ConvaiManager.ActiveManager.Transcripts`.

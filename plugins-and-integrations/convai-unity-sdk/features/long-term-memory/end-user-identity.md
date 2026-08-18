@@ -1,7 +1,7 @@
 ---
 title: End-user identity
 description: Understand how the SDK identifies users for long-term memory scoping and how to implement a custom authentication-backed identity provider.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 Every long-term memory session requires a stable `end_user_id` — a string the SDK sends to Convai on every connection. Convai uses it to scope stored memories: facts extracted from a conversation are stored under the combination of `end_user_id` and `character_id`. If the identifier changes between sessions, the server treats the user as a new person and no memories carry over.

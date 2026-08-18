@@ -3,7 +3,7 @@ description: >-
   Implement a custom end-user identity provider to tie Convai's memory and MAU
   tracking to your own auth system, learner records, or kiosk login flow.
 title: Custom identity provider
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 Convai's long-term memory, MAU (Monthly Active User) tracking, and end-user management features depend on a stable, consistent identifier for each user. For most training simulations and interactive experiences, you will want to replace the default device-based ID with one that is meaningful to your application — a user ID from your auth system, a learner record number, or any stable string that uniquely identifies one person across sessions and devices.
@@ -38,7 +38,7 @@ Requirements for the returned string:
 * Must be unique per user. Shared IDs corrupt long-term memory across users.
 
 {% hint style="warning" %}
-If two distinct users resolve to the same ID, their long-term memory entries merge silently. There is no error — the data is simply wrong. Ensure your ID source is globally unique across your entire user base.
+If two distinct users resolve to the same ID, their long-term memory entries merge silently. There is no error — the data is wrong. Ensure your ID source is globally unique across your entire user base.
 {% endhint %}
 
 ### IEndUserMetadataProvider

@@ -2,21 +2,21 @@
 title: Dispatcher and batch policies
 description: >-
   Configure the dispatcher's batch policy, failure policy, speech gate
-  timeout, and lifecycle events for character action execution.
-last_reviewed: "4.4.0"
+  timeout, barge-in, and lifecycle events for character action execution.
+last_reviewed: "4.5.0"
 ---
 
-`ConvaiActionDispatcher` is the runtime execution layer of the action system. It listens for command batches from Convai, resolves each action and target against the current session's configuration, and calls the bound executor components one step at a time. Two policies control what happens when new batches arrive during execution and when a step fails. A speech gate can also hold the first action of a fresh batch until the character starts speaking.
+`ConvaiActionDispatcher` is the runtime execution layer of the action system. It listens for command batches from Convai, resolves each action and target against the current session's configuration, and calls the bound executor components one step at a time. Two policies control what happens when new batches arrive during execution and when a step fails. A speech gate can also hold the first action of a fresh batch until the character starts speaking, and the dispatcher can optionally cancel its own work when the player starts talking.
 
 ## Component overview
 
 | Attribute       | Value                                                            |
 | --------------- | ---------------------------------------------------------------- |
-| **Menu path**   | `Add Component → Convai → Convai Action Dispatcher`              |
+| **Menu path**   | `Add Component → Convai → Convai Action Runner`                  |
 | **Namespace**   | `Convai.Runtime.Actions`                                         |
 | **Constraints** | `DisallowMultipleComponent`, `RequireComponent(ConvaiCharacter)` |
 
-The dispatcher must be on the same `GameObject` as `ConvaiCharacter`. Only one dispatcher is allowed per character.
+The dispatcher must be on the same `GameObject` as `ConvaiCharacter`. Only one dispatcher is allowed per character. In the Actions Editor's **Character Settings** tab, this component is labeled **Convai Action Runner** under **Actions Are Run By** — see [Configure character actions](configuring-actions.md#where-action-behaviors-live).
 
 ## Inspector fields
 
@@ -25,6 +25,9 @@ The dispatcher must be on the same `GameObject` as `ConvaiCharacter`. Only one d
 | `_batchPolicy`      | `ConvaiActionBatchPolicy`          | `Queue`     | How incoming batches behave while another batch is executing               |
 | `_failurePolicy`    | `ConvaiActionBatchFailurePolicy`   | `StopBatch` | Whether a step failure aborts the remaining batch or allows it to continue |
 | `_speechGateTimeoutSeconds` | `float`                     | `2`         | Maximum seconds the first action of a fresh batch waits for character speech before running anyway |
+| `_defaultStepTimeoutSeconds` | `float`                    | `60`        | Longest any action may run before it is reported as timed out, used only when the action's own `TimeoutSeconds` is `0`. An action's own timeout, when authored, always wins. `0` removes this safety net entirely. |
+| `_cancelOnUserSpeech` | `bool`                            | `false`     | When enabled, the player starting to speak cancels the in-flight batch and clears the queue — the same effect as `ReplaceCurrent`, triggered by the player instead of a new backend batch |
+| `_enablePerformanceReactions` | `bool`                     | `true`      | When enabled, notifies any `IActionPerformanceReactor` peers registered on the character's embodiment context (Gaze look-where-you-act, Body Language acknowledgment nod, Emotion outcome mood beat) of batch and step lifecycle. No-op with no embodiment context or reactor present |
 | `_onBatchStarted`   | `UnityEvent`                       | —           | Fires when a batch begins executing                                        |
 | `_onStepStarted`    | `ConvaiActionInvocationUnityEvent` | —           | Fires at the start of each step                                            |
 | `_onStepSucceeded`  | `ConvaiActionInvocationUnityEvent` | —           | Fires when a step executor returns `Succeeded`                             |
@@ -35,6 +38,18 @@ The dispatcher must be on the same `GameObject` as `ConvaiCharacter`. Only one d
 | `_onBatchAborted`   | `UnityEvent`                       | —           | Fires when the batch is cut short by the failure policy                    |
 
 `ConvaiActionInvocationUnityEvent` is a serializable `UnityEvent<ConvaiActionInvocation>`. Wire it in the Inspector exactly like a standard `UnityEvent` — the event parameter carries the full invocation context (action name, target, character, batch and step index). `ConvaiActionStepReportUnityEvent` is a serializable `UnityEvent<ConvaiActionStepReport>`, exposed via the public `OnStepCompleted` property — use it when you want a single subscription point for every step outcome instead of wiring `OnStepSucceeded`/`OnStepFailed`/`OnStepUnhandled` separately.
+
+## Read-only runtime state
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `IsBusy` | `bool` | Whether the dispatcher is running a batch right now. |
+| `PendingBatchCount` | `int` | How many received batches are waiting behind the one currently running. |
+| `CurrentActionName` | `string` | Display name of the action running right now, or empty between steps. |
+| `BatchPolicy` | `ConvaiActionBatchPolicy` | The authored batch policy (read-only from code; set in the Inspector). |
+| `FailurePolicy` | `ConvaiActionBatchFailurePolicy` | The authored failure policy (read-only from code; set in the Inspector). |
+
+`CancelOnUserSpeech` and `EnablePerformanceReactions` are read/write C# mirrors of the two Inspector fields above — see [Barge-in: cancel on user speech](#barge-in-cancel-on-user-speech).
 
 ## Batch policy
 
@@ -59,7 +74,7 @@ Failure policy controls what happens when an executor returns a non-success resu
 | `StopBatch`     | `0`        | Remaining steps in the batch are skipped. `OnBatchAborted` fires.                                  |
 | `ContinueBatch` | `1`        | Execution continues with the next step regardless of failure. `OnBatchCompleted` fires at the end. |
 
-Use `ContinueBatch` when actions are independent — a failed "Point At" should not prevent a following "Wave." Use `StopBatch` (the default) for dependent sequences — a failed "Move To" should prevent a following "Pick Up" that would fail anyway.
+Use `ContinueBatch` when actions are independent — a failed "Point At" should not prevent a following "Nod Or Shake Head." Use `StopBatch` (the default) for dependent sequences — a failed "Walk To" should prevent a following action that expects the character to have arrived.
 
 ## Gate the first action on character speech
 
@@ -79,6 +94,30 @@ The dispatcher checks these fields only on the first step of a batch (`stepIndex
 `_speechGateTimeoutSeconds` caps how long a gated first step waits, in seconds. The default is `2`. This field has no public C# property — set it in the Inspector.
 
 While the gate is open, the dispatcher listens for `ConvaiCharacter.OnSpeechStarted`, `ConvaiCharacter.OnSpeechStopped`, and `ConvaiCharacter.OnTurnCompleted`. The gate releases on whichever of these fires first, or once `_speechGateTimeoutSeconds` elapses, whichever comes first. `OnStepStarted` fires only after the gate releases.
+
+## Barge-in: cancel on user speech
+
+Enable `_cancelOnUserSpeech` to have the dispatcher cancel its in-flight batch and clear the queue the moment the player starts talking — the same effect as the `ReplaceCurrent` batch policy, but triggered by the player rather than by a new backend batch. Off by default, so existing scenes are unchanged until you opt in.
+
+The signal comes from the character's embodiment context event hub (the same server-VAD-based `PlayerSpeakingStateChanged` signal Gaze and Body Language already react to). With no embodiment module added to the character, barge-in stays inert rather than throwing — the dispatcher only degrades, it does not fail.
+
+```csharp
+using Convai.Runtime.Actions;
+using UnityEngine;
+
+public sealed class BargeInFeedback : MonoBehaviour
+{
+    [SerializeField] private ConvaiActionDispatcher _dispatcher;
+
+    private void OnEnable() => _dispatcher.OnCancelledByUserSpeech += HandleCancelled;
+    private void OnDisable() => _dispatcher.OnCancelledByUserSpeech -= HandleCancelled;
+
+    private void HandleCancelled(string interruptedAction) =>
+        Debug.Log($"Barge-in cancelled: {interruptedAction}");
+}
+```
+
+`OnCancelledByUserSpeech` carries the display name of the action that was interrupted, or an empty string when nothing had started executing yet.
 
 ## Lifecycle events
 
@@ -156,15 +195,15 @@ public sealed class DemoTrigger : MonoBehaviour
     {
         _dispatcher.EnqueueActions(new List<ConvaiActionCommand>
         {
-            new ConvaiActionCommand("Move To", "Extinguisher"),
-            new ConvaiActionCommand("Pick Up", "Extinguisher"),
-            new ConvaiActionCommand("Move To", "Exit")
+            new ConvaiActionCommand("Walk To", "Extinguisher"),
+            new ConvaiActionCommand("Point At", "Extinguisher"),
+            new ConvaiActionCommand("Walk To", "Exit")
         });
     }
 }
 ```
 
-The dispatcher executes these steps sequentially. If the `BatchPolicy` is `Queue`, this batch waits behind any batch already in progress.
+The dispatcher executes these steps sequentially. If the `BatchPolicy` is `Queue`, this batch waits behind any batch already in progress. A manually injected batch is now read the same way a backend batch is — wire-text cleaning, parameter parsing, and target resolution all run — so an unresolvable action name or target produces the same `Actions`-category console explanation as a real conversation, instead of only surfacing later as a step failure. This path does not refuse a command the way the backend path does; the step's own preconditions (definition, executor, target requirement) remain the gate.
 
 ## Bypassing the dispatcher
 
@@ -209,7 +248,10 @@ Bypassing the dispatcher means no automatic target resolution, no batch/failure 
 | Executor field not assigned          | Step fails: `OnStepFailed` fires                                   |
 | Target requirement not met           | Step fails: `OnStepFailed` fires                                   |
 | Executor returns `Unhandled`         | `OnStepUnhandled` fires; treated as failure for `StopBatch` policy |
+| Matched action definition has `Enabled = false` | Step is declined: `OnStepUnhandled` fires with a message naming the action as disabled, without running the executor |
 | First step of a batch has `WaitForBotSpeech` set (on the command or the definition) | `OnStepStarted` is delayed until character speech starts, stops, a turn completes, or `_speechGateTimeoutSeconds` elapses |
+| Player starts speaking with `_cancelOnUserSpeech` enabled | In-flight step is canceled and the queue is cleared; `OnCancelledByUserSpeech` fires |
+| An action step exceeds its timeout (its own `TimeoutSeconds`, or `_defaultStepTimeoutSeconds` when unset) | Step result is `TimedOut`; `OnStepFailed` fires |
 
 ## Usage examples
 
@@ -239,7 +281,7 @@ Subscribe to `OnStepFailed` and inject a dynamic context update:
 ```csharp
 private void HandleStepFailed(ConvaiActionInvocation invocation)
 {
-    if (invocation.Command.Name == "Move To")
+    if (invocation.Command.Name == "Walk To")
     {
         string targetName = invocation.Command.Target ?? "that location";
         // Inject into dynamic context so the NPC acknowledges the failure naturally
@@ -251,9 +293,9 @@ private void HandleStepFailed(ConvaiActionInvocation invocation)
 ## Next steps
 
 {% content-ref url="writing-custom-executors.md" %}
-[writing-custom-executors.md](writing-custom-executors.md)
+[Write a custom action executor](writing-custom-executors.md)
 {% endcontent-ref %}
 
 {% content-ref url="actions-scripting-reference.md" %}
-[actions-scripting-reference.md](actions-scripting-reference.md)
+[Character actions scripting reference](actions-scripting-reference.md)
 {% endcontent-ref %}

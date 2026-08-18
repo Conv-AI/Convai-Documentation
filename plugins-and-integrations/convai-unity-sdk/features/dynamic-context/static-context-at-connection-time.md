@@ -3,7 +3,7 @@ title: Static context at connection time
 description: >-
   Configure fixed scenario facts a character receives once at the start of a
   conversation, separate from updates sent while the conversation is running.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Every Convai character has two fields — **Initial Dynamic Info Text** and **Initial Dynamic Info Keep In Context** — that inject a fixed block of context into the session request at the moment the conversation connects. This context is delivered to Convai once, before the first response, and is separate from runtime Dynamic Context updates.

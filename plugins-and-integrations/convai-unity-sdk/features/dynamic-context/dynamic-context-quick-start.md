@@ -3,7 +3,7 @@ title: Dynamic context quick start
 description: >-
   Add a Dynamic Context Relay component to an NPC, send a tracked update from
   a UI button, and confirm the character references it.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 This guide adds a `ConvaiDynamicContextRelay` component to an NPC, wires a UI button to send a tracked context update, and confirms the character references that update in conversation. Use it after a `ConvaiCharacter` already connects and responds to speech in Play mode.
@@ -74,17 +74,17 @@ Import the **LipSync Sample** from Package Manager and open its scene. The sampl
 ## Next steps
 
 {% content-ref url="relay-component-reference.md" %}
-[relay-component-reference.md](relay-component-reference.md)
+[Relay component reference](relay-component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-scripting-api.md" %}
-[dynamic-context-scripting-api.md](dynamic-context-scripting-api.md)
+[Dynamic context scripting API](dynamic-context-scripting-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="dynamic-context-usage-examples.md" %}
-[dynamic-context-usage-examples.md](dynamic-context-usage-examples.md)
+[Dynamic context usage examples](dynamic-context-usage-examples.md)
 {% endcontent-ref %}
 
 {% content-ref url="sync-behavior-and-timing.md" %}
-[sync-behavior-and-timing.md](sync-behavior-and-timing.md)
+[Sync behavior and timing](sync-behavior-and-timing.md)
 {% endcontent-ref %}

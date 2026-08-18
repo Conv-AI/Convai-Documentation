@@ -1,6 +1,7 @@
 ---
 title: Troubleshoot narrative design
 description: Resolve trigger status failures, Inspector misconfigurations, fetch errors, and queue timeouts using built-in validation and diagnostic tools.
+last_reviewed: "4.5.0"
 ---
 
 Most Narrative Design problems fall into one of three categories: the trigger is not firing, the section events are not responding, or a backend fetch is failing. This page covers all three, starting with the built-in status system on `ConvaiNarrativeDesignTrigger` and working through the most common Inspector misconfigurations.
@@ -36,7 +37,7 @@ Open **Edit > Project Settings > Convai SDK** and confirm the API key is present
 {% step %}
 ### Dump full trigger state
 
-Call `PrintDiagnostics()` from a test script, or press the **Invoke** / **Reset** buttons visible on the component in Play Mode. The dump shows every field at once, making it easy to spot mismatches:
+Call `PrintDiagnostics()` from a test script, or press the **Invoke** / **Reset** buttons shown on the component in Play Mode. The dump shows every field at once, which makes a mismatch obvious:
 
 ```csharp
 trigger.PrintDiagnostics();
@@ -105,7 +106,7 @@ trigger.PrintDiagnostics();
 
 `PrintDiagnostics()` logs:
 
-```
+```text
 [ConvaiNarrativeDesignTrigger] === DIAGNOSTICS ===
   GameObject: TriggerZone_Checkpoint1
   Status: QueuedWaitingForCharacter
@@ -194,7 +195,7 @@ You can call `SetTemplateKey` or `InvokeTrigger` at any point in your scene's li
 
 When the timeout is reached, `OnTriggerFailed` fires with the message:
 
-```
+```text
 Timed out waiting for character to be ready after 30 seconds.
 ```
 

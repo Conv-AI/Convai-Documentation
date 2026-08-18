@@ -1,7 +1,7 @@
 ---
 title: Turn-taking modes
-description: Reference for TurnTakingOptions, SmartTurnSettings, and PushToTalkPolicy — field reference for hands-free voice detection and push-to-talk modes.
-last_reviewed: "4.2.0"
+description: Configure hands-free and push-to-talk conversation modes, including turn detection, release timing, and barge-in interruption behavior.
+last_reviewed: "4.5.0"
 ---
 
 Turn-taking determines who speaks, when a turn ends, and how the SDK handles the transition between the user speaking and the character responding. The SDK supports two modes: hands-free automatic detection and explicit push-to-talk. Choosing the right mode — and tuning it correctly — directly affects how natural and reliable the conversation feels in your training simulation, interactive experience, or game.
@@ -28,9 +28,10 @@ For the Inspector-based setup steps, see [Configure conversation input mode](../
 | `Mode`                | `ConversationInputMode` | `HandsFree`  | Sets the active conversation mode for this session.                             |
 | `TurnDetection`       | `TurnDetectionMode`     | `UseDefault` | Controls automatic end-of-turn detection. Only applies in Hands-Free mode.      |
 | `CustomTurnDetection` | `SmartTurnSettings`     | See below    | Fine-tuned smart-turn parameters. Only active when `TurnDetection` is `Custom`. |
-| `InitialServerStt`    | `ServerSttInitialState` | `UseDefault` | Controls whether backend speech-to-text is enabled at session start.            |
+| `InitialServerStt`    | `ServerSttInitialState` | `UseDefault` | Controls whether Convai's speech-to-text is enabled at session start.            |
 | `LocalAudioPolicy`    | `LocalAudioPolicy`      | See below    | Microphone behavior on this device. Applies to both modes.                      |
 | `PushToTalkPolicy`    | `PushToTalkPolicy`      | See below    | Push-to-talk interaction rules. Only applies in PushToTalk mode.                |
+| `BargeIn`             | `BargeInOptions`        | See below    | Character interruption behavior — smooth audio fade-out and optional client-side speech detection. Applies to both modes.        |
 
 ***
 
@@ -88,7 +89,8 @@ Controls all push-to-talk interaction rules. Set `RequireTurnCompletionBeforeNex
 
 | Field                                        | Type   | Default | Description                                                                                                                                                                                                             |
 | -------------------------------------------- | ------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `EnableServerSttToggle`                      | `bool` | `true`  | Mutes and unmutes backend speech-to-text when the push-to-talk control is pressed and released. Reduces server cost and prevents accidental processing of background audio.                                             |
+| `ReleaseTailMs`                              | `int`  | `1000`  | Length of each bounded finalization window after the user releases the push-to-talk control, in milliseconds. Range `0`–`5000`. `0` closes the microphone immediately on release. See [Release timing](#release-timing) below.  |
+| `EnableServerSttToggle`                      | `bool` | `true`  | Mutes and unmutes Convai's speech-to-text when the push-to-talk control is pressed and released. Reduces cost and prevents accidental processing of background audio.                                             |
 | `InterruptBotOnPress`                        | `bool` | `true`  | If the character is speaking when the user presses push-to-talk, the character is interrupted immediately so the user can start talking.                                                                                |
 | `RequireTurnCompletionBeforeNextPress`       | `bool` | `true`  | The user must wait for the character to finish its full response before pressing push-to-talk again. Prevents overlapping turns.                                                                                        |
 | `TurnCompletionTimeoutMs`                    | `int`  | `5000`  | Fallback timeout in milliseconds. If the character's turn-complete event never arrives (e.g., a network hiccup), this releases the push-to-talk lock after the timeout.                                                 |
@@ -106,6 +108,12 @@ var options = new TurnTakingOptions
     }
 };
 ```
+
+### Release timing
+
+When the user releases the push-to-talk control, the SDK does not close the microphone immediately — it keeps the microphone and Convai's speech-to-text open long enough to capture the tail end of what the user said. This behavior shipped in SDK `4.4.1`.
+
+The SDK first waits `ReleaseTailMs` for a final speech-recognition result. If a final result arrives first, capture closes right away. If the window expires before a final result arrives, the SDK sends the authoritative stop signal and keeps capture open for one further `ReleaseTailMs` window so Convai can finish processing, then closes capture regardless of whether a final result arrived by then. Setting `ReleaseTailMs` to `0` skips both windows and closes capture immediately on release. Lowering `ReleaseTailMs` trims the worst-case delay before the microphone closes after release, but a value that is too low can cut off a word the user was still finishing — `5000` is the maximum.
 
 ***
 
@@ -140,6 +148,40 @@ var options = new TurnTakingOptions
 
 ***
 
+## Barge-in and interruption
+
+`BargeIn` controls how the character's audio responds to being interrupted, and applies to both Hands-Free and Push-to-Talk modes. It has two independent parts: how playback fades when an interruption happens, and how quickly the SDK can detect that the user has started talking.
+
+| Field               | Type                | Default    | Description                                                                                                                                                            |
+| -------------------- | ------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SmoothInterruption` | `bool`               | `true`     | Fades character audio locally to silence when an interruption is requested or confirmed, instead of cutting playback off on one audio frame.                          |
+| `FadeOutSeconds`     | `float`              | `0.12`     | How long the fade takes. Clamped to `0.04`–`0.25` seconds.                                                                                                              |
+| `ClientDetection`    | `ClientBargeInMode`  | `Disabled` | Optional native client-side speech detection that can duck or interrupt character audio before the server's own detection confirms the user is speaking. See below.  |
+
+`SmoothInterruption` applies on native LiveKit playback and WebGL browser playback alike. When an interruption fires, the active character stream fades to silence following a short gain envelope, and incoming audio from the interrupted response is suppressed until the next response starts — so presentation systems such as lip sync settle with the audio instead of continuing past the interruption.
+
+```csharp
+var options = TurnTakingOptions.CreateHandsFreeDefault();
+options.BargeIn.SmoothInterruption = true;
+options.BargeIn.FadeOutSeconds = 0.12f;
+options.BargeIn.ClientDetection = ClientBargeInMode.Disabled;
+```
+
+### `ClientBargeInMode`
+
+| Value      | Behavior                                                                                                             |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `Disabled` | No client-side speech detection. The server remains the sole authority for detecting and confirming an interruption. |
+| `Silero`   | Native clients run a local Silero voice-activity model against the existing microphone stream to detect speech early, without opening a second capture session. |
+
+`Silero` requires the Unity Inference Engine package `com.unity.ai.inference` version `2.2.1` or later. If the package is unavailable, or the active transport does not expose microphone PCM, the SDK logs a warning and falls back to server-only interruption.
+
+Automatic client-triggered interruption additionally requires `LocalAudioPolicy.EnableAcousticEchoCancellation` and a successfully initialized echo-cancellation path with an active rendered-audio reference. Enabling AEC alone does not authorize client interruption if that processing path failed to start. Without AEC, a local speech candidate can still duck character playback locally, but the server remains authoritative for committing the interruption — this prevents character audio leaking into the microphone from repeatedly interrupting itself.
+
+`Silero` client detection is native-only. WebGL receives smooth interruption but always uses server detection.
+
+***
+
 ## `ServerSttInitialState`
 
 Controls whether Convai's speech-to-text is enabled at the moment the session starts.
@@ -148,7 +190,7 @@ Controls whether Convai's speech-to-text is enabled at the moment the session st
 | ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
 | `UseDefault` | Server-side default: STT enabled for Hands-Free, disabled for Push-to-Talk.                                                       |
 | `Enabled`    | STT starts enabled regardless of mode.                                                                                            |
-| `Disabled`   | STT starts disabled regardless of mode. This is an advanced option — manual STT control is not exposed in the current public API. |
+| `Disabled`   | STT starts disabled regardless of mode. To mute or unmute Convai's speech-to-text manually at runtime instead, call `SetSttMuted(bool)` on `IConvaiRoomConnectionService`, available via `ConvaiManager.TryGetRoomConnectionService`. |
 
 ***
 
@@ -254,6 +296,9 @@ public class InputModeToggle : MonoBehaviour
 | Push-to-talk button stays locked after the character finishes     | Turn-complete event was not received (network hiccup)                             | `TurnCompletionTimeoutMs` releases the lock after timeout; lower the value, or set `AllowSpeechStoppedFallbackAfterSpeechStart = true` |
 | Background noise triggers responses in Hands-Free mode            | Environment too noisy for automatic voice detection                               | Switch to Push-to-Talk mode, or increase `StopSecs`                                                                                    |
 | Brief delay on first push-to-talk press                           | `PushToTalkMicStartupMode` is `OpenOnFirstPress` — mic initializes on first press | Switch to `PrewarmMuted`                                                                                                               |
+| Push-to-talk feels slow to close the microphone after release     | `ReleaseTailMs` windows are running to capture the tail of the user's speech      | Lower `ReleaseTailMs`, or set it to `0` to close immediately at the cost of possibly clipping the last word                            |
+| Character audio cuts off abruptly instead of fading on interrupt  | `BargeIn.SmoothInterruption` is `false`, or the platform does not support the smooth path | Set `BargeIn.SmoothInterruption = true`; confirm the session uses native LiveKit or WebGL playback                             |
+| `ClientDetection = Silero` has no effect                          | `com.unity.ai.inference` is missing or below `2.2.1`, the transport does not expose microphone PCM, or the platform is not native | Install/upgrade the Inference Engine package; confirm the target platform is native, not WebGL                |
 
 ***
 

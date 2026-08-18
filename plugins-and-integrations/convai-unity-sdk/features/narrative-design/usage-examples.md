@@ -1,6 +1,7 @@
 ---
 title: Narrative design usage examples
 description: Four worked Narrative Design examples from a single-trigger welcome sequence to an adaptive multi-section scenario with dynamic feedback.
+last_reviewed: "4.5.0"
 ---
 
 The following examples show how to compose `ConvaiNarrativeDesignManager`, `ConvaiNarrativeDesignTrigger`, and `IConvaiNarrativeDesign` into complete, working setups. They are ordered from simple to advanced and cover different domains to illustrate the breadth of what Narrative Design supports. Each example is self-contained — start from whichever matches your current complexity level.

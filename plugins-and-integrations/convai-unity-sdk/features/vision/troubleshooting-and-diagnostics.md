@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot vision
 description: Fix Vision publishing failures, blank feeds, permission errors, and platform-specific issues in Unity using a structured checklist and decision tree.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Work through this page top to bottom. Most Vision failures fall into one of four categories: connection misconfiguration, frame source failure, platform-specific restrictions, or WebGL origin policy.

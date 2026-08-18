@@ -1,10 +1,7 @@
 ---
-description: >-
-  Replace SDK providers, extend the runtime with custom modules, and diagnose
-  latency using built-in telemetry — for deployments where the defaults are not
-  enough.
+description: Replace the SDK-supplied providers, extend the runtime with your own modules, and diagnose latency with the built-in telemetry.
 title: Customize and extend the SDK
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai Unity SDK works out of the box for most training simulations, interactive experiences, and games. This section covers what to reach for when the defaults do not fit your deployment: replacing built-in providers with custom implementations, diagnosing performance issues with built-in telemetry, and adding custom modules to the runtime.

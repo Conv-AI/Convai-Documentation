@@ -3,7 +3,7 @@ title: Configure microphone
 description: >-
   Select an active microphone device at runtime, set a project-wide default, and
   configure platform permissions for Android, iOS, and WebGL builds.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai SDK for Unity opens the system microphone automatically when a session starts. Enumerate and select a specific device at runtime, set a project-wide default device, and satisfy the platform-specific requirements for Android, iOS, and WebGL.
@@ -38,7 +38,7 @@ On WebGL, `GetAvailableDevices()` returns an empty list outside the Editor. Micr
 `ConvaiSettings.DefaultMicrophoneDeviceId` sets the microphone the SDK uses before any script calls `StartListeningAsync` with a specific device index. An empty string resolves to the system default device.
 
 {% hint style="warning" %}
-`DefaultMicrophoneDeviceId` (string) replaced the integer-based `DefaultMicrophoneIndex` in SDK version <code class="expression">space.vars.unity_sdk_version</code>. Convai does not migrate the old index value automatically — if your project set a non-zero `DefaultMicrophoneIndex` before upgrading, open **Runtime Defaults** and re-pick the device.
+`DefaultMicrophoneDeviceId` (string) replaced the integer-based `DefaultMicrophoneIndex` in SDK version `4.4.0`. Convai does not migrate the old index value automatically — if your project set a non-zero `DefaultMicrophoneIndex` before upgrading, open **Runtime Defaults** and re-pick the device.
 {% endhint %}
 
 {% stepper %}

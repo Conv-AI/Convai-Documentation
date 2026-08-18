@@ -1,7 +1,7 @@
 ---
 title: Audio and microphone issues
 description: Fix microphone input failures and character voice playback issues on all Convai Unity SDK platforms, including Android, iOS, and WebGL.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 Audio failures in the Convai Unity SDK fall into two categories: microphone input problems that prevent the SDK from capturing the player's voice, and audio output problems that prevent the character's voice from playing. Both categories produce specific error codes and console messages that point directly to the cause. This page covers both, with platform-specific guidance for Android, iOS, and WebGL.
@@ -32,9 +32,7 @@ If `ConvaiAudioOutput` is on a different GameObject, you will see this error on 
 
 That GameObject also needs an `AudioSource` component. Unity adds it automatically via `[RequireComponent(typeof(AudioSource))]` when you add `ConvaiAudioOutput`, but verify it is present and enabled.
 
-{% hint style="info" %}
 `ConvaiAudioOutput` is used for character voice playback on native platforms (Windows, macOS, Linux, Android, iOS). On WebGL, audio is routed through the browser audio context — `ConvaiAudioOutput` is not used and does not need to be present on WebGL builds.
-{% endhint %}
 {% endstep %}
 
 {% step %}
@@ -109,9 +107,7 @@ Open **Edit → Project Settings → Player → Android → Other Settings**. Se
 
 **Runtime behavior:** Android shows a system permission dialog the first time the microphone is requested. If the user denies it, `audio.mic_permission_denied` fires. The SDK does not re-request the permission automatically — your application must guide the user to grant it in device Settings if they denied it initially.
 
-{% hint style="warning" %}
 If the permission dialog never appears, check that the `RECORD_AUDIO` permission is present in the manifest. A missing permission suppresses the dialog and silently denies access.
-{% endhint %}
 {% endtab %}
 
 {% tab title="iOS" %}

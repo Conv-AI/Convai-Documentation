@@ -3,7 +3,7 @@ title: Add lip sync
 description: >-
   Connect Convai audio output to your character's facial blendshapes,
   synchronize mouth movement with speech, and tune playback latency.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai SDK for Unity includes a real-time lip sync system that drives `SkinnedMeshRenderer` blendshapes in sync with the character's voice audio. It supports three industry-standard blendshape formats and handles playback buffering, smoothing, and fade-out automatically.
@@ -19,6 +19,8 @@ graph LR
     C --> D[Smoothing]
     D --> E[SkinnedMeshRenderer blendshapes]
 ```
+
+If the same character also has another module that drives facial blendshapes — for example, an Emotion controller — Convai composites the lip sync output with that module's output internally before writing to the mesh, rather than letting the two write independently. The shipped balance gives the mouth almost entirely to `ConvaiLipSyncComponent` while the character is speaking. With no other facial output module on the character, `ConvaiLipSyncComponent` writes directly to the target meshes as shown above.
 
 ## Quick setup
 

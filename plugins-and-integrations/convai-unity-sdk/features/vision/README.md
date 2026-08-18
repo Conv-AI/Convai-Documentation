@@ -1,7 +1,7 @@
 ---
 title: Vision
 description: Find guides for adding real-time scene vision to Convai characters in Unity, including frame sources, publish policies, scripting, and troubleshooting.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Vision gives Convai characters the ability to see what is happening inside your Unity scene. A frame source captures images from a Unity camera, physical webcam, or Meta Quest passthrough feed, and the SDK streams them to Convai over WebRTC alongside the audio conversation.

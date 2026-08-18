@@ -1,7 +1,7 @@
 ---
 title: Session lifecycle
-description: Understand how ConvaiCharacter sessions transition through states, where session IDs are stored, and how to configure reconnection and conversation-resume behavior.
-last_reviewed: "4.2.0"
+description: Understand how ConvaiCharacter sessions transition through states, persist session IDs, and support explicit pause, resume, and background policy controls.
+last_reviewed: "4.5.0"
 ---
 
 Every `ConvaiCharacter` in your scene maintains an independent session with Convai. That session tracks whether the character is connected, what its current state is, and — when persistence is enabled — what conversation it was in the last time you connected. Understanding how sessions are created, persisted, and recovered lets you build reliable, resumable character interactions across training simulations, interactive experiences, and games.
@@ -79,7 +79,7 @@ When a session ID is persisted, the SDK can resume a previous conversation on th
 
 The SDK exposes a pluggable persistence layer via `ISessionPersistence` for projects that need a custom backing store (encrypted storage, cloud saves, a database). The default stack is:
 
-```
+```text
 ISessionPersistence
   └─ KeyValueStoreSessionPersistence        ← maps characterId → sessionId with prefix "convai.session."
        └─ PlayerPrefsKeyValueStore           ← default IKeyValueStore implementation; wraps Unity PlayerPrefs
@@ -161,8 +161,82 @@ var policy = new ReconnectPolicy(
 ```
 
 {% hint style="warning" %}
-`AlwaysResume` will put the session into `Error` state if Convai cannot resume the session (e.g., if the session expired on the backend). Use `ResumeIfPossible` unless your training simulation requires strict continuity and you have handled the error state explicitly.
+`AlwaysResume` will put the session into `Error` state if Convai cannot resume the session (for example, if the session already expired). Use `ResumeIfPossible` unless your training simulation requires strict continuity and you have handled the error state explicitly.
 {% endhint %}
+
+***
+
+## Explicit session controls
+
+`ConvaiManager` exposes three async methods for controlling a session outside of automatic reconnect: `PauseAsync()`, `ResumeAsync()`, and `ReconnectAsync()`. Use these when your application needs to pause presentation without disconnecting, or force a fresh connection on demand — for example, a training simulation that pauses for a facilitator break, or a menu screen that interrupts play.
+
+| Method | What it does |
+| ------ | ------------- |
+| `PauseAsync()` | Pauses Convai character audio, shipped transcript presentation, and runtime modules while leaving the room connected. |
+| `ResumeAsync()` | Removes only the manual pause reason set by `PauseAsync()`. A simultaneous application-background pause (see below) remains active until Unity reports foreground state. |
+| `ReconnectAsync()` | Performs an explicit disconnect/connect cycle using the `ReconnectPolicy` and session-resume behavior described above. Calling it while `SessionState` is already `Connecting` or `Disconnecting` throws an `InvalidOperationException`. |
+
+```csharp
+await manager.PauseAsync();
+// ... facilitator break ...
+await manager.ResumeAsync();
+```
+
+***
+
+## Application background policy
+
+`RuntimeBackgroundPolicy` controls what keeps running while the Unity application is backgrounded — for example, when a player alt-tabs or a mobile app moves to the background. Set the project default under **Edit > Project Settings > Convai SDK > Runtime Defaults > Background Policy**, or change the active manager at runtime:
+
+```csharp
+await manager.SetBackgroundPolicyAsync(RuntimeBackgroundPolicy.MuteButCatchUp);
+```
+
+| Value | Character audio | Canonical transcript history | Shipped transcript presentation | LipSync |
+| ----- | ---------------- | ----------------------------- | -------------------------------- | ------- |
+| `ContinueAudibly` | Continues; background execution is requested | Continues | Continues | Continues against the live audio clock |
+| `PauseTimeline` | The Convai `AudioSource` pauses; unrelated game audio is untouched | Continues ingesting room events | Hidden while paused, then replays current state on resume | Presentation ticks pause; ingress stays bounded, and resume re-anchors to available audio so expired buffered data can be skipped |
+| `MuteButCatchUp` | Muted locally while playback advances | Continues | Continues | Continues; returning to foreground resumes at live time rather than replaying missed presentation |
+
+`ContinueAudibly` and `MuteButCatchUp` set `Application.runInBackground` while active, but the operating system or browser can still suspend or mute the process. WebGL audio is browser-routed rather than owned by a Unity `AudioSource`, so `PauseTimeline` falls back to `MuteButCatchUp` on that platform — the state-change event reports both the requested and effective value. `PauseTimeline` only pauses local presentation; it does not stop Convai from generating a response or the SDK from ingesting the transcript.
+
+Subscribe to `OnRuntimeBackgroundStateChanged` to observe the requested and effective policy, since they can differ when a platform cannot implement the requested behavior. The manager applies the selected policy on both `OnApplicationPause` and focus-loss transitions, without double-pausing when Unity reports both callbacks.
+
+```csharp
+[SerializeField] private ConvaiSessionEventRelay _relay;
+
+private void OnEnable() =>
+    _relay.OnRuntimeBackgroundStateChanged.AddListener(HandleBackgroundStateChanged);
+
+private void HandleBackgroundStateChanged(RuntimeBackgroundStateRelayData data)
+{
+    if (data.RequestedPolicy != data.EffectivePolicy)
+        Debug.LogWarning($"Background policy fell back from {data.RequestedPolicy} to {data.EffectivePolicy}.");
+}
+```
+
+***
+
+## Idle warnings and timeouts
+
+Convai sends a `user-idle-warning` message with `remaining_seconds` before it disconnects an idle session. The SDK exposes it as `ConvaiManager.Events.OnUserIdleWarningReceived` and, for Inspector-driven listeners, `ConvaiSessionEventRelay.OnUserIdleWarning`.
+
+The manager also derives a one-shot local deadline from that countdown and exposes it as `ConvaiManager.Events.OnUserIdleTimeoutElapsed` and `ConvaiSessionEventRelay.OnUserIdleTimeout`. `OnUserIdleTimeoutElapsed` is a client-side deadline signal for timeout UI and recovery workflows — it does not confirm that Convai closed the room, since Convai does not currently send a separate timeout packet. Use `OnSessionStateChanged` or `OnDisconnected` as the authoritative transport state.
+
+Voice, text, trigger, and dynamic-context activity already reset Convai's idle tracking. For UI-only activity after a warning, call `ResetIdleTimer()` (or its UI-oriented alias `ExtendIdleTimeout()`) to push the deadline back; both return `false` when no connected room can accept the reset.
+
+```csharp
+private void HandleIdleWarning(UserIdleWarningRelayData warning)
+{
+    ShowIdlePrompt(warning.RemainingSeconds);
+}
+
+public void ContinueSession()
+{
+    if (!manager.ExtendIdleTimeout())
+        ShowReconnectPrompt();
+}
+```
 
 ***
 
@@ -249,11 +323,14 @@ public class SessionErrorHandler : MonoBehaviour
 
 | Symptom                                                                          | Likely Cause                                                                                            | Fix                                                                                                                                                 |
 | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Session stays in `Error` state after a drop                                      | `AlwaysResume` could not resume the expired session on the backend                                      | Switch to `ResumeIfPossible`; call `ClearSessionId(characterId)` to remove the stale session ID, then reconnect                                     |
+| Session stays in `Error` state after a drop                                      | `AlwaysResume` could not resume the session because it already expired                                  | Switch to `ResumeIfPossible`; call `ClearSessionId(characterId)` to remove the stale session ID, then reconnect                                     |
 | Character starts a fresh conversation on every launch despite `ResumeIfPossible` | A previous `ClearAllSessionIds()` call wiped the session file, or the character ID changed between runs | Verify the `characterId` string is stable across runs; check `{persistentDataPath}/Convai/sessions.json`                                            |
 | Session stuck in `Connecting` forever                                            | `StartWaitTimeoutMs` not configured for slow network; or firewall blocking the transport                | Increase `StartWaitTimeoutMs` in `ReconnectPolicy`; verify network access to Convai endpoints                                                       |
 | Reconnect loop never succeeds; session eventually reaches `Error`                | `MaxReconnectAttempts` exhausted                                                                        | Subscribe to `ConvaiSessionEventRelay.OnSessionStateChanged` and surface the error to the user; call reconnect manually after the user acknowledges |
 | Two characters share a session ID                                                | Character ID strings are identical in the Inspector                                                     | Assign unique character IDs to each `ConvaiCharacter` in the scene                                                                                  |
+| `ResumeAsync()` does not restore audio                                           | The application is still backgrounded, so the background policy keeps the manual pause reason active    | Wait for the application to return to the foreground, or check `IsBackgrounded` on the latest `OnRuntimeBackgroundStateChanged` payload             |
+| `ReconnectAsync()` throws `InvalidOperationException`                            | Called while `SessionState` was already `Connecting` or `Disconnecting`                                  | Check `SessionState` before calling, or wait for the in-flight transition to finish                                                                 |
+| Idle warning never fires                                                         | No listener is subscribed, or activity keeps resetting Convai's idle tracking                             | Subscribe to `OnUserIdleWarningReceived` or `OnUserIdleWarning`; note that voice, text, trigger, and dynamic-context activity all reset idle tracking |
 
 ***
 

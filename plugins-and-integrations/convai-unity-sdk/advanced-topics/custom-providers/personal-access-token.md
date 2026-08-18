@@ -4,7 +4,7 @@ description: >-
   inside your Unity build, eliminating credential exposure from client
   applications.
 title: Personal access token
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 By default, the Convai Unity SDK reads your API key from `ConvaiSettings.asset`, which is compiled into your build. Anyone who extracts the build can retrieve the key and use it against your Convai account. Personal Access Tokens (PATs) eliminate that exposure entirely. Your real API key lives on your **backend** — a server-side application you control (Node.js, Python, .NET, etc.) that your users never interact with directly. The backend generates a short-lived token — valid for one hour — and hands it to the Unity app. The app connects to Convai using that token. If the token is intercepted, it expires within the hour and cannot be used to access your account settings, characters, or billing. PATs require a server that holds the real API key and calls Convai's token endpoint on behalf of your users. A lightweight function (AWS Lambda, Azure Function, Cloudflare Worker, etc.) is sufficient — it only needs to make one HTTP request per session.
@@ -30,7 +30,7 @@ All three endpoints target `https://api.convai.com` and require your real API ke
 
 ### Generate a token
 
-```
+```http
 POST https://api.convai.com/user/connect
 ```
 
@@ -59,7 +59,7 @@ You can generate a new token while the current one is still active. Generating a
 
 ### Extend a token
 
-```
+```http
 POST https://api.convai.com/user/extend-token
 ```
 
@@ -75,7 +75,7 @@ Resets the expiry clock on an existing token without invalidating it.
 
 ### Revoke a token
 
-```
+```http
 POST https://api.convai.com/user/revoke-token
 ```
 

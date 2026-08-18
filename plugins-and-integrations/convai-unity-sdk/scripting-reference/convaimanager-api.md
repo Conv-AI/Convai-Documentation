@@ -1,7 +1,7 @@
 ---
 title: ConvaiManager API
 description: Scripting reference for ConvaiManager — the SDK entry point for connection control, facade access, conversation ownership, and service discovery.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 `ConvaiManager` is the primary scripting entry point for the Convai Unity SDK. It initializes the runtime, manages room connections, owns the `Events`, `Audio`, and `Transcripts` facades, and grants access to lower-level services through typed accessors. Every scripted interaction begins here.
@@ -54,7 +54,7 @@ if (manager == null)
 | `ActiveConversationInputMode` | `ConversationInputMode`          | The runtime conversation input mode currently in effect               |
 | `PushToTalkKey`               | `KeyCode`                        | The key code used for push-to-talk, when mode is `PushToTalk`         |
 
-### `ConvaiManagerConversationMode` enum
+## `ConvaiManagerConversationMode` enum
 
 | Value                 | Description                                                                       |
 | --------------------- | --------------------------------------------------------------------------------- |
@@ -66,7 +66,7 @@ if (manager == null)
 
 ## Room operations
 
-### `ConnectAsync`
+## `ConnectAsync`
 
 ```csharp
 // Simple connect — uses scene configuration
@@ -78,7 +78,7 @@ IConvaiOperation<RoomSession> ConnectAsync(RoomSessionConnectOptions options, Ca
 
 Returns a `RoomSession` on success. See [Operation & Stream Types](operation-and-stream-types.md) and [Async Patterns](async-patterns.md) for consumption patterns.
 
-#### `RoomSessionConnectOptions` fields
+### `RoomSessionConnectOptions` fields
 
 Pass this to the second overload to override runtime behavior at connect time.
 
@@ -106,7 +106,7 @@ if (!result.IsSuccessful)
     Debug.LogError($"Connect failed: {result.Error.Message}");
 ```
 
-### `DisconnectAsync`
+## `DisconnectAsync`
 
 ```csharp
 IConvaiOperation<Unit> DisconnectAsync(CancellationToken ct = default)
@@ -137,9 +137,7 @@ Gracefully disconnects the room session. Resolves when the session reaches `Disc
 | `OnDisconnected` | `Action`               | Session reaches `Disconnected` |
 | `OnError`        | `Action<SessionError>` | Session encounters an error    |
 
-{% hint style="info" %}
 For richer session state data (transition context, participant changes, idle warnings), use `ConvaiSessionEventRelay` or `ConvaiManager.ActiveManager.Events`. The direct events above are intentionally minimal — connection and error only.
-{% endhint %}
 
 ***
 
@@ -153,6 +151,42 @@ Use these methods to control which characters and player the manager owns, and w
 | `SetExplicitPlayer(ConvaiPlayer player)`                         | Assigns a specific `ConvaiPlayer` instance as the managed player                                |
 | `SetExplicitCharacters(IEnumerable<ConvaiCharacter> characters)` | Replaces the managed character list with the provided set                                       |
 | `RefreshReferences()`                                            | Rescans the scene for `ConvaiCharacter` and `ConvaiPlayer` instances to rebuild the managed set |
+
+### Characters spawned at runtime
+
+A character instantiated after the scene loads is not usable the instant `Instantiate` returns. The manager has to take ownership of it and inject its services first, and that happens on a later frame. `ConvaiCharacter.IsInjected` reports when that has finished, and the character's conversation and audio calls are inert until it does.
+
+After spawning a character, call `RefreshReferences()` — or `SetExplicitCharacters` if the manager is not scanning the scene automatically — then wait for `IsInjected` before talking to it.
+
+```csharp
+using System;
+using System.Threading.Tasks;
+using Convai.Runtime.Components;
+using UnityEngine;
+
+public static class RuntimeCharacterSpawn
+{
+    public static async Task<ConvaiCharacter> SpawnAsync(GameObject prefab, Vector3 position)
+    {
+        ConvaiCharacter character = UnityEngine.Object
+            .Instantiate(prefab, position, Quaternion.identity)
+            .GetComponent<ConvaiCharacter>();
+
+        ConvaiManager.ActiveManager.RefreshReferences();
+
+        for (int frame = 0; frame < 120; frame++)
+        {
+            if (character != null && character.IsInjected) return character;
+            await Task.Yield();
+        }
+
+        throw new InvalidOperationException(
+            "The runtime character was not injected. Ensure an active ConvaiManager is in the scene.");
+    }
+}
+```
+
+The SDK ships this pattern as `RuntimeCharacterSpawner` in the shared samples.
 
 ***
 
@@ -208,7 +242,7 @@ if (ConvaiSDK.Version >= new System.Version(4, 2, 0))
 
 ## Usage examples
 
-### Example 1 — Connect on scene load with cancellation
+## Example 1 — Connect on scene load with cancellation
 
 An industrial safety simulation connects to Convai when the scene loads, tied to the component's lifetime via `destroyCancellationToken` so the connect operation cancels cleanly if the scene unloads mid-attempt.
 
@@ -240,7 +274,7 @@ public class SceneConnector : MonoBehaviour
 ```
 {% endcode %}
 
-### Example 2 — Swap conversation target on trigger zone entry
+## Example 2 — Swap conversation target on trigger zone entry
 
 A corporate onboarding simulation has multiple AI advisors in a room. When a learner walks into an advisor's zone, that advisor becomes the active conversation target.
 
@@ -269,7 +303,7 @@ public class AdvisorZone : MonoBehaviour
 ```
 {% endcode %}
 
-### Example 3 — Microphone device picker UI
+## Example 3 — Microphone device picker UI
 
 An interactive experience lets users choose their preferred microphone before a session starts, using `IMicrophoneDeviceService` to enumerate available devices.
 

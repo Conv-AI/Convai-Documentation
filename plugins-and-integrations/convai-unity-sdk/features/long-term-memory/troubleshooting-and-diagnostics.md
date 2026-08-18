@@ -3,7 +3,7 @@ title: Troubleshoot long-term memory
 description: >-
   Diagnose why long-term memory isn't persisting, verify end-user identity
   stability across sessions, and resolve Memory Management API HTTP errors.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 Most LTM issues fall into three categories: memories not persisting between sessions, the wrong user receiving memories, and API calls failing with HTTP errors. Work through the diagnostic flow below before consulting the reference tables.

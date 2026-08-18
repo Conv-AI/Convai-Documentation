@@ -3,7 +3,7 @@ title: Sync behavior and timing
 description: >-
   Understand how the SDK batches dynamic context updates before sending them
   and how action and attention changes are confirmed by Convai.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Dynamic Context updates do not reach Convai the instant you call `SetState`, `AddEvent`, or any other tracked method. The SDK stages every call into a short-lived batch and sends one `context-update` message per batch, not one per call. This page explains why the SDK batches, exactly when a batch is sent, and how updates that carry an action config patch or an attention object are acknowledged before the SDK trusts them locally.

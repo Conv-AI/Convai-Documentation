@@ -1,14 +1,12 @@
 ---
 title: Long-term memory scripting reference
-description: Complete API reference for ConvaiRestClient.Memory and ConvaiRestClient.EndUsers — all method signatures, parameters, return types, identity interfaces, and data models.
-last_reviewed: "4.2.0"
+description: "Complete memory and end-user API reference: method signatures, parameters, return types, identity interfaces, and the data models each one returns."
+last_reviewed: "4.5.0"
 ---
 
 Complete reference for all long-term memory scripting APIs in the Convai Unity SDK. Covers the `ConvaiRestClient` entry points, every method on `MemoryService` and `EndUsersService`, the memory-related methods on `CharacterService`, identity interfaces, and all data model types.
 
-{% hint style="warning" %}
 **Beta API.** `MemoryService` and `EndUsersService` methods use the Convai beta API endpoint. `CharacterService` methods (`GetMemoryEnabledAsync`, `SetMemoryEnabledAsync`) use the standard production endpoint. Signatures are stable but subject to change. Pin your SDK version in production.
-{% endhint %}
 
 ***
 

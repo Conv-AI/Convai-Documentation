@@ -3,7 +3,7 @@ title: Convai Unity SDK architecture
 description: >-
   Understand the Convai Unity SDK four-tier architecture — Runtime, Room, Agent,
   and Module — and the responsibilities of each tier.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 The SDK is organized into four tiers: Runtime, Room, Agent, and Module. As a developer, you interact primarily with the Agent tier (character and player components) and the Module layer (opt-in feature modules). The Runtime and Room tiers handle connection and service bootstrapping with minimal configuration required.

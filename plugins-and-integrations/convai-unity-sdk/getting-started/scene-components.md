@@ -1,9 +1,9 @@
 ---
 title: Scene components reference
 description: >-
-  Learn the role of ConvaiManager, ConvaiRoomManager, ConvaiCharacter, and
-  ConvaiPlayer, and how they depend on each other.
-last_reviewed: "4.2.0"
+  Understand the role of each core Convai scene component — manager, room
+  manager, character, and player — and how they depend on each other.
+last_reviewed: "4.5.0"
 ---
 
 Every Convai-powered scene is built from four core components. Understanding what each one does and how they relate to each other makes building and debugging your setup straightforward.
@@ -145,6 +145,22 @@ Handles audio playback for a single character. Add it to the same GameObject as 
 ### ConvaiSceneConfig
 
 An optional ScriptableObject (**Assets > Create > Convai > Scene Config**) that lets you define character IDs, prefabs, and auto-connect behavior in a reusable asset rather than inline in the Inspector. Useful for managing multiple characters across scenes. See Advanced Topics for full details.
+
+## Embodiment infrastructure Convai adds automatically
+
+Five additional components can appear on a character's GameObject without you adding them. Convai adds each one the first time an embodiment module — Gaze, Body Animation, Body Language, or Emotion — needs it on that character, typically the first time you enter Play Mode after adding one of those modules. Seeing them appear is expected; nothing is broken.
+
+| Component | Added when | What it does |
+| --- | --- | --- |
+| `EmbodimentContext` | Any embodiment module resolves its character | Character-scoped composition root that embodiment modules use to find the character's rig and each other's shared data |
+| `StandardRigBinding` | A module needs the character's bones or face meshes | Detects the rig convention (`ARKit`, `ReallusionCC3`, `ReallusionCC4Extended`, `MetaHuman`, or `Custom`) and resolves bones and blendshapes for modules to read |
+| `AnimatorConductor` | A module needs to drive `Animator` parameters | Single writer for `Animator` parameters, so two modules can never overwrite the same parameter |
+| `EmbodimentTickScheduler` | Any embodiment module registers a per-frame update | Runs embodiment modules in a fixed cognition → expression → finalize order every frame |
+| `FacialBlendshapeCompositorHost` | A module needs to write facial blendshapes | Single writer for facial blendshape output, combining LipSync, Emotion, and other sources into one result each frame |
+
+{% hint style="info" %}
+None of these components appear in the **Add Component** menu. `StandardRigBinding` is the only one you can add yourself — from **Add Component > Convai > Embodiment > Character Rig** — if you want to configure rig detection before Play Mode. The other four are internal to the SDK and are never added by hand.
+{% endhint %}
 
 ## Next steps
 

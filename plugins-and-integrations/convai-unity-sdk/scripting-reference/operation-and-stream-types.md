@@ -1,7 +1,7 @@
 ---
 title: Operation and stream types
 description: Type reference for IConvaiOperation<T>, IConvaiStream<T>, ConvaiError, and Unit — the async primitives used across all Convai SDK scripting APIs.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 Most SDK methods that perform async work return `IConvaiOperation<T>` instead of `Task<T>`. Methods that produce a continuous sequence of values return `IConvaiStream<T>`. These types are designed to work across Unity's coroutine system, C# async/await, and progress-driven flows — without forcing a dependency on `Task` throughout your codebase. For usage patterns and code examples, see [Async Patterns](async-patterns.md).

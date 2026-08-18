@@ -1,7 +1,7 @@
 ---
 title: Event system
 description: Reference for Convai event relay components, including available events, payload fields, and subscription patterns for scene logic.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai SDK communicates what happens during a session — connections, character speech, transcripts, emotions — through a set of relay components. Add one of these MonoBehaviours to a GameObject in your scene, wire up UnityEvents in the Inspector or subscribe in code, and your scene logic responds to whatever the SDK broadcasts.
@@ -84,6 +84,9 @@ If `ConvaiManager` initializes after the relay's `OnEnable` (for example, due to
 | `OnReconnecting`        | —                              | A reconnect attempt begins (session was `Connected`, connection dropped). |
 | `OnReconnected`         | —                              | A reconnect attempt succeeded. Session is `Connected` again.              |
 | `OnUsageLimitReached`   | —                              | The API usage quota for the account has been exceeded.                    |
+| `OnUserIdleWarning`     | `UserIdleWarningRelayData`     | The user idle-warning threshold is reached. See [Session lifecycle](session-lifecycle.md) for the timeout policy that triggers this. |
+| `OnUserIdleTimeout`     | `UserIdleTimeoutRelayData`     | The locally derived idle deadline elapses after a warning with no `ExtendIdleTimeout`/`ResetIdleTimer` call. |
+| `OnRuntimeBackgroundStateChanged` | `RuntimeBackgroundStateRelayData` | The application enters or leaves the background, or its effective background policy changes. |
 | `OnSessionStateChanged` | `SessionStateChangedRelayData` | Any session state transition. Fires for every state change.               |
 | `OnSessionError`        | `SessionErrorRelayData`        | An error event is received from the session.                              |
 
@@ -114,6 +117,32 @@ If `ConvaiManager` initializes after the relay's `OnEnable` (for example, due to
 | `HasHttpStatusCode` | `bool`              | Whether `HttpStatusCode` contains a meaningful value.      |
 
 `SessionErrorStage` values: `Unknown`, `Configuration`, `ConnectApi`, `Transport`, `SessionRecovery`, `Runtime`.
+
+### `UserIdleWarningRelayData`
+
+| Property           | Type     | Description                                                          |
+| ------------------ | -------- | ---------------------------------------------------------------------- |
+| `RemainingSeconds` | `int`    | Seconds remaining before the locally derived idle deadline elapses. |
+| `Message`          | `string` | Human-readable idle-warning message.                                |
+
+### `UserIdleTimeoutRelayData`
+
+| Property              | Type     | Description                                              |
+| ---------------------- | -------- | ------------------------------------------------------------ |
+| `WarningReceivedAtUtc` | `string` | ISO 8601 timestamp of when the idle warning was received. |
+| `DeadlineUtc`          | `string` | ISO 8601 timestamp of the locally derived idle deadline.  |
+
+### `RuntimeBackgroundStateRelayData`
+
+| Property            | Type                     | Description                                                                        |
+| -------------------- | ------------------------ | ---------------------------------------------------------------------------------------- |
+| `IsBackgrounded`     | `bool`                   | Whether the application is currently backgrounded.                                     |
+| `RequestedPolicy`    | `RuntimeBackgroundPolicy` | The background policy your project configured.                                         |
+| `EffectivePolicy`    | `RuntimeBackgroundPolicy` | The background policy actually in effect. Can differ from `RequestedPolicy` on platforms that force a fallback. |
+| `Reason`             | `RuntimePauseReason`     | Why the state changed — for example `ApplicationBackground` or `ApplicationFocusLost`. |
+| `UsedPlatformFallback` | `bool`                 | Computed: `true` when `RequestedPolicy != EffectivePolicy`.                            |
+
+`RuntimeBackgroundPolicy` and the full pause/resume/reconnect API are covered in [Session lifecycle](session-lifecycle.md); this page only documents the event payloads.
 
 **Code example — show a connection status indicator:**
 
@@ -237,10 +266,29 @@ Provides a scene-wide transcript feed. Unlike `ConvaiCharacterEventRelay`, this 
 
 | Event                                | Payload                        | When It Fires                                                            |
 | ------------------------------------ | ------------------------------ | ------------------------------------------------------------------------ |
+| `OnTranscriptReceived`               | `TranscriptUpdateRelayData`    | Any character or player transcript update, in a single unified shape (subject to filter and `IgnoreInterimUpdates`). |
 | `OnCharacterTranscriptReceived`      | `CharacterTranscriptRelayData` | Any character transcript (subject to filter and `IgnoreInterimUpdates`). |
 | `OnPlayerTranscriptReceived`         | `PlayerTranscriptRelayData`    | Any player transcript.                                                   |
 | `OnFinalCharacterTranscriptReceived` | `CharacterTranscriptRelayData` | Final character transcript only, regardless of `FinalOnly` setting.      |
 | `OnFinalPlayerTranscriptReceived`    | `PlayerTranscriptRelayData`    | Final player transcript only.                                            |
+
+### `TranscriptUpdateRelayData`
+
+Use this payload when a scene needs one event and one data shape for both character and player transcript updates instead of subscribing to the character and player events separately.
+
+| Property             | Type                         | Description                                                                 |
+| ---------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
+| `MessageId`           | `string`                     | Unique identifier for this transcript message.                             |
+| `TurnId`              | `string`                     | Identifies the turn this update belongs to.                                |
+| `ResponseId`          | `string`                     | Identifies the character response this turn is part of.                   |
+| `SpeakerType`         | `SpeakerType`                | `Character` or `Player`.                                                   |
+| `PlayerOrCharacterId` | `string`                     | The speaking character's or player's ID.                                   |
+| `DisplayName`         | `string`                     | The speaker's display name.                                                |
+| `ParticipantId`       | `string`                     | Room participant identifier.                                               |
+| `Text`                | `string`                     | Transcript text. May be partial if `IsFinal` is false.                     |
+| `Lifecycle`           | `TranscriptLifecycle`        | `Streaming`, `Stable`, or `Completed` — how settled this update's text is. |
+| `IsFinal`             | `bool`                       | Computed: `Lifecycle != Streaming`.                                        |
+| `SourceKind`          | `TranscriptSegmentSourceKind` | Where the text came from — for example `PlayerAsr` or `BotOutput`.         |
 
 ### `PlayerTranscriptRelayData`
 
@@ -319,11 +367,7 @@ Do not subscribe in `Start()` without a matching unsubscribe in `OnDestroy()`. R
 | ----------------- | ------- | ------- | ----------------------------------------------------------- |
 | `CooldownSeconds` | `float` | `10`    | Minimum seconds between showing the same notification type. |
 
-Most projects never interact with this class directly. It is instantiated and managed by the SDK bootstrap. If you are building a custom notification system using `IConvaiNotificationService`, you may use `ConvaiNotificationEventBridge` to integrate session error events into your system.
-
-{% hint style="info" %}
-`ConvaiNotificationEventBridge` is not added to the scene via **Add Component**. It is instantiated programmatically during SDK startup.
-{% endhint %}
+Most projects never interact with this class directly. It is instantiated and managed by the SDK bootstrap. If you are building a custom notification system using `IConvaiNotificationService`, you may use `ConvaiNotificationEventBridge` to integrate session error events into your system. Unlike the relay components above, `ConvaiNotificationEventBridge` is not added to the scene via **Add Component** — it is instantiated programmatically during SDK startup.
 
 ***
 

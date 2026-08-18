@@ -1,7 +1,7 @@
 ---
 title: Network and API requirements
 description: Reference for Convai Unity SDK network access, including Convai and LiveKit hosts, firewall rules, authentication, and log-based connection checks.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai Unity SDK requires outbound internet access during runtime. Speech, language understanding, and text-to-speech run through Convai over HTTPS and LiveKit WebRTC — there is no offline or LAN mode. Use this page when preparing a corporate network, validating a firewall allowlist, or confirming that a Play mode session reached the correct LiveKit room.

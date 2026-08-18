@@ -1,7 +1,7 @@
 ---
 title: Vision scripting API
 description: Reference for the Convai Unity SDK vision scripting API, including publish control, runtime status queries, on-demand triggers, and respond-mode events.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Vision scripting centers on `ConvaiVisionPublisher` for publish control, `ConvaiRoomManager` for on-demand vision status queries and triggers, and the frame source status interfaces for capture state. Domain events let you react to lifecycle changes and backend acknowledgements without polling `IsPublishing` every frame.

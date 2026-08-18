@@ -3,7 +3,7 @@ title: Platform guides
 description: >-
   Deploy the Convai Unity SDK on any supported platform — covers what requires
   extra configuration on WebGL, iOS, Android, and XR headsets before shipping.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai Unity SDK runs on every platform Unity supports. Core features — voice conversation, lip sync, actions, emotion, and long-term memory — work without platform-specific changes. What changes between platforms is how the operating system or browser handles microphone access, audio playback, and camera permissions. These guides cover exactly that: what needs extra configuration, what behaves differently, and what to validate before shipping.

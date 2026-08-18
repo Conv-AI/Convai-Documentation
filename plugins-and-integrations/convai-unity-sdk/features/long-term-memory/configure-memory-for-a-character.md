@@ -1,7 +1,7 @@
 ---
 title: Configure memory for a character
 description: Toggle Long-Term Memory on or off per character via the Convai dashboard or the CharacterService scripting API, and understand the global scope implications.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 Long-term memory is disabled by default (`MemorySettings.IsEnabled = false`). No facts are extracted or stored until you explicitly enable it. You can enable or disable memory through the Convai dashboard or programmatically via `client.Characters`.

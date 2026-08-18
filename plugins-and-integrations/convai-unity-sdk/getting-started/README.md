@@ -3,13 +3,13 @@ description: >-
   Step-by-step path from installing the Convai Unity SDK to a validated, working
   conversational AI character in your scene.
 title: Getting started
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 By the end of this section, your project contains a responsive AI character that listens, processes speech through Convai, and responds in real time. Follow the pages in order — each step builds directly on the previous one.
 
 {% hint style="info" %}
-**Before you begin:** Confirm your environment meets the requirements on the [Prerequisites](prerequisites.md) page — Unity version, required packages, and a Convai account with an API key.
+**Before you begin:** Confirm your environment meets the requirements on the [Prerequisites](prerequisites.md) page — Unity <code class="expression">space.vars.unity_min_version</code>, required packages, and a Convai account with an API key.
 {% endhint %}
 
 ## Preparation

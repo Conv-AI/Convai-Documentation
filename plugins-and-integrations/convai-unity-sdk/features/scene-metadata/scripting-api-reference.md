@@ -1,7 +1,7 @@
 ---
 title: Scene metadata scripting API
 description: Complete C# reference for Scene Metadata's classes, covering object properties, tracked-property updates, registry queries, and manual send triggers.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 The Scene Metadata scripting surface has three parts. `ConvaiObjectMetadata` is the component on each scene object — use it to read and update object properties and tracked properties at runtime. `ConvaiMetadataRegistry` is the static central registry — use it to query registration state and listen for changes. `ConvaiSceneMetadataCollector` is the runtime orchestrator — use it to trigger collection, check readiness, and audit all registered objects.

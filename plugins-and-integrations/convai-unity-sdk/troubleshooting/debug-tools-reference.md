@@ -1,16 +1,34 @@
 ---
 title: Debug tools reference
-description: Reference for Convai SDK debug tools, including logging configuration, ConvaiActionDebugProbe, session diagnostics, and client latency metrics.
-last_reviewed: "4.4.0"
+description: Reference for Convai SDK debug tools, including the Troubleshooter, per-module editor windows, logging, and client latency metrics.
+last_reviewed: "4.5.0"
 ---
 
-The Convai Unity SDK ships with a layered set of diagnostic tools: a configurable logging system with per-subsystem verbosity control, a live Inspector probe for action debugging, real-time session diagnostics on `ConvaiRoomManager`, session metrics emitted to the Console, and client-side latency measurements for conversation pipeline profiling. This page is the complete reference for all of them.
+The Convai Unity SDK ships with a layered set of diagnostic tools: the Convai Troubleshooter, per-module editor windows, a configurable logging system with per-subsystem verbosity control, a live Inspector probe for action debugging, real-time session diagnostics on `ConvaiRoomManager`, session metrics emitted to the Console, and client-side latency measurements for conversation pipeline profiling. This page is the complete reference for all of them.
+
+## Convai Troubleshooter
+
+`Convai → Troubleshooter` reports what is stopping a `ConvaiCharacter` from working, module by module, with a fix beside each finding. Start here before the tools further down this page — most setup mistakes surface in the Troubleshooter with a one-click fix, without needing a Console search.
+
+{% content-ref url="convai-troubleshooter.md" %}
+[Convai Troubleshooter](convai-troubleshooter.md)
+{% endcontent-ref %}
+
+## Per-module editor windows
+
+Each embodiment module and Actions has its own authoring and diagnostic window, reached from the `Convai` menu:
+
+| Window | Menu path | What it shows |
+| --- | --- | --- |
+| Actions Editor | `Convai → Actions Editor` | Authoring, testing, and a **Live** tab — the batch in progress, a timeline of recent batches with each step's duration and outcome, the merged target registry, and per-action insights. The Live tab replaced the standalone action debug window in SDK `4.5.0` |
+| Embodiment Editor | `Convai → Embodiment Editor` | **Setup**, **Presets**, and **Live** tabs for a character's embodiment stack |
+| Gaze Editor | `Convai → Gaze Editor` | Setup and tuning for the Gaze module |
+| Body Animation Editor | `Convai → Body Animation Editor` | Setup and tuning for the Body Animation module |
+| Emotion Editor | `Convai → Emotion Editor` | Setup, the resolved expression mapping for the character's face, and a live view in Play mode |
 
 ## Diagnostics
 
-{% hint style="warning" %}
-SDK `4.4.0` removed the `Convai → Logger Settings` menu and window. Logging configuration now lives in the Diagnostics section, reachable from `Convai → Settings` and from `Edit → Project Settings → Convai SDK`.
-{% endhint %}
+Logging configuration lives in the Diagnostics section, reachable from `Convai → Settings` and from `Edit → Project Settings → Convai SDK`.
 
 ### Where to configure
 
@@ -51,7 +69,7 @@ The SDK uses five log levels. Higher numeric value means more verbose.
 The default is **Info**. Switching to **Debug** during an investigation produces significantly more output — disable it before releasing to production.
 
 {% hint style="warning" %}
-`Debug`-level calls in the SDK source are decorated with `[Conditional("UNITY_EDITOR")]`, `[Conditional("DEVELOPMENT_BUILD")]`, and `[Conditional("CONVAI_DEBUG_LOGGING")]`. This means **Debug log calls are compiled out of non-development builds** unless you add `CONVAI_DEBUG_LOGGING` to your scripting define symbols. Setting `GlobalLogLevel` to `Debug` in a release build will not produce Debug messages because the call sites do not exist in the compiled code. Debug messages remain active in the Unity Editor and in Development Builds without any additional defines.
+`Debug`-level calls in the SDK source are decorated with `[Conditional("UNITY_EDITOR")]`, `[Conditional("DEVELOPMENT_BUILD")]`, and `[Conditional("CONVAI_DEBUG_LOGGING")]`. This means **Debug log calls are compiled out of non-development builds** unless you add `CONVAI_DEBUG_LOGGING` to your scripting define symbols. Setting `GlobalLogLevel` to `Debug` in a release build will not produce Debug messages because the call sites do not exist in the compiled code. Debug messages remain active in the Unity Editor and in Development Builds without any additional defines. This is also why `[SessionMetrics]` Debug-tagged lines and `[ClientLatency]` entries, both covered further down this page, only appear in the Editor and Development Builds.
 {% endhint %}
 
 To enable Debug messages in a production build, add `CONVAI_DEBUG_LOGGING` to **Edit → Project Settings → Player → Scripting Define Symbols**.
@@ -83,6 +101,10 @@ All other categories remain at the global level. The foldout title shows the act
 | `Transcript` | Transcript processing and routing |
 | `Narrative` | Narrative design and story trigger system |
 | `LipSync` | Lip sync processing and blendshape playback |
+| `Animation` | Body animation system (layers, transitions, locomotion) |
+| `Gaze` | Gaze system (targeting, policy, eye/head/body solvers) |
+| `BodyLanguage` | Body language system (gesticulation, posture, breathing, fidgets) |
+| `Actions` | Action system: which commands arrived, which were dropped and why, and how targets resolved |
 
 ### Custom log sinks
 
@@ -147,9 +169,9 @@ ConvaiLogger.UnregisterSink(mySink);
 
 ## ConvaiActionDebugProbe
 
-`ConvaiActionDebugProbe` is the primary diagnostic tool for the Actions feature. It subscribes to every dispatcher event and surfaces live counters and the last-seen action data directly in the Inspector — no custom logging required.
+`ConvaiActionDebugProbe` is the primary diagnostic tool for the Actions feature. It subscribes to every dispatcher event and surfaces live counters and the last-seen action data directly in the Inspector — no custom logging required. SDK `4.5.0` renamed its Add Component entry and Inspector title to **Convai Action Monitor**; the C# type name, `ConvaiActionDebugProbe`, and all serialized data are unchanged.
 
-**Add via:** Add Component → **Convai/Debug/Convai Action Debug Probe**
+**Add via:** Add Component → **Convai/Actions/Diagnostics/Convai Action Monitor**
 
 The component requires `ConvaiCharacter` on the same GameObject and auto-resolves `ConvaiActionDispatcher`. If `ConvaiActionDispatcher` is absent, the probe still records received action batches via `ConvaiCharacter.OnActionsReceived`, but dispatcher lifecycle events (step started, succeeded, failed) will not be tracked.
 
@@ -175,12 +197,8 @@ Right-click the `ConvaiActionDebugProbe` component header in the Inspector to ac
 
 | Item | What it does |
 | --- | --- |
-| **Inject Test Batch** | Sends a `Move To` action targeting the first registered object — verifies executor wiring without a live conversation |
+| **Inject Test Batch** | Sends a `Move To` action targeting the first registered object — verifies executor wiring without a live conversation. If it succeeds, the action definition, object target, and executor are all configured correctly; if `Unhandled Step Count` increments instead of `Succeeded Step Count`, no executor for `Move To` is registered on this GameObject. |
 | **Reset Probe State** | Resets all counters and clears the last-seen text fields |
-
-{% hint style="info" %}
-**Inject Test Batch** is the fastest way to verify executor wiring. If it succeeds, your action definition, object target, and executor are all configured correctly. If `Unhandled Step Count` increments instead of `Succeeded Step Count`, an executor for `Move To` is not registered on this GameObject.
-{% endhint %}
 
 ## ConvaiRoomManager runtime state
 
@@ -203,7 +221,7 @@ Right-click the `ConvaiActionDebugProbe` component header in the Inspector to ac
 
 ### IRoomDiagnostics full snapshot
 
-For a richer snapshot, call `GetDiagnostics()` on `ConvaiRoomManager.DiagnosticsCoordinator`. This returns a `RoomDiagnosticsSnapshot` with connection statistics accumulated since the diagnostics instance was created.
+For a richer snapshot, call `GetDiagnostics()` on `ConvaiRoomManager.DiagnosticsCoordinator`. This returns a `RoomDiagnosticsSnapshot` with connection statistics accumulated since the diagnostics instance was created. `DiagnosticsCoordinator` is `null` until the room's internal assembly has been created, which happens on the first connection attempt — null-check before calling `GetDiagnostics()`.
 
 ```csharp
 var room = FindFirstObjectByType<ConvaiRoomManager>();
@@ -239,13 +257,9 @@ if (room?.DiagnosticsCoordinator != null)
 | `RegisteredCharacterCount` | `int` | `ConvaiCharacter` instances currently registered in the agent registry |
 | `RegisteredPlayerCount` | `int` | `ConvaiPlayer` instances currently registered |
 
-{% hint style="info" %}
-`DiagnosticsCoordinator` is `null` until the room's internal assembly has been created, which happens on the first connection attempt. Null-check before calling `GetDiagnostics()`.
-{% endhint %}
-
 ## Session metrics console messages
 
-`SessionMetrics` logs session lifecycle events to the Console. Some messages appear at **Info** level (visible by default); others require the global log level to be set to **Debug**.
+`SessionMetrics` logs session lifecycle events to the Console. Messages tagged Debug follow the same conditional-compilation rule as every other Debug-level log call — see the [Log levels](#log-levels) hint above.
 
 | Message | Level | When it appears |
 | --- | --- | --- |
@@ -258,13 +272,9 @@ if (room?.DiagnosticsCoordinator != null)
 | `[SessionMetrics] Session error: X` | Warning | A non-reconnect session error was recorded |
 | `[SessionMetrics] Session ended (reason): {snapshot}` | Info | Session terminated for any reason; snapshot includes full metrics |
 
-{% hint style="info" %}
-`[SessionMetrics]` messages tagged Debug only appear in the Unity Editor, Development Builds, or builds with the `CONVAI_DEBUG_LOGGING` scripting define. See [Log levels](#log-levels) above.
-{% endhint %}
-
 ## Client latency metrics
 
-`ClientLatencyMetricsCollector` measures the end-to-end latency of the conversation pipeline from the moment the player stops speaking to the moment the character's audio starts playing. It is active in the Unity Editor and Development Builds.
+`ClientLatencyMetricsCollector` measures the end-to-end latency of the conversation pipeline from the moment the player stops speaking to the moment the character's audio starts playing. It is active in the Unity Editor and Development Builds, the same scope as any other Debug-level diagnostic on this page.
 
 Latency entries appear automatically in the Console after each completed turn:
 
@@ -292,15 +302,13 @@ Latency entries appear automatically in the Console after each completed turn:
 | `audioHoldForLipSync` > 200 ms | Audio buffer is large; acceptable but reduces perceived responsiveness |
 | `stop→audioPlaying` > 1000 ms | Combined network + processing + buffering; investigate each segment |
 
-{% hint style="info" %}
-Latency measurements appear only in Editor and Development Builds — the `[ClientLatency]` log calls are conditionally compiled. They are not available in release builds unless `CONVAI_DEBUG_LOGGING` is defined.
-{% endhint %}
-
 ## LipSync drift monitor
 
-SDK `4.4.0` removed the public `IBlendshapeSink` extension seam entirely — no type of that name remains in the SDK, and custom runtime sink injection is no longer supported. Drive lip sync through a supported map or profile on `ConvaiLipSyncComponent` instead. The related types `SkinnedMeshBlendshapeSink`, `LipSyncDriftMonitor`, `LipSyncDriftSample`, and `LipSyncDriftEvent` were not removed — they were internalized, so they still exist but are no longer part of the public API. The supported diagnostics surface for lip sync alignment is the `Convai → LipSync Drift Monitor` Editor window.
+SDK `4.4.0` removed the public `IBlendshapeSink` extension seam entirely — no type of that name remains in the SDK, and custom runtime sink injection is no longer supported. Drive lip sync through a supported map or profile on `ConvaiLipSyncComponent` instead. The related types `SkinnedMeshBlendshapeSink`, `LipSyncDriftMonitor`, `LipSyncDriftSample`, and `LipSyncDriftEvent` were not removed — they were internalized, so they still exist but are no longer part of the public API.
 
-Open the window from `Convai → LipSync Drift Monitor`. Monitoring is opt-in: enable the **Monitor** toggle, enter Play mode, and talk to a character to populate data. Select a character from the dropdown when more than one is registered — samples and events are tracked per character.
+The drift monitor window no longer has its own top-level `Convai` menu entry. Select a character's `ConvaiLipSyncComponent`, open its Inspector, and select **Open Drift Monitor** near the latency settings. The window opens titled **LipSync Drift**.
+
+Monitoring is opt-in: enable the **Monitor** toggle, enter Play mode, and talk to a character to populate data. Select a character from the dropdown when more than one is registered — samples and events are tracked per character.
 
 The window shows:
 
@@ -316,13 +324,16 @@ Click **Export CSV** to save the current samples and events to a file. The save 
 
 | Tool | What it diagnoses | How to access |
 | --- | --- | --- |
+| **Convai Troubleshooter** | Cross-module findings for one character or the whole scene, with fixes | `Convai → Troubleshooter` |
+| **Actions Editor (Live)** | Action batches, target registry, and per-action insights in Play mode | `Convai → Actions Editor` |
+| **Embodiment / Gaze / Body Animation / Emotion Editors** | Setup and tuning for each embodiment module | `Convai → Embodiment Editor`, `Convai → Gaze Editor`, `Convai → Body Animation Editor`, `Convai → Emotion Editor` |
 | **Diagnostics** | All SDK subsystems — verbosity and filtering | `Convai → Settings` or `Edit → Project Settings → Convai SDK` (Diagnostics section) |
-| **ConvaiActionDebugProbe** | Action dispatch, executor wiring, batch failures | Add Component → Convai/Debug/Convai Action Debug Probe |
+| **Convai Action Monitor (`ConvaiActionDebugProbe`)** | Action dispatch, executor wiring, batch failures | Add Component → Convai/Actions/Diagnostics/Convai Action Monitor |
 | **ConvaiRoomManager properties** | Session state, error codes, connect/reconnect counts | `FindFirstObjectByType<ConvaiRoomManager>()` — read properties directly |
 | **IRoomDiagnostics snapshot** | Connection attempt counts, uptime, last error, agent counts | `room.DiagnosticsCoordinator.GetDiagnostics()` |
 | **Session Metrics messages** | Reconnection success rate, session lifecycle, error timeline | Console filter `[SessionMetrics]`; requires Info or Debug level |
 | **Client Latency metrics** | End-to-end conversation pipeline latency | Console filter `[ClientLatency]`; Editor and Development Builds only |
-| **LipSync Drift Monitor** | Audio-vs-visual lip sync alignment, drift error, CSV export | `Convai → LipSync Drift Monitor` |
+| **LipSync Drift Monitor** | Audio-vs-visual lip sync alignment, drift error, CSV export | `ConvaiLipSyncComponent` Inspector → **Open Drift Monitor** |
 | **Custom log sinks** | Route logs to files, telemetry, or overlays | `ConvaiLogger.RegisterSink(new YourSink())` |
 
 ## Next steps

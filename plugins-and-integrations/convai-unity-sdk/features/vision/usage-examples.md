@@ -1,7 +1,7 @@
 ---
 title: Vision usage examples
 description: Find code patterns for common Vision setups, including safety training, webcam selection, look-at activation, on-demand triggers, and WebGL deployment.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 These examples cover the most common Vision integration patterns. Each example is self-contained — copy the relevant script, attach it to the appropriate GameObject, and configure the serialized fields in the Inspector.

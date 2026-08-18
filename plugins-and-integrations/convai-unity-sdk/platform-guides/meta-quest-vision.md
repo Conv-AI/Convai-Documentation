@@ -3,7 +3,7 @@ title: Meta Quest Vision setup
 description: >-
   Configure QuestVisionFrameSource to stream the Meta Quest passthrough camera
   to a Convai character on Quest 3 and 3S builds.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 `QuestVisionFrameSource` streams the passthrough camera feed from a Meta Quest headset to Convai, enabling the AI character to see and respond to the real world the learner is looking at. This page covers the required Android manifest permissions, step-by-step component setup, Inspector field reference, and troubleshooting for Quest 3 and Quest 3S.

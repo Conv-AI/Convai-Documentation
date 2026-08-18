@@ -1,7 +1,7 @@
 ---
 title: How dynamic context works
 description: Understand how Dynamic Context tracks scene state and events, batches updates, and reports acknowledgement and token feedback.
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 ---
 
 Dynamic Context gives characters a live, structured view of what is happening in the scene. Instead of relying only on the static system prompt configured on the Convai dashboard, a character can reference a trainee's current location, the equipment they have collected, or an alarm that recently triggered — because that information was injected directly into the session as it occurred. This page explains the underlying model: the two primitives the SDK tracks, how they assemble into a canonical context string, how updates batch and flush, and how the SDK reports back what happened to each update.

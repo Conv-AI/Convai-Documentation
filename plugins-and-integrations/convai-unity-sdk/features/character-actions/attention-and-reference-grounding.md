@@ -1,25 +1,27 @@
 ---
-title: Attention and reference grounding
-description: Update NPC focus at runtime so Convai resolves vague player references such as "pick that up" or "go to it" to the correct registered scene object.
-last_reviewed: "4.4.0"
+title: How action target resolution works
+description: Understand how a spoken reference resolves to a specific scene object or character, from Convai's language match to Unity's local lookup.
+last_reviewed: "4.5.0"
 ---
 
-Reference grounding is how Convai resolves vague player language — "grab that," "go to it," "look at the one on the left" — to a specific registered object or character. Two inputs drive grounding: the rich descriptions you register for each target, and the current attention object you update at runtime as the player's focus changes.
+When a player says "pick up that cylinder" or "go to it," two separate systems have to agree on what "that" or "it" means: Convai, which matches the words to a target name, and Unity, which matches that name to a real `GameObject` in the scene. This page explains both steps and the current attention object that steers ambiguous references.
 
-## How grounding works
+## How Convai chooses a target name
 
-When a player says "pick up that cylinder," Convai evaluates two things:
+Convai evaluates two inputs when it decides what a vague reference points to:
 
-1. **Object descriptions** — the Name and Description text registered for each actionable object and character. Convai uses these to match "cylinder" to your registered object.
+1. **Object and character descriptions** — the `Name` and `Description` (or `Bio`) text registered for each actionable object and character. Convai uses these to match "cylinder" to your registered object.
 2. **Current attention object** — which object the NPC is currently "focused on." When set, Convai weighs it heavily for ambiguous references like "that" or "it."
 
 `ConvaiActionConfigSource` fixes descriptions at connect time, but an active session can replace the objects or characters list with a `ConvaiActionConfigPatch` — see [Configure character actions](configuring-actions.md) for patch semantics. The current attention object can be changed at any point during an active conversation.
+
+An object does not have to be authored on `ConvaiActionConfigSource` to be known to Convai. A `ConvaiActionTarget` component on the object itself introduces it the moment the component is enabled, following spawns and despawns automatically. An authored entry always wins when both name the same target — see [Character actions scripting reference](actions-scripting-reference.md) for the field-level difference.
 
 Once Convai returns an action whose target matched a registered name, Unity exposes the match on the enriched parameter's `ResolvedReference` field as a `ConvaiActionParameterReference` (`Convai.Shared.Types.ConvaiActionParameterReference`). Its `Kind` property is a `ConvaiActionTargetKind` value — `None`, `Object`, or `Character` — telling you whether grounding resolved to a registered object or a registered character. See [Character actions scripting reference](actions-scripting-reference.md) for the full parameter-value type.
 
 ## Write effective object descriptions
 
-The `Description` field on each `ConvaiActionObjectDefinition` is the most important text for grounding accuracy. Write each description as a single natural sentence that includes:
+The `Description` field on each `ConvaiActionObjectDefinition` is the most important text for grounding accuracy — it is what Convai reads to decide which object a word like "cylinder" means. Write each description as a single natural sentence that includes:
 
 * **Object type** — what kind of thing it is
 * **Identifying attribute** — color, material, size, or label
@@ -38,6 +40,21 @@ Vague descriptions cause Convai to pick the wrong target or fail to resolve ambi
 {% hint style="warning" %}
 `ConvaiActionConfigSource` descriptions are fixed once a session connects. For scenes known in advance, build alternate descriptions with `RoomSessionConnectOptions.ActionConfigOverride` before connecting. For scenes that change during an active session — objects moved, spawned, or destroyed — send a `ConvaiActionConfigPatch` through `character.DynamicContext.Apply(...)` instead of reconnecting. See [Configure character actions](configuring-actions.md) for override and patch semantics.
 {% endhint %}
+
+## How Unity matches a target name to a scene object
+
+Once Convai returns a target string, resolving it to a real `GameObject` is a local, deterministic match — it never calls Convai again. Unity walks a four-step ladder against the active `ConvaiActionConfig` and stops at the first step that finds something:
+
+1. **Exact** — the returned name matches a registered `Name`, ignoring case.
+2. **Alias** — the returned name matches an entry in that target's `Aliases` list, ignoring case. Aliases are local-only: they are never sent to Convai, so add one only for wording the registered name itself would miss (`lamp` for a `Lantern`, for example).
+3. **Normalized** — the same comparison after stripping a leading "the"/"a"/"an" and collapsing whitespace.
+4. **Contains** — a fuzzy, substring-based match, used only when it is unambiguous. If more than one target loosely matches, the step refuses to guess and resolution fails rather than picking the wrong one.
+
+Entries with `Available` set to `false` — for example a despawned object withdrawn through `ConvaiCharacter.Actions` — are skipped at every step. When two targets of the same kind tie at the same step, the one nearer the character wins; a target bound to a real `GameObjectReference` always beats a same-named entry with nothing behind it.
+
+The resolved binding determines where a movement or gaze executor goes: `InteractionPoint` on the matched `ConvaiActionObjectDefinition` or `ConvaiActionCharacterDefinition` (or the `ConvaiActionTarget` component), when set, otherwise the bound `GameObjectReference`'s own transform.
+
+A target with no `GameObjectReference` and no explicit `TextOnly` flag is reported as a setup error, because a targeted action can never resolve it. Tick `TextOnly` on an entry that deliberately has no scene counterpart — Convai can still talk about it, but no executor will be asked to act on it.
 
 ## Runtime attention API
 
@@ -93,7 +110,7 @@ The object name must match an entry in `ConvaiActionConfigSource.Objects` (case-
 
 ## Attention scope
 
-The attention object affects only the backend's reference resolution for future turns. Setting the attention object does not:
+The attention object affects only Convai's reference resolution for future turns. Setting the attention object does not:
 
 * Create a new actionable target
 * Change which objects are in the action config

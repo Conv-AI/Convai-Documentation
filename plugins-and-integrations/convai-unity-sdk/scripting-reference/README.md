@@ -1,7 +1,7 @@
 ---
 title: Scripting reference
 description: Reference for the Convai Unity SDK C# scripting APIs — events, transcripts, audio control, and async operation patterns.
-last_reviewed: "4.2.0"
+last_reviewed: "4.5.0"
 ---
 
 The Convai Unity SDK exposes two complementary approaches for C# integration. `ConvaiSessionEventRelay`, `ConvaiCharacterEventRelay`, and `ConvaiTranscriptEventRelay` are MonoBehaviours that wire events directly in the Inspector — no code required. For scripted reactions and programmatic control, the `ConvaiEvents` typed event hub and each component's C# API give full access from any script. Both approaches observe the same underlying SDK events and can be combined freely.

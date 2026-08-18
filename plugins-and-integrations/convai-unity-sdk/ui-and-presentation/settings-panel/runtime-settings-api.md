@@ -1,6 +1,6 @@
 ---
 title: Runtime settings API
-last_reviewed: "4.4.0"
+last_reviewed: "4.5.0"
 description: >-
   Reference for IConvaiRuntimeSettingsService — read current settings, apply
   patches, react to changes, and reset to defaults from code.
@@ -191,5 +191,5 @@ private void OnSettingsChanged(ConvaiRuntimeSettingsChanged changed)
 {% endcontent-ref %}
 
 {% content-ref url="../transcript-ui/chat-and-subtitle-modes.md" %}
-[chat-and-subtitle-modes.md](../transcript-ui/chat-and-subtitle-modes.md)
+[Chat and subtitle modes](../transcript-ui/chat-and-subtitle-modes.md)
 {% endcontent-ref %}

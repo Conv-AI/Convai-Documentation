@@ -3,13 +3,12 @@ title: Feature map
 description: >-
   Find the right Convai Unity SDK feature, module, guide, or reference page for
   any development goal, indexed by use case.
+last_reviewed: "4.5.0"
 ---
-
-# Feature map
 
 Use this table when you know the outcome you want but are not sure which SDK feature, module, or guide covers it.
 
-### Getting started
+## Getting started
 
 | I want to...                                         | Feature / Tool      | Documentation                                                                                |
 | ---------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------- |
@@ -25,26 +24,29 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Add real-time lip sync to my character               | Lip sync            | [Add lip sync](../getting-started/add-lip-sync/)                                             |
 | Verify my scene is set up correctly before shipping  | Scene Validator     | [Validate your setup](../getting-started/validate-your-setup.md)                             |
 
-### Features
+## Features
 
 | I want to...                                                                              | Feature          | Documentation                                     |
 | ----------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------- |
 | Let my character execute in-scene commands (trigger animations, open doors, move objects) | Actions          | [Actions](../features/character-actions/)         |
 | Inject runtime state or events into the character's knowledge                             | Dynamic Context  | [Dynamic Context](../features/dynamic-context/)   |
 | Let the character automatically read information about scene objects                      | Scene Metadata   | [Scene Metadata](../features/scene-metadata/)     |
-| Show facial emotion on my character driven by the AI response                             | Emotion          | [Emotion](../features/emotion/)                   |
+| Show facial emotion on my character driven by the AI response                             | Emotion          | [Emotion](../embodiment/emotion/)                 |
 | Make the character remember players between sessions                                      | Long-Term Memory | [Long-Term Memory](../features/long-term-memory/) |
 | Build branching story sections triggered by conversation                                  | Narrative Design | [Narrative Design](../features/narrative-design/) |
 | Give my character vision through a camera or webcam                                       | Vision           | [Vision](../features/vision/)                     |
 
-### Utilities
+## Embodiment
 
-| I want to...                                                      | Utility            | Documentation                                          |
-| ----------------------------------------------------------------- | ------------------ | ------------------------------------------------------ |
-| Add body and head dialogue animations to my character             | Dialogue Animation | [Dialogue Animation](../utilities/dialogue-animation/) |
-| Make my character look at targets, players, or points of interest | Gaze and Attention | [Gaze and Attention](../utilities/gaze-and-attention/) |
+| I want to...                                                                | Module            | Documentation                                                                   |
+| --------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------- |
+| Make my character look at the player, at objects, or around the scene       | Gaze              | [Gaze](../embodiment/gaze/)                                                     |
+| Time a character's behavior to the phase of the conversation                | Conversation Flow | [Conversation flow](../embodiment/conversation-flow/)                           |
+| Share one set of behavior settings across several characters                | Presets           | [Embodiment presets](../embodiment/embodiment-presets.md)                       |
+| Decide how much of the face emotion and lip sync each control while speaking | Facial composition | [Facial composition](../embodiment/facial-composition.md)                      |
+| Move from the retired Attention module to Convai Gaze                       | Migration         | [Migrate from Attention](../embodiment/gaze/migrate-from-attention.md)          |
 
-### UI and presentation
+## UI and presentation
 
 | I want to...                                                         | Component           | Documentation                                                                                            |
 | -------------------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -56,7 +58,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Read or apply runtime settings from code                             | Runtime settings    | [Runtime settings API](../ui-and-presentation/settings-panel/runtime-settings-api.md)                    |
 | Customize the look and layout of UI components                       | UI customization    | [Customizing UI components](../ui-and-presentation/customizing-ui-components.md)                         |
 
-### Core concepts
+## Core concepts
 
 | I want to...                                             | Concept           | Documentation                                                     |
 | -------------------------------------------------------- | ----------------- | ----------------------------------------------------------------- |
@@ -65,7 +67,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Compare hands-free, push-to-talk turn-taking             | Turn-taking modes | [Turn-taking modes](../core-concepts/turn-taking-modes.md)        |
 | Subscribe to conversation events from C# or Inspector    | Event system      | [Event System](../core-concepts/event-system.md)                  |
 
-### Scripting reference
+## Scripting reference
 
 | I want to...                                                 | API                  | Documentation                                                    |
 | ------------------------------------------------------------ | -------------------- | ---------------------------------------------------------------- |
@@ -75,7 +77,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Use the `ConvaiSDK` and `ConvaiAudio` static facades         | Conversation facades | [ConvaiManager API](../scripting-reference/convaimanager-api.md) |
 | Understand `IConvaiOperation<T>` and async patterns          | Async patterns       | [Async Patterns](../scripting-reference/async-patterns.md)       |
 
-### Platform guides
+## Platform guides
 
 | I want to...                               | Platform        | Documentation                                                     |
 | ------------------------------------------ | --------------- | ----------------------------------------------------------------- |
@@ -83,7 +85,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Ship to Android or iOS                     | Mobile          | [Mobile — iOS and Android](../platform-guides/ios-and-android.md) |
 | Ship to Meta Quest with passthrough vision | Meta Quest / XR | [Meta Quest and XR](../platform-guides/xr-headsets.md)            |
 
-### Advanced topics
+## Advanced topics
 
 | I want to...                                                     | Topic            | Documentation                                                                                     |
 | ---------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------- |
@@ -93,7 +95,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Measure latency and interpret session metrics                    | Performance      | [Performance and Optimization](../advanced-topics/performance-and-optimization.md)                |
 | Extend the SDK with a custom module or replace internal services | Extension points | [Extending the SDK](../advanced-topics/extending-the-sdk.md)                                      |
 
-### Next steps
+## Next steps
 
 Start with installation if you have not set up the SDK yet.
 
