@@ -193,6 +193,22 @@ def iter_body_lines(body, body_start):
         yield lineno, raw, ("code" if in_code else "prose")
 
 
+def leading_h1(body, body_start):
+    """Return (title, line) if the body opens with a single `# ` heading, else ("", 0).
+
+    This is the shape GitBook writes when it round-trips a page. Only a heading that is the
+    body's first content counts: a `# ` further down is a second H1 and stays an error."""
+    for lineno, raw, kind in iter_body_lines(body, body_start):
+        if kind in ("code", "fence-close"):
+            continue
+        stripped = raw.strip()
+        if not stripped:
+            continue
+        m = re.match(r"#\s+(\S.*?)\s*$", stripped)
+        return (m.group(1), lineno) if m else ("", 0)
+    return ("", 0)
+
+
 def check_page(path, summary_text=None, summary_titles=None):
     findings = []
     try:
@@ -215,10 +231,32 @@ def check_page(path, summary_text=None, summary_titles=None):
         fm = {}
     title = fm.get("title", "").strip()
     desc = fm.get("description", "").strip()
-    if not title:
-        findings.append(Finding("ERROR", 1, "frontmatter is missing `title`", "CV-33"))
-    elif len(title) > 60:
-        findings.append(Finding("WARN", 1, f"title is {len(title)} chars (keep <= 60)", "CV-33"))
+
+    # A page carries its title in one of two places, and which one depends on who last
+    # touched it. GitBook's editor writes it as a leading `# ` heading and omits the
+    # frontmatter key; the tooling writes the frontmatter key and no body heading. Both
+    # render correctly, so both are accepted - what is not accepted is a page with neither,
+    # or one with both, because then two strings claim to be the title and the sidebar,
+    # the search result and the page can disagree.
+    body_title, body_title_line = leading_h1(body, body_start)
+    effective_title = title or body_title
+
+    if not effective_title:
+        findings.append(Finding(
+            "ERROR", 1,
+            "the page has no title: add `title` to the frontmatter, or a single `# ` heading "
+            "as the first line of the body",
+            "CV-33"))
+    elif title and body_title:
+        findings.append(Finding(
+            "ERROR", body_title_line,
+            f"two titles: frontmatter says {title!r} and the body heading says {body_title!r}; "
+            "keep one",
+            "CV-33"))
+    elif len(effective_title) > 60:
+        findings.append(Finding(
+            "WARN", 1, f"title is {len(effective_title)} chars (keep <= 60)", "CV-33"))
+    title = effective_title
     if not desc:
         findings.append(Finding("ERROR", 1, "frontmatter is missing `description`", "CV-34"))
     else:
@@ -251,7 +289,10 @@ def check_page(path, summary_text=None, summary_titles=None):
                     "use plain English and move identifiers into the body", "CV-34"))
 
     # --- Body scan ---
+    # With a GitBook-shaped page the title heading is content, so the lead-paragraph check
+    # starts after it rather than at it.
     first_content_seen = False
+    lead_after = body_title_line
     hint_count = 0
     saw_publish_blocker = False
     open_blocks = []
@@ -268,15 +309,27 @@ def check_page(path, summary_text=None, summary_titles=None):
         if kind in ("code", "fence-close"):
             continue
 
-        # first non-blank prose/heading line = lead check
+        # First non-blank line. A leading `# ` heading is the page's title in GitBook's own
+        # shape and is allowed; any other heading here means the lead paragraph is missing.
         if not first_content_seen and stripped:
             if stripped.startswith("#"):
-                findings.append(Finding("ERROR", lineno, "body must start with a headingless lead paragraph, not a heading", "CV-26"))
-            first_content_seen = True
+                if not (lineno == lead_after and body_title):
+                    findings.append(Finding(
+                        "ERROR", lineno,
+                        "body must start with a headingless lead paragraph, not a heading",
+                        "CV-26"))
+                    first_content_seen = True
+                else:
+                    # The title heading itself. The lead paragraph is the next line.
+                    pass
+            else:
+                first_content_seen = True
 
-        # headings
-        if re.match(r"#\s+\S", stripped):
-            findings.append(Finding("ERROR", lineno, "body uses an H1 `# ` heading; GitBook page title is the only H1", "CV-25"))
+        # A second H1 is always wrong: the page would claim two titles.
+        if re.match(r"#\s+\S", stripped) and lineno != lead_after:
+            findings.append(Finding(
+                "ERROR", lineno,
+                "a second H1 `# ` heading; a page has exactly one title", "CV-25"))
         # Matches any level from ## down, so `### Overview` is caught too, not just `## Overview`.
         if re.match(r"#{2,6}\s+(Overview|Introduction)\b", stripped, re.IGNORECASE):
             findings.append(Finding("ERROR", lineno, f"forbidden heading: {stripped}", "CV-27"))

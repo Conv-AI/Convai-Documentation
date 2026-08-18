@@ -132,15 +132,15 @@ A product's own interface always wins over this table for a label the reader cli
 
 ## Page structure
 
-* **CV-25:** The GitBook page title is the only H1. Never add a body `#` heading.
-* **CV-26:** The body starts with a headingless lead paragraph that states what the page is for and who it is for. Sections start at `##`.
+* **CV-25:** A page has exactly one title and therefore one H1. GitBook's editor writes it as a leading `#` heading and leaves `title` out of the frontmatter; pages written through the tooling put it in the frontmatter and have no body heading. Both are correct — what is never correct is two of them, or a second `#` further down the page.
+* **CV-26:** The lead paragraph comes first and carries no heading of its own. On a page whose title is a leading `#` heading, it is the first thing after that heading. Sections start at `##`. A page that opens with a section heading has skipped the one paragraph that tells a reader whether they are in the right place.
 * **CV-27:** No `## Overview`, `## Introduction`, `## Conclusion`, or `## Summary` heading at any level. The lead paragraph is the introduction; the ending is verification or next steps.
 * **CV-28:** No vague headings: `More information`, `Miscellaneous`, `Basics`, `Tips`, `Notes`.
 * **CV-29:** No `Step 1` / `Step 2` headings. Use an action title that names the outcome.
 * **CV-30:** Do not use `####` on task or concept pages. If a fourth level is needed, restructure or split the page.
 * **CV-31:** Do not skip heading levels.
 * **CV-32:** Every page has a useful ending: a verification step, next steps, or a complete reference table.
-* **CV-33:** `title` is specific, keyword-first, and at most 60 characters.
+* **CV-33:** The title is specific, keyword-first, and at most 60 characters — wherever it lives, frontmatter or leading heading.
 * **CV-34:** `description` is one plain-English sentence stating the page outcome, 120–160 characters, hard maximum 200. It must not start with `This page covers`, `Learn about`, or `Overview of`, and must not contain class names, method names, file paths, or backtick identifiers — those belong in the body.
 * **CV-35:** Set `last_reviewed` on any page whose accuracy depends on a specific SDK, engine, or API version.
 
@@ -282,4 +282,5 @@ This is the section that matters most. A page that reads beautifully and states 
 | 2026-08-18 | The guide holds itself to its own rules, starting with its own description (CV-34) | The first review of this page flagged that it violated CV-34. A standard its own author exempts is not a standard. |
 | 2026-08-18 | Banned terms are quoted as inline code wherever the guide names them (CV-18) | A rulebook has to contain the words it bans. Marking them as code keeps a checker from reading a definition as a violation. |
 | 2026-08-18 | CV-21 applies to lists and tables inside prose, not to one that directly follows its own heading | A review flagged every reference table on this page. Demanding "Use these patterns:" under a heading that already says it produces the filler CV-3 bans, so the rule was narrowed rather than the pages padded. |
+| 2026-08-18 | A page may carry its title in the frontmatter or as a leading `#` heading, but never both (CV-25, CV-26, CV-33) | The rule demanded frontmatter and no body heading. Measured against the repository it failed 89 pages across three whole sections, because GitBook's editor writes the other shape when it round-trips a page. A rule that fails every page authored on the platform it serves is a broken rule; what it was protecting — one title, machine-findable, never two — is unchanged. |
 | 2026-08-18 | An unbalanced GitBook block blocks publication rather than warning (CV-76) | An unclosed hint or tabs block swallows the rest of the page on the published site, so the reader loses everything after it with nothing to indicate why. |

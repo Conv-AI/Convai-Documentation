@@ -1,0 +1,69 @@
+{
+  "subject": "playground",
+  "kind": "topic",
+  "source_repo": "convai-playground",
+  "package_root": "",
+  "note": "The Playground is a topic pack: most of what a page says about it is settled by looking at the product or asking its owner, not by reading code. This contract deliberately extracts only the few things the source does settle exactly, and the not_covered list is as important as the extract list. A contract that looked like it covered a topic pack would invite the assumption that a clean drift report means a correct pack.",
+  "extract": {
+    "character_editor_tabs": {
+      "glob": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "capture": "key_value_string",
+      "key": "label",
+      "why": "The exact tab labels in the character editor. This is the single most useful thing code settles about the Playground: a page tells a reader to open a tab by name, and a label transcribed from a screenshot is wrong the first time somebody renames one."
+    },
+    "experience_editor_tabs": {
+      "glob": "apps/web/src/navigation/tab-definitions/experience-editor-tabs.ts",
+      "capture": "key_value_string",
+      "key": "label",
+      "why": "The same, for the experience editor."
+    },
+    "apps": {
+      "glob": "apps/*/",
+      "capture": "dir_name",
+      "why": "The deployed applications. The Playground is the web app; analytics is a separate surface that the pack should say whether it documents."
+    },
+    "packages": {
+      "glob": "packages/*/",
+      "capture": "dir_name",
+      "why": "Shared internal packages. Not reader-facing, but a page naming one is describing implementation rather than product, which is usually a mistake worth catching."
+    }
+  },
+  "must_exist": [],
+  "must_exist_why": "Empty on purpose. A must_exist entry promises a rename is an error; for a product surface a rename is normal and the right response is to update the page, not to fail a build.",
+  "must_not_exist": [],
+  "documented_sets": [
+    "apps"
+  ],
+  "documented_sets_why": "Two applications. Which of them the pack covers is a real question.",
+  "coverage_sets": [
+    "character_editor_tabs",
+    "experience_editor_tabs"
+  ],
+  "coverage_sets_why": "How many of the editor's tabs the documentation actually mentions. Reported as a ratio: a tab nobody documented is a screen a reader can open and find no help for.",
+  "symbol_prefixes": [
+    "Convai"
+  ],
+  "historical_pages": [
+    "**/release-notes.md",
+    "**/changelog.md",
+    "**/legacy-playground/**"
+  ],
+  "historical_pages_why": "Plus the legacy Playground pages, which describe the older interface.",
+  "not_covered": [
+    "Everything a screen does. Source shows a tab exists, never what it does or what a setting means - those come from the product or its owner.",
+    "Plan gating and entitlements. Nothing in this repository maps a feature to a tier.",
+    "Which build is deployed. The repository is not the running product.",
+    "Avatar Studio, Convai Sim and the XR capture app, which belong to the no-code pack.",
+    "Anything the analytics app does, unless the pack says it covers it."
+  ],
+  "not_covered_why": "Stated so a clean drift report is not mistaken for a correct pack. For an SDK, source settles most of what a page claims. For a product, it settles almost none of it, and the honest thing is to say which parts.",
+  "gold_standards": {
+    "status": "borrowed",
+    "borrowed_from": "unity",
+    "measured_on": "2026-08-18",
+    "clean_pages": "3 of 23",
+    "reason": "This section has no page that both passes the structure gate and is substantial enough to imitate. The pack borrows shape only and says so on the page. Remove this once the section has an exemplar of its own."
+  },
+  "section": "convai-playground",
+  "section_why": "Where this subject's pages live in the documentation repository. Declared rather than inferred from the pack name: core-service's pages are under api-reference, and guessing reported its own exemplars as borrowed from another subject."
+}

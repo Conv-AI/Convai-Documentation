@@ -99,5 +99,7 @@
     "ConvaiDev",
     "ConvaiTutorial"
   ],
-  "coverage_ignore_prefixes_why": "Names that appear on pages but are deliberately outside the shipped package surface - sample and tutorial assets. MCP tool ids like Convai.ConfigureGaze are excluded automatically because a dotted name is never a type."
+  "coverage_ignore_prefixes_why": "Names that appear on pages but are deliberately outside the shipped package surface - sample and tutorial assets. MCP tool ids like Convai.ConfigureGaze are excluded automatically because a dotted name is never a type.",
+  "section": "plugins-and-integrations/convai-unity-sdk",
+  "section_why": "Where this subject's pages live in the documentation repository. Declared rather than inferred from the pack name: core-service's pages are under api-reference, and guessing reported its own exemplars as borrowed from another subject."
 }

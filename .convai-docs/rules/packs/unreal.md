@@ -278,27 +278,21 @@ frozen here goes stale at the next release and becomes a wrong fact in the docs.
 If a variable is missing from `vars.yaml`, add it there in the same change instead of writing the
 literal value into a page.
 
-## Gold-standard example pages
+## Gold-standard example pages — READ BEFORE DRAFTING
 
-No Unreal gold-standard page exists yet. **Once the first Unreal work unit is reviewed and accepted
-by the human, add those Unreal page paths here and update this note.** Subsequent pages must match
-their structure, tone, and depth.
+**Before drafting, open the example whose Diataxis mode matches your task.** Use it as the
+quality benchmark for lead paragraph, section count, block selection and prose tone. These are
+pages from this subject's own section, chosen because they pass the structure gate and are
+substantial enough that there is something to copy.
 
-Until Unreal gold-standard pages are established, use the **Unity** docs as the cross-SDK structural
-reference — matching their depth, page count per section, and quality bar, but not their
-Unity-specific layout or content. Unreal pages must reflect Blueprint-first workflows and
-Unreal-native terminology. Before drafting, open the closest Unity example for the Diataxis mode
-you are writing:
-
-| Page type | Unity example to open |
+| Page type | Example page to open |
 |---|---|
-| Hub / section index | `plugins-and-integrations/convai-unity-sdk/getting-started/README.md` |
-| How-to with steppers + tabs | `plugins-and-integrations/convai-unity-sdk/getting-started/installation.md` |
-| How-to simple (focused task) | `plugins-and-integrations/convai-unity-sdk/getting-started/configure-api-key.md` |
-| How-to multiplatform / subsections | `plugins-and-integrations/convai-unity-sdk/getting-started/configure-microphone.md` |
-| Explanation with Mermaid + tables | `plugins-and-integrations/convai-unity-sdk/core-concepts/session-lifecycle.md` |
+| Hub / section index | `plugins-and-integrations/convai-unreal-engine-plugin/getting-started/README.md` |
+| How-to with a stepper | `plugins-and-integrations/convai-unreal-engine-plugin/getting-started/set-up-a-reallusion-cc-character.md` |
+| Reference (Blueprint surface) | `plugins-and-integrations/convai-unreal-engine-plugin/blueprint-reference/convai-chatbot-component.md` |
+| Explanation with a diagram | `plugins-and-integrations/convai-unreal-engine-plugin/core-concepts/conversation-flow.md` |
 
-Reading the Unity example is mandatory — it calibrates structure and quality, not content.
+When in doubt, take the how-to. It is the shape most pages end up being.
 
 ## Section layout
 
@@ -415,11 +409,11 @@ import is needed. **There is no bundled demo level/map** — no `.umap` exists a
 and there is no `Convai_Demo`, `Companion`, or `ConvaiDemoGM` asset. Downloadable sample content is
 offered through the Convai editor window **Samples** page (a content feed), not as a shipped level.
 
-For local source verification in the current Unreal plugin development checkout, use
-`C:\Users\Kaan\Documents\UnrealProjects\Convai-UnrealEngine-SDK-Dev\Content` as the plugin content
-root. MetaHuman animation assets and animation Blueprint references are under
-`C:\Users\Kaan\Documents\UnrealProjects\Convai-UnrealEngine-SDK-Dev\Content\MetaHumans\Animations`.
-Published documentation should still use plugin-relative paths such as `MetaHumans/Animations/`.
+For local source verification, the plugin content root is `Content/` under whatever path the
+checkout has on this machine — ask for that path rather than assuming one. MetaHuman animation
+assets and animation Blueprint references are under `Content/MetaHumans/Animations/`.
+Published documentation uses plugin-relative paths such as `MetaHumans/Animations/`, never a
+path from anybody's machine.
 
 | Asset name | Path | Type | Purpose |
 |---|---|---|---|

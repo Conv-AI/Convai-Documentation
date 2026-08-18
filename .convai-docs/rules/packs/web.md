@@ -133,24 +133,27 @@ variables are defined there yet, and the current Web pages hard-code or omit ver
 `<code class="expression">space.vars.web_sdk_version</code>`. Do not carry the current version into this
 pack — a value frozen here goes stale and becomes a wrong fact.
 
-## Gold-standard example pages
+## Gold-standard example pages — READ BEFORE DRAFTING
 
-**No Web page currently meets the quality bar.** Every page sampled carries a body `#` H1, none set
-`title` frontmatter, the current README opens with `## Introduction` and closes with `## Conclusion`,
-and no page uses `space.vars`.
+**This section has no exemplar of its own yet, and pretending otherwise would teach the wrong
+bar.** Measured on 2026-08-18, 16 of 42 pages here pass the structure gate, and none of those is
+substantial enough to be worth imitating.
 
-Until a Web page is written to standard and accepted, model structure on the Unity SDK section, which
-does meet the bar:
+So borrow the *shape* from the Unity SDK section, and nothing else:
 
-| Mode | Model page |
+| Page type | Borrow the shape from |
 |---|---|
-| How-to | `plugins-and-integrations/convai-unity-sdk/getting-started/installation.md` |
-| Hub | `plugins-and-integrations/convai-unity-sdk/README.md` |
+| Hub / section index | `plugins-and-integrations/convai-unity-sdk/getting-started/README.md` |
+| How-to with steppers and tabs | `plugins-and-integrations/convai-unity-sdk/getting-started/installation.md` |
+| Explanation | `plugins-and-integrations/convai-unity-sdk/core-concepts/session-lifecycle.md` |
 
-Take the structure, frontmatter, block usage, and heading discipline. The audience is close enough that
-the voice transfers, unlike the product packs.
+Take from those the lead-paragraph style, the section count, the block choices and the directness
+of the prose. Take nothing else. They are about a different product, for a different reader, with
+different terminology and different assumptions — copying any of that into a page about the web SDK
+produces a page that reads as though it were written for somebody else, because it was.
 
-**When the first Web page is written to standard and accepted, replace this section with its path.**
+The first page written here to that bar becomes this section's exemplar. Replace this section
+when it exists.
 
 ## Section layout
 
@@ -222,3 +225,7 @@ Fix these only on pages the task covers; do not silently rewrite pages the task 
 | Missing `title` frontmatter | Sidebar label cannot be matched to the page title | Add `title`, identical to the `SUMMARY.md` label. |
 | Hardcoded or absent version numbers | Goes stale silently | Use a `space.vars` expression once the variables exist. |
 | Legacy method names appearing in current pages | Sends the reader to an API that no longer exists | Check which folder the identifier came from before quoting it. |
+
+## Areas that are deliberately undocumented
+
+`src/utils/` holds internal helpers with no exported surface a reader imports. It is listed here so the next writer knows the gap is a decision rather than an oversight, and so the drift check stays quiet about it. If anything in there is ever exported from a declared entry point, document it and remove this section.

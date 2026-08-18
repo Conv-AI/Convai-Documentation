@@ -15,10 +15,11 @@ traced to one rule text no matter which of the three raised it. The rule text it
 | Level | Rule | Enforces |
 |---|---|---|
 | ERROR | YAML frontmatter (`--- … ---`) is present | CV-33 |
-| ERROR | `title` is present | CV-33 |
+| ERROR | The page has a title: either `title` in the frontmatter or a single leading `# ` heading | CV-33 |
+| ERROR | The page does not have both — two titles mean the sidebar, the search result and the page can disagree | CV-33 |
 | ERROR | `description` is present | CV-34 |
 | ERROR | `description` is at most 200 characters | CV-34 |
-| WARN | `title` is at most 60 characters | CV-33 |
+| WARN | The title is at most 60 characters, wherever it lives | CV-33 |
 | WARN | `description` is 120–160 characters | CV-34 |
 | WARN | `description` does not start with "This page covers", "Learn about", or "Overview of" | CV-34 |
 | WARN | `description` contains no banned word | CV-1 |
@@ -33,8 +34,8 @@ English about the outcome, not a summary of the page's API surface.
 
 | Level | Rule | Enforces |
 |---|---|---|
-| ERROR | The body starts with a lead paragraph, not a heading | CV-26 |
-| ERROR | The body contains no `# ` H1 — the GitBook page title is the only H1 | CV-25 |
+| ERROR | The lead paragraph comes first, with no heading of its own (after the title heading, on a page that has one) | CV-26 |
+| ERROR | No second `# ` H1. A leading one is the page title in GitBook's own shape and is allowed | CV-25 |
 | ERROR | No `## Overview` or `## Introduction` heading at any level from `##` down | CV-27 |
 | WARN | No `Step 1` / `Step 2` style headings — use an action title | CV-29 |
 | WARN | No `####` headings on task or concept pages — restructure or split | CV-30 |

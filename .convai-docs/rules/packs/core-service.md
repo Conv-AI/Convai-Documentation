@@ -7,6 +7,8 @@ Generic doctrine lives in `references/`.
 This is an **API reference pack**, not an SDK or plugin pack. It governs external developer-facing
 API documentation at the quality bar of Stripe, OpenAI, Twilio, or AWS public API docs.
 
+Last audited: 2026-08-18 against `502ad7f8`. That commit is the realtime engine only. The API gateway that serves the REST surface is a separate repository with no contract yet, so every REST claim on a page is still verified by hand.
+
 Use the **Convai Unity SDK docs as the internal quality benchmark** for structure, clarity, and
 reader guidance. Borrow the relevant practices, not Unity-specific content:
 - Start with a direct, outcome-focused lead paragraph that explains what the reader can do.
@@ -139,8 +141,6 @@ Greenfield only — no legacy page reuse.
 `/plan-docs`, and `/verify-doc`). That id is an internal docs-tool identifier. It is **not** the public
 product name, folder path, or sidebar label. All public-facing names and the final page tree are
 decided after inspecting the source and running `/plan-docs core-service`.
-
-Last audited: 2026-08-18 against the documentation repository only. The API facts below were written
 from a source audit of both backend repositories in an earlier pass, but that audit predates this line
 and its commit was not recorded, so its age is unknown. **Run `/audit-pack core-service` against both
 backend repositories before writing a batch of API pages**, and record the commits here.
@@ -257,22 +257,19 @@ Use `space.vars` for values that must stay synchronized across pages. Do not har
 example `api_base_url`, `stream_base_url`, and any version markers). Reference with
 `<code class="expression">space.vars.variable_name</code>`. Do not use `{{ variable_name }}` syntax.
 
-## Gold-standard example pages
+## Gold-standard example pages — READ BEFORE DRAFTING
 
-External quality benchmarks (structure/tone only — do not copy legacy Convai pages): Stripe API
-Reference, OpenAI API Reference, Twilio API docs.
+**Before drafting, open the example whose Diataxis mode matches your task.** Use it as the
+quality benchmark for lead paragraph, section count, block selection and prose tone. These are
+pages from this subject's own section, chosen because they pass the structure gate and are
+substantial enough that there is something to copy.
 
-Internal Convai quality references (style and GitBook usage only — adapt to API docs):
+| Page type | Example page to open |
+|---|---|
+| Reference (realtime message) | `api-reference/core-api-reference/live-apis-beta/server-to-client-messages.md` |
+| Reference (client message) | `api-reference/core-api-reference/live-apis-beta/client-to-server-messages.md` |
 
-| Page type | Unity page to study | What to borrow |
-|---|---|---|
-| Hub / section index | `plugins-and-integrations/convai-unity-sdk/getting-started/README.md` | Outcome lead, card-table navigation, clear page sequence |
-| Focused task / integration guide | `plugins-and-integrations/convai-unity-sdk/getting-started/configure-api-key.md` | Short lead, stepper flow, security hint, next-step content-ref |
-| Concept / lifecycle explanation | `plugins-and-integrations/convai-unity-sdk/core-concepts/session-lifecycle.md` | State/flow explanation, Mermaid when useful, tables for exact values |
-
-Greenfield API section: no in-repo exemplars yet. The first page written in the approved plan becomes
-the in-repo exemplar. Before drafting any page, read the closest Unity quality reference above and the
-closest external API reference pattern.
+Both examples are reference pages, which is what this section is almost entirely made of. There is no how-to or explanation exemplar here yet; the first one written to this bar becomes it.
 
 ## Section layout
 
@@ -392,10 +389,22 @@ next publish silently discards, which is worse than the original error because n
 
 ---
 
+## Areas that are deliberately undocumented
+
+Three top-level packages in the realtime engine are internal and no page describes them. They are listed here so the next writer knows the gap is a decision rather than an oversight, and so the drift check stays quiet about them:
+
+| Package | Why it is not documented |
+|---|---|
+| `frames` | Pipecat frame types used inside the pipeline. A reader never constructs one; the transport contract is what they see. |
+| `globals` | Process-wide state and configuration singletons. Implementation detail of how the service boots, with no reader-facing surface. |
+| `observers` | Internal instrumentation hooks. Nothing a client can attach to or observe. |
+
+If any of these ever gains a reader-facing surface, document it and remove its row.
+
 ## Source of truth — realtime engine (`core-service`)
 
-- Local path: `C:\Users\Kaan\Documents\core-service`
-- Remote: `https://github.com/Conv-AI/core-service`
+- Repository: `Conv-AI/core-service`
+- Local path: per-machine. Ask for it; never guess it and never copy one from an example.
 
 ### Verification files (public contract)
 
@@ -468,8 +477,8 @@ Alembic, provider adapters, telemetry exporters, env-specific deploy config,
 
 ## Source of truth — API gateway (`ConvAI_Middleman`)
 
-- Local path: `C:\Users\Kaan\Documents\ConvAI_Middleman`
-- Remote: maintainer-provided (not listed in this pack)
+- Repository: `ConvAI_Middleman`, maintainer-provided
+- Local path: per-machine. Ask for it; never guess it and never copy one from an example.
 
 ### Verification files (public contract)
 
