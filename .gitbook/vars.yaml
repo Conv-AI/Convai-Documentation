@@ -10,7 +10,8 @@ dep_modules_xr_version: 1.0.0
 sdk_package_id: com.convai.convai-sdk-for-unity
 dashboard_url: https://convai.com
 live_server_url: https://live.convai.com
-unreal_plugin_version: 4.0.0-beta.21
+unreal_plugin_version: 4.0.0-beta.27
 unreal_min_version: '5.0'
+unreal_max_version: '5.8'
 asset_uploader_unreal_version: '5.8'
 asset_uploader_toolchain_compiler_version: 14.50.35717
