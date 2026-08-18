@@ -1,0 +1,109 @@
+{
+  "subject": "playground",
+  "kind": "topic",
+  "package_root": "",
+  "version": null,
+  "sets": {
+    "apps": [
+      "analytics",
+      "web"
+    ],
+    "character_editor_tabs": [
+      "Avatar",
+      "Core AI Settings",
+      "Core Description",
+      "Description",
+      "Details",
+      "Embed Experience",
+      "Embodied Actions",
+      "Embodiment",
+      "External API",
+      "Guardrails",
+      "Knowledge Bank",
+      "MCP Servers",
+      "MCP and APIs",
+      "Memory",
+      "Memory Settings",
+      "Mindview",
+      "Narrative Design",
+      "Personality",
+      "Publish",
+      "Recent Memory",
+      "Speaking Style",
+      "State Of Mind"
+    ],
+    "experience_editor_tabs": [
+      "Description",
+      "Embed Experience",
+      "Invite People"
+    ],
+    "packages": [
+      "app-shell",
+      "auth",
+      "brand",
+      "convai-api",
+      "eslint-config",
+      "http-client",
+      "playwright-config",
+      "proxy",
+      "routes",
+      "runtime",
+      "templates",
+      "typescript-config",
+      "ui",
+      "utils"
+    ]
+  },
+  "evidence": {
+    "apps": {
+      "analytics": "apps/analytics",
+      "web": "apps/web"
+    },
+    "character_editor_tabs": {
+      "Avatar": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Core AI Settings": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Core Description": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Description": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Details": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Embed Experience": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Embodied Actions": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Embodiment": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "External API": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Guardrails": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Knowledge Bank": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "MCP Servers": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "MCP and APIs": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Memory": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Memory Settings": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Mindview": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Narrative Design": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Personality": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Publish": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Recent Memory": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "Speaking Style": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts",
+      "State Of Mind": "apps/web/src/navigation/tab-definitions/character-editor-tabs.ts"
+    },
+    "experience_editor_tabs": {
+      "Description": "apps/web/src/navigation/tab-definitions/experience-editor-tabs.ts",
+      "Embed Experience": "apps/web/src/navigation/tab-definitions/experience-editor-tabs.ts",
+      "Invite People": "apps/web/src/navigation/tab-definitions/experience-editor-tabs.ts"
+    },
+    "packages": {
+      "app-shell": "packages/app-shell",
+      "auth": "packages/auth",
+      "brand": "packages/brand",
+      "convai-api": "packages/convai-api",
+      "eslint-config": "packages/eslint-config",
+      "http-client": "packages/http-client",
+      "playwright-config": "packages/playwright-config",
+      "proxy": "packages/proxy",
+      "routes": "packages/routes",
+      "runtime": "packages/runtime",
+      "templates": "packages/templates",
+      "typescript-config": "packages/typescript-config",
+      "ui": "packages/ui",
+      "utils": "packages/utils"
+    }
+  },
+  "generated_against": "de9ad46"
+}

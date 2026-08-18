@@ -6,6 +6,7 @@ Those pages live in the documentation repository, not in this plugin, and nothin
 verified them. So the benchmark can quietly rot in three ways, each of which lowers the bar
 for every page written afterwards:
 
+    declared-borrow  the pack knows it has no exemplar of its own and says so, with a date
     missing   the page was renamed or deleted, and the pack sends writers to a dead path
     failing   the exemplar itself no longer passes the linter
     thin      the page shrank to the point where it is no longer worth imitating
@@ -81,13 +82,46 @@ def gold_standard_paths(pack_text):
     return unique
 
 
-def owns(pack, page_path):
+def pack_section(packs_dir, pack):
+    """Where this pack's pages live, from its contract."""
+    path = os.path.join(packs_dir, "contracts", "%s.json" % pack)
+    if not os.path.exists(path):
+        return None
+    try:
+        with io.open(path, encoding="utf-8-sig") as f:
+            return json.load(f).get("section")
+    except (OSError, ValueError):
+        return None
+
+
+def owns(pack, page_path, section=None):
     """Does this exemplar belong to the subject the pack is about?
 
-    A crude test - is the pack's name in the path - and deliberately so. It is wrong only for
-    a pack whose section is named differently from the pack, which is a thing worth noticing
-    on its own."""
+    The contract says where a subject's pages live, because guessing from the pack name is
+    right most of the time and wrong for `core-service`, whose pages are under `api-reference`.
+    A guess that is right most of the time is the worst kind in a checker: the cases it gets
+    wrong look exactly like real findings. The name check remains as a fallback for a pack
+    with no contract."""
+    if section:
+        return page_path.startswith(section)
     return pack.replace("-", "") in page_path.replace("-", "").lower()
+
+
+def declared_borrow(packs_dir, pack):
+    """What the pack's contract says about borrowing, if anything.
+
+    A borrow that has been thought about, written on the page and dated is a state. A borrow
+    nobody has noticed is a defect. The difference is worth keeping, because reporting the
+    first one every run is how people learn to skip the second."""
+    path = os.path.join(packs_dir, "contracts", "%s.json" % pack)
+    if not os.path.exists(path):
+        return None
+    try:
+        with io.open(path, encoding="utf-8-sig") as f:
+            declared = json.load(f).get("gold_standards")
+    except (OSError, ValueError):
+        return None
+    return declared if declared and declared.get("status") == "borrowed" else None
 
 
 def check(packs_dir, docs_root):
@@ -99,10 +133,21 @@ def check(packs_dir, docs_root):
         if not fn.endswith(".md") or fn.startswith("_"):
             continue
         pack = fn[:-3]
-        for rel in gold_standard_paths(read(os.path.join(packs_dir, fn))):
+        pack_text = read(os.path.join(packs_dir, fn))
+        borrow = declared_borrow(packs_dir, pack)
+        section = pack_section(packs_dir, pack)
+        if borrow:
+            findings.append({
+                "level": "INFO", "kind": "declared-borrow", "pack": pack, "page": "-",
+                "detail": "borrows its shape from `%s`; %s pages passed the structure gate when "
+                          "this was measured on %s"
+                          % (borrow.get("borrowed_from", "another subject"),
+                             borrow.get("clean_pages", "too few"), borrow.get("measured_on", "?")),
+                "fix": borrow.get("reason", "")})
+        for rel in gold_standard_paths(pack_text):
             checked += 1
 
-            if not owns(pack, rel):
+            if not owns(pack, rel, section) and not borrow:
                 findings.append({
                     "level": "WARN", "kind": "borrowed", "pack": pack, "page": rel,
                     "detail": "the %s pack holds up a page from another subject as its benchmark"
@@ -155,6 +200,7 @@ def main():
     findings, checked = check(args.packs, args.docs)
     errors = [f for f in findings if f["level"] == "ERROR"]
     warns = [f for f in findings if f["level"] == "WARN"]
+    notes = [f for f in findings if f["level"] == "INFO"]
 
     if args.json:
         json.dump({"checked": checked, "errors": len(errors), "warnings": len(warns),
@@ -168,7 +214,8 @@ def main():
             print("      -> %s" % f["fix"])
         if not findings:
             print("Every exemplar exists, passes the linter, and is substantial enough to copy.")
-        print("\n%d error(s), %d warning(s)." % (len(errors), len(warns)))
+        print("\n%d error(s), %d warning(s), %d declared borrow(s)."
+              % (len(errors), len(warns), len(notes)))
 
     if errors:
         return 1

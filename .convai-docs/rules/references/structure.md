@@ -73,7 +73,20 @@ not add one unless the row below says the page needs it.
 | `noIndex` | A page that must not appear in search engines. Rare; confirm with a human first. |
 | `cover`, `layout` | Landing and hub pages only, and only where the surrounding section already uses them. |
 
-### Do not use body `#` headings
+### Where the title lives
+
+A page carries its title in one of two places, and which one depends on who last edited it.
+
+| Last edited in | Shape |
+|---|---|
+| GitBook's web editor | A leading `# Title` heading; no `title` key in the frontmatter |
+| The repository, through this tooling | `title:` in the frontmatter; no body heading |
+
+Both render correctly, and the linter accepts both. What it rejects is a page with neither, a page with both, or a second `#` heading further down: in each of those cases two strings claim to be the title, and the sidebar, the search result and the page itself can disagree.
+
+Do not convert a page from one shape to the other as a drive-by change. Editing it in GitBook converts it back, and the diff is noise that hides the real change.
+
+### Do not use a second body `#` heading
 
 Because GitBook already has a page title, Markdown pages intended for manual import should not start
 with `#`. The first body content is a headingless lead paragraph; the first heading is `##`.

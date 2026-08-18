@@ -39,7 +39,11 @@ import extract_surface  # noqa: E402
 
 INLINE_CODE = re.compile(r"`([^`\n]+)`")
 VERSION_LITERAL = re.compile(r"\b\d+\.\d+\.\d+\b")
-AUDIT_LINE = re.compile(r"^Last audited:\s*(\S+)\s+against\s+`?([0-9a-f]{6,40})`?", re.MULTILINE)
+# `Last audited: <date> against ... <sha>`. The middle is free text on purpose: a subject
+# with more than one repository needs to say which one, and the sha is taken as the last
+# commit-shaped token on the line rather than the first thing after "against".
+AUDIT_LINE = re.compile(r"^Last audited:\s*(\S+)\s+against\s+(.+)$", re.MULTILINE)
+SHA_TOKEN = re.compile(r"\b([0-9a-f]{7,40})\b")
 
 SEVERITY = {
     "wrong": "ERROR",
@@ -165,15 +169,26 @@ def check(pack_text, contract, surface):
 
     audit = AUDIT_LINE.search(pack_text)
     generated = surface.get("generated_against", "unrecorded")
+    audited_sha = None
+    if audit:
+        shas = SHA_TOKEN.findall(audit.group(2))
+        audited_sha = shas[-1] if shas else None
+
     if audit is None:
         findings.append(Finding(
             "unaudited", contract["subject"], "the pack has no `Last audited:` line",
             "Add `Last audited: <date> against <sha>` once you have checked it."))
-    elif generated not in ("unrecorded", None) and not generated.startswith(audit.group(2)[:7]) \
-            and not audit.group(2).startswith(generated[:7]):
+    elif audited_sha is None:
         findings.append(Finding(
             "unaudited", contract["subject"],
-            "pack was audited against %s; this surface is from %s" % (audit.group(2), generated),
+            "the `Last audited:` line names no commit",
+            "A date alone cannot be checked against anything. Name the commit the pack was "
+            "read against, so a later reader can tell whether the source has moved since."))
+    elif generated not in ("unrecorded", None) and not generated.startswith(audited_sha[:7]) \
+            and not audited_sha.startswith(generated[:7]):
+        findings.append(Finding(
+            "unaudited", contract["subject"],
+            "pack was audited against %s; this surface is from %s" % (audited_sha, generated),
             "Re-audit and update the line, or regenerate the surface from the audited commit."))
 
     return findings

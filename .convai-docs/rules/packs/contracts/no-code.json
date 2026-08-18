@@ -1,0 +1,33 @@
+{
+  "subject": "no-code",
+  "kind": "topic",
+  "extractable": false,
+  "note": "Avatar Studio, Convai Sim and the XR Animation Capture App have no identified source repository, so there is nothing to extract and nothing a machine can settle. This contract exists anyway, because a pack still has machine-readable facts that are not about code: which names must never appear on a page, which pages are historical, and whether its quality benchmark is its own or borrowed. Leaving those undeclared because there is no source would put them nowhere.",
+  "extract": {},
+  "extract_why": "Deliberately empty. `/pack-sync` on this subject will report that there is nothing to extract, which is the correct answer rather than a failure. Every claim in this pack is verified by looking at the product or asking its named owner.",
+  "must_exist": [],
+  "must_not_exist": [],
+  "documented_sets": [],
+  "coverage_sets": [],
+  "historical_pages": [
+    "**/release-notes.md",
+    "**/changelog.md",
+    "**/convai-xr-animation-capture-app/**"
+  ],
+  "historical_pages_why": "The XR capture app is not in active use, confirmed by the pack owner on 2026-08-18. Its pages stay for anyone who still has it, so a retired name there is correct rather than drift.",
+  "gold_standards": {
+    "status": "borrowed",
+    "borrowed_from": "unity",
+    "measured_on": "2026-08-18",
+    "clean_pages": "5 of 24",
+    "reason": "This section has no page that both passes the structure gate and is substantial enough to imitate. The pack borrows shape only and says so on the page. Remove this once the section has an exemplar of its own."
+  },
+  "not_covered": [
+    "Everything. There is no source repository for any of these three products, so nothing here is checked by a machine.",
+    "Which of the three is still in active use — the XR capture app is not, as of 2026-08-18.",
+    "Plan gating, limits, and supported formats, all of which come from the owner."
+  ],
+  "not_covered_why": "Stated in full because the temptation with a contract present is to assume something is being checked. Here nothing is, and the pack's own audit line says the same.",
+  "section": "no-code-experiences",
+  "section_why": "Where this subject's pages live in the documentation repository. Declared rather than inferred from the pack name: core-service's pages are under api-reference, and guessing reported its own exemplars as borrowed from another subject."
+}

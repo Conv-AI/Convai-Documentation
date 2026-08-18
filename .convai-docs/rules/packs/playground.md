@@ -7,7 +7,7 @@ The Playground has a source repository, so most of what a page needs to state is
 rather than guessed from a screenshot. Read "Source of truth and verification" before writing anything —
 it says exactly which file settles which kind of claim, and which claims code cannot settle.
 
-Last audited: 2026-08-18 against `Conv-AI/convai-playground` at `3777d67`.
+Last audited: 2026-08-18 against `Conv-AI/convai-playground` at `de9ad46`.
 
 ---
 
@@ -28,6 +28,12 @@ Out of scope, with the pack that owns each:
 
 Avatar Studio is reachable from the Playground but is a separate product with its own pages. A
 Playground page links to it; it does not document it.
+
+## What this pack does not cover
+
+The Playground repository deploys two applications. This pack covers the **web** app, which is the Playground a creator uses. The **analytics** app is a separate internal surface with its own audience and no public pages; nothing here describes it. If that changes, it needs its own pack rather than a section in this one, because its reader is not this pack's reader.
+
+The shared packages under `packages/` are implementation. A page naming one of them is describing how the Playground is built rather than how it is used, which is almost always a mistake.
 
 ## Product naming
 
@@ -191,25 +197,27 @@ A reader who follows a guide and cannot find the control has been handed a wrong
 If a Playground page needs a synchronized value that has no variable yet, add it to `.gitbook/vars.yaml`
 in the same change rather than writing the literal into the page.
 
-## Gold-standard example pages
+## Gold-standard example pages — READ BEFORE DRAFTING
 
-**No page in `convai-playground/` currently meets the quality bar.** Every page sampled carries a body
-`#` H1, most open with `## Introduction`, none set `title` frontmatter, and several close with
-`## Conclusion`. All four are doctrine violations. Do not model a new page on them.
+**This section has no exemplar of its own yet, and pretending otherwise would teach the wrong
+bar.** Measured on 2026-08-18, 3 of 23 pages here pass the structure gate, and none of those is
+substantial enough to be worth imitating.
 
-Until a Playground page is written to standard and accepted, model structure and tone on the Unity SDK
-section, which does meet the bar, and adapt the audience:
+So borrow the *shape* from the Unity SDK section, and nothing else:
 
-| Mode | Model page |
+| Page type | Borrow the shape from |
 |---|---|
-| How-to | `plugins-and-integrations/convai-unity-sdk/getting-started/installation.md` |
-| Hub | `plugins-and-integrations/convai-unity-sdk/README.md` |
+| Hub / section index | `plugins-and-integrations/convai-unity-sdk/getting-started/README.md` |
+| How-to with steppers and tabs | `plugins-and-integrations/convai-unity-sdk/getting-started/installation.md` |
+| Explanation | `plugins-and-integrations/convai-unity-sdk/core-concepts/session-lifecycle.md` |
 
-Take the structure, frontmatter, block usage, and heading discipline from those pages. Do not take
-their voice: they are written for a developer, and this audience is not one.
+Take from those the lead-paragraph style, the section count, the block choices and the directness
+of the prose. Take nothing else. They are about a different product, for a different reader, with
+different terminology and different assumptions — copying any of that into a page about the Playground
+produces a page that reads as though it were written for somebody else, because it was.
 
-**When the first Playground page is written to standard and accepted, replace this section with that
-page's path.**
+The first page written here to that bar becomes this section's exemplar. Replace this section
+when it exists.
 
 ## Section layout
 

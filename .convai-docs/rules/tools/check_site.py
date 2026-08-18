@@ -14,7 +14,7 @@ Everything here is deterministic. Nothing here judges writing.
     orphan             a page nothing links to and the sidebar does not list
     summary-dangling   a sidebar entry whose page does not exist
     summary-label      a sidebar label that does not match the page title
-    duplicate-title    two pages claiming the same title
+    duplicate-title    two pages in the same section claiming the same title
     duplicate-desc     two pages claiming the same description
     forbidden-symbol   a name a pack says must never appear
     stale-review       a version-sensitive page whose last_reviewed is behind
@@ -106,6 +106,34 @@ class Finding(object):
                 "page": self.page, "line": self.line, "detail": self.detail}
 
 
+RETIRING_FILE = ".convai-docs/retiring-sections.txt"
+
+
+def top_section(page_path):
+    """The part of a path a reader experiences as the product they are in."""
+    parts = page_path.split("/")
+    return "/".join(parts[:2]) if len(parts) > 2 else (parts[0] if parts else "")
+
+
+def retiring_prefixes(root):
+    """Path prefixes for content awaiting deletion, from a committed list in the repo.
+
+    Findings there are counted separately rather than dropped. A section that is deleted
+    next month should not generate a backlog nobody will ever work - but a section that
+    was *supposed* to be deleted and still exists in a year should not have quietly
+    stopped being checked either."""
+    path = os.path.join(root, RETIRING_FILE.replace("/", os.sep))
+    if not os.path.exists(path):
+        return []
+    out = []
+    with io.open(path, encoding="utf-8-sig") as f:
+        for line in f:
+            line = line.split("#")[0].strip()
+            if line:
+                out.append(line.rstrip("/"))
+    return out
+
+
 def resolve(from_page, target):
     """Resolve a relative link the way a static site does, from the linking page's folder."""
     target = target.split("#")[0].strip()
@@ -131,7 +159,7 @@ def existing_files(root):
     return out
 
 
-def check(index, root, forbidden=()):
+def check(index, root, forbidden=(), retiring=()):
     findings = []
     pages = index["pages"]
     files = existing_files(root)
@@ -199,10 +227,24 @@ def check(index, root, forbidden=()):
                 continue
             findings.append(Finding("orphan", rel, "not in SUMMARY.md and nothing links to it"))
 
+    # A title is a name within its context, and the context a reader sees first is the
+    # sidebar parent. `Event system` under Unity and `Event system` under Unreal is not
+    # ambiguous to anyone reading; the two SDK sections mirror each other deliberately.
+    # Two pages with the same title *inside one section* is still a real problem.
     for title, where in sorted(index["titles"].items()):
-        if len(where) > 1:
-            findings.append(Finding("duplicate-title", where[0],
-                                    "%r also used by %s" % (title, ", ".join(where[1:]))))
+        if len(where) < 2:
+            continue
+        by_section = {}
+        for page in where:
+            by_section.setdefault(top_section(page), []).append(page)
+        # Not `pages`: that name already holds index["pages"], and shadowing it here broke
+        # the duplicate-description loop below in a way the type error pointed at the wrong line.
+        for section, in_section in sorted(by_section.items()):
+            if len(in_section) > 1:
+                findings.append(Finding(
+                    "duplicate-title", in_section[0],
+                    "%r also used by %s, in the same section"
+                    % (title, ", ".join(in_section[1:]))))
 
     by_description = {}
     for rel, page in sorted(pages.items()):
@@ -213,6 +255,12 @@ def check(index, root, forbidden=()):
         if len(where) > 1:
             findings.append(Finding("duplicate-desc", where[0],
                                     "same description as %s" % ", ".join(where[1:])))
+
+    if retiring:
+        for f in findings:
+            if any(f.page.startswith(prefix) for prefix in retiring):
+                f.kind = "retiring:" + f.kind
+                f.level = "INFO"
 
     return findings
 
@@ -267,7 +315,8 @@ def main():
         index = build_index.build(args.root, quiet=True)
 
     forbidden = sorted(set(args.forbidden) | forbidden_from_contracts(args.contracts))
-    findings = check(index, os.path.abspath(args.root), forbidden=forbidden)
+    retiring = retiring_prefixes(args.root)
+    findings = check(index, os.path.abspath(args.root), forbidden=forbidden, retiring=retiring)
 
     if args.write_baseline:
         if not args.baseline:
@@ -285,6 +334,7 @@ def main():
 
     errors = [f for f in shown if f.level == "ERROR"]
     warns = [f for f in shown if f.level == "WARN"]
+    retiring_findings = [f for f in findings if f.level == "INFO"]
 
     if args.json:
         json.dump({
@@ -311,6 +361,10 @@ def main():
                 print("  ... and %d more" % (len(group) - 40))
         print("\n%d page(s) checked. %d new finding(s): %d error(s), %d warning(s)."
               % (index["page_count"], len(new), len(errors), len(warns)))
+        if retiring_findings:
+            print("%d finding(s) in sections awaiting deletion, not counted. If those sections "
+                  "are still here in six months, they are not being retired and this number is "
+                  "real work." % len(retiring_findings))
         if baselined and not args.show_baseline:
             print("%d known finding(s) held in the baseline. Run --show-baseline to see them."
                   % len(baselined))

@@ -37,7 +37,10 @@ import sys
 # A backticked token counts as a code symbol when its shape says "identifier" rather than
 # "ordinary word in code font". Being generous here would fill the index with words like
 # `staging`, and every one of those becomes a false hit during a release impact pass.
-CAMEL_CASE = re.compile(r"^[A-Za-z][a-z0-9]*(?:[A-Z][A-Za-z0-9]*)+$")
+# Written without a repeated group: `(?:[A-Z][A-Za-z0-9]*)+` accepts exactly the same
+# tokens but can split a run of capitals in many ways, which CodeQL flags as exponential
+# backtracking (py/redos) on input like `AAAA...`.
+CAMEL_CASE = re.compile(r"^[A-Za-z][a-z0-9]*[A-Z][A-Za-z0-9]*$")
 CALL = re.compile(r"^[A-Za-z_][\w.]*\(\)$")
 QUALIFIED = re.compile(r"^[A-Za-z_]\w*(?:::|\.)[\w.:]+$")
 FILE_PATH = re.compile(r"^[\w./\\-]+\.(?:cs|cpp|h|hpp|py|js|ts|json|yaml|yml|uplugin|asmdef|md|unity|asset|prefab)$")

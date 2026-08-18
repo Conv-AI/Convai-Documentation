@@ -127,23 +127,27 @@ Use the GitBook figure syntax with real alt text:
 
 Add a variable to `.gitbook/vars.yaml` rather than writing a synchronized literal into a page.
 
-## Gold-standard example pages
+## Gold-standard example pages — READ BEFORE DRAFTING
 
-**No page in `no-code-experiences/` currently meets the quality bar.** Pages in this section carry a
-body `#` H1, open with `## Introduction`, and do not set `title` frontmatter. Do not model a new page on
-them.
+**This section has no exemplar of its own yet, and pretending otherwise would teach the wrong
+bar.** Measured on 2026-08-18, 5 of 24 pages here pass the structure gate, and none of those is
+substantial enough to be worth imitating.
 
-Until a page in this section is written to standard and accepted, model structure on the Unity SDK
-section and adapt the audience:
+So borrow the *shape* from the Unity SDK section, and nothing else:
 
-| Mode | Model page |
+| Page type | Borrow the shape from |
 |---|---|
-| How-to | `plugins-and-integrations/convai-unity-sdk/getting-started/installation.md` |
-| Hub | `plugins-and-integrations/convai-unity-sdk/README.md` |
+| Hub / section index | `plugins-and-integrations/convai-unity-sdk/getting-started/README.md` |
+| How-to with steppers and tabs | `plugins-and-integrations/convai-unity-sdk/getting-started/installation.md` |
+| Explanation | `plugins-and-integrations/convai-unity-sdk/core-concepts/session-lifecycle.md` |
 
-Take the structure, frontmatter, block usage, and heading discipline. Do not take the developer voice.
+Take from those the lead-paragraph style, the section count, the block choices and the directness
+of the prose. Take nothing else. They are about a different product, for a different reader, with
+different terminology and different assumptions — copying any of that into a page about the no-code products
+produces a page that reads as though it were written for somebody else, because it was.
 
-**When the first page here is written to standard and accepted, replace this section with its path.**
+The first page written here to that bar becomes this section's exemplar. Replace this section
+when it exists.
 
 ## Section layout
 

@@ -15,6 +15,11 @@
 # check that is red on day one is one people learn to scroll past.
 !.convai-docs/site-baseline.json
 
+# The retiring-sections list IS committed, for the same reason: check_site.py reads it to
+# decide which findings belong to content awaiting deletion. Untracked, the check counts
+# those sections as live and every run reports work nobody intends to do.
+!.convai-docs/retiring-sections.txt
+
 # Python bytecode from running the structure linter
 __pycache__/
 *.py[cod]

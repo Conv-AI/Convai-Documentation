@@ -96,11 +96,11 @@
     "first_seen": "2026-08-18"
   },
   "CV-25": {
-    "summary": "The GitBook page title is the only H1. Never add a body # heading",
+    "summary": "A page has exactly one title and therefore one H1. GitBook's editor writes it as a leading",
     "first_seen": "2026-08-18"
   },
   "CV-26": {
-    "summary": "The body starts with a headingless lead paragraph that states what the page is for and who",
+    "summary": "The lead paragraph comes first and carries no heading of its own. On a page whose title is",
     "first_seen": "2026-08-18"
   },
   "CV-27": {
@@ -128,7 +128,7 @@
     "first_seen": "2026-08-18"
   },
   "CV-33": {
-    "summary": "title is specific, keyword-first, and at most 60 characters",
+    "summary": "The title is specific, keyword-first, and at most 60 characters — wherever it lives, front",
     "first_seen": "2026-08-18"
   },
   "CV-34": {

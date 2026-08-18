@@ -1,0 +1,95 @@
+{
+  "subject": "web",
+  "kind": "sdk",
+  "source_repo": "convai-web-sdk_internal",
+  "source_branch": "stable-release",
+  "package_root": "",
+  "note": "The published web SDK, taken from the stable-release branch rather than main: that branch is what npm serves, and documenting anything else describes a package no reader can install. Everything under examples/ is excluded for the same reason - an example is a demonstration, not surface a reader can import.",
+  "version": {
+    "file": "package.json",
+    "field": "version"
+  },
+  "extract": {
+    "entry_points": {
+      "file": "package.json",
+      "capture": "json_field",
+      "field": "exports",
+      "why": "The subpath entry points the package declares. An import path on a page has to be one of these; an import from a deep source path works in the repository and fails for a reader."
+    },
+    "classes": {
+      "glob": "src/**/*.ts*",
+      "capture": "ts_export",
+      "name_pattern": "^[A-Z]",
+      "why": "Exported types a page names. The `export` keyword is required: a name that is not exported is not surface, however public it looks in the source. The glob ends `.ts*` so it takes `.tsx` too: every React component in this SDK is a `.tsx` file, and missing them left the whole component surface out."
+    },
+    "hooks": {
+      "glob": "src/react/**/*.ts*",
+      "capture": "ts_export",
+      "name_pattern": "^use[A-Z]",
+      "why": "React hooks, which are the whole reader-facing API of the React integration and the thing every React page names."
+    },
+    "core": {
+      "glob": "src/core/**/*.ts*",
+      "capture": "ts_export",
+      "name_pattern": "^[A-Z]",
+      "why": "The framework-agnostic core. A page about using the SDK without React is describing these."
+    },
+    "vanilla": {
+      "glob": "src/vanilla/**/*.ts*",
+      "capture": "ts_export",
+      "why": "The plain-JavaScript surface, for readers not using a framework."
+    },
+    "areas": {
+      "glob": "src/*/",
+      "capture": "dir_name",
+      "why": "The SDK's top-level areas. A new one is a new surface, and a writer relying on the pack cannot know to ask about an area nobody wrote down."
+    },
+    "components": {
+      "glob": "src/react/components/**/*.ts*",
+      "capture": "ts_export",
+      "name_pattern": "^Convai",
+      "why": "The React components a reader renders. Named separately from the hooks because a page usually documents one or the other, not both."
+    }
+  },
+  "must_exist": [],
+  "must_exist_why": "Deliberately empty until the web pages are rewritten against this surface. A must_exist entry promises that a rename is an error; promising that before anyone has agreed which names are load-bearing produces a guard that fires on a rename nobody minds, and a guard people override is worse than none.",
+  "must_not_exist": [
+    "ConvaiWidgetProps"
+  ],
+  "must_not_exist_why": "`ConvaiWidgetProps` is declared in the source but never exported, so it is not a type a reader can import. The pack already says so; listing it here is what makes check_site.py catch a page that documents it as public API. `ConvaiClient` was briefly on this list on the assumption that it belonged to the older standalone web client. It does not - `src` exports it - and the assumption was exactly the kind of reasonable-sounding guess this whole layer exists to stop.",
+  "documented_sets": [
+    "areas"
+  ],
+  "documented_sets_why": "Five areas, each a distinct way to use the SDK. Missing one means a whole integration path nobody wrote down.",
+  "coverage_sets": [
+    "hooks",
+    "components"
+  ],
+  "coverage_sets_why": "The hooks are the reader-facing API of the React integration, so how many of them the docs mention is the number worth watching. The full export list includes internal helpers and is deliberately not a coverage set.",
+  "symbol_prefixes": [
+    "Convai",
+    "use"
+  ],
+  "symbol_prefixes_why": "Ours are either Convai-prefixed or React hooks. Without this the drift check would flag every React and Three.js type a page legitimately names.",
+  "historical_pages": [
+    "**/release-notes.md",
+    "**/changelog.md",
+    "**/migrate-*.md",
+    "**/web-plugins/**"
+  ],
+  "historical_pages_why": "Plus the older web-plugins section, which documents the previous standalone client. Names retired from this package are correct there, because that is a different product.",
+  "not_covered": [
+    "The published npm package contents. This extracts from src/; what ships is dist/, built by tsup.",
+    "Anything under examples/ — demonstrations, not importable surface.",
+    "Runtime behaviour: what a hook does on reconnect, what an error means. Source shows the contract, not the behaviour."
+  ],
+  "gold_standards": {
+    "status": "borrowed",
+    "borrowed_from": "unity",
+    "measured_on": "2026-08-18",
+    "clean_pages": "16 of 42",
+    "reason": "This section has no page that both passes the structure gate and is substantial enough to imitate. The pack borrows shape only and says so on the page. Remove this once the section has an exemplar of its own."
+  },
+  "section": "plugins-and-integrations/web-plugins",
+  "section_why": "Where this subject's pages live in the documentation repository. Declared rather than inferred from the pack name: core-service's pages are under api-reference, and guessing reported its own exemplars as borrowed from another subject."
+}

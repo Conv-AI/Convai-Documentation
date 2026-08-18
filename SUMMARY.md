@@ -613,7 +613,6 @@
     * [Creating ReadyPlayerMe Characters](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters-1/README.md)
       * [Download Plugins](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters-1/adding-metahuman.md)
       * [Adding ReadyPlayerMe Character](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters-1/adding-lipsync-to-metahuman.md)
-      * [Change the parent class for Player \[RPM\]](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters-1/change-the-parent-class-for-player-rpm.md)
     * [Creating Reallusion Characters](plugins-and-integrations/unreal-engine/guides/creating-reallusion-characters/README.md)
       * [Creating a Reallusion Character](plugins-and-integrations/unreal-engine/guides/creating-reallusion-characters/creating-a-reallusion-character.md)
       * [Importing Reallusion character and setting up the Convai plugin](plugins-and-integrations/unreal-engine/guides/creating-reallusion-characters/importing-reallusion-character-and-setting-up-the-convai-plugin.md)
