@@ -4,7 +4,7 @@ description: Fix roster rejections, readiness failures, misrouted audio, and com
 last_reviewed: "4.6.0"
 ---
 
-Most multi-character problems fall into one of three places: the roster the SDK builds at connect, the identity used to address a membership at runtime, or an `IConvaiOperation<T>` command that faults instead of completing. Find the exact message or symptom below; every entry quotes the text as it appears in the Unity Console.
+Most multi-character problems fall into one of three places: the roster the SDK builds at connect, the identity used to address a membership at runtime, or an `IConvaiOperation<T>` command that faults instead of completing. Find the exact message or symptom below; every entry quotes the text as it appears in the Unity Console, and says so where only the opening of a longer line is quoted.
 
 ## Before you start
 
@@ -39,7 +39,7 @@ The `ConvaiOperationException` thrown for any of these four conditions carries t
 
 | Symptom | Cause | Fix | Verify |
 | --- | --- | --- | --- |
-| Console logs `[ConvaiRoomManager] Room ownership did not resolve an active conversation target.` | The scene owns two or more characters and none was named as the conversation target before connecting. | Call `ConvaiManager.SetExplicitConversationTarget` before `ConnectAsync`. See [Build your first multi-character session](quick-start.md). | The connect attempt succeeds and one membership logs as the initial character. |
+| Console logs a line beginning `[ConvaiRoomManager] Room ownership did not resolve an active conversation target.` | The scene owns two or more characters and none was named as the conversation target before connecting. | Call `ConvaiManager.SetExplicitConversationTarget` before `ConnectAsync`. See [Build your first multi-character session](quick-start.md). | The connect attempt succeeds and one membership logs as the initial character. |
 | A character I expected is missing from `session.Characters` | That character's `GameObject` or `ConvaiCharacter` component was inactive or disabled when the room connected. The SDK excludes inactive characters from the startup roster silently — no exception is raised and no validation message names the missing character. | Activate the character before connecting, or add it after connecting with [Add and remove characters at runtime](update-the-roster.md#add-a-character-to-the-roster). | The character appears in `session.Characters` with a `MembershipId`. |
 | A membership stays `Starting` and never reaches `Ready` | Convai has not reported the membership either way, or its provisioning is stuck. | Subscribe to `CharacterStatusChanged` and inspect `ProvisioningStatus` and `FailureCode` on that membership. `WaitUntilReadyAsync` only reports the initial character; see [Roster readiness and partial dispatch](readiness-and-partial-dispatch.md). | The membership's `Status` becomes `Ready` or `Failed` with a `FailureCode` you can act on. |
 | Player input reaches a character other than the one the player intended | Code cached a stale `MembershipId`, or the interaction target changed after the target was resolved but before the input was sent. | Read `MultiCharacterRoomSession.ActiveMembershipId` immediately before addressing input rather than caching a membership reference. | The membership your code addresses matches `ActiveMembershipId` at the moment input is sent. |

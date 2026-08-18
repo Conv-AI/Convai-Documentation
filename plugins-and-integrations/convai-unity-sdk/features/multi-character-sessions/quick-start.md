@@ -154,7 +154,7 @@ Speaking to the room now reaches the initial character. Routing input to any oth
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| The Console reports `Room ownership did not resolve an active conversation target.` | The scene owns two or more characters and none was named as the target. | Call `SetExplicitConversationTarget` before connecting, as the script above does. |
+| The Console reports a line beginning `[ConvaiRoomManager] Room ownership did not resolve an active conversation target.` | The scene owns two or more characters and none was named as the target. | Call `SetExplicitConversationTarget` before connecting, as the script above does. |
 | Connect fails with `Cannot connect because no active character is available.` | No active character was resolved when `ConnectAsync` ran — for example, every owned character is inactive or disabled. | Activate at least one `ConvaiCharacter` in the scene, or call `SetExplicitConversationTarget` with an active character, before connecting. |
 | Connect fails with `Every character in a multi-character room requires a Character ID.` | One active, enabled `ConvaiCharacter` has an empty **Character ID**. An inactive character with no ID does not trigger this — it never reaches roster validation. | Set the **Character ID** field on every active character in the scene, and on any inactive character before you activate and add it later with `AddCharacterAsync`. |
 | Connect fails with `Multi-character roster contains null or duplicate character references.` | The same `ConvaiCharacter` component was registered twice. | Register each component once. Use a second component instance to add a clone of the same character. |

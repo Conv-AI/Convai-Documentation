@@ -86,7 +86,7 @@ manager.Audio.SetRemoteAudioEnabled(characterId, false);
 ```
 
 {% hint style="warning" %}
-`SetCharacterMuted`, `IsCharacterMuted`, `SetRemoteAudioEnabled`, and `IsRemoteAudioEnabled` are all keyed by `characterId`, which is not unique in a room containing two memberships that share a `CharacterId` — see [Why a character ID is not an address](character-identity.md#why-a-character-id-is-not-an-address). None of these four methods can target one instance once a clone is present in the room. Use `BindParticipantAudioOutput` and `SetParticipantAudioEnabled`, keyed by `ParticipantIdentity`, whenever the room may contain clones — they are the only participant-level controls precise enough for that case.
+`SetCharacterMuted`, `IsCharacterMuted`, `SetRemoteAudioEnabled`, `IsRemoteAudioEnabled`, and `TryGetCharacterAudioPlayhead` are all keyed by `characterId`, which is not unique in a room containing two memberships that share a `CharacterId` — see [Why a character ID is not an address](character-identity.md#why-a-character-id-is-not-an-address). Each resolves to the first membership carrying that character ID, so none of them can target one instance once a clone is present in the room. Use `BindParticipantAudioOutput` and `SetParticipantAudioEnabled`, keyed by `ParticipantIdentity`, whenever the room may contain clones — they are the only participant-level controls precise enough for that case.
 {% endhint %}
 
 ## Enable playback on platforms that require a user gesture
@@ -103,7 +103,7 @@ public void OnEnableAudioButtonClicked()
 
 ## Measure a character's playback position
 
-`TryGetCharacterAudioPlayhead(string characterId, out double playedSeconds)` reads how many seconds of a character's audio have actually been rendered to the output device since its current playback signal started. The playhead freezes during an underrun and accounts for any drift-correction skips, so it reflects what the player actually heard rather than a wall-clock estimate. The method returns `false` when the current platform's audio stream does not expose a playhead — fall back to a wall-clock timer in that case rather than treating `playedSeconds` as valid.
+`TryGetCharacterAudioPlayhead(string characterId, out double playedSeconds)` reads how many seconds of a character's audio have actually been rendered to the output device since its current playback signal started. Like the mute controls above, it is keyed by `characterId` and resolves to the first matching membership, so it cannot measure one clone separately from another. The playhead freezes during an underrun and accounts for any drift-correction skips, so it reflects what the player actually heard rather than a wall-clock estimate. The method returns `false` when the current platform's audio stream does not expose a playhead — fall back to a wall-clock timer in that case rather than treating `playedSeconds` as valid.
 
 ```csharp
 if (audioService.TryGetCharacterAudioPlayhead(characterId, out double playedSeconds))
