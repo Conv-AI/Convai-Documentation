@@ -21,22 +21,13 @@ Typical flow:
 
 For the Playground UI walkthrough and example handlers (weather, sports scores, Jira), see [External API](../../../convai-playground/character-customization/external-api.md).
 
+Hard limits (supported models, Python runtime, libraries, schema, caps) are documented once on [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md).
+
 ## Writing functions
 
 Functions run in a sandboxed **Python 3.11** runtime. Write plain Python, keep the surface area small, and return JSON-serializable data the model can read back into the conversation.
 
-### Runtime and allowed libraries
-
-| Rule | Detail |
-| ---- | ------ |
-| Runtime | Python 3.11 |
-| Language field | Must be `"python"` |
-| Built-in modules | Standard library is allowed (`json`, `datetime`, `math`, `re`, `urllib`, and the rest of the stdlib) |
-| Third-party packages | **`requests` only** for now. Other third-party imports are not available. |
-| Source code size | At most 400 lines |
-| Per-character cap | At most 128 active functions on one character |
-
-Use `requests` for HTTP calls to external services. Anything outside the standard library and `requests` will fail at runtime.
+For the full limit list (allowed libraries, line cap, model support, character caps), see [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md).
 
 ### Entry point: `handle_event`
 
@@ -120,6 +111,8 @@ What that means in practice:
 | `parameters.<name>.description` | Non-empty string the model uses to decide what value to pass. |
 | `required` | Array of parameter names that must be present. Names listed here should also exist under `parameters`. |
 
+The same rules are summarized on [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md#input-description).
+
 Example `input_description` (as an object — stringify it before sending in the request body):
 
 ```json
@@ -178,8 +171,8 @@ Creates a new External API function on your account. The function is not attache
 | name<mark style="color:red;">\*</mark>                    | String | Display name of the function. Prefer a clear verb phrase the model can match (for example `Get Weather`). |
 | description<mark style="color:red;">\*</mark>             | String | When the character should call this function. Used by the model for tool selection.                  |
 | language<mark style="color:red;">\*</mark>                | String | Implementation language. Only `python` is supported.                                                 |
-| source\_code<mark style="color:red;">\*</mark>            | String | Full Python 3.11 source, including `handle_event`. Max 400 lines. Stdlib + `requests` only. See [Writing functions](#writing-functions). |
-| input\_description<mark style="color:red;">\*</mark>      | String | JSON **string** describing parameters. Must match the schema in [Input description schema](#input-description-schema). |
+| source\_code<mark style="color:red;">\*</mark>            | String | Full Python 3.11 source, including `handle_event`. Max 400 lines. Stdlib + `requests` only. See [Writing functions](#writing-functions) and [limitations](../../../convai-playground/character-customization/external-api-limitations.md#runtime). |
+| input\_description<mark style="color:red;">\*</mark>      | String | JSON **string** describing parameters. See [Input description schema](#input-description-schema) and [limitations](../../../convai-playground/character-customization/external-api-limitations.md#input-description). |
 
 #### Example payload
 
