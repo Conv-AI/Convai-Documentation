@@ -1,0 +1,70 @@
+{
+  "subject": "core-service",
+  "kind": "sdk",
+  "source_repo": "core-service",
+  "package_root": "",
+  "note": "The realtime engine only. The core-service pack also covers the ConvAI_Middleman API gateway, which is a separate repository with its own routes and models; nothing here extracts from it, so a claim about a REST endpoint on the gateway is still verified by hand. Recording that limit is the point: a contract that silently covers half a subject is worse than none, because the half it misses looks checked.",
+  "version_note": "No version is extracted. The service's own number lives in pyproject.toml, which is TOML rather than JSON, and it is not a value any page may print anyway: this API is versioned by its routes, not by a package number. Teaching the extractor a TOML parser to read a number nothing is allowed to use would be effort spent making a wrong thing easier.",
+  "extract": {
+    "routes": {
+      "glob": "server.py",
+      "capture": "http_route",
+      "why": "Every route the realtime engine serves, with its method. This is the one set a page can be checked against exactly: a documented endpoint that is not here does not exist."
+    },
+    "packages": {
+      "glob": "*/",
+      "capture": "dir_name",
+      "name_pattern": "^(actors|auth|cache|client|config|db|frames|globals|handlers|models|observers|pipelines|processors|services|transport|tts|utils)$",
+      "why": "The service's top-level areas. Named explicitly rather than by exclusion so that a new area shows up as a change here rather than being silently swept in."
+    },
+    "models": {
+      "glob": "models/**/*.py",
+      "capture": "python_class",
+      "why": "Request and response shapes. A field name on an API page comes from one of these, never from memory."
+    },
+    "handlers": {
+      "glob": "handlers/**/*.py",
+      "capture": "python_class",
+      "why": "What handles each kind of incoming message. A page describing what happens after a client connects is describing one of these."
+    },
+    "services": {
+      "glob": "services/**/*.py",
+      "capture": "python_class",
+      "why": "The engine's internal services. Mostly not reader-facing, but a name on a page has to resolve to one of them or it is wrong."
+    },
+    "transport": {
+      "glob": "transport/**/*.py",
+      "capture": "python_class",
+      "why": "Connection and streaming types, which the realtime pages name directly."
+    }
+  },
+  "must_exist": [],
+  "must_exist_why": "Deliberately empty for now. A must_exist entry is a promise that a rename is an error, and nobody has yet agreed which of this service's internal class names are load-bearing for the documentation. Fill it once the API reference pages are rewritten against this surface - an unearned guard is worse than none, because it looks like coverage.",
+  "must_not_exist": [],
+  "documented_sets": [
+    "packages"
+  ],
+  "documented_sets_why": "Small and stable. A new top-level area is a real change worth noticing.",
+  "coverage_sets": [
+    "routes"
+  ],
+  "coverage_sets_why": "Reported as one ratio. Routes are the reader-facing surface of this service, so how much of it the docs mention is the number that matters.",
+  "symbol_prefixes": [
+    "Convai"
+  ],
+  "symbol_prefixes_why": "Python classes here are mostly unprefixed, so the drift check on prose is deliberately narrow: it catches a wrong Convai-prefixed name and leaves generic ones such as SessionManager to the verifier, where a human decides.",
+  "historical_pages": [
+    "**/release-notes.md",
+    "**/changelog.md",
+    "**/migrate-*.md",
+    "**/deprecated/**"
+  ],
+  "not_covered": [
+    "ConvAI_Middleman — the REST API gateway. Separate repository, separate routes and models.",
+    "Backend behaviour beyond the client contract: which models run, server-side limits, plan gating.",
+    "Anything about the dashboard, which belongs to the playground pack."
+  ],
+  "not_covered_why": "Stated so a reader of a clean drift report knows what the report did not look at. A checker that is silent about its own blind spots invites the assumption that it has none.",
+  "section": "api-reference",
+  "section_why": "Where this subject's pages live in the documentation repository. Declared rather than inferred from the pack name: core-service's pages are under api-reference, and guessing reported its own exemplars as borrowed from another subject."
+}

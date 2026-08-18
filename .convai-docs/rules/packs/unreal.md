@@ -4,8 +4,9 @@ SDK-specific facts for Convai Unreal Engine documentation. Read this before draf
 Unreal page. Generic doctrine lives in `references/`; this pack only supplies Unreal specifics.
 
 Verified against the Convai Unreal plugin source (`ConvAI.uplugin`, `Source/Convai/`,
-`Source/ConvaiEditor/`, `Source/Convai/Public/ConvaiDefinitions.h`, `Source/Convai/Convai.h`,
-plugin `Content/` folder). Audit completed 2026-06-09. Last updated 2026-06-09.
+`Source/ConvaiEditor/`, `Source/ConvaiToolset/`, `Source/Convai/Public/ConvaiDefinitions.h`,
+`Source/Convai/Convai.h`, plugin `Content/` folder, `CHANGELOG.md`, `.github/workflows/main.yml`).
+Last audited: 2026-08-18 against 1f06778d.
 
 ## Product naming
 
@@ -18,9 +19,11 @@ plugin `Content/` folder). Audit completed 2026-06-09. Last updated 2026-06-09.
 
 - Primary audience: Unreal Engine developers. The plugin is **Blueprint-first** (it "adds new Blueprint
   functions and components to integrate Convai"); C++ usage is possible but secondary.
-- Common prerequisites: Unreal Engine **5.0 or later** (all UE 5.x releases are supported), a Convai
-  account, an API key, and the `AudioCapture` engine plugin (bundled as an enabled dependency).
-- Supported platforms: **Win64** and **Android** (from the module `PlatformAllowList`).
+- Common prerequisites: a supported Unreal Engine version (see "Platform and version notes" for how
+  the range is derived — do not hardcode it), a Convai account, an API key, and the `AudioCapture`
+  engine plugin (bundled as an enabled dependency).
+- Supported platforms: **Win64**, **Mac**, and **Android** (from the runtime modules'
+  `PlatformAllowList` in `ConvAI.uplugin`; the editor-side modules allow Win64 and Mac).
 
 ## Terminology and concepts
 
@@ -36,9 +39,11 @@ plugin `Content/` folder). Audit completed 2026-06-09. Last updated 2026-06-09.
     Player"**), derives from `UConvaiConversationComponent`. Added to the player Pawn. Manages
     microphone capture, push-to-talk, hands-free VAD, text input, and session initiation.
   - `UConvaiObjectComponent` — the scene object component (Blueprint display name **"Convai Object
-    Component"** — derived from class name; no explicit `DisplayName` in UCLASS meta, verified
-    2026-06-09). Drop on any Actor to register it with all chatbots in the level. Provides object
-    name, description, navigation targeting (`EConvaiMoveTarget`), and live property tracking
+    Component"** — derived from class name; no explicit `DisplayName` in UCLASS meta, re-verified
+    this audit). Drop on any Actor to register it with all chatbots in the level. Provides object
+    name, description, object scoping and movement targeting (`EConvaiObjectReference` plus the
+    Movement Points system on `FConvaiObjectEntry`), movement awareness
+    (`FConvaiObjectMovementSettings` / `EConvaiMovementSensitivity`), and live property tracking
     (`FConvaiTrackedProperty`).
   - `UConvaiFaceSyncComponent` — face/lip sync component (Blueprint display name **"Convai Face Sync"**),
     derives from `USceneComponent`.
@@ -118,8 +123,15 @@ type that only appears in REST API node signatures. These are off-limits across 
 | `EC_ContextUpdateMode` | `ConvaiDefinitions.h` | Append, Replace, Reset | Dynamic context feature |
 | `EC_RunLLMOption` | `ConvaiDefinitions.h` | Auto, Always, Never | Object component, dynamic context, tracked properties |
 | `EConvaiActionParamType` | `ConvaiDefinitions.h` | Auto, Actor Reference, String, Number, Bool, Enum | Parameterized actions |
-| `EConvaiMoveTarget` | `ConvaiDefinitions.h` | Actor as goal, Component as goal | `FConvaiObjectEntry`, movement actions |
+| `EConvaiObjectReference` | `ConvaiDefinitions.h` | Whole Actor, Specific Component | `FConvaiObjectEntry` (shown as **Object Is**) — gaze/attention scope and movement fallback |
+| `EConvaiMovementPointAttachment` | `ConvaiDefinitions.h` | Relative To Object, Keep World Position | `FConvaiMovementPoint.Attachment` |
+| `EConvaiContextDelivery` | `ConvaiDefinitions.h` | Send Normally, Wait Until Conversation Is Idle | Dynamic context delivery, `FConvaiTrackedProperty.Delivery`, spatial preferences |
+| `EConvaiMovementSensitivity` | `ConvaiDefinitions.h` | Very Low, Low, Medium, High, Very High | `FConvaiObjectMovementSettings` (object movement awareness) |
+| `EConvaiObjectNameSuffixStyle` | `ConvaiDefinitions.h` | Numeric (2, 3, 4), Alphabetical (A, B, C) | Duplicate object-name disambiguation; project setting on `UConvaiSettings` |
 | `EConvaiAttentionSource` | `ConvaiDefinitions.h` | None, Explicit (Blueprint/C++), Gaze | Gaze attention system |
+
+`EConvaiMoveTarget` no longer exists in source (removed with the Movement Points rework). Do not
+reference it; existing docs that mention it are stating a dead type.
 
 ## Key structs
 
@@ -128,11 +140,12 @@ source before writing it.
 
 | Struct | Source location | Key fields | Used in |
 |---|---|---|---|
-| `FConvaiAction` | `ConvaiDefinitions.h` | `Name`, `Description`, `Parameters` (array of `FConvaiActionParam`), `bWaitForBotSpeech`, `DelayAfterBotSpeechSec` | Chatbot component action config |
+| `FConvaiAction` | `ConvaiDefinitions.h` | `bEnabled`, `Name`, `Description`, `Parameters` (array of `FConvaiActionParam`), `bWaitForBotSpeech`, `DelayAfterBotSpeechSec` | Chatbot component action config |
 | `FConvaiActionParam` | `ConvaiDefinitions.h` | `Name`, `Description`, `Type` (`EConvaiActionParamType`), `Connector`, `Choices`, `EnumType` | Inside `FConvaiAction.Parameters` |
-| `FConvaiResultAction` | `ConvaiDefinitions.h` | `Action`, `ActionString`, `Parameters` (map of `FConvaiResultParam`), `bWaitForBotSpeech` | Action received events |
-| `FConvaiObjectEntry` | `ConvaiDefinitions.h` | `Name`, `Description`, `Ref` (Actor), `MoveTargetMode` (`EConvaiMoveTarget`), `AcceptanceRadius`, `ComponentName`, `bStepOntoBounds` | Environment, action results, object targeting |
-| `FConvaiTrackedProperty` | `ConvaiDefinitions.h` | `PropertyPath`, `Description`, `ShouldRespond` (`EC_RunLLMOption`), `StateValueDescriptions` | `UConvaiObjectComponent` live state tracking |
+| `FConvaiResultAction` | `ConvaiDefinitions.h` | `Action`, `ActionString`, `Parameters` (map of `FConvaiResultParam`), `bWaitForBotSpeech`, `DelayAfterBotSpeechSec` (deprecated mirrors: `RelatedObjectOrCharacter`, `ConvaiExtraParams`) | Action received events |
+| `FConvaiObjectEntry` | `ConvaiDefinitions.h` | `Ref` (Actor), `OptionalPositionVector` (deprecated auto-written snapshot — point readers at Resolve Goal Location's `Out Goal Location` output), `Name`, `Description`, `ObjectReference` (`EConvaiObjectReference`, shown as **Object Is**), `ComponentName`, `SocketOrBoneName`, `AcceptanceRadius`, `MovementPoints` (array of `FConvaiMovementPoint`), `bFallbackToObjectWhenPointsUnreachable` | Environment, action results, object targeting |
+| `FConvaiMovementPoint` | `ConvaiDefinitions.h` | `Transform`, `Attachment` (`EConvaiMovementPointAttachment`), `bEnabled`, `bCreatesSeparateDestination` (shown as **Create Separate Destination**), `Name` (shown as **Destination Name**) | Movement Points list on `FConvaiObjectEntry`; edited via the viewport visualizer on Convai Object components |
+| `FConvaiTrackedProperty` | `ConvaiDefinitions.h` | `PropertyPath`, `Alias`, `Description`, `StateValueDescriptions` (array of `FConvaiTrackedPropertyStateValueDesc`), `ShouldRespond` (`EC_RunLLMOption`), `Delivery` (`EConvaiContextDelivery`), `bFlushImmediately` | `UConvaiObjectComponent` live state tracking |
 | `FConvaiVADSettings` | `ConvaiDefinitions.h` | `bUseServerDefault`, `Confidence`, `StartSecs`, `StopSecs`, `MinVolume` | `UConvaiPlayerComponent`, project VAD defaults |
 | `FConvaiSpeakerInfo` | `ConvaiDefinitions.h` | `SpeakerID`, `Name`, `DeviceID` | Long-term memory, speaker identity |
 | `FNarrativeSection` | `ConvaiDefinitions.h` | `section_id`, `section_name`, `objective`, `decisions`, `updated_character_data` | Narrative design |
@@ -173,7 +186,8 @@ is looking at and expose it to chatbots as the "attention object". Key concepts:
 - Gaze attention raises highlight events via `UConvaiObjectComponent` and `UConvaiPlayerComponent`
   gaze delegates.
 - The `M_ConvaiGazeOverlay` material (in `Content/Highlights/`) provides the visual highlight effect.
-  It is generated from `Content/Tools/CreateGazeOverlayMaterial.py`.
+  (The `Content/Tools/` generator script that previously produced it is no longer in the plugin;
+  do not reference it.)
 - Document in `features/gaze-attention/` section. Reference `EConvaiAttentionSource` and the gaze
   event delegates on both the player and object components.
 
@@ -210,15 +224,20 @@ Quick-setup video (covers both methods): https://youtu.be/n-UG3nmMeZQ
 
 ### Modules
 
-- `Convai` (Runtime) — Win64 and Android only (`PlatformAllowList`)
-- `ConvaiEditor` (Editor)
-- `ConvaiAnimGraph` (UncookedOnly)
-- `ConvaiVisionBase` (Runtime) — Win64 and Android only
+- `Convai` (Runtime) — Win64, Mac, and Android (`PlatformAllowList`)
+- `ConvaiEditor` (Editor) — Win64 and Mac
+- `ConvaiAnimGraph` (UncookedOnly) — Win64 and Mac
+- `ConvaiVisionBase` (Runtime) — Win64, Mac, and Android
+- `ConvaiToolset` (Editor) — Win64 and Mac. Registers the Convai AI toolset — AI-callable editor
+  setup actions exposed as MCP tools — with the engine `ToolsetRegistry` plugin. Editor-only; on
+  engine versions without `ToolsetRegistry` it compiles as an empty module (gated in
+  `Source/ConvaiToolset/ConvaiToolset.Build.cs`).
 
 ### Enabled plugin dependencies
 
 | Plugin | Enabled | Notes |
 |---|---|---|
+| `ToolsetRegistry` | Yes (Optional) | Backs the Convai AI toolset / MCP editor tooling used by `ConvaiToolset`. Marked `Optional` in the source `.uplugin`; the CI packaging step (`.github/workflows/main.yml`) rewrites it to required on engine versions where the engine plugin exists and keeps it optional below that |
 | `AudioCapture` | Yes | Microphone capture; required on all platforms |
 | `AndroidPermission` | Yes | Microphone permission handling on Android; document platform-specific steps |
 | `EditorScriptingUtilities` | Yes | Editor tooling dependency; no user configuration required |
@@ -235,6 +254,10 @@ UI; read-only in Project Settings).
 Project-wide defaults also live on `UConvaiSettings` in **Edit > Project Settings > Plugins > Convai**:
 - **Audio Settings | VAD** — `FConvaiVADSettings` for project-wide voice activity detection defaults.
 - **Lip Sync Mode** — default `EC_LipSyncMode` applied to all characters unless overridden per-component.
+- Further categories exist on `UConvaiSettings` in source: **Spatial Awareness**, **Objects**
+  (including the `EConvaiObjectNameSuffixStyle` suffix style), **Debug Overlay**, and **Long Term
+  Memory**. Verify field names and display names in `Source/Convai/Convai.h` before documenting
+  any of them.
 
 Document the Convai Editor window only from the user's perspective: how to open it, what fields it
 exposes, and what actions it enables. Do not document its internal implementation or code-level calls
@@ -249,33 +272,27 @@ frozen here goes stale at the next release and becomes a wrong fact in the docs.
 | Variable | Holds | Derive from | Used in |
 |---|---|---|---|
 | `unreal_plugin_version` | Current plugin release version | `VersionName` in the `.uplugin` file | Install steps, release references |
-| `unreal_min_version` | Minimum supported Unreal Engine version | `EngineVersion` in the `.uplugin` file and the build matrix | Prerequisites |
+| `unreal_min_version` | Minimum supported Unreal Engine version | Not derivable from `ConvAI.uplugin` — it has **no `EngineVersion` field**. Read the "Kept compatibility with Unreal Engine ..." line in the latest `CHANGELOG.md` release entry; see "Platform and version notes" for why the CI matrix says something different | Prerequisites |
 | `dashboard_url` | Convai dashboard URL | Stable product URL | API key and character setup |
 
 If a variable is missing from `vars.yaml`, add it there in the same change instead of writing the
 literal value into a page.
 
-## Gold-standard example pages
+## Gold-standard example pages — READ BEFORE DRAFTING
 
-No Unreal gold-standard page exists yet. **Once the first Unreal work unit is reviewed and accepted
-by the human, add those Unreal page paths here and update this note.** Subsequent pages must match
-their structure, tone, and depth.
+**Before drafting, open the example whose Diataxis mode matches your task.** Use it as the
+quality benchmark for lead paragraph, section count, block selection and prose tone. These are
+pages from this subject's own section, chosen because they pass the structure gate and are
+substantial enough that there is something to copy.
 
-Until Unreal gold-standard pages are established, use the **Unity** docs as the cross-SDK structural
-reference — matching their depth, page count per section, and quality bar, but not their
-Unity-specific layout or content. Unreal pages must reflect Blueprint-first workflows and
-Unreal-native terminology. Before drafting, open the closest Unity example for the Diataxis mode
-you are writing:
-
-| Page type | Unity example to open |
+| Page type | Example page to open |
 |---|---|
-| Hub / section index | `plugins-and-integrations/convai-unity-sdk/getting-started/README.md` |
-| How-to with steppers + tabs | `plugins-and-integrations/convai-unity-sdk/getting-started/installation.md` |
-| How-to simple (focused task) | `plugins-and-integrations/convai-unity-sdk/getting-started/configure-api-key.md` |
-| How-to multiplatform / subsections | `plugins-and-integrations/convai-unity-sdk/getting-started/configure-microphone.md` |
-| Explanation with Mermaid + tables | `plugins-and-integrations/convai-unity-sdk/core-concepts/session-lifecycle.md` |
+| Hub / section index | `plugins-and-integrations/convai-unreal-engine-plugin/getting-started/README.md` |
+| How-to with a stepper | `plugins-and-integrations/convai-unreal-engine-plugin/getting-started/set-up-a-reallusion-cc-character.md` |
+| Reference (Blueprint surface) | `plugins-and-integrations/convai-unreal-engine-plugin/blueprint-reference/convai-chatbot-component.md` |
+| Explanation with a diagram | `plugins-and-integrations/convai-unreal-engine-plugin/core-concepts/conversation-flow.md` |
 
-Reading the Unity example is mandatory — it calibrates structure and quality, not content.
+When in doubt, take the how-to. It is the shape most pages end up being.
 
 ## Section layout
 
@@ -289,11 +306,31 @@ Reading the Unity example is mandatory — it calibrates structure and quality, 
 
 ## Platform and version notes
 
-- Current version is a **beta** (`4.0.0-beta.21`). Mark all version-sensitive pages with
+- The current release is a **beta**. The version string lives in `VersionName` in `ConvAI.uplugin`;
+  the docs value is the `unreal_plugin_version` variable in `.gitbook/vars.yaml`. Never write the
+  literal version into a page — or into this pack. Mark all version-sensitive pages with
   `last_reviewed`.
-- Supported UE version: **5.0 and later** (all UE 5.x). No stated upper bound.
-- Platforms: Win64 and Android. Android requires the `AndroidPermission` plugin (bundled dependency)
-  and microphone permission handling — document platform-specific steps where relevant.
+- Supported UE versions: `ConvAI.uplugin` has **no `EngineVersion` field**, so the range is not
+  derivable from the manifest. Two sources look contradictory and are not — they measure different
+  things, and a page that confuses them will turn readers away:
+  - **`CHANGELOG.md` is the support range.** Every recent release entry ends with a
+    "Kept compatibility with Unreal Engine ..." line. Read the latest one. It is the plugin's own
+    statement of what it supports, and it names an upper bound as well as a lower one, so "all UE
+    5.x, no upper bound" is not a safe claim.
+  - **`.github/workflows/main.yml` is the prebuilt-package range**, which starts higher. It is which
+    engine versions CI produces binaries for, not which versions the plugin supports. Since the
+    plugin descriptor no longer carries the precompiled "Installed" flag, Fab compiles from source
+    per engine version, so a reader below the CI floor can still use the plugin — they build it.
+    `Docs/InternalChangelog.md` records manually verified builds below that floor.
+
+  So the support floor comes from `CHANGELOG.md`, and the CI matrix is only worth mentioning on a
+  page if the distinction between a prebuilt package and building from source matters to the reader.
+  Both values move: re-read them rather than trusting this pack's audit date.
+- Platforms: Win64, Mac, and Android (runtime modules; editor modules are Win64 and Mac). Android
+  requires the `AndroidPermission` plugin (bundled dependency) and microphone permission handling —
+  document platform-specific steps where relevant. Mac is newly allowed relative to earlier
+  releases (the beta.23-hotfix changelog entry declared Win64/Android only); no Mac-specific setup
+  steps exist in source, so confirm any Mac install guidance with the plugin owner before writing it.
 
 ## SDK source of truth
 
@@ -305,6 +342,37 @@ Reading the Unity example is mandatory — it calibrates structure and quality, 
 
 Verify every class, component, Blueprint node display name, setting, and console message against
 this source before stating it. Do not fabricate Blueprint node names or component fields.
+
+### What the code settles
+
+| Claim | Where to verify |
+|---|---|
+| Plugin version string | `VersionName` in `ConvAI.uplugin` |
+| Modules, module types, platform allow lists | `Modules` in `ConvAI.uplugin` |
+| Bundled plugin dependencies and whether each is enabled or optional | `Plugins` in `ConvAI.uplugin` |
+| Class names, Blueprint display names, component properties | `UCLASS` / `UPROPERTY` declarations in `Source/Convai/Public/` |
+| Enum values and their exact display names | `UMETA(DisplayName = ...)` in `Source/Convai/Public/ConvaiDefinitions.h` |
+| Struct fields, defaults, and deprecations | `USTRUCT` declarations in `ConvaiDefinitions.h` (deprecations carry `DeprecatedProperty` meta with a message) |
+| Blueprint node names and categories | `UFUNCTION` meta (`DisplayName`, `Category`) in the component and proxy headers |
+| Project settings surface | `UConvaiSettings` in `Source/Convai/Convai.h` |
+| Bundled assets and folder layout | the plugin `Content/` folder |
+| Per-engine-version packaging differences (what ships where) | `.github/workflows/main.yml` |
+
+### What the code cannot settle
+
+These need the plugin owner, or a look at the released product. Do not infer them:
+
+- **Whether the changelog's stated range is still current on the day you write.** It is the best
+  source available and it is maintained per release, but it is prose in a file, not a build
+  constraint — nothing fails if it goes stale. Confirm with the plugin owner before publishing a
+  version claim on a prerequisites page.
+- **Fab listing state and release cadence.** The source says nothing about what is currently
+  published on Fab or GitHub Releases, or how far Fab lags behind.
+- **Server-side behavior.** VAD server defaults (`bUseServerDefault`), when `EC_RunLLMOption::Auto`
+  produces a response, and anything else the Convai backend decides. The local defaults in source
+  are fallbacks, not the served values.
+- **Dashboard behavior.** Character configuration, voices, and everything else done on the Convai
+  dashboard lives outside this repo.
 
 ## Tutorials & external sources
 
@@ -341,11 +409,11 @@ import is needed. **There is no bundled demo level/map** — no `.umap` exists a
 and there is no `Convai_Demo`, `Companion`, or `ConvaiDemoGM` asset. Downloadable sample content is
 offered through the Convai editor window **Samples** page (a content feed), not as a shipped level.
 
-For local source verification in the current Unreal plugin development checkout, use
-`C:\Users\Kaan\Documents\UnrealProjects\Convai-UnrealEngine-SDK-Dev\Content` as the plugin content
-root. MetaHuman animation assets and animation Blueprint references are under
-`C:\Users\Kaan\Documents\UnrealProjects\Convai-UnrealEngine-SDK-Dev\Content\MetaHumans\Animations`.
-Published documentation should still use plugin-relative paths such as `MetaHumans/Animations/`.
+For local source verification, the plugin content root is `Content/` under whatever path the
+checkout has on this machine — ask for that path rather than assuming one. MetaHuman animation
+assets and animation Blueprint references are under `Content/MetaHumans/Animations/`.
+Published documentation uses plugin-relative paths such as `MetaHumans/Animations/`, never a
+path from anybody's machine.
 
 | Asset name | Path | Type | Purpose |
 |---|---|---|---|
@@ -362,7 +430,7 @@ Published documentation should still use plugin-relative paths such as `MetaHuma
 | `Convai_MetaHuman_FaceAnim` | `MetaHumans/Animations/` | Animation Blueprint | MetaHuman face/lip sync animation |
 | `Full_Emotion_spectrum` | `MetaHumans/Animations/Motion/Face/Emotion/` | Animation | Full emotion blendshape spectrum (note: lowercase `spectrum`) |
 | `Full_Emotion_NoMouth_spectrum` | `MetaHumans/Animations/Motion/Face/Emotion/` | Animation | Emotion spectrum excluding mouth shapes |
-| `M_ConvaiGazeOverlay` | `Highlights/` | Material | Gaze-attention highlight overlay (generated by `Content/Tools/CreateGazeOverlayMaterial.py`) |
+| `M_ConvaiGazeOverlay` | `Highlights/` | Material | Gaze-attention highlight overlay |
 | `BPI_Convai_Animation` | `Interfaces/` | Blueprint Interface | Animation interface for Convai characters |
 | `AudioInput` / `MuteMic` | `Submixes/` | Sound Submix | Microphone capture / mute submixes |
 | `EUW_LTM` | `Editor/` | Editor Utility Widget | Long-term-memory editor utility |
@@ -373,10 +441,21 @@ Published documentation should still use plugin-relative paths such as `MetaHuma
 The plugin also bundles:
 
 - A large MetaHuman animation library under `MetaHumans/Animations/Motion/` — body (`Anim_*`),
-  viseme/lip (`MHF_*`), head-look/point (`Pose_*`), and supporting animation Blueprints (`AnimBP/`
-  subfolder: `A1D_MH_BEye`, `A2D_MH_EyeLook`, `B2D_F/M_HeadLook`, `B2D_F/M_Pointing`).
-- Instrument enums and functions under `MetaHumans/Instruments/` — `E_Emotions`, `E_Lips`,
-  `E_Movement`, `E_TurnDirection`, `E_InConversation`, `F_AIUtilities`.
+  face (`MHF_*`, split into `Face/Emotion`, `Face/Eyes`, `Face/Lips`), head-look/point (`Pose_*`)
+  — with supporting animation Blueprints under `MetaHumans/Animations/AnimBP/` (`A1D_MH_BEye`,
+  `A2D_MH_EyeLook`, `B1D_F/M_Movement`, `B2D_F/M_HeadLook`, `B2D_F/M_Pointing`).
+- Instrument enums and functions under `MetaHumans/Instruments/` — enums in `Enm/` (`E_Emotions`,
+  `E_InConversation`, `E_Lips`, `E_Movement`, `E_TurnDirection`), functions in `Functions/`
+  (`F_AIUtilities`).
+- Agent skill assets under `Skills/` — 17 `.uasset` skill documents (`ConvaiQuickStart`,
+  `ConvaiProjectSetup`, `ConvaiActions`, `ConvaiCustomActions`, `ConvaiSimpleAnimationActions`,
+  `ConvaiCharacterReference`, `ConvaiConversation`, `ConvaiDynamicContext`, `ConvaiExpressiveness`,
+  `ConvaiFaceAndAnimation`, `ConvaiGazeAttention`, `ConvaiMetahumanSetup`, `ConvaiNarrativeDesign`,
+  `ConvaiPlayerAndInput`, `ConvaiRestAndAudioUtilities`, `ConvaiSceneObjects`, `ConvaiVision`).
+  This is the in-editor knowledge base an AI coding agent reads through the Convai Toolset / MCP
+  integration. The CI packaging workflow ships `Content/Skills/` only in packages for engine
+  versions that support the toolset (`.github/workflows/main.yml`); packages for older engines
+  do not contain it — do not document it as universally present.
 - Localization font assets under `Widgets/Fonts/` — Arabic (`KFGQPC_Uthman_Taha_Naskh_Regular`),
   CJK (`SourceHanSans`), Hindi (`Mangal_Regular`), default (`ConvaiFont`). These support the
   multilingual chat widget (`Chat_WB`).

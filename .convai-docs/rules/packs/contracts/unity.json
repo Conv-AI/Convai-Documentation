@@ -1,0 +1,105 @@
+{
+  "subject": "unity",
+  "kind": "sdk",
+  "source_repo": "convai-unity-core-sdk",
+  "package_root": "Packages/com.convai.convai-sdk-for-unity/",
+  "note": "Where every volatile Unity SDK fact comes from. The pack prose must not restate a name this file can derive; it names the recipe, and extract_surface.py runs it. The source checkout is per-machine and is never recorded here.",
+  "version": {
+    "file": "package.json",
+    "field": "version"
+  },
+  "extract": {
+    "components": {
+      "glob": "SDK/Runtime/Components/*.cs",
+      "capture": "csharp_type",
+      "why": "The scene components a reader adds. Partial classes span several files, so the type name is read from the source rather than the file name. Scene-level components only; module controllers live under SDK/Modules and are covered by inspector_components."
+    },
+    "configuration": {
+      "glob": "SDK/Runtime/Configuration/*.cs",
+      "capture": "csharp_type",
+      "why": "Settings and profile assets a page tells a reader to create."
+    },
+    "modules": {
+      "glob": "SDK/Modules/*/",
+      "capture": "dir_name",
+      "why": "One folder per feature module. A module missing from the pack is a whole documented surface the writer is blind to."
+    },
+    "assemblies": {
+      "glob": "SDK/Modules/*/*.asmdef",
+      "capture": "json_field",
+      "field": "name",
+      "why": "The assembly a module ships as, which is what a compile error names."
+    },
+    "menu_paths": {
+      "glob": "SDK/**/*.cs",
+      "capture": "attribute",
+      "attribute": "AddComponentMenu",
+      "why": "A class name and its Add Component label differ often enough that guessing produces a click path that does not exist."
+    },
+    "samples": {
+      "file": "package.json",
+      "capture": "json_field",
+      "field": "samples[].displayName",
+      "why": "Samples are referred to by their exact display name."
+    },
+    "dependencies": {
+      "file": "package.json",
+      "capture": "json_field",
+      "field": "dependencies",
+      "why": "The dependency list a compatibility page states. Versions stay in GitBook variables; only the names come from here."
+    },
+    "types": {
+      "glob": "SDK/**/*.cs",
+      "capture": "csharp_type",
+      "why": "Every type the package declares. This is what settles whether a name a page uses is real; the narrower sets say what a reader is meant to touch."
+    },
+    "inspector_components": {
+      "glob": "SDK/**/*.cs",
+      "capture": "attributed_type",
+      "attribute": "AddComponentMenu",
+      "why": "Types a reader can add in the Inspector. A module of these that the pack never mentions is a surface the writer is blind to."
+    }
+  },
+  "must_exist": [
+    "ConvaiCharacter",
+    "ConvaiManager",
+    "ConvaiRoomManager",
+    "ConvaiPlayer",
+    "ConvaiAudioOutput",
+    "ConvaiSceneInstaller"
+  ],
+  "must_not_exist": [
+    "ConvaiNPC",
+    "ConvaiAudioManager",
+    "ConvaiLipSync"
+  ],
+  "must_not_exist_why": "Names that have never existed or were renamed, and that keep reappearing in drafts because they are what a reasonable person would guess. The site check treats any page naming one of these as an error.",
+  "documented_sets": [
+    "modules"
+  ],
+  "documented_sets_why": "Sets small enough that every member matters. Ten feature modules: a missing one is a whole documented surface the writer is blind to.",
+  "symbol_prefixes": [
+    "Convai",
+    "IConvai"
+  ],
+  "coverage_sets": [
+    "inspector_components"
+  ],
+  "coverage_sets_why": "Sets the pack legitimately summarises rather than enumerates. Reported as a single ratio, because sixty-three separate warnings would bury the ten that matter.",
+  "historical_pages": [
+    "**/release-notes.md",
+    "**/migrate-*.md",
+    "**/migrate-to-*.md",
+    "**/migration-guide/**",
+    "**/convai-unity-sdk-architecture.md"
+  ],
+  "historical_pages_why": "Pages whose job is to say what changed. A retired component name on one of these is correct; treating it as drift would bury the pages that are actually wrong.",
+  "coverage_ignore_prefixes": [
+    "ConvaiSample",
+    "ConvaiDev",
+    "ConvaiTutorial"
+  ],
+  "coverage_ignore_prefixes_why": "Names that appear on pages but are deliberately outside the shipped package surface - sample and tutorial assets. MCP tool ids like Convai.ConfigureGaze are excluded automatically because a dotted name is never a type.",
+  "section": "plugins-and-integrations/convai-unity-sdk",
+  "section_why": "Where this subject's pages live in the documentation repository. Declared rather than inferred from the pack name: core-service's pages are under api-reference, and guessing reported its own exemplars as borrowed from another subject."
+}

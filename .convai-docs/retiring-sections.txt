@@ -1,0 +1,17 @@
+# Sections awaiting deletion.
+#
+# Findings under these paths are counted separately by check_site.py and do not fail a run.
+# They are not dropped: every run prints how many there are. If a section listed here still
+# exists in six months, it is not being retired, and its findings are real work this file is
+# hiding.
+#
+# Remove a line when the section is deleted, or when the decision to delete it is reversed.
+
+# The pre-SDK Unity plugin and its beta overview. Superseded by
+# plugins-and-integrations/convai-unity-sdk/.
+plugins-and-integrations/unity-plugin
+plugins-and-integrations/unity-plugin-beta-overview
+
+# The pre-v2 Unreal guides. Superseded by
+# plugins-and-integrations/convai-unreal-engine-plugin/.
+plugins-and-integrations/unreal-engine

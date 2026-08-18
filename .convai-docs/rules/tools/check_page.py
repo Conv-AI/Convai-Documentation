@@ -94,6 +94,13 @@ ALLOWED_CAMEL = {
     "ElevenLabs", "PlayCanvas", "ThreeJS", "NodeJS", "DevOps", "YouTube", "LinkedIn",
 }
 
+# GitBook renders images as <figure><img src="..." alt="...">. Almost every page in the
+# documentation repo uses this rather than Markdown image syntax, so the alt-text rule has
+# to understand it or it never fires where it matters.
+HTML_IMG_RE = re.compile(r"<img[\s>][^>]*>", re.IGNORECASE)
+HTML_ALT_RE = re.compile(r'\balt\s*=\s*"([^"]*)"', re.IGNORECASE)
+HTML_SRC_RE = re.compile(r'\bsrc\s*=\s*"([^"]*)"', re.IGNORECASE)
+
 INLINE_CODE_RE = re.compile(r"`[^`]*`")
 LINK_TARGET_RE = re.compile(r"\]\([^)]*\)")
 BARE_URL_RE = re.compile(r"https?://\S+")
@@ -112,10 +119,18 @@ def strip_code_and_urls(line):
 
 
 class Finding:
-    def __init__(self, level, line, msg):
+    """One linter result.
+
+    `rule` carries the CV id from the style guide, so a linter finding, a reviewer
+    finding, and a flag left by GitBook's agent all name the same rule. A finding with
+    no id is a mechanical failure with no editorial rule behind it, such as a file that
+    cannot be read."""
+
+    def __init__(self, level, line, msg, rule=None):
         self.level = level
         self.line = line
         self.msg = msg
+        self.rule = rule
 
 
 def split_frontmatter(text):
@@ -178,6 +193,22 @@ def iter_body_lines(body, body_start):
         yield lineno, raw, ("code" if in_code else "prose")
 
 
+def leading_h1(body, body_start):
+    """Return (title, line) if the body opens with a single `# ` heading, else ("", 0).
+
+    This is the shape GitBook writes when it round-trips a page. Only a heading that is the
+    body's first content counts: a `# ` further down is a second H1 and stays an error."""
+    for lineno, raw, kind in iter_body_lines(body, body_start):
+        if kind in ("code", "fence-close"):
+            continue
+        stripped = raw.strip()
+        if not stripped:
+            continue
+        m = re.match(r"#\s+(\S.*?)\s*$", stripped)
+        return (m.group(1), lineno) if m else ("", 0)
+    return ("", 0)
+
+
 def check_page(path, summary_text=None, summary_titles=None):
     findings = []
     try:
@@ -196,35 +227,57 @@ def check_page(path, summary_text=None, summary_titles=None):
 
     # --- Frontmatter ---
     if fm is None:
-        findings.append(Finding("ERROR", 1, "missing YAML frontmatter (--- ... ---) with title and description"))
+        findings.append(Finding("ERROR", 1, "missing YAML frontmatter (--- ... ---) with title and description", "CV-33"))
         fm = {}
     title = fm.get("title", "").strip()
     desc = fm.get("description", "").strip()
-    if not title:
-        findings.append(Finding("ERROR", 1, "frontmatter is missing `title`"))
-    elif len(title) > 60:
-        findings.append(Finding("WARN", 1, f"title is {len(title)} chars (keep <= 60)"))
+
+    # A page carries its title in one of two places, and which one depends on who last
+    # touched it. GitBook's editor writes it as a leading `# ` heading and omits the
+    # frontmatter key; the tooling writes the frontmatter key and no body heading. Both
+    # render correctly, so both are accepted - what is not accepted is a page with neither,
+    # or one with both, because then two strings claim to be the title and the sidebar,
+    # the search result and the page can disagree.
+    body_title, body_title_line = leading_h1(body, body_start)
+    effective_title = title or body_title
+
+    if not effective_title:
+        findings.append(Finding(
+            "ERROR", 1,
+            "the page has no title: add `title` to the frontmatter, or a single `# ` heading "
+            "as the first line of the body",
+            "CV-33"))
+    elif title and body_title:
+        findings.append(Finding(
+            "ERROR", body_title_line,
+            f"two titles: frontmatter says {title!r} and the body heading says {body_title!r}; "
+            "keep one",
+            "CV-33"))
+    elif len(effective_title) > 60:
+        findings.append(Finding(
+            "WARN", 1, f"title is {len(effective_title)} chars (keep <= 60)", "CV-33"))
+    title = effective_title
     if not desc:
-        findings.append(Finding("ERROR", 1, "frontmatter is missing `description`"))
+        findings.append(Finding("ERROR", 1, "frontmatter is missing `description`", "CV-34"))
     else:
         if len(desc) > 200:
-            findings.append(Finding("ERROR", 1, f"description is {len(desc)} chars (hard max 200)"))
+            findings.append(Finding("ERROR", 1, f"description is {len(desc)} chars (hard max 200)", "CV-34"))
         elif len(desc) < 120 or len(desc) > 160:
-            findings.append(Finding("WARN", 1, f"description is {len(desc)} chars (target 120-160)"))
+            findings.append(Finding("WARN", 1, f"description is {len(desc)} chars (target 120-160)", "CV-34"))
         low = desc.lower()
         for bad in DESC_BAD_OPENERS:
             if low.startswith(bad):
-                findings.append(Finding("WARN", 1, f'description starts with "{bad}" (forbidden opener)'))
+                findings.append(Finding("WARN", 1, f'description starts with "{bad}" (forbidden opener)', "CV-34"))
         for w in BANNED_WORDS:
             if re.search(r"\b" + re.escape(w) + r"\b", low):
-                findings.append(Finding("WARN", 1, f'description contains banned word "{w}"'))
+                findings.append(Finding("WARN", 1, f'description contains banned word "{w}"', "CV-1"))
         for ph in CLOUD_PHRASES:
             if ph in low:
-                findings.append(Finding("WARN", 1, f'description contains cloud phrasing "{ph}" (refer to the backend as "Convai")'))
+                findings.append(Finding("WARN", 1, f'description contains cloud phrasing "{ph}" (refer to the backend as "Convai")', "CV-10"))
         # The description is plain English for search results and AI answers; identifiers
         # belong in the lead paragraph or body instead.
         if "`" in desc:
-            findings.append(Finding("WARN", 1, "description contains backtick identifiers (use plain English)"))
+            findings.append(Finding("WARN", 1, "description contains backtick identifiers (use plain English)", "CV-34"))
         else:
             tokens = [m.group(0) for m in TECH_TOKEN_RE.finditer(desc)]
             tokens += [m.group(0) for m in CAMEL_CASE_RE.finditer(desc)
@@ -233,10 +286,13 @@ def check_page(path, summary_text=None, summary_titles=None):
                 findings.append(Finding(
                     "WARN", 1,
                     f'description contains technical token(s) {", ".join(sorted(set(tokens)))}; '
-                    "use plain English and move identifiers into the body"))
+                    "use plain English and move identifiers into the body", "CV-34"))
 
     # --- Body scan ---
+    # With a GitBook-shaped page the title heading is content, so the lead-paragraph check
+    # starts after it rather than at it.
     first_content_seen = False
+    lead_after = body_title_line
     hint_count = 0
     saw_publish_blocker = False
     open_blocks = []
@@ -246,36 +302,48 @@ def check_page(path, summary_text=None, summary_titles=None):
             # code fence must declare a language
             lang = stripped[3:].strip()
             if not lang:
-                findings.append(Finding("WARN", lineno, "code fence has no language label"))
+                findings.append(Finding("WARN", lineno, "code fence has no language label", "CV-22"))
             # the fence counts as first content
             first_content_seen = True
             continue
         if kind in ("code", "fence-close"):
             continue
 
-        # first non-blank prose/heading line = lead check
+        # First non-blank line. A leading `# ` heading is the page's title in GitBook's own
+        # shape and is allowed; any other heading here means the lead paragraph is missing.
         if not first_content_seen and stripped:
             if stripped.startswith("#"):
-                findings.append(Finding("ERROR", lineno, "body must start with a headingless lead paragraph, not a heading"))
-            first_content_seen = True
+                if not (lineno == lead_after and body_title):
+                    findings.append(Finding(
+                        "ERROR", lineno,
+                        "body must start with a headingless lead paragraph, not a heading",
+                        "CV-26"))
+                    first_content_seen = True
+                else:
+                    # The title heading itself. The lead paragraph is the next line.
+                    pass
+            else:
+                first_content_seen = True
 
-        # headings
-        if re.match(r"#\s+\S", stripped):
-            findings.append(Finding("ERROR", lineno, "body uses an H1 `# ` heading; GitBook page title is the only H1"))
+        # A second H1 is always wrong: the page would claim two titles.
+        if re.match(r"#\s+\S", stripped) and lineno != lead_after:
+            findings.append(Finding(
+                "ERROR", lineno,
+                "a second H1 `# ` heading; a page has exactly one title", "CV-25"))
         # Matches any level from ## down, so `### Overview` is caught too, not just `## Overview`.
         if re.match(r"#{2,6}\s+(Overview|Introduction)\b", stripped, re.IGNORECASE):
-            findings.append(Finding("ERROR", lineno, f"forbidden heading: {stripped}"))
+            findings.append(Finding("ERROR", lineno, f"forbidden heading: {stripped}", "CV-27"))
         if re.match(r"#{2,4}\s+Step\s+\d+\b", stripped, re.IGNORECASE):
-            findings.append(Finding("WARN", lineno, f'numbered step heading: "{stripped}" (use an action title)'))
+            findings.append(Finding("WARN", lineno, f'numbered step heading: "{stripped}" (use an action title)', "CV-29"))
         if re.match(r"####\s+\S", stripped):
-            findings.append(Finding("WARN", lineno, "`####` heading (avoid on task/concept pages; split instead)"))
+            findings.append(Finding("WARN", lineno, "`####` heading (avoid on task/concept pages; split instead)", "CV-30"))
 
         # vague section headings (## level)
         if re.match(r"#{2,3}\s+\S", stripped):
             heading_text = re.sub(r"^#+\s*", "", stripped).lower().rstrip()
             for vh in VAGUE_HEADINGS:
                 if heading_text == vh:
-                    findings.append(Finding("WARN", lineno, f'vague heading "{stripped}" (use a specific, scannable heading)'))
+                    findings.append(Finding("WARN", lineno, f'vague heading "{stripped}" (use a specific, scannable heading)', "CV-28"))
 
         # hints
         if "{% hint" in stripped:
@@ -290,7 +358,7 @@ def check_page(path, summary_text=None, summary_titles=None):
                 else:
                     findings.append(Finding(
                         "ERROR", lineno,
-                        f"`{{% end{name} %}}` does not close the innermost open GitBook block"))
+                        f"`{{% end{name} %}}` does not close the innermost open GitBook block", "CV-76"))
             else:  # {% X %}
                 open_blocks.append((name, lineno))
 
@@ -299,12 +367,23 @@ def check_page(path, summary_text=None, summary_titles=None):
             findings.append(Finding(
                 "ERROR", lineno,
                 'invalid GitBook variable syntax `{{ ... }}` (use '
-                '`<code class="expression">space.vars.name</code>`)'))
+                '`<code class="expression">space.vars.name</code>`)', "CV-24"))
 
-        # Images must carry alt text for accessibility and AI readability.
+        # Images must carry alt text for accessibility and AI readability. Both syntaxes
+        # count: GitBook writes <figure><img alt="">, which is what almost every page in
+        # the documentation repo actually uses, and Markdown ![alt](src) appears too.
         for m in re.finditer(r"!\[([^\]]*)\]\(([^)]+)\)", raw):
             if not m.group(1).strip():
-                findings.append(Finding("WARN", lineno, f"image `{m.group(2)}` has empty alt text"))
+                findings.append(Finding("WARN", lineno, f"image `{m.group(2)}` has empty alt text", "CV-48"))
+        for m in HTML_IMG_RE.finditer(raw):
+            tag = m.group(0)
+            alt = HTML_ALT_RE.search(tag)
+            src = HTML_SRC_RE.search(tag)
+            label = src.group(1) if src else "image"
+            if alt is None:
+                findings.append(Finding("WARN", lineno, f"image `{label}` has no alt attribute", "CV-48"))
+            elif not alt.group(1).strip():
+                findings.append(Finding("WARN", lineno, f"image `{label}` has empty alt text", "CV-48"))
 
         # publish blockers
         if "Screenshot required before publishing" in raw or re.search(r"\bTODO-[\w\-]+\.(png|jpg|jpeg|gif|svg)", raw):
@@ -317,31 +396,38 @@ def check_page(path, summary_text=None, summary_titles=None):
         # banned words / cloud phrases (prose only)
         for w in BANNED_WORDS:
             if re.search(r"\b" + re.escape(w) + r"\b", low):
-                findings.append(Finding("WARN", lineno, f'banned word "{w}"'))
+                findings.append(Finding("WARN", lineno, f'banned word "{w}"', "CV-1"))
         for ph in CLOUD_PHRASES:
             if ph in low:
-                findings.append(Finding("WARN", lineno, f'cloud phrasing "{ph}" (refer to the backend as "Convai")'))
+                findings.append(Finding("WARN", lineno, f'cloud phrasing "{ph}" (refer to the backend as "Convai")', "CV-10"))
 
         # hedging phrases
         for ph in HEDGING_PHRASES:
             if ph in low:
-                findings.append(Finding("WARN", lineno, f'hedging phrase "{ph}" (use direct instructions: "Add…", "Configure…")'))
+                findings.append(Finding(
+                    "WARN", lineno,
+                    f'hedging phrase "{ph}" (use a direct instruction: "Add...", "Configure...")',
+                    "CV-2"))
 
         # filler openers
         for ph in FILLER_PHRASES:
             if ph in low:
-                findings.append(Finding("WARN", lineno, f'filler phrase "{ph}" (state the outcome directly)'))
+                findings.append(Finding("WARN", lineno, f'filler phrase "{ph}" (state the outcome directly)', "CV-3"))
 
         # "click here" link text
         if re.search(r"\[click here\b", low):
-            findings.append(Finding("WARN", lineno, '"click here" link text (use descriptive link text: "See [X topic](…)")'))
+            findings.append(Finding(
+                "WARN", lineno,
+                '"click here" link text; link text describes the destination, '
+                'as in "See [Configure the API key](...)"',
+                "CV-20"))
 
     for name, lineno in open_blocks:
-        findings.append(Finding("ERROR", lineno, f"`{{% {name} %}}` is never closed by `{{% end{name} %}}`"))
+        findings.append(Finding("ERROR", lineno, f"`{{% {name} %}}` is never closed by `{{% end{name} %}}`", "CV-76"))
     if hint_count > 2:
-        findings.append(Finding("WARN", 0, f"{hint_count} hints on the page (max 2 on task/concept pages)"))
+        findings.append(Finding("WARN", 0, f"{hint_count} hints on the page (max 2 on task/concept pages)", "CV-39"))
     if saw_publish_blocker:
-        findings.append(Finding("ERROR", 0, "page has a TODO- image path or 'Screenshot required before publishing' (not publishable)"))
+        findings.append(Finding("ERROR", 0, "page has a TODO- image path or 'Screenshot required before publishing' (not publishable)", "CV-50"))
 
     # --- SUMMARY.md reachability + label match ---
     if summary_text is not None:
@@ -352,9 +438,9 @@ def check_page(path, summary_text=None, summary_titles=None):
             rel = path.replace("\\", "/")
             candidates = ["/".join(rel.split("/")[-n:]) for n in (3, 2, 1)]
             if not any(c in summary_text for c in candidates):
-                findings.append(Finding("WARN", 0, f"'{base}' is not referenced in SUMMARY.md (possible orphan)"))
+                findings.append(Finding("WARN", 0, f"'{base}' is not referenced in SUMMARY.md (possible orphan)", "CV-37"))
             elif title and title not in (summary_titles or set()):
-                findings.append(Finding("WARN", 0, f"SUMMARY.md has no sidebar label exactly matching title '{title}'"))
+                findings.append(Finding("WARN", 0, f"SUMMARY.md has no sidebar label exactly matching title '{title}'", "CV-38"))
 
     return findings
 
@@ -397,7 +483,8 @@ def main():
         report.append({
             "page": page,
             "status": status,
-            "findings": [{"level": f.level, "line": f.line, "message": f.msg}
+            "findings": [{"level": f.level, "rule": f.rule, "line": f.line,
+                          "message": f.msg}
                          for f in errors + warns],
         })
         if args.json:
@@ -405,7 +492,8 @@ def main():
         print(f"\n{status}  {page}")
         for f in errors + warns:
             loc = f"L{f.line}" if f.line else "-"
-            print(f"  {f.level:5} {loc:>5}  {f.msg}")
+            rule = f.rule or ""
+            print(f"  {f.level:5} {rule:6} {loc:>5}  {f.msg}")
         if status == "PASS":
             print("  no structural issues")
 

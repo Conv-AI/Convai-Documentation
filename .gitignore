@@ -9,6 +9,17 @@
 .convai-docs/*
 !.convai-docs/rules/
 
+# The site-check baseline IS committed. It records the findings that already existed
+# when the whole-repository check was adopted, so only new problems fail a pull request.
+# Leaving it untracked would make the check report every one of them on every run, and a
+# check that is red on day one is one people learn to scroll past.
+!.convai-docs/site-baseline.json
+
+# The retiring-sections list IS committed, for the same reason: check_site.py reads it to
+# decide which findings belong to content awaiting deletion. Untracked, the check counts
+# those sections as live and every run reports work nobody intends to do.
+!.convai-docs/retiring-sections.txt
+
 # Python bytecode from running the structure linter
 __pycache__/
 *.py[cod]

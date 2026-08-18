@@ -8,6 +8,11 @@ This is a **topic pack**, not an SDK pack. There is no package to install and no
 read, so every claim about an interface is verified against that interface. Read "Source of truth and
 verification" before writing anything.
 
+Last audited: 2026-08-18 against the documentation repository only. **No source repository has been
+identified for Avatar Studio, Convai Sim, or the XR Animation Capture App**, so nothing in this pack
+has been checked against code. Treat every interface claim here as needing the owner's confirmation
+until a repository is named, and name one in this line when it is.
+
 ---
 
 ## What this pack covers
@@ -18,7 +23,7 @@ Pages under `no-code-experiences/`:
 |---|---|---|
 | Avatar Studio | `avatar-studio-experiences/` | Browser tool for creating and customizing an avatar, including MetaHuman and Reallusion avatars, face filters, environment, and lighting |
 | Convai Sim | `convai-sim-experiences/` | Interactive 3D simulation experiences built without code |
-| Convai XR Animation Capture App | `convai-xr-animation-capture-app/` | Meta Quest application for capturing animation for AI avatars |
+| Convai XR Animation Capture App | `convai-xr-animation-capture-app/` | Meta Quest application for capturing animation for AI avatars. **Not in active use as of 2026-08-18 (confirmed by the pack owner). Do not write or plan pages for it** — the existing pages stay for anyone who still has it. Re-check before spending effort here. |
 
 Out of scope, with the pack that owns each:
 
@@ -122,23 +127,27 @@ Use the GitBook figure syntax with real alt text:
 
 Add a variable to `.gitbook/vars.yaml` rather than writing a synchronized literal into a page.
 
-## Gold-standard example pages
+## Gold-standard example pages — READ BEFORE DRAFTING
 
-**No page in `no-code-experiences/` currently meets the quality bar.** Pages in this section carry a
-body `#` H1, open with `## Introduction`, and do not set `title` frontmatter. Do not model a new page on
-them.
+**This section has no exemplar of its own yet, and pretending otherwise would teach the wrong
+bar.** Measured on 2026-08-18, 5 of 24 pages here pass the structure gate, and none of those is
+substantial enough to be worth imitating.
 
-Until a page in this section is written to standard and accepted, model structure on the Unity SDK
-section and adapt the audience:
+So borrow the *shape* from the Unity SDK section, and nothing else:
 
-| Mode | Model page |
+| Page type | Borrow the shape from |
 |---|---|
-| How-to | `plugins-and-integrations/convai-unity-sdk/getting-started/installation.md` |
-| Hub | `plugins-and-integrations/convai-unity-sdk/README.md` |
+| Hub / section index | `plugins-and-integrations/convai-unity-sdk/getting-started/README.md` |
+| How-to with steppers and tabs | `plugins-and-integrations/convai-unity-sdk/getting-started/installation.md` |
+| Explanation | `plugins-and-integrations/convai-unity-sdk/core-concepts/session-lifecycle.md` |
 
-Take the structure, frontmatter, block usage, and heading discipline. Do not take the developer voice.
+Take from those the lead-paragraph style, the section count, the block choices and the directness
+of the prose. Take nothing else. They are about a different product, for a different reader, with
+different terminology and different assumptions — copying any of that into a page about the no-code products
+produces a page that reads as though it were written for somebody else, because it was.
 
-**When the first page here is written to standard and accepted, replace this section with its path.**
+The first page written here to that bar becomes this section's exemplar. Replace this section
+when it exists.
 
 ## Section layout
 

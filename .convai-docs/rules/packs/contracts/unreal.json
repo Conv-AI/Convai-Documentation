@@ -1,0 +1,89 @@
+{
+  "subject": "unreal",
+  "kind": "sdk",
+  "source_repo": "Convai-UnrealEngine-SDK-Dev",
+  "package_root": "",
+  "note": "Where every volatile Unreal SDK fact comes from. The pack prose must not restate a name this file can derive; it names the recipe, and extract_surface.py runs it. The source checkout is per-machine and is never recorded here. Unlike Unity, the plugin is the repository root rather than a package inside it, so package_root is empty.",
+  "version": {
+    "file": "ConvAI.uplugin",
+    "field": "VersionName"
+  },
+  "extract": {
+    "modules": {
+      "file": "ConvAI.uplugin",
+      "capture": "json_field",
+      "field": "Modules[].Name",
+      "why": "The modules the plugin declares. A module missing from the pack is a whole surface the writer is blind to, and a wrong module name is a build error the reader cannot diagnose."
+    },
+    "types": {
+      "glob": "Source/**/*.h",
+      "capture": "cpp_type",
+      "why": "Every type the plugin declares in a header. This settles whether a name a page uses is real. Includes forward declarations, which is the safe direction: a name declared and never defined is not surface either way."
+    },
+    "public_types": {
+      "glob": "Source/*/Public/**/*.h",
+      "capture": "cpp_type",
+      "why": "Types under Public/ are the ones another module - and therefore a reader's project - can use. This is the set a scripting reference documents."
+    },
+    "components": {
+      "glob": "Source/Convai/Public/Convai*Component.h",
+      "capture": "cpp_type",
+      "why": "The components a reader adds to an Actor. Narrowed by name because a C++ header declares the component beside its state enum and helper structs, and those are not components.",
+      "name_pattern": "^UConvai.*Component$"
+    },
+    "blueprint_labels": {
+      "glob": "Source/**/*.h",
+      "capture": "key_value_string",
+      "key": "DisplayName",
+      "why": "A Blueprint node's label and its C++ name differ constantly - UConvaiChatbotComponent shows as \"Convai Chatbot\". Telling a reader to search for the C++ name sends them looking for a node that is not there."
+    },
+    "actions": {
+      "glob": "Source/Convai/Public/Actions/*.h",
+      "capture": "cpp_type",
+      "why": "Character action tasks, which the actions pages name individually."
+    }
+  },
+  "must_exist": [
+    "UConvaiChatbotComponent",
+    "UConvaiPlayerComponent",
+    "UConvaiAudioStreamer"
+  ],
+  "must_not_exist": [
+    "UConvaiNPCComponent",
+    "UConvaiCharacterComponent",
+    "EConvaiMoveTarget"
+  ],
+  "must_not_exist_why": "Names a writer coming from the Unity SDK would reasonably guess, because Unity's equivalent is ConvaiCharacter, plus a type the pack already warns about: EConvaiMoveTarget was removed in the Movement Points rework. Listing it here is what makes check_site.py catch it on a published page, rather than leaving the warning as a sentence only a writer who reads the pack will see.",
+  "documented_sets": [
+    "modules"
+  ],
+  "documented_sets_why": "Small enough that every member matters. A missing module is a whole documented surface nobody wrote down.",
+  "coverage_sets": [
+    "components"
+  ],
+  "coverage_sets_why": "Reported as a single ratio rather than one warning per name. The types set holds hundreds of internal helpers, so it is deliberately not a coverage set.",
+  "symbol_prefixes": [
+    "UConvai",
+    "FConvai",
+    "EConvai",
+    "IConvai",
+    "AConvai",
+    "SConvai"
+  ],
+  "symbol_prefixes_why": "Unreal's type prefixes, narrowed to ours. Without the Convai part this would flag every engine type a page legitimately names, such as UActorComponent.",
+  "historical_pages": [
+    "**/release-notes.md",
+    "**/migrate-*.md",
+    "**/migration-*.md",
+    "**/migration-guide/**",
+    "**/guides-v2-under-development/**"
+  ],
+  "historical_pages_why": "Pages whose job is to say what changed, plus the v1 guides kept for readers who have not migrated. A retired type name on one of these is correct, not drift.",
+  "coverage_ignore_prefixes": [
+    "ConvaiSample",
+    "ConvaiTutorial"
+  ],
+  "coverage_ignore_prefixes_why": "Sample and tutorial asset names that appear on pages but are outside the shipped plugin surface.",
+  "section": "plugins-and-integrations/convai-unreal-engine-plugin",
+  "section_why": "Where this subject's pages live in the documentation repository. Declared rather than inferred from the pack name: core-service's pages are under api-reference, and guessing reported its own exemplars as borrowed from another subject."
+}
