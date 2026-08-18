@@ -71,7 +71,7 @@ If the SDK connects before a gesture, mic publishing is aborted with:
 
 | Error code | Description | Common cause |
 | --- | --- | --- |
-| `audio.mic_unavailable` | No microphone device was found | No microphone connected; WebGL platform (always returns no devices) |
+| `audio.mic_unavailable` | No microphone device was found | No microphone connected to the machine |
 | `audio.mic_permission_denied` | Permission to access the microphone was denied | User rejected the system permission dialog; WebGL called before user gesture |
 | `audio.mic_publish_failed` | Microphone track could not be published to the LiveKit room | Room not connected; internal factory not registered |
 
@@ -101,9 +101,9 @@ If you do not have a custom `AndroidManifest.xml`, create one at `Assets/Plugins
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
 ```
 
-**Step 2 — Set the Microphone Usage Description in Player Settings:**
+**Step 2 — No Player Settings field to configure:**
 
-Open **Edit → Project Settings → Player → Android → Other Settings**. Set **Microphone Usage Description** to a user-facing explanation, for example: `"Used for voice interaction with AI characters."`
+Android has no **Microphone Usage Description** field in Player Settings — that field exists only for iOS and macOS builds. The SDK requests the `RECORD_AUDIO` permission automatically at runtime through `ConvaiPermissionService`, using Unity's `Permission.RequestUserPermission` API. Beyond the manifest entry from Step 1, no additional Player Settings configuration is required.
 
 **Runtime behavior:** Android shows a system permission dialog the first time the microphone is requested. If the user denies it, `audio.mic_permission_denied` fires. The SDK does not re-request the permission automatically — your application must guide the user to grant it in device Settings if they denied it initially.
 
@@ -129,7 +129,7 @@ Submitting an iOS build to the App Store without `NSMicrophoneUsageDescription` 
 {% tab title="WebGL" %}
 WebGL has two constraints that affect microphone access:
 
-**1. No device enumeration.** `MicrophoneDeviceService.GetAvailableDevices()` always returns an empty list on WebGL. The SDK uses the browser's default input device — device selection at the SDK level is not supported on this platform.
+**1. Single placeholder device.** The SDK's WebGL microphone source factory (`WebGLMicrophoneSourceFactory.GetAvailableDevices()`) returns one placeholder entry, `"Default Microphone"`, instead of one entry per physical device. The browser handles actual device selection at its own `getUserMedia` permission prompt — the SDK cannot enumerate or select a specific physical microphone on this platform.
 
 **2. User gesture required.** Browsers enforce a policy that microphone access can only be requested within a user gesture handler (a button click, key press, etc.). Calling connect automatically on scene load — without a prior user interaction — results in:
 
@@ -163,7 +163,6 @@ public void OnStartButtonClicked()
 | `audio.mic_permission_denied` on iOS | `NSMicrophoneUsageDescription` missing in Player Settings | Set the description; rebuild | App requests mic permission on first launch; voice reaches character |
 | `audio.mic_permission_denied` on WebGL | No user gesture before connect | Trigger connect from a UI button click | `audio.mic_permission_denied` no longer fires; mic input active |
 | `audio.mic_unavailable` | No microphone connected to the machine | Connect a microphone; check OS audio devices | `audio.mic_unavailable` no longer fires on connect |
-| `audio.mic_unavailable` on WebGL | Platform always returns empty device list | Expected — SDK uses browser default device | No action needed; mic publishes via browser default |
 | `[ConvaiAudioOutput] ConvaiCharacter component not found on X` | `ConvaiAudioOutput` on wrong GameObject | Move it to the same GameObject as `ConvaiCharacter` | Error no longer appears in Console on Play |
 | Character transcript appears but no audio plays | `AudioSource` muted, volume 0, or mixer at −80 dB | Inspect the `AudioSource` component on the NPC | Character voice plays through NPC `AudioSource` |
 | Character audio plays on one ear only in 3D | `AudioSource.spatialBlend` set to 1 with camera too far | Reduce Max Distance on AudioSource or bring camera closer | Audio plays in both ears at appropriate distance |

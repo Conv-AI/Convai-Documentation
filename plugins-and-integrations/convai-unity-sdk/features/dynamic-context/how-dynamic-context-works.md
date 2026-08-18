@@ -12,7 +12,7 @@ Dynamic Context is built on two primitive types.
 
 **States** are persistent, named key-value pairs. Each state has a name and a value. When you set a state, any previous value for that name is replaced. States are suitable for facts that change over time but have exactly one current value: the operator's current station, the hazard level in a zone, or whether a checklist item has been completed.
 
-**Events** are chronological, one-time occurrences. Unlike states, events accumulate in sequence and are never replaced or deduplicated. Each call to `AddEvent` appends a new line to the character's context. Events are suitable for things that happened during a session and that the character should be able to reference in order: "Trainee bypassed the manual lockout procedure", "Chemical alarm triggered at Bay 7".
+**Events** are chronological, one-time occurrences. Unlike states, events accumulate in sequence rather than being replaced. Each call to `AddEvent` appends a new line to the character's context, with one exception: if the exact same event text is already staged in the current pending batch, the repeat call is dropped and does not add a second line. This dedup window closes once the batch flushes — the same text can be added again in a later batch. Events are suitable for things that happened during a session and that the character should be able to reference in order: "Trainee bypassed the manual lockout procedure", "Chemical alarm triggered at Bay 7".
 
 Both primitives feed into the character's awareness simultaneously. States provide a stable, queryable snapshot of current conditions; events provide a chronological record of what has happened.
 

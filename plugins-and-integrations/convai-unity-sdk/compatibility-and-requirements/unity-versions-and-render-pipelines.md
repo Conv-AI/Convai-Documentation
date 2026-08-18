@@ -44,6 +44,8 @@ The SDK detects the active render pipeline at runtime and adapts automatically. 
 | Universal Render Pipeline (URP)        | ✅ Full    |
 | High Definition Render Pipeline (HDRP) | ✅ Full    |
 
+Support requires no manual configuration on any pipeline, but the Vision module's `CameraVisionFrameSource` captures differently depending on the pipeline. On the Built-in pipeline it uses command-buffer render hooks with no extra render pass. On URP and HDRP it falls back to an explicit render-compatibility path that issues one additional `Camera.Render()` call per captured frame.
+
 The included sample scenes use URP materials. If your project uses the Built-in or HDRP pipeline, sample scene materials require reassignment. The optional depth-of-field camera scripts in `SamplesShared/Camera/` support URP and HDRP; on the Built-in pipeline they skip depth-of-field and log a warning instead. None of these scripts are required for SDK functionality.
 
 ## Next steps

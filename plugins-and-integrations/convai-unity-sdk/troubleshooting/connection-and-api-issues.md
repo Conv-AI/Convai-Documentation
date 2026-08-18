@@ -8,7 +8,7 @@ All session errors surface through `ConvaiSessionEventRelay.OnSessionError`. The
 
 | Category prefix | What failed |
 | --- | --- |
-| `config.*` | SDK configuration — missing API key or Character ID |
+| `config.*` | SDK configuration — missing API key, Character ID, or Auth Token mode setup |
 | `connection.*` | Convai API or network — authentication, routing, limits |
 | `transport.*` | WebRTC / LiveKit layer — ICE, peer connection, signal |
 | `server.*` | Convai backend pipeline — quota, fatal errors |
@@ -64,6 +64,9 @@ Configuration errors fire immediately on connect — before any network traffic.
 | --- | --- | --- |
 | `config.api_key_missing` | API key field is empty in `ConvaiSettings` | Open Edit → Project Settings → Convai SDK and paste your API key |
 | `config.character_id_missing` | `CharacterId` field on `ConvaiCharacter` is empty | Set the Character ID in the `ConvaiCharacter` Inspector field |
+| `config.auth_token_provider_missing` | Auth Mode is Auth Token, but no `IConvaiAuthTokenProvider` is registered and no Token Endpoint URL is configured | Register a provider or configure a Token Endpoint URL — see [Troubleshoot authentication](../authentication/troubleshooting.md) |
+| `config.auth_token_endpoint_invalid` | The configured Token Endpoint URL is not HTTPS and is not a loopback development address | Use `https://`, or `http://localhost` / `http://127.0.0.1` for local development — see [Troubleshoot authentication](../authentication/troubleshooting.md) |
+| `config.auth_token_mode_required` | `ConnectWithAuthTokenAsync` was called while Auth Mode is still API Key | Set Auth Mode to Auth Token in Convai Project Settings before calling `ConnectWithAuthTokenAsync` — see [Troubleshoot authentication](../authentication/troubleshooting.md) |
 
 {% hint style="warning" %}
 The SDK emits a warning before any connect attempt if the API key is empty: `Convai Bootstrapper: API key not configured. Please set your API key in Edit > Project Settings > Convai SDK.` This fires on Play — fix it before testing connections.
@@ -76,13 +79,14 @@ These codes appear when Convai rejects or cannot fulfill the connect request. Mo
 | Error code | Description | Retried automatically | Fix |
 | --- | --- | --- | --- |
 | `connection.connect_invalid_api_key` | The API key was rejected by Convai | No | Copy a fresh key from the Convai dashboard; check for trailing spaces |
+| `connection.auth_token_fetch_failed` | Auth Token mode failed to resolve a token before connecting (provider exception, empty token, or endpoint failure) | Yes | See [Troubleshoot authentication](../authentication/troubleshooting.md) for the exact console message and cause |
 | `connection.auth_failed` | Authentication failed (revoked token or bad credentials) | No | Re-enter your API key; check if the key has been revoked on the dashboard |
 | `connection.invalid_token` | The connection token provided is invalid | No | Tokens are generated internally — if this appears, reconnect to generate a fresh token |
 | `connection.connect_invalid_session_id` | Connect request used an invalid session identifier | No | Session IDs are generated internally — reconnect to reset the session |
 | `connection.connect_character_not_found` | The Character ID does not exist on your account | No | Verify the Character ID in the Convai dashboard matches exactly |
 | `connection.connect_realtime_not_allowed` | Realtime access is not enabled for this account | No | Upgrade your Convai plan or contact support |
 | `connection.connect_concurrency_limit_reached` | Your plan's simultaneous session limit is reached | Yes | Disconnect idle characters; upgrade plan for higher limits |
-| `connection.connect_speaker_limit_reached` | Backend speaker limit reached for this account | Yes | Reduce concurrent active characters |
+| `connection.connect_speaker_limit_reached` | Backend speaker limit reached for this account | No | Reduce the number of concurrently active characters, or raise the limit on your account. The SDK does not retry this one — unlike the concurrency limit, it is treated as a hard limit rather than a transient condition. |
 | `connection.connect_bot_start_failed` | Convai pipeline failed to start (transient backend issue) | Yes | SDK retries automatically; if persistent, contact support |
 | `connection.connect_unhandled_server_exception` | Unhandled exception on Convai during connect | Yes | SDK retries automatically; check Convai status page if persistent |
 | `connection.timeout` | Connect did not complete within the timeout window | Yes | Check internet connection; increase **Connection Timeout** in settings (default 30 s, max 120 s) |
@@ -151,6 +155,7 @@ The following error codes trigger automatic retries:
 * `connection.connect_concurrency_limit_reached`
 * `connection.connect_bot_start_failed`
 * `connection.connect_unhandled_server_exception`
+* `connection.auth_token_fetch_failed`
 * `transport.ice_failed`
 * `transport.signal_disconnected`
 * `server.error`

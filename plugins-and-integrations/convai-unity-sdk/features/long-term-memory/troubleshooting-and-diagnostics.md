@@ -86,6 +86,7 @@ Use this script to confirm what the server has stored. Run it from the Inspector
 ```csharp
 using Convai.RestAPI;
 using Convai.RestAPI.Internal;
+using Convai.Runtime;
 using Convai.Runtime.Identity;
 using UnityEngine;
 
@@ -105,6 +106,7 @@ public class MemoryDiagnostic : MonoBehaviour
 
         int page = 1;
         bool hasMore = true;
+        int totalRecords = 0;
 
         while (hasMore)
         {
@@ -115,11 +117,12 @@ public class MemoryDiagnostic : MonoBehaviour
             foreach (MemoryRecord record in response.Memories)
                 Debug.Log($"  [{record.Id}] {record.Memory}");
 
+            totalRecords += response.Memories.Count;
             hasMore = response.HasMore;
             page++;
         }
 
-        if (page == 1)
+        if (totalRecords == 0)
             Debug.Log("[LTM] No memory records found for this user–character pair.");
     }
 }
@@ -176,7 +179,7 @@ public static class MemoryRetryHelper
             {
                 return await operation();
             }
-            catch (ConvaiRestException ex) when (ex.StatusCode == 429 || ex.StatusCode == 500)
+            catch (ConvaiRestException ex) when (ex.StatusCodeInt == 429 || ex.StatusCodeInt == 500)
             {
                 if (attempt == maxAttempts - 1) throw;
 
