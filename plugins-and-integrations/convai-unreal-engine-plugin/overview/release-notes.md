@@ -1,16 +1,160 @@
 ---
 title: Release notes
 description: Version history and notable changes for the Convai Unreal Engine plugin, covering public 4.x beta releases and the full 3.x history.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: "4.0.0-beta.27"
 ---
 
-Track changes to the Convai Unreal Engine plugin across releases. The current release is <code class="expression">space.vars.unreal_plugin_version</code>, supporting Unreal Engine <code class="expression">space.vars.unreal_min_version</code> and later.
+Track changes to the Convai Unreal Engine plugin across releases. The current release is <code class="expression">space.vars.unreal_plugin_version</code>, supporting Unreal Engine <code class="expression">space.vars.unreal_min_version</code> through <code class="expression">space.vars.unreal_max_version</code>.
 
 {% hint style="info" %}
 This plugin is in beta. Beta releases may include breaking changes between minor versions. The plugin manifest identifies the current package as <code class="expression">space.vars.unreal_plugin_version</code>.
 {% endhint %}
 
 {% updates format="full" %}
+{% update date="2026-08-11" tags="4.0.0-beta.27" %}
+## 4.0.0-beta.27
+
+**Breaking Blueprint change**
+
+* `Invoke Speech` and `Invoke Narrative Design Trigger` no longer expose the `Generate Actions` and `Replicate On Network` pins. Both now follow the chatbot's own configuration. Existing Blueprints that wired the removed pins need a node refresh before they compile.
+* `Invoke Speech` gained a `Delivery` option, so a line can wait for a quiet moment instead of interrupting, and its message is now heard exactly once instead of accumulating in the conversation context.
+
+**Actions**
+
+* The bundled `BP Convai Chatbot Component` ships with the `Escort` action ready to use, so a character can lead a player or another character to a destination without rebuilding the Blueprint handler. The unused `Wait for Action` entry is disabled.
+* Improved move-task cancellation during level shutdown and garbage collection, so a cancelling task no longer reaches for navigation components that Unreal is already destroying.
+
+**Spatial awareness**
+
+* Characters can give directions from the player's point of view. Every described object now also states where it sits relative to the player's camera, so "where is it?" gets an answer that matches what the player sees. Controlled by `Describe From Player Perspective` under **Project Settings > Plugins > Convai**, in the **Spatial Awareness** category, and on by default.
+
+**Audio and animation**
+
+* Fixed microphone tests being a no-op while a conversation was live. Recording now works during an open stream, the character does not hear the test recording, and the project's mute setting is restored afterwards.
+* Body and face mesh detection now only considers meshes with a running animation Blueprint, so hair, cloth, and static props can no longer be mistaken for a character's body or face.
+
+**Other**
+
+* Added Blueprint-accessible Knowledge Bank operations, and fixed REST requests that use a custom Convai server URL.
+* The debug overlay always shows the full picture: the exact surroundings sentences the character receives, plus the `FACTS` and `EVENTS` sections, are now visible in every build.
+{% endupdate %}
+
+{% update date="2026-08-05" tags="4.0.0-beta.26" %}
+## 4.0.0-beta.26
+
+**Movement**
+
+* Added the reusable `Convai Move To` and `Convai Escort` Blueprint nodes. An escorting character can lead someone to a destination, wait when they fall behind, resume when they catch up, and handle a destination that is already nearby.
+* Improved goal resolution and merged-object navigation, so a movement task picks a reachable destination and distinguishes arriving from already being there.
+
+**Actions**
+
+* Added cooperative action-plan cancellation. A character can change course while an action is running, and a custom Blueprint action can clean up before its replacement begins.
+* Improved parameterized actions: named values, spaces, punctuation, localized choices, and object-style responses are handled more reliably, and large action lists and multibyte text are no longer cut off by fixed-size buffers.
+
+**Other**
+
+* Improved realtime compatibility by reporting the supported protocol and client version correctly, recognizing current lifecycle messages, and forwarding interaction IDs.
+* Added the authenticated editor route the optional Convai Pak Manager needs, and fixed linking for external editor plugins that resolve their own Convai services.
+* Updated the bundled AgentSkills and action documentation for the new movement, escort, cancellation, and response behavior.
+{% endupdate %}
+
+{% update date="2026-07-30" tags="4.0.0-beta.25.1" %}
+## 4.0.0-beta.25.1
+
+* Fixed the plugin failing to load on Unreal Engine 5.8 installed from the Epic Games Launcher, where opening a project reported `Plugin 'ConvAI' failed to load because module 'ConvaiToolset' could not be loaded`. Projects now open normally. Unreal Engine 5.0 through 5.7 was unaffected and needs no changes.
+* Strengthened release testing: every update is now automatically verified to open cleanly in the Unreal editor on UE 5.6, 5.7, and 5.8 before it ships.
+{% endupdate %}
+
+{% update date="2026-07-27" tags="4.0.0-beta.25" %}
+## 4.0.0-beta.25
+
+**Movement and scene awareness**
+
+* Added movement awareness for scene objects, covering direction, stop detection, five sensitivity levels, optional movement states, and configurable start and stop responses.
+* Added Movement Points and named destinations, so a character can choose a reachable approach, recognise that it has already arrived, and react when a path opens or closes.
+* Reduced prompt repetition across duplicate objects and spatial facts, and improved action goal resolution for Blueprint movement.
+
+**Dynamic context**
+
+* Added delivery controls for live context updates. A responsive event can wait for a natural pause, send immediately when timing matters, or update the character silently.
+* Improved tracked properties with nested object paths, aliases, Blueprint-rename recovery, clearer Details panels, and more concise change wording.
+
+**Actions**
+
+* Added the experimental `Remind Self` and `Watch Property` actions, which help a character continue a multi-step task and react to the next meaningful property change.
+
+**Tooling**
+
+* Added the Convai Debug Overlay for inspecting surroundings, context states, reachability, tracked properties, and action results during development.
+
+**Migration note**
+
+* Goal fields and the `Resolve Goal Location` pins were renamed in this release. Refresh affected Blueprint nodes after upgrading.
+{% endupdate %}
+
+{% update date="2026-06-25" tags="4.0.0-beta.24" %}
+## 4.0.0-beta.24
+
+**AI coding agents**
+
+* Added MCP (Model Context Protocol) support on Unreal Engine 5.8, letting an AI coding agent work directly in the editor.
+* Added a setup workflow for connecting an agent: Claude Code, Cursor, VS Code, Gemini, or Codex.
+* Added the Convai Toolset, a set of AI-callable editor actions so an agent can set up and extend Convai characters instead of hand-editing Blueprints: `SetupConvaiCharacter`, `SetupConvaiPlayer`, and `SetupConvaiPawnMovement` wire a MetaHuman and the player for conversation and navigation; `AddNavMeshVolumeForCurrentLevel` makes the level navigable; `AddConvaiAction` and `CreateConvaiActionHandler` declare actions and generate their handler events; and `SetBlueprintPropertyAndPropagate` edits a property and pushes the change onto characters already placed in the level.
+* Added Convai AgentSkills, an in-editor knowledge base an agent reads to use Convai correctly, covering project and character setup, conversation, actions, animation, dynamic context, gaze, scene awareness, narrative, player input, vision, and expressiveness.
+
+**Compatibility**
+
+* The plugin still compiles across UE 5.0 through 5.8. The new tooling is editor-only, has no runtime dependency, and activates on UE 5.8 and later.
+{% endupdate %}
+
+{% update date="2026-06-19" tags="4.0.0-beta.23-hotfix" %}
+## 4.0.0-beta.23-hotfix
+
+* Packaging: the plugin now ships to Fab as a source-only submission, with no Unreal-generated `Binaries` or `Intermediate` folders, matching Fab's required plugin file structure.
+* Packaging: dropped the precompiled `Installed` flag from the plugin descriptor, so Fab compiles the plugin from source for each engine version.
+* Packaging: every module now declares a `PlatformAllowList`, as Fab requires.
+{% endupdate %}
+
+{% update date="2026-06-18" tags="4.0.0-beta.23" %}
+## 4.0.0-beta.23
+
+* Added support for Unreal Engine 5.8.
+* Fixed an Android microphone capture issue.
+* Improved facial-animation stability with thread-safe access to blendshape data.
+{% endupdate %}
+
+{% update date="2026-06-14" tags="4.0.0-beta.22" %}
+## 4.0.0-beta.22
+
+**Spatial awareness**
+
+* Added a spatial-awareness subsystem that gives each chatbot a continuous sense of its surroundings, delivered to the character as plain-language facts. It describes nearby objects, other characters, and the player by distance band, direction, and facing, gated by line of sight.
+* Added inter-entity relations, such as "on top of the pressure plate" or "to the left of the fountain", anchored to the nearest higher-priority neighbour.
+* Added a master enable plus line-of-sight, distance-band, and relation controls under **Project Settings > Plugins > Convai**, in the **Spatial Awareness** category, with per-chatbot surroundings and relations toggles.
+* **Retired the per-object proximity mechanism.** Spatial awareness replaces it.
+
+**Scene objects**
+
+* Added the ability to merge identically named Convai Object components into a single logical object, so a pile of crates reads to the character as one thing. Opt in per component with `Merge With Same-Named Objects`, and keep separate sets apart with `Merge Group Index`. A merged object exposes one position, one description, and one collective gaze highlight.
+* Added a global `Duplicate Name Suffix Style` setting, `Numeric` or `Alphabetical`, for disambiguating same-named objects that are not merged.
+
+**Dynamic context**
+
+* Added ephemeral context events: `Add Context Event` gained a `bEphemeral` option that nudges the character exactly once on the next update without persisting it.
+* `SetObjectInAttention` now emits a one-flush attention cue by default, so gazing at an object tells the character once without leaving a lingering state. The call also logs a warning explaining why it had no effect, whether actions are disabled on the chatbot, the object is missing from the environment list, or the object is missing from the connect-time action config.
+
+**Other**
+
+* Added `FConvaiAvatarInfo`: the get-characters request now returns full character details rather than only character IDs.
+* Fixed pointing animations so they play and aim correctly from character-issued point actions.
+* Fixed step-onto arrival, so a character standing on a wide object's footprint is treated as having reached it instead of never registering arrival for objects wider than its acceptance radius.
+* Fixed spatial-awareness and duplicate-name settings being ignored at runtime; toggling them in Project Settings now takes effect without an editor restart.
+* Fixed one-flush ephemeral context events being lost while the chatbot was disconnected; the flush is deferred until reconnect.
+* Fixed an audio resampler divide-by-zero that could occur when an invalid sample rate was reported.
+* Fixed the Convai editor update check so it correctly detects V4 releases, and fixed editor theme initialization.
+{% endupdate %}
+
 {% update date="2026-05-25" tags="4.0.0-beta.21" %}
 ## 4.0.0-beta.21
 
