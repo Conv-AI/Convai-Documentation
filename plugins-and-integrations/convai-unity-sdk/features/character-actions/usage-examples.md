@@ -28,7 +28,7 @@ In `ConvaiActionConfigSource`:
 | Action name | Target requirement | Executor |
 | --- | --- | --- |
 | `Retrieve` | `Object` | `ConvaiWalkToActionExecutor` |
-| `Point At` | `Either` | `LookAtTargetActionExecutor` |
+| `Point At` | `Either` | `ConvaiLookAtActionExecutor` |
 
 **Actionable objects:**
 
@@ -98,7 +98,7 @@ public sealed class OnboardingTourController : MonoBehaviour
 | Action name | Target requirement | Executor |
 | --- | --- | --- |
 | `Walk To` | `Object` | `ConvaiWalkToActionExecutor` |
-| `Demonstrate` | `Object` | `LookAtTargetActionExecutor` |
+| `Demonstrate` | `Object` | `ConvaiLookAtActionExecutor` |
 
 **Actionable objects:** Each workstation registered with its name and location description.
 
