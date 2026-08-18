@@ -19,6 +19,7 @@ component fields, behavior, requirements, limits, or console messages.
 | **You just want a page written and you do not write documentation for a living** | Run **`/doc`**. It asks what it needs in plain language, picks the page type and location for you, writes it, and runs all three checks. This is the default. |
 | Write or revise a single page, and you already know the page type and pack | `/write-doc <topic> [pack]`, then the single-page workflow below. |
 | Add one feature/section that has several pages | Plan just that scope (`/plan-docs <pack> --scope <area>`), approve, then `/build-docs` the resulting unit(s). |
+| **An SDK released a new version and the docs must catch up** | `/release <pack> <old>..<new>` works out which pages the release broke, which new surface nobody documented, and what the version bump touches; writes a plan; stops for approval. Then `/build-docs` per unit. |
 | Document a whole area from scratch — an SDK, a product surface, or a customer's set | **Plan first, then build by unit.** Run `/plan-docs <sdk>` → human approves the plan → `/build-docs <sdk>` writes one work unit at a time, with review between units. See "Scaffold a whole SDK" below. |
 
 ### Scaffold a whole area
@@ -206,6 +207,51 @@ These are the highest-frequency failure points. Always enforce them on every pag
 - Run a block-fit pass before handing off: identify structured content (procedures, alternatives,
   important notes, hub navigation, code) and upgrade it to the matching native block.
 
+## How a pack stays true
+
+A pack holds four kinds of thing that change at four different speeds, and only one of them
+rots on its own: the actual names of components and modules. So that layer is not prose.
+
+| Layer | File | Who writes it |
+|---|---|---|
+| Doctrine — naming policy, audience, terminology, what code cannot settle | `packs/<subject>.md` | A person, rarely |
+| Contract — where each kind of fact lives in the source, and the never-use list | `packs/contracts/<subject>.json` | A person, once |
+| Surface — the names actually in the source right now | `packs/surfaces/<subject>.json` | `tools/extract_surface.py`, never by hand |
+
+`tools/check_pack.py` compares the doctrine against the surface and reports what drifted: a
+type the pack names that no longer exists, a feature module the pack never mentions, a name
+the contract forbids that has become real, a version literal frozen into the prose. Run it
+before writing a batch of pages for a subject, and after any release of that subject.
+
+The contract's `must_not_exist` list is also what `tools/check_site.py` enforces across the
+whole documentation repository, so a name the pack forbids cannot reach a published page.
+
+## Measuring the system itself
+
+Every gate emits findings that name a CV rule, and `tools/collect_findings.py` rolls them up from
+`.convai-docs/findings/`: which rule fails most often, on how many pages, and which rules have
+never been flagged at all. A rule at the top of that list is a question rather than a verdict -
+people may be getting it wrong, they may not know it exists, or the rule may be making pages worse,
+and those three have different fixes.
+
+`tools/check_gold_standards.py` protects the benchmark itself. Every pack points writers at example
+pages and tells them to match that bar, but those pages live in the documentation repository where
+nothing was watching them: an exemplar can be deleted, fail the linter, be cut down to nothing, or -
+the case that was actually true - belong to a different subject entirely, so an Unreal writer is
+told to match a Unity page.
+
+## Rule ids
+
+Every enforceable rule has a permanent id, `CV-<n>`. The rule text lives in exactly one file,
+`gitbook/styleguide.md`, which is also the page GitBook's agent reads when it reviews a change
+request. The linter, the `docs-reviewer`, and GitBook's agent all cite the same id, so a finding can
+be traced to one rule no matter which of the three raised it.
+
+Never renumber or reuse an id — a flag recorded last month refers to it. `tools/check_rules.py`
+fails the build when an id is duplicated, deleted, quietly redefined, or referenced without being
+defined. Changing a rule is expected to fail it once: re-run with `--update <date>`, commit the
+`gitbook/rules.json` diff, and record why in the style guide's decision log.
+
 ## Quality gate
 
 Every page passes three independent checks before a human accepts it. Run them after drafting:
@@ -217,6 +263,17 @@ Every page passes three independent checks before a human accepts it. Run them a
    message, version, and menu path against the actual SDK source. Catches wrong or invented facts.
 3. **Quality review (`/review-doc`).** The `docs-reviewer` runs `references/quality-checklist.md` for
    the judgement-based standards the linter cannot check.
+
+A fourth check runs over the repository rather than one page:
+`python "${CLAUDE_PLUGIN_ROOT}/skills/convai-docs/tools/check_site.py" <docs-root> --baseline .convai-docs/site-baseline.json` —
+broken relative links, missing images, orphan pages, dangling `SUMMARY.md` entries, sidebar labels
+that do not match a page title, duplicate titles and descriptions, and names a pack forbids. It is
+baselined: findings that existed before the check was adopted are recorded and do not fail a run, so
+only new problems surface. `tools/build_index.py` builds the index it reads, which also answers "which
+pages name this symbol" — the question a release has to answer before anything can be updated.
+`tools/diff_surface.py` is what turns that answer into a work list: it intersects the difference
+between two extracted surfaces with the index, separating pages that are wrong now from migration
+guides and release notes, where naming a retired component is the point of the page.
 
 The `docs-writer` runs the lint itself and fixes ERRORs; accuracy and quality review are independent
 gates a human triggers before accepting the page.
@@ -232,9 +289,33 @@ gates a human triggers before accepting the page.
 - `/write-doc <topic> [pack]` runs the `docs-writer` to draft or revise a single page.
 - `/verify-doc <path> [source-path]` runs the `docs-verifier` to check technical accuracy against SDK source.
 - `/review-doc <path>` runs the lint plus the `docs-reviewer` to audit quality against the checklist.
+- `/gate <path> [source-path]` runs all three checks on one page and gives a single verdict. Use
+  it on a page that arrived some other way - written by hand, from a pull request, or proposed by
+  GitBook's agent. A page that skipped the gate is a page nobody has checked.
+- `/preview <path...>` pushes drafts to the GitBook Staging space and returns a rendered preview
+  link. Markdown review misses collapsed steppers, unclosed blocks, and images that resolve to
+  nothing; a rendered page does not.
+- `/coverage <pack> [section]` reports what the SDK ships that no page mentions, and what pages
+  name that the SDK does not have. A planning tool, never a gate.
+- `/deprecate <path>` retires or moves a page with its redirect, its inbound links, and its
+  sidebar entry handled in the same change.
+- `/styleguide-sync` publishes the rule text and the agent instructions to GitBook, so the
+  platform enforces exactly what this plugin enforces. Run it after any rule change.
 - `/new-pack <name> [sdk|topic|customer]` scaffolds a new pack from the matching template.
+- `/release <pack> <old>..<new> [source-path]` is the version-bump pipeline: it extracts the
+  surface at both versions, intersects the difference with the symbol index of the documentation,
+  and produces a plan of what is broken, what is undocumented, and what the version move touches.
+  Stops for approval; writes no page itself.
+- `/pack-sync <pack> [source-path]` regenerates a pack's source surface and reports what drifted.
+  This is the deterministic half of an audit: names that no longer exist, modules nobody wrote
+  down, a forbidden name that became real, a version frozen into the prose. Run it before writing
+  a batch of pages for a subject, and after any release of that subject.
+- `/audit-pack <pack> [source-path]` re-verifies a pack against its current source and reports what has
+  drifted. Run it before writing a batch of pages for a subject — a pack that has gone stale will
+  confidently hand you the old component name, and nothing else in the tooling will catch it.
 
-Directory map (bundled in the plugin, read-only): `references/` (generic doctrine),
+Directory map (bundled in the plugin, read-only): `gitbook/styleguide.md` (the rule text and its
+`rules.json` registry), `references/` (generic doctrine),
 `packs/` (per-SDK facts), `templates/` (page skeletons),
 `plans/_plan-template.md` (the plan format), `tools/` (the linter). Generated per-SDK plans are written
 to `.convai-docs/plans/<sdk>.md` in the documentation repo (a gitignored working artifact, never published).

@@ -2,12 +2,12 @@
 
 SDK-specific facts for the Convai Web SDK. Generic doctrine lives in `references/`.
 
-**Provenance of the facts below.** They were read out of the existing pages under
-`plugins-and-integrations/web-plugins/convai-web-sdk/`, not out of the SDK source, because the Web SDK
-repository is not checked out on the machine where this pack was written. Existing docs are an allowed
-source of truth, but they are a weaker one than code: they can be stale. When `/verify-doc` runs against
-a Web page, supply the SDK source path so claims are checked against the implementation. Treat any fact
-here that the source contradicts as wrong, and fix the pack in the same change.
+Every fact below was verified against the SDK source on the `stable-release` branch, with the file and
+symbol noted where it matters. An earlier draft of this pack was built from the published documentation
+instead, and verifying it against code found three wrong claims and four missing API areas — which is
+why the rule is what it is: code settles a claim, documentation does not.
+
+Last audited: 2026-08-18 against `Conv-AI/convai-web-sdk_internal` (`stable-release`) at `be3824c`.
 
 ---
 
@@ -33,11 +33,13 @@ Baseline prerequisites stated in the current quickstart:
 
 - A Convai account with an API key
 - A character ID from the Convai dashboard
-- Node.js 18 or newer
-- For the React path: React 18 or newer (`react` and `react-dom` are peer dependencies)
+- For the React path: **React 18 or 19**. Both are declared peer dependencies alongside `react-dom`.
 
-No browser-support statement exists in the docs. **Do not invent one.** If a page needs it, ask the Web
-SDK owner and add it here.
+The package declares **no `engines` field**, so there is no Node version requirement in the manifest.
+The published quickstart says Node 18+; that claim is not backed by the package and should be confirmed
+with the Web SDK owner before a page repeats it.
+
+No browser-support statement exists in the source or the docs. **Do not invent one.**
 
 ## Terminology and concepts
 
@@ -45,21 +47,47 @@ SDK owner and add it here.
 |---|---|
 | Convai Web SDK | The product. |
 | `@convai/web-sdk` | The npm package. Always inline code. |
-| `@convai/web-sdk/core` | Import subpath for framework-free core. |
+| `@convai/web-sdk/core` | Import subpath for the framework-free core. |
 | `@convai/web-sdk/react` | Import subpath for the React bindings. |
 | `@convai/web-sdk/vanilla` | Import subpath for the vanilla-TypeScript API. |
+| `@convai/web-sdk/vanilla/websocket` | Import subpath for the WebSocket transport. |
+| `@convai/web-sdk/lipsync-helpers` | Import subpath for the blendshape and ARKit helpers. |
 | `ConvaiClient` | The core client class. |
 | `useConvaiClient` | The React hook. |
-| `ConvaiWidget` | The React component. |
 | `createConvaiWidget()` | The vanilla helper that mounts a widget. |
-| `AudioRenderer`, `BlendshapeQueue`, `MemoryManager` | Named runtime pieces. |
-| `ConvaiConfig`, `ConvaiWidgetProps` | Named TypeScript interfaces. |
+| `BlendshapeQueue`, `MemoryManager` | Named runtime pieces, defined in `src/core/`. |
+| `AudioRenderer` | **Two different things with one name.** In vanilla it is the SDK's own class in `src/vanilla/AudioRenderer.ts`. In React it is an alias re-exported from LiveKit. Never describe them as the same object. |
+| `ConvaiWidget` | **Also two things.** A React component, and a vanilla construct mounted through `createConvaiWidget`. Say which one a page means. |
+| `ConvaiConfig` | The public config interface, `src/core/types.ts`. |
+| `createBlendshapeQueue`, `createARKitBlendshapeQueue`, `createARKitNameMapper` | Lip sync helpers, from the `lipsync-helpers` subpath. |
+
+`ConvaiWidgetProps` exists in the source but is **not exported**, so it is not public API. Do not
+document it as a type a reader can import.
+
+The six subpaths above are the package's declared `exports`. There is no other public entry point.
 
 Web-native terms keep their conventional spelling: npm, ES module, bundler, `Promise`, WebSocket,
 `getUserMedia`, `AudioContext`.
 
 Format every package name, import path, class, hook, component, method, event name, and config field as
 inline code, including inside table cells.
+
+## Public API areas a writer must not miss
+
+Verified in `src/core/types.ts`. The published documentation covers only part of this surface, so a page
+written from those pages alone will silently omit real features:
+
+| Area | Notes |
+|---|---|
+| `transport` | Selects `"livekit"` or `"websocket"`. A significant choice for an integrator, with its own subpath. |
+| `authToken` | Token-based auth alongside `apiKey`. Prefer it for anything client-side. |
+| `enableEmotion`, `emotionConfig` | Emotion support, with selectable providers. |
+| `visionInputConfig` | Vision input configuration. |
+| `respondModes` | Response mode selection. |
+| `endUserMetadata`, `characterSessionId` | Session and end-user identity. |
+
+Read the full `ConvaiConfig` interface before writing any configuration page. Do not document a field
+set from an existing page; that is how the above went missing.
 
 ## Install and package model
 
@@ -72,7 +100,7 @@ npm install @convai/web-sdk
 `yarn add` and `pnpm add` equivalents appear on the React page. There is **no CDN or script-tag install**
 documented; do not write one.
 
-The three import subpaths are part of the single package — `react` and `vanilla` are not separate
+All six import subpaths are part of the single package — `react` and `vanilla` are not separate
 packages. A page that implies otherwise is wrong.
 
 Canonical entry page: `plugins-and-integrations/web-plugins/convai-web-sdk/quickstart.md`.
@@ -149,12 +177,27 @@ verified against.
 
 ## SDK source of truth
 
-The Web SDK repository is **not** checked out alongside the other SDKs on this machine, and its path is
-per-machine like every other SDK. Ask the user for it when running `/plan-docs web` or `/verify-doc` on
-a Web page; do not guess it and do not fall back to treating the existing docs as verified.
+**Repository:** `Conv-AI/convai-web-sdk_internal`, branch `stable-release`. The path is per-machine —
+ask for it when running `/plan-docs web` or `/verify-doc` on a Web page. Do not guess it.
 
-Until the source is available, a Web page may be drafted from the existing docs, but every identifier,
-config field, event name, and default it states must be listed for the verifier to confirm.
+Verify against these:
+
+| Claim | Where |
+|---|---|
+| Package name, version, entry points, peer dependencies | `package.json` — the `exports` field is the list of public subpaths |
+| Config fields, types, defaults | `src/core/types.ts` |
+| Client behavior and methods | `src/core/ConvaiClient.ts` |
+| React surface | `src/react/` — check `index.ts` for what is actually exported |
+| Vanilla surface | `src/vanilla/` |
+| Lip sync helpers | `src/lipsync-helpers/` |
+
+The repository also ships a `docs/` directory. **Read it to orient yourself, then verify everything you
+take from it against the code**, and never copy its wording — our pages follow `references/`, not
+another repository's house style. See "In-repo documentation is a lead, not a source of truth" in
+`references/safe-publishing.md`.
+
+An identifier is public only if it is exported from the relevant `index.ts`. Existing in the source is
+not the same as being public API — `ConvaiWidgetProps` is the example that caught this pack out.
 
 ## Not part of this pack
 

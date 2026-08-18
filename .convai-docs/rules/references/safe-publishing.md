@@ -98,6 +98,28 @@ Finish by listing every file you added, changed, moved, or deleted, the source y
 verified technical claims against, and any assumption or open question.
 ```
 
+## In-repo documentation is a lead, not a source of truth
+
+A source repository often ships its own `docs/`, `README.md`, or `CLAUDE.md`. Read them — they are the
+fastest way to learn what a system does and what its parts are called. Then verify everything you take
+from them against the code.
+
+They are prose written by a person at some point in the past, under the same pressures that make
+published documentation go stale, and nothing recompiles when they drift. A constant renamed, a limit
+raised, a field removed — none of that updates the repo's own docs. Treating them as settled fact
+imports someone else's stale claim into ours and gives it our name on it.
+
+Two rules follow:
+
+- **Never state a fact on the strength of in-repo docs alone.** Find the constant, the interface, the
+  handler, the label in the source, and cite that. If the code and the repo's docs disagree, the code
+  wins and the disagreement is worth reporting.
+- **Never copy their wording.** Our pages follow the voice, structure, and terminology in
+  `references/`, not whatever style that repository happens to use. A paragraph lifted from a
+  README will not match our standards and will not read like the rest of our documentation.
+
+The same applies to an existing published page: it is evidence of what someone once believed, not proof.
+
 ## Source-of-truth rule
 
 Use the SDK source code, existing docs, provided technical notes, and the current documentation plan

@@ -1,5 +1,5 @@
 ---
-title: ConvaiNPC
+title: ConvaiCharacter
 description: Reference for the character component, including its required fields, serialized settings, events, and its runtime behavior.
 last_reviewed: "<version you verified against>"
 ---
@@ -12,7 +12,7 @@ No narrative teaching, marketing, or opinion. Verify every fact against SDK sour
 Replace all content. No body `#`. Delete this comment before publishing.
 -->
 
-`ConvaiNPC` <one-sentence factual statement of what it is and where it lives>.
+`ConvaiCharacter` <one-sentence factual statement of what it is and where it lives>.
 
 ## Fields
 
