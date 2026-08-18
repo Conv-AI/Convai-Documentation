@@ -1,7 +1,7 @@
 ---
 title: Event system
 description: Reference for Convai event relay components, including available events, payload fields, and subscription patterns for scene logic.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 The Convai SDK communicates what happens during a session — connections, character speech, transcripts, emotions — through a set of relay components. Add one of these MonoBehaviours to a GameObject in your scene, wire up UnityEvents in the Inspector or subscribe in code, and your scene logic responds to whatever the SDK broadcasts.
@@ -195,6 +195,10 @@ Tracks events for a single `ConvaiCharacter`. Add one per character that needs t
 | `OnTurnCompleted`      | `CharacterTurnCompletedRelayData` | The character's full response for one turn is complete.           |
 | `OnCharacterReady`     | —                                 | The character is fully initialized and connected to the session.  |
 | `OnEmotionChanged`     | `CharacterEmotionRelayData`       | A new emotion signal is received from Convai.                     |
+
+### Events in a multi-character room
+
+While a multi-character session is active, `ConvaiCharacterEventRelay` and the per-character events on `ConvaiEvents` resolve an inbound message through room membership rather than through `CharacterId` alone. A roster can hold two memberships with the same `CharacterId`, and only membership disambiguates between them — code that filters solely on `CharacterId` cannot tell the two apart. See [React to roster and target changes](../features/multi-character-sessions/handle-roster-events.md) for the membership-scoped events on `MultiCharacterRoomSession`.
 
 ### `CharacterTranscriptRelayData`
 

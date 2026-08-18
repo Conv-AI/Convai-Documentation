@@ -1,7 +1,7 @@
 ---
 title: Session lifecycle
 description: Understand how ConvaiCharacter sessions transition through states, persist session IDs, and support explicit pause, resume, and background policy controls.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Every `ConvaiCharacter` in your scene maintains an independent session with Convai. That session tracks whether the character is connected, what its current state is, and — when persistence is enabled — what conversation it was in the last time you connected. Understanding how sessions are created, persisted, and recovered lets you build reliable, resumable character interactions across training simulations, interactive experiences, and games.
@@ -44,6 +44,8 @@ You receive state transitions as `SessionStateChangedRelayData` events via `Conv
 ## Per-character sessions
 
 Each `ConvaiCharacter` has its own independent session. Sessions are not shared between characters. In multi-character scenes, each character connects and disconnects independently — session IDs are keyed to the character's ID string set in the Inspector (not the scene or object name), reconnect policy applies per character, and a session error on one character does not affect others.
+
+This describes the connection each `ConvaiCharacter` tracks locally. When a scene registers two or more characters, the SDK builds one shared multi-character room around them at connect, with its own roster and readiness model layered on top of these per-character sessions. See [How multi-character sessions work](../features/multi-character-sessions/how-multi-character-sessions-work.md) for that layer.
 
 `ConvaiSessionData` is the persistent session store that maps each character to its current session identifier. It loads from disk automatically at startup and writes to `{Application.persistentDataPath}/Convai/sessions.json` on every change — session IDs survive application restarts without any additional setup.
 
