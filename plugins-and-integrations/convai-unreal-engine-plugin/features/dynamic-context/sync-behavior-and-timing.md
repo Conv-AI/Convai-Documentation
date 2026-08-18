@@ -1,20 +1,36 @@
 ---
 title: Sync behavior and timing
-description: Understand how dynamic context payloads flush after debounce, how offline queueing works, and when immediate flushes bypass batching.
-last_reviewed: "4.0.0-beta.21"
+description: Understand how dynamic context flushes after debounce, how Wait Until Conversation Is Idle holds updates, and how offline queueing works.
+last_reviewed: "4.0.0-beta.27"
 ---
 
-Dynamic context updates do not send to Convai on every Blueprint call. By default, the plugin waits briefly so rapid changes can merge into one send. This page explains when flushes happen, what each flush contains, and when to bypass the debounce timer.
+Dynamic context updates do not send to Convai on every Blueprint call. By default, the plugin waits briefly so rapid changes can merge into one send, and each mutation function also carries a separate `Delivery` option that can hold the update for a natural pause in the conversation. This page explains when flushes happen, what each flush contains, when a held update is actually delivered, and when to bypass either wait.
 
 ## When updates send
 
 | Situation | What happens |
 |---|---|
-| Default debounced call while connected | Updates stage locally; one `Replace` `context-update` sends after `ContextDebounceWindow` (default `0.5` s) with no new updates in the window |
+| Default debounced call while connected, `Delivery` = `Send Normally` | Updates stage locally; one `Replace` `context-update` sends after `ContextDebounceWindow` (default `0.5` s) with no new updates in the window |
 | Rapid burst of updates | All changes in the burst coalesce into one flush; timer resets on each call but cannot exceed `ContextMaxDebounceWindow` (default `3.0` s) from the first update |
-| `bFlushImmediately = true` after connect | `FlushDynamicContext()` runs in the current frame, bypassing debounce |
+| `Delivery` = `Wait Until Conversation Is Idle`, aggregate `ShouldRespond` is `Auto`/`Always` | The update is held — not staged into the debounce batch — until the conversation has stayed continuously quiet for `Quiet Time Before Delivery (s)` (default `2.0` s), then it flushes. See [When a held update is actually delivered](#when-a-held-update-is-actually-delivered) |
+| `Delivery` = `Wait Until Conversation Is Idle`, aggregate `ShouldRespond` is `Never` | Holding does not apply — a silent update has nothing to interrupt with, so it sends normally through the regular debounce path |
+| `bFlushImmediately = true` after connect, `Delivery` = `Send Normally` | `FlushDynamicContext()` runs in the current frame, bypassing debounce |
+| `bFlushImmediately = true` after connect, `Delivery` = `Wait Until Conversation Is Idle` | Still waits for a quiet moment, but sends at the first quiet instant instead of waiting out the full `Quiet Time Before Delivery (s)` window |
 | Updates before session connects | Changes accumulate in `PendingContextBatch`; first flush after connect and debounce deadline |
 | `Reset Dynamic Context` | Drains staged content first, then sends a `Reset` `context-update`, then clears the local tracker |
+
+## When a held update is actually delivered
+
+`Set Context State`, `Set Context States`, and `Add Context Event` each expose a `Delivery` parameter (`EConvaiContextDelivery`). Debounce and delivery are two separate waits, and they apply in sequence:
+
+1. **Debounce** (`ContextDebounceWindow`, `ContextMaxDebounceWindow`) decides when a batch of staged updates is ready to leave the client.
+2. **Delivery** decides whether a ready update sends immediately or waits for the conversation to go quiet first.
+
+An update with `Delivery` set to `Wait Until Conversation Is Idle` is held rather than staged into the normal debounce batch. It is released, and flushed as a `Replace` `context-update`, only after the conversation has stayed continuously quiet for `Quiet Time Before Delivery (s)` (the `ConversationIdleSettleSeconds` property, default `2.0` s). Any conversation activity — the character speaking, the user speaking — restarts that quiet window. There is deliberately no upper bound on the total hold, so a waiting update can never interrupt an ongoing exchange; it can wait for as long as the conversation lasts. A held `Add Context Event` lands at the end of the event history when it finally sends, so it still reads as the most recent thing that happened.
+
+Holding only applies when the batch's aggregate `ShouldRespond` is `Auto` or `Always`. A silent (`Never`) update has nothing to interrupt with, so `Delivery` has no effect on it and it always sends through the regular debounce path.
+
+`bFlushImmediately = true` changes what the hold waits for, not whether it holds: with `Delivery` set to `Wait Until Conversation Is Idle`, an immediate call still waits for a quiet moment, but sends as soon as that first quiet instant is detected instead of waiting out the full `Quiet Time Before Delivery (s)` window.
 
 ## Transport message shape
 
@@ -168,6 +184,8 @@ Each mutation function — `Set Context State`, `Set Context States`, `Add Conte
 Use `bFlushImmediately` for time-critical updates where the default debounce delay would cause perceptible lag. Each immediate call runs `FlushDynamicContext()` in the current frame and sends a `context-update` when the chatbot is connected with deliverable staged work. Avoid calling it every tick on continuously changing values.
 
 `Reset Dynamic Context` calls the flush path immediately when connected. It has no `bFlushImmediately` parameter.
+
+`bFlushImmediately` does not override `Delivery`. On an update with `Delivery` set to `Wait Until Conversation Is Idle`, `bFlushImmediately` still waits for the conversation to go quiet — see [When a held update is actually delivered](#when-a-held-update-is-actually-delivered) — it only skips the full `Quiet Time Before Delivery (s)` window once quiet is detected.
 
 {% hint style="warning" %}
 High-frequency use of `bFlushImmediately` — for example, syncing a value that updates every frame — can generate one `context-update` per call when connected. Use the default debounce behavior for continuously changing values.
