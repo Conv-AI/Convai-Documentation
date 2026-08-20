@@ -14,6 +14,8 @@ The [Model Context Protocol (MCP)](https://modelcontextprotocol.io) integration 
 
 This lets your character look up data, search a knowledge source, or trigger an action in your systems, without a custom integration for each service.
 
+{% embed url="https://youtu.be/Q4xLERLR2Eg" %}
+
 ### Prerequisites
 
 Your MCP server must:
