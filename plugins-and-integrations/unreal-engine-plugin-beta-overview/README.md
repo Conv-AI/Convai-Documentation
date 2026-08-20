@@ -4,6 +4,7 @@ description: >-
   deliver hands-free, low-latency, and vision-enabled AI character interactions
   in Unreal Engine.
 hidden: true
+noIndex: true
 ---
 
 # Unreal Engine Plugin (Beta) Overview

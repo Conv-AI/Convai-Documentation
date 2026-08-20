@@ -3,6 +3,7 @@ description: >-
   Integrate advanced conversational AI to create intelligent, interactive NPCs
   for your games.
 hidden: true
+noIndex: true
 ---
 
 # Unity Plugin
@@ -31,4 +32,3 @@ Visit [convai.com](https://convai.com/pipeline/dashboard) for more information a
 {% embed url="https://youtu.be/anb9ityi0MQ?feature=shared" %}
 Quick Guide On Adding AI Characters to Your Unity Project
 {% endembed %}
-
