@@ -1,28 +1,29 @@
 ---
 description: >-
-  Create and configure AI characters with Convai’s Character Crafting APIs to
+  Create and configure AI characters with Convai's Character Crafting APIs to
   define their personality, behavior, knowledge and more.
 ---
 
 # Character Crafting APIs
 
 The **Character Crafting APIs** give developers full control over how an AI character is designed, configured, and evolved.\
-These APIs serve as the foundation of your character’s identity — defining its **personality, behavior, knowledge, and narrative** consistency across all interactions.
+These APIs serve as the foundation of your character's identity — defining its **personality, behavior, knowledge, and narrative** consistency across all interactions.
 
 With these APIs, you can:
 
 * **Create and manage characters** — define character metadata such as name, description, language.
 * **Configure AI settings** through the **Core AI Setting API**, including model selection, temperature.
-* **Build and maintain Knowledge Banks** — upload, update, and organize documents that form the character’s domain knowledge.
+* **Build and maintain Knowledge Banks** — upload, update, and organize documents that form the character's domain knowledge.
 * **Develop backstories** using the **Backstory API**, providing depth and continuity to your characters.
 * **Design narrative elements** via the **Narrative Design API** to create immersive storylines and world-building connections.
 * **Create External API functions** — Python handlers characters can call as tools (weather, tickets, live data) via the **External API**.
+* **Connect MCP servers** — register remote MCP tool servers, with static headers or OAuth, and attach them to characters via the **MCP Server API**.
 * **Define and manage actions** (gestures, movements, or environment-specific behaviors) using the **Action API**.
 * **Access language and voice options** via the **Language List** and **Voice List APIs**, allowing multilingual and voice-customized character experiences.
 * **Retrieve and manage character lists and versions** through the **Character List API**, ensuring your production characters stay organized and versioned properly.
-* **Evaluate and refine** your characters’ responses and performance using the **Evaluation API**.
+* **Evaluate and refine** your characters' responses and performance using the **Evaluation API**.
 
-Together, these APIs let you shape a character’s **core intelligence, emotional tone, and knowledge framework**, ensuring a consistent, believable personality in every conversation.
+Together, these APIs let you shape a character's **core intelligence, emotional tone, and knowledge framework**, ensuring a consistent, believable personality in every conversation.
 
 {% content-ref url="character-api.md" %}
 [character-api.md](character-api.md)
@@ -50,6 +51,10 @@ Together, these APIs let you shape a character’s **core intelligence, emotiona
 
 {% content-ref url="external-api.md" %}
 [external-api.md](external-api.md)
+{% endcontent-ref %}
+
+{% content-ref url="mcp-server-api.md" %}
+[mcp-server-api.md](mcp-server-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="action-api.md" %}

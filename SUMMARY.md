@@ -711,6 +711,7 @@
     * [Custom LLM API](api-reference/core-api-reference/character-crafting-apis/custom-llm-api.md)
     * [Text to Speech API](api-reference/core-api-reference/character-crafting-apis/text-to-speech-api.md)
     * [Streaming Transcription API](api-reference/core-api-reference/character-crafting-apis/streaming-transcription-api.md)
+    * [MCP Server API](api-reference/core-api-reference/character-crafting-apis/mcp-server-api.md)
   * [Live APIs (Beta)](api-reference/core-api-reference/live-apis-beta/README.md)
     * [Connect API](api-reference/core-api-reference/live-apis-beta/connect-api.md)
     * [Use multi-character sessions](api-reference/core-api-reference/live-apis-beta/multi-character-sessions.md)
