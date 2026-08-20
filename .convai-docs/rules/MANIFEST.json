@@ -19,10 +19,10 @@
     "packs/surfaces/core-service.json": "31f436dcf3e233cc15803300f4cf9cf82cf5d1cd92f85e2ffcbe40132a24a12a",
     "packs/surfaces/playground.json": "b1553b358dcd2a93065c1c2707cfded58fb3365ecad672a362c5097d71dfdbf8",
     "packs/surfaces/unity.json": "ffd6c1a605022ef6352354b2f044a5605de854a7ca7719df4976958005dd631f",
-    "packs/surfaces/unreal.json": "60c2dbf1e39ae02f7498eb629ed2c45a767a2698e24f973ec349df7d4e29d89c",
+    "packs/surfaces/unreal.json": "aeb97c607ac8ccc88a6f366afb063342305ad4b206741acc846dcafa3ecf03b8",
     "packs/surfaces/web.json": "217bd752ccb1bb5918e89222fa586bd90536a02afa28fb305c39c5252719a67b",
     "packs/unity.md": "02cf20a0497f59172f252bc723e49c69f0e61291222207b94d69edf244703881",
-    "packs/unreal.md": "8933682bbe2d7cf61b67dd3658aec63a68ba44526585b7db25f5aa7e3caac623",
+    "packs/unreal.md": "ac22b6ccb5a4cedd8b43629927382db89ed647f36dfa789123e8de2ee52b0a7b",
     "packs/web.md": "0d28c43c086989b85aa79beb6b8ca22ff6a9eaaeb3a902f0d00ab2f66367c6db",
     "plans/_plan-template.md": "90524d30307f0782980a9885b135896b0ac5ea9a79a39e156f9ee7e3f03a0bcb",
     "references/aaa-prompt.md": "7627167035331162642adb1d02ffcf594c8fd38e1f31593f905965f0e6db9894",
@@ -47,7 +47,7 @@
     "templates/release-notes.md": "9674a2c86d832cdcc015260c9d4e51dfd1517aaf413c23f5e35815c5cd09bafa",
     "templates/troubleshooting.md": "ecde6f2df14d69e91528e0efb0f253860aa4ad9bcab350c2eb6a61f2526db8d3",
     "templates/tutorial.md": "d3346c8b4d2771ab8453e0a96c1ddb73d2d254961c6590b4085adaf464d638f3",
-    "tools/build_index.py": "78135f778d9b5661ba5927861a4401b4264b4df9627426921222ba6e8783e510",
+    "tools/build_index.py": "7f1a3934ff259ba41ec187a9b0cb2d8c0be9875ec41d11d0b489be2e94c4af71",
     "tools/check_coverage.py": "04acd87ee70006aa4a074454677db0c7feb6513ee3758d81675df685f5284818",
     "tools/check_gold_standards.py": "b4d17283695461b0f21c1a033c3222cab445e55856c516573a4ad41f2ec58d84",
     "tools/check_pack.py": "ce29ec62ecf99911de30e97de76ff40aba75546e7ef1f9d38cba39be3cc629df",
@@ -56,9 +56,9 @@
     "tools/check_site.py": "c46daf406573f088e2303c20181f6287b2e9f2331e351705abc6b3b1a733e80e",
     "tools/collect_findings.py": "72e1204939077b798092fecad9cf0c661017f23b6edf6f8d678133e4fc215194",
     "tools/diff_surface.py": "4ed127c8e1deb7d83ad794cb7723c6e9f5dde7aaaea4ba45092ce9ba4f8c9e51",
-    "tools/extract_surface.py": "4e8ace134e65f3d38e0c8f816209e8cd62572a03608dd2145820f5df6af42cd1",
+    "tools/extract_surface.py": "863d48b119cfc10aa2044349bdbc1d7f9248cc279a470910a03dd2594d1bf9e6",
     "tools/rules.py": "943d5762295389729eec6de372f49c91e28ee1b7776164bb16a0e7273dd1421e"
   },
   "generated_by": "convai-docs-tools/scripts/sync_agent_rules.py",
-  "plugin_version": "2.4.1"
+  "plugin_version": "2.5.0"
 }

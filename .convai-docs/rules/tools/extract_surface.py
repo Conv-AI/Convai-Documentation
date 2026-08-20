@@ -81,6 +81,15 @@ CPP_TYPE = re.compile(
     r"\s*(?::|\{|;|$)")
 CPP_ENUM = re.compile(r"(?m)^\s*enum\s+class\s+([A-Za-z_]\w*)")
 
+# Unreal declares a delegate through a macro, not a `class` or `struct`, so the two patterns
+# above cannot see one: `DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FConvaiObjectGazeEvent, ...)`.
+# A BlueprintAssignable event's type is real surface a reference page names, and leaving these
+# out made the coverage report accuse correct pages of naming something that does not exist.
+# `_RetVal` variants put the return type first and the delegate name second.
+CPP_DELEGATE = re.compile(
+    r"(?m)^\s*DECLARE_(?:DYNAMIC_)?(?:MULTICAST_)?(?:SPARSE_)?DELEGATE"
+    r"(_RetVal)?(?:_\w+)?\s*\(\s*([^,)\s]+)\s*(?:,\s*([^,)\s]+))?")
+
 # TypeScript: what a consumer can import. A name that is not exported is not surface, however
 # public it looks, so the `export` keyword is required rather than optional.
 TS_EXPORT = re.compile(
@@ -222,6 +231,9 @@ def _capture_raw(path, rel, spec):
         text = read(path)
         names = [m.group(2) for m in CPP_TYPE.finditer(text)]
         names += [m.group(1) for m in CPP_ENUM.finditer(text)]
+        names += [(m.group(3) if m.group(1) else m.group(2))
+                  for m in CPP_DELEGATE.finditer(text)
+                  if (m.group(3) if m.group(1) else m.group(2))]
         # A forward declaration and a definition look the same here. Keeping both is the safe
         # direction: a name declared and never defined is not surface either way, and the
         # contract's must_exist list is what catches a real disappearance.
