@@ -23,6 +23,7 @@ The **Language and Speech** section allows you to define the spoken languages, s
 * Default language: **English**.
 * Over **65+ languages** are available.
 * Selecting a language will filter the available voices in the **Voice** section.
+* The languages you select also determine which speech recognition provider transcribes your users. See [Speech recognition language support](speech-recognition-language-support.md).
 
 <figure><img src="../../.gitbook/assets/image (43).png" alt=""><figcaption></figcaption></figure>
 
