@@ -23,7 +23,7 @@ Before you write methods, skim [External API limitations](external-api-limitatio
 
 Navigate to the **External API** section in your dashboard. Here you can view existing API methods, activate or deactivate them, and create new methods. To add a new API method, click **Add API Method**.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2025-08-09 222338.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Screenshot 2025-08-09 222338.png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -38,7 +38,7 @@ Navigate to the **External API** section in your dashboard. Here you can view ex
 * **Inputs** – Enter test parameters for validating your method.
 * **Output** – Displays the result when you click **Test API**.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2025-08-09 222520.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Screenshot 2025-08-09 222520.png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -94,7 +94,7 @@ def handle_event(data):
 }
 ```
 
-Click **Test API**.&#x20;
+Click **Test API**.
 
 **A successful Output Example:**
 
@@ -104,20 +104,20 @@ Click **Test API**.&#x20;
 }
 ```
 
-<figure><img src="../../.gitbook/assets/Screenshot 2025-08-09 222520.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Screenshot 2025-08-09 222520.png" alt=""><figcaption></figcaption></figure>
 
 #### **Activate the method**
 
 If the test passes, click **Save Changes**, return to the main API list, and enable the method by toggling **Connect** to green.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2025-08-09 222055.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Screenshot 2025-08-09 222055.png" alt=""><figcaption></figcaption></figure>
 
 #### **Test with a character**
 
 Once activated, test the method in a conversation with your character.\
 As seen in the screenshot below, the character correctly returned the current weather for Roma and Wrangell.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2025-08-09 155243.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Screenshot 2025-08-09 155243.png" alt=""><figcaption></figcaption></figure>
 
 ***
 
@@ -245,7 +245,7 @@ def handle_event(data):
 }
 ```
 
-Click **Test API**.&#x20;
+Click **Test API**.
 
 **A successful Output Example:**
 
@@ -257,18 +257,18 @@ Click **Test API**.&#x20;
 }
 ```
 
-<figure><img src="../../.gitbook/assets/image (37).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (37).png" alt=""><figcaption></figcaption></figure>
 
 **Activate the method**\
 If the test passes, click **Save Changes**, return to the main API list, and enable the method by toggling **Connect** to green.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2025-08-09 164455.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Screenshot 2025-08-09 164455.png" alt=""><figcaption></figcaption></figure>
 
 **Test with a character**\
 Once activated, test the method in a conversation with your character.\
 As seen in the screenshot below, the character successfully created a Jira ticket and returned the ticket key.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2025-08-09 164924 (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/Screenshot 2025-08-09 164924 (1).png" alt=""><figcaption></figcaption></figure>
 
 ***
 

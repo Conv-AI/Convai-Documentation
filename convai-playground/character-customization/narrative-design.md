@@ -4,7 +4,7 @@ description: >-
   that move the story forward without rigid dialogue trees.
 ---
 
-# Narrative Design | Playground
+# Narrative Design
 
 ## Introduction
 
@@ -19,7 +19,7 @@ Narrative Design lets you guide a character with high‑level objectives while k
 Watch this series of videos to learn how to create a Narrative Design Graph in the Convai Playground.\
 The demo features a Tour Guide scenario, showing step-by-step how to design, connect, and implement your own Narrative Design flow.
 
-{% embed url="https://youtube.com/playlist?feature=shared&list=PLn_7tCx0Chip2mfSbOkqJLevEbm3jDuNV" %}
+{% embed url="https://www.youtube.com/playlist?list=PLD3AIwsrrHJ0" %}
 
 ***
 
@@ -38,9 +38,9 @@ A narrative graph is made of four building blocks:
 A Section contains:
 
 * **Objectives** – The goal the character aims to achieve in this part of the narrative.\
-  &#xNAN;_&#x45;xample:_ A virtual tour guide’s objective could be to welcome the user and ask if they want to begin the tour.
+  \&#xNAN;_Example:_ A virtual tour guide’s objective could be to welcome the user and ask if they want to begin the tour.
 * **Decisions** – Choices based on user interaction that direct the character to different sections.\
-  &#xNAN;_&#x45;xample:_ If the user says “yes” to a tour, the next section might start the tour route; if “no,” the character might offer alternative information.
+  \&#xNAN;_Example:_ If the user says “yes” to a tour, the next section might start the tour route; if “no,” the character might offer alternative information.
 
 {% hint style="warning" %}
 Ensure decisions are clear and unambiguous; otherwise, the intended section may not be triggered.

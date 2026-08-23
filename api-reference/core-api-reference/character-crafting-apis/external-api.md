@@ -19,15 +19,15 @@ Typical flow:
 3. List functions (optionally filtered by character) with `/functions/list/`
 4. Unlink it from a character with `/character/update` (`status: "inactive"`), or delete it entirely with `/functions/delete/`
 
-For the Playground UI walkthrough and example handlers (weather, sports scores, Jira), see [External API](../../../convai-playground/character-customization/external-api.md).
+For the Playground UI walkthrough and example handlers (weather, sports scores, Jira), see [External API](../../../convai-playground/character-customization/external-api/).
 
-Hard limits (supported models, Python runtime, libraries, schema, caps) are documented once on [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md).
+Hard limits (supported models, Python runtime, libraries, schema, caps) are documented once on [External API limitations](../../../convai-playground/character-customization/external-api/external-api-limitations.md).
 
 ## Writing functions
 
 Functions run in a sandboxed **Python 3.11** runtime. Write plain Python, keep the surface area small, and return JSON-serializable data the model can read back into the conversation.
 
-For the full limit list (allowed libraries, line cap, model support, character caps), see [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md).
+For the full limit list (allowed libraries, line cap, model support, character caps), see [External API limitations](../../../convai-playground/character-customization/external-api/external-api-limitations.md).
 
 ### Entry point: `handle_event`
 
@@ -103,15 +103,15 @@ def handle_event(inputs):
 
 What that means in practice:
 
-| Field | Rules |
-| ----- | ----- |
-| `parameters` | Object whose keys are parameter names. Extra keys outside this map are rejected (`additionalProperties: false`). |
-| Parameter name | Must match `^[a-zA-Z_][a-zA-Z0-9_]*$` (letter or `_` first, then letters, digits, or `_`). |
-| `parameters.<name>.type` | One of: `string`, `integer`, `boolean`, `object`, `array`. |
-| `parameters.<name>.description` | Non-empty string the model uses to decide what value to pass. |
-| `required` | Array of parameter names that must be present. Names listed here should also exist under `parameters`. |
+| Field                           | Rules                                                                                                            |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `parameters`                    | Object whose keys are parameter names. Extra keys outside this map are rejected (`additionalProperties: false`). |
+| Parameter name                  | Must match `^[a-zA-Z_][a-zA-Z0-9_]*$` (letter or `_` first, then letters, digits, or `_`).                       |
+| `parameters.<name>.type`        | One of: `string`, `integer`, `boolean`, `object`, `array`.                                                       |
+| `parameters.<name>.description` | Non-empty string the model uses to decide what value to pass.                                                    |
+| `required`                      | Array of parameter names that must be present. Names listed here should also exist under `parameters`.           |
 
-The same rules are summarized on [External API limitations](../../../convai-playground/character-customization/external-api-limitations.md#input-description).
+The same rules are summarized on [External API limitations](../../../convai-playground/character-customization/external-api/external-api-limitations.md#input-description).
 
 Example `input_description` (as an object — stringify it before sending in the request body):
 
@@ -166,13 +166,13 @@ Creates a new External API function on your account. The function is not attache
 
 #### Request body
 
-| Name                                                      | Type   | Description                                                                                          |
-| --------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
-| name<mark style="color:red;">\*</mark>                    | String | Display name of the function. Prefer a clear verb phrase the model can match (for example `Get Weather`). |
-| description<mark style="color:red;">\*</mark>             | String | When the character should call this function. Used by the model for tool selection.                  |
-| language<mark style="color:red;">\*</mark>                | String | Implementation language. Only `python` is supported.                                                 |
-| source\_code<mark style="color:red;">\*</mark>            | String | Full Python 3.11 source, including `handle_event`. Max 400 lines. Stdlib + `requests` only. See [Writing functions](#writing-functions) and [limitations](../../../convai-playground/character-customization/external-api-limitations.md#runtime). |
-| input\_description<mark style="color:red;">\*</mark>      | String | JSON **string** describing parameters. See [Input description schema](#input-description-schema) and [limitations](../../../convai-playground/character-customization/external-api-limitations.md#input-description). |
+| Name                                                 | Type   | Description                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| name<mark style="color:red;">\*</mark>               | String | Display name of the function. Prefer a clear verb phrase the model can match (for example `Get Weather`).                                                                                                                                                                      |
+| description<mark style="color:red;">\*</mark>        | String | When the character should call this function. Used by the model for tool selection.                                                                                                                                                                                            |
+| language<mark style="color:red;">\*</mark>           | String | Implementation language. Only `python` is supported.                                                                                                                                                                                                                           |
+| source\_code<mark style="color:red;">\*</mark>       | String | Full Python 3.11 source, including `handle_event`. Max 400 lines. Stdlib + `requests` only. See [Writing functions](external-api.md#writing-functions) and [limitations](../../../convai-playground/character-customization/external-api/external-api-limitations.md#runtime). |
+| input\_description<mark style="color:red;">\*</mark> | String | JSON **string** describing parameters. See [Input description schema](external-api.md#input-description-schema) and [limitations](../../../convai-playground/character-customization/external-api/external-api-limitations.md#input-description).                              |
 
 #### Example payload
 
@@ -319,11 +319,11 @@ Returns the External API functions on your account. Pass `character_id` to inclu
 
 All fields are optional. An empty body lists every function on the account.
 
-| Name          | Type    | Description                                                                                         |
-| ------------- | ------- | --------------------------------------------------------------------------------------------------- |
-| character\_id | String  | If set, each function includes `status` relative to this character (`active` / `inactive`).         |
+| Name          | Type    | Description                                                                                          |
+| ------------- | ------- | ---------------------------------------------------------------------------------------------------- |
+| character\_id | String  | If set, each function includes `status` relative to this character (`active` / `inactive`).          |
 | per\_page     | Integer | Page size. Defaults to `-1` (return all). When set to a positive value, pagination fields are added. |
-| page          | Integer | Page number, starting at `1`. Used only when `per_page` is not `-1`. Default `1`.                   |
+| page          | Integer | Page number, starting at `1`. Used only when `per_page` is not `-1`. Default `1`.                    |
 
 #### Example payload
 
@@ -429,7 +429,7 @@ curl --location --request POST 'https://api.convai.com/functions/list/' \
 
 Attach one or more External API functions to a character through the existing [Character Base API](character-api.md) update endpoint. Once linked (`status: "active"`), the model can call those functions during conversation.
 
-A character can have at most **128** active functions. You can link several functions in one request, and you can mix link and [unlink](#unlink-functions-from-a-character) entries together.
+A character can have at most **128** active functions. You can link several functions in one request, and you can mix link and [unlink](external-api.md#unlink-functions-from-a-character) entries together.
 
 #### Headers
 
@@ -440,10 +440,10 @@ A character can have at most **128** active functions. You can link several func
 
 #### Request body
 
-| Name                                     | Type   | Description                                                                                          |
-| ---------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
-| charID<mark style="color:red;">\*</mark> | String | Character to update.                                                                                 |
-| functions                                | Array  | List of function configs. Each item needs `id` (function UUID) and `status` set to `"active"`.      |
+| Name                                     | Type   | Description                                                                                    |
+| ---------------------------------------- | ------ | ---------------------------------------------------------------------------------------------- |
+| charID<mark style="color:red;">\*</mark> | String | Character to update.                                                                           |
+| functions                                | Array  | List of function configs. Each item needs `id` (function UUID) and `status` set to `"active"`. |
 
 #### Example payload
 
@@ -559,10 +559,10 @@ After unlinking, the character can no longer call that function. The function st
 
 #### Request body
 
-| Name                                     | Type   | Description                                                                                            |
-| ---------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------ |
-| charID<mark style="color:red;">\*</mark> | String | Character to update.                                                                                   |
-| functions                                | Array  | List of function configs. Each item needs `id` (function UUID) and `status` set to `"inactive"`.      |
+| Name                                     | Type   | Description                                                                                      |
+| ---------------------------------------- | ------ | ------------------------------------------------------------------------------------------------ |
+| charID<mark style="color:red;">\*</mark> | String | Character to update.                                                                             |
+| functions                                | Array  | List of function configs. Each item needs `id` (function UUID) and `status` set to `"inactive"`. |
 
 #### Example payload
 
@@ -653,7 +653,7 @@ curl --location --request POST 'https://api.convai.com/character/update' \
 Confirm with `/functions/list/` and `character_id` set — unlinked functions show `"status": "inactive"`.
 
 {% hint style="info" %}
-Unlinking only removes the character association. To remove the function from your account entirely (and every character it is linked to), use [Delete a function](#delete-a-function).
+Unlinking only removes the character association. To remove the function from your account entirely (and every character it is linked to), use [Delete a function](external-api.md#delete-a-function).
 {% endhint %}
 
 ***
@@ -673,9 +673,9 @@ Deletes a function you own and removes every character association for it. This 
 
 #### Request body
 
-| Name                                              | Type   | Description                    |
-| ------------------------------------------------- | ------ | ------------------------------ |
-| function\_id<mark style="color:red;">\*</mark>    | String | UUID of the function to delete |
+| Name                                           | Type   | Description                    |
+| ---------------------------------------------- | ------ | ------------------------------ |
+| function\_id<mark style="color:red;">\*</mark> | String | UUID of the function to delete |
 
 #### Example payload
 
@@ -762,5 +762,5 @@ curl --location --request POST 'https://api.convai.com/functions/delete/' \
 {% endtabs %}
 
 {% hint style="info" %}
-To disconnect a function from a character without deleting it, use [Unlink functions from a character](#unlink-functions-from-a-character).
+To disconnect a function from a character without deleting it, use [Unlink functions from a character](external-api.md#unlink-functions-from-a-character).
 {% endhint %}

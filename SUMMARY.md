@@ -22,9 +22,9 @@
   * [State Of Mind](convai-playground/character-customization/state-of-mind.md)
   * [Memory](convai-playground/character-customization/memory.md)
   * [Mindview](convai-playground/character-customization/mindview.md)
-  * [Narrative Design | Playground](convai-playground/character-customization/narrative-design.md)
-  * [External API](convai-playground/character-customization/external-api.md)
-  * [External API limitations](convai-playground/character-customization/external-api-limitations.md)
+  * [Narrative Design](convai-playground/character-customization/narrative-design.md)
+  * [External API](convai-playground/character-customization/external-api/README.md)
+    * [External API limitations](convai-playground/character-customization/external-api/external-api-limitations.md)
   * [Publish](convai-playground/character-customization/publish.md)
   * [MCP Servers](convai-playground/character-customization/mcp-servers.md)
 
