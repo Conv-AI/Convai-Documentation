@@ -7,9 +7,7 @@ description: >-
 
 # Knowledge Bank
 
-{% embed url="https://www.youtube.com/watch?v=MCbBHA2BKLM" %}
-
-{% endembed %}
+{% embed url="https://youtu.be/0Zac4X0flHg" %}
 
 ## Introduction
 
@@ -38,9 +36,9 @@ In-Context KB is available only on **supported LLMs**. When you enable In-Contex
 
 The file types you can upload and connect depend on the retrieval mode and, for In-Context, on the selected LLM.
 
-| Mode | Supported files |
-| ---- | --------------- |
-| **RAG** | Text only — `.txt`, `.csv` |
+| Mode           | Supported files                                                                                                 |
+| -------------- | --------------------------------------------------------------------------------------------------------------- |
+| **RAG**        | Text only — `.txt`, `.csv`                                                                                      |
 | **In-Context** | Text (`.txt`, `.csv`), **images**, **PDF**, **audio**, **video** — subject to the selected model's capabilities |
 
 Not every In-Context model supports every modality. For example, some self-hosted models accept only text and images. The Knowledge Bank tab shows a **"Supported file types for the selected model"** line so you always know what the current model accepts before you pick a file. The upload picker and drag-and-drop only accept those types.
