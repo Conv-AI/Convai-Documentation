@@ -1,11 +1,15 @@
 ---
 description: >-
-  Subscribe with `client.on(event, callback)`. The return value is an
-  unsubscribe function.
+  Reference for subscribing to connection, conversation, speech, action,
+  session, media, and acknowledgment events in the Convai Web SDK.
 icon: arrow-up-small-big
 ---
 
 # Event Reference
+
+{% hint style="warning" %}
+`modelOutput`, `modelOutputProtocolError`, and v2 tool-call behavior describe an opt-in candidate implementation. They do not confirm production availability or publication in the current `@convai/web-sdk` npm release. Confirm the exports in your installed package.
+{% endhint %}
 
 ```ts
 const unsub = client.on('botReady', () => {
@@ -256,21 +260,57 @@ client.on('blendshapeStatsReceived', (stats) => {
 
 ### Action events
 
-Requires `actionConfig` in config.
+`actionResponse` requires semantic affordances or v2 tool declarations. `modelOutput` requires `modelOutputVersion: 2` and can carry text even when no Actions contract is active.
 
 #### `actionResponse`
 
-Fires after each bot turn with the actions the bot decided to perform.
+Fires on the legacy compatibility event surface. Under action protocol v1, the ordered array contains semantic actions. Under action protocol v2, it can also contain correlated tool calls. The SDK does not execute or schedule them.
 
 ```ts
-client.on('actionResponse', ({ actions }) => {
-  for (const { name, target } of actions) {
-    executeAction(name, target);
+import type { ActionResponseEvent } from '@convai/web-sdk/core';
+
+client.on('actionResponse', ({ actions }: ActionResponseEvent) => {
+  for (const action of actions) {
+    handleAuthorizedAction(action);
   }
 });
 ```
 
-See Actions for the complete guide.
+When `modelOutputVersion: 2` is selected, the SDK suppresses `actionResponse` to prevent duplicate handling. Use `modelOutput` instead.
+
+**`modelOutput`**
+
+Fires for each valid canonical v2 output envelope when `modelOutputVersion: 2` was selected. The SDK preserves item order and drops a repeated `output_id`; it does not execute items or guarantee exactly-once tool execution.
+
+```ts
+import type { ModelOutputMessage } from '@convai/web-sdk/core';
+
+client.on('modelOutput', (output: ModelOutputMessage) => {
+  for (const item of output.items) {
+    if (item.type === 'message') renderMessage(item);
+    if (item.type === 'tool_call') handleAuthorizedToolCall(item);
+  }
+});
+```
+
+Use validated `items` for rendering and execution. Treat `raw` as diagnostics only. Distinct envelopes can share a `logical_turn_id`, and `final: true` finalizes one envelope rather than the entire logical turn.
+
+**`modelOutputProtocolError`**
+
+Fires when a selected v2 `model-output` envelope is malformed or contains an unsupported item. The parser rejects the whole envelope.
+
+```ts
+import type { ModelOutputProtocolError } from '@convai/web-sdk/core';
+
+client.on(
+  'modelOutputProtocolError',
+  ({ code, message }: ModelOutputProtocolError) => {
+    console.error(code, message);
+  },
+);
+```
+
+The `code` is currently `"invalid_model_output"`. See [Actions](actions.md) for configuration, tool results, and limits.
 
 ***
 
@@ -291,6 +331,8 @@ client.on('serverResponse', (response) => {
   }
 });
 ```
+
+For `action-result`, `extras.tool_call_id` correlates the acknowledgment and `extras.idempotent` reports whether an identical result was already accepted. A `void` return from `sendActionResult()` is not an acknowledgment.
 
 #### `interactionCreated`
 
@@ -399,7 +441,9 @@ client.on('botAudioTrack', (track: MediaStreamTrack) => {
 | `userMuteStopped`         | —                                       | Server un-muted user mic       |
 | `blendshapes`             | raw data                                | Blendshape chunk               |
 | `blendshapeStatsReceived` | stats                                   | Turn end stats                 |
-| `actionResponse`          | `{ actions }`                           | Bot action decisions           |
+| `actionResponse`          | `{ actions }`                           | Compatibility action projection |
+| `modelOutput`             | `ModelOutputMessage`                    | Valid canonical v2 envelope    |
+| `modelOutputProtocolError` | `ModelOutputProtocolError`             | Invalid v2 envelope            |
 | `serverResponse`          | `ServerResponse`                        | Server acknowledgment          |
 | `interactionCreated`      | `{ interactionId, characterSessionId }` | Session ID assigned            |
 | `idleWarning`             | `{ remainingSeconds }`                  | Idle timeout warning           |

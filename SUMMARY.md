@@ -21,6 +21,7 @@
   * [Core AI Settings](convai-playground/character-customization/core-ai-settings.md)
   * [Guardrails](convai-playground/character-customization/guardrails.md)
   * [State Of Mind](convai-playground/character-customization/state-of-mind.md)
+  * [Agentic Actions](convai-playground/character-customization/agentic-actions.md)
   * [Memory](convai-playground/character-customization/memory.md)
   * [Mindview](convai-playground/character-customization/mindview.md)
   * [Narrative Design](convai-playground/character-customization/narrative-design.md)

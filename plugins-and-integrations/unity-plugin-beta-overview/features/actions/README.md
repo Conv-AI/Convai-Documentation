@@ -6,9 +6,15 @@ description: >-
 
 # Actions
 
+This legacy section documents an earlier Unity actions workflow.
+
+{% hint style="warning" %}
+**Deprecated on August 26, 2026.** Use [Character actions](../../../convai-unity-sdk/features/character-actions/README.md) in the current Convai Unity SDK documentation. This section remains available for projects that have not migrated.
+{% endhint %}
+
 ## What Are Actions?
 
-Convai Actions give your AI characters the ability to **do things**, not just talk. When a player says "Go to the crate" or "Wave hello," the Convai backend selects the right behavior and target from a menu you define. The SDK then runs that behavior directly in your Unity scene — no scripting required for common use cases.
+Convai Actions give your AI characters the ability to **do things**, not only talk. When a player says "Go to the crate" or "Wave hello," Convai selects the right behavior and target from a menu you define. The SDK then runs that behavior directly in your Unity scene—no scripting is required for common use cases.
 
 Actions are the bridge between conversation and gameplay. Instead of writing keyword-detection logic or scripting every possible NPC response, you declare a set of possible behaviors once. The AI handles the rest.
 
@@ -56,6 +62,6 @@ Both components must live on the **same GameObject** as `ConvaiCharacter`.
 
 <table data-view="cards"><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>Quick Start</strong></td><td>Get your first action working in minutes with a step-by-step walkthrough.</td></tr><tr><td><strong>Configuring Actions</strong></td><td>Define actions, register targets, and fine-tune behavior from the Inspector.</td></tr><tr><td><strong>Action Executors</strong></td><td>Explore every executor that ships with the SDK and learn when to use each one.</td></tr><tr><td><strong>Dispatcher &#x26; Batch Policies</strong></td><td>Control how the dispatcher sequences and handles action batches at runtime.</td></tr><tr><td><strong>Writing Custom Executors</strong></td><td>Build your own executor in C# to create any game behavior you need.</td></tr><tr><td><strong>Attention &#x26; Reference Grounding</strong></td><td>Understand how object descriptions and attention objects help the AI resolve vague player references.</td></tr><tr><td><strong>Debugging &#x26; Troubleshooting</strong></td><td>Diagnose issues with the built-in debug probe and a step-by-step checklist.</td></tr></tbody></table>
 
-## Conclusion
+## Use the current character actions guide
 
 Convai Actions connect natural conversation to in-game behavior. You define what the character _can_ do — the AI decides _when_ and _why_ to do it. The pages in this section walk you through everything from your first working action to writing fully custom executors in C#.

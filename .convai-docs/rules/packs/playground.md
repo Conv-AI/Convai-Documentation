@@ -110,16 +110,17 @@ This is the backbone of `character-customization/`, so its structure is worth st
 **Verify the current list against `character-editor-tabs.ts` before writing** — it changes.
 
 At the time of writing, the top-level tabs were: Description, Avatar, Knowledge Bank, Core AI Settings,
-MCP and APIs, Guardrails, State Of Mind, Embodied Actions, Narrative Design, Publish, Memory, Mindview.
+MCP and APIs, Guardrails, State Of Mind, Agentic Actions, Narrative Design, Publish, Memory, Mindview.
 
 Three things about that list matter for documentation:
 
 - **A tab's label is not always its documentation page title.** The tab reads "Description"; the
   documentation page for it is "Character Description". Use the tab's exact label when telling a reader
   where to click, and the page title for the page itself.
-- **Some tabs are disabled with a legacy-only tooltip.** Embodied Actions and Narrative Design are in
-  this state in the code. A page that walks a reader into a disabled tab is a wrong page — check the
-  `disabled` flag and the tooltip before documenting a surface.
+- **Some tabs are disabled with a legacy-only tooltip.** Narrative Design is in this state in the
+  code. Agentic Actions is active and keeps `embodied-actions` as a legacy deep-link alias. A page that
+  walks a reader into a disabled tab is a wrong page — check the `disabled` flag and the tooltip before
+  documenting a surface.
 - **One tab renames itself when a capability is denied**: MCP and APIs appears as "External API" for
   users without it. If a page names that tab, it has to account for both labels or say which one it
   assumes.

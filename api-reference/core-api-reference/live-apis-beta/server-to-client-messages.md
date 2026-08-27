@@ -5,15 +5,9 @@ description: Complete reference for all messages Convai sends to the client over
 
 The Convai Live API server sends these messages over the WebRTC data channel during an active session. Each message type signals a distinct event — an acknowledgment, a bot state change, animation data, or a session limit. See the [Message Glossary](message-glossary.md) for a summary of all message types and their envelope formats.
 
-{% hint style="info" %}
-Most server messages use the RTVI envelope format shown under [`interaction-created`](#interaction-created). Subsequent examples in this page show only the inner `data` payload for clarity.
+Most server messages use the RTVI envelope format shown under [`interaction-created`](#interaction-created). Subsequent examples show only the inner `data` payload. `server-response` uses a flat legacy shape, while the [bot output stream](#bot-output-stream) places its event type at the top level. See [Turn lifecycle and message ordering](turn-lifecycle-and-message-ordering.md#two-envelope-forms) for demultiplexing logic.
 
-Two families are exceptions: `server-response` uses a flat legacy shape, and the [bot output stream](#bot-output-stream) puts the event type at the top level. See [Turn lifecycle and message ordering](turn-lifecycle-and-message-ordering.md#two-envelope-forms) for the demux logic that handles all three.
-{% endhint %}
-
-{% hint style="warning" %}
-**Field presence is not uniform.** Some optional fields are emitted as `null`, others are omitted from the JSON entirely. Read [Field presence rules](turn-lifecycle-and-message-ordering.md#field-presence-rules) before writing a client that assumes a key exists, and prefer optional access over null checks.
-{% endhint %}
+Field presence is not uniform. Some optional fields are emitted as `null`, while others are omitted. Read [Field presence rules](turn-lifecycle-and-message-ordering.md#field-presence-rules) and use optional access rather than assuming a key exists.
 
 ---
 
@@ -23,7 +17,7 @@ These messages carry the character's response text and its speech-state transiti
 
 ### bot-llm-text
 
-The bot's spoken response, streamed in chunks. Concatenate `data.text` in arrival order to rebuild the full reply.
+The bot text projection, streamed in chunks. Concatenate `data.text` in arrival order to rebuild the projection selected at `/connect`.
 
 **Full message**
 
@@ -33,11 +27,9 @@ The bot's spoken response, streamed in chunks. Concatenate `data.text` in arriva
 
 | Field | Type | Description |
 |---|---|---|
-| `text` | string | An incremental chunk of the bot's response |
+| `text` | string | An incremental chunk of the selected text projection |
 
-{% hint style="info" %}
-This is the **spoken response only**. Actions, emotion, and internal control syntax have already been removed — see [Response contract and parsing](response-contract-and-parsing.md#what-the-server-removes-from-the-spoken-response). What you concatenate here is exactly what the character says, which is what you should render in a chat transcript.
-{% endhint %}
+With omitted capabilities or `bot_llm_text_mode: "legacy"`, this is the filtered text used by the conversational path. With `bot_llm_text_mode: "raw"`, it is provider-visible text before Convai's structured-output parsing and conversational filtering. Raw mode is diagnostic and may contain JSON, control syntax, refusal text, or other content that should not be executed or sent to speech synthesis. It is not guaranteed to carry non-text native tool-call deltas. See [Response contract and parsing](response-contract-and-parsing.md#bot-llm-text-modes).
 
 **Recommended action:** Append to the in-progress bot message in your transcript UI.
 
@@ -143,6 +135,7 @@ Mark the audio boundaries of the bot's turn. These use the `server-message` enve
 | `usage-toggle` | `enabled` |
 | `trigger-message` | `trigger_name`, `has_speak_tag` |
 | `user_text_message` | `text` |
+| `action-result` | `tool_call_id`, `idempotent`; errors also include `error_code` |
 
 **About the `message` field**
 
@@ -421,11 +414,68 @@ Sent with behavior tree data for character AI behavior.
 
 ---
 
+## Canonical model output
+
+### model-output
+
+Sent when the client negotiates `capabilities.model_output_version: 2`. This is the typed authority for renderable and executable model output. The legacy `action-response` may also be emitted as a compatibility projection; process one authority, not both.
+
+```json
+{
+  "type": "model-output",
+  "version": 2,
+  "output_id": "out_abc123",
+  "logical_turn_id": "turn_42",
+  "format": "convai-combined-json",
+  "raw": "{\"response\":\"I will open it.\",\"actions\":[\"Wave\"]}",
+  "items": [
+    {
+      "type": "message",
+      "role": "assistant",
+      "channel": "final",
+      "content": "I will open it."
+    },
+    {
+      "type": "semantic_action",
+      "id": "act_abc123",
+      "name": "Wave",
+      "target": null
+    }
+  ],
+  "final": true
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `type` | string | Always `"model-output"`. |
+| `version` | integer | Always `2`. |
+| `output_id` | string | Envelope identifier. Deduplicate repeated delivery by this field. |
+| `logical_turn_id` | string | Optional correlation ID shared by output envelopes from one logical turn. A present value is at most `128` UTF-8 bytes. |
+| `format` | string | `"text"`, `"convai-combined-json"`, `"semantic-actions-json"`, or `"client-tool-calls-json"`. |
+| `raw` | string | Exact provider or runtime output retained for diagnostics. Never execute or render this field as trusted content. |
+| `items` | object[] | Convai-validated semantic items. |
+| `final` | boolean | Always `true` for this completed envelope. It does not mean that no later envelope can share the same `logical_turn_id`. |
+
+| Item `type` | Fields | Meaning |
+|---|---|---|
+| `message` | `role`, `channel`, `content` | Assistant text for `"final"` or `"commentary"`. |
+| `semantic_action` | `id`, `name`, `target` | Parsed semantic action. `target` may be `null`. |
+| `tool_call` | `id`, `name`, `target`, `arguments` | Correlated client tool call. Return [`action-result`](client-to-server-messages.md#action-result) for its `id`. |
+| `emotion` | `name`, `scale` | Turn emotion with scale `1`, `2`, or `3`. |
+| `extension` | `schema`, `version`, `payload`, `fallback` | Schema-versioned extension item. This preview does not define a display or quick-response extension schema. |
+
+Current producers emit final-channel messages, semantic actions, client tool calls, and emotions. Commentary-channel messages and `extension` items are represented by the candidate protocol and parsers, but the current runtime does not produce them.
+
+Multiple envelopes can share one `logical_turn_id`, such as a text envelope followed by a semantic action or client tool call. Deduplicate only by `output_id`. Convai does not execute or authorize `tool_call` items; validate and execute them in your application before returning a result.
+
+---
+
 ## Actions
 
 ### action-response
 
-Sent with an ordered list of actions or animations the bot wants to perform. Actions reference only the objects, characters, and action types declared in `action_config` at connect time. See the [Connect API](connect-api.md) for details on `action_config`.
+Sent with an ordered compatibility projection of semantic actions or client tool calls. See the [Connect API](connect-api.md) for `action_config` and capability selection.
 
 ```json
 {
@@ -444,7 +494,35 @@ Sent with an ordered list of actions or animations the bot wants to perform. Act
 | `actions[].name` | string | Action or animation identifier |
 | `actions[].target` | string | Optional target object or character name |
 
-**Recommended action:** Iterate over `actions` in order and trigger the corresponding animations or behaviors on your avatar or scene.
+Legacy semantic actions use `{ name, target? }`. Convai validates the semantic action name and any non-empty target against the session affordances before emission.
+
+Action protocol v2 also projects client tool calls in this shape:
+
+```json
+{
+  "type": "action-response",
+  "actions": [
+    {
+      "kind": "tool_call",
+      "id": "call_abc123",
+      "name": "open_training_record",
+      "arguments": {
+        "record_id": "record-42"
+      }
+    }
+  ]
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `kind` | string | Always `"tool_call"` for a v2 client tool call. |
+| `id` | string | Correlation ID for the required terminal result. |
+| `name` | string | Declared client tool name. |
+| `target` | string | Optional compatibility field. Do not treat it as authorization for the tool's arguments. |
+| `arguments` | object | JSON object validated against the tool's declared input schema. |
+
+Array order is preserved, but Convai does not execute the operations or promise sequential client execution. Apply your own authorization, scheduling, cancellation, and retry policy. If you negotiated model output v2, consume `model-output.items` and ignore the duplicate `action-response` projection.
 
 ---
 
