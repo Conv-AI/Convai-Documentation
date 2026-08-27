@@ -6,8 +6,6 @@ description: >-
 
 # Language And Speech
 
-## Introduction
-
 The **Language and Speech** section allows you to define the spoken languages, select a voice, and improve pronunciation and recognition for your AI character. With support for multiple languages and voice providers, you can ensure that your character communicates naturally and effectively with your audience.
 
 <figure><img src="../../.gitbook/assets/image (42).png" alt=""><figcaption></figcaption></figure>
@@ -23,6 +21,7 @@ The **Language and Speech** section allows you to define the spoken languages, s
 * Default language: **English**.
 * Over **65+ languages** are available.
 * Selecting a language will filter the available voices in the **Voice** section.
+* The languages you select also determine which speech recognition provider transcribes your users. See [Speech recognition language support](speech-recognition-language-support.md).
 
 <figure><img src="../../.gitbook/assets/image (43).png" alt=""><figcaption></figcaption></figure>
 

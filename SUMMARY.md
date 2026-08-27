@@ -15,6 +15,7 @@
   * [Character Description](convai-playground/character-customization/character-description.md)
   * [Avatar Studio](convai-playground/character-customization/avatar-section.md)
   * [Language And Speech](convai-playground/character-customization/language-and-speech.md)
+  * [Speech recognition language support](convai-playground/character-customization/speech-recognition-language-support.md)
   * [Knowledge Bank](convai-playground/character-customization/knowledge-bank.md)
   * [Personality Traits](convai-playground/character-customization/personality-traits.md)
   * [Core AI Settings](convai-playground/character-customization/core-ai-settings.md)

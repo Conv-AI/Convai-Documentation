@@ -84,10 +84,27 @@ def split_frontmatter(text):
     if end is None:
         return {}, 0
     fm = {}
-    for line in lines[1:end]:
-        m = re.match(r"([A-Za-z0-9_]+):\s*(.*)$", line)
-        if m:
-            fm[m.group(1)] = m.group(2).strip().strip('"').strip("'")
+    i = 1
+    while i < end:
+        m = re.match(r"([A-Za-z0-9_]+):\s*(.*)$", lines[i])
+        if not m:
+            i += 1
+            continue
+        key, val = m.group(1), m.group(2).strip()
+        if val and val[0] in "|>":
+            # YAML block scalar. Without this branch the value reads as the literal ">-"
+            # and every page using GitBook's folded form collides with every other one,
+            # which turned duplicate-desc into 310 pages of noise on one repository.
+            block = []
+            i += 1
+            while i < end and (lines[i].strip() == "" or lines[i][:1] in (" ", "\t")):
+                block.append(lines[i].strip())
+                i += 1
+            joined = " ".join(x for x in block if x) if val[0] == ">" else "\n".join(block)
+            fm[key] = joined.strip()
+            continue
+        fm[key] = val.strip().strip('"').strip("'")
+        i += 1
     return fm, end + 1
 
 

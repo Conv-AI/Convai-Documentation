@@ -129,6 +129,14 @@ type that only appears in REST API node signatures. These are off-limits across 
 | `EConvaiMovementSensitivity` | `ConvaiDefinitions.h` | Very Low, Low, Medium, High, Very High | `FConvaiObjectMovementSettings` (object movement awareness) |
 | `EConvaiObjectNameSuffixStyle` | `ConvaiDefinitions.h` | Numeric (2, 3, 4), Alphabetical (A, B, C) | Duplicate object-name disambiguation; project setting on `UConvaiSettings` |
 | `EConvaiAttentionSource` | `ConvaiDefinitions.h` | None, Explicit (Blueprint/C++), Gaze | Gaze attention system |
+| `EConvaiMoveToResultCode` | `Actions/ConvaiMoveToTask.h` | Reached, Already At Destination, Unknown Destination, Unreachable, Invalid Character, Missing AI Controller, Missing Movement Component, Missing Path Following Component, Missing Navigation Data, Move Failed | `Convai Move To` result |
+| `EConvaiEscortResultCode` | `Actions/ConvaiEscortToTask.h` | Reached, Already At Destination, Character Unavailable, Destination Unavailable, Invalid Escort Setup, Movement Failed | `Convai Escort` result |
+
+Both result enums also declare `Cancelled` as `UMETA(Hidden)`. A hidden value is not in the
+Blueprint dropdown, so documenting it sends a reader looking for something they cannot select.
+Read the value list off the enum itself rather than off the Blueprint label surface — the labels
+extract cleanly but do not tell you which values are hidden, and guessing the set from the labels
+is how a wrong list gets written.
 
 `EConvaiMoveTarget` no longer exists in source (removed with the Movement Points rework). Do not
 reference it; existing docs that mention it are stating a dead type.
@@ -331,6 +339,26 @@ When in doubt, take the how-to. It is the shape most pages end up being.
   document platform-specific steps where relevant. Mac is newly allowed relative to earlier
   releases (the beta.23-hotfix changelog entry declared Win64/Android only); no Mac-specific setup
   steps exist in source, so confirm any Mac install guidance with the plugin owner before writing it.
+
+## Never document — internal, no Blueprint surface
+
+Verified against `4.0.0-beta.27`. Each of these is `public` in the C++ sense and appears in the
+extracted surface, but has no `BlueprintType`, no `UFUNCTION`, or lives in a private header.
+Naming one on a page teaches a reader about something they cannot reach from Blueprint.
+
+| Type | Why it is off-limits |
+|---|---|
+| `UConvaiMoveToTask`, `UConvaiMoveOwnedAITask` | Internal `UGameplayTask` movement primitives. The Blueprint surface is `UConvaiMoveToProxy`, exposed as the `Convai Move To` node |
+| `UConvaiEscortToTask`, `UConvaiEscortHoldTask`, `EEscortTaskState` | Internal escort task implementation. The Blueprint surface is `UConvaiEscortProxy`, exposed as `Convai Escort` |
+| `UConvaiDebugSubsystem`, `SConvaiDebugOverlay` | The debug overlay has no Blueprint API and no console variables. Document the toggle, the settings, and the panels — never these classes. `SConvaiDebugOverlay` is a private header |
+| `UConvaiKnowledgeBankUtils` | Plain statics with no `UFUNCTION`; JSON parsing helpers |
+| `UConvaiMicrophoneSaveGame` | Internal persistence container behind `UConvaiMicrophoneSubsystem`. Describe the persistence as subsystem behaviour instead |
+| `FConvaiHeldContextLane` | Plain struct with no reflection macros; internal context batching state |
+| `UConvaiTest_*`, `UConvaiConversationStateTestProbe` | Test-only probes |
+
+The general rule this table is an instance of: a type being in `public_types` means another module
+can link it, not that a reader can use it. Before documenting a type, check it carries
+`BlueprintType` or a `UFUNCTION`, and that its header is under `Public/`.
 
 ## SDK source of truth
 
