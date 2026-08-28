@@ -33,7 +33,7 @@ This candidate surface does not define built-in display, link, card, table, CSV,
 Semantic actions and client tool calls use different paths:
 
 1. You declare semantic action affordances and optional client tools in `action_config` at [`/connect`](connect-api.md).
-2. When **Enable Agentic Actions** is on for the character, Convai adds the applicable contract to the prompt. When it is off, semantic action and client tool schemas are not exposed to the model. A missing persisted setting is treated as off with model output v2, while model output v1 keeps its legacy behavior.
+2. When **Enable Agentic Actions** is on for the character, Convai adds the applicable contract to the prompt. When it is explicitly off, semantic action and client tool schemas are not exposed to the model. If the setting is absent, saved legacy Character Actions inherit an enabled state for model output v1 and v2; characters without saved legacy actions default to off for model output v2.
 3. Semantic actions can use provider-native calls or a supported structured response that Convai parses. Client tools require provider-native function calling.
 4. Convai emits semantic actions or correlated client tool calls through canonical `model-output` when selected. It can also emit `action-response` as a compatibility projection.
 

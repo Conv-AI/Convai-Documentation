@@ -222,7 +222,7 @@ client.updateContext({
 
 ## Opt into v2 client tools
 
-Client tools add typed arguments and a correlated result loop. The character's **Enable Agentic Actions** toggle must be on, and the selected model/provider must support native function calling. When model output v2 is selected, a character without a persisted toggle setting is treated as off. The SDK does not expose a provider support matrix or an `actionsEnabled` config field.
+Client tools add typed arguments and a correlated result loop. The character's **Enable Agentic Actions** toggle must be on, and the selected model/provider must support native function calling. If the toggle has never been persisted, a character with saved legacy Character Actions inherits an enabled state; a character without saved legacy actions defaults to off for model output v2. An explicit off setting always wins. The SDK does not expose a provider support matrix or an `actionsEnabled` config field.
 
 Omitting `capabilities` preserves the legacy v1 contract. Opt in explicitly and reconnect whenever the tool declarations change:
 

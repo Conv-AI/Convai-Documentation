@@ -230,7 +230,7 @@ The candidate implementation enforces these limits:
 
 Any v2 action selection, v2 model-output selection, or raw `bot-llm-text` selection requires `mode: "create"`, a singular `character_id`, no `shared_session_key`, and `max_num_participants: 1`. Joined, roster, shared-session, and multi-participant topologies are rejected.
 
-The character's **Enable Agentic Actions** setting remains authoritative. When it is off, Convai does not add the Actions contract, semantic action tools, or client tool schemas to the model. A character without a persisted setting is treated as off when model output v2 is selected, while model output v1 retains its legacy behavior. Text-only model output v2 can still be emitted when Actions are off.
+The character's explicit **Enable Agentic Actions** setting remains authoritative. When it is off, Convai does not add the Actions contract, semantic action tools, or client tool schemas to the model. When the setting is absent, a character with one or more saved legacy Character Actions inherits an enabled state for both model output v1 and v2; a character without saved legacy actions defaults to off for model output v2. Reading this inherited state does not persist a new setting. Text-only model output v2 can still be emitted when Actions are off.
 
 Client tools also require a resolved model that supports provider-native function calling. Capability negotiation alone does not authorize a tool or guarantee that the selected model can call it.
 
