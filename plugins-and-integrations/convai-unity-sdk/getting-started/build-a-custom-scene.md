@@ -1,12 +1,12 @@
 ---
 title: Build a custom scene
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 description: >-
   Add required Convai components to a new Unity scene using the Setup Required
   Components command and configure your first character.
 ---
 
-This page walks you through setting up a new scene with a Convai AI character from scratch. By the end, your scene will have the minimum required components for a character to receive voice input and respond.
+A new Unity scene needs three Convai components wired together before a character can hear a player and respond: a manager, a character, and a player. Build that hierarchy in an empty scene using the **Setup Required Components** command, then add and configure the character itself.
 
 ## Minimum required hierarchy
 
@@ -86,7 +86,7 @@ When the validator reports no errors, the scene is ready for Play Mode.
 Press **Play**. The Unity Console logs:
 
 * `[ConvaiRuntime] Started successfully` — SDK initialized
-* `[RoomConnectionRuntimeAdapter] Character <character-id> connected successfully (mode=create).` — character connected to Convai
+* `[RoomConnectionRuntimeAdapter] Room connection succeeded (mode=create).` — the room connected to Convai
 
 Speak into your microphone. The character responds within a few seconds.
 
@@ -125,7 +125,7 @@ The copy is created next to the character's prefab when it has one, or under `As
 * Each `ConvaiCharacter` has its own unique Character ID
 * Only one `ConvaiManager` and one `ConvaiPlayer` in the scene
 
-**Expected outcome:** Both characters are discovered and registered automatically, but with more than one character in the scene `ActiveConversationCharacter` stays unset until you call `ConvaiManager.SetExplicitConversationTarget` to choose which character receives the player's speech.
+**Expected outcome:** Both characters are discovered and registered automatically. There is no component to add and no field to fill: `ConvaiManager` keeps the conversation pointed at whichever character the player is addressing, and moves it there as the player's attention shifts. See [Conversation targeting](../features/conversation-targeting/README.md) for the rule that decides who is being addressed and the settings that tune it.
 
 Character A and Character B do not share conversation context unless your Convai character configuration explicitly links them.
 

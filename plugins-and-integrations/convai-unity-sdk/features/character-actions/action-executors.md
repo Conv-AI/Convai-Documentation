@@ -1,7 +1,7 @@
 ---
 title: Action executors
 description: Reference for all 21 built-in action executor components, grouped by pack, with every Inspector field, default, and required peer.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Executors are the components that perform in-scene behavior when the dispatcher runs an action step — an NPC that walks, points, changes mood, or plays a sound. 21 executor components ship with the Convai SDK, grouped into six packs. Every one carries a `ConvaiActionArchetype` attribute, so adding one from the Actions Editor's **+ Add Action ▾** catalog pre-fills its action name, description, target requirement, and any parameters — no manual authoring required to get a working action.
@@ -111,7 +111,7 @@ Asking for a state the object is already in succeeds and says so ("Already showi
 | --- | --- | --- | --- |
 | `_bindings` | `List<ConvaiAnimatorActionBinding>` | Empty | One row per action this character can perform through the Animator. |
 
-**`ConvaiAnimatorActionBinding` row fields:**
+**Binding row fields.** Each row is configured in the Inspector; the row type is internal to the SDK, so a script cannot construct one.
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -338,7 +338,7 @@ Points at the thing the action names, choosing the arm from where the target act
 | `_release` | `PointingReleaseStyle` (`PlayTail`, `Blend`) | `PlayTail` | What happens when the hold ends. `PlayTail` lowers the arm through the rest of the animation clip; `Blend` drops the pose out instead, ending the gesture roughly as soon as the hold does. |
 
 {% hint style="warning" %}
-**`_holdSeconds` no longer means the length of the whole gesture.** It is only the pause at full extension — the arm's rise and fall are the animation clip's own timing and add roughly 2.5 seconds each way with the shipped pointing clips, so a `_holdSeconds` of `1` still produces a gesture around 6 seconds long. `_gestureSpeed` and `_release` are new in this release and control the rise/fall directly; both default to the prior behavior, so an existing scene's timing is unchanged until you adjust one of them. Set `_release` to `Blend` for the shortest possible point.
+**`_holdSeconds` is only the pause at full extension, not the length of the whole gesture.** The arm's rise and fall are the animation clip's own timing and add roughly 2.5 seconds each way with the shipped pointing clips, so a `_holdSeconds` of `1` still produces a gesture around 6 seconds long. `_gestureSpeed` and `_release` control the rise/fall directly. Set `_release` to `Blend` for the shortest possible point.
 {% endhint %}
 
 No pointing clips in the Animation Set declines as `Unhandled`. No resolved target declines the same way — pointing always needs a target.
@@ -466,7 +466,7 @@ The home position is recorded in `Awake`, before anything else on the character 
 
 ## Observation pack (`Convai.Runtime`)
 
-`SDK/Runtime/Actions/Executors/` — the new pack in this release. Both behaviors return an answer through `ConvaiActionExecutionResult.Answered` and are authored with `AnswerDelivery = TellThePlayer` by default, so the character speaks the result unless you change the action's **When It Finishes** setting.
+`SDK/Runtime/Actions/Executors/` holds the observation executors. Both behaviors return an answer through `ConvaiActionExecutionResult.Answered` and are authored with `AnswerDelivery = TellThePlayer` by default, so the character speaks the result unless you change the action's **When It Finishes** setting.
 
 ### Count Target Group
 

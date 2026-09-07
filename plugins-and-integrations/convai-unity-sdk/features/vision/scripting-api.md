@@ -1,7 +1,7 @@
 ---
 title: Vision scripting API
 description: Reference for the Convai Unity SDK vision scripting API, including publish control, runtime status queries, on-demand triggers, and respond-mode events.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Vision scripting centers on `ConvaiVisionPublisher` for publish control, `ConvaiRoomManager` for on-demand vision status queries and triggers, and the frame source status interfaces for capture state. Domain events let you react to lifecycle changes and backend acknowledgements without polling `IsPublishing` every frame.
@@ -24,7 +24,7 @@ Vision scripting centers on `ConvaiVisionPublisher` for publish control, `Convai
 | Method | Description |
 | --- | --- |
 | `SetPublishPolicy(VisionPublishPolicy policy)` | Changes the client-side transport budget. Takes effect on the next published frame. |
-| `EnablePublishing(bool enabled)` | Starts or stops publishing without changing the selected policy. Only meaningful when policy is `Manual`; ignored for auto-publishing policies. |
+| `EnablePublishing(bool enabled)` | Starts or stops publishing without changing the selected policy. Takes effect under every policy, not only `Manual`. Once called, it also overrides the policy's own on-or-off default for the rest of the session, so a later policy change no longer decides whether publishing runs. |
 
 ### Usage
 
@@ -145,10 +145,10 @@ public class FrameSourceMonitor : MonoBehaviour
 
 ## `ConvaiRoomManager` vision methods
 
-`ConvaiRoomManager` implements `IConvaiRoomConnectionService` and exposes three runtime methods, added in SDK 4.4.0, for querying and driving dynamic vision context mid-session without reconnecting. Access them through a serialized `ConvaiRoomManager` field, a custom `IConvaiRoomConnectionService` implementation, or `ConvaiManager.ActiveManager.TryGetRoomConnectionService(out IConvaiRoomConnectionService service)` when no scene reference is available.
+`ConvaiRoomManager` implements `IConvaiRoomConnectionService` and exposes three runtime methods for querying and driving dynamic vision context mid-session without reconnecting. Access them through a serialized `ConvaiRoomManager` field, a custom `IConvaiRoomConnectionService` implementation, or `ConvaiManager.ActiveManager.TryGetRoomConnectionService(out IConvaiRoomConnectionService service)` when no scene reference is available.
 
-{% hint style="warning" %}
-**Breaking change in SDK 4.4.0.** `IConvaiRoomConnectionService` gained three members: `RequestVisionStatus(string updateId = null)`, `TriggerVision(ConvaiVisionTriggerRequest request)`, and `UpdateRespondMode(ConvaiRespondModeLane lane, ConvaiRespondMode mode, string updateId = null)`. Code that only consumes the interface through `ConvaiRoomManager` is unaffected. Any custom implementation of `IConvaiRoomConnectionService` must add all three methods — return `false` from each when vision is not supported by that implementation.
+{% hint style="info" %}
+A custom `IConvaiRoomConnectionService` implementation must implement all three methods below. Return `false` from any of them when vision is not supported by that implementation.
 {% endhint %}
 
 | Method | Returns | Description |

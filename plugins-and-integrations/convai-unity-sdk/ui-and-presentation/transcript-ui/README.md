@@ -1,16 +1,12 @@
 ---
 title: Transcript UI
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 description: >-
   Understand how the Convai Unity SDK separates durable chat history from
   speech-aligned captions, and which built-in component displays each.
 ---
 
-`ConvaiManager.ActiveManager.Transcripts` is the single entry point for transcript data in the Convai Unity SDK. It exposes two purposes side by side — a durable turn-by-turn chat history and a stream of speech-aligned captions — so your scene UI can show conversation history and live subtitles without building either pipeline yourself.
-
-{% hint style="warning" %}
-**Breaking change in SDK 4.4.0.** `ITranscriptUI`, `ITranscriptListener`, `TranscriptViewModel`, `TranscriptUIController`, and `ITranscriptPresentationStrategy` were removed. Custom transcript displays now subscribe directly through `ConvaiManager.ActiveManager.Transcripts` — see the durable and caption paths below.
-{% endhint %}
+`ConvaiManager.ActiveManager.Transcripts` is the single entry point for transcript data in the Convai Unity SDK. It exposes two purposes side by side — a durable turn-by-turn chat history and a stream of speech-aligned captions — so your scene UI can show conversation history and live subtitles without building either pipeline yourself. Custom transcript displays subscribe directly through `ConvaiManager.ActiveManager.Transcripts` — see the durable and caption paths below.
 
 ## How transcript data reaches your scene UI
 
@@ -28,6 +24,8 @@ graph TD
 ```
 
 Both paths read from the same room session, so a character's speech always appears in history and, if a caption UI is present, as a caption at the same time.
+
+Neither path is scoped to a single character. For a push notification tied to one `ConvaiCharacter`'s own spoken line — outside of scene UI, for example a gaze or gesture trigger — see `ConvaiCharacter.OnTranscriptReceived` in [Transcript API](../../scripting-reference/transcript-api.md).
 
 ## Durable chat history vs. speech-aligned captions
 

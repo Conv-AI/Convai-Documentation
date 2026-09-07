@@ -1,12 +1,12 @@
 ---
 title: MCP tools reference
 description: Reference for every Convai MCP tool exposed to a coding agent, including default enablement and scene-mutation behavior.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
-Unity's official MCP server exposes 37 Convai-specific tools under the `Convai.*` namespace, at tool contract version 4, so a connected coding agent can inspect, configure, or diagnose Convai components instead of you wiring them by hand in the Unity Editor. Unity AI Assistant calls a tool by its dot-separated name (for example `Convai.GetGuidance`); external MCP clients receive the same tool under an underscore-normalized name (`Convai_GetGuidance`). Most of the growth since `4.4.0` is the embodiment module wave — Gaze, Body Animation, Body Language, and Emotion each shipped with its own Configure, Diagnose, and content-inspection tools, tied together by three Embodiment-core tools. This page documents every tool's purpose, parameters, default enabled state, and scene or project mutation behavior, using the dot-separated name throughout.
+Unity's official MCP server exposes 44 Convai-specific tools under the `Convai.*` namespace, at tool contract version 7, so a connected coding agent can inspect, configure, or diagnose Convai components instead of you wiring them by hand in the Unity Editor. Unity AI Assistant calls a tool by its dot-separated name (for example `Convai.GetGuidance`); external MCP clients receive the same tool under an underscore-normalized name (`Convai_GetGuidance`). Seven of the 44 tools cover conversation targeting and multi-character rooms — deciding which of several characters the player is addressing, and adding, removing, or waiting on a character in a room that is already connected. This page documents every tool's purpose, parameters, default enabled state, and scene or project mutation behavior, using the dot-separated name throughout.
 
-## All 37 tools
+## All 44 tools
 
 | Tool | Area | Enabled by default | Mutates |
 |---|---|---|---|
@@ -20,6 +20,13 @@ Unity's official MCP server exposes 37 Convai-specific tools under the `Convai.*
 | `Convai.ConfigureCharacter` | Scene and conversation setup | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
 | `Convai.SetupConversationScene` | Scene and conversation setup | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
 | `Convai.DiagnoseConversation` | Scene and conversation setup | Yes | No |
+| `Convai.ConfigureConversationTargeting` | Conversation targeting | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
+| `Convai.SimulateConversationTargeting` | Conversation targeting | Yes | No |
+| `Convai.SetupMultiCharacterRoster` | Conversation targeting | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
+| `Convai.SetConversationTarget` | Multi-character | Yes | Play Mode only; requires explicit `dryRun=false`; never changes Play Mode |
+| `Convai.UpdateCharacterRoster` | Multi-character | Yes | Play Mode only; requires explicit `dryRun=false`; never changes Play Mode |
+| `Convai.WaitForCharacterReady` | Multi-character | Yes | No — waits only; never changes Play Mode |
+| `Convai.WaitForMultiCharacterState` | Multi-character | Yes | No — waits only; never changes Play Mode |
 | `Convai.ConfigureActions` | Character actions | Yes | Yes — Edit Mode only |
 | `Convai.DiagnoseActions` | Character actions | Yes | No |
 | `Convai.SimulateAction` | Character actions | Yes | Play Mode only, through the dispatcher |
@@ -77,6 +84,7 @@ Loads concise Convai SDK workflow guidance for one topic. Call it before configu
 | `BodyAnimation` | Body animation is content-gated — several behaviours stay inert until the character's animation set carries clips for them, which is a content gap, not a setup fault. |
 | `BodyLanguage` | Body Language layers ambient nonverbal motion on top of Body Animation and Gaze, ducking itself automatically when either module is present. |
 | `Emotion` | Give a character a face that reacts to what is said, and tune its temperament without restyling every other character sharing its personality. |
+| `MultiCharacter` | A Convai room holds every active `ConvaiCharacter` in the loaded scenes; there is no multi-character mode to switch on. Configure only what the project wants changed with `Convai.ConfigureConversationTargeting`. |
 | `Events` | Prefer `ConvaiManager.Events` for typed code and relay components for Inspector-driven `UnityEvent`s. |
 | `Runtime` | Use `ConvaiManager` for session ownership, Audio for room audio, and Transcripts for canonical history. |
 
@@ -125,7 +133,7 @@ Idempotently adds the required `ConvaiManager` and `ConvaiRoomManager` to the ac
 | `dryRun` | `bool` | `true` via Unity AI Assistant; `false` via the external MCP tool contract | Preview required changes without modifying the scene. |
 
 {% hint style="warning" %}
-`Convai.BootstrapScene` is the only one of the 37 tools disabled by default. Its `dryRun` default also depends on how the agent calls it: Unity AI Assistant's dot-named wrapper defaults `dryRun` to `true` like every other mutating tool, but the underlying MCP tool contract used by external MCP clients (the underscore-named `Convai_BootstrapScene`) defaults `dryRun` to `false` — those clients apply the change immediately unless they pass `dryRun: true` explicitly. Prefer `Convai.SetupConversationScene` for end-to-end setup; use `Convai.BootstrapScene` only for manager/room-only work.
+`Convai.BootstrapScene` is the only one of the 44 tools disabled by default. Its `dryRun` default also depends on how the agent calls it: Unity AI Assistant's dot-named wrapper defaults `dryRun` to `true` like every other mutating tool, but the underlying MCP tool contract used by external MCP clients (the underscore-named `Convai_BootstrapScene`) defaults `dryRun` to `false` — those clients apply the change immediately unless they pass `dryRun: true` explicitly. Prefer `Convai.SetupConversationScene` for end-to-end setup; use `Convai.BootstrapScene` only for manager/room-only work.
 {% endhint %}
 
 ### `Convai.ConfigureRoom`
@@ -210,8 +218,129 @@ Diagnoses active-scene Convai conversation readiness and runtime state with rank
 |---|---|---|---|
 | `characterInstanceId` | `long` | `0` | Optional focused character GameObject instance ID. |
 | `includeInactive` | `bool` | `true` | Include inactive scene objects. |
+| `includeRecentMultiCharacterEvents` | `bool` | `false` | Include up to 20 recent sanitized target, roster, and availability events from an active trace. |
 
 Returns `readyToRun`, configuration and runtime snapshots, and an `issues` array with stable codes, evidence, `autoFixable`, and `suggestedTool`/`suggestedArguments` for each issue.
+
+The `configuration` snapshot includes a `conversationTargeting` block reporting the targeting rule and its values — `mode`, `within` (range in metres), `lookAngle`, `switchMargin`, and `switchDelaySeconds` — plus `isShippedDefault`, which is `true` only when every value still matches the shipped defaults. The `runtime` snapshot reports `addressedCharacter` and `addressedCharacterInstanceId` for the character currently being addressed, `conversationAvailability` and `playerCanTalk` for the availability verdict, and a `multiCharacter` block. When no multi-character room is active, `multiCharacter` reports only `isMultiCharacterRoom: false`; when one is active, it also reports the room session ID, route and roster epochs, the active conversation target, the targeting mode and verdict, and the full roster with each character's membership status.
+
+## Conversation targeting
+
+A Convai room holds every active `ConvaiCharacter` in the loaded scenes, and the SDK works out which one the player is addressing. These tools configure that rule and preview it before a room connects; the [Multi-character](#multi-character) tools below operate a room that is already connected.
+
+### `Convai.ConfigureConversationTargeting`
+
+**Area:** Conversation targeting · **Enabled by default:** Yes · **Mutates:** Yes
+
+Previews or configures which characters join the next Convai room and how the SDK decides which of them the player is talking to. Every field is optional and omitting one leaves that setting exactly as the project authored it, and the whole request is planned before anything is written. Uses Undo, never saves the scene, and never changes credentials. Available only in Edit Mode — returns a `PLAY_MODE_ACTIVE` failure code if called during Play Mode.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `managerInstanceId` | `long` | `0` | The `ConvaiManager` to configure. Zero uses the only one in the loaded scenes. |
+| `targetingMode` | `enum ConversationTargetingMode` | omit = unchanged | How the character being addressed is chosen: `LookAt`, `Proximity`, or `Manual`. `LookAt` picks the character nearest the centre of view; `Proximity` picks the nearest character wherever the player is looking; `Manual` moves the conversation only when the game calls `ConvaiManager.TalkTo`. |
+| `maxDistance` | `float` | omit = unchanged | Range: how far away a character can be and still be addressed, in metres. Shipped default `30`. |
+| `maxAngle` | `float` | omit = unchanged | Look Angle: how far from the centre of view a character can be, in degrees. `LookAt` only. Shipped default `35` (a 70-degree cone). |
+| `switchMargin` | `float` | omit = unchanged | Switch Margin: how much better a different character must look before the conversation moves, in degrees. `LookAt` only. Shipped default `10`. |
+| `switchDelaySeconds` | `float` | omit = unchanged | Switch Delay: how long a character must stay the best choice before the conversation moves. Shipped default `0.2`. |
+| `viewCameraInstanceId` | `long` | omit = unchanged | Player Camera: the `Camera` GameObject instance ID treated as the player's view. |
+| `clearViewCamera` | `bool` | omit = unchanged | Clear Player Camera so the main camera is used again. |
+| `initialCharacterInstanceId` | `long` | omit = unchanged | Initial Character: the character the room opens on regardless of where the player is looking. |
+| `clearInitialCharacter` | `bool` | omit = unchanged | Clear Initial Character so the room opens on whoever the player is looking at. |
+| `includedCharacterInstanceIds` | `long[]` | omit = unchanged | Characters Joining the Room: the exact set of characters to send. A character left out is excluded, and a character added to the scene later stays out until it is included too. Read the current set from `Convai.DiagnoseConversation` before changing it. |
+| `includeAllCharacters` | `bool` | omit = unchanged | Send every active character to the next room, which is the shipped default. |
+| `dryRun` | `bool` | `true` | Preview changes without modifying the scene. |
+
+### `Convai.SimulateConversationTargeting`
+
+**Area:** Conversation targeting · **Enabled by default:** Yes · **Mutates:** No
+
+Explains the geometric proposal — and any live room-order recovery fallback — produced by the configured `LookAt` or `Proximity` targeting rule, without claiming that temporal switch gates such as Switch Delay have committed it. Read-only in both Edit Mode and Play Mode; never contacts Convai.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `managerInstanceId` | `long` | `0` | The `ConvaiManager` to simulate. Zero uses the only one in the loaded scenes. |
+| `viewCameraInstanceId` | `long` | `0` | Camera GameObject instance ID. Zero uses the manager's authored camera, then Main Camera, then the owned player. |
+| `includeInactive` | `bool` | `true` | Include inactive characters in the report; they remain ineligible. |
+
+Returns the targeting mode, the current and proposed targets, whether a recovery fallback applied, each candidate character's distance, angle, and eligibility evidence, and the settings the proposal was scored against.
+
+### `Convai.SetupMultiCharacterRoster`
+
+**Area:** Conversation targeting · **Enabled by default:** Yes · **Mutates:** Yes
+
+Previews or configures the exact roster of at least two characters for the next room, and optionally chooses which one speaks first. Validates that every character has its own Character ID before applying, and applies through `Convai.ConfigureConversationTargeting`, using Unity's Undo system. Available only in Edit Mode — returns a `PLAY_MODE_ACTIVE` failure code if called during Play Mode.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `characterInstanceIds` | `long[]` | — (required) | The exact set of at least two character GameObject instance IDs for the next room. |
+| `managerInstanceId` | `long` | `0` | The `ConvaiManager` to configure. Zero uses the only one in the loaded scenes. |
+| `initialCharacterInstanceId` | `long` | `0` | Optional roster member that speaks first. Zero leaves the authored value unchanged. Must also appear in `characterInstanceIds`. |
+| `dryRun` | `bool` | `true` | Preview changes without modifying the scene. |
+
+## Multi-character
+
+These tools operate a multi-character room that is already connected. Every mutating tool here requires Play Mode and an explicit `dryRun=false`; none of them change Play Mode itself.
+
+### `Convai.SetConversationTarget`
+
+**Area:** Multi-character · **Enabled by default:** Yes · **Mutates:** Play Mode only; requires explicit `dryRun=false`
+
+Previews or changes which character the player is addressing in an active multi-character room.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `characterInstanceId` | `long` | — (required) | Character GameObject instance ID to address. |
+| `managerInstanceId` | `long` | `0` | The `ConvaiManager` to use. Zero uses the only one in the loaded scenes. |
+| `dryRun` | `bool` | `true` | Preview without contacting the active room. |
+| `timeoutSeconds` | `float` | `10` | Maximum seconds to wait for the authoritative response, clamped between `0.1` and `60`. |
+
+If the change is requested while the player is still speaking, the tool reports `executed=false` and `queued=true` — the request is queued locally and has not been sent to the room until the player's current utterance ends. Use `Convai.WaitForMultiCharacterState` after speech ends to observe the canonical target.
+
+### `Convai.UpdateCharacterRoster`
+
+**Area:** Multi-character · **Enabled by default:** Yes · **Mutates:** Play Mode only; requires explicit `dryRun=false`
+
+Previews or adds or removes one character in an active multi-character room, and returns the authoritative roster and routing epochs.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `operation` | `enum ConvaiCharacterRosterOperation` | `Add` | `Add` or `Remove`. |
+| `characterInstanceId` | `long` | — (required) | Character GameObject instance ID to add or remove. |
+| `roomManagerInstanceId` | `long` | `0` | The `ConvaiRoomManager` to use. Zero uses the only one in the loaded scenes. |
+| `replacementTargetCharacterInstanceId` | `long` | `0` | Optional character GameObject instance ID to address after removing the current target. Valid only for `Remove`. |
+| `dryRun` | `bool` | `true` | Preview without contacting the active room. |
+| `timeoutSeconds` | `float` | `15` | Maximum seconds to wait for the authoritative response, clamped between `0.1` and `15`. |
+
+### `Convai.WaitForCharacterReady`
+
+**Area:** Multi-character · **Enabled by default:** Yes · **Mutates:** No — waits only; never changes Play Mode
+
+Waits for one character already in the active multi-character room to become Ready. The wait never cancels character startup.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `characterInstanceId` | `long` | — (required) | Character GameObject instance ID whose current membership must become Ready. |
+| `roomManagerInstanceId` | `long` | `0` | The `ConvaiRoomManager` to use. Zero uses the only one in the loaded scenes. |
+| `timeoutSeconds` | `float` | `30` | Maximum seconds to wait, clamped between `0.1` and `60`. |
+
+Requires Play Mode — returns a `PLAY_MODE_REQUIRED` failure code otherwise. If the membership has already failed to start, the tool returns its failure code immediately instead of waiting.
+
+### `Convai.WaitForMultiCharacterState`
+
+**Area:** Multi-character · **Enabled by default:** Yes · **Mutates:** No — waits only; never changes Play Mode
+
+Waits for authoritative target, roster epoch, route epoch, roster size, readiness, or conversation-availability conditions in the active multi-character room. With no conditions set, returns a current snapshot instead of waiting. Read-only and requires Play Mode.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `managerInstanceId` | `long` | `0` | The `ConvaiManager` to use. Zero uses the only one in the loaded scenes. |
+| `expectedActiveCharacterInstanceId` | `long` | `0` | Optional character GameObject instance ID that must become the authoritative target. |
+| `expectedRosterSize` | `int` | `-1` | Expected roster size. A negative value omits this condition. |
+| `minimumRosterEpoch` | `int` | `-1` | Minimum authoritative roster epoch. A negative value omits this condition. |
+| `minimumRouteEpoch` | `int` | `-1` | Minimum authoritative route epoch. A negative value omits this condition. |
+| `requireAllCharactersReady` | `bool` | `false` | Wait until every current roster member is Ready. |
+| `requireConversationAvailable` | `bool` | `false` | Wait until the addressed character can accept player input. |
+| `timeoutSeconds` | `float` | `30` | Maximum seconds to wait, clamped between `0.1` and `60`. |
 
 ## Character actions
 

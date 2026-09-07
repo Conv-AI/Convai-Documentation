@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot emotion
-description: Fix common Convai Unity SDK emotion pipeline failures — from no facial output to silent neutral fallback and LipSync conflicts.
-last_reviewed: "4.5.0"
+description: Fixes common emotion pipeline problems in the Unity SDK, from no facial output at all to silent fallback and lip sync conflicts.
+last_reviewed: "4.6.0"
 ---
 
 Most emotion problems fall into one of three categories: no visual output at all, scores updating but no face movement, or event and scripting callbacks not firing. Start by watching `Current.DominantScore` in Play Mode — this one signal identifies whether the issue is in the signal path or in facial output.
@@ -157,10 +157,10 @@ The following messages appear in the Unity Console from the Emotion system.
 | --- | --- | --- |
 | `[ConvaiEmotionController] No facial blendshapes could be resolved on '<name>', so emotion state will update but the face will not move. Check that the character has a skinned facial mesh with blendshapes, and that its blendshape names follow a supported convention (ARKit, Reallusion CC3/CC4, or MetaHuman). For a rig using none of those, assign a Custom Rig Convention Map.` | `ConvaiEmotionController` | No mesh or blendshape on the character's rig matched a supported convention. Facial output cannot resolve. |
 | `[MaterialPropertyEmotionBinding] '<name>' has authored material-property slot(s) but none of the authored shader properties (<names>) were found on any target material. Verify the property name(s) (e.g. "_EmotionBlush") match a property exposed by the character's assigned material(s).` | `MaterialPropertyEmotionBinding` | Every authored `propertyName` in the profile's Material Binding list missed on every target material — likely a typo. |
-| `[ConvaiEmotionController] SetEmotionOverride was given '<label>', which this character's emotion vocabulary does not define, so the face stays neutral.` | `ConvaiEmotionController` | `SetEmotionOverride` was called with a label the active taxonomy cannot resolve. Validate with `TryResolveEmotionLabel` first. |
-| `[ConvaiEmotionController] SetMood was given '<label>', which this character's emotion vocabulary does not define, so the character rests at no mood.` | `ConvaiEmotionController` | `SetMood` was called with a label the active taxonomy cannot resolve. |
-| `[EmotionTaxonomyAsset] This emotion vocabulary marks no emotion as the neutral one, so a stand-in is being used.` | `EmotionTaxonomyAsset` | A custom taxonomy asset has no entry with `isNeutral = true`. The system synthesizes a fallback neutral so the pipeline runs. |
-| `[EmotionTaxonomyAsset] N emotions in this vocabulary are ticked 'Is Neutral' and only the first is used.` | `EmotionTaxonomyAsset` | Multiple taxonomy entries have `isNeutral = true`. Only the first is used. |
+| `[ConvaiEmotionController] SetEmotionOverride was given '<label>', which this character's emotion vocabulary does not define, so the face stays neutral. Pass a label the vocabulary defines, or add it to that emotion's other words on the vocabulary asset.` | `ConvaiEmotionController` | `SetEmotionOverride` was called with a label the active taxonomy cannot resolve. Validate with `TryResolveEmotionLabel` first. |
+| `[ConvaiEmotionController] SetMood was given '<label>', which this character's emotion vocabulary does not define, so the character rests at no mood. Pass a label the vocabulary defines, or add it to that emotion's other words on the vocabulary asset.` | `ConvaiEmotionController` | `SetMood` was called with a label the active taxonomy cannot resolve. |
+| `[EmotionTaxonomyAsset] This emotion vocabulary marks no emotion as the neutral one, so a stand-in will be used at runtime. Tick 'Is Neutral' on exactly one emotion — it is what the face relaxes to between feelings.` | `EmotionTaxonomyAsset` | A custom taxonomy asset has no entry with `isNeutral = true`. The system synthesizes a fallback neutral so the pipeline runs. |
+| `[EmotionTaxonomyAsset] N emotions in this vocabulary are ticked 'Is Neutral' and only the first is used. Untick the others, so it is clear which one the face relaxes to.` | `EmotionTaxonomyAsset` | Multiple taxonomy entries have `isNeutral = true`. Only the first is used. |
 
 There is **no console warning** when Convai sends an unrecognized emotion label — `TryResolve` silently falls back to the neutral descriptor. If an expected emotion never appears on the character, see [Unknown server labels — silent neutral fallback](#unknown-server-labels-silent-neutral-fallback) above.
 

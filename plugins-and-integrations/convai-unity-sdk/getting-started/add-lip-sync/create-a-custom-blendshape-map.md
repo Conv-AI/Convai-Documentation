@@ -3,14 +3,10 @@ title: Create a custom lip sync map
 description: >-
   Create a lip sync map that routes incoming blendshape channels to your
   character's mesh, with per-channel weight and clamp tuning.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 A lip sync map routes source blendshape channels (from the transport stream) to the actual blendshape names on your character's `SkinnedMeshRenderer`. Create a custom map when your rig uses different blendshape names than the bundled passthrough maps expect, or when you need to tune weights for your specific character.
-
-{% hint style="warning" %}
-As of SDK 4.4.0, `ConvaiLipSyncMapAsset` no longer exposes `ClearMappings()`, `InitializeWithDefaults()`, or `AutoDetectFromMeshes()` as public runtime methods. These operations now run only from the asset's Inspector — see **Populate mapping entries** below. Existing map assets keep working unchanged; only the ability to call these operations from your own C# code was removed.
-{% endhint %}
 
 {% stepper %}
 {% step %}
@@ -24,23 +20,28 @@ In the Project window, navigate to the folder where you want to store the map. R
 
 Select the new asset to open it in the Inspector, and expand the **Configuration** section.
 
-| Field                          | Default   | Description                                                                             |
-| ------------------------------ | --------- | --------------------------------------------------------------------------------------- |
-| **Target Profile ID**          | _(empty)_ | The profile ID this map targets (e.g., `arkit`, `metahuman`, or your custom profile ID) |
-| **Description**                | _(empty)_ | Optional designer notes — not used at runtime                                           |
-| **Global Multiplier**          | `1.0`     | Scale applied to all output weights before writing (0–3)                                |
-| **Global Offset**              | `0.0`     | Offset added to all output weights (-1–1)                                               |
-| **Allow Unmapped Passthrough** | `true`    | Channels with no explicit mapping entry are written using their source name directly    |
+| Field           | Default   | Description                                                                                                                  |
+| --------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Target Profile** | _(none)_ | Popup listing the registered lip sync profiles this map targets (e.g., `arkit`, `metahuman`, or your custom profile). If no profiles are registered, the Inspector falls back to a **Target Profile ID** text field instead. |
+| **Description** | _(empty)_ | Optional designer notes — not used at runtime                                                                                |
+
+Below **Description**, a **Global Modifiers** subheading groups three fields:
+
+| Field              | Default | Description                                                                          |
+| ------------------ | ------- | --------------------------------------------------------------------------------------- |
+| **Multiplier**     | `1.0`   | Scale applied to all output weights before writing                                     |
+| **Offset**         | `0.0`   | Offset added to all output weights                                                     |
+| **Allow Unmapped** | `true`  | Channels with no explicit mapping entry are written using their source name directly   |
 
 {% hint style="info" %}
-**Allow Unmapped Passthrough** is useful when most of your blendshape names match the source channels — you only need to add entries for the ones that differ. Unmapped channels write directly using their source name.
+**Allow Unmapped** is useful when most of your blendshape names match the source channels — you only need to add entries for the ones that differ. Unmapped channels write directly using their source name.
 {% endhint %}
 {% endstep %}
 
 {% step %}
 ### Populate mapping entries
 
-Expand the **Tools** section in the same Inspector to add mapping entries. This section replaces the runtime `ClearMappings()`, `InitializeWithDefaults()`, and `AutoDetectFromMeshes()` calls used in earlier SDK versions — every mapping operation now runs from the Inspector.
+Expand the **Tools** section in the same Inspector to add mapping entries. Every mapping operation — clearing, initializing defaults, and auto-detecting from a mesh — runs from the Inspector.
 
 **From a mesh:** Add one or more `SkinnedMeshRenderer` references under **Preview Mesh**, then click **Auto-Detect From Mesh** and choose a match mode:
 
@@ -68,7 +69,7 @@ Expand the **Tools** section in the same Inspector to add mapping entries. This 
 
 Use **Copy Mapping JSON** to export the current asset's mappings in this same format, for example to share a map between assets or check it into version control as text.
 
-**Other mapping actions:** **Initialize Defaults** clears all existing mappings and creates one disabled entry per known source channel for the asset's **Target Profile ID**. **Clear All** removes every mapping entry. **Sort A-Z** reorders entries alphabetically by source channel. **+ Add Entry** adds a single blank entry to hand-edit.
+**Other mapping actions:** **Initialize Defaults** clears all existing mappings and creates one enabled, passthrough entry per known source channel for the asset's **Target Profile** — each entry's **Target Names** is set to the source channel's own name. **Clear All** removes every mapping entry. **Sort A-Z** reorders entries alphabetically by source channel. **+ Add Entry** adds a single blank entry to hand-edit.
 
 Each entry — however it was added — maps one source channel to one or more target blendshape names, with the following fields:
 
@@ -80,11 +81,23 @@ Each entry — however it was added — maps one source channel to one or more t
 | **Offset**                  | `0.0`          | Per-entry offset (-1–1)                                                   |
 | **Response Curve**          | `1.0`          | Exponent applied to the incoming value before scaling (0.25–4)            |
 | **Enabled**                 | `true`         | Toggle this entry on or off without deleting it                           |
-| **Clamp Min Value**         | `0.0`          | Minimum output value (0–1)                                                |
-| **Clamp Max Value**         | `1.0`          | Maximum output value (0–1)                                                |
+| **Clamp Min**                | `0.0`          | Minimum output value (0–1)                                                |
+| **Clamp Max**                | `1.0`          | Maximum output value (0–1)                                                |
 | **Use Override Value**      | `false`        | When enabled, always write **Override Value** instead of the stream value |
 | **Override Value**          | `0.0`          | Constant value written when **Use Override Value** is on                  |
-| **Ignore Global Modifiers** | `false`        | Skip **Global Multiplier** and **Global Offset** for this entry           |
+| **Ignore Global Modifiers** | `false`        | Skip the **Global Modifiers** **Multiplier** and **Offset** for this entry |
+
+**Bulk operations:** Expand the **Bulk Operations** section (collapsed by default) to apply a change to every mapping entry at once instead of editing them one at a time:
+
+| Button | Effect |
+| --- | --- |
+| **Enable All** / **Disable All** | Sets **Enabled** on every entry |
+| **Reset Multipliers** | Sets every entry's **Multiplier** back to `1.0` |
+| **Reset Offsets** | Sets every entry's **Offset** back to `0.0` |
+| **Reset Curves** | Sets every entry's **Response Curve** back to `1.0` |
+| **Enable Eyes Only** | Enables entries whose source blendshape name matches an eye-related keyword (`Eye`, `Blink`, `Look`, `Squint`, `Wide`) and disables the rest |
+| **Enable Mouth Only** | Enables entries whose source blendshape name matches a mouth-related keyword (`Mouth`, `Jaw`, `Lip`, `Smile`, `Frown`) and disables the rest |
+| **Enable Brows Only** | Enables entries whose source blendshape name matches `Brow` and disables the rest |
 {% endstep %}
 
 {% step %}
@@ -105,8 +118,8 @@ Enter Play Mode and speak to the character. All mapped blendshapes animate. Chec
 **Setup:**
 
 * Create `ConvaiLipSyncMap_CustomRig_FromARKit.asset`
-* Target Profile ID: `arkit`
-* Allow Unmapped Passthrough: `false` (all names differ)
+* Target Profile: `arkit`
+* Allow Unmapped: `false` (all names differ)
 * Add entries for each blendshape:
 
 | Source blendshape                    | Target names        |
@@ -126,7 +139,7 @@ Enter Play Mode and speak to the character. All mapped blendshapes animate. Chec
 
 * Duplicate the bundled `ConvaiLipSyncDefaultMap_ARKit.asset` and rename it
 * Find the `jawOpen` entry
-* Set **Multiplier** to `0.6` and **Clamp Max Value** to `0.7`
+* Set **Multiplier** to `0.6` and **Clamp Max** to `0.7`
 
 **Expected outcome:** The character's jaw opens only 60–70% as much as the raw stream value, resulting in more restrained, naturalistic mouth movement.
 

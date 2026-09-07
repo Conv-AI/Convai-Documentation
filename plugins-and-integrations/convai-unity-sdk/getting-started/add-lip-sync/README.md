@@ -3,7 +3,7 @@ title: Add lip sync
 description: >-
   Connect Convai audio output to your character's facial blendshapes,
   synchronize mouth movement with speech, and tune playback latency.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 The Convai SDK for Unity includes a real-time lip sync system that drives `SkinnedMeshRenderer` blendshapes in sync with the character's voice audio. It supports three industry-standard blendshape formats and handles playback buffering, smoothing, and fade-out automatically.
@@ -91,7 +91,8 @@ If your character was rigged with non-standard blendshape names, create a custom
 | Field              | Default | Range    | Description                                                    |
 | ------------------ | ------- | -------- | -------------------------------------------------------------- |
 | `_smoothingFactor` | `0.5`   | 0–0.9    | Exponential smoothing per frame (higher = smoother but slower) |
-| `_fadeOutDuration` | `0.2`   | 0.05–2.0 | Seconds to fade all blendshapes to 0 after audio ends          |
+| `_fadeOutDuration` | `0.2`   | 0.05–2.0 | Seconds to fade all blendshapes to 0 when a response is interrupted or canceled |
+| `_settleDuration`  | `0.35`  | 0.1–1.0  | Seconds the mouth takes to come to rest after the character's last word, continuing the motion the animation left off with rather than cutting it. See [How a response ends](#how-a-response-ends). |
 | `_fadeInDuration`  | `0.1`   | 0–0.5    | Seconds to blend from the pre-playback pose into the first sampled frames at the start of playback, removing the first-frame pop when a response begins (`0` disables it) |
 | `_timeOffset`      | `0.0`   | -0.5–0.5 | Shift playback timing relative to audio (negative = earlier)   |
 
@@ -112,6 +113,12 @@ If your character was rigged with non-standard blendshape names, create a custom
 | `UltraLowLatency` | Minimal delay; susceptible to starvation on unstable connections |
 | `NetworkSafe`     | High buffering; best for unreliable or high-latency networks     |
 | `Custom`          | Unlocks manual control over buffer fields above                  |
+
+## How a response ends
+
+When a response finishes normally, the mouth settles to rest over **Settle Duration** (`0.35` s by default) rather than snapping shut or holding its last shape. The close continues the motion the last frames were already making — a jaw still rising eases back down with no visible kink, and one already closing keeps closing. This is separate from **Fade Out Duration**, which is the faster cut used when a response is interrupted or canceled instead of finishing on its own.
+
+If you drive `LipSyncPlaybackEngine` directly instead of going through `ConvaiLipSyncComponent`, call `SettleToRest()` to trigger the same settle from your own code, and read `IsSettling` to check whether the current fade-out is a settle rather than a timed cut.
 
 ## Ahead chunk delivery preview
 
@@ -134,7 +141,7 @@ The SDK buffers ahead chunks by their frame index and waits until frames are con
 3. In the **Target Meshes** list, add the `SkinnedMeshRenderer` from the avatar's head mesh.
 4. Leave `_mapping` empty — the bundled ARKit auto-map covers standard camelCase ARKit blendshape names (`jawOpen`, `mouthSmileLeft`, etc.).
 
-**Expected outcome:** The avatar's mouth, lips, and jaw animate in sync with the character's voice during conversation. Blendshapes return to neutral smoothly after each response ends (`_fadeOutDuration` = 0.2s default).
+**Expected outcome:** The avatar's mouth, lips, and jaw animate in sync with the character's voice during conversation. The mouth settles to rest smoothly after each response ends (`_settleDuration` = 0.35s default).
 
 ### Example 2: MetaHuman character
 
@@ -152,8 +159,20 @@ The SDK buffers ahead chunks by their frame index and waits until frames are con
 
 ## Next steps
 
-After lip sync is configured, validate your complete setup.
+With lip sync configured, choose how the player talks to the character.
 
-{% content-ref url="../validate-your-setup.md" %}
-[Validate your setup](../validate-your-setup.md)
+{% content-ref url="../configure-conversation-input-mode.md" %}
+[Configure conversation input mode](../configure-conversation-input-mode.md)
+{% endcontent-ref %}
+
+Or explore the Features section to add Actions, Emotion, Long-Term Memory, or Vision to your characters.
+
+{% content-ref url="../../features/README.md" %}
+[Features](../../features/README.md)
+{% endcontent-ref %}
+
+Review Core Concepts for a deeper understanding of the session lifecycle and event system.
+
+{% content-ref url="../../core-concepts/README.md" %}
+[Core Concepts](../../core-concepts/README.md)
 {% endcontent-ref %}

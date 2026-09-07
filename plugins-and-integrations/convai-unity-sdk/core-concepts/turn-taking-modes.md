@@ -8,7 +8,7 @@ Turn-taking determines who speaks, when a turn ends, and how the SDK handles the
 
 For the Inspector-based setup steps, see [Configure conversation input mode](../getting-started/configure-conversation-input-mode.md). This page is the full field reference.
 
-`TurnTakingOptions` configures the room, not one character. In a multi-character session every membership shares the same turn-taking configuration, and the current interaction target decides which membership receives the next turn. See [Switch the interaction target](../features/multi-character-sessions/switch-the-interaction-target.md).
+`TurnTakingOptions` configures the room, not one character. In a multi-character session every membership shares the same turn-taking configuration, and the current conversation target decides which membership receives the next turn. See [Multi-character sessions](../features/multi-character-sessions/README.md).
 
 ***
 

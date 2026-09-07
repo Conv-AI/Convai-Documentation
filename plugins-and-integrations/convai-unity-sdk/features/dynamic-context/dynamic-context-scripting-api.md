@@ -3,7 +3,7 @@ title: Dynamic context scripting API
 description: >-
   Reference for the Convai Unity SDK dynamic context scripting interface,
   including every method, the respond mode enum, and the attention object API.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 `ConvaiCharacter.DynamicContext` returns the `IConvaiDynamicContext` interface — the scripting surface for tracked state, chronological events, attention-object updates, and raw context sends. This page documents every interface member, the `ConvaiRespondMode` enum that controls whether an update triggers a spoken reply, and the `ConvaiDynamicContextUpdate` type used by `Apply`.
@@ -15,11 +15,7 @@ using Convai.Runtime.DynamicContext;
 IConvaiDynamicContext context = character.DynamicContext;
 ```
 
-`DynamicContext` is available on every `ConvaiCharacter` instance and requires no additional setup.
-
-{% hint style="warning" %}
-`ConvaiContextReactionMode` is removed as of SDK 4.4.0. Every method below takes a `ConvaiRespondMode` value instead. See [Migration from ConvaiContextReactionMode](#migration-from-convaicontextreactionmode) for the full migration table.
-{% endhint %}
+`DynamicContext` is available on every `ConvaiCharacter` instance and requires no additional setup. Every method below takes a `ConvaiRespondMode` value to control whether the update triggers a spoken reply.
 
 ## Method reference
 
@@ -236,18 +232,6 @@ Used by `Apply` and `ConvaiDynamicContextUpdate`.
 | `Silent` | `silent` | Absorbed into the character's awareness; never triggers a spoken reply on its own. |
 | `Auto` | `auto` | Convai decides whether the update warrants a spoken reply. |
 | `MustRespond` | `must_respond` | Always triggers a spoken reply after the update. |
-
-### Migration from `ConvaiContextReactionMode`
-
-`ConvaiContextReactionMode` is removed in SDK 4.4.0. Every dynamic-context method uses `ConvaiRespondMode` instead.
-
-| Old value (`ConvaiContextReactionMode`) | New value (`ConvaiRespondMode`) |
-|---|---|
-| `SyncOnly` | `Silent` |
-| `ReactImmediately` | `MustRespond` |
-| `Auto` | `Auto` (unchanged) |
-
-The enum was renumbered as part of the rename — `ConvaiRespondMode` declares `Silent = 0, Auto = 1, MustRespond = 2`, while the removed `ConvaiContextReactionMode` declared `Auto = 0, ReactImmediately = 1, SyncOnly = 2`. A scene or prefab saved with a serialized reaction override against an unreleased beta build changes meaning after upgrading: old `Auto` (`0`) deserializes as `Silent`, old `ReactImmediately` (`1`) as `Auto`, and old `SyncOnly` (`2`) as `MustRespond`. Shipped SDK assets carry no such serialized values — this only affects scenes saved against pre-release beta builds. Re-check any serialized reaction field after upgrading if that applies to your project.
 
 ## Default reaction mode reference
 

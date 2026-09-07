@@ -1,5 +1,5 @@
 ---
-title: Multi-character connection API reference
+title: Connection API reference
 description: Reference for the multi-character connection operations, their join and connect option types, and every exception each operation can throw.
 last_reviewed: "4.6.0"
 ---
@@ -23,13 +23,13 @@ Defined in `SDK/Runtime/Room/IConvaiRoomConnectionService.cs:68-147`. Access the
 | `RemoveCharacterAsync` | `RemoveCharacterAsync(string membershipId, string replacementTargetMembershipId = null, CancellationToken cancellationToken = default)` | `IConvaiOperation<CharacterRosterUpdateResult>` |
 | `RemoveCharacterAsync` | `RemoveCharacterAsync(IConvaiCharacterAgent character, string replacementTargetMembershipId = null, CancellationToken cancellationToken = default)` | `IConvaiOperation<CharacterRosterUpdateResult>` |
 
-See [Operation & Stream Types](../../scripting-reference/operation-and-stream-types.md) for how to consume `IConvaiOperation<T>`. Result and exception types are documented on [Multi-character room session reference](room-session-reference.md).
+See [Operation & Stream Types](../../scripting-reference/operation-and-stream-types.md) for how to consume `IConvaiOperation<T>`. Result and exception types are documented on [Room session reference](room-session-reference.md).
 
 ***
 
 ## Concurrency gates
 
-`ConvaiRoomManager` serializes each command family through its own `SemaphoreSlim(1, 1)`, defined in `SDK/Runtime/Adapters/Networking/ConvaiRoomManager.Connection.cs:27-28`. At most one roster mutation and one interaction-target change are in flight at a time.
+`ConvaiRoomManager` serializes each command family through its own `SemaphoreSlim(1, 1)`, defined in `SDK/Runtime/Adapters/Networking/ConvaiRoomManager.Connection.cs:29-30`. At most one roster mutation and one interaction-target change are in flight at a time.
 
 | Gate | Guards |
 | --- | --- |
@@ -59,7 +59,7 @@ Every operation faults its `IConvaiOperation<T>` rather than throwing synchronou
 | `options` is `null` | `ArgumentNullException` | — (`options`) |
 | Convai rejects the join or the underlying connect attempt otherwise fails | `ConvaiOperationException` | The backend session error code and message. |
 
-`JoinMultiCharacterRoomAsync` converts `options` to a `RoomSessionConnectOptions` with `JoinExistingMultiCharacterRoom` set to `true`, then calls the same connect path as `ConnectAsync` (`ConvaiRoomManager.Connection.cs:58-66`). It does not send a roster, so the roster-validation exceptions in [Connect-time roster validation](#connect-time-roster-validation) do not apply to it — but it inherits `ConnectAsync`'s other failure modes, including a `ConvaiOperationException` for a rejected or unreachable connection. See [Join an existing multi-character session](join-an-existing-session.md#troubleshooting) for the join-specific causes and their fixes.
+`JoinMultiCharacterRoomAsync` converts `options` to a `RoomSessionConnectOptions` with `JoinExistingMultiCharacterRoom` set to `true`, then calls the same connect path as `ConnectAsync` (`ConvaiRoomManager.Connection.cs:58-66`). It does not send a roster, so the roster-validation exceptions in [Connect-time roster validation](#connect-time-roster-validation) do not apply to it — but it inherits `ConnectAsync`'s other failure modes, including a `ConvaiOperationException` for a rejected or unreachable connection. See [Join an existing room](join-an-existing-session.md#troubleshooting) for the join-specific causes and their fixes.
 
 ### `SetInteractionTargetAsync`
 
@@ -90,7 +90,7 @@ Clearing the interaction target does not interrupt audio a character is already 
 | The local character instance is already a member of the room | `ArgumentException` | `This local character instance is already a member of the current room. Use another instance when adding a clone.` (`character`) |
 | The same local character was added while this command waited on the gate | `InvalidOperationException` | `The local character was added while this roster update was waiting.` |
 | No acknowledgement within 15 seconds | `TimeoutException` | `Timed out waiting for the character-roster-update acknowledgement.` |
-| Convai's acknowledgement reports a non-success status | `CharacterRosterUpdateException` | The backend message, or `Character roster update failed.` when Convai reported none. See [Multi-character room session reference](room-session-reference.md#characterrosterupdateexception). |
+| Convai's acknowledgement reports a non-success status | `CharacterRosterUpdateException` | The backend message, or `Character roster update failed.` when Convai reported none. See [Room session reference](room-session-reference.md#characterrosterupdateexception). |
 
 ### `RemoveCharacterAsync`
 
@@ -116,12 +116,13 @@ A replacement target must already be a member of the room and must not be the me
 
 ## Connect-time roster validation
 
-A scene that registers two or more characters builds its roster during `ConnectAsync`, before any of the operations above run. The SDK validates that roster in `RoomConnectionRuntimeAdapter.ApplyMultiCharacterTopology` and throws a `ConvaiOperationException` for each condition below. An outer handler in the same adapter (`RoomConnectionRuntimeAdapter.cs:328-341`) catches every exception raised during connect and re-wraps it into a `ConnectionFailure` carrying `SessionErrorCodes.ConnectionFailed`. The caller sees a `ConvaiOperationException` with the **original message** below, but its `Code` is `ConnectionFailed` — the original codes (`ConnectionBadRequest`, `ConfigCharacterIdMissing`) are not observable at the call site.
+A scene that registers two or more characters builds its roster during `ConnectAsync`, before any of the operations above run. The SDK validates that roster in `RoomConnectionRuntimeAdapter.ApplyMultiCharacterTopology` and throws a `ConvaiOperationException` for each condition below, checked in this order. An outer handler in the same adapter catches every exception raised during connect and re-wraps it into a `ConnectionFailure` carrying `SessionErrorCodes.ConnectionFailed`. The caller sees a `ConvaiOperationException` with the **original message** below, but its `Code` is `ConnectionFailed` — the original codes (`ConnectionBadRequest`, `ConfigCharacterIdMissing`) are not observable at the call site.
 
 | Condition | Message (Code at the call site is always `ConnectionFailed`) |
 | --- | --- |
-| More than 50 characters registered | `Multi-character rooms support at most 50 characters.` |
+| More than 50 characters registered | `A Convai room supports at most 50 characters, and this one asks for <count>. The Convai plan for this API key may allow fewer still; use Convai Manager > Characters Joining the Room to send only the characters this conversation needs.` |
 | A null or repeated character reference | `Multi-character roster contains null or duplicate character references.` |
+| Two characters resolve to the same Character ID | ``'<name>' and '<name>' both use Character ID <id>. Two characters in one room cannot share an ID — the SDK routes ownership, participants and audio by it, so they would collide rather than each being answered separately. Give each character its own Character ID from the Convai dashboard.`` See [Character identity](character-identity.md). |
 | A character with no Character ID | `Every character in a multi-character room requires a Character ID.` |
 | Two characters resolving to the same character-session ID | `Character session IDs must be unique within a multi-character roster.` |
 
@@ -131,7 +132,7 @@ This validation runs only when building a roster at connect. `JoinMultiCharacter
 
 ## `MultiCharacterJoinOptions`
 
-`MultiCharacterJoinOptions` is a serializable class passed to `JoinMultiCharacterRoomAsync`. Defined in `SDK/Runtime/Room/TurnTakingOptions.cs:404-432`.
+`MultiCharacterJoinOptions` is a serializable class passed to `JoinMultiCharacterRoomAsync`. Defined in `SDK/Runtime/Room/TurnTakingOptions.cs:411-439`.
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -161,7 +162,7 @@ Joining converts these fields into a `RoomSessionConnectOptions` with `JoinExist
 ## Related reference
 
 {% content-ref url="room-session-reference.md" %}
-[Multi-character room session reference](room-session-reference.md)
+[Room session reference](room-session-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="how-multi-character-sessions-work.md" %}

@@ -1,7 +1,7 @@
 ---
 title: AI coding assistant
 description: Find guides for connecting AI coding agents to Unity through Convai's SDK-aware MCP tools, including setup, supported agents, and troubleshooting.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 The Convai AI coding assistant integration adds Convai-specific tools to Unity's official MCP server, so a coding agent can inspect, configure, and diagnose Convai components in your project instead of you wiring them by hand. Use it if you already work with a supported coding agent and want that agent to understand Convai rooms, characters, actions, lip sync, embodiment modules such as gaze and emotion, transcripts, and vision. Once connected, you prompt the agent in natural language and review the resulting changes in the Unity Editor.
@@ -12,7 +12,7 @@ The Convai AI coding assistant integration adds Convai-specific tools to Unity's
 
 ## What the integration adds
 
-Unity's official MCP server, provided by the `com.unity.ai.assistant` package, gives a coding agent generic tools for GameObjects, scripts, assets, and scene operations, but no knowledge of Convai components. The Convai Unity SDK adds 37 SDK-aware tools with a `Convai.*` name prefix — for example `Convai.ConfigureCharacter`, `Convai.ConfigureLipSync`, `Convai.ConfigureGaze`, and `Convai.DiagnoseConversation` — that read and mutate only Convai components such as `ConvaiManager`, characters, actions, lip sync, embodiment modules (gaze, body animation, body language, emotion), transcripts, and narrative sections. Unity MCP tools continue to own generic GameObjects, scripts, and scene operations. Convai tools never accept or return API keys, and mutating Convai tools use Unity's Undo system instead of saving scenes automatically.
+Unity's official MCP server, provided by the `com.unity.ai.assistant` package, gives a coding agent generic tools for GameObjects, scripts, assets, and scene operations, but no knowledge of Convai components. The Convai Unity SDK adds 44 SDK-aware tools with a `Convai.*` name prefix — for example `Convai.ConfigureCharacter`, `Convai.ConfigureLipSync`, `Convai.ConfigureGaze`, `Convai.DiagnoseConversation`, and `Convai.ConfigureConversationTargeting` — that read and mutate only Convai components such as `ConvaiManager`, characters, actions, lip sync, embodiment modules (gaze, body animation, body language, emotion), transcripts, narrative sections, and which character in a multi-character room the player is addressing. Unity MCP tools continue to own generic GameObjects, scripts, and scene operations. Convai tools never accept or return API keys, and mutating Convai tools use Unity's Undo system instead of saving scenes automatically.
 
 ## Supported coding agents
 
@@ -20,7 +20,7 @@ The integration supports five coding agents: Codex, Claude Code, Cursor, Gemini,
 
 ## Connect a coding agent to your project
 
-Open **Convai > Convai Editor** in the Unity Editor menu, then select **AI Coding** in the window's navigation rail to start. The section's **Setup Health** card checks <code class="expression">space.vars.unity_recommended_version</code> or newer, a compatible `com.unity.ai.assistant` package, the packaged Convai skill, and the 37-tool contract, with inline **Fix** buttons for any check that fails. Open **Project Settings > AI > Unity MCP Server** — directly, or through the **Open Unity MCP Server Settings** button in the same section — to accept Unity's terms for the MCP Server feature and confirm which MCP clients are connected to your project. Then click **Install** next to a supported coding agent in the **Managed Project Instructions** card to write its managed instruction block. See [AI coding assistant quick start](quick-start.md) for the full walkthrough.
+Open **Convai > Convai Editor** in the Unity Editor menu, then select **AI Coding** in the window's navigation rail to start. The section's **Setup Health** card checks <code class="expression">space.vars.unity_recommended_version</code> or newer, a compatible `com.unity.ai.assistant` package, the packaged Convai skill, and the 44-tool contract, with inline **Fix** buttons for any check that fails. Open **Project Settings > AI > Unity MCP Server** — directly, or through the **Open Unity MCP Server Settings** button in the same section — to accept Unity's terms for the MCP Server feature and confirm which MCP clients are connected to your project. Then click **Install** next to a supported coding agent in the **Managed Project Instructions** card to write its managed instruction block. See [AI coding assistant quick start](quick-start.md) for the full walkthrough.
 
 ## What you can ask a connected agent to do
 
@@ -32,6 +32,7 @@ With a coding agent connected, prompt it in natural language instead of wiring c
 * Add objects to the scene for a character to reference
 * Enable vision so a character can see the scene
 * Configure gaze, body animation, body language, or emotion for a character
+* Add a second character to a room and configure how the SDK decides which one the player is addressing
 
 The agent uses Convai tools for Convai components and Unity's own MCP tools for generic GameObjects, scripts, and scene operations, then reports which instance IDs it changed. See [MCP tools reference](mcp-tools-reference.md) for the complete list of Convai tools available to the agent.
 

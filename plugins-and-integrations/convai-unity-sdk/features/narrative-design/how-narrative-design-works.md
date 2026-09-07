@@ -1,21 +1,22 @@
 ---
 title: How narrative design works
 description: Understand the Narrative Design pipeline — how sections, triggers, and template keys connect at runtime to advance a story graph.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Narrative Design gives a Convai character a structured story to follow. You author a graph of sections and triggers in the Convai dashboard; at runtime, the SDK listens for section-change signals from Convai and fires the Unity Events you configured — no polling, no custom state machines. This page explains the underlying model: what the primitives are, how a trigger advances the graph, and which SDK component handles each part of the pipeline.
 
 ## How the runtime pipeline works
 
-When the player activates a trigger, the SDK sends a named signal to the Convai backend. The backend advances the story graph and responds with a `behavior-tree-response` message that carries the new section ID. The SDK translates this into a `NarrativeSectionChanged` domain event and delivers it to `ConvaiNarrativeDesignManager`, which fires the per-section Unity Events you wired in the Inspector.
+When the player activates a trigger, the SDK sends a named signal to Convai. Convai advances the story graph and responds with a `behavior-tree-response` message that carries the new section ID. The SDK translates this into a `NarrativeSectionChanged` domain event and delivers it to `ConvaiNarrativeDesignManager`, which fires the per-section Unity Events you wired in the Inspector.
 
 ```mermaid
 sequenceDiagram
     participant Player
     participant Trigger as ConvaiNarrativeDesignTrigger
     participant Char as ConvaiCharacter (RTVI)
-    participant Backend as Convai Backend
+    participant Backend as Convai
+    participant Hub as Event hub
     participant Manager as ConvaiNarrativeDesignManager
     participant Scene as Your scene
 
@@ -23,9 +24,12 @@ sequenceDiagram
     Trigger->>Char: InvokeTrigger(triggerName, message)
     Char->>Backend: trigger-message (RTVI)
     Backend-->>Char: behavior-tree-response (sectionId, btCode)
-    Char-->>Manager: NarrativeSectionChanged event
+    Char->>Hub: publish NarrativeSectionChanged
+    Hub-->>Manager: NarrativeSectionChanged event
     Manager->>Scene: UnitySectionEventConfig.OnSectionStart.Invoke()
 ```
+
+`ConvaiCharacter` also subscribes to `NarrativeSectionChanged` independently through the same event hub, alongside `ConvaiNarrativeDesignManager` — the diagram above shows only the path that reaches your scene's Unity Events.
 
 Triggers queue automatically if the character's real-time session is not yet open and are flushed when the connection is established. You do not need to check session state before calling `InvokeTrigger()`.
 

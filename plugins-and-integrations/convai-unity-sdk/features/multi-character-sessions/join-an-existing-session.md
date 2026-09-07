@@ -1,5 +1,5 @@
 ---
-title: Join an existing multi-character session
+title: Join an existing room
 description: Bring a second human participant into a Unity multi-character room another client already created, using exactly one room locator.
 last_reviewed: "4.6.0"
 ---
@@ -24,7 +24,7 @@ Call `JoinMultiCharacterRoomAsync(MultiCharacterJoinOptions options, Cancellatio
 | `EndUserMetadata` | Optional key-value metadata for the joining participant. |
 | `TurnTaking` | Turn-taking options for this participant's session; defaults to hands-free. |
 
-Set `RoomSessionId` or `SharedSessionKey`, not both — the room accepts exactly one locator per join request. Joining does not require an active character or a call to `SetExplicitConversationTarget`; the SDK skips that requirement entirely when `JoinExistingMultiCharacterRoom` is set.
+Set `RoomSessionId` or `SharedSessionKey`, not both — the room accepts exactly one locator per join request. Joining does not require an active character or a call to `SetInitialCharacter`; the SDK skips that requirement entirely when `JoinExistingMultiCharacterRoom` is set.
 
 {% code title="Assets/Scripts/JoinExistingSessionBootstrap.cs" %}
 ```csharp
@@ -112,12 +112,12 @@ See [Use multi-character sessions](../../../../api-reference/core-api-reference/
 
 ## Next steps
 
-{% content-ref url="switch-the-interaction-target.md" %}
-[Switch the interaction target](switch-the-interaction-target.md)
+{% content-ref url="../conversation-targeting/README.md" %}
+[Conversation targeting](../conversation-targeting/README.md)
 {% endcontent-ref %}
 
 {% content-ref url="update-the-roster.md" %}
-[Add and remove characters at runtime](update-the-roster.md)
+[Characters joining and leaving](update-the-roster.md)
 {% endcontent-ref %}
 
 {% content-ref url="../../../../api-reference/core-api-reference/live-apis-beta/multi-character-sessions.md" %}

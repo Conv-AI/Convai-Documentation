@@ -1,7 +1,7 @@
 ---
 title: Implement a custom module
-description: Implement `IConvaiModule` to add custom runtime behavior that starts with the SDK, accesses runtime services, and reacts to domain events.
-last_reviewed: "4.5.0"
+description: Build a custom runtime module that starts with the SDK, accesses its services, and reacts to character and session events.
+last_reviewed: "4.6.0"
 ---
 
 Build a custom module that integrates with the Convai runtime lifecycle, accesses SDK services, and subscribes to domain events. Before starting, read [Runtime module system](extending-the-sdk.md) to understand when a module is the right tool and how the lifecycle states map to your implementation.

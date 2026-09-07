@@ -198,7 +198,7 @@ Tracks events for a single `ConvaiCharacter`. Add one per character that needs t
 
 ### Events in a multi-character room
 
-While a multi-character session is active, `ConvaiCharacterEventRelay` and the per-character events on `ConvaiEvents` resolve an inbound message through room membership rather than through `CharacterId` alone. A roster can hold two memberships with the same `CharacterId`, and only membership disambiguates between them — code that filters solely on `CharacterId` cannot tell the two apart. See [React to roster and target changes](../features/multi-character-sessions/handle-roster-events.md) for the membership-scoped events on `MultiCharacterRoomSession`.
+While a multi-character session is active, `ConvaiCharacterEventRelay` and the per-character events on `ConvaiEvents` resolve an inbound message through room membership rather than through `CharacterId` alone. A roster can hold two memberships with the same `CharacterId`, and only membership disambiguates between them — code that filters solely on `CharacterId` cannot tell the two apart. See [Handle room events](../features/multi-character-sessions/handle-roster-events.md) for the membership-scoped events on `MultiCharacterRoomSession`.
 
 ### `CharacterTranscriptRelayData`
 
@@ -360,6 +360,135 @@ private void OnDisable() => _relay.OnConnected.RemoveListener(MyHandler);
 {% hint style="warning" %}
 Do not subscribe in `Start()` without a matching unsubscribe in `OnDestroy()`. Relay components can be disabled and re-enabled; a subscription from `Start()` without cleanup will result in duplicate handlers or null-reference errors after the relay is disabled.
 {% endhint %}
+
+***
+
+## Conversation targeting and availability events
+
+These events have no relay component. Subscribe to them through the typed hub on `ConvaiManager.ActiveManager.Events` instead of adding a component to the scene.
+
+**Events:**
+
+| Event                              | Payload                          | When It Fires                                                                 |
+| ----------------------------------- | --------------------------------- | ------------------------------------------------------------------------------ |
+| `OnConversationTargetChanged`      | `ConversationTargetChanged`      | The conversation moves from one character in a multi-character room to another — once when the move is requested, once when the service confirms it, and once if it is refused. |
+| `OnConversationAvailabilityChanged` | `ConversationAvailabilityChanged` | The answer to "can the player talk right now" changes for the character being addressed. |
+| `OnRoomRosterChanged`               | `RoomRosterChanged`               | A connected room's roster is edited during play — a character joins, leaves, or the edit is refused. |
+
+**Code example — react to a target move and a roster change:**
+
+```csharp
+using Convai.Domain.DomainEvents.Runtime;
+using Convai.Runtime.Facades;
+using UnityEngine;
+
+public class ConversationTargetingMonitor : MonoBehaviour
+{
+    private void OnEnable()
+    {
+        var manager = ConvaiManager.ActiveManager;
+        if (manager == null) return;
+
+        manager.Events.OnConversationTargetChanged += HandleTargetChanged;
+        manager.Events.OnRoomRosterChanged += HandleRosterChanged;
+    }
+
+    private void OnDisable()
+    {
+        var manager = ConvaiManager.ActiveManager;
+        if (manager == null) return;
+
+        manager.Events.OnConversationTargetChanged -= HandleTargetChanged;
+        manager.Events.OnRoomRosterChanged -= HandleRosterChanged;
+    }
+
+    private void HandleTargetChanged(ConversationTargetChanged e)
+    {
+        if (e.Phase == ConversationTargetChangePhase.Confirmed)
+            Debug.Log($"Now talking to {e.CharacterName}.");
+    }
+
+    private void HandleRosterChanged(RoomRosterChanged e)
+    {
+        if (e.Change == RoomRosterChange.Joined)
+            Debug.Log($"{e.CharacterName} joined the room.");
+    }
+}
+```
+
+### `ConversationTargetChanged`
+
+| Property        | Type                          | Description                                                                     |
+| --------------- | ------------------------------ | -------------------------------------------------------------------------------- |
+| `Phase`         | `ConversationTargetChangePhase` | How far the move has got: `Requested`, `Confirmed`, or `Failed`.                |
+| `CharacterId`   | `string`                       | Convai Character ID of the character the conversation is moving to.             |
+| `CharacterName` | `string`                       | Display name of that character.                                                 |
+| `MembershipId`  | `string`                       | The room membership the move addresses.                                         |
+| `Reason`        | `string`                       | Why the move was refused. Empty unless `Phase` is `Failed`.                     |
+| `Timestamp`     | `DateTime`                     | UTC time the phase was reached.                                                 |
+
+`ConversationTargetChangePhase` values: `Requested` (the manager claimed the routing window and is about to send the move), `Confirmed` (the service response reconciled the authoritative route), `Failed` (the requested move was refused).
+
+### `ConversationAvailabilityChanged`
+
+| Property               | Type                          | Description                                              |
+| ----------------------- | ------------------------------ | ---------------------------------------------------------- |
+| `Availability`          | `ConvaiConversationAvailability` | The verdict now.                                          |
+| `PreviousAvailability`  | `ConvaiConversationAvailability` | The verdict this replaced.                                |
+| `CharacterId`           | `string`                       | Convai Character ID of the character being addressed, when there is one. |
+| `CharacterName`         | `string`                       | Display name of that character.                           |
+| `Timestamp`             | `DateTime`                     | UTC time the verdict changed.                              |
+| `CanAcceptPlayerInput`  | `bool`                         | Whether the player may send speech or text right now.     |
+
+`ConvaiConversationAvailability` values, in lifecycle order: `NoCharacter`, `Offline`, `Connecting`, `Preparing`, `Ready`, `Answering`, `Unavailable`. Only `Ready` and `Answering` accept player input.
+
+### `RoomRosterChanged`
+
+| Property       | Type              | Description                                                          |
+| --------------- | ------------------ | ----------------------------------------------------------------------- |
+| `Change`        | `RoomRosterChange` | What happened: `Joined`, `Left`, or `Refused`.                        |
+| `MembershipId`  | `string`           | The room membership affected. Empty for a join that never got one.    |
+| `CharacterId`   | `string`           | Convai Character ID this event is about.                              |
+| `CharacterName` | `string`           | Display name of that character.                                       |
+| `RosterSize`    | `int`              | How many characters the room holds after this change.                 |
+| `Reason`        | `string`           | Why the edit was refused. Empty unless `Change` is `Refused`.         |
+| `Timestamp`     | `DateTime`         | UTC time the roster moved.                                            |
+
+### `LocalPlayerActivityChanged`
+
+The SDK's own local reading of whether the player has started speaking — a hint, not the service's own verdict. It has no property on `ConvaiEvents`; subscribe through the raw hub instead:
+
+```csharp
+using Convai.Domain.DomainEvents.Runtime;
+using Convai.Domain.EventSystem;
+using UnityEngine;
+
+public class LocalPlayerActivityMonitor : MonoBehaviour
+{
+    private SubscriptionToken _token;
+
+    private void OnEnable()
+    {
+        var hub = ConvaiManager.ActiveManager?.Events?.Raw;
+        if (hub == null) return;
+        _token = hub.Subscribe<LocalPlayerActivityChanged>(HandleActivity);
+    }
+
+    private void OnDisable() => ConvaiManager.ActiveManager?.Events?.Raw?.Unsubscribe(_token);
+
+    private void HandleActivity(LocalPlayerActivityChanged e) =>
+        Debug.Log(e.IsActive ? "Player started talking." : "Player stopped talking.");
+}
+```
+
+| Property    | Type                       | Description                                                                    |
+| ------------ | --------------------------- | ---------------------------------------------------------------------------------- |
+| `IsActive`   | `bool`                      | Whether `Source` currently sees the player.                                       |
+| `Source`     | `LocalPlayerActivitySource` | Which local evidence raised this: `Microphone` or `PushToTalk`.                    |
+| `Level`      | `float`                     | How loud the microphone was relative to its measured noise floor. Zero for `PushToTalk` and for the falling edge. |
+| `Timestamp`  | `DateTime`                  | UTC time the local evidence changed.                                              |
+
+Treat this as "somebody is starting to talk to me" and nothing more — never route a message, commit a turn, or bill anything on it. The service's own verdict is `PlayerSpeakingStateChanged`.
 
 ***
 

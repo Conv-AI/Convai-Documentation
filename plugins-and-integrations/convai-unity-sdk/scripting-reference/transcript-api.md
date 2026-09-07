@@ -1,25 +1,45 @@
 ---
 title: Transcript API
 description: Query transcript turns, subscribe to live changes, read captions, and export session history from Unity scripts using the transcript facade.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 `ConvaiTranscripts` is the Convai Unity SDK's canonical transcript facade: a live, in-memory timeline of every player and character turn in the room, with pull-based queries, push-based change events, live captions, and a session export helper. Use this page when scripting custom chat UI, transcript export, or turn-level conversation logic. Access the facade through `ConvaiManager.ActiveManager.Transcripts`.
-
-{% hint style="warning" %}
-**Breaking change in SDK 4.4.0.** The snapshot-based transcript model is replaced. `CurrentTimeline` now returns `TranscriptTimeline` instead of `TranscriptTimelineSnapshot`. The `Changed` event now carries `TranscriptChangeBatch` instead of `TranscriptUpdateBatch`, and turns are `TranscriptTurn` instead of `TranscriptTurnSnapshot`. The entire legacy presentation and history layer is removed: `ITranscriptUI`, `ITranscriptListener`, `TranscriptViewModel`, `TranscriptUIController`, `ChatPresentationStrategy`, `ITranscriptPresentationStrategy`, `ConversationHistoryService`, `TranscriptEntry`, and `ConversationExportFormat` no longer exist. Replace `ConversationHistoryService.Entries` with `CurrentTimeline.Turns` or `GetTurns(...)`, replace `EntryAdded` with `SubscribeCommitted(...)`, and replace `Export(ConversationExportFormat)` with `Export(TranscriptExportFormat)`. If you used the beta `TranscriptSubscriptionOptions.IncludeInterim`/`IncludeCommitted` fields, rename them to `IncludeActive` and `IncludeTerminal`.
-{% endhint %}
 
 ***
 
 ## Push vs. pull
 
-|               | Event relays (`ConvaiTranscriptEventRelay`, `ConvaiEvents`) | `ConvaiTranscripts`                                                   |
-| ------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| **Delivery**  | Push — Inspector `UnityEvent`s or C# events fire per update  | Pull (`CurrentTimeline`, `GetTurns`) and push (`Changed`, `Subscribe`) |
-| **History**   | Only the current update                                      | Full history: active turns, committed turns, and live captions        |
-| **Use cases** | Subtitle rendering, per-character animation triggers         | Custom chat UI, post-session export, turn-level assessment logic       |
-| **Access**    | `ConvaiTranscriptEventRelay`, `ConvaiManager.ActiveManager.Events` | `ConvaiManager.ActiveManager.Transcripts`                         |
+|               | `ConvaiCharacter.OnTranscriptReceived`                              | Event relays (`ConvaiTranscriptEventRelay`, `ConvaiEvents`) | `ConvaiTranscripts`                                                   |
+| ------------- | --------------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| **Delivery**  | Push — plain C# event fires per update, for one character's own spoken line | Push — Inspector `UnityEvent`s or C# events fire per update  | Pull (`CurrentTimeline`, `GetTurns`) and push (`Changed`, `Subscribe`) |
+| **History**   | Only the current update, scoped to that character                    | Only the current update                                      | Full history: active turns, committed turns, and live captions        |
+| **Use cases** | Character-scoped push reactions — gaze, gestures, single-character subtitles | Subtitle rendering, per-character animation triggers         | Custom chat UI, post-session export, turn-level assessment logic       |
+| **Access**    | `character.OnTranscriptReceived` on a `ConvaiCharacter` reference     | `ConvaiTranscriptEventRelay`, `ConvaiManager.ActiveManager.Events` | `ConvaiManager.ActiveManager.Transcripts`                         |
+
+***
+
+## `ConvaiCharacter.OnTranscriptReceived`
+
+`OnTranscriptReceived` is a plain C# event declared on `ConvaiCharacter`: `event Action<string, bool> OnTranscriptReceived`. It is the character-scoped counterpart to the `ConvaiTranscripts` facade below — reach for it when you already hold a reference to one `ConvaiCharacter` and want a direct push notification for that character's own spoken line, without subscribing to the room-wide facade or adding an event relay component.
+
+```csharp
+character.OnTranscriptReceived += HandleTranscript;
+
+private void HandleTranscript(string text, bool isFinal)
+{
+    if (!isFinal) return; // discard the interim delivery so the sentence is not appended twice
+    _log.text += $"\n{text}";
+}
+```
+
+The first argument is the transcript text. The second, `isFinal`, comes from the message's own lifecycle — a settled line reports `true`; a line that is still streaming reports `false`.
+
+Text arrives per sentence, not per synthesis chunk. A sentence that streams before it settles is delivered **twice**: once with `isFinal` `false` while it is still in progress, and once more with `isFinal` `true` once it settles. A handler that appends text on every call without checking `isFinal` duplicates the sentence.
+
+`OnTranscriptReceived` only fires for this character's own spoken output — quiet, unspoken bot text is filtered out, and the incoming message is matched to this character by participant ID first, falling back to character ID.
+
+Use `ConvaiCharacter.OnTranscriptReceived` for single-character push reactions. Use `ConvaiTranscripts` below when you need full room history, multiple characters or players, or pull-based queries.
 
 ***
 
@@ -239,7 +259,7 @@ var query = new TranscriptQuery
 IReadOnlyList<TranscriptTurn> turns = transcripts.GetTurns(query);
 ```
 
-`TranscriptQuery` is unchanged from earlier SDK versions — it keeps the `IncludeActiveTurns`/`IncludeCommittedTurns` field names. Only the newer `TranscriptSubscriptionOptions`, used by `Subscribe`, uses the renamed `IncludeActive`/`IncludeTerminal` fields.
+`TranscriptQuery` uses the `IncludeActiveTurns`/`IncludeCommittedTurns` field names. `TranscriptSubscriptionOptions`, used by `Subscribe`, uses `IncludeActive`/`IncludeTerminal` instead.
 
 ### `TranscriptParticipantKind` enum
 
@@ -274,8 +294,6 @@ Constructed with `new TranscriptParticipantRef(TranscriptParticipantKind kind, s
 | `SpeakerType`        | `TranscriptSpeakerType?`    | `null` (all) | Filter to a specific speaker type                                                     |
 | `SpeakerId`          | `string`                    | `null` (all) | Filter to a specific speaker ID                                                       |
 | `ParticipantId`      | `string`                    | `null` (all) | Filter to a specific room participant ID                                              |
-
-In SDK 4.4.0, these fields were renamed from `IncludeInterim` and `IncludeCommitted` to `IncludeActive` and `IncludeTerminal`.
 
 ***
 

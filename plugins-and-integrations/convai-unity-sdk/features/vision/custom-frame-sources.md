@@ -1,7 +1,7 @@
 ---
 title: Custom frame sources
 description: Implement IVisionFrameSource to publish a custom video pipeline to Convai, including the Y-flip requirement, lifecycle state pattern, and auto-discovery rules.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Implement `IVisionFrameSource` to publish any custom video pipeline — a video file, a custom render texture, or a screen capture utility — without modifying the publishing layer. Once your component is on the scene, `ConvaiVisionPublisher` discovers and streams it automatically.
@@ -40,11 +40,7 @@ Apply the flip with a `Graphics.Blit` call when writing from your source texture
 Graphics.Blit(sourceTexture, _outputRt, new Vector2(1f, -1f), new Vector2(0f, 1f));
 ```
 
-The `scale.y = -1` and `offset.y = 1` arguments together flip the vertical axis. Assign `_outputRt` to `CurrentRenderTexture`.
-
-{% hint style="warning" %}
-v4.4.0 removed an internal double vertical-flip in the LiveKit texture readback that runs during publishing. Before v4.4.0, a custom `IVisionFrameSource` needed an extra compensating flip, in addition to the one shown above, to cancel that internal flip and land on a correct top-down image. Remove any such extra flip now. The single flip shown above is the only orientation correction applied after v4.4.0. Leaving the extra flip in place reintroduces an upside-down feed. See [Publish policies](publishing-and-policies.md) for the full migration note.
-{% endhint %}
+The `scale.y = -1` and `offset.y = 1` arguments together flip the vertical axis. Assign `_outputRt` to `CurrentRenderTexture`. This is the only orientation correction a custom `IVisionFrameSource` applies — the LiveKit texture readback that runs during publishing does not apply any further flip.
 
 ## Minimal implementation
 
@@ -186,11 +182,7 @@ public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource, IVisionFra
 
 ## Custom Inspectors
 
-`IVisionFrameSource` is the only supported extension point for a custom video pipeline. The SDK's own frame source inspectors are internal implementation detail, not an extension surface.
-
-{% hint style="warning" %}
-**Breaking in SDK 4.5.0.** `ConvaiVisionBaseEditor` — the shared base class behind the built-in `CameraVisionFrameSource`, `WebcamVisionFrameSource`, and `QuestVisionFrameSource` inspectors — changed from `public` to `internal`. A project that derived a custom Inspector from it no longer compiles. Write a standalone `CustomEditor` for your `IVisionFrameSource` component instead of subclassing the SDK's editor base.
-{% endhint %}
+`IVisionFrameSource` is the only supported extension point for a custom video pipeline. The SDK's own frame source inspectors are internal implementation detail, not an extension surface. `ConvaiVisionBaseEditor` — the shared base class behind the built-in `CameraVisionFrameSource`, `WebcamVisionFrameSource`, and `QuestVisionFrameSource` inspectors — is `internal`, so write a standalone `CustomEditor` for your `IVisionFrameSource` component rather than subclassing the SDK's editor base.
 
 ## Auto-discovery
 

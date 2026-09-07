@@ -10,6 +10,8 @@ Two worked patterns show how an application drives a multi-character session onc
 Both examples assume a connected multi-character session with `IConvaiRoomConnectionService.CurrentMultiCharacterSession` already populated. See [Build your first multi-character session](quick-start.md) if the room is not connected yet.
 {% endhint %}
 
+For most scenes, the built-in **Look At** targeting mode on **Convai Manager > Who The Player Talks To** already does what the first example below builds by hand — see [Conversation targeting](../conversation-targeting/README.md). Reach for `SetInteractionTargetAsync` directly only when a project needs a targeting rule the built-in modes and `IConversationTargetProvider` cannot express, since calling it bypasses `ConvaiManager`'s own targeting state (`ConversationTarget`, `AddressedCharacter`, and the targeting events do not observe a room-level call made this way).
+
 ## Look-to-address targeting
 
 **Context:** A scene with several characters standing in different locations. The player should address whichever character they are currently facing, without every small head turn interrupting a character mid-answer.
@@ -258,11 +260,11 @@ The command is atomic from the caller's point of view, but not from an event sub
 ## Next steps
 
 {% content-ref url="update-the-roster.md" %}
-[Add and remove characters at runtime](update-the-roster.md)
+[Characters joining and leaving](update-the-roster.md)
 {% endcontent-ref %}
 
-{% content-ref url="switch-the-interaction-target.md" %}
-[Switch the interaction target](switch-the-interaction-target.md)
+{% content-ref url="../conversation-targeting/README.md" %}
+[Conversation targeting](../conversation-targeting/README.md)
 {% endcontent-ref %}
 
 {% content-ref url="troubleshooting.md" %}

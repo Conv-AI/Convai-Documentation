@@ -1,6 +1,6 @@
 ---
 title: Configure conversation input mode
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 description: >-
   Choose between hands-free voice activation and push-to-talk, configure the
   trigger key or controller button, and switch between the two modes at runtime.
@@ -12,7 +12,7 @@ The Convai SDK for Unity supports two conversation input modes: **Hands Free** (
 
 Select the `ConvaiManager` GameObject in the Hierarchy. In the Inspector, find `ConvaiRoomManager`. The **Turn-Taking Options** section contains all input mode settings.
 
-<figure><img src="../../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/image (6).png" alt="ConvaiRoomManager Inspector with the Turn-Taking Options section expanded, showing the Mode dropdown for Hands Free and Push to Talk"><figcaption></figcaption></figure>
 
 ## Input mode comparison
 

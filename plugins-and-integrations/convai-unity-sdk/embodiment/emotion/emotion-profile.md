@@ -1,7 +1,7 @@
 ---
 title: Emotion profile
-description: Reference for ConvaiEmotionProfile fields, including resting mood, mood drift, contagion, blending, and micro-expression life.
-last_reviewed: "4.5.0"
+description: Every setting on a character emotion profile, covering resting mood, drift, contagion, blending, and the micro-expression life that keeps a face alive.
+last_reviewed: "4.6.0"
 ---
 
 `ConvaiEmotionProfile` is the authoring asset for the Emotion module. It controls how quickly expressions transition, whether a character rests on a mood between server signals, how many emotions can show at once, and the optional shader output for effects such as blush or tears. Facial expression itself needs no per-rig authoring on this asset — the profile's expression recipes are resolved automatically against the character's rig. Every field defaults to a value suitable for conversational NPC expression; start from a character type preset and adjust from there.
@@ -112,10 +112,6 @@ Complements are authored per label on the taxonomy (`EmotionTaxonomyEntry.Comple
 
 ## Micro-expression life
 
-{% hint style="warning" %}
-The slot-list facial output system — `EmotionSlotBinding`, `BlendshapeEmotionBinding`, `AnimatorParameterEmotionBinding`, `RealisticEmotionSlots`, and the `NeutralAlternator` that periodically dipped a sustained expression toward neutral — is removed as of SDK <code class="expression">space.vars.unity_sdk_version</code>. This section's micro-expression layer is the replacement for keeping a resting face from reading as frozen. See [Emotion output bindings](output-bindings.md) for the migration.
-{% endhint %}
-
 A perfectly still expression reads as frozen even with smoothing and a resting mood active. This optional low-amplitude layer adds idle brow/cheek/eye drift plus a brow-raise accent on speech emphasis, so the face keeps a trace of movement.
 
 | Field | Range | Default | Description |
@@ -130,6 +126,8 @@ A perfectly still expression reads as frozen even with smoothing and a resting m
 | `interruptedFlinchStrength` | 0 – 1 | **0** | One-shot flinch on entering the `Interrupted` dialogue state. `0` disables it. |
 
 Idle drift is deterministic per character and biased by the current dominant emotion or, when stronger, the current resting mood.
+
+Raising any of the four dialogue-reaction strengths above `0` asks Convai to add a Conversation Flow controller automatically if the character has none — see [Conversation Flow is added automatically when needed](how-the-emotion-system-works.md#conversation-flow-is-added-automatically-when-needed).
 
 ## Expression recipes and output
 

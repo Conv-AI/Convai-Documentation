@@ -1,7 +1,7 @@
 ---
 title: Configure memory for a character
-description: Toggle Long-Term Memory on or off per character via the Convai dashboard or the CharacterService scripting API, and understand the global scope implications.
-last_reviewed: "4.5.0"
+description: Explains how to turn long-term memory on or off for a character from the dashboard or from script, and what its global scope means for shared characters.
+last_reviewed: "4.6.0"
 ---
 
 Long-term memory is disabled by default (`MemorySettings.IsEnabled = false`). No facts are extracted or stored until you explicitly enable it. You can enable or disable memory through the Convai dashboard or programmatically via `client.Characters`.
@@ -28,7 +28,7 @@ To disable, repeat the same steps and toggle **Long-Term Memory** to **Off**.
 {% endtab %}
 
 {% tab title="Scripting" %}
-Use `client.Characters` when you need programmatic control — for example, in automated test setups, build pipelines, or runtime admin panels.
+Use `client.Characters` when you need programmatic control — for example, in automated test setups, build pipelines, or runtime admin panels. `ConvaiRestClient.Characters` is marked `[Obsolete]` in favor of `ConvaiCharacterApiClient`, so this code compiles with a `CS0618` warning; it remains the only typed accessor for reading and writing this setting today.
 
 **Check current state**
 

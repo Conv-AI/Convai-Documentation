@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot gaze
 description: Fix static eyes, heads that will not turn, unselected gaze targets, and refused scripted gaze on Convai Gaze characters.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Start diagnosis on the character itself: the `ConvaiGazeController` inspector's **SETUP** section and **Convai > Gaze Editor**'s **Setup** tab report the same rig findings — which bones resolved, which eye backend is active, and the facing-direction check — before you ever press Play. This page covers the symptoms that report does not already explain, plus the runtime behaviors listed below.
@@ -25,7 +25,7 @@ If the profile's **Eye Actuation Mode** is forced to a specific backend rather t
 
 ## Head does not turn to a target
 
-`ConvaiGazeController` logs `No Head bone is mapped — head/eye gaze stays inert until it exists` when no semantic Head bone resolves at all; head and eye gaze both stay inert until one does. If a `StandardRigBinding` exists but its Head field is empty, the message instead reads `Rig binding has no semantic Head mapping`. Either way, assign Head in **Convai > Embodiment > Character Rig**, or confirm the rig uses a recognized bone name so name-based fallback can find it. A missing Neck bone is not blocking — the head carries the full swing on its own, slightly stiffer — and only produces an informational note.
+When no semantic rig binding resolves at all, `ConvaiGazeController` logs `No semantic rig binding could be resolved. Add StandardRigBinding to the character root and map Head (plus optional Neck/Eyes); gaze stays inert until a binding exists.` If a `StandardRigBinding` exists but its Head field is empty, the message instead reads `Rig binding has no semantic Head mapping. Assign Head in StandardRigBinding or use a recognized bone name; head/eye gaze stays inert until Head resolves.` The Gaze Inspector's Setup tab reports the same condition before Play mode as `No Head bone is mapped — head/eye gaze stays inert until it exists`. Either way, assign Head in **Convai > Embodiment > Character Rig**, or confirm the rig uses a recognized bone name so name-based fallback can find it. A missing Neck bone is not blocking — the head carries the full swing on its own, slightly stiffer — and only produces an informational note.
 
 ## A target is never selected
 
@@ -46,6 +46,13 @@ If the rig's head bone does not have local +Z as the character's visual forward 
 ## Body turn does not happen
 
 A full-body turn is the last stage of the Head & Body ladder — feet only activate once the head and chest have taken all the share they can, so a target well within head/eye/chest reach never recruits the body at all; that is expected. If a target genuinely requires a body turn and none happens, confirm the character is not mid-walk: while traveling, the movement system owns the character's facing and the gaze-driven body turn is deliberately stood down so the two systems never fight over the same rotation. With the Body Animation module present, body turns use animated turn-in-place clips and require **Enable Turn In Place** in its config; without that module, or when it refuses, a procedural root turn is used automatically instead and the fallback is logged once. If a target sits outside what the head and eyes can physically reach even after the body turns, the trace logs `Gaze cannot fully reach '<target>' — sustained N° residual (target outside the head/eye envelope)` at `State` verbosity, which is the diagnosable case of an unreachable target rather than a silent failure.
+
+## Find out who a character is watching
+
+The `ConvaiGazeController` inspector's **Live** section, the **Live** tab of **Convai > Gaze Editor**, and the `Convai.DiagnoseGaze` MCP tool all report the same two facts, so any of the three answers "why isn't it looking at me":
+
+* **Off target** is the angle, in degrees, between where the eyes actually point and where the current target is. A small number under a few degrees is normal saccade and fixation noise; a number that stays large points at a target the character cannot actually reach, or a target that never resolved.
+* **Following the conversation** names who the character is watching because of `AttendToSpeaker`, or names the gate that turned a would-be speaker away — for example "beyond the attention distance", "too far behind this character", or "they publish no gaze target". A character that should be turning to a speaking colleague but is not will name the gate that is blocking it, rather than staying silent about the failure.
 
 ## Next steps
 

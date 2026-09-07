@@ -1,7 +1,7 @@
 ---
 title: Scripted gaze
 description: Direct a Convai character's gaze at a transform or point from code, and await the result to gate a follow-up action on it landing.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Direct a character's gaze at a transform or a world-space point from code, and use the returned handle to know when the look has landed. Use this page when a cutscene beat, an action executor, or a UI event needs to control where a character looks, outside the automatic targeting the gaze policy already provides.

@@ -3,7 +3,7 @@ title: Prerequisites
 description: >-
   Confirm the Unity version, package dependencies, and Convai account the
   Convai Unity SDK requires before you begin installation.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Before installing the Convai Unity SDK, confirm that your environment meets the requirements below. Missing any of these causes installation errors or runtime failures that are harder to diagnose after the fact.
@@ -22,16 +22,14 @@ Unity <code class="expression">space.vars.unity_min_version</code> is a hard flo
 
 ## Required Unity packages
 
-The SDK depends on six Unity packages. Both installation methods (Package Manager and Asset Store) install these automatically — you do not need to add them manually unless you encounter a version conflict.
+The SDK depends on four Unity packages. Both installation methods (Package Manager and Asset Store) install these automatically — you do not need to add them manually unless you encounter a version conflict.
 
 | Package                           | Minimum version |
 | --------------------------------- | ---------------- |
+| `com.unity.ai.inference`          | <code class="expression">space.vars.dep_ai_inference_version</code> |
 | `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> |
 | `com.unity.ugui`                  | <code class="expression">space.vars.dep_ugui_version</code> |
 | `com.unity.inputsystem`           | <code class="expression">space.vars.dep_inputsystem_version</code> |
-| `com.unity.ai.navigation`         | <code class="expression">space.vars.dep_ai_navigation_version</code> |
-| `com.unity.collections`           | <code class="expression">space.vars.dep_collections_version</code> |
-| `com.unity.modules.xr`            | <code class="expression">space.vars.dep_modules_xr_version</code> |
 
 If your project already pins any of these packages to an older version in `Packages/manifest.json`, the automatic install fails silently or produces a version conflict. Remove or update the existing version pins before installing the SDK.
 

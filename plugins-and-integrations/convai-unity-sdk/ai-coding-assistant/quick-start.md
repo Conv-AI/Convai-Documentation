@@ -3,7 +3,7 @@ title: AI coding assistant quick start
 description: >-
   Open the AI Coding section of the Convai Editor, accept the Unity MCP
   terms, install a coding agent's instructions, and verify Convai's tools.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Convai extends Unity's MCP server with SDK-aware tools so a coding agent such as Codex, Claude Code, or Cursor can configure Convai components directly in your project. Use this quick start the first time you connect an agent to a project that already has the Convai Unity SDK installed. At the end, your agent has managed instructions installed and the AI Coding section reports every Convai tool as registered.
@@ -12,7 +12,7 @@ Convai extends Unity's MCP server with SDK-aware tools so a coding agent such as
 
 * <code class="expression">space.vars.unity_recommended_version</code> or later — Convai's AI coding tools require Unity 6000 or newer.
 * The Convai Unity SDK installed in the project. See [Install the Convai Unity SDK](../getting-started/installation.md).
-* A compatible Unity AI Assistant package (`com.unity.ai.assistant`, version `2.13.0` or later and below `3.0.0` — a `2.13.0` build must carry prerelease tag `pre.2` or later, and a `3.0.0` build is accepted only as a prerelease, never the final release). Install it manually, or install it from inside this walkthrough.
+* A compatible Unity AI Assistant package (`com.unity.ai.assistant`, version `2.13.0` or later and below `3.0.0`). A `2.13.0` pre-release build must be `pre.2` or later to count as compatible; any version strictly between `2.13.0` and `3.0.0` is accepted regardless of pre-release tag; and `3.0.0` itself is accepted only as a pre-release, never the final release. Install it manually, or install it from inside this walkthrough.
 * A supported coding agent installed on your machine, such as Codex CLI, Claude Code, or Cursor. See [Supported coding agents](supported-coding-agents.md) for the full list.
 
 ## Open the AI Coding section
@@ -63,10 +63,10 @@ The managed instructions direct your agent to read `Packages/com.convai.convai-s
 
 ## Verify the tool count
 
-The **Convai MCP Tools** row reads `37/37 registered` once Unity's MCP registry has registered all 37 Convai tools under tool contract version 4. If the count is lower or the row lists a missing or unexpected tool name, click **Fix** next to **Convai MCP Tools** to refresh the registry and recompile.
+The **Convai MCP Tools** row reads `44/44 registered` once Unity's MCP registry has registered all 44 Convai tools under tool contract version 7. If the count is lower or the row lists a missing or unexpected tool name, click **Fix** next to **Convai MCP Tools** to refresh the registry and recompile.
 
 {% hint style="success" %}
-Setup is complete when all four rows read **Ready** and **Convai MCP Tools** reads `37/37 registered`.
+Setup is complete when all four rows read **Ready** and **Convai MCP Tools** reads `44/44 registered`.
 {% endhint %}
 
 ## Prompt the agent to build your scene
@@ -80,8 +80,9 @@ With managed instructions installed and the tool count verified, prompt your age
 | Switch push-to-talk or hands-free | "Switch the room to Push to Talk input mode." |
 | Add objects | "Add a red fire extinguisher GameObject next to the workbench." |
 | Enable vision | "Turn on vision for the Instructor character so it can see the workbench." |
+| Add a second character | "Add a second Convai Character named Trainee, and switch conversation targeting to Proximity." |
 
-Vision setup is not among Convai's 37 tools, so your agent configures it by editing `ConvaiRoomManager` and adding `ConvaiVisionPublisher` directly. See [Vision quick start](../features/vision/quick-start.md) for the exact fields it sets.
+Vision setup is not among Convai's 44 tools, so your agent configures it by editing `ConvaiRoomManager` and adding `ConvaiVisionPublisher` directly. See [Vision quick start](../features/vision/quick-start.md) for the exact fields it sets.
 
 ## What to try next
 

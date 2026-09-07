@@ -1,6 +1,6 @@
 ---
 title: Session lifecycle
-description: Understand how ConvaiCharacter sessions transition through states, persist session IDs, and support explicit pause, resume, and background policy controls.
+description: Explains how a character's connection moves between states, keeps its session across reconnects, and can be paused, resumed, or backgrounded.
 last_reviewed: "4.6.0"
 ---
 

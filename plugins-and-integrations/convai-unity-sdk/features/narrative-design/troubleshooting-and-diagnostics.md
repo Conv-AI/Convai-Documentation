@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot narrative design
 description: Resolve trigger status failures, Inspector misconfigurations, fetch errors, and queue timeouts using built-in validation and diagnostic tools.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Most Narrative Design problems fall into one of three categories: the trigger is not firing, the section events are not responding, or a backend fetch is failing. This page covers all three, starting with the built-in status system on `ConvaiNarrativeDesignTrigger` and working through the most common Inspector misconfigurations.
@@ -165,7 +165,7 @@ Common causes:
 |---|---|
 | `"API key is not configured. Please set it in Project Settings > Convai SDK."` | API key not set — see [Configure the API key](../../getting-started/configure-api-key.md) |
 | `"Character ID is required."` | Character ID field is empty on `ConvaiCharacter` |
-| `"Exception: ..."` | Network error or Convai backend is unreachable |
+| `"Exception: ..."` | Network error, or Convai is unreachable |
 | `"No character assigned or character has no ID."` | Manager has no character reference and auto-detect failed |
 
 You can also check the result of `FetchAndSyncFromBackendAsync()` in code:
@@ -185,9 +185,7 @@ When template keys or triggers are sent before the character's session is open, 
 | Session opens | `FlushPending()` is called internally; all queued keys and triggers are sent in order. |
 | Session disconnects and reconnects | `MarkPendingReplayAfterDisconnect()` is called internally; the latest template key snapshot is re-sent on the next connection. |
 
-{% hint style="info" %}
 You can call `SetTemplateKey` or `InvokeTrigger` at any point in your scene's lifecycle — including in `Awake` or before Play Mode is fully running — and the SDK will deliver those values correctly once the connection is ready.
-{% endhint %}
 
 ## Queue timeout
 
@@ -213,14 +211,18 @@ Setting **Max Wait Time** to `0` disables the timeout entirely. In a build where
 
 The following log messages appear when **Enable Diagnostics** is on or when errors occur at runtime.
 
+{% hint style="info" %}
+The SDK's logger automatically prefixes every Console entry with `[SourceFileName]`, taken from the source file that logged it — for example `[ConvaiNarrativeDesignTrigger]` or `[ConvaiNarrativeDesignManager]`. The messages below are the message body that follows that prefix; search the Console for the message text, not the full line. Diagnostic-only lines logged through the trigger's internal diagnostic helper carry a second, inner prefix with the GameObject's name, so those lines read `[ConvaiNarrativeDesignTrigger] [<GameObject name>] <message>`.
+{% endhint %}
+
 | Log message | Component | Meaning |
 |---|---|---|
 | `Trigger '<name>' invoked successfully on character '<character>'.` | `ConvaiNarrativeDesignTrigger` | Trigger was accepted and sent to the backend successfully. |
 | `Trigger '<name>' queued. Waiting for character to be ready (max <N>s).` | `ConvaiNarrativeDesignTrigger` | Character session not yet open. Trigger will fire automatically on connect. |
-| `Character became ready after <N>s, sending queued trigger` | `ConvaiNarrativeDesignTrigger` | Session opened; the deferred trigger is being sent now. Appears only when **Enable Diagnostics** is on. |
+| `[<GameObject name>] Character became ready after <N>s, sending queued trigger` | `ConvaiNarrativeDesignTrigger` | Session opened; the deferred trigger is being sent now. Appears only when **Enable Diagnostics** is on. |
 | `Timed out waiting for character to be ready after <N> seconds.` | `ConvaiNarrativeDesignTrigger` | `MaxWaitTime` elapsed. Handle `OnTriggerFailed` and increase the timeout or check session connectivity. |
 | `Trigger already fired and TriggerOnce is enabled. Call ResetTrigger() to allow it to fire again.` | `ConvaiNarrativeDesignTrigger` | `TriggerOnce` is `true` and the trigger has already fired. |
-| `[ConvaiNarrativeDesignTrigger] Validation: <detail>` | `ConvaiNarrativeDesignTrigger` | A configuration issue was detected at Start. Read the detail string for the specific field. |
+| `Validation: <detail>` | `ConvaiNarrativeDesignTrigger` | A configuration issue was detected at Start. Read the detail string for the specific field. |
 | `Multiple ConvaiCharacters found (<N>). Cannot auto-assign. Please assign one explicitly.` | `ConvaiNarrativeDesignTrigger` | Auto-find is ambiguous. Drag the correct character into the **Character** field. |
 | `Section transition: Previous=<id> → New=<id>` | `ConvaiNarrativeDesignManager` | Section transition received. If `OnSectionStart` did not fire, the section ID is not in the local config list — re-sync. |
 | `Sync complete: <N> added, <N> updated, <N> orphaned, <N> reactivated` | `ConvaiNarrativeDesignManager` | Summary of the last **Sync with Backend** call. Non-zero orphaned count means dashboard sections were removed. |

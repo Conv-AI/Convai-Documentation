@@ -1,7 +1,7 @@
 ---
 title: Connection and API issues
-description: Interpret Convai session error codes, read ConvaiRoomManager diagnostics, and resolve authentication, transport, and rate-limit failures.
-last_reviewed: "4.5.0"
+description: Interpret Convai session error codes, read the room manager diagnostics, and resolve authentication, transport, and rate-limit failures.
+last_reviewed: "4.6.0"
 ---
 
 All session errors surface through `ConvaiSessionEventRelay.OnSessionError`. The event payload carries an `ErrorCode` string and a human-readable `Message`. Error codes follow a hierarchical dot-notation format: `{category}.{detail}`. The category prefix tells you which layer of the system failed.
@@ -11,7 +11,7 @@ All session errors surface through `ConvaiSessionEventRelay.OnSessionError`. The
 | `config.*` | SDK configuration — missing API key, Character ID, or Auth Token mode setup |
 | `connection.*` | Convai API or network — authentication, routing, limits |
 | `transport.*` | WebRTC / LiveKit layer — ICE, peer connection, signal |
-| `server.*` | Convai backend pipeline — quota, fatal errors |
+| `server.*` | Convai's own pipeline — quota, fatal errors |
 | `session.*` | Session lifecycle — token expiry, state conflicts |
 
 ## Subscribe to session errors

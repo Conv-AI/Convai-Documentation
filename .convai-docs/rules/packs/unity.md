@@ -111,12 +111,10 @@ value.
 | `unity_min_version` | Minimum supported Unity editor version | Prerequisites sections |
 | `unity_recommended_version` | Recommended Unity editor version | Prerequisites, compatibility |
 | `sdk_package_id` | Package Manager package identifier | Package Manager install steps |
+| `dep_ai_inference_version` | AI Inference dependency version | Dependency and compatibility tables |
 | `dep_newtonsoft_json_version` | Newtonsoft JSON dependency version | Dependency and compatibility tables |
 | `dep_ugui_version` | uGUI dependency version | Dependency and compatibility tables |
 | `dep_inputsystem_version` | Input System dependency version | Dependency and compatibility tables |
-| `dep_ai_navigation_version` | AI Navigation dependency version | Dependency and compatibility tables |
-| `dep_collections_version` | Collections dependency version | Dependency and compatibility tables |
-| `dep_modules_xr_version` | XR module dependency version | Dependency and compatibility tables |
 | `dashboard_url` | Convai dashboard URL | API key setup, character ID steps |
 | `live_server_url` | Realtime server URL | Connection and networking references |
 

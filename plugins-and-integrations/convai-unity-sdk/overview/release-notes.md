@@ -3,13 +3,153 @@ title: Release notes
 description: >-
   Release notes for the Convai Unity SDK — current version highlights,
   previous release notes, bug fixes, and migration guidance for each release.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Track changes to the Convai Unity SDK across releases, including new features, bug fixes, and configuration changes. The current release is <code class="expression">space.vars.unity_sdk_version</code>.
 
 {% updates format="full" %}
-{% update date="2026-08-14" tags="v4.5.0,Current" %}
+{% update date="2026-09-04" tags="v4.6.0,Current" %}
+## v4.6.0
+
+**Breaking this release:** `SetExplicitConversationTarget` renames to `SetInitialCharacter`, three Gaze profile Conversation Attention fields are removed and replaced, `headStabilityDegrees` is removed, two Gaze profile defaults changed, and the microphone open timing in multi-character scenes changed. See **Breaking changes and migration** below.
+
+**Multi-character conversations**
+
+* Conversation targeting moved into the SDK: no component to add, no collider, no layer, and no field
+  to fill. `ConvaiManager.ConversationTargeting` reads the player's view by default and scores every
+  candidate by angle with distance as a tiebreak, so it works the same on a mouse, a gamepad, and a
+  head-mounted display. `Mode` chooses `LookAt`, `Proximity`, or `Manual`; `ConvaiManager.TalkTo(character)`
+  points the conversation explicitly for scripted moments
+* A room now opens on the character the player is looking at, instead of always the first character
+  in scene order. An assigned **Convai Manager > Initial Character** still wins outright, and the
+  Console names the character it opened on and why
+* A character that joins or leaves a connected room is added or removed live, with no reconnect —
+  instantiating a character prefab, or enabling a character `GameObject`, is the whole integration.
+  A room that connected with a single character carries no roster and cannot grow live; the Console
+  names that case and what to do instead
+* `ConvaiManager.Events` gains `OnConversationAvailabilityChanged`, `OnConversationTargetChanged`
+  (with phases `Requested`, `Confirmed`, `Failed`), and `OnRoomRosterChanged`
+* `Convai.ConfigureConversationTargeting` joins the MCP and Unity Assistant tool set, and
+  `Convai.DiagnoseConversation` reports the roster, the addressed character, and the targeting
+  verdict. Tool contract version `7`
+* A **Multi-Character Sample** ships alongside the existing Basic and LipSync samples. Import the
+  LipSync Sample first — the multi-character sample reuses its Sofia assets
+
+**Conversation availability**
+
+* `ConvaiManager.ConversationAvailability` answers whether the player can talk right now —
+  `Offline`, `Connecting`, `Preparing`, `Ready`, `Answering`, `Unavailable` — for
+  `ConvaiManager.AddressedCharacter`, with `ConversationAvailabilityChanged` reporting each move and
+  `CanAcceptPlayerInput()` as the question a UI asks. The same answer is available per character on
+  `ConvaiCharacter.ConversationAvailability`
+* The shipped chat field, push-to-talk, and hands-free input all consult this now. The chat field
+  disables until the character can hear, and `ConvaiPlayer.TrySendTextMessage` refuses with a reason
+  a project can show instead of dropping the message silently
+* **Behaviour change:** in multi-character scenes the microphone now opens when the room confirms
+  its first character, rather than when the transport connects — typically a fraction of a second
+  later. Single-character rooms are unaffected
+
+**Gaze**
+
+* **Attend To Speaker** on the Gaze component now follows the conversational floor — the player,
+  another character, or both — while a character is not in its own turn, so listeners in a room with
+  more than one participant react to whoever is speaking instead of sitting in `Idle`. Four new
+  settings in the profile's **Conversation** group tune the model: **Typical Pause Before Turning**,
+  **How Much Reactions Vary**, **How Long Attention Fades Over**, and **Shortest Gap Between
+  Listeners Turning**
+* Listener attention is now a per-participant value that rises on a speech onset and decays
+  continuously, fixing listeners that turned to a new speaker late, together, or to the wrong person
+* The head and chest now follow a moving target continuously instead of in bursts, removing the
+  dead band that caused parked holds and whip-like corrections. A camera cut is now treated as an
+  ordinary look rather than a startle. **Head Speed Limit** drops from 240°/s to 150°/s, and
+  **Turn Speed (Rigs Without Turn Animation)** drops from 140°/s to 90°/s — both are safety
+  ceilings; profiles already authored keep their saved values
+
+**Speech and performance**
+
+* On a character with Lip Sync, the speaking turn now ends on lip sync's own frame data rather than
+  waiting on the silence detector or the service's confirmation, so a character stops performing
+  when its voice stops rather than up to two seconds later. `ConvaiCharacter.IsSpeaking`,
+  `OnSpeechStopped`, and `OnTurnCompleted` are unaffected. The Conversation Flow profile carries a
+  `stopWhenTheVoiceStops` switch for the previous timing, but it ships on and is not exposed in the
+  profile's Inspector or through a public setter, so the new timing is what every character gets
+* A character's mouth now settles closed at the end of a sentence instead of hanging open or
+  snapping shut: a new **Settle Duration** (0.35 s) on the Lip Sync component drives a spring-based
+  close, and `LipSyncPlaybackEngine.SettleToRest()` triggers it from code
+* A talking hand no longer freezes mid-gesture when a response ends — the gesture now decelerates to
+  rest as its weight fades, starting **Talk Release Lead Seconds** (0.6 s) before the response
+  actually ends
+* Lip sync no longer stalls after the first response in a session; every later response now plays
+  with a moving mouth instead of a still one
+* `ConvaiCharacter.OnTranscriptReceived` fires. It previously read a message the service does not
+  send, so it never fired in any room and everything downstream of it sat idle — gaze referential
+  glances, and any `IConvaiCharacterBehavior` reacting to what a character said. It now reads the
+  room transcript feed, and its `isFinal` argument comes from the message's own lifecycle instead of
+  being hard-coded to `false`, so consumers gating on the final utterance work. Two consequences:
+  text arrives per sentence rather than per synthesis chunk, and a line that streams before it
+  settles is delivered twice — once interim, once final
+
+**Editor and inspector work**
+
+* Multi-character controls in the **Convai Manager** inspector were renamed for clarity: *Include in
+  Next Room* is now **Characters Joining the Room**, *Within* is **Range (Metres)**, *Seen From* is
+  **Player Camera**, *Scene Characters* is **Characters in Scene**, and *Roster room* / *Single
+  character* are **Several characters** / **One character only**
+* The **Convai Manager** inspector's Live section now names who is being addressed, whether the
+  player can talk to them, and one row per character in the room with its status
+* The Character inspector now flags a duplicated Character ID before Play mode, instead of only when
+  the room refuses to connect
+* The **Convai Player** and **Convai Room Manager** Validation sections were redesigned with a
+  header that reflects the worst check found, instead of a permanently amber header
+* Every Convai inspector section now shares one left-edge alignment and one section-padding system
+
+**Unity 6000.5 compatibility**
+
+* The package compiles on Unity 6000.5 again. Unity's scene identity move to a 64-bit `EntityId`,
+  and the deprecation of `Object.GetInstanceID()`, are now routed through compatibility seams
+  (`ConvaiSceneId`, `ConvaiObjectId`, `ConvaiObjectFind`), so ids are unchanged on `6000.0` through
+  `6000.3` and agree with the old ones on `6000.4` and later
+
+**Package dependencies**
+
+* `com.unity.ai.inference` `2.2.1` is a new dependency, for client-side voice activity detection
+* `com.unity.nuget.newtonsoft-json` `3.2.2`, `com.unity.ugui` `2.0.0`, and `com.unity.inputsystem`
+  `1.19.0` are retained
+* `com.unity.ai.navigation`, `com.unity.collections`, and `com.unity.modules.xr` are no longer
+  declared dependencies
+
+**Breaking changes and migration**
+
+* **`ConvaiManager.SetExplicitConversationTarget` is renamed to `ConvaiManager.SetInitialCharacter`.**
+  The old name is still callable and marked `[Obsolete]`. The rename exists because the old name read
+  like the verb for changing who the player is talking to, but it chooses which character speaks
+  first, and calling it on a connected room queues an ownership reconnect rather than moving the
+  conversation. Replace `SetExplicitConversationTarget(character)` with
+  `SetInitialCharacter(character)` for the same behavior; use `TalkTo(character)` to switch the
+  conversation in a running room
+* **The Gaze profile's Conversation Attention fields are removed:** **Shortest/Longest Delay Before
+  Turning**, **Stays With The Conversation For**, and **Looks To Whoever Answers Next**, along with
+  `ConvaiGazeProfile.SpeakerAttentionReactionDelayMin/Max`, `SpeakerAttentionLingerSeconds`, and
+  `SpeakerAttentionHandOffGlanceChance`. Their replacements are **Typical Pause Before Turning**,
+  **How Much Reactions Vary**, **How Long Attention Fades Over**, and **Shortest Gap Between
+  Listeners Turning**. A profile carrying the removed fields loses them silently on its next save —
+  re-apply a personality, or leave the defaults, to pick up the new attention model's tuning
+* **The Gaze profile's Ignore Small Target Movement (`headStabilityDegrees`) is removed.** Its
+  replacements on **Head & Body** are **How Quickly The Head Follows Movement**
+  (`HeadFollowSeconds`, default 0.2 s) and **How Quickly The Chest Follows Movement**
+  (`TorsoFollowSeconds`, default 0.35 s). A profile carrying the removed field ignores it from the
+  moment it loads and drops it on its next save; lower **How Quickly The Head Follows Movement** if
+  a fast target trails the head more than wanted
+* **Two Gaze profile defaults changed:** **Neck Relaxes During A Turn** (`bodyTurnHeadRelief`) from
+  `0.4` to `1`, and **Chest Speed Limit** (`maxTorsoAngularSpeed`) from `180°/s` to `90°/s`. Existing
+  profiles keep their saved values — only new profiles pick up the new defaults. To pick up the new
+  defaults on an existing profile, set both values by hand
+* **Behaviour change:** in multi-character scenes the microphone now opens when the room confirms
+  its first character, rather than when the transport connects
+{% endupdate %}
+
+{% update date="2026-08-14" tags="v4.5.0" %}
 ## v4.5.0
 
 **Character embodiment**

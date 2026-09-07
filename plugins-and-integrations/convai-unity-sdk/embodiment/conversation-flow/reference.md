@@ -1,7 +1,7 @@
 ---
 title: Conversation flow reference
 description: Full reference for the Conversation Flow controller's public API, the dialogue-state reading it returns, and every timing field on its profile asset.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Reference for the public conversation-flow surface: `ConvaiConversationFlowController`, the `DialogueStateReading` struct it returns, and every field on `ConvaiConversationFlowProfile`. For what each `DialogueState` value means, see [Dialogue state](../../core-concepts/dialogue-state.md). The cross-module contract `IConversationFlowSource` is internal and is not part of this surface — read the controller's own members instead.
@@ -73,6 +73,16 @@ If **Thinking Min Hold** is set above **Thinking Max Hold** in the Inspector, th
 | Field | Range | Default | Description |
 | --- | --- | --- | --- |
 | Speaking Base Energy | `0.1`–`1` | `0.6` | Base energy level emitted during `Speaking`, read by `EnergyLevel` and used to scale body language intensity. |
+
+### Fixed behavior
+
+Three of the profile's fields — `noticeYouLocally`, `stopWhenTheVoiceStops`, and `voiceEndHold` — are `private` and the profile's Inspector does not draw them, so no reader can change any of the three, through the Inspector or through script. They ship as fixed behavior, the same for every character:
+
+- The character reacts the moment it has local evidence you have started talking, ahead of Convai's own confirmation that it heard you.
+- A speaking turn ends the moment the character's own voice stops, rather than waiting for Convai's turn-completed confirmation.
+- Before the controller treats silence as the end of a turn, it waits `0.4` seconds, since a pause between two sentences sounds the same as an ending. This hold only applies when the character has no Lip Sync reading; Lip Sync, when present, marks a response's end with no hold needed.
+
+See [How a speaking turn ends](README.md#how-a-speaking-turn-ends) for the full model both behaviors are part of.
 
 ***
 

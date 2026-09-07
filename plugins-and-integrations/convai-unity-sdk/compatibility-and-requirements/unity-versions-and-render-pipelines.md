@@ -1,10 +1,10 @@
 ---
 title: Unity versions and render pipelines
 description: Reference for Convai Unity SDK environment requirements, including the minimum Unity version, required package dependencies, and render pipeline support.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
-The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code>. There is no supported configuration on an earlier Unity release. All three Unity render pipelines are supported with no additional configuration, and both installation methods — Package Manager and Asset Store — resolve the required package dependencies automatically.
+The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code>. There is no supported configuration on an earlier Unity release, and the SDK compiles on Unity `6000.5` now that Unity moved scene identity to 64-bit. All three Unity render pipelines are supported with no additional configuration, and both installation methods — Package Manager and Asset Store — resolve the required package dependencies automatically.
 
 ## Unity version requirements
 
@@ -19,20 +19,20 @@ The minimum is a hard floor. Convai supports no configuration below Unity <code 
 
 ## Required package dependencies
 
-The SDK depends on six Unity packages. Both installation methods install these automatically — you do not need to add them manually unless you encounter a version conflict.
+The SDK depends on four Unity packages. Both installation methods install these automatically — you do not need to add them manually unless you encounter a version conflict.
 
 | Package                           | Version |
 | --------------------------------- | ------- |
+| `com.unity.ai.inference`          | <code class="expression">space.vars.dep_ai_inference_version</code> |
 | `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> |
 | `com.unity.ugui`                  | <code class="expression">space.vars.dep_ugui_version</code> |
 | `com.unity.inputsystem`           | <code class="expression">space.vars.dep_inputsystem_version</code> |
-| `com.unity.ai.navigation`         | <code class="expression">space.vars.dep_ai_navigation_version</code> |
-| `com.unity.collections`           | <code class="expression">space.vars.dep_collections_version</code> |
-| `com.unity.modules.xr`            | <code class="expression">space.vars.dep_modules_xr_version</code> |
 
 {% hint style="warning" %}
 Do not downgrade these packages after installation. The SDK targets the versions listed above and behavior on lower versions is undefined. If your project already pins an older version of any of these in `Packages/manifest.json`, remove or update the pin before installing.
 {% endhint %}
+
+NavMesh-driven locomotion needs one more package the SDK does not install. `ConvaiNavMeshLocomotion` drives a built-in Unity `NavMeshAgent`, but NavMesh authoring — `Window > AI > Navigation` and the `NavMeshSurface` component — comes from `com.unity.ai.navigation`. If your project bakes a NavMesh for character movement, install `com.unity.ai.navigation` yourself through Package Manager.
 
 ## Render pipeline support
 

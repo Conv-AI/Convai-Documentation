@@ -3,7 +3,7 @@ title: Feature map
 description: >-
   Find the right Convai Unity SDK feature, module, guide, or reference page for
   any development goal, indexed by use case.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Use this table when you know the outcome you want but are not sure which SDK feature, module, or guide covers it.
@@ -16,6 +16,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Configure my Convai API key                          | API key setup       | [Configure API key](../getting-started/configure-api-key.md)                                 |
 | Add my first conversational character to a scene     | Scene setup         | [Build a custom scene](../getting-started/build-a-custom-scene.md)                           |
 | Run a working example without building from scratch  | Sample scenes       | [Import and run sample scenes](../getting-started/import-and-run-sample-scenes.md)           |
+| Run a working example with several characters in one session | Multi-Character Sample | [Multi-Character Sample](../features/multi-character-sessions/multi-character-sample.md) |
 | Understand what each component in the scene does     | Component reference | [Scene components reference](../getting-started/scene-components.md)                         |
 | Choose between push-to-talk and hands-free input     | Input mode          | [Configure conversation input mode](../getting-started/configure-conversation-input-mode.md) |
 | Configure character audio output                     | Audio setup         | [Configure character audio](../getting-started/configure-character-audio.md)                 |
@@ -23,6 +24,18 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Add a chat or subtitle transcript display            | Transcript UI       | [Add chat UI](../getting-started/add-chat-ui.md)                                             |
 | Add real-time lip sync to my character               | Lip sync            | [Add lip sync](../getting-started/add-lip-sync/)                                             |
 | Verify my scene is set up correctly before shipping  | Scene Validator     | [Validate your setup](../getting-started/validate-your-setup.md)                             |
+
+## Authentication
+
+| I want to...                                                | Feature              | Documentation                                                                  |
+| ------------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------- |
+| Compare API Key and Auth Token authentication modes           | Authentication         | [Authentication](../authentication/)                                            |
+| Understand how a `ConvaiManager` resolves credentials         | Authentication concept | [How authentication works](../authentication/how-authentication-works.md)       |
+| Switch a project between API Key and Auth Token mode          | Auth mode setup        | [Configure auth token mode](../authentication/configure-auth-token-mode.md)     |
+| Connect a room session using a short-lived Auth Token         | Auth Token connect     | [Connect with Auth Token](../authentication/connect-with-auth-token.md)         |
+| Supply my own Auth Token minting logic                        | Custom token provider  | [Custom token provider](../authentication/custom-token-provider.md)             |
+| Ship a player build without exposing my account API key       | Secure build           | [Ship a secure build](../authentication/ship-a-secure-build.md)                 |
+| Call the authentication API from C#                           | Scripting reference    | [Authentication scripting reference](../authentication/scripting-reference.md)  |
 
 ## Features
 
@@ -35,6 +48,8 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Make the character remember players between sessions                                      | Long-Term Memory | [Long-Term Memory](../features/long-term-memory/) |
 | Build branching story sections triggered by conversation                                  | Narrative Design | [Narrative Design](../features/narrative-design/) |
 | Give my character vision through a camera or webcam                                       | Vision           | [Vision](../features/vision/)                     |
+| Decide which character the player is talking to                                           | Conversation Targeting | [Conversation Targeting](../features/conversation-targeting/) |
+| Know whether the player can talk right now, and gate my UI on it                          | Conversation Availability | [Conversation Availability](../features/conversation-availability/) |
 
 ## Embodiment
 
@@ -44,7 +59,8 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Time a character's behavior to the phase of the conversation                | Conversation Flow | [Conversation flow](../embodiment/conversation-flow/)                           |
 | Share one set of behavior settings across several characters                | Presets           | [Embodiment presets](../embodiment/embodiment-presets.md)                       |
 | Decide how much of the face emotion and lip sync each control while speaking | Facial composition | [Facial composition](../embodiment/facial-composition.md)                      |
-| Move from the retired Attention module to Convai Gaze                       | Migration         | [Migrate from Attention](../embodiment/gaze/migrate-from-attention.md)          |
+| Drive idle, talk, locomotion, and gesture animation from code               | Body Animation     | [Body Animation](../embodiment/body-animation/)                                 |
+| Direct conversational nonverbal behavior — posture, breathing, listening     | Body Language      | [Body Language](../embodiment/body-language/)                                   |
 
 ## UI and presentation
 
@@ -76,6 +92,22 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Read and clear transcript history at runtime                 | Transcript API       | [Transcript API](../scripting-reference/transcript-api.md)       |
 | Use the `ConvaiSDK` and `ConvaiAudio` static facades         | Conversation facades | [ConvaiManager API](../scripting-reference/convaimanager-api.md) |
 | Understand `IConvaiOperation<T>` and async patterns          | Async patterns       | [Async Patterns](../scripting-reference/async-patterns.md)       |
+| Use the `ConvaiCharacter` and `ConvaiPlayer` API surface      | Character and player API | [Character and Player API](../scripting-reference/character-and-player-api.md) |
+| Understand `IConvaiOperation<T>` and stream result types      | Operation and stream types | [Operation & Stream Types](../scripting-reference/operation-and-stream-types.md) |
+
+## Compatibility and requirements
+
+| I want to...                                                | Requirement           | Documentation                                                                          |
+| --------------------------------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------- |
+| Check the Unity version, render pipeline, and package requirements | Compatibility overview  | [Compatibility and requirements](../compatibility-and-requirements/)                    |
+| Confirm which Unity versions and render pipelines are supported | Unity and render pipeline support | [Unity versions and render pipelines](../compatibility-and-requirements/unity-versions-and-render-pipelines.md) |
+| Confirm domains, ports, and firewall rules the SDK needs        | Network requirements     | [Network and API requirements](../compatibility-and-requirements/network-and-api-requirements.md) |
+
+## Troubleshooting
+
+| I want to...                                                | Tool                 | Documentation                                                     |
+| ---------------------------------------------------------------- | ----------------------- | ---------------------------------------------------------------------- |
+| Find why a character is not working, with a fix beside each finding | Convai Troubleshooter  | [Troubleshooting](../troubleshooting/)                                 |
 
 ## Platform guides
 
@@ -83,7 +115,9 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | ------------------------------------------ | --------------- | ----------------------------------------------------------------- |
 | Ship to a browser with WebGL               | WebGL           | [WebGL](../platform-guides/webgl.md)                              |
 | Ship to Android or iOS                     | Mobile          | [Mobile — iOS and Android](../platform-guides/ios-and-android.md) |
+| Ship to Windows, macOS, or Linux           | Desktop         | [Windows, macOS, and Linux](../platform-guides/windows-macos-and-linux.md) |
 | Ship to Meta Quest with passthrough vision | Meta Quest / XR | [Meta Quest and XR](../platform-guides/xr-headsets.md)            |
+| Stream the Meta Quest passthrough camera to a character | Meta Quest / XR | [Meta Quest Vision setup](../platform-guides/meta-quest-vision.md) |
 
 ## Advanced topics
 

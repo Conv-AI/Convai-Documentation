@@ -1,7 +1,7 @@
 ---
 description: >-
-  Learn how to use the Backstory API to create and manage character backstories,
-  adding depth and personality to your NPCs.
+  Generates a character backstory from a short description and name using a
+  streaming API endpoint, available on paid plans.
 ---
 
 # Backstory API

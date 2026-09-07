@@ -1,7 +1,7 @@
 ---
 title: Play actions and gestures
 description: Play named actions, anchored actions, and pointing gestures on a Convai character from script, and read the handles each call returns.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Play a named action or gesture, walk a character to an anchor and perform an action there, or point at a target — all from script, through `ConvaiBodyAnimationController` and the handle each call returns. Use this page once Convai Body Animation is running on a character and its animation set authors the actions or pointing directions you want to trigger.
@@ -150,7 +150,7 @@ public sealed class PointAtProp : MonoBehaviour
 `holdSeconds < 0` (or `PointingPlayOptions.HoldSeconds <= 0`) holds until `StopPointing`/`Release()` is called.
 
 {% hint style="warning" %}
-**`HoldSeconds` changed in SDK 4.5.0.** It has always meant only the pause at the apex of the point, not the total gesture duration — the raise and lower belong to the animation clip. Before 4.5.0 there was no way to shorten that raise/lower, so a one-second hold on a five-second apex clip still produced a roughly six-second point. `PointingPlayOptions.Speed` now multiplies the raise and fall, and `ReleaseStyle` set to `Blend` drops the pose out when the hold ends instead of playing the lower-arm tail. Both default to the pre-4.5.0 behavior, so an existing scene is unaffected; a point of about a second is `Speed = 1.5f` with `ReleaseStyle = PointingReleaseStyle.Blend`.
+**`HoldSeconds` means only the pause at the apex of the point, not the total gesture duration.** The raise and lower belong to the animation clip. `PointingPlayOptions.Speed` multiplies the raise and fall, and `ReleaseStyle` set to `Blend` drops the pose out when the hold ends instead of playing the lower-arm tail. For a point of about a second, set `Speed = 1.5f` with `ReleaseStyle = PointingReleaseStyle.Blend`.
 {% endhint %}
 
 `PointingPlayOptions` fields:
