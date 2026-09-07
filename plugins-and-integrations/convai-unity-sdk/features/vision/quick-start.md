@@ -14,6 +14,8 @@ Before starting, verify:
 
 * [ ] A `ConvaiCharacter` is in the scene and responds to speech in Play Mode
 
+## Turn on vision for a character
+
 {% stepper %}
 {% step %}
 ### Set Connection Type to Video

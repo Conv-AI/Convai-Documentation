@@ -9,22 +9,15 @@ The **Multi-Character Sample** is a shared-room scene shipped with the Convai Un
 ## Prerequisites
 
 - Convai Unity SDK <code class="expression">space.vars.unity_sdk_version</code> installed.
-- The **LipSync Sample** imported first. The Multi-Character Sample reuses its shared Sofia character and Reallusion assets.
 - A configured API key and server environment in **Edit > Project Settings > Convai SDK**.
 
 ## Import the sample
 
 {% stepper %}
 {% step %}
-### Import the LipSync Sample
-
-In **Window > Package Manager**, select **Convai SDK for Unity**, open the **Samples** tab, and import **LipSync Sample**. Import it before the Multi-Character Sample — the scene reuses its Sofia character and Reallusion assets.
-{% endstep %}
-
-{% step %}
 ### Import the Multi-Character Sample
 
-In the same **Samples** tab, import **Multi-Character Sample**. Unity copies its scene and scripts into `Assets/Samples/Convai SDK for Unity/<version>/Multi-Character Sample/`, where `<version>` is the installed SDK version (<code class="expression">space.vars.unity_sdk_version</code>).
+In **Window > Package Manager**, select **Convai SDK for Unity**, open the **Samples** tab, and import **Multi-Character Sample**. It is self-contained: the `Sofia` character it uses ships with the package rather than with another sample, so nothing else needs importing first. Unity copies its scene and scripts into `Assets/Samples/Convai SDK for Unity/<version>/Multi-Character Sample/`, where `<version>` is the installed SDK version (<code class="expression">space.vars.unity_sdk_version</code>).
 {% endstep %}
 
 {% step %}
