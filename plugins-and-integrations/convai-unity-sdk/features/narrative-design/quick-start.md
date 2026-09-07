@@ -15,6 +15,8 @@ Before starting, verify:
 * [ ] A `ConvaiCharacter` is in the scene with its Character ID set in the Inspector
 * [ ] At least one section and one trigger are defined for that character on the [Convai dashboard](https://convai.com)
 
+## Set up the manager and a trigger
+
 {% stepper %}
 {% step %}
 ### Add the Narrative Design Manager

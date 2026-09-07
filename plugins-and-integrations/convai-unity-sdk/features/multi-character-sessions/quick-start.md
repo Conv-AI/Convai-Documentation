@@ -11,6 +11,8 @@ Add a second `ConvaiCharacter` to a scene that already has one working character
 * [ ] A Unity scene with a working single-character setup: `ConvaiManager`, `ConvaiRoomManager`, `ConvaiPlayer`, and one `ConvaiCharacter` that already talks back in Play mode.
 * [ ] A second Character ID from your [Convai dashboard](https://convai.com).
 
+## Set up and test the second character
+
 {% stepper %}
 {% step %}
 ### Add a second character
@@ -43,11 +45,11 @@ Turn to face the second character and speak again. The conversation moves to it:
 {% endstep %}
 {% endstepper %}
 
+## Verify the setup
+
 {% hint style="success" %}
 **Success:** both characters answer depending on which one you are looking at, not on which one connected first or spoke last.
 {% endhint %}
-
-## Check the Convai Manager Live section
 
 Select `ConvaiManager` again while still in Play mode. Its **Live** section is the fastest way to confirm two characters are actually sharing the room:
 

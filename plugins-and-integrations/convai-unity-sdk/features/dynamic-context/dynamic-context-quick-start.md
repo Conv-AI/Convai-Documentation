@@ -14,6 +14,8 @@ Before starting, verify:
 
 * [ ] A `ConvaiCharacter` is in the scene and responds to speech in Play mode
 
+## Add Dynamic Context to a character
+
 {% stepper %}
 {% step %}
 ### Add the relay component
