@@ -58,7 +58,7 @@ manager.ConversationTargetChanged   += character => Confirm(character);
 
 ## One character speaks at a time
 
-Convai allows only one character to speak at a time. Moving the conversation — whether by `TalkTo` or automatic targeting — ends the previous character's turn, even mid-sentence. If a scripted line must always be heard in full, either keep the mode at `Manual` and control every target change yourself, or check `ConvaiCharacter.IsSpeaking` before calling `TalkTo`.
+Calling `TalkTo` ends the previous character's turn immediately, even mid-sentence — see [One character speaks at a time](how-conversation-targeting-works.md#one-character-speaks-at-a-time) for the full rule and how to avoid cutting off a scripted line.
 
 ## Verify the change
 

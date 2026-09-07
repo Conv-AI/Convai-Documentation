@@ -73,7 +73,7 @@ The main gameplay workflows are exposed to Blueprint graphs. C++ access is avail
 | Unreal Engine | <code class="expression">space.vars.unreal_min_version</code> |
 | Platforms | `Win64`, `Android` |
 | Network | Internet connection to Convai |
-| API key | Account at <code class="expression">space.vars.dashboard_url</code> |
+| API key | An account on the [Convai dashboard](https://convai.com) |
 
 {% hint style="info" %}
 Android requires microphone permission handling. The plugin bundles the `AndroidPermission` engine plugin as a dependency and requests `RECORD_AUDIO` permission automatically when it connects to Convai.

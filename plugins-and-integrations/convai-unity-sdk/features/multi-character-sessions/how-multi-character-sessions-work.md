@@ -23,7 +23,7 @@ An assigned **Initial Character** only chooses where the conversation *starts*. 
 
 ## Choosing who the player is talking to
 
-The **Convai Manager → Who The Player Talks To** section decides which character an active room is addressing, and it only appears once a scene has more than one character to choose between — with one character there is nothing to decide. Three modes are available: **Look At** measures the angle from the player's camera to each character's head and addresses whoever is nearest the centre of view; **Proximity** addresses the nearest character regardless of where the player is looking; **Manual** moves the conversation only when a script calls `TalkTo`.
+The **Convai Manager → Who The Player Talks To** section decides which character an active room is addressing, and it only appears once a scene has more than one character to choose between — with one character there is nothing to decide. Three modes are available: **Look At**, **Proximity**, and **Manual**. See [Choose a targeting mode](../conversation-targeting/choose-a-targeting-mode.md) to compare them, and [Conversation targeting](../conversation-targeting/README.md) for the feature.
 
 The rule never clears the target on its own. When nobody qualifies — the player looking at empty space, for example — the last character addressed keeps the conversation rather than being left with nobody to answer.
 
@@ -39,7 +39,7 @@ graph TD
 
 ## One character speaks at a time
 
-This is Convai's rule for the room, not a setting in the SDK: moving the conversation ends the previous character's answer, even mid-sentence. A character part-way through a reply stops as soon as the player addresses somebody else. `ConvaiCharacter.IsSpeaking` reports whether a character is mid-answer, which is the value to check before deciding to hold a conversation on one character deliberately — for example with targeting set to `Manual`.
+The room only ever has one character answering at a time — addressing a different character stops whichever one is mid-answer, even mid-sentence, so see [One character speaks at a time](../conversation-targeting/how-conversation-targeting-works.md#one-character-speaks-at-a-time) for the full rule and how to hold a conversation on one character deliberately.
 
 ## Why every character needs its own Character ID
 

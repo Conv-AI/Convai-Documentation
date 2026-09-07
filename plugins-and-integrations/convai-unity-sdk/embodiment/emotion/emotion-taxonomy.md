@@ -68,9 +68,25 @@ A new asset named `EmotionTaxonomy` appears. Select it to edit the entries list 
 
 ### Assigning a custom taxonomy to a profile
 
-1. Open your `ConvaiEmotionProfile` asset.
-2. Drag the custom `EmotionTaxonomyAsset` into the **Taxonomy** field.
-3. The controller picks up the new taxonomy the next time the profile is applied — immediately in Play Mode, and immediately in Edit Mode because `ConvaiEmotionController` carries `[ExecuteAlways]` from its base class.
+{% stepper %}
+{% step %}
+### Open the profile asset
+
+Open your `ConvaiEmotionProfile` asset.
+{% endstep %}
+
+{% step %}
+### Assign the taxonomy
+
+Drag the custom `EmotionTaxonomyAsset` into the **Taxonomy** field.
+{% endstep %}
+
+{% step %}
+### Confirm the controller picks it up
+
+The controller picks up the new taxonomy the next time the profile is applied — immediately in Play Mode, and immediately in Edit Mode because `ConvaiEmotionController` carries `[ExecuteAlways]` from its base class.
+{% endstep %}
+{% endstepper %}
 
 ## When to create a custom taxonomy
 

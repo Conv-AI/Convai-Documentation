@@ -244,11 +244,14 @@ The `ConvaiSDK` static class exposes the SDK version for conditional feature che
 ```csharp
 using Convai.Application;
 
-Debug.Log($"Convai SDK {ConvaiSDK.Version}"); // e.g. "4.2.0"
+Debug.Log($"Convai SDK {ConvaiSDK.Version}");
 
-if (ConvaiSDK.Version >= new System.Version(4, 2, 0))
+// Set this to the lowest SDK version your integration supports.
+const string MinimumSupportedVersion = "4.6.0";
+
+if (ConvaiSDK.Version >= System.Version.Parse(MinimumSupportedVersion))
 {
-    // Use a feature introduced in 4.2
+    // Safe to use APIs available at that version
 }
 ```
 

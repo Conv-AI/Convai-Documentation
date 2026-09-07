@@ -16,7 +16,7 @@ API Key mode is for local development, not for a build you distribute. A player 
 {% step %}
 ### Copy your API key
 
-Log in to your Convai dashboard at <code class="expression">space.vars.dashboard_url</code>, navigate to **Account Settings**, and copy your API key.
+Log in to your [Convai dashboard](https://convai.com), navigate to **Account Settings**, and copy your API key.
 {% endstep %}
 
 {% step %}
