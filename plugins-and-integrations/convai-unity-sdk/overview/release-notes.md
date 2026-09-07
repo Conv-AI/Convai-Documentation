@@ -33,8 +33,7 @@ Track changes to the Convai Unity SDK across releases, including new features, b
 * `Convai.ConfigureConversationTargeting` joins the MCP and Unity Assistant tool set, and
   `Convai.DiagnoseConversation` reports the roster, the addressed character, and the targeting
   verdict. Tool contract version `7`
-* A **Multi-Character Sample** ships alongside the existing Basic and LipSync samples. Import the
-  LipSync Sample first — the multi-character sample reuses its Sofia assets
+* A **Multi-Character Sample** ships alongside the existing Basic and LipSync samples
 
 **Conversation availability**
 

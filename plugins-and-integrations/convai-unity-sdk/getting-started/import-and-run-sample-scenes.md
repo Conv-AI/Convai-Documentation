@@ -14,10 +14,6 @@ The Convai SDK for Unity ships with three sample scenes. Running one is the fast
 | **LipSync Sample** | High-quality character `Sofia` with real-time lip sync, plus a debug hub for inspecting emotion, dynamic context, and vision state during Play mode |
 | **Multi-Character Sample** | A shared-room sample demonstrating multiple Convai characters, interaction targeting, transcript UI, and runtime roster changes |
 
-{% hint style="warning" %}
-The Multi-Character Sample reuses the shared `Sofia` character assets from the LipSync Sample. Import the LipSync Sample first — importing the Multi-Character Sample on its own leaves those character assets missing.
-{% endhint %}
-
 The steps for locating the samples differ depending on how you installed the SDK.
 
 {% tabs %}
