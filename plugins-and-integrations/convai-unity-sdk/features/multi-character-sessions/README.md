@@ -1,41 +1,31 @@
 ---
 title: Multi-character sessions
-description: Find guides for running several Convai characters in one shared room in Unity, choosing who the player is addressing, and changing the cast at runtime.
+description: Find guides for running several Convai characters in one Unity scene, choosing who the player talks to, and testing the shared room.
 last_reviewed: "4.6.0"
 ---
 
-A multi-character session puts every registered `ConvaiCharacter` in your scene into one room with Convai. Each character holds its own membership, its own audio track, and its own readiness, while the player's speech is routed to whichever membership is the current interaction target. Use these pages when a scene needs more than one character talking to the same player.
+A multi-character session is a Unity scene where two or more `ConvaiCharacter` components are active at once, sharing one room with Convai. The player addresses one character at a time, and the SDK works out which — no mode to switch on, no component to add, and no field to fill. Use these pages to add a second character to a working scene, understand how the room decides who is being addressed, and identify each character correctly once more than one shares the room.
 
 <table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody>
-<tr><td><strong>How multi-character sessions work</strong><br>Understand roster creation at connect, the initial character, and the epoch-guarded command model that keeps the client and Convai in agreement.</td><td><a href="how-multi-character-sessions-work.md">how-multi-character-sessions-work.md</a></td></tr>
-<tr><td><strong>Character identity and addressing</strong><br>Learn why a membership ID, a character ID, and a participant identity are three different things, and which one to use for each job.</td><td><a href="character-identity.md">character-identity.md</a></td></tr>
-<tr><td><strong>Build your first multi-character session</strong><br>Put two characters in a scene, connect them as one room, and confirm that the room reaches a ready state.</td><td><a href="quick-start.md">quick-start.md</a></td></tr>
-<tr><td><strong>Roster readiness and partial dispatch</strong><br>Understand what readiness means per character, why a ready secondary character does not make the session ready, and how start failures surface.</td><td><a href="readiness-and-partial-dispatch.md">readiness-and-partial-dispatch.md</a></td></tr>
-<tr><td><strong>Switch the interaction target</strong><br>Route player input to a chosen character, then release the target without interrupting whoever is already speaking.</td><td><a href="switch-the-interaction-target.md">switch-the-interaction-target.md</a></td></tr>
-<tr><td><strong>Add and remove characters at runtime</strong><br>Change a connected room's cast with <code>AddCharacterAsync</code> and <code>RemoveCharacterAsync</code>, including replacement targets and the clone rule.</td><td><a href="update-the-roster.md">update-the-roster.md</a></td></tr>
-<tr><td><strong>Join an existing multi-character session</strong><br>Bring a second human participant into a room another client already created, using one room locator.</td><td><a href="join-an-existing-session.md">join-an-existing-session.md</a></td></tr>
-<tr><td><strong>Route audio for each character</strong><br>Bind one audio source per participant identity, then enable or silence each character or human independently.</td><td><a href="route-character-audio.md">route-character-audio.md</a></td></tr>
-<tr><td><strong>React to roster and target changes</strong><br>Subscribe to roster and interaction-target events, and rely on the ordering the SDK guarantees between them.</td><td><a href="handle-roster-events.md">handle-roster-events.md</a></td></tr>
-<tr><td><strong>Multi-character room session reference</strong><br>Look up every member of the room session type, its membership and status fields, and the results its commands return.</td><td><a href="room-session-reference.md">room-session-reference.md</a></td></tr>
-<tr><td><strong>Multi-character connection API reference</strong><br>Look up the connection operations, their option types, and every exception each operation can throw.</td><td><a href="connection-api-reference.md">connection-api-reference.md</a></td></tr>
-<tr><td><strong>Multi-character usage examples</strong><br>See two worked patterns: look-to-address targeting with turn retention, and a scripted roster swap mid-scenario.</td><td><a href="usage-examples.md">usage-examples.md</a></td></tr>
-<tr><td><strong>Troubleshoot multi-character sessions</strong><br>Fix roster rejections, readiness failures, misrouted audio, duplicated clones, epoch mismatches, and command timeouts.</td><td><a href="troubleshooting.md">troubleshooting.md</a></td></tr>
+<tr><td><strong>How multi-character sessions work</strong><br>Understand how the room forms around the active characters in a scene, and how it decides who the player is addressing.</td><td><a href="how-multi-character-sessions-work.md">how-multi-character-sessions-work.md</a></td></tr>
+<tr><td><strong>Build your first multi-character session</strong><br>Add a second character to a working scene and confirm the room addresses whichever one the player looks at.</td><td><a href="quick-start.md">quick-start.md</a></td></tr>
+<tr><td><strong>Character identity</strong><br>Give every character in a room its own Character ID, and understand what happens when two characters share one.</td><td><a href="character-identity.md">character-identity.md</a></td></tr>
+<tr><td><strong>Multi-Character Sample</strong><br>Import the shipped sample scene and see several characters, interaction targeting, and a transcript UI working together.</td><td><a href="multi-character-sample.md">multi-character-sample.md</a></td></tr>
 </tbody></table>
 
-## How a scene becomes a multi-character session
+## Two questions a multi-character scene raises
 
-A scene becomes a multi-character session as soon as two or more `ConvaiCharacter` components are registered with the manager when it connects. There is no opt-in flag and no Inspector toggle. [How multi-character sessions work](how-multi-character-sessions-work.md) covers roster ordering, the connect-time validation rules, and the command model.
+Adding a second character to a scene raises two questions that a single-character scene never asks: who is the player talking to, and can the player talk right now. Each has its own feature area.
 
-{% hint style="info" %}
-A scene with several `ConvaiCharacter` components needs an explicit conversation target, because the SDK only infers one automatically when the scene owns exactly one character. See [Build your first multi-character session](quick-start.md).
-{% endhint %}
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody>
+<tr><td><strong>Conversation targeting</strong><br>How the SDK decides which character the player is addressing, and how to script or tune that decision.</td><td><a href="../conversation-targeting/README.md">../conversation-targeting/README.md</a></td></tr>
+<tr><td><strong>Conversation availability</strong><br>Whether the addressed character can hear the player yet, and how to gate your own UI on that state.</td><td><a href="../conversation-availability/README.md">../conversation-availability/README.md</a></td></tr>
+</tbody></table>
 
 ## Next steps
 
-Start with [Build your first multi-character session](quick-start.md) to get two characters into one room, then read [Character identity and addressing](character-identity.md) before you write any code that resolves a message back to a character.
+Start with [Build your first multi-character session](quick-start.md) to add a second character to a scene and confirm the room reaches it, then read [Character identity](character-identity.md) before assigning Character IDs to more than one character.
 
-The Live API pages document the same feature at the protocol level, including the exact message shapes the SDK sends and receives on your behalf.
-
-{% content-ref url="../../../../api-reference/core-api-reference/live-apis-beta/multi-character-sessions.md" %}
-[Use multi-character sessions](../../../../api-reference/core-api-reference/live-apis-beta/multi-character-sessions.md)
+{% content-ref url="how-multi-character-sessions-work.md" %}
+[How multi-character sessions work](how-multi-character-sessions-work.md)
 {% endcontent-ref %}

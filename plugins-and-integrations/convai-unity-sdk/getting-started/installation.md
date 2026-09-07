@@ -3,12 +3,12 @@ title: Install the Convai Unity SDK
 description: >-
   Install the Convai Unity SDK into a Unity project using Package Manager or
   Asset Store so the SDK and its dependencies resolve correctly.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 The Convai Unity SDK is available through two channels. Use **Package Manager** for new projects or when you prefer not to manage Asset Store downloads — the package resolves directly from the Convai registry with no manual download. Use **Asset Store** if your project already sources packages from your Asset Store library or if your studio manages package versions through My Assets.
 
-Both methods require Unity <code class="expression">space.vars.unity_min_version</code> and install SDK version **<code class="expression">space.vars.unity_sdk_version</code>** and the same six required dependencies.
+Both methods require Unity <code class="expression">space.vars.unity_min_version</code> and install SDK version **<code class="expression">space.vars.unity_sdk_version</code>** and the same four required dependencies.
 
 {% tabs %}
 {% tab title="Package Manager" %}
@@ -38,23 +38,21 @@ Type or paste the following identifier into the Name field, then click **Add**:
 com.convai.convai-sdk-for-unity
 ```
 
-Unity contacts the registry, resolves the package, and begins downloading. Six dependencies install automatically:
+Unity contacts the registry, resolves the package, and begins downloading. Four dependencies install automatically:
 
 | Package                           | Version |
 | --------------------------------- | ------- |
+| `com.unity.ai.inference`          | <code class="expression">space.vars.dep_ai_inference_version</code> |
 | `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> |
 | `com.unity.ugui`                  | <code class="expression">space.vars.dep_ugui_version</code> |
 | `com.unity.inputsystem`           | <code class="expression">space.vars.dep_inputsystem_version</code> |
-| `com.unity.ai.navigation`         | <code class="expression">space.vars.dep_ai_navigation_version</code> |
-| `com.unity.collections`           | <code class="expression">space.vars.dep_collections_version</code> |
-| `com.unity.modules.xr`            | <code class="expression">space.vars.dep_modules_xr_version</code> |
 
 Wait for the progress bar in the bottom-right of the Unity Editor to complete before continuing.
 {% endstep %}
 {% endstepper %}
 
 {% hint style="warning" %}
-**Dependency conflict:** If your project already pins any of these six packages to an older version in `Packages/manifest.json`, the install will fail or produce a version mismatch. Open `Packages/manifest.json`, remove or update the conflicting version entries, then retry.
+**Dependency conflict:** If your project already pins any of these four packages to an older version in `Packages/manifest.json`, the install will fail or produce a version mismatch. Open `Packages/manifest.json`, remove or update the conflicting version entries, then retry.
 {% endhint %}
 
 {% hint style="success" %}
@@ -91,28 +89,22 @@ Your Asset Store library loads. Locate **Convai SDK for Unity** in the list.
 
 Select **Convai SDK for Unity** in the list. Click **Download**, then click **Import** once the download completes.
 
-Unity imports the package and installs six dependencies automatically:
+Unity imports the package and installs four dependencies automatically:
 
 | Package                           | Version |
 | --------------------------------- | ------- |
+| `com.unity.ai.inference`          | <code class="expression">space.vars.dep_ai_inference_version</code> |
 | `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> |
 | `com.unity.ugui`                  | <code class="expression">space.vars.dep_ugui_version</code> |
 | `com.unity.inputsystem`           | <code class="expression">space.vars.dep_inputsystem_version</code> |
-| `com.unity.ai.navigation`         | <code class="expression">space.vars.dep_ai_navigation_version</code> |
-| `com.unity.collections`           | <code class="expression">space.vars.dep_collections_version</code> |
-| `com.unity.modules.xr`            | <code class="expression">space.vars.dep_modules_xr_version</code> |
 
 Wait for the progress bar in the bottom-right of the Unity Editor to complete before continuing.
 {% endstep %}
 {% endstepper %}
 
-{% hint style="info" %}
-To update the SDK to a newer version, return to **My Assets** in the Package Manager, select the SDK, and click **Update**.
-{% endhint %}
+To update the SDK to a newer version later, return to **My Assets** in the Package Manager, select the SDK, and click **Update**.
 
-{% hint style="success" %}
-**Installation complete** when the Convai SDK for Unity entry appears in the Package Manager list with version <code class="expression">space.vars.unity_sdk_version</code>. You will also see a new **Convai** menu item in the Unity menu bar.
-{% endhint %}
+Installation is complete when the Convai SDK for Unity entry appears in the Package Manager list with version <code class="expression">space.vars.unity_sdk_version</code>. You will also see a new **Convai** menu item in the Unity menu bar.
 {% endtab %}
 {% endtabs %}
 

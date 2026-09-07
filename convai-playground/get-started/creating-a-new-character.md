@@ -6,9 +6,7 @@ description: >-
 
 # Creating a New Character
 
-## Introduction
-
-The Convai Playground allows you to design AI-powered characters with unique personalities, voices, and visual appearances. This guide will walk you through creating a new character, from initial setup to customization of avatar, voice, and languages.
+Create a character in the Convai Playground, then configure its description, avatar, voice, and languages before testing it.
 
 ## Step-by-Step Guide
 
@@ -16,12 +14,12 @@ The Convai Playground allows you to design AI-powered characters with unique per
 
 * From your **Dashboard**, click **Create a new character** in the top-right corner.
 
-<figure><img src="../../.gitbook/assets/Screenshot 2026-05-08 135026.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/Screenshot 2026-05-08 135026.png" alt="Convai Playground dashboard with the Create a new character control"><figcaption></figcaption></figure>
 
 * A new character creation interface will open.
 * In the left menu, only **Character Description**, **Avatar**, and **Language and Speech** are active initially. Other sections will unlock after the character is created.
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt="New character editor with the initial configuration sections available"><figcaption></figcaption></figure>
 
 ***
 
@@ -36,7 +34,7 @@ The Convai Playground allows you to design AI-powered characters with unique per
   * **Unlisted** _(default)_ – Only accessible via a direct link.
   * **Private** – Restricted to you and invited users.
 
-<figure><img src="../../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2).png" alt="Character Description fields in the new character editor"><figcaption></figcaption></figure>
 
 ***
 
@@ -47,7 +45,7 @@ The Convai Playground allows you to design AI-powered characters with unique per
 * Follow the steps in the [**Avatar Studio Documentation**](../../no-code-experiences/avatar-studio-experiences/) to learn how to adjust facial features, clothing, and other design elements.
 * Click **Save Changes** when done.
 
-<figure><img src="../../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (3).png" alt="Avatar configuration section for a new character"><figcaption></figcaption></figure>
 
 ***
 
@@ -57,7 +55,7 @@ The Convai Playground allows you to design AI-powered characters with unique per
 * In **Language**, select one or more languages your character can speak.
 * In **Voice**, choose from the filtered voice options for your selected languages
 
-<figure><img src="../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (4).png" alt="Voice and language settings for a new character"><figcaption></figcaption></figure>
 
 ***
 
@@ -81,7 +79,7 @@ When the character is created, all the sections in the left menu become availabl
 * Core AI Settings
 * Guardrails
 * State of Mind
-* Embodied Actions (_Coming Soon to the new Playground. Available on_ [_Legacy Playground_](https://playground.convai.com/pipeline/dashboard))
+* [Agentic Actions](../character-customization/agentic-actions.md)
 * Narrative Design (_Coming Soon to the new Playground. Available on_ [_Legacy Playground_](https://playground.convai.com/pipeline/dashboard))
 * External API (_Coming Soon to the new Playground. Available on_ [_Legacy Playground_](https://playground.convai.com/pipeline/dashboard))
 * Publish
@@ -90,10 +88,10 @@ When the character is created, all the sections in the left menu become availabl
 
 Each of these features allows you to enhance and refine your character for more natural, intelligent, and engaging interactions. These are covered in separate documentation.
 
-<figure><img src="../../.gitbook/assets/image (7).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (7).png" alt="Character editor navigation after the character has been created"><figcaption></figcaption></figure>
 
 ***
 
-## Conclusion
+## Continue configuring the character
 
 The character creation process in Convai Playground is designed for flexibility — you can launch a character in minutes or spend time refining every detail. Whether you start with default settings or fully customize the avatar, voice, and description.

@@ -176,9 +176,7 @@ Updates the descriptive scene context the bot knows about, including in-scene ob
 - Update interactable objects in the scene as the environment changes.
 - Adjust environment context for the bot without modifying action affordances.
 
-{% hint style="warning" %}
-`update-scene-metadata` updates descriptive context only. It does not modify the authoritative `action_config.objects` list supplied at `/connect` time. To change which objects the bot may act on, reconnect with a new `action_config`.
-{% endhint %}
+`update-scene-metadata` updates descriptive context only. It does not modify `action_config.objects`. Use [`context-update`](#context-update) to replace semantic action objects, or reconnect when changing v2 client tool declarations.
 
 ---
 
@@ -191,7 +189,7 @@ Updates dynamic information injected into the bot's system prompt. Use this for 
   "type": "update-dynamic-info",
   "data": {
     "dynamic_info": {
-      "text": "The user just completed the dragon quest and received a golden sword."
+      "text": "The user completed the dragon quest and received a golden sword."
     }
   }
 }
@@ -236,11 +234,9 @@ Updates the bot's runtime dynamic context with full control over mode, token bud
 
 **Updating action affordances mid-session**
 
-`action_config` accepts the same structure as the [Connect API](connect-api.md#request-body). Only the lists you provide are replaced — sending just `objects` leaves `actions` and `characters` untouched. Use this when the scene changes and the character's affordances change with it.
+`action_config` accepts the semantic `actions`, `objects`, `characters`, and `current_attention_object` fields from the [Connect API](connect-api.md#request-body). Only the lists you provide are replaced—sending only `objects` leaves `actions` and `characters` untouched. Use this when the scene changes and the character's semantic affordances change with it.
 
-{% hint style="warning" %}
-Adding an object to `scene_description` or to `text` does **not** make it targetable. Only `action_config` grants affordances. See [Response contract and parsing](response-contract-and-parsing.md#how-actions-are-separated).
-{% endhint %}
+`action_config.tools` is connection-scoped. A `context-update` that includes `tools` returns an error; reconnect to replace client tool declarations. Adding an object to `scene_description` or `text` does not make it a semantic action target. See [Response contract and parsing](response-contract-and-parsing.md).
 
 **Mode values**
 
@@ -331,6 +327,59 @@ When a token limit is exceeded, the server returns a `server-response` with `"st
 - Validation checks apply to the static, runtime, and combined estimated-token limits independently.
 - When combined dynamic context exceeds 40,000 estimated tokens, Convai logs a server-side warning.
 - Error messages include the estimated-token breakdown for both partitions.
+
+---
+
+## Agentic action results
+
+### action-result
+
+Returns one terminal result for a client-executed tool call. This message requires action protocol v2 and correlates to the `id` in a `tool_call` item or v2 `action-response` projection.
+
+```json
+{
+  "type": "action-result",
+  "data": {
+    "id": "call_abc123",
+    "status": "completed",
+    "output": {
+      "record_opened": true
+    },
+    "character_session_id": "CHARACTER_SESSION_ID"
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `id` | string | Yes | Correlation ID from the tool call. Length is `1`–`256` characters. |
+| `status` | string | Yes | Terminal status: `"completed"`, `"error"`, or `"cancelled"`. |
+| `output` | JSON value | No | Result data. Use with `"completed"` when the model needs output from the operation. |
+| `error` | JSON value | No | Failure or cancellation details. A completed result cannot include this field. |
+| `character_session_id` | string | No | Session guard. When present, it must match the active character session. |
+
+Convai does not execute or authorize the requested operation. Validate the tool name and arguments, apply your application's permission and confirmation rules, execute on the client, and then return the terminal result.
+
+The candidate implementation accepts a maximum serialized result size of `64 KiB`. It allows up to `8` outstanding calls and up to `8` tool-result continuation rounds for one user turn. Convai waits `60` seconds by default for each result. A timed-out call becomes stale, and a late result is rejected.
+
+An accepted result produces this acknowledgment:
+
+```json
+{
+  "type": "server-response",
+  "event_type": "action-result",
+  "status": "success",
+  "message": "Tool result accepted",
+  "extras": {
+    "tool_call_id": "call_abc123",
+    "idempotent": false
+  }
+}
+```
+
+Retrying the same terminal payload for the same `id` is accepted with `extras.idempotent: true`. Sending a different terminal payload for an already completed `id` returns `conflicting_terminal_tool_result`. Unknown, stale, cross-session, oversized, and participant-mismatched results return an error `server-response` with `extras.error_code` and, when available, `extras.tool_call_id`.
+
+After accepting the result, Convai supplies it to the same model context so generation can continue. The acknowledgment is not an ordering barrier; continuation output can arrive before its `server-response`. Distinct calls may be outstanding in parallel. Do not infer that the SDK or Convai executed them sequentially.
 
 ---
 
@@ -523,9 +572,7 @@ Connect-time `respond_modes.vision` seeds the default when `respond_mode` is omi
 | `invalid_respond_mode` | Explicit `respond_mode` was not one of the allowed values. |
 | `frame_id_evicted` / `invalid_frame_ids` / `invalid_frame_indices` / `invalid_frame_indices_range` / `rate_limited` | Frame binding failed. |
 
-{% hint style="info" %}
-`update_id` makes retries safe: a repeated `vision-status` or `vision-trigger` with the same id replays the prior ack with `"duplicate": true` and does not attach or trigger again.
-{% endhint %}
+`update_id` makes retries safe: a repeated `vision-status` or `vision-trigger` with the same ID replays the prior acknowledgment with `"duplicate": true` and does not attach or trigger again.
 
 **Use cases:**
 
@@ -675,9 +722,7 @@ Enables or disables streaming of informational `usage-update` messages to this c
 |---|---|---|---|
 | `enabled` | boolean | Yes | `true` resumes `usage-update` streaming, `false` stops it. |
 
-{% hint style="info" %}
-This only controls whether the server **pushes** usage messages to your client. It never affects server-side usage tracking, aggregation, or billing, which continue unconditionally. `usage-update` messages are only available when the session is running in debug mode with usage tracking enabled.
-{% endhint %}
+This controls only whether the server pushes usage messages to your client. It does not affect usage tracking, aggregation, or billing. `usage-update` messages are available only when the session runs in debug mode with usage tracking enabled.
 
 **Use cases:**
 

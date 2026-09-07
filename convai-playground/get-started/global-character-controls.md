@@ -1,15 +1,12 @@
 ---
 description: >-
-  A single reference for the shared toolbar controls available across all
-  character pages in Convai Playground, including Versioning, Update, and
-  Character Settings.
+  Use the shared character toolbar to manage versions, save changes, clone or
+  share a character, and review destructive settings before deletion.
 ---
 
 # Global Character Controls
 
-## Introduction
-
-This page explains the shared controls that appear at the top right of every character page in Convai Playground. You will see the same toolbar on Character Description, Avatar, Language and Speech, Knowledge Bank, Personality Traits, Core AI Settings, State of Mind, Embodied Actions, Narrative Design, External API, Publish, and Memory. Understanding these controls helps you work faster and avoid losing changes.
+Use the shared controls at the top right of each character page in the Convai Playground. The toolbar appears on Character Description, Avatar, Language and Speech, Knowledge Bank, Personality Traits, Core AI Settings, State of Mind, Agentic Actions, Narrative Design, External API, Publish, and Memory.
 
 ***
 
@@ -23,7 +20,7 @@ Look at the top right of any character screen. You will see:
 
 These controls behave the same way on every page.
 
-<figure><img src="../../.gitbook/assets/image (11) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (11) (1) (1) (1) (1).png" alt="Shared character toolbar with versioning, update, and settings controls"><figcaption></figcaption></figure>
 
 ***
 
@@ -45,7 +42,7 @@ Use Versioning to save and switch between alternative definitions of your charac
 
 For more information, refer to the [Character Versioning](character-versioning.md) documentation.
 
-<figure><img src="../../.gitbook/assets/image (12) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (12) (1) (1) (1) (1).png" alt="Character versioning panel opened from the shared toolbar"><figcaption></figcaption></figure>
 
 ### 2. Update button
 
@@ -55,11 +52,11 @@ Apply your unsaved changes to the character.
 
     * **Green**: there are unsaved edits. Click **Update** to save.
 
-    <figure><img src="../../.gitbook/assets/Screenshot 2025-08-10 142530.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/Screenshot 2025-08-10 142530.png" alt="Enabled Update button indicating unsaved character changes"><figcaption></figcaption></figure>
 
     * **Gray**: everything is already saved.
 
-    <figure><img src="../../.gitbook/assets/image (13) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (13) (1) (1) (1) (1).png" alt="Disabled Update button indicating that character changes are saved"><figcaption></figcaption></figure>
 * **Important**
   * If you refresh or navigate away while the button is green, your unsaved changes will be lost.
   * Click **Update** after edits on any tab, then proceed to testing.
@@ -68,9 +65,9 @@ Apply your unsaved changes to the character.
 
 Open the three dots menu to access actions that affect the entire character.
 
-<figure><img src="../../.gitbook/assets/image (14) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (14) (1) (1) (1) (1).png" alt="Character Settings menu with clone, share, and delete actions"><figcaption></figcaption></figure>
 
-#### **Clone Character**
+**Clone Character**
 
 Create a duplicate so you can branch work safely.
 
@@ -78,14 +75,14 @@ Create a duplicate so you can branch work safely.
 * **What changes**: the clone receives a new Character ID.
 * **When to use**: large experiments, staging vs production split, A or B variants.
 
-#### **Share Character**
+**Share Character**
 
 Let others **test** your character.
 
 * **What it does:** Generates a share link so recipients can interact with the character (e.g., Chatbox or video call) without being able to modify it.
 * **How it works:** Open the dialog to copy a share link, respecting your current visibility setting (Public, Unlisted, or Private).
 
-#### **Delete Character**
+**Delete Character**
 
 Remove the character from your characters.
 

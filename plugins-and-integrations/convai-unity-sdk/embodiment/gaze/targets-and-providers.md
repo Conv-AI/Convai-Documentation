@@ -1,7 +1,7 @@
 ---
 title: Gaze targets and providers
 description: Mark scene objects as gaze candidates, add advanced provider components, and register a custom gaze target provider from code.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Mark GameObjects as gaze candidates, add the eight advanced provider components for richer targeting behavior, and register a custom provider from code. Use this page after adding `ConvaiGazeController` to a character, when you want it to notice specific scene objects, other characters, or the player in a non-default way.
@@ -40,6 +40,7 @@ The advanced providers live under `Convai/Gaze/Advanced/` in the Add Component m
 | `Publish Self` | `true` | Register this character as a target other characters can look at. |
 | `Look At Others` | `true` | Generate gaze candidates for the other registered characters. |
 | `Priority` | `7` | Between the player anchor (`10`) and world objects (`5`), so the player wins during conversation but characters beat background props. |
+| `Speaking Priority` | `9` | Priority tier used while this character is the one speaking — above the idle `Priority` tier so a listener that has settled on the speaker is not pulled away to a bystander, and still below the player anchor (`10`). |
 | `Max Distance` | `12` (meters) | Distance beyond which another character stops being a candidate (`0` = unlimited). |
 | `Full Relevance Distance` | `4` (meters) | Distance below which another character is at full relevance. |
 | `Idle Glance Relevance` | `0.35` | Relevance of a non-speaking character. A speaking character is always fully relevant, so listeners turn to the active speaker. |
@@ -106,6 +107,7 @@ The advanced providers live under `Convai/Gaze/Advanced/` in the Add Component m
 | `Explicit Anchor` | none | When empty, resolves `Camera.main`, then the first eligible enabled Game-view camera. |
 | `Eye Line Offset` | `1.6` (meters) | Vertical lift applied to explicit non-camera anchors. |
 | `Aim Mode` | `Auto` | `GazeAnchorAimMode` — where on the anchor gaze aims. |
+| `Face Presence` | `Auto` | `GazeAnchorFacePresence` — whether the character treats the anchor as a face and looks around it (its eyes, its mouth) instead of aiming exactly at it. `Auto` decides from the anchor: one assigned by hand is treated as a face, while a camera the SDK resolved on its own is a viewpoint and is aimed at exactly. `Face` always treats the anchor as a face — correct in VR, where the camera sits between the player's eyes. `Point` always aims exactly at the anchor. |
 | `Local Aim Offset` | `(0, 0, 0)` | Anchor-local aim offset used by `Local Offset` mode. |
 | `Max Distance` | `8` (meters) | Distance beyond which the player is no longer a candidate. |
 | `Full Relevance Distance` | `4` (meters) | Distance below which relevance is at its maximum. |
@@ -221,6 +223,10 @@ public sealed class XrGazeRaySetup : MonoBehaviour
 ```
 
 Return `false` when no ray is available this frame — tracking lost, headset off — so the consumer falls back to the camera ray. The source is registered per component instance, not process-wide, so one scene's adapter never silently drives characters in another scene.
+
+## How target movement is filtered
+
+Every gaze target's aim point is smoothed before the head's movement detector sees it, so a centimetre or two of ordinary motion — a talking character's head bob, camera sway on a handheld rig — never reads as a moving target and never triggers a head re-plan. A genuine discontinuity, such as a camera cut or a teleport, is detected on the raw jump rather than the smoothed one, so the eyes still snap to the new position immediately instead of sliding toward it.
 
 ## Verify targets are found
 

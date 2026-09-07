@@ -1,7 +1,7 @@
 ---
 title: How character actions work
 description: Understand the Convai character actions pipeline — how Convai selects actions, how Unity resolves targets, and which components are required.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 The Convai character actions system lets NPC characters respond to player requests by performing physical behaviors in your scene. When a trainee says "retrieve the fire extinguisher," the character navigates to it. When a student says "point at the diagram," the character turns and faces it. Convai identifies what to do and who to target; Unity executes the behavior through a simple, extensible pipeline.
@@ -44,7 +44,7 @@ Action affordances and targets are not fixed for the whole session. Changes sent
 | `ConvaiActionDispatcher` | Convai Action Runner | Optional | Executes received batches automatically through bound executors |
 | One or more executor components | Varies by executor | If using the dispatcher | Performs the actual in-scene behavior; several depend on an embodiment module such as Gaze or Body Animation |
 
-The class names are unchanged from earlier SDK versions; only the Inspector labels changed, so existing scripts, scenes, and prefabs need no migration.
+Code, scenes, and prefabs reference these components by the class names in the table above; the Inspector displays the friendlier names in the **Inspector name** column.
 
 {% hint style="info" %}
 `ConvaiActionDispatcher` is optional. If you want to handle action batches in your own gameplay code, subscribe to `ConvaiCharacter.OnActionsReceived` directly and skip the dispatcher entirely.
@@ -61,7 +61,7 @@ The class names are unchanged from earlier SDK versions; only the Inspector labe
 | Attention (Gaze module) | Look At Target, Watch The Player, Scan Environment | `ConvaiGazeController` |
 | Expression | Set Mood, React, Nod Or Shake Head | `ConvaiEmotionController` (Set Mood, React) or `ConvaiBodyLanguageController` (Nod Or Shake Head) |
 | Gesture | Play Gesture, Point At Target | `ConvaiBodyAnimationController` (Body Animation module) |
-| Movement | Walk To Target, Lead Player To Target, Turn To Face Target, Follow The Player, Return To Start | `ConvaiBodyAnimationController`, and `ConvaiNavMeshLocomotion` for every executor except Turn To Face Target |
+| Movement | Walk To Target, Lead Player To Target, Turn To Face Target, Follow The Player, Return To Start | `ConvaiNavMeshLocomotion` for every executor except Turn To Face Target, which needs `ConvaiBodyAnimationController` instead |
 
 The Attention, Gesture, and Movement packs run through the Gaze and Body Animation embodiment modules — see [Embodiment](../../embodiment/README.md) — so a character needs the matching module installed before those actions work. Adding an executor through the Actions Editor's catalog adds the required module component automatically when it is missing; see [Actions Editor](actions-editor.md).
 

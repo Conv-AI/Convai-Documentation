@@ -1,7 +1,7 @@
 ---
 description: >-
-  Learn how to publish your scene and whitelist domains to embed Convai
-  experiences securely in your web application.
+  Publish a scene from Avatar Studio and whitelist the domains allowed to embed
+  it, so your experience loads only on the sites you control.
 icon: chalkboard
 ---
 
@@ -11,7 +11,7 @@ icon: chalkboard
 
 Before using `@convai/experience-embed`, make sure:
 
-1. **Your scene is published** via Convai's Avatar Studio (https://convai.com).
+1. **Your scene is published** via Convai's [Avatar Studio](https://convai.com).
 2. **You have your `expId`** — available in the "Publish" tab of the scene.
 3. **The domain you're embedding on and email used to create the scene is whitelisted** through us.
 

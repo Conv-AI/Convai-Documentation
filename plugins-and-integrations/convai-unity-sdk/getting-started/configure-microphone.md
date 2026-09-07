@@ -3,7 +3,7 @@ title: Configure microphone
 description: >-
   Select an active microphone device at runtime, set a project-wide default, and
   configure platform permissions for Android, iOS, and WebGL builds.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 The Convai SDK for Unity opens the system microphone automatically when a session starts. Enumerate and select a specific device at runtime, set a project-wide default device, and satisfy the platform-specific requirements for Android, iOS, and WebGL.
@@ -13,21 +13,29 @@ The Convai SDK for Unity opens the system microphone automatically when a sessio
 To list available microphone devices and let the player choose one:
 
 ```csharp
-using Convai.Runtime.Settings;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Convai.Runtime.Components;
+using Convai.Shared.Abstractions;
+using Convai.Shared.Types;
+using UnityEngine;
 
-// Get the microphone device service from the SDK
-if (ConvaiManager.ActiveManager.TryGetMicrophoneDeviceService(out IMicrophoneDeviceService micService))
+private async Task SwitchToDeviceAsync(int deviceIndex)
 {
-    // List all available devices
-    IReadOnlyList<ConvaiMicrophoneDevice> devices = micService.GetAvailableDevices();
-
-    foreach (var device in devices)
+    // Get the microphone device service from the SDK
+    if (ConvaiManager.ActiveManager.TryGetMicrophoneDeviceService(out IMicrophoneDeviceService micService))
     {
-        Debug.Log($"{device.Name} (ID: {device.Id}, Index: {device.Index})");
-    }
+        // List all available devices
+        IReadOnlyList<ConvaiMicrophoneDevice> devices = micService.GetAvailableDevices();
 
-    // Start listening with a specific device index
-    await ConvaiManager.ActiveManager.Audio.StartListeningAsync(microphoneIndex: device.Index);
+        foreach (ConvaiMicrophoneDevice device in devices)
+        {
+            Debug.Log($"{device.Name} (ID: {device.Id}, Index: {device.Index})");
+        }
+
+        // Start listening with a specific device index
+        await ConvaiManager.ActiveManager.Audio.StartListeningAsync(microphoneIndex: deviceIndex);
+    }
 }
 ```
 
@@ -36,10 +44,6 @@ On WebGL, `GetAvailableDevices()` returns an empty list outside the Editor. Micr
 ## Set the project-wide default device
 
 `ConvaiSettings.DefaultMicrophoneDeviceId` sets the microphone the SDK uses before any script calls `StartListeningAsync` with a specific device index. An empty string resolves to the system default device.
-
-{% hint style="warning" %}
-`DefaultMicrophoneDeviceId` (string) replaced the integer-based `DefaultMicrophoneIndex` in SDK version `4.4.0`. Convai does not migrate the old index value automatically — if your project set a non-zero `DefaultMicrophoneIndex` before upgrading, open **Runtime Defaults** and re-pick the device.
-{% endhint %}
 
 {% stepper %}
 {% step %}

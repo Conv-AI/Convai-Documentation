@@ -1,7 +1,7 @@
 ---
 title: Character actions scripting reference
 description: API reference for the Convai character actions system — executor base classes, dispatcher, config types, invocation objects, and enums.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Complete API reference for the public types in the Convai character actions system. Types are in the `Convai.Runtime.Actions`, `Convai.Runtime.Components`, `Convai.Shared.Actions`, or `Convai.Shared.Types` namespaces unless noted.
@@ -423,9 +423,7 @@ Marks any `GameObject` as a runtime action grounding target with no code require
 
 ## Built-in executor types
 
-The shipped executor catalog changed in this release. Full field-level reference for every executor lives on [Action executors](action-executors.md); this section records only what changed.
-
-**Added:**
+Full field-level reference for every executor lives on [Action executors](action-executors.md). A selection from that catalog:
 
 | Executor | Menu path | Notes |
 | --- | --- | --- |
@@ -434,9 +432,7 @@ The shipped executor catalog changed in this release. Full field-level reference
 | `ConvaiCountTargetGroupActionExecutor` | `Convai/Actions/Count Target Group` | Observation pack; requires a `ConvaiActionTargetGroup` on the resolved target; returns `Answered(...)` |
 | `ConvaiMeasureDistanceActionExecutor` | `Convai/Actions/Measure Distance` | Observation pack; no required peer; returns `Answered(...)` |
 
-The Observation pack is genuinely new: it is the first pair of built-in executors whose job is to answer a question rather than perform a visible act, using `ConvaiActionExecutionResult.Answered(...)` instead of `Succeeded(...)`.
-
-**Removed:** `ConvaiGuidedTourActionExecutor`, `ConvaiAddressGroupActionExecutor`, `ConvaiPerformAtTargetActionExecutor` are no longer present in the SDK. A scene referencing one of these components has a broken reference after upgrading; rebind the action to a built-in or custom replacement. See [Migrate actions to v4.5.0](migrate-to-v4-5.md) for the upgrade path.
+The Observation pack's executors answer a question rather than perform a visible act, using `ConvaiActionExecutionResult.Answered(...)` instead of `Succeeded(...)`.
 
 ## `ConvaiActionDispatcher`
 

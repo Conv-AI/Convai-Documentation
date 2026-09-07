@@ -1,5 +1,5 @@
 ---
-title: Roster readiness and partial dispatch
+title: Room readiness
 description: Understand when a shared Unity room is ready to take player input, why one slow character does not block the others, and how start failures are reported.
 last_reviewed: "4.6.0"
 ---
@@ -84,11 +84,9 @@ Do not route player input to a membership that is not `Ready`. A membership in `
 
 ## How readiness reaches the client
 
-Two paths mark a membership ready, and both end at the same place.
-
 The direct path is the `character-status` lifecycle message. The SDK resolves the message to a membership, merges the roster epoch it carries, and marks the membership `Ready` or `Failed` from the reported status. A status message for a membership the client has not seen yet inserts that membership into the roster first, so a room can learn about a character and its readiness in the same message.
 
-The second path is inference from observed activity. When a membership is still `Starting` and the SDK observes media, speech, or lip-sync data attributable to it, it marks that membership ready rather than waiting. This keeps a character from being stuck in `Starting` because a status message was lost, and it is why a character can become ready without any explicit lifecycle message appearing.
+A membership still `Starting` is never marked `Ready` on unverified evidence alone. Speech attributable to a membership — text, lip-sync frames, a speech-start — recovers it immediately, because nothing that is not ready produces speech. Weaker evidence, such as a subscribed audio track, only arms a short wait for the real `character-status` message rather than completing readiness on the spot; if that message never arrives, the membership recovers once the wait elapses. This is what keeps a character from being stuck in `Starting` when a status message is lost, without announcing a character the service has not actually started routing to yet.
 
 The session's own connection state follows the initial character. The room reports `Connected` when the initial membership's ready signal arrives, and ready signals from other memberships do not move it.
 
@@ -113,7 +111,7 @@ Decide up front what a failed secondary character means for your scenario. A tra
 {% endcontent-ref %}
 
 {% content-ref url="character-identity.md" %}
-[Character identity and addressing](character-identity.md)
+[Character identity](character-identity.md)
 {% endcontent-ref %}
 
 {% content-ref url="quick-start.md" %}

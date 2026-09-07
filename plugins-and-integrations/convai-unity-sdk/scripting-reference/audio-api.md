@@ -1,7 +1,7 @@
 ---
 title: Audio API
-description: Scripting reference for ConvaiAudio — microphone muting, per-character audio control, audio playback unlock, and listening state management.
-last_reviewed: "4.5.0"
+description: Reference for controlling microphone muting, per-character audio output, and playback unlock from script in the Unity SDK.
+last_reviewed: "4.6.0"
 ---
 
 `ConvaiAudio` is the audio facade on `ConvaiManager`, providing scripted control over microphone capture, per-character remote audio output, and audio playback unlock. It separates concerns cleanly: microphone input (what you send to Convai), character audio output (what you hear from characters), and the WebGL audio playback gate.

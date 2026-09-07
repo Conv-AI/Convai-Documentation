@@ -9,6 +9,10 @@ hidden: true
 
 Convai characters can do more than talk: they can **perform physical actions** in your scene. The action system lets the LLM that drives a Convai character emit structured commands (move to a target, pick up an object, wait, run a custom animation, etc.) which your gameplay code then executes.
 
+{% hint style="warning" %}
+**Deprecated on August 26, 2026.** Use [Character actions](../../convai-unreal-engine-plugin/features/character-actions/README.md) in the current Convai Unreal Engine plugin documentation. This hidden section remains available for projects that have not migrated.
+{% endhint %}
+
 This guide is split into **three phases**, each one introducing the next layer of capability:
 
 | Phase                               | Goal                                                                        | What you'll learn                                                                                                                                              |

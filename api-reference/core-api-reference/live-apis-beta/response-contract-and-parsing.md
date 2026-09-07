@@ -1,47 +1,47 @@
 ---
 title: Response contract and parsing
 description: >-
-  How Convai separates a character's spoken response from its actions and other
-  non-verbal output, exactly what the server removes from the spoken text, and
-  which patterns are reserved.
+  Understand legacy and canonical model output, raw text projection, action
+  parsing, client execution feedback, and reserved response patterns.
 ---
 
-# Response contract and parsing
+A Convai character can produce conversational text, semantic actions, client tool calls, and emotion. The contract your client receives depends on the capabilities selected at `/connect`.
 
-A Convai character produces more than speech. It can also emit actions for your client to execute, emotional tone for an avatar, and — when narrative design or vision are active — internal control data. All of that originates from a single model output stream and is separated **server-side** before it reaches you.
-
-This page documents that separation precisely: what reaches the spoken response, what is removed, and which patterns are reserved. If you author custom core descriptions, prompts, or output formats, read this page — a character can be broken by text that is silently removed, and knowing the rules is the difference between a working agent and an unexplainable one.
-
----
-
-## The three kinds of output
-
-| Output | Delivered as | Spoken? |
-|---|---|---|
-| **Spoken response** | `bot-llm-text` messages + the WebRTC audio track | Yes |
-| **Actions** | [`action-response`](server-to-client-messages.md#action-response) messages | No |
-| **Emotion** | [`bot-emotion`](server-to-client-messages.md#bot-emotion) messages | No |
-
-{% hint style="info" %}
-There is currently **no channel for non-spoken visual content** — tables, links, cards, or rich media. Any such content the model produces will appear in the spoken response and be read aloud. If your experience needs to display something without speaking it, encode it in an action and render it client-side.
+{% hint style="warning" %}
+Actions protocol v2, canonical model output v2, and raw `bot-llm-text` are opt-in candidate surfaces. This documentation does not confirm production availability or a published SDK release. Verify the `capabilities` returned by your target environment.
 {% endhint %}
+
+---
+
+## Select an output contract
+
+| Selection | Delivered behavior |
+|---|---|
+| Omit `capabilities` | Action protocol v1, model output v1, and legacy filtered `bot-llm-text`. The `/connect` response omits `capabilities`. |
+| `action_protocol_version: 2` | Correlated client `tool_call` items and [`action-result`](client-to-server-messages.md#action-result) feedback. |
+| `model_output_version: 2` | Typed [`model-output`](server-to-client-messages.md#model-output) envelopes become the canonical output authority. |
+| `bot_llm_text_mode: "raw"` | The existing `bot-llm-text` event carries provider-visible text before structured-output parsing and conversational filtering. |
+
+These selections are independent, but every non-legacy selection requires a singular created session. See [Agentic Actions v2 preview](connect-api.md#agentic-actions-v2-preview) for the topology and tool declaration constraints.
+
+This candidate surface does not define built-in display, link, card, table, CSV, or quick-response schemas. Do not treat raw text as a display protocol. If your application uses an `extension` item, accept only schemas and versions that your client explicitly recognizes, and always provide a safe fallback.
 
 ---
 
 ## How actions are separated
 
-Actions are **not** parsed out of the response text. They travel on a separate path from the beginning.
+Semantic actions and client tool calls use different paths:
 
-1. You declare the available affordances in `action_config` at [`/connect`](connect-api.md), or replace them mid-session with [`context-update`](client-to-server-messages.md#context-update).
-2. Convai injects those affordances into the character's prompt, together with the action rules below.
-3. When the character decides to act, the model invokes a dedicated action tool rather than writing the action into its reply.
-4. The server validates the result against your declared affordances and emits [`action-response`](server-to-client-messages.md#action-response).
+1. You declare semantic action affordances and optional client tools in `action_config` at [`/connect`](connect-api.md).
+2. When **Enable Agentic Actions** is on for the character, Convai adds the applicable contract to the prompt. When it is explicitly off, semantic action and client tool schemas are not exposed to the model. If the setting is absent, saved legacy Character Actions inherit an enabled state for model output v1 and v2; characters without saved legacy actions default to off for model output v2.
+3. Semantic actions can use provider-native calls or a supported structured response that Convai parses. Client tools require provider-native function calling.
+4. Convai emits semantic actions or correlated client tool calls through canonical `model-output` when selected. It can also emit `action-response` as a compatibility projection.
 
-The spoken response and the action sequence therefore never contend for the same text. This is the mechanism that keeps `"Move To cube"` out of the audio.
+The resolved model must support provider-native function calling for client tools. Capability negotiation alone does not authorize an operation or guarantee that a model can call a declared tool.
 
 ### The action rules the character is given
 
-Convai adds these constraints to the prompt whenever `action_config` declares at least one action. They are worth knowing because they explain behavior you will observe:
+Convai adds these constraints when semantic action affordances are active:
 
 * A complete, ordered action sequence is returned **only** when the user asks for a physical task.
 * Only exact action names from your `actions` list may be used. The model is instructed never to invent or rename actions.
@@ -50,17 +50,60 @@ Convai adds these constraints to the prompt whenever `action_config` declares at
 * `"this"`, `"that"`, `"it"`, and `"there"` resolve to `current_attention_object` when one is set.
 * If the task is impossible, unsupported, non-physical, unsafe, or verbally refused, the action list is empty.
 * If the character declines the task in its spoken reply, the action list is also empty.
-* Action payloads must not be written into the spoken response.
+* Action payloads should not be written into conversational text.
 
 {% hint style="warning" %}
-If a character keeps attempting actions on objects that are not in your `objects` list, add them to `action_config` — describing them in `scene_description` is not sufficient.
+Prompt instructions reduce invalid model output, but they are not client authorization. Convai validates semantic action names and targets before projection. For client tools, it validates the declared name and JSON Schema arguments, while your application remains responsible for permissions, confirmation, execution, and side-effect safety.
 {% endhint %}
 
 ---
 
-## What the server removes from the spoken response
+## Canonical model output
 
-Before any `bot-llm-text` message is emitted or any text reaches speech synthesis, the server applies a fixed sequence of filters. **These apply to both the text you receive and the audio you hear** — they run once, upstream of both.
+When `model_output_version` is `2`, each completed envelope includes a unique `output_id`, an optional `logical_turn_id`, the original `raw` string, and typed `items`. Use `items` as the only trusted renderable or executable projection. Never parse or execute `raw`.
+
+A logical turn can produce multiple envelopes, such as one for text and another for a semantic action or client tool call. Deduplicate by `output_id`. Group related envelopes by `logical_turn_id` when it is present. `final: true` completes one envelope rather than the entire logical turn.
+
+The supported item types are:
+
+| Item | Purpose |
+|---|---|
+| `message` | Assistant `content` on the `"final"` or `"commentary"` channel. |
+| `semantic_action` | Validated semantic action with `id`, `name`, and optional `target`. |
+| `tool_call` | Correlated client tool request with `id`, `name`, optional `target`, and validated `arguments`. |
+| `emotion` | Emotion `name` and intensity `scale`. |
+| `extension` | Schema-versioned payload for a client-recognized extension. No display or quick-response schema is defined by this preview. |
+
+Current producers emit final-channel messages, semantic actions, client tool calls, and emotions. Commentary-channel messages and `extension` items are valid typed projections that candidate clients can parse, but the current runtime does not produce them.
+
+Convai continues to emit legacy projections for compatibility. If your client chooses model output v2, consume `model-output.items` and ignore duplicate `action-response` messages.
+
+## Client tool execution feedback
+
+A `tool_call` is a request for the client to consider. Convai does not execute it. The client validates the request against local policy, performs or rejects the operation, and sends one terminal [`action-result`](client-to-server-messages.md#action-result) with `"completed"`, `"error"`, or `"cancelled"`.
+
+Convai acknowledges the result with `server-response`. Retrying the same terminal payload for an accepted call ID is idempotent. A conflicting retry is rejected. After an accepted result, Convai supplies it to the same model context so generation can continue. Do not use the acknowledgment as an ordering barrier; continuation output can arrive first.
+
+Calls can be outstanding in parallel. The candidate implementation permits up to `8` outstanding calls and up to `8` continuation rounds per user turn. It waits `60` seconds by default before returning a timeout error to the model. These limits do not imply sequential execution or exactly-once side effects in your application.
+
+## bot-llm-text modes
+
+`bot-llm-text` remains a streaming text projection in both modes:
+
+| Mode | Content | Safe use |
+|---|---|---|
+| `"legacy"` or omitted | Conversational text after the legacy parsing and filtering path. | Chat transcript and the established spoken-response path. |
+| `"raw"` | Provider-visible text chunks before Convai's structured-output parsing and conversational filtering. | Diagnostics or an explicitly labeled developer view. |
+
+Raw mode can include structured JSON, control syntax, refusal text, audio-transcript text, or other provider-visible text fields. It is not guaranteed to include non-text native tool-call deltas. It does not replace `model-output.items`, and it must not drive actions. The parsed conversational and speech path remains authoritative even when raw text is projected to the client.
+
+If raw delivery fails, Convai continues the parsed output path and can emit a nonfatal `raw_bot_llm_text_delivery_failed` error. The failed raw chunk is not replayed.
+
+---
+
+## Legacy text filtering
+
+In legacy mode, Convai applies a fixed filter sequence before conversational text is projected or reaches speech synthesis. Raw `bot-llm-text` bypasses this client projection filter, but it does not change the parsed speech path.
 
 | # | Removed | Matched | Scope |
 |---|---|---|---|
@@ -71,9 +114,7 @@ Before any `bot-llm-text` message is emitted or any text reaches speech synthesi
 | 5 | Narrative design index prefix | `<index>\|\|\|` at the very start of the response | Leading only, when narrative design is active |
 | 6 | Emoji | Unicode emoji and shortcodes | Anywhere, at the speech synthesis stage |
 
-{% hint style="info" %}
-Filters 1–5 affect **both** the `bot-llm-text` you receive and the spoken audio. Filter 6 (emoji) is applied at the speech stage only — emoji may still appear in the text you receive, but are never spoken.
-{% endhint %}
+Filters 1–5 affect legacy `bot-llm-text` and the spoken path. Filter 6 applies only at the speech stage, so emoji may remain in legacy text while being omitted from speech.
 
 ### Streaming behavior
 
@@ -87,7 +128,7 @@ These patterns are removed when they appear at the **start** of the character's 
 
 **Internal tool-call syntax.** A label followed by a call expression:
 
-```
+```text
 tool_code: <name>(...)
 tool_call: <name>(...)
 function_call: <name>(...)
@@ -97,7 +138,7 @@ where `<name>` is one of `look`, `get_image`, `abstain`, or `emit_actions`. Matc
 
 **Visual modality labels.** Bracketed or colon-suffixed forms of `vision`, `visual`, `camera`, `webcam`, `canvas`, `screen`:
 
-```
+```text
 [vision] ...        [vision]: ...        vision: ...
 [camera] ...        [camera]: ...        camera: ...
 ```
@@ -106,9 +147,7 @@ where `<name>` is one of `look`, `get_image`, `abstain`, or `emit_actions`. Matc
 
 **Narrative design prefix.** A leading integer followed by three pipes — `1|||`, `-1|||` — when narrative design is active on the character.
 
-{% hint style="success" %}
-**Mid-sentence mentions are safe.** Tool-call syntax and vision labels are only removed at the start of a response. A character can say *"the camera: prefix is used for..."* mid-sentence without it being stripped. Only leading occurrences are treated as control syntax.
-{% endhint %}
+Mid-sentence mentions are preserved by these leading-pattern filters. Only occurrences at the start of legacy conversational output are treated as tool-call or vision control syntax.
 
 ---
 
@@ -117,9 +156,9 @@ where `<name>` is one of `look`, `get_image`, `abstain`, or `emit_actions`. Matc
 If you write your own core description, character prompt, or output format, these rules will keep you out of trouble:
 
 * **Do not open a response with any reserved pattern.** A reply that begins `function_call: emit_actions(...)` will have that prefix silently removed and your client will never see it.
-* **Do not rely on markdown surviving.** Emphasis, headings, and code fences are removed from the spoken response. If you need structured output for a client to parse, deliver it as an action, not as formatted text.
-* **Do not put action payloads in the reply text.** Use `action_config` and let the action path deliver them. JSON written into the spoken response will be read aloud.
-* **Expect the whole reply to be spoken.** Everything in `bot-llm-text` that survives filtering is sent to speech synthesis. There is no marker that makes part of a reply visible-but-silent.
+* **Do not rely on markdown surviving the legacy path.** Emphasis, headings, and code fences are removed from conversational output. Use canonical `model-output.items` or a declared client tool instead of parsing formatted text.
+* **Do not put action payloads in conversational text.** Use `action_config` and process validated semantic items. JSON that survives the legacy path can be read aloud.
+* **Keep raw text separate from speech.** Raw `bot-llm-text` is a developer projection and can differ from the parsed text sent through the spoken path.
 * **Keep template and scene text free of reserved prefixes.** Values injected via `narrative_template_keys`, `update-scene-metadata`, or `context-update` become part of the prompt and can influence how a response begins.
 
 ---
@@ -127,16 +166,19 @@ If you write your own core description, character prompt, or output format, thes
 ## Troubleshooting
 
 **The character reads scaffolding, JSON, or option lists aloud.**
-Its output format is producing content that is not a reserved pattern, so it survives filtering and is treated as speech. Move that content into actions, or change the prompt so the character speaks a natural summary instead of its structure.
+The parsed conversational output contains structure that survives filtering. Move executable data into a declared tool or semantic action, and keep the conversational response natural.
 
 **An action never fires.**
-Check in order: is the action name an exact match for an entry in `action_config.actions`? Is the target present in `objects` or `characters` — not merely in `scene_description`? Did the character verbally decline, which forces an empty action list?
+Confirm that **Enable Agentic Actions** is on for the character and that the target model supports the required output mode. For a semantic action, confirm that its name and target are declared. For a client tool, confirm that action protocol v2 was selected and the declaration passed schema validation.
+
+**A tool call appears, but the model never continues.**
+Return an `action-result` whose `id` matches the call. Check the `server-response` acknowledgment for `status: "success"`. Unknown, stale, cross-session, conflicting, or oversized results are rejected.
 
 **The character's reply is missing its first few words.**
 Those words most likely matched a reserved leading pattern. Check the [reserved patterns](#reserved-patterns) list — particularly the vision labels, which are common English words followed by a colon.
 
 **Actions and speech are out of sync.**
-This is expected. Actions carry no positional relationship to the response text — see [Ordering guarantees](turn-lifecycle-and-message-ordering.md#ordering-guarantees).
+Semantic items can share a `logical_turn_id`, but they do not carry word-level offsets. See [Ordering guarantees](turn-lifecycle-and-message-ordering.md#ordering-guarantees).
 
 **A leading `|||` sequence disappears from a response.**
 Narrative design is active and the leading index prefix is being consumed. Avoid starting responses with an integer followed by three pipes.
@@ -146,6 +188,7 @@ Narrative design is active and the leading index prefix is being consumed. Avoid
 ## Related pages
 
 * [Turn lifecycle and message ordering](turn-lifecycle-and-message-ordering.md) — how output is delivered and what ordering you can rely on
-* [action-response](server-to-client-messages.md#action-response) — the action message format
-* [Connect API](connect-api.md) — declaring `action_config`
-* [context-update](client-to-server-messages.md#context-update) — replacing affordances mid-session
+* [model-output](server-to-client-messages.md#model-output) — canonical v2 envelope and item fields
+* [action-response](server-to-client-messages.md#action-response) — legacy and compatibility projections
+* [Connect API](connect-api.md#agentic-actions-v2-preview) — capabilities, tools, limits, and topology constraints
+* [action-result](client-to-server-messages.md#action-result) — returning correlated client execution feedback

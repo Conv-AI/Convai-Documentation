@@ -6,11 +6,11 @@ description: >-
 
 # Connect API
 
-## Overview
+The **Connect API** establishes a live interactive session between an end user and a Convai character. Reuse the returned `character_session_id` to continue conversational context across connections.
 
-The **Connect API** establishes a live interactive session between an end-user and a Convai character.\
-It allows developers to maintain conversational context using the `character_session_id` returned in each response and supports both **audio** and **video** connections.\
-Optionally, scene descriptions or dynamic information can be included to tailor the interaction.
+{% hint style="warning" %}
+The Actions protocol v2 fields on this page describe an opt-in candidate surface. Their presence here does not confirm production availability or a published SDK release. Verify the selected capabilities returned by your target environment before depending on them.
+{% endhint %}
 
 ## Connecting to a Character
 
@@ -26,7 +26,7 @@ Optionally, scene descriptions or dynamic information can be included to tailor 
 
 Only `character_id` is required. Every other field has a server-side default.
 
-#### Session identity
+**Session identity**
 
 | Name | Type | Description |
 |---|---|---|
@@ -36,11 +36,12 @@ Only `character_id` is required. Every other field has a server-side default.
 | `end_user_id` | String | Your own unique identifier for the end user. Tags sessions and enables Long Term Memory. |
 | `end_user_metadata` | JSON | Arbitrary metadata associated with the end user. Echoed back in the response. |
 
-#### Character behavior and context
+**Character behavior and context**
 
 | Name | Type | Description |
 |---|---|---|
-| `action_config` | [JSON](connect-api.md#action_config) | The authoritative action contract for the session — which actions the character may perform and on what. See [Response contract and parsing](response-contract-and-parsing.md#how-actions-are-separated). |
+| `action_config` | [JSON](connect-api.md#action_config) | Semantic action affordances and optional client-executed tool declarations for the session. See [Response contract and parsing](response-contract-and-parsing.md). |
+| `capabilities` | [JSON](connect-api.md#agentic-actions-v2-preview) | Explicit protocol selections. Omit this field to preserve the legacy v1 response shape. |
 | `dynamic_info` | [JSON](connect-api.md#dynamic-info) | Real-time contextual data to influence the conversation flow. |
 | `scene_description` | [JSON](connect-api.md#scene_description) | Descriptions of the current scene or environment. Descriptive context only — **does not grant action affordances**. |
 | `narrative_template_keys` | JSON | Key/value pairs substituted into the character's prompt templates. |
@@ -48,7 +49,7 @@ Only `character_id` is required. Every other field has a server-side default.
 | `thinking_mode` | Bool | Enables extended model reasoning before responding. Default `false`. |
 | `respond_modes` | JSON | Per-modality control over when the character is required to respond. |
 
-#### Models and providers
+**Models and providers**
 
 | Name | Type | Description |
 |---|---|---|
@@ -56,7 +57,7 @@ Only `character_id` is required. Every other field has a server-side default.
 | `stt_provider` | String | Override the speech-to-text provider for this session. |
 | `disable_live_fallback` | Bool | Prevents falling back to a non-realtime model. Default `true`. |
 
-#### Audio, speech and turn-taking
+**Audio, speech and turn-taking**
 
 | Name | Type | Description |
 |---|---|---|
@@ -66,7 +67,7 @@ Only `character_id` is required. Every other field has a server-side default.
 | `vad_params` | JSON | Voice activity detection tuning: `confidence`, `start_secs`, `stop_secs`, `min_volume`. |
 | `turn_detection_config` | JSON | Turn-detection strategy overrides. |
 
-#### Avatar and vision
+**Avatar and vision**
 
 | Name | Type | Description |
 |---|---|---|
@@ -75,7 +76,7 @@ Only `character_id` is required. Every other field has a server-side default.
 | `vision_input_config` | JSON | Vision input configuration, including sampling window. Enables the vision ring buffer consumed by [`vision-status`](client-to-server-messages.md#vision-status) and [`vision-trigger`](client-to-server-messages.md#vision-trigger). |
 | `video_track_name` | String | Name of the incoming video track. Default `"camera"`. |
 
-#### Multi-participant sessions
+**Multi-participant sessions**
 
 | Name | Type | Description |
 |---|---|---|
@@ -84,7 +85,7 @@ Only `character_id` is required. Every other field has a server-side default.
 | `mode` | String | `"create"` (default) or `"join"`. |
 | `room_name` | String | Explicit room name to create or join. |
 
-#### Diagnostics
+**Diagnostics**
 
 | Name | Type | Description |
 |---|---|---|
@@ -109,19 +110,17 @@ Only `character_id` is required. Every other field has a server-side default.
 }
 ```
 
-#### Fields
+**Fields**
 
-**`actions`** — The exact action names the character may emit. Accepts an array of strings, or an array of `{ "value": "..." }` objects. Returned verbatim in [`action-response`](server-to-client-messages.md#action-response), so these should match the identifiers your client dispatches on.
+**`actions`** — Semantic action names the character may emit. Accepts an array of strings or an array of `{ "value": "..." }` objects. Convai validates semantic action names before projecting them through [`action-response`](server-to-client-messages.md#action-response).
 
-**`objects`** — `{ name, description }` entries. The only objects the character may target.
+**`objects`** — `{ name, description }` entries used to ground and validate semantic action targets.
 
-**`characters`** — `{ name, bio }` entries. The only characters the character may target.
+**`characters`** — `{ name, bio }` entries used to ground and validate semantic action targets.
 
 **`current_attention_object`** — Name of the object the user is currently looking at or referring to. Grounds pronouns like *"this"*, *"that"*, and *"it"*. Must match one of the `objects[].name` values. Accepts a string or a full object.
 
-{% hint style="warning" %}
-`actions`, `objects`, and `characters` are the **complete** set of affordances for the session. Objects mentioned only in `scene_description` cannot be targeted — the character is explicitly instructed that scene description does not expand its affordances.
-{% endhint %}
+`actions`, `objects`, and `characters` constrain the legacy semantic action projection. Objects mentioned only in `scene_description` do not become semantic action targets. Client-executed v2 tools use their own JSON Schema arguments and still require client-side authorization before execution.
 
 The whole contract can be replaced mid-session with [`context-update`](client-to-server-messages.md#context-update).
 {% endtab %}
@@ -155,7 +154,7 @@ The whole contract can be replaced mid-session with [`context-update`](client-to
 }
 ```
 
-#### Fields <a href="#fields-24" id="fields-24"></a>
+**Fields** <a href="#fields-24" id="fields-24"></a>
 
 **`audio_routing`** - Controls audio delivery method:
 
@@ -174,6 +173,82 @@ The whole contract can be replaced mid-session with [`context-update`](client-to
 * Only applies when using `data_only` or `both` routing
 {% endtab %}
 {% endtabs %}
+
+***
+
+## Agentic Actions v2 preview
+
+Protocol selections are independent. Request only the behavior your client implements:
+
+```json
+{
+  "character_id": "CHARACTER_ID",
+  "capabilities": {
+    "action_protocol_version": 2,
+    "model_output_version": 2,
+    "bot_llm_text_mode": "legacy"
+  },
+  "action_config": {
+    "actions": ["Wave"],
+    "objects": [],
+    "characters": [],
+    "tools": [
+      {
+        "name": "open_training_record",
+        "description": "Open a training record after the operator confirms the record ID.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "record_id": { "type": "string" }
+          },
+          "required": ["record_id"]
+        }
+      }
+    ]
+  }
+}
+```
+
+| Field | Values | Behavior |
+|---|---|---|
+| `capabilities.action_protocol_version` | `1` or `2` | Version `2` enables correlated client tool calls and [`action-result`](client-to-server-messages.md#action-result). |
+| `capabilities.model_output_version` | `1` or `2` | Version `2` enables canonical [`model-output`](server-to-client-messages.md#model-output) messages. |
+| `capabilities.bot_llm_text_mode` | `"legacy"` or `"raw"` | `"legacy"` keeps the filtered chat projection. `"raw"` streams provider-visible text through `bot-llm-text`; never execute or speak this stream without application review. |
+| `action_config.tools` | Array of tool declarations | Declares tools that the client, not Convai, may execute after validating each call. Requires action protocol v2. |
+
+Each tool declaration requires `name`, `description`, and an object-rooted `inputSchema`. The root schema accepts `type`, `properties`, and `required`; supported validation keywords can be used inside property schemas. Tool names must be unique, must begin with a letter or underscore, and may contain letters, numbers, underscores, or hyphens.
+
+The candidate implementation enforces these limits:
+
+| Limit | Value |
+|---|---|
+| Tools per connection | `32` |
+| Tool name | `64` characters |
+| Tool description | `1,024` characters |
+| Serialized input schema | `16 KiB` |
+| Input schema nesting depth | `8` |
+
+Any v2 action selection, v2 model-output selection, or raw `bot-llm-text` selection requires `mode: "create"`, a singular `character_id`, no `shared_session_key`, and `max_num_participants: 1`. Joined, roster, shared-session, and multi-participant topologies are rejected.
+
+The character's explicit **Enable Agentic Actions** setting remains authoritative. When it is off, Convai does not add the Actions contract, semantic action tools, or client tool schemas to the model. When the setting is absent, a character with one or more saved legacy Character Actions inherits an enabled state for both model output v1 and v2; a character without saved legacy actions defaults to off for model output v2. Reading this inherited state does not persist a new setting. Text-only model output v2 can still be emitted when Actions are off.
+
+Client tools also require a resolved model that supports provider-native function calling. Capability negotiation alone does not authorize a tool or guarantee that the selected model can call it.
+
+Tool declarations are connection-scoped. A [`context-update`](client-to-server-messages.md#context-update) can replace semantic action lists, but it cannot replace `action_config.tools`; reconnect to change the tool set.
+
+When the request includes `capabilities`, the response reports the selected fields:
+
+```json
+{
+  "capabilities": {
+    "action_protocol_version": 2,
+    "model_output_version": 2,
+    "bot_llm_text_mode": "legacy"
+  }
+}
+```
+
+If the request omits `capabilities`, the response also omits it. The session then uses action protocol v1, model output v1, and legacy `bot-llm-text` behavior.
 
 ***
 
@@ -204,6 +279,7 @@ The whole contract can be replaced mid-session with [`context-update`](client-to
 | `token` | String | Authentication token for joining the room. |
 | `end_user_id` | String \| null | Echoed from the request. |
 | `end_user_metadata` | Object \| null | Echoed from the request. |
+| `capabilities` | Object | Present only when the request explicitly includes `capabilities`. Contains the server-selected protocol fields. |
 {% endtab %}
 
 {% tab title="404: Not Found Response generation failed for the request" %}
@@ -243,13 +319,7 @@ Users must not generate or distribute toxic, harmful, or inappropriate content.\
 Repeated violations will result in your API key being **blacklisted**.
 {% endhint %}
 
-{% hint style="info" %}
-Always reuse the same **character\_session\_id** if you want to **maintain context** between interactions.
-{% endhint %}
-
-{% hint style="info" %}
-A new **character\_session\_id** creates a **fresh session** without prior context.
-{% endhint %}
+Reuse the same `character_session_id` to maintain context between interactions. A new `character_session_id` starts a session without prior conversational context.
 
 ***
 
@@ -320,13 +390,6 @@ curl --location 'https://live.convai.com/connect' \
 Join the room using `room_url` and `token`. From that point the session is driven entirely by messages on the WebRTC data channel, plus the audio track.
 
 * [Turn lifecycle and message ordering](turn-lifecycle-and-message-ordering.md) — how a bot turn is delivered, and what ordering you can rely on
-* [Response contract and parsing](response-contract-and-parsing.md) — how speech, actions and emotion are separated
+* [Response contract and parsing](response-contract-and-parsing.md) — how legacy text, canonical output, actions, and raw text differ
 * [Client-to-server messages](client-to-server-messages.md) — updating context, toggling audio, sending text
 * [Server-to-client messages](server-to-client-messages.md) — full field reference for everything you receive
-
----
-
-## Conclusion
-
-The **Connect API** is a key component for integrating Convai’s real-time conversational capabilities into your applications.\
-By maintaining session context and dynamically adapting scene or character information, developers can build seamless, context-aware voice or video interactions powered by Convai.

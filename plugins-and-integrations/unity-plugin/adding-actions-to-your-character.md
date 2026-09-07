@@ -1,10 +1,16 @@
 ---
 description: >-
-  Follow these instructions to enable actions for your Convai-powered
-  characters.
+  Follow the retained legacy Unity action workflow for existing projects and
+  find the current Convai Unity SDK character actions guide for migration.
 ---
 
 # Adding Actions to your Character
+
+This page preserves the legacy Unity action workflow for projects that still use the older Convai integration.
+
+{% hint style="warning" %}
+**Deprecated on August 26, 2026.** Use [Character actions](../convai-unity-sdk/features/character-actions/README.md) in the current Convai Unity SDK documentation. This page remains available for projects that have not migrated.
+{% endhint %}
 
 ## Setting Up Action Configurations
 
@@ -12,12 +18,12 @@ description: >-
 2. Scroll down to the ConvaiNPC script attached to your character.
 3. Click the "Add Component" button.
 
-<figure><img src="../../.gitbook/assets/image (1) (2).png" alt="" width="438"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (2).png" alt="Unity Inspector with the Add Component control for the selected character" width="438"><figcaption></figcaption></figure>
 
 4. Use the checkbox to add the action script to the NPC Actions.
 5. Click "Apply Changes" to confirm.
 
-<figure><img src="../../.gitbook/assets/image (1) (2) (1).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (2) (1).png" alt="Legacy NPC Actions setup with the action script selected" width="563"><figcaption></figcaption></figure>
 
 ## Pre-defined Actions
 
@@ -26,7 +32,7 @@ Convai offers predefined actions for a quick start.
 1. Click the "+" button to add a new action.
 2. From the dropdown menu, select "Move To."
 
-<figure><img src="../../.gitbook/assets/image (2) (2).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (2).png" alt="Legacy action configuration dropdown with Move To selected"><figcaption></figcaption></figure>
 
 3. Enter the action name as "Move To" (the name doesn't have to match the action choice name).
 4. Leave the Animation Name field empty for now.
@@ -38,7 +44,7 @@ Repeat these steps to add more actions like "Pickup" and "Drop" etc.
 1. Add any object into the scene—a sphere, a cube, a rock, etc.—that can be interacted with
 2. Resize and place the object in your scene.
 
-<figure><img src="../../.gitbook/assets/image (4) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (4) (1) (1) (1) (1) (1) (1) (1) (1).png" alt="An interactable object placed in the Unity scene"><figcaption></figcaption></figure>
 
 ### Adding the Convai Interactables Data Script
 
@@ -46,11 +52,11 @@ Repeat these steps to add more actions like "Pickup" and "Drop" etc.
 * Attach the Convai Interactables Data script to this GameObject.
 * Add characters and objects to the script by clicking the "+" button and attaching the corresponding GameObjects.
 
-<figure><img src="../../.gitbook/assets/image (391).png" alt=""><figcaption><p>Convai Interactables Setup</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (391).png" alt="Legacy Convai Interactables Data component with character and object lists"><figcaption><p>Convai Interactables Setup</p></figcaption></figure>
 
 *   Add the "There" object in Objects list, so that we can use the Dynamic Move Target indicator.<br>
 
-    <figure><img src="../../.gitbook/assets/image (394).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (394).png" alt="There object added to the legacy interactable objects list"><figcaption></figcaption></figure>
 * Add the [Dynamic Move Target Indicator](adding-actions-to-your-character.md#adding-a-dynamic-move-target-indicator) and setup [NavMesh agent](adding-actions-to-your-character.md#setting-up-navmesh) to you NPC.
 
 ### Setting Up NavMesh
@@ -66,7 +72,7 @@ To ensure your NPCs can navigate the scene:
     * If not already attached, click **"Add Component"** and search for **NavMeshAgent**.
     * Adjust the **Agent Radius, Speed,** and other parameters according to your NPC's requirements.
 
-    <figure><img src="../../.gitbook/assets/image (392).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (392).png" alt="NavMeshAgent settings on the legacy Convai character"><figcaption></figcaption></figure>
 
 ### Adding a Dynamic Move Target Indicator
 
@@ -75,7 +81,7 @@ To visually indicate where your NPC will move:
 * Create a new empty GameObject in the scene and name it accordingly or use the pre-made prefab named **Dynamic Move Target Indicator.**
 * Link this **Move Target Indicator** to your NPC's action script so it updates dynamically when you point the cursor to the ground and ask the NPC to move to "There".
 
-<figure><img src="../../.gitbook/assets/image (393).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (393).png" alt="Dynamic Move Target Indicator positioned in the Unity scene"><figcaption></figcaption></figure>
 
 ### Test the Setup
 
@@ -89,7 +95,7 @@ This feature is currently experimental and can misbehave. Feel free to try it ou
 
 ## Adding Custom Actions to Your Unity NPC in Convai
 
-### Introduction
+### Create an animation action
 
 Make your NPC perform custom actions like dancing.
 
@@ -97,7 +103,7 @@ Make your NPC perform custom actions like dancing.
 
 1.  Locate the dance animation file within our plugin.
 
-    <figure><img src="../../.gitbook/assets/image (9) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (9) (1) (1) (1) (1) (1) (1).png" alt="Dance animation asset selected in the Unity Project window"><figcaption></figcaption></figure>
 2. Incorporate this animation into your NPC's actions.
 
 ### Setting Up the Animator Controller
@@ -105,7 +111,7 @@ Make your NPC perform custom actions like dancing.
 1. Open the Animator Controller from the Inspector window.
 2.  Drag and drop the dance animation onto the controller, creating a new node named "Dancing."
 
-    <figure><img src="../../.gitbook/assets/image (11) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (11) (1) (1) (1) (1) (1).png" alt="Animator Controller with a Dancing animation state"><figcaption></figcaption></figure>
 
 ### Adding custom Animation Action
 
@@ -114,7 +120,7 @@ Make your NPC perform custom actions like dancing.
 3. In the Animation Name field, enter "Dancing" (it must exactly match the Animator Controller node name).
 4. Leave the enum as "None."
 
-<figure><img src="../../.gitbook/assets/image (12) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (12) (1) (1) (1) (1) (1).png" alt="Legacy action handler configured with a Dancing action"><figcaption></figcaption></figure>
 
 ### Testing the Custom Action
 
@@ -123,7 +129,7 @@ Make your NPC perform custom actions like dancing.
 
 ## Creating Complex Custom Actions in Unity with Convai: Throwing a Rock
 
-### Introduction
+### Define the throwing action
 
 Adding advanced custom actions, such as a throw action, to your NPC.
 
@@ -140,20 +146,20 @@ Adding advanced custom actions, such as a throw action, to your NPC.
 
 1.  Add the "Throw" enum to the script.
 
-    <figure><img src="../../.gitbook/assets/image (13) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (13) (1) (1) (1) (1) (1).png" alt="Legacy action handler source with a Throw enum entry"><figcaption></figcaption></figure>
 2.  In the "Do Action" function, add a switch case for the throw action.
 
-    <figure><img src="../../.gitbook/assets/image (17) (1) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (17) (1) (1).png" alt="Legacy Do Action switch with a Throw case"><figcaption></figcaption></figure>
 3.  Define the "Throw()" function.
 
-    <figure><img src="../../.gitbook/assets/image (19) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (19) (1).png" alt="Legacy action handler source defining the Throw function"><figcaption></figcaption></figure>
 
 ### Adding the Throw Action
 
 1. Add a new action named "Throw" and select the "Throw" enum.
 2.  Leave the animation name field empty.
 
-    <figure><img src="../../.gitbook/assets/image (21) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (21) (1).png" alt="Legacy action configuration with the Throw action selected"><figcaption></figcaption></figure>
 
 ### Adding the Object (Rock) to the Convai Interactables Data script
 
@@ -165,7 +171,7 @@ Adding advanced custom actions, such as a throw action, to your NPC.
 1. Add a stage/new location in the ground of the scene.
 2.  Add that new location game object in the Convai Interactable Data.
 
-    <figure><img src="../../.gitbook/assets/image (22) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../.gitbook/assets/image (22) (1).png" alt="Stage location added to the legacy interactable objects list"><figcaption></figcaption></figure>
 
 ### Testing the Complex Action
 

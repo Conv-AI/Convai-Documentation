@@ -1,14 +1,20 @@
 ---
-description: This page describes the Action API and how to use it.
+description: >-
+  Reference the retained string-based Action API workflow for existing clients
+  and find the Agentic Actions and Live API replacements for new integrations.
 ---
 
 # Action API
 
+This page preserves the string-based Action API workflow for existing clients that call `POST /character/getResponse`.
+
+{% hint style="warning" %}
+**Deprecated for new action integrations on August 26, 2026.** Use [Agentic Actions](../../../convai-playground/character-customization/agentic-actions.md) to author the character contract, then use the [Connect API](../live-apis-beta/connect-api.md) or a current SDK to declare and receive structured actions. Existing clients can continue to use this page while they migrate.
+{% endhint %}
+
 {% hint style="danger" %}
 This API is available only on the Professional Plan and above.
 {% endhint %}
-
-### Introduction
 
 Conversations can be made even more engaging if they result in driving the behaviour of your character and give it the ability to manipulate the environment. The Action API enables this by allowing you to define various actions that the character can perform. The actions are often tied to the available objects in the environment.&#x20;
 
@@ -149,7 +155,7 @@ actions = "Play, Serve, Give, Call Cab"
 
 ### Characters
 
-This is pretty simple, just provide the characters that are present in the scene. You can add more than two characters; for example, if you are in a restaurant with multiple people, you can add all of them here.
+Provide the characters that are present in the scene. You can add more than two characters; for example, if you are in a restaurant with multiple people, you can add all of them here.
 
 You should make sure that you include important information about your characters in the either the knowledge bank or the backstory. And not use the bio for any truly important information.
 

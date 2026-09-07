@@ -1,7 +1,7 @@
 ---
 title: Supported coding agents
 description: Reference for the coding agents the Convai Unity SDK supports, including the exact instruction file path and install behavior for each agent.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 The Convai Unity SDK installs a managed instruction block into a project file for each supported coding agent — Codex, Claude Code, Cursor, Gemini, and VS Code Copilot. Use this reference to find the exact file path and install behavior for each agent.

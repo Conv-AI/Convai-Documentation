@@ -1,7 +1,7 @@
 ---
 title: Network and API requirements
-description: Reference for Convai Unity SDK network access, including Convai and LiveKit hosts, firewall rules, authentication, and log-based connection checks.
-last_reviewed: "4.5.0"
+description: Explains which network hosts, ports, and firewall rules a Unity project must allow before it can connect to Convai over the internet.
+last_reviewed: "4.6.0"
 ---
 
 The Convai Unity SDK requires outbound internet access during runtime. Speech, language understanding, and text-to-speech run through Convai over HTTPS and LiveKit WebRTC — there is no offline or LAN mode. Use this page when preparing a corporate network, validating a firewall allowlist, or confirming that a Play mode session reached the correct LiveKit room.
@@ -156,7 +156,7 @@ If steps 5 or 6 fail with `transport.ice_failed` or `transport.signal_disconnect
 | `transport.ice_failed` or `transport.peer_connection_failed` | LiveKit UDP or TURN hosts blocked | Add the LiveKit minimum rules and optional direct media paths from this page | `Room details received` log appears; character responds in Play mode |
 | No `Room details received` log line | Transport logging below **Debug** | Open **Diagnostics** in Project Settings; set **Transport** category override to **Debug** | Readable `Token:` line appears in the Console |
 | LiveKit connection test fails after connect succeeds | UDP media or TURN fallback path blocked | Allow UDP `50000`–`60000`, UDP `3478` to `*.host.livekit.cloud`, and TCP `443` to `*.turn.livekit.cloud` | LiveKit connection test succeeds with the logged `Room URL` and `Token` |
-| `connection.connect_invalid_api_key` | Invalid or revoked API key | Copy a fresh key from <code class="expression">space.vars.dashboard_url</code> into Project Settings | Connect error no longer fires |
+| `connection.connect_invalid_api_key` | Invalid or revoked API key | Copy a fresh key from the [Convai dashboard](https://convai.com) into Project Settings | Connect error no longer fires |
 | WebGL mic unavailable | Build served over HTTP | Serve the build over HTTPS or from `localhost` | Microphone permission prompt appears in the browser |
 
 {% hint style="warning" %}

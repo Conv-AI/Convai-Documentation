@@ -1,9 +1,9 @@
 ---
 title: Configure the narrative design manager
 description: >-
-  Add and configure ConvaiNarrativeDesignManager on a character, sync sections
-  from Convai, and wire per-section Unity Events in the Inspector.
-last_reviewed: "4.5.0"
+  Explains how to add the narrative design manager to a character, sync its
+  story sections from Convai, and wire per-section events in the Inspector.
+last_reviewed: "4.6.0"
 ---
 
 `ConvaiNarrativeDesignManager` is the permanent listening post on your character. It subscribes to section-change signals from Convai and forwards them to the Unity Events you configure in the Inspector. One Manager per character is the standard setup; it lives on the character GameObject for the lifetime of the scene.

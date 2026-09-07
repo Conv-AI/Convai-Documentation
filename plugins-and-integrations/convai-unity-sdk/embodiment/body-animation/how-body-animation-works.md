@@ -1,7 +1,7 @@
 ---
 title: How body animation works
 description: Understand the layered animation graph that plays idle, talk, locomotion, action, and pointing motion, and how dialogue state drives it.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 `ConvaiBodyAnimationController` builds a layered `PlayableGraph` directly against a Humanoid `Animator` — no Animator Controller asset, no states, no transitions authored in the Animator window. This page describes what that graph looks like, what drives each layer, and how the layers resolve when more than one wants the arms at once.
@@ -15,7 +15,7 @@ The graph runs six layers, from the base pose up through the most specific overl
 | Layer | Mask | Driven by |
 | --- | --- | --- |
 | Locomotion (base) | Full body | The idle variant pool, plus the NavMesh-synced state machine for starts, walk-jog blending, stops, and turns. |
-| Talk | Upper body by default, full body per entry | `DialogueState.Speaking`, scaled by live speech energy, held briefly on release. |
+| Talk | Upper body by default, full body per entry | `DialogueState.Speaking`, scaled by live speech energy, released as the response nears its end. |
 | Action | Full body, upper body, or a custom mask per entry | `PlayAction` calls and Convai actions. A full-body action suspends locomotion and ducks the overlays above it. |
 | Pointing | Upper body | `PointAt`, with an apex hold and re-aiming while the target moves. |
 | Moving Talk | Arms and hands | An additive or softened-override walk-and-talk overlay, so a talk gesture does not freeze the arms mid-stride. |
@@ -43,6 +43,14 @@ The talk layer reads [dialogue state](../../core-concepts/dialogue-state.md) to 
 | `Interrupted` | The current talk pose freezes briefly, then releases faster than a normal fade-out. |
 
 Listen and Think are optional pools. A set that does not author them, including the SDK's shipped default set, releases to idle for those states instead of playing a pose — the character never freezes or stands in an incorrect posture for want of content.
+
+***
+
+## How the talk layer releases
+
+The talk layer does not wait for `DialogueState` to leave `Speaking` before it starts winding a gesture down. When the character has Lip Sync, the talk layer also reads how much speech is left to play and whether that end is known. Once the remaining time drops to or below **Talk Release Lead Seconds** (`0.6` s by default), the layer begins its normal release early — the gesture decelerates and its weight fades out as the response's last words play, instead of continuing at full weight until `Speaking` ends and then freezing mid-motion.
+
+Without a Lip Sync reading, the talk layer releases only once `DialogueState` leaves `Speaking`. See [Body animation config reference](config-reference.md#talking) for **Talk Release Lead Seconds** and the other fields that shape the release — **Talk Release Delay Seconds** and **Talk Release Playback Speed**.
 
 ***
 

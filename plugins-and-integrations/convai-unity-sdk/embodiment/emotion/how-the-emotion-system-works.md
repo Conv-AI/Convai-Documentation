@@ -1,7 +1,7 @@
 ---
 title: How the emotion system works
 description: Understand how Emotion resolves the emotion signal in Convai's response, smooths it, and composes the character's face and mood.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 `ConvaiEmotionController` turns the emotion signal Convai sends with its response into a smoothed, composited facial expression, and separately tracks the character's longer-lived resting mood. This page explains where that input comes from, how the controller resolves and smooths it, and how the result reaches the character's face.
@@ -43,6 +43,20 @@ Expression recipes name *what should move* in semantic terms — `MouthSmileLeft
 Emotion does not write blendshapes directly. It submits its composed expression, and — when enabled — a continuous micro-expression life layer (idle drift plus a speech-emphasis accent), to the character's shared facial compositor, the same single writer LipSync and every other facial contributor submit to. See [Facial composition](../facial-composition.md) for how the compositor resolves overlapping claims on the same region, such as the mouth during speech.
 
 Emotion can also drive arbitrary shader float properties — blush, tear glisten, sweat sheen — from composed scores through an optional material property binding, entirely independent of the blendshape path. See [Emotion output bindings](output-bindings.md).
+
+***
+
+## What "speaking" means for expression
+
+Prosody coupling and the character's speaking-driven micro-expression accent only apply while the character is actually performing a speaking turn, and that signal comes from [Conversation Flow](../conversation-flow/README.md) when the character has it: expression follows the same `Speaking` dialogue state Body Animation's talk layer reads, not a raw speech-started/speech-stopped event. Conversation Flow arbitrates the end of a turn against local evidence a raw event does not see, so keying expression off it keeps the face's speaking bias releasing at the same moment the body's does — see [How a speaking turn ends](../conversation-flow/README.md#how-a-speaking-turn-ends).
+
+With no Conversation Flow module present on the character, Emotion falls back to the raw speech-started/speech-stopped event.
+
+***
+
+## Conversation Flow is added automatically when needed
+
+Unlike Gaze and Body Language, none of Emotion's dialogue-driven behavior is on by default — the listening lift, the thinking look, and the two one-shot reaction accents (on entering `Reacting` and `Interrupted`) all ship at zero strength on `ConvaiEmotionProfile`. Raising any of **Listening Reaction Strength**, **Thinking Reaction Strength**, **Reacting Accent Strength**, or **Interrupted Flinch Strength** above `0` asks Convai to add a `ConvaiConversationFlowController` to the character at runtime if none exists yet, the same way Body Animation's **Auto Create Conversation Flow** setting does. The Console logs once, naming the character, so a component you did not add is never a silent surprise. See [Conversation flow](../conversation-flow/README.md#convai-adds-it-automatically-when-needed).
 
 ***
 

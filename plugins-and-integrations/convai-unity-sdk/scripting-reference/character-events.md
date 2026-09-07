@@ -1,6 +1,6 @@
 ---
 title: Character events
-description: Reference for character events — speech, emotion, transcripts, turn lifecycle, and actions — via relay component or the `ConvaiEvents` C# hub.
+description: Reference for character events covering speech, emotion, transcripts, turn changes, and actions, wired through Inspector relays or script.
 last_reviewed: "4.6.0"
 ---
 
@@ -125,6 +125,7 @@ Use this relay when you need to react to both character and player transcript st
 
 | Event                                | Argument                       | Fires When                                      |
 | ------------------------------------ | ------------------------------ | ----------------------------------------------- |
+| `OnTranscriptReceived`               | `TranscriptUpdateRelayData`    | Any transcript update arrives, character or player, ahead of the per-role events below |
 | `OnCharacterTranscriptReceived`      | `CharacterTranscriptRelayData` | Character transcript arrives (respects filters) |
 | `OnPlayerTranscriptReceived`         | `PlayerTranscriptRelayData`    | Player transcript arrives (respects filters)    |
 | `OnFinalCharacterTranscriptReceived` | `CharacterTranscriptRelayData` | Character transcript is finalized               |

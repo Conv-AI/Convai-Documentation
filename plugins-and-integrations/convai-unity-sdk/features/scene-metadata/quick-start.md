@@ -12,6 +12,8 @@ Before starting, verify:
 
 * [ ] A `ConvaiCharacter` is in the scene and responds to speech in Play Mode
 
+## Tag scene objects and collect them
+
 {% stepper %}
 {% step %}
 ### Add ConvaiObjectMetadata to a scene object

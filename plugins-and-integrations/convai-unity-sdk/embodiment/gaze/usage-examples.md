@@ -1,7 +1,7 @@
 ---
 title: Gaze usage examples
 description: Configure eye contact, script glances, and coordinate multi-character gaze with four complete Convai Gaze usage examples.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 These scenarios show how `ConvaiGazeController` and its supporting components combine to serve realistic application requirements. Each scenario is self-contained: Inspector setup is described first, followed by any runtime code needed to complete the behavior. Field references are in [Gaze profile reference](profile-reference.md); the full scripting surface is in [Gaze scripting reference](scripting-reference.md).
@@ -31,9 +31,9 @@ public sealed class SafetyBriefingGazeDirector : MonoBehaviour
 }
 ```
 
-`GazeEyeContactMode.ConversationLock` gives full commitment to the player anchor — engagement pinned at 1, no aversion, full head participation — through every conversational dialogue state, while `Idle` between briefings keeps the profile's authored ambient behavior instead of staring. `GazeFocusFidelity.Social` keeps subtle fixation life inside the contact cone so the lock still reads as alive rather than mechanical. Set `EyeContactMode` back to `Natural` once the explanation ends so the instructor returns to ordinary conversational behavior.
+`GazeEyeContactMode.ConversationLock` gives full commitment to the player anchor — engagement pinned at 1, no aversion, full head participation — through every conversational dialogue state, while `Idle` between briefings keeps the profile's authored ambient behavior instead of staring. `GazeFocusFidelity.Social` keeps subtle fixation life inside the contact cone so the lock still reads as alive rather than mechanical.
 
-***
+**Expected outcome:** The instructor holds full, committed eye contact with the trainee throughout the explanation, with subtle fixation life inside the contact cone so the lock reads as alive rather than mechanical, and returns to ordinary conversational behavior once `EndExplanation()` runs.
 
 ## Scenario 2: Glance at a document, then return to the visitor
 
@@ -57,7 +57,7 @@ public sealed class NegotiationDocumentCue : MonoBehaviour
 
 `GlanceAt` is a committed but low-priority scripted request: it never turns the body, and the character returns to whatever the policy dictates as soon as the two-second hold ends — no extra bookkeeping required. Keep `EyeContactMode` on `Natural` (the default) for this scenario; under `ConversationLock` or `AlwaysLock` with `LockBlocksGlances` on (the default), the glance is absorbed instead and the negotiator never looks away from the trainee, which is the wrong read for a character meant to break contact and check the paperwork.
 
-***
+**Expected outcome:** The negotiator glances down at the contract for two seconds without turning its body, then returns its attention to the trainee automatically once the hold ends.
 
 ## Scenario 3: Multi-character listening in a group scene
 
@@ -66,6 +66,8 @@ public sealed class NegotiationDocumentCue : MonoBehaviour
 ### Component setup
 
 Add `CharacterGazeTargetProvider` (**Add Component > Convai > Gaze > Advanced > Character Target**) to every participating character, alongside its `ConvaiGazeController`. Leave **Publish Self** and **Look At Others** on so each character both offers itself as a target and generates candidates for the rest. The default **Priority** of `7` sits between the player anchor's `10` and a world object's `5`, so listeners turn to a speaking colleague but a conversation with the player still wins.
+
+Leave each character's **Attend To Speaker** (`ConvaiGazeController.AttendToSpeaker`, a `GazeSpeakerAttention` value: `Off`, `Player`, `Characters`, or `Anyone`) on its default, `Anyone`. That is the setting that actually turns a listening character toward whoever currently holds the floor — the `CharacterGazeTargetProvider` above only makes a character eligible to be looked at. `Anyone` reacts to both the player's turn and another character's turn, which is what this scene needs.
 
 ### Verify every character has the provider
 
@@ -89,7 +91,7 @@ public sealed class MultiCharacterGazeAudit : MonoBehaviour
 
 `ConvaiManager.ActiveManager.Characters` lists every `ConvaiCharacter` the manager currently owns, which makes this a convenient one-shot audit for a scene with several NPCs added at different times. A speaking character is always fully relevant to the others regardless of distance-based relevance falloff, which is what makes listeners turn toward whoever currently holds the floor; **Idle Glances** (on by default) governs the occasional exchange between characters that are all idle at once.
 
-***
+**Expected outcome:** The two listening characters turn to face whoever is speaking, and all three characters exchange occasional glances instead of staring blankly ahead once the scene goes idle.
 
 ## Scenario 4: Answer a question after looking at the target
 
@@ -127,6 +129,8 @@ public sealed class ReadGaugeActionExecutor : ConvaiActionExecutorBase
 ```
 
 `GazeAt` with an explicit `Engagement` of `1` works in any dialogue state, including `Idle`, and outranks every automatic target. Awaiting `handle.Settled` gates the answer on the character actually having looked — `Settled` completes once gaze is visibly aligned on the target, so the reported value never arrives before the eyes do. `ConvaiActionExecutionResult.Answered` is the only part of the result the character itself is told; whether the answer is spoken is decided separately, per action, in the Actions Editor.
+
+**Expected outcome:** The technician visibly looks at the gauge before reporting the reading — the answer is never returned before the character's gaze has settled on the target.
 
 ## Next steps
 

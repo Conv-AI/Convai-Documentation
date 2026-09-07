@@ -6,9 +6,7 @@ description: >-
 
 # Message Glossary
 
-## Overview
-
-This glossary provides a comprehensive reference for all message types used in Convai's Live APIs. Messages flow bidirectionally between your client application and the Convai server over WebRTC data channels.
+This glossary summarizes the message types used in Convai's Live APIs. Messages flow bidirectionally between your client application and Convai over WebRTC data channels.
 
 ---
 
@@ -132,6 +130,7 @@ For every client-to-server message, the server automatically sends a `server-res
 | `update-scene-metadata`       | Update scene objects                       | [client-to-server-messages.md](client-to-server-messages.md#update-scene-metadata)       |
 | `update-dynamic-info`         | Update dynamic context (basic)             | [client-to-server-messages.md](client-to-server-messages.md#update-dynamic-info)         |
 | `context-update`              | Update runtime context (with mode control) | [client-to-server-messages.md](client-to-server-messages.md#context-update)              |
+| `action-result`               | Return a correlated v2 client tool result | [client-to-server-messages.md](client-to-server-messages.md#action-result)               |
 | `vision-status`               | Query vision buffer state                  | [client-to-server-messages.md](client-to-server-messages.md#vision-status)               |
 | `vision-trigger`              | Attach buffered frames / trigger vision    | [client-to-server-messages.md](client-to-server-messages.md#vision-trigger)              |
 | `tts-toggle`                  | Enable/disable bot audio                   | [client-to-server-messages.md](client-to-server-messages.md#tts-toggle)                  |
@@ -149,7 +148,7 @@ For every client-to-server message, the server automatically sends a `server-res
 | Message Type                    | Purpose                                     | Format                 | Details Page                                                                               |
 | ------------------------------- | ------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------ |
 | `bot-llm-started`               | Model generation began                      | Bot output stream      | [server-to-client-messages.md](server-to-client-messages.md#bot-llm-started-bot-llm-stopped) |
-| `bot-llm-text`                  | **The bot's spoken response text**          | Bot output stream      | [server-to-client-messages.md](server-to-client-messages.md#bot-llm-text)                  |
+| `bot-llm-text`                  | Selected legacy or raw text projection      | Bot output stream      | [server-to-client-messages.md](server-to-client-messages.md#bot-llm-text)                  |
 | `bot-llm-stopped`               | Model generation finished                   | Bot output stream      | [server-to-client-messages.md](server-to-client-messages.md#bot-llm-started-bot-llm-stopped) |
 | `bot-tts-started`               | Speech synthesis began                      | Bot output stream      | [server-to-client-messages.md](server-to-client-messages.md#bot-tts-started)               |
 | `bot-started-speaking`          | Bot audio began                             | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#bot-started-speaking-bot-stopped-speaking) |
@@ -161,6 +160,7 @@ For every client-to-server message, the server automatically sends a `server-res
 | `bot-emotion`                   | Bot emotion for avatar                      | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#bot-emotion)                   |
 | `behavior-tree-response`        | Behavior tree data                          | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#behavior-tree-response)        |
 | `moderation-response`           | Content moderation result                   | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#moderation-response)           |
+| `model-output`                  | Canonical typed v2 model output             | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#model-output)                  |
 | `action-response`               | Actions/animations to trigger               | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#action-response)               |
 | `final-user-transcription`      | User speech transcription                   | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#final-user-transcription)      |
 | `visemes`                       | Lip-sync data                               | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#visemes)                       |
@@ -200,6 +200,7 @@ When you receive a `server-response` message, the `extras` field may contain eve
 | `stt-toggle`        | `muted`                                                    |
 | `trigger-message`   | `trigger_name`, `has_speak_tag`                            |
 | `user_text_message` | `text`                                                     |
+| `action-result`      | `tool_call_id`, `idempotent`; errors also include `error_code` |
 
 ---
 
@@ -250,7 +251,8 @@ When you receive a `server-response` message, the `extras` field may contain eve
 The character's own output:
 
 - `bot-llm-started` / `bot-llm-stopped` - Model generation boundaries
-- `bot-llm-text` - The spoken response text
+- `bot-llm-text` - The selected legacy or raw text projection
+- `model-output` - Canonical typed output for clients that negotiate model output v2
 - `bot-tts-started` - Speech synthesis began
 - `bot-started-speaking` / `bot-stopped-speaking` - Audio boundaries
 - `bot-turn-completed` - Server-side terminal state for the turn
@@ -263,6 +265,14 @@ Messages for managing conversation context and bot state:
 - `update-dynamic-info` - Basic dynamic context updates
 - `update-template-keys` - Update prompt template variables
 - `update-scene-metadata` - Update scene object descriptions
+
+### Agentic actions
+
+Messages for correlated client-executed tools:
+
+- `action-response` - Legacy semantic action or v2 tool-call compatibility projection
+- `model-output` - Canonical semantic items when model output v2 is selected
+- `action-result` - Terminal client result for a v2 `tool_call`
 
 ### Vision
 
@@ -301,7 +311,7 @@ Messages containing animation and visual data:
 - `visemes` - Lip-sync blendshape data
 - `neurosync-blendshapes` - Facial animation blendshapes (single frame)
 - `chunked-neurosync-blendshapes` - Batched facial animation blendshapes
-- `action-response` - Actions and animations to perform
+- `action-response` - Semantic actions or v2 client tool-call projections
 
 ### Transcription & Text
 

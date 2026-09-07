@@ -1,7 +1,7 @@
 ---
 title: Character actions examples
 description: Progressive examples for the Convai character actions system — Inspector setup, event subscriptions, scripted batch injection, and an observation action.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 These six examples progress from the simplest possible configuration to full scripting control. Each example is self-contained — you can follow any one of them without reading the others first.
@@ -20,6 +20,7 @@ On the instructor NPC's `GameObject`, add these components:
 * `ConvaiActionConfigSource`
 * `ConvaiActionDispatcher` (leave both policies at defaults: Queue, StopBatch)
 * `ConvaiWalkToActionExecutor` — `_arriveDistance = 0.6`
+* `ConvaiPointAtActionExecutor` — leave `Hold Seconds` at `3`. It drives the arm through `ConvaiBodyAnimationController`, so the character needs that component too.
 
 In `ConvaiActionConfigSource`:
 
@@ -28,7 +29,7 @@ In `ConvaiActionConfigSource`:
 | Action name | Target requirement | Executor |
 | --- | --- | --- |
 | `Retrieve` | `Object` | `ConvaiWalkToActionExecutor` |
-| `Point At` | `Either` | `ConvaiLookAtActionExecutor` |
+| `Point At` | `Either` | `ConvaiPointAtActionExecutor` |
 
 **Actionable objects:**
 
@@ -40,7 +41,7 @@ In `ConvaiActionConfigSource`:
 **Expected outcome:**
 
 * "Retrieve the extinguisher" → the NPC navigates to the extinguisher and stops 0.6 units away.
-* "Point at the alarm panel" → the NPC rotates to face the alarm panel over 0.5 seconds.
+* "Point at the alarm panel" → the NPC raises an arm toward the alarm panel, holds the point for 3 seconds, then lowers the arm.
 * "Retrieve the alarm" → Convai correctly resolves "alarm" to "Alarm Panel" based on the description.
 
 {% hint style="success" %}
@@ -180,7 +181,7 @@ public sealed class DemonstrationTrigger : MonoBehaviour
 
 Wire `RunDefibrillatorDemo` to a `UnityEngine.Timeline` signal, a UI button `OnClick`, or any other trigger in your scene.
 
-**Expected outcome:** The instructor NPC navigates to the equipment cart, picks up the defibrillator, walks to the patient bed, and turns to face it — all without the trainee saying anything. `OnBatchCompleted` fires when the sequence finishes, which you can use to advance the training stage.
+**Expected outcome:** The instructor NPC navigates to the equipment cart, picks up the defibrillator, walks to the patient bed, and points at it — all without the trainee saying anything. `OnBatchCompleted` fires when the sequence finishes, which you can use to advance the training stage.
 
 {% hint style="info" %}
 `BatchPolicy = Queue` ensures this scripted sequence waits politely if the trainee is mid-conversation with an active action batch. Switch to `BatchPolicy = ReplaceCurrent` if the demonstration should interrupt any ongoing action.
@@ -257,8 +258,4 @@ On the action definition, set **Answer Delivery** to `Tell The Player` — the s
 
 {% content-ref url="actions-scripting-reference.md" %}
 [Character actions scripting reference](actions-scripting-reference.md)
-{% endcontent-ref %}
-
-{% content-ref url="migrate-to-v4-5.md" %}
-[Migrate actions to v4.5.0](migrate-to-v4-5.md)
 {% endcontent-ref %}

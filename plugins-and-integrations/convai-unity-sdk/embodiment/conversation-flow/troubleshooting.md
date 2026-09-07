@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot conversation flow
 description: Diagnose a dialogue state stuck on Idle, timing that feels wrong, and conflicts between conversation flow drivers in multi-character scenes.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Use this page when a character's dialogue state never changes, changes at the wrong pace, or a multi-character scene shows one character reacting to another's conversation. Start by entering Play mode and expanding the **Live** section on the `ConvaiConversationFlowController` component — most of the symptoms below are visible there directly.
@@ -14,7 +14,7 @@ Use this page when a character's dialogue state never changes, changes at the wr
 | --- | --- | --- | --- |
 | **State** stays `Idle` in the **Live** section even while the character is speaking | The character's ready signal never arrived — the `ConvaiCharacter` has not finished connecting, or events for it are not reaching this controller | Confirm the character finishes connecting before you expect embodiment behavior. If `ConvaiConversationFlowController` sits under a different `GameObject` than the `ConvaiCharacter` it should track, move it under the same hierarchy | **State** changes away from `Idle` once the character connects and the conversation starts |
 | Character lingers in `Thinking`, `Attending`, or `Settling` far longer or shorter than expected | The assigned `ConvaiConversationFlowProfile` sets a longer or shorter hold than intended, or no profile is assigned and the built-in defaults do not match the pace you want | Open the assigned profile (or assign one) and check its **Dialogue Beats** fields against [Conversation flow reference](reference.md) | **Time In State** in the **Live** section stops advancing past the tuned duration for that state |
-| A `ConvaiConversationFlowController` appeared on a character you never added it to | Convai auto-provisioned it because another module — currently Body Animation, with **Auto Create Conversation Flow** enabled — needed a dialogue state and none existed | Nothing to fix — this is expected. Configure the auto-added controller like any other, or disable **Auto Create Conversation Flow** on the Body Animation component if you want to add the controller yourself | The Console logged the message quoted below once, naming the character |
+| A `ConvaiConversationFlowController` appeared on a character you never added it to | Convai auto-provisioned it because another module needed a dialogue state and none existed — Body Animation with **Auto Create Conversation Flow** enabled, or Emotion once its listening lift, thinking look, or reaction accent strengths are raised above `0` | Nothing to fix — this is expected. Configure the auto-added controller like any other, or turn off the setting that demanded it if you want to add the controller yourself | The Console logged the message quoted below once, naming the character |
 | In a multi-character scene, one character's dialogue state reacts to another character's player speech | More than one `ConvaiConversationFlowController` is active at once; each driver scopes itself to its own character once it detects other active drivers, but a scene with no scoped conversation target can briefly share unscoped signals | Give each character's conversation flow driver a scoped conversation target instead of relying on unscoped player speech and transcript events | The Console warning quoted below stops appearing, and each character's **State** only changes for its own turns |
 
 ***
@@ -37,7 +37,7 @@ One field pair is self-correcting rather than silently wrong: if **Thinking Min 
 
 ## Conversation flow appeared without being added
 
-Convai adds `ConvaiConversationFlowController` automatically when a module on the character demands a dialogue state and none exists yet. Currently only Body Animation does this, through its **Auto Create Conversation Flow** setting (enabled by default). The Console logs once, naming the character:
+Convai adds `ConvaiConversationFlowController` automatically when a module on the character demands a dialogue state and none exists yet. Body Animation does this through its **Auto Create Conversation Flow** setting (enabled by default). Emotion does it too, but only once one of its dialogue-driven settings — Listening Reaction Strength, Thinking Reaction Strength, Reacting Accent Strength, or Interrupted Flinch Strength — is raised above `0`, since all four ship off. The Console logs once, naming the character:
 
 ```text
 [ConvaiConversationFlowController] Added to '<character name>' because an embodiment module on this character needs the dialogue state. Add the component yourself if you want to configure it.

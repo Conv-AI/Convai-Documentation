@@ -1,5 +1,7 @@
 ---
-description: Ask your NPC to perform actions using our JavaScript SDK
+description: >-
+  Follow the retained actions workflow for the deprecated unscoped Web SDK, or
+  move to the current Convai Web SDK action event and configuration surface.
 metaLinks:
   canonical: >-
     https://docs.convai.com/api-docs/plugins-and-integrations/web-plugins/convai-web-sdk
@@ -7,14 +9,8 @@ metaLinks:
 
 # Actions
 
-{% hint style="info" %}
-:no\_entry: This plugin has been deprecated and is no longer supported.
-
-\
-If you are still running the old plugin, we recommend switching to the new Convai Web SDK: [Link](https://docs.convai.com/api-docs/plugins-and-integrations/web-plugins/convai-web-sdk)
-
-\
-For historical reference only — these docs are no longer maintained.
+{% hint style="warning" %}
+**Deprecated on August 26, 2026.** The unscoped `convai-web-sdk` package is no longer supported. Migrate to [Actions in the current Convai Web SDK](../convai-web-sdk/actions.md). This page remains available for historical reference and is not maintained.
 {% endhint %}
 
 To set up the Actions you need to follow the following steps:

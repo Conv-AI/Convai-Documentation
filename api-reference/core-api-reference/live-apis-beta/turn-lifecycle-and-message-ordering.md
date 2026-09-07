@@ -1,24 +1,19 @@
 ---
 title: Turn lifecycle and message ordering
 description: >-
-  How a single conversational turn is delivered over the Live API — the bot
-  output stream, the order messages arrive in, what ordering is and is not
-  guaranteed, and which fields are always present.
+  Understand Live API turn delivery, including legacy text, canonical output,
+  action-result continuations, correlation, and ordering guarantees.
 ---
 
-# Turn lifecycle and message ordering
-
-A Live API session delivers a bot turn across **three parallel carriers**. Understanding which carrier a given piece of output arrives on — and what ordering you can rely on between them — is the single most important thing to get right when writing a client.
+A Live API session delivers one logical turn across parallel media and data carriers. Treat message order, logical-turn correlation, and client tool completion as separate concerns.
 
 | Carrier | Carries | Format |
 |---|---|---|
 | **WebRTC audio track** | The spoken audio itself | Standard WebRTC media track (or `audio-data` messages if you opt into data-channel routing) |
 | **Bot output stream** | The bot's response text and speech-state transitions | Data channel, event type at the **top level** |
-| **Custom server messages** | Everything else — actions, emotion, transcription, animation, lifecycle | Data channel, event type nested under `data.type` |
+| **Custom server messages** | Canonical model output, actions, emotion, transcription, animation, and lifecycle | Data channel, event type nested under `data.type` |
 
-{% hint style="warning" %}
-Audio never appears in the data-channel message stream unless you explicitly enable `audio_routing: "data_only"` or `"both"` in `audio_config`. See [Audio Data via Data Channel](audio-data-via-data-channel.md).
-{% endhint %}
+Audio appears in the data-channel stream only when you enable `audio_routing: "data_only"` or `"both"` in `audio_config`. See [Audio Data via Data Channel](audio-data-via-data-channel.md).
 
 ---
 
@@ -52,9 +47,7 @@ function eventType(message) {
 }
 ```
 
-{% hint style="info" %}
-`server-response` is a third, legacy shape: its fields sit at the top level rather than under a `server-message` envelope. See [server-response](server-to-client-messages.md#server-response).
-{% endhint %}
+`server-response` is a third, legacy shape. Its fields sit at the top level rather than under a `server-message` envelope. See [server-response](server-to-client-messages.md#server-response).
 
 ---
 
@@ -65,13 +58,11 @@ These messages use **Form A**. They are the only place the bot's response text a
 | Message | Payload | Meaning |
 |---|---|---|
 | `bot-llm-started` | `{}` | The model has begun generating this turn |
-| `bot-llm-text` | `{ text }` | An incremental chunk of the bot's spoken response. Concatenate in arrival order to rebuild the full reply |
+| `bot-llm-text` | `{ text }` | An incremental chunk of the selected legacy or raw text projection. Concatenate in arrival order to rebuild that projection |
 | `bot-llm-stopped` | `{}` | Generation finished |
 | `bot-tts-started` | `{}` | Speech synthesis has begun for this turn |
 
-{% hint style="warning" %}
-`bot-llm-text` carries the **spoken response only**. Actions, emotion, and internal tool syntax are removed before this message is emitted — see [Response contract and parsing](response-contract-and-parsing.md). Concatenating `bot-llm-text` chunks gives you exactly what the character says, which is what you should render in a chat transcript.
-{% endhint %}
+With omitted capabilities or `bot_llm_text_mode: "legacy"`, `bot-llm-text` carries filtered conversational text. With `bot_llm_text_mode: "raw"`, it carries provider-visible text before structured-output parsing and conversational filtering. Raw output is not trusted renderable or executable content. See [Response contract and parsing](response-contract-and-parsing.md).
 
 ### Speech-state messages
 
@@ -106,11 +97,13 @@ Three messages — `bot-started-speaking`, `bot-stopped-speaking`, and `bot-turn
 
 Use `response_id` to associate blendshape and cancel messages with the turn that produced them. Do not assume these fields are present.
 
+Clients that negotiate model output v2 receive one or more `model-output` envelopes. Use `output_id` to deduplicate an envelope. Use an optional `logical_turn_id` to group text, semantic action, and client tool-call envelopes that belong to one logical turn. Distinct envelopes can share a `logical_turn_id`.
+
 ---
 
-## A complete turn
+## A complete legacy turn
 
-The user says *"go grab the cube"*. A representative message sequence:
+The user says *"go grab the cube"*. A representative v1 message sequence is:
 
 ```json
 {"label":"rtvi-ai","type":"server-message","data":{"type":"vad-stt-started",
@@ -141,6 +134,20 @@ The user says *"go grab the cube"*. A representative message sequence:
 
 The spoken audio for this turn plays on the WebRTC audio track, in parallel with the messages above.
 
+For a client that negotiates model output v2, Convai can also emit separate canonical envelopes that share one logical-turn ID:
+
+```json
+{"type":"model-output","version":2,"output_id":"out_text","logical_turn_id":"turn_42",
+  "format":"text","raw":"Sure, on my way.","items":[{"type":"message","role":"assistant",
+  "channel":"final","content":"Sure, on my way."}],"final":true}
+
+{"type":"model-output","version":2,"output_id":"out_action","logical_turn_id":"turn_42",
+  "format":"semantic-actions-json","raw":"{\"actions\":[{\"name\":\"Move To\",\"target\":\"cube\"}]}",
+  "items":[{"type":"semantic_action","id":"act_42","name":"Move To","target":"cube"}],"final":true}
+```
+
+`final: true` completes one envelope. It does not close the entire logical turn.
+
 ---
 
 ## Ordering guarantees
@@ -149,10 +156,12 @@ Getting this right avoids a large class of integration bugs.
 
 ### What is guaranteed
 
-* **`bot-llm-text` chunks arrive in order.** Concatenating them in arrival order reproduces the response text exactly.
+* **`bot-llm-text` chunks arrive in order.** Concatenating them in arrival order reproduces the selected text projection.
 * **The turn brackets are ordered.** `bot-llm-started` precedes any `bot-llm-text`, which precedes `bot-llm-stopped`. `bot-started-speaking` precedes `bot-stopped-speaking`, which precedes `bot-turn-completed`.
-* **`actions` within a single `action-response` are ordered.** The array is an ordered sequence — execute it front to back.
-* **`bot-turn-completed` is terminal** for the turn.
+* **Array and item order is preserved.** This does not require sequential client execution.
+* **`output_id` identifies one canonical envelope.** A repeated ID is a duplicate. Distinct IDs remain distinct even when they share `logical_turn_id`.
+* **A client tool call waits for its correlated result or timeout.** Convai supplies a result accepted before timeout to the same model context before that tool continuation proceeds.
+* **`bot-turn-completed` is terminal** for the associated server response lifecycle, not proof that client-side actions or playback have completed.
 
 ### What is *not* guaranteed
 
@@ -164,10 +173,10 @@ Concretely, this means:
 
 * You **cannot** determine that an action was meant to happen "after the second sentence."
 * You **cannot** determine which words a `bot-emotion` applies to. Emotion is **turn-level**, not span-level.
-* An interleaved sequence — *say, then move, then say again* — has no representation in the current contract. A turn produces one action sequence, delivered as a single ordered array.
+* Legacy v1 has no representation for an interleaved sequence such as *say, then move, then say again*. Canonical v2 can group multiple completed envelopes, but it does not provide word-level action offsets.
 * `action-response` typically arrives near the end of generation, but its position relative to `bot-llm-stopped` is **not contractual**. Do not gate action execution on having seen `bot-llm-stopped`.
 
-**Recommended handling:** treat `action-response` as "the action plan for this turn" and begin executing it when it arrives. Treat `bot-emotion` as the emotional tone for the whole turn. If your experience requires tight action/speech choreography, drive it from your own client-side sequencing rather than from message arrival order.
+**Recommended handling:** v1 clients can treat `action-response` as a proposed action plan. V2 clients should use `model-output.items` as the canonical source and ignore the duplicate projection. In both modes, authorize and schedule operations in your application. Return an [`action-result`](client-to-server-messages.md#action-result) only after the client operation reaches a terminal state.
 
 ---
 
@@ -185,17 +194,13 @@ Concretely, this means:
 | `was_aborted` | boolean | Only when `true` | The turn ended because required output could not be delivered |
 | `error_reason` | string | Only when aborted **and** set | Machine-readable abort reason; currently `audio_delivery_failed` |
 
-{% hint style="warning" %}
-`bot-turn-completed` is **not** a client playback acknowledgment. It does not mean the user has finished hearing the audio, nor that avatar blendshapes have drained locally.
-
-Clients that drive local audio playback, `isSpeaking` state, lip-sync, or avatar animation should drain their own media and animation queues before clearing those states. If you need exact playback completion, implement a client-side playback acknowledgment.
-{% endhint %}
+`bot-turn-completed` is not a client playback acknowledgment. It does not mean the user has finished hearing the audio, nor that avatar blendshapes or client tools have completed. Clients that drive local audio playback, `isSpeaking` state, lip-sync, or avatar animation should drain their own queues before clearing those states.
 
 ### Interruption
 
 When the user barges in, the current turn ends with `was_interrupted: true`. Clients that opted into ahead-delivered NeuroSync chunks also receive [`neurosync-blendshapes-cancel`](server-to-client-messages.md#neurosync-blendshapes-cancel), which specifies how much of the buffered visual tail to keep.
 
-Actions already delivered in an `action-response` are **not** retracted on interruption. If your experience requires cancelling in-flight actions when the user interrupts, handle that in your client on receipt of `was_interrupted: true`.
+Actions and tool calls already delivered are not retracted on interruption. If your experience requires cancelling in-flight client work, handle that in your application when `was_interrupted` is `true`, then return a terminal `"cancelled"` result for an affected v2 tool call.
 
 ---
 
@@ -210,11 +215,9 @@ Field presence is **not uniform** across message types. Three different conventi
 | **Omitted when null (nested)** | Optional keys on nested objects are dropped | `action-response.actions[].target` |
 | **Included only when set** | Correlation metadata, variable turn to turn | `response_id`, `neurosync_turn_id`, `epoch`, `sequence` |
 
-{% hint style="info" %}
-**Write defensively.** Use optional access (`message.data?.target`) rather than checking for `null`. An absent `target` on an action means the action has no target — it is not an error.
-{% endhint %}
+Write defensively. Use optional access (`message.data?.target`) rather than checking only for `null`. An absent semantic-action `target` means the action has no target. A v2 tool call carries its validated inputs in `arguments`; its optional `target` field is not an authorization decision.
 
-The minimal real payload for `final-user-transcription`, for example, is just:
+The minimal real payload for `final-user-transcription`, for example, is:
 
 ```json
 { "type": "final-user-transcription", "text": "hello" }

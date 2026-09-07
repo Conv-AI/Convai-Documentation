@@ -1,10 +1,10 @@
 ---
 title: Body animation config reference
 description: Reference for every setting group and field in the Convai Body Animation config asset, including defaults and value ranges for each entry.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
-`ConvaiBodyAnimationConfig` (`Convai/Embodiment/Body Animation Config`) is the runtime-tuning asset for Convai Body Animation: transition timings, layer behavior, locomotion synchronization, feature toggles, and diagnostics. Content lives in a separate `ConvaiBodyAnimationSet`; this asset only shapes behavior, so one config can be shared across many characters. Its 90 serialized fields are grouped into 11 named sections, one `##` per section below, matching the config asset's own Inspector and the Body Animation Editor window's Feel mode.
+`ConvaiBodyAnimationConfig` (`Convai/Embodiment/Body Animation Config`) is the runtime-tuning asset for Convai Body Animation: transition timings, layer behavior, locomotion synchronization, feature toggles, and diagnostics. Content lives in a separate `ConvaiBodyAnimationSet`; this asset only shapes behavior, so one config can be shared across many characters. Its 91 serialized fields are grouped into 11 named sections, one `##` per section below, matching the config asset's own Inspector and the Body Animation Editor window's Feel mode.
 
 ## Personality
 
@@ -25,6 +25,7 @@ How the character gestures while it speaks.
 | `TalkFadeOutSeconds` | `float` | `0.9` | `>= 0.01` | Talk layer fade-out when the character stops speaking. |
 | `TalkReleaseDelaySeconds` | `float` | `0.16` | `>= 0` | Short hold before talk fades out after speech stops, letting the current gesture settle before blending to idle. |
 | `TalkReleasePlaybackSpeed` | `float` | `0.2` | `0`–`1` | Playback speed during the speech-release window. Slowing the clip prevents an authored arm motion from continuing to rise after speech ends. |
+| `TalkReleaseLeadSeconds` | `float` | `0.6` | `>= 0` | How long before the end of its speech the character starts to lower its hands. Read from a Lip Sync speech-playback reading when the character has one; see [How the talk layer releases](how-body-animation-works.md#how-the-talk-layer-releases). |
 | `UseSpeechEnergy` | `bool` | `true` | — | Scale the talk layer weight by live speech energy so soft speech gestures less. |
 | `TalkWeightAtLowEnergy` | `float` | `0.2` | `0`–`1` | Talk layer weight at zero speech energy, when `UseSpeechEnergy` is on. |
 | `TalkOverlayWeight` | `float` | `0.45` | `0`–`1` | Maximum weight the talk overlay can reach. Lower values keep more of the idle pose under speech gestures. |

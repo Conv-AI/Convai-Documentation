@@ -1,7 +1,7 @@
 ---
 title: Installation and package issues
 description: Fix Convai Unity SDK import failures, unsupported Unity versions, missing package dependencies, and bootstrapper startup warnings.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Package import and initial configuration problems account for the majority of first-run failures with the Convai Unity SDK. Most produce a clear message in the Unity Console the moment you enter Play Mode — or even before that, as compiler errors. An unsupported Unity version is the single most common root cause and produces no clear message at all, so confirm it first, then work through the Setup Health checks and the remaining first-line checks below.
@@ -76,16 +76,14 @@ When everything is configured correctly, pressing Play shows `Convai Bootstrappe
 
 ### Required dependencies
 
-All six dependencies are pulled in automatically by UPM when you install the Convai SDK package. If any is missing or at the wrong version, assembly compilation fails.
+All four dependencies are pulled in automatically by UPM when you install the Convai SDK package. If any is missing or at the wrong version, assembly compilation fails.
 
 | Dependency | Minimum version | Notes |
 | --- | --- | --- |
+| `com.unity.ai.inference` | <code class="expression">space.vars.dep_ai_inference_version</code> | Client-side voice activity detection |
 | `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> | JSON serialization — required by all SDK communication |
 | `com.unity.ugui` | <code class="expression">space.vars.dep_ugui_version</code> | UI Toolkit module — required by all UI components |
 | `com.unity.inputsystem` | <code class="expression">space.vars.dep_inputsystem_version</code> | New Input System — required by conversation input |
-| `com.unity.ai.navigation` | <code class="expression">space.vars.dep_ai_navigation_version</code> | NavMesh authoring package — resolved automatically with the SDK package |
-| `com.unity.collections` | <code class="expression">space.vars.dep_collections_version</code> | Native collections — required by the vendored LiveKit transport's audio and video sources |
-| `com.unity.modules.xr` | <code class="expression">space.vars.dep_modules_xr_version</code> | Built-in XR input module — required by XR push-to-talk input |
 
 To verify installed versions: **Window → Package Manager → In Project**.
 
@@ -109,29 +107,21 @@ Assembly definition errors prevent the project from entering Play Mode. The Cons
 
 **Verify:** Open the Console. InputSystem namespace errors are gone. Accept the backend switch prompt if Unity shows it.
 
-### Collections missing or downgraded
+### AI Inference missing
 
-**Error:** `The type or namespace name 'Collections' does not exist in the namespace 'Unity'`
+**Error:** `The type or namespace name 'InferenceEngine' does not exist in the namespace 'Unity'`
 
-**Fix:** Install `com.unity.collections` version <code class="expression">space.vars.dep_collections_version</code> or higher via Package Manager. Do not downgrade below this version: SDK `4.4.1` pins `com.unity.collections` to <code class="expression">space.vars.dep_collections_version</code> specifically to avoid a known regression in Collections `2.6.7` that conflicts with the Unity AI Assistant package's `xxHash3`/`Unsafe` compiled code on Unity 6.0 projects.
+**Fix:** Open **Window → Package Manager**. Click **+** → **Add package by name**. Enter `com.unity.ai.inference` and confirm. Unity installs version <code class="expression">space.vars.dep_ai_inference_version</code> or higher automatically.
 
-**Verify:** Open the Console. Unity.Collections namespace errors are gone and the project compiles cleanly.
+**Verify:** Open the Console. `Unity.InferenceEngine` namespace errors are gone and the project compiles cleanly.
 
 ### XR module missing
 
 **Error:** `The type or namespace name 'XR' does not exist in the namespace 'UnityEngine'`
 
-**Fix:** `com.unity.modules.xr` is a built-in Unity module rather than a registry package. It ships enabled by default; if a project's `Packages/manifest.json` explicitly excludes it, remove the exclusion, or add `com.unity.modules.xr` at version <code class="expression">space.vars.dep_modules_xr_version</code> to its `dependencies` block directly and let Unity reimport.
+**Fix:** `com.unity.modules.xr` is a built-in Unity module rather than a registry package, and the SDK does not list it as a dependency. It ships enabled by default; if a project's `Packages/manifest.json` explicitly excludes it, remove the exclusion and let Unity reimport. XR push-to-talk input needs it.
 
-**Verify:** Open the Console. UnityEngine.XR namespace errors are gone and the project compiles cleanly.
-
-### AI Navigation missing or fails to resolve
-
-**Symptom:** Package Manager reports the Convai SDK package itself as unresolved, or lists `com.unity.ai.navigation` with a resolution error — the SDK's own compiled code does not reference this package's API directly, so a missing copy does not raise a C# namespace error the way the other dependencies do.
-
-**Fix:** Open **Window → Package Manager**. Click **+** → **Add package by name**. Enter `com.unity.ai.navigation` and confirm.
-
-**Verify:** Package Manager shows `com.unity.ai.navigation` installed and the Convai SDK package resolves without errors.
+**Verify:** Open the Console. `UnityEngine.XR` namespace errors are gone and the project compiles cleanly.
 
 ### Assembly recompile loop
 
@@ -153,9 +143,8 @@ Deleting the `Library/` folder forces Unity to reimport the entire project from 
 | `API key not configured` warning on Play | API key field is empty | Paste key from Convai dashboard into Edit → Project Settings → Convai SDK → Credentials, then select **Validate & Save** | Re-enter Play Mode — the `API key not configured` warning is gone |
 | `The type or namespace 'Newtonsoft' could not be found` | Newtonsoft.Json package missing | Install `com.unity.nuget.newtonsoft-json` via Package Manager | Project compiles without Newtonsoft namespace errors |
 | `The type or namespace 'InputSystem' could not be found` | Input System package missing or old version | Install `com.unity.inputsystem` <code class="expression">space.vars.dep_inputsystem_version</code>+ | Project compiles without InputSystem namespace errors |
-| `The type or namespace 'Collections' does not exist in the namespace 'Unity'` | `com.unity.collections` missing, or downgraded below <code class="expression">space.vars.dep_collections_version</code> | Install `com.unity.collections` <code class="expression">space.vars.dep_collections_version</code>+ via Package Manager; do not downgrade to `2.6.7` | Project compiles without Unity.Collections namespace errors |
-| `The type or namespace 'XR' does not exist in the namespace 'UnityEngine'` | `com.unity.modules.xr` excluded from `Packages/manifest.json` | Restore `com.unity.modules.xr` in `Packages/manifest.json` | Project compiles without UnityEngine.XR namespace errors |
-| Convai SDK package fails to resolve, or Package Manager flags `com.unity.ai.navigation` | AI Navigation dependency missing | Install `com.unity.ai.navigation` <code class="expression">space.vars.dep_ai_navigation_version</code>+ via Package Manager | Convai SDK package resolves without errors in Package Manager |
+| `The type or namespace name 'InferenceEngine' does not exist in the namespace 'Unity'` | `com.unity.ai.inference` missing or old version | Install `com.unity.ai.inference` <code class="expression">space.vars.dep_ai_inference_version</code>+ via Package Manager | Project compiles without `Unity.InferenceEngine` namespace errors |
+| `The type or namespace name 'XR' does not exist in the namespace 'UnityEngine'` | `com.unity.modules.xr` excluded from `Packages/manifest.json` | Remove the exclusion in `Packages/manifest.json` and let Unity reimport | Project compiles without `UnityEngine.XR` namespace errors |
 | Package not found when adding via UPM name | Scoped registry not configured | Follow the UPM installation guide to add the Convai scoped registry to `manifest.json` | SDK package appears in Package Manager |
 | Asset Store import fails with conflict errors | Files from a previous SDK version still present | Remove the old `Assets/Convai/` folder before reimporting | Package imports without conflict errors |
 | Project Settings → Convai SDK window is blank | Script compilation errors exist | Fix all CS errors in the Console; the settings UI only renders when editor scripts compile cleanly | Edit → Project Settings → Convai SDK displays all six sections |
