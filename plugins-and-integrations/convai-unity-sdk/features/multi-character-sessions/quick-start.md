@@ -1,45 +1,63 @@
 ---
 title: Build your first multi-character session
-description: Add a second Convai character to a working Unity scene and confirm the room addresses whichever character the player looks at.
+description: Add a second Convai character to a working Unity scene and confirm the room lets you talk to either one by looking at them.
 last_reviewed: "4.6.0"
 ---
 
-Add a second character to a scene that already has one working Convai character, and confirm the room lets you talk to either one by looking at them. You finish with two characters sharing one room, with no script and no settings changed beyond their Character IDs.
-
-## What you will build
-
-A scene with two active `ConvaiCharacter` components, connected as one shared room. You look at the first character and ask it a question, then look at the second and ask it a question, and confirm the conversation follows your gaze.
+Add a second `ConvaiCharacter` to a scene that already has one working character, and confirm the room lets you talk to either one depending on where you look. There is no multi-character mode to switch on, no component to add, and no field to fill: a room holds every active Convai character in the loaded scenes automatically.
 
 ## Prerequisites
 
-- A Unity scene with a working single-character setup: `ConvaiManager`, `ConvaiRoomManager`, `ConvaiPlayer`, and one `ConvaiCharacter` that already talks back in Play mode.
-- A second Character ID from your Convai dashboard at <code class="expression">space.vars.dashboard_url</code>.
+* [ ] A Unity scene with a working single-character setup: `ConvaiManager`, `ConvaiRoomManager`, `ConvaiPlayer`, and one `ConvaiCharacter` that already talks back in Play mode.
+* [ ] A second Character ID from your [Convai dashboard](https://convai.com).
 
-## Add a second character
+{% stepper %}
+{% step %}
+### Add a second character
 
-Drop a second working character into the scene. If your project ships a second character prefab, use it. Otherwise duplicate your existing character `GameObject` — Unity assigns the copy the same `ConvaiCharacter` component, `ConvaiAudioOutput`, and `AudioSource` your first character already uses, including its Character ID.
+Drop a second working character into the scene — use a second character prefab if your project ships one, or duplicate your existing character's `GameObject`. Duplicating carries over every component the original has, including `ConvaiCharacter`, and it carries over the original's Character ID too — a duplicate never gets one of its own.
 
-A duplicated character keeps the original's Character ID, which the Character inspector flags immediately — two characters cannot share one, and the room refuses to connect rather than half-working. Select the new character's `ConvaiCharacter` component and paste its own Character ID into the **Character ID** field.
+Select the new character's `ConvaiCharacter` component. Its Inspector reports **Another character has this Character ID** immediately, above every other section, because two characters cannot share one and the room refuses to connect while they do. Paste the second character's own Character ID from the [Convai dashboard](https://convai.com) into the **Character ID** field, and the message clears.
+{% endstep %}
 
-## Confirm the scene setup
+{% step %}
+### Confirm the scene setup
 
-Select the `GameObject` holding **Convai Manager** and open its inspector. The **Scene Setup** section lists every `ConvaiCharacter` Convai Manager has found in the scene, each with a checkbox — confirm both characters appear here. Nothing needs enabling by hand; a character with its checkbox already ticked is included in the room. Use **Include Everyone** if either checkbox is cleared.
+Select the `GameObject` holding `ConvaiManager` and open its Inspector. The **Scene Setup** section now reports **Characters in Scene** as `2` and **Joining the Room** as `All 2` — both characters count toward the next room connection.
 
-## Choose how the player addresses each character
+Scroll down to **Characters Joining the Room**. It lists one row per character with a ticked checkbox, since every character joins by default — nothing needs enabling by hand. If either checkbox is cleared, click **Include Everyone** to send both.
+{% endstep %}
 
-Scroll to **Who The Player Talks To**. Leave **Chosen By** on its default, **Look At** — the room addresses whichever character is nearest the centre of the player's view.
+{% step %}
+### Leave Who The Player Talks To on Look At
 
-## Enter Play mode
+With two characters selected for the room, the `ConvaiManager` Inspector adds a **Who The Player Talks To** section. Leave **Chosen By** on its default, **Look At** — it measures the angle from the player's camera to each character's head, so it needs no colliders, no layer masks, and no input wiring. That is why nothing else here needs setting.
+{% endstep %}
 
-Enter Play mode. Look toward the first character and start talking or typing. The character answers, and the Console reports which character the room opened on.
+{% step %}
+### Enter Play mode and address each character
 
-## Talk to the second character
+Enter Play mode. Look toward the first character and start talking or typing — it answers.
 
-Turn to face the second character and speak again. The conversation moves to it — the first character's turn ends, and the second responds.
+Turn to face the second character and speak again. The conversation moves to it: the first character's turn ends, and the second one responds.
+{% endstep %}
+{% endstepper %}
 
 {% hint style="success" %}
-Both characters answer depending on which one you are looking at. That confirms the room is addressing characters by gaze rather than by whichever one connected first.
+**Success:** both characters answer depending on which one you are looking at, not on which one connected first or spoke last.
 {% endhint %}
+
+## Check the Convai Manager Live section
+
+Select `ConvaiManager` again while still in Play mode. Its **Live** section is the fastest way to confirm two characters are actually sharing the room:
+
+* **Characters in Room** reads the number the room actually opened for.
+* **Talking To** names the character you are addressing right now, and updates as you turn your head.
+* **Player Can Talk** reads **Yes** once that character can hear you — it reads **Not yet — this character is still joining** for the brief moment right after it joins the room.
+* **Room Holds** reads **Several characters** once the room has grown past one.
+* **Room Roster**, below that, lists one row per character. The one you are addressing is marked `· addressed`, and a character that can currently hold the conversation reads `Ready`.
+
+If **Talking To** never changes when you look at the other character, check **Range** and **Look Angle** in **Who The Player Talks To** first, then confirm the second character's row in **Room Roster** actually reads `Ready`.
 
 ## Next steps
 
@@ -53,4 +71,8 @@ Both characters answer depending on which one you are looking at. That confirms 
 
 {% content-ref url="../conversation-targeting/choose-a-targeting-mode.md" %}
 [Choose a targeting mode](../conversation-targeting/choose-a-targeting-mode.md)
+{% endcontent-ref %}
+
+{% content-ref url="troubleshooting.md" %}
+[Troubleshoot multi-character sessions](troubleshooting.md)
 {% endcontent-ref %}

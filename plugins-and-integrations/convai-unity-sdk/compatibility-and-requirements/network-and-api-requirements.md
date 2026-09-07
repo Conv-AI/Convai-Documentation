@@ -156,7 +156,7 @@ If steps 5 or 6 fail with `transport.ice_failed` or `transport.signal_disconnect
 | `transport.ice_failed` or `transport.peer_connection_failed` | LiveKit UDP or TURN hosts blocked | Add the LiveKit minimum rules and optional direct media paths from this page | `Room details received` log appears; character responds in Play mode |
 | No `Room details received` log line | Transport logging below **Debug** | Open **Diagnostics** in Project Settings; set **Transport** category override to **Debug** | Readable `Token:` line appears in the Console |
 | LiveKit connection test fails after connect succeeds | UDP media or TURN fallback path blocked | Allow UDP `50000`–`60000`, UDP `3478` to `*.host.livekit.cloud`, and TCP `443` to `*.turn.livekit.cloud` | LiveKit connection test succeeds with the logged `Room URL` and `Token` |
-| `connection.connect_invalid_api_key` | Invalid or revoked API key | Copy a fresh key from <code class="expression">space.vars.dashboard_url</code> into Project Settings | Connect error no longer fires |
+| `connection.connect_invalid_api_key` | Invalid or revoked API key | Copy a fresh key from the [Convai dashboard](https://convai.com) into Project Settings | Connect error no longer fires |
 | WebGL mic unavailable | Build served over HTTP | Serve the build over HTTPS or from `localhost` | Microphone permission prompt appears in the browser |
 
 {% hint style="warning" %}
