@@ -3,7 +3,7 @@ title: Validate your setup
 description: >-
   Check a Convai character with the Troubleshooter window and confirm required
   components are present before entering Play Mode.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Before entering Play Mode, check your character with the Convai Troubleshooter and the scene-wide validator. The two answer different questions: the Troubleshooter reports what would stop a module from working on the selected character, while the validator confirms the basic scene wiring — `ConvaiManager`, `ConvaiCharacter`, `ConvaiPlayer`, and the Character ID field — is in place. Run both.
@@ -63,7 +63,7 @@ When the validator shows zero errors and zero warnings, your scene is ready for 
 After the validator passes, enter Play Mode and watch the Console for these log lines in order.
 
 * [ ] `[ConvaiRuntime] Started successfully` — SDK initialized all internal services
-* [ ] `[RoomConnectionRuntimeAdapter] Character <character-id> connected successfully (mode=create).` — character connected to Convai
+* [ ] `[RoomConnectionRuntimeAdapter] Room connection succeeded (mode=create).` — the room connected
 * [ ] If a chat transcript UI is present, it starts showing messages once the conversation starts — it logs nothing on a successful connection, so watch the UI itself rather than the Console
 * [ ] Character `IsCharacterReady` becomes `true` within 30 seconds — Convai has acknowledged the character
 

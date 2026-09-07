@@ -1,5 +1,5 @@
 ---
-title: Route audio for each character
+title: Route character audio
 description: Control the shared room microphone, bind and mute each character's audio by identity, and measure character playback in Unity.
 last_reviewed: "4.6.0"
 ---
@@ -16,7 +16,7 @@ Control microphone capture, bind an `AudioSource` per participant, mute or disab
 
 The microphone is room-scoped: one capture device feeds the whole room, and it is not bound to any single character. `IsMicMuted` reports whether it is currently muted, and `SetMicMuted(bool muted)` mutes or unmutes it. Subscribe to `MicMuteChanged` (`Action<bool>`) to react whenever the state changes, whether your own code changed it or something else did. The facade prefixes its events with `On`, so the same event is `ConvaiManager.Audio.OnMicMuteChanged`.
 
-Muting the microphone does not decide which character the player is addressing. That routing is a separate decision made by the interaction target — see [Switch the interaction target](switch-the-interaction-target.md) to change who receives the player's speech once the microphone is unmuted.
+Muting the microphone does not decide which character the player is addressing. That routing is a separate decision made by conversation targeting — see [Conversation targeting](../conversation-targeting/README.md) to change who receives the player's speech once the microphone is unmuted.
 
 ```csharp
 ConvaiManager manager = ConvaiManager.ActiveManager;
@@ -58,6 +58,8 @@ public class MultiCharacterAudioBinder : MonoBehaviour
 While a multi-character session is active, an incoming audio track is matched to a membership through the membership index only. A track that resolves to no membership is not attached to any `AudioSource` — there is no fallback to matching by `CharacterId`. Bind by `ParticipantIdentity`, never by `CharacterId`.
 {% endhint %}
 
+`ConvaiAudioOutput` registers its `AudioSource` with the room audio service on every enable, not only the first time its dependencies resolve. A character disabled and re-enabled during play re-registers automatically and keeps its voice — routing does not depend on which component of the two happens to wake up first.
+
 Call `SetParticipantAudioEnabled(string participantIdentity, bool enabled)` to mute or unmute a bound participant without unbinding its `AudioSource`. It returns `false` when no `AudioSource` has been bound for that identity yet — bind it first.
 
 ```csharp
@@ -67,7 +69,7 @@ audioService.SetParticipantAudioEnabled(secondaryMembership.ParticipantIdentity,
 
 ## Route audio for other humans in the room
 
-`BindParticipantAudioOutput` and `SetParticipantAudioEnabled` also cover other humans present in the room, such as a second participant who joined with [Join an existing multi-character session](join-an-existing-session.md). Human participant identities use the backend form `human:{speaker_id}`, so a scene that renders another learner's voice through a spatial `AudioSource` binds it exactly the way it binds a character.
+`BindParticipantAudioOutput` and `SetParticipantAudioEnabled` also cover other humans present in the room, such as a second participant who joined with [Join an existing room](join-an-existing-session.md). Human participant identities use the backend form `human:{speaker_id}`, so a scene that renders another learner's voice through a spatial `AudioSource` binds it exactly the way it binds a character.
 
 ```csharp
 audioService.BindParticipantAudioOutput("human:learner-43", _otherLearnerAudioSource);
@@ -86,7 +88,7 @@ manager.Audio.SetRemoteAudioEnabled(characterId, false);
 ```
 
 {% hint style="warning" %}
-`SetCharacterMuted`, `IsCharacterMuted`, `SetRemoteAudioEnabled`, `IsRemoteAudioEnabled`, and `TryGetCharacterAudioPlayhead` are all keyed by `characterId`, which is not unique in a room containing two memberships that share a `CharacterId` — see [Why a character ID is not an address](character-identity.md#why-a-character-id-is-not-an-address). Each resolves to the first membership carrying that character ID, so none of them can target one instance once a clone is present in the room. Use `BindParticipantAudioOutput` and `SetParticipantAudioEnabled`, keyed by `ParticipantIdentity`, whenever the room may contain clones — they are the only participant-level controls precise enough for that case.
+`SetCharacterMuted`, `IsCharacterMuted`, `SetRemoteAudioEnabled`, `IsRemoteAudioEnabled`, and `TryGetCharacterAudioPlayhead` are all keyed by `characterId`, which is not unique in a room containing two memberships that share a `CharacterId` — see [Why an ID cannot be shared](character-identity.md#why-an-id-cannot-be-shared). Each resolves to the first membership carrying that character ID, so none of them can target one instance once a clone is present in the room. Use `BindParticipantAudioOutput` and `SetParticipantAudioEnabled`, keyed by `ParticipantIdentity`, whenever the room may contain clones — they are the only participant-level controls precise enough for that case.
 {% endhint %}
 
 ## Enable playback on platforms that require a user gesture
@@ -124,13 +126,13 @@ if (audioService.TryGetCharacterAudioPlayhead(characterId, out double playedSeco
 ## Next steps
 
 {% content-ref url="character-identity.md" %}
-[Character identity and addressing](character-identity.md)
+[Character identity](character-identity.md)
 {% endcontent-ref %}
 
 {% content-ref url="handle-roster-events.md" %}
-[React to roster and target changes](handle-roster-events.md)
+[Handle room events](handle-roster-events.md)
 {% endcontent-ref %}
 
-{% content-ref url="switch-the-interaction-target.md" %}
-[Switch the interaction target](switch-the-interaction-target.md)
+{% content-ref url="../conversation-targeting/README.md" %}
+[Conversation targeting](../conversation-targeting/README.md)
 {% endcontent-ref %}

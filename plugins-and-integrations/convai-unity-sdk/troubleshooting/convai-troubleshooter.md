@@ -1,7 +1,7 @@
 ---
 title: Convai Troubleshooter
 description: Reference for the Convai Troubleshooter window, including how it reports findings, applies fixes, and lets a project add its own checks.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 The Convai Troubleshooter is an Editor window that lists what is stopping a `ConvaiCharacter` from working, module by module, with a fix beside each finding. Open it from `Convai → Troubleshooter` before reading the Unity Console when a character does not behave as expected — it is the SDK's first-line diagnostic.
@@ -47,7 +47,7 @@ A module's section header shows a right-aligned summary. When the module has no 
 The window's header chip mirrors this at the character level — `Nothing to fix`, or `1 to fix` / `N to fix` for the current character's combined issue count.
 
 {% hint style="info" %}
-In this release, `ConvaiActionSetupHealthProvider` (`SDK/Editor/Actions/ConvaiActionSetupHealthProvider.cs`) is the only module that reports through the full `IConvaiSetupHealthProvider` interface, so Actions findings are the only ones that can carry a **Fix**, **Show Me**, or **Open** button. Gaze, Body Animation, Body Language, Emotion, and Embodiment still register only as the older, read-only `IConvaiModuleSurveyor`. The Troubleshooter still shows a section for each of these when the module applies to the selected character — their findings are informational text, with no button attached.
+`ConvaiActionSetupHealthProvider` (`SDK/Editor/Actions/ConvaiActionSetupHealthProvider.cs`) is the only module that reports through the full `IConvaiSetupHealthProvider` interface, so Actions findings are the only ones that can carry a **Fix**, **Show Me**, or **Open** button. Gaze, Body Animation, Body Language, Emotion, and Embodiment still register only as the older, read-only `IConvaiModuleSurveyor`. The Troubleshooter still shows a section for each of these when the module applies to the selected character — their findings are informational text, with no button attached.
 {% endhint %}
 
 ## Act on a finding

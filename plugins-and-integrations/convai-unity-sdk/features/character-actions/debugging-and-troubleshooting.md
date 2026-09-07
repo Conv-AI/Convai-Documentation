@@ -3,7 +3,7 @@ title: Troubleshoot character actions
 description: >-
   Diagnose character action setup and runtime issues with the Convai
   Troubleshooter, the Action Monitor, and a symptom-and-fix reference.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Start with **Convai > Troubleshooter** — it checks a character's action setup and lists exactly what to fix, with a one-click fix on most findings. For runtime behavior while a scene is playing, add `ConvaiActionDebugProbe` to the NPC's `GameObject` and watch its counters update in Play mode. For hand-testing actions and the runtime update wire protocol, open **Convai > Actions Editor** and switch to its Live mode. This page covers all three tools, a diagnostic checklist, and a complete troubleshooting table for common failures.
@@ -87,7 +87,7 @@ For failures:
 
 Menu path: `Convai → Actions Editor`
 
-The Actions Editor's Live mode is where injecting a command, testing target resolution, and composing a runtime action-config patch now live — the previous standalone Action Debug Window is gone as of `4.5.0`. Switch to Live mode, pick a character, and open the **Advanced** group to reach three cards:
+The Actions Editor's Live mode is where injecting a command, testing target resolution, and composing a runtime action-config patch happen. Switch to Live mode, pick a character, and open the **Advanced** group to reach three cards:
 
 **Send a Raw Command** sends one action command straight to the dispatcher, bypassing conversation entirely — the same dispatch path a real command from Convai takes, so timing, policies, and events all behave identically. Type an **Action Name** and optional **Target / Parameters**, then select **Send**, or select **Send To First Known Object** to aim it at the first entry in the character's Known Objects list. Every authored action also gets its own one-click button. If a project registers an `IConvaiActionDebugPresetProvider`, its templates and named injection presets appear here too.
 
@@ -202,10 +202,6 @@ Select **Clear** on the Action Monitor between test runs to keep its Activity se
 
 {% content-ref url="actions-scripting-reference.md" %}
 [Character actions scripting reference](actions-scripting-reference.md)
-{% endcontent-ref %}
-
-{% content-ref url="migrate-to-v4-5.md" %}
-[Migrate actions to v4.5.0](migrate-to-v4-5.md)
 {% endcontent-ref %}
 
 {% content-ref url="../../getting-started/validate-your-setup.md" %}

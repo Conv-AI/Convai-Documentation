@@ -1,5 +1,5 @@
 ---
-title: Multi-character room session reference
+title: Room session reference
 description: Reference for the multi-character room session type, its membership and status fields, and the results and exceptions its commands return.
 last_reviewed: "4.6.0"
 ---
@@ -38,6 +38,8 @@ last_reviewed: "4.6.0"
 | `FailureCode` | `string` | The failure reason Convai reported, set when `Status` is `Failed`. `null` otherwise. |
 | `ParticipantId` | `string` | The transport-assigned participant the SDK bound to this membership when its media appeared. Populated after the binding, not at connect. |
 
+`CharacterRoomMembership.WaitUntilReadyAsync(CancellationToken cancellationToken = default)` returns a `Task` that completes when this specific membership reaches `Ready`, or faults when it reaches `Failed`. Use it to wait on a secondary character; `MultiCharacterRoomSession.WaitUntilReadyAsync` only ever answers for `InitialCharacter`.
+
 {% hint style="info" %}
 `ProvisioningStatus == "dispatch_failed"` marks a membership `Failed` the moment it is created, before any separate lifecycle message arrives.
 {% endhint %}
@@ -69,6 +71,8 @@ last_reviewed: "4.6.0"
 | `CharacterAdded` | `Action<CharacterRoomMembership>` | A membership is added to the roster, from a roster command's acknowledgement or an unsolicited lifecycle message. |
 | `CharacterRemoved` | `Action<CharacterRoomMembership>` | A membership is removed from the roster. |
 | `InteractionTargetChanged` | `Action<CharacterRoomMembership, CharacterRoomMembership>` | The interaction target changes. The first argument is the previous membership (or `null`), the second is the current one (or `null`). |
+| `RosterEpochChanged` | `Action<int>` | A newer authoritative roster epoch is observed. Can advance without a matching `CharacterAdded`/`CharacterRemoved`, so do not infer a roster change from add/remove events alone if this is what you need. |
+| `Retired` | `Action` | This session is replaced or cleared — raised once. Treat it as a terminal signal and reattach handlers to the new `CurrentMultiCharacterSession`. |
 
 {% hint style="warning" %}
 Removing the active membership fires `InteractionTargetChanged` first, with the removed membership as the previous value and `null` as the current one, then fires `CharacterRemoved`. Code that reacts to removal can rely on the target already being cleared.
@@ -124,14 +128,14 @@ Removing the active membership fires `InteractionTargetChanged` first, with the 
 
 SDK tests confirm exactly two `Code` values: `roster_epoch_mismatch` and `unauthorized_sender`. Other codes may exist on the backend; do not assume the set is limited to these two.
 
-This exception is distinct from the `ConvaiOperationException` a connect attempt raises for client-side roster validation — see [Multi-character connection API reference](connection-api-reference.md#exceptions-and-timeouts) for that path.
+This exception is distinct from the `ConvaiOperationException` a connect attempt raises for client-side roster validation — see [Connection API reference](connection-api-reference.md#exceptions-and-timeouts) for that path.
 
 ***
 
 ## Related reference
 
 {% content-ref url="connection-api-reference.md" %}
-[Multi-character connection API reference](connection-api-reference.md)
+[Connection API reference](connection-api-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="how-multi-character-sessions-work.md" %}
@@ -139,5 +143,5 @@ This exception is distinct from the `ConvaiOperationException` a connect attempt
 {% endcontent-ref %}
 
 {% content-ref url="readiness-and-partial-dispatch.md" %}
-[Roster readiness and partial dispatch](readiness-and-partial-dispatch.md)
+[Room readiness](readiness-and-partial-dispatch.md)
 {% endcontent-ref %}

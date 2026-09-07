@@ -1,7 +1,7 @@
 ---
 title: Configure locomotion
-description: Add NavMesh-based movement to a Convai character, tune its walk and jog speeds, and report travel manually for a custom mover.
-last_reviewed: "4.5.0"
+description: Adds walking and jogging movement to a Convai character using Unity's baked navigation mesh, with tunable speed and a manual movement option.
+last_reviewed: "4.6.0"
 ---
 
 Add `ConvaiNavMeshLocomotion` to a Convai character so it can walk and jog across a baked NavMesh, tune its speed and turning behavior, and connect a custom movement system through `IConvaiLocomotionSource` or `ConvaiTravelIntent`. Use this page once Convai Body Animation is running on a character that also needs to move.
@@ -11,7 +11,7 @@ Add `ConvaiNavMeshLocomotion` to a Convai character so it can walk and jog acros
 ## Prerequisites
 
 * `ConvaiBodyAnimationController` added to the character. Movement is optional for Body Animation — a character with no locomotion component idles, talks, gestures, and points in place.
-* A baked NavMesh in the scene, if you use `ConvaiNavMeshLocomotion`. The SDK depends on `com.unity.ai.navigation` (<code class="expression">space.vars.dep_ai_navigation_version</code>), so `Window > AI > Navigation` and the `NavMeshSurface` component are available with no extra install.
+* A baked NavMesh in the scene, if you use `ConvaiNavMeshLocomotion`. `ConvaiNavMeshLocomotion` drives a built-in Unity `NavMeshAgent`, but NavMesh authoring — `Window > AI > Navigation` and the `NavMeshSurface` component — comes from `com.unity.ai.navigation`, which the SDK does not install. If your project bakes a NavMesh, install `com.unity.ai.navigation` yourself through Package Manager.
 
 ***
 

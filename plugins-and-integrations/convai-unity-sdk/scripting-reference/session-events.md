@@ -1,7 +1,7 @@
 ---
 title: Session events
-description: Reference for session events — connection state, errors, idle warnings, and participant changes — via relay component or the `ConvaiEvents` C# hub.
-last_reviewed: "4.5.0"
+description: Reference for session-level events covering connection state, errors, idle warnings, and participant changes, wired through Inspector relays or script.
+last_reviewed: "4.6.0"
 ---
 
 The SDK exposes session-level events through two wiring approaches that you can use independently or together. `ConvaiSessionEventRelay` is a MonoBehaviour that wires events to Inspector-assigned `UnityEvent` callbacks with no code required. `ConvaiEvents` is a C# typed event hub accessible from any script via `ConvaiManager.ActiveManager.Events`. Both approaches fire on the same underlying SDK events — choose based on what your code needs. For a conceptual overview of relay components and when to choose each approach, see [Event System](../core-concepts/event-system.md).

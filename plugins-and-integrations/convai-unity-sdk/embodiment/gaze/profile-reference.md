@@ -1,10 +1,10 @@
 ---
 title: Gaze profile reference
 description: Reference for every setting group and field in the Convai Gaze profile asset, including defaults and value ranges for each entry.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
-`ConvaiGazeProfile` (`Convai/Embodiment/Gaze Profile`) is the single authoring asset for the Convai Gaze system: targeting, per-state policies, head/torso solving, the oculomotor eye model, blinking, body turns, idle life, emotion modulation, and diagnostics. Settings are grouped into 15 nested blocks, one per authoring concern; every public accessor keeps the same name and type regardless of the block it reads from.
+`ConvaiGazeProfile` (`Convai/Embodiment/Gaze Profile`) is the single authoring asset for the Convai Gaze system: targeting, per-state policies, head/torso solving, the oculomotor eye model, blinking, body turns, idle life, emotion modulation, conversation attention, and diagnostics. Settings are grouped into 16 nested blocks, one per authoring concern; every public accessor keeps the same name and type regardless of the block it reads from.
 
 ## Targeting
 
@@ -56,10 +56,11 @@ How much of the body a look recruits beyond the eyes.
 
 | Field | Type | Default | Range | Description |
 |---|---|---|---|---|
-| `HeadStabilityDegrees` | `float` | `2.5` | `0`–`10` | Angular dead-band: target motion inside this band is absorbed by the eyes while the head holds its aim, preventing the head from micro-chasing every small camera move. |
+| `HeadFollowSeconds` | `float` | `0.2` | `0.05`–`0.8` | How quickly the head follows a target that is already moving. Lower keeps the head closer to a fast target; higher trails a moving target further, with the eyes covering the difference. |
+| `TorsoFollowSeconds` | `float` | `0.35` | `0.05`–`1.2` | How quickly the chest follows a target that is already moving. Slower than the head — a chest that keeps up with the head reads wrong. |
 | `HeadStabilization` | `float` | `1` | `0`–`1` | How much the head cancels the animation's own head movement while engaged. At `1` the head stays level and the eyes stay centered; lower values let the animated head bob show through. |
-| `MaxHeadAngularSpeed` | `float` | `240` (degrees/second) | `30`–`720` | Safety ceiling on head angular speed. A correctly tuned character never reaches this. |
-| `MaxTorsoAngularSpeed` | `float` | `180` (degrees/second) | `30`–`480` | Safety ceiling on chest angular speed. |
+| `MaxHeadAngularSpeed` | `float` | `150` (degrees/second) | `30`–`720` | Safety ceiling on head angular speed, not the dial that sets turn speed. A correctly tuned character never reaches this. |
+| `MaxTorsoAngularSpeed` | `float` | `90` (degrees/second) | `30`–`480` | Safety ceiling on chest angular speed. |
 | `MaxHeadYawDegrees` | `float` | `55` | `0`–`60` | Maximum yaw contributed by the neck+head chain. |
 | `MaxHeadPitchDegrees` | `float` | `32` | `0`–`45` | Maximum pitch contributed by the neck+head chain. |
 | `NeckShare` | `float` | `0.35` | `0`–`1` | Share of the head chain rotation carried by the neck bone; the rest goes to the head bone. |
@@ -152,8 +153,8 @@ When a look becomes a full-body reorientation.
 |---|---|---|---|---|
 | `EnableBodyTurn` | `bool` | `true` | — | Allow full-body reorientation toward the gaze target. The state policy still gates it. |
 | `BodyTurnCompletionToleranceDegrees` | `float` | `8` | `1`–`30` | Yaw error below which the turn is considered complete. |
-| `BodyTurnHeadRelief` | `float` | `0.4` | `0`–`1` | While a body turn is in flight, head/torso gaze offsets scale to this fraction, so the neck visibly relaxes and rides the turn. |
-| `ProceduralTurnSpeed` | `float` | `140` (degrees/second) | `45`–`540` | Peak speed of the procedural fallback turn used when no animated handler is available. |
+| `BodyTurnHeadRelief` | `float` | `1` | `0`–`1` | How much of its aim the head keeps while the body turns. At `1` the head stays on the target and unwinds only as fast as the body brings the target round; lower values let the head give up that fraction of its turn the moment the body turn is requested, before the body has actually moved. |
+| `ProceduralTurnSpeed` | `float` | `90` (degrees/second) | `45`–`540` | Peak speed of the procedural fallback turn used when no animated handler is available. This is the turn's fastest moment, not its average — the default pivots a standing character through 180° in about three and a half seconds. |
 
 ## Idle life
 
@@ -201,8 +202,8 @@ Nods and the interruption startle.
 | Field | Type | Default | Range | Description |
 |---|---|---|---|---|
 | `EnableListeningNods` | `bool` | `true` | — | Small acknowledgment nods while the character is listening. Never nods while it speaks. |
-| `NodPitchDegrees` | `float` | `4` | `1`–`10` | Peak downward pitch of a listening nod. |
-| `NodDurationSeconds` | `float` | `0.7` | `0.3`–`2` | Duration of one nod's double-bob envelope. |
+| `NodPitchDegrees` | `float` | `3` | `1`–`10` | Peak downward pitch of a listening nod. |
+| `NodDurationSeconds` | `float` | `0.55` | `0.3`–`2` | Duration of one nod — a single dip and a slower return. |
 | `ListeningNodIntervalMin` / `Max` | `float` | `3.5` / `8` | `1`–`20` / `2`–`30` | Interval range between listening nods. |
 | `AcknowledgeNodProbability` | `float` | `0.7` | `0`–`1` | Probability of a nod right when `Listening` begins. |
 | `EnableInterruptionReaction` | `bool` | `true` | — | Plays a one-shot ~1 second startle micro-reaction (re-acquisition saccade, blink, small head tilt) when the character is interrupted mid-sentence (`Speaking` → `Interrupted`). Non-repeating until the character speaks again. |
@@ -245,6 +246,28 @@ How eye contact softens as the player closes the distance.
 | `EnableProxemicRegulation` | `bool` | `true` | — | Soften eye contact instead of holding a fixed stare as the player leans in close (VR): the aversion floor rises, face-scan radius widens, and blink rate quickens the closer they get. Bypassed entirely while an eye-contact lock is in force. |
 | `ProxemicCloseDistanceMeters` | `float` | `0.6` | `0.2`–`1.5` | Distance at which the player starts to read as "close" — softening ramps in below this distance. |
 | `ProxemicIntensity` | `float` | `1` | `0`–`1` | Overall strength of the proxemic softening effect. `0` disables the effect while leaving the toggle on. |
+
+## Conversation attention
+
+How the character attends whoever else currently holds the floor while it is not in its own turn. The on/off switch lives on `ConvaiGazeController.AttendToSpeaker`; these are the manner-and-limits knobs, so one shared profile governs a whole cast. See [How gaze works](how-gaze-works.md#following-the-conversation).
+
+| Field | Type | Default | Range | Description |
+|---|---|---|---|---|
+| `SpeakerAttentionEngagement` | `float` | `0.6` | `0`–`1` | How committed a listener's attention is. Deliberately below the engagement of the character actually being spoken to — a bystander watches the speaker, it does not lock onto them. |
+| `SpeakerAttentionHeadContribution` | `float` | `0.7` | `0`–`1` | How much of the turn the head takes; the rest is eyes, so the eyes lead and the head follows. |
+| `SpeakerAttentionAllowBodyTurn` | `bool` | `false` | — | Allow a listener to turn its whole body toward the speaker. Off by default: a bystander shifts its gaze, it does not reposition itself. Also lets the character attend speakers beyond the comfortable head angle. |
+| `SpeakerAttentionMaxAngleDegrees` | `float` | `100` | `20`–`180` | Widest angle off the character's forward at which a speaker is still worth turning to, unless body turns are allowed. |
+| `SpeakerAttentionMaxDistance` | `float` | `10` (meters) | `1`–`40` | Distance beyond which a speaker is out of earshot for attention purposes. |
+| `ConversationReactionMedianSeconds` | `float` | `0.28` | `0.1`–`1` | Typical delay before a listener reacts to a new speaker. The actual delay is drawn per listener, per event, so a group never turns in lockstep. |
+| `ConversationReactionSpread` | `float` | `0.35` | `0`–`1` | How wide the reaction-delay draw spreads around the median. `0` makes every listener react at the same instant. |
+| `ConversationAttentionDecaySeconds` | `float` | `6` | `1`–`30` | How long a listener's attention keeps fading toward whoever it last attended before drifting to idle life. Not a timeout — the fade is continuous. |
+| `ConversationReactionMinSeparationSeconds` | `float` | `0.35` | `0`–`0.5` | Shortest gap enforced between two listeners' reactions to the same speech onset, so the room never turns as one. |
+| `SpeakerAttentionHoldSeconds` | `float` | `2.5` | `0`–`8` | How long a speaker keeps the floor after they stop talking, carrying a listener's look across the pauses in a turn. |
+| `SpeakerAttentionAversionStrength` | `float` | `0.2` | `0`–`1` | How much a listener lets its gaze wander while attending. `0` is an unbroken stare. |
+| `SpeakerAttentionInterruptionSeconds` | `float` | `0.6` | `0.05`–`5` | How long somebody else has to keep talking to take the floor from whoever holds it. Below this it is an interjection and the room's heads stay put. |
+| `EnableAudienceChecks` | `bool` | `true` | — | Also allow a rarer glance at the person being spoken to in the middle of a turn, in addition to the end-of-turn look. |
+| `AudienceCheckIntervalMin` / `Max` | `float` | `9` / `22` | `3`–`30` / `4`–`60` | Interval range between mid-turn audience-check glances. |
+| `AudienceCheckDuration` | `float` | `0.6` | `0.2`–`3` | How long one audience check lasts before attention returns to the speaker. |
 
 ## Performance
 

@@ -1,7 +1,7 @@
 ---
 title: Configure conversation flow
 description: Add the Conversation Flow module to a character, or let Convai auto-create it, then assign a profile to tune its timing.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Add `ConvaiConversationFlowController` to a character yourself, or let Convai add it automatically, then assign a `ConvaiConversationFlowProfile` to change how quickly it moves between dialogue states. Use this page once you want direct control over the module's timing instead of relying on its built-in defaults.
@@ -63,7 +63,7 @@ Select the character and drag the profile asset onto the **Flow Profile** field 
 {% step %}
 ### Tune the timing fields
 
-Open the profile asset and adjust its fields under **Transition**, **Dialogue Beats**, and **Energy** — for example, lower **Thinking Max Hold** for a character that should reply faster. See [Conversation flow reference](reference.md) for every field, its range, and its default.
+Open the profile asset and adjust its fields under **Transition**, **Dialogue Beats**, and **Energy** — for example, lower **Thinking Max Hold** for a character that should reply faster, or raise **Idle Return Delay** to keep the character attentive longer between turns. See [Conversation flow reference](reference.md) for every field, its range, and its default.
 {% endstep %}
 {% endstepper %}
 

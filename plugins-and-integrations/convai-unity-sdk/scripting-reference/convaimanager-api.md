@@ -1,6 +1,6 @@
 ---
 title: ConvaiManager API
-description: Scripting reference for ConvaiManager — the SDK entry point for connection control, facade access, conversation ownership, and service discovery.
+description: Every public member of the scene manager component, covering connection control, facade access, who the player is talking to, and service discovery.
 last_reviewed: "4.6.0"
 ---
 
@@ -12,7 +12,7 @@ last_reviewed: "4.6.0"
 var manager = ConvaiManager.ActiveManager;
 if (manager == null)
 {
-    Debug.LogError("ConvaiManager not found in scene. Add it via Convai → Create Manager.");
+    Debug.LogError("ConvaiManager not found in scene. Add it via GameObject > Convai > Setup Required Components.");
     return;
 }
 ```
@@ -86,10 +86,11 @@ Pass this to the second overload to override runtime behavior at connect time.
 | --------------------------- | ------------------------------------- | -------------------------------------------------------------------- |
 | `TurnTaking`                | `TurnTakingOptions`                   | Override the turn-taking configuration for this session. See [Turn-taking modes](../core-concepts/turn-taking-modes.md) for the full field reference. |
 | `EndUserId`                 | `string`                              | Override the end-user ID for this session (used by Long-Term Memory) |
+| `CharacterSessionId`        | `string`                              | Optional session ID scoped to this explicit end-user connection request. Prefer this over the character's own `ConvaiCharacter.CharacterSessionId` field when an end-user ID is present. |
 | `EndUserMetadata`           | `IReadOnlyDictionary<string, object>` | Additional metadata for the end user                                 |
 | `ActionConfigOverride`      | `ConvaiActionConfig`                  | Override the action configuration for this session                   |
 | `ActionDefinitionsOverride` | `List<ConvaiActionDefinition>`        | Override the action definitions registered for this session          |
-| `SharedSessionKey`          | `string`                              | Optional shared session key used to group multiplayer participants into the same room. See [Multi-character connection API reference](../features/multi-character-sessions/connection-api-reference.md). |
+| `SharedSessionKey`          | `string`                              | Optional shared session key used to group multiplayer participants into the same room. See [Connection API reference](../features/multi-character-sessions/connection-api-reference.md). |
 | `RoomSessionId`             | `string`                              | Durable multi-character room identifier used when joining an existing room. Set through `MultiCharacterJoinOptions` for normal use rather than directly. |
 | `JoinExistingMultiCharacterRoom` | `bool`                           | Selects a topology-free human join rather than building and sending a roster. |
 | `MaxNumParticipants`        | `int`                                 | Optional maximum number of participants for the shared session.      |
@@ -147,14 +148,23 @@ For richer session state data (transition context, participant changes, idle war
 
 ## Ownership management
 
-Use these methods to control which characters and player the manager owns, and which character is the active conversation target.
+Use these methods and properties to control which characters and player the manager owns, which characters join the next room connection, and which character the room opens on.
 
-| Method                                                           | Description                                                                                     |
+| Member                                                           | Description                                                                                     |
 | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `SetExplicitConversationTarget(ConvaiCharacter character)`       | Sets the active conversation target character. Pass `null` to clear.                            |
-| `SetExplicitPlayer(ConvaiPlayer player)`                         | Assigns a specific `ConvaiPlayer` instance as the managed player                                |
-| `SetExplicitCharacters(IEnumerable<ConvaiCharacter> characters)` | Replaces the managed character list with the provided set                                       |
-| `RefreshReferences()`                                            | Rescans the scene for `ConvaiCharacter` and `ConvaiPlayer` instances to rebuild the managed set |
+| `SetInitialCharacter(ConvaiCharacter character)`                 | Chooses which character speaks first when the room connects. This is setup, not steering — it decides where a conversation starts, and changing it on a connected room queues a reconnect rather than moving the conversation. Leaving it unset is normal: the first character in scene order takes the first turn. To move the conversation in a live room, use `TalkTo`. |
+| `InitialCharacter`                                                | `ConvaiCharacter`. The read half of `SetInitialCharacter`. `null` when nothing has been explicitly chosen. |
+| `TalkTo(ConvaiCharacter character)`                               | Points the conversation at one character in a live, multi-character room. Safe to call at any time; does nothing when the room is not multi-character or the character is not in it. See [Conversation targeting](../features/conversation-targeting/README.md). |
+| `AddressedCharacter`                                              | `ConvaiCharacter`. The character the player is currently talking to, resolved before a room exists and after. Bind chat field labels to this, never to whoever the player happens to be looking at. |
+| `ConversationAvailability`                                        | `ConvaiConversationAvailability`. Whether the player can talk to `AddressedCharacter` right now. Values: `NoCharacter`, `Offline`, `Connecting`, `Preparing`, `Ready`, `Answering`, `Unavailable`. |
+| `ConversationAvailability.CanAcceptPlayerInput()`                 | Extension method on `ConvaiConversationAvailability`. Returns `true` when the value is `Ready` or `Answering` — the only two states that accept a message. Gate chat fields and microphone buttons on this, not on `IsConnected`. |
+| `ConversationTargeting`                                           | `ConversationTargetingOptions`. Tuning for automatic conversation targeting (mode, range, look angle, switch margin, switch delay). Never `null`. |
+| `SetCharactersToConnect(IEnumerable<ConvaiCharacter> characters)` | Selects the exact set of owned characters included in the next room connection, replacing any previous selection. Passing an empty collection intentionally leaves the next connection without a valid character roster. Changes apply to the next connection, not the current one. |
+| `CharactersToConnect`                                             | `IReadOnlyList<ConvaiCharacter>`. The explicit room selection set by `SetCharactersToConnect`, or empty while every active character is included. The selection is an exact set rather than a list to append to — read this before calling `SetCharactersToConnect` if you mean "and also this one." |
+| `UseAllCharactersForConnection()`                                 | Restores the default behavior where every owned, active scene character is included in the next room connection. |
+| `SetExplicitPlayer(ConvaiPlayer player)`                          | Assigns a specific `ConvaiPlayer` instance as the managed player                                |
+| `SetExplicitCharacters(IEnumerable<ConvaiCharacter> characters)`  | Replaces the managed character list with the provided set                                       |
+| `RefreshReferences()`                                             | Rescans the scene for `ConvaiCharacter` and `ConvaiPlayer` instances to rebuild the managed set |
 
 ### Characters spawned at runtime
 
@@ -278,9 +288,9 @@ public class SceneConnector : MonoBehaviour
 ```
 {% endcode %}
 
-## Example 2 — Swap conversation target on trigger zone entry
+## Example 2 — Move the conversation on trigger zone entry
 
-A corporate onboarding simulation has multiple AI advisors in a room. When a learner walks into an advisor's zone, that advisor becomes the active conversation target.
+A corporate onboarding simulation has multiple AI advisors in a room. When a learner walks into an advisor's zone, the conversation moves to that advisor with `TalkTo`.
 
 {% code title="AdvisorZone.cs" %}
 ```csharp
@@ -295,13 +305,7 @@ public class AdvisorZone : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        ConvaiManager.ActiveManager?.SetExplicitConversationTarget(_advisor);
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (!other.CompareTag("Player")) return;
-        ConvaiManager.ActiveManager?.SetExplicitConversationTarget(null);
+        ConvaiManager.ActiveManager?.TalkTo(_advisor);
     }
 }
 ```
@@ -342,7 +346,7 @@ public class MicrophonePicker : MonoBehaviour
 
 | Symptom | Likely Cause | Fix |
 | ------- | ------------ | --- |
-| `ActiveManager` returns `null` at runtime | `ConvaiManager` not in scene, or accessed before bootstrap completes | Add via **Convai → Create Manager**; null-check before use; subscribe to `OnConnected` instead of reading state in `Awake` or `OnEnable` |
+| `ActiveManager` returns `null` at runtime | `ConvaiManager` not in scene, or accessed before bootstrap completes | Add via **GameObject > Convai > Setup Required Components**; null-check before use; subscribe to `OnConnected` instead of reading state in `Awake` or `OnEnable` |
 | `TryGet*` returns `false` | Service unavailable or manager not fully bootstrapped | Check `IsBootstrapped` before calling; call after `OnConnected` fires |
 | `ConnectAsync` stays `Running` indefinitely | Invalid API key, network unreachable, or `ConvaiSettings` asset missing | Verify API key in **Convai → Settings**; use a timeout `CancellationToken` to surface the failure |
 | `RefreshReferences` does not find a dynamically spawned character | Characters instantiated after scene load are not auto-discovered | Call `RefreshReferences()` after instantiation, or use `SetExplicitCharacters()` to register them directly |

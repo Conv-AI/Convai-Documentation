@@ -3,15 +3,20 @@ title: Import and run sample scenes
 description: >-
   Import the bundled sample scenes and verify the SDK is installed and connected
   correctly before building your own scene.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
-The Convai SDK for Unity ships with two sample scenes. Running one is the fastest way to confirm your installation, API key, and audio setup are working before you build your own scene.
+The Convai SDK for Unity ships with three sample scenes. Running one is the fastest way to confirm your installation, API key, and audio setup are working before you build your own scene.
 
 | Sample | Description |
 | --- | --- |
 | **Basic Sample** | Core setup and interaction flow with `Convai_Char_Robot`, a non-humanoid character |
 | **LipSync Sample** | High-quality character `Sofia` with real-time lip sync, plus a debug hub for inspecting emotion, dynamic context, and vision state during Play mode |
+| **Multi-Character Sample** | A shared-room sample demonstrating multiple Convai characters, interaction targeting, transcript UI, and runtime roster changes |
+
+{% hint style="warning" %}
+The Multi-Character Sample reuses the shared `Sofia` character assets from the LipSync Sample. Import the LipSync Sample first — importing the Multi-Character Sample on its own leaves those character assets missing.
+{% endhint %}
 
 The steps for locating the samples differ depending on how you installed the SDK.
 
@@ -51,7 +56,7 @@ When installed via the Asset Store, all sample scenes are imported into your pro
 Assets/Convai SDK For Unity/Samples/
 ```
 
-Two folders are present: `BasicSample` and `LipSyncSample`.
+Three folders are present: `BasicSample`, `LipSyncSample`, and `MultiCharacterSample`.
 {% endstep %}
 
 {% step %}
@@ -72,7 +77,7 @@ Once the scene is open:
 Press **Play**. The Unity Console logs the following lines as the SDK initializes:
 
 * `[ConvaiRuntime] Started successfully` — SDK initialized all internal services
-* `[RoomConnectionRuntimeAdapter] Character <character-id> connected successfully (mode=create).` — character connected to Convai
+* `[RoomConnectionRuntimeAdapter] Room connection succeeded (mode=create).` — the room connected to Convai
 
 Speak into your microphone. The character responds with voice and text output.
 

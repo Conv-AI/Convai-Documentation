@@ -1,7 +1,7 @@
 ---
 title: How vision works
 description: Understand the Vision pipeline architecture, including frame sources, publish policy, the WebRTC track to Convai, and how dynamic vision context fits in.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Vision streams a live camera feed from Unity to Convai, where it is processed alongside the audio conversation. This page explains the pipeline architecture, the role of each component, and what the SDK does at runtime when Vision starts.
@@ -49,14 +49,14 @@ On WebGL, `ConvaiVisionPublisher` bypasses the frame source entirely and publish
 
 Understanding which component belongs where prevents the most common setup mistakes.
 
-| Component | Where to place it | Notes |
-| --- | --- | --- |
-| `ConvaiRoomManager` | Any persistent scene GameObject | **Connection Type** must be set to **Video** |
-| `ConvaiVisionPublisher` | Any persistent scene GameObject | Typically placed on or near the NPC's root |
-| `CameraVisionFrameSource` | Same or child GameObject as the publisher | One per capture source |
-| `WebcamVisionFrameSource` | Same or child GameObject as the publisher | One per capture source |
-| `QuestVisionFrameSource` | Same or child GameObject as the publisher | Meta Quest 3 / 3S only; requires Meta XR SDK |
-| `VisionDebugPreview` | Any scene GameObject | Editor-only; auto-disabled in player builds |
+| Component | Add via | Where to place it | Notes |
+| --- | --- | --- | --- |
+| `ConvaiRoomManager` | — | Any persistent scene GameObject | **Connection Type** must be set to **Video** |
+| `ConvaiVisionPublisher` | — | Any persistent scene GameObject | Typically placed on or near the NPC's root. Has no `Add Component` menu entry — add it as a script component directly. |
+| `CameraVisionFrameSource` | `Convai/Vision/Camera Vision Frame Source` | Same or child GameObject as the publisher | One per capture source |
+| `WebcamVisionFrameSource` | `Convai/Vision/Webcam Vision Frame Source` | Same or child GameObject as the publisher | One per capture source |
+| `QuestVisionFrameSource` | `Convai/Vision/Quest Vision Frame Source` | Same or child GameObject as the publisher | Meta Quest 3 / 3S only; requires Meta XR SDK |
+| `VisionDebugPreview` | `Convai/Vision/Vision Debug Preview (Editor Only)` | Any scene GameObject | Editor-only; auto-disabled in player builds |
 
 ## Startup sequence
 
@@ -84,7 +84,7 @@ The reason this exists is token cost, not network transport. An attached frame c
 | --- | --- |
 | `Auto` (default) | Vision context is enabled only when **Connection Type** is already Video. Audio-only rooms are never upgraded automatically. |
 | `Enabled` | Always enables vision context and forces the room's effective connection type to Video. |
-| `Disabled` | Never sends vision context configuration. **Connection Type** is left untouched, so legacy native-video paths keep publishing without backend sampling. |
+| `Disabled` | Never sends vision context configuration. **Connection Type** is left untouched, so the standard frame-source publishing path keeps publishing without backend sampling. |
 
 When enabled, `ConvaiRoomManager` sends a `vision_input_config` payload on room connect that describes the sampling interval, frames-per-turn budget, buffer size, staleness window, and resolution cap. Convai then decides which buffered frames to attach to a turn and whether a vision update should stay silent, let the model decide, or force a response — configured per lane through `ConvaiVisionRespondModeSettings`.
 

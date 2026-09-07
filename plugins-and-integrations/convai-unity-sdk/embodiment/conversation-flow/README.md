@@ -1,7 +1,7 @@
 ---
 title: Conversation flow
 description: Understand what the Conversation Flow module tracks in a conversation and why every other embodiment module depends on its timing.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Conversation Flow is the embodiment module that decides a character's dialogue state — idle, listening, thinking, or speaking — and every other embodiment module reads that state instead of tracking its own version of it. You rarely add it by hand: Convai adds a controller automatically the moment another module needs a dialogue state to read. This page explains what the module owns and why the modules that depend on it behave the way they do.
@@ -14,6 +14,21 @@ Conversation Flow is the embodiment module that decides a character's dialogue s
 
 ***
 
+## How a speaking turn ends
+
+A speaking turn ends the moment the character's own voice stops, not when Convai confirms the turn is over. Convai's turn-completed confirmation is sent after the sound has already finished, so a character that waited for it kept performing for as long as that message took to arrive. The controller instead watches locally and leaves `Speaking` as soon as it has local evidence the response is over, and every module that reads `Speaking` — Body Animation's talk layer among them — winds down from that same moment.
+
+Two sources of local evidence feed this, and the controller acts on whichever reports the end first:
+
+- **The character's voice.** A gap between two sentences sounds the same as an ending, so the controller waits `0.4` seconds before treating silence as the turn's end.
+- **Lip Sync, when the character has it.** Speech animation arrives ahead of the audio it belongs to, so Lip Sync knows where a response ends before the sound gets there, with no hold needed.
+
+This is fixed behavior — the same for every character and not configurable on `ConvaiConversationFlowProfile`. The controller also notices you the moment it has local evidence you have started talking, ahead of Convai's own confirmation that it heard you — the opposite edge of a turn, and equally fixed. See [Conversation flow reference](reference.md#fixed-behavior) for both behaviors.
+
+`ConvaiCharacter.IsSpeaking`, `OnSpeechStopped`, and `OnTurnCompleted` are unaffected — they still report Convai's own verdict, not the controller's local one.
+
+***
+
 ## Why every other module reads it
 
 Without a dialogue state to read, Gaze, Body Animation, Body Language, and Emotion cannot tell listening apart from speaking, and fall back to their neutral behavior: eye contact stops differentiating a listening beat from a thinking pause, and gesture and expression intensity stop scaling with speaking energy. Conversation Flow is what turns those otherwise-neutral behaviors into ones that track the actual shape of a conversation.
@@ -22,7 +37,7 @@ Without a dialogue state to read, Gaze, Body Animation, Body Language, and Emoti
 
 ## Convai adds it automatically when needed
 
-A character does not need an authored `ConvaiConversationFlowController` to get one. Body Animation's `Auto Create Conversation Flow` setting (enabled by default) asks Convai to provision the controller the moment the character needs a dialogue state and none exists yet. Gaze, Body Language, and Emotion read the state when it is present, but degrade gracefully to `Idle` rather than provisioning a controller themselves. When Convai adds one, the Console logs once, naming the character:
+A character does not need an authored `ConvaiConversationFlowController` to get one. Body Animation's **Auto Create Conversation Flow** setting (enabled by default) asks Convai to provision the controller the moment the character needs a dialogue state and none exists yet. Emotion does the same, but only when one of its dialogue-driven touches is actually turned on — its listening lift, thinking look, or reaction accents — since none of them ship enabled by default. Gaze and Body Language read the state when it is present, but degrade gracefully to `Idle` rather than provisioning a controller themselves. When Convai adds one, the Console logs once, naming the character:
 
 ```text
 [ConvaiConversationFlowController] Added to '<character name>' because an embodiment module on this character needs the dialogue state. Add the component yourself if you want to configure it.

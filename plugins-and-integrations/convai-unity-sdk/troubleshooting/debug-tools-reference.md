@@ -1,7 +1,7 @@
 ---
 title: Debug tools reference
 description: Reference for Convai SDK debug tools, including the Troubleshooter, per-module editor windows, logging, and client latency metrics.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 The Convai Unity SDK ships with a layered set of diagnostic tools: the Convai Troubleshooter, per-module editor windows, a configurable logging system with per-subsystem verbosity control, a live Inspector probe for action debugging, real-time session diagnostics on `ConvaiRoomManager`, session metrics emitted to the Console, and client-side latency measurements for conversation pipeline profiling. This page is the complete reference for all of them.
@@ -20,7 +20,7 @@ Each embodiment module and Actions has its own authoring and diagnostic window, 
 
 | Window | Menu path | What it shows |
 | --- | --- | --- |
-| Actions Editor | `Convai → Actions Editor` | Authoring, testing, and a **Live** tab — the batch in progress, a timeline of recent batches with each step's duration and outcome, the merged target registry, and per-action insights. The Live tab replaced the standalone action debug window in SDK `4.5.0` |
+| Actions Editor | `Convai → Actions Editor` | Authoring, testing, and a **Live** tab — the batch in progress, a timeline of recent batches with each step's duration and outcome, the merged target registry, and per-action insights |
 | Embodiment Editor | `Convai → Embodiment Editor` | **Setup**, **Presets**, and **Live** tabs for a character's embodiment stack |
 | Gaze Editor | `Convai → Gaze Editor` | Setup and tuning for the Gaze module |
 | Body Animation Editor | `Convai → Body Animation Editor` | Setup and tuning for the Body Animation module |
@@ -170,7 +170,7 @@ ConvaiLogger.UnregisterSink(mySink);
 
 ## ConvaiActionDebugProbe
 
-`ConvaiActionDebugProbe` is the primary diagnostic tool for the Actions feature. It subscribes to every dispatcher event and surfaces live counters and the last-seen action data directly in the Inspector — no custom logging required. SDK `4.5.0` renamed its Add Component entry and Inspector title to **Convai Action Monitor**; the C# type name, `ConvaiActionDebugProbe`, and all serialized data are unchanged.
+`ConvaiActionDebugProbe` is the primary diagnostic tool for the Actions feature. It subscribes to every dispatcher event and surfaces live counters and the last-seen action data directly in the Inspector — no custom logging required. The component's Add Component entry is **Convai/Actions/Diagnostics/Convai Action Monitor**; its Inspector title is **Action Monitor**.
 
 **Add via:** Add Component → **Convai/Actions/Diagnostics/Convai Action Monitor**
 
@@ -262,6 +262,8 @@ if (room?.DiagnosticsCoordinator != null)
 
 `SessionMetrics` logs session lifecycle events to the Console. Messages tagged Debug follow the same conditional-compilation rule as every other Debug-level log call — see the [Log levels](#log-levels) hint above.
 
+The SDK's logger automatically prefixes every Console entry with `[SourceFileName]`, taken from the source file that logged it. The messages below are the message body that follows that prefix — search the Console for the message text, not the full line.
+
 | Message | Level | When it appears |
 | --- | --- | --- |
 | `[SessionMetrics] Metrics reset` | Debug | Metrics were reset programmatically |
@@ -282,6 +284,8 @@ Latency entries appear automatically in the Console after each completed turn:
 ```text
 [ClientLatency] Player: stop→finalTranscript=120ms | Character: stop→firstTranscript=450ms stop→ttsStarted=520ms stop→firstLipSync=600ms stop→audioPlaying=650ms (audioHoldForLipSync=130ms)
 ```
+
+The logger's automatic `[SourceFileName]` prefix precedes this line as well, so the entry in the Console reads `[ClientLatencyMetricsCollector] [ClientLatency] ...` — filter by `[ClientLatency]` to find it.
 
 ### Latency segment reference
 
@@ -305,9 +309,9 @@ Latency entries appear automatically in the Console after each completed turn:
 
 ## LipSync drift monitor
 
-SDK `4.4.0` removed the public `IBlendshapeSink` extension seam entirely — no type of that name remains in the SDK, and custom runtime sink injection is no longer supported. Drive lip sync through a supported map or profile on `ConvaiLipSyncComponent` instead. The related types `SkinnedMeshBlendshapeSink`, `LipSyncDriftMonitor`, `LipSyncDriftSample`, and `LipSyncDriftEvent` were not removed — they were internalized, so they still exist but are no longer part of the public API.
+Custom runtime sink injection is not supported — the SDK has no public extension seam for it. Drive lip sync through a supported map or profile on `ConvaiLipSyncComponent` instead. The related types `SkinnedMeshBlendshapeSink`, `LipSyncDriftMonitor`, `LipSyncDriftSample`, and `LipSyncDriftEvent` exist in the SDK but are internal, not part of the public API.
 
-The drift monitor window no longer has its own top-level `Convai` menu entry. Select a character's `ConvaiLipSyncComponent`, open its Inspector, and select **Open Drift Monitor** near the latency settings. The window opens titled **LipSync Drift**.
+Open the drift monitor from a character's `ConvaiLipSyncComponent` Inspector: select **Open Drift Monitor** near the latency settings. The window opens titled **LipSync Drift**.
 
 Monitoring is opt-in: enable the **Monitor** toggle, enter Play mode, and talk to a character to populate data. Select a character from the dropdown when more than one is registered — samples and events are tracked per character.
 

@@ -1,9 +1,9 @@
 ---
 title: Character and Player API
 description: >-
-  Reference for ConvaiCharacter and ConvaiPlayer, including properties, methods,
-  and events for session control, speech, audio, and attention.
-last_reviewed: "4.5.0"
+  Reference for the character and player scripting components, covering
+  session control, speech, audio, and attention targeting.
+last_reviewed: "4.6.0"
 ---
 
 `ConvaiCharacter` controls a single AI character's session, speech, remote audio, dynamic context, and attention targeting. `ConvaiPlayer` represents the local human participant and provides text message sending and identity configuration. Both components are owned and tracked by `ConvaiManager`.
@@ -108,11 +108,16 @@ Per-character audio control lets you mute individual characters in multi-charact
 
 ### Dynamic context and narrative
 
-| Method                                                          | Returns | Description                                                                                                                   |
-| --------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `SendDynamicInfo(string contextText)`                           | `void`  | Sends a dynamic context update to Convai for this character. Updates the character's in-session context without reconnecting. |
-| `SendTrigger(string triggerName, string triggerMessage = null)` | `void`  | Sends a Narrative Design trigger by name. `triggerMessage` overrides the trigger's configured message if provided.            |
-| `UpdateTemplateKeys(Dictionary<string, string> templateKeys)`   | `void`  | Updates Narrative Design template key values for dynamic narrative variable substitution.                                     |
+| Method                                                                                       | Returns | Description                                                                                                      |
+| ---------------------------------------------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------- |
+| `DynamicContext.AddEvent(string text, ConvaiRespondMode reaction = ConvaiRespondMode.Auto)`   | `void`  | Appends a chronological event to the character's tracked dynamic context and stages a batched update to Convai. |
+| `SendTrigger(string triggerName)`                                                              | `void`  | Invokes a saved Narrative Design trigger by name.                                                                |
+| `SendNarrativeEvent(string eventMessage)`                                                     | `void`  | Sends inline narrative event context and lets Convai respond naturally.                                          |
+| `UpdateTemplateKeys(Dictionary<string, string> templateKeys)`                                 | `void`  | Updates Narrative Design template key values for dynamic narrative variable substitution.                       |
+
+{% hint style="info" %}
+`SendTrigger` fires a trigger already configured in Narrative Design by name. `SendNarrativeEvent` sends an inline message you compose in code instead. Use whichever matches where the event text is authored.
+{% endhint %}
 
 ### Attention and actions
 
@@ -341,7 +346,7 @@ public class AccessibilityTextInput : MonoBehaviour
 | Symptom                                                   | Likely Cause                                                      | Fix                                                                                                 |
 | --------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `WaitForCharacterReadyAsync` times out                    | Character never receives ready confirmation from Convai           | Verify API key, check network; call after `StartConversationAsync` succeeds, not before             |
-| `SendDynamicInfo` has no visible effect                   | Called before character session is connected                      | Call after `WaitForCharacterReadyAsync` resolves successfully                                       |
+| `DynamicContext.AddEvent` has no visible effect            | Called before the character is in conversation, so the event is staged locally but not yet sent | The staged event sends automatically once `WaitForCharacterReadyAsync` resolves; `DynamicContext.Flush()` also only sends once in conversation |
 | `ToggleRemoteAudio()` has no effect                       | `EnableRemoteAudioOnStart` is `false` and audio was never enabled | Call `EnableRemoteAudio()` first to activate audio, then toggle                                     |
 | `SendTextMessage` sends but character does not respond    | Session not in `Connected` state                                  | Check `character.IsSessionConnected` before sending                                                 |
 | `OnActionsReceived` fires but no in-scene actions execute | `ConvaiActionDispatcher` not in scene or action names don't match | Verify dispatcher is present; action names are case-insensitive but must match the configured names |

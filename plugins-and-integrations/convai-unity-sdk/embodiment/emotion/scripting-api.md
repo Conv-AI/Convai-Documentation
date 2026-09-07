@@ -1,7 +1,7 @@
 ---
 title: Emotion scripting API
-description: Reference for ConvaiEmotionController — reading emotion state, mood control, locks, overrides, events, and known emotion labels.
-last_reviewed: "4.5.0"
+description: Explains how to read a character's emotion state from script, control mood, lock or override expressions, and subscribe to emotion events.
+last_reviewed: "4.6.0"
 ---
 
 The Emotion system exposes two paths for reacting to and controlling emotional state at runtime. The **Inspector path** uses `ConvaiCharacterEventRelay` — a component that surfaces raw emotion callbacks as Unity Events, requiring no code. The **scripting path** uses `ConvaiEmotionController` directly, exposing the full C# API for reading composed state, controlling mood, injecting overrides, and locking expressions. Both paths can be used simultaneously. For the conceptual difference between a transient emotion and a resting mood, see [Moods](moods.md).

@@ -1,7 +1,7 @@
 ---
 title: How dynamic context works
 description: Understand how Dynamic Context tracks scene state and events, batches updates, and reports acknowledgement and token feedback.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Dynamic Context gives characters a live, structured view of what is happening in the scene. Instead of relying only on the static system prompt configured on the Convai dashboard, a character can reference a trainee's current location, the equipment they have collected, or an alarm that recently triggered — because that information was injected directly into the session as it occurred. This page explains the underlying model: the two primitives the SDK tracks, how they assemble into a canonical context string, how updates batch and flush, and how the SDK reports back what happened to each update.
@@ -18,7 +18,7 @@ Both primitives feed into the character's awareness simultaneously. States provi
 
 ## Canonical context format
 
-Before an update reaches Convai, the SDK assembles a canonical context string from all tracked states and events:
+Before an update reaches Convai, the SDK assembles a canonical context string from all tracked states and events. This base format is unconditional — every update includes it, and for a batch whose aggregated reaction is `Silent` it is the entire text sent:
 
 ```text
 {StateName} is {Value}
@@ -50,15 +50,52 @@ Operator bypassed interlock
 
 You supply only names, values, and event text. The SDK assembles and delivers the canonical string automatically.
 
+## Delta narration on a non-Silent batch
+
+The canonical block above is not the whole story whenever the pending batch's aggregated reaction is `Auto` or `MustRespond` — the common case, since `AddEvent`'s default reaction is `Auto` and any call passed a non-`Silent` reaction produces the same effect for its batch. On a non-`Silent` batch, the SDK appends a delta-narration line after the canonical block for every state that changed **in that batch** — not for every tracked state, only the ones this update touched:
+
+- A state staged for the first time reports `"{StateName} is {Value}"`. The canonical block above omits that state's own "is" line on this batch, so it is not listed twice — it appears once, in the delta tail.
+- A state that already had a value reports `"{StateName} changed from {PreviousValue} to {CurrentValue}"`, unless the new value is more than three whitespace-separated words long, in which case the destination is dropped and the tail reports only `"{StateName} changed from {PreviousValue}"`.
+
+The recorded previous value is the value the state held before the *first* change staged for it in the current batch — if a state is set more than once before the batch flushes, only the first previous value and the final current value appear in the delta line, not every intermediate value.
+
+Canonical and delta lines are joined with a newline, canonical block first:
+
+```text
+Station is Bay 7
+HazardLevel is High
+Operator bypassed interlock
+Station changed from Bay 3 to Bay 7
+```
+
+**Example — a batch that escalates to `Auto`:**
+
+```csharp
+// Already delivered in an earlier batch: Station is "Bay 3", HazardLevel is "High".
+
+context.SetState("Station", "Bay 7");                  // default reaction: Silent
+context.AddEvent("Operator bypassed interlock");        // default reaction: Auto — outranks Silent for this batch
+```
+
+The `AddEvent` call's default `Auto` reaction outranks `SetState`'s default `Silent`, so the whole batch's aggregated reaction is `Auto`. `Station` is the only state that changed in this batch, so it is the only one that gets a delta line — `HazardLevel`, untouched by this update, appears only once, in the canonical block, exactly as it would on a `Silent` batch.
+
+**Example — the word cap on a changed value:**
+
+```csharp
+context.SetState("HazardLevel", "Confirmed multi-agent chemical exposure across Bay 7", ConvaiRespondMode.Auto);
+```
+
+`"Confirmed multi-agent chemical exposure across Bay 7"` is seven whitespace-separated words, more than the three-word cap, so the delta line drops the destination: `HazardLevel changed from High`. The full new value still reaches the character — it is the current line in the canonical block above (`HazardLevel is Confirmed multi-agent chemical exposure across Bay 7`); the cap only shortens the narration line that follows it.
+
 ## Two entry points to the same tracker
 
 Dynamic Context has two entry points that write to the same underlying tracker and produce identical network behavior.
 
 **Inspector — `ConvaiDynamicContextRelay`**
 
-`ConvaiDynamicContextRelay` is the Inspector entry point. It replaces the retired `ConvaiDynamicContextCommand` component. Add it via **Convai → Dynamic Context → Convai Dynamic Context Relay**, either on the same GameObject as `ConvaiCharacter` or on any GameObject with an explicit **Character** reference assigned. If **Character** is empty and **Auto Resolve Character** is enabled (the default), the relay looks for a `ConvaiCharacter` on its own GameObject at call time.
+`ConvaiDynamicContextRelay` is the Inspector entry point for Dynamic Context. Add it via **Convai → Dynamic Context → Convai Dynamic Context Relay**, either on the same GameObject as `ConvaiCharacter` or on any GameObject with an explicit **Character** reference assigned. If **Character** is empty and **Auto Resolve Character** is enabled (the default), the relay looks for a `ConvaiCharacter` on its own GameObject at call time.
 
-Unlike `ConvaiDynamicContextCommand`, one relay does not encapsulate a single preconfigured operation, so you no longer need a child GameObject per command. The relay exposes public methods that call directly into `character.DynamicContext`: `SetState(name, value)`, `AddEvent(text)`, `SetCurrentAttentionObject(objectName)`, `ClearCurrentAttentionObject()`, `ResetContext()` / `ResetContext(removeStatic)`, and `Flush()`. Bind any of these to a `UnityEvent` — a trigger collider, a timeline marker, or a UI button — the same way you would bind any other public `MonoBehaviour` method. One relay component can serve several different `UnityEvent` callbacks on the same character.
+The relay exposes public methods that call directly into `character.DynamicContext`: `SetState(name, value)`, `AddEvent(text)`, `SetCurrentAttentionObject(objectName)`, `ClearCurrentAttentionObject()`, `ResetContext()` / `ResetContext(removeStatic)`, and `Flush()`. Bind any of these to a `UnityEvent` — a trigger collider, a timeline marker, or a UI button — the same way you would bind any other public `MonoBehaviour` method. One relay component can serve several different `UnityEvent` callbacks on the same character.
 
 Two Inspector fields apply as defaults to every call made through that relay instance: **Reaction Mode** sets the `ConvaiRespondMode` passed with each call (default `Silent`), and **Flush Immediately**, when enabled, calls `Flush()` right after the operation so the update bypasses the batch delay. Because the relay always passes its configured **Reaction Mode** explicitly, a method's own scripting default does not apply when the call is routed through the relay — for example, `AddEvent`'s scripting default of `Auto` is overridden by whatever **Reaction Mode** the relay is set to.
 
@@ -111,9 +148,7 @@ When the session disconnects, the SDK marks the tracked context for a full canon
 
 When multiple staged changes carry different respond modes, the strongest one wins for the whole batch: `MustRespond` outranks `Auto`, which outranks `Silent`.
 
-{% hint style="warning" %}
-**Renamed in SDK 4.4.0.** `ConvaiContextReactionMode` is removed. Dynamic context and dynamic vision context now share one respond-mode vocabulary, `ConvaiRespondMode` (namespace `Convai.Runtime`): `SyncOnly` maps to `Silent`, `ReactImmediately` maps to `MustRespond`, and `Auto` is unchanged.
-{% endhint %}
+Dynamic context and dynamic vision context share one respond-mode vocabulary, `ConvaiRespondMode` (namespace `Convai.Runtime`), whose values are `Silent`, `Auto`, and `MustRespond`.
 
 {% hint style="warning" %}
 `Apply()` is the one exception: it does not stage or queue. Calling it while the character is not in conversation discards the update. Use `SetState`, `AddEvent`, or the other tracked methods for context that must survive until a conversation starts.

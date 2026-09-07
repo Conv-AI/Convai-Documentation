@@ -1,7 +1,7 @@
 ---
 title: Gaze scripting reference
 description: Reference for the Convai Gaze system's public API, including the controller, gaze readings, handles, and the target provider interface.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Complete reference for the public types in the Convai Gaze system. Types live in the `Convai.Modules.Gaze.Components`, `Convai.Modules.Gaze.Core`, `Convai.Modules.Gaze.Providers`, `Convai.Domain.Embodiment.Readings`, and `Convai.Domain.Embodiment.Semantics` namespaces, as noted per type.
@@ -21,6 +21,7 @@ The Convai Gaze system's composition root: it decides what the character looks a
 | `Current` | `GazeReading` | The character's latest gaze reading, published every cognition tick. |
 | `PlayerAnchorOverride` | `Transform` | The transform this character treats as "the player". `null` (default) resolves to `Camera.main`, then any enabled camera. Assign for split-screen, multiplayer, or cutscene rigs; applies immediately at runtime. |
 | `EyeContactMode` | `GazeEyeContactMode` | How eye contact is governed. Settable at runtime; ramps in smoothly. |
+| `AttendToSpeaker` | `GazeSpeakerAttention` | Whether the character turns to whoever else is currently speaking while it is not in its own turn. Values: `Off`, `Player`, `Characters`, `Anyone` (default). Settable at runtime. |
 | `FocusFidelity` | `GazeFocusFidelity` | Precision used while `EyeContactMode` is active. |
 | `PlayerAnchorAimMode` | `GazeAnchorAimMode` | How the player anchor's conversational aim point is derived. |
 | `PlayerAnchorAimOffset` | `Vector3` | Anchor-local aim offset used by `GazeAnchorAimMode.LocalOffset`. |
@@ -177,6 +178,19 @@ How a character turns its body when it looks at something it cannot reach with h
 | `SteppingTurn` | `0` | Plays the character's own turn animation, so the feet step round. Needs turn clips in the Animation Set and the Body Animation module; falls back to smooth rotation without either. |
 | `SmoothRotation` | `1` | Rotates the character directly, at the speed the gaze profile sets. Needs no clips and no animation module. |
 
+## `GazeSpeakerAttention`
+
+Enum — `Convai.Modules.Gaze.Components`
+
+Whether a character turns to whoever is currently speaking in the room, and to whom. Applies only while the character is not in its own turn, so it never competes with the character's own conversational gaze. Set through `ConvaiGazeController.AttendToSpeaker`; the manner and limits of the look are tuned in the profile's [Conversation attention](profile-reference.md#conversation-attention) group.
+
+| Value | Integer | Description |
+|---|---|---|
+| `Off` | `0` | Never follow another participant's turn. |
+| `Player` | `1` | Turn to the player while the player is speaking; ignore other characters' turns. |
+| `Characters` | `2` | Turn to another character while that character is speaking; never to the player. |
+| `Anyone` | `3` | Turn to whoever holds the floor, player or character (default). A player barging in over a speaking character takes the floor immediately. |
+
 ## `GazeTargetKind`
 
 Enum — `Convai.Domain.Embodiment.Semantics`
@@ -206,7 +220,7 @@ public interface IGazeTargetProvider
 }
 ```
 
-`GazeTargetCandidate` is a readonly struct carrying `Kind` (`GazeTargetKind`), `Priority` (`int`, higher tiers always win), `Relevance` (`float`, `0`–`1`, `0` removes the candidate), `Target` (`Transform`, optional), `WorldPoint` (`Vector3`), and `DebugName` (`string`).
+`GazeTargetCandidate` is a readonly struct carrying `Kind` (`GazeTargetKind`), `Priority` (`int`, higher tiers always win), `Relevance` (`float`, `0`–`1`, `0` removes the candidate), `Target` (`Transform`, optional), `WorldPoint` (`Vector3`), `DebugName` (`string`), and `HasFace` (`bool`, default `false`) — whether there is a face at `WorldPoint` worth looking around rather than aiming at exactly. A provider that does not set it gets exact aim; set it `true` only when the point really is somebody's face.
 
 ## `GazeCapabilityInfo`
 
@@ -244,6 +258,9 @@ Mutable, reusable capture of the full gaze runtime state for HUDs and tests. All
 | `LeftEyeAngles` / `RightEyeAngles` | `Vector2` | Solved eye yaw/pitch in degrees, orbit space. |
 | `EyePhase` | `string` | Current fixation/saccade phase label (`"Fixating"`, `"Saccade"`, `"Pursuit"`, and similar). |
 | `ContactErrorDegrees` | `float` | Live angular error between where the eyes aim and where the gaze target actually is. `float.NaN` while disengaged. |
+| `AimErrorDegrees` | `float` | Composed angular error between where the eyes actually point and the target, including every offset applied after the solver's own goal. `float.NaN` while disengaged. |
+| `TargetHasFace` | `bool` | Whether the current target is somebody's face, so face scanning applies. |
+| `LookNature` | `string` | What the character means by the current look — `"Glance"`, `"Attention"`, `"Reflex"`. |
 | `FocusActive` | `bool` | Whether a product-level conversational focus scope is active. |
 | `FocusFidelity` | `GazeFocusFidelity` | Precision contract applied while `FocusActive` is true. |
 | `FocusDegraded` | `bool` | Whether focus is retaining a last-known point because its anchor is unavailable. |
@@ -253,10 +270,31 @@ Mutable, reusable capture of the full gaze runtime state for HUDs and tests. All
 | `IsNodding` | `bool` | Whether a listening backchannel nod is currently playing. |
 | `PlayerAttention` | `float` | Smoothed 0–1 "is the player looking at me" estimate from a `PlayerAttentionSensor`, or `-1` when no sensor is present. |
 | `PlayerLooking` | `bool` | The sensor's post-hysteresis classification. Only meaningful while `PlayerAttention` is not negative. |
+| `AttendingSpeaker` | `bool` | Whether the character is currently following somebody else's turn — the "everyone looks at the person talking" behavior. `false` while it is in its own turn, while `AttendToSpeaker` is `Off`, and while nobody attendable speaks. |
+| `SpeakerAttention` | `string` | One line describing what conversation attention is actually doing — who is being watched, or the gate that turned the speaker away (`"too far"`, `"behind them"`, `"its own turn"`). |
 | `LodEnabled` | `bool` | Whether crowd LOD is active on this character. |
 | `LodFar` | `bool` | Whether the character is in the reduced-rate far LOD band. |
 | `LodExpressionSkipped` | `bool` | Whether the solver stage is being skipped this frame (off-screen LOD). |
 | `RecentTrace` | `List<GazeTraceEntry>` | Recent transition log copied from the trace ring buffer, oldest first. |
+
+### Head-pose contributor trace
+
+These fields break down what moved the head this frame and why. `HeadAngles` and `TorsoAngles` are what a reader normally wants; this group exists for diagnosing a specific head-pose defect — a residual gap between `TargetErrorAngles` and the sum of the actuators below, where one contributor has backed off and another has silently clamped. Read them together, not individually.
+
+| Field | Type | Description |
+|---|---|---|
+| `HeadGoal` | `Vector2` | The actuator ladder's head yaw/pitch goal, in degrees, for this frame's shift. |
+| `HeadShiftActive` | `bool` | Whether the head is executing a shaped movement toward a new goal (the ballistic lane is in flight). |
+| `StabilizationOffset` | `Vector2` | The stabilization reflex's applied offset, in degrees, that cancels the animation's own head deviation. |
+| `AnimatedDeviation` | `Vector2` | The animation's own measured head deviation, in degrees, that the stabilization reflex is cancelling. |
+| `GestureOffset` | `Vector2` | Composed head-gesture offset, in degrees — backchannel nod, external program, and floor-yield dip. |
+| `AversionHeadOffset` | `Vector2` | Aversion beat's head-share offset, in degrees, after the eye-contact-lock and turn-taking scaling that fed the head solve. |
+| `AversionEyeOffset` | `Vector2` | Aversion beat's eye-share offset, in degrees, as fed to the eye solve. |
+| `MicroOffset` | `Vector2` | Composed eye micro-motion offset, in degrees — micro-saccade dwell, face-scan, and arrival-settle pitch. |
+| `ChainLagOffset` | `Vector2` | Degrees the neck/head chain-lag redistribution shifts onto the head bone this frame — the overlapping-action follow-through and settle. |
+| `AppliedHeadDeltaDegrees` | `float` | Degrees the head bone's world rotation moved between this frame and the last, measured after the solve writes the bone. |
+| `TargetPointDeltaMeters` | `float` | Meters the engaged directive's world point moved since the last expression tick. |
+| `GenerationId` | `int` | The directive's generation id at capture time; increments on every re-target, so a probe can tell a contributor step apart from a fresh look. |
 
 ### Methods
 

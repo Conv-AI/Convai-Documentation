@@ -1,18 +1,14 @@
 ---
 title: Configure eye contact
 description: Configure how strongly a Convai character commits to eye contact with the player, from natural behavior to a permanent lock.
-last_reviewed: "4.5.0"
+last_reviewed: "4.6.0"
 ---
 
 Configure how strongly a Convai character commits to the player's eye contact by setting `GazeEyeContactMode`, `GazeFocusFidelity`, and the player anchor aim mode on `ConvaiGazeController`. Use this page when the default per-state behavior is too soft for a presenter or kiosk character, or when a character needs to look at something other than the main camera.
 
-***
-
 ## Prerequisites
 
 - A character with `ConvaiGazeController` added — see [Gaze quick start](quick-start.md).
-
-***
 
 ## Choose an eye contact mode
 
@@ -36,7 +32,7 @@ Changing `EyeContactMode` at runtime ramps smoothly to the new commitment level 
 While `ConversationLock` or `AlwaysLock` is active, the profile's per-state policy table is bypassed for engagement and aversion. If you want natural thinking-aversion and speaking-planning breaks, stay on `Natural` or use `SpeakingFocus` instead.
 {% endhint %}
 
-***
+An eye-contact lock also overrides `AttendToSpeaker` (the **Attend To Speaker** setting that turns a character toward whoever else holds the floor in a multi-character conversation): while `ConversationLock` or `AlwaysLock` is active, the character never turns away to follow another speaker's turn, regardless of what **Attend To Speaker** is set to. The lock is a promise to keep looking at the player, and it wins. See [Conversation attention](profile-reference.md#conversation-attention).
 
 ## Set focus fidelity
 
@@ -53,8 +49,6 @@ gaze.FocusFidelity = GazeFocusFidelity.Social;
 
 `Social` fidelity still allows an explicit `GazeAt()` request to preempt the lock, so a composed action that looks somewhere first and then acts keeps working. `Exact` fidelity rejects a scripted `GazeAt()` by default; enable `AllowScriptedOverridesDuringExactFocus` if an authored sequence needs to preempt it anyway. See [Scripted gaze](scripted-gaze.md).
 
-***
-
 ## Choose how the anchor is aimed
 
 `GazeAnchorAimMode` controls where on the player anchor the character actually aims, independently of which eye contact mode is active:
@@ -69,13 +63,9 @@ Set the mode on `ConvaiGazeController` as `PlayerAnchorAimMode`, and set `Player
 
 For split-screen, multiplayer, or cutscene setups where the character should not follow `Camera.main`, set `PlayerAnchorOverride` to the transform it should treat as the player instead.
 
-***
-
 ## Verify the setting
 
 Enter Play mode and start a conversation. With `ConversationLock` or `AlwaysLock` set, the character should hold eye contact through every conversational beat with no look-away, and with `AlwaysLock` it should also hold contact while `Idle`. With `Natural` or `SpeakingFocus`, contact should visibly soften during `Thinking` and idle periods.
-
-***
 
 ## Next steps
 

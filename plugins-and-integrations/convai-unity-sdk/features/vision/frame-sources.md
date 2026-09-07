@@ -1,7 +1,7 @@
 ---
 title: Vision frame sources
-description: Reference for CameraVisionFrameSource, WebcamVisionFrameSource, and QuestVisionFrameSource, including Inspector fields, capture presets, and platform support.
-last_reviewed: "4.5.0"
+description: Explains the frame sources that capture video for a character to see, covering scene cameras, webcams, and Meta Quest passthrough.
+last_reviewed: "4.6.0"
 ---
 
 A frame source captures images from your scene and exposes them as a Y-flipped `RenderTexture` for `ConvaiVisionPublisher` to stream. The Convai SDK ships three built-in frame sources: `CameraVisionFrameSource` for Unity scene cameras, `WebcamVisionFrameSource` for physical devices, and `QuestVisionFrameSource` for Meta Quest passthrough.
@@ -127,13 +127,13 @@ On Android and iOS the system camera permission dialog appears the first time `S
 
 ## QuestVisionFrameSource
 
-`QuestVisionFrameSource` streams the real-world passthrough feed from a Meta Quest 3 or 3S headset, giving Convai characters a live view of the physical environment. The component binds to Meta's `PassthroughCameraAccess` API via reflection so the SDK does not take a hard compile-time dependency on the Meta XR package. In SDK 4.5.0 the Inspector gained a dedicated Live Status panel — resolution, target FPS, frame count, `State`, and `ErrorKind` — matching the panels already shown by `CameraVisionFrameSource` and `WebcamVisionFrameSource`. Earlier versions drew Unity's default Inspector for this component; no serialized field changed.
+`QuestVisionFrameSource` streams the real-world passthrough feed from a Meta Quest 3 or 3S headset, giving Convai characters a live view of the physical environment. The component binds to Meta's `PassthroughCameraAccess` API via reflection so the SDK does not take a hard compile-time dependency on the Meta XR package. The Inspector shows a dedicated Live Status panel — resolution, target FPS, frame count, `State`, and `ErrorKind` — matching the panels shown by `CameraVisionFrameSource` and `WebcamVisionFrameSource`.
 
 **Component menu path:** `Convai/Vision/Quest Vision Frame Source`
 
 <figure><img src="../../../../.gitbook/assets/convai-quest-vision-frame-source-inspector.png" alt="QuestVisionFrameSource Inspector"><figcaption><p>QuestVisionFrameSource Inspector.</p></figcaption></figure>
 
-`QuestVisionFrameSource` requires **Meta Quest 3 or 3S** running Horizon OS with the Passthrough Camera API. Quest 2 and Quest Pro do not support `PassthroughCameraAccess`. In the Editor or on other platforms, the component enters `Failed` state with `ErrorKind = UnsupportedPlatform` and produces no frames.
+`QuestVisionFrameSource` requires **Meta Quest 3 or 3S** running Horizon OS with the Passthrough Camera API. Quest 2 and Quest Pro do not support `PassthroughCameraAccess`. In the Editor or on other platforms, `PassthroughCameraAccess` cannot be found or read, so the component enters `Failed` state with `ErrorKind = InvalidConfiguration` and produces no frames.
 
 {% hint style="danger" %}
 **AndroidManifest.xml permissions required.** Your manifest must declare both `horizonos.permission.HEADSET_CAMERA` and `android.permission.CAMERA`. Without these declarations, passthrough capture fails silently on device and the frame source enters `Failed` state. The device does not show a permission dialog — it denies access outright.
@@ -180,7 +180,7 @@ All three frame sources implement `IVisionFrameSourceStatusProvider`, which expo
 | `None` | No error. |
 | `Timeout` | The source did not produce a usable frame within the expected time window. |
 | `PermissionDenied` | Camera permission was denied by the user or the OS. |
-| `UnsupportedPlatform` | The source is not supported on this platform (e.g., `QuestVisionFrameSource` on PC, or `SrpNative` capture mode selected). |
+| `UnsupportedPlatform` | The source is not supported on this platform (e.g., `SrpNative` capture mode selected). |
 | `DeviceUnavailable` | The requested camera device could not be opened. |
 | `InvalidConfiguration` | A field value is out of range or inconsistent (check `StatusMessage`). |
 | `Unknown` | An unexpected error occurred. |

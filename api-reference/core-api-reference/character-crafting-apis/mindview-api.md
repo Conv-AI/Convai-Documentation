@@ -1,7 +1,7 @@
 ---
 description: >-
-  Learn how to use the Backstory API to create and manage character backstories,
-  adding depth and personality to your NPCs.
+  Fetches the conversation context used to build responses, either from a
+  stored session or from the current character setup.
 ---
 
 # Mindview API

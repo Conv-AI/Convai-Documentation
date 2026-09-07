@@ -1,17 +1,70 @@
 ---
-title: React to roster and target changes
+title: Handle room events
 description: Subscribe to roster and interaction-target events in a shared Unity room, and rely on the order the SDK guarantees between them.
 last_reviewed: "4.6.0"
 ---
 
-Subscribe to `CharacterAdded`, `CharacterRemoved`, `CharacterStatusChanged`, and `InteractionTargetChanged` on `MultiCharacterRoomSession` to react to a roster or target change as it happens. Use this page when your scene needs to update UI, logging, or gameplay state as characters come and go instead of polling the roster.
+Subscribe to `ConvaiManager.Events.OnRoomRosterChanged` to react to a character joining or leaving a connected room, including a refused edit and its reason. Use this page when your scene needs to update UI, logging, or gameplay state as characters come and go instead of polling the roster.
 
 ## Prerequisites
 
 - A connected multi-character session. See [Build your first multi-character session](quick-start.md).
-- A reference to the current `MultiCharacterRoomSession`, from `IConvaiRoomConnectionService.CurrentMultiCharacterSession`.
+- A `ConvaiManager` reference, for `Events.OnRoomRosterChanged`.
 
-## Subscribe to the roster and target events
+## Subscribe to OnRoomRosterChanged
+
+`ConvaiManager.Events.OnRoomRosterChanged` is `Action<RoomRosterChanged>`, and fires every time a connected room's roster is edited during play — whether the change came from a character appearing or disappearing in the scene, or from an explicit `AddCharacterAsync`/`RemoveCharacterAsync` call.
+
+| `RoomRosterChanged` field | Type | Description |
+| --- | --- | --- |
+| `Change` | `RoomRosterChange` | `Joined`, `Left`, or `Refused`. |
+| `MembershipId` | `string` | The affected room membership. Empty for a join that never got one. |
+| `CharacterId` | `string` | Convai Character ID of the character this is about. |
+| `CharacterName` | `string` | Display name, for logs and UI. |
+| `RosterSize` | `int` | How many characters the room holds after this change. |
+| `Reason` | `string` | Why the edit was refused. Empty unless `Change` is `Refused`. |
+
+```csharp
+private void OnEnable()
+{
+    ConvaiManager manager = ConvaiManager.ActiveManager;
+    if (manager == null || !manager.IsInitialized) return;
+    manager.Events.OnRoomRosterChanged += HandleRosterChanged;
+}
+
+private void OnDisable()
+{
+    ConvaiManager manager = ConvaiManager.ActiveManager;
+    if (manager == null) return;
+    manager.Events.OnRoomRosterChanged -= HandleRosterChanged;
+}
+
+private void HandleRosterChanged(RoomRosterChanged e)
+{
+    switch (e.Change)
+    {
+        case RoomRosterChange.Joined:
+            Debug.Log($"[MultiCharacter] {e.CharacterName} joined. Roster now has {e.RosterSize}.");
+            break;
+        case RoomRosterChange.Left:
+            Debug.Log($"[MultiCharacter] {e.CharacterName} left. Roster now has {e.RosterSize}.");
+            break;
+        case RoomRosterChange.Refused:
+            Debug.LogWarning($"[MultiCharacter] {e.CharacterName} could not join or leave: {e.Reason}");
+            break;
+    }
+}
+```
+
+`ConvaiManager.Events` throws while the manager is still starting up. It becomes available at the end of the manager's own `Awake`, so `OnEnable` and `Start` are both safe places to subscribe — another component's `Awake` is not, because Unity gives no ordering guarantee between two `Awake` calls. Guard on `ConvaiManager.IsInitialized` where you cannot control the order.
+
+A character joining a live room is a world event, not a chat event — a nameplate over the character is usually the right place to show it, not the chat field. `ConvaiCharacter.RoomMembershipStatus` reports `Starting` while a given character is still being announced by the service, if you need the per-character state alongside the event.
+
+Also relevant on `ConvaiManager.Events`: `OnConversationTargetChanged` reports the conversation moving between characters, including its `Requested`/`Confirmed`/`Failed` phase, and `OnConversationAvailabilityChanged` reports whether the addressed character can hear the player yet. See [Conversation targeting](../conversation-targeting/README.md) and [Conversation availability](../conversation-availability/README.md).
+
+## The lower-level session events
+
+`MultiCharacterRoomSession` — read from `IConvaiRoomConnectionService.CurrentMultiCharacterSession` — exposes the same facts as plain C# events, one level below `ConvaiManager.Events`. Reach for these only when a script already holds a `MultiCharacterRoomSession` reference and needs `CharacterRoomMembership` objects directly rather than the IDs `OnRoomRosterChanged` reports.
 
 | Event | Signature | Raised when |
 | --- | --- | --- |
@@ -94,19 +147,19 @@ A related ordering guarantee applies to additions: when a new membership is inse
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `CharacterAdded` never fires for a character the scene started with | Those memberships were populated when the session object was created, not through the runtime-addition code path. | Read `session.Characters` right after connecting instead of waiting for `CharacterAdded`. |
-| `InteractionTargetChanged` fires with `current` as `null` unexpectedly | The membership holding the target was removed. This event fires whether or not a replacement target was supplied. | Expected behavior. Pass `replacementTargetMembershipId` to [Add and remove characters at runtime](update-the-roster.md#remove-a-character-from-the-roster) so a second event immediately restores a target, and treat the `null` as a transition. |
-| An event you expected does not fire at all | The underlying acknowledgement was a stale or duplicate one and was discarded by the epoch guard. | See [How multi-character sessions work](how-multi-character-sessions-work.md#epochs-and-the-command-acknowledgement-model). |
+| `InteractionTargetChanged` fires with `current` as `null` unexpectedly | The membership holding the target was removed. This event fires whether or not a replacement target was supplied. | Expected behavior. Pass `replacementTargetMembershipId` to [Characters joining and leaving](update-the-roster.md#remove-a-character-from-the-roster) so a second event immediately restores a target, and treat the `null` as a transition. |
+| An event you expected does not fire at all | The underlying acknowledgement was a stale or duplicate one and was discarded because `RosterEpoch` or `RouteEpoch` had already advanced past it. | Read `session.RosterEpoch` / `session.RouteEpoch` and compare against the state you expected before assuming the event was lost. |
 
 ## Next steps
 
-{% content-ref url="switch-the-interaction-target.md" %}
-[Switch the interaction target](switch-the-interaction-target.md)
+{% content-ref url="../conversation-targeting/README.md" %}
+[Conversation targeting](../conversation-targeting/README.md)
 {% endcontent-ref %}
 
 {% content-ref url="update-the-roster.md" %}
-[Add and remove characters at runtime](update-the-roster.md)
+[Characters joining and leaving](update-the-roster.md)
 {% endcontent-ref %}
 
 {% content-ref url="character-identity.md" %}
-[Character identity and addressing](character-identity.md)
+[Character identity](character-identity.md)
 {% endcontent-ref %}

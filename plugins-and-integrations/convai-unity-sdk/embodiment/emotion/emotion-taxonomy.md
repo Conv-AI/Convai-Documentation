@@ -1,7 +1,7 @@
 ---
 title: Emotion taxonomy
-description: Reference for EmotionTaxonomyAsset, including the built-in emotion set, server alias resolution, and custom taxonomy authoring.
-last_reviewed: "4.5.0"
+description: Explains the built-in emotion set, how server labels map to it, and how to author a custom emotion taxonomy for a character.
+last_reviewed: "4.6.0"
 ---
 
 The taxonomy translates Convai's raw emotion strings into the canonical labels the rest of the Emotion module uses. When Convai sends `"happy"`, the taxonomy resolves that alias to `"joy"` so that the accumulator and expression pipeline — which are keyed on canonical labels — know exactly which score to update. The SDK ships with a nine-emotion Plutchik-inspired default; author a custom `EmotionTaxonomyAsset` when you need a different vocabulary or additional server aliases.
