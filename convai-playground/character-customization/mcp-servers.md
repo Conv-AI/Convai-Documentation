@@ -6,6 +6,10 @@ description: >-
 
 # MCP Servers
 
+{% embed url="https://www.youtube.com/watch?v=Q4xLERLR2Eg" %}
+
+
+
 The [Model Context Protocol (MCP)](https://modelcontextprotocol.io) integration lets your character use tools from MCP servers during conversations. Your character can:
 
 * Connect to any MCP-compatible server you host or subscribe to
@@ -28,14 +32,14 @@ Your MCP server must:
 2. Click **Create Server**.
 3. Fill in the server settings:
 
-| Field         | Notes                                                                                                                                                                                                                |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Name          | Shown in the tool list. Short and descriptive.                                                                                                                                                                       |
-| Description   | Optional, for your own reference.                                                                                                                                                                                    |
-| Server URL    | The full MCP endpoint, including the path, typically ending in `/mcp`.                                                                                                                                               |
-| Protocol      | Streamable HTTP (recommended). Use SSE only if your server doesn't support Streamable HTTP.                                                                                                                          |
-| Authorization | <p><strong>HTTP headers</strong>: name/value pairs sent with every request, e.g. <code>Authorization: Bearer &#x3C;token></code>. <br><strong>OAuth</strong>: sign in to the provider instead of entering a key.</p> |
-| Timeout       | Maximum seconds to wait for a single tool call (1–300, default 30). Keep it low, since the character can't reply until the tool call finishes.                                                                       |
+| Field         | Notes                                                                                                                                                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Name          | Shown in the tool list. Short and descriptive.                                                                                                                                                                      |
+| Description   | Optional, for your own reference.                                                                                                                                                                                   |
+| Server URL    | The full MCP endpoint, including the path, typically ending in `/mcp`.                                                                                                                                              |
+| Protocol      | Streamable HTTP (recommended). Use SSE only if your server doesn't support Streamable HTTP.                                                                                                                         |
+| Authorization | <p><strong>HTTP headers</strong>: name/value pairs sent with every request, e.g. <code>Authorization: Bearer &#x3C;token></code>.<br><strong>OAuth</strong>: sign in to the provider instead of entering a key.</p> |
+| Timeout       | Maximum seconds to wait for a single tool call (1–300, default 30). Keep it low, since the character can't reply until the tool call finishes.                                                                      |
 
 4. The **Available Tools** section connects to your server and lists the tools it exposes. This is also your connection test: an unreachable server or a wrong auth header shows its error here.
 5. Uncheck any tools the character should not have. Only checked tools are offered to the LLM.
@@ -68,7 +72,7 @@ Some providers (Google, and most enterprise identity systems) don't allow automa
 
 #### After you connect
 
-Convai stores the provider's tokens encrypted and refreshes them automatically.&#x20;
+Convai stores the provider's tokens encrypted and refreshes them automatically.
 
 If the provider invalidates the grant (token expiry without renewal, a password change, an admin revoking the app), the status changes to **Reconnect needed** and the server's tools drop out of new sessions until you click **Reconnect**.
 
@@ -84,7 +88,7 @@ For a **public** character, strangers can trigger tools under your connected acc
 
 **Disconnect** revokes the grant with the provider and deletes the stored tokens; the server configuration stays, so you can reconnect later. **Delete** removes the server, its tokens, and its character connections. Switching the auth method back to headers also disconnects. Not every provider supports remote revocation. To be certain a grant is dead, also revoke it from the provider's own security settings.
 
-### Compatible servers&#x20;
+### Compatible servers
 
 Any MCP server that authenticates with static headers, with OAuth, or with no auth at all. This can be a server you build yourself with an MCP SDK ([Python](https://github.com/modelcontextprotocol/python-sdk), [TypeScript](https://github.com/modelcontextprotocol/typescript-sdk), FastMCP), or a hosted server that accepts an API key in a header, such as [Firecrawl](https://docs.firecrawl.dev/mcp), [Context7](https://context7.com), [GitHub](https://github.com/github/github-mcp-server) (personal access token), or an OAuth-based server such as [Notion](https://developers.notion.com/docs/mcp) or [Linear](https://linear.app/docs/mcp). Check the provider's docs for the endpoint URL and auth style.
 
@@ -101,8 +105,6 @@ During the conversation, the LLM decides when to call a tool based on its name a
 #### Writing tools that work well in voice
 
 Descriptions are prompts, so one clear sentence about what the tool does and when to use it beats an exhaustive spec. Expose few tools rather than many (large tool sets slow the model and cause wrong picks). Return short results fast, and fail with a message ("no orders found for that email") rather than an empty result.
-
-
 
 {% hint style="info" %}
 Tool permissions are set before the conversation: the per-tool checklist is the approval surface. There are no per-call approval prompts, so only enable tools you're comfortable having called on any turn.
