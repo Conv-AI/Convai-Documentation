@@ -1,6 +1,6 @@
 ---
 title: Room controls reference
-description: Reference for every control in a chat experience room's top bar and side panel, and what each one does to the conversation.
+description: Reference for the controls in a chat experience room's top bar and side panel, and what each one does to the conversation.
 last_reviewed: "2026-09-10"
 ---
 
@@ -12,7 +12,7 @@ The top bar runs above the thread and names the experience the room was opened f
 
 | Part | What it does |
 |---|---|
-| Back arrow | Returns to **My Experiences**. Leaving the room ends the conversation |
+| Back arrow | Returns to **My Experiences** and ends the conversation |
 | The experience name | Names the chat experience this room was opened from |
 | Pencil | Opens **Rename experience**, where you change the name. The room type, the purpose, and the briefing are untouched |
 | Room type chip | The room type the experience was created with, for example **Focus group** |
@@ -26,7 +26,7 @@ The bar drops what it has no room for as the window narrows. The room ID and the
 
 ## The three-dots menu
 
-The three-dots menu sits at the right of the top bar and holds five actions:
+The three-dots menu sits at the right of the top bar and holds these actions:
 
 | Item | What it does |
 |---|---|
@@ -34,10 +34,9 @@ The three-dots menu sits at the right of the top bar and holds five actions:
 | **Duplicate with a new brief** | Opens the create dialog prefilled from this experience, with every field editable. See [Why the brief cannot be changed](../the-room-brief/why-the-brief-cannot-be-changed.md) |
 | **Export transcript** | Downloads the conversation in this room as a Markdown file. See [Export a transcript](../sessions-and-transcripts/export-a-transcript.md) |
 | **Clear conversation** | Ends the conversation and empties the room: the thread, the characters, and the **Shared in room** list |
-| **Leave room** | Ends the conversation and empties the room the same way, but keeps the **Shared in room** list |
 
 {% hint style="warning" %}
-**Clear conversation** and **Leave room** both end the conversation as soon as you select them. Neither asks you to confirm, and a conversation that has ended cannot be rejoined. Both leave the room empty and waiting for characters, and both keep you on the same page, so the room you are looking at afterwards is a new one. The difference between them is the file list: **Clear conversation** empties it, and **Leave room** keeps it.
+**Clear conversation** ends the conversation as soon as you select it. It does not ask you to confirm, and a conversation that has ended cannot be rejoined. The room stays open, emptied and waiting for characters, so the room you are looking at afterwards is a new one.
 {% endhint %}
 
 ## The room ID

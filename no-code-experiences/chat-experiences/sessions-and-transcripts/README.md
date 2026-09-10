@@ -8,11 +8,11 @@ A session is one conversation in a chat experience, from the characters taking t
 
 ## Why every opening is a new room
 
-Opening a chat experience always starts a new room. There is no control that reopens a past conversation, and a room you have left cannot be re-entered.
+Opening a chat experience always starts a new room. There is no control that reopens a past conversation, and a conversation that has ended cannot be re-entered.
 
-The room opens empty. It becomes a session once the characters you seat have joined, and the experience records it from there. Opening an experience and leaving again without adding anyone records nothing. A session nobody wrote in is still recorded and still listed, with **No messages recorded** in place of its first question.
+The room opens empty. It becomes a session once the characters you seat have joined, and the experience records it from there. Opening an experience and going back without adding anyone records nothing. A session nobody wrote in is still recorded and still listed, with **No messages recorded** in place of its first question.
 
-Opening the experience is not the only thing that starts a session. **Clear conversation** and **Leave room** both end the conversation you are in and leave you in the same room, emptied, so seating characters there again starts another numbered session at the same address. See [Room controls reference](../running-the-room/room-controls-reference.md).
+Opening the experience is not the only thing that starts a session. **Clear conversation** ends the conversation you are in and keeps you in the same room, emptied, so seating characters there again starts another numbered session at the same address. See [Room controls reference](../running-the-room/room-controls-reference.md).
 
 Sessions are numbered in the order they ran. `Session 1` is the first the experience recorded, and the newest one leads every list. A new session never renumbers the ones before it.
 

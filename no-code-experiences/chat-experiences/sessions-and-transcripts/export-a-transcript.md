@@ -48,7 +48,7 @@ The browser saves the file, and the page confirms with **Transcript downloaded**
 
 A room exports the conversation recorded for the session running in it, covering every message sent so far. Characters have to be seated and the conversation under way before there is anything to export. Open the three-dots menu in the room's top bar and select **Export transcript**.
 
-Leaving the room afterwards does not cost you the conversation. It is recorded as a session of that experience and can be exported again from the experience's page.
+Going back to **My Experiences** afterwards does not cost you the conversation. It is recorded as a session of that experience and can be exported again from the experience's page.
 
 ## What the Markdown file holds
 

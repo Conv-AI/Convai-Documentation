@@ -44,7 +44,7 @@ The room keeps file names, not file contents. Three places show a file after you
 - **The side panel.** Its **Shared in room** section lists the files sent so far in this conversation, each with its name, the same second line as the chip, and a note saying what the characters were given. [File limits reference](file-limits-reference.md) sets out what each note means, and [Running the room](../running-the-room/README.md) covers the panel's other sections.
 - **A finished session's transcript.** It records the name of every file a turn carried, and a transcript you download lists those names under the turn they were sent with. See [Review a past session](../sessions-and-transcripts/review-a-past-session.md) and [Export a transcript](../sessions-and-transcripts/export-a-transcript.md).
 
-**Clear conversation** in the room's three-dots menu empties the **Shared in room** list along with the thread. **Leave room** empties the room in the same way, but the **Shared in room** list survives it. See [Room controls reference](../running-the-room/room-controls-reference.md).
+**Clear conversation** in the room's three-dots menu empties the **Shared in room** list along with the thread. See [Room controls reference](../running-the-room/room-controls-reference.md).
 
 Because only names are kept, every file in a past session's thread is shown as a name, whatever happened to it at the time. A transcript records that a file was shared, not what the characters were given from it.
 

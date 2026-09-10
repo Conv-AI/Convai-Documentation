@@ -80,7 +80,7 @@ Each file in the list carries at most one note:
 | `described` | A description written in words |
 | `name only` | The file name alone |
 
-**Clear conversation**, in the three-dots menu in the room's top bar, empties the list. **Leave room** keeps it. See [Room controls reference](../running-the-room/room-controls-reference.md).
+**Clear conversation**, in the three-dots menu in the room's top bar, empties the list. See [Room controls reference](../running-the-room/room-controls-reference.md).
 
 ## Related pages
 

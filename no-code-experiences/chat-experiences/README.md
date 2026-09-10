@@ -4,7 +4,7 @@ description: Understand what a chat experience is, what a moderated text room do
 last_reviewed: "2026-09-10"
 ---
 
-A chat experience is a text room built from your own Convai characters. You name it, pick a room type, and write a purpose, and every character that joins is briefed with what you set. Read this page before you create one: it sets out what a room does, what it does not do, and what is kept after you leave. Chat Experiences is in beta, so read **What a chat experience does not do** before you plan around it.
+A chat experience is a text room built from your own Convai characters. You name it, pick a room type, and write a purpose, and every character that joins is briefed with what you set. Read this page before you create one: it sets out what a room does, what it does not do, and what is kept once the conversation ends. Chat Experiences is in beta, so read **What a chat experience does not do** before you plan around it.
 
 {% hint style="info" %}
 **Before you begin:** If **My Experiences** does not show **Create a Chat Experience**, see [What you need to use Chat Experiences](prerequisites.md).
@@ -20,7 +20,7 @@ Six room types are available: **Focus group**, **Classroom**, **Meeting simulati
 
 ## What a chat experience does not do
 
-- **A session is not resumable.** Opening a chat experience always starts a new room. A conversation you have left cannot be rejoined.
+- **A session is not resumable.** Opening a chat experience always starts a new room. A conversation that has ended cannot be rejoined.
 - **Characters are chosen for each session.** The room opens empty and you add the characters you want this time. The roster from your last session does not carry over.
 - **The brief is fixed at creation.** The room type, the purpose, and the briefing are set once, in the create dialog, and cannot be changed afterwards. There is no control anywhere that edits them. To run the same characters against different wording, open the menu on the experience's card or row on **My Experiences** and choose **Duplicate with a new brief**.
 - **The room is text.** The characters answer in writing, and the room carries no voice. A message can carry a file attachment.
