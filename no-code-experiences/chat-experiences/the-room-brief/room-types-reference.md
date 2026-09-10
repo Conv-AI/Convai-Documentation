@@ -1,7 +1,7 @@
 ---
 title: Room types reference
-description: Reference for the six chat experience room types: the line each one shows in the room type menu, what it tells the characters, and what it fills in for you.
-last_reviewed: 2026-09-10
+description: "Reference for the six chat experience room types: the line each one shows in the room type menu, what it tells the characters, and what it fills in for you."
+last_reviewed: "2026-09-10"
 ---
 
 A room type is one half of a chat experience's brief, and the purpose you write is the other. In a room of two or more characters it supplies the sentence the briefing opens with, the rules it closes with, and the rules chips shown under the briefing. It also fills in an experience name and, except for **Custom**, a purpose for you to edit before the experience is created. This page lists all six types: the line each one shows in the menu, the name and purpose it fills in, the sentence it opens with, and the rules chips it sets. Chat Experiences is in beta.

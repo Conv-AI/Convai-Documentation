@@ -1,7 +1,7 @@
 ---
 title: Why the brief cannot be changed
 description: Understand why a chat experience settles its room type, purpose, and briefing at creation, and why different wording means a second experience, not an edit.
-last_reviewed: 2026-09-10
+last_reviewed: "2026-09-10"
 ---
 
 A chat experience settles its brief the moment it is created. Chat Experiences is in beta. The room type, the purpose, and the briefing are written in [the create dialog](../create-a-chat-experience.md) and stay as they were written, for that experience and every room opened from it. Knowing what that covers explains why the room shows a lock rather than an edit control, and points you at the one way to put the same characters in front of different wording.
