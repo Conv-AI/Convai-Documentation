@@ -758,6 +758,8 @@
   * [Live APIs (Beta)](api-reference/core-api-reference/live-apis-beta/README.md)
     * [Connect API](api-reference/core-api-reference/live-apis-beta/connect-api.md)
     * [Use multi-character sessions](api-reference/core-api-reference/live-apis-beta/multi-character-sessions.md)
+    * [Build a group chat](api-reference/core-api-reference/live-apis-beta/build-a-group-chat.md)
+    * [Group chat messages](api-reference/core-api-reference/live-apis-beta/group-chat-messages.md)
     * [Metrics](api-reference/core-api-reference/live-apis-beta/metrics.md)
     * [Audio Data (via data channel)](api-reference/core-api-reference/live-apis-beta/audio-data-via-data-channel.md)
     * [Message Glossary](api-reference/core-api-reference/live-apis-beta/message-glossary.md)
