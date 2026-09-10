@@ -56,7 +56,6 @@
   * [Manage your chat experiences](no-code-experiences/chat-experiences/manage-your-chat-experiences.md)
   * [The room brief](no-code-experiences/chat-experiences/the-room-brief/README.md)
     * [How the room brief is written](no-code-experiences/chat-experiences/the-room-brief/how-the-room-brief-is-written.md)
-    * [Room types reference](no-code-experiences/chat-experiences/the-room-brief/room-types-reference.md)
     * [Write your own briefing](no-code-experiences/chat-experiences/the-room-brief/write-your-own-briefing.md)
     * [Why the brief cannot be changed](no-code-experiences/chat-experiences/the-room-brief/why-the-brief-cannot-be-changed.md)
 * [Convai Sim Experiences](no-code-experiences/convai-sim-experiences/README.md)
