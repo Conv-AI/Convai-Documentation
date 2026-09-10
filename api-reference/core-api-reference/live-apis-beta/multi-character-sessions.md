@@ -6,6 +6,8 @@ last_reviewed: "2026-08-15"
 
 Create one Live API room containing multiple character instances and route each user turn to one active character. Character instances remain independently addressable, even when two entries use the same character ID.
 
+To have several instances answer the same message at once, create the room with `group_chat: true` and address it with `group-address` instead of switching the active character. See [Build a group chat](build-a-group-chat.md).
+
 {% hint style="info" %}
 Multi-character sessions are available only to accounts with the feature enabled. Your account's character and participant limits still apply.
 {% endhint %}
@@ -205,6 +207,10 @@ Before sending conversational input, verify that:
 Use a unique `id` for each new command. If delivery is uncertain, retry the same command with the same ID and unchanged payload so the server can identify the duplicate safely.
 
 ## Next steps
+
+{% content-ref url="build-a-group-chat.md" %}
+[Build a group chat](build-a-group-chat.md)
+{% endcontent-ref %}
 
 {% content-ref url="../../../plugins-and-integrations/convai-unity-sdk/features/multi-character-sessions/README.md" %}
 [Multi-character sessions](../../../plugins-and-integrations/convai-unity-sdk/features/multi-character-sessions/README.md)
