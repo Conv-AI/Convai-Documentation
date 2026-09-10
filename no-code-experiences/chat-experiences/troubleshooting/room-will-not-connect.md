@@ -4,7 +4,7 @@ description: Fix a chat experience room whose characters are still joining, an e
 last_reviewed: "2026-09-10"
 ---
 
-A chat experience room opens empty and connects the moment you seat the first characters. When that does not happen, the room says so in the message box, in the character picker, or on the page that should have held the experience. Chat Experiences is in beta. Use this page to read those messages and get the room running.
+A chat experience room opens empty and connects the moment you seat the first characters. When that does not happen, the room says so in the message box, in the character picker, or on the page that should have held the experience. Use this page to read those messages and get the room running.
 
 ## The characters are still joining
 
@@ -63,8 +63,6 @@ A character you look up under **By character ID** becomes a row under **Results*
 | **Could not look up** followed by a shortened form of the ID | "Something went wrong while looking this character up. Try again." | Select the look-up button again |
 
 Any of the three is cleared when the row comes back with the character's name, its description, and an **Add** button on it.
-
-A row for a character that has not been shared with you also carries a **Request access** button. Selecting it reports "Access requests are not available yet.", so ask the character's owner directly instead.
 
 On **From my workspaces**, a search that matches nothing reads "No characters match." Clear the search field to bring the grid back, and expand it with the button under the grid when the character you want is outside the eight most recently edited. If the search field is already empty, the tab has no characters to offer you at all, so look the character up under **By character ID** instead.
 

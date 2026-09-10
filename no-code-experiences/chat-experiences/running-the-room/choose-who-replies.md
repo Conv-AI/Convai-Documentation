@@ -4,7 +4,7 @@ description: Set who answers the next message in a chat experience room, tag ind
 last_reviewed: "2026-09-10"
 ---
 
-A chat experience room of two or more characters opens on **Auto · room brief decides**, where the [room brief](../the-room-brief/README.md) settles who answers. Two controls override it: the respond chip under the message box, which holds until you change it, and an `@` tag in the message, which applies to that message only. Chat Experiences is in beta. Use this page to set either one, to know which of them wins, and to see what a room holding a single character offers instead.
+A chat experience room of two or more characters opens on **Auto · room brief decides**, where the [room brief](../the-room-brief/README.md) settles who answers. Two controls override it: the respond chip under the message box, which holds until you change it, and an `@` tag in the message, which applies to that message only. Use this page to set either one, to know which of them wins, and to see what a room holding a single character offers instead.
 
 ## Prerequisites
 

@@ -4,7 +4,7 @@ description: Attach a PDF, a Word file, or a plain-text file to a message in a c
 last_reviewed: "2026-09-10"
 ---
 
-A document you attach reaches the characters your message addresses, as text. Use this page to attach a PDF, a Word file, or a plain-text file, to send it with a message, and to read what the room reports about the file once it has been read or described. Chat Experiences is in beta.
+A document you attach reaches the characters your message addresses, as text. Use this page to attach a PDF, a Word file, or a plain-text file, to send it with a message, and to read what the room reports about the file once it has been read or described.
 
 ## Prerequisites
 
@@ -85,10 +85,6 @@ A CSV file and a JSON file each add a count to the chip, so you can check that t
 A document the room could not read is still sent, by name alone. The characters are given the file name and nothing else.
 
 The room tells you as soon as the file settles, in two places. The chip's second line settles to `could not read` after the size, and a message reads "Could not read ⟨name⟩; only its name will be shared". A PDF that could be neither read nor described settles to `could not describe` instead, and its message reads "Could not describe ⟨name⟩; only its name will be shared". Either outcome sends the name on its own, and the side panel notes the file as `name only`.
-
-{% hint style="warning" %}
-Nothing tells you in advance whether a document's contents can be read, and the paperclip is never greyed out because of a file. If you would rather not send the name on its own, take the file off the message before you send it.
-{% endhint %}
 
 ## Next steps
 

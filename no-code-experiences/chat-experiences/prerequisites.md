@@ -4,14 +4,13 @@ description: What a Convai account needs before you can build a chat experience,
 last_reviewed: "2026-09-10"
 ---
 
-Chat Experiences is in beta and is available on every Convai plan. Creating and running a chat experience takes a Convai account, at least one character, and the Chat Experiences controls on **My Experiences**.
+Creating and running a chat experience takes a Convai account, at least one character, and the Chat Experiences controls on **My Experiences**.
 
 ## Account requirements
 
 | Requirement | Detail |
 |---|---|
 | Convai account | Signed in at <code class="expression">space.vars.dashboard_url</code>. |
-| Plan | Available on every Convai plan. No upgrade is required. |
 | Dashboard access | **My Experiences** present in the left sidebar. Chat experiences are created and reopened from that page, and there is no other entry point. |
 | At least one character | One of your own characters, or one someone has shared with you by ID. A room needs at least one character before you can send a message to it. |
 
@@ -28,9 +27,7 @@ A character joins with its own persona and receives the experience's brief on to
 
 ## When the Create a Chat Experience button is missing
 
-Chat Experiences is released in stages, so not every environment serves it yet. If **My Experiences** shows neither a **Create a Chat Experience** button nor a **Chat experiences** section, the release has not reached your environment.
-
-This is not a plan limit. To ask when Chat Experiences will be available to you, contact [support@convai.com](mailto:support@convai.com).
+If **My Experiences** shows neither a **Create a Chat Experience** button nor a **Chat experiences** section, contact [support@convai.com](mailto:support@convai.com).
 
 ## Next steps
 

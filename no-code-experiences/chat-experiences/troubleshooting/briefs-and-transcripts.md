@@ -4,7 +4,7 @@ description: Answers for a brief that cannot be edited, an experience that will 
 last_reviewed: "2026-09-10"
 ---
 
-A chat experience settles its brief when you create it, and keeps every conversation it runs as a session you can read but not rejoin. Chat Experiences is in beta. Use this page when the brief will not do what you expect, or when a session or a transcript will not open, download, or hold what you thought it would.
+A chat experience settles its brief when you create it, and keeps every conversation it runs as a session you can read but not rejoin. Use this page when the brief will not do what you expect, or when a session or a transcript will not open, download, or hold what you thought it would.
 
 ## The brief cannot be edited
 
@@ -34,7 +34,7 @@ An experience does not always save. When it does not, the dialog stays open and 
 
 An experience lists a session only for a room that recorded one, and it records a room once the room opens—which happens when you seat the first characters in it. A room that never finished connecting is not recorded, so a session can be missing because the room never came up. See [The room will not connect](room-will-not-connect.md).
 
-An experience with nothing recorded shows a panel in place of the list: "No sessions recorded yet. Rooms opened before this experience began recording sessions are not listed; the next one will appear here." A room you opened and left without adding anyone records nothing, so it never reaches the list.
+An experience with nothing recorded shows a panel in place of the list, headed "No sessions recorded yet." A room you opened and left without adding anyone records nothing, so it never reaches the list.
 
 Select **Start new session** to open a room from this experience and seat characters in it. That session takes a row on the page once the room has opened, whether or not anyone wrote in it.
 

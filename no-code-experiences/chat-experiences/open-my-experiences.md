@@ -4,7 +4,7 @@ description: Sign in to the Convai dashboard, open the My Experiences page, and 
 last_reviewed: "2026-09-10"
 ---
 
-**My Experiences** is where you build both kinds of Convai experience and open them again: chat experiences, which are text rooms and are in beta, and 3D experiences, which place your characters in a scene. Use this page to open **My Experiences** and pick the button that matches what you are building.
+**My Experiences** is where you build both kinds of Convai experience and open them again: chat experiences, which are text rooms, and 3D experiences, which place your characters in a scene. Use this page to open **My Experiences** and pick the button that matches what you are building.
 
 ## Prerequisites
 
@@ -46,7 +46,7 @@ If **Create a Chat Experience** is not on the page, see [What you need to use Ch
 
 ## Next steps
 
-Read what a chat experience is and what this version does before creating one.
+Read what a chat experience is and what a room does and does not do before creating one.
 
 {% content-ref url="README.md" %}
 [Chat Experiences](README.md)

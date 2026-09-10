@@ -4,7 +4,7 @@ description: Understand what a chat experience room is made of, what the side pa
 last_reviewed: "2026-09-10"
 ---
 
-A [chat experience](../README.md) room has three working parts: a side panel down the left, the thread in the middle, and the message box at the bottom. Each answers a different question—who is in the room, what has been said, and what happens to the next message you send. These pages cover how a turn runs, how to choose who replies and in which mode, how to change the roster mid-conversation, and what every control in the room does. Chat Experiences is in beta.
+A [chat experience](../README.md) room has three working parts: a side panel down the left, the thread in the middle, and the message box at the bottom. Each answers a different question—who is in the room, what has been said, and what happens to the next message you send. These pages cover how a turn runs, how to choose who replies and in which mode, how to change the roster mid-conversation, and what every control in the room does.
 
 ## What the room is made of
 

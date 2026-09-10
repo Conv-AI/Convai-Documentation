@@ -4,7 +4,7 @@ description: Attach a picture to a message in a chat experience room, and unders
 last_reviewed: "2026-09-10"
 ---
 
-A picture you attach to a message in a chat experience room reaches the characters as words. Use this page to attach a `.png`, `.jpg`, or `.jpeg` picture, to send it with a message, and to know exactly what the characters are told about it. Chat Experiences is in beta.
+A picture you attach to a message in a chat experience room reaches the characters as words. Use this page to attach a `.png`, `.jpg`, or `.jpeg` picture, to send it with a message, and to know exactly what the characters are told about it.
 
 ## Prerequisites
 

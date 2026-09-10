@@ -4,7 +4,7 @@ description: Find, search, rename, duplicate, and delete the chat experiences on
 last_reviewed: "2026-09-10"
 ---
 
-Chat Experiences is in beta, and every chat experience you create stays on **My Experiences** until you delete it. Use this page to find one again, to rename it, to delete it, and to duplicate it when you want to run the same kind of conversation with a different brief.
+Every chat experience you create stays on **My Experiences** until you delete it. Use this page to find one again, to rename it, to delete it, and to duplicate it when you want to run the same kind of conversation with a different brief.
 
 ## Find a chat experience
 

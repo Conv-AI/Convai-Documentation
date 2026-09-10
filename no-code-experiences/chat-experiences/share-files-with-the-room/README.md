@@ -4,7 +4,7 @@ description: Understand what reaches the characters when you attach a file to a 
 last_reviewed: "2026-09-10"
 ---
 
-A message you send in a [chat experience](../README.md) room can carry files. A file is never handed to the characters as a file: what reaches them is text—either the words the file already holds, or a description written for it. These pages cover what each kind of file becomes, what the room shows you about it, and what is kept once the conversation is over. Chat Experiences is in beta.
+A message you send in a [chat experience](../README.md) room can carry files. A file is never handed to the characters as a file: what reaches them is text—either the words the file already holds, or a description written for it. These pages cover what each kind of file becomes, what the room shows you about it, and what is kept once the conversation is over.
 
 ## What the characters receive
 
@@ -32,7 +32,7 @@ A PDF is the one format with two outcomes, and both are correct. [Share a docume
 
 A file the room could not read is still sent. Its name goes to the characters and nothing else, and the message is not held back.
 
-Nothing tells you in advance whether a file's contents can be shared. You find out afterwards. Every file you attach gets a chip above where you type, and the chip's second line settles once the file has been dealt with. A file whose contents were not shared says so on that line, and a file the room could not read—or a picture it could not describe—also raises a message naming the file. A picture shared by its name alone raises no message, so the chip is the one place that reports every case.
+Nothing tells you in advance whether a file's contents can be shared. You find out afterwards. Every file you attach gets a chip above where you type, and the chip's second line settles once the file has been dealt with. A file whose contents were not shared says so on that line, and a file the room could not read—or a picture it could not describe—also raises a message naming the file.
 
 The paperclip that attaches a file is greyed out only while the message box is locked. No file makes it unavailable. See [You cannot send a message](../troubleshooting/composer-is-locked.md) for every reason the box locks.
 

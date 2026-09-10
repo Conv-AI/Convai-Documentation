@@ -4,7 +4,7 @@ description: Reference for every control in a chat experience room's top bar and
 last_reviewed: "2026-09-10"
 ---
 
-A chat experience room carries controls in a top bar above the conversation and in the side panel down the left. Chat Experiences is in beta. This page lists both, in the order they appear on screen. The message box under the thread holds controls of its own—the respond chip and the paperclip—covered in [Choose who replies](choose-who-replies.md) and [Share files with the room](../share-files-with-the-room/README.md).
+A chat experience room carries controls in a top bar above the conversation and in the side panel down the left. This page lists both, in the order they appear on screen. The message box under the thread holds controls of its own—the respond chip and the paperclip—covered in [Choose who replies](choose-who-replies.md) and [Share files with the room](../share-files-with-the-room/README.md).
 
 ## The top bar
 

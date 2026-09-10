@@ -4,7 +4,7 @@ description: Understand how a room type and a purpose become the one briefing ev
 last_reviewed: "2026-09-10"
 ---
 
-The briefing a character receives is one paragraph, written from the room type and the purpose you set when you created the chat experience. A one-character room is briefed in different words from a room of two or more, and the two are labeled differently as well. Knowing how that paragraph is assembled tells you what the characters are working from, which wording they received, and what is shortened when the briefing grows too long. Chat Experiences is in beta.
+The briefing a character receives is one paragraph, written from the room type and the purpose you set when you created the chat experience. A one-character room is briefed in different words from a room of two or more, and the two are labeled differently as well. Knowing how that paragraph is assembled tells you what the characters are working from, which wording they received, and what is shortened when the briefing grows too long.
 
 ## The three parts of a briefing
 

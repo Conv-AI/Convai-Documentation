@@ -4,7 +4,7 @@ description: Replace the briefing written for you in the create dialog with your
 last_reviewed: "2026-09-10"
 ---
 
-The briefing every character receives is written for you, and the create dialog is the one place where you can replace that wording with your own—creating the experience settles the briefing, and **Duplicate with a new brief** opens the same dialog on a copy when you want different wording later. Chat Experiences is in beta. Use this page to rewrite the briefing in the **What each character will be told** box, to put the written-for-you version back, and to understand what your own wording replaces.
+The briefing every character receives is written for you, and the create dialog is the one place where you can replace that wording with your own—creating the experience settles the briefing, and **Duplicate with a new brief** opens the same dialog on a copy when you want different wording later. Use this page to rewrite the briefing in the **What each character will be told** box, to put the written-for-you version back, and to understand what your own wording replaces.
 
 ## Prerequisites
 

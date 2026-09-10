@@ -4,7 +4,7 @@ description: Understand why every opening of a chat experience is a new room, wh
 last_reviewed: "2026-09-10"
 ---
 
-A session is one conversation in a chat experience, from the characters taking their seats to the moment the conversation ends. Every opening starts a new session, and a finished one is kept as a transcript you can read but not continue. Chat Experiences is in beta.
+A session is one conversation in a chat experience, from the characters taking their seats to the moment the conversation ends. Every opening starts a new session, and a finished one is kept as a transcript you can read but not continue.
 
 ## Why every opening is a new room
 

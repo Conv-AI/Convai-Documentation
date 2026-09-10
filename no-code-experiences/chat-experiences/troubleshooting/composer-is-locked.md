@@ -4,7 +4,7 @@ description: Work out why the message box in a chat experience room will not tak
 last_reviewed: "2026-09-10"
 ---
 
-The message box in a chat experience room locks whenever the room cannot take a message, and it always says why. Chat Experiences is in beta. Use this page to read the reason the room gives you, to clear it, and to tell a locked box apart from a message that went nowhere.
+The message box in a chat experience room locks whenever the room cannot take a message, and it always says why. Use this page to read the reason the room gives you, to clear it, and to tell a locked box apart from a message that went nowhere.
 
 ## What each locked message means
 

@@ -4,7 +4,7 @@ description: Understand why a chat experience settles its room type, purpose, an
 last_reviewed: "2026-09-10"
 ---
 
-A chat experience settles its brief the moment it is created. Chat Experiences is in beta. The room type, the purpose, and the briefing are written in [the create dialog](../create-a-chat-experience.md) and stay as they were written, for that experience and every room opened from it. Knowing what that covers explains why the room shows a lock rather than an edit control, and points you at the one way to put the same characters in front of different wording.
+A chat experience settles its brief the moment it is created. The room type, the purpose, and the briefing are written in [the create dialog](../create-a-chat-experience.md) and stay as they were written, for that experience and every room opened from it. Knowing what that covers explains why the room shows a lock rather than an edit control, and points you at the one way to put the same characters in front of different wording.
 
 ## What is settled at creation
 

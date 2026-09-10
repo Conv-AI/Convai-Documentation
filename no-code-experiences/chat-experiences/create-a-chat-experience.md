@@ -4,7 +4,7 @@ description: Name a chat experience, pick a room type, write its purpose, and cr
 last_reviewed: "2026-09-10"
 ---
 
-Chat Experiences is in beta, and creating a chat experience settles what the room is for: the room type and the purpose you write become the briefing every character receives when it joins. The create dialog is the one place where that wording is yours to change. Use this page to name the experience, pick its room type, write its purpose, and read the briefing before it is fixed.
+Creating a chat experience settles what the room is for: the room type and the purpose you write become the briefing every character receives when it joins. The create dialog is the one place where that wording is yours to change. Use this page to name the experience, pick its room type, write its purpose, and read the briefing before it is fixed.
 
 ## Prerequisites
 

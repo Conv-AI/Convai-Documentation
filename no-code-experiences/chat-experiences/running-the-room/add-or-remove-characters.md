@@ -4,7 +4,7 @@ description: Seat a character in a chat experience room that is already running,
 last_reviewed: "2026-09-10"
 ---
 
-The characters in a room can change while the conversation is running. Chat Experiences is in beta. A character seated halfway through receives the same [room brief](../the-room-brief/README.md) as the characters already seated, and a character removed stops answering from that point on. Use this page to change the roster of a live room and to recognize the moments when those controls are frozen.
+The characters in a room can change while the conversation is running. A character seated halfway through receives the same [room brief](../the-room-brief/README.md) as the characters already seated, and a character removed stops answering from that point on. Use this page to change the roster of a live room and to recognize the moments when those controls are frozen.
 
 ## Prerequisites
 

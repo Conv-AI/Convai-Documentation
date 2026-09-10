@@ -4,7 +4,7 @@ description: Understand what the room brief tells every character that joins a c
 last_reviewed: "2026-09-10"
 ---
 
-A chat experience holds one brief, and every character in the room is given it the moment it joins. The brief is written from the room type and the purpose you set while creating the experience, and it is settled at that moment. These pages cover what the brief contains, how its wording is put together, and the one moment that wording is yours to write. Chat Experiences is in beta.
+A chat experience holds one brief, and every character in the room is given it the moment it joins. The brief is written from the room type and the purpose you set while creating the experience, and it is settled at that moment. These pages cover what the brief contains, how its wording is put together, and the one moment that wording is yours to write.
 
 ## What the brief is made of
 

@@ -4,7 +4,7 @@ description: Add characters to a chat experience room from the workspace you are
 last_reviewed: "2026-09-10"
 ---
 
-A chat experience opens as an empty room, and the characters you seat in it are the ones that answer you. Chat Experiences is in beta. You add characters for each session: opening the experience again starts a new room with nobody in it. Use this page to add characters from your workspace or by character ID, and to recognize the point at which each one has joined and been briefed.
+A chat experience opens as an empty room, and the characters you seat in it are the ones that answer you. You add characters for each session: opening the experience again starts a new room with nobody in it. Use this page to add characters from your workspace or by character ID, and to recognize the point at which each one has joined and been briefed.
 
 ## Prerequisites
 

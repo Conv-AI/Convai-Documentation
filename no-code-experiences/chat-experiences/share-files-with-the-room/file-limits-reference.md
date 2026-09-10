@@ -4,7 +4,7 @@ description: Reference for the file types a chat experience room accepts, the si
 last_reviewed: "2026-09-10"
 ---
 
-A chat experience room accepts a short list of file formats and limits how much of a file it shares with the characters. This page lists the formats, the limits, and what the room does when a file passes one. Chat Experiences is in beta.
+A chat experience room accepts a short list of file formats and limits how much of a file it shares with the characters. This page lists the formats, the limits, and what the room does when a file passes one.
 
 ## Accepted file types
 

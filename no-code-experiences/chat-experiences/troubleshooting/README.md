@@ -4,7 +4,7 @@ description: Find the chat experience symptom you are seeing, from a room that w
 last_reviewed: "2026-09-10"
 ---
 
-Chat Experiences reports what is wrong where it happens: the message box says why it is locked, the character picker says why a character will not join, and anything else is reported on the page you were working on. Chat Experiences is in beta. Start from what you can see on screen, and these pages tell you what it means and what clears it.
+Chat Experiences reports what is wrong where it happens: the message box says why it is locked, the character picker says why a character will not join, and anything else is reported on the page you were working on. Start from what you can see on screen, and these pages tell you what it means and what clears it.
 
 ## Where each symptom is answered
 
@@ -12,7 +12,7 @@ Chat Experiences reports what is wrong where it happens: the message box says wh
 
 ## Behavior that is not a fault
 
-Six things that look like faults are how a chat experience works in this version:
+Six things that look like faults are how a chat experience works:
 
 | What you see | Why | Where it is explained |
 |---|---|---|
@@ -25,7 +25,7 @@ Six things that look like faults are how a chat experience works in this version
 
 ## The Chat Experiences controls are missing
 
-Chat Experiences reaches accounts in stages. If **My Experiences** shows neither a **Create a Chat Experience** button nor a **Chat experiences** section, the release has not reached you yet. This is not a plan limit. To ask when it will reach your account, contact [support@convai.com](mailto:support@convai.com).
+If **My Experiences** shows neither a **Create a Chat Experience** button nor a **Chat experiences** section, contact [support@convai.com](mailto:support@convai.com).
 
 {% content-ref url="../prerequisites.md" %}
 [What you need to use Chat Experiences](../prerequisites.md)

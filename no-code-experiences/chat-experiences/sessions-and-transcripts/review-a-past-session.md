@@ -4,7 +4,7 @@ description: Open a chat experience's previous sessions, pick one of its finishe
 last_reviewed: "2026-09-10"
 ---
 
-A finished conversation stays with the chat experience that ran it and can be opened again as a read-only thread. Use this page to reach an experience's previous sessions, pick one, and read it. Chat Experiences is in beta.
+A finished conversation stays with the chat experience that ran it and can be opened again as a read-only thread. Use this page to reach an experience's previous sessions, pick one, and read it.
 
 ## Prerequisites
 

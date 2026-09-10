@@ -4,7 +4,7 @@ description: Reference for the five respond modes in a chat experience room, wha
 last_reviewed: "2026-09-10"
 ---
 
-A respond mode decides who is expected to answer the next message. Five are available in a room of two or more characters, and a room opens on **Auto**, where the [room brief](../the-room-brief/README.md) decides who answers. Chat Experiences is in beta.
+A respond mode decides who is expected to answer the next message. Five are available in a room of two or more characters, and a room opens on **Auto**, where the [room brief](../the-room-brief/README.md) decides who answers.
 
 Two controls set the mode. The respond chip sits to the left of the message box, under what you are typing, and holds until you change it; an `@` tag written into the message applies to that one message. See [Choose who replies](choose-who-replies.md) for setting either. A room holding one character has no chip and no mode to set: the message box carries a sentence in place of the chip, and every message goes to the character in the room.
 

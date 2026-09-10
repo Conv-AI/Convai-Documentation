@@ -4,7 +4,7 @@ description: Write and send a message in a chat experience room, address a chara
 last_reviewed: "2026-09-10"
 ---
 
-You are the moderator of a chat experience, and the characters answer you rather than talk among themselves. Use this page to send the first message in a room, to address a character so that it replies, and to read what the thread reports once the turn is over. Chat Experiences is in beta.
+You are the moderator of a chat experience, and the characters answer you rather than talk among themselves. Use this page to send the first message in a room, to address a character so that it replies, and to read what the thread reports once the turn is over.
 
 ## Prerequisites
 

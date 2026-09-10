@@ -4,7 +4,7 @@ description: Download a chat experience conversation as a Markdown file from a p
 last_reviewed: "2026-09-10"
 ---
 
-A conversation held in a chat experience can be downloaded as a Markdown file, whether it has finished or is still running. Use this page to export one, and to know what the file holds before you open it. Chat Experiences is in beta.
+A conversation held in a chat experience can be downloaded as a Markdown file, whether it has finished or is still running. Use this page to export one, and to know what the file holds before you open it.
 
 ## Prerequisites
 

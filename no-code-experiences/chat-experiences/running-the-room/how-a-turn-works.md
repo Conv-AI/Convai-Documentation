@@ -4,7 +4,7 @@ description: Understand why a chat experience room answers one message at a time
 last_reviewed: "2026-09-10"
 ---
 
-A chat experience room answers one message at a time, and it reports the result of each one under the message that prompted it. Chat Experiences is in beta. That report is where every wait, every count, and every "stayed quiet" line in the thread comes from. Knowing how a turn is measured tells you what the room is still waiting for, what it has given up on, and which characters chose to say nothing.
+A chat experience room answers one message at a time, and it reports the result of each one under the message that prompted it. That report is where every wait, every count, and every "stayed quiet" line in the thread comes from. Knowing how a turn is measured tells you what the room is still waiting for, what it has given up on, and which characters chose to say nothing.
 
 ## One message at a time
 
