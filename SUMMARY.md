@@ -740,6 +740,10 @@
     * [Interaction API (Beta)](api-reference/core-api-reference/interaction-apis/interaction-api-beta.md)
     * [Interaction API](api-reference/core-api-reference/interaction-apis/interaction-api.md)
 
-## Convai Credits
+## Credits & Billing
 
-* [Convai Credits: How Usage and Billing Work](convai-credits/convai-credits-how-usage-and-billing-work.md)
+* [Convai credits](convai-credits/README.md)
+  * [How Convai credits work](convai-credits/how-convai-credits-work.md)
+  * [Credit balance and billing cycle](convai-credits/credit-balance-and-billing-cycle.md)
+  * [Estimate credit usage for a project](convai-credits/estimate-credit-usage.md)
+  * [How existing subscriptions move to credits](convai-credits/existing-subscriptions-and-credits.md)
