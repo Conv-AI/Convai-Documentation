@@ -98,7 +98,7 @@ Gemini 3.8 Flash offers these reasoning profiles:
 
 The Low, Medium, and High profiles select how much reasoning Gemini 3.8 Flash performs. Their provider token prices are the same; additional reasoning increases output-token usage.
 
-All three profiles use **0.75 Convai credits per 1,000 input tokens** and **3.75 credits per 1,000 output tokens**, including reasoning. The isolated text LLM minimum is **one credit**. Actual usage can exceed this minimum. Convai processing adds six credits per generation. Speech, transport, memory, knowledge retrieval, and other enabled services add their own usage.
+All three profiles use **0.75 Convai credits per 1,000 input tokens** and **3.75 credits per 1,000 output tokens**, including reasoning. Each turn also includes the **Platform Fee** of <code class="expression">space.vars.platform_fee_credits</code> credits. Speech, session duration, memory, knowledge retrieval, and other enabled services add their own usage, and Convai rounds each turn's total up to the next whole credit. See [How Convai credits work](../../convai-credits/how-convai-credits-work.md).
 
 <details>
 <summary>Gemini 3.8 Flash latency and credit measurements</summary>
@@ -111,7 +111,7 @@ These staging measurements use 30 synthetic requests per profile across conversa
 | Medium | 4.26 s | 7.49 s | 8.63 | 14.63 |
 | High | 5.57 s | 9.28 s | 11.03 | 17.03 |
 
-The LLM column quotes the language model in isolation, using measured input, visible output, and reasoning tokens. The generation column shows observed staging charges including the six-credit processing charge. Both columns exclude connection-duration charges and other services. These workload averages differ from the one-credit LLM minimum and do not guarantee production costs or response times.
+The LLM column quotes the language model in isolation, using measured input, visible output, and reasoning tokens. The generation column shows observed staging charges including the six-credit **Platform Fee**. Both columns exclude session duration charges and other services. These workload averages do not guarantee production costs or response times.
 
 </details>
 
