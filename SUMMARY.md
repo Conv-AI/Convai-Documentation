@@ -739,3 +739,7 @@
   * [Interaction APIs](api-reference/core-api-reference/interaction-apis/README.md)
     * [Interaction API (Beta)](api-reference/core-api-reference/interaction-apis/interaction-api-beta.md)
     * [Interaction API](api-reference/core-api-reference/interaction-apis/interaction-api.md)
+
+## Convai Credits
+
+* [Convai Credits: How Usage and Billing Work](convai-credits/convai-credits-how-usage-and-billing-work.md)
