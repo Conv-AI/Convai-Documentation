@@ -24,17 +24,27 @@ The Actions protocol v2 fields on this page describe an opt-in candidate surface
 
 ### Request Body
 
-Only `character_id` is required. Every other field has a server-side default.
+A single-character session requires only `character_id`; every other field has a server-side default. A multi-character room sends `characters` and a non-blank `end_user_id` instead of `character_id`.
 
 **Session identity**
 
 | Name | Type | Description |
 |---|---|---|
-| `character_id` <mark style="color:red;">\*</mark> | String | Unique ID of the character to connect with. |
-| `connection_type` | String | Connection mode. `"audio"` (default) or `"video"`. |
+| `character_id` | String | Unique ID of the character to connect with. Required for a single-character session; omit it when you send `characters`. |
+| `connection_type` | String | Connection mode. `"audio"` (default), `"video"`, or `"text"`. |
 | `character_session_id` | String | Existing session ID for conversation continuity. If omitted, a new one is generated. |
-| `end_user_id` | String | Your own unique identifier for the end user. Tags sessions and enables Long Term Memory. |
+| `end_user_id` | String | Your own unique identifier for the end user. Tags sessions and enables Long Term Memory. Required when you send `characters`, and when you join an existing room with `mode: "join"` and a room locator (`room_session_id` or `shared_session_key`) instead of a character. |
 | `end_user_metadata` | JSON | Arbitrary metadata associated with the end user. Echoed back in the response. |
+
+**Multi-character rooms**
+
+Multi-character rooms are available only to accounts with the feature enabled, and your account's character and participant limits still apply.
+
+| Name | Type | Description |
+|---|---|---|
+| `characters` | JSON | Ordered list of `{ "character_id", "character_session_id" }` entries, one per character instance; the first entry is the initial instance. `character_id` is required and must be a bare UUID; `character_session_id` is optional and continues that instance's earlier conversation. Send either `character_id` or `characters`, not both. See [Use multi-character sessions](multi-character-sessions.md). |
+| `group_chat` | Bool | Opts the room into group chat, where several instances answer the same message. Default `false`. Fixed at create; a join inherits it. See [Build a group chat](build-a-group-chat.md). |
+| `room_brief` | String | Up to 4000 characters given to every character in the room as context, including characters added later. Fixed at create. Takes effect only with `group_chat: true`. |
 
 **Character behavior and context**
 
@@ -80,7 +90,7 @@ Only `character_id` is required. Every other field has a server-side default.
 
 | Name | Type | Description |
 |---|---|---|
-| `max_num_participants` | Integer | Maximum participants in the session. Default `1`. |
+| `max_num_participants` | Integer | Maximum number of **human** participants in the room. Default `1`. Character instances are not counted here; the roster size is set by `characters` and capped by the account. |
 | `shared_session_key` | String | Grouping key that deterministically places participants into the same room. 1–128 characters, alphanumeric plus `-` and `_`. |
 | `mode` | String | `"create"` (default) or `"join"`. |
 | `room_name` | String | Explicit room name to create or join. |
@@ -265,9 +275,17 @@ If the request omits `capabilities`, the response also omits it. The session the
   "room_name": "<name of the room to join>",
   "token": "<token for the client to join the room>",
   "end_user_id": "<end_user_id of the user in the session, null if not sent in request>",
-  "end_user_metadata": "<metadata associated with the end user, null if not sent in request>"
+  "end_user_metadata": "<metadata associated with the end user, null if not sent in request>",
+  "room_session_id": null,
+  "active_membership_id": null,
+  "route_epoch": null,
+  "roster_epoch": null,
+  "partial_dispatch": false,
+  "characters": null
 }
 ```
+
+The last six keys are present on every response and populated only for a roster room.
 
 | Field | Type | Description |
 |---|---|---|
@@ -280,6 +298,12 @@ If the request omits `capabilities`, the response also omits it. The session the
 | `end_user_id` | String \| null | Echoed from the request. |
 | `end_user_metadata` | Object \| null | Echoed from the request. |
 | `capabilities` | Object | Present only when the request explicitly includes `capabilities`. Contains the server-selected protocol fields. |
+| `room_session_id` | String \| null | Identifies the room; sent with every room command. Populated for any roster room, including a `mode: "join"` response; `null` for a single-character session. |
+| `active_membership_id` | String \| null | The character instance currently receiving user turns. On a create this is the first `characters` entry; on a join it is whichever instance is active at that moment, because [switching the active character](multi-character-sessions.md#switch-the-active-character) changes it. Populated for any roster room; `null` for a single-character session. |
+| `route_epoch` | Integer \| null | Send as `expected_route_epoch` on the first room command. Populated for any roster room, including a `mode: "join"` response; `null` for a single-character session. |
+| `roster_epoch` | Integer \| null | Send as `expected_roster_epoch` on the first `character-roster-update`. Populated for any roster room, including a `mode: "join"` response; `null` for a single-character session. |
+| `partial_dispatch` | Bool | `true` if any character instance failed to start. Always `false` for a single-character session. |
+| `characters` | Array \| null | One entry per character instance: `membership_id`, `session_id`, `is_initial`, `provisioning_status`, `failure_code`, `display_name`, `description`, and the identifiers listed in [Use multi-character sessions](multi-character-sessions.md#map-each-character-instance). Populated for any roster room, including a `mode: "join"` response; `null` for a single-character session. |
 {% endtab %}
 
 {% tab title="404: Not Found Response generation failed for the request" %}

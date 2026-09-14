@@ -140,6 +140,8 @@ For every client-to-server message, the server automatically sends a `server-res
 | `reset-idle-timer`            | Reset idle timeout monitoring              | [client-to-server-messages.md](client-to-server-messages.md#reset-idle-timer)            |
 | `usage-toggle`                | Enable/disable the client usage stream     | [client-to-server-messages.md](client-to-server-messages.md#usage-toggle)                |
 | `kill-pipeline`               | End the session                            | [client-to-server-messages.md](client-to-server-messages.md#kill-pipeline)               |
+| `group-address`               | Address a group chat room for one turn     | [group-chat-messages.md](group-chat-messages.md#group-address)                           |
+| `group-address-part`          | One frame of a large `group-address`       | [group-chat-messages.md](group-chat-messages.md#group-address-part)                      |
 
 ---
 
@@ -177,6 +179,7 @@ For every client-to-server message, the server automatically sends a `server-res
 | `server-log`                    | Server log lines (debug sessions only)      | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#diagnostics)                   |
 | `usage-update`                  | Per-turn usage and cost (debug sessions only) | Server-message wrapped | [server-to-client-messages.md](server-to-client-messages.md#diagnostics)                 |
 | `audio-data`                    | Audio chunks via data channel (custom mode) | Server-message wrapped | See [Audio Data via Data Channel](audio-data-via-data-channel.md)                          |
+| `turn-complete`                 | Group chat turn finished                    | Server-message wrapped | [group-chat-messages.md](group-chat-messages.md#turn-complete)                             |
 
 **Format Key:**
 
