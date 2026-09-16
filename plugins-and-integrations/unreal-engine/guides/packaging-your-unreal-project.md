@@ -7,17 +7,11 @@ last_reviewed: 2026-09-16
 
 # Packaging your Unreal project for deployment
 
-Convai hosts your packaged Unreal experience and streams it to a browser. You enable Pixel Streaming, package a Windows build, compress it, and upload that archive to Convai. This page is for developers whose project already runs in the Unreal Editor.
+Convai deploys your Unreal Engine application and streams it to a browser. You enable Pixel Streaming, package a Windows build, compress it, and upload that archive to Convai. Blueprint and C++ projects both work, and you need nothing beyond a project that opens and runs in the Unreal Editor.
 
 {% hint style="warning" %}
 Enable Pixel Streaming before you package. Unreal compiles plugins into the build, so enabling the plugin afterwards has no effect on a build that already exists.
 {% endhint %}
-
-## Before you start
-
-* [ ] An Unreal Engine project that opens and runs in the Editor
-* [ ] A Windows machine with Visual Studio 2022 and the **Game development with C++** workload
-* [ ] Free disk space of roughly three times your project size
 
 ## Prepare and package the project
 
