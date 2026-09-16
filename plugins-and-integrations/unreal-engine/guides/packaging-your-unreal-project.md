@@ -34,9 +34,11 @@ Restart the Editor when it prompts you.
 {% endstep %}
 
 {% step %}
-### Add the audio capture component
+### Add the audio capture component, if you use the Convai plugin
 
-This step applies to projects that use the Convai Unreal Engine plugin. If you have not installed it, follow [Convai Unreal Engine plugin](https://docs.convai.com/api-docs/plugins-and-integrations/convai-unreal-engine-plugin) first.
+Skip this step when your project does not use the Convai Unreal Engine plugin. Nothing else on this page depends on it.
+
+If your project does use the plugin, and you have not installed it yet, follow [Convai Unreal Engine plugin](https://docs.convai.com/api-docs/plugins-and-integrations/convai-unreal-engine-plugin) first.
 
 Open the blueprint that holds `BP_ConvaiPlayerComponent`, select **Add** in the **Components** panel, and add `ConvaiPSAudioCapture` under that component. It routes microphone audio from the browser into your character, so the character hears a viewer who is talking through the stream.
 
@@ -96,52 +98,10 @@ When the deployment finishes, select the test button on your application. It ope
 {% endstep %}
 {% endstepper %}
 
-## Confirm Pixel Streaming is in the build
-
-A package that succeeds does not prove the plugin reached the build. Unreal links plugin modules directly into the executable for a Shipping build, so the packaged `Plugins` folder shows nothing either way.
-
-Read the build receipt before you upload:
-
-```powershell
-$receipt = "Windows\YourProject\Binaries\Win64\YourProject-Win64-Shipping.target"
-(Get-Content $receipt -Raw | ConvertFrom-Json).BuildPlugins
-```
-
-The returned list names `PixelStreaming` or `PixelStreaming2` when the plugin compiled into the build. If neither appears, the build cannot stream.
-
 ## Troubleshooting
 
-### The build renders but nothing streams
-
-**Symptom:** the deployed application loads and no stream reaches the browser.
-
-**Cause:** Pixel Streaming was not enabled when the project was packaged.
-
-**Fix:** enable the plugin in the Editor, package the project again, and upload the new archive.
-
-**Verification:** run the build receipt check described earlier on this page and confirm the plugin is listed.
-
-### The character does not hear the viewer
-
-**Symptom:** the stream plays and the character does not respond to speech from the browser.
-
-**Cause:** `ConvaiPSAudioCapture` is missing from the blueprint that holds `BP_ConvaiPlayerComponent`.
-
-**Fix:** add the component, compile the blueprint, then package and upload again.
-
-**Verification:** the component appears under `BP_ConvaiPlayerComponent` in the **Components** panel.
-
-### Packaging stops with a path length error
-
-**Symptom:** packaging fails with `The following action paths are longer than 260 characters. Please move the engine to a directory with a shorter path.`
-
-**Cause:** Unreal enforces a 260-character limit on build paths. Pixel Streaming stages a deeply nested web server folder, which pushes paths past that limit when the project sits far from the drive root.
-
-**Fix:** move the project closer to the drive root, such as `C:\Projects\MyGame`, and package again.
-
-**Verification:** packaging passes the build stage and starts cooking content.
-
-## Next steps
-
-* [Convai Pixel Streaming Embed](../../convai-pixel-streaming-embed) embeds the deployed experience in a React or JavaScript application.
-* [Integration with Pixel Streaming](integration-with-pixel-streaming) covers the in-editor Pixel Streaming setup, including audio submix configuration.
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| The deployed application loads and no stream reaches the browser | Pixel Streaming was not enabled when the project was packaged | Enable the plugin in the Editor, package the project again, and upload the new archive |
+| The stream plays and the character does not respond to speech from the browser | `ConvaiPSAudioCapture` is missing from the blueprint that holds `BP_ConvaiPlayerComponent` | Add the component, compile the blueprint, then package and upload again |
+| Packaging fails with `The following action paths are longer than 260 characters. Please move the engine to a directory with a shorter path.` | Unreal enforces a 260-character limit on build paths, and Pixel Streaming stages a deeply nested web server folder that passes it when the project sits far from the drive root | Move the project closer to the drive root, such as `C:\Projects\MyGame`, and package again |
