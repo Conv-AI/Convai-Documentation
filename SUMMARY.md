@@ -413,6 +413,7 @@
       * [Managing the environment at runtime](plugins-and-integrations/convai-unreal-engine-plugin/features/scene-metadata/managing-the-environment-at-runtime.md)
       * [Scene metadata usage examples](plugins-and-integrations/convai-unreal-engine-plugin/features/scene-metadata/scene-metadata-usage-examples.md)
       * [Troubleshoot scene metadata](plugins-and-integrations/convai-unreal-engine-plugin/features/scene-metadata/troubleshoot-scene-metadata.md)
+      * [Scene Auto Tagger](plugins-and-integrations/convai-unreal-engine-plugin/features/scene-metadata/scene-auto-tagger.md)
     * [Vision](plugins-and-integrations/convai-unreal-engine-plugin/features/vision/README.md)
       * [How vision works](plugins-and-integrations/convai-unreal-engine-plugin/features/vision/how-vision-works.md)
       * [Vision quick start](plugins-and-integrations/convai-unreal-engine-plugin/features/vision/vision-quick-start.md)

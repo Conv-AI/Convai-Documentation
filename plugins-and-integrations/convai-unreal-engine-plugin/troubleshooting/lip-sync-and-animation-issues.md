@@ -1,36 +1,40 @@
 ---
 title: Lip sync and animation issues
-description: Fix missing mouth movement, wrong blendshape curves, frame starvation, and packaged build animation failures in the Convai Unreal Engine plugin.
-last_reviewed: "4.0.0-beta.21"
+last_reviewed: 4.0.0-beta.21
+description: >-
+  Fix missing mouth movement, wrong blendshape curves, frame starvation, and
+  packaged build animation failures in the Convai Unreal Engine plugin.
 ---
+
+# Lip sync and animation issues
 
 Use this page to resolve problems with facial animation during character speech. Issues where the character produces no audio at all are covered in [Audio and microphone issues](audio-and-microphone-issues.md). For a full reference of `Convai Face Sync` component properties, see [Face Sync component reference](../features/lip-sync/face-sync-component-reference.md).
 
 {% hint style="info" %}
 **Not sure which `LipSyncMode` to use?** Match your rig to the table below before investigating further — most mouth-movement problems are caused by a `LipSyncMode` mismatch.
-
-| Rig type | Correct `LipSyncMode` |
-| --- | --- |
-| MetaHuman | `MetaHuman Blendshapes` |
-| CC5 | `MetaHuman Blendshapes` |
-| CC4 (standard export) | `ARKit Blendshapes` |
-| CC4 (extended export) | `CC4 Extended Blendshapes` |
-| Custom rig with OVR viseme curves | `Viseme Based` |
 {% endhint %}
 
-## Choose the right troubleshooting path
+| Rig type                          | Correct `LipSyncMode`      |
+| --------------------------------- | -------------------------- |
+| MetaHuman                         | `MetaHuman Blendshapes`    |
+| CC5                               | `MetaHuman Blendshapes`    |
+| CC4 (standard export)             | `ARKit Blendshapes`        |
+| CC4 (extended export)             | `CC4 Extended Blendshapes` |
+| Custom rig with OVR viseme curves | `Viseme Based`             |
+
+### Choose the right troubleshooting path
 
 Start with the top-level checks on this page when you are not sure whether the issue is setup, audio, or rig selection. Move to the feature troubleshooting page when the `Convai Face Sync` component is present and you need to inspect AnimGraph node properties, blendshape remapping, smoothing, starvation, or command-line overrides.
 
-| What you observe | Start here |
-| --- | --- |
-| Character produces no audio and no mouth movement | [Audio and microphone issues](audio-and-microphone-issues.md) |
-| Character speaks but the face does not move | This page, then [Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md) |
-| Mouth moves but the wrong facial curves animate | This page, then [Face Sync component reference](../features/lip-sync/face-sync-component-reference.md) |
-| Lip sync starts, then freezes or fades during speech | [Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md) |
-| Custom curve remapping does not work | [Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md) |
+| What you observe                                     | Start here                                                                                             |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Character produces no audio and no mouth movement    | [Audio and microphone issues](audio-and-microphone-issues.md)                                          |
+| Character speaks but the face does not move          | This page, then [Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md)                 |
+| Mouth moves but the wrong facial curves animate      | This page, then [Face Sync component reference](../features/lip-sync/face-sync-component-reference.md) |
+| Lip sync starts, then freezes or fades during speech | [Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md)                                 |
+| Custom curve remapping does not work                 | [Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md)                                 |
 
-## No mouth movement during speech
+### No mouth movement during speech
 
 **Symptom:** The character speaks, but the mouth and face do not move.
 
@@ -40,7 +44,7 @@ Start with the top-level checks on this page when you are not sure whether the i
 
 **Verify:** Enter Play mode and confirm that the `Convai Face Sync` component is present on the character Actor.
 
----
+***
 
 **Cause — Face Sync AnimGraph node is not in the active pose path:** The node exists in the Animation Blueprint but its `Source Pose` and `Output Pose` pins are not connected to the pose chain that reaches the final animation output.
 
@@ -48,7 +52,7 @@ Start with the top-level checks on this page when you are not sure whether the i
 
 **Verify:** Recompile the Animation Blueprint. The node should have no disconnected pins in the active path to the output.
 
-## Mouth moves but the wrong curves animate
+### Mouth moves but the wrong curves animate
 
 **Symptom:** The face moves, but the movement does not match speech. For example, unrelated facial controls activate instead of mouth shapes.
 
@@ -62,7 +66,7 @@ Start with the top-level checks on this page when you are not sure whether the i
 Use per-component `LipSyncMode` values when one project contains multiple rig types. A project-wide value can make every character of a different rig type animate incorrectly.
 {% endhint %}
 
-## Lip sync freezes or drifts during speech
+### Lip sync freezes or drifts during speech
 
 **Symptom:** Lip sync starts correctly, then freezes, fades out, or lags behind the audio.
 
@@ -73,10 +77,10 @@ Use per-component `LipSyncMode` values when one project contains multiple rig ty
 **Verify:** The mouth should remain synchronized with the spoken audio through the full response.
 
 {% content-ref url="../features/lip-sync/troubleshoot-lip-sync.md" %}
-[Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md)
+[troubleshoot-lip-sync.md](../features/lip-sync/troubleshoot-lip-sync.md)
 {% endcontent-ref %}
 
-## Face animates in editor but not in a packaged build
+### Face animates in editor but not in a packaged build
 
 **Symptom:** Lip sync works in PIE but the face does not animate in a cooked build.
 
@@ -86,16 +90,16 @@ Use per-component `LipSyncMode` values when one project contains multiple rig ty
 
 **Verify:** Run a Development cook and check the cook log for warnings about stripped curve tracks on the character's Skeleton.
 
-## Next steps
+### Next steps
 
 {% content-ref url="../features/lip-sync/face-sync-component-reference.md" %}
-[Face Sync component reference](../features/lip-sync/face-sync-component-reference.md)
+[face-sync-component-reference.md](../features/lip-sync/face-sync-component-reference.md)
 {% endcontent-ref %}
 
 {% content-ref url="../features/lip-sync/troubleshoot-lip-sync.md" %}
-[Troubleshoot lip sync](../features/lip-sync/troubleshoot-lip-sync.md)
+[troubleshoot-lip-sync.md](../features/lip-sync/troubleshoot-lip-sync.md)
 {% endcontent-ref %}
 
 {% content-ref url="diagnostics-and-log-export.md" %}
-[Diagnostics and log export](diagnostics-and-log-export.md)
+[diagnostics-and-log-export.md](diagnostics-and-log-export.md)
 {% endcontent-ref %}
