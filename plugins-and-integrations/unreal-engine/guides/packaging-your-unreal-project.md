@@ -1,101 +1,63 @@
 ---
-description: >-
-  Enable Pixel Streaming, add the audio capture component, package a Windows
-  build, and upload it to Convai so your experience streams in a browser.
-last_reviewed: 2026-09-16
+title: Host your Unreal project with Cloud Projects
+description: Upload an Unreal project from the Convai plugin, let Cloud Projects package and activate the build, and open the streamed experience in a browser.
+last_reviewed: 2026-09-25
 ---
 
-# Packaging your Unreal project for deployment
+Use **Cloud Projects** in the Convai Unreal Engine plugin to host the project open in your Unreal Editor. The tool prepares the project, packages a Windows build, uploads it to Convai, and activates it for browser streaming.
 
-Convai deploys your Unreal Engine application and streams it to a browser. You enable Pixel Streaming, package a Windows build, compress it, and upload that archive to Convai. Blueprint and C++ projects both work, and you need nothing beyond a project that opens and runs in the Unreal Editor.
+## Before you begin
 
-{% hint style="warning" %}
-Enable Pixel Streaming before you package. Unreal compiles plugins into the build, so enabling the plugin afterwards has no effect on a build that already exists.
-{% endhint %}
+You need the Convai Unreal Engine plugin installed in a project that opens in Unreal Editor. Sign in to your Convai account from the Editor when prompted. The Editor also needs the Windows platform SDK to package this project for Windows.
 
-## Prepare and package the project
+Cloud Projects needs the engine's Pixel Streaming plugin. If it is installed but disabled, Cloud Projects enables it for the project during preparation. If the tool enables it in this Editor session, restart the Editor before testing Pixel Streaming in the Editor.
 
-{% stepper %}
-{% step %}
-### Enable Pixel Streaming
-
-In the Unreal Editor, open **Edit > Plugins** and search for Pixel Streaming. Enable one version:
-
-* **Pixel Streaming 2** on Unreal Engine 5.5 and later
-* **Pixel Streaming** on earlier versions, or where **Pixel Streaming 2** is not listed
-
-Restart the Editor when it prompts you.
-{% endstep %}
-
-{% step %}
-### Add the audio capture component, if you use the Convai plugin
-
-Skip this step when your project does not use the Convai Unreal Engine plugin. Nothing else on this page depends on it.
-
-If your project does use the plugin, and you have not installed it yet, follow [Convai Unreal Engine plugin](https://docs.convai.com/api-docs/plugins-and-integrations/convai-unreal-engine-plugin) first.
-
-Open the blueprint that holds `BP_ConvaiPlayerComponent`, select **Add** in the **Components** panel, and add `ConvaiPSAudioCapture` under that component. It routes microphone audio from the browser into your character, so the character hears a viewer who is talking through the stream.
-
-<figure><img src="../../../.gitbook/assets/convai-ps-audio-capture-component.png" alt="The Components panel showing ConvaiPSAudioCapture nested under BP_ConvaiPlayerComponent"><figcaption><p><code>ConvaiPSAudioCapture</code> added under <code>BP_ConvaiPlayerComponent</code></p></figcaption></figure>
-
-Compile and save the blueprint.
-{% endstep %}
-
-{% step %}
-### Package the project for Windows
-
-Open **Platforms > Windows > Build Configuration** and select **Shipping**, then open **Platforms > Windows > Package Project** and choose an empty output folder.
-
-The first package can take 30 to 45 minutes, because Unreal cooks every asset in the project. Later packages reuse that work and finish faster.
-
-When packaging finishes, the output folder holds `YourProject.exe` alongside the `Engine` and `YourProject` folders.
-{% endstep %}
-
-{% step %}
-### Compress the build
-
-Compress the packaged folder into a single `.zip` or `.tar` archive. Convai accepts either format.
-{% endstep %}
-{% endstepper %}
-
-## Upload the build to Convai
+## Create and upload a cloud project
 
 {% stepper %}
 {% step %}
-### Open your experiences
+### Open Cloud Projects
 
-Sign in at [convai.com](https://convai.com) and select **My Experiences**.
-
-<figure><img src="../../../.gitbook/assets/convai-my-experiences-nav.png" alt="The Convai navigation sidebar with My Experiences selected"><figcaption><p>Selecting <strong>My Experiences</strong></p></figcaption></figure>
+In Unreal Editor, select **Tools > Convai > Cloud Projects**. If the panel asks you to sign in, select **Sign in** and complete the account sign-in flow.
 {% endstep %}
 
 {% step %}
-### Upload the archive
+### Name the project
 
-Select **Upload application**, enter an **Application name** and a **Version**, then select **Choose archive** and pick the archive you compressed.
+Select **+ New project**. Enter a name in **PROJECT NAME**. This is the name shown in your Convai dashboard.
 
-<figure><img src="../../../.gitbook/assets/convai-upload-application-dialog.png" alt="The Upload application dialog with fields for application name and version and an area to drop the archive"><figcaption><p>The <strong>Upload application</strong> dialog</p></figcaption></figure>
-
-Select **Upload &#x26; build**.
+<figure><img src="../../../.gitbook/assets/convai-cloud-projects-create-and-upload.png" alt="Cloud Projects panel showing the project name field and Create and upload button"><figcaption><p>The upload form in the Convai Unreal Engine plugin.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
-### Wait for the deployment
+### Start the upload
 
-Convai builds and deploys the uploaded application. This takes a few minutes.
-{% endstep %}
-
-{% step %}
-### Test the stream
-
-When the deployment finishes, select the test button on your application. It opens your experience on its `convai.com` address, where your packaged project streams in the browser.
+Select **Create and upload**. Cloud Projects prepares the Unreal project, packages it for Windows, compresses the build, uploads the archive, runs the build on Convai, and requests activation. The panel shows each stage as it progresses. The first package can take 30–45 minutes while Unreal cooks the project's assets.
 {% endstep %}
 {% endstepper %}
+
+If your project has a Convai player component in one of its own Blueprints, preparation also adds `ConvaiPSAudioCapture` when the component is available in this Editor session. This component passes microphone audio from the browser stream to the Convai player. If the panel says the audio component is unavailable, restart Unreal Editor and select **Upload changes** for the project after it reopens.
+
+## Open the streamed project
+
+After the upload, select your project in **Cloud Projects**. Wait until its status is **Live** and the version is **Active**. Select **Open in browser** to start a stream session in the Convai player. The browser should display your Unreal project; if your project uses a Convai character, test the browser microphone as well.
+
+If the panel still shows **Preparing** or **Waiting to start**, select **Refresh** and check again after activation finishes.
+
+## Publish an experience page
+
+**Open in browser** creates an experience page for the project if one does not exist. To share that page, use the **PUBLISH** section in **Cloud Projects**. Enter a **Page name** and, if useful, a **Short description**. Choose **Public**, **Unlisted**, or **Private**, then select **Publish**. Select **Save draft** if you want to save those details without making the page live.
+
+## Upload changes
+
+After changing your Unreal project, select it in **Cloud Projects** and choose **Upload changes**. The plugin packages and uploads the current project as another version, builds it, and requests activation. Wait for the new version to become **Active**, then use **Open in browser** to check the update.
 
 ## Troubleshooting
 
-| Symptom | Cause | Fix |
-| --- | --- | --- |
-| The deployed application loads and no stream reaches the browser | Pixel Streaming was not enabled when the project was packaged | Enable the plugin in the Editor, package the project again, and upload the new archive |
-| The stream plays and the character does not respond to speech from the browser | `ConvaiPSAudioCapture` is missing from the blueprint that holds `BP_ConvaiPlayerComponent` | Add the component, compile the blueprint, then package and upload again |
-| Packaging fails with `The following action paths are longer than 260 characters. Please move the engine to a directory with a shorter path.` | Unreal enforces a 260-character limit on build paths, and Pixel Streaming stages a deeply nested web server folder that passes it when the project sits far from the drive root | Move the project closer to the drive root, such as `C:\Projects\MyGame`, and package again |
+| What you see | What to do |
+| --- | --- |
+| Cloud Projects says the Pixel Streaming plugin is not installed | Install Pixel Streaming for this Unreal Engine installation, restart the Editor, and try **Create and upload** or **Upload changes** again. |
+| **Create and upload** or **Upload changes** is unavailable because Windows packaging is unavailable | Install the Windows platform SDK for this engine, restart the Editor, and try again. |
+| The packaging stage fails | Open Unreal's packaging log from its notification, fix the reported error, and select **Upload changes** again. |
+| The cloud build fails | Select **Logs** on that version to inspect the build report. |
+| The stream opens, but the Convai character does not hear the browser microphone | Check the preparation notes for the audio component warning. Restart the Editor and select **Upload changes** to let the plugin add `ConvaiPSAudioCapture` to a project Blueprint with a Convai player component. |

@@ -669,7 +669,7 @@
     * [Dynamic Environment Info](plugins-and-integrations/unreal-engine/guides/dynamic-environment-info.md)
     * [Change AI Character Movement Speed](plugins-and-integrations/unreal-engine/guides/change-ai-character-movement-speed.md)
     * [Integration with Pixel Streaming](plugins-and-integrations/unreal-engine/guides/integration-with-pixel-streaming.md)
-    * [Packaging your Unreal project for deployment](plugins-and-integrations/unreal-engine/guides/packaging-your-unreal-project.md)
+    * [Host your Unreal project with Cloud Projects](plugins-and-integrations/unreal-engine/guides/packaging-your-unreal-project.md)
     * [Adjust Interaction Radius](plugins-and-integrations/unreal-engine/guides/adjust-interaction-radius.md)
     * [Creating MetaHuman Characters](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters/README.md)
       * [Adding MetaHuman](plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters/adding-metahuman.md)
