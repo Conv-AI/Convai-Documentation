@@ -1,19 +1,18 @@
 ---
-title: Host your Unreal project with Cloud Projects
+title: Deploy your Unreal project for Pixel Streaming
 description: Package and upload an Unreal project from the Convai plugin, manage its versions and runtime settings, and share the streamed experience.
 last_reviewed: 2026-09-25
 ---
 
-Use **Cloud Projects** to upload the open Unreal project and stream it in a browser.
+Use the Convai Unreal Engine plugin to deploy the open project for browser streaming.
 
 ## Before you begin
 
 - Open the Unreal project with the Convai plugin enabled. Sign in when prompted.
-- Install the Windows platform SDK. The plugin packages a `Win64` `Development` build.
 - Install Unreal's Pixel Streaming plugin. Cloud Projects enables it for this project during preparation if needed.
 - Keep enough disk space for the packaged build and its compressed archive.
 
-## Create and upload a cloud project
+## Upload your Unreal project
 
 {% stepper %}
 {% step %}
