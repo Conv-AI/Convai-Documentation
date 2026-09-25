@@ -4,17 +4,14 @@ description: Package and upload an Unreal project from the Convai plugin, manage
 last_reviewed: 2026-09-25
 ---
 
-Use **Cloud Projects** in the Convai Unreal Engine plugin to package the open Unreal project, upload it to Convai, and stream it in a browser. The same Editor panel lets you inspect versions, change runtime settings, and publish an experience page.
+Use **Cloud Projects** to upload the open Unreal project and stream it in a browser.
 
 ## Before you begin
 
-Open a project with the Convai Unreal Engine plugin enabled. Sign in to your Convai account from the Editor if **Cloud Projects** prompts you. The Editor needs the Windows platform SDK because Cloud Projects packages a `Win64` `Development` build. Leave enough disk space for both the staged build and its compressed archive.
-
-Cloud Projects needs Unreal's Pixel Streaming plugin installed. During preparation, it enables Pixel Streaming for this project if needed. A newly enabled plugin is included in the packaged build, but you must restart the Editor before testing Pixel Streaming in the Editor.
-
-### Use a different Convai environment
-
-Cloud Projects follows the API host configured for the Convai plugin, including the `CustomBetaURL` project setting or a `-ConvaiBetaURL=` launch override. Use `-ConvaiProjectApiURL=` when only Cloud Projects should use a different API host. If that environment uses a separate browser player host, `-ConvaiExperienceURL=` overrides the player URL. Sign in with credentials for the environment you selected.
+- Open the Unreal project with the Convai plugin enabled. Sign in when prompted.
+- Install the Windows platform SDK. The plugin packages a `Win64` `Development` build.
+- Install Unreal's Pixel Streaming plugin. Cloud Projects enables it for this project during preparation if needed.
+- Keep enough disk space for the packaged build and its compressed archive.
 
 ## Create and upload a cloud project
 
@@ -22,13 +19,13 @@ Cloud Projects follows the API host configured for the Convai plugin, including 
 {% step %}
 ### Open Cloud Projects
 
-In Unreal Editor, select **Tools > Convai > Cloud Projects**. Select **Sign in** if the panel asks for your Convai account.
+In Unreal Editor, select **Tools > Convai > Cloud Projects**. Sign in if prompted.
 {% endstep %}
 
 {% step %}
 ### Name the project
 
-Select **+ New project**. The **PROJECT NAME** field starts with the open Unreal project's name; change it if needed. This name appears in your Convai project list.
+Select **+ New project**. Edit **PROJECT NAME** if needed; it starts with the open Unreal project's name.
 
 <figure><img src="../../../.gitbook/assets/convai-cloud-projects-create-and-upload.png" alt="Cloud Projects upload form with a project name field and Create and upload button"><figcaption><p>Name the open Unreal project before starting its upload.</p></figcaption></figure>
 {% endstep %}
@@ -51,25 +48,36 @@ Cloud Projects runs these stages in order:
 | **Cloud build** | Builds the uploaded version for streaming. |
 | **Activate** | Requests that the new build serve the project. |
 
-Preparation may change the project's `.uproject` file and save Blueprints under `/Game/`. It does not modify the plugin's sample content. If the audio component is unavailable in this Editor session, restart the Editor and use **Upload changes** to let preparation add it.
-
-**Cancel** stops the local packaging or upload work. A build already started on Convai continues if you close the tab.
+- Preparation may update `.uproject` and project-owned Blueprints under `/Game/`. It does not change plugin sample content.
+- If Pixel Streaming was enabled during preparation, restart the Editor before testing it there.
+- If `ConvaiPSAudioCapture` was unavailable, restart the Editor and select **Upload changes**.
+- **Cancel** stops local packaging or upload. A cloud build continues after you close the tab.
 
 ## Check the project and open the stream
 
-Select the project in **Cloud Projects** and use **Refresh** while the build or rollout is in progress. A project marked **Live** has a build available to stream. The version shown in the project list is the newest uploaded version; check the **VERSIONS** rows to see which version is **Active**.
-
-Select **Open in browser** when it becomes available. The plugin creates an experience page if this project has none, starts a stream session, and opens the Convai player. Check that the Unreal project appears in the browser. If it uses a Convai character, also test microphone input from the browser.
+1. Select the project and use **Refresh** while it builds. **Live** means a build is available to stream.
+2. Check **VERSIONS** for the **Active** version. The project list shows the newest upload, which may be different.
+3. Select **Open in browser**. The plugin creates an experience page if needed and opens a stream session.
+4. Check the stream. If the project uses a Convai character, test the browser microphone.
 
 ## Upload changes and manage versions
 
-To update an existing project, select it and choose **Upload changes**. Cloud Projects packages the Unreal project currently open in the Editor and adds a version with the next version number. If the open Unreal project's name differs from the selected cloud project's name, the panel warns you which project the upload will replace.
+To update a project, select it and choose **Upload changes**. The plugin packages the open Unreal project and assigns the next version number. If its name differs from the selected cloud project's name, the panel shows a warning before upload.
 
-The **VERSIONS** list shows each version's build state, archive size, and rollout state. **Uploaded** means the archive is stored; **Building** means Convai is processing it; **Built** means it is ready to activate. **Build failed** identifies a version that needs log review. **Active** identifies the version serving viewers. **Preparing** and **Waiting to start** mean a requested rollout is still in progress.
+In **VERSIONS**, check the build state, archive size, and rollout state:
+
+| State | Meaning |
+| --- | --- |
+| **Uploaded** / **Building** | The archive is stored / the cloud build is running. |
+| **Built** / **Build failed** | Ready to activate / open **Logs** to investigate. |
+| **Active** | Serving viewers. |
+| **Preparing** / **Waiting to start** | A rollout is in progress. |
 
 <figure><img src="../../../.gitbook/assets/convai-cloud-projects-versions.png" alt="Cloud Projects Versions section showing three builds with Make active and Logs actions and a rollout waiting to start"><figcaption><p>Inspect each version's build and rollout state before activating it.</p></figcaption></figure>
 
-Select **Make active** on a built version to serve it. Selecting a different built version during a rollout replaces the pending request. If a rollout is moving away from the version that is serving, **Cancel rollout and keep active** lets you keep that version. Select **Logs** on a version to inspect its build report, especially when its state is **Build failed**.
+- Select **Make active** on a built version to serve it. A new activation request replaces a pending one.
+- Select **Cancel rollout and keep active** to retain the version currently serving.
+- Select **Logs** on a version to inspect its build report.
 
 ## Change runtime settings
 
@@ -112,3 +120,7 @@ Select **Publish** to make the page live at the selected audience. Select **Save
 | The build succeeds but activation fails | Use **Make active** on the built version to retry activation; the archive is already uploaded. |
 | **Save and redeploy** is unavailable | Wait for a version row to show **Active**, or use **Make active** on a built version. |
 | The browser stream works but the Convai character cannot hear speech | Check the preparation notes for an audio-component warning. Restart the Editor and use **Upload changes** so the plugin can add `ConvaiPSAudioCapture` to a project Blueprint with a Convai player component. |
+
+### Use a different Convai environment
+
+Cloud Projects uses the Convai plugin's API host (`CustomBetaURL` or `-ConvaiBetaURL=`). Use `-ConvaiProjectApiURL=` to override only Cloud Projects. If the browser player has a separate host, use `-ConvaiExperienceURL=`. Sign in to the selected environment.
