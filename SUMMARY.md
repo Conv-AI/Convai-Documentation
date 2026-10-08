@@ -527,6 +527,7 @@
   * [Third-Party API Integrations](plugins-and-integrations/other-integrations/third-party-api-integrations/README.md)
     * [ElevenLabs API Integration](plugins-and-integrations/other-integrations/third-party-api-integrations/elevenlabs-api-integration.md)
 * [Convai Pixel Streaming Embed](plugins-and-integrations/convai-pixel-streaming-embed/README.md)
+  * [Authorize embeds with an auth token](plugins-and-integrations/convai-pixel-streaming-embed/authorize-embeds-with-an-auth-token.md)
   * [Whitelisting & Publishing an Experience](plugins-and-integrations/convai-pixel-streaming-embed/whitelisting-and-publishing-an-experience.md)
   * [React Typescript](plugins-and-integrations/convai-pixel-streaming-embed/react-typescript.md)
   * [ReactJS (JavaScript)](plugins-and-integrations/convai-pixel-streaming-embed/reactjs-javascript.md)

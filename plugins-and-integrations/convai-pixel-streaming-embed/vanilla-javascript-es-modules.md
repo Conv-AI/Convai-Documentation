@@ -7,6 +7,10 @@ icon: js
 
 # Vanilla JavaScript (ES Modules)
 
+{% hint style="info" %}
+Pass an `authToken` minted on your server to run the embed on any origin, including `localhost`, without whitelisting your domain. See [Authorize embeds with an auth token](authorize-embeds-with-an-auth-token.md).
+{% endhint %}
+
 ```html
 <!-- index.html -->
 <div id="pixel-stream-container" style="width: 100%; height: 600px;"></div>

@@ -7,6 +7,10 @@ icon: react
 
 # React Typescript
 
+{% hint style="info" %}
+Pass an `authToken` minted on your server to run the embed on any origin, including `localhost`, without whitelisting your domain. See [Authorize embeds with an auth token](authorize-embeds-with-an-auth-token.md).
+{% endhint %}
+
 {% embed url="https://www.npmjs.com/package/@convai/experience-embed" %}
 
 ## Installation Instructions
