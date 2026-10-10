@@ -8,7 +8,7 @@ Authorize a Pixel Streaming embed with a short-lived Convai auth token instead o
 
 ## Prerequisites
 
-- A published experience and its `expId`. See [Whitelisting & Publishing an Experience](whitelisting-and-publishing-an-experience.md).
+- A published experience and its `expId`. See [Publish and authorize an experience](whitelisting-and-publishing-an-experience.md).
 - Your Convai API key from `<code class="expression">space.vars.dashboard_url</code>`.
 - `@convai/experience-embed` version `0.7.0` or later.
 - A server-side route you control, such as an Express route, a Next.js route handler, or a serverless function.
