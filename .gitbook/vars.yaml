@@ -16,3 +16,4 @@ asset_uploader_toolchain_compiler_version: 14.50.35717
 credits_per_dollar: 1,000
 platform_fee_credits: '6'
 embody_version: 0.4.2
+experience_embed_version: 0.7.1
