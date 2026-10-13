@@ -1,7 +1,8 @@
 ---
 title: Use the WebSocket transport
 description: Connect a Convai character over a WebSocket instead of WebRTC, register the transport, and play the character's voice in React or plain TypeScript.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: webhook
 ---
 
 Switch a Convai Web SDK session from the default WebRTC transport, built on LiveKit, to a WebSocket transport built on Pipecat. Use this page when your deployment cannot use WebRTC or when you are testing the WebSocket path.

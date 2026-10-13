@@ -1,7 +1,8 @@
 ---
 title: Connect to a published text chat
 description: Start a credential-free, text-only chat with a published Convai character from a single-use launch grant, in React, plain TypeScript or a copy/paste embed.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: comments
 ---
 
 Let a visitor chat with a published character without putting an API key, a character ID or any reusable credential in the browser. Use this page when you embed a published chat in your own app, or when you are moving a page off the removed `<convai-chat>` element.

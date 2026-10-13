@@ -1,7 +1,8 @@
 ---
 title: Chat over the SSE transport
 description: Send text to a Convai character over Server-Sent Events, keep the API key on your server, play the character's voice and run the client under Node.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: tower-broadcast
 ---
 
 Chat with a Convai character over the SSE transport: text in, with the reply streamed back as text and, optionally, as speech. Each message is one HTTP `POST` whose response is a stream of events, and nothing stays open between messages. There is no WebRTC, no room and no microphone, so the SSE transport also runs under Node. Use this page to set up a chat, keep your API key off the page, play the character's voice, or call a character from a server.

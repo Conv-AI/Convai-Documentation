@@ -1,7 +1,8 @@
 ---
 title: Web SDK quickstart
 description: Build a React page that connects to a Convai character, sends it a text message, and shows the reply, using the Convai Web SDK from npm.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: forward-fast
 ---
 
 In this quickstart we will connect a React page to a Convai character with the Convai Web SDK, send the character a message, and show its reply. By the end, you will have a page with a **Connect** button and a running conversation.

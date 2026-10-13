@@ -1,7 +1,7 @@
 ---
 title: Add lip sync in React
 description: Drive the face of a 3D character in a React Three Fiber scene from the blendshape frames Convai streams with the character's voice.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
 ---
 
 Animate a character's face in a `@react-three/fiber` scene from the blendshape stream that the Convai Web SDK buffers alongside the character's voice. Use this page when you already render a character model with morph targets and want its mouth to follow its speech.

@@ -1,7 +1,7 @@
 ---
 title: Add lip sync in vanilla TypeScript
 description: Play the facial animation frames that the Convai Web SDK streams with a character's voice on a 3D model in plain TypeScript, without a UI framework.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
 ---
 
 Drive a three.js character's morph targets from the blendshape frames that Convai streams alongside the character's voice. Use this page when you render the character yourself in framework-free TypeScript. At the end, the character's mouth moves in time with its speech and settles to neutral when it stops or is interrupted.

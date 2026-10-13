@@ -1,7 +1,8 @@
 ---
 title: Get started with React
 description: Install the Convai Web SDK in a React app and add a ready-made chat and voice widget, with optional camera and screen sharing for your character.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: react
 ---
 
 Add a Convai character to a React app with the `useConvaiClient` hook and the `ConvaiWidget` component. Use this page when setting up the React bindings for the first time. At the end, the page shows a widget button that opens a voice and text conversation with your character.
