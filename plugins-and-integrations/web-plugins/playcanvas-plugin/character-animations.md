@@ -6,6 +6,10 @@ description: >-
 
 # Character Animations
 
+{% hint style="warning" %}
+**Deprecated.** This page describes the legacy PlayCanvas Editor template, built on the deprecated `convai-web-sdk` package. Start new projects from the [Web SDK template](start-from-the-web-sdk-template.md) or the [Convai Embody template](start-from-the-convai-embody-template.md).
+{% endhint %}
+
 {% content-ref url="../glb-fbx-animations-for-convai.md" %}
 [glb-fbx-animations-for-convai.md](../glb-fbx-animations-for-convai.md)
 {% endcontent-ref %}
