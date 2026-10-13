@@ -1,11 +1,15 @@
 ---
 title: Use the WebSocket transport
-description: Connect a Convai character over a WebSocket instead of WebRTC, register the transport, and play the character's voice in React or plain TypeScript.
-last_reviewed: "1.9.1"
+description: Connect a Convai character over a WebSocket instead of WebRTC, register the transport, and hear the character's voice in React or plain TypeScript.
+last_reviewed: "1.9.2"
 icon: webhook
 ---
 
 Switch a Convai Web SDK session from the default WebRTC transport, built on LiveKit, to a WebSocket transport built on Pipecat. Use this page when your deployment cannot use WebRTC or when you are testing the WebSocket path.
+
+{% hint style="info" %}
+Use version 1.9.2 or later on hosted Convai. Hosted Convai's `/connect` returns a `ws://` URL for this transport, but the endpoint accepts only `wss://`. Version 1.9.1 and earlier fail to connect, and the browser reports close code `1006`. Version 1.9.2 upgrades `ws://` to `wss://` when the `/connect` URL or the page uses https; a local http setup keeps `ws://`.
+{% endhint %}
 
 ## How the transport is selected
 
@@ -41,17 +45,13 @@ export default function App() {
 {% code title="src/main.ts" %}
 ```typescript
 import '@convai/web-sdk/vanilla/websocket';
-import { ConvaiClient, AudioRenderer } from '@convai/web-sdk/vanilla';
+import { ConvaiClient } from '@convai/web-sdk/vanilla';
 
 const client = new ConvaiClient({
   apiKey: 'YOUR_API_KEY',
   characterId: 'YOUR_CHARACTER_ID',
   transport: 'websocket',
 });
-
-const audio = new AudioRenderer(client.room);
-client.on('botAudioTrack', (track: MediaStreamTrack) => audio.attachWebSocketTrack(track));
-client.on('disconnect', () => audio.detachWebSocketTrack());
 
 await client.connect();
 ```
@@ -61,16 +61,11 @@ await client.connect();
 
 ## Play the character's voice
 
-On the WebSocket transport the character's audio does not arrive through the LiveKit room, so a room-based audio renderer plays nothing. The SDK emits the bot audio as a `MediaStreamTrack` on the `botAudioTrack` event instead.
+The transport plays the voice; no wiring is needed. Pipecat's WebSocket transport plays the character's audio through its own Web Audio player, straight to the speakers, in React and plain TypeScript alike. The examples above are complete: they need no `AudioRenderer` and no `botAudioTrack` listener.
 
-| Integration | What plays the audio |
-|---|---|
-| `useConvaiClient` in React | The hook creates a hidden `<audio data-convai-ws>` element and attaches each `botAudioTrack` to it. No extra code is needed. The React `ConvaiWidget` mute button mutes that element. |
-| Vanilla TypeScript | Your code. Subscribe to `botAudioTrack` and call `attachWebSocketTrack(track)` on an `AudioRenderer`, as in the example above, or set the track on your own `<audio>` element. |
+The `botAudioTrack` event does not fire on this transport. The Pipecat transport exposes only the local microphone track, so there is no character track to attach. Any `botAudioTrack` listener or `AudioRenderer` you keep from older code is harmless; it never receives a track.
 
-{% hint style="warning" %}
-The vanilla `createConvaiWidget()` helper creates a room-based `AudioRenderer` only. With `transport: 'websocket'`, subscribe to `botAudioTrack` yourself, or the character is silent.
-{% endhint %}
+To silence the character, call `setCharacterMuted(true)`. On the WebSocket transport this needs version 1.9.2 or later, and speech made while muted is dropped, not queued. See [Mute the character's voice](mute-the-characters-voice.md).
 
 ## Microphone behaviour
 
@@ -91,7 +86,8 @@ Leave `startWithAudioOn` unset on the WebSocket transport only when the page may
 |---|---|---|
 | `uploadFile()` | Supported | Not supported. It requires a LiveKit room and throws `[ConvaiClient] uploadFile: not connected to a LiveKit room` without one. |
 | Ready-signal timeout | `error` fires with `bot-ready not received within 45000ms` if the character never signals readiness | No timeout; the WebSocket session reports readiness itself. |
-| Bot audio | Played through the room by `AudioRenderer` or `ConvaiWidget` | Delivered on `botAudioTrack` |
+| Bot audio | Played through the room by `AudioRenderer` or `ConvaiWidget` | Played by the Pipecat transport itself; `botAudioTrack` does not fire |
+| Time to `botReady` | About 4 to 7 seconds in our tests | About 17 to 21 seconds in our tests |
 | Vision frames | Video tracks published to the room | Sent over the WebSocket only when `enableVideo` is `true` and `visionInputConfig.enabled` is not `false` |
 | `client.room` | The connected LiveKit room | Present but never connected |
 
@@ -130,6 +126,16 @@ Leave `startWithAudioOn` unset on the WebSocket transport only when the page may
 **Fix:** Retry the connection, and check network rules that block WebSocket traffic to Convai.
 
 **Verify:** `connect()` resolves.
+
+### The connection closes with code 1006 on hosted Convai
+
+**Symptom:** The WebSocket closes during connect, and the browser reports close code `1006`.
+
+**Cause:** Version 1.9.1 or earlier opened the `ws://` URL that hosted Convai returns, and the endpoint accepts only `wss://`.
+
+**Fix:** Upgrade `@convai/web-sdk` to 1.9.2 or later.
+
+**Verify:** `connect()` resolves and `botReady` fires.
 
 ## Next steps
 

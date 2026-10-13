@@ -1,7 +1,7 @@
 ---
 title: useConvaiClient hook reference
 description: Reference for the React hook that owns a Convai client, including its parameter, every returned field, and the state it keeps for rendering.
-last_reviewed: "1.9.1"
+last_reviewed: "1.9.2"
 ---
 
 `useConvaiClient` is the React hook exported from `@convai/web-sdk/react`. It creates one `ConvaiClient` for the lifetime of the component, subscribes to its events, and returns the client's API together with React state that re-renders the component when the conversation changes.
@@ -89,7 +89,7 @@ Every method is bound to the hook's client, so you can pass it directly as an ev
 | `connectWithPublicationGrant(launchToken, options?)` | Connects to a published text chat with a single-use launch token. |
 | `disconnect()` | Ends the session. |
 | `reconnect()` | Connects again with the last stored config. |
-| `resetSession()` | Clears the conversation and starts a new session on the next connect. |
+| `resetSession()` | Clears the conversation and starts a new session on the next connect. On a live connection, call `disconnect()` first, then `connect()` again. |
 | `sendUserTextMessage(text, options?)` | Sends a text message. |
 | `sendTriggerMessage(triggerName?, triggerMessage?)` | Fires a trigger. |
 | `sendInterruptMessage()` | Interrupts the character's current response. |
@@ -111,7 +111,7 @@ Every method is bound to the hook's client, so you can pass it directly as an ev
 
 ## WebSocket audio playback
 
-When the session uses `transport: "websocket"`, the hook plays the character's voice itself. It appends a hidden `<audio>` element with the `data-convai-ws` attribute to `document.body` and sets its source from the client's `botAudioTrack` event. With the default LiveKit transport, render `AudioRenderer` or `ConvaiWidget` to hear the character. See [Build a custom UI in React](custom-ui-and-advanced-usage.md).
+When the session uses `transport: "websocket"`, the Pipecat transport plays the character's voice itself through Web Audio, so no extra code is needed. The hook also appends a hidden `<audio data-convai-ws>` element to `document.body` for the `botAudioTrack` event, but that event does not fire with the current WebSocket transport, so the element stays silent. With the default LiveKit transport, render `AudioRenderer` or `ConvaiWidget` to hear the character. See [Build a custom UI in React](custom-ui-and-advanced-usage.md).
 
 ## Example
 

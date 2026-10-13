@@ -1,7 +1,7 @@
 ---
 title: Build a custom UI in TypeScript
 description: Build your own chat interface on the Convai Web SDK in plain TypeScript, with connection status, messages, the character's voice, and media controls.
-last_reviewed: "1.9.1"
+last_reviewed: "1.9.2"
 ---
 
 Build a chat interface of your own on top of `ConvaiClient` instead of using the prebuilt widget. Use this page when the widget does not fit your design. At the end, your page connects, shows the conversation, plays the character's voice, and toggles the microphone.
@@ -137,11 +137,11 @@ Without an `AudioRenderer`, a custom UI on the WebRTC transport connects and rec
 
 ## Play audio on the WebSocket transport
 
-With `transport: 'websocket'`, the character's voice does not arrive through the room. The client emits it as a `MediaStreamTrack` on the `botAudioTrack` event instead. Attach that track with the same `AudioRenderer`:
+With `transport: 'websocket'`, the transport plays the voice; no wiring is needed. Pipecat's WebSocket transport plays the character's audio through its own Web Audio player, so a custom UI needs no `AudioRenderer` and no `botAudioTrack` listener:
 
 ```typescript
 import '@convai/web-sdk/vanilla/websocket';
-import { AudioRenderer, ConvaiClient } from '@convai/web-sdk/vanilla';
+import { ConvaiClient } from '@convai/web-sdk/vanilla';
 
 const client = new ConvaiClient({
   apiKey: 'YOUR_API_KEY',
@@ -149,16 +149,10 @@ const client = new ConvaiClient({
   transport: 'websocket',
 });
 
-const audioRenderer = new AudioRenderer(client.room);
-
-client.on('botAudioTrack', (track: MediaStreamTrack) => {
-  audioRenderer.attachWebSocketTrack(track);
-});
-
-client.on('disconnect', () => {
-  audioRenderer.detachWebSocketTrack();
-});
+await client.connect(); // the character's voice plays with no extra code
 ```
+
+The `botAudioTrack` event does not fire on this transport, so an `AudioRenderer` created for it stays silent and does no harm.
 
 See [Use the WebSocket transport](../websocket-transport-layer.md) for the rest of the setup.
 

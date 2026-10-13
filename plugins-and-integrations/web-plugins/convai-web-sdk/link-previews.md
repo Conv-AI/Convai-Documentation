@@ -1,7 +1,7 @@
 ---
 title: Render links and link previews
 description: Turn links the character sends into clickable links, media cards and Open Graph site cards in the Convai widgets or in your own chat UI.
-last_reviewed: "1.9.1"
+last_reviewed: "1.9.2"
 icon: link
 ---
 

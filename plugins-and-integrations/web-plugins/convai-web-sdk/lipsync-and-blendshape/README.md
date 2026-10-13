@@ -1,7 +1,7 @@
 ---
 title: Drive facial animation with blendshapes
 description: Stream blendshape frames alongside a character's voice and apply them to the morph targets of a 3D face so its mouth moves in time with speech.
-last_reviewed: "1.9.1"
+last_reviewed: "1.9.2"
 icon: head-side-speak
 ---
 
