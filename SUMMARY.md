@@ -494,6 +494,7 @@
     * [Choose a transport](plugins-and-integrations/web-plugins/convai-web-sdk/choose-a-transport.md)
     * [Chat over the SSE transport](plugins-and-integrations/web-plugins/convai-web-sdk/sse-transport.md)
     * [Use the WebSocket transport](plugins-and-integrations/web-plugins/convai-web-sdk/websocket-transport-layer.md)
+    * [Connect to a self-hosted deployment](plugins-and-integrations/web-plugins/convai-web-sdk/self-hosted-deployments.md)
     * [Read raw transport messages](plugins-and-integrations/web-plugins/convai-web-sdk/raw-messages.md)
     * [Web SDK event reference](plugins-and-integrations/web-plugins/convai-web-sdk/event-reference.md)
   * [Convai Embody](plugins-and-integrations/web-plugins/convai-embody/README.md)

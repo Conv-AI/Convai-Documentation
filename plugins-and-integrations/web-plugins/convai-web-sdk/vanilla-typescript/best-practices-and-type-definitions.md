@@ -31,7 +31,10 @@ Passed to `new ConvaiClient(config)`, `connect(config)`, or `useConvaiClient(con
 | `characterId` | `string` | required | Character to connect to. |
 | `apiKey` | `string` | none | Convai API key. Either `apiKey` or `authToken` is required. |
 | `authToken` | `string` | none | Short-lived auth token. Used instead of `apiKey` when both are set. See [Connect with an auth token](../auth-tokens.md). |
-| `url` | `string` | `https://realtime-api.convai.com` | Base URL of the realtime API. The client posts to `{url}/connect`. |
+| `url` | `string` | `https://realtime-api.convai.com` | Base URL of the realtime API. The client posts to `{url}/connect`. For your own deployment, see [Connect to a self-hosted deployment](../self-hosted-deployments.md). |
+| `characterInfoUrl` | `string` | `https://api.convai.com` | Origin that serves `POST /character/get`, which the bundled widget uses for the character's name and avatar. Set it on a self-hosted deployment, or the lookup and your API key go to `api.convai.com`. |
+| `characterApiUrl` | `string` | `https://api2.convai.com` | Origin of the Character REST platform used by `client.characterVersions`. |
+| `iceTransportPolicy` | `"relay" \| "all"` | `"relay"` | WebRTC ICE policy. `"relay"` uses TURN only; `"all"` also allows direct connections, for a LiveKit server without TURN. |
 | `transport` | `"livekit" \| "websocket"` | `"livekit"` | WebRTC through LiveKit, or the WebSocket transport. See [Use the WebSocket transport](../websocket-transport-layer.md). |
 | `endUserId` | `string` | none | Stable ID of the end user, such as a UUID or an email address. Enables long-term memory and per-user analytics. Without it the session is anonymous. |
 | `endUserMetadata` | `Record<string, unknown>` | none | Metadata about the end user, sent as `end_user_metadata`. |
