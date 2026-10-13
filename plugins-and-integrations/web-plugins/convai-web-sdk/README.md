@@ -89,6 +89,10 @@ Each feature page shows the configuration and the client calls for one capabilit
 <td><a href="websocket-transport-layer.md">websocket-transport-layer.md</a></td>
 </tr>
 <tr>
+<td><strong>Connect to a self-hosted deployment</strong><br>Point the SDK at your own hosts instead of api.convai.com.</td>
+<td><a href="self-hosted-deployments.md">self-hosted-deployments.md</a></td>
+</tr>
+<tr>
 <td><strong>Mute the character's voice</strong><br>Silence the character for the listener while it keeps speaking.</td>
 <td><a href="mute-the-characters-voice.md">mute-the-characters-voice.md</a></td>
 </tr>
