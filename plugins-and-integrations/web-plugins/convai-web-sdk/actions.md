@@ -1,430 +1,260 @@
 ---
-description: >-
-  Configure semantic actions or correlated client tools, handle typed output,
-  return execution results, and preserve legacy Web SDK behavior.
-icon: person-running
+title: Handle character actions
+description: Declare the actions, objects, and tools a character can use, receive the actions it chooses, and return the results of tools your app runs.
+last_reviewed: "1.9.0"
 ---
 
-# Actions
+Let a character act in your scene by declaring what it can do at connect time and handling the actions it chooses during the conversation. Use this page when a character should move, pick things up, or call functions in your application. Your application stays responsible for authorizing and running every action.
 
-Use the Convai Web SDK to receive semantic actions or opt into correlated client-executed tools. Your application remains responsible for authorization, execution, scheduling, and side-effect safety.
+The SDK supports two contracts. Semantic actions, the default, return named actions with an optional target. Client tools are opt-in and return typed tool calls that your application answers with a result.
 
-{% hint style="warning" %}
-The v2 APIs on this page describe a candidate implementation. They are not proof that the feature is available in production or in the published `@convai/web-sdk` package. Confirm the installed package exports these types before adopting them.
-{% endhint %}
+## Prerequisites
 
-## Configure semantic actions at connect
+- The Convai Web SDK installed, with a client that connects. See [Web SDK quickstart](quickstart.md).
+- The names of the actions, objects, and characters your scene supports.
 
-```typescript
-const client = useConvaiClient({
-  apiKey: '...',
-  characterId: '...',
+## Declare semantic actions
+
+Pass `actionConfig` when you create the client. The same option works on `new ConvaiClient(...)` and `useConvaiClient(...)`.
+
+```ts
+import { ConvaiClient } from '@convai/web-sdk/core';
+
+const client = new ConvaiClient({
+  apiKey: 'YOUR_API_KEY',
+  characterId: 'YOUR_CHARACTER_ID',
   actionConfig: {
-    // Action names the character can emit
-    actions: ['Move To', 'Pick Up', 'Drop', 'Follow', 'Wave', 'Attack'],
-
-    // Objects in the scene the character can act on
+    actions: ['Move To', 'Pick Up', 'Drop', 'Wave'],
     objects: [
-      { name: 'sword',  description: 'A sharp steel sword on the ground' },
-      { name: 'chest',  description: 'A wooden treasure chest in the corner' },
-      { name: 'torch',  description: 'A flaming torch on the wall' },
+      { name: 'fire extinguisher', description: 'A red extinguisher mounted by the door' },
+      { name: 'valve', description: 'The gas shut-off valve on the north wall' },
     ],
-
-    // Other characters the bot can reference or act on
     characters: [
-      { name: 'Player', bio: 'The current user' },
-      { name: 'Guard',  bio: 'A nearby guard NPC' },
+      { name: 'Trainee', bio: 'The person taking the safety drill' },
     ],
-
-    // Optional: object the character starts focused on
-    current_attention_object: 'sword',
+    current_attention_object: 'valve',
   },
 });
 ```
 
-Rules:
+`actions`, `objects`, and `characters` are required inside `actionConfig`. `current_attention_object` is optional and must match a name in `objects`. The configuration is sent when the session connects, so reconnect to change it.
 
-* `actions`, `objects`, and `characters` define the semantic action affordances for this session.
-* `current_attention_object` must match an entry in `objects[].name` when supplied.
-* If the set of available actions or objects changes, reconnect with an updated `actionConfig`.
+## Receive semantic actions
 
-***
+Subscribe to `actionResponse`. Each event carries the actions for one turn, in order.
 
-## Receive legacy `actionResponse`
-
-
-
-Subscribe to `actionResponse` for the compatibility event. An omitted-capabilities connection receives legacy semantic actions; action protocol v2 can also project correlated tool calls through this event. Import `ActionResponseEvent` from the SDK and annotate the callback because the event emitter accepts string event names.
-
-```typescript
+```ts
 import type { ActionResponseEvent } from '@convai/web-sdk/core';
 
 client.on('actionResponse', ({ actions }: ActionResponseEvent) => {
-  // This omitted-capabilities connection receives ConvaiAction values.
-  // Empty array is a valid no-action response
   for (const action of actions) {
-    dispatch(action.name, action.target);
+    if (action.target) {
+      // Parameterized: "Move To" -> "valve"
+      runTargetedAction(action.name, action.target);
+    } else {
+      // Simple: "Wave"
+      playAnimation(action.name);
+    }
   }
 });
 ```
 
-* Array order is preserved, but the SDK does not execute or schedule actions.
-* `target` is optional; some actions (e.g. `"Wave"`) have no target.
-* An empty `actions` array is a valid no-action result.
-* When model output v2 is selected, the SDK suppresses this compatibility event. Subscribe to `modelOutput` instead.
+- `name` is a base action from `actionConfig.actions`.
+- `target` is present when the character acts on a specific object or character, and absent for a simple action. Branch on `target`, not on the action name: the same action can arrive with or without one.
+- An empty `actions` array is a valid turn with no action.
+- The SDK does not run or schedule actions. It also adds an `action` entry to the chat messages, labeled with the action names.
 
-***
+A request such as "pick up the extinguisher and bring it to the trainee" can produce several actions in one event:
 
-## Handle parameterized semantic actions
-
-
-
-An action with a `target` is _parameterized_: the character acts **on** a specific object or character rather than performing a bare gesture. The base action name comes from `actionConfig.actions[]`, and the target resolves to a name from `actionConfig.objects[]` or `actionConfig.characters[]`.
-
-```typescript
-import type { ConvaiAction } from '@convai/web-sdk/core';
-
-function handleAction(action: ConvaiAction) {
-  if (action.target) {
-    // Parameterized: "Move To" → "chest", "Follow" → "Player"
-    moveCharacterTo(action.name, action.target);
-  } else {
-    // Simple: "Wave", "Dance"
-    playAnimation(action.name);
-  }
+```json
+{
+  "actions": [
+    { "name": "Move To", "target": "fire extinguisher" },
+    { "name": "Pick Up", "target": "fire extinguisher" },
+    { "name": "Move To", "target": "Trainee" },
+    { "name": "Drop", "target": "Trainee" }
+  ]
 }
-
-client.on('actionResponse', ({ actions }) => actions.forEach(handleAction));
 ```
 
-If the user says _"pick up the sword and give it to the guard"_, a single turn can emit:
+## Update what the character is focused on
 
-```typescript
-{ "actions": [
-  { "name": "Move To", "target": "sword" },
-  { "name": "Pick Up", "target": "sword" },
-  { "name": "Move To", "target": "Guard" },
-  { "name": "Drop",    "target": "Guard" }
-] }
-```
+Tell the character which object is in focus with `updateContext`, so it can resolve words such as "it" or "that". The value must match a name in `actionConfig.objects`, and an empty string clears it.
 
-### Key points
+```ts
+// Change focus silently
+client.updateContext({ current_attention_object: 'fire extinguisher', run_llm: 'false' });
 
-
-
-* Convai validates non-empty semantic action targets against `actionConfig.objects[]` and `actionConfig.characters[]` before projecting them. Your application must still authorize the requested effect.
-* The same base action can appear both parameterized and simple depending on what the character decides (`"Wave"` vs `"Wave" → "Player"`); branch on the presence of `target`, not on the action name.
-* Scene metadata from `updateSceneMetadata` is descriptive only and never appears as a `target` — promote anything actable into `actionConfig.objects`.
-
-***
-
-## Update runtime action context
-
-
-
-Tell the character which object the player is currently looking at using `updateContext`. The character uses this to resolve "it", "that", "here".
-
-```typescript
-// Player moved focus to the chest — update silently
+// Change focus and let Convai decide whether to respond
 client.updateContext({
-  current_attention_object: 'chest',
-  run_llm: 'false',
-});
-
-// Update attention and let the character respond
-client.updateContext({
-  text: 'The player is now looking at the lever.',
-  current_attention_object: 'lever',
+  text: 'The trainee is now looking at the valve.',
+  current_attention_object: 'valve',
   run_llm: 'auto',
 });
 
-// Clear attention object
-client.updateContext({
-  current_attention_object: '',
-  run_llm: 'false',
-});
+// Clear focus
+client.updateContext({ current_attention_object: '', run_llm: 'false' });
 ```
 
-`current_attention_object` must match an entry in `actionConfig.objects[].name`.
+To describe surroundings without making them actionable, use `updateSceneMetadata`. It does not change `actionConfig`, so an item sent this way never becomes an action target. See [Update character context at runtime](dynamic-context.md).
 
-***
+## Trigger a response without input
 
-### Update descriptive scene context
+`sendTriggerMessage(triggerName?, triggerMessage?)` makes the character respond without a message from the person using your app, for example at the start of a drill. Both arguments are optional.
 
-
-
-Use `updateSceneMetadata` for environment changes the character should know about. This is **descriptive only** — it does not add new action targets.
-
-```typescript
-client.updateSceneMetadata([
-  { name: 'fog',  description: 'A thick fog has rolled in, visibility is low' },
-  { name: 'rain', description: 'Heavy rain is falling outside' },
-]);
+```ts
+client.sendTriggerMessage('drill_start');
+client.sendTriggerMessage(undefined, 'Ask the trainee to locate the nearest extinguisher.');
 ```
 
-If the character needs to act on something, it must be in `actionConfig.objects`.
+## Opt in to client tools
 
-***
+Client tools add typed arguments and a correlated result. Request action protocol version 2 and model output version 2 in `capabilities`, and declare the tools in `actionConfig.tools`. Omitting `capabilities` keeps the semantic action contract.
 
-## Trigger a character response
-
-
-
-Use `sendTriggerMessage` to make the character speak and act without user input — for scripted events or cinematics.
-
-```typescript
-// Named trigger defined in the Convai dashboard
-client.sendTriggerMessage('greet_player');
-
-// Trigger with a custom instruction
-client.sendTriggerMessage('pickup_item', 'Pick up the sword and hand it to the player.');
-```
-
-***
-
-## Semantic action example
-
-
-
-```typescript
-const client = useConvaiClient({
-  apiKey: '...',
-  characterId: '...',
-  actionConfig: {
-    actions: ['Move To', 'Pick Up', 'Drop', 'Follow'],
-    objects: [
-      { name: 'apple',  description: 'A green apple on a wooden crate' },
-      { name: 'basket', description: 'A wicker basket near the player' },
-    ],
-    characters: [{ name: 'Player', bio: 'The current user' }],
-    current_attention_object: 'apple',
-  },
-});
-
-client.on('actionResponse', ({ actions }) => {
-  for (const { name, target } of actions) {
-    console.log(`[ACTION] ${name}${target ? ` → ${target}` : ''}`);
-    // e.g. "Move To → apple", "Pick Up → apple", "Drop → basket"
-  }
-});
-
-// Player selects the basket in the UI
-client.updateContext({
-  current_attention_object: 'basket',
-  run_llm: 'false',
-});
-
-// Player says "put that in the basket"
-// Character can propose: Move To apple → Pick Up apple → Move To basket → Drop apple
-```
-
-***
-
-## Opt into v2 client tools
-
-Client tools add typed arguments and a correlated result loop. The character's **Enable Agentic Actions** toggle must be on, and the selected model/provider must support native function calling. If the toggle has never been persisted, a character with saved legacy Character Actions inherits an enabled state; a character without saved legacy actions defaults to off for model output v2. An explicit off setting always wins. The SDK does not expose a provider support matrix or an `actionsEnabled` config field.
-
-Omitting `capabilities` preserves the legacy v1 contract. Opt in explicitly and reconnect whenever the tool declarations change:
-
-```typescript
-const client = useConvaiClient({
-  apiKey: '...',
-  characterId: '...',
+```ts
+const client = new ConvaiClient({
+  apiKey: 'YOUR_API_KEY',
+  characterId: 'YOUR_CHARACTER_ID',
   capabilities: {
     actionProtocolVersion: 2,
     modelOutputVersion: 2,
-    botLlmTextMode: 'legacy',
   },
   actionConfig: {
     actions: [],
     objects: [],
     characters: [],
-    tools: [{
-      name: 'open_training_record',
-      description: 'Open a training record after the user confirms.',
-      inputSchema: {
-        type: 'object',
-        properties: { recordId: { type: 'string' } },
-        required: ['recordId'],
+    tools: [
+      {
+        name: 'open_training_record',
+        description: 'Open a training record after the trainee confirms.',
+        inputSchema: {
+          type: 'object',
+          properties: { recordId: { type: 'string' } },
+          required: ['recordId'],
+        },
       },
-    }],
+    ],
   },
 });
 ```
 
-The candidate service requires an object-rooted `inputSchema`. Only `type`, `properties`, and `required` are accepted at the root; supported constraints can be used inside property schemas.
+`capabilities` takes three fields:
 
-The candidate connection rejects a v2 or raw-text request for shared, joined, or multi-character sessions. The `/connect` response must echo requested v2 or raw selections. The SDK rejects a v2/raw downgrade or unsolicited upgrade; it tolerates an omitted echo for explicit v1 or legacy selections.
+| Field | Values | When omitted |
+|---|---|---|
+| `actionProtocolVersion` | `1` or `2` | Semantic actions |
+| `modelOutputVersion` | `1` or `2` | Legacy output messages, no `modelOutput` event |
+| `botLlmTextMode` | `'legacy'` or `'raw'` | Filtered text in `bot-llm-text` messages |
 
-### Handle canonical output
+`'raw'` switches the `bot-llm-text` chat messages to the complete provider output before action parsing. It is chat text, not a tool-call stream: never parse or run actions from it.
 
-With `modelOutputVersion: 2`, use `modelOutput` as the canonical event. The SDK suppresses the legacy `actionResponse` event in this mode so one operation is not handled twice.
+Convai confirms the selected capabilities in its connect response. `connect()` rejects when the selection does not match the request:
 
-```typescript
+| Error | Cause |
+|---|---|
+| `Core did not select requested action protocol version 2` | Version 2 was requested and not granted. |
+| `Core selected action protocol version 2 without an explicit client opt-in` | Version 2 was granted without a request. |
+| `Core did not select requested model output version 2` | Model output version 2 was requested and not granted. |
+| `Core did not select requested raw bot LLM text mode` | `'raw'` was requested and not granted. |
+
+Declarations are sent on connect, so reconnect to change the tools.
+
+## Handle model output and tool calls
+
+With `modelOutputVersion: 2`, subscribe to `modelOutput`. Each event is one validated envelope whose `items` hold messages, emotions, semantic actions, tool calls, and extensions in order. The SDK suppresses `actionResponse` in this mode so one operation is not handled twice, and it drops an envelope whose `output_id` it has already delivered.
+
+```ts
 import type {
   ActionResult,
   ModelOutputMessage,
   ModelOutputProtocolError,
   ModelOutputToolCallItem,
-  ServerResponse,
 } from '@convai/web-sdk/core';
 
 client.on('modelOutput', (output: ModelOutputMessage) => {
   for (const item of output.items) {
-    if (item.type === 'message') renderMessage(item);
-    if (item.type === 'semantic_action') handleSemanticAction(item);
-    if (item.type === 'tool_call') void handleToolCall(item);
+    if (item.type === 'message') renderMessage(item.content);
+    if (item.type === 'semantic_action') runTargetedAction(item.name, item.target);
+    if (item.type === 'tool_call') void runTool(item);
   }
 });
 
-client.on(
-  'modelOutputProtocolError',
-  (error: ModelOutputProtocolError) => {
-    console.error(error.code, error.message);
-  },
-);
+client.on('modelOutputProtocolError', (error: ModelOutputProtocolError) => {
+  console.error(error.code, error.message);
+});
 
-async function handleToolCall(call: ModelOutputToolCallItem) {
+async function runTool(call: ModelOutputToolCallItem) {
   let result: ActionResult;
-
   try {
-    // Application-defined: validate permissions and request confirmation here.
-    const output = await runAuthorizedTool(call.name, call.arguments);
+    // Check permissions and ask for confirmation here.
+    const output = await openTrainingRecord(call.arguments);
     result = { id: call.id, status: 'completed', output };
   } catch (error) {
     result = {
       id: call.id,
       status: 'error',
-      error: {
-        message: error instanceof Error ? error.message : 'Tool failed',
-      },
+      error: { message: error instanceof Error ? error.message : 'Tool failed' },
     };
   }
-
   client.sendActionResult(result);
 }
+```
 
-client.on('serverResponse', (response: ServerResponse) => {
-  if (response.event_type !== 'action-result') return;
-  console.log(response.status, response.extras?.tool_call_id);
+Render and run only the validated `items`. `raw` holds the provider output for diagnostics and must never be executed. When an envelope is malformed or holds an unsupported item, the SDK rejects the whole envelope and emits `modelOutputProtocolError` with the code `invalid_model_output`.
+
+Several envelopes can share one `logical_turn_id`, and `final: true` closes one envelope, not the whole turn. The SDK does not track pending calls, deduplicate tool-call IDs across envelopes, retry results, or guarantee exactly-once execution. Keep that bookkeeping in your application.
+
+## Return a tool result
+
+`sendActionResult(result)` validates the result and sends it to Convai. It returns nothing; a return without an exception means the result was sent, not accepted.
+
+| Field | Required | Notes |
+|---|---|---|
+| `id` | Yes | The `id` of the tool call. |
+| `status` | Yes | `'completed'`, `'error'`, or `'cancelled'`. |
+| `output` | No | Finite JSON data. |
+| `error` | No | Finite JSON data. Not allowed with `'completed'`. |
+| `characterSessionId` | No | Defaults to the current session. |
+
+It throws before sending when the result is invalid:
+
+| Error | Cause |
+|---|---|
+| `Cannot send an action result before the session is ready` | The transport is not connected. |
+| `Action result id is required` | `id` is empty. |
+| `Unsupported action result status` | `status` is not one of the three values. |
+| `Completed action results cannot include error` | `status` is `'completed'` and `error` is set. |
+| `Action result output must contain only finite JSON values` | `output` holds a non-JSON value. |
+| `Action result error must contain only finite JSON values` | `error` holds a non-JSON value. |
+
+Convai acknowledges the result with a `serverResponse` event whose `event_type` is `'action-result'`. Check its `status` and `message`.
+
+```ts
+client.on('serverResponse', (response) => {
+  if (response.event_type === 'action-result' && response.status === 'error') {
+    console.error('Result rejected:', response.message);
+  }
 });
 ```
 
-`sendActionResult()` returns `void`. It validates the local payload and sends an `action-result`; a successful return is not a server acknowledgment. Listen to `serverResponse` and inspect `status`, `message`, `extras.tool_call_id`, and `extras.idempotent`.
+To correlate a typed turn with its output, pass `sendUserTextMessage(text, { logicalTurnId })`. The ID must be non-empty and at most 128 UTF-8 bytes, or the method throws `logicalTurnId must be non-empty and at most 128 UTF-8 bytes`.
 
-The method works with either SDK transport after the session is ready. The optional `sendUserTextMessage(text, { logicalTurnId })` correlation value is currently carried by LiveKit/WebRTC sessions and is limited to `128` UTF-8 bytes.
+## Next steps
 
-The acknowledgment is not an ordering barrier; canonical continuation output can arrive first. Correlate both by the call and output identifiers rather than arrival order.
+{% content-ref url="dynamic-context.md" %}
+[Update character context at runtime](dynamic-context.md)
+{% endcontent-ref %}
 
-Convai can continue the same logical turn after accepting a result. Multiple calls may be outstanding, so do not assume sequential execution. The SDK preserves item order and drops a repeated `output_id`, but it does not maintain a pending-call registry, deduplicate tool-call IDs across different envelopes, retry results, or guarantee exactly-once execution. Keep those controls in your application. Identical result retries are accepted idempotently; a conflicting retry is rejected.
+{% content-ref url="event-reference.md" %}
+[Web SDK event reference](event-reference.md)
+{% endcontent-ref %}
 
-Treat `ModelOutputMessage.raw` as diagnostic text only. Render or execute the validated `items` projection. Unknown or malformed items cause the entire envelope to be rejected through `modelOutputProtocolError`.
-
-Selecting `botLlmTextMode: 'raw'` changes the existing `bot-llm-text` chat stream to provider-visible text before action parsing. The SDK has no separate raw-text event; these chunks appear in `ChatMessage` updates through `messagesChange`. It is not a structured tool-call stream and delivery of a raw chunk can fail while canonical parsing continues. Do not parse or execute actions from chat text.
-
-### Candidate limits
-
-| Limit | Value |
-| --- | ---: |
-| Tools per connection | `32` |
-| Tool name / description | `64` / `1,024` characters |
-| Serialized input schema / schema depth | `16 KiB` / `8` |
-| Serialized arguments / result | `32 KiB` / `64 KiB` |
-| Tool-call ID / logical-turn ID | `1`–`256` characters / `128` UTF-8 bytes |
-| Outstanding calls / continuation rounds | `8` / `8` |
-| Default result timeout | `60` seconds |
-
-These are candidate service limits, not SDK-side scheduling guarantees.
-
-***
-
-## API reference
-
-
-
-### `actionConfig` connect option
-
-
-
-| Field                      | Type                      | Description                         |
-| -------------------------- | ------------------------- | ----------------------------------- |
-| `actions`                  | `string[]`                | Action names the character can emit |
-| `objects`                  | `{ name, description }[]` | Objects in the scene                |
-| `characters`               | `{ name, bio }[]`         | Other characters                    |
-| `current_attention_object` | `string?`                 | Initial focus object                |
-| `tools`                    | `ClientToolDeclaration[]?` | V2 client tools; requires explicit action protocol v2 |
-
-### `capabilities` connect option
-
-| Field | Type | Omitted behavior |
-| --- | --- | --- |
-| `actionProtocolVersion` | `1 \| 2` | Action protocol v1 |
-| `modelOutputVersion` | `1 \| 2` | Legacy output messages |
-| `botLlmTextMode` | `"legacy" \| "raw"` | Legacy filtered text |
-
-### `actionResponse` event
-
-
-
-```typescript
-import type {
-  ActionResponseEvent,
-  ConvaiAction,
-  ConvaiToolCall,
-} from '@convai/web-sdk/core';
-
-client.on('actionResponse', ({ actions }: ActionResponseEvent) => { ... });
-```
-
-| Type                  | Field                     | Description                                                                                             |
-| --------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `ActionResponseEvent` | `actions: Array<ConvaiAction \| ConvaiToolCall>` | Ordered compatibility projection; empty means no action                                                |
-| `ConvaiAction`        | `name: string`            | Base action name from `actionConfig.actions[]`                                                          |
-| `ConvaiAction`        | `target?: string`         | Parameterized target — a name from `actionConfig.objects[]` / `characters[]`; absent for simple actions |
-| `ConvaiToolCall`      | `kind: "tool_call"`, `id: string` | V2 compatibility call identity. |
-| `ConvaiToolCall`      | `arguments: JsonObject`   | Validated call arguments; authorize them before execution. |
-
-### `sendActionResult(result)`
-
-Returns `void` after local validation and transport publication.
-
-| Field | Type | Required | Description |
-| --- | --- | --- | --- |
-| `id` | `string` | Yes | Correlation ID from a `tool_call`. |
-| `status` | `"completed" \| "error" \| "cancelled"` | Yes | Terminal client outcome. |
-| `output` | `JsonValue` | No | Plain, finite, cycle-free JSON result data. |
-| `error` | `JsonValue` | No | Plain, finite, cycle-free JSON failure details. Not allowed with `"completed"`. |
-| `characterSessionId` | `string` | No | Session override; the current character session is sent automatically when available. |
-
-### `updateContext` attention
-
-
-
-| Field                      | Type                               | Description                        |
-| -------------------------- | ---------------------------------- | ---------------------------------- |
-| `text`                     | `string?`                          | Optional context text              |
-| `mode`                     | `"append" \| "replace" \| "reset"` | How to apply text                  |
-| `run_llm`                  | `"true" \| "false" \| "auto"`      | Whether to trigger a response      |
-| `current_attention_object` | `string?`                          | New focus object, or `""` to clear |
-
-### `updateSceneMetadata(items)`
-
-
-
-| Field   | Type                      | Description                |
-| ------- | ------------------------- | -------------------------- |
-| `items` | `{ name, description }[]` | Descriptive scene elements |
-
-### `sendTriggerMessage(triggerName?, triggerMessage?)`
-
-
-
-Programmatically triggers a character response. Both arguments are optional.
-
-## Related reference
+{% content-ref url="vanilla-typescript/best-practices-and-type-definitions.md" %}
+[Configuration and type reference](vanilla-typescript/best-practices-and-type-definitions.md)
+{% endcontent-ref %}
 
 {% content-ref url="../../../api-reference/core-api-reference/live-apis-beta/connect-api.md" %}
-[Live API connect](../../../api-reference/core-api-reference/live-apis-beta/connect-api.md)
+[Connect API](../../../api-reference/core-api-reference/live-apis-beta/connect-api.md)
 {% endcontent-ref %}
 
 {% content-ref url="../../../api-reference/core-api-reference/live-apis-beta/client-to-server-messages.md" %}

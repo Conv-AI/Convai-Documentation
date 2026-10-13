@@ -1,164 +1,165 @@
 ---
-description: >-
-  Integrate real-time facial animation in vanilla JavaScript/TypeScript
-  applications.
+title: Add lip sync in vanilla TypeScript
+description: Play the facial animation frames that the Convai Web SDK streams with a character's voice on a 3D model in plain TypeScript, without a UI framework.
+last_reviewed: "1.9.0"
 ---
 
-# Real-time Lipsync
+Drive a three.js character's morph targets from the blendshape frames that Convai streams alongside the character's voice. Use this page when you render the character yourself in framework-free TypeScript. At the end, the character's mouth moves in time with its speech and settles to neutral when it stops or is interrupted.
 
-## Enable Lipsync
+## Prerequisites
 
-Create a client with lipsync configuration:
+- A connected `ConvaiClient`. See [Get started with vanilla TypeScript](README.md).
+- A three.js mesh whose morph targets are named after the channels of the format you request. See [Blendshape channel order reference](mappings-reference.md).
+
+## Enable lip sync
+
+Set `enableLipsync: true` and choose the frame format in `blendshapeConfig.format`: `'mha'` (251 MetaHuman channels, the default) or `'arkit'` (61 values).
 
 ```typescript
 import { ConvaiClient } from '@convai/web-sdk/vanilla';
 
 const client = new ConvaiClient({
-  apiKey: 'your-api-key',
-  characterId: 'your-character-id',
-  enableLipsync: true,          // Enable blendshape streaming
-  blendshapeFormat: 'mha',      // 'arkit' or 'mha' (default: 'mha')
+  apiKey: 'YOUR_API_KEY',
+  characterId: 'YOUR_CHARACTER_ID',
+  enableLipsync: true,
+  blendshapeConfig: { format: 'arkit' },
 });
 
-// Connect to start receiving blendshapes
 await client.connect();
 ```
 
-## Configuration Options
+Without `enableLipsync: true`, Convai sends no frames and the queue stays empty. Frames arrive in chunks and the SDK buffers them in `client.blendshapeQueue`.
 
-### ConvaiConfig
+## Bind the morph targets
+
+Build a lookup from frame index to morph target slot once, after the model loads. The frame order is `ARKIT_ORDER_61` for `'arkit'` and `METAHUMAN_ORDER_251` for `'mha'`.
 
 ```typescript
-interface ConvaiConfig {
-  // ... other options
-  
-  /**
-   * Enable lipsync/facial animation blendshapes (default: false).
-   * When enabled, streams real-time blendshape data at 60fps.
-   */
-  enableLipsync?: boolean;
-  
-  /**
-   * Blendshape format to receive from server (default: 'mha').
-   * 'arkit' - 61 elements (52 blendshapes + 9 rotation values)
-   * 'mha' - 251 elements (MetaHuman format)
-   */
-  blendshapeFormat?: 'arkit' | 'mha';
+import * as THREE from 'three';
+import { ARKIT_ORDER_61 } from '@convai/web-sdk/lipsync-helpers';
+
+function bindMorphs(mesh: THREE.Mesh, channelNames: readonly string[]): Int32Array {
+  const dictionary = mesh.morphTargetDictionary ?? {};
+  const slots = new Int32Array(channelNames.length).fill(-1);
+  channelNames.forEach((name, i) => {
+    // ARKit channels are PascalCase; many exports name the morphs in camelCase.
+    const camel = name.charAt(0).toLowerCase() + name.slice(1);
+    const slot = dictionary[name] ?? dictionary[camel];
+    if (slot !== undefined) slots[i] = slot;
+  });
+  return slots;
+}
+
+const slots = bindMorphs(faceMesh, ARKIT_ORDER_61);
+
+function applyFrame(frame: Float32Array) {
+  const influences = faceMesh.morphTargetInfluences!;
+  for (let i = 0; i < slots.length; i++) {
+    if (slots[i] >= 0) influences[slots[i]] = frame[i];
+  }
+}
+
+function clearFace() {
+  const influences = faceMesh.morphTargetInfluences!;
+  for (let i = 0; i < slots.length; i++) {
+    if (slots[i] >= 0) influences[slots[i]] = 0;
+  }
 }
 ```
 
-### Example with All Options
+The last nine `'arkit'` values are head and eye rotations, not morph targets. They find no slot and are skipped.
+
+## Play the frames
+
+Run a `requestAnimationFrame` loop that advances a clock while the character speaks, plays the frame for that time, and consumes the frames it has passed. Read the frame with `getFrameWithAlpha`, which fades the face in over the first 10 frames of a turn and out over the last 10.
 
 ```typescript
-const client = new ConvaiClient({
-  apiKey: 'your-api-key',
-  characterId: 'your-character-id',
-  enableVideo: true,
-  enableLipsync: true,
-  blendshapeFormat: 'arkit',
-  startWithVideoOn: false,
-});
-```
+const queue = client.blendshapeQueue;
 
-## Create Lipsync Player
+let playing = false;
+let lastTime = 0;
+let elapsedMs = 0;
+let lastFrameIndex = -1;
 
-Implement a player class to handle the animation loop:
-
-```typescript
-class LipsyncPlayer {
-  private client: ConvaiClient;
-  private isPlaying: boolean = false;
-  private animationFrameId: number | null = null;
-  private startTime: number = 0;
-  
-  constructor(
-    client: ConvaiClient, 
-    private onFrame: (frame: Float32Array) => void
-  ) {
-    this.client = client;
-    
-    // Track when bot starts speaking to sync timing
-    client.on('speakingChange', (isSpeaking) => {
-      if (isSpeaking) {
-        this.startTime = performance.now();
-      }
-    });
+function tick(now: number) {
+  // Interruption or a cancelled response: return the face to neutral.
+  if (queue.consumeNormalizationSignal()) {
+    clearFace();
+    playing = false;
   }
 
-  start(): void {
-    if (this.isPlaying) return;
-    this.isPlaying = true;
-    this.animate();
-  }
+  const speaking = queue.isBotSpeaking();
+  const draining = queue.hasReceivedEndSignal() && queue.hasFrames();
 
-  stop(): void {
-    if (!this.isPlaying) return;
-    this.isPlaying = false;
-    if (this.animationFrameId !== null) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
+  if (speaking || draining) {
+    if (!playing) {
+      playing = true;
+      lastTime = now;
+      elapsedMs = 0;
+      lastFrameIndex = -1;
+    }
+    elapsedMs += now - lastTime;
+    lastTime = now;
+
+    const frameDurationMs = 1000 / queue.getPlaybackFps();
+    const targetIndex = Math.floor(elapsedMs / frameDurationMs);
+    const advance = Math.min(targetIndex - lastFrameIndex, queue.length);
+
+    if (advance > 0) {
+      const frame = queue.getFrameWithAlpha(advance - 1);
+      if (frame) applyFrame(frame);
+      queue.consumeFrames(advance);
+      lastFrameIndex = targetIndex;
     }
   }
 
-  private animate = (): void => {
-    if (!this.isPlaying) return;
+  // The turn is over and every frame is played: reset for the next turn.
+  if (queue.isConversationEnded()) {
+    clearFace();
+    queue.reset();
+    playing = false;
+  }
 
-    const queue = this.client.blendshapeQueue;
-    
-    if (queue.hasFrames() && queue.isConversationActive()) {
-      // Calculate elapsed time since bot started speaking
-      const elapsedTime = (performance.now() - this.startTime) / 1000;
-      
-      // Get frame based on elapsed time (synced with audio)
-      const result = queue.getFrameAtTime(elapsedTime);
-      
-      if (result) {
-        this.onFrame(result.frame);
-      }
-    }
-
-    this.animationFrameId = requestAnimationFrame(this.animate);
-  };
+  requestAnimationFrame(tick);
 }
 
-// Usage
-const lipsyncPlayer = new LipsyncPlayer(client, (blendshapes) => {
-  applyBlendshapesToCharacter(blendshapes, character.morphTargetInfluences);
+requestAnimationFrame(tick);
+```
+
+The loop never pairs `getFrameAtTime()` with `consumeFrames()`. `getFrameAtTime()` indexes from the front of the queue, so consuming frames after it advances playback twice. Use one of the two approaches, not both.
+
+The client itself starts each turn on the queue when you send a message, fire a trigger, or the user starts speaking, and clears it when you call `sendInterruptMessage()`. Your loop only reads and consumes.
+
+## Remap channels with a mapper
+
+To translate frames into your rig's own layout as they enter the queue, set a mapper. A mapper receives each raw frame and returns a `Float32Array`. Pass it as `blendshapeConfig.customMapper`, or set it on a live queue:
+
+```typescript
+client.blendshapeQueue.setMapper((input) => {
+  const out = new Float32Array(52); // your rig's channel count
+  out[0] = input[17]; // ARKit JawOpen into your rig's slot 0
+  return out;
 });
 
-lipsyncPlayer.start();
-
-// Helper function: Map blendshapes to your character's morph targets
-function applyBlendshapesToCharacter(frame: Float32Array, influences: number[]) {
-  // Simple direct mapping (first N blendshapes to first N morph targets)
-  const maxIndex = Math.min(frame.length, influences.length);
-  for (let i = 0; i < maxIndex; i++) {
-    influences[i] = frame[i];
-  }
-  
-  // OR custom mapping if your character's morphs are in different order:
-  // influences[10] = frame[17]; // Map jawOpen (ARKit index 17) to your jaw morph (index 10)
-  // influences[15] = frame[18]; // Map mouthClose (ARKit index 18) to your mouth morph (index 15)
-}
+client.blendshapeQueue.clearMapper(); // back to raw frames
 ```
 
-BlendQueue functions:
+With a mapper set, frames no longer follow `ARKIT_ORDER_61` or `METAHUMAN_ORDER_251`, so bind your slots to the mapper's output layout instead.
 
-```tsx
-// TIME-BASED ACCESS (Most important for real usage!)
-queue.getFrameAtTime(elapsedSeconds) // Returns { frame, frameIndex }
+## Verify lip sync
 
-// STATE CHECKS
-queue.isConversationActive() // Is bot speaking?
-queue.isConversationEnded()  // Did stats arrive?
-queue.isAllFramesConsumed()  // Playback complete?
+Send a message and listen to the reply. The mouth moves while the character speaks and returns to neutral after the last word. Call `sendInterruptMessage()` mid-reply: the face settles at once instead of freezing on the last shape. For a snapshot of the queue while debugging, log `queue.getDebugInfo()`.
 
-// STATISTICS
-queue.getTurnStats()         // TurnStats object
-queue.getTimeLeftMs()        // Remaining time in ms
-queue.getFramesConsumed()    // How many frames played
-queue.getDebugInfo()         // Complete state snapshot
+## Next steps
 
-// INTERRUPTION
-queue.interrupt()     // Called automatically on sendInterruptMessage()
-```
+{% content-ref url="../lipsync-and-blendshape/README.md" %}
+[Drive facial animation with blendshapes](../lipsync-and-blendshape/README.md)
+{% endcontent-ref %}
+
+{% content-ref url="../lipsync-and-blendshape/metahuman-limit-drivers-required-for-mha.md" %}
+[Apply MetaHuman limit drivers](../lipsync-and-blendshape/metahuman-limit-drivers-required-for-mha.md)
+{% endcontent-ref %}
+
+{% content-ref url="convaiclient-core-api.md" %}
+[ConvaiClient reference](convaiclient-core-api.md)
+{% endcontent-ref %}
