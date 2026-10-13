@@ -1,14 +1,14 @@
 ---
 title: Connect to a character version
 description: Connect to a character's draft, latest release or a tagged version, and list, compare, release, promote and discard versions from the client.
-last_reviewed: "1.9.1"
+last_reviewed: "1.9.2"
 icon: code-branch
 ---
 
 Every character has an editable draft and, once released, a set of immutable tagged versions such as `1.0` and `1.1`. A movable `latest` pointer names the release the runtime uses when a client connects without a selector. Use this page to test changes in the draft, release a tag when it is ready, and roll back by pointing `latest` at an older tag.
 
 {% hint style="warning" %}
-Character versioning is in beta. Explicit selectors (`draft`, `latest` or a tag) need the runtime to have character version resolution enabled. Staging (`https://realtime-api-stg.convai.com`) has it. Production answers explicit selectors with `503 Character version resolution is unavailable` until it is promoted there. Omitting `characterVersion` works as before.
+Character versioning is in beta. Explicit selectors (`draft`, `latest` or a tag) work on production and staging. A deployment without character version resolution, such as a self-hosted runtime, answers them with `503 Character version resolution is unavailable`. Omitting `characterVersion` works as before.
 {% endhint %}
 
 ## Prerequisites
@@ -273,7 +273,7 @@ try {
 
 | Error | Cause |
 |---|---|
-| `503 Character version resolution is unavailable` | The runtime does not resolve explicit selectors yet. This is the case on production until versioning is promoted there. |
+| `503 Character version resolution is unavailable` | The runtime does not resolve explicit selectors, for example a self-hosted deployment without character version resolution. Omit `characterVersion` there. |
 | `404 Character version was not found` | The tag does not exist for this character. |
 | `403` from `resolve()` | `includeRuntimeSettings` is reserved for trusted services. An API key cannot request it. |
 | `Expected "draft", "latest", or a major.minor[.patch] tag` | A malformed selector, rejected locally before any request. |

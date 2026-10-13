@@ -1,7 +1,7 @@
 ---
 title: Mute the character's voice
 description: Silence what the character says without stopping the conversation, build your own mute button, and mute one character in a multi-character session.
-last_reviewed: "1.9.1"
+last_reviewed: "1.9.2"
 icon: volume-xmark
 ---
 
@@ -25,6 +25,10 @@ client.setCharacterMuted(false);  // the character is audible again
 The conversation is unaffected. The character goes on talking, the reply goes on streaming, and transcripts, emotions, and blendshapes go on arriving. Only the sound stops, which means a 3D character keeps lip-syncing while muted.
 
 Nothing is renegotiated with the server, so muting in the middle of a sentence and unmuting a moment later resumes in place instead of restarting the reply.
+
+## Mute on the WebSocket transport
+
+`setCharacterMuted` works on the WebRTC and WebSocket transports. WebSocket support requires 1.9.2 or later; on earlier versions the client reports muted but the voice keeps playing. On the WebSocket transport, speech made while muted is dropped, not queued, so unmuting resumes from what the character is saying at that moment.
 
 ## Read the current state
 
