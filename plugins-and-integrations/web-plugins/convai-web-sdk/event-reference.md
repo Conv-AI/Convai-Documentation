@@ -1,452 +1,120 @@
 ---
-description: >-
-  Reference for subscribing to connection, conversation, speech, action,
-  session, media, and acknowledgment events in the Convai Web SDK.
-icon: arrow-up-small-big
+title: Web SDK event reference
+description: Reference for every event the Convai Web SDK client and its media controls emit, with the payload each one carries and when it fires.
+last_reviewed: "1.9.0"
 ---
 
-# Event Reference
+`ConvaiClient` emits the events on this page through `on(event, callback)`, which returns an unsubscribe function, and `off(event, callback)`. The `useConvaiClient` hook in `@convai/web-sdk/react` exposes the same `on` and `off`. Event names are plain strings and payloads are not typed by the emitter, so annotate callback parameters with the exported types.
 
-{% hint style="warning" %}
-`modelOutput`, `modelOutputProtocolError`, and v2 tool-call behavior describe an opt-in candidate implementation. They do not confirm production availability or publication in the current `@convai/web-sdk` npm release. Confirm the exports in your installed package.
-{% endhint %}
-
-```ts
-const unsub = client.on('botReady', () => {
-  console.log('Bot is ready');
+```typescript
+const unsubscribe = client.on('botReady', () => {
+  client.sendUserTextMessage('Hello');
 });
 
-// Later
-unsub();
-// or
-client.off('botReady', handler);
+unsubscribe();
 ```
 
-***
+## Connection events
 
-### Connection events
+| Event | Payload | Fires when |
+|---|---|---|
+| `connect` | none | `connect()` or `connectWithPublicationGrant()` has opened the transport. The character can still be unready; wait for `botReady` before sending. |
+| `botReady` | none | The character signals that it is ready for messages. Fires once per connection. |
+| `disconnect` | `DisconnectReason` (`number`) | The session ends. The code is `0` when the transport gives no reason. See [Handle errors and disconnects](error-handling.md). |
+| `error` | `unknown` | `connect()` or `connectWithPublicationGrant()` fails (the same error is rethrown), or, on the LiveKit transport, no ready signal arrives within 45 seconds (`bot-ready not received within 45000ms`). |
+| `stateChange` | `ConvaiClientState` | Any field of `client.state` changes value. |
+| `interactionCreated` | `InteractionCreated`: `{ interactionId: string; characterSessionId: string }` | Convai assigns an interaction ID to the session. |
+| `botAudioTrack` | `MediaStreamTrack` | The character's audio track becomes available. WebSocket transport only. See [Use the WebSocket transport](websocket-transport-layer.md). |
 
-#### `connect`
+## Conversation events
 
-Fires when the WebRTC/WebSocket transport connects. The bot may not be ready yet — wait for `botReady` before sending messages.
+| Event | Payload | Fires when |
+|---|---|---|
+| `conversationStart` | `{ sessionId: number; userMessage: string; timestamp: number }` | A new turn starts. `sessionId` increments per turn and matches `client.conversationSessionId`. `timestamp` is a `Date.now()` value. |
+| `turnEnd` | `{ sessionId: number; duration: number; timestamp: number }` | The character stops speaking after at least one turn has started. `duration` is the seconds since the matching `conversationStart`. |
+| `message` | `ChatMessage` | The message list changes. The payload is the last message in the list, so it fires again as a streaming message grows. |
+| `messagesChange` | `ChatMessage[]` | The message list changes, including streaming updates and resets. |
+| `userTranscriptionChange` | `string` | The live transcription of the end user's speech changes. An empty string clears it. |
+| `llmNoResponse` | none | The character deliberately does not answer the turn. |
+| `metrics` | `Record<string, unknown>` | Convai sends a metrics message. The raw data is also appended to `client.state.metrics`. |
 
-```ts
-client.on('connect', () => {
-  console.log('Transport connected');
-});
-```
+`conversationStart.userMessage` identifies what started the turn:
 
-#### `botReady`
+| Value | Started by |
+|---|---|
+| The trimmed message text | `sendUserTextMessage()` |
+| `[voice]` | The end user starting to speak |
+| `[trigger:<name>]` | `sendTriggerMessage()`; `<name>` is empty when no trigger name was passed |
+| `[context-update:<mode>]` | `updateContext()` with `run_llm: "true"`, or with `respond_mode: "must_respond"` and no `run_llm`; `<mode>` defaults to `append` |
+| `[vision-trigger:must_respond]` | `visionTrigger()` with `respondMode: "must_respond"` |
+| `[scene-metadata:must_respond]` | `updateSceneMetadata()` with `respondMode: "must_respond"` |
 
-Fires when the character has confirmed it is ready to receive messages. This is the correct signal to start interacting.
+## Speech events
 
-```ts
-client.on('botReady', () => {
-  client.sendUserTextMessage('Hello!');
-});
-```
+| Event | Payload | Fires when |
+|---|---|---|
+| `speakingChange` | `boolean` | The character starts (`true`) or stops (`false`) speaking. A reset or interruption also emits `false`. |
+| `botOutput` | `{ text: string; spoken: boolean; aggregatedBy: string; segmentId?: number \| string; spokenStatus?: string }` | Convai sends an aggregated output segment. `aggregatedBy` is `"sentence"` when Convai does not specify it. The same `segmentId` can repeat as speech progresses. |
+| `botTtsText` | `{ text: string }` | Convai sends text as it is spoken. |
+| `botTtsStarted` | none | Speech synthesis for a response starts. |
+| `botTtsStopped` | none | Speech synthesis for a response stops. |
+| `userMuteStarted` | none | Convai reports that it stopped accepting the end user's audio. |
+| `userMuteStopped` | none | Convai reports that it accepts the end user's audio again. |
+| `emotionChange` | `{ emotion: string; scale?: number } \| null` | The character's emotion changes. `null` on reset and disconnect. Requires `enableEmotion: true`. See [Use character emotions](emotions.md). |
 
-#### `disconnect`
+## Lip sync events
 
-Fires when the session ends. Receives a `DisconnectReason` code.
+These require `enableLipsync: true`. Read frames from `client.blendshapeQueue` rather than from these payloads. See [Drive facial animation with blendshapes](lipsync-and-blendshape/README.md).
 
-```ts
-client.on('disconnect', (reason) => {
-  // reason: number (see DisconnectReason)
-  // 1 = CLIENT_INITIATED (intentional), others may warrant reconnection
-  if (reason !== 1) {
-    client.reconnect();
-  }
-});
-```
+| Event | Payload | Fires when |
+|---|---|---|
+| `blendshapes` | Raw chunk object from Convai, with a `blendshapes` array of frames | A blendshape chunk is accepted for the current response. |
+| `blendshapeStatsReceived` | Raw object from Convai, with turn statistics in `stats` | Convai sends end-of-turn blendshape statistics, meaning no more frames will come for that response. |
+| `blendshapeCancel` | Raw cancel object from Convai | Convai cancels the blendshape stream of a response, for example after an interruption. |
 
-#### `stateChange`
+## Action events
 
-Fires whenever any part of `ConvaiClientState` changes. Use this for UI updates.
+| Event | Payload | Fires when |
+|---|---|---|
+| `actionResponse` | `ActionResponseEvent`: `{ actions: Array<ConvaiAction \| ConvaiToolCall> }` | Convai sends actions for a turn. An empty array means no action. Not emitted when model output version 2 is selected. |
+| `modelOutput` | `ModelOutputMessage` | A valid model output envelope arrives on a session that selected `capabilities.modelOutputVersion: 2`. A repeated `output_id` is dropped. |
+| `modelOutputProtocolError` | `ModelOutputProtocolError`: `{ code: "invalid_model_output"; message: string }` | A model output envelope on a version 2 session is malformed or unsupported. |
 
-```ts
-client.on('stateChange', (state) => {
-  // state.isConnected, state.isConnecting, state.isListening,
-  // state.isThinking, state.isSpeaking, state.agentState,
-  // state.emotion, state.endUserId, state.metrics, state.disconnectReason
-  updateUI(state);
-});
-```
+See [Handle character actions](actions.md) for how to use these events.
 
-#### `error`
+## Acknowledgment and session events
 
-Fires on connection errors or bot-ready timeout.
+| Event | Payload | Fires when |
+|---|---|---|
+| `serverResponse` | `ServerResponse`: `{ event_type: string; status: "success" \| "error" \| "processing" \| "pending"; message: string \| null; extras: ServerResponseExtras \| null }` | Convai acknowledges a message the client sent. `event_type` is the type of that message, such as `context-update` or `action-result`. |
+| `idleWarning` | `{ remainingSeconds: number \| null }` | Convai warns that it will close the inactive session. Call `resetIdleTimer()` to keep it open. |
 
-```ts
-client.on('error', (error: Error) => {
-  console.error(error.message);
-});
-```
+## Media control events
 
-***
+`client.audioControls`, `client.videoControls`, and `client.screenShareControls` each have their own `on` and `off` methods and emit one event.
 
-### Conversation events
+| Emitter | Event | Payload fields |
+|---|---|---|
+| `audioControls` | `audioStateChange` | `isAudioMuted`, `isAudioEnabled`, and on most changes `audioLevel` |
+| `videoControls` | `videoStateChange` | `isVideoEnabled`, `isVideoHidden`, `activeVisionSource`, `hasActiveVisionSource`, `visionSourceState` |
+| `screenShareControls` | `screenShareStateChange` | `isScreenShareActive`, and on enable, disable, and reset `isScreenShareEnabled` |
 
-#### `conversationStart`
-
-Fires when a new conversation turn begins — either when the user sends a text message or starts speaking.
-
-```ts
-client.on('conversationStart', ({ sessionId, userMessage, timestamp }) => {
-  // sessionId: incrementing turn counter
-  // userMessage: text sent, or "[voice]" for voice turns
-  // timestamp: Date.now() value
-  console.log(`Turn ${sessionId} started`);
-});
-```
-
-#### `turnEnd`
-
-Fires when the bot finishes speaking for a turn.
-
-```ts
-client.on('turnEnd', ({ sessionId, duration, timestamp }) => {
-  // duration: seconds the bot spoke
-  console.log(`Turn ${sessionId} lasted ${duration}s`);
+```typescript
+const off = client.audioControls.on('audioStateChange', (s: { isAudioMuted?: boolean }) => {
+  micButton.textContent = s.isAudioMuted ? 'Unmute' : 'Mute';
 });
 ```
 
-#### `message`
-
-Fires for each new `ChatMessage` added to the conversation. The full history is also available in `client.chatMessages`.
-
-```ts
-client.on('message', (msg) => {
-  // msg.type, msg.content, msg.id, msg.timestamp, msg.isStreaming
-  if (msg.type === 'bot-output') {
-    display(msg.content);
-  }
-});
-```
-
-#### `messagesChange`
-
-Fires whenever the message array changes (includes message updates mid-stream).
-
-```ts
-client.on('messagesChange', (messages) => {
-  renderHistory(messages);
-});
-```
-
-#### `userTranscriptionChange`
-
-Fires repeatedly as the user speaks, providing live speech-to-text.
-
-```ts
-client.on('userTranscriptionChange', (text) => {
-  showLiveTranscript(text);
-});
-```
-
-***
-
-### Speaking events
-
-#### `speakingChange`
-
-Fires when the bot starts or stops speaking.
-
-```ts
-client.on('speakingChange', (isSpeaking) => {
-  if (isSpeaking) {
-    startLipsyncAnimation();
-  } else {
-    stopLipsyncAnimation();
-  }
-});
-```
-
-#### `botOutput`
-
-Fires for each aggregated output chunk from the bot. Includes both spoken and unspoken text.
-
-```ts
-client.on('botOutput', ({ text, spoken, aggregatedBy }) => {
-  // spoken: true when the TTS engine will read this text aloud
-  // aggregatedBy: "sentence" or "word" indicating chunk granularity
-  if (spoken) {
-    addToSubtitles(text);
-  }
-});
-```
-
-#### `botTtsStarted`
-
-Fires when the TTS engine starts producing audio.
-
-```ts
-client.on('botTtsStarted', () => {
-  showSpeakingIndicator();
-});
-```
-
-#### `botTtsStopped`
-
-Fires when the TTS engine finishes.
-
-```ts
-client.on('botTtsStopped', () => {
-  hideSpeakingIndicator();
-});
-```
-
-#### `botTtsText`
-
-Fires word-by-word as the bot speaks, synchronized with TTS audio.
-
-```ts
-client.on('botTtsText', ({ text }) => {
-  highlightWord(text); // karaoke-style word highlighting
-});
-```
-
-***
-
-### Microphone events
-
-#### `userMuteStarted`
-
-Fires when the server-side mutes the user's microphone (e.g., when the bot starts speaking to prevent echo).
-
-```ts
-client.on('userMuteStarted', () => {
-  showMicMutedIndicator();
-});
-```
-
-#### `userMuteStopped`
-
-Fires when the server un-mutes the user's microphone.
-
-```ts
-client.on('userMuteStopped', () => {
-  hideMicMutedIndicator();
-});
-```
-
-***
-
-### Blendshape / lipsync events
-
-These require `enableLipsync: true` in config.
-
-#### `blendshapes`
-
-Fires for each incoming blendshape chunk (10 frames by default). Use `client.blendshapeQueue` instead of handling raw chunks directly.
-
-```ts
-client.on('blendshapes', (data) => {
-  // Low-level: raw chunk data before queue processing
-});
-```
-
-#### `blendshapeStatsReceived`
-
-Fires when the server sends end-of-turn blendshape statistics. Signals that no more frames are coming for this turn.
-
-```ts
-client.on('blendshapeStatsReceived', (stats) => {
-  // stats.total_blendshapes, stats.total_audio_duration_ms
-});
-```
-
-***
-
-### Action events
-
-`actionResponse` requires semantic affordances or v2 tool declarations. `modelOutput` requires `modelOutputVersion: 2` and can carry text even when no Actions contract is active.
-
-#### `actionResponse`
-
-Fires on the legacy compatibility event surface. Under action protocol v1, the ordered array contains semantic actions. Under action protocol v2, it can also contain correlated tool calls. The SDK does not execute or schedule them.
-
-```ts
-import type { ActionResponseEvent } from '@convai/web-sdk/core';
-
-client.on('actionResponse', ({ actions }: ActionResponseEvent) => {
-  for (const action of actions) {
-    handleAuthorizedAction(action);
-  }
-});
-```
-
-When `modelOutputVersion: 2` is selected, the SDK suppresses `actionResponse` to prevent duplicate handling. Use `modelOutput` instead.
-
-**`modelOutput`**
-
-Fires for each valid canonical v2 output envelope when `modelOutputVersion: 2` was selected. The SDK preserves item order and drops a repeated `output_id`; it does not execute items or guarantee exactly-once tool execution.
-
-```ts
-import type { ModelOutputMessage } from '@convai/web-sdk/core';
-
-client.on('modelOutput', (output: ModelOutputMessage) => {
-  for (const item of output.items) {
-    if (item.type === 'message') renderMessage(item);
-    if (item.type === 'tool_call') handleAuthorizedToolCall(item);
-  }
-});
-```
-
-Use validated `items` for rendering and execution. Treat `raw` as diagnostics only. Distinct envelopes can share a `logical_turn_id`, and `final: true` finalizes one envelope rather than the entire logical turn.
-
-**`modelOutputProtocolError`**
-
-Fires when a selected v2 `model-output` envelope is malformed or contains an unsupported item. The parser rejects the whole envelope.
-
-```ts
-import type { ModelOutputProtocolError } from '@convai/web-sdk/core';
-
-client.on(
-  'modelOutputProtocolError',
-  ({ code, message }: ModelOutputProtocolError) => {
-    console.error(code, message);
-  },
-);
-```
-
-The `code` is currently `"invalid_model_output"`. See [Actions](actions.md) for configuration, tool results, and limits.
-
-***
-
-### Server response events
-
-#### `serverResponse`
-
-Fires as an acknowledgment for every message you send to the server.
-
-```ts
-client.on('serverResponse', (response) => {
-  // response.event_type: the message type you sent
-  // response.status: "success" | "error" | "processing" | "pending"
-  // response.message: human-readable result
-  // response.extras: event-specific data (e.g., token counts for context-update)
-  if (response.status === 'error') {
-    console.error(`Server error on ${response.event_type}:`, response.message);
-  }
-});
-```
-
-For `action-result`, `extras.tool_call_id` correlates the acknowledgment and `extras.idempotent` reports whether an identical result was already accepted. A `void` return from `sendActionResult()` is not an acknowledgment.
-
-#### `interactionCreated`
-
-Fires early in the session lifecycle — before `botReady` — when the server assigns a unique interaction ID. This is the first message that carries both `interactionId` and `characterSessionId`, making it the right place to capture identifiers for analytics, logging, or session resumption.
-
-```ts
-client.on('interactionCreated', ({ interactionId, characterSessionId }) => {
-  console.log('Interaction ID:', interactionId);       // e.g. "int_abc123def456"
-  console.log('Character session:', characterSessionId); // e.g. "cs_xyz789"
-
-  // Store for analytics / logging
-  analytics.track('conversation_started', {
-    interactionId,
-    characterSessionId,
-    timestamp: Date.now(),
-  });
-});
-```
-
-| Field                | Type     | Description                                                                            |
-| -------------------- | -------- | -------------------------------------------------------------------------------------- |
-| `interactionId`      | `string` | Unique identifier for this interaction. Use for analytics or log correlation.          |
-| `characterSessionId` | `string` | Character session identifier. Same value as `client.characterSessionId` after connect. |
-
-`interactionCreated` fires once per `connect()` call. If you reconnect, a new `interactionId` is issued.
-
-***
-
-### Session events
-
-#### `idleWarning`
-
-Fires before the server disconnects an idle session.
-
-```ts
-client.on('idleWarning', ({ remainingSeconds }) => {
-  if (remainingSeconds !== null) {
-    showWarning(`Session will close in ${remainingSeconds}s`);
-  }
-  // Reset the timer on any user activity
-  client.resetIdleTimer();
-});
-```
-
-#### `llmNoResponse`
-
-Fires when the LLM deliberately chose not to respond (e.g., because the input didn't warrant a reply).
-
-```ts
-client.on('llmNoResponse', () => {
-  // No response will arrive for this turn — update UI accordingly
-  hideThinkingIndicator();
-});
-```
-
-***
-
-#### `metrics`
-
-Fires with performance data after each turn.
-
-```ts
-client.on('metrics', (data) => {
-  // Raw metrics from the server (latency, token counts, etc.)
-  console.log('Turn metrics:', data);
-});
-```
-
-***
-
-### Audio track (WebSocket transport)
-
-#### `botAudioTrack`
-
-Fires when a new audio track is available from the bot (WebSocket transport only). Attach to an `<audio>` element to play.
-
-```ts
-client.on('botAudioTrack', (track: MediaStreamTrack) => {
-  const audio = document.querySelector<HTMLAudioElement>('#bot-audio')!;
-  audio.srcObject = new MediaStream([track]);
-});
-```
-
-***
-
-### Event quick-reference
-
-| Event                     | Payload                                 | When                           |
-| ------------------------- | --------------------------------------- | ------------------------------ |
-| `connect`                 | —                                       | Transport connected            |
-| `botReady`                | —                                       | Bot confirmed ready            |
-| `disconnect`              | `DisconnectReason`                      | Session ended                  |
-| `stateChange`             | `ConvaiClientState`                     | Any state change               |
-| `error`                   | `Error`                                 | Connection or timeout error    |
-| `conversationStart`       | `{ sessionId, userMessage, timestamp }` | New turn begins                |
-| `turnEnd`                 | `{ sessionId, duration, timestamp }`    | Bot finishes speaking          |
-| `message`                 | `ChatMessage`                           | New message                    |
-| `messagesChange`          | `ChatMessage[]`                         | History updated                |
-| `userTranscriptionChange` | `string`                                | Live STT update                |
-| `speakingChange`          | `boolean`                               | Bot speaking state             |
-| `botOutput`               | `{ text, spoken, aggregatedBy }`        | Aggregated bot chunk           |
-| `botTtsStarted`           | —                                       | TTS begins                     |
-| `botTtsStopped`           | —                                       | TTS ends                       |
-| `botTtsText`              | `{ text }`                              | Word-by-word TTS               |
-| `userMuteStarted`         | —                                       | Server muted user mic          |
-| `userMuteStopped`         | —                                       | Server un-muted user mic       |
-| `blendshapes`             | raw data                                | Blendshape chunk               |
-| `blendshapeStatsReceived` | stats                                   | Turn end stats                 |
-| `actionResponse`          | `{ actions }`                           | Compatibility action projection |
-| `modelOutput`             | `ModelOutputMessage`                    | Valid canonical v2 envelope    |
-| `modelOutputProtocolError` | `ModelOutputProtocolError`             | Invalid v2 envelope            |
-| `serverResponse`          | `ServerResponse`                        | Server acknowledgment          |
-| `interactionCreated`      | `{ interactionId, characterSessionId }` | Session ID assigned            |
-| `idleWarning`             | `{ remainingSeconds }`                  | Idle timeout warning           |
-| `llmNoResponse`           | —                                       | LLM chose not to respond       |
-| `metrics`                 | data                                    | Turn performance data          |
-| `botAudioTrack`           | `MediaStreamTrack`                      | New audio track (WS transport) |
+## Related reference
+
+{% content-ref url="vanilla-typescript/convaiclient-core-api.md" %}
+[ConvaiClient reference](vanilla-typescript/convaiclient-core-api.md)
+{% endcontent-ref %}
+
+{% content-ref url="vanilla-typescript/best-practices-and-type-definitions.md" %}
+[Configuration and type reference](vanilla-typescript/best-practices-and-type-definitions.md)
+{% endcontent-ref %}
+
+{% content-ref url="error-handling.md" %}
+[Handle errors and disconnects](error-handling.md)
+{% endcontent-ref %}

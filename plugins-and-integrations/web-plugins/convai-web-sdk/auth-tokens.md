@@ -1,71 +1,66 @@
 ---
-description: >-
-  For production apps, use a short-lived auth token instead of embedding your
-  Convai API key in client-side code. The API key stays on your server; the
-  client receives a token that expires after 1 hour.
-icon: fingerprint
+title: Connect with an auth token
+description: Keep your Convai API key on your server by minting an auth token there and connecting the Web SDK in the browser with that token instead.
+last_reviewed: "1.9.0"
 ---
 
-# Auth Tokens
+Connect the Convai Web SDK with an auth token minted by your server, so your API key never reaches the browser. Use this page before you publish any page that talks to a character.
 
-### Why auth tokens matter
+## Why use an auth token
 
-Your API key has full access to your Convai account. Shipping it in a client bundle means anyone who inspects the source can extract it and use it without restriction. Auth tokens are scoped, short-lived, and revocable — the right tool for production.
+An API key is a credential for your whole Convai account. Any value in a client bundle can be read by anyone who opens the page, so a shipped API key can be copied and used outside your application. An auth token is created on your server from the API key, and only the token is sent to the browser.
 
-***
-
-### Flow
-
-```
-Client                  Your server              Convai API
-  |                         |                        |
-  |  "start conversation"   |                        |
-  |-----------------------> |                        |
-  |                         |  POST /user/connect    |
-  |                         |  CONVAI-API-KEY: ...   |
-  |                         |----------------------->|
-  |                         |  { apiAuthToken, ... } |
-  |                         |<-----------------------|
-  |  { authToken }          |                        |
-  |<----------------------- |                        |
-  |                         |                        |
-  |  new ConvaiClient({ authToken })                 |
-  |------------------------------------------------->|
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant Server as Your server
+    participant Convai
+    Browser->>Server: Request a token
+    Server->>Convai: POST /user/connect with CONVAI-API-KEY
+    Convai-->>Server: apiAuthToken
+    Server-->>Browser: Token
+    Browser->>Convai: connect() with authToken
 ```
 
-The API key never leaves your server.
+The diagram shows the API key staying on your server: the browser only ever holds the token.
 
-***
+## Mint a token on your server
 
-### 1. Generate a token (server-side)
+Send a `POST` request to `https://api.convai.com/user/connect` with your API key in the `CONVAI-API-KEY` header. The token is in the `apiAuthToken` field of the JSON response.
 
-```
-POST https://api.convai.com/user/connect
-CONVAI-API-KEY: <your-api-key>
-Content-Type: application/json
-```
-
-**Response**
-
-```json
-{
-  "apiAuthToken": "your_auth_token_here",
-  "expirationTime": "2026-06-11T13:00:00Z"
+{% tabs %}
+{% tab title="Node.js" %}
+{% code title="server/token.ts" %}
+```typescript
+export async function createConvaiToken(): Promise<string> {
+  const response = await fetch('https://api.convai.com/user/connect', {
+    method: 'POST',
+    headers: {
+      'CONVAI-API-KEY': process.env.CONVAI_API_KEY!,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({}),
+  });
+  if (!response.ok) {
+    throw new Error(`Token request failed: ${response.status}`);
+  }
+  const data = await response.json();
+  return data.apiAuthToken;
 }
 ```
+{% endcode %}
+{% endtab %}
 
-The token is valid for **1 hour**. You can generate a new token while the current one is still active.
-
-**Example (Python)**
-
+{% tab title="Python" %}
 ```python
+import os
 import requests
 
-def get_auth_token(api_key: str) -> str:
+def create_convai_token() -> str:
     response = requests.post(
         "https://api.convai.com/user/connect",
         headers={
-            "CONVAI-API-KEY": api_key,
+            "CONVAI-API-KEY": os.environ["CONVAI_API_KEY"],
             "Content-Type": "application/json",
         },
         json={},
@@ -73,77 +68,77 @@ def get_auth_token(api_key: str) -> str:
     response.raise_for_status()
     return response.json()["apiAuthToken"]
 ```
+{% endtab %}
+{% endtabs %}
 
-***
+Expose the function through an endpoint of your own that only your signed-in end users can call.
 
-### 2. Use the token in the SDK
+## Connect with the token
 
-Pass `authToken` instead of `apiKey`. Everything else stays the same.
+Pass `authToken` instead of `apiKey`. Every other option stays the same.
 
-```ts
-const client = useConvaiClient({
-  // apiKey: '...',    ← never ship this in client code
-  authToken: await fetchTokenFromYourServer(),
-  characterId: '...',
-  endUserId: 'user@example.com',
+{% tabs %}
+{% tab title="React" %}
+```tsx
+import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
+
+export function Assistant({ token }: { token: string }) {
+  const client = useConvaiClient({
+    authToken: token,
+    characterId: 'YOUR_CHARACTER_ID',
+  });
+
+  return <ConvaiWidget convaiClient={client} />;
+}
+```
+{% endtab %}
+
+{% tab title="TypeScript" %}
+```typescript
+import { ConvaiClient } from '@convai/web-sdk/core';
+
+const token = await fetch('/api/convai-token').then((r) => r.text());
+
+const client = new ConvaiClient({
+  authToken: token,
+  characterId: 'YOUR_CHARACTER_ID',
 });
+
+await client.connect();
 ```
+{% endtab %}
+{% endtabs %}
 
-Once a session starts, the token is no longer checked for the duration of that session — the WebRTC/WebSocket connection persists independently.
+The vanilla `createConvaiWidget()` helper also accepts `authToken` in place of `apiKey` when you let it create the client.
 
-***
+Credential rules in `connect()`:
 
-### 3. Extend a token
+| Configuration | Result |
+|---|---|
+| `authToken` set | The SDK sends it in the `API-AUTH-TOKEN` header. It takes precedence when `apiKey` is also set. |
+| Only `apiKey` set | The SDK sends it in the `X-API-Key` header. |
+| Neither set, or no `characterId` | `connect()` throws `Either apiKey or authToken is required, and characterId is required`. |
 
-If you need more time before the token expires, extend it from your server:
+The long-term memory manager created for the session uses the same credential, so memory calls also work with a token. See [Use long-term memory](long-term-memory.md).
 
-```
-POST https://api.convai.com/user/extend-token
-CONVAI-API-KEY: <your-api-key>
-Content-Type: application/json
+{% hint style="danger" %}
+Do not ship an API key in browser code for a public page. Keep `apiKey` for local development and server-side tools.
+{% endhint %}
 
-{
-  "apiAuthToken": "your_auth_token_here"
-}
-```
+## Verify the connection
 
-***
+Connect from the page and confirm that `connect()` resolves and the `botReady` event fires. In the browser's network panel, the `/connect` request carries an `API-AUTH-TOKEN` header and no `X-API-Key` header.
 
-### 4. Revoke a token
+## Next steps
 
-Revoke a token immediately — for example, when a user logs out:
+{% content-ref url="error-handling.md" %}
+[Handle errors and disconnects](error-handling.md)
+{% endcontent-ref %}
 
-```
-POST https://api.convai.com/user/revoke-token
-CONVAI-API-KEY: <your-api-key>
-Content-Type: application/json
+{% content-ref url="long-term-memory.md" %}
+[Use long-term memory](long-term-memory.md)
+{% endcontent-ref %}
 
-{
-  "apiAuthToken": "your_auth_token_here"
-}
-```
-
-Revoking a token does not end an already-active session.
-
-***
-
-### API reference
-
-#### `ConvaiConfig`
-
-| Field       | Type     | Description                                                         |
-| ----------- | -------- | ------------------------------------------------------------------- |
-| `apiKey`    | `string` | Your Convai API key. Use server-side only or during development.    |
-| `authToken` | `string` | Short-lived auth token. Preferred for production client-side usage. |
-
-Exactly one of `apiKey` or `authToken` must be set.
-
-#### Token endpoints
-
-| Endpoint                  | Description                       |
-| ------------------------- | --------------------------------- |
-| `POST /user/connect`      | Generate a new token (1 hour TTL) |
-| `POST /user/extend-token` | Extend an existing token's expiry |
-| `POST /user/revoke-token` | Immediately invalidate a token    |
-
-All endpoints require `CONVAI-API-KEY` in the request header.
+{% content-ref url="vanilla-typescript/best-practices-and-type-definitions.md" %}
+[Configuration and type reference](vanilla-typescript/best-practices-and-type-definitions.md)
+{% endcontent-ref %}
