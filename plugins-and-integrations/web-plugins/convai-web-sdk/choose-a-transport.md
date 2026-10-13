@@ -10,6 +10,10 @@ The Convai Web SDK reaches a character over three transports, and one `ConvaiCli
 * **Realtime (WebRTC, the default)** is for conversations: voice in and out, video, screen share, lip sync and low latency. The session stays open while you are connected.
 * **WebSocket** carries realtime voice where WebRTC is blocked, such as some webviews and networks that block UDP. See [Use the WebSocket transport](websocket-transport-layer.md).
 
+{% hint style="warning" %}
+The interaction API that SSE uses is in beta. It is reachable at staging (`https://interaction-api-stg.convai.com/v1/interactions`) and on self-hosted deployments; a production host is planned. See [Chat over the SSE transport](sse-transport.md).
+{% endhint %}
+
 ## Compare the transports
 
 | | Realtime (WebRTC) | WebSocket | SSE |
