@@ -61,6 +61,17 @@ The API key is bundled into the page that the browser downloads. Keep `apiKey` f
 
 Select the chat button in the bottom-right corner of the page and send a message. The widget connects to Convai on first use and plays the character's voice. Drag across the scene to turn around the character, and scroll to zoom.
 
+## Use the template in the PlayCanvas Editor
+
+The template is also a public PlayCanvas Editor project, [Convai Web SDK](https://playcanvas.com/project/1619450/overview/convai-web-sdk). It needs no build step: its `convaiCharacter` script imports `@convai/web-sdk` from esm.sh.
+
+1. Open the project and fork it.
+2. Select the **Japanese F** entity.
+3. In the `convaiCharacter` script, set **API Key** and, optionally, **Character ID**.
+4. Select **Launch**.
+
+To add the character to your own Editor project, upload `editor/convai-character.mjs` from the repository, add the `convaiCharacter` script to a MetaHuman-rig model's entity, and set **Idle Animation** and **Talk Animation** to the names of the animation assets the model's import created.
+
 ## Understand how the template works
 
 The template creates one `ConvaiClient` and shares it between the chat widget and the scene. The client asks Convai for MetaHuman blendshapes with `enableLipsync: true` and `blendshapeConfig: { format: 'mha' }`.

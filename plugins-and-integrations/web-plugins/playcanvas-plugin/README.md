@@ -5,7 +5,7 @@ cover: ../../../.gitbook/assets/playcanvas cover.jpg
 coverY: 0
 ---
 
-Add a talking Convai character to a PlayCanvas scene. Two templates on GitHub give you a working scene with MetaHuman lip sync, idle and talking animation, and a chat widget. Both use Japanese F, a MetaHuman-rig character, by default. Pick the template that matches where the character's 3D model comes from.
+Add a talking Convai character to a PlayCanvas scene. Two templates, each on GitHub and as a PlayCanvas Editor project, give you a working scene with MetaHuman lip sync, idle and talking animation, and a chat widget. Both use Japanese F, a MetaHuman-rig character, by default. Pick the template that matches where the character's 3D model comes from.
 
 <table data-view="cards">
 <thead>
@@ -31,6 +31,7 @@ Add a talking Convai character to a PlayCanvas scene. Two templates on GitHub gi
 | | Web SDK template | Convai Embody template |
 |---|---|---|
 | Repository | [`Conv-AI/convai-playcanvas-web-sdk`](https://github.com/Conv-AI/convai-playcanvas-web-sdk) | [`Conv-AI/convai-playcanvas-embody`](https://github.com/Conv-AI/convai-playcanvas-embody) |
+| PlayCanvas Editor project | [Convai Web SDK](https://playcanvas.com/project/1619450/overview/convai-web-sdk) | [Convai Embody](https://playcanvas.com/project/1619476/overview/convai-embody) |
 | Packages | `@convai/web-sdk` | `@convai/embody` and `@convai/web-sdk` |
 | Character model | A GLB file in your app | Resolved from the character ID |
 | Face animation | Lip sync | Lip sync and blinking |

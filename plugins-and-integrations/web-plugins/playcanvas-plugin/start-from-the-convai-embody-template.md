@@ -63,6 +63,17 @@ The template defaults to Convai's staging environment, which serves web bodies a
 
 Select the chat button in the bottom-right corner of the page and send a message. The widget connects to Convai on first use, shows the character's name, and plays the character's voice. Drag across the scene to turn around the character, and scroll to zoom.
 
+## Use the template in the PlayCanvas Editor
+
+The template is also a public PlayCanvas Editor project, [Convai Embody](https://playcanvas.com/project/1619476/overview/convai-embody). The project holds no model: its `convaiCharacter` script resolves the body when the app starts, and imports `@convai/embody` and `@convai/web-sdk` from esm.sh.
+
+1. Open the project and fork it.
+2. Select the **Convai Character** entity.
+3. In the `convaiCharacter` script, set **API Key** and, optionally, **Character ID**, **API Host**, and **Realtime URL**.
+4. Select **Launch**.
+
+To add the character to your own Editor project, upload `editor/convai-character.mjs` from the repository and add the `convaiCharacter` script to an empty entity where the character should stand.
+
 ## Understand how the template works
 
 The template resolves the body first, then loads it into PlayCanvas, then shares one `ConvaiClient` between the chat widget and Convai Embody.
