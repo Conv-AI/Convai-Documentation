@@ -1,7 +1,8 @@
 ---
 title: Web SDK event reference
 description: Reference for every event the Convai Web SDK client and its media controls emit, with the payload each one carries and when it fires.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: arrow-up-small-big
 ---
 
 `ConvaiClient` emits the events on this page through `on(event, callback)`, which returns an unsubscribe function, and `off(event, callback)`. The `useConvaiClient` hook in `@convai/web-sdk/react` exposes the same `on` and `off`. Event names are plain strings and payloads are not typed by the emitter, so annotate callback parameters with the exported types.

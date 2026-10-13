@@ -1,7 +1,8 @@
 ---
 title: Render links and link previews
 description: Turn links the character sends into clickable links, media cards and Open Graph site cards in the Convai widgets or in your own chat UI.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: link
 ---
 
 Render the links a character sends as clickable links with image, video and document cards instead of literal `[Doc](https://…)` markdown. Use this page to turn links on, to add Open Graph site cards through `linkPreviewResolver`, or to render links safely in a chat UI you built yourself.
@@ -208,7 +209,7 @@ for (const node of parseInlineMarkdown(line)) {
 Only `http`, `https`, `ftp`, `ftps`, `mailto`, `tel` and `sms` become links. Everything else, including `javascript:` and `data:`, becomes a `blocked` node, and the widgets render it as text.
 
 {% hint style="warning" %}
-Never put a `blocked` node's `href` on an anchor. Do not rely on the server to sanitise schemes; the client is the guard. If you write your own tokenizer instead of `parseInlineMarkdown`, check every href with `isSafeHref` before you render it.
+Never put a `blocked` node's `href` on an anchor. The server does not sanitise schemes: a markdown link such as `[Click me](javascript:alert(1))` reaches the client unchanged, so the client is the only guard. If you write your own tokenizer instead of `parseInlineMarkdown`, check every href with `isSafeHref` before you render it.
 {% endhint %}
 
 ## API reference

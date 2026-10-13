@@ -1,7 +1,8 @@
 ---
 title: Use long-term memory
 description: Give a Convai character memory of each end user across sessions, and list, add, or delete those memories from your web application.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: brain
 ---
 
 Let a character remember an end user across sessions by connecting with a stable end-user ID, then read or change that user's memories through the memory manager. Use this page when you identify your users and want the character to recall them, or when your application needs to seed or prune what it remembers.

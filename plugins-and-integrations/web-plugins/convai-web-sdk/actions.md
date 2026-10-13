@@ -1,7 +1,8 @@
 ---
 title: Handle character actions
 description: Declare the actions, objects, and tools a character can use, receive the actions it chooses, and return the results of tools your app runs.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: person-running
 ---
 
 Let a character act in your scene by declaring what it can do at connect time and handling the actions it chooses during the conversation. Use this page when a character should move, pick things up, or call functions in your application. Your application stays responsible for authorizing and running every action.

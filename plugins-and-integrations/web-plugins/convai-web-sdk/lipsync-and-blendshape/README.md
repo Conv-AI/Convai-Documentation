@@ -1,7 +1,8 @@
 ---
 title: Drive facial animation with blendshapes
 description: Stream blendshape frames alongside a character's voice and apply them to the morph targets of a 3D face so its mouth moves in time with speech.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: head-side-speak
 ---
 
 Turn on lip sync so Convai streams facial blendshape frames with the character's audio, then play those frames onto the morph targets of a 3D model. Use this page when you render your own character with three.js or another WebGL engine. At the end, the character's mouth moves in time with its voice and settles back to neutral when it stops talking.

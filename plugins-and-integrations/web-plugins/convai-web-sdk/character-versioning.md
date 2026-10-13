@@ -1,7 +1,8 @@
 ---
 title: Connect to a character version
 description: Connect to a character's draft, latest release or a tagged version, and list, compare, release, promote and discard versions from the client.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: code-branch
 ---
 
 Every character has an editable draft and, once released, a set of immutable tagged versions such as `1.0` and `1.1`. A movable `latest` pointer names the release the runtime uses when a client connects without a selector. Use this page to test changes in the draft, release a tag when it is ready, and roll back by pointing `latest` at an older tag.

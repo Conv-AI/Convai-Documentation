@@ -1,7 +1,8 @@
 ---
 title: Get started with vanilla TypeScript
 description: Install the Convai Web SDK in a project without a UI framework, connect a client to a character, and add the optional chat widget.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: js
 ---
 
 Connect to a Convai character from plain TypeScript or JavaScript, with no React or other UI framework. Use this page when you set up the SDK in a framework-free project for the first time. At the end, your page holds a connected client and, optionally, the prebuilt chat widget.

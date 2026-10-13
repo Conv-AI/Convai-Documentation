@@ -1,7 +1,8 @@
 ---
 title: Read raw transport messages
 description: Observe every message a session receives, on any transport, with the typed rawMessage event, including MCP tool lifecycle frames and unknown types.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: code
 ---
 
 Observe the messages a Convai session receives, as decoded from the wire and before the SDK interprets them. Use the `rawMessage` event to log traffic, to read MCP tool lifecycle frames, or to handle message types the SDK does not turn into its own events. It works the same on LiveKit, WebSocket and SSE.
