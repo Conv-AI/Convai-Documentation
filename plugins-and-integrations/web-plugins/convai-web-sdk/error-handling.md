@@ -1,7 +1,8 @@
 ---
 title: Handle errors and disconnects
 description: Catch connection failures, react to dropped sessions with your own reconnect logic, and read the acknowledgments Convai returns for each message.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: cloud-xmark
 ---
 
 Handle the failures a Convai Web SDK session can hit: a connection that never opens, a session that drops, and a message that Convai rejects. Use this page when you move from a prototype to an application that has to recover on its own.

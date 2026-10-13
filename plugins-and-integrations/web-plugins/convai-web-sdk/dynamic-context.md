@@ -1,7 +1,8 @@
 ---
 title: Update character context at runtime
 description: Give a character live information about the scene, the session, and the person it is talking to, and control whether each update makes it respond.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: connectdevelop
 ---
 
 Keep a character informed as your application changes: pass starting context on connect, then send updates during the session without reconnecting. Use this page when the character should know about scene state, progress, or files that change while it talks. Every method here exists on `ConvaiClient` and on the value returned by `useConvaiClient`.

@@ -1,7 +1,8 @@
 ---
 title: Choose a transport
 description: Decide between SSE, WebRTC and WebSocket for a Convai Web SDK app, see the recommended SSE chat with a realtime voice mode and why, and set up any of them.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: route
 ---
 
 The Convai Web SDK reaches a character over three transports, and one `ConvaiClient` can use any of them. Use this page to pick one, or to combine SSE and realtime the way we recommend.

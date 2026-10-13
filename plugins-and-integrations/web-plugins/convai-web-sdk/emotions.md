@@ -1,7 +1,8 @@
 ---
 title: Use character emotions
 description: Receive the emotion Convai detects in a character's replies, choose how it is detected, and set the character's temporary state of mind.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: face-smile-plus
 ---
 
 Read the emotion a character expresses as it replies, and set the mood it starts from. Use this page when your interface or 3D character reacts to the character's emotional state, or when a scene should put the character in a particular state of mind.

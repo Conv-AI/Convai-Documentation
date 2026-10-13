@@ -1,7 +1,7 @@
 ---
 title: Configuration and type reference
 description: Reference for the Convai Web SDK package entry points, every connection configuration field with its default, and the main exported types.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
 ---
 
 This page lists the entry points of `@convai/web-sdk`, every field of `ConvaiConfig`, and the state, message, and acknowledgment types the client works with. The types are defined in the SDK's core and re-exported from `@convai/web-sdk/core`, `@convai/web-sdk/vanilla`, and `@convai/web-sdk/react`.

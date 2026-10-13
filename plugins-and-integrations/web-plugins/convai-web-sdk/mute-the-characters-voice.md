@@ -1,7 +1,8 @@
 ---
 title: Mute the character's voice
 description: Silence what the character says without stopping the conversation, build your own mute button, and mute one character in a multi-character session.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: volume-xmark
 ---
 
 Silence the character's voice while the conversation continues. Use this page when you are building your own mute button, or when one character in a multi-character session should be heard and another should not.

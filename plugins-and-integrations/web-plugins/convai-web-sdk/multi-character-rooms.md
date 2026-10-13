@@ -1,7 +1,8 @@
 ---
 title: Host several characters in one room
 description: Connect a roster of Convai characters to one realtime room, choose which one answers, change the roster live, and let a second person join.
-last_reviewed: "1.9.0"
+last_reviewed: "1.9.1"
+icon: users
 ---
 
 Host several characters in one realtime room and talk to any of them without reconnecting. Use this page for scenes with more than one speaker, such as a guide and an assessor, a panel interview or a group of NPCs.
