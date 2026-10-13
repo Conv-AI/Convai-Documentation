@@ -1,146 +1,119 @@
 ---
-description: >-
-  Explore the Convai Web SDK — Fast, low-latency, voice-first AI character
-  interaction for the browser
+title: Convai Web SDK
+description: Find the setup guides, feature how-tos, and API reference for the Convai Web SDK, which connects web apps to Convai characters by voice and text.
 ---
 
-# Convai Web SDK
-
-## Introduction
-
-The **Convai Web SDK (`@convai/web-sdk`)** brings the new Convai backend to the browser, enabling fast, natural, hands-free AI interactions across modern web experiences.\
-Built for production apps, immersive sites, and interactive worlds, the SDK handles real-time audio, text, optional video, character actions, and emotion signals — giving developers the tools to create responsive, intelligent AI characters directly on the web.
-
-With built-in voice capture, speech detection, a ready-to-use chat widget, and full custom UI support, Convai makes it simple to integrate lifelike assistants, companions, and NPCs into any web environment.
+The Convai Web SDK, published on npm as `@convai/web-sdk`, connects a web page to a Convai character for real-time voice and text conversation, with optional camera, screen share, lip sync, actions, and emotions. It ships React bindings, a framework-free client, and a prebuilt chat widget for both. These pages describe release <code class="expression">space.vars.web_sdk_version</code>.
 
 {% embed url="https://youtu.be/fK8R0SzuvNI" %}
-Build Browser-Based Conversational AI Avatars with the Convai Web SDK, Three.JS, and React
+Build browser-based conversational avatars with the Convai Web SDK, three.js, and React.
 {% endembed %}
 
-## What’s New
+## Start here
 
-The Web SDK introduces a streamlined, high-performance interaction pipeline powered by Convai’s newest backend:
+The quickstart builds a first conversation in React. The two getting-started pages cover installation and the widget for each path; pick the one that matches your app.
 
-* **Hands-free voice conversations**\
-  Natural, continuous dialogue without push-to-talk.
-* **Low-latency responses**\
-  Faster streaming replies for smooth, real-time interaction.
-* **Emotion and action signalling**\
-  Characters can express mood and trigger contextual behaviours.
-* **Optional video and screen sharing**\
-  Add richer visual context when your experience requires it.
-* **Pre-built ConvaiWidget**\
-  A polished, complete UI for audio, text, and video chat.
-* **Custom UI and full control APIs**\
-  Build your own interface and behaviour logic with exposed hooks and state.
-* **Modern web integration**\
-  Designed for Web-based frameworks and tooling.
-* Long-term memory\
-  Per-user memory that persists across sessions via the MemoryManager API.
-* Binary file transfer\
-  Send images and files directly to the character via uploadFile().
+<table data-view="cards">
+<thead>
+<tr>
+<th></th>
+<th data-hidden data-card-target data-type="content-ref"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Web SDK quickstart</strong><br>Connect to a character from React, send a message, and read its reply.</td>
+<td><a href="quickstart.md">quickstart.md</a></td>
+</tr>
+<tr>
+<td><strong>Get started with React</strong><br>Install the package, add the chat widget, and turn on camera and screen share.</td>
+<td><a href="react/README.md">react/README.md</a></td>
+</tr>
+<tr>
+<td><strong>Get started with vanilla TypeScript</strong><br>Create a client without a framework and mount the vanilla widget.</td>
+<td><a href="vanilla-typescript/README.md">vanilla-typescript/README.md</a></td>
+</tr>
+</tbody>
+</table>
 
-{% include "../../../.gitbook/includes/separation-line.md" %}
+## Add features
 
-### Core Concepts
+Each feature page shows the configuration and the client calls for one capability, for React and vanilla code alike.
 
-At a high level, the SDK is organised into a few core pieces:
+<table data-view="cards">
+<thead>
+<tr>
+<th></th>
+<th data-hidden data-card-target data-type="content-ref"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Drive facial animation with blendshapes</strong><br>Stream lip sync frames and apply them to a 3D character's morph targets.</td>
+<td><a href="lipsync-and-blendshape/README.md">lipsync-and-blendshape/README.md</a></td>
+</tr>
+<tr>
+<td><strong>Handle character actions</strong><br>Receive semantic actions or run client tools and return their results.</td>
+<td><a href="actions.md">actions.md</a></td>
+</tr>
+<tr>
+<td><strong>Use character emotions</strong><br>Read the character's emotion and set its state of mind.</td>
+<td><a href="emotions.md">emotions.md</a></td>
+</tr>
+<tr>
+<td><strong>Update character context at runtime</strong><br>Send scene state, template keys, and files during a session.</td>
+<td><a href="dynamic-context.md">dynamic-context.md</a></td>
+</tr>
+<tr>
+<td><strong>Use long-term memory</strong><br>Let a character remember each person across sessions, and manage those memories.</td>
+<td><a href="long-term-memory.md">long-term-memory.md</a></td>
+</tr>
+<tr>
+<td><strong>Connect with an auth token</strong><br>Keep the API key on your server and connect the browser with a token.</td>
+<td><a href="auth-tokens.md">auth-tokens.md</a></td>
+</tr>
+<tr>
+<td><strong>Handle errors and disconnects</strong><br>Tell failures, disconnect reasons, and acknowledgments apart, and reconnect.</td>
+<td><a href="error-handling.md">error-handling.md</a></td>
+</tr>
+<tr>
+<td><strong>Choose a transport</strong><br>Pick SSE, WebRTC or WebSocket, or combine SSE chat with a realtime voice mode.</td>
+<td><a href="choose-a-transport.md">choose-a-transport.md</a></td>
+</tr>
+<tr>
+<td><strong>Use the WebSocket transport</strong><br>Connect over WebSocket instead of WebRTC.</td>
+<td><a href="websocket-transport-layer.md">websocket-transport-layer.md</a></td>
+</tr>
+</tbody>
+</table>
 
-1. **ConvaiClient**\
-   The brain. Manages connection, state, messages, audio/video/screen-share control, and blendshape queue.
-2. **ConvaiWidget**\
-   A complete, prebuilt interface for text + voice + optional video/screen share.
-3. **AudioRenderer** **(Critical for audio playback)**\
-   Attaches the bot's audio tracks to the user's speakers.
-   * Required for custom UIs
-   * Already built in to `ConvaiWidget`
-4. **BlendshapeQueue** **(Essential for facial animation)**\
-   Manages buffering and time-based retrieval of facial blendshape data.
-   * Provides 60fps blendshape streams synchronized with speech
-   * Supports ARKit (61 elements) and MetaHuman (251 elements) formats
-   * Optional custom mapping for any character rig
-5. **Connection Type**\
-   Determines what's possible:
-   * `"audio"` (default) – audio-only conversations
-   * `"video"` – audio + video + screen share
-6. MemoryManager
-   * Per-user long-term memory. List, add, and delete memories tied to an endUserId.
-   * endUserId.\
-     Returned by client.memoryManager — null if no endUserId is set.
+## Look up the API
 
-***
+<table data-view="cards">
+<thead>
+<tr>
+<th></th>
+<th data-hidden data-card-target data-type="content-ref"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ConvaiClient reference</strong><br>Every property, method, and control interface on the client.</td>
+<td><a href="vanilla-typescript/convaiclient-core-api.md">vanilla-typescript/convaiclient-core-api.md</a></td>
+</tr>
+<tr>
+<td><strong>Configuration and type reference</strong><br>Every connection option, the package entry points, and the shared types.</td>
+<td><a href="vanilla-typescript/best-practices-and-type-definitions.md">vanilla-typescript/best-practices-and-type-definitions.md</a></td>
+</tr>
+<tr>
+<td><strong>Web SDK event reference</strong><br>Every event the client emits, with its payload.</td>
+<td><a href="event-reference.md">event-reference.md</a></td>
+</tr>
+<tr>
+<td><strong>useConvaiClient hook reference</strong><br>What the React hook returns and which fields re-render.</td>
+<td><a href="react/useconvaiclient-hook.md">react/useconvaiclient-hook.md</a></td>
+</tr>
+</tbody>
+</table>
 
-### Architecture
-
-```
-┌─────────────────────────────────────────────────┐
-│  ConvaiWidget (UI Layer)                        │
-│  ├─ Chat Interface                              │
-│  ├─ Voice Mode                                  │
-│  └─ Video/Screen Share UI                       │
-└─────────────────────────────────────────────────┘
-                     ▼
-┌─────────────────────────────────────────────────┐
-│  ConvaiClient (Core Logic)                      │
-│  ├─ Connection Management                       │
-│  ├─ Message Handling                            │
-│  ├─ State Management                            │
-│  └─ Audio/Video Controls                        │
-│  └─ Blendshape Queue Management                 │
-└─────────────────────────────────────────────────┘
-                     ▼
-┌─────────────────────────────────────────────────┐
-│  WebRTC Room (Communication Layer)              │
-│  ├─ Real-time Audio/Video Streaming             │
-│  ├─ Blendshape Data Streaming (60fps)           │
-│  ├─ Track Management                            │
-│  └─ Network Communication                       │
-└─────────────────────────────────────────────────┘
-                     ▼
-┌─────────────────────────────────────────────────┐
-│  AudioRenderer (Critical for Playback)         │
-│  ├─ Attaches audio tracks to DOM               │
-│  ├─ Manages audio elements                     │
-│  └─ Enables bot voice playback                 │
-└─────────────────────────────────────────────────┘
-```
-
-***
-
-#### What's Included
-
-* **React SDK**
-  * `useConvaiClient` hook for easy client lifecycle
-  * `<ConvaiWidget />` for full UI
-  * `<AudioRenderer />` + `AudioContext` for custom UIs
-  * Access to `blendshapeQueue` for facial animation
-* **Vanilla SDK**
-  * `ConvaiClient` class for direct control
-  * `AudioRenderer` class for playback
-  * Optional `createConvaiWidget()` helper
-  * `BlendshapeQueue` API for facial animation
-* **Lipsync & Facial Animation**
-  * Real-time blendshape streaming at 60fps
-  * Support for ARKit (61) and MetaHuman (251) formats
-  * Declarative name-based mapping system
-  * Helper functions and preset configurations
-  * Works with Three.js, Babylon.js, Unity WebGL, and custom engines
-* **Video & Screen Share**
-  * Camera and screen share support when `enableVideo: true`
-  * Fine-grained video and screen share controls
-* **TypeScript-first**
-  * Full type definitions for configs, state, messages, and control APIs<br>
-
-{% hint style="success" %}
-#### Performance Optimization
-
-To achieve the lowest possible latency, we recommend configuring your Core AI settings to use the `gemini-flash-2.5-beta` model. This model is optimized for speed and is ideal for real-time applications where response time is critical.
-{% endhint %}
-
-<figure><img src="../../../.gitbook/assets/Core AI.png" alt=""><figcaption></figcaption></figure>
-
-## Conclusion
-
-The **Convai Web SDK (`@convai/web-sdk`)** marks a major step forward in bringing real-time AI interaction to the browser. With speech, actions, emotions, and optional video all running on the latest Convai backend, you can build fast, responsive, and deeply interactive AI characters across any web experience.
-
-Start building today and bring the next generation of AI-powered interaction to the open web.
+The SDK is not the legacy `convai-web-sdk` package documented under [Convai Web SDK (Legacy)](../convai-web-sdk-1/README.md). The two have different APIs, so code written for one does not run on the other.

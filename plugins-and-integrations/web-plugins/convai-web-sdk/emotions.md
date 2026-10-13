@@ -1,191 +1,149 @@
 ---
-description: >-
-  Enable emotion detection to receive the character's emotional state during a
-  conversation.Enable emotion detection to receive the character's emotional
-  state alongside each response.
-icon: face-smile-plus
+title: Use character emotions
+description: Receive the emotion Convai detects in a character's replies, choose how it is detected, and set the character's temporary state of mind.
+last_reviewed: "1.9.0"
 ---
 
-# Emotions
+Read the emotion a character expresses as it replies, and set the mood it starts from. Use this page when your interface or 3D character reacts to the character's emotional state, or when a scene should put the character in a particular state of mind.
 
-### Enable at connect time
+## Prerequisites
+
+- The Convai Web SDK installed, with a client that connects. See [Web SDK quickstart](quickstart.md).
+
+## Enable emotion detection
+
+Set `enableEmotion` to `true` when you create the client. The option works the same on `new ConvaiClient(...)` from `@convai/web-sdk/core` and `useConvaiClient(...)` from `@convai/web-sdk/react`.
 
 ```ts
-const client = useConvaiClient({
-  apiKey: '...',
-  characterId: '...',
+import { ConvaiClient } from '@convai/web-sdk/core';
+
+const client = new ConvaiClient({
+  apiKey: 'YOUR_API_KEY',
+  characterId: 'YOUR_CHARACTER_ID',
   enableEmotion: true,
 });
 ```
 
-When `enableEmotion` is `true`, the SDK sends `emotion_config` to the server on connect. Without it, no `bot-emotion` frames are sent and `emotionChange` never fires.
+`enableEmotion` defaults to `false`. Only when it is `true` does the SDK send an emotion configuration on connect.
 
-***
+## Receive emotion updates
 
-### Subscribe to `emotionChange`
+Subscribe to `emotionChange`. The payload is `{ emotion: string; scale?: number }`, or `null` when the conversation state is cleared, for example by `resetSession()` or a disconnect.
 
 ```ts
-client.on('emotionChange', (emotion) => {
+const unsubscribe = client.on('emotionChange', (emotion) => {
   if (emotion === null) {
-    // Conversation reset — clear any emotion UI
+    clearEmotionDisplay();
     return;
   }
-  console.log(emotion.emotion); // e.g. "Trust", "Grief", "Joy"
-  console.log(emotion.scale);   // integer intensity: 1 (low) → 3 (high)
+  showEmotion(emotion.emotion, emotion.scale);
 });
+
+// Later, when the view is removed:
+unsubscribe();
 ```
 
-The event fires:
+The latest value is also on `client.state.emotion`, which updates with every `stateChange` event. Each update also adds a `bot-emotion` entry to the chat messages, with content such as `Joy (scale: 2)`; filter that type out if your chat view shows only text.
 
-* After each character turn, with the detected emotion and scale
-* With `null` when the conversation is reset (e.g. `resetSession()`)
-
-***
-
-### React
+In React, `useConvaiClient` re-renders when the state changes, so you can read the value during render:
 
 ```tsx
-import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk';
-import { useEffect, useState } from 'react';
+import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
 
 export default function App() {
   const client = useConvaiClient({
-    apiKey: '...',
-    characterId: '...',
+    apiKey: 'YOUR_API_KEY',
+    characterId: 'YOUR_CHARACTER_ID',
     enableEmotion: true,
   });
 
-  const [emotion, setEmotion] = useState<{ emotion: string; scale?: number } | null>(null);
-
-  useEffect(() => {
-    return client.on('emotionChange', setEmotion);
-  }, [client]);
-
   return (
     <>
-      {emotion && (
-        <div style={{ position: 'fixed', top: 20, right: 20 }}>
-          {emotion.emotion} ({emotion.scale})
-        </div>
-      )}
+      <div className="emotion-badge">{client.state.emotion?.emotion ?? 'No emotion yet'}</div>
       <ConvaiWidget convaiClient={client} />
     </>
   );
 }
 ```
 
-`client.on(...)` returns an unsubscribe function — returning it from `useEffect` cleans up automatically.
+## Choose the detection provider
 
-#### Via `state.emotion`
-
-Emotion is also available synchronously on the reactive state object — no extra subscription needed if you already render from state:
-
-```tsx
-// emotion updates whenever stateChange fires — no useEffect required
-<div>{client.state.emotion?.emotion}</div>
-```
-
-***
-
-### Vanilla JS
+`emotionConfig` selects how Convai detects emotion. It applies only when `enableEmotion` is `true`.
 
 ```ts
-import { ConvaiClient } from '@convai/web-sdk/core';
-import { createConvaiWidget } from '@convai/web-sdk/vanilla';
-
-const client = new ConvaiClient({
-  apiKey: '...',
-  characterId: '...',
-  enableEmotion: true,
-});
-
-const emotionEl = document.querySelector('#emotion');
-
-const unsubEmotion = client.on('emotionChange', (emotion) => {
-  if (emotionEl) {
-    emotionEl.textContent = emotion ? `${emotion.emotion} (${emotion.scale})` : '';
-  }
-});
-
-createConvaiWidget(document.body, { convaiClient: client as any });
-
-// On cleanup
-// unsubEmotion();
-```
-
-***
-
-### Fine-tuning detection
-
-Control how aggressively emotions are detected via `emotionConfig`:
-
-Two providers are supported: `"llm"` uses the language model to infer emotion from the response text; `"nrclex"` uses the NRC Emotion Lexicon, a word-level lexicon lookup that is faster but less context-aware.
-
-```ts
-// LLM provider (default) — no extra options
-useConvaiClient({
-  apiKey: '...',
-  characterId: '...',
+// Language model (the default when emotionConfig is omitted)
+const llmClient = new ConvaiClient({
+  apiKey: 'YOUR_API_KEY',
+  characterId: 'YOUR_CHARACTER_ID',
   enableEmotion: true,
   emotionConfig: { provider: 'llm' },
 });
 
-// NRCLex provider — supports intensity thresholds
-useConvaiClient({
-  apiKey: '...',
-  characterId: '...',
+// Word-level lexicon lookup with intensity thresholds
+const lexiconClient = new ConvaiClient({
+  apiKey: 'YOUR_API_KEY',
+  characterId: 'YOUR_CHARACTER_ID',
   enableEmotion: true,
   emotionConfig: {
     provider: 'nrclex',
-    min_word_threshold: 3,        // skip turns shorter than this
-    low_intensity_threshold: 0.33,  // score below this → scale 1
-    high_intensity_threshold: 0.66, // score above this → scale 3; between → scale 2
+    min_word_threshold: 3,
+    low_intensity_threshold: 0.33,
+    high_intensity_threshold: 0.66,
   },
 });
 ```
 
-#### `"llm"` config
+| Provider | Field | Default sent by the SDK | Description |
+|---|---|---|---|
+| `'llm'` | none | none | Infers emotion from the response context. |
+| `'nrclex'` | `min_word_threshold` | `3` | Minimum word count for detection. |
+| `'nrclex'` | `low_intensity_threshold` | `0.33` | Low intensity threshold, from 0 to 1. |
+| `'nrclex'` | `high_intensity_threshold` | `0.66` | High intensity threshold, from 0 to 1. |
 
-| Field      | Type    | Description                                        |
-| ---------- | ------- | -------------------------------------------------- |
-| `provider` | `"llm"` | Infers emotion from response context using the LLM |
+## Set the character's state of mind
 
-#### `"nrclex"` config
-
-| Field                      | Type       | Default | Description                                          |
-| -------------------------- | ---------- | ------- | ---------------------------------------------------- |
-| `provider`                 | `"nrclex"` | —       | Word-level NRC Emotion Lexicon lookup                |
-| `min_word_threshold`       | `number`   | `3`     | Skip detection on turns shorter than this word count |
-| `low_intensity_threshold`  | `number`   | `0.33`  | Score boundary between scale 1 and scale 2           |
-| `high_intensity_threshold` | `number`   | `0.66`  | Score boundary between scale 2 and scale 3           |
-
-***
-
-### API reference
-
-#### `enableEmotion` (connect option)
-
-| Field           | Type      | Default | Description                                                           |
-| --------------- | --------- | ------- | --------------------------------------------------------------------- |
-| `enableEmotion` | `boolean` | `false` | Enable emotion detection. Must be `true` for `emotionChange` to fire. |
-
-#### `emotionChange` event
+The state of mind is the mood a character carries into its next responses. Set it at connect time with `stateOfMind`, or change it during a session with `updateEmotion`.
 
 ```ts
-client.on('emotionChange', (emotion: { emotion: string; scale?: number } | null) => { ... });
+const client = new ConvaiClient({
+  apiKey: 'YOUR_API_KEY',
+  characterId: 'YOUR_CHARACTER_ID',
+  stateOfMind: 'fear',
+});
+
+// Later, once the character feels safe again:
+client.updateEmotion('trust');
+
+// Clear it:
+client.updateEmotion(null);
 ```
 
-| Field     | Type     | Description                                        |
-| --------- | -------- | -------------------------------------------------- |
-| `emotion` | `string` | Emotion label (e.g. `"Trust"`, `"Grief"`, `"Joy"`) |
-| `scale`   | `number` | Intensity: `1` = low, `2` = medium, `3` = high     |
+- `updateEmotion` is silent. It affects the next response and does not trigger one.
+- The value is trimmed and lowercased. `null`, an empty string, and `'neutral'` all clear the state of mind.
+- The server applies only Plutchik's eight primary emotions: `joy`, `trust`, `fear`, `surprise`, `sadness`, `disgust`, `anger`, `anticipation`. Any other value (`'happy'`, `'calm'`, `'sad'`) is acknowledged with `extras.applied: false` and ignored; the SDK logs a warning.
+- The value is kept for later connections. When called before the session is connected, it is stored and sent on the next `connect()`. A `stateOfMind` passed in the connect configuration takes precedence over the stored value.
+- Convai acknowledges each update with a `serverResponse` event whose `event_type` is `'update-emotion'`.
 
-Fires `null` on conversation reset.
+## Verify emotion updates
 
-#### `state.emotion`
+Connect, send a message that invites an emotional reply, and log `client.state.emotion`.
 
-```ts
-client.state.emotion // { emotion: string; scale?: number } | null
-```
+{% hint style="success" %}
+After the character answers, `emotionChange` fires with an emotion name, and `client.state.emotion` holds the same value.
+{% endhint %}
 
-Same value as the last `emotionChange` payload. Reactive in the React hook via `stateChange`.
+If `emotionChange` never fires, confirm that `enableEmotion` is `true` in the configuration the client connected with.
+
+## Next steps
+
+{% content-ref url="dynamic-context.md" %}
+[Update character context at runtime](dynamic-context.md)
+{% endcontent-ref %}
+
+{% content-ref url="event-reference.md" %}
+[Web SDK event reference](event-reference.md)
+{% endcontent-ref %}
+
+{% content-ref url="vanilla-typescript/best-practices-and-type-definitions.md" %}
+[Configuration and type reference](vanilla-typescript/best-practices-and-type-definitions.md)
+{% endcontent-ref %}

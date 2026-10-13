@@ -1,106 +1,166 @@
 ---
-description: Build your own UI while using Convai’s audio pipelines and message system.
+title: Build a custom UI in React
+description: Replace the prebuilt widget with your own React components for messages and controls while the Convai Web SDK keeps handling audio and state.
+last_reviewed: "1.9.0"
 ---
 
-# Custom UI & Advanced Usage
+Build your own conversation interface in React on top of `useConvaiClient` instead of rendering `ConvaiWidget`. Use this page when the widget's layout does not fit your app. At the end, your components show the conversation, send text, and control the microphone, camera, and screen share.
 
-## Required for Custom UIs: AudioRenderer
+## Prerequisites
 
-If you don’t use the widget, include `AudioRenderer` so bot audio works.
+- A React app with the Convai Web SDK installed. See [Get started with React](README.md).
+- One `useConvaiClient` call for the conversation. Create the client once, near the top of the tree, and pass it down; each call to the hook creates a separate client with its own connection.
 
+## Play the character's audio
+
+Without the widget, nothing plays the character's voice on the default LiveKit transport. Render `AudioRenderer` inside `AudioContext.Provider` with the client's room.
+
+{% code title="src/App.tsx" %}
 ```tsx
-import { useConvaiClient, AudioRenderer, AudioContext } from '@convai/web-sdk';
+import { useConvaiClient, AudioRenderer, AudioContext } from '@convai/web-sdk/react';
+import { Conversation } from './Conversation';
 
-function CustomApp() {
+export default function App() {
   const convaiClient = useConvaiClient({
-    apiKey: 'your-api-key',
-    characterId: 'your-character-id'
+    apiKey: 'YOUR_API_KEY',
+    characterId: 'YOUR_CHARACTER_ID',
   });
 
   return (
     <AudioContext.Provider value={convaiClient.room}>
-      <AudioRenderer />       {/* Required for audio playback */}
-      <YourCustomUI />
+      <AudioRenderer />
+      <Conversation convaiClient={convaiClient} />
     </AudioContext.Provider>
   );
 }
 ```
+{% endcode %}
 
-***
+`AudioRenderer` and `AudioContext` from `@convai/web-sdk/react` are LiveKit's `RoomAudioRenderer` and `RoomContext` under SDK names. `AudioContext` here is not the browser's Web Audio `AudioContext`; import it under another name if the same file also uses Web Audio.
 
-## Custom Message List
+With `transport: "websocket"`, `useConvaiClient` plays the voice through a hidden `<audio>` element, and `AudioRenderer` is not needed.
 
+## Render the messages
+
+`chatMessages` holds every message type the SDK records. For a chat view, keep the user's typed text and transcribed speech and the character's text.
+
+{% code title="src/Conversation.tsx" %}
 ```tsx
-function Messages({ convaiClient }) {
-  return convaiClient.chatMessages.map(msg => (
-    <div key={msg.id} className={msg.type}>
-      {msg.content}
+import { useState } from 'react';
+import type { useConvaiClient } from '@convai/web-sdk/react';
+
+type Client = ReturnType<typeof useConvaiClient>;
+
+const SHOWN = new Set(['user-llm-text', 'user-transcription', 'bot-llm-text', 'bot-output']);
+
+export function Conversation({ convaiClient }: { convaiClient: Client }) {
+  const [text, setText] = useState('');
+  const canSend = convaiClient.state.isConnected && convaiClient.isBotReady;
+
+  const send = () => {
+    if (!text.trim() || !canSend) return;
+    convaiClient.sendUserTextMessage(text);
+    setText('');
+  };
+
+  return (
+    <div>
+      {!convaiClient.state.isConnected && (
+        <button onClick={() => convaiClient.connect()}>Connect</button>
+      )}
+
+      <ul>
+        {convaiClient.chatMessages
+          .filter((m) => SHOWN.has(m.type) && m.content.trim())
+          .map((m) => (
+            <li key={m.id} className={m.type.startsWith('user') ? 'user' : 'character'}>
+              {m.content}
+            </li>
+          ))}
+      </ul>
+
+      <p>{convaiClient.userTranscription}</p>
+
+      <input value={text} onChange={(e) => setText(e.target.value)} disabled={!canSend} />
+      <button onClick={send} disabled={!canSend}>Send</button>
+
+      <Controls convaiClient={convaiClient} />
     </div>
-  ));
+  );
 }
 ```
+{% endcode %}
 
-***
+| Type | Contains |
+|---|---|
+| `user-llm-text` | Text you sent with `sendUserTextMessage`, added locally when you send it. |
+| `user-transcription` | Final transcription of your speech. The live, partial transcription is in `userTranscription`. |
+| `bot-llm-text` | The character's reply, streamed. `isStreaming` is `true` until the reply is complete. |
+| `bot-output` | The character's spoken text, recorded when no `bot-llm-text` message carries the reply. |
 
-## Custom Controls
+The full list of message types is in the [Configuration and type reference](../vanilla-typescript/best-practices-and-type-definitions.md).
 
+## Add media controls
+
+The control objects are not React state, so their fields, such as `audioControls.isAudioMuted`, do not re-render your component when they change. Read the hook's reactive `isAudioMuted`, `isVideoEnabled`, and `isScreenShareActive` instead, and call the control methods to change them.
+
+{% code title="src/Controls.tsx" %}
 ```tsx
-function Controls({ convaiClient }) {
+import type { useConvaiClient } from '@convai/web-sdk/react';
+
+type Client = ReturnType<typeof useConvaiClient>;
+
+export function Controls({ convaiClient }: { convaiClient: Client }) {
   const { audioControls, videoControls, screenShareControls } = convaiClient;
+  const hasVideo = convaiClient.connectionType === 'video';
 
   return (
     <>
-      <button onClick={audioControls.toggleAudio}>
-        {audioControls.isAudioMuted ? 'Unmute' : 'Mute'}
+      <button onClick={() => audioControls.toggleAudio()}>
+        {convaiClient.isAudioMuted ? 'Unmute' : 'Mute'}
       </button>
 
-      <button onClick={videoControls.toggleVideo}>
-        {videoControls.isVideoEnabled ? 'Stop Camera' : 'Start Camera'}
-      </button>
+      {hasVideo && (
+        <button onClick={() => videoControls.toggleVideo()}>
+          {convaiClient.isVideoEnabled ? 'Stop camera' : 'Start camera'}
+        </button>
+      )}
 
-      <button onClick={screenShareControls.toggleScreenShare}>
-        {screenShareControls.isScreenShareActive ? 'Stop Sharing' : 'Share Screen'}
-      </button>
+      {hasVideo && (
+        <button onClick={() => screenShareControls.toggleScreenShare()}>
+          {convaiClient.isScreenShareActive ? 'Stop sharing' : 'Share screen'}
+        </button>
+      )}
     </>
   );
 }
 ```
+{% endcode %}
 
-***
+The control methods return promises and can reject, for example when the browser denies microphone or camera access. Camera and screen share require a connection made with `enableVideo: true`.
 
-### Message Types
+## Verify the custom UI
 
-Common message types in `convaiClient.chatMessages`:
+Select **Connect**, wait for the input to enable, and send a message.
 
-```ts
-type ChatMessageType =
-  | "user"               // User's sent message (raw)
-  | "user-transcription" // Real-time speech-to-text from user
-  | "user-llm-text"      // Final user text processed by LLM
-  | "convai"             // Raw character message
-  | "bot-llm-text"       // Character’s LLM-generated text
-  | "bot-emotion"        // Character’s emotion state
-  | "emotion"            // Generic emotion message
-  | "behavior-tree"      // Behavior tree / decision output
-  | "action"             // Action execution
-  | "interrupt-bot";     // Interrupt message
-```
+{% hint style="success" %}
+Your message appears in the list, the character's reply streams in below it, and you hear the character's voice.
+{% endhint %}
 
-For chat UIs, you usually show only:
+## Next steps
 
-```ts
-const displayMessages = chatMessages.filter(
-  (msg) => msg.type === "user-llm-text" || msg.type === "bot-llm-text"
-);
-```
+{% content-ref url="useconvaiclient-hook.md" %}
+[useConvaiClient hook reference](useconvaiclient-hook.md)
+{% endcontent-ref %}
 
-***
+{% content-ref url="../event-reference.md" %}
+[Web SDK event reference](../event-reference.md)
+{% endcontent-ref %}
 
-## Best Practices
+{% content-ref url="../error-handling.md" %}
+[Handle errors and disconnects](../error-handling.md)
+{% endcontent-ref %}
 
-1. Use a **single** `useConvaiClient()` per application.
-2. Always check `state.isConnected` before sending messages.
-3. Call `resetSession()` when switching scenes or flows.
-4. Use `<AudioRenderer />` for custom UIs.
-5. Provide `endUserId` in production for memory and analytics.
-6. Wrap connect/disconnect in `try/catch`.
+{% content-ref url="audio-visualizer-optional.md" %}
+[Add an audio visualizer in React](audio-visualizer-optional.md)
+{% endcontent-ref %}

@@ -1,105 +1,192 @@
 ---
-description: >-
-  This page shows how to wire up a simple DOM-based chat UI using vanilla
-  TypeScript.
+title: Build a custom UI in TypeScript
+description: Build your own chat interface on the Convai Web SDK in plain TypeScript, with connection status, messages, the character's voice, and media controls.
+last_reviewed: "1.9.0"
 ---
 
-# Building a Custom UI (TypeScript)
+Build a chat interface of your own on top of `ConvaiClient` instead of using the prebuilt widget. Use this page when the widget does not fit your design. At the end, your page connects, shows the conversation, plays the character's voice, and toggles the microphone.
 
-## Example HTML
+## Prerequisites
 
+- `@convai/web-sdk` installed. See [Get started with vanilla TypeScript](README.md).
+- A Convai API key or auth token, and a character ID.
+
+## Add the markup
+
+{% code title="index.html" %}
 ```html
-<div id="status">Disconnected</div>
+<div id="status">disconnected</div>
 <button id="connect">Connect</button>
+<button id="mic" disabled>Unmute</button>
 
 <div id="chat"></div>
 
-<input id="input" type="text" placeholder="Type message..." disabled />
+<input id="input" type="text" placeholder="Type a message" disabled />
 <button id="send" disabled>Send</button>
+
+<script type="module" src="/src/main.ts"></script>
 ```
+{% endcode %}
 
-***
+## Wire the client
 
-## TypeScript Implementation
+The script below connects on click, keeps the controls in step with `stateChange`, renders the conversation from `messagesChange`, and plays the character's voice through `AudioRenderer`.
 
-```ts
+{% code title="src/main.ts" %}
+```typescript
 import {
+  AudioRenderer,
   ConvaiClient,
+  type ChatMessage,
   type ConvaiClientState,
-  type ChatMessage
 } from '@convai/web-sdk/vanilla';
 
-const client = new ConvaiClient();
+const client = new ConvaiClient({
+  apiKey: 'YOUR_API_KEY',
+  characterId: 'YOUR_CHARACTER_ID',
+});
 
 const statusEl = document.getElementById('status') as HTMLDivElement;
 const connectBtn = document.getElementById('connect') as HTMLButtonElement;
+const micBtn = document.getElementById('mic') as HTMLButtonElement;
 const chatEl = document.getElementById('chat') as HTMLDivElement;
 const inputEl = document.getElementById('input') as HTMLInputElement;
 const sendBtn = document.getElementById('send') as HTMLButtonElement;
 
-// State updates
-client.on('stateChange', (state) => {
-  updateStatus(state);
-  updateControls(state);
+let audioRenderer: AudioRenderer | null = null;
+
+client.on('stateChange', (state: ConvaiClientState) => {
+  statusEl.textContent = state.isConnected ? state.agentState : 'disconnected';
+  connectBtn.disabled = state.isConnected || state.isConnecting;
+  micBtn.disabled = !state.isConnected;
 });
 
-// New messages
-client.on('message', (msg) => {
-  if (msg.type === 'user-transcription' || msg.type === 'bot-llm-text') {
-    addMessageToUI(msg);
+client.on('botReady', () => {
+  inputEl.disabled = false;
+  sendBtn.disabled = false;
+});
+
+client.on('messagesChange', (messages: ChatMessage[]) => {
+  const shown = messages.filter(
+    (m) =>
+      (m.type === 'user-llm-text' ||
+        m.type === 'user-transcription' ||
+        m.type === 'bot-llm-text' ||
+        m.type === 'bot-output') &&
+      m.content.trim(),
+  );
+  chatEl.replaceChildren(
+    ...shown.map((m) => {
+      const div = document.createElement('div');
+      div.className = m.type.startsWith('user') ? 'user' : 'bot';
+      div.textContent = m.content;
+      return div;
+    }),
+  );
+  chatEl.scrollTop = chatEl.scrollHeight;
+});
+
+// Play the character's voice on the default WebRTC transport.
+client.on('connect', () => {
+  audioRenderer ??= new AudioRenderer(client.room);
+});
+
+client.on('disconnect', () => {
+  audioRenderer?.destroy();
+  audioRenderer = null;
+  inputEl.disabled = true;
+  sendBtn.disabled = true;
+});
+
+connectBtn.addEventListener('click', async () => {
+  try {
+    await client.connect();
+  } catch (error) {
+    statusEl.textContent = error instanceof Error ? error.message : 'connect failed';
   }
 });
 
-function updateStatus(state: ConvaiClientState) {
-  if (!state.isConnected) return statusEl.textContent = 'Disconnected';
-  statusEl.textContent = state.agentState;
-}
-
-function updateControls(state: ConvaiClientState) {
-  const connected = state.isConnected;
-  connectBtn.disabled = connected;
-  inputEl.disabled = !connected;
-  sendBtn.disabled = !connected;
-}
-
-function addMessageToUI(msg: ChatMessage) {
-  const div = document.createElement('div');
-  div.className = msg.type === 'user-transcription' ? 'user' : 'bot';
-  div.textContent = msg.content;
-  chatEl.appendChild(div);
-  chatEl.scrollTop = chatEl.scrollHeight;
-}
-
-// Connect logic
-connectBtn.addEventListener('click', async () => {
-  await client.connect({
-    apiKey: 'your-api-key',
-    characterId: 'your-character-id',
-    // endUserId: 'user-uuid', // Optional for memory
-  });
-});
-
-// Send message
 function sendMessage() {
   const text = inputEl.value.trim();
-  if (text) {
-    client.sendUserTextMessage(text);
-    inputEl.value = '';
-  }
+  if (!text) return;
+  client.sendUserTextMessage(text);
+  inputEl.value = '';
 }
 
 sendBtn.addEventListener('click', sendMessage);
-inputEl.addEventListener('keypress', (e) => {
+inputEl.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') sendMessage();
+});
+
+micBtn.addEventListener('click', async () => {
+  try {
+    await client.audioControls.toggleAudio();
+    micBtn.textContent = client.audioControls.isAudioMuted ? 'Unmute' : 'Mute';
+  } catch (error) {
+    console.error('Microphone toggle failed:', error);
+  }
+});
+```
+{% endcode %}
+
+On the default WebRTC transport the microphone starts off unless you set `startWithAudioOn: true`, so the first click asks the browser for microphone permission. Media control methods are async and reject when the browser denies the device, so keep them inside `try`.
+
+{% hint style="warning" %}
+Without an `AudioRenderer`, a custom UI on the WebRTC transport connects and receives text, but the character's voice never plays. The chat widget creates one for you; a custom UI must create its own.
+{% endhint %}
+
+## Play audio on the WebSocket transport
+
+With `transport: 'websocket'`, the character's voice does not arrive through the room. The client emits it as a `MediaStreamTrack` on the `botAudioTrack` event instead. Attach that track with the same `AudioRenderer`:
+
+```typescript
+import '@convai/web-sdk/vanilla/websocket';
+import { AudioRenderer, ConvaiClient } from '@convai/web-sdk/vanilla';
+
+const client = new ConvaiClient({
+  apiKey: 'YOUR_API_KEY',
+  characterId: 'YOUR_CHARACTER_ID',
+  transport: 'websocket',
+});
+
+const audioRenderer = new AudioRenderer(client.room);
+
+client.on('botAudioTrack', (track: MediaStreamTrack) => {
+  audioRenderer.attachWebSocketTrack(track);
+});
+
+client.on('disconnect', () => {
+  audioRenderer.detachWebSocketTrack();
 });
 ```
 
-***
+See [Use the WebSocket transport](../websocket-transport-layer.md) for the rest of the setup.
 
-## Adding Audio/Video Controls
+## Add camera and screen share controls
 
-```ts
-await client.audioControls.toggleAudio();
+Camera and screen share need a video connection. Set `enableVideo: true` in the client configuration, then call the controls:
+
+```typescript
 await client.videoControls.toggleVideo();
 await client.screenShareControls.toggleScreenShare();
 ```
+
+Read `client.videoControls.isVideoEnabled` and `client.screenShareControls.isScreenShareActive` to label the buttons, or subscribe to `videoStateChange` and `screenShareStateChange` on the same control objects.
+
+## Verify the UI
+
+Click **Connect**. The status shows `connected`, the input enables once the character is ready, and a typed message is answered both in the chat and aloud. Click the microphone button and speak: your words appear as a transcription and the character replies.
+
+## Next steps
+
+{% content-ref url="events-and-message-handling.md" %}
+[Handle events and messages in TypeScript](events-and-message-handling.md)
+{% endcontent-ref %}
+
+{% content-ref url="convaiclient-core-api.md" %}
+[ConvaiClient reference](convaiclient-core-api.md)
+{% endcontent-ref %}
+
+{% content-ref url="real-time-lipsync.md" %}
+[Add lip sync in vanilla TypeScript](real-time-lipsync.md)
+{% endcontent-ref %}

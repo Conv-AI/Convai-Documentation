@@ -1,307 +1,202 @@
 ---
-description: >-
-  Drive real-time facial animation on 3D characters using blendshape data
-  streamed alongside the bot's audio.
-icon: head-side-speak
+title: Drive facial animation with blendshapes
+description: Stream blendshape frames alongside a character's voice and apply them to the morph targets of a 3D face so its mouth moves in time with speech.
+last_reviewed: "1.9.0"
 ---
 
-# Lipsync & Blendshape
+Turn on lip sync so Convai streams facial blendshape frames with the character's audio, then play those frames onto the morph targets of a 3D model. Use this page when you render your own character with three.js or another WebGL engine. At the end, the character's mouth moves in time with its voice and settles back to neutral when it stops talking.
 
-### How it works
+## Prerequisites
 
-1. Enable lipsync in config — the server starts generating blendshape frames alongside TTS audio.
-2. Frames arrive in chunks of 10 and are buffered in `client.blendshapeQueue`.
-3. Your render loop reads frames from the queue at 60 fps, synchronized to when the bot is speaking.
-4. When the bot stops speaking, the queue drains and signals conversation end.
+- The Convai Web SDK installed, with a client that connects. See [Web SDK quickstart](../quickstart.md).
+- A 3D model whose face is driven by morph targets, loaded in your renderer.
+- The model's morph target names, so you can match them to a stream format.
 
-***
+## Enable lip sync
 
-### Enable lipsync
+Set `enableLipsync` and choose the stream format in `blendshapeConfig`. The same options apply to `new ConvaiClient(...)` from `@convai/web-sdk/core` and to `useConvaiClient(...)` from `@convai/web-sdk/react`.
 
 ```ts
-const client = useConvaiClient({
-  apiKey: '...',
-  characterId: '...',
+import { ConvaiClient } from '@convai/web-sdk/core';
+
+const client = new ConvaiClient({
+  apiKey: 'YOUR_API_KEY',
+  characterId: 'YOUR_CHARACTER_ID',
   enableLipsync: true,
   blendshapeConfig: {
-    format: 'arkit', // or 'mha' (MetaHuman 251, default)
+    format: 'mha', // or 'arkit'
   },
 });
 ```
 
-Formats (server-verified — an unknown string rejects the connect with the valid list):
+When `enableLipsync` is `true`, the SDK asks Convai for blendshapes in chunks of 10 frames and buffers them in `client.blendshapeQueue`. When it is `false` or omitted, no blendshape frames are sent.
 
-| `format`          | Frame dim | Channel naming             | Notes                                                                                                            |
-| ----------------- | --------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `"mha"` (default) | 251       | `CTRL_expressions_*`       | Unreal MetaHuman Animation; MetaHuman-Lite characters (103 morphs) consume their named subset of the same stream |
-| `"arkit"`         | 61        | ARKit names (`JawOpen`, …) | Apple ARKit standard                                                                                             |
-| `"cc4_extended"`  | 170       | CC4 ExpressionPlus         | Reallusion Character Creator 4                                                                                   |
-| `"cc5_hd"`        | —         | —                          | Accepted by the server but currently delivers **no frames**                                                      |
-| `"visemes"`       | 15        | OVR viseme set             | `sil, PP, FF, TH, DD, kk, CH, SS, nn, RR, aa, E, ih, oh, ou`                                                     |
+The `format` decides the length and order of every frame:
 
-***
+| `format` | Frame length | Channel names |
+|---|---|---|
+| `"mha"` (default) | 251 | MetaHuman controls, for example `CTRL_expressions_jawOpen` |
+| `"arkit"` | 61 | 52 ARKit blendshapes, for example `JawOpen`, then three head and six eye rotation values |
 
-### Reading frames in the render loop
+The full channel order for both formats is in [Blendshape channel order reference](../vanilla-typescript/mappings-reference.md).
 
-Access `client.blendshapeQueue` from your animation loop. The queue is time-indexed at 60 fps.
+## Tune delivery
+
+`blendshapeConfig` takes three delivery options. Leave them at their defaults unless you have a measured reason to change them.
+
+| Option | Default | Effect |
+|---|---|---|
+| `deliver_chunks_ahead` | `true` when `enableLipsync` is on | Convai sends indexed chunks ahead of the audio, so the queue holds a buffer before playback starts. Set `false` to fall back to the legacy paced delivery path. |
+| `output_fps` | `60` | Frame rate of ahead-delivered chunks. Ignored when `deliver_chunks_ahead` is `false`. |
+| `frames_buffer_duration` | `0.1` | Seconds of blendshapes Convai accumulates before releasing them with the audio. |
+
+The queue plays frames at the frame rate carried in the chunk metadata, or 60 frames per second when a chunk carries none. Read it with `client.blendshapeQueue.getPlaybackFps()`.
+
+## Play frames from the queue
+
+Run one loop on `requestAnimationFrame`. Each tick, advance a time accumulator, take the frames that are due, write the newest one to the face, and remove them from the queue.
 
 ```ts
-// Three.js / requestAnimationFrame example
-let lipsyncStartTime: number | null = null;
+let lastTime = 0;
+let carryMs = 0;
 
-function animate() {
-  requestAnimationFrame(animate);
-
+function tick(now: number) {
   const queue = client.blendshapeQueue;
 
-  if (queue.isBotSpeaking()) {
-    // Start clock when bot begins speaking
-    if (lipsyncStartTime === null) {
-      lipsyncStartTime = performance.now();
-    }
-
-    const elapsed = (performance.now() - lipsyncStartTime) / 1000;
-    const result = queue.getFrameAtTime(elapsed);
-
-    if (result) {
-      applyBlendshapes(morphTargets, result.frame);
-      queue.consumeFrames(result.frameIndex + 1);
-    }
-  } else {
-    lipsyncStartTime = null;
+  // An interruption stops the audio: return the face to neutral at once.
+  if (queue.consumeNormalizationSignal()) {
+    applyFrame(new Float32Array(frameLength));
+    carryMs = 0;
   }
 
-  renderer.render(scene, camera);
-}
-```
+  const playing =
+    queue.isBotSpeaking() || (queue.hasReceivedEndSignal() && queue.hasFrames());
 
-#### `getFrameAtTime(elapsedSeconds)`
-
-Returns the frame closest to the given elapsed time (assuming 60 fps), or `null` if the queue is empty.
-
-```ts
-const result = queue.getFrameAtTime(elapsed);
-// result.frame: Float32Array of blendshape values
-// result.frameIndex: index in the queue
-```
-
-#### `getFrameWithAlpha(index)`
-
-Same as `getFrame` but applies fade-in (first 10 frames) and fade-out (last 10 frames or on interrupt) automatically:
-
-```ts
-const frame = queue.getFrameWithAlpha(index);
-// Smoothly fades in at start and out at end
-```
-
-***
-
-### Applying blendshapes to a Three.js mesh
-
-```ts
-import { ARKIT_ORDER_61 } from '@convai/web-sdk/lipsync-helpers';
-
-function applyBlendshapes(mesh: THREE.SkinnedMesh, frame: Float32Array) {
-  const morphInfluences = mesh.morphTargetInfluences;
-  if (!morphInfluences) return;
-
-  ARKIT_ORDER_61.forEach((name, i) => {
-    const morphIndex = mesh.morphTargetDictionary?.[name];
-    if (morphIndex !== undefined) {
-      morphInfluences[morphIndex] = frame[i];
+  if (playing && queue.hasFrames()) {
+    carryMs += lastTime ? now - lastTime : 0;
+    const frameMs = 1000 / queue.getPlaybackFps();
+    const due = Math.floor(carryMs / frameMs);
+    if (due > 0) {
+      const count = Math.min(due, queue.length);
+      // Read before consuming: the fade depends on how many frames were played.
+      const frame = queue.getFrameWithAlpha(count - 1);
+      if (frame) applyFrame(frame);
+      queue.consumeFrames(count);
+      carryMs -= due * frameMs;
     }
-  });
+  } else {
+    carryMs = 0;
+  }
+
+  // The turn is over and every expected frame has played.
+  if (queue.isConversationEnded()) {
+    queue.reset();
+  }
+
+  lastTime = now;
+  requestAnimationFrame(tick);
 }
+
+requestAnimationFrame(tick);
 ```
 
-`ARKIT_ORDER_61` is an ordered array of the 61 ARKit blendshape names matching the frame indices.
+`frameLength` is 251 for `mha` and 61 for `arkit`. `getFrameWithAlpha` fades the first 10 frames of a turn in and the last 10 frames out, so the mouth neither pops open nor freezes mid-shape. `getFrame` returns the same frame without the fade.
 
-For MetaHuman (`"mha"` format), import `METAHUMAN_ORDER_251` instead.
+{% hint style="warning" %}
+Do not combine `getFrameAtTime` with `consumeFrames`. `getFrameAtTime` indexes from the front of the queue by elapsed time, and `consumeFrames` moves the front forward, so using both advances playback twice and the mouth runs ahead of the voice.
+{% endhint %}
 
-***
+Every `BlendshapeQueue` method is listed in [ConvaiClient reference](../vanilla-typescript/convaiclient-core-api.md).
 
-### Custom mappers
+## Apply frames to morph targets
 
-Use a custom mapper to transform incoming blendshapes to match your character's morph target names.
+When the model's morph targets use the stream's channel names, build a slot table once after the model loads, then write each frame through it. This needs no mapper.
 
-#### ARKit name mapper
+```ts
+import { METAHUMAN_ORDER_251 } from '@convai/web-sdk/lipsync-helpers';
+import type { Mesh } from 'three';
+
+function bindFace(mesh: Mesh) {
+  const slots = new Int32Array(METAHUMAN_ORDER_251.length).fill(-1);
+  METAHUMAN_ORDER_251.forEach((name, i) => {
+    const slot = mesh.morphTargetDictionary?.[name];
+    if (slot !== undefined) slots[i] = slot;
+  });
+
+  return (frame: Float32Array) => {
+    const influences = mesh.morphTargetInfluences;
+    if (!influences) return;
+    for (let i = 0; i < slots.length; i++) {
+      if (slots[i] >= 0) influences[slots[i]] = frame[i] ?? 0;
+    }
+  };
+}
+
+const applyFrame = bindFace(faceMesh);
+```
+
+For `arkit`, use `ARKIT_ORDER_61` in place of `METAHUMAN_ORDER_251`. Both are exported from `@convai/web-sdk/lipsync-helpers`.
+
+For an `mha` character, also apply the MetaHuman rig couplings, or the lips part every time the jaw opens. `createLipsyncProcessor('mha')` binds the meshes, repairs known name mangling, and applies the couplings, gains, and a fade envelope in one call. See [Apply MetaHuman limit drivers](metahuman-limit-drivers-required-for-mha.md).
+
+## Remap channels with a custom mapper
+
+When the morph targets use different names, pass a mapper. The SDK runs it on every frame as the frame enters the queue.
 
 ```ts
 import { createARKitNameMapper } from '@convai/web-sdk/lipsync-helpers';
 
 const mapper = createARKitNameMapper({
-  // SDK name → your character's morph target name(s)
-  'jawOpen': ['Jaw_Open', 'Mouth_Open'],
-  'eyeBlinkLeft': ['Eye_Blink_L'],
-  'eyeBlinkRight': ['Eye_Blink_R'],
-  'mouthSmileLeft': ['Smile_L'],
-  'mouthSmileRight': ['Smile_R'],
-}, 'optimized'); // 'optimized' extracts only mapped targets; omit for all 61
+  jawOpen: ['Jaw_Open'],
+  eyeBlinkLeft: ['Eye_Blink_L'],
+  eyeBlinkRight: ['Eye_Blink_R'],
+  mouthSmileLeft: ['Mouth_Smile'],
+  mouthSmileRight: ['Mouth_Smile'], // averaged with mouthSmileLeft
+});
 
-const client = useConvaiClient({
-  apiKey: '...',
-  characterId: '...',
+const client = new ConvaiClient({
+  apiKey: 'YOUR_API_KEY',
+  characterId: 'YOUR_CHARACTER_ID',
   enableLipsync: true,
-  blendshapeConfig: {
-    format: 'arkit',
-    customMapper: mapper,
-  },
+  blendshapeConfig: { format: 'arkit', customMapper: mapper },
 });
 ```
 
-The mapper is applied to every frame as it enters the queue.
+`createMetaHumanNameMapper` does the same for `mha`, keyed by the full `CTRL_expressions_*` names or the short form (`jawOpen`). Source names that do not exist in the format are skipped with a console warning. When several sources map to one target, their values are averaged. Only the targets you map are output.
 
-#### Direct name-mapped characters (no mapper needed)
+The second argument selects the output shape. Both give every frame its own values, and both survive the fade in `getFrameWithAlpha`:
 
-If your character's morph targets are named **exactly** like the stream's channels, skip mappers entirely and write frames by name:
+| Output | Each queued frame | How to read it |
+|---|---|---|
+| `'object'` (default) | A `Float32Array` of the target values, in target order, with the names attached | `getBlendshapeObject(frame)` for a name-to-value object |
+| `'optimized'` | `{ names, values, nameToIndex, length }` | `frame.values[frame.nameToIndex.get('Jaw_Open')]`, or `getBlendshapeObject(frame)` |
 
-* `format: 'mha'` channels are named `CTRL_expressions_jawOpen`, `CTRL_expressions_eyeBlinkL`, … — matching MetaHuman-style exports.
-* `format: 'arkit'` channels use ARKit names (`JawOpen`, `EyeBlinkLeft`, …).
+To change the mapper after connecting, call `client.blendshapeQueue.setMapper(fn)`. `clearMapper()` returns to raw frames, and `hasMapper()` reports whether one is set.
 
-Build an index table once per mesh, then apply frames with zero per-frame lookups:
+## Verify lip sync
 
-```ts
-import { METAHUMAN_ORDER_251 } from '@convai/web-sdk/lipsync-helpers';
+Connect, send a message, and watch the face while the character answers.
 
-// Once, after the model loads:
-const slots = new Int32Array(METAHUMAN_ORDER_251.length).fill(-1);
-METAHUMAN_ORDER_251.forEach((name, i) => {
-  const slot = mesh.morphTargetDictionary?.[name];
-  if (slot !== undefined) slots[i] = slot;
-});
+{% hint style="success" %}
+The mouth starts moving when the character's voice starts, follows its syllables, and returns to neutral within a fraction of a second after the voice stops.
+{% endhint %}
 
-// Per frame:
-function applyFrame(frame: Float32Array) {
-  const infl = mesh.morphTargetInfluences!;
-  for (let i = 0; i < slots.length; i++) {
-    if (slots[i] >= 0) infl[slots[i]] = frame[i];
-  }
-}
-```
+If the face never moves, confirm that `enableLipsync` is `true` and that `client.blendshapeQueue.length` rises while the character speaks. If frames arrive but the face stays still, the morph target names do not match the format: log `mesh.morphTargetDictionary` and compare it with the channel order reference.
 
-> Exports sometimes mangle names (e.g. a missing separator: `CTRL_expressionsjawOpen`). Normalize `morphTargetDictionary` keys at load rather than adjusting every consumer.
+## Next steps
 
-#### Set mapper after connect
+{% content-ref url="metahuman-limit-drivers-required-for-mha.md" %}
+[Apply MetaHuman limit drivers](metahuman-limit-drivers-required-for-mha.md)
+{% endcontent-ref %}
 
-```ts
-client.blendshapeQueue.setMapper((frame) => {
-  // frame: Float32Array of raw blendshape values
-  const output = new Float32Array(52); // your character's morph count
-  // ... remap indices ...
-  return output;
-});
+{% content-ref url="../react/real-time-lipsync.md" %}
+[Add lip sync in React](../react/real-time-lipsync.md)
+{% endcontent-ref %}
 
-// Remove mapper (passthrough)
-client.blendshapeQueue.clearMapper();
-```
+{% content-ref url="../vanilla-typescript/real-time-lipsync.md" %}
+[Add lip sync in vanilla TypeScript](../vanilla-typescript/real-time-lipsync.md)
+{% endcontent-ref %}
 
-***
-
-### BlendshapeQueue API
-
-`client.blendshapeQueue` is the live queue instance.
-
-#### State checks
-
-```ts
-queue.isBotSpeaking()         // true while bot audio is playing
-queue.isConversationActive()  // true from user message until turn-stats arrive
-queue.isConversationEnded()   // true after turn ends and all frames consumed
-queue.hasFrames()             // true when frames are waiting
-queue.length                  // number of frames in queue
-```
-
-#### Frame access
-
-```ts
-queue.getFrameAtTime(elapsed) // { frame, frameIndex } | null — time-based lookup
-queue.getFrame(index)         // Float32Array | null — direct index access
-queue.getFrameWithAlpha(index) // Float32Array | null — with fade in/out applied
-queue.getFrames()             // Float32Array[] — all frames
-```
-
-#### Consumption
-
-```ts
-queue.consumeFrames(count)    // remove N frames from the front
-queue.getFramesConsumed()     // total frames consumed this turn
-```
-
-#### Turn stats
-
-```ts
-queue.getTurnStats()
-// { fps, total_audio_bytes, total_audio_duration_ms, total_blendshapes, total_turn_duration_ms }
-
-queue.getTimeLeftMs()         // estimated ms until queue is empty
-queue.isAllFramesConsumed()   // true when framesConsumed >= total_blendshapes
-```
-
-#### Interruption
-
-```ts
-queue.consumeNormalizationSignal()
-// Returns true (once) when the bot was interrupted — use to lerp morphs back to 0
-```
-
-#### Debug
-
-```ts
-console.log(queue.getDebugInfo());
-// { frameCount, conversationActive, botSpeaking, conversationEnded,
-//   interrupted, framesConsumed, turnStats, timeLeftMs }
-```
-
-***
-
-### Making lipsync feel natural
-
-Patterns proven on production characters — each one addresses a specific artifact you will otherwise see:
-
-#### Fade the stream in and out
-
-Raw frames hit the face at full strength on the first frame and freeze the last viseme when frames stop. Scale every stream-driven value by an eased envelope: bloom in over \~0.25 s at speech start, settle out over \~0.5 s after the last frame (keep the final frame and fade it to zero — don't drop it mid-shape).
-
-```ts
-// Per render frame:
-const target = isSpeaking ? 1 : 0;
-const tau = target > env ? 0.09 : 0.18; // fast attack, gentler release
-env += (target - env) * (1 - Math.exp(-delta / tau));
-// ...then apply: infl[slot] = frame[i] * env;
-```
-
-(`getFrameWithAlpha` does this automatically if you consume the queue directly; apply your own envelope when you buffer/apply frames yourself.)
-
-#### Let procedural systems own their channels
-
-If you run procedural blinking or camera-following gaze, the stream must **never write the eye channels** — two writers on different timers race each other into flicker (blinks never visibly close). Keep a skip mask of channel indices the stream leaves untouched, and let your blink/gaze code own them outright.
-
-#### End-of-speech detection
-
-Frames can stop arriving before any explicit end event. Treat \~300 ms without a new frame as end-of-speech and start your fade-out — the official end signal can then arrive late without a visible freeze.
-
-#### Per-channel gains
-
-Streams are tuned for a reference face; your character's shapes may read too strong. A per-channel gain table fixes this surgically — e.g. on one MetaHuman-style rig we ship `jawOpen × 0.7` and lateral jaw/mouth shifts × 0 (they read as lopsidedness), leaving everything else at 1.
-
-#### Mouth symmetry
-
-If the stream drives L/R mouth pairs unevenly (we've measured up to 1.5× side-to-side), average each sided pair (`…L`/`…R`) before applying — an open mouth reads far better symmetric.
-
-#### Apply after your animation mixer
-
-If body animation clips also touch the head, re-apply the current lipsync frame **after** the mixer updates each render frame so speech always wins on the face.
-
-***
-
-### Buffer tuning
-
-The `frames_buffer_duration` option controls how many seconds of blendshapes the server accumulates before releasing them with the audio. Higher values increase lipsync accuracy at the cost of latency.
-
-```ts
-blendshapeConfig: {
-  format: 'arkit',
-  frames_buffer_duration: 0.2, // 200ms buffer (default: 0.1)
-}
-```
-
+{% content-ref url="../vanilla-typescript/mappings-reference.md" %}
+[Blendshape channel order reference](../vanilla-typescript/mappings-reference.md)
+{% endcontent-ref %}

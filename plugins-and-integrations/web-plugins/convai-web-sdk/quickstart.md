@@ -1,35 +1,41 @@
 ---
-description: Get a Convai character speaking in your app in under five minutes.
-icon: forward-fast
+title: Web SDK quickstart
+description: Build a React page that connects to a Convai character, sends it a text message, and shows the reply, using the Convai Web SDK from npm.
+last_reviewed: "1.9.0"
 ---
 
-# Quickstart
+In this quickstart we will connect a React page to a Convai character with the Convai Web SDK, send the character a message, and show its reply. By the end, you will have a page with a **Connect** button and a running conversation.
 
-### Prerequisites
+## What we will build
 
-* A Convai account with an API key — get one at [convai.com](https://convai.com)
-* A Character ID from your Convai dashboard
-* Node.js 18+ and a React project (Vite, Next.js, or CRA)
+We will build one React component that creates a client with `useConvaiClient`, connects when you select **Connect**, sends a greeting, and lists the messages from both sides. The character answers in text and, by default, in speech.
 
-### Install
+## Prerequisites
+
+- A React 18 or 19 project with a bundler.
+- A Convai account and an API key from <code class="expression">space.vars.dashboard_url</code>.
+- The ID of a character you created in Convai.
+
+## Install the SDK
+
+Install `@convai/web-sdk`, release <code class="expression">space.vars.web_sdk_version</code> or later:
 
 ```bash
 npm install @convai/web-sdk
 ```
 
-### Your first conversation (React)
+## Create the client
 
-This is the minimum code to connect to a character and exchange text messages.
+We create the client once per component with `useConvaiClient`. The config is stored and used when we call `connect()`. `endUserId` is a stable ID for the person using the page; Convai uses it for long-term memory and analytics. `AudioRenderer`, inside an `AudioContext` provider that receives `client.room`, plays the character's voice.
 
+{% code title="src/App.tsx" %}
 ```tsx
-import { useConvaiClient } from '@convai/web-sdk';
+import { useConvaiClient, AudioRenderer, AudioContext } from '@convai/web-sdk/react';
 
 export default function App() {
   const client = useConvaiClient({
     apiKey: 'YOUR_API_KEY',
     characterId: 'YOUR_CHARACTER_ID',
-    // Recommended: a stable id per end user. It keys the character's
-    // long-term memory for that person across sessions.
     endUserId: 'user-123',
   });
 
@@ -37,131 +43,80 @@ export default function App() {
     try {
       await client.connect();
     } catch (err) {
-      // connect() rejects with a server reason — surface it, don't swallow it.
-      // e.g. "LTM speaker limit reached" means this API key hit its
-      // long-term-memory speaker cap for new endUserIds.
+      // connect() rejects with the reason Convai returned.
       console.error('Connect failed:', err);
     }
   };
 
   const handleSend = () => {
-    client.sendUserTextMessage('Hello! Who are you?');
+    client.sendUserTextMessage('Hello. Who are you?');
   };
 
   return (
-    <div>
+    <AudioContext.Provider value={client.room}>
+      {/* Plays the character's voice */}
+      <AudioRenderer />
       <p>Status: {client.activity}</p>
 
       {!client.state.isConnected ? (
         <button onClick={handleConnect}>Connect</button>
       ) : (
-        <button onClick={handleSend}>Say hello</button>
+        <button onClick={handleSend} disabled={!client.isBotReady}>
+          Say hello
+        </button>
       )}
 
       <ul>
         {client.chatMessages
-          .filter(m => m.type === 'bot-output' || m.type === 'user-llm-text')
-          .map(m => (
+          .filter(
+            (m) =>
+              m.type === 'user-llm-text' ||
+              m.type === 'user-transcription' ||
+              m.type === 'bot-llm-text' ||
+              m.type === 'bot-output',
+          )
+          .map((m) => (
             <li key={m.id}>
-              <strong>{m.type.startsWith('user') ? 'You' : 'Bot'}:</strong> {m.content}
+              <strong>{m.type.startsWith('user') ? 'You' : 'Character'}:</strong> {m.content}
             </li>
           ))}
       </ul>
-    </div>
+    </AudioContext.Provider>
   );
 }
 ```
+{% endcode %}
 
-#### What this does
+The status line shows `client.activity`, a string the hook keeps up to date: `"Idle"` before the first connection, then `"Connecting..."`, `"Connected"`, `"Listening"`, `"Thinking"`, `"Speaking"`, or `"Disconnected"`.
 
-1. `useConvaiClient` creates a persistent client instance and wires up React state.
-2. `client.connect()` opens a WebRTC session. The character is ready once `client.isBotReady` is `true`.
-3. `client.sendUserTextMessage` sends text to the character; responses arrive as `chatMessages`.
-4. `client.activity` is a string showing the current state: `"Idle"`, `"Connecting..."`, `"Connected"`, `"Listening"`, `"Thinking"`, or `"Speaking"`.
+## Run the conversation
 
-### Drop-in widget
+Start your dev server and open the page. Select **Connect** and wait until the **Say hello** button is enabled. The button stays disabled until `client.isBotReady` is `true`, the same check `ConvaiWidget` applies before it sends text.
 
-If you want a fully built chat UI (voice + text), use `ConvaiWidget`:
+Select **Say hello**. Your message appears in the list straight away as a `user-llm-text` message, and the character's reply streams in as a `bot-llm-text` message.
 
-```tsx
-import { useConvaiClient } from '@convai/web-sdk';
-import { ConvaiWidget } from '@convai/web-sdk/react';
+{% hint style="success" %}
+The status changes to `Thinking` and then `Speaking`, the reply text appears under your message, and you hear the character's voice.
+{% endhint %}
 
-export default function App() {
-  const client = useConvaiClient({
-    apiKey: 'YOUR_API_KEY',
-    characterId: 'YOUR_CHARACTER_ID',
-    startWithAudioOn: false, // ask for mic permission only when user enters voice mode
-  });
+{% hint style="danger" %}
+This page ships your API key to the browser. Use it for local development only. For a page other people can open, create a short-lived auth token on your server and pass `authToken` instead. See [Connect with an auth token](auth-tokens.md).
+{% endhint %}
 
-  return <ConvaiWidget convaiClient={client} />;
-}
-```
+## Next steps
 
-The widget handles connection, microphone, voice mode, and message display out of the box.
+{% content-ref url="react/README.md" %}
+[Get started with React](react/README.md)
+{% endcontent-ref %}
 
-### Add a talking 3D character
+{% content-ref url="vanilla-typescript/README.md" %}
+[Get started with vanilla TypeScript](vanilla-typescript/README.md)
+{% endcontent-ref %}
 
-Two config lines turn on the facial-animation stream for a 3D avatar:
+{% content-ref url="lipsync-and-blendshape/README.md" %}
+[Drive facial animation with blendshapes](lipsync-and-blendshape/README.md)
+{% endcontent-ref %}
 
-```tsx
-const client = useConvaiClient({
-  apiKey: 'YOUR_API_KEY',
-  characterId: 'YOUR_CHARACTER_ID',
-  enableLipsync: true,
-  blendshapeConfig: { format: 'mha' }, // 'mha' (MetaHuman 251) or 'arkit' (61)
-});
-
-// client.blendshapeQueue now buffers per-frame blendshape values,
-// synchronized with the bot's speech — feed them to your renderer.
-```
-
-See Lipsync & Blendshapes for the render-loop integration, character mapping, and the patterns that make it feel natural (fades, blink ownership, per-channel gains). The `examples/react-three-fiber` demo is a complete, production-style reference: a MetaHuman-style character in a lit room with lipsync, procedural blink/gaze/head tracking, body animation, SDK-driven actions, and a scripted intro scene.
-
-### Troubleshooting first connects
-
-| Symptom                                              | Cause / fix                                                                                                                                                          |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `connect()` rejects with `LTM speaker limit reached` | The API key hit its long-term-memory speaker cap; reuse an existing `endUserId` or raise the limit in the dashboard.                                                 |
-| Character connects but stays silent on triggers      | `sendTriggerMessage` resolves triggers by their **dashboard name** (e.g. `'Welcome'`), not the trigger's UUID — an unknown name is silently ignored.                 |
-| No blendshape frames                                 | `enableLipsync: true` missing, or the widget/session was started before the config change — reload after config edits.                                               |
-| Duplicate/garbled bot text in a custom chat UI       | Render `bot-llm-text` messages; `bot-output` events are TTS progress ticks (same `segment_id` re-sent per tick) — the SDK dedupes them in `chatMessages` since v1.5. |
-
-### Vanilla JavaScript
-
-No React? Use `ConvaiClient` directly:
-
-```ts
-import { ConvaiClient } from '@convai/web-sdk/core';
-import { AudioRenderer } from '@convai/web-sdk/vanilla';
-
-const client = new ConvaiClient({
-  apiKey: 'YOUR_API_KEY',
-  characterId: 'YOUR_CHARACTER_ID',
-});
-
-// Play bot audio through speakers
-const audio = new AudioRenderer(client.room);
-
-client.on('botReady', () => {
-  console.log('Character is ready');
-  client.sendUserTextMessage('Hello!');
-});
-
-client.on('message', (msg) => {
-  if (msg.type === 'bot-output') {
-    console.log('Bot:', msg.content);
-  }
-});
-
-await client.connect();
-```
-
-### Next steps
-
-* Configuration reference — all `ConvaiConfig` options
-* React integration — hooks, widget, custom UI
-* Lipsync & blendshapes — drive a 3D character's face
-* Actions & triggers — let the character act, and script beats with `sendTriggerMessage`
-* Events reference — every event the client emits
-* Voice & audio controls — mic, camera, screen share
+{% content-ref url="error-handling.md" %}
+[Handle errors and disconnects](error-handling.md)
+{% endcontent-ref %}
