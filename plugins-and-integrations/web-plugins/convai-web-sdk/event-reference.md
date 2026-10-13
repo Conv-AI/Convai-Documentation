@@ -1,7 +1,7 @@
 ---
 title: Web SDK event reference
 description: Reference for every event the Convai Web SDK client and its media controls emit, with the payload each one carries and when it fires.
-last_reviewed: "1.9.1"
+last_reviewed: "1.9.2"
 icon: arrow-up-small-big
 ---
 
@@ -25,7 +25,7 @@ unsubscribe();
 | `error` | `unknown` | `connect()` or `connectWithPublicationGrant()` fails (the same error is rethrown), or, on the LiveKit transport, no ready signal arrives within 45 seconds (`bot-ready not received within 45000ms`). |
 | `stateChange` | `ConvaiClientState` | Any field of `client.state` changes value. |
 | `interactionCreated` | `InteractionCreated`: `{ interactionId: string; characterSessionId: string }` | Convai assigns an interaction ID to the session. |
-| `botAudioTrack` | `MediaStreamTrack` | The character's audio track becomes available. WebSocket transport only. See [Use the WebSocket transport](websocket-transport-layer.md). |
+| `botAudioTrack` | `MediaStreamTrack` | A WebSocket session exposes a character audio track. It does not fire with the current Pipecat WebSocket transport, which plays the voice itself and exposes no character track. See [Use the WebSocket transport](websocket-transport-layer.md). |
 
 ## Conversation events
 

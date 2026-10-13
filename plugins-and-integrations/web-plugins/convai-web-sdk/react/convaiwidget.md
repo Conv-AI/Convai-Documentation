@@ -1,7 +1,7 @@
 ---
 title: ConvaiWidget component reference
 description: Reference for the prebuilt React chat and voice widget, including every prop, its default, and what the widget handles for you during a session.
-last_reviewed: "1.9.1"
+last_reviewed: "1.9.2"
 ---
 
 `ConvaiWidget` is the prebuilt React component exported from `@convai/web-sdk/react`. It renders a collapsible conversation panel for text, voice, camera, and screen share, driven by a client from `useConvaiClient`.
@@ -30,7 +30,7 @@ The props type is not exported from the package. Pass the props inline as JSX at
 
 ## Conversation behavior
 
-- The widget plays the character's voice. With the LiveKit transport it creates its own `AudioRenderer`; with the WebSocket transport the voice is played by `useConvaiClient`.
+- The widget plays the character's voice. With the LiveKit transport it creates its own `AudioRenderer`; with the WebSocket transport the Pipecat transport plays the voice itself.
 - The message list shows `ChatMessage` entries whose type is `user-transcription`, `user-llm-text`, `bot-llm-text`, `bot-output`, or `bot-emotion`, and whose content is not empty.
 - Text can be sent only while `state.isConnected` and `isBotReady` are both `true`.
 - In text mode the widget mutes the microphone with `audioControls.muteAudio()`.

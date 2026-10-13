@@ -1,7 +1,7 @@
 ---
 title: Blendshape channel order reference
 description: Reference for the channel order of the ARKit and MetaHuman blendshape frames that the Convai Web SDK streams for lip sync and facial animation.
-last_reviewed: "1.9.1"
+last_reviewed: "1.9.2"
 ---
 
 Each blendshape frame in `client.blendshapeQueue` is a `Float32Array` whose position `i` holds the value of channel `i` below. The order depends on `blendshapeConfig.format` and applies to raw frames, before any `customMapper` changes them. Both tables are exported from `@convai/web-sdk/lipsync-helpers`, so read them in code instead of copying them.
