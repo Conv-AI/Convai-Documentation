@@ -1,7 +1,7 @@
 ---
 title: Connect to a self-hosted deployment
 description: Point the Web SDK at your own Convai deployment instead of Convai's hosted service, set every host it calls, and keep requests and API keys inside your network.
-last_reviewed: "1.9.2"
+last_reviewed: "1.9.4"
 icon: server
 ---
 
@@ -49,6 +49,8 @@ If you leave `characterInfoUrl` unset, the widget sends its character lookup to 
 
 This failure is hard to spot. The widget still works without the lookup. It shows the fallback name `Convi` and no avatar, so a missing setting looks like a cosmetic glitch rather than an error. If your widget header shows `Convi` instead of your character's name, check this setting first.
 
+The lookup authenticates with the `CONVAI-API-KEY` header when you pass `apiKey`, or `API-AUTH-TOKEN` when you pass `authToken`. Configure your deployment's `POST /character/get` to accept the same header. SDK versions up to 1.9.2 sent the API key as `X-API-Key`, which self-hosted deployments reject with `401`.
+
 `characterInfoUrl` and `characterApiUrl` are separate options because they are separate services. The Character REST platform does not serve `/character/get`, so one value cannot be used for both.
 
 ## Set the hosts for the other APIs
@@ -78,6 +80,7 @@ The SSE and WebSocket transports do not use WebRTC, so they ignore this option.
 | Symptom | Cause | Fix |
 |---|---|---|
 | The widget header shows `Convi` and no avatar. | `characterInfoUrl` is unset or wrong, so the character lookup failed. | Set `characterInfoUrl` to your deployment's API origin. |
+| `POST {characterInfoUrl}/character/get` returns `401`, on SDK 1.9.2 or earlier. | Those versions send the API key as `X-API-Key`, and your deployment expects `CONVAI-API-KEY`. | Upgrade the SDK. |
 | A request to `api.convai.com` appears in the browser's network log. | One of the options on this page is unset. | Check the request's path against the table above and set the matching option. |
 | The first connection fails with `v1 RTC path not found. Consider upgrading your LiveKit server version`. | Your LiveKit server is older than the `livekit-client` 2.x that the SDK uses. | Upgrade the LiveKit server. No SDK version changes this. |
 | Connecting with a `characterVersion` fails with `503 Character version resolution is unavailable`. | Your deployment does not resolve character versions. | Omit `characterVersion`. See [Connect to a character version](character-versioning.md). |

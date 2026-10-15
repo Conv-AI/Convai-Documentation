@@ -1,7 +1,7 @@
 ---
 title: Configuration and type reference
 description: Reference for the Convai Web SDK package entry points, every connection configuration field with its default, and the main exported types.
-last_reviewed: "1.9.2"
+last_reviewed: "1.9.4"
 ---
 
 This page lists the entry points of `@convai/web-sdk`, every field of `ConvaiConfig`, and the state, message, and acknowledgment types the client works with. The types are defined in the SDK's core and re-exported from `@convai/web-sdk/core`, `@convai/web-sdk/vanilla`, and `@convai/web-sdk/react`.
@@ -35,7 +35,8 @@ Passed to `new ConvaiClient(config)`, `connect(config)`, or `useConvaiClient(con
 | `characterInfoUrl` | `string` | `https://api.convai.com` | Origin that serves `POST /character/get`, which the bundled widget uses for the character's name and avatar. Set it on a self-hosted deployment, or the lookup and your API key go to `api.convai.com`. |
 | `characterApiUrl` | `string` | `https://api2.convai.com` | Origin of the Character REST platform used by `client.characterVersions`. |
 | `iceTransportPolicy` | `"relay" \| "all"` | `"relay"` | WebRTC ICE policy. `"relay"` uses TURN only; `"all"` also allows direct connections, for a LiveKit server without TURN. |
-| `transport` | `"livekit" \| "websocket"` | `"livekit"` | WebRTC through LiveKit, or the WebSocket transport. See [Use the WebSocket transport](../websocket-transport-layer.md). |
+| `transport` | `"livekit" \| "websocket" \| "sse"` | `"livekit"`, or `"sse"` when `interactionApiUrl` is set | WebRTC through LiveKit, the WebSocket transport, or the SSE transport. See [Choose a transport](../choose-a-transport.md). |
+| `interactionApiUrl` | `string` | none | SSE endpoint. Setting it selects the SSE transport when `transport` is omitted. See [Chat over the SSE transport](../sse-transport.md). |
 | `endUserId` | `string` | none | Stable ID of the end user, such as a UUID or an email address. Enables long-term memory and per-user analytics. Without it the session is anonymous. |
 | `endUserMetadata` | `Record<string, unknown>` | none | Metadata about the end user, sent as `end_user_metadata`. |
 | `characterSessionId` | `string` | none | Session to resume. `'-1'` is treated as no session. After a connection, the client stores the session ID Convai returns. |
