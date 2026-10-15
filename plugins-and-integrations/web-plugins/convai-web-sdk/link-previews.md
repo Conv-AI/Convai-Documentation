@@ -1,7 +1,7 @@
 ---
 title: Render links and link previews
 description: Turn links the character sends into clickable links, media cards and Open Graph site cards in the Convai widgets or in your own chat UI.
-last_reviewed: "1.9.2"
+last_reviewed: "1.9.4"
 icon: link
 ---
 
@@ -12,7 +12,7 @@ Render the links a character sends as clickable links with image, video and docu
 - The Convai Web SDK installed, with a client that connects. See [Web SDK quickstart](quickstart.md).
 
 {% hint style="warning" %}
-Links depend on a server-side setting. `preserveLinksInOutput` is a per-session flag sent on `/connect`, and the server default is off. Where the server does not support it, links are stripped before they reach the client and everything on this page renders plain text, with no errors. As of 1.9.0, Convai's hosted servers do not preserve links yet, so plan for plain text until your Convai contact confirms the setting is available for your deployment.
+Links depend on a server-side setting. `preserveLinksInOutput` is a per-session flag sent on `/connect` by the realtime and WebSocket transports, and the server default is off. Convai's hosted servers honor it. Without it, the server removes each URL's scheme before the text reaches the client: `[Docs](https://docs.convai.com)` arrives as `[Docs](docs.convai.com)`, which the widgets show as the label in dotted text, and a bare URL arrives as plain text such as `example.com/guide.pdf`. There is no error either way.
 {% endhint %}
 
 ## Turn links on
@@ -59,6 +59,7 @@ createConvaiWidget(document.body, { convaiClient: client });
 - The flag is read once, when the session connects. To change it, reconnect; a UI toggle that does not reconnect has no effect on the current session.
 - The flag is sent as `preserve_links_in_output` and omitted when unset, so the server default applies. If you build the `/connect` request on your server for `connectWithConnectionData()`, add the field there.
 - If you render `chatMessages` yourself, expect markdown links in `content` once the flag is on. Speech is unaffected; URLs are never read aloud.
+- The SSE transport does not send the flag, and the Interaction API has no per-request equivalent: links over SSE follow the deployment's `PRESERVE_LINKS_IN_LLM_OUTPUT` setting, which is off by default. Setting `preserveLinksInOutput` on an SSE client has no effect. For links in an SSE chat, ask your Convai contact to enable that setting for your deployment.
 
 ## How each link renders
 

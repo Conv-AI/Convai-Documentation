@@ -1,7 +1,7 @@
 ---
 title: ConvaiWidget component reference
 description: Reference for the prebuilt React chat and voice widget, including every prop, its default, and what the widget handles for you during a session.
-last_reviewed: "1.9.2"
+last_reviewed: "1.9.4"
 ---
 
 `ConvaiWidget` is the prebuilt React component exported from `@convai/web-sdk/react`. It renders a collapsible conversation panel for text, voice, camera, and screen share, driven by a client from `useConvaiClient`.

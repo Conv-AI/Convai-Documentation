@@ -1,7 +1,7 @@
 ---
 title: useConvaiClient hook reference
 description: Reference for the React hook that owns a Convai client, including its parameter, every returned field, and the state it keeps for rendering.
-last_reviewed: "1.9.2"
+last_reviewed: "1.9.4"
 ---
 
 `useConvaiClient` is the React hook exported from `@convai/web-sdk/react`. It creates one `ConvaiClient` for the lifetime of the component, subscribes to its events, and returns the client's API together with React state that re-renders the component when the conversation changes.
@@ -111,7 +111,7 @@ Every method is bound to the hook's client, so you can pass it directly as an ev
 
 ## WebSocket audio playback
 
-When the session uses `transport: "websocket"`, the Pipecat transport plays the character's voice itself through Web Audio, so no extra code is needed. The hook also appends a hidden `<audio data-convai-ws>` element to `document.body` for the `botAudioTrack` event, but that event does not fire with the current WebSocket transport, so the element stays silent. With the default LiveKit transport, render `AudioRenderer` or `ConvaiWidget` to hear the character. See [Build a custom UI in React](custom-ui-and-advanced-usage.md).
+When the session uses `transport: "websocket"`, the Pipecat transport plays the character's voice itself through Web Audio, so no extra code is needed. With the default LiveKit transport, render `AudioRenderer` or `ConvaiWidget` to hear the character. See [Build a custom UI in React](custom-ui-and-advanced-usage.md).
 
 ## Example
 
