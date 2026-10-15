@@ -1,7 +1,7 @@
 ---
 title: Choose a transport
 description: Decide between SSE, WebRTC and WebSocket for a Convai Web SDK app, see the recommended SSE chat with a realtime voice mode and why, and set up any of them.
-last_reviewed: "1.9.2"
+last_reviewed: "1.9.4"
 icon: route
 ---
 
@@ -12,7 +12,7 @@ The Convai Web SDK reaches a character over three transports, and one `ConvaiCli
 * **WebSocket** carries realtime voice where WebRTC is blocked, such as some webviews and networks that block UDP. See [Use the WebSocket transport](websocket-transport-layer.md).
 
 {% hint style="warning" %}
-The interaction API that SSE uses is in beta. It is reachable at staging (`https://interaction-api-stg.convai.com/v1/interactions`) and on self-hosted deployments; a production host is planned. See [Chat over the SSE transport](sse-transport.md).
+The interaction API that SSE uses is in beta. It is reachable in production (`https://interaction-api.convai.com/v1/interactions`), at staging (`https://interaction-api-stg.convai.com/v1/interactions`) and on self-hosted deployments. See [Chat over the SSE transport](sse-transport.md).
 {% endhint %}
 
 ## Compare the transports

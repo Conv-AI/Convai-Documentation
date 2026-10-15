@@ -1,7 +1,7 @@
 ---
 title: Connect with an auth token
 description: Keep your Convai API key on your server by minting an auth token there and connecting the Web SDK in the browser with that token instead.
-last_reviewed: "1.9.2"
+last_reviewed: "1.9.4"
 icon: fingerprint
 ---
 

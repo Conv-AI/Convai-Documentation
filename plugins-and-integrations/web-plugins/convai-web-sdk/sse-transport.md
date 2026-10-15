@@ -1,20 +1,20 @@
 ---
 title: Chat over the SSE transport
 description: Send text to a Convai character over Server-Sent Events, keep the API key on your server, play the character's voice and run the client under Node.
-last_reviewed: "1.9.2"
+last_reviewed: "1.9.4"
 icon: tower-broadcast
 ---
 
 Chat with a Convai character over the SSE transport: text in, with the reply streamed back as text and, optionally, as speech. Each message is one HTTP `POST` whose response is a stream of events, and nothing stays open between messages. There is no WebRTC, no room and no microphone, so the SSE transport also runs under Node. Use this page to set up a chat, keep your API key off the page, play the character's voice, or call a character from a server.
 
 {% hint style="warning" %}
-The interaction API behind the SSE transport is in beta. It is reachable at staging, `https://interaction-api-stg.convai.com/v1/interactions`, and on self-hosted deployments. A production host is planned.
+The interaction API behind the SSE transport is in beta. It is reachable in production at `https://interaction-api.convai.com/v1/interactions`, at staging (`https://interaction-api-stg.convai.com/v1/interactions`), and on self-hosted deployments.
 {% endhint %}
 
 ## Prerequisites
 
 - The Convai Web SDK installed. See [Web SDK quickstart](quickstart.md).
-- An interaction API URL: the staging endpoint above, your self-hosted endpoint, or your own server route that forwards to one.
+- An interaction API URL: the production or staging endpoint above, your self-hosted endpoint, or your own server route that forwards to one.
 
 ## Connect and send a message
 
@@ -75,7 +75,7 @@ Two configurations make `connect()` throw:
 
 - **`connect()` makes no network request.** It marks the session ready and emits `connect` and `botReady` at once. The first request goes out when you send a message.
 - **The character session ID arrives on the first interaction.** There is no `/connect` handshake, so the server assigns the ID on the first message and the client emits `characterSessionId`. The event can fire again on later messages with the same value, so treat it as idempotent.
-- **Credentials travel as `Authorization: Bearer …`.** The SDK sends `authToken` if you supplied one, otherwise `apiKey`.
+- **An API key travels as `Authorization: Bearer …`, an auth token as `API-AUTH-TOKEN`.** When you supply both, the SDK sends only `authToken`. Up to 1.9.3 the SDK sent `authToken` as a Bearer value too, which the interaction API rejects with `401`.
 - **`botTurnCompleted` marks the end of a reply.** `turnEnd` never fires on SSE, because it depends on the character's speaking state, which this transport does not report.
 - **Microphone, video, screen share and lip sync do nothing on this transport.** Speech output is the exception; see [Play the character's voice](#play-the-characters-voice).
 

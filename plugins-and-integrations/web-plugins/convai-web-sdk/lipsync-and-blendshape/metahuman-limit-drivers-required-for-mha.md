@@ -1,7 +1,7 @@
 ---
 title: Apply MetaHuman limit drivers
 description: Apply the MetaHuman rig couplings, tuned gains, and fade envelope to the 251-channel stream so a character's lips stay closed while its jaw moves.
-last_reviewed: "1.9.2"
+last_reviewed: "1.9.4"
 ---
 
 Apply the MetaHuman rig couplings to every `mha` frame before you write it to a character's morph targets. Use this page when a character driven by the `mha` format shows its teeth on every jaw movement. At the end, the lips stay in contact while the jaw opens and the mouth reads as speech rather than flapping.
@@ -36,6 +36,8 @@ Names are the short form of the `CTRL_expressions_*` channels. `MHA_LIMIT_DRIVER
 ## Apply the couplings to a frame
 
 When you already write frames to the morphs yourself, call `applyMhaLimits` on each frame first. It changes the frame in place and does nothing to a frame shorter than 251 values.
+
+The stream sends `noseWrinkleUpperL` and `noseWrinkleUpperR` at exactly 1.0 on every frame of a reply, which reads as a frozen sneer. `applyMhaLimits` and the lipsync processor treat a value of 0.999 or more on those two channels as unset, so the coupling derives them from `noseWrinkle`. If you write raw frames to the morphs without these helpers, clear those two channels yourself.
 
 ```ts
 import { applyMhaLimits } from '@convai/web-sdk/lipsync-helpers';
