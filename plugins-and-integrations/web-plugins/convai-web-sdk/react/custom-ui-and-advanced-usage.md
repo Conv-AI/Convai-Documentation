@@ -1,7 +1,7 @@
 ---
 title: Build a custom UI in React
 description: Replace the prebuilt widget with your own React components for messages and controls while the Convai Web SDK keeps handling audio and state.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.0"
 ---
 
 Build your own conversation interface in React on top of `useConvaiClient` instead of rendering `ConvaiWidget`. Use this page when the widget's layout does not fit your app. At the end, your components show the conversation, send text, and control the microphone, camera, and screen share.
@@ -17,7 +17,8 @@ Without the widget, nothing plays the character's voice on the default LiveKit t
 
 {% code title="src/App.tsx" %}
 ```tsx
-import { useConvaiClient, AudioRenderer, AudioContext } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { AudioRenderer, AudioContext } from '@convai/web-widget/react';
 import { Conversation } from './Conversation';
 
 export default function App() {
@@ -36,7 +37,7 @@ export default function App() {
 ```
 {% endcode %}
 
-`AudioRenderer` and `AudioContext` from `@convai/web-sdk/react` are LiveKit's `RoomAudioRenderer` and `RoomContext` under SDK names. `AudioContext` here is not the browser's Web Audio `AudioContext`; import it under another name if the same file also uses Web Audio.
+`AudioRenderer` and `AudioContext` from `@convai/web-widget/react` are LiveKit's `RoomAudioRenderer` and `RoomContext` under SDK names. `AudioContext` here is not the browser's Web Audio `AudioContext`; import it under another name if the same file also uses Web Audio.
 
 With `transport: "websocket"`, the Pipecat transport plays the voice itself through Web Audio, and `AudioRenderer` is not needed.
 

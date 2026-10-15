@@ -1,7 +1,7 @@
 ---
 title: Add an audio visualizer in React
 description: Draw a live level meter and frequency bars from the character's voice in a React app, using the Web Audio API on the audio track of the session.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.0"
 ---
 
 Draw the character's voice as frequency bars and a level meter in a React component. Use this page when you build a custom UI and want visual feedback while the character speaks. The example is a starting point to adapt to your design.
@@ -15,7 +15,7 @@ Draw the character's voice as frequency bars and a level meter in a React compon
 
 The component waits for the session to connect, takes the first remote audio track, and feeds it into a Web Audio `AnalyserNode`. Each animation frame it draws the frequency data on a canvas and stores the average level.
 
-The `AudioContext` used here is the browser's Web Audio class. Do not import `AudioContext` from `@convai/web-sdk/react` in the same file; that export is the LiveKit room context.
+The `AudioContext` used here is the browser's Web Audio class. Do not import `AudioContext` from `@convai/web-widget/react` in the same file; that export is the LiveKit room context.
 
 {% code title="src/AudioVisualizer.tsx" %}
 ```tsx

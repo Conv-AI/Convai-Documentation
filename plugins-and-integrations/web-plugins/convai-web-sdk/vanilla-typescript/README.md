@@ -1,7 +1,7 @@
 ---
 title: Get started with vanilla TypeScript
 description: Install the Convai Web SDK in a project without a UI framework, connect a client to a character, and add the optional chat widget.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.0"
 icon: js
 ---
 
@@ -19,24 +19,24 @@ The vanilla API is part of the single `@convai/web-sdk` package. There is no sep
 {% tabs %}
 {% tab title="npm" %}
 ```bash
-npm install @convai/web-sdk
+npm install @convai/web-sdk @convai/web-widget
 ```
 {% endtab %}
 
 {% tab title="pnpm" %}
 ```bash
-pnpm add @convai/web-sdk
+pnpm add @convai/web-sdk @convai/web-widget
 ```
 {% endtab %}
 
 {% tab title="yarn" %}
 ```bash
-yarn add @convai/web-sdk
+yarn add @convai/web-sdk @convai/web-widget
 ```
 {% endtab %}
 {% endtabs %}
 
-Import from `@convai/web-sdk/vanilla`. It exports `ConvaiClient`, the SDK's own `AudioRenderer` class, `createConvaiWidget`, `destroyConvaiWidget`, and every core type. `ConvaiClient` is also available from `@convai/web-sdk/core`.
+Import from `@convai/web-sdk/vanilla`. It exports `ConvaiClient`, the SDK's own `AudioRenderer` class, and every core type. The prebuilt chat UI, `createConvaiWidget` and `destroyConvaiWidget`, is in `@convai/web-widget/vanilla`. `ConvaiClient` is also available from `@convai/web-sdk/core`.
 
 ## Create and connect a client
 
@@ -100,7 +100,8 @@ See [Build a custom UI in TypeScript](building-a-custom-ui-typescript.md) for th
 `createConvaiWidget(container, options)` mounts a ready-made chat and voice UI into a DOM element and returns a widget handle. The widget connects the client the first time it is clicked, and uses `reconnect()` when it is opened again after a disconnect.
 
 ```typescript
-import { ConvaiClient, createConvaiWidget } from '@convai/web-sdk/vanilla';
+import { ConvaiClient } from '@convai/web-sdk/vanilla';
+import { createConvaiWidget } from '@convai/web-widget/vanilla';
 
 const client = new ConvaiClient({
   apiKey: 'YOUR_API_KEY',

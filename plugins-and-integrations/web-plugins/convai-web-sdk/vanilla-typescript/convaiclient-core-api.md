@@ -1,7 +1,7 @@
 ---
 title: ConvaiClient reference
 description: Reference for the framework-free Convai Web SDK client, including its properties, methods, media controls, lip sync queue, and errors.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.0"
 ---
 
 `ConvaiClient` is the framework-free client of the Convai Web SDK. It is exported from `@convai/web-sdk/core` and `@convai/web-sdk/vanilla`, implements the `IConvaiClient` interface, and extends the SDK's `EventEmitter`. The React hook `useConvaiClient` wraps the same class.
