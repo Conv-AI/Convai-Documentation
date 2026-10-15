@@ -12,7 +12,7 @@ Render the links a character sends as clickable links with image, video and docu
 - The Convai Web SDK installed, with a client that connects. See [Web SDK quickstart](quickstart.md).
 
 {% hint style="warning" %}
-Links depend on a server-side setting. `preserveLinksInOutput` is a per-session flag sent on `/connect` by the realtime and WebSocket transports, and the server default is off. Convai's hosted servers honor it. Without it, the server removes each URL's scheme before the text reaches the client: `[Docs](https://docs.convai.com)` arrives as `[Docs](docs.convai.com)`, which the widgets show as the label in dotted text, and a bare URL arrives as plain text such as `example.com/guide.pdf`. There is no error either way.
+Links depend on a server-side setting. `preserveLinksInOutput` is a per-session flag sent on `/connect` by the realtime and WebSocket transports, and the server default is off. Convai's hosted servers honor it. Without it, the server removes each URL's scheme before the text reaches the client, so a markdown link to `https://docs.convai.com` arrives pointing at `docs.convai.com`, which the widgets show as the label in dotted text, and a bare URL arrives as plain text such as `example.com/guide.pdf`. There is no error either way.
 {% endhint %}
 
 ## Turn links on
