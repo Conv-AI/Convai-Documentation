@@ -1,7 +1,7 @@
 ---
 title: Read raw transport messages
 description: Observe every message a session receives, on any transport, with the typed rawMessage event, including MCP tool lifecycle frames and unknown types.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.0"
 icon: code
 ---
 
@@ -20,7 +20,8 @@ Call `client.on('rawMessage', listener)`. It returns an unsubscribe function. Th
 {% code title="src/Chat.tsx" %}
 ```tsx
 import { useEffect } from 'react';
-import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 
 const config = {
   apiKey: 'YOUR_API_KEY',
@@ -48,7 +49,7 @@ Return the unsubscribe function from the effect, as above, so unmounts and reren
 {% code title="src/main.ts" %}
 ```typescript
 import { ConvaiClient } from '@convai/web-sdk/core';
-import { createConvaiWidget } from '@convai/web-sdk/vanilla';
+import { createConvaiWidget } from '@convai/web-widget/vanilla';
 
 const client = new ConvaiClient({
   apiKey: 'YOUR_API_KEY',

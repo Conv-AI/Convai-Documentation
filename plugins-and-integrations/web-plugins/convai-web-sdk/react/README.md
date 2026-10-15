@@ -1,7 +1,7 @@
 ---
 title: Get started with React
 description: Install the Convai Web SDK in a React app and add a ready-made chat and voice widget, with optional camera and screen sharing for your character.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.0"
 icon: react
 ---
 
@@ -9,7 +9,7 @@ Add a Convai character to a React app with the `useConvaiClient` hook and the `C
 
 ## Prerequisites
 
-- A React 18 or 19 app with a bundler. `react` and `react-dom` 18 or 19 are peer dependencies of the SDK.
+- A React 18 or 19 app with a bundler. `react` 18 or 19 is a peer dependency of `@convai/web-sdk/react`; `@convai/web-widget` (the prebuilt UI) also needs `react-dom`.
 - A Convai account and an API key from <code class="expression">space.vars.dashboard_url</code>.
 - The ID of the character to connect to.
 
@@ -20,19 +20,19 @@ The React bindings ship in `@convai/web-sdk` and are imported from the `@convai/
 {% tabs %}
 {% tab title="npm" %}
 ```bash
-npm install @convai/web-sdk
+npm install @convai/web-sdk @convai/web-widget
 ```
 {% endtab %}
 
 {% tab title="pnpm" %}
 ```bash
-pnpm add @convai/web-sdk
+pnpm add @convai/web-sdk @convai/web-widget
 ```
 {% endtab %}
 
 {% tab title="yarn" %}
 ```bash
-yarn add @convai/web-sdk
+yarn add @convai/web-sdk @convai/web-widget
 ```
 {% endtab %}
 {% endtabs %}
@@ -43,7 +43,8 @@ yarn add @convai/web-sdk
 
 {% code title="src/App.tsx" %}
 ```tsx
-import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 
 export default function App() {
   const convaiClient = useConvaiClient({

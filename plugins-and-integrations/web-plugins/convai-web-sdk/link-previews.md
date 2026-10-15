@@ -1,7 +1,7 @@
 ---
 title: Render links and link previews
 description: Turn links the character sends into clickable links, media cards and Open Graph site cards in the Convai widgets or in your own chat UI.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.0"
 icon: link
 ---
 
@@ -23,7 +23,8 @@ Set `preserveLinksInOutput: true` in the client configuration. `ConvaiWidget` an
 {% tab title="React" %}
 {% code title="src/App.tsx" %}
 ```tsx
-import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 
 export default function App() {
   const client = useConvaiClient({
@@ -42,7 +43,7 @@ export default function App() {
 {% code title="src/main.ts" %}
 ```typescript
 import { ConvaiClient } from '@convai/web-sdk/core';
-import { createConvaiWidget } from '@convai/web-sdk/vanilla';
+import { createConvaiWidget } from '@convai/web-widget/vanilla';
 
 const client = new ConvaiClient({
   apiKey: 'YOUR_API_KEY',
@@ -99,7 +100,8 @@ A plain web link can show the page's own card: favicon, site name, title, descri
 {% tab title="React" %}
 {% code title="src/App.tsx" %}
 ```tsx
-import { ConvaiWidget, useConvaiClient, type LinkPreviewResolver } from '@convai/web-sdk/react';
+import { useConvaiClient, type LinkPreviewResolver } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 
 const resolveLinkPreview: LinkPreviewResolver = async (url, signal) => {
   const res = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`, { signal });
@@ -123,7 +125,8 @@ export default function App() {
 {% code title="src/main.ts" %}
 ```typescript
 import { ConvaiClient } from '@convai/web-sdk/core';
-import { createConvaiWidget, type LinkPreviewResolver } from '@convai/web-sdk/vanilla';
+import { type LinkPreviewResolver } from '@convai/web-sdk/vanilla';
+import { createConvaiWidget } from '@convai/web-widget/vanilla';
 
 const resolveLinkPreview: LinkPreviewResolver = async (url, signal) => {
   const res = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`, { signal });
@@ -165,7 +168,7 @@ If you use `useConvaiClient` or `ConvaiClient` for the connection but draw your 
 
 {% code title="src/Bubble.tsx" %}
 ```tsx
-import { MarkdownRenderer } from '@convai/web-sdk/react';
+import { MarkdownRenderer } from '@convai/web-widget/react';
 
 export function Bubble({ text, isMe }: { text: string; isMe: boolean }) {
   return <MarkdownRenderer text={text} media={!isMe} />;
