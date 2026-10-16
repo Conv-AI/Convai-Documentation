@@ -4,6 +4,10 @@ description: First Person View - PlayCanvas Plugin Guide for Convai integration.
 
 # First Person View
 
+{% hint style="warning" %}
+**Deprecated.** This page describes the legacy PlayCanvas Editor template, built on the deprecated `convai-web-sdk` package. Start new projects from the [Web SDK template](start-from-the-web-sdk-template.md) or the [Convai Embody template](start-from-the-convai-embody-template.md).
+{% endhint %}
+
 ### Adding Physics components to plane
 
 1. Scale up the plane and add physics component to it. Add both collision and rigidbody.&#x20;

@@ -1,22 +1,42 @@
 ---
-description: PlayCanvas template for Convai integration.
+title: PlayCanvas Plugin
+description: Add a talking Convai character to a PlayCanvas scene from a template built on the Convai Web SDK or Convai Embody, with Japanese F as the default.
 cover: ../../../.gitbook/assets/playcanvas cover.jpg
 coverY: 0
 ---
 
-# PlayCanvas Plugin
+Add a talking Convai character to a PlayCanvas scene. Two templates, each on GitHub and as a PlayCanvas Editor project, give you a working scene with MetaHuman lip sync, idle and talking animation, and a chat widget. Both use Japanese F, a MetaHuman-rig character, by default. Pick the template that matches where the character's 3D model comes from.
 
-### Overview
+<table data-view="cards">
+<thead>
+<tr>
+<th></th>
+<th data-hidden data-card-target data-type="content-ref"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Start from the Web SDK template</strong><br>Ship the character's model with your app and drive it with the Convai Web SDK.</td>
+<td><a href="start-from-the-web-sdk-template.md">start-from-the-web-sdk-template.md</a></td>
+</tr>
+<tr>
+<td><strong>Start from the Convai Embody template</strong><br>Load the character's body from its character ID with Convai Embody.</td>
+<td><a href="start-from-the-convai-embody-template.md">start-from-the-convai-embody-template.md</a></td>
+</tr>
+</tbody>
+</table>
 
-### Integrating ConvAI with PlayCanvas
+## Choose a template
 
-ConvAI is a powerful tool that enables developers to incorporate natural language processing (NLP) and conversational AI capabilities into their PlayCanvas projects. By following this guide, you'll learn how to seamlessly integrate ConvAI into your PlayCanvas project, allowing you to create engaging and interactive experiences for your users.
+| | Web SDK template | Convai Embody template |
+|---|---|---|
+| Repository | [`Conv-AI/convai-playcanvas-web-sdk`](https://github.com/Conv-AI/convai-playcanvas-web-sdk) | [`Conv-AI/convai-playcanvas-embody`](https://github.com/Conv-AI/convai-playcanvas-embody) |
+| PlayCanvas Editor project | [Convai Web SDK](https://playcanvas.com/project/1619450/overview/convai-web-sdk) | [Convai Embody](https://playcanvas.com/project/1619476/overview/convai-embody) |
+| Packages | `@convai/web-sdk` | `@convai/embody` and `@convai/web-sdk` |
+| Character model | A GLB file in your app | Resolved from the character ID |
+| Face animation | Lip sync | Lip sync and blinking |
+| Environment | Production | Staging, which serves web bodies |
 
-To help you get started, we've created a reference PlayCanvas project that demonstrates the integration of ConvAI. This project serves as a foundation for you to build upon and understand the necessary steps to incorporate ConvAI into your own projects.
+## Legacy editor template
 
-{% hint style="success" %}
-<mark style="color:yellow;">**Project Link :**</mark> [<mark style="color:yellow;">**https://playcanvas.com/project/1216467/overview/convai-sdk**</mark>](https://playcanvas.com/project/1216467/overview/convai-sdk)
-{% endhint %}
-
-### &#x20;
-
+The earlier PlayCanvas Editor template, [Convai SDK](https://playcanvas.com/project/1216467/overview/convai-sdk), and the pages under this section that describe it are built on the deprecated `convai-web-sdk` package. Start new projects from one of the templates above.
