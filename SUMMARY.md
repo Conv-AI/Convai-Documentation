@@ -478,6 +478,8 @@
       * [Configuration and type reference](plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/best-practices-and-type-definitions.md)
       * [Blendshape channel order reference](plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/mappings-reference.md)
     * [Web SDK quickstart](plugins-and-integrations/web-plugins/convai-web-sdk/quickstart.md)
+    * [Use cases](plugins-and-integrations/web-plugins/convai-web-sdk/use-cases/README.md)
+      * [Build a website assistant](plugins-and-integrations/web-plugins/convai-web-sdk/use-cases/website-assistant.md)
     * [Drive facial animation with blendshapes](plugins-and-integrations/web-plugins/convai-web-sdk/lipsync-and-blendshape/README.md)
       * [Apply MetaHuman limit drivers](plugins-and-integrations/web-plugins/convai-web-sdk/lipsync-and-blendshape/metahuman-limit-drivers-required-for-mha.md)
     * [Handle character actions](plugins-and-integrations/web-plugins/convai-web-sdk/actions.md)
