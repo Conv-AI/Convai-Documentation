@@ -39,6 +39,22 @@ export default function App() {
 
 `AudioRenderer` and `AudioContext` from `@convai/web-widget/react` are LiveKit's `RoomAudioRenderer` and `RoomContext` under SDK names. `AudioContext` here is not the browser's Web Audio `AudioContext`; import it under another name if the same file also uses Web Audio.
 
+Browsers block sound until the visitor clicks, taps or presses a key on the page. If your app connects on page load, the character can be silent until then, and this `AudioRenderer` does not start playback by itself. Resume it on the first interaction:
+
+```tsx
+useEffect(() => {
+  const start = () => void client.room.startAudio();
+  addEventListener('pointerdown', start, { once: true });
+  addEventListener('keydown', start, { once: true });
+  return () => {
+    removeEventListener('pointerdown', start);
+    removeEventListener('keydown', start);
+  };
+}, [client]);
+```
+
+Connecting from a click, such as a **Start** button, avoids the problem entirely.
+
 With `transport: "websocket"`, the Pipecat transport plays the voice itself through Web Audio, and `AudioRenderer` is not needed.
 
 ## Render the messages

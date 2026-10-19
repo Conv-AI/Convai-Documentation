@@ -323,13 +323,7 @@ mic.addEventListener('click', () => void client.audioControls.toggleAudio());
 void client.connect().then(() => new AudioRenderer(client.room));
 ```
 
-Browsers block sound until the visitor clicks, taps or presses a key on the page, and the client usually connects before that. Start the character's audio on the first interaction, so the visitor hears the very first reply:
-
-```ts
-for (const type of ['pointerdown', 'keydown']) {
-  addEventListener(type, () => void client.room.startAudio(), { once: true });
-}
-```
+Browsers block sound until the visitor clicks, taps or presses a key on the page, and the client usually connects before that. `AudioRenderer` handles this: when the browser blocks playback, it starts the voice on the visitor's first interaction, such as typing a message or pressing the microphone button.
 
 The panel is plain HTML: an ordered list for the transcript and a form with a microphone button, a text input, and a **Send** button. Fix it to the side of the page so it stays put while the page underneath changes.
 
