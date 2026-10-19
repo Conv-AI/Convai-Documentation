@@ -1,7 +1,7 @@
 ---
 title: Handle events and messages in TypeScript
 description: Subscribe to connection, state, and message events from the Convai Web SDK client and render the conversation in a framework-free page.
-last_reviewed: "2.0.0"
+last_reviewed: "2.0.1"
 ---
 
 Subscribe to the client's events to keep a framework-free UI in step with the conversation. Use this page when you render state, messages, or live transcription yourself instead of using the chat widget.

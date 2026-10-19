@@ -1,7 +1,7 @@
 ---
 title: Build a custom UI in React
 description: Replace the prebuilt widget with your own React components for messages and controls while the Convai Web SDK keeps handling audio and state.
-last_reviewed: "2.0.0"
+last_reviewed: "2.0.1"
 ---
 
 Build your own conversation interface in React on top of `useConvaiClient` instead of rendering `ConvaiWidget`. Use this page when the widget's layout does not fit your app. At the end, your components show the conversation, send text, and control the microphone, camera, and screen share.
