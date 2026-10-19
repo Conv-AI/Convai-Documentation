@@ -36,6 +36,25 @@ The quickstart builds a first conversation in React. The two getting-started pag
 </tbody>
 </table>
 
+## Build a use case
+
+Each use case builds a complete application from several features, step by step.
+
+<table data-view="cards">
+<thead>
+<tr>
+<th></th>
+<th data-hidden data-card-target data-type="content-ref"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Build a website assistant</strong><br>Add a character to every page that knows where the visitor is and can navigate, highlight, and fill in forms.</td>
+<td><a href="use-cases/website-assistant.md">use-cases/website-assistant.md</a></td>
+</tr>
+</tbody>
+</table>
+
 ## Add features
 
 Each feature page shows the configuration and the client calls for one capability, for React and vanilla code alike.
