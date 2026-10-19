@@ -1,7 +1,7 @@
 ---
 title: useConvaiClient hook reference
 description: Reference for the React hook that owns a Convai client, including its parameter, every returned field, and the state it keeps for rendering.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.1"
 ---
 
 `useConvaiClient` is the React hook exported from `@convai/web-sdk/react`. It creates one `ConvaiClient` for the lifetime of the component, subscribes to its events, and returns the client's API together with React state that re-renders the component when the conversation changes.

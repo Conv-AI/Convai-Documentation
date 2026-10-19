@@ -1,7 +1,7 @@
 ---
 title: Build a custom UI in TypeScript
 description: Build your own chat interface on the Convai Web SDK in plain TypeScript, with connection status, messages, the character's voice, and media controls.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.1"
 ---
 
 Build a chat interface of your own on top of `ConvaiClient` instead of using the prebuilt widget. Use this page when the widget does not fit your design. At the end, your page connects, shows the conversation, plays the character's voice, and toggles the microphone.

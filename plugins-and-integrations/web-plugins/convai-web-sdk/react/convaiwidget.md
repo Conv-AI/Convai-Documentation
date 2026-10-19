@@ -1,10 +1,10 @@
 ---
 title: ConvaiWidget component reference
 description: Reference for the prebuilt React chat and voice widget, including every prop, its default, and what the widget handles for you during a session.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.1"
 ---
 
-`ConvaiWidget` is the prebuilt React component exported from `@convai/web-sdk/react`. It renders a collapsible conversation panel for text, voice, camera, and screen share, driven by a client from `useConvaiClient`.
+`ConvaiWidget` is the prebuilt React component exported from `@convai/web-widget/react` (install `@convai/web-widget` next to the SDK; since 2.0 the SDK ships no UI). It renders a collapsible conversation panel for text, voice, camera, and screen share, driven by a client from `useConvaiClient`.
 
 ## Props
 
@@ -53,7 +53,8 @@ Reset and Disconnect are hidden in a published chat session that has no `request
 ## Example
 
 ```tsx
-import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 
 export default function App() {
   const convaiClient = useConvaiClient({

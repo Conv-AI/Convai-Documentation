@@ -1,7 +1,7 @@
 ---
 title: Chat over the SSE transport
 description: Send text to a Convai character over Server-Sent Events, keep the API key on your server, play the character's voice and run the client under Node.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.1"
 icon: tower-broadcast
 ---
 
@@ -24,7 +24,8 @@ Supplying `interactionApiUrl` selects the SSE transport when `transport` is omit
 {% tab title="React" %}
 {% code title="src/App.tsx" %}
 ```tsx
-import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 
 export default function App() {
   const client = useConvaiClient({

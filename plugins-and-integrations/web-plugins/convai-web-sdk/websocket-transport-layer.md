@@ -1,7 +1,7 @@
 ---
 title: Use the WebSocket transport
 description: Connect a Convai character over a WebSocket instead of WebRTC, register the transport, and hear the character's voice in React or plain TypeScript.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.1"
 icon: webhook
 ---
 
@@ -17,6 +17,16 @@ Use version 1.9.2 or later on hosted Convai. Hosted Convai's `/connect` returns 
 
 The WebSocket session is not built into `ConvaiClient`. Only the `@convai/web-sdk/vanilla/websocket` subpath imports the Pipecat packages, and importing it registers the session with `ConvaiClient` as a side effect. An application that never imports that subpath does not load Pipecat code.
 
+## Install the Pipecat packages
+
+The WebSocket session runs on two Pipecat packages. They are optional peer dependencies of the SDK, so your package manager does not install them for you. Add them next to the SDK:
+
+```bash
+npm install @convai/web-sdk @pipecat-ai/client-js @pipecat-ai/websocket-transport
+```
+
+Without them, importing `@convai/web-sdk/vanilla/websocket` fails with `Could not resolve "@pipecat-ai/client-js"`.
+
 ## Register the transport and connect
 
 Import `@convai/web-sdk/vanilla/websocket` once, before `connect()` runs, and set `transport: 'websocket'`. React applications import the same subpath; the package has no React-specific WebSocket entry point.
@@ -26,7 +36,8 @@ Import `@convai/web-sdk/vanilla/websocket` once, before `connect()` runs, and se
 {% code title="src/App.tsx" %}
 ```tsx
 import '@convai/web-sdk/vanilla/websocket';
-import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 
 export default function App() {
   const client = useConvaiClient({

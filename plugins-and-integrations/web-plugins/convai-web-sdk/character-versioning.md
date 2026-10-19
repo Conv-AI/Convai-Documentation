@@ -1,7 +1,7 @@
 ---
 title: Connect to a character version
 description: Connect to a character's draft, latest release or a tagged version, and list, compare, release, promote and discard versions from the client.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.1"
 icon: code-branch
 ---
 
@@ -37,7 +37,8 @@ On the wire the selector is joined to the character ID as `<uuid>-draft`, `<uuid
 {% tab title="React" %}
 {% code title="src/App.tsx" %}
 ```tsx
-import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 
 export default function App() {
   const client = useConvaiClient({
@@ -58,7 +59,7 @@ The hook returns `characterVersion`, `characterReference` and `characterVersions
 {% code title="src/main.ts" %}
 ```typescript
 import { ConvaiClient } from '@convai/web-sdk/core';
-import { createConvaiWidget } from '@convai/web-sdk/vanilla';
+import { createConvaiWidget } from '@convai/web-widget/vanilla';
 
 const client = new ConvaiClient({
   apiKey: 'YOUR_API_KEY',
@@ -88,7 +89,8 @@ By default the manager calls `https://api2.convai.com`. Set `characterApiUrl` to
 {% tab title="React" %}
 {% code title="src/App.tsx" %}
 ```tsx
-import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 
 export default function App() {
   const client = useConvaiClient({
@@ -123,7 +125,7 @@ export default function App() {
 {% code title="src/main.ts" %}
 ```typescript
 import { ConvaiClient } from '@convai/web-sdk/core';
-import { createConvaiWidget } from '@convai/web-sdk/vanilla';
+import { createConvaiWidget } from '@convai/web-widget/vanilla';
 
 const config = {
   apiKey: 'YOUR_API_KEY',

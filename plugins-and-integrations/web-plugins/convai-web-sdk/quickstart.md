@@ -1,7 +1,7 @@
 ---
 title: Web SDK quickstart
 description: Build a React page that connects to a Convai character, sends it a text message, and shows the reply, using the Convai Web SDK from npm.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.1"
 icon: forward-fast
 ---
 
@@ -22,7 +22,7 @@ We will build one React component that creates a client with `useConvaiClient`, 
 Install `@convai/web-sdk`, release <code class="expression">space.vars.web_sdk_version</code> or later:
 
 ```bash
-npm install @convai/web-sdk
+npm install @convai/web-sdk @convai/web-widget
 ```
 
 ## Create the client
@@ -31,7 +31,8 @@ We create the client once per component with `useConvaiClient`. The config is st
 
 {% code title="src/App.tsx" %}
 ```tsx
-import { useConvaiClient, AudioRenderer, AudioContext } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { AudioRenderer, AudioContext } from '@convai/web-widget/react';
 
 export default function App() {
   const client = useConvaiClient({

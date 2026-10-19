@@ -1,7 +1,7 @@
 ---
 title: Configuration and type reference
 description: Reference for the Convai Web SDK package entry points, every connection configuration field with its default, and the main exported types.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.1"
 ---
 
 This page lists the entry points of `@convai/web-sdk`, every field of `ConvaiConfig`, and the state, message, and acknowledgment types the client works with. The types are defined in the SDK's core and re-exported from `@convai/web-sdk/core`, `@convai/web-sdk/vanilla`, and `@convai/web-sdk/react`.
@@ -20,7 +20,7 @@ The package declares these import paths in its `exports` field. There is no othe
 | `@convai/web-sdk/lipsync-helpers` | Channel order tables, mappers, queue factories, and the lip sync processor. See [Blendshape channel order reference](mappings-reference.md). |
 | `@convai/web-sdk/embed` | Helpers for loading a published chat: `fetchPublishedChatDescriptor`, `requestPublishedChatGrant`, `loadPublishedChatSession`, and their types. |
 
-`AudioRenderer` from `@convai/web-sdk/vanilla` and `AudioRenderer` from `@convai/web-sdk/react` are different objects with one name: the first is a class you construct with a room, the second is a React component.
+`AudioRenderer` from `@convai/web-sdk/vanilla` and `AudioRenderer` from `@convai/web-widget/react` are different objects with one name: the first is a class you construct with a room, the second is a React component.
 
 ## ConvaiConfig
 
@@ -32,7 +32,7 @@ Passed to `new ConvaiClient(config)`, `connect(config)`, or `useConvaiClient(con
 | `apiKey` | `string` | none | Convai API key. Either `apiKey` or `authToken` is required. |
 | `authToken` | `string` | none | Short-lived auth token. Used instead of `apiKey` when both are set. See [Connect with an auth token](../auth-tokens.md). |
 | `url` | `string` | `https://realtime-api.convai.com` | Base URL of the realtime API. The client posts to `{url}/connect`. For your own deployment, see [Connect to a self-hosted deployment](../self-hosted-deployments.md). |
-| `characterInfoUrl` | `string` | `https://api.convai.com` | Origin that serves `POST /character/get`, which the bundled widget uses for the character's name and avatar. Set it on a self-hosted deployment, or the lookup and your API key go to `api.convai.com`. |
+| `characterInfoUrl` | `string` | `https://api.convai.com` | Origin that serves `POST /character/get`, which the `@convai/web-widget` chat widget uses for the character's name and avatar. Set it on a self-hosted deployment, or the lookup and your API key go to `api.convai.com`. |
 | `characterApiUrl` | `string` | `https://api2.convai.com` | Origin of the Character REST platform used by `client.characterVersions`. |
 | `iceTransportPolicy` | `"relay" \| "all"` | `"relay"` | WebRTC ICE policy. `"relay"` uses TURN only; `"all"` also allows direct connections, for a LiveKit server without TURN. |
 | `transport` | `"livekit" \| "websocket" \| "sse"` | `"livekit"`, or `"sse"` when `interactionApiUrl` is set | WebRTC through LiveKit, the WebSocket transport, or the SSE transport. See [Choose a transport](../choose-a-transport.md). |

@@ -1,7 +1,7 @@
 ---
 title: Host several characters in one room
 description: Connect a roster of Convai characters to one realtime room, choose which one answers, change the roster live, and let a second person join.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.1"
 icon: users
 ---
 
@@ -29,7 +29,8 @@ Roster rooms need the realtime (WebRTC) transport and a nonblank `endUserId`.
 {% tab title="React" %}
 {% code title="src/App.tsx" %}
 ```tsx
-import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 
 const GUIDE = 'YOUR_CHARACTER_ID';
 const ASSESSOR = 'YOUR_SECOND_CHARACTER_ID';

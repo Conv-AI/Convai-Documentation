@@ -1,7 +1,7 @@
 ---
 title: Connect to a published text chat
 description: Start a credential-free, text-only chat with a published Convai character from a single-use launch grant, in React, plain TypeScript or a copy/paste embed.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.1"
 icon: comments
 ---
 
@@ -34,7 +34,8 @@ The helpers for steps 1 and 2 live in `@convai/web-sdk/embed`. They have no tran
 {% code title="src/PublishedChat.tsx" %}
 ```tsx
 import { useState } from 'react';
-import { ConvaiWidget, useConvaiClient } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 import {
   getPublishedChatEndpoints,
   loadPublishedChatSession,
@@ -79,7 +80,7 @@ export default function PublishedChat() {
 {% code title="src/main.ts" %}
 ```typescript
 import { ConvaiClient } from '@convai/web-sdk/core';
-import { createConvaiWidget } from '@convai/web-sdk/vanilla';
+import { createConvaiWidget } from '@convai/web-widget/vanilla';
 import {
   getPublishedChatEndpoints,
   loadPublishedChatSession,
