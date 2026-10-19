@@ -1,7 +1,7 @@
 ---
 title: Mute the character's voice
 description: Silence what the character says without stopping the conversation, build your own mute button, and mute one character in a multi-character session.
-last_reviewed: "2.0.0"
+last_reviewed: "2.0.1"
 icon: volume-xmark
 ---
 

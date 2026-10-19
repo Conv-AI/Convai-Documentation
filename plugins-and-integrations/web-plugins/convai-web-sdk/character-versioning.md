@@ -1,7 +1,7 @@
 ---
 title: Connect to a character version
 description: Connect to a character's draft, latest release or a tagged version, and list, compare, release, promote and discard versions from the client.
-last_reviewed: "2.0.0"
+last_reviewed: "2.0.1"
 icon: code-branch
 ---
 

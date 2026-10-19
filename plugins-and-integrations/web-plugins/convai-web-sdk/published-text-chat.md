@@ -1,7 +1,7 @@
 ---
 title: Connect to a published text chat
 description: Start a credential-free, text-only chat with a published Convai character from a single-use launch grant, in React, plain TypeScript or a copy/paste embed.
-last_reviewed: "2.0.0"
+last_reviewed: "2.0.1"
 icon: comments
 ---
 

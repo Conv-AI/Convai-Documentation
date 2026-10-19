@@ -1,7 +1,7 @@
 ---
 title: Use long-term memory
 description: Give a Convai character memory of each end user across sessions, and list, add, or delete those memories from your web application.
-last_reviewed: "2.0.0"
+last_reviewed: "2.0.1"
 icon: brain
 ---
 

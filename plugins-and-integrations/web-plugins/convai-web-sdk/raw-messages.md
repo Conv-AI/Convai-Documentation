@@ -1,7 +1,7 @@
 ---
 title: Read raw transport messages
 description: Observe every message a session receives, on any transport, with the typed rawMessage event, including MCP tool lifecycle frames and unknown types.
-last_reviewed: "2.0.0"
+last_reviewed: "2.0.1"
 icon: code
 ---
 

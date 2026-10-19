@@ -1,7 +1,7 @@
 ---
 title: Chat over the SSE transport
 description: Send text to a Convai character over Server-Sent Events, keep the API key on your server, play the character's voice and run the client under Node.
-last_reviewed: "2.0.0"
+last_reviewed: "2.0.1"
 icon: tower-broadcast
 ---
 
