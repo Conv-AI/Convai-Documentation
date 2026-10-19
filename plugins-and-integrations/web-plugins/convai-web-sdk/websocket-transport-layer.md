@@ -1,7 +1,7 @@
 ---
 title: Use the WebSocket transport
 description: Connect a Convai character over a WebSocket instead of WebRTC, register the transport, and hear the character's voice in React or plain TypeScript.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.0"
 icon: webhook
 ---
 
@@ -26,7 +26,8 @@ Import `@convai/web-sdk/vanilla/websocket` once, before `connect()` runs, and se
 {% code title="src/App.tsx" %}
 ```tsx
 import '@convai/web-sdk/vanilla/websocket';
-import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 
 export default function App() {
   const client = useConvaiClient({

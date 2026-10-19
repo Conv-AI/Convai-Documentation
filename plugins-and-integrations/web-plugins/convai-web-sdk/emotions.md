@@ -1,7 +1,7 @@
 ---
 title: Use character emotions
 description: Receive the emotion Convai detects in a character's replies, choose how it is detected, and set the character's temporary state of mind.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.0"
 icon: face-smile-plus
 ---
 
@@ -49,7 +49,8 @@ The latest value is also on `client.state.emotion`, which updates with every `st
 In React, `useConvaiClient` re-renders when the state changes, so you can read the value during render:
 
 ```tsx
-import { useConvaiClient, ConvaiWidget } from '@convai/web-sdk/react';
+import { useConvaiClient } from '@convai/web-sdk/react';
+import { ConvaiWidget } from '@convai/web-widget/react';
 
 export default function App() {
   const client = useConvaiClient({

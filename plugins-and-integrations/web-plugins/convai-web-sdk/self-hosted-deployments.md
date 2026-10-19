@@ -1,7 +1,7 @@
 ---
 title: Connect to a self-hosted deployment
 description: Point the Web SDK at your own Convai deployment instead of Convai's hosted service, set every host it calls, and keep requests and API keys inside your network.
-last_reviewed: "1.9.4"
+last_reviewed: "2.0.0"
 icon: server
 ---
 
@@ -11,7 +11,7 @@ The SDK does not use one base URL. It talks to several services, and on Convai's
 
 ## Prerequisites
 
-- The Convai Web SDK 1.9.0 or later. `characterInfoUrl` was added in 1.9.0.
+- The Convai Web SDK 2.0 or later. If you use the prebuilt chat widget, `@convai/web-widget` installed next to it.
 - The public URL of each service in your deployment. Your deployment's administrator can provide them.
 
 ## Set the hosts
@@ -19,7 +19,7 @@ The SDK does not use one base URL. It talks to several services, and on Convai's
 | Option | Service | Hosted default | What calls it |
 |---|---|---|---|
 | `url` | Core service (realtime) | `https://realtime-api.convai.com` | `connect()`, which posts to `{url}/connect` |
-| `characterInfoUrl` | Character info | `https://api.convai.com` | The bundled chat widget, which looks up the character's name and avatar with `POST /character/get` |
+| `characterInfoUrl` | Character info | `https://api.convai.com` | The chat widget from `@convai/web-widget`, which looks up the character's name and avatar with `POST /character/get` |
 | `characterApiUrl` | Character REST platform | `https://api2.convai.com` | `client.characterVersions` |
 | `interactionApiUrl` | Interaction API | none | The SSE transport. See [Chat over the SSE transport](sse-transport.md). |
 
@@ -45,7 +45,7 @@ You do not configure LiveKit. The core service returns the LiveKit room URL in i
 
 ## Set characterInfoUrl even if the chat looks right
 
-If you leave `characterInfoUrl` unset, the widget sends its character lookup to `https://api.convai.com`, and your API key goes with that request. On a restricted network, that is a failed request plus a credential sent to a host outside your network.
+The SDK makes no request to this host itself; it stores the value on the client as `client.characterInfoUrl`, and the chat widget from `@convai/web-widget` reads it from there. If you leave `characterInfoUrl` unset, the widget sends its character lookup to `https://api.convai.com`, and your API key goes with that request. On a restricted network, that is a failed request plus a credential sent to a host outside your network.
 
 This failure is hard to spot. The widget still works without the lookup. It shows the fallback name `Convi` and no avatar, so a missing setting looks like a cosmetic glitch rather than an error. If your widget header shows `Convi` instead of your character's name, check this setting first.
 
@@ -91,7 +91,7 @@ The SSE and WebSocket transports do not use WebRTC, so they ignore this option.
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `url` | `string` | `https://realtime-api.convai.com` | Origin of the core service. The client posts to `{url}/connect`. |
-| `characterInfoUrl` | `string` | `https://api.convai.com` | Origin that serves `POST /character/get`, used by the bundled widget for the character's name and avatar. |
+| `characterInfoUrl` | `string` | `https://api.convai.com` | Origin that serves `POST /character/get`, used by the `@convai/web-widget` chat widget for the character's name and avatar. Read it back as `client.characterInfoUrl`. |
 | `characterApiUrl` | `string` | `https://api2.convai.com` | Origin of the Character REST platform, used by `client.characterVersions`. |
 | `interactionApiUrl` | `string` | none | SSE endpoint. Setting it selects the SSE transport when `transport` is omitted. |
 | `iceTransportPolicy` | `"relay" \| "all"` | `"relay"` | WebRTC ICE policy. Use `"all"` for a LiveKit server without TURN. |
