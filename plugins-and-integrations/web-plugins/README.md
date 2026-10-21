@@ -3,7 +3,7 @@ title: Web Plugins
 description: Add Convai characters to web apps with the Convai Web SDK, render them as 3D bodies with Convai Embody, or build in PlayCanvas.
 ---
 
-Convai's web plugins put a Convai character in a web page. Start with the Convai Web SDK for voice and text conversation in React or plain TypeScript, add Convai Embody when the character needs a talking 3D body, or use the PlayCanvas plugin inside a PlayCanvas project.
+Convai's web plugins put a Convai character in a web page. Start with the Convai Web SDK for voice and text conversation in React or plain TypeScript, add Convai Embody when the character needs a talking 3D body, or start a PlayCanvas scene from a template built on either one.
 
 ## Plugins
 
@@ -24,7 +24,7 @@ Convai's web plugins put a Convai character in a web page. Start with the Convai
 <td><a href="convai-embody/README.md">convai-embody/README.md</a></td>
 </tr>
 <tr>
-<td><strong>PlayCanvas Plugin</strong><br>Add conversational Convai characters to a PlayCanvas project from a template.</td>
+<td><strong>PlayCanvas Plugin</strong><br>Add a talking Convai character to a PlayCanvas scene from a Web SDK or Convai Embody template.</td>
 <td><a href="playcanvas-plugin/README.md">playcanvas-plugin/README.md</a></td>
 </tr>
 </tbody>
