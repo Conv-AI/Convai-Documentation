@@ -1,7 +1,7 @@
 ---
 title: Add a 3D character to a three.js scene
 description: Add a Convai character to an existing 3D web scene with the framework-free Convai Embody API and update it from your own render loop.
-last_reviewed: "0.4.2"
+last_reviewed: "1.0.0-beta.0"
 ---
 
 Add a Convai character to a three.js scene you already render, without React. Use this page when your app owns the renderer, scene, and camera. At the end, the character stands in your scene and speaks with lip sync, driven from your render loop.

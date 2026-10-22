@@ -1,7 +1,7 @@
 ---
 title: Add a 3D character to a React app
 description: Install Convai Embody in a React app and render a Convai character that speaks with lip sync, gaze, and blinking from its character ID.
-last_reviewed: "0.4.2"
+last_reviewed: "1.0.0-beta.0"
 ---
 
 Render a Convai character as a 3D body in a React app with one component. Use this page when adding Convai Embody to a project for the first time. At the end, the character stands on the page, follows the camera with its eyes, and moves its mouth in sync with its voice.
