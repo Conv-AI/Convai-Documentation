@@ -1,10 +1,12 @@
 ---
 title: React API reference
 description: Reference for the Convai Embody React components and hooks, including every prop, its type and default, and what each hook returns.
-last_reviewed: "0.4.2"
+last_reviewed: "1.0.0"
 ---
 
 The React API is exported from `@convai/embody/react`. Every component and hook here also accepts the character options documented in the [createCharacter reference](createcharacter-reference.md), such as `characterId`, `token`, and `apiKey`.
+
+Changing one of those options reloads the body, with one exception: a new `correctiveMap` is applied to the running character, so switching maps does not interrupt speech.
 
 ## ConvaiCharacter
 
@@ -83,18 +85,19 @@ function useWidgetClient(client: ConvaiClient | null): WidgetClient | null
 
 Adapts a character's `ConvaiClient` to the `convaiClient` prop of `ConvaiWidget`, without opening a second connection. Returns `null` while `client` is `null`. `WidgetClient` is `ConvaiClient` plus `activity`, `isAudioMuted`, `isVideoEnabled`, and the other state fields the widget reads.
 
+Only needed with `@convai/web-widget` before 0.3.0. From 0.3.0, `ConvaiWidget` takes the character's `ConvaiClient` directly.
+
 ## Re-exported from the Convai Web SDK
 
-These are the Convai Web SDK's own exports, re-exported unchanged so an app needs only `@convai/embody`.
+These are the Convai Web SDK's own exports, re-exported unchanged.
 
 | Export | Kind |
 |---|---|
-| `ConvaiWidget` | React component |
 | `useConvaiClient` | React hook. Constructs a separate client and connection; do not use it for a character's widget. |
-| `AudioRenderer` | React component |
-| `AudioContext` | React context |
 | `ConvaiClient` | Class |
 | `ConvaiConfig` | Type |
+
+Convai Embody is the 3D character only. The chat UI (`ConvaiWidget`, and the React `AudioRenderer` and `AudioContext`) is in `@convai/web-widget/react`.
 
 ## Related reference
 
