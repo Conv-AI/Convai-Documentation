@@ -1,7 +1,7 @@
 ---
 title: createCharacter reference
 description: Reference for the createCharacter function in Convai Embody, including every option, its default, and the character handle it returns.
-last_reviewed: "0.4.2"
+last_reviewed: "1.0.0"
 ---
 
 `createCharacter` is exported from `@convai/embody`. It resolves a character's body, loads it, opens a Convai Web SDK connection, and resolves to a `CharacterHandle`. The React components accept the same options as props.
@@ -51,6 +51,7 @@ function createCharacter(options: CreateCharacterOptions): Promise<CharacterHand
 | `blink` | `BlinkConfig` | built-in tuning | Blinking and eyelids. |
 | `breathing` | `BreathingConfig` | built-in tuning | Additive chest and spine breathing. |
 | `mouth` | `MouthTuning` | built-in tuning | Lip sync tuning, such as the jaw-open cap and lip-seal thresholds. |
+| `correctiveMap` | `CorrectiveMap` | none | A table, built by `compileCorrectiveMap`, that re-weights each lip sync frame toward the full rig. Use it for a body that drives one morph per control and so renders none of the rig's corrective shapes or joint movement. Replace it at any time through `handle.lipsync.correctiveMap`. |
 
 ## CharacterHandle
 
