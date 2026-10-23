@@ -1,7 +1,7 @@
 ---
 title: Add a chat widget to a character
 description: Add the Convai chat widget to a Convai Embody character so users can type and talk to it over the connection the character already holds.
-last_reviewed: "0.4.2"
+last_reviewed: "1.0.0-beta.2"
 ---
 
 Add the Convai Web SDK chat widget beside a Convai Embody character so users can type and speak to it. Use this page after the character renders in your React app. At the end, a message sent from the widget gets a spoken reply that the character lip-syncs.
@@ -16,21 +16,20 @@ The character holds the connection. `onReady` hands you the character once its b
 
 ## Render the widget
 
-`useWidgetClient` adapts the character's client to the props `ConvaiWidget` expects and returns `null` until a client exists. `ConvaiWidget`, `ConvaiClient`, and `useWidgetClient` are all exported from `@convai/embody/react`, so the app needs no direct import from `@convai/web-sdk`.
+Pass the character's own client to `ConvaiWidget`. The widget subscribes to it, so the chat and the character share one connection. `ConvaiClient` comes from `@convai/embody/react`; `ConvaiWidget` is the chat UI package's, so install it (0.3.0 or later) next to Convai Embody:
+
+```bash
+npm install @convai/web-widget
+```
 
 {% code title="src/App.tsx" %}
 ```tsx
 import { useState } from 'react'
-import {
-  ConvaiCharacter,
-  ConvaiWidget,
-  useWidgetClient,
-  type ConvaiClient,
-} from '@convai/embody/react'
+import { ConvaiCharacter, type ConvaiClient } from '@convai/embody/react'
+import { ConvaiWidget } from '@convai/web-widget/react'
 
 export default function App({ token }: { token: string }) {
   const [client, setClient] = useState<ConvaiClient | null>(null)
-  const widgetClient = useWidgetClient(client)
 
   return (
     <>
@@ -39,7 +38,7 @@ export default function App({ token }: { token: string }) {
         characterId="YOUR_CHARACTER_ID"
         onReady={(character) => setClient(character.client)}
       />
-      {widgetClient && <ConvaiWidget convaiClient={widgetClient} />}
+      {client && <ConvaiWidget convaiClient={client} />}
     </>
   )
 }
