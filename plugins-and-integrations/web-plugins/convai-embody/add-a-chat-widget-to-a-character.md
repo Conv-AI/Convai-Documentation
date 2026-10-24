@@ -1,7 +1,7 @@
 ---
 title: Add a chat widget to a character
 description: Add the Convai chat widget to a Convai Embody character so users can type and talk to it over the connection the character already holds.
-last_reviewed: "1.0.0"
+last_reviewed: "1.0.1-beta.0"
 ---
 
 Add the Convai Web SDK chat widget beside a Convai Embody character so users can type and speak to it. Use this page after the character renders in your React app. At the end, a message sent from the widget gets a spoken reply that the character lip-syncs.
