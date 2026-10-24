@@ -33,6 +33,10 @@ The manifest can offer the same body for several rigs. Convai Embody picks the f
 
 Models are Draco-compressed, so the loader needs the Draco decoder. The model is then scaled to a standing human height and placed with its feet on the floor, and the idle clip starts, so a character is never left in its bind pose.
 
+The body's clips and any clips the app passes in `animations` are loaded by name, and an app's clip replaces the body's clip of the same name. After the idle clip starts, Convai Embody leaves clip changes to the app: speaking moves the mouth, not the body clip, so an app that wants a talking clip switches to it when the client reports that the character is speaking. See [Add your own animations to a character](add-your-own-animations.md).
+
+The manifest normally comes from Convai, but an app can supply its own resolver that returns a manifest for files it hosts. The rest of the flow is the same, because the body still connects to the character's Convai session. See [Use your own 3D model](use-your-own-3d-model.md).
+
 ## The frame pipeline
 
 Every frame, the systems that move the character run in a fixed order. The order is part of the design: each system writes to bones or morph targets that a later system reads or overrides.
