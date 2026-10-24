@@ -1,7 +1,7 @@
 ---
 title: React API reference
 description: Reference for the Convai Embody React components and hooks, including every prop, its type and default, and what each hook returns.
-last_reviewed: "1.0.0"
+last_reviewed: "1.0.1"
 ---
 
 The React API is exported from `@convai/embody/react`. Every component and hook here also accepts the character options documented in the [createCharacter reference](createcharacter-reference.md), such as `characterId`, `token`, and `apiKey`.
@@ -20,7 +20,7 @@ A self-contained character view: a `<Canvas>`, a camera, lights, orbit controls,
 | `camera` | `{ position?: [number, number, number]; fov?: number; target?: [number, number, number] }` | `position: [0, 1.45, 3.6]`, `fov: 35`, `target: [0, 0.92, 0]` | Camera framing in meters. |
 | `orbit` | `boolean \| OrbitOptions` | `true` | Drag to turn around the character and scroll to move in and out. `false` fixes the camera. An object tunes the limits. |
 | `fallback` | `React.ReactNode` | `null` | Rendered while the body loads. |
-| `onReady` | `(character: CharacterHandle) => void` | none | Called once the body is loaded and the connection is live. |
+| `onReady` | `(character: CharacterHandle) => void` | none | Called once for each character that loads, when the body is loaded and the connection is live. An inline function is fine: re-renders do not call it again. |
 | `onError` | `(error: Error) => void` | none | Called with the error that stopped loading. |
 | `queue` | `BlendshapeQueue` | the character's own session | Overrides which turn this body lip-syncs to. Only needed when one client drives several characters. |
 
@@ -32,7 +32,7 @@ The character alone, for use inside a `<Canvas>` you create. It adds no camera, 
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `onReady` | `(character: CharacterHandle) => void` | none | Called once the body is loaded and the connection is live. |
+| `onReady` | `(character: CharacterHandle) => void` | none | Called once for each character that loads, when the body is loaded and the connection is live. An inline function is fine: re-renders do not call it again. |
 | `onError` | `(error: Error) => void` | none | Called with the error that stopped loading. |
 | `queue` | `BlendshapeQueue` | the character's own session | Overrides which turn this body lip-syncs to. |
 
@@ -76,6 +76,12 @@ Loads a character and returns it. `UseCharacterOptions` is every [createCharacte
 | `client` | `ConvaiClient \| null` | The connected client once ready. The same object as `character.client`. |
 | `error` | `Error \| null` | The error that stopped loading. |
 | `status` | `'loading' \| 'ready' \| 'error'` | `'loading'` until the body and the connection are both up. |
+
+## When the character reloads
+
+The components and `useCharacter` load the character again, and close and reopen its connection, only when one of these props changes: `characterId`, `token`, `authToken`, `apiKey`, `baseUrl`, `resolver`, or `modelVariant`. Compare `resolver` by identity: define it outside the component or memoize it.
+
+`camera` and `correctiveMap` apply to the loaded character without a reload. Every other option, such as `animations`, `idleClip`, `session`, `client`, and `decorators`, is read once when the character loads; to change one, remount the component with a new `key`.
 
 ## useWidgetClient
 

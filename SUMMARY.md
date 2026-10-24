@@ -503,6 +503,8 @@
     * [Add a 3D character to a React app](plugins-and-integrations/web-plugins/convai-embody/add-a-3d-character-to-a-react-app.md)
     * [Add a 3D character to a three.js scene](plugins-and-integrations/web-plugins/convai-embody/add-a-3d-character-to-a-three-js-scene.md)
     * [Add a chat widget to a character](plugins-and-integrations/web-plugins/convai-embody/add-a-chat-widget-to-a-character.md)
+    * [Add your own animations to a character](plugins-and-integrations/web-plugins/convai-embody/add-your-own-animations.md)
+    * [Use your own 3D model](plugins-and-integrations/web-plugins/convai-embody/use-your-own-3d-model.md)
     * [React API reference](plugins-and-integrations/web-plugins/convai-embody/react-api-reference.md)
     * [createCharacter reference](plugins-and-integrations/web-plugins/convai-embody/createcharacter-reference.md)
     * [How Convai Embody works](plugins-and-integrations/web-plugins/convai-embody/how-convai-embody-works.md)

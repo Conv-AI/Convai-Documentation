@@ -26,6 +26,14 @@ Convai Embody renders a Convai character as a 3D body in a web page and drives i
 <td><a href="add-a-chat-widget-to-a-character.md">add-a-chat-widget-to-a-character.md</a></td>
 </tr>
 <tr>
+<td><strong>Add your own animations to a character</strong><br>Load your own clips, crossfade between them, and play a talking clip while the character speaks.</td>
+<td><a href="add-your-own-animations.md">add-your-own-animations.md</a></td>
+</tr>
+<tr>
+<td><strong>Use your own 3D model</strong><br>Render a character with a MetaHuman GLB you host, with Full and Lite files.</td>
+<td><a href="use-your-own-3d-model.md">use-your-own-3d-model.md</a></td>
+</tr>
+<tr>
 <td><strong>React API reference</strong><br>Props, defaults, and return values for the React components and hooks.</td>
 <td><a href="react-api-reference.md">react-api-reference.md</a></td>
 </tr>
