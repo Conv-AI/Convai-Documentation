@@ -1,7 +1,7 @@
 ---
 title: Add a 3D character to a React app
 description: Install Convai Embody in a React app and render a Convai character that speaks with lip sync, gaze, and blinking from its character ID.
-last_reviewed: "1.0.0"
+last_reviewed: "1.0.1-beta.0"
 ---
 
 Render a Convai character as a 3D body in a React app with one component. Use this page when adding Convai Embody to a project for the first time. At the end, the character stands on the page, follows the camera with its eyes, and moves its mouth in sync with its voice.
@@ -57,9 +57,7 @@ export default function App() {
 
 The component fills its parent and is at least as tall as the viewport. Drag to turn around the character and scroll to move closer. Pass `orbit={false}` for a fixed camera.
 
-{% hint style="info" %}
 If the character has Long-Term Memory turned on, the connection also needs an end-user id so the character can tell your users apart. Pass a stable id for the person using your app: `session={{ endUserId: user.id }}`. Without it, connecting fails with "Missing end\_user\_id".
-{% endhint %}
 
 {% hint style="danger" %}
 An API key is a workspace-wide credential. Anyone who opens a page that ships it can read it. For a public page, create a short-lived auth token on your server and pass `token` instead of `apiKey`. See [Auth Tokens](../convai-web-sdk/auth-tokens.md).
