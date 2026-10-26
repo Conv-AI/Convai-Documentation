@@ -34,9 +34,9 @@ public ConvaiRestClient(ConvaiRestClientOptions options)
 
 | Property | Type | Description |
 |---|---|---|
-| `Memory` | `MemoryService` | Character-scoped long-term memory operations |
+| `Memory` | `MemoryService` | Character-scoped long-term memory operations and, in SDK 5.0, the character's memory settings |
 | `EndUsers` | `EndUsersService` | End-user identity and record management |
-| `Characters` | `CharacterService` | Character configuration, including memory enable/disable |
+| `Characters` | `CharacterService` | Character configuration, including memory enable/disable (obsolete in SDK 5.0 for memory) |
 
 **Usage pattern:**
 
@@ -145,7 +145,7 @@ public Task<MemoryDeleteResponse> DeleteAsync(
 ### `DeleteAllAsync`
 
 {% hint style="danger" %}
-Permanently removes all memory records for the specified user–character pair. Cannot be undone.
+Permanently removes all memory records for the specified user–character pair. Cannot be undone. Convai deletes them in the background, so a list made right after can still show some.
 {% endhint %}
 
 ```csharp
@@ -156,6 +156,46 @@ public Task<MemoryDeleteAllResponse> DeleteAllAsync(
 ```
 
 **Returns:** `Task<MemoryDeleteAllResponse>`
+
+***
+
+### `GetSettingsAsync`
+
+{% hint style="info" %}
+Requires Convai Unity SDK 5.0.
+{% endhint %}
+
+Reads the character's memory settings.
+
+```csharp
+public Task<MemorySettings> GetSettingsAsync(
+    string characterId,
+    CancellationToken cancellationToken = default)
+```
+
+**Returns:** `Task<MemorySettings>`
+
+***
+
+### `UpdateSettingsAsync`
+
+{% hint style="info" %}
+Requires Convai Unity SDK 5.0.
+{% endhint %}
+
+Changes the character's memory settings and keeps every setting you don't pass. Convai replaces the whole settings object on write, so this reads the current settings first and writes them back with only your changes. With no change given, nothing is written. The change applies to every app that uses the character.
+
+```csharp
+public Task<MemorySettings> UpdateSettingsAsync(
+    string characterId,
+    bool? enabled = null,
+    EndUserIdRequirement? endUserIdRequirement = null,
+    CancellationToken cancellationToken = default)
+```
+
+**Returns:** `Task<MemorySettings>`, the settings as written.
+
+A character that connects through a pinned version takes memory on or off from that version's saved settings. The end-user ID requirement applies to every version at once.
 
 ***
 
@@ -212,7 +252,7 @@ public Task<EndUsersListResponse> ListAsync(
 
 ### `UpdateMetadataAsync`
 
-Patches the metadata dictionary for an end-user record. Keys not included in the patch are preserved.
+Patches the metadata dictionary for an end-user record. Keys not included in the patch are preserved, and a key can't be removed this way.
 
 ```csharp
 public Task<EndUserUpdateResponse> UpdateMetadataAsync(
@@ -227,8 +267,8 @@ public Task<EndUserUpdateResponse> UpdateMetadataAsync(
 
 ### `DeleteAsync`
 
-{% hint style="danger" %}
-Removes the end-user record and all memory records for that user across **all characters**. Cannot be undone.
+{% hint style="warning" %}
+Deactivates the end user. Their memories are not deleted: they stay stored, the memory API can no longer find them, and a later connect with the same end-user ID starts with no memories. To delete memories, call `MemoryService.DeleteAllAsync` for each character first.
 {% endhint %}
 
 ```csharp
@@ -250,6 +290,10 @@ public sealed class CharacterService
 ```
 
 Accessed via `ConvaiRestClient.Characters`. These two methods control the LTM enabled/disabled state for a character.
+
+{% hint style="warning" %}
+Obsolete in SDK 5.0: use `MemoryService.GetSettingsAsync` and `UpdateSettingsAsync`. In SDK 4.x, `SetMemoryEnabledAsync` also resets the character's end-user ID requirement to Required; in 5.0 it keeps it.
+{% endhint %}
 
 ***
 
@@ -462,6 +506,36 @@ Extends `EndUserDetails` with an additional field:
 | Property | JSON key | Type | Default | Description |
 |---|---|---|---|---|
 | `IsEnabled` | `"enabled"` | `bool` | `false` | Whether LTM is active for the character |
+| `EndUserMode` | `"end_user_mode"` | `string` | `null` | SDK 5.0. Convai's raw end-user ID requirement value |
+| `EndUserIdRequirement` | — | `EndUserIdRequirement` | `Required` | SDK 5.0. Computed from `EndUserMode`: `"optional"` is `Optional`; anything else, including a missing value, is `Required` |
+
+### `EndUserIdRequirement`
+
+{% hint style="info" %}
+Requires Convai Unity SDK 5.0.
+{% endhint %}
+
+```csharp
+namespace Convai.RestAPI.Internal
+
+public enum EndUserIdRequirement { Required, Optional }
+```
+
+`Required` refuses a connect that sends no end-user ID while memory is on, with `connection.connect_end_user_id_required`. This is the default. `Optional` serves the connect, but nothing from it is remembered.
+
+### `LongTermMemoryStatus`
+
+{% hint style="info" %}
+Requires Convai Unity SDK 5.0.
+{% endhint %}
+
+```csharp
+namespace Convai.Shared.Types
+
+public enum LongTermMemoryStatus { NotReported, Active, SkippedNoEndUser }
+```
+
+Read it from `ConvaiManager.CurrentLongTermMemoryStatus` after a connect. `ConvaiManager.CurrentEndUserId` is the end-user ID Convai confirmed for the room. See [Troubleshoot long-term memory](troubleshooting-and-diagnostics.md) for what each value means.
 
 ***
 

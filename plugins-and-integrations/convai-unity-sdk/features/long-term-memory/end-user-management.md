@@ -4,7 +4,11 @@ last_reviewed: "4.5.0"
 description: Browse and manage end-user records from the Convai Editor window or from a script, covering the editor tool, every method, and pagination.
 ---
 
-The Convai Unity SDK tracks every user who connects with a memory-enabled character as an **end-user record**. Each record stores the user's stable identifier, last activity timestamps, and any metadata you sent during connection. You can browse and delete these records from the Unity editor or manage them programmatically with `client.EndUsers`.
+The Convai Unity SDK tracks every user who connects with a memory-enabled character as an **end-user record**. Each record stores the user's stable identifier, last activity timestamps, and any metadata you sent during connection. You can browse and deactivate these records from the Unity editor or manage them programmatically with `client.EndUsers`.
+
+{% hint style="warning" %}
+Deactivating an end user does not delete their memories. The memories stay stored on Convai, but they can no longer be listed or reached, and a later connect with the same end-user ID starts with no memories. To remove memories, delete them with each character first (`client.Memory.DeleteAllAsync`), then deactivate the end user.
+{% endhint %}
 
 {% hint style="warning" %}
 **Beta API.** Method signatures are stable but may change in future SDK updates. Pin your SDK version in production and review the changelog before upgrading.
@@ -29,7 +33,13 @@ The panel shows all end-user records associated with your API key. It loads reco
 
 <figure><img src="../../../../.gitbook/assets/image (472).png" alt="Unity menu bar showing Convai → Long Term Memory navigation path"><figcaption><p>Open the end-user management panel from the Unity menu bar: Convai → Long Term Memory.</p></figcaption></figure>
 
-Deleting an end-user record from the editor removes **the record and all memory records for that user across every character**. This cannot be undone. A confirmation dialog appears before deletion proceeds.
+Deleting a record from the editor deactivates the end user. Their memories are not deleted: they stay stored but can no longer be listed, and a later connect with the same ID starts with no memories. A confirmation dialog appears first.
+
+{% hint style="info" %}
+Requires Convai Unity SDK 5.0. The panel is in **Convai > Convai Editor**, under **Long Term Memory**. You pick a character from the scene (or enter any character ID), then click an end user to see what that character remembers about them. You can search the loaded end users, look one up with **Find Exact ID**, add a memory by hand, and use **Delete Selected** or **Delete All with This Character**. Badges mark the ID this Editor's Play Mode sends (**This Editor**) and the current player's (**Current player**).
+
+**Forget End User…** asks Convai to delete the end user's memories with every character you own and lists the result under **Memory Deletion Requests**. Deletion happens in the background, so the end user stays active until a check finds nothing left; **Deactivate End User** is offered after that. The checkboxes select end users for **Deactivate Selected**.
+{% endhint %}
 
 <figure><img src="../../../../.gitbook/assets/image (471).png" alt="End-user records with name and session count"><figcaption><p>End-user records with name and session count.</p></figcaption></figure>
 {% endtab %}
@@ -142,7 +152,7 @@ Debug.Log($"Display name: {user.DisplayName}");
 
 ### Update user metadata
 
-Update one or more metadata keys for a user. The patch operation preserves keys you do not include — it does not replace the entire metadata object.
+Update one or more metadata keys for a user. Keys you leave out keep their values, and a key can't be removed this way.
 
 ```csharp
 var patch = new Dictionary<string, object>
@@ -160,7 +170,7 @@ Debug.Log($"Updated metadata for {updated.EndUserId}.");
 ### Delete an end user
 
 {% hint style="danger" %}
-`DeleteAsync` removes the end-user record **and all memory records for that user across all characters**. Unlike `MemoryService.DeleteAllAsync`, which is scoped to one character, this operation removes the user globally. This cannot be undone.
+`DeleteAsync` deactivates the end user. It does not delete their memories: they stay stored, the memory API can no longer find them, and a later connect with the same end-user ID starts with no memories. Call `client.Memory.DeleteAllAsync(characterId, endUserId)` for each character first if the memories must go.
 {% endhint %}
 
 ```csharp
@@ -176,12 +186,12 @@ else
 
 ## `DeleteAllAsync` vs. `DeleteAsync`
 
-| Operation                                              | Scope                     | What is removed                                         |
-| ------------------------------------------------------ | ------------------------- | ------------------------------------------------------- |
-| `client.Memory.DeleteAllAsync(characterId, endUserId)` | One user + one character  | All memory records for that user–character pair         |
-| `client.EndUsers.DeleteAsync(endUserId)`               | One user + all characters | The user record and all memories across every character |
+| Operation                                              | Scope                    | What happens                                                                                  |
+| ------------------------------------------------------ | ------------------------ | --------------------------------------------------------------------------------------------- |
+| `client.Memory.DeleteAllAsync(characterId, endUserId)` | One user + one character | Convai deletes that pair's memories in the background                                         |
+| `client.EndUsers.DeleteAsync(endUserId)`               | One user                 | The user is deactivated; their memories stay stored but can no longer be listed or reached |
 
-Use `DeleteAllAsync` when you want to reset a user's memory for a specific character while keeping their records for other characters intact. Use `EndUsers.DeleteAsync` when you need to fully remove a user from the system.
+Use `DeleteAllAsync` to reset what one character remembers about a user. To remove a user and their memories, call `DeleteAllAsync` for every character they talked to, check that `client.Memory.ListAsync` comes back empty, then call `EndUsers.DeleteAsync`. Convai has no single call that deletes one user's memories with every character. In SDK 5.0 the editor's **Forget End User…** runs the deletions for every character you own.
 
 ***
 
