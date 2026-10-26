@@ -121,7 +121,7 @@ If you call `SetEndUserIdentityProvider` after `ConnectAsync` has already been c
 ## Empty or whitespace end-user ID
 
 {% hint style="danger" %}
-If `GetEndUserId()` returns an empty string, a whitespace-only string, or `null`, the SDK normalizes it to `null` before sending. Convai treats `null` as an anonymous session — **no memories are stored or retrieved**. Always ensure your identity source returns a non-empty, non-whitespace value.
+If `GetEndUserId()` returns an empty string, a whitespace-only string, or `null`, the SDK sends no end-user ID. When the character has memory on, what happens next depends on its end-user ID requirement. With **Required** (the default), Convai refuses the connect with HTTP 400 "Missing end_user_id". With **Optional**, the session runs but **no memories are stored or retrieved**. Always ensure your identity source returns a non-empty, non-whitespace value. See [Configure memory for a character](configure-memory-for-a-character.md).
 {% endhint %}
 
 ***
