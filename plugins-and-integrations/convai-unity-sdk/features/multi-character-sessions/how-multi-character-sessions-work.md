@@ -1,14 +1,14 @@
 ---
 title: How multi-character sessions work
 description: Understand how a Unity scene with several Convai characters becomes one shared room and how the room decides who the player is addressing.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 A Convai room can hold more than one character. This page explains how a scene with several `ConvaiCharacter` components becomes one shared room, how that room decides who the player is talking to, and why one character speaks at a time.
 
 ## Two or more characters is the whole setup
 
-A room holds every active `ConvaiCharacter` in the loaded scenes. There is no multi-character mode to switch on, no component to add, and no field to fill — the room carries more than one character once the scene does. The reason there is nothing to configure is that a single-character scene and a multi-character scene go through the same connect path; the only difference is how many characters that path finds active when it runs.
+A classic room holds the active characters that the manager owns and that are selected in **Characters Joining the Room**. All are selected by default; unticked characters are left out. No additional multi-character component is required. The reason there is nothing to configure is that a single-character scene and a multi-character scene go through the same connect path; the only difference is how many characters that path finds active when it runs.
 
 The **Convai Manager** component reflects this directly. Its **Scene Setup** section detects every `ConvaiCharacter` in the scene automatically and lists them with a checkbox per character, plus an **Include Everyone** button to select them all at once. Nothing in that list is manually wired — it is a live view of what the scene already contains.
 
@@ -19,7 +19,7 @@ The room opens on one character before the player has looked at or said anything
 - An assigned **Initial Character** in the Convai Manager inspector wins outright. The room opens on that character regardless of scene order or where the player's camera happens to be facing.
 - With no **Initial Character** assigned, the room opens on the first character in scene order.
 
-An assigned **Initial Character** only chooses where the conversation *starts*. From the moment the room is ready, the rule below re-evaluates who is being addressed roughly 15 times a second, so the conversation moves on to whoever the player is looking at unless targeting is set to `Manual`.
+An assigned **Initial Character** only chooses where the conversation *starts*. From the moment the room is ready, the rule below re-evaluates who is being addressed roughly 15 times a second, so the conversation moves on to whoever the active Look At or Proximity rule selects, unless **Chosen By** is **Manual**. Look At follows the view; Proximity chooses the nearest eligible character.
 
 ## Choosing who the player is talking to
 
@@ -43,7 +43,11 @@ The room only ever has one character answering at a time — addressing a differ
 
 ## Why every character needs its own Character ID
 
-The SDK routes ownership, participants, and audio by Character ID. Two characters sharing an ID collide instead of each being answered separately, which is why a Convai account with multi-character access still refuses a room whose two characters carry the same ID rather than connecting it half-working. See [Character identity](character-identity.md) for the exact rules and what the Character inspector reports.
+The SDK routes ownership, participants, and audio by Character ID. Two characters sharing an ID collide instead of each being answered separately, so the SDK rejects duplicate IDs before sending the connect request, independently of account access. See [Character identity](character-identity.md) for the exact rules and what the Character inspector reports.
+
+## Opt in to group conversation
+
+The separate **Convai > Group Conversation** component enables a 2–4-character group-voice preview at connect, where service state determines the speaker and the player joins with push-to-talk. Classic rooms keep the player-directed targeting behavior described here. See [Group conversation](../group-conversation/README.md) for prerequisites and service availability limits.
 
 ## Related
 

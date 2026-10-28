@@ -1,73 +1,62 @@
 ---
 title: How long-term memory works
-description: Understand the long-term memory session lifecycle, how memory is scoped by user and character, and how facts are extracted, deduplicated, and injected.
-last_reviewed: "4.5.0"
+description: Understand how character memory uses end-user identity, what the SDK sends and reports, and how stored records differ from conversation state.
+last_reviewed: "5.0.0-preview"
 ---
 
-Long-term memory (LTM) gives Convai characters a persistent, per-user knowledge store that survives across separate conversation sessions. A safety instructor remembers that a trainee passed module 3 last week. A corporate onboarding assistant knows which policies an employee has already reviewed. A medical training guide recalls that a user prefers detailed explanations over summaries. This page explains the underlying mechanism — what LTM stores, how it scopes memory per user, and when facts flow in and out of a session.
+Long-term memory associates stored records with an end user and a character. The Unity SDK supplies identity when it connects and exposes APIs for inspecting the records returned by Convai. Memory extraction and response generation happen outside the Unity client.
 
 ## Session lifecycle
 
-Every LTM session moves through four stages:
+The client captures identity when a connection begins. Retries for that connection reuse the captured identity, so replacing a provider or editing a metadata dictionary does not change an attempt already in progress.
+
+The flow separates connection status from stored-record verification:
 
 ```mermaid
 sequenceDiagram
     participant App as Your application
     participant SDK as Convai Unity SDK
-    participant Convai as Convai
-
-    App->>SDK: SetEndUserIdentityProvider(provider)
-    App->>SDK: ConnectAsync()
-    SDK->>Convai: connect(end_user_id, character_id)
-    Convai-->>SDK: inject stored memories into context
-    Note over SDK,Convai: Conversation proceeds with memory context
-    SDK->>Convai: session ends
-    Convai-->>Convai: extract and store new facts
+    participant Service as Convai
+    App->>SDK: Connect with end-user identity
+    SDK->>Service: Character and identity request
+    Service-->>SDK: Connection details and optional memory status
+    SDK-->>App: CurrentEndUserId and CurrentLongTermMemoryStatus
+    Note over App,Service: Conversation proceeds
+    App->>Service: List memories for the character and end user
+    Service-->>App: Returned records and pagination
 ```
 
-**Connect:** The SDK sends the `end_user_id` and `character_id` to Convai at session start. Convai resolves the pair to a stored memory set and injects any existing facts into the character's context before the first response is generated.
-
-**Conversation:** The character responds with awareness of the injected facts — it does not need to be told the user's name, role, or history because that context is already present. New information shared during the conversation is not stored in real time; it is held in the session buffer.
-
-**Session end:** When the session closes, Convai processes the conversation transcript and extracts meaningful facts (names, roles, preferences, completed tasks, stated history) as natural-language `MemoryRecord` entries. These are stored under the `end_user_id + character_id` key.
-
-**Next connect:** On the following session, the new facts are available and injected alongside any previously stored ones.
+Stopping Play mode ends the client session. It is not a client-side command to extract memory. Do not use disconnect completion as proof that facts were stored; inspect the memory records separately.
 
 ## Memory scoping
 
-Every memory record is scoped to exactly one user–character pair.
+Memory operations take a `characterId` and an `endUserId`. A query for a different pair asks for a different set of records. A stable application account identifier lets your application request the same scope across devices; a device identifier identifies a device rather than a signed-in person.
 
-```text
-end_user_id  +  character_id  →  set of MemoryRecord entries
-```
-
-Facts stored for user `A` on character `X` are never visible to user `B` or to character `Y`. If your application uses multiple characters, each character builds its own independent memory set for each user. There is no cross-character memory sharing.
-
-The `end_user_id` is the stable string identifier supplied by your `IEndUserIdentityProvider` (or by the default `DeviceEndUserIdProvider`). If the identifier changes between sessions — for example, because `PlayerPrefs` was cleared — Convai treats the new value as a new user. No memories from the previous identifier carry over.
+`ConvaiPlayer.PlayerId` is local player identity for presentation. It is separate from the end-user ID resolved for a connection. [End-user identity](end-user-identity.md) explains the default provider and explicit overrides.
 
 ## Memory records
 
-Each stored fact is a `MemoryRecord` with a natural-language `Memory` string and an auto-assigned `Id`.
+`MemoryRecord` contains an `Id`, a natural-language `Memory` string, timestamps, and optional metadata. For example, an application might submit the test fact `Jordan completed the fire safety module.` The text is application data, not an instruction to the SDK's connection state machine.
 
-Example `Memory` values:
-- `"The user's name is Jordan."`
-- `"Jordan completed confined-space entry certification on 2025-03-12."`
-- `"Jordan prefers step-by-step explanations over summaries."`
+`MemoryService.AddAsync` returns operation results that include an `Event` string. Read the returned result instead of assuming every submitted fact creates one record or that repeated writes are always merged in a particular way.
 
-Facts are written in third person by Convai. The character uses them as background context, not as a script to recite verbatim.
+## Reported memory status
 
-## Deduplication
+`ConvaiManager.CurrentLongTermMemoryStatus` reflects the connection response:
 
-When a new session produces a fact that is semantically equivalent to an existing memory, Convai updates the existing `MemoryRecord` rather than creating a duplicate. For example, if a user corrects their name from `"Jordan"` to `"Jordan Kim"`, the existing name record is updated in place. The `Event` field on `MemoryAddResult` returns `"update"` for deduplicated writes and `"add"` for new records.
+| Status | Interpretation |
+|---|---|
+| `Active` | Convai reported memory active for this connection. It does not prove that a specific fact was extracted or retrieved. |
+| `SkippedNoEndUser` | Convai reported that memory was skipped because no end-user ID was sent. |
+| `NotReported` | No status is available. This includes disconnected state and responses that omit memory status, including multi-character and group rooms. |
 
-## What LTM does not do
+The character's **End-User ID** requirement controls the contract for connections without identity. **Required** can produce a connect refusal; **Optional** permits a connection without memory. See [Configure the end-user ID requirement](configure-end-user-id-requirement.md).
 
-Understanding the limits of LTM prevents incorrect assumptions:
+## Memory, session resume, and deletion
 
-- **LTM does not enable real-time lookup.** Memory injection happens at connect time, not on demand during a conversation. The character cannot query the memory store mid-session.
-- **LTM does not guarantee every spoken detail is stored.** Convai extracts facts it judges as meaningful and persistent. Brief, incidental remarks may not be retained.
-- **LTM does not share memory across characters.** Each character has an independent memory set per user.
-- **LTM is not enabled by default.** Memory is disabled (`MemorySettings.IsEnabled = false`) until you explicitly enable it on the Convai dashboard or via the scripting API.
+Session resume and long-term memory use different identifiers. A character session ID refers to a resumable conversation, while memory operations use the end-user and character pair. A fresh session therefore does not, by itself, delete memory records.
+
+Disabling character memory changes settings. Deleting memory records and deactivating an end user are separate administrative operations. The [Long Term Memory window](long-term-memory-window.md) makes the distinction visible and tracks deletion requests for subsequent checking.
 
 ## Next steps
 
@@ -75,6 +64,6 @@ Understanding the limits of LTM prevents incorrect assumptions:
 [Long-term memory quick start](quick-start.md)
 {% endcontent-ref %}
 
-{% content-ref url="end-user-identity.md" %}
-[End-user identity](end-user-identity.md)
+{% content-ref url="memory-management-api.md" %}
+[Memory management API](memory-management-api.md)
 {% endcontent-ref %}

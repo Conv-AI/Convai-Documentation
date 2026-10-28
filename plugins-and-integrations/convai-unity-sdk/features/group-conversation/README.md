@@ -1,0 +1,9 @@
+---
+title: Group conversation
+description: Explore the opt-in group voice preview for two to four characters, configure player push-to-talk, and distinguish offline rehearsal from live testing.
+last_reviewed: "5.0.0-preview"
+---
+
+Group conversation lets 2–4 characters share a service-directed voice conversation while the player listens and joins with push-to-talk. It is an opt-in 5.0 preview with client configuration requirements and separate service availability checks. Classic player-directed rooms remain documented under [Multi-character sessions](../multi-character-sessions/README.md).
+
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>How group conversation works</strong><br>Understand service turns, player input, and spatial state.</td><td><a href="how-group-conversation-works.md">how-group-conversation-works.md</a></td></tr><tr><td><strong>Set up group conversation</strong><br>Configure the preview prerequisites and verify a small group.</td><td><a href="quick-start.md">quick-start.md</a></td></tr><tr><td><strong>Run the group conversation sample</strong><br>Rehearse the workshop scene offline before live testing.</td><td><a href="run-the-sample.md">run-the-sample.md</a></td></tr><tr><td><strong>Group conversation component reference</strong><br>Look up settings, events, and command results.</td><td><a href="component-reference.md">component-reference.md</a></td></tr><tr><td><strong>Simulator and debug overlay</strong><br>Inspect client behavior without exposing transcripts.</td><td><a href="simulator-and-debug-overlay.md">simulator-and-debug-overlay.md</a></td></tr><tr><td><strong>Troubleshoot group conversation</strong><br>Separate setup, state, input, and service failures.</td><td><a href="troubleshooting.md">troubleshooting.md</a></td></tr></tbody></table>
