@@ -1,10 +1,12 @@
 ---
 title: Conversation availability reference
 description: Reference for the conversation availability states, events, and methods used to gate player input in the Convai Unity SDK.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Every public member involved in checking whether a character can hear the player, in lifecycle and call order.
+
+The enum and its extension methods are in `Convai.Domain.DomainEvents.Session`. `CanAcceptPlayerInput()` describes readiness only; group rooms refuse typed text and require correlated push-to-talk.
 
 ## `ConvaiConversationAvailability` enum
 
@@ -13,18 +15,18 @@ Every public member involved in checking whether a character can hear the player
 | `NoCharacter` | No character is being addressed, or it is not set up yet. |
 | `Offline` | There is no room. Nothing is listening. |
 | `Connecting` | The room is being established. |
-| `Preparing` | The room is connected, but this character has not been confirmed by the service yet. Messages sent now are lost. |
+| `Preparing` | The room is connected, but this character has not been confirmed by the service yet. The shipped input gate blocks messages until readiness. |
 | `Ready` | The character can hear the player. |
 | `Answering` | The character is answering. Input is still accepted — that is barge-in. |
-| `Unavailable` | The character failed to start, or left the room. Unlike `Connecting` and `Preparing`, this does not resolve on its own. |
+| `Unavailable` | The character failed to start, left the room, or the session is in `Error`. Unlike `Connecting` and `Preparing`, this does not resolve on its own. |
 
-Values are listed in lifecycle order. Do not compare them with `<` or `>` — the two states that accept input, `Ready` and `Answering`, are not adjacent.
+Values are listed in lifecycle order. Use `CanAcceptPlayerInput()` instead of relying on enum ordering or numeric ranges.
 
 ## `ConvaiConversationAvailabilityExtensions`
 
 | Member | Returns | Description |
 | --- | --- | --- |
-| `CanAcceptPlayerInput()` | `bool` | Whether a message sent now — typed or spoken — will reach the character. True for `Ready` and `Answering`. |
+| `CanAcceptPlayerInput()` | `bool` | The availability gate only: true for `Ready` and `Answering`. Input-mode restrictions still apply. |
 | `IsSettling()` | `bool` | Whether the state resolves on its own, given a moment. True for `Connecting` and `Preparing`. |
 
 ## `ConvaiManager` members
@@ -40,7 +42,7 @@ Values are listed in lifecycle order. Do not compare them with `<` or `>` — th
 | Member | Type | Description |
 | --- | --- | --- |
 | `ConversationAvailability` | `ConvaiConversationAvailability` | Whether the player can talk to this character right now, and if not, what is in the way. |
-| `CanAcceptPlayerInput` | `bool` | Whether a message sent to this character right now — typed or spoken — will reach it. Equivalent to `ConversationAvailability.CanAcceptPlayerInput()`. |
+| `CanAcceptPlayerInput` | `bool` | The character availability gate, equivalent to `ConversationAvailability.CanAcceptPlayerInput()`. It does not guarantee delivery or override input-mode restrictions. |
 | `IsCharacterReady` | `bool` | Whether the character has received the bot-ready signal from Convai. Set only by that signal, not by room connection — distinct from `ConversationAvailability`, which also accounts for room state and roster membership. |
 
 ## `ConversationAvailabilityChanged` domain event
@@ -54,7 +56,7 @@ Published on the SDK's event hub, and exposed as a typed property on `ConvaiEven
 | `CharacterId` | `string` | Convai Character ID of the character being addressed, when there is one. |
 | `CharacterName` | `string` | Display name of that character, for logs and UI. |
 | `Timestamp` | `DateTime` | When the verdict moved, in UTC. |
-| `CanAcceptPlayerInput` | `bool` | Whether the player may send speech or text right now. |
+| `CanAcceptPlayerInput` | `bool` | Whether the availability state accepts input; input-mode restrictions remain separate. |
 
 ## `LocalPlayerActivityChanged` domain event
 
@@ -82,6 +84,12 @@ The same event hub also publishes `RoomRosterChanged` — a character joining, l
 | --- | --- | --- |
 | `SendTextMessage` | `void SendTextMessage(string message)` | Sends a text message to the addressed character. Logs a warning and does nothing when refused. |
 | `TrySendTextMessage` | `bool TrySendTextMessage(string message, out string reason)` | Sends a text message and reports why it was refused. Returns `true` when the message was handed to the room. |
+
+## `ConvaiPushToTalkController`
+
+The component is under **Convai > Convai Push To Talk Controller** in Add Component. `Press()`, `Release()`, and `SetPressed(bool)` return whether the requested transition was accepted; inspect `BlockedReason` on refusal. `State`, `StateChanged`, `CommitCompleted`, and `RetryAsync` expose the correlated capture/commit lifecycle. Availability is only one gate: pending capture, microphone policy, speech holds, and group compatibility also apply.
+
+See [Push-to-talk API](../../scripting-reference/push-to-talk-api.md) and [Push-to-talk lifecycle](../../core-concepts/push-to-talk-lifecycle.md) for complete signatures and lifecycle handling.
 
 ## Related
 

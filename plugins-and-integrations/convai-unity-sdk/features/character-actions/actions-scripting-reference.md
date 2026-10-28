@@ -1,7 +1,7 @@
 ---
 title: Character actions scripting reference
 description: API reference for the Convai character actions system — executor base classes, dispatcher, config types, invocation objects, and enums.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Complete API reference for the public types in the Convai character actions system. Types are in the `Convai.Runtime.Actions`, `Convai.Runtime.Components`, `Convai.Shared.Actions`, or `Convai.Shared.Types` namespaces unless noted.
@@ -73,6 +73,8 @@ public abstract class ConvaiTargetedActionExecutor : ConvaiActionExecutorBase
 | `MissingTargetResult(invocation)` | `protected virtual ConvaiActionExecutionResult` | Result returned when a required target is missing. Override to return `Failed(..., ConvaiActionFailureReason.TargetMissing)` instead of the default `Unhandled` |
 | `ResolveTargetGameObject(invocation)` | `protected static GameObject` | The resolved target `GameObject`, or `null` |
 | `ResolveTargetInteractionPoint(invocation)` | `protected static Transform` | The resolved target's `InteractionPoint`, falling back to its `GameObjectReference`'s transform |
+| `ResolveTargetName(invocation)` | `protected static string` | Registered target name for result text, falling back to the bound GameObject name. |
+| `ResolvePhysicalTarget(invocation, observer, out point)` | `protected static GameObject` | Projects a logical group to its nearest active member and interaction point; returns `null` for an empty active group. |
 | `TryResolvePeer<T>(ref T authored, out T peer)` | `protected bool` | Resolves a required peer: an explicit `authored` field always wins; otherwise looks up `GetComponentInParent<T>()` then `GetComponentInChildren<T>()` and remembers the result for the component's lifetime |
 | `UnhandledMissingPeer<T>()` | `protected ConvaiActionExecutionResult` | Builds an `Unhandled` result for a missing peer of type `T`, logging it once per component instance |
 | `GetOverride(invocation, name, defaultValue)` | `protected static float`/`bool`/`string` | Reads an invocation parameter override, falling back to the Inspector-authored default when absent or `invocation` is `null` |
@@ -113,7 +115,7 @@ Binds public fields and properties of `TParameters` by parameter name (supported
 
 `Convai.Runtime.Actions` — `public static class`
 
-Where the player actually is, for scene code that is not an executor. `ConvaiActionExecutorBase.ResolvePlayer()` (protected virtual, `ConvaiActionExecutorBase.cs:113`) is the executor-side shorthand for this.
+Where the player actually is, for scene code that is not an executor. `ConvaiActionExecutorBase.ResolvePlayer()` (protected virtual) is the executor-side shorthand for this.
 
 | Method | Signature | Description |
 | --- | --- | --- |
@@ -131,7 +133,7 @@ Return type for `IConvaiActionExecutor.ExecuteAsync`.
 | Property | Type | Description |
 | --- | --- | --- |
 | `Status` | `ConvaiActionExecutionStatus` | The outcome of this execution step |
-| `Message` | `string` | Optional diagnostic detail. Reaches the Console, the Actions Editor, and your own game code — never the Convai Character |
+| `Message` | `string` | Diagnostic/result detail. Custom and InvalidState failure feedback can include this text verbatim; keep it suitable for the character/player and omit secrets or private diagnostics. |
 | `Answer` | `string` | What this action found out, written as one plain sentence the character could say aloud. Empty for actions that perform a visible act rather than answer a question |
 | `HasAnswer` | `bool` | Whether this result carries a non-empty `Answer` |
 | `Exception` | `Exception` | The exception captured when the executor threw |
@@ -149,7 +151,7 @@ Return type for `IConvaiActionExecutor.ExecuteAsync`.
 | `TimedOut` | `static ConvaiActionExecutionResult TimedOut(string message = null)` | **Do not call manually.** The dispatcher returns this automatically when `TimeoutSeconds` expires. `FailureReason` is `Timeout` |
 | `Unhandled` | `static ConvaiActionExecutionResult Unhandled(string message = null)` | This executor intentionally declines the invocation. `FailureReason` is `None` |
 
-`Answered(...)` is what distinguishes a query action from every other kind: it is the only factory that populates `Answer`, and `Answer` is the only part of a result the Convai Character is ever told about. Whether it is spoken, silently remembered, or left to the character's judgement is decided separately by the action's `ConvaiActionAnswerDelivery` setting, not by the executor. See [Answer a question instead of acting](writing-custom-executors.md#answer-a-question-instead-of-acting) for the full pattern.
+`Answered(...)` is what distinguishes a query action from every other kind: it is the only factory that populates `Answer`, and it supplies the observation for a successful query. Failure feedback is different: Custom or InvalidState failures can expose `Message` through the feedback relay. Whether it is spoken, submitted as silent context, or left to the character's judgement is decided separately by the action's `ConvaiActionAnswerDelivery` setting, not by the executor. See [Answer a question instead of acting](writing-custom-executors.md#answer-a-question-instead-of-acting) for the full pattern.
 
 ## `ConvaiActionFailureReason`
 
@@ -187,7 +189,7 @@ Authoring definition that binds a backend action name to a local executor, its t
 | `TargetRequirement` | `ConvaiActionTargetRequirement` | What kind of target this action requires |
 | `Executor` | `MonoBehaviour` | The component that performs the behavior. Must implement `IConvaiActionExecutor`. An explicit reference here always wins over `ExecutorTypeHint` |
 | `ExecutorTypeHint` | `string` | Optional short or full type name of an `IConvaiActionExecutor` to auto-bind on the character's hierarchy when `Executor` is `null` — used by definitions authored inside a `ConvaiActionSet` asset, which cannot hold a scene reference |
-| `TimeoutSeconds` | `float` | Maximum execution time in seconds. `0` or less disables the timeout |
+| `TimeoutSeconds` | `float` | Positive action timeout in seconds. A nonpositive value uses the runner fallback, initially 60 seconds; only a zero runner limit disables that fallback |
 | `FailurePolicyOverride` | `ConvaiActionFailurePolicyOverride` | Per-action override of the dispatcher's batch failure policy |
 | `AnswerDelivery` | `ConvaiActionAnswerDelivery` | What the character does with an `Answered(...)` result. Authoring-only — never sent to Convai |
 | `WaitForBotSpeech` | `bool` | Whether the first step of a fresh batch waits for character speech |
@@ -210,9 +212,9 @@ What a Convai Character does with the `Answer` an action returned. Authored per 
 | Value | Integer | Description |
 | --- | --- | --- |
 | `UseCharacterSetting` | `0` | Defers to the character's `ConvaiActionFeedbackRelay`. Default |
-| `RememberOnly` | `1` | The character keeps the answer without saying it out loud. It still reaches the character's memory |
+| `RememberOnly` | `1` | Requests silent runtime context through the optional relay; does not establish long-term memory persistence |
 | `MentionIfRelevant` | `2` | The character decides for itself whether the answer is worth bringing up |
-| `TellThePlayer` | `3` | The character says what the action found. Use for actions that answer a direct question |
+| `TellThePlayer` | `3` | Requests that the character say the answer through the optional relay; not a speech guarantee |
 
 ## `ConvaiActionParameterDefinition`
 
@@ -411,6 +413,7 @@ Marks any `GameObject` as a runtime action grounding target with no code require
 
 | Property | Type | Description |
 | --- | --- | --- |
+| `MetadataSource` | `ConvaiObjectMetadata` | Optional metadata binding. When assigned, `TargetName` and `Description` read the World Object values instead of the authored fallback fields. |
 | `TargetName` | `string` | Target name the resolution ladder matches. Defaults to this `GameObject`'s name when blank |
 | `Kind` | `ConvaiActionTargetKind` | Whether this is an actionable object or character |
 | `Description` | `string` | Sent to Convai for grounding (Object kind) |
@@ -420,6 +423,62 @@ Marks any `GameObject` as a runtime action grounding target with no code require
 | `ApplyTo` | `ConvaiActionTargetApplyScope` | Which characters register this target while enabled: `AllCharacters` or `SpecificCharacters` |
 | `SpecificCharacters` | `List<ConvaiCharacter>` | Characters to register onto when `ApplyTo` is `SpecificCharacters` |
 | `RegisterOnEnable` | `bool` | Whether the target registers on enable and unregisters on disable. Default `true` |
+
+## `ConvaiCharacterActions`
+
+`Convai.Runtime.Actions` — obtained through `character.Actions`. Methods operate on that character's runtime state; they do not rewrite serialized action assets. Registrations and availability changes stage synchronization, subject to connection and room holds.
+
+| Member | Signature or type | Behavior |
+|---|---|---|
+| `RegisterTarget` | `void RegisterTarget(ConvaiActionTarget target)` | Copies the component's current values as a one-time explicit registration, independent of its enable lifecycle and scope. |
+| `RegisterObject` | `void RegisterObject(string name, string description, GameObject gameObject = null)` | Registers an object; provide a scene binding for physical actions. |
+| `RegisterCharacter` | `void RegisterCharacter(string name, string bio, GameObject gameObject = null)` | Registers another character as a target. |
+| `UnregisterTarget` | `void UnregisterTarget(string name)` | Removes all explicitly registered entries with that case-insensitive name. Does not remove authored or component-polled targets. |
+| `SetTargetAvailable` | `void SetTargetAvailable(string name, bool available)` | Per-character overlay affecting all target sources with that name. |
+| `SetActionAvailable` | `void SetActionAvailable(string actionName, bool available)` | Overrides authored action availability and stages a config sync. Does not create an executor or definition. |
+| `IsActionAvailable` | `bool IsActionAvailable(string actionName)` | Reads the override, then the authored definition flag; false for an unknown name without an override. Not proof an executor exists or an update was acknowledged. |
+| `Targets` | `IReadOnlyList<ConvaiActionTargetSnapshot>` | Current merged target snapshot. |
+
+`ConvaiActionTargetSnapshot` exposes read-only `Name` (`string`), `Kind` (`ConvaiActionTargetKind`), `Description` (`string`), `Aliases` (`IReadOnlyList<string>`), `GameObjectReference` (`GameObject`), `InteractionPoint` (`Transform`), and `Available` (`bool`). Authored targets win registration name collisions.
+
+The registration surface is retained by the character instance. Explicitly restore availability or unregister when gameplay scope ends; do not depend on reconnect to clear these overrides. See [Register targets and toggle actions from code](register-targets-from-code.md).
+
+## `ConvaiActionSet`
+
+`Convai.Runtime.Actions` — `ScriptableObject`. Create through **Assets > Create > Convai > Action Set**.
+
+| Member | Type | Behavior |
+|---|---|---|
+| `Definitions` | `IReadOnlyList<ConvaiActionDefinition>` | Reusable definition templates. Assets use `ExecutorTypeHint` because they cannot hold scene executor references. |
+| `CreateDefault()` | `static ConvaiActionSet` | Creates an empty default instance. |
+
+## `ConvaiActionTargetGroup`
+
+`Convai.Runtime.Actions` — component at **Add Component > Convai > Actions > Convai Action Target Group**. A collection of action targets, distinct from the scene metadata `ConvaiLogicalObjectGroup`.
+
+| Property | Type | Behavior |
+|---|---|---|
+| `GroupName` | `string` | Name used for registration; falls back to the GameObject name. |
+| `Description` | `string` | Grounding description. |
+| `IsOrdered` | `bool` | Whether member order is meaningful. |
+| `RegisterOnEnable` | `bool` | Registers on enable and unregisters on disable; default true. |
+| `Members` | `IReadOnlyList<ConvaiActionTarget>` | Authored members with null entries filtered out, preserving order. Not an active-members-only list. |
+
+## `ConvaiActionFeedbackRelay`
+
+`Convai.Runtime.Actions` — optional component requiring `ConvaiActionDispatcher` on the same GameObject. See [Report action results](action-feedback.md) for ordinary-room and group behavior.
+
+| Member | Type | Default / behavior |
+|---|---|---|
+| `FailureFeedbackMode` | `ConvaiActionFeedbackMode` | `NarrateInCharacter` |
+| `SuccessFeedbackMode` | `ConvaiActionFeedbackMode` | `SilentContext` |
+| `DroppedCommandFeedbackMode` | `ConvaiActionFeedbackMode` | `Off`; commands refused before dispatch. |
+| `CooldownSeconds` | `float` | 10; setter clamps to nonnegative. |
+| `OnFeedbackComposed` | `event Action<string, bool>` | Composed fact and whether spoken delivery was selected. Not a delivery or playback receipt. |
+
+`ConvaiActionFeedbackMode` values are `Off = 0`, `SilentContext = 1`, `NarrateInCharacter = 2`, and `ScriptedSpeech = 3`. Silent context is runtime context, not a long-term-memory guarantee. Group activity reporting still sends completion when the mode is Off, with delivery set to remember.
+
+`ConvaiActionFeedbackScriptedLine` exposes read-only `Reason` (`ConvaiActionFailureReason`) and `Line` (`string`), a default constructor, a `(reason, line)` constructor, and `CreateDefaultFailureLines()`. Templates support `{action}`, `{target}`, and `{reason}`.
 
 ## Built-in executor types
 
@@ -441,6 +500,8 @@ The Observation pack's executors answer a question rather than perform a visible
 Menu path: `Add Component → Convai → Convai Action Runner`
 
 Constraints: `DisallowMultipleComponent`, `RequireComponent(ConvaiCharacter)`
+
+`public const float DefaultStepTimeoutSeconds = 60f` is the initial fallback execution limit.
 
 ### Properties
 
@@ -484,11 +545,13 @@ Constraints: `DisallowMultipleComponent`, `RequireComponent(ConvaiCharacter)`
 | Property | Type | Description |
 | --- | --- | --- |
 | `Definitions` | `IReadOnlyList<ConvaiActionDefinition>` | The authored inline action definitions list |
-| `ActionSets` | `IReadOnlyList<ConvaiActionSet>` | Reusable action-set assets merged ahead of `Definitions`; an inline definition always wins a name collision against any set |
+| `ActionSets` | `IReadOnlyList<ConvaiActionSet>` | Reusable assets considered after inline `Definitions`, in list order. The first eligible normalized definition wins |
 | `Objects` | `IReadOnlyList<ConvaiActionObjectDefinition>` | The authored actionable objects list |
 | `Characters` | `IReadOnlyList<ConvaiActionCharacterDefinition>` | The authored actionable characters list |
 | `InitialAttentionObject` | `string` | Object name to pre-seed as the NPC's focus at connect time |
 | `ActionExecutionMode` | `ConvaiActionExecutionMode` | Declares whether `ConvaiActionDispatcher` or custom code runs this character's actions. Changes nothing at runtime; used by the SDK's own setup checks |
+| `ConfiguredBehaviorHost` | `Transform` | The exact authored host, including invalid assignments; `null` when no child is assigned. |
+| `HasValidBehaviorHost` | `bool` | False for an assigned host outside this character hierarchy; no assignment is valid. |
 | `BehaviorHost` | `GameObject` | The object newly authored action behaviors are added to: the assigned child, or the character itself when none is assigned |
 
 ### Methods
@@ -499,7 +562,7 @@ Constraints: `DisallowMultipleComponent`, `RequireComponent(ConvaiCharacter)`
 
 ## `ConvaiActionExecutionMode`
 
-`Convai.Runtime.Components`
+`Convai.Runtime.Actions`
 
 | Value | Integer | Description |
 | --- | --- | --- |
@@ -520,6 +583,7 @@ Constraints: `DisallowMultipleComponent`, `RequireComponent(ConvaiCharacter)`
 
 | Property | Type | Description |
 | --- | --- | --- |
+| `Actions` | `ConvaiCharacterActions` | Lazily created runtime registration and availability surface for this character. |
 | `ActionConfig` | `ConvaiActionConfig` | Returns a clone of the active session's action config. May be `null` before connect |
 
 ### Methods
@@ -531,6 +595,12 @@ Constraints: `DisallowMultipleComponent`, `RequireComponent(ConvaiCharacter)`
 {% hint style="info" %}
 Runtime updates to the current attention object are handled by the dynamic context system, not by `ConvaiCharacter` directly. See [How action target resolution works](attention-and-reference-grounding.md#runtime-attention-api).
 {% endhint %}
+
+## `CharacterActionReceived`
+
+`Convai.Domain.DomainEvents.Runtime` — received through `ConvaiManager.Events.OnCharacterActionReceived`. `TurnId` is a `string` containing the SDK-resolved reply identity, or empty when unavailable; the action payload itself does not supply that identity. Custom command queues can associate work with the reply and stop queued work when the reply is cut short. The SDK already drops late batches for interrupted or aborted replies before dispatch.
+
+Runtime action patches use `bool IConvaiDynamicContext.Apply(ConvaiDynamicContextUpdate update)`: true is local submission, false is local refusal. Neither is an acknowledgement. See [Update actions at runtime](update-actions-at-runtime.md).
 
 ## `RoomSessionConnectOptions` — action fields
 
@@ -653,12 +723,14 @@ Constraints: `DisallowMultipleComponent`, `RequireComponent(ConvaiCharacter)`
 
 See [Troubleshoot character actions](debugging-and-troubleshooting.md) for the full Inspector field reference and usage guide.
 
-### Context menu actions
+### Methods
 
-| Command | Effect |
-| --- | --- |
-| `Inject Test Batch` | Submits a `Move To` command targeting the first registered object to the dispatcher. Tests the pipeline without a live conversation |
-| `Reset Probe State` | Resets all counters and text fields to zero/empty |
+These are public C# methods, not component context-menu items.
+
+| Method | Signature | Effect |
+|---|---|---|
+| `InjectTestBatch` | `void InjectTestBatch()` | Picks the first available configured action and first nonblank configured object name, then submits a local test batch. |
+| `ResetProbeState` | `void ResetProbeState()` | Clears recorded counters and text. |
 
 ## Next steps
 

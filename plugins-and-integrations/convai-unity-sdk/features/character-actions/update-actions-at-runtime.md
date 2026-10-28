@@ -3,7 +3,7 @@ title: Update character actions at runtime
 description: >-
   Send an action configuration patch mid-session, track its update ID, and
   confirm the backend's acknowledgement before assuming the change applied.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Use `ConvaiActionConfigPatch` with `ConvaiCharacter.DynamicContext.Apply` to replace a connected character's actions, objects, characters, or attention target without disconnecting the session. Use this when scene state changes after connect — a new object appears, a target becomes unavailable — and the character's affordances need to catch up. The patch only takes effect after Convai returns a successful acknowledgement for its update ID.
@@ -59,16 +59,20 @@ Pass the patch to `DynamicContext.Apply` with an explicit `updateId` so you can 
 using Convai.Runtime;
 using Convai.Runtime.DynamicContext;
 
-character.DynamicContext.Apply(new ConvaiDynamicContextUpdate(
+string updateId = System.Guid.NewGuid().ToString("N");
+bool submitted = character.DynamicContext.Apply(new ConvaiDynamicContextUpdate(
     text: null,
     reaction: ConvaiRespondMode.Silent,
     currentAttentionObject: "Lever",
-    updateId: "lever-unlock-01",
+    updateId: updateId,
     actionConfig: patch));
+
+if (!submitted)
+    UnityEngine.Debug.LogWarning("Action patch was refused locally; inspect the Console before resending.");
 ```
 
 {% hint style="warning" %}
-Sending a patch does not change `ConvaiCharacter.ActionConfig` immediately. Acknowledgements commit in the order the updates were sent. An error status, a mismatched acknowledgement, a disconnect, or the 30-second acknowledgement timeout discards the pending mutation without retrying it — `ActionConfig` always reflects the latest backend-confirmed snapshot, not the latest patch you sent.
+Sending a patch does not change `ConvaiCharacter.ActionConfig` immediately. Acknowledgements commit in the order the updates were sent. An error, mismatch, disconnect, or 30-second expiry discards the pending local mutation. `submitted == true` means accepted for local submission, not acknowledged or applied. In group rooms, a successful acknowledgement without verification counts can be applied as unverified with a warning.
 {% endhint %}
 {% endstep %}
 {% endstepper %}
@@ -81,7 +85,7 @@ An `updateId` can only have one pending runtime action mutation at a time. Sendi
 
 ## Read the backend acknowledgement
 
-Subscribe to `ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived` and filter by the `updateId` you sent:
+Subscribe before submitting, retain the unique `updateId` in your component, and unsubscribe when the listener is disabled. The following callback fragment checks the received status. Ordinary rooms should also check any available sender identity; group rooms can relay an acknowledgement through any participant, so check `membership_id` when present and the unique update ID instead of filtering solely by sender `CharacterId`:
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
@@ -89,16 +93,16 @@ using Convai.Runtime.Components;
 
 ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived += result =>
 {
-    if (result.UpdateId != "lever-unlock-01")
+    if (result.UpdateId != updateId)
         return;
 
     if (result.Status == "success")
     {
-        Debug.Log($"Actions confirmed: objects={result.ObjectsCount}, attention={result.CurrentAttentionObject}");
+        UnityEngine.Debug.Log($"Action ACK received: objects={result.ObjectsCount}, attention={result.CurrentAttentionObject}");
     }
     else
     {
-        Debug.LogWarning($"Action patch failed: {result.Status}");
+        UnityEngine.Debug.LogWarning($"Action patch failed: {result.Status}");
     }
 };
 ```
@@ -107,7 +111,8 @@ ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived += resul
 
 | Property | Type | Meaning |
 |---|---|---|
-| `UpdateId` | `string` | The ID you supplied on `ConvaiDynamicContextUpdate`. |
+| `UpdateId` | `string` | The unique ID supplied on the update. Use an ID unique across clients in shared rooms. |
+| `CharacterId`, `ParticipantId` | `string` | Sender identity on the acknowledgement. A group relay sender need not be the intended member. |
 | `Status` | `string` | `"success"` when the patch was applied; any other value means it was rejected. |
 | `ActionConfigUpdated` | `bool?` | Whether this acknowledgement includes an action-config change. |
 | `ActionConfigCreated` | `bool?` | Whether the backend created a new action config for the session. |
@@ -120,7 +125,7 @@ ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived += resul
 
 When `ActionGenerationStrategyStatus` is `"requires_reconnect"`, the SDK surfaces that status but does not reconnect automatically — reconnect the session yourself if the new strategy requires it.
 
-To preview a patch's predicted outcome before sending it in code, use the runtime patch composer in the Action Debug window described in [Troubleshoot character actions](debugging-and-troubleshooting.md).
+Use **Runtime Session State & Patch Composer** under **Advanced** in the Actions Editor's **Live** view during Play mode. **Preview** checks the patch without sending it. See [Troubleshoot character actions](debugging-and-troubleshooting.md).
 
 ## Troubleshooting
 
@@ -134,11 +139,15 @@ To preview a patch's predicted outcome before sending it in code, use the runtim
 
 **Verify:** The console shows no rejection warning and `OnDynamicContextUpdateResultReceived` later fires for the same `updateId`.
 
+### Connection or target refuses the update
+
+If `Apply` returns `false`, inspect warnings for `Cannot apply raw dynamic context update: not in conversation`, a missing transport, or `Connection not ready for {purpose}`. An ordinary multi-character room also refuses a raw update for a non-target character. Target the character and submit again when ready; raw updates are not queued. Active group conversations use silent per-member routing instead. See [context in rooms](../dynamic-context/multi-character-and-group-rooms.md).
+
 ### No acknowledgement ever arrives
 
 **Symptom:** `OnDynamicContextUpdateResultReceived` never fires for the `updateId` you sent, and `ConvaiCharacter.ActionConfig` never reflects the patch.
 
-**Cause:** The update was discarded after the 30-second acknowledgement timeout, an ACK error, or malformed/mismatched acknowledgement metadata — the Console logs `Runtime action mutation discarded update_id=<id> reason=<reasonCode>` in these cases. A session disconnect before Convai responded also discards the update, but silently, with no Console message. Discarded updates are not retried automatically.
+**Cause:** The update was discarded after the 30-second acknowledgement timeout, an ACK error, or malformed/mismatched acknowledgement metadata — the Console logs `Runtime action mutation discarded update_id=<id> reason=<reasonCode>` in these cases. A session disconnect before Convai responded also discards the update, but silently, with no Console message. Do not equate this local reconciliation outcome with the transport's safe resend behavior for identified commands.
 
 **Fix:** Resend the patch with a new `updateId` once the character is confirmed connected (`IsInConversation` is `true`).
 

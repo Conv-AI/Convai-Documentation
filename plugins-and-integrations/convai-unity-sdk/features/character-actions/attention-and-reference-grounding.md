@@ -1,7 +1,7 @@
 ---
 title: How action target resolution works
 description: Understand how a spoken reference resolves to a specific scene object or character, from Convai's language match to Unity's local lookup.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 When a player says "pick up that cylinder" or "go to it," two separate systems have to agree on what "that" or "it" means: Convai, which matches the words to a target name, and Unity, which matches that name to a real `GameObject` in the scene. This page explains both steps and the current attention object that steers ambiguous references.
@@ -15,9 +15,9 @@ Convai evaluates two inputs when it decides what a vague reference points to:
 
 `ConvaiActionConfigSource` fixes descriptions at connect time, but an active session can replace the objects or characters list with a `ConvaiActionConfigPatch` — see [Configure character actions](configuring-actions.md) for patch semantics. The current attention object can be changed at any point during an active conversation.
 
-An object does not have to be authored on `ConvaiActionConfigSource` to be known to Convai. A `ConvaiActionTarget` component on the object itself introduces it the moment the component is enabled, following spawns and despawns automatically. An authored entry always wins when both name the same target — see [Character actions scripting reference](actions-scripting-reference.md) for the field-level difference.
+An object does not have to be authored on `ConvaiActionConfigSource` to be known to Convai. A `ConvaiActionTarget` component on the object itself introduces it the moment the component is enabled, following spawns and despawns automatically. The component can bind `MetadataSource` to World Object metadata; [Scene Auto Tagger](../scene-metadata/scene-auto-tagger.md) creates such bindings for generated targets. An authored entry always wins when both name the same target — see [Character actions scripting reference](actions-scripting-reference.md) for the field-level difference.
 
-Once Convai returns an action whose target matched a registered name, Unity exposes the match on the enriched parameter's `ResolvedReference` field as a `ConvaiActionParameterReference` (`Convai.Shared.Types.ConvaiActionParameterReference`). Its `Kind` property is a `ConvaiActionTargetKind` value — `None`, `Object`, or `Character` — telling you whether grounding resolved to a registered object or a registered character. See [Character actions scripting reference](actions-scripting-reference.md) for the full parameter-value type.
+The main action target is exposed as `invocation.ResolvedTarget`, a `ConvaiResolvedActionTarget`. Reference-type parameters use a separate slot: each enriched `ConvaiActionParameterValue.ResolvedReference` is a `ConvaiActionParameterReference`. Do not read a parameter reference to obtain the main target. See [Character actions scripting reference](actions-scripting-reference.md).
 
 ## Write effective object descriptions
 
@@ -56,6 +56,8 @@ The resolved binding determines where a movement or gaze executor goes: `Interac
 
 A target with no `GameObjectReference` and no explicit `TextOnly` flag is reported as a setup error, because a targeted action can never resolve it. Tick `TextOnly` on an entry that deliberately has no scene counterpart — Convai can still talk about it, but no executor will be asked to act on it.
 
+For a `ConvaiLogicalObjectGroup`, targeted gaze, pointing, distance, sound, and facing behaviors resolve a physical member near the character. Walk To instead evaluates complete NavMesh paths across members, preferring usable standing points and falling back to ordinary destinations. A selected exact standing point supplies position and facing and ignores `arriveDistance`. See [Object groups and standing positions](../scene-metadata/group-objects-and-standing-positions.md).
+
 ## Runtime attention API
 
 Update the NPC's current attention object at any point during an active conversation through `ConvaiCharacter.DynamicContext`:
@@ -92,7 +94,7 @@ character.DynamicContext.SetCurrentAttentionObject("GasValve");
 character.DynamicContext.SetCurrentAttentionObject("GasValve", ConvaiRespondMode.MustRespond);
 ```
 
-Attention changes are staged locally and sent in the next dynamic-context batch (up to `ConvaiCharacter.DynamicContextBatchDelaySeconds`, 0.5 seconds by default), or immediately when you call `character.DynamicContext.Flush()`.
+Attention changes are staged locally and sent in the next dynamic-context batch (0.5 seconds after the latest staged change by default, with a 3-second batching ceiling), or when you call `character.DynamicContext.Flush()`, subject to [room delivery rules](../dynamic-context/multi-character-and-group-rooms.md).
 
 ## Silent failure conditions
 
@@ -104,9 +106,11 @@ Invalid updates are rejected before they are staged. A warning is logged to the 
 | --- | --- |
 | `currentAttentionObject` is `null` | Rejected. Warning: `Dynamic context attention object cannot be null` |
 | Object name not in the active action-config objects | Rejected. Warning: `Dynamic context attention update rejected (invalid_attention): current_attention_object 'X' is not present in action_config.objects` |
-| Character not yet ready, or not in an active conversation | Staged locally and sent automatically once the character is ready. No warning is logged. |
+| Character not ready or not in conversation | Valid attention can stage for later delivery, but the name must already pass current action-config validation. Missing objects or no usable action config still reject it. |
 
-The object name must match an entry in `ConvaiActionConfigSource.Objects` (case-insensitive). It does not need to match the `GameObjectReference` name — it must match the `Name` field in the object definition.
+The name must match an object in the character's current action configuration (case-insensitive), including valid runtime registrations. Pending registrations are flushed before attention validation; merely having scene metadata is not sufficient. A source with no available runnable actions can produce no action configuration. It does not need to match the `GameObjectReference` name — it must match the `Name` field in the object definition.
+
+The Gaze Dynamic Context Bridge checks that its chosen World Object exists in the runtime action-config objects before publishing attention. In 5.0 it quietly clears or skips attention when that registration is absent. See [Gaze](../../embodiment/gaze/README.md).
 
 ## Attention scope
 
