@@ -3,10 +3,10 @@ title: AI coding assistant quick start
 description: >-
   Open the AI Coding section of the Convai Editor, accept the Unity MCP
   terms, install a coding agent's instructions, and verify Convai's tools.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-Convai extends Unity's MCP server with SDK-aware tools so a coding agent such as Codex, Claude Code, or Cursor can configure Convai components directly in your project. Use this quick start the first time you connect an agent to a project that already has the Convai Unity SDK installed. At the end, your agent has managed instructions installed and the AI Coding section reports every Convai tool as registered.
+Convai extends Unity's MCP server with SDK-aware tools so a coding agent such as Codex, Claude Code, or Cursor can configure Convai components directly in your project. Use this quick start the first time you connect an agent to a project that already has the Convai Unity SDK installed. At the end, your agent can find the project skill or managed instructions and the AI Coding section reports every Convai tool as registered.
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ Convai extends Unity's MCP server with SDK-aware tools so a coding agent such as
 
 In the Unity Editor menu bar, select **Convai > Convai Editor**. In the window's navigation rail, select **AI Coding**.
 
-The section's **Setup Health** card reports four readiness rows: **Unity 6000+**, **Unity AI Assistant**, **Packaged Convai Skill**, and **Convai MCP Tools**. Each row reads **Ready** or **Needs attention**.
+The section's **Setup Health** card reports four readiness rows: **Unity 6000+**, **Unity AI Assistant**, **Packaged Convai Skill**, and **Convai MCP Tools**. Three more rows report **Claude MCP configuration**, **ChatGPT / Codex app**, and **Unity plugin (Codex)**. These last three are read-only installation/configuration checks, not proof that an agent is connected.
 {% endstep %}
 
 {% step %}
@@ -35,38 +35,31 @@ Unity may prompt you to accept the Unity AI Assistant and MCP server terms of se
 {% step %}
 ### Resolve any row that shows a warning
 
-Each unready row shows a **Fix** button. Click **Fix** next to **Unity AI Assistant** to install `com.unity.ai.assistant@2.14.0-pre.1` through Package Manager — Unity recompiles and the row updates automatically. Click **Fix** next to **Packaged Convai Skill** or **Convai MCP Tools** to refresh package assets and re-register Convai's tools without reinstalling the Assistant package.
+A repairable unready row shows a **Fix** button. Unity version and client-detection rows have no repair button. Click **Fix** next to **Unity AI Assistant** to install `com.unity.ai.assistant@2.14.0-pre.1` through Package Manager — Unity recompiles and the row updates automatically. Click **Fix** next to **Packaged Convai Skill** or **Convai MCP Tools** to refresh package assets and re-register Convai's tools without reinstalling the Assistant package.
 {% endstep %}
 {% endstepper %}
 
 {% hint style="warning" %}
-Clicking **Fix** while Unity is compiling, updating packages, or in Play Mode shows a warning and does not start the repair — exit Play Mode first, since repair never exits Play Mode for you. A **Fix** button is only disabled outright while a repair it started is already running.
+Clicking **Fix** while Unity is compiling, updating packages, or in Play Mode shows a warning and does not start the repair — exit Play Mode first, since repair never exits Play Mode for you. All **Fix** buttons are disabled while any repair is running. The tools repair also requires a compatible Unity AI Assistant package.
 {% endhint %}
 
-## Install your coding agent's managed instructions
+## Configure the client and install its skill
 
-{% stepper %}
-{% step %}
-### Choose your coding agent
+1. Click **Open Unity MCP Server Settings** and follow Unity's client configuration. Choose **Codex** for ChatGPT / Codex.
+2. Return to **AI Coding**. In the **Claude Code** or **ChatGPT / Codex** card, click **Install** beside **Project skill**. See [Install the project skill](install-project-skill.md) for existing or modified copies.
+3. Optionally install **Project instructions** in that card. For Cursor, Gemini, or VS Code Copilot, install the instructions under **Other AI Clients** instead.
+4. Start or reconnect your coding client so it can load the project skill and the Unity tools.
 
-Scroll to the **Managed Project Instructions** card. Convai lists each supported agent with the file it manages — for example `AGENTS.md` for Codex, `CLAUDE.md` for Claude Code, and `.cursor/rules/convai-unity-sdk.mdc` for Cursor. See [Supported coding agents](supported-coding-agents.md) for the complete list and per-agent notes.
-{% endstep %}
+Instruction installation preserves text outside the `<!-- BEGIN CONVAI UNITY SDK -->` and `<!-- END CONVAI UNITY SDK -->` block. With an installed project copy, the block names the skill; otherwise it points to the resolved packaged `SKILL.md`.
 
-{% step %}
-### Install the managed instructions
-
-Click **Install** next to your agent. Convai writes a sentinel-delimited block, marked by `<!-- BEGIN CONVAI UNITY SDK -->` and `<!-- END CONVAI UNITY SDK -->`, into that agent's file without disturbing any existing content. The button changes to **Update** once the block exists, and **Remove** becomes available to delete it later.
-{% endstep %}
-{% endstepper %}
-
-The managed instructions direct your agent to read `Packages/com.convai.convai-sdk-for-unity/AIAssistantSkills/convai-unity-sdk/SKILL.md` and its linked references, use Unity's generic MCP tools for GameObjects, scripts, and scenes, and use Convai's tools for SDK configuration and diagnosis.
+<figure><img src="../../../.gitbook/assets/unity-ai-coding.png" alt="Convai Editor AI Coding section with setup health and client installation cards"><figcaption><p>The AI Coding section separates Unity setup checks, project skills, and project instructions.</p></figcaption></figure>
 
 ## Verify the tool count
 
-The **Convai MCP Tools** row reads `44/44 registered` once Unity's MCP registry has registered all 44 Convai tools under tool contract version 7. If the count is lower or the row lists a missing or unexpected tool name, click **Fix** next to **Convai MCP Tools** to refresh the registry and recompile.
+The **Convai MCP Tools** row reads `47/47 registered` once Unity's MCP registry has registered all 47 Convai tools under tool contract version 10. If the count is lower or the row lists a missing or unexpected tool name, click **Fix** next to **Convai MCP Tools** to refresh the registry and recompile.
 
 {% hint style="success" %}
-Setup is complete when all four rows read **Ready** and **Convai MCP Tools** reads `44/44 registered`.
+The Unity side is ready when the four readiness rows read **Ready** and **Convai MCP Tools** reads `47/47 registered`. From the coding client, call `Convai.GetProjectStatus` and confirm contract version `10`, then `Convai.InspectScene`. Those successful read-only calls verify the connection. Installation-detection rows need only match the client you use.
 {% endhint %}
 
 ## Prompt the agent to build your scene
@@ -82,7 +75,7 @@ With managed instructions installed and the tool count verified, prompt your age
 | Enable vision | "Turn on vision for the Instructor character so it can see the workbench." |
 | Add a second character | "Add a second Convai Character named Trainee, and switch conversation targeting to Proximity." |
 
-Vision setup is not among Convai's 44 tools, so your agent configures it by editing `ConvaiRoomManager` and adding `ConvaiVisionPublisher` directly. See [Vision quick start](../features/vision/quick-start.md) for the exact fields it sets.
+Vision setup is not among Convai's 47 tools, so your agent configures it by editing `ConvaiRoomManager` and adding `ConvaiVisionPublisher` directly. See [Vision quick start](../features/vision/quick-start.md) for the exact fields it sets.
 
 ## What to try next
 

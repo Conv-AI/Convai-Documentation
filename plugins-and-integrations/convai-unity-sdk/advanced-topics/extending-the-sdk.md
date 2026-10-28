@@ -1,7 +1,7 @@
 ---
 title: Runtime module system
 description: Understand the Convai runtime module system, including when to use custom modules, the module lifecycle states, and which SDK extension points are safe to use.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 The Convai Unity SDK is built around a module system that gives optional features — lip sync, emotion, vision, narrative design — a defined place in the runtime lifecycle. You can add your own modules using the same system: they receive the same startup sequence, access the same services, and can share interfaces with other modules.
@@ -17,9 +17,9 @@ A custom module is the right tool when you need behavior that:
 
 You do not need a custom module for:
 
-* Reacting to SDK events in a MonoBehaviour — subscribe directly via `context.Events` from an `IInjectable` component, or use the public events on `ConvaiCharacter`
+* Reacting to SDK events in a MonoBehaviour — subscribe via `dependencies.EventHub` from an `IInjectable` component, or use the public events on `ConvaiCharacter`
 * Simple custom behavior on a character — add a MonoBehaviour to the character's GameObject
-* Calling the Convai REST API from your own scripts — use `ConvaiManager.ActiveManager` directly
+* Calling the Convai REST API from your own scripts — create a `ConvaiRestClient` with `ConvaiRestOptionsFactory.Create()`
 
 If in doubt, start with a `MonoBehaviour` and only escalate to `IConvaiModule` when you need lifecycle integration.
 
@@ -61,11 +61,10 @@ Use only the public extension points listed below. Internal types and platform-s
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Custom module behavior | Implement `IConvaiModule` and register via `RegisterModule()` or `AddModule()` |
 | Inter-module services | `ProvideModuleService<T>()` / `TryGetModuleService<T>()` |
-| Custom credentials | Override `CreateRuntimeBuilder()` and call `builder.UseConfig()` |
+| Runtime credentials | Use `IConvaiAuthTokenProvider` or `ConnectWithAuthTokenAsync` in Auth Token mode |
 | Custom identity | `SetEndUserIdentityProvider()` / `SetEndUserMetadataProvider()`, or builder |
-| Custom persistence | Override `CreateRuntimeBuilder()` and call `builder.UsePersistence()` |
 | Character-level component integration | Implement `IInjectable<IConvaiCharacterDependencies>` on a MonoBehaviour in the character's hierarchy |
-| Event subscriptions | `IEventHub.Subscribe<T>()` / `Unsubscribe<T>()` |
+| Event subscriptions | `IEventHub.Subscribe<T>()` / `Unsubscribe(token)` |
 | Log routing | `ConvaiLogger.RegisterSink(ILogSink)` |
 
 ### Internal APIs — do not override
@@ -74,7 +73,7 @@ Use only the public extension points listed below. Internal types and platform-s
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------ |
 | `ConvaiRuntime` internals | Private by design; subject to change without notice |
 | Transport layer (`ITransportProvider` implementations) | Platform-specific; overriding breaks platform support |
-| RTVI protocol handler (`RTVIHandler`) | Serialization format is tied to Convai's backend — any override desyncs the protocol |
+| RTVI protocol handler (`RTVIHandler`) | Serialization format is tied to Convai — any override desyncs the protocol |
 | `ConvaiRoomManager` internals | Room coordinator internals are not extension points |
 | Module execution ordering beyond `RequiredModules` | The topological sort is automatic; do not rely on registration order |
 

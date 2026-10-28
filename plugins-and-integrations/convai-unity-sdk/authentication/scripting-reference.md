@@ -1,6 +1,6 @@
 ---
 title: Authentication scripting reference
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 description: Reference for the Convai Unity SDK authentication API, including the token provider interface, registry, and settings accessors.
 ---
 
@@ -43,6 +43,10 @@ The result returned by `IConvaiAuthTokenProvider.GetTokenAsync`.
 | `Token` | `string` | The resolved auth token. Empty when `IsSuccess` is `false`. |
 | `ExpiresAtUtc` | `DateTimeOffset?` | Optional expiration time for the token, normalized to UTC. `null` if not supplied. |
 | `ErrorMessage` | `string` | The failure reason. Empty when `IsSuccess` is `true`. |
+
+### Construction
+
+The public constructor is `AuthTokenResult(string token, DateTimeOffset? expiresAtUtc = null, string errorMessage = null)`. A blank token without an explicit error produces `Auth token provider returned an empty token.` Expiry is informational: the SDK does not schedule refresh or mid-session rotation from this value.
 
 ### Factory methods
 
@@ -88,7 +92,7 @@ Adapts a developer-supplied async delegate into a provider, for cases that do no
 | --- | --- | --- |
 | `DelegateAuthTokenProvider` | `DelegateAuthTokenProvider(Func<CancellationToken, Task<string>> getTokenAsync)` | Wraps `getTokenAsync`, which is invoked once per `GetTokenAsync` call. Throws `ArgumentNullException` if `getTokenAsync` is `null`. |
 
-`GetTokenAsync` returns `AuthTokenResult.Failed` when the delegate returns `null`, an empty task, or a `null`/whitespace-only string; otherwise it returns `AuthTokenResult.Succeeded` with the trimmed token.
+`GetTokenAsync` returns `AuthTokenResult.Failed` for a null task, a blank result, or an exception. Cancellation propagates. A non-empty result becomes `AuthTokenResult.Succeeded` with the trimmed token.
 
 ## `ConvaiAuthMode`
 
@@ -99,7 +103,7 @@ Authentication strategy used for runtime Convai room connections.
 | Value | Integer | Description |
 | --- | --- | --- |
 | `ApiKey` | `0` | Read the account API key from `ConvaiSettings`. Default. |
-| `AuthToken` | `1` | Resolve a short-lived auth token from a registered provider or a configured endpoint. |
+| `AuthToken` | `1` | Resolve an explicit token, a registered provider, or a configured endpoint. |
 
 ## `ConvaiAuthTokenHttpMethod`
 
@@ -160,14 +164,18 @@ Every failure below carries a `ConvaiOperationException`, and how you receive it
 
 | Error code | Message | Cause |
 | --- | --- | --- |
-| `ConnectionInvalidToken` | `A non-empty Convai auth token is required.` | `authToken` was empty or whitespace-only. |
-| `ConnectionBadRequest` | `A non-empty end-user ID is required.` | `endUserId` was empty or whitespace-only. |
-| `ConnectionBadRequest` | `A non-empty end-user name is required.` | `endUserName` was empty or whitespace-only. |
-| `ConnectionFailed` | `ConvaiRoomManager not available.` | No room manager is present on the manager object. |
-| `ConfigAuthTokenModeRequired` | `Explicit auth-token connections require Auth Token mode in Convai Project Settings.` | The project's authentication mode is `ConvaiAuthMode.ApiKey`. |
-| `ConnectionInvalidToken` | `Connection token is invalid` | Convai rejected the supplied token. |
+| `ConnectionInvalidToken` (`connection.invalid_token`) | `A non-empty Convai auth token is required.` | `authToken` was empty or whitespace-only. |
+| `ConnectionBadRequest` (`connection.bad_request`) | `A non-empty end-user ID is required.` | `endUserId` was empty or whitespace-only. |
+| `ConnectionBadRequest` (`connection.bad_request`) | `A non-empty end-user name is required.` | `endUserName` was empty or whitespace-only. |
+| `ConnectionFailed` (`connection.failed`) | `ConvaiRoomManager not available.` | No room manager is present on the manager object. |
+| `ConfigAuthTokenModeRequired` (`config.auth_token_mode_required`) | `Explicit auth-token connections require Auth Token mode in Convai Project Settings.` | The project's authentication mode is `ConvaiAuthMode.ApiKey`. |
+| `ConnectionConnectInvalidApiKey` (`connection.connect_invalid_api_key`) | Response message | The connect request returned HTTP `401`. |
 
-The first four are raised before any network work starts; the last two during the connection attempt. Both reach the caller the same way.
+The first five are raised before network work. The HTTP response row is classified after the connect request. Both reach the caller the same way.
+
+Identity validation also reports `connection.bad_request` for IDs over `512` characters, names over `255`, or metadata that cannot be sent as JSON. A missing-ID response maps to `connection.connect_end_user_id_required`.
+
+Provider and endpoint failures use `SessionErrorCodes.ConnectionAuthTokenFetchFailed` (`connection.auth_token_fetch_failed`) with the source's failure message.
 
 ## `ConvaiSettings` authentication accessors
 
@@ -185,6 +193,12 @@ The first four are raised before any network work starts; the last two during th
 | `HasValidAuthConfig` | `bool` | `true` when the selected mode has enough configuration to attempt a connection: for `ApiKey`, an API key is present; for `AuthToken`, either a provider is registered with `ConvaiAuthTokenProviderRegistry` or a valid endpoint URL is configured. |
 
 Endpoint URL validation — HTTPS required, except for HTTP loopback addresses during local development — is applied internally when the SDK resolves a token from the configured endpoint. There is no public method to run that check from your own code; read `HasValidAuthConfig` instead to confirm the project has enough configuration to connect.
+
+## Related public contracts
+
+`IAsyncCredentialProvider` declares `Task EnsureCredentialsAsync(CancellationToken cancellationToken)`. The runtime invokes it before reading a credential when its selected provider implements it. It is not a registration hook for replacing the default credential provider; use `IConvaiAuthTokenProvider` for application token integration.
+
+The Editor-only `Convai.Editor.ConvaiEditorApiKeyAuthTokenProvider.FetchTokenAsync(CancellationToken)` returns `Task<AuthTokenResult>` by exchanging the saved account key. It is unavailable in player assemblies.
 
 ## Next steps
 

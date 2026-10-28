@@ -1,6 +1,6 @@
 ---
 title: Write a custom token provider
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 description: Register a custom credential provider so your backend issues short-lived Convai auth tokens automatically for each connection.
 ---
 
@@ -33,23 +33,31 @@ using Convai.Runtime.Core.Configuration;
 
 public sealed class MyAuthTokenProvider : IConvaiAuthTokenProvider
 {
+    private readonly Func<CancellationToken, Task<string>> requestToken;
+
+    public MyAuthTokenProvider(Func<CancellationToken, Task<string>> requestToken)
+    {
+        this.requestToken = requestToken ?? throw new ArgumentNullException(nameof(requestToken));
+    }
+
     public async Task<AuthTokenResult> GetTokenAsync(CancellationToken cancellationToken)
     {
         try
         {
-            string token = await MyBackend.RequestConvaiTokenAsync(cancellationToken);
-            return string.IsNullOrWhiteSpace(token)
-                ? AuthTokenResult.Failed("My backend returned an empty token.")
-                : AuthTokenResult.Succeeded(token);
+            string token = await requestToken(cancellationToken);
+            return AuthTokenResult.Succeeded(token);
         }
+        catch (OperationCanceledException) { throw; }
         catch (Exception exception)
         {
-            return AuthTokenResult.Failed($"My backend request failed ({exception.GetType().Name}).");
+            return AuthTokenResult.Failed($"Token request failed ({exception.GetType().Name}).");
         }
     }
 }
 ```
 {% endcode %}
+
+Supply your login service's token request delegate when constructing this provider.
 
 {% hint style="warning" %}
 `IConvaiAuthTokenProvider` implementations must not log or persist the returned token. Treat it as a short-lived secret scoped to a single connection attempt.
@@ -59,26 +67,7 @@ public sealed class MyAuthTokenProvider : IConvaiAuthTokenProvider
 
 Register the provider with `ConvaiAuthTokenProviderRegistry` before the first connection attempt, typically from an early `Awake`:
 
-```csharp
-using Convai.Runtime.Core.Configuration;
-using UnityEngine;
-
-public sealed class AuthBootstrap : MonoBehaviour
-{
-    private MyAuthTokenProvider _provider;
-
-    private void Awake()
-    {
-        _provider = new MyAuthTokenProvider();
-        ConvaiAuthTokenProviderRegistry.Register(_provider);
-    }
-
-    private void OnDestroy()
-    {
-        ConvaiAuthTokenProviderRegistry.Unregister(_provider);
-    }
-}
-```
+The shipped `LocalServerAuthTokenProviderExample` in `SamplesShared/Scripts/Runtime` is a complete component example. It uses `[DefaultExecutionOrder(-1200)]`, registers itself in `Awake`, and unregisters in `OnDestroy`. Its matching local server is in `Documentation~/Examples/AuthTokenServer`; see [Mint auth tokens on your backend](mint-tokens-on-your-backend.md).
 
 `ConvaiAuthTokenProviderRegistry.Register` replaces whichever provider is currently registered. `Unregister(provider)` removes it only if it is still the active registration; `Unregister()` with no argument and `Clear()` both remove whichever provider is active.
 
@@ -91,18 +80,17 @@ public sealed class AuthBootstrap : MonoBehaviour
 For a provider that only needs a single async lookup, wrap a lambda in `DelegateAuthTokenProvider` instead of writing a full class:
 
 ```csharp
-using Convai.Runtime.Core.Configuration;
-
+// Inside your login bootstrap, after creating your token request delegate:
+// pseudocode: RequestTokenAsync is supplied by your login service.
 ConvaiAuthTokenProviderRegistry.Register(
-    new DelegateAuthTokenProvider(async cancellationToken =>
-        await MyBackend.RequestConvaiTokenAsync(cancellationToken)));
+    new DelegateAuthTokenProvider(RequestTokenAsync));
 ```
 
-`DelegateAuthTokenProvider` wraps a `Func<CancellationToken, Task<string>>`. It fails with `AuthTokenResult.Failed` if the delegate returns `null`, an empty task, or an empty string, so your delegate only needs to return the token string or throw.
+A null task fails with `Auth token delegate returned no task.` A task yielding a blank token fails with `Auth token delegate returned an empty token.` Exceptions become `Auth token delegate failed ({Type}).`; cancellation propagates separately.
 
 ## Verify the setup
 
-Enter Play mode and connect a character. If the provider resolves correctly, the connection proceeds with no auth-related error. If it fails, the connection surfaces the message from `AuthTokenResult.Failed` through the normal connection error path.
+Enter Play mode and connect a character. If the provider resolves correctly, the connection proceeds with no auth-related error. If it fails, the connection reports `connection.auth_token_fetch_failed` with the provider's failure message. Register before the room manager starts, or explicitly call `ConnectAsync` after registration. When no source exists at startup, automatic connection is skipped, with only a Debug-level lazy-connection message.
 
 ## Next steps
 
