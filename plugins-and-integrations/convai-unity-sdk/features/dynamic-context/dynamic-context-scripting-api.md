@@ -3,7 +3,7 @@ title: Dynamic context scripting API
 description: >-
   Reference for the Convai Unity SDK dynamic context scripting interface,
   including every method, the respond mode enum, and the attention object API.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 `ConvaiCharacter.DynamicContext` returns the `IConvaiDynamicContext` interface — the scripting surface for tracked state, chronological events, attention-object updates, and raw context sends. This page documents every interface member, the `ConvaiRespondMode` enum that controls whether an update triggers a spoken reply, and the `ConvaiDynamicContextUpdate` type used by `Apply`.
@@ -15,11 +15,11 @@ using Convai.Runtime.DynamicContext;
 IConvaiDynamicContext context = character.DynamicContext;
 ```
 
-`DynamicContext` is available on every `ConvaiCharacter` instance and requires no additional setup. Every method below takes a `ConvaiRespondMode` value to control whether the update triggers a spoken reply.
+`DynamicContext` is available on every `ConvaiCharacter` instance and requires no additional setup. `SetState`, `SetStates`, `AddEvent`, and the attention methods accept a `ConvaiRespondMode` request. `RemoveState`, `Reset`, `Flush`, and `TryGetStateValue` do not; raw `Apply` takes its reaction from the update object.
 
 ## Method reference
 
-Every tracked method below stages its change in the local tracker; Convai receives the update in the next dynamic context batch — a background flush that fires after `ConvaiCharacter.DynamicContextBatchDelaySeconds` (0.5 seconds by default) or immediately when `Flush()` is called, capped at an internal maximum delay so staged changes are never held indefinitely. When more than one reaction is requested before a batch flushes, the strongest value wins for the whole batch, ranked `Silent` < `Auto` < `MustRespond`. See [Sync behavior and timing](sync-behavior-and-timing.md) for the exact batch window and message content.
+Every tracked method below stages its change in the local tracker; Convai receives the update in the next dynamic context batch — a background flush that fires after `ConvaiCharacter.DynamicContextBatchDelaySeconds` (0.5 seconds by default) or immediately when `Flush()` is called, with a 3-second batching ceiling. Connection and room holds can delay delivery beyond that ceiling. When more than one reaction is requested before a batch flushes, the strongest value wins for the whole batch, ranked `Silent` < `Auto` < `MustRespond`. See [Sync behavior and timing](sync-behavior-and-timing.md) for the exact batch window and message content.
 
 ### `SetState`
 
@@ -69,7 +69,7 @@ character.DynamicContext.SetStates(
 void AddEvent(string text, ConvaiRespondMode reaction = ConvaiRespondMode.Auto)
 ```
 
-Appends a chronological event entry. Events accumulate after all states in the canonical context and are never replaced by a later call.
+Appends a chronological event entry after the states in canonical context. A pending batch holds at most 64 distinct events; additional events drop the oldest pending event and log a warning on the first drop in that batch. This is a pending-batch limit, not a total session-history limit.
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
@@ -140,7 +140,7 @@ Stages a clear for the current attention object. Convai treats the character as 
 void Flush()
 ```
 
-Sends any staged dynamic context (and pending scene-metadata) changes immediately, without waiting for the batch window. `Flush` is a no-op when the character is not in an active conversation — staged data remains pending and is included in the batch sent automatically once the character becomes ready.
+Attempts to send staged context and pending scene-metadata changes without the batch delay. Connection and room holds retain staged data. Ordinary non-target characters wait for targeting; group members use a separate silent route. A local send refusal can drop the batch. See [room delivery rules](multi-character-and-group-rooms.md).
 
 ### `TryGetStateValue`
 
@@ -167,10 +167,10 @@ else
 ### `Apply`
 
 ```csharp
-void Apply(ConvaiDynamicContextUpdate update)
+bool Apply(ConvaiDynamicContextUpdate update)
 ```
 
-Sends a raw typed update directly to the transport layer, bypassing the local tracker and the batch queue. Use for advanced cases that construct context text externally, or that combine a context update with a runtime action-config patch or attention-object change in one message — see [`ConvaiActionConfigPatch`](../character-actions/actions-scripting-reference.md#convaiactionconfigpatch) in the character actions scripting reference.
+Attempts a raw typed update directly, bypassing the local tracker and batch queue. Returns `true` when accepted for local submission, not when acknowledged or applied; returns `false` when validation, readiness, reconciliation, or routing refuses the update. Use for advanced cases that construct context text externally, or that combine a context update with a runtime action-config patch or attention-object change in one message — see [`ConvaiActionConfigPatch`](../character-actions/actions-scripting-reference.md#convaiactionconfigpatch) in the character actions scripting reference.
 
 | Parameter | Type | Description |
 |---|---|---|
@@ -180,7 +180,9 @@ Sends a raw typed update directly to the transport layer, bypassing the local tr
 |---|---|
 | `update` is `null` | Warning: `Raw dynamic context update cannot be null`. Call returns without sending. |
 | `update.Mode` is not `Reset`, and `Text`, `ActionConfig`, and `CurrentAttentionObject` are all `null` | Warning: `Raw dynamic context updates require text, action_config, current_attention_object, or Reset mode`. Call returns without sending. |
-| Character is not in an active conversation | Warning: `Cannot apply raw dynamic context update: not in conversation`. Update discarded. |
+| Character is not in an active conversation | Warning: `Cannot apply raw dynamic context update: not in conversation`. Returns `false`. |
+| Ordinary multi-character room targets another character | Returns `false`; no raw update is queued. Group rooms use member routing instead. |
+| Transport unavailable, connection not ready, invalid action patch, or local send refusal | Returns `false`; inspect the Console warning and correct the cause before resubmitting. |
 
 {% hint style="danger" %}
 **`Apply` does not queue or batch.** If the character is not in an active conversation, Convai discards the update and logs a warning — nothing is sent and nothing is retried. Values sent through `Apply` bypass the local tracker: `TryGetStateValue` returns `false` for keys sent this way. Use the tracked methods (`SetState`, `SetStates`, `AddEvent`, `RemoveState`, `Reset`) for all standard context management.
@@ -210,7 +212,7 @@ new ConvaiDynamicContextUpdate(
 | `reaction` | `ConvaiRespondMode` | `Auto` | Whether the update triggers a spoken reply. |
 | `removeStatic` | `bool` | `false` | When `mode` is `Reset` and this is `true`, also asks Convai to remove the character's static initial dynamic context for the session. |
 | `currentAttentionObject` | `object` | `null` | Attention object to set alongside this update. Accepts a `string` object name or a `ConvaiActionObjectDefinition` reference. |
-| `updateId` | `string` | `null` | Correlates this update with its backend acknowledgement. Auto-generated when omitted. |
+| `updateId` | `string` | `null` | Correlates this update with its backend acknowledgement. Supply a unique explicit ID for raw text/reset correlation. An omitted ID is generated only when the update includes action or attention mutations. |
 | `actionConfig` | `ConvaiActionConfigPatch` | `null` | Runtime action-config patch to apply alongside this context update. See [Character actions scripting reference](../character-actions/actions-scripting-reference.md#convaiactionconfigpatch). |
 
 ## `ConvaiContextUpdateMode`
@@ -225,13 +227,13 @@ Used by `Apply` and `ConvaiDynamicContextUpdate`.
 
 ## `ConvaiRespondMode`
 
-`Convai.Runtime` — the single respond-mode vocabulary shared by dynamic context and dynamic vision.
+`Convai.Runtime` — the respond-mode request shared by dynamic context and dynamic vision. The acknowledged `ActualRunLlm` can differ from the requested mode.
 
 | Value | Wire string | Description |
 |---|---|---|
-| `Silent` | `silent` | Absorbed into the character's awareness; never triggers a spoken reply on its own. |
+| `Silent` | `silent` | Requests an update without starting a response. |
 | `Auto` | `auto` | Convai decides whether the update warrants a spoken reply. |
-| `MustRespond` | `must_respond` | Always triggers a spoken reply after the update. |
+| `MustRespond` | `must_respond` | Requests a response. It is not a speech guarantee; group context is forced to `Silent`. |
 
 ## Default reaction mode reference
 

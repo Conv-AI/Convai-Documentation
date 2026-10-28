@@ -1,12 +1,46 @@
 ---
 title: Action executors
 description: Reference for all 21 built-in action executor components, grouped by pack, with every Inspector field, default, and required peer.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Executors are the components that perform in-scene behavior when the dispatcher runs an action step — an NPC that walks, points, changes mood, or plays a sound. 21 executor components ship with the Convai SDK, grouped into six packs. Every one carries a `ConvaiActionArchetype` attribute, so adding one from the Actions Editor's **+ Add Action ▾** catalog pre-fills its action name, description, target requirement, and any parameters — no manual authoring required to get a working action.
 
 All 21 derive from `ConvaiActionExecutorBase` (`Convai.Runtime.Actions`), most through `ConvaiTargetedActionExecutor` or the generic `ConvaiCharacterActionExecutor<TPeer>`. An executor built on `ConvaiCharacterActionExecutor<TPeer>` exposes one extra Inspector field beyond what is listed per executor below — **Character Component**, a reference to the peer component (for example `ConvaiGazeController`) it works through. Leave it empty and the executor finds the peer automatically, searching this `GameObject`'s parents first and then its children; assign it explicitly only when the character carries more than one instance of that peer type.
+
+## Parameters and catalog defaults
+
+Declared parameters below are added by the catalog. Optional overrides are read by the executor but must be authored in the action's **Advanced** parameter list before Convai can supply them. Locally injected commands can supply their `Parameters` dictionary directly.
+
+| Executor | Declared parameters | Optional overrides to author |
+|---|---|---|
+| Raise Unity Event | None | None |
+| Wait | `seconds` (Number) | None |
+| Run In Order | None; forwards invocation | Depends on child behaviors |
+| Show Or Hide Object | `mode` (Choice: `show`, `hide`, `toggle`) | None |
+| Play Animator State | None | None |
+| Play Sound | `volume` (Number) | None |
+| Look At Target | None | `mode` (String), `holdSeconds` (Number), `engagement` (Number) |
+| Watch The Player | `mode` (Choice: `watch`, `stop`) | `engagement` (Number) |
+| Scan Environment | None | `duration` (Number) |
+| Set Mood | `mood` (Choice), `intensity` (Number) | `transition` (Number) |
+| React | `reaction` (Choice), `intensity` (Number) | `holdSeconds` (Number) |
+| Nod Or Shake Head | `response` (Choice: `yes`, `no`, `maybe`), `intensity` (Number) | None |
+| Play Gesture | `gesture` (String) | `duration` (Number) |
+| Point At Target | None | `duration` (Number) |
+| Walk To Target | None | `arriveDistance` (Number) |
+| Lead Player To Target | None | `arriveDistance` (Number) |
+| Turn To Face Target | None | None |
+| Follow The Player | `mode` (Choice: `follow`, `stop`) | None |
+| Return To Start | None | None |
+| Count Target Group | None | None |
+| Measure Distance | None | None |
+
+## Object groups and standing positions
+
+A `ConvaiLogicalObjectGroup` names several physical objects as one target. Gaze, pointing, facing, distance, and target-audio lookup project it to a nearby active member. Show Or Hide operates on all stored physical members, including hidden ones, while keeping the logical root active. Walk To chooses a reachable destination across members instead of assuming the geometrically nearest one is reachable.
+
+`ConvaiActionTargetGroup`, used by Count Target Group, is a different authored collection of action targets. See [Object groups and standing positions](../scene-metadata/group-objects-and-standing-positions.md) for logical groups and `ConvaiObjectMovementPoints`.
 
 ## Flow & Utility pack (`Convai.Runtime`)
 
@@ -91,7 +125,7 @@ Turns the target object on or off — the shortest path from "show them the map"
 | --- | --- | --- | --- |
 | `_mode` | `ConvaiShowHideMode` (`Show`, `Hide`, `Toggle`) | `Show` | What to do to the object. The character can ask for a different mode with the `mode` parameter. |
 
-Asking for a state the object is already in succeeds and says so ("Already showing.") rather than failing — a satisfied request is fulfilled, not failed. No resolved target returns `Unhandled`.
+Asking for a state the object is already in succeeds and says so ("Already showing.") rather than failing — a satisfied request is fulfilled, not failed. No resolved target returns `Unhandled`. An enabled logical group with no stored physical members declines with `This object group has no physical members.` Show/hide changes every member; toggle hides all if any member is currently visible.
 
 ### Play Animator State
 
@@ -120,7 +154,7 @@ Asking for a state the object is already in succeeds and says so ("Already showi
 | `WaitForStateTag` | `string` | Empty | Optional. Tag the Animator state with the same word to wait for it before the action finishes. Leave empty to finish as soon as the trigger is set. |
 | `NormalizedExitTime` | `float` | `0.95` | How far through the tagged state counts as finished (`0`–`1`). Only used when `WaitForStateTag` is set. |
 
-An action name with no matching row is declined as `Unhandled` rather than failed, so another Action Behavior on the character still gets a chance to answer it. If the character has a `ConvaiBodyAnimationController`, the decline message names **Play Gesture** instead — the two behaviors drive the same Animator and would fight over it if used together.
+An action name with no matching row is declined as `Unhandled` rather than failed, and the effective failure policy determines whether the batch continues. If the character has a `ConvaiBodyAnimationController`, the decline message names **Play Gesture** instead — the two behaviors drive the same Animator and would fight over it if used together.
 
 ### Play Sound
 
@@ -143,7 +177,7 @@ Plays a sound through an ordinary `AudioSource`. Works with or without a target 
 | `_volume` | `float` | `1` | Playback volume, `0`–`1`. The character can ask for a different level with the `volume` parameter. |
 | `_waitForSoundToFinish` | `bool` | `false` | Hold the action open until the clip finishes. |
 
-Never plays through the character's own speech `AudioSource` — borrowing it would cut the character off mid-sentence. With neither an assigned source nor one on the target, the action declines and says what to assign. No clip resolves to `Failed`.
+Automatic lookup searches the physical target and its children, excluding sources with `ConvaiAudioOutput`. An explicitly assigned voice source is accepted with a warning that the sound mixes into speech. A source clip marked `DontSave` is ignored unless an explicit authored clip is supplied. The executor never stops a voice source on cancellation. No usable source declines; no usable clip fails.
 
 ## Attention pack (`Convai.Modules.Gaze`)
 
@@ -161,6 +195,7 @@ Turns the character's attention to the target — eyes lead, head follows, and t
 | **Target requirement** | Either |
 | **Required peer** | `ConvaiGazeController` |
 | **Timeout** | 10s (archetype default) |
+| **Failure policy** | `ContinueBatch` (catalog default) |
 
 **Inspector fields:**
 
@@ -171,6 +206,8 @@ Turns the character's attention to the target — eyes lead, head follows, and t
 | `_engagement` | `float` | `1` | How intently to look, `0`–`1`. |
 
 A glance the character declines in order to keep eye contact with the person it is talking to reports `Unhandled` (eye-contact lock working as intended), not a failure.
+
+A logical group uses its nearest active physical member. A group without active physical members declines instead of acting on the generated root.
 
 ### Watch The Player
 
@@ -205,6 +242,7 @@ Inspects several distinct points across the surrounding environment, preferring 
 | **Target requirement** | None |
 | **Required peer** | `ConvaiGazeController` |
 | **Timeout** | 15s (archetype default) |
+| **Failure policy** | `ContinueBatch` (catalog default) |
 
 **Inspector fields:**
 
@@ -306,6 +344,7 @@ Plays one of the character's gestures by name — a wave, a shrug, a bow — ble
 | **Target requirement** | None |
 | **Required peer** | `ConvaiBodyAnimationController` |
 | **Timeout** | 15s (archetype default) |
+| **Failure policy** | `ContinueBatch` (catalog default) |
 
 **Inspector fields:**
 
@@ -314,7 +353,7 @@ Plays one of the character's gestures by name — a wave, a shrug, a bow — ble
 | `_defaultGesture` | `string` | Empty | Gesture to play when the character does not name one. Matched against the Animation Set's gesture names and aliases. |
 | `_holdSeconds` | `float` | `8` | How long to hold a gesture that would otherwise continue indefinitely (a dance, a thinking pose). `0` holds until something else stops it. |
 
-An unknown gesture name declines as `Unhandled`; the Animation Set's real gesture names are logged once at Detail tracing verbosity. Characters that use a plain Animator Controller instead of the Body Animation module want **Play Animator State** instead.
+Gesture resolution uses the supplied `gesture` value first. A declared but omitted `gesture` parameter declines rather than silently substituting a default. Otherwise it uses **Default Gesture**, then the action name. In 5.0, an unknown gesture declines with a message naming the source of the requested name, the Animation Set, and up to eight available gesture names. The Body Animation authoring checks also flag mismatches before Play mode. Characters that use a plain Animator Controller instead of the Body Animation module want **Play Animator State** instead.
 
 ### Point At Target
 
@@ -328,6 +367,7 @@ Points at the thing the action names, choosing the arm from where the target act
 | **Target requirement** | Either |
 | **Required peer** | `ConvaiBodyAnimationController` |
 | **Timeout** | 15s (archetype default) |
+| **Failure policy** | `ContinueBatch` (catalog default) |
 
 **Inspector fields:**
 
@@ -342,6 +382,8 @@ Points at the thing the action names, choosing the arm from where the target act
 {% endhint %}
 
 No pointing clips in the Animation Set declines as `Unhandled`. No resolved target declines the same way — pointing always needs a target.
+
+A logical group uses its nearest active physical member. A group without active physical members declines instead of acting on the generated root.
 
 ## Movement pack (`Convai.Modules.BodyAnimation`)
 
@@ -366,7 +408,7 @@ Walks to the target, pathing around obstacles and stopping a comfortable distanc
 | --- | --- | --- | --- |
 | `_arriveDistance` | `float` | `1` | How far short of the target to stop, in metres. The character can override with the `arriveDistance` parameter. |
 
-No baked NavMesh, or a target off the mesh, fails with `ConvaiActionFailureReason.PathBlocked` and names the destination. Needs a baked NavMesh.
+Needs a baked NavMesh. With a usable agent on the NavMesh, Walk To evaluates complete paths across logical members, preferring usable standing points per member and falling back to normal projected destinations. It picks the shortest complete path. An exact selected standing point supplies position and facing and ignores `arriveDistance`. An empty group declines with `This object group has no active physical members.` No complete path to any candidate fails with `PathBlocked`.
 
 ### Lead Player To Target
 
@@ -404,6 +446,7 @@ Turns on the spot to face the target without walking toward it — most of the t
 | **Target requirement** | Either |
 | **Required peer** | `ConvaiBodyAnimationController` |
 | **Timeout** | 10s (archetype default) |
+| **Failure policy** | `ContinueBatch` (catalog default) |
 
 **Inspector fields:**
 
@@ -414,6 +457,8 @@ Turns on the spot to face the target without walking toward it — most of the t
 | `_toleranceDegrees` | `float` | `8` | How close to facing the target counts as done, `0`–`45`. |
 
 `SteppingTurn` with no turn clips in the Animation Set declines as `Unhandled`, naming `SmoothRotation` as the alternative.
+
+A logical group uses its nearest active physical member. A group without active physical members declines instead of acting on the generated root.
 
 ### Follow The Player
 
@@ -466,7 +511,7 @@ The home position is recorded in `Awake`, before anything else on the character 
 
 ## Observation pack (`Convai.Runtime`)
 
-`SDK/Runtime/Actions/Executors/` holds the observation executors. Both behaviors return an answer through `ConvaiActionExecutionResult.Answered` and are authored with `AnswerDelivery = TellThePlayer` by default, so the character speaks the result unless you change the action's **When It Finishes** setting.
+`SDK/Runtime/Actions/Executors/` holds the observation executors. Both behaviors return an answer through `ConvaiActionExecutionResult.Answered` and are authored with `AnswerDelivery = TellThePlayer` by default, requesting that the optional [Action Feedback Relay](action-feedback.md) submit the result to tell the player.
 
 ### Count Target Group
 
@@ -511,7 +556,9 @@ Measures ground-plane distance from the character to the target, or to the playe
 | `_acrossAreaMetres` | `float` | `9` | Distances up to this value are described as "across the area." Beyond it: "a long way away." |
 | `_includeMetres` | `bool` | `true` | Include the measured value in metres in the answer. |
 
-No target and no player in the scene fails with `ConvaiActionFailureReason.TargetMissing`.
+The catalog's **Either** target requirement needs a named target. Author **No target** to permit the executor's player fallback. With that setup, no target and no player fails with `ConvaiActionFailureReason.TargetMissing`.
+
+A logical group uses its nearest active physical member. A group without active physical members declines instead of acting on the generated root.
 
 ## Choosing the right executor
 
