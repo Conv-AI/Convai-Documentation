@@ -1,7 +1,7 @@
 ---
 title: How authentication works
 description: Understand the credential resolution order the Convai Unity SDK follows and the transport header each authentication mode sends.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 The Convai SDK for Unity resolves a credential fresh for every room connection attempt — it does not cache a token across connections. Understanding the resolution order helps you decide whether to register a provider, configure an endpoint, or pass a token explicitly.
@@ -14,7 +14,7 @@ In Auth Token mode, `AuthTokenCredentialProvider.EnsureCredentialsAsync` runs on
 2. **A registered `IConvaiAuthTokenProvider`.** If no explicit token was supplied, the SDK checks `ConvaiAuthTokenProviderRegistry` for a provider and calls `GetTokenAsync` on it.
 3. **The endpoint configured in Project Settings.** If no provider is registered, the SDK falls back to `EndpointAuthTokenProvider`, built from the **Token Endpoint URL**, **HTTP Method**, **Token Response Field**, and **Request Headers** saved under **Edit > Project Settings > Convai SDK**.
 
-If none of the three sources yields a token, the connection fails with the error `Auth Token mode requires a registered IConvaiAuthTokenProvider or a configured endpoint URL.`
+If no source is configured, the connection fails with `Auth Token mode requires a registered IConvaiAuthTokenProvider or a configured endpoint URL.` A provider or endpoint that fails reports its own failure message with code `connection.auth_token_fetch_failed`; a failed provider does not fall through to the endpoint.
 
 ```mermaid
 sequenceDiagram
@@ -59,11 +59,11 @@ The header the SDK sends to Convai differs by authentication mode, not by platfo
 | API Key | `X-API-Key` |
 | Auth Token | `API-AUTH-TOKEN` |
 
-`TransportAuthenticationSupport.GetHeaderName` selects the header from the active `ITransportConfiguration`. The Native and WebGL room controllers call the same selection logic, so the header name and the authentication-mode handling are identical on both platforms — there is no WebGL-specific header variant to account for.
+Native and WebGL connections use these same header names. HTTP header names are case-insensitive.
 
 ## Editor-only fallback
 
-When Auth Token mode is selected, an API key is saved, and no endpoint or provider is configured, the Editor exchanges the saved API key for a token directly against Convai. This fallback exists only inside `ConvaiEditorApiKeyAuthTokenProvider`, an Editor-assembly type that is never compiled into a player build — a shipped build in Auth Token mode always relies on a real provider or endpoint, never on this fallback.
+When Auth Token mode is selected, an API key is saved, and no endpoint or provider is configured, the Editor exchanges the saved API key for a token directly against Convai. Before the scene loads, the fallback registers in `ConvaiAuthTokenProviderRegistry`, so it occupies source 2 above. Your own later registration replaces it. It exists only inside `ConvaiEditorApiKeyAuthTokenProvider`, an Editor-assembly type that is never compiled into a player build — a shipped build in Auth Token mode relies on an explicit token, a runtime provider, or an endpoint.
 
 ## Next steps
 

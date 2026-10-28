@@ -1,19 +1,19 @@
 ---
 description: >-
   Configure SDK log verbosity per subsystem, route logs to custom sinks, read
-  RTVI pipeline latency metrics, and tune the connection retry policy.
+  RTVI pipeline latency metrics, and understand connection retry limits.
 title: Logging, metrics, and retry policy
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-The Convai Unity SDK ships with defaults that work across training simulations, interactive experiences, and games. When you need to diagnose latency, reduce log noise in production, understand the AI pipeline's timing, or tune reconnection behavior — this page covers the available controls.
+The Convai Unity SDK ships with defaults that work across training simulations, interactive experiences, and games. When you need to diagnose latency, reduce log noise in production, understand the AI pipeline's timing, or understand retry limits, use the controls below.
 
 **Jump to the topic you need:**
 
 * [Log level configuration](performance-and-optimization.md#log-level-configuration) — reduce console noise in production builds
 * [Custom log sinks](performance-and-optimization.md#custom-log-sinks) — route logs to a file or remote service
 * [RTVI server-side debug metrics](performance-and-optimization.md#rtvi-server-side-debug-metrics) — measure AI pipeline latency per turn
-* [Retry policy](performance-and-optimization.md#retry-policy) — tune reconnection behavior for flaky networks
+* [Retry policy](performance-and-optimization.md#retry-policy) — understand fixed room retries and wrap your own operations
 
 ***
 
@@ -38,14 +38,14 @@ These values correspond to the `Convai.Domain.Logging.LogLevel` enum.
 
 ### Configuring in the Inspector
 
-Open **Project Settings → Convai** (or select the `ConvaiSettings` asset at `Assets/Resources/ConvaiSettings.asset`). Under the **Logging** section:
+Open **Edit > Project Settings > Convai SDK** and scroll to **Diagnostics**. Presets are **Verbose**, **Default**, and **Errors Only**.
 
 | Field                  | Description                                                                                       |
 | ---------------------- | ------------------------------------------------------------------------------------------------- |
-| `Global Log Level`     | Minimum level for all SDK subsystems.                                                             |
-| `Include Stack Traces` | Attach stack traces to Warning and Error messages.                                                |
-| `Colored Output`       | Color-code log messages in the Unity Console.                                                     |
-| `Category Overrides`   | Per-subsystem level overrides — add entries to set a finer-grained level for specific categories. |
+| **Global Log Level** | Most verbose level emitted by default.                                                             |
+| **Stack Trace Levels** | Choose which severity levels include stack traces.                                                |
+| **Colored Console Output**       | Color-code log messages in the Unity Console.                                                     |
+| **Category Overrides (N)**   | Per-subsystem level overrides — add entries to set a finer-grained level for specific categories. |
 
 ### Log categories
 
@@ -89,13 +89,13 @@ ConvaiSettings.Instance.SetCategoryOverrides(new[]
 });
 ```
 
-`LogLevelOverride` is a struct with two fields: `LogCategory Category` and `LogLevel Level`.
+`LogLevelOverride` is a struct with `Category` and `Level` fields. Later category overrides win. Use `SetStackTraceLevels(LogStackTraceLevels)` and `SetColoredOutput(bool)` for the other controls. `IncludeStackTraces` and `SetIncludeStackTraces` are obsolete; the default stack-trace mask is `Error`.
 
 ### `CONVAI_DEBUG_LOGGING` scripting define
 
 `ConvaiLogger.Debug(...)` calls are guarded by three `[Conditional]` attributes: `UNITY_EDITOR`, `DEVELOPMENT_BUILD`, and `CONVAI_DEBUG_LOGGING`. The compiler strips them from any build where none of these symbols is defined — zero overhead in production release builds.
 
-To enable debug logs in a release build: add `CONVAI_DEBUG_LOGGING` to **Project Settings → Player → Scripting Define Symbols**. Development Builds enable them automatically without this define.
+Enable **Advanced > Feature Flags > Debug Logging** in Convai settings to set `CONVAI_DEBUG_LOGGING` for the active build target group. Development Builds enable them automatically without this define.
 
 ***
 
@@ -119,7 +119,9 @@ public class FileSink : ILogSink
     public FileSink(string path)
         => _writer = new StreamWriter(path, append: true);
 
-    public void Write(LogEntry entry)
+    public bool IsEnabledFor(LogLevel level, LogCategory category) => IsEnabled;
+
+    public void Write(in LogEntry entry)
         => _writer.WriteLine($"[{entry.Timestamp:HH:mm:ss.fff}] [{entry.Level}] [{entry.Category}] {entry.Message}");
 
     public void Flush()             => _writer.Flush();
@@ -128,38 +130,47 @@ public class FileSink : ILogSink
 }
 ```
 
-Register after `ConvaiLogger` initializes:
+Register a new sink in `Awake` or an `AfterSceneLoad` runtime initializer. Logger initialization normally runs before scene components, so a scene subscription to `OnInitializationCompleted` misses that event.
 
 ```csharp
+using System.IO;
 using Convai.Runtime.Logging;
+using UnityEngine;
 
-// OnInitializationCompleted fires when ConvaiLogger is ready — always register sinks here,
-// never before, to avoid missing the initialization window.
-ConvaiLogger.OnInitializationCompleted += _ =>
+public sealed class FileLogging : MonoBehaviour
 {
-    string logPath = Path.Combine(Application.persistentDataPath, "convai_session.log");
-    ConvaiLogger.RegisterSink(new FileSink(logPath));
-};
+    private FileSink sink;
+    private void Awake()
+    {
+        sink = new FileSink(Path.Combine(UnityEngine.Application.persistentDataPath, "convai_session.log"));
+        ConvaiLogger.RegisterSink(sink);
+    }
+    private void OnDestroy()
+    {
+        if (sink != null) ConvaiLogger.UnregisterSink(sink);
+    }
+}
 ```
 
 **Sink lifecycle:**
 
 * `ILogSink` extends `IDisposable` — implementing classes must provide a `Dispose()` method.
-* Call `ConvaiLogger.UnregisterSink(sink)` before disposing the sink.
-* Call `ConvaiLogger.FlushAllSinks()` on application quit to ensure buffered entries are written.
+* `UnregisterSink(sink)` retires and disposes it. A retired sink cannot be registered again; create a new instance.
+* Three consecutive write failures disable a sink.
+* Shutdown on application quit flushes and clears sinks. Session reset clears registrations, so register anew each Play session.
 
 ***
 
 ## RTVI server-side debug metrics
 
-RTVI (Real-Time Voice Interaction) is Convai's session protocol. When `ConvaiRoomManager.Debug` is `true`, the server streams pipeline metrics to the client after each AI turn, showing how long each stage (speech-to-text, LLM, text-to-speech, etc.) took. Use this when you need to identify which pipeline stage is the bottleneck — e.g., is the AI slow to respond because of transcription latency or LLM generation time?
+RTVI (Real-Time Voice Interaction) is Convai's session protocol. When `ConvaiRoomManager.Debug` is `true`, the connection requests pipeline metrics from Convai, showing how long each stage (speech-to-text, LLM, text-to-speech, etc.) took. Use this when you need to identify which pipeline stage is the bottleneck — e.g., is the AI slow to respond because of transcription latency or LLM generation time?
 
 ### Enabling debug metrics
 
 `ConvaiRoomManager.Debug` is a read-only runtime property. Enable it by checking the **Debug** checkbox on the `ConvaiRoomManager` component in the Inspector before entering Play Mode.
 
 {% hint style="warning" %}
-Debug metrics add a small overhead to each turn. Check this option for profiling sessions only — do not ship with it enabled.
+Enable debug metrics for diagnostic sessions and inspect only the fields returned. Their presence and timing depend on Convai.
 {% endhint %}
 
 ### Reading the metrics
@@ -214,15 +225,11 @@ The SDK uses `ExponentialBackoffPolicy` to handle transient connection failures.
 
 After 4 total attempts (1 initial + 3 retries), the operation fails. The policy retries only transient errors: timeouts, network interruptions, and `OperationCanceledException`. Non-transient errors (auth failures, invalid configuration) fail immediately.
 
-### When to customize the retry policy
+### Limits of retry customization
 
-The default policy (4 attempts, exponential back-off up to 4 s) covers most consumer network conditions. Consider a custom policy when:
+The room connection constructs its own `RetryExecutor` with `ExponentialBackoffPolicy`: four attempts with delays of `0`, `1`, `2`, and `4` seconds. There is no public hook to replace that policy. `ConvaiBootstrapConfigSnapshot` retry fields do not change it.
 
-* **Deployed on industrial or embedded hardware** with known intermittent connectivity — increase `MaxAttempts` and delay steps.
-* **Kiosk or always-on installation** — a more aggressive retry (more attempts, longer max delay) avoids user intervention after a brief network dropout.
-* **Low-latency training environment** with reliable networking — reduce `MaxAttempts` to fail fast and surface errors to your own reconnect UI rather than silently retrying.
-
-If you only need more attempts without changing the delay curve, increase `maxRetryAttempts` in `ConvaiBootstrapConfigSnapshot` — no custom policy needed.
+A custom policy applies only to operations your code wraps in its own executor. The default transient classification includes `TimeoutException`, `HttpRequestException`, and `OperationCanceledException`, including nested and aggregate exceptions. Configure room request timeout through **Advanced > Connection Timeout (s)**.
 
 ### Custom retry policy
 
@@ -260,6 +267,7 @@ public class AggressiveRetryPolicy : IRetryPolicy
 ```csharp
 using Convai.Runtime.Core.Policies;
 
+// pseudocode: someAsyncOperation and cancellationToken belong to your application.
 var executor = new RetryExecutor(new AggressiveRetryPolicy());
 
 await executor.ExecuteAsync(async (attempt, ct) =>
@@ -277,9 +285,9 @@ await executor.ExecuteAsync(async (attempt, ct) =>
 * [ ] `Global Log Level` set to `Warning` or `Error` in the production `ConvaiSettings` asset.
 * [ ] `CONVAI_DEBUG_LOGGING` **not** present in release build Scripting Define Symbols.
 * [ ] `ConvaiRoomManager.Debug` checkbox **unchecked** in production scenes.
-* [ ] `maxRetryAttempts` in `ConvaiBootstrapConfigSnapshot` is appropriate for your target network (default `3` suits most consumer connections).
-* [ ] `connectionTimeoutSeconds` accounts for the slowest target device/network in your deployment (default `30` s).
-* [ ] Custom `ILogSink` instances are unregistered and disposed on application quit.
+* [ ] Your application handles a failed connection after the SDK's fixed retry sequence.
+* [ ] **Advanced > Connection Timeout (s)** fits the target network (`5`–`120` seconds, default `30`).
+* [ ] Custom sinks are registered each session and unregistered when their owner is destroyed.
 * [ ] `ConvaiLogger.FlushAllSinks()` called in `Application.quitting` handler if any sinks buffer output.
 
 ***
@@ -291,8 +299,8 @@ await executor.ExecuteAsync(async (attempt, ct) =>
 | Console flooded with SDK messages in a release build         | `CONVAI_DEBUG_LOGGING` define is present, or `GlobalLogLevel` is `Debug` or `Trace`    | Remove the scripting define and set the global level to `Warning` or `Error`.                                 |
 | `OnRtvMetricsReceived` never fires                           | `ConvaiRoomManager.Debug` is unchecked, or the character has not completed a full turn | Enable the Debug checkbox and verify a full AI turn completes (user speaks, character responds).              |
 | `Ttfb` / `Processing` fields are null                        | The server did not include those metric types for this turn                            | Handle null before accessing. Not every turn includes every metric type.                                      |
-| Connection fails after 4 attempts and does not retry further | Default `ExponentialBackoffPolicy` reached `MaxAttempts = 4`                           | Increase `maxRetryAttempts` in `ConvaiBootstrapConfigSnapshot`, or implement a custom `IRetryPolicy`.         |
-| Custom log sink missing early startup messages               | Sink registered after `ConvaiLogger.Initialize()` already fired                        | Register via the `OnInitializationCompleted` callback — never register sinks before initialization completes. |
+| Connection fails after 4 attempts and does not retry further | Default `ExponentialBackoffPolicy` reached `MaxAttempts = 4`                           | Handle failure in the application; a custom policy does not replace SDK room retries.         |
+| Custom log sink missing early startup messages               | Sink registered after `ConvaiLogger.Initialize()` already fired                        | Register in an early runtime initialization callback if startup coverage is required; scene Awake runs after logger initialization. |
 
 ***
 

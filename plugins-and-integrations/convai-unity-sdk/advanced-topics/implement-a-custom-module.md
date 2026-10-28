@@ -1,7 +1,7 @@
 ---
 title: Implement a custom module
 description: Build a custom runtime module that starts with the SDK, accesses its services, and reacts to character and session events.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Build a custom module that integrates with the Convai runtime lifecycle, accesses SDK services, and subscribes to domain events. Before starting, read [Runtime module system](extending-the-sdk.md) to understand when a module is the right tool and how the lifecycle states map to your implementation.
@@ -24,6 +24,7 @@ using System.Threading;
 using Convai.Domain.DomainEvents.Runtime;
 using Convai.Domain.EventSystem;
 using Convai.Runtime.Components;
+using Convai.Runtime.Core;
 using Convai.Runtime.Core.Modules;
 using UnityEngine;
 
@@ -40,13 +41,13 @@ public class MinimalModule : MonoBehaviour, IConvaiModule
     private IEventHub _events;
     private SubscriptionToken _sub;
 
-    private void Awake() => ConvaiManager.ActiveManager?.RegisterModule(this);
+    private void Start() => ConvaiManager.ActiveManager?.RegisterModule(this);
     private void OnDestroy() => ConvaiManager.ActiveManager?.UnregisterModule(this);
 
     public System.Threading.Tasks.ValueTask RegisterAsync(IModuleContext ctx, CancellationToken ct = default)
     {
         _events = ctx.Events;
-        return System.Threading.Tasks.ValueTask.CompletedTask;
+        return System.Threading.Tasks.default;
     }
 
     public System.Threading.Tasks.ValueTask StartAsync(IModuleContext ctx, CancellationToken ct = default)
@@ -56,17 +57,17 @@ public class MinimalModule : MonoBehaviour, IConvaiModule
             if (e.IsSpeaking) Debug.Log($"[MinimalModule] Character {e.CharacterId} started speaking.");
         });
         IsActive = true;
-        return System.Threading.Tasks.ValueTask.CompletedTask;
+        return System.Threading.Tasks.default;
     }
 
     public System.Threading.Tasks.ValueTask PauseAsync(RuntimePauseReason r, CancellationToken ct = default)
-    { IsActive = false; return System.Threading.Tasks.ValueTask.CompletedTask; }
+    { IsActive = false; return System.Threading.Tasks.default; }
 
     public System.Threading.Tasks.ValueTask ResumeAsync(CancellationToken ct = default)
-    { IsActive = true; return System.Threading.Tasks.ValueTask.CompletedTask; }
+    { IsActive = true; return System.Threading.Tasks.default; }
 
     public System.Threading.Tasks.ValueTask StopAsync(CancellationToken ct = default)
-    { _events?.Unsubscribe(_sub); IsActive = false; return System.Threading.Tasks.ValueTask.CompletedTask; }
+    { _events?.Unsubscribe(_sub); IsActive = false; return System.Threading.Tasks.default; }
 }
 ```
 
@@ -128,6 +129,7 @@ For the full list of subscribable domain events, see [Event System](../core-conc
 A module that subscribes to a domain event and triggers haptic feedback when a character speaks.
 
 ```csharp
+// pseudocode: supply your HapticService and HapticPattern implementation.
 // HapticFeedbackModule.cs
 using System;
 using System.Collections.Generic;
@@ -136,6 +138,7 @@ using System.Threading.Tasks;
 using Convai.Domain.DomainEvents.Runtime;
 using Convai.Domain.EventSystem;
 using Convai.Domain.Logging;
+using Convai.Runtime.Core;
 using Convai.Runtime.Core.Modules;
 
 public class HapticFeedbackModule : IConvaiModule
@@ -157,7 +160,7 @@ public class HapticFeedbackModule : IConvaiModule
     {
         _logger = context.Logger;
         _events = context.Events;
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     public ValueTask StartAsync(IModuleContext context, CancellationToken ct = default)
@@ -165,19 +168,19 @@ public class HapticFeedbackModule : IConvaiModule
         _subscription = context.Events.Subscribe<CharacterSpeechStateChanged>(OnSpeechStateChanged);
         IsActive = true;
         _logger?.Debug("[HapticFeedbackModule] Started.", LogCategory.SDK);
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     public ValueTask PauseAsync(RuntimePauseReason reason, CancellationToken ct = default)
     {
         IsActive = false;
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     public ValueTask ResumeAsync(CancellationToken ct = default)
     {
         IsActive = true;
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     public ValueTask StopAsync(CancellationToken ct = default)
@@ -185,7 +188,7 @@ public class HapticFeedbackModule : IConvaiModule
         _events?.Unsubscribe(_subscription);
         IsActive = false;
         _logger?.Debug("[HapticFeedbackModule] Stopped.", LogCategory.SDK);
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     private void OnSpeechStateChanged(CharacterSpeechStateChanged e)
@@ -201,6 +204,13 @@ public class HapticFeedbackModule : IConvaiModule
 A module declares its provided services in `ProvidedServices`, registers the instance in `RegisterAsync`, and consuming modules retrieve it via `TryGetModuleService<T>`.
 
 ```csharp
+// pseudocode: supply the application services and implementations shown below.
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Convai.Runtime.Core;
+using Convai.Runtime.Core.Modules;
 // AudioAnalysisModule.cs — provides IAudioAnalysisService
 public class AudioAnalysisModule : IConvaiModule
 {
@@ -218,26 +228,33 @@ public class AudioAnalysisModule : IConvaiModule
     {
         _service = new AudioAnalysisService(context.RoomAudio);
         context.ProvideModuleService<IAudioAnalysisService>(_service); // Must be in RegisterAsync, not StartAsync.
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     public ValueTask StartAsync(IModuleContext context, CancellationToken ct = default)
-    { IsActive = true; _service.Start(); return ValueTask.CompletedTask; }
+    { IsActive = true; _service.Start(); return default; }
 
     public ValueTask PauseAsync(RuntimePauseReason reason, CancellationToken ct = default)
-    { IsActive = false; return ValueTask.CompletedTask; }
+    { IsActive = false; return default; }
 
     public ValueTask ResumeAsync(CancellationToken ct = default)
-    { IsActive = true; return ValueTask.CompletedTask; }
+    { IsActive = true; return default; }
 
     public ValueTask StopAsync(CancellationToken ct = default)
-    { IsActive = false; _service.Stop(); return ValueTask.CompletedTask; }
+    { IsActive = false; _service.Stop(); return default; }
 }
 ```
 
 A consuming module:
 
 ```csharp
+// pseudocode: supply the application services and implementations shown below.
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Convai.Runtime.Core;
+using Convai.Runtime.Core.Modules;
 // VisualizerModule.cs — consumes IAudioAnalysisService
 public class VisualizerModule : IConvaiModule
 {
@@ -250,7 +267,7 @@ public class VisualizerModule : IConvaiModule
         {
             // analysis is guaranteed non-null here.
         }
-        return ValueTask.CompletedTask;
+        return default;
     }
 }
 ```
@@ -268,6 +285,7 @@ Attach the module as a component to any GameObject. It self-registers with `Conv
 ```csharp
 // HapticFeedbackBridge.cs
 using Convai.Runtime.Components;
+using Convai.Runtime.Core;
 using Convai.Runtime.Core.Modules;
 using UnityEngine;
 
@@ -291,13 +309,20 @@ public class HapticFeedbackBridge : MonoBehaviour, IConvaiModule
 }
 ```
 
-After `ConvaiManager.Start()` completes, `ConvaiManager.ActiveManager.IsInitialized` returns `true`, indicating all registered modules have been discovered and the runtime has started.
+`ConvaiManager.IsInitialized` means the host is bootstrapped and has an event hub. Inspect `ConvaiRuntime.State` for `RuntimeState.Running`. Even then, a module registered while running starts asynchronously; wait for your module's own startup completion before using its services.
 
 ### CreateRuntimeBuilder override
 
 Use this when you prefer all customization in one place, or when the module is not a `MonoBehaviour`.
 
 ```csharp
+// pseudocode: supply the application services and implementations shown below.
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Convai.Runtime.Core;
+using Convai.Runtime.Core.Modules;
 // CustomRuntimeManager.cs
 using Convai.Runtime.Components;
 using Convai.Runtime.Core;
@@ -316,7 +341,7 @@ public class CustomRuntimeManager : ConvaiManager
 
 ## Use the dependency injection pattern
 
-Components on `ConvaiCharacter` or `ConvaiPlayer` GameObjects can receive SDK services automatically by implementing `IInjectable<TDependencies>`. The SDK injects dependencies after the character or player is registered with the runtime.
+Components on a `ConvaiCharacter` GameObject or its children can receive `IConvaiCharacterDependencies` through `IInjectable<IConvaiCharacterDependencies>`. Nested hierarchies owned by another character are excluded. `ConvaiPlayer` receives its own bundle but does not forward it to neighboring components.
 
 ### IInjectable\<TDependencies\>
 
@@ -336,14 +361,6 @@ public interface IInjectable<in TDependencies> where TDependencies : class
 | `ConnectionService` | `IConvaiRoomConnectionService` | Required |
 | `AudioService` | `IConvaiRoomAudioService` | Required |
 | `AgentRegistry` | `IAgentRegistry` | Optional |
-| `Logger` | `ILogger` | Optional |
-
-### IConvaiPlayerDependencies
-
-| Property | Type | Availability |
-| ------------------------ | ------------------------------- | ------------ |
-| `PlayerInputService` | `IPlayerInputService` | Optional |
-| `RuntimeSettingsService` | `IConvaiRuntimeSettingsService` | Optional |
 | `Logger` | `ILogger` | Optional |
 
 ### Write an injectable component
@@ -394,6 +411,13 @@ Add this component to the same GameObject as `ConvaiCharacter`. The SDK calls `I
 Records character emotion data alongside biometric sensor readings for post-session analysis.
 
 ```csharp
+// pseudocode: supply the application services and implementations shown below.
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Convai.Runtime.Core;
+using Convai.Runtime.Core.Modules;
 using Convai.Domain.DomainEvents.Runtime;
 using Convai.Domain.EventSystem;
 
@@ -414,27 +438,27 @@ public class BiometricCorrelationModule : IConvaiModule
     {
         _bioLogger = BiometricLogger.Instance;
         _events = context.Events;
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     public ValueTask StartAsync(IModuleContext context, CancellationToken ct = default)
     {
         _emotionSubscription = context.Events.Subscribe<CharacterEmotionChanged>(OnEmotionChanged);
         IsActive = true;
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     public ValueTask PauseAsync(RuntimePauseReason reason, CancellationToken ct = default)
-    { IsActive = false; return ValueTask.CompletedTask; }
+    { IsActive = false; return default; }
 
     public ValueTask ResumeAsync(CancellationToken ct = default)
-    { IsActive = true; return ValueTask.CompletedTask; }
+    { IsActive = true; return default; }
 
     public ValueTask StopAsync(CancellationToken ct = default)
     {
         _events?.Unsubscribe(_emotionSubscription);
         IsActive = false;
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     private void OnEmotionChanged(CharacterEmotionChanged e)
@@ -450,6 +474,13 @@ public class BiometricCorrelationModule : IConvaiModule
 Tracks character-triggered actions against a scoring rubric and exposes the score service to other modules via `ProvideModuleService`.
 
 ```csharp
+// pseudocode: supply the application services and implementations shown below.
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Convai.Runtime.Core;
+using Convai.Runtime.Core.Modules;
 using Convai.Domain.DomainEvents.Runtime;
 using Convai.Domain.EventSystem;
 
@@ -471,27 +502,27 @@ public class ScoringModule : IConvaiModule
         _scoreService = new AssessmentScoreService();
         context.ProvideModuleService<IAssessmentScoreService>(_scoreService);
         _events = context.Events;
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     public ValueTask StartAsync(IModuleContext context, CancellationToken ct = default)
     {
         _actionSubscription = context.Events.Subscribe<CharacterActionReceived>(OnActionReceived);
         IsActive = true;
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     public ValueTask PauseAsync(RuntimePauseReason reason, CancellationToken ct = default)
-    { IsActive = false; return ValueTask.CompletedTask; }
+    { IsActive = false; return default; }
 
     public ValueTask ResumeAsync(CancellationToken ct = default)
-    { IsActive = true; return ValueTask.CompletedTask; }
+    { IsActive = true; return default; }
 
     public ValueTask StopAsync(CancellationToken ct = default)
     {
         _events?.Unsubscribe(_actionSubscription);
         IsActive = false;
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     private void OnActionReceived(CharacterActionReceived e)
@@ -507,12 +538,14 @@ public class ScoringModule : IConvaiModule
 
 | Symptom | Likely cause | Fix |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Module's `StartAsync` never called | `RegisterAsync` threw an unhandled exception; the runtime halts module startup silently | Wrap `RegisterAsync` body in a try-catch and log explicitly. |
+| Module's `StartAsync` never called | `RegisterAsync` failed; the runtime logs Start failed, transitions to Stopped, and rethrows | Inspect the failed operation and log, repair initialization, and preserve the failure instead of swallowing it. |
 | `TryGetModuleService<T>` returns `false` unexpectedly | `ProvideModuleService<T>` was called in `StartAsync` instead of `RegisterAsync` | Move `ProvideModuleService<T>` to `RegisterAsync` — services must be registered before any module's `StartAsync` runs. |
-| Module starts but misses early events | Subscribed in `RegisterAsync` but event fires during startup before `StartAsync` | Move subscriptions to `StartAsync`, or guard with `IsActive` check in the handler. |
+| Module starts but misses early events | The subscription was not established before the relevant publication | Subscribe before that publication, or read a current-state snapshot when attaching. Moving the subscription later cannot recover an earlier event. |
 | `RequiredModules` entry causes startup error | Listed module ID not registered before runtime build | Verify the module ID string matches exactly — IDs are case-sensitive. |
 | `InjectDependencies` never called on `IInjectable` component | Component is not on a GameObject in the `ConvaiCharacter` hierarchy | `IInjectable<IConvaiCharacterDependencies>` only works on GameObjects that are children of a character. |
 | `ConvaiManager.ActiveManager` is null in `Awake` | Manager's `Awake` has not yet run at execution order −1100 | Register modules in `Start()` or use `ConvaiManager.ActiveManager?.RegisterModule(this)` with null-safety. |
+
+Use `TurnId` on `CharacterActionReceived`, `CharacterSpeechStateChanged`, and `CharacterTurnCompleted` to correlate events with a reply. Turn completion also reports `WasAborted`, `AbortReason`, and `WasCutShort`; completion does not by itself mean buffered audio has finished.
 
 ## Next steps
 
