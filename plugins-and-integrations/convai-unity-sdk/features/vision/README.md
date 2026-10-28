@@ -1,7 +1,7 @@
 ---
 title: Vision
 description: Find guides for adding real-time scene vision to Convai characters in Unity, including frame sources, publish policies, scripting, and troubleshooting.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Vision gives Convai characters the ability to see what is happening inside your Unity scene. A frame source captures images from a Unity camera, physical webcam, or Meta Quest passthrough feed, and the SDK streams them to Convai over WebRTC alongside the audio conversation.
@@ -12,15 +12,15 @@ Vision gives Convai characters the ability to see what is happening inside your 
 | --- | --- | --- |
 | PC / Mac / Console | `CameraVisionFrameSource`, `WebcamVisionFrameSource` | Full RenderTexture pipeline; max 30 fps |
 | Android / iOS | `CameraVisionFrameSource`, `WebcamVisionFrameSource` | Webcam source requests camera permission at startup |
-| WebGL | _(Canvas, automatic)_ | `canvas.captureStream()` path — no frame source component needed; frame rate capped at 15 fps; **HTTPS required** |
+| WebGL | Camera, webcam, custom texture, or page canvas | Defaults to the frame source; **Game View** publishes the game canvas. An explicit FPS override can exceed the policy's `15` fps default cap. See [WebGL vision](webgl.md). |
 | Meta Quest 3 / 3S | `QuestVisionFrameSource` | Requires Meta XR SDK and `horizonos.permission.HEADSET_CAMERA` |
 
 {% hint style="info" %}
-Vision requires `ConvaiRoomManager.Connection Type` set to **Video**. If it is set to `Audio`, `ConvaiVisionPublisher` remains idle regardless of how other components are configured.
+Vision needs an effective Video connection. **Dynamic Vision > On** resolves Audio to Video; **Off** preserves the configured connection type. Group conversation rooms resolve to Audio and do not publish vision.
 {% endhint %}
 
 {% hint style="danger" %}
-**WebGL: HTTPS required.** The `canvas.captureStream()` API is blocked by browsers on non-HTTPS origins. `http://localhost` is the only exception. Deploy your WebGL build to an HTTPS host before testing Vision in production.
+Deploy WebGL over HTTPS and verify browser camera permission for webcam capture. Use loopback only for local development; test the selected source in an actual browser build.
 {% endhint %}
 
 <table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody>
@@ -38,7 +38,7 @@ Vision requires `ConvaiRoomManager.Connection Type` set to **Video**. If it is s
 
 ## Dynamic vision context
 
-Dynamic vision context lets Convai continuously sample the published video track into a rolling frame buffer and attach the freshest frames to a character's turns, instead of reacting to every frame as it arrives. It shares its respond-mode vocabulary with [dynamic context](../dynamic-context/README.md): `ConvaiRespondMode` values `Silent`, `Auto`, and `MustRespond` decide whether new input speaks, whether the model decides, or whether it stays silent. See [Dynamic context scripting API](../dynamic-context/dynamic-context-scripting-api.md) for the full `ConvaiRespondMode` reference.
+Dynamic vision context lets Convai continuously sample the published video track into a rolling frame buffer and attach the freshest frames to a character's turns, instead of reacting to every frame as it arrives. It shares its respond-mode vocabulary with [dynamic context](../dynamic-context/README.md): `ConvaiRespondMode` values `Silent`, `Auto`, and `MustRespond` request silent input, let the character decide, or request a reply, respectively. See [Dynamic context scripting API](../dynamic-context/dynamic-context-scripting-api.md) for the full `ConvaiRespondMode` reference.
 
 ## Next steps
 

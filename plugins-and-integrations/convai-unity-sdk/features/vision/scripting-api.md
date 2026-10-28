@@ -1,7 +1,7 @@
 ---
 title: Vision scripting API
 description: Reference for the Convai Unity SDK vision scripting API, including publish control, runtime status queries, on-demand triggers, and respond-mode events.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Vision scripting centers on `ConvaiVisionPublisher` for publish control, `ConvaiRoomManager` for on-demand vision status queries and triggers, and the frame source status interfaces for capture state. Domain events let you react to lifecycle changes and backend acknowledgements without polling `IsPublishing` every frame.
@@ -23,8 +23,8 @@ Vision scripting centers on `ConvaiVisionPublisher` for publish control, `Convai
 
 | Method | Description |
 | --- | --- |
-| `SetPublishPolicy(VisionPublishPolicy policy)` | Changes the client-side transport budget. Takes effect on the next published frame. |
-| `EnablePublishing(bool enabled)` | Starts or stops publishing without changing the selected policy. Takes effect under every policy, not only `Manual`. Once called, it also overrides the policy's own on-or-off default for the rest of the session, so a later policy change no longer decides whether publishing runs. |
+| `SetPublishPolicy(VisionPublishPolicy policy)` | Changes the client-side transport budget. Restarts an active or pending track when the policy changes. |
+| `EnablePublishing(bool enabled)` | Starts or stops publishing without changing the selected policy. Takes effect under every policy, not only `Manual`. Once called, it also overrides the policy's own on-or-off default for the component's lifetime, including reconnects, so a later policy change no longer decides whether publishing runs. |
 
 ### Usage
 
@@ -53,6 +53,21 @@ public class VisionController : MonoBehaviour
     }
 }
 ```
+
+## Additional publisher and source members
+
+| Member | Contract |
+|---|---|
+| `WebGLPublishSource` / `SetWebGLPublishSource(VisionWebGLPublishSource)` | Select `FrameSource` or `GameView`; changing the live selection replaces the track. |
+| `videoTrackName` | Public track-name field; keep it aligned with the room's requested name. |
+| `publishFrameRateOverride` / `publishBitrateOverride` | Setup fields read during configuration. Assigning them on a running publisher does not update cached caps. |
+| `CameraVisionFrameSource.TargetCamera` | Read-only resolved camera reference. |
+| `EffectiveWidth`, `EffectiveHeight`, `EffectiveFps` | Resolved camera preset dimensions and rate. |
+| `WebcamVisionFrameSource.SwitchWebcamAsync(string)` | Returns `IConvaiOperation<Unit>`. Stops then reopens the camera; re-enable publication after success. |
+| `GetAvailableDeviceNames()` / `AvailableDevices` | Webcam device enumeration. |
+| `LastErrorCode` / `LastErrorMessage` | Webcam startup error detail. |
+
+`EnablePublishing(true)` can restart publication after a source stop. `IVisionPageCanvasSource` adds `PageCanvasElementId` for a browser-owned canvas. See [WebGL vision](webgl.md).
 
 ## `IVisionFrameSource`
 
@@ -155,9 +170,9 @@ A custom `IConvaiRoomConnectionService` implementation must implement all three 
 | --- | --- | --- |
 | `RequestVisionStatus(string updateId = null)` | `bool` | Requests backend dynamic vision buffer/status diagnostics for the current session. The backend answers with [`VisionContextStatusReceived`](#visioncontextstatusreceived). |
 | `TriggerVision(ConvaiVisionTriggerRequest request)` | `bool` | Requests backend dynamic vision attachment/response behavior for the current session — asks the character to look at the buffered frames and, depending on the request, respond. The backend answers with [`VisionContextTriggerReceived`](#visioncontexttriggerreceived). |
-| `UpdateRespondMode(ConvaiRespondModeLane lane, ConvaiRespondMode mode, string updateId = null)` | `bool` | Changes one input lane's respond mode for the rest of the session, without reconnecting. The backend acknowledges with [`RespondModeUpdateResultReceived`](#respondmodeupdateresultreceived). |
+| `UpdateRespondMode(ConvaiRespondModeLane lane, ConvaiRespondMode mode, string updateId = null)` | `bool` | Changes one input lane's respond mode for the component's lifetime, including reconnects, without reconnecting. The backend acknowledges with [`RespondModeUpdateResultReceived`](#respondmodeupdateresultreceived). |
 
-Each method returns `false` when no session transport is available (for example, before the room connects).
+Each method returns a send-acceptance boolean, not server confirmation. It can return `false` without a transport, without a selected target in a multi-character room, or for an oversized data message. `TriggerVision` and `UpdateRespondMode` also refuse group-room requests. `RequestVisionStatus` does not have that explicit group guard. Observe the response event separately.
 
 ```csharp
 using Convai.Runtime;
@@ -200,7 +215,7 @@ public class VisionRuntimeQueries : MonoBehaviour
 
 `Convai.Runtime.Vision.Context` — sealed class
 
-Parameters for an explicit dynamic vision trigger sent with `TriggerVision`. A trigger asks the backend to attach buffered vision frames to a turn and, depending on `RespondMode`, invoke the model. When no frame selection is set, the backend attaches the latest fresh frames up to its configured frames-per-turn.
+Parameters for an explicit dynamic vision trigger sent with `TriggerVision`. A trigger asks the backend to attach buffered vision frames to a turn and, depending on `RespondMode`, invoke the model. With no frame selection, the request asks the service to use its default fresh-frame selection. Client submission does not prove which frames were received or used.
 
 ```csharp
 new ConvaiVisionTriggerRequest(string updateId = null)
@@ -208,14 +223,14 @@ new ConvaiVisionTriggerRequest(string updateId = null)
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `updateId` | `string` | `null` | Idempotency key echoed back in the acknowledgement's `update_id`. When omitted, a unique ID is generated. Reusing the same ID makes the request idempotent — the backend replays the original acknowledgement instead of triggering again, so retries are always safe. |
+| `updateId` | `string` | `null` | Correlation/idempotency-key intent for the service, expected in acknowledgement `update_id`. The client trims a supplied ID or generates one; it does not deduplicate requests. Confirm service replay and duplicate-effect behavior before automatically retrying. |
 
 ### Properties
 
 | Property | Type | Description |
 | --- | --- | --- |
 | `UpdateId` | `string` | Idempotency key for this request, set by the constructor. |
-| `Text` | `string` | Optional prompt accompanying the frames, e.g. `"What changed on the table?"`. When empty, the backend uses its generic inspect-the-frames prompt. |
+| `Text` | `string` | Optional prompt accompanying the frames, e.g. `"What changed on the table?"`. Empty leaves prompt selection to the service default; confirm the deployed service contract for the resulting behavior. |
 | `RespondMode` | `ConvaiRespondMode?` | How this trigger affects the character's speech. `null` uses the connect-time default for the trigger lane (`ConvaiVisionRespondModeSettings.Trigger`). |
 | `FrameWindowStart` | `int?` | Start of the relative frame window, set via `SetFrameWindow`. |
 | `FrameWindowEnd` | `int?` | End of the relative frame window, set via `SetFrameWindow`. |
@@ -324,7 +339,7 @@ public class VisionAnalytics : MonoBehaviour
 
 ## `VisionCaptureStarted`
 
-Raised when a frame source begins producing frames.
+Raised by `CameraVisionFrameSource` when capture starts, before the first frame. Webcam and Quest sources do not publish this domain event.
 
 | Property | Type | Description |
 | --- | --- | --- |
@@ -338,20 +353,20 @@ Raised when a frame source begins producing frames.
 
 ## `VisionFrameCaptured`
 
-Raised each time a frame is captured. This event fires on every captured frame — at 15 fps over a 60-second session that is 900 events. Use `EventDeliveryPolicy.Immediate` and keep the handler lightweight; for analytics, sample every N-th frame rather than subscribing to every event.
+Raised by `CameraVisionFrameSource` each time it captures a frame. Webcam and Quest sources do not publish this domain event. This event fires on every captured frame — at 15 fps over a 60-second session that is 900 events. Use `EventDeliveryPolicy.Immediate` and keep the handler lightweight; for analytics, sample every N-th frame rather than subscribing to every event.
 
 | Property | Type | Description |
 | --- | --- | --- |
 | `Width` | `int` | Frame width in pixels. |
 | `Height` | `int` | Frame height in pixels. |
-| `FrameIndex` | `long` | Zero-based capture frame index. |
-| `SizeBytes` | `long` | Frame data size in bytes. |
+| `FrameIndex` | `long` | One-based capture frame count; first frame is `1`. |
+| `SizeBytes` | `int` | The camera source currently supplies `0`; not a measured payload size. |
 | `Timestamp` | `DateTime` | UTC time the frame was captured. |
 | `SourceId` | `string` | Source identifier. |
 
 ## `VisionCaptureStopped`
 
-Raised when a frame source stops producing frames.
+Raised when `CameraVisionFrameSource` stops capture. Webcam and Quest sources expose their own status events instead.
 
 | Property | Type | Description |
 | --- | --- | --- |
@@ -378,7 +393,7 @@ Raised when the WebRTC video track is successfully opened.
 | `TrackSid` | `string` | LiveKit track session ID. |
 | `TrackName` | `string` | Track name as set by `VideoTrackName` (default: `"unity-scene"`). |
 | `Timestamp` | `DateTime` | UTC publish time. |
-| `RoomSessionId` | `string` | Room session ID. |
+| `RoomSessionId` | `string` | Currently `null` in events emitted by the track manager. |
 | `IsVisionTrack` | `bool` | `true` when `TrackName == "vision"` (case-insensitive). |
 
 ## `VideoTrackUnpublished`
@@ -390,8 +405,8 @@ Raised when the WebRTC video track is removed.
 | `TrackSid` | `string` | LiveKit track session ID. |
 | `TrackName` | `string` | Track name. |
 | `Timestamp` | `DateTime` | UTC unpublish time. |
-| `Reason` | `VideoTrackUnpublishReason` | Why the track was unpublished (`UserRequested`, `SessionEnded`, `SourceLost`, `Error`, `ComponentDisabled`). |
-| `RoomSessionId` | `string` | Room session ID. |
+| `Reason` | `VideoTrackUnpublishReason` | The track manager emits `UserRequested` for normal unpublish, including session end, and `ComponentDisabled` for disposal. Other enum values are not emitted by this implementation. |
+| `RoomSessionId` | `string` | Currently `null` in events emitted by the track manager. |
 | `IsVisionTrack` | `bool` | `true` when `TrackName == "vision"` (same caveat as `VideoTrackPublished.IsVisionTrack`). |
 | `IsNormalUnpublish` | `bool` | `true` when `Reason` is `UserRequested` or `SessionEnded`. |
 

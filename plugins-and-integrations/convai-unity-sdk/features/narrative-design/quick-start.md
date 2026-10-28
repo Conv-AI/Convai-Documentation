@@ -3,7 +3,7 @@ title: Narrative design quick start
 description: >-
   Add a Narrative Design Manager and a collision trigger to a Convai character
   and confirm a section change in Play Mode — no code required.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 This guide walks you through the fastest path to a working Narrative Design setup. By the end, a character reacts to a section change when the player walks through a trigger zone — entirely through the Inspector, no code required.
@@ -13,6 +13,7 @@ This guide walks you through the fastest path to a working Narrative Design setu
 Before starting, verify:
 
 * [ ] A `ConvaiCharacter` is in the scene with its Character ID set in the Inspector
+* [ ] A single-character conversation for this first test; [shared and group rooms](narrative-design-multi-character.md) have different command behavior
 * [ ] At least one section and one trigger are defined for that character on the [Convai dashboard](https://convai.com)
 
 ## Set up the manager and a trigger
@@ -25,7 +26,6 @@ Select the GameObject that has your `ConvaiCharacter` component. In the Inspecto
 
 The Manager auto-detects the `ConvaiCharacter` on the same GameObject. If your character is on a different GameObject, drag it into the **Character** field.
 
-<figure><img src="../../../../.gitbook/assets/image (478).png" alt="ConvaiNarrativeDesignManager added to the character GameObject in the Unity Inspector"><figcaption><p>ConvaiNarrativeDesignManager on the character's GameObject.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -33,9 +33,8 @@ The Manager auto-detects the `ConvaiCharacter` on the same GameObject. If your c
 
 In the Manager's Inspector, click **Sync with Backend**. The SDK fetches your narrative sections and populates the **Narrative Sections** list. Each entry shows the section's name from the dashboard.
 
-If the list stays empty, confirm that the character ID is set on `ConvaiCharacter` and that your API key is valid — see [Configure the API key](../../getting-started/configure-api-key.md). The **Last Fetch Error** field shows the specific error if something went wrong.
+If the list stays empty, confirm that the character ID is set on `ConvaiCharacter` and that your API key is valid — see [Configure the API key](../../getting-started/configure-api-key.md). A failed request appears as a **Sync failed** box in **Sync Status**. Selected character version reads require **API Mode > Upgraded**.
 
-<figure><img src="../../../../.gitbook/assets/image (480).png" alt="Narrative Sections list populated after clicking Sync with Backend"><figcaption><p>Narrative Sections list after a successful sync.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -73,7 +72,6 @@ public class NarrativeDesignDebugLogger : MonoBehaviour
 
 </details>
 
-<figure><img src="../../../../.gitbook/assets/image (481).png" alt="On Section Start Unity Event wired to a debug logger component"><figcaption><p>On Section Start wired to NarrativeDesignDebugLogger.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -81,17 +79,15 @@ public class NarrativeDesignDebugLogger : MonoBehaviour
 
 Create a new empty GameObject in your scene and position it where the player will walk. Click **Add Component** and search for **Convai Narrative Design Trigger** (path: **Convai > Convai Narrative Design Trigger**).
 
-Drag your `ConvaiCharacter` into the **Character** field, or leave it blank to let **Auto Find Character** locate it automatically.
+Drag your `ConvaiCharacter` into **Character** before fetching. **Auto Find** operates at runtime and does not enable the Inspector's Fetch button.
 
-<figure><img src="../../../../.gitbook/assets/image (482).png" alt="ConvaiNarrativeDesignTrigger added to an empty GameObject in the scene"><figcaption><p>ConvaiNarrativeDesignTrigger on a world-space trigger GameObject.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
 ### Fetch and select a trigger
 
-In the Trigger component's Inspector, click **Fetch** to load the named triggers from the dashboard. A dropdown appears — select the trigger that should advance the graph to your first section.
+In the Trigger component's Inspector, click **Fetch** to load the named triggers from the dashboard. The picker is already present; select the trigger that should advance the graph to your first section. Selection shows read-only **ID**, **Message**, and **Destination** rows.
 
-<figure><img src="../../../../.gitbook/assets/image (483).png" alt="Trigger Selection dropdown populated after clicking Fetch"><figcaption><p>Trigger dropdown populated from the Convai dashboard.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -101,7 +97,6 @@ The default activation mode is **Collision**, which uses Unity's `OnTriggerEnter
 
 Size the collider to cover the zone where you want the trigger to fire. In the Scene view, the green wireframe box shows the detection area.
 
-<figure><img src="../../../../.gitbook/assets/image (485).png" alt="Box Collider with Is Trigger enabled on the trigger zone GameObject"><figcaption><p>Box Collider with Is Trigger enabled.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -119,17 +114,21 @@ Missing any of these is the most common reason the trigger appears to do nothing
 
 Enter Play Mode and move the player through the collider zone.
 
-{% hint style="success" %}
-The section ID appears in the Console when the player enters the zone. The character's next response reflects the new section's objectives.
-{% endhint %}
+Confirm the configured section event fires after Convai reports the new section. If the trigger is only queued or accepted locally, this response has not yet been confirmed.
 {% endstep %}
 {% endstepper %}
+
+{% hint style="warning" %}
+**Screenshot required before publishing:** Capture the Narrative Design Trigger Inspector with an assigned character, fetched Trigger picker, Activation Settings set to Collision, and Auto-Recovery Settings expanded.
+{% endhint %}
+
+<figure><img src="../../../../.gitbook/assets/TODO-unity-narrative-trigger.png" alt="the Narrative Design Trigger Inspector with an assigned character, fetched Trigger picker, Activation Settings set to Collision, and Auto-Recovery Settings expanded"><figcaption><p>TODO: Replace with screenshot showing the Narrative Design Trigger Inspector with an assigned character, fetched Trigger picker, Activation Settings set to Collision, and Auto-Recovery Settings expanded.</p></figcaption></figure>
 
 ## What the setup produced
 
 Walking through the collider zone activated the full Narrative Design pipeline:
 
-The `ConvaiNarrativeDesignTrigger` detected the player via `OnTriggerEnter` and called `InvokeTrigger()` with the trigger name you selected. The SDK queued the trigger until the character's real-time session was open, then sent a `trigger-message` over the RTVI connection to Convai. Convai advanced the narrative graph along the matching edge and responded with a `behavior-tree-response` containing the new section ID. `ConvaiNarrativeDesignManager` matched that section ID against its local list and fired `OnSectionStart` on the matching entry.
+The `ConvaiNarrativeDesignTrigger` detected the player via `OnTriggerEnter` and called `InvokeTrigger()` with the trigger name you selected. The SDK accepted or held the trigger until the character was ready and selected, then sent a `trigger-message` over the RTVI connection to Convai. Convai advanced the narrative graph along the matching edge and responded with a `behavior-tree-response` containing the new section ID. `ConvaiNarrativeDesignManager` matched that section ID against its local list and fired `OnSectionStart` on the matching entry.
 
 For a full explanation of this pipeline, see [How narrative design works](how-narrative-design-works.md).
 
