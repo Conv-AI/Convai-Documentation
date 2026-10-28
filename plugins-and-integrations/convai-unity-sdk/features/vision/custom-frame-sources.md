@@ -1,7 +1,7 @@
 ---
 title: Custom frame sources
 description: Implement IVisionFrameSource to publish a custom video pipeline to Convai, including the Y-flip requirement, lifecycle state pattern, and auto-discovery rules.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Implement `IVisionFrameSource` to publish any custom video pipeline — a video file, a custom render texture, or a screen capture utility — without modifying the publishing layer. Once your component is on the scene, `ConvaiVisionPublisher` discovers and streams it automatically.
@@ -26,7 +26,7 @@ public interface IVisionFrameSource
 }
 ```
 
-Your implementation must be a `MonoBehaviour`. `ConvaiVisionPublisher` discovers frame sources using `GetComponent` and `GetComponentsInChildren`, which only work on Unity components.
+For Inspector assignment and discovery, implement the source on a `MonoBehaviour`. `ConvaiVisionPublisher` discovers frame sources using `GetComponent` and `GetComponentsInChildren`, which only work on Unity components.
 
 ## Y-flip requirement
 
@@ -145,6 +145,7 @@ public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource
 Implement `IVisionFrameSourceStatusProvider` alongside `IVisionFrameSource` to expose richer lifecycle state — permission flow, delayed initialization, or structured error information. The publisher can then react to readiness changes without polling.
 
 ```csharp
+// pseudocode: merge these status members into the complete source above.
 public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource, IVisionFrameSourceStatusProvider
 {
     // --- IVisionFrameSourceStatusProvider ---
@@ -182,17 +183,26 @@ public class MyCustomFrameSource : MonoBehaviour, IVisionFrameSource, IVisionFra
 
 ## Custom Inspectors
 
-`IVisionFrameSource` is the only supported extension point for a custom video pipeline. The SDK's own frame source inspectors are internal implementation detail, not an extension surface. `ConvaiVisionBaseEditor` — the shared base class behind the built-in `CameraVisionFrameSource`, `WebcamVisionFrameSource`, and `QuestVisionFrameSource` inspectors — is `internal`, so write a standalone `CustomEditor` for your `IVisionFrameSource` component rather than subclassing the SDK's editor base.
+Use `IVisionFrameSource` for custom textures, or its companion `IVisionPageCanvasSource` for an application-owned browser canvas. The SDK's own frame source inspectors are internal implementation detail, not an extension surface. `ConvaiVisionBaseEditor` — the shared base class behind the built-in `CameraVisionFrameSource`, `WebcamVisionFrameSource`, and `QuestVisionFrameSource` inspectors — is `internal`, so write a standalone `CustomEditor` for your `IVisionFrameSource` component rather than subclassing the SDK's editor base.
 
 ## Auto-discovery
 
 Once your component is on the scene, `ConvaiVisionPublisher` discovers it automatically in this order:
 
 1. The **Source** field in the Inspector (explicit assignment).
-2. `GetComponent<CameraVisionFrameSource>()` on the same GameObject (built-in preference).
-3. `GetComponentsInChildren<MonoBehaviour>(true)` — first `IVisionFrameSource` found on the same GameObject or children.
+2. On WebGL, a local `IVisionPageCanvasSource` when no source was assigned.
+3. `GetComponent<CameraVisionFrameSource>()` on the same GameObject (built-in preference).
+4. `GetComponentsInChildren<MonoBehaviour>(true)` — first `IVisionFrameSource` found on the same GameObject or children.
 
-If more than one frame source is found under step 3, the publisher logs a warning and selects the first. Assign the **Source** field explicitly to avoid ambiguity.
+If more than one frame source is found under step 4, the publisher logs a warning and selects the first. Assign the **Source** field explicitly to avoid ambiguity.
+
+## Publication lifecycle
+
+The publisher calls `StartCapture` when needed, then waits for a texture (or page canvas ID), capture state, and a usable frame. Its readiness budget is `2` active seconds, suspended while permission is pending. A later `FrameReady` can retry. Replacing the output texture and raising `FrameReady` or `StatusChanged` causes republication.
+
+A stopped or failed source ends publication until a reconnect or `EnablePublishing(true)`. When the publisher stops, it calls `StopCapture` only if it started that source. Keep source events on the Unity main thread and do not advertise readiness before a valid output exists.
+
+On WebGL, `IVisionPageCanvasSource.PageCanvasElementId` identifies the canvas your application draws into. Plain texture sources are also supported through a hidden page canvas; the video output drops alpha. See [WebGL vision](webgl.md).
 
 ## Next steps
 

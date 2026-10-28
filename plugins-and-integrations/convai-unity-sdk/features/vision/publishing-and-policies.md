@@ -1,21 +1,21 @@
 ---
 title: Publish policies
 description: Reference for Vision publish policies, including FPS and bitrate budgets, runtime control methods, auto-publish behavior, and WebGL-specific behavior.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 `ConvaiVisionPublisher` manages the WebRTC video track that carries the camera feed from Unity to Convai. A publish policy controls the client-side frame rate and bitrate budget; it does not configure any AI model or backend vision provider.
 
 ## Inspector reference
 
-The Inspector is divided into two collapsible sections: **FRAME SOURCE** and **PUBLISH POLICY**.
+The Inspector contains **Frame Source**, **Publish Policy**, and **Live**. Validation can show **Frame Source Required** with **Auto-Find**, or **More Than One Frame Source Here**. Inspector Auto-Find can search parents; runtime discovery is limited as described below.
 
 ### Frame source
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| **Source** | `MonoBehaviour` | _(auto-discovered)_ | The `IVisionFrameSource` to publish. Leave blank to auto-discover from the same GameObject, children, or scene. Assign explicitly when multiple frame sources are present. |
-| **Track Name** | `string` | `"unity-scene"` | The name of the WebRTC track as it appears in the LiveKit room. Change only if your backend routing requires a specific name. |
+| **Source** | `MonoBehaviour` | _(auto-discovered)_ | The `IVisionFrameSource` to publish. Leave blank to auto-discover from the same GameObject or its children. On WebGL a local page-canvas source is preferred; otherwise a same-object camera source precedes other sources. Assign explicitly when multiple frame sources are present. |
+| **Track Name** | `string` | `"unity-scene"` | The name of the WebRTC track as it appears in the LiveKit room. Match the room's resolved **Video Track Name**. Its profile or inline value wins, otherwise it uses a child publisher's name, then `unity-scene`. |
 
 ### Publish policy
 
@@ -34,22 +34,17 @@ A publish policy is a client-side transport budget. It controls how many frames 
 | `AutoCompatible` | 10 | 750 kbps | Default. Balanced budget compatible with the current backend processing rate. Use this unless you have a specific reason to change it. |
 | `HighResponsiveness` | 15 | 1 000 kbps | Scenes where faster visual updates improve AI response quality (fast-moving objects, gesture recognition). Higher network cost. |
 | `LowOverhead` | 5 | 350 kbps | High-volume deployments, mobile devices with limited bandwidth, or scenes where the visual context changes slowly. |
-| `Manual` | _(none)_ | _(none)_ | Publishing does not start automatically on room connect. Call `EnablePublishing(true)` from a script to start. Use for session-gated or trigger-based capture. |
+| `Manual` | `10` once enabled | `750` kbps once enabled | Publishing does not start automatically on room connect. Call `EnablePublishing(true)` from a script to start. Use for session-gated or trigger-based capture. |
 
 To override the policy defaults for a specific instance without changing the policy, set **Max Publish FPS** or **Max Bitrate (bps)** in the Inspector. A value of `0` means "use the policy default".
 
-```csharp
-// Runtime override via script
-ConvaiVisionPublisher publisher = GetComponent<ConvaiVisionPublisher>();
-publisher.publishFrameRateOverride = 12;
-publisher.publishBitrateOverride = 600_000;
-```
+Configure caps in the Inspector before runtime initialization. The public `publishFrameRateOverride` and `publishBitrateOverride` fields are read during setup, module start, and Editor validation; assigning them on a running publisher is not an immediate runtime control. `SetPublishPolicy` reuses the coordinator's cached caps.
 
 ## Control publishing from scripts
 
 **Switch policy at runtime**
 
-Call `SetPublishPolicy` to change the transport budget while a session is running. The change takes effect on the next published frame.
+Call `SetPublishPolicy` to change the transport budget while a session is running. A changed policy restarts an active or pending publication by unpublishing and publishing again. Switching to Manual stops automatic publication unless an explicit EnablePublishing choice already overrides it.
 
 ```csharp
 ConvaiVisionPublisher publisher = GetComponent<ConvaiVisionPublisher>();
@@ -67,7 +62,7 @@ publisher.SetPublishPolicy(VisionPublishPolicy.AutoCompatible);
 
 `EnablePublishing` takes effect under every policy, not only `Manual`. Under an auto-publishing policy, publishing otherwise starts and stops with the room connection, and `EnablePublishing(false)` stops it anyway.
 
-Calling it once is a lasting decision: from that point on your explicit value wins, and the policy no longer decides whether publishing runs. Switching to another policy afterwards changes the frame rate and bitrate, but not the on-or-off state. Use `Manual` when you want on-demand control to be the visible intent in the Inspector.
+Calling it once is a decision for this publisher component's lifetime, including reconnects: from that point on your explicit value wins, and the policy no longer decides whether publishing runs. Switching to another policy afterwards changes the frame rate and bitrate, but not the on-or-off state. Use `Manual` when you want on-demand control to be the visible intent in the Inspector.
 
 ```csharp
 ConvaiVisionPublisher publisher = GetComponent<ConvaiVisionPublisher>();
@@ -98,7 +93,7 @@ else
     Debug.Log("Not publishing — check Connection Type and frame source state.");
 ```
 
-`IsPublishing` becomes `true` after `ConvaiRoomManager` connects with **Connection Type** set to **Video**, the frame source reaches the `Ready` state, and the coordinator successfully opens the WebRTC video track.
+`IsPublishing` becomes `true` after the room connects with effective connection type Video, the frame source reaches the `Ready` state, and the coordinator successfully opens the WebRTC video track.
 
 ## Auto-publish behavior
 
@@ -120,18 +115,15 @@ Advanced setups that bypass every `IVisionFrameSource` and assign a raw `RenderT
 
 ## WebGL
 
-On WebGL, no frame source component is required or used. `ConvaiVisionPublisher` captures the visible browser canvas automatically via `canvas.captureStream()` as soon as the room connects. The assigned **Source** field is ignored.
+**WebGL Publishes** selects **Frame Source** (default) or **Game View**. A frame source texture is copied to a hidden page canvas; Game View captures the rendered game with its UI. With no source, the game view is the fallback. An `IVisionPageCanvasSource` always uses its own page canvas, even when Game View is selected.
 
-{% hint style="danger" %}
-**WebGL: HTTPS required.** Browsers block `canvas.captureStream()` on non-HTTPS origins. The only exception is `http://localhost`. Deploy your WebGL build to an HTTPS host before testing Vision in production.
+The policy default is capped at `15` fps on WebGL; a positive **Max Publish FPS** override is used as configured. Policy bitrate still applies. See [WebGL vision](webgl.md) for selection and browser verification.
+
+{% hint style="warning" %}
+**Screenshot required before publishing:** Capture Convai Vision Publisher with Frame Source, WebGL Publishes, Track Name, Publish Policy, Max Publish FPS, and Max Bitrate visible with the WebGL build target active.
 {% endhint %}
 
-| Behavior | Detail |
-| --- | --- |
-| Frame source | None required. Assigned frame source is ignored on WebGL. |
-| Frame rate | The policy's own frame rate is clamped to 15 fps. An explicit **Max Publish FPS** above `0` is used as given and is not clamped. |
-| Bitrate | Policy bitrate applies (no additional clamping). |
-| HTTPS | Required in production. `http://localhost` is the only exception. |
+<figure><img src="../../../../.gitbook/assets/TODO-unity-vision-publisher.png" alt="Convai Vision Publisher with Frame Source, WebGL Publishes, Track Name, Publish Policy, Max Publish FPS, and Max Bitrate visible with the WebGL build target active"><figcaption><p>TODO: Replace with screenshot showing Convai Vision Publisher with Frame Source, WebGL Publishes, Track Name, Publish Policy, Max Publish FPS, and Max Bitrate visible with the WebGL build target active.</p></figcaption></figure>
 
 ## Next steps
 

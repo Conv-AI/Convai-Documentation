@@ -1,7 +1,7 @@
 ---
 title: Vision usage examples
 description: Find code patterns for common Vision setups, including safety training, webcam selection, look-at activation, on-demand triggers, and WebGL deployment.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 These examples cover the most common Vision integration patterns. Each example is self-contained — copy the relevant script, attach it to the appropriate GameObject, and configure the serialized fields in the Inspector.
@@ -49,10 +49,11 @@ public class SafetyTrainingVisionController : MonoBehaviour
 
 A desktop onboarding application where the user selects which physical camera to use before a session starts. Useful when the user's workstation has multiple cameras (built-in webcam, USB camera, etc.).
 
-**Expected outcome:** The dropdown populates on Start with all detected camera names. Selecting a camera name and clicking **Switch** swaps the capture device without stopping the session.
+**Expected outcome:** The dropdown populates on Start with all detected camera names. Changing the dropdown swaps devices without disconnecting the room. The source stops during the switch, so re-enable publication after the operation succeeds.
 
 ```csharp
 using System.Collections.Generic;
+using Convai.Modules.Vision;
 using Convai.Runtime.Vision.Sources;
 using TMPro;
 using UnityEngine;
@@ -64,11 +65,12 @@ using UnityEngine;
 public class WebcamSelectorUI : MonoBehaviour
 {
     [SerializeField] private WebcamVisionFrameSource _webcamSource;
+    [SerializeField] private ConvaiVisionPublisher _publisher;
     [SerializeField] private TMP_Dropdown _deviceDropdown;
 
     private List<string> _deviceNames = new();
 
-    async void Start()
+    void Start()
     {
         _deviceNames = new List<string>(WebcamVisionFrameSource.GetAvailableDeviceNames());
         _deviceDropdown.ClearOptions();
@@ -77,7 +79,10 @@ public class WebcamSelectorUI : MonoBehaviour
         _deviceDropdown.onValueChanged.AddListener(async index =>
         {
             if (index >= 0 && index < _deviceNames.Count)
+            {
                 await _webcamSource.SwitchWebcamAsync(_deviceNames[index]);
+                _publisher.EnablePublishing(true);
+            }
         });
     }
 }
@@ -159,9 +164,9 @@ public class LookAtVisionTrigger : MonoBehaviour
 
 ## Configure Vision for WebGL
 
-On WebGL, no frame source component is required. `ConvaiVisionPublisher` captures the browser canvas automatically via `canvas.captureStream()`. Set **Connection Type** to **Video** and the publish policy as needed — everything else is automatic.
+To publish the game view, set **WebGL Publishes > Game View**. With no source this is also the fallback. With a source and the default **Frame Source** choice, the browser build publishes the source texture instead. See [WebGL vision](webgl.md).
 
-**Expected outcome:** The character receives a live feed of the browser canvas. No frame source component is on the scene.
+**Expected outcome:** The character receives a live feed of the browser canvas. This example deliberately publishes the game view, including its UI.
 
 ```csharp
 using Convai.Modules.Vision;
@@ -169,7 +174,7 @@ using Convai.Runtime.Vision.Publishing;
 using UnityEngine;
 
 /// <summary>
-/// WebGL-specific setup. No frame source needed — publisher uses canvas.captureStream().
+/// WebGL-specific setup. Select Game View in the publisher before building.
 /// Attach to the same GameObject as ConvaiVisionPublisher.
 /// Set ConvaiRoomManager.ConnectionType = Video before Play.
 /// </summary>
@@ -179,7 +184,7 @@ public class WebGLVisionSetup : MonoBehaviour
 
     void Awake()
     {
-        // LowOverhead is appropriate for WebGL — canvas capture is capped at 15 fps
+        // LowOverhead supplies a 5 fps default budget.
         _publisher.SetPublishPolicy(VisionPublishPolicy.LowOverhead);
     }
 }
@@ -193,7 +198,7 @@ public class WebGLVisionSetup : MonoBehaviour
 
 The previous examples all publish frames continuously through `ConvaiVisionPublisher`. A separate, lower-level surface on `IConvaiRoomConnectionService` lets you ask the backend to inspect the buffered frames on demand — independent of the publisher's own cadence — and control whether that inspection makes the character speak. This pattern fits a "Look now" button, an inspection tool the player triggers manually, or a step in a scripted sequence that needs a vision check at a precise moment.
 
-`RequestVisionStatus()` asks the backend to report the state of the session's frame buffer. `TriggerVision(ConvaiVisionTriggerRequest)` asks the backend to attach buffered frames to the next turn and, depending on the request's respond mode, invoke the model. `UpdateRespondMode(ConvaiRespondModeLane, ConvaiRespondMode)` changes how an entire input lane affects the character's speech for the rest of the session. All three are acknowledged asynchronously through domain events rather than a return value — see [Vision scripting API](scripting-api.md) for the full method signatures, request fields, and event payloads.
+`RequestVisionStatus()` asks the backend to report the state of the session's frame buffer. `TriggerVision(ConvaiVisionTriggerRequest)` asks the backend to attach buffered frames to the next turn and, depending on the request's respond mode, invoke the model. `UpdateRespondMode(ConvaiRespondModeLane, ConvaiRespondMode)` changes how an entire input lane affects the character's speech for the rest of the session. All three return a local send-acceptance boolean and expose asynchronous acknowledgement events separately — see [Vision scripting API](scripting-api.md) for the full method signatures, request fields, and event payloads.
 
 **Expected outcome:** Calling `RequestLookNow()` logs the buffer status, then the character describes what changed and speaks its answer. Calling `SilenceVisionUntilAsked()` stops the character from reacting to new vision frames until `RequestLookNow()` is called again.
 

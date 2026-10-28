@@ -1,240 +1,78 @@
 ---
 title: Configure narrative design triggers
-description: >-
-  Explains how to add a narrative design trigger that advances a character's
-  story using collision, proximity, timing, or a manual signal.
-last_reviewed: "4.6.0"
+description: Choose collision, proximity, timed, or manual activation for a saved narrative trigger and verify its local acceptance and resulting section update.
+last_reviewed: "5.0.0-preview"
 ---
 
-`ConvaiNarrativeDesignTrigger` sends a named signal to Convai that advances the story graph from one section to the next. Place it on any GameObject — a doorway, an exhibit, a UI button's event target — and choose how it should activate. A narrative trigger is distinct from a Unity Physics trigger: the activation mode controls _when_ the signal is sent, not what kind of Unity physics event fires.
+Place `ConvaiNarrativeDesignTrigger` on a scene object and configure when it sends a saved trigger name. This component sends `trigger_name`; its fetched message and destination are read-only metadata, not extra request fields.
 
-## Add the trigger component
+## Select the character and trigger
 
 {% stepper %}
 {% step %}
-### Create or select a GameObject
-
-For zone-based activation (Collision, Proximity, TimeBased), create an empty GameObject and position it in the scene where you want the trigger zone. For Manual activation, you can place the component anywhere.
-{% endstep %}
-
-{% step %}
 ### Add the component
 
-Click **Add Component** and navigate to **Convai > Convai Narrative Design Trigger**.
-
-<figure><img src="../../../../.gitbook/assets/image (489).png" alt="ConvaiNarrativeDesignTrigger added via Add Component in the Unity Inspector"><figcaption><p>Adding ConvaiNarrativeDesignTrigger to a GameObject.</p></figcaption></figure>
+Add **Convai > Convai Narrative Design Trigger** to a doorway, exhibit, or other event target. Assign **Character** explicitly. The **Auto Find** toggle only resolves the character at runtime, so it does not make the Inspector fetch possible without an assignment.
 {% endstep %}
-
 {% step %}
-### Assign the character
+### Fetch the selected character's triggers
 
-Drag your `ConvaiCharacter` into the **Character** field. If you leave it blank, **Auto Find Character** searches the parent hierarchy and then the `ConvaiManager`'s character list automatically. If more than one character is in the scene, assign the target explicitly.
+In **Trigger**, click **Fetch** beside the picker. The button requires a character with an ID. Select a trigger and check the **ID**, **Message**, and **Destination** rows. Changing the character or selected version clears cached selection and fetches again. Qualified version reads require **API Mode > Upgraded**.
 {% endstep %}
-
 {% step %}
-### Fetch and select a trigger
+### Choose activation and recovery
 
-Click **Fetch** in the **Trigger Selection** section. The SDK calls `NarrativeDesignFetcher.FetchTriggersAsync` and populates the dropdown with all triggers defined for this character on the dashboard.
-
-Select the trigger you want this component to send. The **Trigger Name**, **Trigger ID**, and **Destination Section** fields populate automatically. **Trigger Message** is displayed only as fetched metadata from Convai; the component sends the saved trigger name only.
-
-<figure><img src="../../../../.gitbook/assets/image (483).png" alt="Trigger Selection dropdown showing fetched triggers from the Convai dashboard"><figcaption><p>Trigger dropdown populated from the Convai dashboard.</p></figcaption></figure>
+Select **Mode** in **Activation Settings**, configure the fields below, then expand **Auto-Recovery Settings** if the character may connect later. Set **Trigger Once** to control repeated activation.
 {% endstep %}
-
 {% step %}
-### Choose an activation mode
+### Verify in Play mode
 
-Select one of the four activation modes described below and configure its settings.
+Use **Activation Runtime > Invoke** for a manual test, or enter the configured zone. Local acceptance appears in **Has Triggered**; verify the resulting section event separately. Read **Runtime Status > Last Error** for a component failure.
 {% endstep %}
 {% endstepper %}
 
+{% hint style="warning" %}
+**Screenshot required before publishing:** Capture the Narrative Design Trigger Inspector with an assigned character, fetched Trigger picker, Activation Settings set to Collision, and Auto-Recovery Settings expanded.
+{% endhint %}
+
+<figure><img src="../../../../.gitbook/assets/TODO-unity-narrative-trigger.png" alt="the Narrative Design Trigger Inspector with an assigned character, fetched Trigger picker, Activation Settings set to Collision, and Auto-Recovery Settings expanded"><figcaption><p>TODO: Replace with screenshot showing the Narrative Design Trigger Inspector with an assigned character, fetched Trigger picker, Activation Settings set to Collision, and Auto-Recovery Settings expanded.</p></figcaption></figure>
+
 ## Activation modes
 
-<figure><img src="../../../../.gitbook/assets/image (490).png" alt="Activation Settings header in the Inspector showing all four activation mode options"><figcaption><p>Activation Settings header with mode selector.</p></figcaption></figure>
+| Mode | Setup and behavior |
+|---|---|
+| **Collision** | A trigger collider detects player entry. Use **Player Tag** and **Player Layer** to filter it. Unity physics needs a player collider and a Rigidbody on one of the participating objects. |
+| **Proximity** | **Radius** defaults to `3` world units. A distance check runs in `Update`; no collider is required. The Scene view offers a radius handle. Auto-found players use tag/layer filters; a transform supplied with `SetPlayerTransform` is used directly. |
+| **Time Based** | Uses the collider setup and **Delay (seconds)**, default `0`. Exiting cancels the countdown. |
+| **Manual** | Call `InvokeTrigger()` or `TryInvokeTrigger()` from code. Both return `bool`, so use a public `void` wrapper for an Inspector Unity Event. |
 
-### Collision
+The zone modes expose **Player Tag** (default `Player`) and **Player Layer** (all layers by default). A mask of **Nothing** detects no players. Collision and Time Based show **Add Box Collider** or **Enable Is Trigger** fixes when applicable.
 
-The default mode. The trigger fires when a tagged player GameObject enters the collider attached to the same GameObject.
+## Recovery and repeated activation
 
-**Requirements:**
+| Setting | Default | Effect |
+|---|---|---|
+| **Auto Find Player** | `true` | Attempts runtime player lookup when no player is assigned. |
+| **Queue Until Ready** | `true` | Waits for the character to enter conversation before attempting the character API. |
+| **Max Wait Time** | `30` seconds | Appears when queuing is enabled. `0` waits without a timeout. |
+| **Reset On Scene Load** | `true` | Resets component activation when a scene loads. |
+| **Trigger Once** | `true` | Prevents another accepted activation until reset. |
 
-* A `Collider` component on the same GameObject with **Is Trigger** enabled.
-* Either the trigger GameObject or the player GameObject must have a `Rigidbody` for Unity physics to generate the `OnTriggerEnter` callback.
+`ResetTrigger()` cancels the component's pending wait and re-evaluates status. It does not clear the last error text or validation warnings. After fixing configuration, validate and reset; `ValidateConfiguration()` alone does not restore **Ready**. Runtime failures can also produce `ConfigurationError`.
 
-{% hint style="warning" %}
-If **Is Trigger** is not enabled on the collider, or if neither the trigger object nor the player has a `Rigidbody`, `OnTriggerEnter` will never fire. Enable **Validate On Start** to catch this automatically when the scene runs.
-{% endhint %}
+The character API has a separate bounded queue for readiness and multi-character targeting. Its acceptance does not mean the command reached Convai. Group conversations refuse these commands, and that refusal need not raise the component's `OnTriggerFailed`; use [the shared-room guide](narrative-design-multi-character.md).
 
-**Detection settings:**
+## Events and diagnostics
 
-| Field            | Default    | Description                                                     |
-| ---------------- | ---------- | --------------------------------------------------------------- |
-| **Player Tag**   | `"Player"` | Only GameObjects with this tag are recognized as the player.    |
-| **Player Layer** | All layers | Layer mask to further filter which objects count as the player. |
+| Event | Meaning |
+|---|---|
+| `OnTriggerActivated` | The character API accepted the request locally, including a held request. |
+| `OnPlayerEnterZone` / `OnPlayerExitZone` | Unity collider callbacks only. The proximity distance check does not raise these events. |
+| `OnTriggerFailed` | A component failure with its error message; not a universal server-refusal event. |
+| `OnTriggerQueued` | The component started waiting for the character. |
 
-### Proximity
+**Diagnostics** exposes **Enable Diagnostics** and **Validate On Start**. Diagnostic messages use Debug logging; enable the Narrative category at Debug in **Convai SDK > Diagnostics** to see them. In Play mode, **Activation Runtime** shows **Has Triggered**, **Player In Zone**, **Invoke**, and **Reset**. **Runtime Status** shows **Current Status**, **Character Ready**, **Last Error**, and **Print Diagnostics to Console**. A disabled component can retain an older displayed status until it is re-evaluated.
 
-The trigger fires when the player's distance from the component's `Transform` falls within **Proximity Radius**. The check runs every frame in `Update`. A green sphere is drawn in the Scene view showing the detection radius.
-
-| Field                | Default    | Description                                                            |
-| -------------------- | ---------- | ---------------------------------------------------------------------- |
-| **Proximity Radius** | `3`        | Detection radius in world units.                                       |
-| **Player Tag**       | `"Player"` | Tag used to identify the player.                                       |
-| **Auto Find Player** | `true`     | Searches the scene for a tagged player GameObject if none is assigned. |
-
-This mode does not require a collider.
-
-### TimeBased
-
-The trigger fires after the player has been inside the collider zone for a set duration. If the player exits before the delay elapses, the countdown cancels and restarts the next time the player enters.
-
-**Requirements:** same collider setup as Collision mode.
-
-| Field          | Default    | Description                                                          |
-| -------------- | ---------- | -------------------------------------------------------------------- |
-| **Time Delay** | `0`        | Seconds the player must remain in the zone before the trigger fires. |
-| **Player Tag** | `"Player"` | Tag used to identify the player.                                     |
-
-### Manual
-
-The trigger does nothing automatically. Call `InvokeTrigger()` or `TryInvokeTrigger()` from your own code or a Unity Event to fire it. Use this mode when the activation condition is controlled entirely by your game logic — a UI button, a quest completion callback, or a scored interaction.
-
-```csharp
-// Fire the trigger from code
-narrativeTrigger.InvokeTrigger();
-
-// Attempt silently — skips without warning if TriggerOnce already fired
-narrativeTrigger.TryInvokeTrigger();
-```
-
-## Trigger request mode
-
-Activation mode and trigger request mode are two independent settings. Activation mode (`Collision`, `Proximity`, `TimeBased`, `Manual`) controls _when_ `ConvaiNarrativeDesignTrigger` fires, as described above. Trigger request mode controls _what_ gets sent to Convai over RTVI once it fires.
-
-`ConvaiNarrativeDesignTrigger` always sends its configured trigger using `ConvaiNarrativeTriggerMode.SavedTrigger`. Internally it calls `convaiCharacter.NarrativeDesign.InvokeTrigger(_triggerName)`, which sends only the `trigger_name` field. This component has no Inspector option to switch to either of the other two trigger request modes.
-
-Two additional trigger request modes exist on `ConvaiNarrativeTriggerRequest` (namespace `Convai.Runtime.NarrativeDesign`):
-
-| Trigger request mode | Wire field | How to send it |
-| --- | --- | --- |
-| `SavedTrigger` | `trigger_name` | `ConvaiNarrativeDesignTrigger` (this component), or `IConvaiNarrativeDesign.InvokeTrigger(string)` from code |
-| `InlineEvent` | `trigger_message` | `IConvaiNarrativeDesign.InvokeEvent(string)` — code only, no Inspector equivalent |
-| `ScriptedSpeech` | `trigger_message` (wrapped in `<speak>` tags) | `IConvaiNarrativeDesign.InvokeSpeech(string)` — code only, no Inspector equivalent |
-
-`InlineEvent` and `ScriptedSpeech` are not reachable from this component's Inspector. Use `InvokeEvent` to send contextual event text that Convai responds to naturally, or `InvokeSpeech` to make the character say exact scripted text without advancing the narrative graph. See [Narrative design scripting reference](scripting-narrative-design.md) for the full code API.
-
-## Auto-recovery settings
-
-These settings make the trigger resilient to common runtime conditions where the character or player may not be ready immediately.
-
-<figure><img src="../../../../.gitbook/assets/image (509).png" alt="Auto-Recovery Settings header in the Inspector"><figcaption><p>Auto-Recovery Settings header.</p></figcaption></figure>
-
-| Field                   | Default | Description                                                                                                                                                                                                                                                     |
-| ----------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Auto Find Character** | `true`  | Searches the parent hierarchy, then `ConvaiManager.Characters`. Assigns automatically if only one character exists; logs a warning if multiple characters are found.                                                                                            |
-| **Auto Find Player**    | `true`  | Searches by Player Tag, then by common name list, then via `Camera.main.parent`.                                                                                                                                                                                |
-| **Queue Until Ready**   | `true`  | If the character is not yet in an active conversation (`IsInConversation` is `false`), the trigger is queued and fires automatically when the connection is established. You do not need to check `IsInConversation` manually before calling `InvokeTrigger()`. |
-| **Max Wait Time**       | `30`    | Maximum seconds to wait for the character to become ready. Set to `0` for no timeout.                                                                                                                                                                           |
-| **Reset On Scene Load** | `true`  | Calls `ResetTrigger()` whenever a scene is loaded, so the trigger can fire again in reloaded scenes.                                                                                                                                                            |
-
-{% hint style="warning" %}
-Setting **Max Wait Time** to `0` in a production build where the session may never connect creates an indefinite coroutine. Always set a reasonable timeout unless you have explicit control over session lifetime.
-{% endhint %}
-
-## Control trigger frequency
-
-**Trigger Once** (default `true`) prevents the trigger from firing more than once. After the first successful invocation, `HasTriggered` becomes `true`, `CurrentStatus` becomes `AlreadyFired`, and all subsequent calls return `false`.
-
-To allow the trigger to fire again, call `ResetTrigger()`:
-
-```csharp
-narrativeTrigger.ResetTrigger();
-```
-
-`ResetTrigger()` also cancels any queued trigger that is waiting for the character to become ready.
-
-To allow the trigger to fire on every activation, disable **Trigger Once** in the Inspector.
-
-## Events reference
-
-| Event                | Signature            | When it fires                                                                           |
-| -------------------- | -------------------- | --------------------------------------------------------------------------------------- |
-| `OnTriggerActivated` | `UnityEvent`         | The trigger was successfully sent to the backend.                                       |
-| `OnPlayerEnterZone`  | `UnityEvent`         | The player entered the collider or proximity zone (before the trigger fires).           |
-| `OnPlayerExitZone`   | `UnityEvent`         | The player exited the collider or proximity zone.                                       |
-| `OnTriggerFailed`    | `UnityEvent<string>` | The trigger could not fire. The string argument contains the error message.             |
-| `OnTriggerQueued`    | `UnityEvent`         | The trigger was accepted but deferred because the character is not yet in conversation. |
-
-## Trigger status
-
-The `CurrentStatus` property tracks the trigger's state at all times:
-
-```mermaid
-stateDiagram-v2
-    [*] --> Ready
-    Ready --> AlreadyFired : InvokeTrigger() succeeds\n(TriggerOnce = true)
-    Ready --> QueuedWaitingForCharacter : InvokeTrigger() called\ncharacter not ready\nQueueUntilReady = true
-    Ready --> ConfigurationError : ValidateConfiguration() fails
-    QueuedWaitingForCharacter --> AlreadyFired : character becomes ready
-    QueuedWaitingForCharacter --> ConfigurationError : MaxWaitTime exceeded
-    AlreadyFired --> Ready : ResetTrigger()
-    ConfigurationError --> Ready : fix issue + ValidateConfiguration()
-    Ready --> Disabled : component or GameObject disabled
-    Disabled --> Ready : component or GameObject re-enabled
-```
-
-See [Troubleshoot narrative design](troubleshooting-and-diagnostics.md) for a full resolution guide for each status.
-
-## Inspector reference
-
-### Character Reference header
-
-| Field                   | Default | Description                                                                               |
-| ----------------------- | ------- | ----------------------------------------------------------------------------------------- |
-| **Character**           | None    | The target `ConvaiCharacter`. Auto-found if blank and **Auto Find Character** is enabled. |
-| **Auto Find Character** | `true`  | Searches hierarchy and ConvaiManager if Character field is empty.                         |
-
-### Trigger Selection header
-
-| Field | Default | Description |
-| --- | --- | --- |
-| **Trigger ID** | Empty | Read-only after selection. Unique identifier from the dashboard. |
-| **Trigger Name** | Empty | Saved trigger name sent to Convai when this component fires. |
-| **Trigger Message** | Empty | Read-only metadata fetched from Convai. It is not sent by `ConvaiNarrativeDesignTrigger`. |
-
-### Activation Settings header
-
-| Field                | Default     | Description                                                                    |
-| -------------------- | ----------- | ------------------------------------------------------------------------------ |
-| **Activation Mode**  | `Collision` | How the trigger activates: `Collision`, `Proximity`, `Manual`, or `TimeBased`. |
-| **Proximity Radius** | `3`         | Detection radius for Proximity mode.                                           |
-| **Time Delay**       | `0`         | Countdown seconds for TimeBased mode.                                          |
-| **Trigger Once**     | `true`      | If enabled, fires only once until `ResetTrigger()` is called.                  |
-| **Player Layer**     | All         | Layer mask for player detection.                                               |
-| **Player Tag**       | `"Player"`  | Tag used to identify the player GameObject.                                    |
-
-### Auto-Recovery Settings header
-
-| Field                   | Default | Description                                                 |
-| ----------------------- | ------- | ----------------------------------------------------------- |
-| **Auto Find Player**    | `true`  | Searches the scene for a tagged player if none is detected. |
-| **Queue Until Ready**   | `true`  | Defers the trigger until the character's session is open.   |
-| **Max Wait Time**       | `30`    | Timeout in seconds for the queue. `0` = no timeout.         |
-| **Reset On Scene Load** | `true`  | Resets `HasTriggered` on scene load.                        |
-
-### Diagnostics header
-
-| Field                  | Default | Description                                                  |
-| ---------------------- | ------- | ------------------------------------------------------------ |
-| **Enable Diagnostics** | `false` | Logs detailed state transitions to the Console.              |
-| **Validate On Start**  | `true`  | Runs `ValidateConfiguration()` at Start and logs any issues. |
-
-## Next steps
-
-{% content-ref url="template-keys-dynamic-narrative-variables.md" %}
-[Configure narrative template keys](template-keys-dynamic-narrative-variables.md)
-{% endcontent-ref %}
-
-{% content-ref url="scripting-narrative-design.md" %}
-[Narrative design scripting reference](scripting-narrative-design.md)
+{% content-ref url="usage-examples.md" %}
+[Narrative design usage examples](usage-examples.md)
 {% endcontent-ref %}
