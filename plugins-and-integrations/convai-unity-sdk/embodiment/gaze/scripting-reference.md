@@ -1,7 +1,7 @@
 ---
 title: Gaze scripting reference
 description: Reference for the Convai Gaze system's public API, including the controller, gaze readings, handles, and the target provider interface.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Complete reference for the public types in the Convai Gaze system. Types live in the `Convai.Modules.Gaze.Components`, `Convai.Modules.Gaze.Core`, `Convai.Modules.Gaze.Providers`, `Convai.Domain.Embodiment.Readings`, and `Convai.Domain.Embodiment.Semantics` namespaces, as noted per type.
@@ -95,7 +95,7 @@ Live handle for one scripted gaze request, returned by `GazeAt` and `GlanceAt`. 
 | Property | Type | Description |
 |---|---|---|
 | `TargetName` | `string` | Display name of the requested target, for diagnostics. |
-| `IsActive` | `bool` | Whether the request is still live (not released, expired, or superseded by destroy). |
+| `IsActive` | `bool` | Whether the request is still live (not released, expired, reset, or ended by target destruction). |
 | `Settled` | `Task<bool>` | Completes `true` once gaze is aligned on the target, or `false` when the request ended before alignment. |
 | `Completion` | `Task` | Completes when the request ends — hold elapsed, released, or target lost. |
 | `Outcome` | `GazeOutcome` | What became of the request. `Taken` until something says otherwise. |
@@ -119,6 +119,8 @@ Options for a scripted `GazeAt` request. See [Scripted gaze](scripted-gaze.md) f
 | `Engagement` | `float` | Engagement override in `(0, 1]`. Values `<= 0` use the current dialogue state's engagement. |
 | `AllowBodyTurn` | `bool` | Whether this request may trigger a full-body turn toward the target. |
 
+A higher-priority request selects a different current winner; it does not by itself end a lower-priority handle. Live requests can resume when the winner releases, so use a finite hold or explicit cancellation for requests that may wait.
+
 ## `GazeOutcome`
 
 Enum — `Convai.Modules.Gaze.Components`
@@ -128,7 +130,7 @@ Why a gaze request never reached its target, or confirmation that it did.
 | Value | Integer | Description |
 |---|---|---|
 | `Taken` | `0` | The gaze request is live, or it arrived on its target. |
-| `Interrupted` | `1` | The request ended before gaze arrived — released, expired, superseded, or its target was destroyed. |
+| `Interrupted` | `1` | The request ended before gaze arrived — released, expired, cleared by a reset, or its target was destroyed. |
 | `HeldEyeContactInstead` | `2` | The character deliberately held eye contact and the glance was folded into it rather than taken, because `LockBlocksGlances` is on. |
 
 ## `GazeEyeContactMode`
@@ -167,15 +169,27 @@ How the conversational focus point is derived from its anchor transform.
 | `ExactTransform` | `1` | Uses the anchor's exact world position. |
 | `LocalOffset` | `2` | Transforms `PlayerAnchorAimOffset` from anchor-local to world space. |
 
+## `GazeAnchorFacePresence`
+
+Enum — `Convai.Modules.Gaze.Components`
+
+| Value | Integer | Behavior |
+|---|---|---|
+| `Auto` | `0` | Treats an explicit anchor as a face and an automatically found camera as a viewpoint. |
+| `Face` | `1` | Always enables face-aware fixation; useful when an XR camera is between the player's eyes. |
+| `Point` | `2` | Aims at the anchor as a point, without face scanning. |
+
+Configured by **Face Presence** on `PlayerAnchorTargetProvider`.
+
 ## `GazeBodyTurnStyle`
 
 Enum — `Convai.Modules.Gaze.Components`
 
-How a character turns its body when it looks at something it cannot reach with head and eyes alone.
+How a character turns its body when it looks at something it cannot reach with head and eyes alone. The controller stores this in private serialized `bodyTurnStyle`, default `SteppingTurn`. It has no public property and is not drawn in the normal component Inspector; use Unity's Debug Inspector or the `Convai.ConfigureGaze` assistant tool's `bodyTurnStyle` argument.
 
 | Value | Integer | Description |
 |---|---|---|
-| `SteppingTurn` | `0` | Plays the character's own turn animation, so the feet step round. Needs turn clips in the Animation Set and the Body Animation module; falls back to smooth rotation without either. |
+| `SteppingTurn` | `0` | Plays the character's own turn animation, so the feet step round. Needs turn clips, Body Animation, and **Enable Turn In Place** in its config (off by default); falls back to smooth rotation without either. |
 | `SmoothRotation` | `1` | Rotates the character directly, at the speed the gaze profile sets. Needs no clips and no animation module. |
 
 ## `GazeSpeakerAttention`
@@ -236,7 +250,36 @@ One optional gaze capability: what it does in plain English, and which component
 | `ProviderType` | `Type` | The `MonoBehaviour` type that provides this capability. |
 | `IsPresent` | `bool` | Whether an enabled provider exists on this character right now. |
 
-`GazeCapabilityId` values: `PlayerAttention` (`0`), `AttentionGrounding` (`1`), `ReferentialGlances` (`2`), `JointAttention` (`3`), `CharacterGaze` (`4`), `PupilResponse` (`5`) — one per advanced provider described in [Gaze targets and providers](targets-and-providers.md).
+`GazeCapabilityId` values: `PlayerAttention` (`0`), `AttentionGrounding` (`1`), `ReferentialGlances` (`2`), `JointAttention` (`3`), `CharacterGaze` (`4`), `PupilResponse` (`5`) — six optional capabilities. Player Anchor and World Object Target are provider components but have no capability IDs. Display names are available through `GazeCapabilities.DisplayNameOf`; see [Gaze targets and providers](targets-and-providers.md).
+
+## `GazeCapabilities`
+
+Static class — `Convai.Modules.Gaze.Core`
+
+| Member | Signature | Purpose |
+|---|---|---|
+| `Count` | `int` | Number of catalogued optional capabilities (`6`). |
+| `Evaluate` | `void Evaluate(Transform characterRoot, List<GazeCapabilityInfo> results)` | Clears and fills the supplied list with presence information. |
+| `DisplayNameOf` | `string DisplayNameOf(GazeCapabilityId id)` | Readable capability name. |
+| `DescriptionOf` | `string DescriptionOf(GazeCapabilityId id)` | Description of the behavior. |
+| `ProviderTypeOf` | `Type ProviderTypeOf(GazeCapabilityId id)` | Component type that supplies the capability. |
+| `IsPresentUnder` | `bool IsPresentUnder(Transform characterRoot, Type providerType)` | Whether an active, enabled provider exists under the root. This checks component presence, not successful runtime behavior. |
+
+## Player attention and supplied rays
+
+`IPlayerGazeRaySource` is in `Convai.Domain.Embodiment.Interfaces`. Implement `bool TryGetPlayerGazeRay(out Ray ray)` to supply a world-space eye or camera ray; return `false` when unavailable so the consumer can use its fallback.
+
+`PlayerAttentionSensor` and `GazeJointAttention` are in `Convai.Modules.Gaze.Providers`. Each accepts `void SetGazeRaySource(IPlayerGazeRaySource source)`. Register the source on each component that should consume it.
+
+| `PlayerAttentionSensor` member | Type/signature | Purpose |
+|---|---|---|
+| `PlayerAttention` | `float` | Smoothed attention strength. |
+| `IsPlayerLooking` | `bool` | Looking classification after enter/exit thresholds. |
+| `TryGetPlayerGazeRay` | `bool TryGetPlayerGazeRay(out Ray ray)` | Reads the current source or fallback ray. |
+| `IsPlayerLookingAt` | `bool IsPlayerLookingAt(Transform subject)` | Tests whether the player looks toward a transform. |
+| `IsPlayerLookingAt` | `bool IsPlayerLookingAt(Vector3 worldPoint, float subjectRadiusMeters)` | Tests a point with an explicit subject radius. |
+
+`GazeReferentialGlances.NotifyUtterance(string utterance)` supplies a spoken line for object-name matching. The component normally receives `ConvaiCharacter.OnSpokenLine`; custom or text-only integrations can call it directly.
 
 ## `GazeSnapshot`
 
@@ -271,7 +314,7 @@ Mutable, reusable capture of the full gaze runtime state for HUDs and tests. All
 | `PlayerAttention` | `float` | Smoothed 0–1 "is the player looking at me" estimate from a `PlayerAttentionSensor`, or `-1` when no sensor is present. |
 | `PlayerLooking` | `bool` | The sensor's post-hysteresis classification. Only meaningful while `PlayerAttention` is not negative. |
 | `AttendingSpeaker` | `bool` | Whether the character is currently following somebody else's turn — the "everyone looks at the person talking" behavior. `false` while it is in its own turn, while `AttendToSpeaker` is `Off`, and while nobody attendable speaks. |
-| `SpeakerAttention` | `string` | One line describing what conversation attention is actually doing — who is being watched, or the gate that turned the speaker away (`"too far"`, `"behind them"`, `"its own turn"`). |
+| `SpeakerAttention` | `string` | One line describing what conversation attention is actually doing — who is being watched, or the gate that turned the speaker away (for example, a distance limit, an obstructed view, or the character's own turn). |
 | `LodEnabled` | `bool` | Whether crowd LOD is active on this character. |
 | `LodFar` | `bool` | Whether the character is in the reduced-rate far LOD band. |
 | `LodExpressionSkipped` | `bool` | Whether the solver stage is being skipped this frame (off-screen LOD). |

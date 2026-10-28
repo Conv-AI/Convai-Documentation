@@ -1,7 +1,7 @@
 ---
 title: How body language works
 description: Understand how Body Language directs a Convai character's posture, breathing, and gestures every tick, and how it yields to scripted gestures.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Every tick, `ConvaiBodyLanguageController` reads the character's dialogue state and emotion, resolves what its behavior should look like right now, and composes that behavior onto the skeleton alongside whatever Body Animation and Gaze are already writing. This page describes what drives that decision, the pieces that produce the motion, and the rule that keeps Body Language from fighting a scripted gesture. For the composition-root model these mechanics build on, see [Character embodiment](../../core-concepts/character-embodiment.md).
@@ -10,9 +10,11 @@ Every tick, `ConvaiBodyLanguageController` reads the character's dialogue state 
 
 ## What drives the body every tick
 
+If no Conversation Flow source exists, Body Language requests one on entering Play mode so it can respond to dialogue states.
+
 In the embodiment `Cognition` tick, the controller reads the character's current [dialogue state](../../core-concepts/dialogue-state.md) and its emotion reading, then resolves the profile's policy for that state — gesticulation intensity, listening lean-in, posture bias, breathing rate and depth, fidget rate. A state change never snaps the policy: values blend over the profile's `Policy Transition Seconds` so a character does not visibly jolt the instant it starts speaking.
 
-In the later `Expression` tick, after the Animator or `PlayableGraph` has posed the skeleton and before Gaze, the controller's solvers spring toward that tick's targets and accumulate every channel — spine, shoulders, pelvis, head-gesture fallback — onto one shared compositor that performs exactly one guarded write per bone. Two Body Language behaviors can never wind up an unbounded delta on the same bone, because there is only ever one writer.
+In `LateUpdate` at execution order `19300`, after the Animator or `PlayableGraph` has posed the skeleton and before Gaze at `19400`, the controller's solvers spring toward that tick's targets and accumulate every channel — spine, shoulders, pelvis, head-gesture fallback — onto one shared compositor that performs exactly one guarded write per bone. Two Body Language behaviors can never wind up an unbounded delta on the same bone, because there is only ever one writer.
 
 ***
 
@@ -57,7 +59,7 @@ Body Animation's talk-clip system can report a suppression level every tick, and
 | Upper body (an upper-body talk clip or locomotion is playing) | Full | Reduced | Refused | Posture reduced, breathing stays at full weight |
 | Full body (a full-body action or turn is playing) | None | None | Refused | Both fade to zero |
 
-This is why the two modules never look like they are fighting: while Body Animation plays an authored upper-body gesture, Body Language keeps the character breathing and keeps its head beats going, but steps back from adding its own posture pulses on top of the same motion. Breathing deliberately never suppresses, even under full suppression's posture and gesture fade — a character that stops breathing while gesturing reads as broken in a way nothing else does.
+This is why the two modules never look like they are fighting: while Body Animation plays an authored upper-body gesture, Body Language keeps the character breathing and keeps its head beats going, but steps back from adding its own posture pulses on top of the same motion. Breathing stays at full weight under upper-body suppression. Full-body suppression fades the shared master weight, which also fades procedural breathing while the authored motion owns the body.
 
 ***
 

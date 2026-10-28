@@ -1,14 +1,14 @@
 ---
 title: Emotion taxonomy
 description: Explains the built-in emotion set, how server labels map to it, and how to author a custom emotion taxonomy for a character.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 The taxonomy translates Convai's raw emotion strings into the canonical labels the rest of the Emotion module uses. When Convai sends `"happy"`, the taxonomy resolves that alias to `"joy"` so that the accumulator and expression pipeline — which are keyed on canonical labels — know exactly which score to update. The SDK ships with a nine-emotion Plutchik-inspired default; author a custom `EmotionTaxonomyAsset` when you need a different vocabulary or additional server aliases.
 
 ## Built-in taxonomy
 
-When the `taxonomy` field on a `ConvaiEmotionProfile` is left empty, the system synthesizes the following set at runtime. This default covers every emotion Convai currently produces and requires no asset to be created.
+When the `taxonomy` field on a `ConvaiEmotionProfile` is left empty, the system synthesizes the following set at runtime. This provides the SDK's built-in vocabulary without requiring an asset.
 
 | Canonical label | Server aliases | Default mouth influence |
 | --- | --- | --- |
@@ -28,15 +28,15 @@ Every non-neutral entry in the built-in set also carries a **complement** — a 
 
 ## How alias resolution works
 
-Every time Convai sends an emotion, the controller calls `IEmotionTaxonomy.TryResolve(serverLabel, out EmotionDescriptor descriptor)`. The resolver checks canonical labels first, then the full alias list across all entries.
+Every time Convai sends an emotion, the controller calls `IEmotionTaxonomy.TryResolve(serverLabel, out EmotionDescriptor descriptor)`. The resolver trims input and compares without case sensitivity. Canonical labels take precedence over aliases. Duplicate canonical labels are skipped after the first entry; for duplicate aliases, the first authored mapping wins. Remove an alias from its earlier entry when remapping it.
 
 - If the label resolves successfully, the corresponding canonical label and descriptor are used throughout the pipeline.
-- If the label does **not** resolve, the controller falls back to the neutral descriptor. **No console warning is produced.** The pipeline continues running normally, writing neutral scores every frame.
+- If the label does **not** resolve, the controller falls back to the neutral descriptor. It logs a warning once for each unknown label and uses neutral for that signal.
 
 **Example:** Convai sends `"happy"` → `TryResolve` finds `"happy"` in the aliases list of the `joy` entry → the accumulator sets the target score for `"joy"`.
 
 {% hint style="warning" %}
-When Convai sends a label that is not in the taxonomy, the failure is silent — no console warning appears and no error is logged. The character returns to neutral as if no emotion signal arrived. If a specific emotion never appears on your character, the server label is likely not covered by the active taxonomy. See [Troubleshoot emotion](troubleshooting-and-diagnostics.md#unknown-server-labels-silent-neutral-fallback) for how to detect and fix this.
+Unknown labels fall back to neutral and produce a warning once per label. Inspect that warning before editing the vocabulary. See [Troubleshoot emotion](troubleshooting-and-diagnostics.md#unknown-server-labels) for the verification steps.
 {% endhint %}
 
 ## Creating a custom taxonomy asset
@@ -45,7 +45,7 @@ In the Project window, right-click inside your `Assets/` folder and choose:
 
 **Create → Convai → Embodiment → Emotion Taxonomy**
 
-A new asset named `EmotionTaxonomy` appears. Select it to edit the entries list in the Inspector.
+A new asset named `EmotionTaxonomy` appears, prefilled with the nine built-in emotions. Its Inspector shows **Emotion Taxonomy**, **Entries**, and **Diagnostics**. Edit the entries, then check Diagnostics for duplicate labels, duplicate aliases, and neutral-entry problems.
 
 ### EmotionTaxonomyEntry fields
 
@@ -60,7 +60,7 @@ A new asset named `EmotionTaxonomy` appears. Select it to edit the entries list 
 | `valence`, `arousal`, `agency`, `approach` | `float` (-1 – 1) | The `EmotionDimensions` this emotion carries: how pleasant, how worked up, how in control, and whether it moves the character toward or away from what caused it. Consumed by Gaze, Body Language, and locomotion as one shared modulation signal alongside the categorical label. Only used when `useCustomDimensions` is `true`. |
 
 {% hint style="warning" %}
-**Exactly one entry must have `isNeutral = true`.** The accumulator uses the neutral entry as its decay anchor. If no entry is marked neutral, or if more than one is marked neutral, the system logs a warning and synthesizes a fallback — but expressions will not settle correctly at runtime. The console warning messages are:
+**Exactly one entry must have `isNeutral = true`.** The accumulator uses the neutral entry as its decay anchor. If no entry is marked neutral, the system logs a warning and uses a stand-in neutral descriptor. If several are marked neutral, it warns and uses the first; fix the authoring ambiguity. The console warning messages are:
 
 - `[EmotionTaxonomyAsset] This emotion vocabulary marks no emotion as the neutral one, so a stand-in is being used. Tick 'Is Neutral' on exactly one emotion — it is what the face relaxes to between feelings.` — no neutral entry found
 - `[EmotionTaxonomyAsset] N emotions in this vocabulary are ticked 'Is Neutral' and only the first is used. Untick the others, so it is clear which one the face relaxes to.` — multiple neutral entries found
@@ -78,19 +78,19 @@ Open your `ConvaiEmotionProfile` asset.
 {% step %}
 ### Assign the taxonomy
 
-Drag the custom `EmotionTaxonomyAsset` into the **Taxonomy** field.
+Drag the custom `EmotionTaxonomyAsset` into **Emotion Vocabulary → Emotion Vocabulary** on the profile. The controller's **Personality** field points to that profile; there is no controller Taxonomy field.
 {% endstep %}
 
 {% step %}
 ### Confirm the controller picks it up
 
-The controller picks up the new taxonomy the next time the profile is applied — immediately in Play Mode, and immediately in Edit Mode because `ConvaiEmotionController` carries `[ExecuteAlways]` from its base class.
+The controller uses the new vocabulary when its runtime pipeline next builds. Enter Play mode, or disable and re-enable the controller while playing, then confirm a known alias resolves. Editing the asset does not promise an immediate rebuild of an already-running pipeline or an Edit-mode facial preview.
 {% endstep %}
 {% endstepper %}
 
 ## When to create a custom taxonomy
 
-The built-in Plutchik set covers all emotions Convai currently sends. A custom taxonomy is worth creating when:
+Start with the built-in set. Create a custom taxonomy when:
 
 - Your Convai configuration uses custom emotion labels that differ from the built-in aliases.
 - You want to use a different conceptual model — for example, Ekman's six basic emotions — and map multiple server aliases onto fewer canonical buckets.

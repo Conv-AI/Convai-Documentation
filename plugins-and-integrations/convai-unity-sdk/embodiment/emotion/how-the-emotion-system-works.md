@@ -1,7 +1,7 @@
 ---
 title: How the emotion system works
 description: Understand how Emotion resolves the emotion signal in Convai's response, smooths it, and composes the character's face and mood.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 `ConvaiEmotionController` turns the emotion signal Convai sends with its response into a smoothed, composited facial expression, and separately tracks the character's longer-lived resting mood. This page explains where that input comes from, how the controller resolves and smooths it, and how the result reaches the character's face.
@@ -13,7 +13,9 @@ last_reviewed: "4.6.0"
 Unlike Gaze, Body Animation, and Body Language, which decide everything from state already local to the scene — the dialogue state, the rig, nearby targets — Emotion's decisions are only partly local. Two things arrive from outside the character on every turn:
 
 - **The transient emotion itself.** Convai emits it as part of its response: an emotion label and an intensity, chosen by whichever detection provider `EmotionDetectionMode` on `ConvaiEmotionController` requests. **Responsive** (`EmotionDetectionMode.Nrclex`, the default) reads the reply as it streams, so the face can change more than once within one reply. **Accurate** (`EmotionDetectionMode.Llm`) reads the finished reply once, arriving later but weighing meaning rather than wording — the better choice for a character speaking any language other than English. **Off** requests no signal at all; a character with no `ConvaiEmotionController` is treated as `Off` by default. This setting lives on the character in Unity — it decides which provider Convai runs, not a Convai console setting.
-- **Mood commands.** When Convai's response includes a set-mood or reaction instruction, it reaches this character through `MoodCommandHandlerAdapter` — infrastructure Convai adds alongside `ConvaiEmotionController` automatically, never a component you add or configure yourself. The adapter calls the same `SetMood` and `SetEmotionOverride` methods your own gameplay code can call — see [Moods](moods.md).
+- **Mood and reaction actions.** The **Set Mood** and **React** behaviors route through `ConvaiSetMoodActionExecutor` and `ConvaiReactActionExecutor`, which call the Emotion Controller directly. The required `MoodCommandHandlerAdapter` is dormant in this snapshot and is not the action route. See [action executors](../../features/character-actions/action-executors.md#set-mood) and [Moods](moods.md).
+
+The 5.0 receive path drops late emotion effects for interrupted or aborted replies, including lines cut short by a group push-to-talk press. An accepted event belongs to the character's current reply; it is not a replay of every packet received.
 
 Everything downstream of these two entry points — resolution, smoothing, blending, micro-expression life, and output — runs locally, the same as every other embodiment module.
 
@@ -56,7 +58,9 @@ With no Conversation Flow module present on the character, Emotion falls back to
 
 ## Conversation Flow is added automatically when needed
 
-Unlike Gaze and Body Language, none of Emotion's dialogue-driven behavior is on by default — the listening lift, the thinking look, and the two one-shot reaction accents (on entering `Reacting` and `Interrupted`) all ship at zero strength on `ConvaiEmotionProfile`. Raising any of **Listening Reaction Strength**, **Thinking Reaction Strength**, **Reacting Accent Strength**, or **Interrupted Flinch Strength** above `0` asks Convai to add a `ConvaiConversationFlowController` to the character at runtime if none exists yet, the same way Body Animation's **Auto Create Conversation Flow** setting does. The Console logs once, naming the character, so a component you did not add is never a silent surprise. See [Conversation flow](../conversation-flow/README.md#convai-adds-it-automatically-when-needed).
+All four character types — Composed, Warm, Energetic, and Reserved — give the four conversation reactions nonzero strengths. The hidden Composed profile used when **Personality** is empty does too, so these defaults request a `ConvaiConversationFlowController` at runtime if none exists. A blank profile created from the asset menu has zero reaction strengths until you configure it.
+
+The controls are **Attentive While Listening**, **Concentrating While Thinking**, **Reaction Flash**, and **Flinch When Interrupted** under **Small Movements**. Each also needs **Never Sits Perfectly Still** enabled because that layer renders the reactions. If it is off, the **Conversation reactions will never show** finding offers **Keep The Face Alive**. See [Conversation flow](../conversation-flow/README.md#convai-adds-it-automatically-when-needed).
 
 ***
 
@@ -73,9 +77,9 @@ Alongside its categorical label, every resolved emotion also carries continuous 
 | `ConvaiEmotionController` | The `MonoBehaviour` that owns the entire pipeline for one character. Add one per character. |
 | `ConvaiEmotionProfile` | The `ScriptableObject` asset holding every tunable parameter: smoothing, micro-burst, blending, mood, and micro-expression life. |
 | `EmotionTaxonomyAsset` | The `ScriptableObject` defining the emotion vocabulary — canonical labels, server aliases, and complements. The built-in default is Plutchik's nine emotions including neutral. |
-| `MoodCommandHandlerAdapter` | Hidden infrastructure Convai adds alongside `ConvaiEmotionController` so a mood or reaction instruction in Convai's response can reach this character. Never authored directly. |
+| `MoodCommandHandlerAdapter` | Required internal adapter; dormant in this preview. Use Set Mood/React action executors or controller methods. |
 | `EmotionReading` | An immutable snapshot of the current state: dominant label and score, all scores, mouth influence, and the mood label and score. Available every frame via `ConvaiEmotionController.Current`. |
-| `ConvaiCharacterEventRelay` | An Inspector-friendly component that exposes emotion and mood change callbacks as Unity Events — no code required. |
+| `ConvaiCharacterEventRelay` | Exposes accepted raw emotion changes as `UnityEvent<CharacterEmotionRelayData>`. Mood changes use the controller's C# `MoodChanged` event. |
 
 ***
 
@@ -83,7 +87,7 @@ Alongside its categorical label, every resolved emotion also carries continuous 
 
 | Component | Where to place it | Notes |
 | --- | --- | --- |
-| `ConvaiEmotionController` | On the character's root `GameObject`, alongside the character's other embodiment modules | One per character |
+| `ConvaiEmotionController` | On the owning `ConvaiCharacter` or a child beneath it | One per character; context resolves on the owning character |
 | `ConvaiEmotionProfile` | Anywhere in your `Assets/` folder as a `ScriptableObject` asset | Shared across multiple characters if needed; Convai copies a package-shipped profile for you the first time you edit it on a shared character |
 | `EmotionTaxonomyAsset` | Anywhere in your `Assets/` folder | Optional — omit to use the built-in Plutchik set |
 | `MoodCommandHandlerAdapter` | Added automatically alongside `ConvaiEmotionController` | Never add or remove this yourself |

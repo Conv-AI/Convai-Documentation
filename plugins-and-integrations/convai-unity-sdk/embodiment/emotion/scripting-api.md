@@ -1,14 +1,14 @@
 ---
 title: Emotion scripting API
 description: Explains how to read a character's emotion state from script, control mood, lock or override expressions, and subscribe to emotion events.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-The Emotion system exposes two paths for reacting to and controlling emotional state at runtime. The **Inspector path** uses `ConvaiCharacterEventRelay` — a component that surfaces raw emotion callbacks as Unity Events, requiring no code. The **scripting path** uses `ConvaiEmotionController` directly, exposing the full C# API for reading composed state, controlling mood, injecting overrides, and locking expressions. Both paths can be used simultaneously. For the conceptual difference between a transient emotion and a resting mood, see [Moods](moods.md).
+The Emotion system exposes two paths for reacting to and controlling emotional state at runtime. The **Inspector path** uses `ConvaiCharacterEventRelay` — a component that surfaces raw emotion callbacks as Unity Events, carrying a structured payload. The **scripting path** uses `ConvaiEmotionController` directly, exposing the full C# API for reading composed state, controlling mood, injecting overrides, and locking expressions. Both paths can be used simultaneously. For the conceptual difference between a transient emotion and a resting mood, see [Moods](moods.md).
 
 ## Inspector path — ConvaiCharacterEventRelay
 
-`ConvaiCharacterEventRelay` is a MonoBehaviour that bridges character callbacks to Unity Events, allowing designers to wire emotion reactions entirely in the Inspector without writing any code.
+`ConvaiCharacterEventRelay` is a MonoBehaviour that bridges character callbacks to Unity Events, allowing designers to wire emotion reactions to a receiver method in the Inspector.
 
 **Add Component:** **Convai → Events → Convai Character Event Relay**
 
@@ -23,7 +23,7 @@ Place it on any GameObject in the scene. It automatically finds the `ConvaiChara
 
 ### OnEmotionChanged event
 
-The relay exposes an **On Emotion Changed** Unity Event that fires whenever Convai sends a raw emotion signal. The event delivers a `CharacterEmotionRelayData` payload:
+The relay exposes an **On Emotion Changed** Unity Event that fires for each accepted current-reply emotion signal. The event delivers a `CharacterEmotionRelayData` payload:
 
 | Property | Type | Description |
 | --- | --- | --- |
@@ -32,9 +32,25 @@ The relay exposes an **On Emotion Changed** Unity Event that fires whenever Conv
 | `Emotion` | `string` | The raw server label (e.g. `"happy"`). |
 | `Intensity` | `int` | Integer scale 1–3 as sent by Convai. |
 
-**Example wiring:** Add a `ConvaiCharacterEventRelay` to your NPC's GameObject. In the **On Emotion Changed** list, click **+**, drag a UI Text component into the object field, and select `Text.text` — the label updates automatically on every emotion change.
+**Example wiring:** the event is `UnityEvent<CharacterEmotionRelayData>`, not a string event. A dynamic `Text.text` or `TMP_Text.text` binding cannot extract its `Emotion` property. Add this receiver to a scene object, assign its TextMeshPro label, then connect **On Emotion Changed → Dynamic CharacterEmotionRelayData → EmotionLabelDisplay.Show**. This example requires TextMeshPro in your project.
 
-`ConvaiCharacterEventRelay` fires on the raw server label before taxonomy resolution or smoothing. Use it for UI display, audio cues, or simple branching logic. For smoothed, post-resolution state with scores and hold time, use `ConvaiEmotionController.Current` from script instead.
+```csharp
+using Convai.Runtime.Presentation.Events;
+using TMPro;
+using UnityEngine;
+
+public sealed class EmotionLabelDisplay : MonoBehaviour
+{
+    [SerializeField] private TMP_Text label;
+
+    public void Show(CharacterEmotionRelayData data)
+    {
+        if (label != null) label.text = data.Emotion;
+    }
+}
+```
+
+`ConvaiCharacterEventRelay` delivers the raw server label before taxonomy resolution or smoothing. The receive path has already discarded effects from cut-short replies. It has no mood Unity Event; subscribe to `ConvaiEmotionController.MoodChanged` from C# for mood transitions. Use it for UI display, audio cues, or simple branching logic. For smoothed, post-resolution state with scores and hold time, use `ConvaiEmotionController.Current` from script instead.
 
 ## Accessing the controller from script
 
@@ -119,7 +135,7 @@ public sealed class EmotionLogger : MonoBehaviour
 | `CurrentMoodLabel` | `string` | Canonical label of the character's persona/temperament resting mood. Explicitly **not** the transient dominant emotion. |
 | `CurrentMoodScore` | `float` | Normalized \[0, 1] intensity for `CurrentMoodLabel`. |
 | `KnownEmotionLabels` | `IReadOnlyList<string>` | Non-neutral canonical labels this character's active taxonomy recognizes, in taxonomy authoring order. Empty before the pipeline builds. |
-| `TryResolveEmotionLabel(string label, out string canonicalLabel)` | `bool` | Resolves `label` against the active taxonomy (canonical labels and aliases), returning the canonical, non-neutral label. Returns `false` for an empty label, an unresolvable label, a label that resolves to the taxonomy's neutral entry, or before the pipeline has built. Validate a label with this before calling `SetMood`/`SetEmotionOverride`, which otherwise silently degrade an unknown label to neutral rather than failing. |
+| `TryResolveEmotionLabel(string label, out string canonicalLabel)` | `bool` | Resolves `label` against the active taxonomy (canonical labels and aliases), returning the canonical, non-neutral label. Returns `false` for an empty label, an unresolvable label, a label that resolves to the taxonomy's neutral entry, or before the pipeline has built. Validate a label with this before calling `SetMood`/`SetEmotionOverride`, which otherwise warn once for an unknown label and fall back to no mood or neutral. |
 
 ```csharp
 if (emotionController.TryResolveEmotionLabel(userSuppliedLabel, out string canonicalLabel))
@@ -128,17 +144,17 @@ else
     Debug.LogWarning($"'{userSuppliedLabel}' is not in this character's emotion vocabulary.");
 ```
 
-## Authoring-time lock
+## Serialized expression hold
 
-The controller has three serialized fields that fix the expression to a specific emotion directly from the Inspector — useful during authoring and debugging, or to preview expression results in the Scene view without entering Play Mode.
+The controller has three serialized fields that fix the expression to a specific emotion directly from the Inspector — useful for testing or a scripted fixed expression. These fields affect the face in Play mode; they do not provide an Edit-mode facial preview.
 
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `lockEmotion` | `bool` | `false` | When enabled, all incoming server emotion events are ignored and the character holds the locked emotion. |
-| `lockedEmotionLabel` | `string` | `"neutral"` | Canonical taxonomy label to hold while `lockEmotion` is active. |
-| `lockedIntensity` | `float` | `1.0` | Intensity \[0–1] of the locked emotion. |
+| Serialized field | Inspector label under Advanced | Type | Default | Description |
+| --- | --- | --- | --- | --- |
+| `lockEmotion` | **Hold one expression** | `bool` | `false` | When enabled, all incoming server emotion events are ignored and the character holds the locked emotion. |
+| `lockedEmotionLabel` | **Expression** | `string` | `"neutral"` | Canonical taxonomy label to hold while `lockEmotion` is active. |
+| `lockedIntensity` | **How strong** | `float` | `1.0` | Intensity \[0–1] of the locked emotion. |
 
-`ConvaiEmotionController` inherits `[ExecuteAlways]` from its base class, so setting `lockEmotion = true` in the Inspector updates the expression in the Scene view immediately, without entering Play Mode.
+For a temporary test, enter Play mode and use **Live → Try It**, then **Stop** to release it. The runtime scheduler and facial compositor do not apply expression output in Edit mode.
 
 {% hint style="danger" %}
 `lockEmotion` is a **serialized field** — its value is saved with the scene or prefab. If you leave it enabled and forget to reset it, the character silently ignores all live emotion signals in your production build with no runtime error or warning. Always disable it before building.
@@ -146,7 +162,7 @@ The controller has three serialized fields that fix the expression to a specific
 
 ## SetEmotionOverride and ClearEmotionOverride
 
-`SetEmotionOverride` injects an additional transient score into the accumulator on top of whatever Convai is sending. The override is still subject to smoothing — it blends in at `lerpSpeed`, not instantly. Use this when application logic needs to amplify or steer the transient emotion in response to in-scene events.
+`SetEmotionOverride` replaces the transient target and holds it until cleared. Incoming server emotions are ignored while the override is active. The target is smoothed at the profile's **How Fast Emotions Appear** (`lerpSpeed`) rate; mood remains independent.
 
 ```csharp
 using Convai.Modules.Emotion.Components;
@@ -170,7 +186,7 @@ public sealed class HazardZoneTrigger : MonoBehaviour
 }
 ```
 
-`ClearEmotionOverride` removes the override and returns the accumulator to server-driven state. The transition back is smoothed.
+`ClearEmotionOverride` releases the hold and sets a neutral target until a new accepted server emotion arrives. It does not restore or replay the previous server signal. The transition is smoothed.
 
 ## LockEmotion and UnlockEmotion
 
@@ -286,29 +302,39 @@ public sealed class ExpressionListener : MonoBehaviour
 - `MoodChanged` fires when `CurrentMoodLabel` changes, with the new label and its `CurrentMoodScore`. It covers every source that can move the mood: the authored baseline first taking effect, `SetMood`/`ClearMood`, and mood drift taking over or releasing.
 - Both fire only on label transitions — never every tick while the label persists, and never for score-only movement while the label stays the same.
 - Both fire after `Current`/`CurrentMoodLabel` are already updated, so a handler always observes a consistent state. Neither fires before the pipeline has built or while it is torn down, and a throwing subscriber is caught and logged rather than breaking the tick.
-- This is distinct from `ConvaiManager.Events.OnCharacterEmotionChanged` below, which relays the raw backend packet as received, before smoothing, hysteresis, or the persona baseline are applied.
+- This is distinct from `ConvaiManager.Events.OnCharacterEmotionChanged` below, which relays accepted current-reply emotion events, before smoothing, hysteresis, or the persona baseline are applied.
 
 ## Subscribing to the raw emotion event
 
-To react to each raw emotion signal Convai sends — for logging, analytics, or adaptive scenario logic — subscribe to `OnCharacterEmotionChanged` on `ConvaiManager.Events`. This is a standard C# event; subscribe in `OnEnable` and unsubscribe in `OnDisable`.
+To react to each accepted raw emotion signal — for logging, analytics, or adaptive scenario logic — subscribe to `OnCharacterEmotionChanged` on `ConvaiManager.Events`. Late effects for interrupted, aborted, or group push-to-talk-cut replies are discarded before this event. This is a standard C# event. The example waits for manager initialization, caches the event facade, and detaches from that same facade on disable. Assign the manager in the Inspector; `Update` only retries until the subscription succeeds.
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
 using Convai.Runtime.Components;
+using Convai.Runtime.Facades;
 using UnityEngine;
 
 public sealed class EmotionEventListener : MonoBehaviour
 {
     [SerializeField] private ConvaiManager convaiManager;
 
-    private void OnEnable()
+    private ConvaiEvents _events;
+
+    private void OnEnable() => TrySubscribe();
+    private void Update() => TrySubscribe();
+
+    private void TrySubscribe()
     {
-        convaiManager.Events.OnCharacterEmotionChanged += HandleEmotionChanged;
+        if (_events != null || convaiManager == null || !convaiManager.IsInitialized) return;
+        _events = convaiManager.Events;
+        _events.OnCharacterEmotionChanged += HandleEmotionChanged;
     }
 
     private void OnDisable()
     {
-        convaiManager.Events.OnCharacterEmotionChanged -= HandleEmotionChanged;
+        if (_events == null) return;
+        _events.OnCharacterEmotionChanged -= HandleEmotionChanged;
+        _events = null;
     }
 
     private void HandleEmotionChanged(CharacterEmotionChanged e)
@@ -326,11 +352,11 @@ public sealed class EmotionEventListener : MonoBehaviour
 | `Emotion` | `string` | The raw server label (e.g. `"happy"`, not the canonical `"joy"`). |
 | `Intensity` | `int` | Integer scale 1–3 as sent by Convai (clamped). |
 | `NormalizedIntensity` | `float` | `Intensity / 3f` — maps the 1–3 scale to `(0, 1]`. A subtle (scale 1) signal still maps to `0.33`, not `0`. |
-| `Timestamp` | `DateTime` | UTC timestamp of when the event was created. |
-| `Sequence` | `long` | Optional server sequence number for ordering, `-1` when the backend omits it. Lets a delayed packet be ignored rather than rewinding the character's expression. |
-| `UtteranceId` | `string` | Optional identifier correlating the emotion to a specific reply. Empty when omitted. |
-| `Confidence` | `float` | Optional \[0, 1] detection confidence, `1` when omitted. |
-| `DurationMilliseconds` | `int` | Optional duration hint from the backend, `0` when omitted. |
+| `Timestamp` | `DateTime` | Local UTC receive time when the event is created, not a server timestamp. |
+| `Sequence` | `long` | The 5.0 receive path sets this to `-1`; it does not copy a payload sequence hint. |
+| `UtteranceId` | `string` | The current reply's client-resolved turn ID in the 5.0 receive path; not a server-provided utterance ID. |
+| `Confidence` | `float` | The 5.0 receive path sets this to `1`; it does not copy a payload confidence hint. |
+| `DurationMilliseconds` | `int` | The 5.0 receive path sets this to `0`; it does not copy a payload duration hint. |
 | `IsNeutral` | `bool` | `true` if `Emotion` is `"neutral"`. |
 | `IsHighIntensity` | `bool` | `true` if `Intensity >= 3`. |
 | `IsLowIntensity` | `bool` | `true` if `Intensity <= 1`. |
@@ -338,6 +364,20 @@ public sealed class EmotionEventListener : MonoBehaviour
 {% hint style="warning" %}
 `CharacterEmotionChanged.Emotion` contains the **raw server label** (e.g. `"happy"`), not the canonical taxonomy label (`"joy"`). If you need the canonical label — for example, to look up a score in `Current.AllScores` — resolve it through `TryResolveEmotionLabel`.
 {% endhint %}
+
+## Character event and detection mode
+
+`ConvaiCharacter.OnEmotionChanged` is `event Action<string, int>` for the raw label and integer intensity (1–3) of an accepted event scoped to that character. Use it when a character reference is more convenient than the manager-wide event. Subscribe and unsubscribe with the component lifecycle, as in the event examples above.
+
+The controller's read-only `EmotionDetectionMode` property reports the provider selected in the Inspector and requested at connection time:
+
+| Inspector option | Enum value | Request |
+| --- | --- | --- |
+| **Off** | `EmotionDetectionMode.Off` | No server emotion detection |
+| **Responsive** | `EmotionDetectionMode.Nrclex` | Emotion while the reply streams |
+| **Accurate** | `EmotionDetectionMode.Llm` | Emotion from the completed reply |
+
+The enum is in `Convai.Domain.Emotion`. The read-only `ConvaiCharacter.EmotionDetectionMode` resolves the character's controller; without one it returns Off. Selecting a provider requests backend behavior, while the local mood and expression-testing APIs remain separate.
 
 ## Emotion dimensions
 

@@ -1,7 +1,7 @@
 ---
 title: Conversation flow reference
 description: Full reference for the Conversation Flow controller's public API, the dialogue-state reading it returns, and every timing field on its profile asset.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Reference for the public conversation-flow surface: `ConvaiConversationFlowController`, the `DialogueStateReading` struct it returns, and every field on `ConvaiConversationFlowProfile`. For what each `DialogueState` value means, see [Dialogue state](../../core-concepts/dialogue-state.md). The cross-module contract `IConversationFlowSource` is internal and is not part of this surface — read the controller's own members instead.
@@ -18,26 +18,32 @@ Reference for the public conversation-flow surface: `ConvaiConversationFlowContr
 | --- | --- | --- |
 | `Current` | `DialogueStateReading` | The character's current dialogue-state reading. Returns `DialogueStateReading.Idle` before the controller has ticked for the first time. |
 
+### Methods
+
+| Method | Signature | Behavior |
+|---|---|---|
+| `PulseReaction` | `void PulseReaction(float durationSeconds = 0.6f)` | Requests a `Reacting` beat for a game event. Duration is capped at `1.5` seconds; nonpositive values do nothing. A new call restarts the beat rather than queueing. A character that is not ready remains `Idle` and drops the beat. |
+
 ### Events
 
 | Event | Signature | Raised when |
 | --- | --- | --- |
-| `Changed` | `event Action<DialogueStateReading>` | The reading's `Primary` state changes. Not raised on blend progress alone. |
+| `Changed` | `event Action<DialogueStateReading>` | The reading's `Primary` state changes. Not raised on blend progress alone. The event reading has `TimeInState` and `EnergyLevel` set to `0`; read `Current` after a tick for sampled time and energy. |
 
 ***
 
 ## `DialogueStateReading`
 
-`DialogueStateReading` (`readonly struct`, `SDK/Domain/Embodiment/Readings/DialogueStateReading.cs`) is the immutable snapshot exposed by `Current` and passed to `Changed`. A reading always describes a blend between two states rather than a hard cut, so a consumer can cross-fade its output instead of snapping.
+`DialogueStateReading` (`readonly struct`, `SDK/Domain/Embodiment/Readings/DialogueStateReading.cs`) is the immutable snapshot exposed by `Current` and passed to `Changed`. The struct can describe a blend between states, but the current controller publishes both `Primary` and `BlendTo` as the newly entered state. Do not rely on it to retain the previous state.
 
 | Field | Type | Description |
 | --- | --- | --- |
 | `Primary` | `DialogueState` | The current authoritative state. |
-| `BlendTo` | `DialogueState` | The state being blended toward. Equal to `Primary` when no transition is in flight. |
-| `BlendWeight` | `float` | Linear blend weight from `Primary` to `BlendTo`, clamped to `[0, 1]`. `0` means fully in `Primary`; `1` means the transition has finished. |
+| `BlendTo` | `DialogueState` | The state being blended toward. The current controller sets this equal to `Primary`, including during blend progress. |
+| `BlendWeight` | `float` | Progress from `0` to `1` over `Transition Duration`. The current controller does not expose the preceding state through `Primary`. |
 | `TimeInState` | `float` | Seconds the character has been in `Primary`, clamped to `0` or above. |
 | `EnergyLevel` | `float` | Normalized energy in `[0, 1]` used by gesture schedulers and micro-behavior intensity — higher during `Speaking` and `Reacting`, lower during `Idle`. |
-| `IsTransitioning` | `bool` | `true` when `Primary` and `BlendTo` differ and `BlendWeight` is greater than `0`. |
+| `IsTransitioning` | `bool` | `true` only when `Primary` and `BlendTo` differ and `BlendWeight` is greater than `0`; therefore `false` for the current controller's readings. |
 
 `DialogueStateReading.Idle` is a static property that returns the steady-state reading for a character in `Idle` — `Primary` and `BlendTo` both `Idle`, `BlendWeight` `0`, `TimeInState` `0`, `EnergyLevel` `0`.
 
@@ -76,10 +82,10 @@ If **Thinking Min Hold** is set above **Thinking Max Hold** in the Inspector, th
 
 ### Fixed behavior
 
-Three of the profile's fields — `noticeYouLocally`, `stopWhenTheVoiceStops`, and `voiceEndHold` — are `private` and the profile's Inspector does not draw them, so no reader can change any of the three, through the Inspector or through script. They ship as fixed behavior, the same for every character:
+Three profile fields — `noticeYouLocally`, `stopWhenTheVoiceStops`, and `voiceEndHold` — are private serialized fields omitted by the standard profile Inspector. They remain editable through Unity's Debug Inspector or editor code using `SerializedObject`. There are no public setters; `NoticeYouLocally` is a read-only getter. Their defaults are `true`, `true`, and `0.4` seconds, respectively:
 
 - The character reacts the moment it has local evidence you have started talking, ahead of Convai's own confirmation that it heard you.
-- A speaking turn ends the moment the character's own voice stops, rather than waiting for Convai's turn-completed confirmation.
+- With `stopWhenTheVoiceStops` enabled, local voice or lip-sync evidence can end the speaking performance before the service confirmation.
 - Before the controller treats silence as the end of a turn, it waits `0.4` seconds, since a pause between two sentences sounds the same as an ending. This hold only applies when the character has no Lip Sync reading; Lip Sync, when present, marks a response's end with no hold needed.
 
 See [How a speaking turn ends](README.md#how-a-speaking-turn-ends) for the full model both behaviors are part of.

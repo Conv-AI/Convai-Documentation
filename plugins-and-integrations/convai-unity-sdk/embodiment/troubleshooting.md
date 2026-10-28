@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot embodiment
 description: Diagnose rig detection, preset slot, module tick, and facial compositing problems in the Convai embodiment system, with fixes and verification steps.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Use this page when a character's rig is not detected correctly, an embodiment preset is not applying the way you expect, a module never seems to update, or two modules appear to fight over the same facial expression. Start with the [Embodiment Editor window](embodiment-editor.md) — its `Setup` tab and `Presets` tab surface most of these problems directly, with a one-click fix where one exists.
@@ -10,16 +10,16 @@ Use this page when a character's rig is not detected correctly, an embodiment pr
 
 | Symptom | Likely cause | Fix | Verify |
 |---|---|---|---|
-| Rig section in the Embodiment Editor reads `Not Set Up` | No character is selected, or the selected `GameObject` has no `ConvaiCharacter` component | Select the character in the Hierarchy, or add `ConvaiCharacter` to its `GameObject` | The `Setup` tab's `Rig` section header changes to `Ready` or `Needs Attention` |
+| Rig section in the Embodiment Editor reads `Not Set Up` | The selected `GameObject` has no `ConvaiCharacter` component; no selection instead shows **Pick A Character** | Select the character in the Hierarchy, or add `ConvaiCharacter` to its `GameObject` | The `Setup` tab's `Rig` section header changes to `Ready` or `Needs Attention` |
 | Rig section reads `Needs Attention`: "No Animator (Optional)" or "Rig is not Humanoid" | The character has no `Animator`, or its rig is not set to `Humanoid` | Skip this if the character does not need skeletal body movement; otherwise set the model's Rig type to `Humanoid` in its import settings | The finding is replaced by an `Ok` finding, or a bone-resolution finding for `Head`/`LeftEye`/`RightEye` |
-| Rig section reads `Needs Attention`: "Face rig not recognized" | `StandardRigBinding.DetectedConvention` resolved to `Unknown` — the face mesh does not match a known blendshape naming convention | Set `Convention Override` on the `StandardRigBinding` component manually, or assign a `CustomRigConventionMap` | The finding is replaced by an `Ok` finding naming the convention |
+| Rig section reads `Needs Attention`: "Face rig not recognized" | `StandardRigBinding.DetectedConvention` resolved to `Unknown` — the face mesh does not match a known blendshape naming convention | Set **Rig Type** under **Character Type** on the `StandardRigBinding` component manually, or assign a `CustomRigConventionMap` | The finding is replaced by an `Ok` finding naming the convention |
 | Rig section reads `Needs Attention`: `…but only just` | `DetectionConfidence` is below `50%` | Check that expression and lip sync look correct; if not, set the convention manually instead of trusting auto-detection | `DetectionConfidence` reported by `StandardRigBinding` rises above `50%`, or the convention is set manually |
 | "Head", "Left eye", or "Right eye" bone finding shows a warning | The rig's humanoid avatar has no bone mapped for that semantic, or the rig is not Humanoid | Set the model's Rig type to `Humanoid` in its import settings, or assign an explicit bone override on `StandardRigBinding` | `StandardRigBinding.TryGetBone` for that bone returns `true`, and the corresponding warning stops appearing in the Console |
-| Console repeats a rig bone or blendshape warning every time you touch the character | Normal for the first miss — this is a rig gap, not a bug | Fill the gap (see the two rows above), or ignore it if the feature that needs it is not in use | The warning is logged once per component lifetime, not once per frame, so it should not recur without a state change |
+| Console repeats a rig bone or blendshape warning every time you touch the character | Normal for the first miss — this is a rig gap, not a bug | Fill the gap (see the two rows above), or ignore it if the feature that needs it is not in use | Bone misses log once per bone; the batched missing-shape warning recurs only when the missing set changes |
 | A `ConvaiEmbodimentPreset` shows `Not Set Up` in the Embodiment Editor's `Presets` tab | The preset has duplicate module IDs, a slot with no module chosen, or a slot pointing at the wrong profile type | Open the preset and use the finding's fix button, such as `Remove Duplicate` or `Clear Settings` | The preset's status in the `Presets` tab changes to `Ready` or `Needs Attention` |
-| A module's settings do not match what the assigned preset says they should be | `Preserve Missing Slots` is enabled and the preset has no slot for that module, so the module kept its own inspector-assigned profile | Add a slot for the module in the preset, or disable `Preserve Missing Slots` if you want every unlisted module to fall back to its default profile instead | The Console's preset diagnostics message for that character no longer lists the module under "Active receivers without a preset slot" |
+| A module's settings do not match what the assigned preset says they should be | **Keep Unmatched Profiles** is enabled and the preset has no slot for that module, so the module kept its own inspector-assigned profile | Add a slot for the module in the preset, or disable **Keep Unmatched Profiles** if you want every unlisted module to fall back to its default profile instead | The Console's preset diagnostics message for that character no longer lists the module under "Active receivers without a preset slot" |
 | A module never seems to update — its state never changes at runtime | The component is not on the same `GameObject` hierarchy as `ConvaiCharacter`, so it disabled itself | Move the component onto the character's `GameObject` or one of its children | The Console error naming the component and "is not on a Convai character" stops appearing, and the component stays enabled after entering Play mode |
-| A module updates correctly for a while, then silently stops | The module's tick threw an exception, which is reported once and then the module is skipped | Check the Console for the "threw during its embodiment tick" message and fix the underlying exception in that module | The module resumes updating once code that raised the exception is corrected and the scene is re-entered |
+| A module updates correctly for a while, then silently stops | The module's tick threw an exception, which is reported once; the scheduler retries that module on later frames | Check the Console for the "threw during its embodiment tick" message and fix the underlying exception in that module | The module resumes updating once code that raised the exception is corrected and the scene is re-entered |
 | Two modules appear to fight over the same facial expression | Two modules are driving blendshapes in the same facial region with conflicting weights | Check the per-region weights on the character's `ConvaiFacialCompositionProfile` rather than disabling either module — facial output is a weighted blend of Emotion, LipSync, and Custom layers per region, not an exclusive lock | The region's blendshapes settle into one consistent expression instead of visibly oscillating |
 
 ## Rig not detected or low confidence
@@ -38,19 +38,19 @@ If no known convention matches at all, `DetectedConvention` stays `Unknown` and 
 Face rig not recognized
 ```
 
-In both cases, set `Convention Override` on the `StandardRigBinding` component directly, or supply a `CustomRigConventionMap` for a rig that does not match any built-in convention. See [Character rig setup](character-rig-setup.md) for the full detection model.
+In both cases, set **Rig Type** under **Character Type** on the `StandardRigBinding` component directly, or supply a `CustomRigConventionMap` for a rig that does not match any built-in convention. See [Character rig setup](character-rig-setup.md) for the full detection model.
 
-A missing bone or blendshape logs a warning through the Console once per component lifetime:
+A missing bone logs once per bone. Missing requested blendshapes are reported together after a binding pass, and reported again if the missing set changes:
 
 ```text
 [<character name>] This rig has no '<bone>' bone, so anything that needs it stays inactive. Assign it under Custom Rig Setup on the Character Rig component, or use a rig whose humanoid avatar maps that bone.
 ```
 
 ```text
-[<character name>] No mesh on this character has a '<blendshape>' blendshape, so anything that drives it stays inactive. Add the blendshape to the face mesh, or map its actual name under Custom Convention Map.
+[<character name>] Missing blendshapes (N): <list>. Features that drive these shapes stay inactive. Add them to the face mesh, or map their actual names under Custom Convention Map.
 ```
 
-Both messages come from `StandardRigBinding.TryGetBone` and `TryGetBlendshape`. They stop repeating once the corresponding bone or blendshape resolves, or once you assign an explicit override.
+These diagnostics follow `StandardRigBinding.TryGetBone` and `TryGetBlendshape` requests. The missing-shape report is aggregated for SDK binding passes; it is not one warning per individual shape.
 
 ## Preset slot mismatches
 
@@ -76,11 +76,11 @@ The `<report>` portion can include any of:
 
 - `Profile slots without an active receiver: <ids>.` — the preset configures a module the character does not have.
 - `Profile slots with null profiles: <ids>.` — a slot exists but has no profile asset assigned.
-- `Active receivers without a preset slot; inspector profiles will be preserved: <ids>.` — shown when `Preserve Missing Slots` is enabled: modules with no matching slot keep whatever profile is assigned on their own component.
-- `Active receivers without a preset slot; null profiles will be applied: <ids>.` — shown when `Preserve Missing Slots` is disabled: modules with no matching slot fall back to `null`, which resolves to their built-in default profile.
+- `Active receivers without a preset slot; inspector profiles will be preserved: <ids>.` — shown when **Keep Unmatched Profiles** is enabled: modules with no matching slot keep whatever profile is assigned on their own component.
+- `Active receivers without a preset slot; null profiles will be applied: <ids>.` — shown when **Keep Unmatched Profiles** is disabled: modules with no matching slot fall back to `null`, which resolves to their built-in default profile.
 - `Blank profile slot indices: <indices>.` — a slot entry has no module ID at all.
 
-If a module's behavior does not match what you expect from the preset, check `Preserve Missing Slots` on `ConvaiEmbodimentPresetBinding` first — it decides whether an unlisted module keeps its own settings or is reset to defaults.
+If a module's behavior does not match what you expect from the preset, check **Keep Unmatched Profiles** on `ConvaiEmbodimentPresetBinding` first — it decides whether an unlisted module keeps its own settings or is reset to defaults.
 
 ## A module is not ticking
 
@@ -94,15 +94,15 @@ Every embodiment module registers with the character's tick scheduler in `OnEnab
 
 Move the component onto the character's `GameObject` or a child of it, then re-enable it.
 
-**The component registered but its tick throws.** The scheduler catches an exception from any single module's tick, reports it once, and keeps ticking every other module normally:
+**The component registered but its tick throws.** The scheduler catches an exception from any single module's tick and reports it once. It continues ticking the other modules and retries the failing module on subsequent frames:
 
 ```text
 [EmbodimentTickScheduler] <ComponentType> on '<GameObject name>' threw during its embodiment tick and will be reported only once. Other modules on this character are unaffected.
 ```
 
-Because this is reported only once per module per session, a module that appears to have "stopped working" without any further Console output is the usual sign of this case. Fix the exception at its source and re-enter Play mode — the module resumes on the fix.
+Because this is reported only once per module per session, a module that appears to have "stopped working" without any further Console output is the usual sign of this case. Fix the exception at its source; a transient failure can recover on a later tick without re-entering Play mode.
 
-If neither message appears and the module still seems inert, confirm the scene is in Play mode: the tick scheduler is created only at runtime, so nothing ticks in Edit mode outside the Embodiment Editor's `Live` tab.
+If neither message appears and the module still seems inert, confirm the scene is in Play mode: the tick scheduler is created only at runtime, so nothing ticks in Edit mode. The Embodiment Editor's **Live** tab also requires Play mode.
 
 ## Facial output fighting between modules
 

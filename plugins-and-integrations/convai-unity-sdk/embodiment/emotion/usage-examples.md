@@ -1,22 +1,22 @@
 ---
 title: Emotion examples
-description: Seven complete scenarios covering hazard overrides, locked expressions, mood shifts, distress branching, analytics logging, and no-code UI wiring.
-last_reviewed: "4.5.0"
+description: Seven complete scenarios covering hazard overrides, locked expressions, mood shifts, distress branching, analytics logging, and a small UI event receiver.
+last_reviewed: "5.0.0-preview"
 ---
 
 These scenarios show how the Emotion system's configuration and scripting API combine to serve realistic application requirements. Each scenario is self-contained: Inspector setup is described first, followed by any runtime code needed to complete the behavior. Profile field references are in [Emotion profile](emotion-profile.md); the full scripting surface is in [Emotion scripting API](scripting-api.md).
 
 ## Scenario 1: Dynamic hazard response
 
-**Situation:** An instructor NPC guides trainees through a fire evacuation simulation. When a trainee enters a marked danger zone, the instructor's expression should shift sharply toward fear or urgency to reinforce the seriousness of the situation. When the trainee exits the zone, the expression returns to the server-driven state.
+**Situation:** An instructor NPC guides trainees through a fire evacuation simulation. When a trainee enters a marked danger zone, the instructor's expression should shift sharply toward fear or urgency to reinforce the seriousness of the situation. When the trainee exits the zone, the held override clears to neutral until the next accepted server emotion arrives.
 
 ### Profile settings
 
-Open the `ConvaiEmotionProfile` assigned to the instructor NPC and adjust:
+Select the instructor in the Emotion Editor and open **Feel**. Editing a package-owned profile here creates and assigns a project copy. Adjust:
 
-- **`lerpSpeed`** → `12` — fast rise so the fear expression arrives without delay.
-- **`microBurstOvershoot`** → `1.6` — a pronounced burst makes the transition visually impactful.
-- **`microBurstDuration`** → `0.2 s` — short burst before the expression settles.
+- **How Fast Emotions Appear** (`lerpSpeed`) → `12` — fast rise so the fear expression arrives without delay.
+- **Kick Strength** (`microBurstOvershoot`) → `1.6` — a pronounced burst makes the transition visually impactful.
+- **Kick Length** (`microBurstDuration`) → `0.2 s` — short burst before the expression settles.
 
 ### Runtime script
 
@@ -42,7 +42,7 @@ public sealed class HazardZoneTrigger : MonoBehaviour
 }
 ```
 
-`SetEmotionOverride` adds the fear score on top of whatever Convai is currently sending. The accumulator blends it in at the configured `lerpSpeed`, so the override arrives quickly but naturally. `ClearEmotionOverride` on trigger exit lets the server signal resume full control. The face itself needs no per-slot authoring — expression recipes resolve `"fear"` against the character's rig automatically.
+`SetEmotionOverride` replaces the transient target with fear and ignores server emotions until cleared. The accumulator smooths the change at the configured `lerpSpeed`. `ClearEmotionOverride` on trigger exit sets a neutral target until the next accepted server signal. The face itself needs no per-slot authoring — expression recipes resolve `"fear"` against the character's rig automatically.
 
 ***
 
@@ -165,6 +165,7 @@ public sealed class EmotionBranchDirector : MonoBehaviour
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
 using Convai.Runtime.Components;
+using Convai.Runtime.Facades;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -174,14 +175,23 @@ public sealed class EmotionSessionLogger : MonoBehaviour
 
     private readonly List<string> _emotionLog = new();
 
-    private void OnEnable()
+    private ConvaiEvents _events;
+
+    private void OnEnable() => TrySubscribe();
+    private void Update() => TrySubscribe();
+
+    private void TrySubscribe()
     {
-        convaiManager.Events.OnCharacterEmotionChanged += HandleEmotionChanged;
+        if (_events != null || convaiManager == null || !convaiManager.IsInitialized) return;
+        _events = convaiManager.Events;
+        _events.OnCharacterEmotionChanged += HandleEmotionChanged;
     }
 
     private void OnDisable()
     {
-        convaiManager.Events.OnCharacterEmotionChanged -= HandleEmotionChanged;
+        if (_events == null) return;
+        _events.OnCharacterEmotionChanged -= HandleEmotionChanged;
+        _events = null;
     }
 
     private void HandleEmotionChanged(CharacterEmotionChanged e)
@@ -195,65 +205,52 @@ public sealed class EmotionSessionLogger : MonoBehaviour
 }
 ```
 
-`OnCharacterEmotionChanged` fires on every emotion signal from Convai, before the controller has smoothed or processed it. This gives analytics code access to the raw signal rather than the interpolated visual state, which is more meaningful for session review. To log what the character actually ended up expressing instead, subscribe to `DominantEmotionChanged`/`MoodChanged` — see [Emotion scripting API](scripting-api.md#resolved-emotion-and-mood-events).
+`OnCharacterEmotionChanged` fires on each accepted current-reply emotion signal before controller smoothing. Late effects from interrupted or aborted replies, and group lines cut short by push-to-talk, are discarded before publication. This gives analytics code access to the raw signal rather than the interpolated visual state, which is more meaningful for session review. To log what the character actually ended up expressing instead, subscribe to `DominantEmotionChanged`/`MoodChanged` — see [Emotion scripting API](scripting-api.md#resolved-emotion-and-mood-events).
 
 ***
 
-## Scenario 6: No-code UI display
+## Scenario 6: Display the raw emotion in a UI label
 
-**Situation:** A non-programmer wants to update a UI label showing the character's current emotion whenever it changes, without writing any code.
+**Situation:** A UI label should update when an accepted emotion signal arrives. The relay sends a `CharacterEmotionRelayData` object, so use a receiver to read its `Emotion` string.
 
-{% stepper %}
-{% step %}
-### Add the Event Relay
+```csharp
+using Convai.Runtime.Presentation.Events;
+using TMPro;
+using UnityEngine;
 
-Select the NPC's root GameObject. Click **Add Component** and navigate to **Convai → Events → Convai Character Event Relay**.
+public sealed class EmotionLabelDisplay : MonoBehaviour
+{
+    [SerializeField] private TMP_Text label;
 
-The relay auto-resolves the `ConvaiCharacter` on the same GameObject via the **Auto Resolve Character** toggle, which is enabled by default.
-{% endstep %}
+    public void Show(CharacterEmotionRelayData data)
+    {
+        if (label != null) label.text = data.Emotion;
+    }
+}
+```
 
-{% step %}
-### Wire the On Emotion Changed event
+1. Add `ConvaiCharacterEventRelay` to the NPC. Leave **Auto Resolve Character** enabled when it shares the `ConvaiCharacter` GameObject, or assign **Character** explicitly.
+2. Add `EmotionLabelDisplay` to a scene object and assign its TextMeshPro label. This script needs TextMeshPro installed in the project.
+3. Add an entry to **On Emotion Changed**, drag the receiver object into it, and choose the dynamic **EmotionLabelDisplay.Show** method.
+4. Enter Play mode and converse with the character. The label shows raw values such as `happy`; resolve through the taxonomy if you need canonical values such as `joy`.
 
-In the **On Emotion Changed** Unity Event list on `ConvaiCharacterEventRelay`, click **+**.
-{% endstep %}
-
-{% step %}
-### Assign the UI Text component
-
-Drag your UI `Text` (or `TMP_Text`) component into the object field of the new event entry.
-{% endstep %}
-
-{% step %}
-### Select the target property
-
-From the function dropdown, select **Text → string text** (or **TMP\_Text → string text**).
-
-Now every time the character's emotion changes, the `Emotion` property from `CharacterEmotionRelayData` is written directly to the label — no code required.
-{% endstep %}
-{% endstepper %}
-
-{% hint style="success" %}
-Enter Play Mode and speak to the character. The UI label updates automatically as Convai sends new emotion signals.
-{% endhint %}
-
-`ConvaiCharacterEventRelay` delivers the raw server label (e.g. `"happy"`). If you need a friendlier display name (e.g. `"Joy"` rather than `"happy"`), add a small formatting script that maps raw labels to display strings, or post-process the string in a UnityEvent target method.
+A direct dynamic `Text.text` or `TMP_Text.text` binding cannot extract a string from this payload. For the smoothed visible state, read `Current` or subscribe to `DominantEmotionChanged` instead.
 
 ***
 
-## Scenario 7: Previewing expressions in the Editor
+## Scenario 7: Test expressions in Play mode
 
-**Situation:** You have configured a character's rig and want to confirm that each emotion drives a recognizable expression before entering Play Mode.
+**Situation:** Confirm that each expression is recognizable without waiting for a matching conversation response.
 
-1. Select the NPC's root GameObject.
-2. On the `ConvaiEmotionController` component, enable **Lock Emotion**.
-3. Set **Locked Emotion Label** to the canonical label you want to preview (e.g. `"anger"`).
-4. Set **Locked Intensity** to `1.0`.
+1. Select the character and enter Play mode.
+2. Expand the Emotion Controller's **Live** section.
+3. Choose an emotion and strength, then select **Try It**.
+4. Observe the face, then select **Stop** before continuing the conversation.
 
-The Scene view updates immediately — expression recipes are resolved and applied in Edit Mode because `ConvaiEmotionController` inherits `[ExecuteAlways]` from its base class. Cycle through the labels in your taxonomy to verify each expression visually, or use the [Emotion editor windows](emotion-editor.md) for a guided preview across every character in the open scenes.
+The runtime pipeline must be running for this test. The Emotion Editor's **Live** tab displays readings and offers the timeline, but does not provide an Edit-mode expression preview. To author a fixed expression, use **Advanced → Hold one expression**, **Expression**, and **How strong**.
 
-{% hint style="danger" %}
-Set **Lock Emotion** back to `false` before building for production. The field is serialized — if it remains enabled, the character ignores all backend emotion signals in the shipped build with no runtime error or warning.
+{% hint style="warning" %}
+**Hold one expression** is serialized. Disable it before saving a scene or prefab intended to react to conversation; while held, incoming emotion signals are ignored.
 {% endhint %}
 
 ## Next steps

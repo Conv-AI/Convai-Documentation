@@ -1,7 +1,7 @@
 ---
 title: Embodiment Editor window
 description: Reference for the Convai Embodiment Editor window, covering the Setup, Presets, and Live tabs and what each one shows about a character.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 The Convai Embodiment Editor is a `Convai/Embodiment Editor` window with three tabs: `Setup`, `Presets`, and `Live`. Its subtitle reads "Set up a character's gaze, emotion and body." Use it to check whether a character's rig and modules are configured correctly, to see every `ConvaiEmbodimentPreset` in the project, and to watch a running character's conversation and emotion state during Play mode.
@@ -10,13 +10,13 @@ The Convai Embodiment Editor is a `Convai/Embodiment Editor` window with three t
 
 Select **Convai > Embodiment Editor** to open the window.
 
-At the top of the window, a **Follow Selection** toggle (tooltip: "Track whatever character is selected in the scene.") controls which character the window inspects. When enabled, the window follows whatever `GameObject` is selected in the Hierarchy — resolving up to the nearest `ConvaiCharacter` if the selection is a child object. When disabled, drag a `GameObject` into the character field manually.
+Below the **Setup**, **Presets**, and **Live** tabs, a **Follow Selection** toggle (tooltip: "Track whatever character is selected in the scene.") controls which character the window inspects. When enabled, the window follows whatever `GameObject` is selected in the Hierarchy — resolving up to the nearest `ConvaiCharacter` if the selection is a child object. When disabled, drag a `GameObject` into the character field manually.
 
-Below the character picker, the three tabs read, in order: `Setup`, `Presets`, `Live`.
+The tabs stay above the character picker.
 
 ## Setup tab
 
-The `Setup` tab (tooltip: "Get this character's expressive features working.") shows two sections for the selected character.
+The `Setup` tab (tooltip: "Get this character's expressive features working.") shows two sections for the selected character. Without a character, it shows **Pick A Character** and asks you to select a character in the scene.
 
 ### Rig
 
@@ -34,18 +34,20 @@ A **Set Up This Character** button at the bottom of the section adds a `Standard
 
 ### Features
 
-The `Features` section lists every embodiment module registered in the project — `Conversation Flow`, `Gaze`, `Body Animation`, `Body Language`, and `Emotion` — one row per module. Each row shows the module's display name and a status indicator for whether the module's controller component is present on the character:
+The `Features` section lists every embodiment module registered in the project — `Conversation Flow`, `Gaze`, `Emotion`, `Body Animation`, and `Body Language`, in that order — one row per module. Each row shows the module's display name, a one-line description of its behavior, and a status indicator for whether the module's controller component is present on the character:
 
 - **Present** — the row shows a **Select** button that selects the component in the Inspector.
 - **Absent** — the row shows an **Add** button that adds the module's controller component to the character.
+
+<figure><img src="../../../.gitbook/assets/unity-embodiment-setup.png" alt="Embodiment Editor Setup with automatic rig setup and the five feature rows"><figcaption><p>This character has Conversation Flow and Gaze. The rig is scheduled for automatic setup when the character starts; this Ready status does not confirm that every bone or facial shape has resolved.</p></figcaption></figure>
 
 ## Presets tab
 
 The `Presets` tab (tooltip: "Preset assets in this project and whether they are valid.") opens with an info box: "Presets Are Optional — A preset hands one set of settings to each feature at once. Every feature also works on its own, so presets are optional."
 
-Below it, the tab lists every `ConvaiEmbodimentPreset` asset found in the project. If none exist, the tab shows "No presets in this project." and a **Create A Preset** button that opens a save dialog for a new preset asset.
+Below it, the tab lists every `ConvaiEmbodimentPreset` asset found in the project. If none exist, the tab shows **No Presets In This Project** with "Create one to hand every feature its settings in a single step." and a **Create A Preset** button that opens a save dialog for a new preset asset.
 
-Each listed preset shows a status pill using the same three-word vocabulary as the `Setup` tab's `Rig` section (`Ready`, `Needs Attention`, `Not Set Up`), computed by inspecting the preset's slots: duplicate module IDs, slots with no matching feature installed, slots pointing at the wrong profile type, and — when the window is also tracking a character — features present on that character but missing from the preset, or slots naming a feature the character does not have. Selecting **Open** on any row selects the preset asset so its full diagnostics and slot list are visible in the Inspector.
+Each listed preset shows a status pill using the same three-word vocabulary as the `Setup` tab's `Rig` section (`Ready`, `Needs Attention`, `Not Set Up`), computed from the preset alone: no features configured, empty entries, entries with no feature selected, duplicate module IDs, features not installed in this project, wrong settings types, or an informational row for a feature with no settings. Selecting a character does not add character-versus-preset checks to this tab. Selecting **Open** on any row selects the preset asset so its full diagnostics and slot list are visible in the Inspector.
 
 ## Live tab
 
