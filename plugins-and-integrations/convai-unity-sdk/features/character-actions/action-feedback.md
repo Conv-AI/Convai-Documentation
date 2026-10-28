@@ -19,7 +19,7 @@ A diagnostic result message and an answer serve different purposes. `ConvaiActio
 3. Select **Add Action Feedback**. This adds `ConvaiActionFeedbackRelay` on the same GameObject as the runner.
 4. Choose how successful and failed batches are reported. Use **Edit On Component** to edit scripted lines.
 
-The relay Inspector has **When An Action Fails**, **When Everything Succeeds**, **Timing**, and conditional **Scripted Lines** sections. Its mode buttons are **Off**, **Silent**, **Narrate**, and **Scripted**.
+The relay Inspector has **When An Action Fails**, **When Everything Succeeds**, **Timing**, and conditional **Scripted Lines** sections. Its mode buttons are **Off**, **Silent**, **Narrate**, and **Scripted**. In the Actions Editor, **Character Settings → Action Feedback** shows the same modes as **Failure Feedback Mode** and **Success Feedback Mode** dropdowns with the options **Off**, **Silent Context**, **Narrate In Character**, and **Scripted Speech**.
 
 | Mode | Ordinary-room behavior |
 |---|---|
@@ -30,11 +30,7 @@ The relay Inspector has **When An Action Fails**, **When Everything Succeeds**, 
 
 Defaults are **Narrate** for hard failures and **Silent** for success. `DroppedCommandFeedbackMode` is `Off` by default and controls feedback for commands refused before dispatch. It is also available through C#.
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the 5.0 Actions Editor **Character Settings → Action Feedback** section with a relay present, showing the failure and success delivery controls and **Edit On Component**.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-action-feedback-settings.png" alt="Actions Editor Character Settings showing optional action feedback delivery controls"><figcaption><p>TODO: Replace with the 5.0 Action Feedback settings on a configured character.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-action-feedback-settings.png" alt="Actions Editor Character Settings for a character with an Action Feedback relay, showing Failure Feedback Mode, Success Feedback Mode, Dropped Command Feedback, Speech Cooldown and Edit On Component"><figcaption><p>Character Settings with the Action Feedback section for a character that has a relay.</p></figcaption></figure>
 
 ## Return and deliver an answer
 

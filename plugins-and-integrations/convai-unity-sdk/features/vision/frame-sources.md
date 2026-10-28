@@ -35,11 +35,7 @@ Custom fields are serialized as zero before assignment; an untouched Custom pres
 
 Automatic capture uses Built-in rendering hooks or the explicit compatibility path for SRP. `SrpNative` is unavailable in this implementation and reports `UnsupportedPlatform`; use the compatibility path when diagnosing SRP capture. The optional diagnostic health probe is exposed only in the Inspector's Debug mode, not this custom Inspector. See [Troubleshoot vision](troubleshooting-and-diagnostics.md).
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture Camera Vision Frame Source with Capture Settings showing Balanced Preset and Camera Setup showing an assigned Target Camera and Identifier.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-vision-camera.png" alt="Camera Vision Frame Source with Capture Settings showing Balanced Preset and Camera Setup showing an assigned Target Camera and Identifier"><figcaption><p>TODO: Replace with screenshot showing Camera Vision Frame Source with Capture Settings showing Balanced Preset and Camera Setup showing an assigned Target Camera and Identifier.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-vision-camera.png" alt="Camera Vision Frame Source Inspector with the Balanced capture preset selected and Main Camera assigned as Target Camera with the identifier main-camera"><figcaption><p>Camera Vision Frame Source with the Balanced preset and an assigned target camera.</p></figcaption></figure>
 
 ## WebcamVisionFrameSource
 

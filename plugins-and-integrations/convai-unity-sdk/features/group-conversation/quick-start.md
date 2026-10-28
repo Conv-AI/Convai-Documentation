@@ -49,11 +49,7 @@ Exit Play mode and disable the simulator. Connect the configured group using the
 {% endstep %}
 {% endstepper %}
 
-{% hint style="warning" %}
-Screenshot required before publishing: capture the reviewed Group Conversation Inspector with Scene Brief, Topics, Members, Spatial, and validation status visible, using non-private test content.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-group-conversation-inspector.png" alt="Group Conversation Inspector showing a test scene brief, topics, member settings, spatial options, and validation status"><figcaption><p>Configure group settings before connecting; the Inspector checks client prerequisites.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-group-conversation-inspector.png" alt="Group Conversation Inspector from the Group Conversation Sample showing the scene brief, three topics with starters, three members, the Spatial section and a Ready status"><figcaption><p>Group Conversation configured in the bundled Group Conversation Sample.</p></figcaption></figure>
 
 ## Next steps
 

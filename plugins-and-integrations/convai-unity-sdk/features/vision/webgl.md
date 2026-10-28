@@ -28,11 +28,7 @@ Serve the build over HTTPS. For webcam capture, grant browser camera permission 
 {% endstep %}
 {% endstepper %}
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture Convai Vision Publisher with Frame Source, WebGL Publishes, Track Name, Publish Policy, Max Publish FPS, and Max Bitrate visible with the WebGL build target active.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-vision-publisher.png" alt="Convai Vision Publisher with Frame Source, WebGL Publishes, Track Name, Publish Policy, Max Publish FPS, and Max Bitrate visible with the WebGL build target active"><figcaption><p>TODO: Replace with screenshot showing Convai Vision Publisher with Frame Source, WebGL Publishes, Track Name, Publish Policy, Max Publish FPS, and Max Bitrate visible with the WebGL build target active.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-vision-publisher.png" alt="Convai Vision Publisher Inspector showing the assigned frame source, Track Name, WebGL Publishes set to Frame Source, the Publish Policy mode, Max Publish FPS and Max Bitrate"><figcaption><p>Convai Vision Publisher with a camera frame source assigned. WebGL Publishes applies only to WebGL builds.</p></figcaption></figure>
 
 ## Frame-source path
 
