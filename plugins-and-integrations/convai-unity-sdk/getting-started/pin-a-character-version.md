@@ -32,11 +32,7 @@ Save the changed scene, prefab or profile asset. Select it again and confirm the
 {% endstep %}
 {% endstepper %}
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the reviewed 5.0 Convai Character Identity card with the Character Version popup open, showing Live and at least one released version. Hide character identifiers. Include Refresh and the selected released version.
-{% endhint %}
-
-<figure><img src="../../../.gitbook/assets/TODO-unity-character-version.png" alt="Character Version popup with Live and a selected released version"><figcaption><p>TODO: Character release choices and Refresh in the Identity card.</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/unity-character-version.png" alt="Identity card of the ConvaiCharacter Inspector with Character Version set to the released version 1.0 (Latest release) next to Refresh, with the Character ID blurred"><figcaption><p>A character pinned to its released version 1.0. The drop-down also lists Live and every release the API returns.</p></figcaption></figure>
 
 ## Resolve a saved-version warning
 

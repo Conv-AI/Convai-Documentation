@@ -87,11 +87,7 @@ If `chatContainer` is not assigned, messages will not appear and the Console log
 
 If the prefab is present but no messages appear, check **Transcript System**, its runtime override and the component references. If only the input is disabled, inspect the availability prompt: room connection alone does not mean the character is ready.
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture Game view with TranscriptUI_Chat in Play Mode, one non-sensitive player bubble, one character bubble and a ready Message <name> input prompt. Use a sample matching the reviewed 5.0 source.
-{% endhint %}
-
-<figure><img src="../../../.gitbook/assets/TODO-unity-chat-ready.png" alt="Chat transcript with player and character bubbles and a ready input prompt"><figcaption><p>TODO: Chat transcript with player and character bubbles and a ready input prompt.</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/unity-chat-ready.png" alt="Chat transcript panel of the Basic Sample in Play mode showing a player message, a Robot reply and the Message Robot input prompt"><figcaption><p>TranscriptUI_Chat in Play mode with one exchange and the ready input prompt.</p></figcaption></figure>
 
 ## Usage examples
 

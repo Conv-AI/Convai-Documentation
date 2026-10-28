@@ -118,11 +118,7 @@ Confirm the configured section event fires after Convai reports the new section.
 {% endstep %}
 {% endstepper %}
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the Narrative Design Trigger Inspector with an assigned character, fetched Trigger picker, Activation Settings set to Collision, and Auto-Recovery Settings expanded.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-narrative-trigger.png" alt="the Narrative Design Trigger Inspector with an assigned character, fetched Trigger picker, Activation Settings set to Collision, and Auto-Recovery Settings expanded"><figcaption><p>TODO: Replace with screenshot showing the Narrative Design Trigger Inspector with an assigned character, fetched Trigger picker, Activation Settings set to Collision, and Auto-Recovery Settings expanded.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-narrative-trigger.png" alt="Narrative Design Trigger Inspector with the character assigned, the EnterLab trigger selected with its ID, message and destination, Activation Settings set to Collision, and Auto-Recovery Settings expanded"><figcaption><p>A Narrative Design Trigger with a fetched trigger selected and Collision activation.</p></figcaption></figure>
 
 ## What the setup produced
 

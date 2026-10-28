@@ -64,11 +64,7 @@ The grouping plan is retained after the first Apply. Generated movement position
 
 Apply records an Undo step and marks scenes dirty without saving. It preserves manual metadata and edited owned companions. Changes to geometry, transforms, or materials since capture can make a result stale; capture again. Inspect the applied components before saving and verify runtime delivery separately.
 
-{% hint style="warning" %}
-Screenshot required before publishing: capture Review with one approved object, its saved image and text, the separate include/check controls, and Apply. Use non-private test content.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-scene-auto-tagger-review.png" alt="Scene Auto Tagger Review with object image, approved name and description, inclusion controls, and Apply"><figcaption><p>Review each proposed object before applying scene components.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-scene-auto-tagger-review.png" alt="Scene Auto Tagger Review tab with one included object, its analysis image, the editable name and description, the row check box and include toggle, and Apply 1"><figcaption><p>Review after analyzing one test object. Nothing changes in the scene until Apply.</p></figcaption></figure>
 
 ## Failure handling
 
