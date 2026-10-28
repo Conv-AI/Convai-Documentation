@@ -41,11 +41,7 @@ Start a fresh connection with the intended identity source. On `ConvaiManager`, 
 {% endstep %}
 {% endstepper %}
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the preview SDK's `ConvaiCharacter` Inspector with **Memory**, **Long-Term Memory**, and **End-User ID** visible. Show **Required** and the neighboring **Optional** choice without exposing account identifiers.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-character-memory-settings.png" alt="Character Inspector Memory section showing Long-Term Memory and the Required and Optional end-user ID choices"><figcaption><p>TODO: Character memory settings and the end-user ID requirement.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-character-memory-settings.png" alt="Memory card of the ConvaiCharacter Inspector with Long-Term Memory enabled and End-User ID set to Required"><figcaption><p>Long-Term Memory on with End-User ID set to Required. Choose Optional in the same drop-down to allow connects without an ID.</p></figcaption></figure>
 
 ## Set the requirement from a script
 

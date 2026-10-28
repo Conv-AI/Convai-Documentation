@@ -33,11 +33,7 @@ Enter Play mode and invoke the corresponding saved trigger. Confirm the old sect
 {% endstep %}
 {% endstepper %}
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the Narrative Design Manager Inspector with Character, Sync Status, an expanded narrative section showing its ID and start/end events, and Template Keys.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-narrative-manager.png" alt="the Narrative Design Manager Inspector with Character, Sync Status, an expanded narrative section showing its ID and start/end events, and Template Keys"><figcaption><p>TODO: Replace with screenshot showing the Narrative Design Manager Inspector with Character, Sync Status, an expanded narrative section showing its ID and start/end events, and Template Keys.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-narrative-manager.png" alt="Narrative Design Manager Inspector with the character assigned, Sync Status showing two sections, the Welcome section expanded with its Section ID and On Section Start and On Section End events, and a player_name template key"><figcaption><p>The Narrative Design Manager after a sync, with one section expanded and a template key.</p></figcaption></figure>
 
 ## Read sync status
 

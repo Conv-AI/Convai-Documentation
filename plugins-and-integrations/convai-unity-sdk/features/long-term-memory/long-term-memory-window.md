@@ -39,11 +39,7 @@ Use **Refresh Memories** to reload the selected pair. **Previous** and **Next** 
 {% endstep %}
 {% endstepper %}
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the released target version's **Long Term Memory** section with **Character**, **Search**, **Character Memories**, **End User Actions**, and **Memory Deletion Requests** visible. Use test identifiers and non-sensitive facts. The current local panel differs from the audited source, so it is not a valid replacement image.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-long-term-memory-window.png" alt="Long Term Memory window showing character and end-user selection, memory records, and separate deletion and deactivation controls"><figcaption><p>TODO: Audited Long Term Memory window with test data and identifiers concealed.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-long-term-memory-window.png" alt="Long Term Memory section of the Convai Editor with a test character selected, the end-user search filtered to a test player, three test memories, End User Actions and Memory Deletion Requests"><figcaption><p>The Long Term Memory section for a test character and a test end user.</p></figcaption></figure>
 
 ## Add or remove individual facts
 
