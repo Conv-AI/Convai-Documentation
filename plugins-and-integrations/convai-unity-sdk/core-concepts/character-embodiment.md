@@ -1,7 +1,7 @@
 ---
 title: Character embodiment
 description: Understand how a character's embodiment modules share one composition root, tick deterministically, and never write the same bone twice.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Every embodiment module on a Convai character — Gaze, Body Animation, Body Language, Conversation Flow, and Emotion — plugs into the same composition root for that character. This root owns the character's tick order and its only path to the Animator and the face. Understanding it explains why modules cooperate instead of fighting over the same bone or blendshape.
@@ -30,7 +30,7 @@ Every module controller — `ConvaiGazeController`, `ConvaiBodyAnimationControll
 
 ## Auto-provisioned infrastructure
 
-The context also lazily provisions four more infrastructure components the first time a module needs them: `StandardRigBinding` (works out which bones and blendshapes play which semantic role, for Humanoid, ARKit, CC3/CC4, and other common rigs), `AnimatorConductor`, `EmbodimentTickScheduler`, and `FacialBlendshapeCompositorHost`. All four are ordinary components you can select and inspect in the hierarchy — the SDK deliberately does not hide them, because a component you cannot see is a component you cannot debug. `AnimatorConductor`, `EmbodimentTickScheduler`, and `FacialBlendshapeCompositorHost` carry `[AddComponentMenu("")]`; treat all three as behavior Convai provides, never as components you add or an API you call directly.
+The context also lazily provisions four infrastructure components the first time a module needs them: `StandardRigBinding` (works out which bones and blendshapes play which semantic role, for Humanoid, ARKit, CC3/CC4, and other common rigs), `AnimatorConductor`, `EmbodimentTickScheduler`, and `FacialBlendshapeCompositorHost`. Runtime dependency creation is guarded by Play Mode; `EmbodimentContext` itself can also be resolved in Edit Mode. An authored rig binding may already be present. These are ordinary components you can select and inspect in the hierarchy — the SDK deliberately does not hide them, because a component you cannot see is a component you cannot debug. `AnimatorConductor`, `EmbodimentTickScheduler`, and `FacialBlendshapeCompositorHost` carry `[AddComponentMenu("")]`; treat all three as behavior Convai provides, never as components you add or an API you call directly.
 
 ***
 
@@ -44,9 +44,9 @@ The scheduler runs every tickable through three phases, always in this order:
 | --- | --- |
 | `Cognition` | Conversation Flow, Gaze, and Emotion directors sample signals and update their readings. |
 | `Expression` | Gaze, body, and facial actuators translate those readings into bone, blendshape, and Animator-parameter writes. |
-| `Finalize` | The facial compositor and the Animator conductor finalize their writes after Cognition and Expression have both settled. |
+| `Finalize` | Tickables registered for the final scheduler phase run after Cognition and Expression. Facial composition and pose flushing happen later in `LateUpdate`; the Animator conductor applies parameter calls immediately. |
 
-Within a phase, a tickable's `TickOrder` decides who runs first — lower values earlier — and ties break by registration order. This is why the tick order does not depend on hierarchy order or which module happened to enable first: reparenting a GameObject or adding a module in a different order cannot silently change which one writes to a shared bone first.
+Within a phase, a tickable's `TickOrder` decides who runs first — lower values earlier — and ties break by registration order. Hierarchy position is not a sorting key. Registration order can depend on enable order, so use distinct `TickOrder` values when ordering matters.
 
 ***
 
@@ -57,7 +57,7 @@ Two modules writing to the same Animator parameter or the same blendshape in the
 - `AnimatorConductor` is the single authoritative writer of Animator parameters. A module submits a named parameter write through the conductor instead of calling `Animator.SetFloat` directly; the conductor records which module registered each parameter and refuses a conflicting registration from another module.
 - `FacialBlendshapeCompositorHost` is the single writer of facial blendshapes. It composites every module's contribution — Emotion, LipSync, and any custom layer — into one set of blendshape values, using the region rules in a `ConvaiFacialCompositionProfile` to decide how much of the mouth, brow, eye, cheek, and jaw regions each contributor gets.
 
-Both are auto-provisioned infrastructure, not components you configure directly. If you need to influence what they write, do it through the module that owns the behavior — Emotion for expression, LipSync for mouth shape — not by writing blendshapes on the same mesh yourself.
+Both are auto-provisioned infrastructure. Set the optional **Facial Composition Profile Override** on `EmbodimentContext` to choose composition rules; without one, built-in rules apply. If you need to influence what they write, do it through the module that owns the behavior — Emotion for expression, LipSync for mouth shape — not by writing blendshapes on the same mesh yourself.
 
 {% hint style="info" %}
 Cross-module contracts such as how Gaze tells Body Animation to turn are `internal` to the package. They are not a published extension point — only the components and their profiles are.
