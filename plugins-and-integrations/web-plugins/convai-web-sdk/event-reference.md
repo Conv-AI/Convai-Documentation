@@ -1,7 +1,7 @@
 ---
 title: Web SDK event reference
 description: Reference for every event the Convai Web SDK client and its media controls emit, with the payload each one carries and when it fires.
-last_reviewed: "2.0.1"
+last_reviewed: "2.0.2"
 icon: arrow-up-small-big
 ---
 

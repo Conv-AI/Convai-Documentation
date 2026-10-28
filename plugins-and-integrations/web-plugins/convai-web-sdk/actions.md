@@ -1,7 +1,7 @@
 ---
 title: Handle character actions
 description: Declare the actions, objects, and tools a character can use, receive the actions it chooses, and return the results of tools your app runs.
-last_reviewed: "2.0.1"
+last_reviewed: "2.0.2"
 icon: person-running
 ---
 
