@@ -1,101 +1,100 @@
 ---
 title: Configure memory for a character
-description: Explains how to turn long-term memory on or off for a character from the dashboard or from script, and what its global scope means for shared characters.
-last_reviewed: "4.6.0"
+description: Turn character memory on or off from the Unity Inspector or a script, preserve other settings, and verify the configuration before connecting.
+last_reviewed: "5.0.0-preview"
 ---
 
-Long-term memory is disabled by default (`MemorySettings.IsEnabled = false`). No facts are extracted or stored until you explicitly enable it. You can enable or disable memory through the Convai dashboard or programmatically via `client.Characters`.
+Configure long-term memory in the **Memory** section of the `ConvaiCharacter` Inspector or through `client.Memory`. Read the saved settings before changing a shared character.
 
-{% hint style="danger" %}
-**Memory settings apply globally to the character.** Enabling LTM for a character affects every application, SDK version, and deployment that connects to that character ID. If you share a character across development, staging, and production environments, enabling memory in one environment enables it in all of them. Coordinate with your team before enabling on a shared character.
+{% hint style="warning" %}
+Memory settings belong to the character on Convai, so changing them affects other applications that use it. A connection pinned to a character version keeps that version's memory enabled setting; the end-user ID requirement applies across versions. Use a test character when evaluating changes.
 {% endhint %}
 
-***
+<figure><img src="../../../../.gitbook/assets/unity-character-memory.png" alt="Character Inspector Memory card with Long-Term Memory unchecked and Refresh and Manage Memories controls"><figcaption><p>The Memory card with memory disabled. Enable Long-Term Memory to reveal the end-user ID requirement.</p></figcaption></figure>
+
+## Prerequisites
+
+- Install the Convai Unity SDK and [configure credentials](../../getting-started/configure-api-key.md) for an account that can manage the character.
+- Set the character's **Character ID** in the Inspector.
+- Choose a stable [end-user identity](end-user-identity.md) for conversations that should use memory.
 
 ## Enable or disable memory
 
 {% tabs %}
-{% tab title="Dashboard" %}
-This is the recommended approach for most teams. Changes take effect immediately without requiring a code update or redeployment.
+{% tab title="Inspector" %}
+{% stepper %}
+{% step %}
+### Open the character's Memory section
 
-1. Sign in at [convai.com](https://convai.com).
-2. Open the character you want to configure.
-3. Select the **Memory** tab in the character's settings sidebar.
-4. Toggle **Long-Term Memory** to **On**.
-5. Click **Save**.
+Select the GameObject containing `ConvaiCharacter`, then expand **Memory**. Wait for its settings to load. If loading fails, resolve the displayed error before editing.
+{% endstep %}
+{% step %}
+### Set Long-Term Memory
 
-To disable, repeat the same steps and toggle **Long-Term Memory** to **Off**.
+Change **Long-Term Memory** and confirm the dialog for the character you intend to edit. The change is saved through Convai; editing a scene asset alone does not configure character memory.
+{% endstep %}
+{% step %}
+### Check the end-user requirement
+
+Leave **End-User ID** on **Required** when every conversation must have an identity. Use **Optional** only when your application intentionally allows connections without memory. See [Configure the end-user ID requirement](configure-end-user-id-requirement.md).
+{% endstep %}
+{% endstepper %}
 {% endtab %}
-
 {% tab title="Scripting" %}
-Use `client.Characters` when you need programmatic control — for example, in automated test setups, build pipelines, or runtime admin panels. `ConvaiRestClient.Characters` is marked `[Obsolete]` in favor of `ConvaiCharacterApiClient`, so this code compiles with a `CS0618` warning; it remains the only typed accessor for reading and writing this setting today.
+Use `MemoryService.GetSettingsAsync` and `UpdateSettingsAsync` from a trusted Editor tool or service. `UpdateSettingsAsync` reads the character's existing settings and preserves settings you omit. The older `client.Characters` memory methods are deprecated.
 
-**Check current state**
+The following method is a complete helper for an existing administrative tool. Pass a client configured with credentials your tool is allowed to use:
 
 ```csharp
+using System.Threading;
+using System.Threading.Tasks;
 using Convai.RestAPI;
-using UnityEngine;
+using Convai.RestAPI.Internal;
 
-public class MemoryAdmin : MonoBehaviour
+public static class CharacterMemorySettings
 {
-    private async void Start()
+    public static Task<MemorySettings> SetEnabledAsync(
+        ConvaiRestClient client,
+        string characterId,
+        bool enabled,
+        CancellationToken cancellationToken = default)
     {
-        using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
-
-        bool isEnabled = await client.Characters.GetMemoryEnabledAsync("your-character-id");
-        Debug.Log($"LTM enabled: {isEnabled}");
+        return client.Memory.UpdateSettingsAsync(
+            characterId, enabled: enabled, cancellationToken: cancellationToken);
     }
 }
 ```
 
-**Enable memory**
-
-```csharp
-using Convai.RestAPI;
-using UnityEngine;
-
-public class MemoryAdmin : MonoBehaviour
-{
-    private async void Start()
-    {
-        using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
-
-        await client.Characters.SetMemoryEnabledAsync("your-character-id", true);
-        Debug.Log("Long-term memory enabled.");
-    }
-}
-```
-
-**Disable memory**
-
-```csharp
-await client.Characters.SetMemoryEnabledAsync("your-character-id", false);
-```
+Await the operation and handle `ConvaiRestException` in the calling tool. Read back `client.Memory.GetSettingsAsync(characterId)` to verify `IsEnabled`. Keep account API keys out of distributed player builds.
 {% endtab %}
 {% endtabs %}
 
-***
+## Verify the configuration
+
+Reload the character's **Memory** section and confirm that **Long-Term Memory** has the intended value. Reconnect with the same end-user ID, then inspect **Memory** on the `ConvaiManager` Inspector. `CurrentLongTermMemoryStatus` reports what the connect response says; it does not prove that a particular fact has been stored or recalled.
+
+For a concrete memory check, open the [Long Term Memory window](long-term-memory-window.md), select the character and end user, and refresh the returned records.
 
 ## Disable memory without deleting records
 
-{% hint style="warning" %}
-Disabling LTM stops new memories from being extracted, but **does not delete existing memory records**. The stored facts remain on Convai and will be re-injected if you re-enable LTM later.
+Changing the enabled setting does not call a memory-deletion API. Treat disabling memory and deleting records as separate actions. To request deletion for one character and end user, use `client.Memory.DeleteAllAsync(characterId, endUserId)` and check the result afterward.
 
-If you want to disable LTM and remove all stored memories, delete the memories first, then disable.
-{% endhint %}
+`client.EndUsers.DeleteAsync(endUserId)` deactivates an end user. It is not a replacement for deleting memory records. If you need to request deletion across owned characters, use **Forget End User…** in the [Long Term Memory window](long-term-memory-window.md) before deactivation.
 
-To purge all memories for a user–character pair before disabling, use `client.Memory.DeleteAllAsync` followed by `SetMemoryEnabledAsync`. `DeleteAllAsync` removes memories for one specific user–character pair. To remove all end-user records across all characters instead, use `client.EndUsers.DeleteAsync(endUserId)`. See [Manage end-user records](end-user-management.md).
+## Troubleshooting
 
-See [Long-term memory usage examples](usage-examples.md) for a complete reset pattern.
-
-***
+| Symptom | Cause to check | Fix and verification |
+|---|---|---|
+| Memory settings do not load | Credentials or character access failed | Resolve the shown error and reload; the controls must show saved values before you edit. |
+| A change affects another application | Both applications use the same character | Use a separate test character; read back settings for the intended character ID. |
+| A pinned connection uses a different enabled setting | The connection selects a released character version | Verify its version selection; do not infer its memory setting from the live character alone. |
 
 ## Next steps
 
-{% content-ref url="end-user-identity.md" %}
-[End-user identity](end-user-identity.md)
+{% content-ref url="configure-end-user-id-requirement.md" %}
+[Configure the end-user ID requirement](configure-end-user-id-requirement.md)
 {% endcontent-ref %}
 
-{% content-ref url="end-user-management.md" %}
-[Manage end-user records](end-user-management.md)
+{% content-ref url="long-term-memory-window.md" %}
+[Inspect and manage long-term memories](long-term-memory-window.md)
 {% endcontent-ref %}

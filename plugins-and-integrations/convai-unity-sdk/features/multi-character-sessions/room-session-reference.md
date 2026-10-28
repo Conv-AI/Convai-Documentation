@@ -1,7 +1,7 @@
 ---
 title: Room session reference
 description: Reference for the multi-character room session type, its membership and status fields, and the results and exceptions its commands return.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 `MultiCharacterRoomSession` is the client-side projection of a multi-character room's roster. This page lists every public member you read or call on `MultiCharacterRoomSession`, `CharacterRoomMembership`, `CharacterRoomStatus`, `InteractionTargetResult`, `CharacterRosterUpdateResult`, and `CharacterRosterUpdateException`. The SDK constructs the three result and exception types itself, so their constructors are omitted. All six types live in the `Convai.Runtime.Room` namespace, defined in `SDK/Runtime/Room/MultiCharacterRoomSession.cs`.
@@ -26,10 +26,10 @@ last_reviewed: "4.6.0"
 
 | Member | Type | Description |
 | --- | --- | --- |
-| `MembershipId` | `string` | Addresses this instance — pass it to `SetInteractionTargetAsync(string, CancellationToken)`, `RemoveCharacterAsync(string, string, CancellationToken)`, or `FindByMembershipId`. |
-| `CharacterId` | `string` | The Convai character definition this instance was created from. Not unique within a roster — the same value can appear on several memberships. |
+| `MembershipId` | `string` | Addresses this instance — pass it to `RemoveCharacterAsync(string, string, CancellationToken)`, or `FindByMembershipId`. |
+| `CharacterId` | `string` | The Convai character definition this instance was created from. Unique within a roster built by the SDK; duplicate IDs are refused. |
 | `SessionId` | `string` | The session identifier Convai returned for this membership in the connect response. |
-| `CharacterSessionId` | `string` | Continues this instance's conversation across sessions and disambiguates repeated `CharacterId` values. |
+| `CharacterSessionId` | `string` | Resumes this character's earlier conversation; can be empty when resume is off. It does not allow duplicate Character IDs. |
 | `ParticipantIdentity` | `string` | Matches this instance to its transport participant and audio track. Treat as opaque. |
 | `IsInitial` | `bool` | `true` for the one membership Convai flagged as the room's initial character. |
 | `ProvisioningStatus` | `string` | The raw provisioning string Convai returned for this entry. |
@@ -38,7 +38,7 @@ last_reviewed: "4.6.0"
 | `FailureCode` | `string` | The failure reason Convai reported, set when `Status` is `Failed`. `null` otherwise. |
 | `ParticipantId` | `string` | The transport-assigned participant the SDK bound to this membership when its media appeared. Populated after the binding, not at connect. |
 
-`CharacterRoomMembership.WaitUntilReadyAsync(CancellationToken cancellationToken = default)` returns a `Task` that completes when this specific membership reaches `Ready`, or faults when it reaches `Failed`. Use it to wait on a secondary character; `MultiCharacterRoomSession.WaitUntilReadyAsync` only ever answers for `InitialCharacter`.
+`CharacterRoomMembership.WaitUntilReadyAsync(CancellationToken cancellationToken = default)` returns a `Task` that completes when this specific membership reaches `Ready`, or faults when it fails, leaves before readiness, or the session retires. Use it to wait on a secondary character; `MultiCharacterRoomSession.WaitUntilReadyAsync` only ever answers for `InitialCharacter`.
 
 {% hint style="info" %}
 `ProvisioningStatus == "dispatch_failed"` marks a membership `Failed` the moment it is created, before any separate lifecycle message arrives.
@@ -61,7 +61,7 @@ last_reviewed: "4.6.0"
 | `PartialDispatch` | `bool` | `true` when Convai did not dispatch every requested character at connect. Fixed for the life of the session. |
 | `Characters` | `IReadOnlyList<CharacterRoomMembership>` | Every membership currently in the roster. |
 | `InitialCharacter` | `CharacterRoomMembership` | The membership Convai flagged as initial, or the first membership in the roster when none carries that flag. Never `null` for a room with any members. |
-| `IsReady` | `bool` | `true` when `InitialCharacter.Status` is `Ready`. Unaffected by every other membership's status. |
+| `IsReady` | `bool` | `true` while the session is active and `InitialCharacter.Status` is `Ready`. Unaffected by every other membership's status. |
 
 ### Events
 
@@ -70,12 +70,12 @@ last_reviewed: "4.6.0"
 | `CharacterStatusChanged` | `Action<CharacterRoomMembership>` | A membership transitions into `Ready` or `Failed`, or a new membership is inserted into the roster. |
 | `CharacterAdded` | `Action<CharacterRoomMembership>` | A membership is added to the roster, from a roster command's acknowledgement or an unsolicited lifecycle message. |
 | `CharacterRemoved` | `Action<CharacterRoomMembership>` | A membership is removed from the roster. |
-| `InteractionTargetChanged` | `Action<CharacterRoomMembership, CharacterRoomMembership>` | The interaction target changes. The first argument is the previous membership (or `null`), the second is the current one (or `null`). |
+| `InteractionTargetChanged` | `Action<CharacterRoomMembership, CharacterRoomMembership>` | The target changes or a successful no-op acknowledgement confirms the current target (both arguments equal). The first argument is the previous membership (or `null`), the second is the current one (or `null`). |
 | `RosterEpochChanged` | `Action<int>` | A newer authoritative roster epoch is observed. Can advance without a matching `CharacterAdded`/`CharacterRemoved`, so do not infer a roster change from add/remove events alone if this is what you need. |
 | `Retired` | `Action` | This session is replaced or cleared — raised once. Treat it as a terminal signal and reattach handlers to the new `CurrentMultiCharacterSession`. |
 
 {% hint style="warning" %}
-Removing the active membership fires `InteractionTargetChanged` first, with the removed membership as the previous value and `null` as the current one, then fires `CharacterRemoved`. Code that reacts to removal can rely on the target already being cleared.
+An acknowledged replacement handover fires one `InteractionTargetChanged(removed, replacement)`, then `CharacterRemoved`. A null current value means no replacement was applied; do not expect two callbacks for a handover.
 {% endhint %}
 
 ### Methods
@@ -88,9 +88,11 @@ Removing the active membership fires `InteractionTargetChanged` first, with the 
 
 ***
 
+The session readiness wait also faults if the initial member is removed before readiness or the session retires. `IsReady` is false after retirement; previously completed waits are not retroactively faulted.
+
 ## `InteractionTargetResult`
 
-`InteractionTargetResult` is a public readonly struct returned by `SetInteractionTargetAsync` and `ClearInteractionTargetAsync`.
+`InteractionTargetResult` is a public readonly struct returned by `ConvaiManager.TalkToAsync` and `ConvaiManager.ClearConversationTargetAsync`.
 
 | Property | Type | Description |
 | --- | --- | --- |
@@ -98,7 +100,7 @@ Removing the active membership fires `InteractionTargetChanged` first, with the 
 | `ActiveMembershipId` | `string` | The canonical `ActiveMembershipId` on the session after this command was applied. |
 | `PreviousMembershipId` | `string` | The `MembershipId` that was active before this command. |
 | `RouteEpoch` | `int` | The `RouteEpoch` value that resulted from this command. |
-| `Changed` | `bool` | `true` when this command's result actually moved the canonical target. `false` when a stale acknowledgement was discarded because its route epoch did not exceed `RouteEpoch`. |
+| `Changed` | `bool` | `true` when this command's result actually moved the canonical target. `false` when the target did not move, including an already-current target or discarded stale acknowledgement. |
 
 ***
 
@@ -126,7 +128,7 @@ Removing the active membership fires `InteractionTargetChanged` first, with the 
 | `Code` | `string` | The backend error code from the acknowledgement. Empty string when Convai reported none. |
 | `Message` | `string` (inherited) | The backend error message from the acknowledgement, or `Character roster update failed.` when Convai reported no message. |
 
-SDK tests confirm exactly two `Code` values: `roster_epoch_mismatch` and `unauthorized_sender`. Other codes may exist on the backend; do not assume the set is limited to these two.
+Known codes include `roster_epoch_mismatch` (state changed), `unauthorized_sender` (permission refused), `replacement_target_required` and `replacement_target_unavailable` (replacement refused by the service), and SDK-generated `removed_before_seated` (an added member left before seating completed). This list is not an exhaustive backend schema.
 
 This exception is distinct from the `ConvaiOperationException` a connect attempt raises for client-side roster validation — see [Connection API reference](connection-api-reference.md#exceptions-and-timeouts) for that path.
 

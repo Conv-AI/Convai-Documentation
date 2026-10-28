@@ -1,174 +1,107 @@
 ---
 title: Connection API reference
-description: Reference for the multi-character connection operations, their join and connect option types, and every exception each operation can throw.
-last_reviewed: "4.6.0"
+description: Look up room joining, roster edits, current targeting APIs, identity options, validation failures, and recovery after lost acknowledgements.
+last_reviewed: "5.0.0-preview"
 ---
 
-This page lists the multi-character members of `IConvaiRoomConnectionService`, the `MultiCharacterJoinOptions` type, the multi-character fields on `RoomSessionConnectOptions`, and the exceptions and timeouts each operation produces. All types are in the `Convai.Runtime.Room` namespace.
+Use `IConvaiRoomConnectionService` for joining and roster edits, and `ConvaiManager` for conversation targeting. Room types live in `Convai.Runtime.Room`; manager components live in `Convai.Runtime.Components`.
 
-***
+## Connection and roster members
 
-## `IConvaiRoomConnectionService` — multi-character members
+Retrieve the service with `ConvaiManager.TryGetRoomConnectionService(out IConvaiRoomConnectionService roomService)`. The signatures below omit namespaces for readability.
 
-Defined in `SDK/Runtime/Room/IConvaiRoomConnectionService.cs:68-147`. Access the service through `ConvaiManager.ActiveManager.TryGetRoomConnectionService(out IConvaiRoomConnectionService roomService)`.
-
-| Member | Signature | Returns |
-| --- | --- | --- |
-| `CurrentMultiCharacterSession` | `MultiCharacterRoomSession CurrentMultiCharacterSession { get; }` | The canonical roster for the current room, or `null` for a single-character room. |
-| `JoinMultiCharacterRoomAsync` | `JoinMultiCharacterRoomAsync(MultiCharacterJoinOptions options, CancellationToken cancellationToken = default)` | `IConvaiOperation<RoomSession>` |
-| `SetInteractionTargetAsync` | `SetInteractionTargetAsync(IConvaiCharacterAgent character, CancellationToken cancellationToken = default)` | `IConvaiOperation<InteractionTargetResult>` |
-| `SetInteractionTargetAsync` | `SetInteractionTargetAsync(string membershipId, CancellationToken cancellationToken = default)` | `IConvaiOperation<InteractionTargetResult>` |
-| `ClearInteractionTargetAsync` | `ClearInteractionTargetAsync(CancellationToken cancellationToken = default)` | `IConvaiOperation<InteractionTargetResult>` |
-| `AddCharacterAsync` | `AddCharacterAsync(IConvaiCharacterAgent character, string characterSessionId = null, CancellationToken cancellationToken = default)` | `IConvaiOperation<CharacterRosterUpdateResult>` |
-| `RemoveCharacterAsync` | `RemoveCharacterAsync(string membershipId, string replacementTargetMembershipId = null, CancellationToken cancellationToken = default)` | `IConvaiOperation<CharacterRosterUpdateResult>` |
-| `RemoveCharacterAsync` | `RemoveCharacterAsync(IConvaiCharacterAgent character, string replacementTargetMembershipId = null, CancellationToken cancellationToken = default)` | `IConvaiOperation<CharacterRosterUpdateResult>` |
-
-See [Operation & Stream Types](../../scripting-reference/operation-and-stream-types.md) for how to consume `IConvaiOperation<T>`. Result and exception types are documented on [Room session reference](room-session-reference.md).
-
-***
-
-## Concurrency gates
-
-`ConvaiRoomManager` serializes each command family through its own `SemaphoreSlim(1, 1)`, defined in `SDK/Runtime/Adapters/Networking/ConvaiRoomManager.Connection.cs:29-30`. At most one roster mutation and one interaction-target change are in flight at a time.
-
-| Gate | Guards |
+| Member | Signature or result |
 | --- | --- |
-| `_rosterMutationGate` | `AddCharacterAsync`, both `RemoveCharacterAsync` overloads |
-| `_interactionTargetMutationGate` | Both `SetInteractionTargetAsync` overloads, `ClearInteractionTargetAsync` |
+| `CurrentMultiCharacterSession` | `MultiCharacterRoomSession`; null for a single-character room |
+| `JoinMultiCharacterRoomAsync` | `(MultiCharacterJoinOptions options, CancellationToken cancellationToken = default)` → `IConvaiOperation<RoomSession>` |
+| `AddCharacterAsync` | `(IConvaiCharacterAgent character, string characterSessionId = null, CancellationToken cancellationToken = default)` → `IConvaiOperation<CharacterRosterUpdateResult>` |
+| `RemoveCharacterAsync` | `(string membershipId, string replacementTargetMembershipId = null, CancellationToken cancellationToken = default)` → `IConvaiOperation<CharacterRosterUpdateResult>` |
+| `RemoveCharacterAsync` | `(IConvaiCharacterAgent character, string replacementTargetMembershipId = null, CancellationToken cancellationToken = default)` → the same result |
 
-A second call to an operation in the same family waits for the first to finish rather than running concurrently.
+See [Operation & Stream Types](../../scripting-reference/operation-and-stream-types.md) for consuming operations and [Room session reference](room-session-reference.md) for results.
 
-***
+## Conversation targeting in 5.0
+
+Use `ConvaiManager.TalkToAsync(ConvaiCharacter)` and `ConvaiManager.ClearConversationTargetAsync()`, both returning `IConvaiOperation<InteractionTargetResult>`. Their operations are not cancellable; calling `Cancel` does not retract a target command. Use **Chosen By > Manual** for persistent scripted targeting, otherwise Look At or Proximity may choose another target.
+
+The former room-service `SetInteractionTargetAsync` overloads and `ClearInteractionTargetAsync` are removed. There is no equivalent public membership-ID-only target setter; the manager API requires a local `ConvaiCharacter`. Clearing a target does not by itself interrupt already-playing audio.
+
+## Validation and failures
+
+Await operations and handle failures on their returned tasks. Joining with null options produces `ArgumentNullException`; rejected or unreachable connection attempts produce `ConvaiOperationException`. Joining creates no new roster and does not wait for the initial character's readiness.
+
+### AddCharacterAsync
+
+Checks include the following, in source order:
+
+| Condition | Failure |
+| --- | --- |
+| Null character | `ArgumentNullException` |
+| Empty Character ID | `ArgumentException` |
+| Specific/pinned character version | `ConvaiOperationException` with `ConnectionBadRequest`; use Live |
+| No multi-character session | `InvalidOperationException` |
+| Same local instance already present | `ArgumentException`; do not add it again |
+| Roster would exceed 50 characters | `InvalidOperationException`; account limits may be lower |
+| Another member uses the same Character ID | `ArgumentException`; each needs a distinct ID |
+| Room or local membership changed while waiting | `InvalidOperationException` |
+| Data channel unavailable | `InvalidOperationException` |
+| Service refusal | `CharacterRosterUpdateException` with the reported code |
+| Member removed before the add could seat it | `CharacterRosterUpdateException`, `removed_before_seated` |
+
+The version check happens before the no-session check. Adding another component with the same Character ID is not supported.
+
+### RemoveCharacterAsync
+
+The character overload rejects a null character. Both overloads reject a nonmember, a replacement that is not in the room, or a replacement equal to the removed member. A changed room, removed membership, or unavailable channel can produce `InvalidOperationException` while the command waits.
+
+With no explicit replacement, 5.0 chooses at send time: keep the current target if it remains, otherwise select another Ready, enabled local member. Pass a Ready replacement when the destination matters. A service can refuse a routed-member removal with `replacement_target_required` or `replacement_target_unavailable`; handle those codes rather than assuming a target will clear or removal will succeed.
+
+The automatic live-roster path declines a change that would empty the room before sending. Explicit removal has no equivalent client-side last-member guard; service acceptance is a separate contract.
+
+### Connect-time roster validation
+
+A creating client checks the full roster before sending it. It rejects more than 50 characters, null/repeated component references, duplicate Character IDs, missing IDs, Specific/pinned versions, and duplicate character-session IDs. These failures surface as `ConvaiOperationException` with `ConnectionFailed` while retaining the diagnostic message.
+
+For pinned versions the message is:
+
+```text
+Pinned character versions require a single-character connection. Use Live for multi-character rosters, which accept only bare Character IDs.
+```
+
+The 50-character maximum is a client ceiling, not an account entitlement. A join sends no roster, so it does not run these roster-building checks.
 
 ## Exceptions and timeouts
 
-Every operation faults its `IConvaiOperation<T>` rather than throwing synchronously. Handle the exception on the awaited task.
+Roster mutations are serialized. The caller-facing roster wait can time out after 15 seconds while the SDK continues waiting for the authoritative response and keeps the mutation gate held. Cancelling the caller's wait also cannot retract a command already sent.
 
-### Preconditions common to every operation
+A separate canonical deadline is 30 seconds from command registration, not 30 additional seconds after the caller timeout. At that deadline, lifecycle join/leave evidence can settle a roster operation only when it proves the result without leaving route ambiguity. A lost target acknowledgement triggers one state probe after 3 seconds.
 
-| Condition | Exception | Message |
+If the outcome remains ambiguous, the SDK retires the room and disconnects before reopening input. It does not reconnect automatically from this fail-closed recovery. Inspect the final session state, resolve the cause, and call `ConnectAsync` again to establish a new session. Do not treat a caller timeout as permission to issue duplicate mutations immediately.
+
+## MultiCharacterJoinOptions
+
+Defined in `SDK/Runtime/Room/TurnTakingOptions.cs`.
+
+| Field | Default | Meaning |
 | --- | --- | --- |
-| No multi-character room is active | `InvalidOperationException` | `No multi-character room session is active.` |
-| The multi-character room changed while a command was waiting on its gate | `InvalidOperationException` | `The multi-character room changed while this update was waiting.` |
-| The room data channel is not ready | `InvalidOperationException` | `The room data channel is not ready.` |
+| `RoomSessionId` | null | Durable room locator; use this or SharedSessionKey |
+| `SharedSessionKey` | null | Developer-controlled alternative locator |
+| `EndUserId` | null | Stable joining-user identity |
+| `EndUserName` | null | Typed name; overrides metadata `name` and player-name fallback |
+| `EndUserMetadata` | null | Additional JSON-compatible metadata |
+| `TurnTaking` | Hands-free defaults | Joining participant's input policy |
 
-### `JoinMultiCharacterRoomAsync`
+Joining converts these options to `RoomSessionConnectOptions` with `JoinExistingMultiCharacterRoom = true` and no roster.
 
-| Condition | Exception | Message |
-| --- | --- | --- |
-| `options` is `null` | `ArgumentNullException` | — (`options`) |
-| Convai rejects the join or the underlying connect attempt otherwise fails | `ConvaiOperationException` | The backend session error code and message. |
+## RoomSessionConnectOptions
 
-`JoinMultiCharacterRoomAsync` converts `options` to a `RoomSessionConnectOptions` with `JoinExistingMultiCharacterRoom` set to `true`, then calls the same connect path as `ConnectAsync` (`ConvaiRoomManager.Connection.cs:58-66`). It does not send a roster, so the roster-validation exceptions in [Connect-time roster validation](#connect-time-roster-validation) do not apply to it — but it inherits `ConnectAsync`'s other failure modes, including a `ConvaiOperationException` for a rejected or unreachable connection. See [Join an existing room](join-an-existing-session.md#troubleshooting) for the join-specific causes and their fixes.
-
-### `SetInteractionTargetAsync`
-
-`SetInteractionTargetAsync` has two overloads: one takes an `IConvaiCharacterAgent`, the other takes a `membershipId` string. Both share the same timeout and acknowledgement-failure behavior; only the not-a-member check differs by parameter.
-
-| Condition | Exception | Message |
-| --- | --- | --- |
-| The character overload's `character` is not a member of the current room | `ArgumentException` | `The character is not a member of the current room.` (`character`) |
-| The membership-ID overload's `membershipId` is not part of the current room | `ArgumentException` | `The membership is not part of the current room.` (`membershipId`) |
-| The target membership was removed while the command waited on the gate | `InvalidOperationException` | `The interaction target was removed while this update was waiting.` |
-| No acknowledgement within 10 seconds | `TimeoutException` | `Timed out waiting for the interaction-target acknowledgement.` |
-| Convai's acknowledgement reports a non-success status | `InvalidOperationException` | The backend message, or `Interaction target update failed.` when Convai reported none. |
-
-### `ClearInteractionTargetAsync`
-
-`ClearInteractionTargetAsync` sends an empty target, so the "removed while waiting" check does not apply. It shares the same timeout and acknowledgement-failure behavior as the two `SetInteractionTargetAsync` overloads above.
-
-{% hint style="info" %}
-Clearing the interaction target does not interrupt audio a character is already playing. It only stops new player input from being routed to that character.
-{% endhint %}
-
-### `AddCharacterAsync`
-
-| Condition | Exception | Message |
-| --- | --- | --- |
-| `character` is `null` | `ArgumentNullException` | — (`character`) |
-| `character.CharacterId` is empty | `ArgumentException` | `The character must have a character ID.` (`character`) |
-| The local character instance is already a member of the room | `ArgumentException` | `This local character instance is already a member of the current room. Use another instance when adding a clone.` (`character`) |
-| The same local character was added while this command waited on the gate | `InvalidOperationException` | `The local character was added while this roster update was waiting.` |
-| No acknowledgement within 15 seconds | `TimeoutException` | `Timed out waiting for the character-roster-update acknowledgement.` |
-| Convai's acknowledgement reports a non-success status | `CharacterRosterUpdateException` | The backend message, or `Character roster update failed.` when Convai reported none. See [Room session reference](room-session-reference.md#characterrosterupdateexception). |
-
-### `RemoveCharacterAsync`
-
-`RemoveCharacterAsync` has two overloads: one takes a `membershipId` string, the other takes an `IConvaiCharacterAgent`. Both share the replacement-target and gate-race checks; only the not-a-member check differs by parameter.
-
-| Condition | Exception | Message |
-| --- | --- | --- |
-| The character overload's `character` is `null` | `ArgumentNullException` | — (`character`) |
-| The membership-ID overload's `membershipId` is not part of the current room | `ArgumentException` | `The membership is not part of the current room.` (`membershipId`) |
-| The character overload's `character` is not a member of the current room | `ArgumentException` | `The character is not a member of the current room.` (`character`) |
-| `replacementTargetMembershipId` is not part of the current room | `ArgumentException` | `The replacement target is not part of the current room.` (`replacementTargetMembershipId`) |
-| `replacementTargetMembershipId` equals the membership being removed | `ArgumentException` | `The replacement target cannot be the membership being removed.` (`replacementTargetMembershipId`) |
-| The membership being removed was removed while this command waited on the gate | `InvalidOperationException` | `The character membership was removed while this roster update was waiting.` |
-| The replacement target was removed while this command waited on the gate | `InvalidOperationException` | `The replacement target was removed while this roster update was waiting.` |
-| No acknowledgement within 15 seconds | `TimeoutException` | `Timed out waiting for the character-roster-update acknowledgement.` |
-| Convai's acknowledgement reports a non-success status | `CharacterRosterUpdateException` | The backend message, or `Character roster update failed.` when Convai reported none. |
-
-{% hint style="warning" %}
-A replacement target must already be a member of the room and must not be the membership being removed. The roster can never become empty: removing the active membership without a valid replacement leaves the target cleared rather than deleting the last membership.
-{% endhint %}
-
-***
-
-## Connect-time roster validation
-
-A scene that registers two or more characters builds its roster during `ConnectAsync`, before any of the operations above run. The SDK validates that roster in `RoomConnectionRuntimeAdapter.ApplyMultiCharacterTopology` and throws a `ConvaiOperationException` for each condition below, checked in this order. An outer handler in the same adapter catches every exception raised during connect and re-wraps it into a `ConnectionFailure` carrying `SessionErrorCodes.ConnectionFailed`. The caller sees a `ConvaiOperationException` with the **original message** below, but its `Code` is `ConnectionFailed` — the original codes (`ConnectionBadRequest`, `ConfigCharacterIdMissing`) are not observable at the call site.
-
-| Condition | Message (Code at the call site is always `ConnectionFailed`) |
-| --- | --- |
-| More than 50 characters registered | `A Convai room supports at most 50 characters, and this one asks for <count>. The Convai plan for this API key may allow fewer still; use Convai Manager > Characters Joining the Room to send only the characters this conversation needs.` |
-| A null or repeated character reference | `Multi-character roster contains null or duplicate character references.` |
-| Two characters resolve to the same Character ID | ``'<name>' and '<name>' both use Character ID <id>. Two characters in one room cannot share an ID — the SDK routes ownership, participants and audio by it, so they would collide rather than each being answered separately. Give each character its own Character ID from the Convai dashboard.`` See [Character identity](character-identity.md). |
-| A character with no Character ID | `Every character in a multi-character room requires a Character ID.` |
-| Two characters resolving to the same character-session ID | `Character session IDs must be unique within a multi-character roster.` |
-
-This validation runs only when building a roster at connect. `JoinMultiCharacterRoomAsync` sends no roster, so it never raises these exceptions.
-
-***
-
-## `MultiCharacterJoinOptions`
-
-`MultiCharacterJoinOptions` is a serializable class passed to `JoinMultiCharacterRoomAsync`. Defined in `SDK/Runtime/Room/TurnTakingOptions.cs:411-439`.
-
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `RoomSessionId` | `string` | `null` | The durable room identifier returned by the creating client's connect call. Use this or `SharedSessionKey`, not both. |
-| `SharedSessionKey` | `string` | `null` | An alternative developer-controlled locator for the room. Use this or `RoomSessionId`, not both. |
-| `EndUserId` | `string` | `null` | A stable developer identifier for the joining player. |
-| `EndUserMetadata` | `IReadOnlyDictionary<string, object>` | `null` | Additional metadata for the end user. |
-| `TurnTaking` | `TurnTakingOptions` | `TurnTakingOptions.CreateHandsFreeDefault()` | The turn-taking configuration for the joining participant. See [Turn-taking modes](../../core-concepts/turn-taking-modes.md). |
-
-Joining converts these fields into a `RoomSessionConnectOptions` with `JoinExistingMultiCharacterRoom` set to `true` and sends connect mode `join` with no character roster.
-
-***
-
-## `RoomSessionConnectOptions` — multi-character fields
-
-`RoomSessionConnectOptions` is the options type accepted by `ConnectAsync(RoomSessionConnectOptions, CancellationToken)`. Defined in `SDK/Runtime/Room/TurnTakingOptions.cs:329-358`. The table below covers the fields relevant to multi-character sessions only; see [ConvaiManager API](../../scripting-reference/convaimanager-api.md#roomsessionconnectoptions-fields) for the complete field list.
-
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `SharedSessionKey` | `string` | `null` | Optional shared session key used to group multiplayer participants into the same room. |
-| `RoomSessionId` | `string` | `null` | Durable multi-character room identifier used when joining an existing room. Set through `MultiCharacterJoinOptions` for normal use rather than directly. |
-| `JoinExistingMultiCharacterRoom` | `bool` | `false` | Selects a topology-free human join rather than building and sending a roster. |
-| `MaxNumParticipants` | `int` | `0` | Optional maximum number of participants for the shared session. |
-
-***
+The same file defines the connect options. Relevant fields are `SharedSessionKey`, `RoomSessionId`, `JoinExistingMultiCharacterRoom` (false by default), `MaxNumParticipants` (0 by default), `EndUserId`, `EndUserName`, and `EndUserMetadata`. Use `MultiCharacterJoinOptions` for ordinary joins. Identity is copied and validated for the connect attempt; see [End-user identity](../long-term-memory/end-user-identity.md).
 
 ## Related reference
 
 {% content-ref url="room-session-reference.md" %}
 [Room session reference](room-session-reference.md)
 {% endcontent-ref %}
-
-{% content-ref url="how-multi-character-sessions-work.md" %}
-[How multi-character sessions work](how-multi-character-sessions-work.md)
-{% endcontent-ref %}
-
-{% content-ref url="quick-start.md" %}
-[Build your first multi-character session](quick-start.md)
+{% content-ref url="update-the-roster.md" %}
+[Characters joining and leaving](update-the-roster.md)
 {% endcontent-ref %}
