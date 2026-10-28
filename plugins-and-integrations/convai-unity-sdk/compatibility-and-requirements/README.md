@@ -1,7 +1,7 @@
 ---
 title: Compatibility and requirements
 description: Find the Unity version, render pipeline, platform, and network requirements you need before installing the Convai Unity SDK.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Confirm your environment meets these requirements before installing the Convai Unity SDK. The SDK requires Unity <code class="expression">space.vars.unity_min_version</code>, and there is no supported configuration on an earlier Unity release. The pages below cover Unity version support, render pipeline compatibility, platform-specific constraints, and network requirements.

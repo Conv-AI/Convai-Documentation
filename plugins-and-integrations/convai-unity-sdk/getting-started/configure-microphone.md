@@ -3,10 +3,10 @@ title: Configure microphone
 description: >-
   Select an active microphone device at runtime, set a project-wide default, and
   configure platform permissions for Android, iOS, and WebGL builds.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-The Convai SDK for Unity opens the system microphone automatically when a session starts. Enumerate and select a specific device at runtime, set a project-wide default device, and satisfy the platform-specific requirements for Android, iOS, and WebGL.
+The Convai SDK for Unity opens the microphone according to the room's input policy, when microphone capture is allowed. Select a device and configure platform permissions before testing voice. For a session that never requests microphone permission, turn off **Allow Microphone** before connecting.
 
 ## Microphone device selection
 
@@ -20,21 +20,22 @@ using Convai.Shared.Abstractions;
 using Convai.Shared.Types;
 using UnityEngine;
 
-private async Task SwitchToDeviceAsync(int deviceIndex)
+public class MicrophoneDevicePicker : MonoBehaviour
 {
-    // Get the microphone device service from the SDK
-    if (ConvaiManager.ActiveManager.TryGetMicrophoneDeviceService(out IMicrophoneDeviceService micService))
+    public async Task SwitchToDeviceAsync(int deviceIndex)
     {
-        // List all available devices
-        IReadOnlyList<ConvaiMicrophoneDevice> devices = micService.GetAvailableDevices();
-
-        foreach (ConvaiMicrophoneDevice device in devices)
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.TryGetMicrophoneDeviceService(out IMicrophoneDeviceService service))
         {
-            Debug.Log($"{device.Name} (ID: {device.Id}, Index: {device.Index})");
+            Debug.LogWarning("Start the Convai runtime before selecting a microphone.");
+            return;
         }
 
-        // Start listening with a specific device index
-        await ConvaiManager.ActiveManager.Audio.StartListeningAsync(microphoneIndex: deviceIndex);
+        IReadOnlyList<ConvaiMicrophoneDevice> devices = service.GetAvailableDevices();
+        foreach (ConvaiMicrophoneDevice device in devices)
+            Debug.Log($"{device.Name} (Index: {device.Index})");
+
+        await manager.Audio.StartListeningAsync(microphoneIndex: deviceIndex);
     }
 }
 ```
@@ -49,7 +50,7 @@ On WebGL, `GetAvailableDevices()` returns an empty list outside the Editor. Micr
 {% step %}
 ### Open the Runtime Defaults section
 
-Open **Edit > Project Settings > Convai SDK**, or select **Convai > Settings** in the Unity Editor menu bar. Select the **Runtime Defaults** section.
+Open **Edit > Project Settings > Convai SDK**, or select **Convai > Settings** in the Unity Editor menu bar. Scroll to the **Runtime Defaults** card.
 {% endstep %}
 
 {% step %}
@@ -69,17 +70,17 @@ Select **Refresh** to re-enumerate connected microphones if you plugged in or re
 
 ### Android
 
-The SDK requests microphone permission at runtime automatically when a recording starts. You must declare the permission in your `AndroidManifest.xml`:
+The SDK requests permission when capture starts. Unity includes the microphone permission when it builds a project using the microphone APIs. If you supply a custom manifest, check that the merged manifest still contains:
 
 ```xml
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
 ```
 
-If your project does not have a custom manifest, create one or enable **Override Default Manifest** in **Player Settings > Publishing Settings**.
+You do not need to create a custom manifest solely for this permission.
 
 When the SDK requests the permission, Android shows its standard permission dialog. If the player grants it, recording starts automatically. If denied, the SDK logs a warning and the microphone remains inactive.
 
-### iOS
+### macOS and iOS
 
 Add a microphone usage description to your `Info.plist`. In Unity, set this via **Player Settings > iOS > Other Settings > Microphone Usage Description**:
 
@@ -87,35 +88,45 @@ Add a microphone usage description to your `Info.plist`. In Unity, set this via 
 "This app uses the microphone to support voice conversations with AI characters."
 ```
 
-The SDK requests authorization automatically using Unity's `Application.RequestUserAuthorization`. The app does not need to call any permission API directly.
+Open **Convai > Settings > Setup Health** and use **Setup** beside **macOS / iOS Microphone Usage Description**. For iOS, also enable **Prepare iOS for Recording**. The SDK requests microphone authorization on macOS and iOS when capture needs it.
+
+<figure><img src="../../../.gitbook/assets/unity-setup-health.png" alt="Setup Health card showing Apple microphone usage, iOS recording, and Android permission checks"><figcaption><p>Project health checks for microphone permissions and recording configuration.</p></figcaption></figure>
 
 {% hint style="danger" %}
-Submitting to the App Store without a microphone usage description will cause App Store review rejection. Set this value before building for iOS distribution.
+Set a microphone usage description before building an app that records on macOS or iOS. If permission was denied, enable it in the operating system privacy settings before testing again.
 {% endhint %}
 
 ### WebGL
 
-Browsers block audio playback and microphone access until the user has interacted with the page. The SDK provides two methods depending on your use case:
+A browser may require a gesture for blocked audio playback. Microphone capture separately requires HTTPS (or localhost) and permission. On each eligible scene click or tap after connection, the manager rechecks playback and calls `EnableAudioAndStartListening()` if needed; pointer events over UI are excluded. For a dedicated start button or when the automatic option is disabled, use one of these methods:
 
 * **`Audio.EnableAudioPlayback()`** — unlocks browser audio output only. Use this when you want character voice to play but are not yet starting the microphone (for example, during a tutorial before the player speaks).
 * **`ConvaiManager.EnableAudioAndStartListening()`** — unlocks browser audio output **and** opens the microphone. Use this when the player is ready to begin a full conversation.
 
 ```csharp
-// Call from a UI button's onClick event
-public void OnStartButtonClicked()
-{
-    // Option A: unlock audio only (no microphone yet)
-    if (ConvaiManager.ActiveManager.Audio.RequiresUserGesture)
-    {
-        ConvaiManager.ActiveManager.Audio.EnableAudioPlayback();
-    }
+using Convai.Runtime.Components;
+using UnityEngine;
 
-    // Option B: unlock audio and open microphone in one step
-    // ConvaiManager.ActiveManager.EnableAudioAndStartListening();
+public class BrowserVoiceStartButton : MonoBehaviour
+{
+    // Assign this method to a UI Button's On Click event.
+    public void StartVoice()
+    {
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager != null) manager.EnableAudioAndStartListening();
+    }
 }
 ```
 
-If you skip this step on WebGL, the character's voice will not play even though Convai sends audio data. `RequiresUserGesture` returns `true` only on WebGL.
+If browser playback remains blocked, click the scene or your start button and check `Audio.RequiresUserGesture`. When microphone capture is disabled, `EnableAudioAndStartListening()` enables playback without opening the microphone.
+
+## Microphone processing and level
+
+Under **Convai Room Manager > Listening > Microphone**, configure **Echo Cancellation**, **Noise Suppression**, and **Automatic Gain Control**. Native defaults are off, on, and off respectively. Processing changes apply on the next connection. WebGL uses browser processing.
+
+Read `ConvaiRoomManager.MicrophoneLevel` for a continuous audio level, and check `IsMicrophoneLevelAvailable` before interpreting zero as silence. A level meter is separate from the speech-detection decision.
+
+Turn off **Allow Microphone** before connecting for text input with voice replies. Use `SetMicrophoneAllowed(false)` to stop capture during an active session, or `SetMicrophoneAllowed(true)` to permit it again. See [Run a text-only session](run-a-text-only-session.md).
 
 ## Next steps
 
@@ -124,3 +135,5 @@ With audio configured, add a transcript UI to display conversation text.
 {% content-ref url="add-chat-ui.md" %}
 [Add chat UI](add-chat-ui.md)
 {% endcontent-ref %}
+
+<figure><img src="../../../.gitbook/assets/unity-room-listening.png" alt="Room Listening card with microphone policy and processing controls above Interruptions"><figcaption><p>This existing sample enables echo cancellation. Newly configured policies default to echo cancellation off; choose processing for your application.</p></figcaption></figure>

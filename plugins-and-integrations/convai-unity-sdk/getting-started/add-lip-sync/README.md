@@ -3,7 +3,7 @@ title: Add lip sync
 description: >-
   Connect Convai audio output to your character's facial blendshapes,
   synchronize mouth movement with speech, and tune playback latency.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 The Convai SDK for Unity includes a real-time lip sync system that drives `SkinnedMeshRenderer` blendshapes in sync with the character's voice audio. It supports three industry-standard blendshape formats and handles playback buffering, smoothing, and fade-out automatically.
@@ -28,23 +28,23 @@ If the same character also has another module that drives facial blendshapes —
 {% step %}
 ### Add the component
 
-Add `ConvaiLipSyncComponent` to the same GameObject as your `ConvaiCharacter` (or to any child GameObject).
+Select the character or its child mesh object and choose **Add Component > Convai > Lip Sync > Convai Lip Sync**.
 {% endstep %}
 
 {% step %}
-### Set the profile ID
+### Select the profile
 
-In the Inspector, set **Locked Profile ID** to the transport format your character uses:
+In the Inspector, choose the matching **Profile**:
 
-* `arkit` — Apple ARKit (61 blendshapes)
-* `metahuman` — Unreal MetaHuman (251 blendshapes)
-* `cc4_extended` — Character Creator 4 Extended (170 blendshapes)
+* **ARKit** (`arkit`) — Apple ARKit (61 blendshapes)
+* **MetaHuman** (`metahuman`, transport token `mha`) — Unreal MetaHuman (251 blendshapes)
+* **CC4 Extended** (`cc4_extended`) — Character Creator 4 Extended (170 blendshapes)
 {% endstep %}
 
 {% step %}
 ### Assign target meshes
 
-In the **Target Meshes** list, add all `SkinnedMeshRenderer` components that have facial blendshapes.
+Use **Auto-Find** to locate the child meshes, then check that the **Renderers** list contains the `SkinnedMeshRenderer` components with facial blendshapes. Use **Validator** to inspect the effective map before entering Play Mode.
 {% endstep %}
 
 {% step %}
@@ -64,7 +64,7 @@ If the mouth does not move, confirm that your `SkinnedMeshRenderer` blendshape n
 
 Choose the profile that matches the blendshape format your character was rigged with.
 
-| Profile      | Locked Profile ID | Blendshapes | Typical character source                  |
+| Profile      | Profile ID | Blendshapes | Typical character source                  |
 | ------------ | ----------------- | ----------- | ----------------------------------------- |
 | ARKit        | `arkit`           | 61          | Apple-rigged characters, some custom rigs |
 | MetaHuman    | `metahuman`       | 251         | Unreal MetaHuman exported to Unity        |
@@ -82,28 +82,28 @@ If your character was rigged with non-standard blendshape names, create a custom
 
 | Field              | Default        | Description                                                            |
 | ------------------ | -------------- | ---------------------------------------------------------------------- |
-| `_lockedProfileId` | `arkit`        | Transport format the SDK streams (`arkit`, `metahuman`, `cc4_extended`) |
-| `_mapping`         | _(none)_       | Optional custom mapping asset (leave empty to use bundled auto-map)    |
-| `_targetMeshes`    | _(empty list)_ | `SkinnedMeshRenderer` components to write blendshapes to               |
+| **Profile** (`_lockedProfileId`) | `arkit`        | Transport format the SDK streams (`arkit`, `metahuman`, `cc4_extended`) |
+| **Mapping** (`_mapping`)         | _(none)_       | Optional custom mapping asset (leave empty to use bundled auto-map)    |
+| **Renderers** (`_targetMeshes`)    | _(empty list)_ | `SkinnedMeshRenderer` components to write blendshapes to               |
 
 **Playback & behavior:**
 
 | Field              | Default | Range    | Description                                                    |
 | ------------------ | ------- | -------- | -------------------------------------------------------------- |
-| `_smoothingFactor` | `0.5`   | 0–0.9    | Exponential smoothing per frame (higher = smoother but slower) |
-| `_fadeOutDuration` | `0.2`   | 0.05–2.0 | Seconds to fade all blendshapes to 0 when a response is interrupted or canceled |
-| `_settleDuration`  | `0.35`  | 0.1–1.0  | Seconds the mouth takes to come to rest after the character's last word, continuing the motion the animation left off with rather than cutting it. See [How a response ends](#how-a-response-ends). |
-| `_fadeInDuration`  | `0.1`   | 0–0.5    | Seconds to blend from the pre-playback pose into the first sampled frames at the start of playback, removing the first-frame pop when a response begins (`0` disables it) |
-| `_timeOffset`      | `0.0`   | -0.5–0.5 | Shift playback timing relative to audio (negative = earlier)   |
+| **Lip Smoothing** (`_smoothingFactor`) | `0.5`   | 0–0.9    | Exponential smoothing per frame (higher = smoother but slower) |
+| **Fade Transition** (`_fadeOutDuration`) | `0.2`   | 0.05–2.0 | Seconds to fade all blendshapes to 0 when a response is interrupted or canceled |
+| `_settleDuration` (serialized only)  | `0.35`  | 0.1–1.0  | Seconds the mouth takes to come to rest after the character's last word, continuing the motion the animation left off with rather than cutting it. See [How a response ends](#how-a-response-ends). |
+| `_fadeInDuration` (serialized only)  | `0.1`   | 0–0.5    | Seconds to blend from the pre-playback pose into the first sampled frames at the start of playback, removing the first-frame pop when a response begins (`0` disables it) |
+| **A/V Sync Offset** (`_timeOffset`)      | `0.0`   | -0.5–0.5 | Shift playback timing relative to audio (negative = earlier)   |
 
 **Streaming & latency:**
 
 | Field                       | Default    | Range    | Description                                          |
 | --------------------------- | ---------- | -------- | ---------------------------------------------------- |
-| `_latencyMode`              | `Balanced` | —        | Preset that controls buffer depth vs. responsiveness |
-| `_maxBufferedSeconds`       | `3.0`      | 1–10     | Ring buffer capacity in seconds                      |
-| `_minResumeHeadroomSeconds` | `0.12`     | 0.05–0.3 | Buffer refill threshold after starvation             |
-| `_deliverChunksAhead`       | `false`    | —        | Preview opt-in for indexed NeuroSync chunks          |
+| **Latency Mode** (`_latencyMode`)              | `Balanced` | —        | Preset that controls buffer depth vs. responsiveness |
+| **Max Buffered (s)** (`_maxBufferedSeconds`)       | `3.0`      | 1–10     | Ring buffer capacity in seconds                      |
+| **Resume Headroom (s)** (`_minResumeHeadroomSeconds`) | `0.12`     | 0.05–0.3 | Buffer refill threshold after starvation             |
+| **Deliver Ahead (Preview)** (`_deliverChunksAhead`)       | `false`    | —        | Preview opt-in for indexed NeuroSync chunks          |
 
 **Latency mode options:**
 
@@ -114,6 +114,8 @@ If your character was rigged with non-standard blendshape names, create a custom
 | `NetworkSafe`     | High buffering; best for unreliable or high-latency networks     |
 | `Custom`          | Unlocks manual control over buffer fields above                  |
 
+The custom Inspector exposes **Lip Smoothing**, **Fade Transition**, and **A/V Sync Offset**. `_settleDuration` and `_fadeInDuration` are serialized fields available in the Debug Inspector, not controls in the normal Inspector. **Max Buffered (s)** and **Resume Headroom (s)** appear only with **Latency Mode** set to **Custom**. In Play Mode, expand **Live** to inspect the receive buffer and playback state.
+
 ## How a response ends
 
 When a response finishes normally, the mouth settles to rest over **Settle Duration** (`0.35` s by default) rather than snapping shut or holding its last shape. The close continues the motion the last frames were already making — a jaw still rising eases back down with no visible kink, and one already closing keeps closing. This is separate from **Fade Out Duration**, which is the faster cut used when a response is interrupted or canceled instead of finishing on its own.
@@ -122,7 +124,7 @@ If you drive `LipSyncPlaybackEngine` directly instead of going through `ConvaiLi
 
 ## Ahead chunk delivery preview
 
-**Ahead Chunk Delivery (Preview)** enables the SDK to request indexed NeuroSync chunks before their playback position. Leave it disabled for normal projects. Enable it only when you are testing the preview ahead-chunk path for a character that already uses `ConvaiLipSyncComponent`.
+**Deliver Ahead (Preview)** enables the SDK to request indexed NeuroSync chunks before their playback position. Leave it disabled for normal projects. Enable it only when you are testing the preview ahead-chunk path for a character that already uses `ConvaiLipSyncComponent`.
 
 When `_deliverChunksAhead` is enabled, the SDK sends `deliver_chunks_ahead=true` in the room connection lip sync configuration. The default request does not include this field, so existing lip sync behavior stays unchanged unless you turn on the preview option.
 
@@ -137,8 +139,8 @@ The SDK buffers ahead chunks by their frame index and waits until frames are con
 **Setup:**
 
 1. Add `ConvaiLipSyncComponent` to the NPC GameObject (same as `ConvaiCharacter`).
-2. Set `_lockedProfileId` to `arkit`.
-3. In the **Target Meshes** list, add the `SkinnedMeshRenderer` from the avatar's head mesh.
+2. Set **Profile** to **ARKit**.
+3. In the **Renderers** list, add the `SkinnedMeshRenderer` from the avatar's head mesh.
 4. Leave `_mapping` empty — the bundled ARKit auto-map covers standard camelCase ARKit blendshape names (`jawOpen`, `mouthSmileLeft`, etc.).
 
 **Expected outcome:** The avatar's mouth, lips, and jaw animate in sync with the character's voice during conversation. The mouth settles to rest smoothly after each response ends (`_settleDuration` = 0.35s default).
@@ -150,12 +152,12 @@ The SDK buffers ahead chunks by their frame index and waits until frames are con
 **Setup:**
 
 1. Add `ConvaiLipSyncComponent` to the NPC GameObject.
-2. Set `_lockedProfileId` to `metahuman`.
-3. In the **Target Meshes** list, add all `SkinnedMeshRenderer` components on the MetaHuman head and teeth meshes — MetaHuman separates these into multiple renderers.
+2. Set **Profile** to **MetaHuman**.
+3. In the **Renderers** list, add all `SkinnedMeshRenderer` components on the MetaHuman head and teeth meshes — MetaHuman separates these into multiple renderers.
 4. Leave `_mapping` empty — the bundled MetaHuman map targets `CTRL_expressions_` prefixed blendshapes.
-5. Increase `_smoothingFactor` to `0.7` for more fluid animation on high-poly rigs.
+5. Increase **Lip Smoothing** to `0.7` for more fluid animation on high-poly rigs.
 
-**Expected outcome:** All facial regions animate together — lips, jaw, cheeks, and tongue shapes — producing highly realistic mouth movement. Smoothing reduces per-frame jitter visible on high-resolution meshes.
+**Expected outcome:** All facial regions animate together — lips, jaw, cheeks, and tongue shapes — following the mapped incoming facial channels. Smoothing reduces per-frame jitter visible on high-resolution meshes.
 
 ## Next steps
 

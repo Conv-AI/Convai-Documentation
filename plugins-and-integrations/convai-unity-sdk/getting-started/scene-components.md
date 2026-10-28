@@ -3,7 +3,7 @@ title: Scene components reference
 description: >-
   Understand the role of each core Convai scene component — manager, room
   manager, character, and player — and how they depend on each other.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Every Convai-powered scene is built from four core components. Understanding what each one does and how they relate to each other makes building and debugging your setup straightforward.
@@ -27,7 +27,7 @@ graph TD
 
 `ConvaiManager` is the SDK's entry point. It must be present in every scene that uses Convai. It initializes all internal services and injects dependencies into the other components automatically.
 
-**Add it:** Use **GameObject > Convai > Setup Required Components** to add `ConvaiManager` and its companion components in one step. Do not add it manually via Add Component — the wizard ensures the correct setup.
+**Add it:** Use **GameObject > Convai > Setup Required Components** to create a `[Convai Manager]` GameObject with `ConvaiManager` and `ConvaiRoomManager`. Add the player and character separately as described in [Build a custom scene](build-a-custom-scene.md).
 
 **Key behavior:**
 
@@ -40,12 +40,25 @@ graph TD
 
 | Property                      | Type                             | Description                            |
 | ----------------------------- | -------------------------------- | -------------------------------------- |
-| `IsBootstrapped`              | `bool`                           | SDK internal services are initialized  |
+| `ConvaiManager.IsBootstrapped` (static) | `bool`                           | SDK internal services are initialized  |
 | `IsInitialized`               | `bool`                           | Bootstrap complete and event hub ready |
 | `IsConnected`                 | `bool`                           | Room connection is active              |
 | `Characters`                  | `IReadOnlyList<ConvaiCharacter>` | All characters owned by this manager   |
 | `Player`                      | `ConvaiPlayer`                   | The player component in this scene     |
 | `ActiveConversationCharacter` | `ConvaiCharacter`                | Currently active conversation target   |
+
+**Inspector sections:**
+
+| Section | Controls and purpose |
+| --- | --- |
+| Scene Setup | Shows the Room Manager, Player, characters found and characters joining the room. Assign **Player** and **Initial Character** here. |
+| Scene Setup, multiple characters | **Characters Joining the Room**, **Include Everyone** and **Include Nobody** choose the roster for the next connection. |
+| Conversation Targeting | Appears when a room can hold several characters. **Chosen By** selects Look At, Proximity or Manual; **Player Camera** supplies the view. |
+| Live, Play Mode | Shows connection, current target, input availability and the service-confirmed memory identity. |
+
+<figure><img src="../../../.gitbook/assets/unity-manager-scene-setup.png" alt="Convai Manager Scene Setup showing the room manager, player, one character and the initial character"><figcaption><p>The single-character setup hides controls that only apply to larger rooms.</p></figcaption></figure>
+
+See [Conversation targeting](../features/conversation-targeting/README.md) and [Multi-character sessions](../features/multi-character-sessions/README.md) for selection and roster behavior.
 
 ## ConvaiRoomManager
 
@@ -55,38 +68,53 @@ graph TD
 
 * Auto-connects on `Start()` when `ConnectOnStart` is `true` (default: `true`).
 * Reconnects automatically on transient failures, up to `_maxReconnectAttempts` (default: `3`).
-* Manages the microphone — starts capturing audio `_autoMicStartDelaySeconds` (default: `0.5s`) after the connection is established.
+* Manages microphone startup according to **Allow Microphone**, input mode and **Prepare Microphone**. The configured startup delay defaults to `0.5s`; it does not override a disabled microphone or browser permission requirements.
 
 **Inspector fields:**
 
-| Field                       | Default     | Description                                                      |
-| --------------------------- | ----------- | ---------------------------------------------------------------- |
-| `ConnectOnStart`            | `true`      | Connect to Convai automatically when the scene starts            |
-| `_connectionType`           | `Audio`     | `Audio` for voice-only; `Video` to also send camera frames       |
-| `_pushToTalkKey`            | `KeyCode.T` | Keyboard key used for push-to-talk input mode                    |
-| `_maxReconnectAttempts`     | `3`         | Attempts before giving up on reconnection                        |
-| `_autoMicStartDelaySeconds` | `0.5`       | Seconds to wait after connection before opening the microphone   |
-| `_roomRejoinTtlSeconds`     | `60`        | Seconds after disconnect during which the session can be resumed |
+| Inspector label | Code field or property | Default | Purpose |
+| --- | --- | --- | --- |
+| Room Setup Source | `_configurationSource` | Inline | Read settings from this component or a reusable profile. |
+| Room Manager Profile Asset | `_roomConfigAsset` | Empty | Settings asset used in Profile Asset mode. |
+| Starts Connected | `ConnectOnStart` | `true` | Connect when Play starts. |
+| Connection Type | `_connectionType` | Audio | Use Video when sending camera frames. |
+| Push To Talk Key | `_pushToTalkKey` | `KeyCode.T` | Key used by built-in input. |
+| Retry Attempts | `_maxReconnectAttempts` | `3` | Reconnect attempt limit. |
+| Resume Conversation | `_resumePolicy` | ResumeIfPossible | Session resume policy. |
+| Rejoin Window (s) | `_roomRejoinTtlSeconds` | `60` | Time window for rejoining an existing room. |
+| Restart Character On Rejoin | `_spawnAgentOnRejoin` | `true` | Request character spawning when rejoining. |
+| Startup Wait (ms) | `_startWaitTimeoutMs` | `5000` | Wait for component startup before connecting. |
+| Mic Start Delay (s) | `_autoMicStartDelaySeconds` | `0.5` | Delay before eligible automatic microphone startup. |
+
+**Conversation**, **Connection**, **Listening**, **Interruptions**, **Vision** and **Reconnect** organize these settings. Some advanced controls require developer settings to be enabled.
 
 Turn-taking settings are also configured here. See [Configure conversation input mode](configure-conversation-input-mode.md).
 
 ## ConvaiCharacter
 
-`ConvaiCharacter` represents one AI character in your scene. Each NPC or virtual instructor that talks to players needs its own `ConvaiCharacter` component. Multiple characters are fully supported: a scene with two or more registered characters connects as one shared multi-character session, and a scene with exactly one connects as a single-character session. See [Multi-character sessions](../features/multi-character-sessions/README.md) for how the room is built and how player input is routed to one character at a time.
+`ConvaiCharacter` represents one AI character in your scene. Each NPC or virtual instructor that talks to players needs its own `ConvaiCharacter` component. Multiple characters are fully supported: a scene with two or more eligible characters selected to join connects as one shared multi-character session, and a connection selecting exactly one character connects as a single-character session. See [Multi-character sessions](../features/multi-character-sessions/README.md) for how the room is built and how player input is routed to one character at a time.
 
 **The Character ID field is required.** Get this value from your character's profile on the [Convai dashboard](https://convai.com).
 
 **Inspector fields:**
 
-| Field                           | Default   | Description                                                     |
-| ------------------------------- | --------- | --------------------------------------------------------------- |
-| `_characterId`                  | _(empty)_ | **Required.** Unique ID from your Convai dashboard              |
-| `_characterName`                | _(empty)_ | Display name shown in transcripts and logs                      |
-| `_nameTagColor`                 | White     | Color used to identify this character in the transcript UI      |
-| `_autoConnect`                  | `false`   | Start a conversation immediately after the scene loads          |
-| `_enableRemoteAudio`            | `true`    | Play back the character's voice audio                           |
-| `_enableSessionResume`          | `false`   | Resume the previous session on reconnect                        |
-| `_characterReadyTimeoutSeconds` | `30`      | Seconds to wait for the character-ready signal (0 = no timeout) |
+| Inspector label | Code field | Default and purpose |
+| --- | --- | --- |
+| Character Setup Source | `_configurationSource` | Inline; choose Profile Asset for shared setup. |
+| Character Profile Asset | `_characterConfigAsset` | Empty; supplies identity, audio and resume settings when selected. |
+| Character ID | `_characterId` | Required dashboard character ID. |
+| Character Version | `_characterVersionMode`, `_characterVersion` | Live; choose a released version to pin behavior. See [Pin a character version](pin-a-character-version.md). |
+| Character Name | `_characterName` | Empty; display name. **Fetch** reads the dashboard name. |
+| Name Tag Color | `_nameTagColor` | White; transcript label color. |
+| Play Voice On Start | `_enableRemoteAudio` | On; enable voice playback. |
+| Auto Connect | `_autoConnect` | Off; start this character after room startup. |
+| Owner ID | `_ownerId` | Empty; use the local player. |
+| Ready Timeout (s) | `_characterReadyTimeoutSeconds` | `30`; `0` waits indefinitely. |
+| Resume Last Conversation | `_enableSessionResume` | Off; resume the supplied session when enabled. |
+| Character Session ID | `_characterSessionId` | Empty; conversation to resume. |
+| Opening Context > Initial Dynamic Info / Text | `_initialDynamicInfoKeepInContext`, `_initialDynamicInfoText` | Initial context for the connection. See [Static context](../features/dynamic-context/static-context-at-connection-time.md) for room-specific routing. |
+
+The **Memory** card controls character-level service settings separately from these local fields. See [Configure memory](../features/long-term-memory/configure-memory-for-a-character.md).
 
 **Useful properties at runtime:**
 
@@ -111,11 +139,11 @@ Turn-taking settings are also configured here. See [Configure conversation input
 | Field           | Default    | Description                                                     |
 | --------------- | ---------- | --------------------------------------------------------------- |
 | `_playerName`   | `"Player"` | Display name shown in the transcript UI                         |
-| `_playerId`     | _(empty)_  | Local ID for transcript attribution (empty = use `_playerName`) |
+| `_playerId`     | _(empty)_  | Stable local identity for transcripts and character ownership; initialized once from Player Name when empty |
 | `_nameTagColor` | Green      | Color used to identify the player in the transcript UI          |
 
 {% hint style="info" %}
-`PlayerId` is a local display identifier for the transcript UI only. It is not the server-generated speaker ID used for Long-Term Memory. The server-assigned speaker ID is resolved after connection and is not set manually.
+`PlayerId` is local to the scene and is never sent to Convai. It remains unchanged when the display name changes. It is neither the end-user ID used for Long-Term Memory nor the server-assigned transcript speaker ID. Use `Configure(name, id)` when you intend to change the local ID.
 {% endhint %}
 
 **Useful methods:**
@@ -139,28 +167,36 @@ Handles audio playback for a single character. Add it to the same GameObject as 
 | `Volume`       | `1.0`   | Playback volume (0–1)              |
 | `IsMuted`      | `false` | Mute this character's audio output |
 | `_use3DAudio`  | `true`  | Enable spatial (3D) audio          |
-| `_minDistance` | `1`     | Spatial audio minimum distance     |
+| `_minDistance` | `5`     | Spatial audio minimum distance     |
 | `_maxDistance` | `50`    | Spatial audio maximum distance     |
 
 ### ConvaiSceneConfig
 
-An optional ScriptableObject (**Assets > Create > Convai > Scene Config**) that lets you define character IDs, prefabs, and auto-connect behavior in a reusable asset rather than inline in the Inspector. Useful for managing multiple characters across scenes. See Advanced Topics for full details.
+A data asset created through **Assets > Create > Convai > Scene Config**. The 5.0 runtime does not consume this asset, so creating one does not spawn characters or configure a connection. Use scene components or profile assets for active setup.
+
+### ConvaiSceneInstaller
+
+Add **Convai > Convai Scene Installer** through Add Component when you need explicit registration. **Characters** and **Players** list the scene agents to register; **Owned Characters** assigns the local player's characters. This is useful for explicit IL2CPP or additive-scene setup. It has no field that consumes `ConvaiSceneConfig`.
+
+See [Scene installer and scene config](../advanced-topics/scene-installer-and-scene-config.md) for the runtime integration and ownership rules.
 
 ## Embodiment infrastructure Convai adds automatically
 
-Five additional components can appear on a character's GameObject without you adding them. Convai adds each one the first time an embodiment module — Gaze, Body Animation, Body Language, or Emotion — needs it on that character, typically the first time you enter Play Mode after adding one of those modules. Seeing them appear is expected; nothing is broken.
+The following infrastructure components can appear on a character's GameObject without you adding them. Convai adds each one the first time an embodiment module — Gaze, Body Animation, Body Language, or Emotion — needs it on that character, typically the first time you enter Play Mode after adding one of those modules. Seeing them appear is expected; nothing is broken.
 
 | Component | Added when | What it does |
 | --- | --- | --- |
 | `EmbodimentContext` | Any embodiment module resolves its character | Character-scoped composition root that embodiment modules use to find the character's rig and each other's shared data |
 | `StandardRigBinding` | A module needs the character's bones or face meshes | Detects the rig convention (`ARKit`, `ReallusionCC3`, `ReallusionCC4Extended`, `MetaHuman`, or `Custom`) and resolves bones and blendshapes for modules to read |
-| `AnimatorConductor` | A module needs to drive `Animator` parameters | Single writer for `Animator` parameters, so two modules can never overwrite the same parameter |
+| `AnimatorConductor` | A module needs to drive `Animator` parameters | Single writer for `Animator` parameters, to coordinate writes from SDK modules |
 | `EmbodimentTickScheduler` | Any embodiment module registers a per-frame update | Runs embodiment modules in a fixed cognition → expression → finalize order every frame |
 | `FacialBlendshapeCompositorHost` | A module needs to write facial blendshapes | Single writer for facial blendshape output, combining LipSync, Emotion, and other sources into one result each frame |
 
 {% hint style="info" %}
-None of these components appear in the **Add Component** menu. `StandardRigBinding` is the only one you can add yourself — from **Add Component > Convai > Embodiment > Character Rig** — if you want to configure rig detection before Play Mode. The other four are internal to the SDK and are never added by hand.
+`EmbodimentContext`, `AnimatorConductor`, `EmbodimentTickScheduler`, and `FacialBlendshapeCompositorHost` are not exposed in Add Component. Add **Convai > Embodiment > Character Rig** (`StandardRigBinding`) when you want to configure rig detection before Play Mode. Runtime-created infrastructure remains visible in the Inspector for diagnosis.
 {% endhint %}
+
+Other feature-specific helpers can also appear on demand: Conversation Flow, Travel Intent, and the lip-sync speech-energy adapter. They are not all provisioned for every character. See [How embodiment works](../embodiment/how-embodiment-works.md).
 
 ## Next steps
 

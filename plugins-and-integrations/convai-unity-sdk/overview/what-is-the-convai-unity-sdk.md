@@ -3,7 +3,7 @@ title: What is the Convai Unity SDK
 description: >-
   Real-time conversational AI characters for Unity — voice pipeline, opt-in
   feature modules, supported platforms, and minimum requirements.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 The Convai Unity SDK connects Unity characters to Convai so they can speak, listen, reason, and act in real time. A player speaks into a microphone; the SDK captures audio, streams it to Convai for speech recognition and language understanding, generates a response with text-to-speech, and plays it back on the character with synchronized lip sync, facial emotion, and optional in-scene actions. The SDK targets Unity developers building training simulations, interactive experiences, and games.
@@ -14,7 +14,7 @@ The SDK ships with a complete conversation pipeline and a set of opt-in feature 
 
 ### Conversation pipeline
 
-Always active once connected:
+The ordinary voice workflow includes:
 
 * **Real-time voice input** — microphone capture, streaming speech recognition
 * **Language understanding and generation** — Convai processes and responds in character
@@ -22,26 +22,30 @@ Always active once connected:
 
 ### Feature modules
 
-Opt-in, each added as a Unity component:
+Optional features, configured through scene components, room policy or service settings:
 
 * **Lip sync** — real-time blend shape mouth animation; supports ARKit, MetaHuman, and CC4 Extended maps
-* **Emotion** — maps Convai emotion signals to facial blend shapes or Animator parameters
+* **Emotion** — maps Convai emotion signals to semantic facial expressions and material properties
 * **Actions** — character executes structured in-scene commands dispatched by Convai
 * **Long-term memory** — character remembers each player across separate sessions
 * **Narrative design** — trigger-based story section progression tied to conversation flow
 * **Vision** — character sees through a Unity camera, webcam, or Meta Quest passthrough
 * **Dynamic context** — inject runtime state and events into the character's knowledge at any time
 
+The SDK also supports [multi-character rooms](../features/multi-character-sessions/README.md), [target selection](../features/conversation-targeting/README.md), [input availability](../features/conversation-availability/README.md), and [scene metadata](../features/scene-metadata/README.md). Native on-device voice detection uses the optional Sentis/Silero implementation selected in room policy. The 5.0 preview adds [group conversation](../features/group-conversation/README.md) and [text-only sessions](../getting-started/run-a-text-only-session.md).
+
 ### Utilities
 
 Optional helpers that run entirely in Unity without Convai communication:
 
-* **Dialogue animation** — four-layer animator stack driving body and head movement during speech
-* **Gaze and attention** — eye and head gaze blended toward focus targets and conversation partners
+* **Body Animation** — idle, talk, locomotion and gestures through a PlayableGraph.
+* **Gaze** — coordinated torso, head, eye and eyelid movement toward conversation partners and scene targets.
+* **Body Language** — posture, breathing and nonverbal responses.
+* **Conversation Flow** — shared conversation phase for local behavior.
 
 ### Editor tooling
 
-Project Settings API key configuration, scene setup menu, Scene Validator, and custom Inspectors for every SDK component.
+**Convai > Convai Editor** and **Convai > Settings** provide project configuration. The Convai menu also exposes Actions, Body Animation, Emotion, Gaze and Embodiment editors, the Troubleshooter, scene setup and validation, documentation links and Platform Support tools for native transport libraries. The [Scene Auto Tagger](../features/scene-metadata/scene-auto-tagger.md) has separate distribution prerequisites. Not every SDK component has a custom Inspector.
 
 ## Voice → Convai → Character flow
 
@@ -70,7 +74,7 @@ graph LR
 The sample scenes use URP. If your project uses the Built-in render pipeline, the samples require minor material reassignment. The SDK itself works with all three pipelines.
 {% endhint %}
 
-The Convai Unity SDK is available on the [Unity Asset Store](https://assetstore.unity.com/packages/tools/behavior-ai/npc-ai-engine-dialog-actions-voice-and-lipsync-convai-235621).
+An SDK distribution is available on the [Unity Asset Store](https://assetstore.unity.com/packages/tools/behavior-ai/npc-ai-engine-dialog-actions-voice-and-lipsync-convai-235621). Check that channel's listed version; this 5.0 preview does not establish that 5.0 is available there.
 
 For the full platform and Unity version support matrix, see Compatibility and requirements.
 

@@ -3,13 +3,13 @@ title: Create a lip sync profile
 description: >-
   Explains how to create a custom lip sync profile asset for a blendshape
   format beyond the three profiles the SDK bundles by default.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 A lip sync profile defines the transport format identifier — it tells the SDK which blendshape channel names to expect from Convai.
 
 {% hint style="warning" %}
-Convai currently streams blendshape data in three formats only: `arkit`, `metahuman`, and `cc4_extended`. A custom profile is only useful if Convai explicitly supports a custom format for your deployment. Creating a profile with an unsupported format ID will result in no blendshape data being received.
+The bundled profiles request transport tokens `arkit`, `mha`, and `cc4_extended`. A custom profile is useful only when Convai supports its transport format for your deployment. Creating a local asset does not add a server-side format.
 {% endhint %}
 
 For all standard setups, use one of the three bundled profiles and leave this page for advanced or future use.
@@ -28,19 +28,21 @@ Select the new asset to open it in the Inspector.
 
 | Field                | Description                                                                              |
 | -------------------- | ---------------------------------------------------------------------------------------- |
-| **Profile ID**       | Transport format identifier. Must exactly match the format ID Convai streams for this character. |
+| **Profile ID**       | Canonical local profile identifier, used to select the profile and its map. |
 | **Display Name**     | Human-readable name shown in the Inspector. Does not affect runtime behavior.            |
-| **Transport Format** | Network transport format string — typically the same as Profile ID.                      |
+| **Transport Token** | Token sent to Convai and expected on incoming data. It defaults to Profile ID; enable **Override default token** if it differs.                      |
 
 {% hint style="danger" %}
-**Profile ID** must exactly match the identifier Convai uses when streaming blendshape data. A mismatch causes the SDK to fall back to a no-op map — no blendshapes animate.
+**Transport Token** must match the format Convai sends. The bundled MetaHuman profile demonstrates the distinction: its Profile ID is `metahuman`, while its Transport Token is `mha`.
 {% endhint %}
 {% endstep %}
 
 {% step %}
-### Assign the profile ID to the component
+### Register and select the profile
 
-Set `ConvaiLipSyncComponent._lockedProfileId` to the **Profile ID** string you defined. The SDK looks up this profile from the registry at runtime.
+Create a **Convai > Lip Sync > Profile Registry** asset from the Project window's **Create** menu under `Assets/Resources/LipSync/ProfileRegistries/`. Add your profile to its **Profiles** list. The catalog loads registry assets from that Resources path; an unregistered profile asset is not enough.
+
+Return to the character's Convai Lip Sync component and select your profile in **Profile**. Assign a compatible map, then verify it with **Validator**. Higher-priority registries are applied after lower-priority registries.
 {% endstep %}
 {% endstepper %}
 

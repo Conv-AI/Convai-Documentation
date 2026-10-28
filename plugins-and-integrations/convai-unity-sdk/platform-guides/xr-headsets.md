@@ -1,12 +1,12 @@
 ---
 title: XR headsets
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 description: >-
   Find guides for deploying the Convai Unity SDK on XR headsets, including Meta
   Quest Vision passthrough setup and custom XR frame source implementation.
 ---
 
-The Convai Unity SDK runs on Android-based XR headsets (Meta Quest, Horizon OS, Android XR) and Windows XR headsets without extra configuration for core features. Voice conversation, lip sync, actions, emotion, and long-term memory work the same as on any other supported platform. Vision is the only feature that requires XR-specific integration work — and only when you want the AI character to see the real world through the headset's cameras.
+XR applications use the underlying Android or Windows runtime path. Configure native libraries, microphone access and input for the headset. Passthrough vision additionally needs a camera integration supported by that device; verify each headset model in a built application.
 
 {% embed url="https://youtu.be/CGPAG_CWGJw" %}
 Convai Unity VR setup for Meta Quest
@@ -16,16 +16,16 @@ Convai Unity VR setup for Meta Quest
 
 | Feature              | Android XR (Meta Quest, Horizon OS)            | Windows XR                              |
 | -------------------- | ---------------------------------------------- | --------------------------------------- |
-| Voice conversation   | ✅ Full                                         | ✅ Full                                  |
-| Lip sync             | ✅ Full                                         | ✅ Full                                  |
-| Actions              | ✅ Full                                         | ✅ Full                                  |
-| Emotion              | ✅ Full                                         | ✅ Full                                  |
-| Long-Term Memory     | ✅ Full                                         | ✅ Full                                  |
-| Narrative Design     | ✅ Full                                         | ✅ Full                                  |
+| Voice conversation   | ✅ Implemented                                         | ✅ Implemented                                  |
+| Lip sync             | ✅ Implemented                                         | ✅ Implemented                                  |
+| Actions              | ✅ Implemented                                         | ✅ Implemented                                  |
+| Emotion              | ✅ Implemented                                         | ✅ Implemented                                  |
+| Long-Term Memory     | ✅ Implemented                                         | ✅ Implemented                                  |
+| Narrative Design     | ✅ Implemented                                         | ✅ Implemented                                  |
 | Vision (passthrough) | ✅ `QuestVisionFrameSource` (Quest 3 / 3S only) | ⚠️ Custom `IVisionFrameSource` required |
-| Spatial audio        | ✅ Full                                         | ✅ Full                                  |
+| Spatial audio        | ✅ Implemented                                         | ✅ Implemented                                  |
 
-For Android-based XR headsets, all core setup follows the Android platform guide — including the `RECORD_AUDIO` manifest declaration and runtime permission flow.
+For Android-based XR headsets, all core setup follows the Android platform guide — including verification of the generated `RECORD_AUDIO` manifest entry and the SDK's runtime permission flow. A custom manifest must not strip the permission.
 
 {% content-ref url="ios-and-android.md" %}
 [iOS and Android](ios-and-android.md)
@@ -33,15 +33,17 @@ For Android-based XR headsets, all core setup follows the Android platform guide
 
 ## Push-to-talk on Meta Quest
 
-On Meta Quest, push-to-talk reads the controller's A, B, X, and Y buttons through Unity's XR input API instead of a keyboard key. If the active XR controller cannot be read, or disconnects mid-press, the SDK fails closed and stops microphone capture rather than leaving it open. Keyboard and non-XR joystick input are unaffected. See [Configure conversation input mode](../getting-started/configure-conversation-input-mode.md) for the full button mapping.
+Set **Push To Talk Key** to `JoystickButton0`, `JoystickButton1`, `JoystickButton2` or `JoystickButton3` to use right A, right B, left X or left Y through Unity's XR input API. The default `T` remains a keyboard binding. If the active XR controller cannot be read, or disconnects mid-press, the SDK fails closed and stops microphone capture rather than leaving it open. Keyboard and non-XR joystick input are unaffected. See [Configure conversation input mode](../getting-started/configure-conversation-input-mode.md) for the full button mapping.
 
-Vision is the only feature that varies between XR platforms. The decision tree below shows when extra setup is needed:
+For a custom XR input system, acquire `ConvaiManager.AcquirePushToTalkInput()` and drive the controller through `Press()` and `Release()`. `Press(true)` is only for an input source that can reliably observe release through focus loss. See [Use your own push-to-talk input](../getting-started/use-your-own-push-to-talk-input.md).
+
+Use this decision tree to choose a Vision source after configuring input and permissions:
 
 ```mermaid
 graph TD
     A[XR Deployment] --> B{Vision needed?}
     B -->|No| C[Follow Android or Windows guide for permissions]
-    C --> D[Done — all core features work]
+    C --> D[Validate voice and input on the device]
     B -->|Yes| E{Meta Quest 3 or 3S?}
     E -->|Yes| F[Use QuestVisionFrameSource]
     F --> G[Import Meta XR SDK + declare manifest permissions]
@@ -59,9 +61,9 @@ For the complete setup guide, Inspector reference, and troubleshooting steps, se
 
 ## Vision on other XR platforms
 
-No built-in frame source exists for non-Meta XR headsets — OpenXR-only devices, Windows Mixed Reality, HoloLens, or Android XR platforms that do not expose a passthrough camera through the Meta XR SDK.
+No built-in passthrough frame source exists for non-Meta XR headsets — OpenXR-only devices, Windows Mixed Reality, HoloLens, or Android XR platforms that do not expose a passthrough camera through the Meta XR SDK.
 
-To enable Vision on these devices, implement `IVisionFrameSource` and supply frames from your XR SDK's camera API:
+To enable passthrough Vision on these devices, implement `IVisionFrameSource` using a camera API the device permits your application to access. The skeleton below only shows the interface; its comments must be replaced with capture, frame delivery and resource cleanup before it can publish images:
 
 {% code title="CustomXRVisionFrameSource.cs" %}
 ```csharp

@@ -3,13 +3,30 @@ title: Release notes
 description: >-
   Release notes for the Convai Unity SDK — current version highlights,
   previous release notes, bug fixes, and migration guidance for each release.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-Track changes to the Convai Unity SDK across releases, including new features, bug fixes, and configuration changes. The current release is <code class="expression">space.vars.unity_sdk_version</code>.
+Track changes to the Convai Unity SDK across releases, including new features, bug fixes, and configuration changes. This page includes the planned <code class="expression">space.vars.unity_sdk_version</code> refresh and historical release entries. The 5.0 branch is still marked Unreleased; availability must be confirmed before publication.
+
+## SDK 5.0 preview — unreleased
+
+The reviewed branch adds group voice conversation, transcript entries and caption states, microphone policy for text-only sessions, connection and audio-level diagnostics, and expanded memory settings. It updates native audio to LiveKit Unity 2.1 with FFI 0.12.80, publishes the configured Vision frame source on WebGL by default, and routes browser voice volume and mute through the character audio output.
+
+**Breaking changes:** migrate transcript callbacks and renderers, saved spoken-line relay listeners, player-ID assumptions, custom behavior hooks and Editor tool requests. Native voice AudioSources are reserved for SDK playback. Group conversation requires correlated push-to-talk and a compatible capture-drain path. Read [Migrate to SDK 5.0](migrate-to-5-0.md) before updating.
+
+**Publication gates:** final version and package availability, target-device media qualification, service availability for group conversation, and the Scene Auto Tagger native Core distribution remain separate checks. The source includes Scene Auto Tagger changes but its Core manifest is marked unsigned internal prerelease, not customer-distribution ready.
 
 {% updates format="full" %}
-{% update date="2026-09-04" tags="v4.6.0,Current" %}
+{% update date="2026-09-28" tags="v4.6.1" %}
+## v4.6.1
+
+The source changelog records this release on 28 September 2026. It added Scene Auto Tagger authoring and its sample, push-to-talk finalization, project API Mode and workspace configuration, released character version selection, revised Inspectors and copied connection diagnostics. It also updated echo cancellation, browser lip-sync onset timing and Unity 6000.6 identity compatibility. Availability of a particular native tool distribution still depends on its own release gate.
+
+**Migration from 4.6.0:** remove the ignored `DisconnectReason` argument from room disconnect calls; use `SetInitialCharacter` or `TalkTo` instead of `SetExplicitConversationTarget`; migrate from `NarrativeDesignFetcher` to `NarrativeDesignDataService`; remove usage of the placeholder `ConvaiConversationProvider` and deleted participant-builder/persistence scaffolding. Custom logging integrations must follow `Log(in LogEntry)`.
+
+Transcript text is no longer printed by routine handler diagnostics. Use subscriptions rather than parsing Console output. New Audio Output components use a 5 m minimum distance; existing scenes retain saved values. The manifest declares the AI and XR engine modules in addition to the other package dependencies.
+{% endupdate %}
+{% update date="2026-09-04" tags="v4.6.0" %}
 ## v4.6.0
 
 **Breaking this release:** `SetExplicitConversationTarget` renames to `SetInitialCharacter`, three Gaze profile Conversation Attention fields are removed and replaced, `headStabilityDegrees` is removed, two Gaze profile defaults changed, and the microphone open timing in multi-character scenes changed. See **Breaking changes and migration** below.

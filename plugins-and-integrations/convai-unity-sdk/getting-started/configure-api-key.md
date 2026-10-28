@@ -1,6 +1,6 @@
 ---
 title: Configure the API key
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 description: >-
   Enter and validate your Convai API key for local development in the Unity
   Editor so a Convai character can authenticate while you build a scene.
@@ -22,7 +22,7 @@ Log in to your [Convai dashboard](https://convai.com), navigate to **Account Set
 {% step %}
 ### Open the Credentials section
 
-In the Unity Editor menu bar, open **Convai > Settings** (or **Edit > Project Settings > Convai SDK**), then select the **Credentials** section. Leave **Auth Mode** set to **API Key**, its default.
+In the Unity Editor menu bar, open **Convai > Settings** (or **Edit > Project Settings > Convai SDK**), then scroll to the **Credentials** card. Leave **Auth Mode** set to **Api Key**, its default. Keep **Environment** on **Production**. Keep **API Mode** on **Legacy** unless your integration is configured for the upgraded REST contract. The screenshot shows a project using **Upgraded**; it is not the default.
 {% endstep %}
 
 {% step %}
@@ -36,9 +36,9 @@ The status badge next to the button reports the result: **Key valid** when Conva
 {% step %}
 ### Verify the key is accepted
 
-Run **GameObject > Convai > Validate Scene Setup**. A missing API key appears as a warning in the validator dialog. If no API key warning appears, your key is configured correctly.
+Confirm that the Credentials badge reads **Key valid**. Scene validation checks whether a key is configured; it does not authenticate that key with Convai.
 
-<figure><img src="../../../.gitbook/assets/image (14).png" alt="Scene validator dialog with no missing-API-key warning"><figcaption></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/unity-sdk-credentials.png" alt="Credentials card with a masked API key, validation controls, environment, and API mode"><figcaption><p>The Credentials card before validation. After validation succeeds, the badge reads Key valid.</p></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 

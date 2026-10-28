@@ -3,19 +3,19 @@ title: Meta Quest Vision setup
 description: >-
   Explains how to stream the Meta Quest passthrough camera to a Convai
   character so it can see the player's real surroundings.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 `QuestVisionFrameSource` streams the passthrough camera feed from a Meta Quest headset to Convai, enabling the AI character to see and respond to the real world the learner is looking at. This page covers the required Android manifest permissions, step-by-step component setup, Inspector field reference, and troubleshooting for Quest 3 and Quest 3S.
 
 **Supported hardware:** Meta Quest 3 and Quest 3S running Horizon OS with the Passthrough Camera API available.
 
-The component uses reflection to bind to the Meta XR SDK's `PassthroughCameraAccess` at runtime. The Convai SDK has no hard compile-time dependency on any Meta SDK package — you can update or swap the Meta XR SDK version without changes to the Convai SDK.
+The component uses reflection to bind to the Meta XR SDK's `PassthroughCameraAccess` at runtime. The Convai SDK has no hard compile-time dependency on any Meta SDK package ; verify the reflected members remain compatible when updating the Meta SDK.
 
 ## Required permissions
 
 {% hint style="danger" %}
-Both permissions must be declared in your `AndroidManifest.xml`. The passthrough camera will not start without them, and `QuestVisionFrameSource` will enter the `Failed` state after three retry attempts.
+Declare and grant both camera permissions before capture. A missing or unreadable `PassthroughCameraAccess` fails immediately with `InvalidConfiguration`. A bound component that never starts playing is retried three times at one-second intervals, then reports `DeviceUnavailable`.
 {% endhint %}
 
 {% code title="AndroidManifest.xml" %}
@@ -51,7 +51,7 @@ Drag the `PassthroughCameraAccess` component into the **Passthrough Camera Acces
 {% step %}
 ### Add a vision publisher
 
-Add `ConvaiVisionPublisher` to the same GameObject. It auto-discovers `QuestVisionFrameSource` in the scene, or you can assign the frame source reference in the publisher's Inspector field.
+Add `ConvaiVisionPublisher` to the same GameObject. It auto-discovers `QuestVisionFrameSource` on its own GameObject or children, or you can assign the frame source reference in the publisher's Inspector field.
 {% endstep %}
 
 {% step %}
@@ -62,7 +62,7 @@ Add both `horizonos.permission.HEADSET_CAMERA` and `android.permission.CAMERA` t
 {% endstepper %}
 
 {% hint style="success" %}
-Build and deploy to your Quest device. After the scene loads, the Vision status in the Convai Settings Panel should show **Ready**. The character will begin receiving passthrough frames and can respond to what it sees.
+Build and deploy to your Quest device. After capture starts, inspect the source's **Live > State** or a `VisionDebugPreview` overlay. Confirm Ready, advancing frames and the intended orientation. Then confirm publishing and a relevant character response; the runtime Settings Panel has no Vision status.
 {% endhint %}
 
 In the Unity Editor, `QuestVisionFrameSource` produces no frames. If `StartCapture()` is called, the source transitions to the `Failed` state with `InvalidConfiguration` — `PassthroughCameraAccess` is only available on Horizon OS. Test Vision on a physical Quest 3 or 3S device.
@@ -71,7 +71,7 @@ In the Unity Editor, `QuestVisionFrameSource` produces no frames. If `StartCaptu
 
 | Field                         | Default             | Description                                                                                                                                                                 |
 | ----------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Passthrough Camera Access** | None                | Optional reference to the `PassthroughCameraAccess` component. Auto-discovered from the active scene if left empty. The component retries up to three times with one-second intervals before entering the `Failed` state — assign explicitly when `PassthroughCameraAccess` initializes asynchronously or after a delay. |
+| **Passthrough Camera Access** | None                | Optional reference to the `PassthroughCameraAccess` component. Auto-discovered from the active scene if left empty. If no readable component exists when capture starts, it fails immediately. Create or bind the component before starting capture; retries apply only after it has bound a component that is not yet playing. |
 | **Source Id**                 | `quest-passthrough` | Identifier used by `ConvaiVisionPublisher` to select this frame source.                                                                                                     |
 | **Max Output Width**          | 1280                | Maximum pixel width of frames sent to Convai. Reduce to lower bandwidth usage.                                                                                              |
 | **Max Output Height**         | 720                 | Maximum pixel height of frames sent to Convai.                                                                                                                              |
@@ -86,21 +86,22 @@ A surgical resident training application on Quest 3 places learners in a simulat
 
 **Setup:** `QuestVisionFrameSource` on a scene GameObject with **Passthrough Camera Access** auto-discovered. `ConvaiVisionPublisher` on the same object. Both permissions declared in the manifest. The character's Convai configuration includes a vision-aware system prompt instructing it to acknowledge and respond to what it sees in the passthrough feed.
 
-**Outcome:** The character responds to visual context alongside conversation — "I can see you are preparing the scalpel — let's review the incision depth for this procedure." The resident practices both verbal interaction and physical task execution without any object detection code in the Unity project.
+**Verification:** Use non-sensitive props and confirm the preview shows them clearly. Test whether the authored character uses the visual context as intended; a working video stream does not establish recognition accuracy or suitability for clinical decisions.
 
 ### Industrial safety inspection with environmental object recognition
 
 A factory safety training application on Quest 3S guides equipment operators through machinery inspection. The AI character identifies physical components visible in the passthrough feed and adapts its safety guidance based on what the operator is looking at.
 
-**Setup:** Same configuration as the medical training example. **Target Frame Rate** is set to 10 (reduced from 15) to accommodate an industrial network environment with limited bandwidth. **Max Output Width** is set to 960 to reduce per-frame payload size without meaningful quality loss for object recognition tasks.
+**Setup:** Same configuration as the medical training example. **Target Frame Rate** is set to 10 (reduced from 15) to accommodate an industrial network environment with limited bandwidth. **Max Output Width** is set to 960 to reduce per-frame payload size and then evaluated for the visual details the training task requires.
 
-**Outcome:** The character identifies machinery in the passthrough view and provides component-specific safety instructions — no hardcoded object detection, no custom computer vision pipeline. The SDK streams passthrough frames to Convai, which handles scene understanding and generates contextually appropriate guidance.
+**Outcome:** Verify the character's responses against the authored training scenario; frame delivery alone does not establish reliable identification or safety advice. The SDK streams passthrough frames to Convai, which handles scene understanding and generates contextually appropriate guidance.
 
 ## Troubleshooting
 
 | Symptom                                                                           | Likely cause                                                                                                                                                               | Fix                                                                                                                                                                                                                                     |
 | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Source transitions to `Failed / DeviceUnavailable` a few seconds after scene load | `PassthroughCameraAccess` not found after three retry attempts — OR — missing `horizonos.permission.HEADSET_CAMERA` / `android.permission.CAMERA` in `AndroidManifest.xml` | (1) Add `PassthroughCameraAccess` to the scene or assign it explicitly in the **Passthrough Camera Access** Inspector field. (2) Verify both permissions are declared in `AndroidManifest.xml` and appear in the exported APK manifest. |
+| Source transitions to `Failed / DeviceUnavailable` a few seconds after scene load | A bound `PassthroughCameraAccess` did not start playing, possibly because camera permissions are not granted | (1) Add `PassthroughCameraAccess` to the scene or assign it explicitly in the **Passthrough Camera Access** Inspector field. (2) Verify both permissions are declared in `AndroidManifest.xml` and appear in the exported APK manifest. |
+| Immediate `Failed / InvalidConfiguration` | No readable passthrough component was bound. | Add or assign a compatible `PassthroughCameraAccess` before starting capture. |
 | `QuestVisionFrameSource` produces no output in the Editor                         | Expected — `PassthroughCameraAccess` only runs on Horizon OS                                                                                                               | Test on a physical Quest 3 or 3S device.                                                                                                                                                                                                |
 | Character does not respond to visual context                                      | Vision publisher not connected, or Vision not enabled in character config                                                                                                  | Verify `ConvaiVisionPublisher` is in the scene and Vision is enabled in the character's Convai dashboard configuration.                                                                                                                 |
 | Passthrough feed correct but image appears upside down                            | **Flip Y** was disabled                                                                                                                                                    | Re-enable **Flip Y** in the `QuestVisionFrameSource` Inspector.                                                                                                                                                                         |
