@@ -1,7 +1,7 @@
 ---
 title: Add a 3D character to a three.js scene
 description: Add a Convai character to an existing 3D web scene with the framework-free Convai Embody API and update it from your own render loop.
-last_reviewed: "0.4.2"
+last_reviewed: "1.0.1"
 ---
 
 Add a Convai character to a three.js scene you already render, without React. Use this page when your app owns the renderer, scene, and camera. At the end, the character stands in your scene and speaks with lip sync, driven from your render loop.
@@ -52,6 +52,8 @@ export async function addCharacter(
 {% endcode %}
 
 `update` advances the animation, lip sync, gaze, breathing, and blinking by the elapsed seconds. Call it once per frame, before rendering.
+
+If the character has Long-Term Memory turned on, the connection also needs an end-user id so the character can tell your users apart: `createCharacter({ token, characterId, session: { endUserId: user.id } })`. Without it, connecting fails with "Missing end\_user\_id".
 
 {% hint style="warning" %}
 Without `character.camera`, gaze tracking does nothing and the character looks straight ahead. Set it once your camera exists.

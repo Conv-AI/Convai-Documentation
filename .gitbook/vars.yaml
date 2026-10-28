@@ -15,6 +15,6 @@ asset_uploader_unreal_version: '5.8'
 asset_uploader_toolchain_compiler_version: 14.50.35717
 credits_per_dollar: 1,000
 platform_fee_credits: '6'
-embody_version: 0.4.2
+embody_version: 1.0.1
 experience_embed_version: 0.7.1
 web_sdk_version: 2.0.1
