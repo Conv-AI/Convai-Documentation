@@ -1,64 +1,50 @@
 ---
 title: Transcript UI
-last_reviewed: "4.6.0"
-description: >-
-  Understand how the Convai Unity SDK separates durable chat history from
-  speech-aligned captions, and which built-in component displays each.
+last_reviewed: "5.0.0-preview"
+description: Choose chat history, speech captions, or a label for one character, and understand how transcript visibility differs from retained history.
 ---
 
-`ConvaiManager.ActiveManager.Transcripts` is the single entry point for transcript data in the Convai Unity SDK. It exposes two purposes side by side — a durable turn-by-turn chat history and a stream of speech-aligned captions — so your scene UI can show conversation history and live subtitles without building either pipeline yourself. Custom transcript displays subscribe directly through `ConvaiManager.ActiveManager.Transcripts` — see the durable and caption paths below.
+`ConvaiManager.Transcripts` exposes retained conversation history and live speech captions. History supports chat panels, queries, and export. Captions support text shown as a character speaks. Presentation can be disabled without stopping history collection.
 
-## How transcript data reaches your scene UI
+## History and captions
 
-The runtime's internal transcript engine maintains room state and exposes it through the `ConvaiTranscripts` facade at `ConvaiManager.ActiveManager.Transcripts`. That facade splits into two independent read paths.
+The room transcript engine supplies both paths through the `ConvaiTranscripts` facade:
 
 ```mermaid
 graph TD
-    A[Room transcript engine] --> B[ConvaiTranscripts facade]
-    B -->|CurrentTimeline / Subscribe / SubscribeCommitted| C[Durable chat history]
-    B -->|CurrentCaptions / SubscribeCaptions| D[Speech-aligned captions]
+    A[Room transcript engine] --> B[ConvaiTranscripts]
+    B -->|CurrentTimeline / Subscribe / SubscribeFinalized| C[Retained entries]
+    B -->|CurrentCaptions / SubscribeCaptions| D[Speech captions]
     C --> E[ChatTranscriptUI]
     D --> F[SubtitleTranscriptUI]
-    E --> G[Scene UI]
-    F --> G[Scene UI]
+    C --> G[ConvaiTranscriptDisplay in History mode]
+    D --> H[ConvaiTranscriptDisplay in Captions mode]
 ```
 
-Both paths read from the same room session, so a character's speech always appears in history and, if a caption UI is present, as a caption at the same time.
+History consists of immutable `TranscriptEntry` values. An entry records a typed submission, a voice contribution, or a character response. A final entry can still receive a correction. Finalization does not prove that audio playback has finished.
 
-Neither path is scoped to a single character. For a push notification tied to one `ConvaiCharacter`'s own spoken line — outside of scene UI, for example a gaze or gesture trigger — see `ConvaiCharacter.OnTranscriptReceived` in [Transcript API](../../scripting-reference/transcript-api.md).
+Captions follow player recognition and character speech. Timing depends on the available speech signals: a caption can follow server word progress, or be released around speech activity and run ahead of the audio. Do not assume every caption arrives word by word or at the same instant as its history entry.
 
-## Durable chat history vs. speech-aligned captions
+History is bounded in memory. The default limits are 500 closed entries and 1,000,000 retained UTF-16 text units. Per-entry truncation and open-entry recovery also apply. Read `Transcripts.Health` to detect truncation or eviction; it is not permanent storage.
 
-`CurrentTimeline`, `Subscribe`, and `SubscribeCommitted` give you the durable side of the transcript: a timeline of committed conversation turns that persists for the life of the room, suitable for scroll-back chat panels, post-session review, and export. `ChatTranscriptUI` is built on this path.
+## Choose a display
 
-`CurrentCaptions` and `SubscribeCaptions` give you the ephemeral side: text aligned to what is currently being spoken, replaced as soon as the next segment starts. Caption text is never written into the durable chat history — it exists only to drive a subtitle-style overlay. `SubtitleTranscriptUI` is built on this path.
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Chat and subtitle modes</strong><br>Add the shipped chat prefab or the sample subtitle component.</td><td><a href="chat-and-subtitle-modes.md">chat-and-subtitle-modes.md</a></td></tr><tr><td><strong>Per-character transcript display</strong><br>Show one character's latest entry or caption in a text label.</td><td><a href="per-character-transcript-display.md">per-character-transcript-display.md</a></td></tr><tr><td><strong>Transcript history and queries</strong><br>Page through entries, subscribe to changes, and export retained history.</td><td><a href="transcript-history-and-queries.md">transcript-history-and-queries.md</a></td></tr></tbody></table>
 
-Choose the durable path when the reader needs to see or query what was said. Choose the caption path when the reader needs to see what is being said right now.
+The chat prefabs are `Prefabs/TranscriptUI/TranscriptUI_Chat.prefab` and `TranscriptUI_Chat_WorldSpace.prefab` in the <code class="expression">space.vars.sdk_package_id</code> package. `SubtitleTranscriptUI` is sample reference code under `SamplesShared/Scripts/UI/Transcript/Subtitle/`; it has no companion prefab.
 
-## Built-in presentation components
+For Inspector callbacks, add `ConvaiTranscriptEventRelay`. Its **Entry Updated** event includes replayed history; **Entry Finalized** reports finalization, while **Entry Corrected**, **Entry Removed**, and **Reset** handle later changes. These callbacks carry full entry text, not a text delta. The relay forwards while presentation is disabled.
 
-`ChatTranscriptUI` ships as a ready-to-use component with two prefabs in the <code class="expression">space.vars.sdk_package_id</code> package: `Prefabs/TranscriptUI/TranscriptUI_Chat.prefab` for a screen-space chat panel, and `Prefabs/TranscriptUI/TranscriptUI_Chat_WorldSpace.prefab` for the same component rendered on a world-space `Canvas` — for example a panel mounted above a character or kiosk. Both prefabs subscribe to the durable timeline on `Start` (and re-subscribe on `OnEnable`) and render committed and in-progress turns as message bubbles.
+For a character-local spoken sentence callback, use `ConvaiCharacter.OnSpokenLine` (`Action<string>`). It is separate from history subscriptions. See [Transcript API](../../scripting-reference/transcript-api.md).
 
-`SubtitleTranscriptUI` ships as sample reference code at `SamplesShared/Scripts/UI/Transcript/Subtitle/SubtitleTranscriptUI.cs` rather than a drop-in prefab. It subscribes to captions and renders the current speaker's text with auto-hide after a configurable delay, and is meant to be copied into your project and adapted.
+## Hide presentation without clearing history
 
-Neither component is the only option. Any script can call `Subscribe`, `SubscribeCommitted`, or `SubscribeCaptions` directly to drive a custom display.
+The runtime **Transcript** setting controls `IsPresentationEnabled` and `PresentationEnabledChanged`. The shipped chat, subtitle, and character display components honor that setting. History continues to accumulate within its retention limits while they are hidden.
 
-## Hide presentation without losing history
-
-`IsPresentationEnabled` and the `PresentationEnabledChanged` event let shipped presentation components hide their rendered content — for example while a cutscene or menu is on screen — without stopping the room from recording. `ChatTranscriptUI` and `SubtitleTranscriptUI` both clear their rendered content when presentation is disabled, then resubscribe with replay enabled when it turns back on, so no turns are lost from the durable history while the UI was hidden.
+Custom subscriptions keep receiving changes. Your own UI must observe the presentation setting if it should hide with the built-in displays. `ClearHistory()` clears the retained local history and emits a reset; hiding a view does not.
 
 ## Next steps
 
-You have covered how the durable and caption paths split and which shipped component reads each. Continue to querying the durable timeline from code, configuring the two built-in display modes, or controlling transcript visibility from the settings panel.
-
-{% content-ref url="transcript-history-and-queries.md" %}
-[Transcript history and queries](transcript-history-and-queries.md)
-{% endcontent-ref %}
-
-{% content-ref url="chat-and-subtitle-modes.md" %}
-[Chat and subtitle modes](chat-and-subtitle-modes.md)
-{% endcontent-ref %}
-
-{% content-ref url="../settings-panel/" %}
-[settings-panel](../settings-panel/)
+{% content-ref url="../../scripting-reference/migrate-transcripts-to-5-0.md" %}
+[Migrate transcript integrations](../../scripting-reference/migrate-transcripts-to-5-0.md)
 {% endcontent-ref %}

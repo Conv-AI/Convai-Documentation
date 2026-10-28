@@ -1,10 +1,10 @@
 ---
 title: Convai Troubleshooter
 description: Reference for the Convai Troubleshooter window, including how it reports findings, applies fixes, and lets a project add its own checks.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-The Convai Troubleshooter is an Editor window that lists what is stopping a `ConvaiCharacter` from working, module by module, with a fix beside each finding. Open it from `Convai → Troubleshooter` before reading the Unity Console when a character does not behave as expected — it is the SDK's first-line diagnostic.
+The Convai Troubleshooter is an Editor window that lists what is stopping a `ConvaiCharacter` from working, module by module, with actions where the reporting module supplies them. Open it from `Convai → Troubleshooter` before reading the Unity Console when a character does not behave as expected — it is the SDK's first-line diagnostic.
 
 ## Open the Troubleshooter
 
@@ -83,6 +83,7 @@ A project can add its own checks to the Troubleshooter by implementing `IConvaiS
 
 {% code title="Assets/Editor/MyCustomSetupHealthProvider.cs" %}
 ```csharp
+// pseudocode: QuestGiver and its quest properties are application-owned types.
 using Convai.Editor.AI;
 using Convai.Editor.Diagnostics;
 using UnityEditor;
