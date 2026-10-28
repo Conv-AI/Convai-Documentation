@@ -52,11 +52,7 @@ The timeline is editor-only tooling. It has no runtime API and changes nothing a
 
 ***
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** capture **Convai > Emotion Editor**, select a configured test character in **CHARACTERS**, and show **Feel** with **Character Type** and the profile sections. Use the exact 5.0 preview UI and keep project paths and credentials out of view.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-emotion-editor.png" alt="Placeholder: Emotion Editor Feel tab with selected character and Character Type controls"><figcaption><p>Capture pending: the Emotion Editor's character and personality controls.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-emotion-editor.png" alt="Emotion Editor in Feel mode with a sample character selected under CHARACTERS, Character Type set to Warm, and the Personality and Resting Mood sections expanded"><figcaption><p>Emotion Editor Feel mode for a sample character.</p></figcaption></figure>
 
 ## Next steps
 

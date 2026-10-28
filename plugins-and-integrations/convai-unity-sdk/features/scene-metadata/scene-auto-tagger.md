@@ -57,11 +57,7 @@ A successful Apply proves that scene components were authored. It does not prove
 {% endstep %}
 {% endstepper %}
 
-{% hint style="warning" %}
-Screenshot required before publishing: capture the reviewed 5.0 Setup window with character selection, scene guidance, scope, quality, and readiness visible; omit credentials and private content.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-scene-auto-tagger-setup.png" alt="Scene Auto Tagger Setup with character selection, scene guidance, scope, quality, and local readiness"><figcaption><p>Setup controls for an approved preview package; local readiness is separate from release approval.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-scene-auto-tagger-setup.png" alt="Scene Auto Tagger Setup tab with the character picker, scene description, description focus, Scope set to Current Scene, Quality set to Accurate, and the Vision ready status"><figcaption><p>Scene Auto Tagger Setup. The character cards are blurred because they show account characters.</p></figcaption></figure>
 
 ## Next steps
 

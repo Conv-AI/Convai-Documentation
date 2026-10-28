@@ -14,16 +14,12 @@ Use this mechanism for facts that are true before the conversation begins and wi
 
 Select `ConvaiCharacter`, open **Session → Opening Context**, and enable **Initial Dynamic Info**. The **Text** field appears only while the toggle is enabled.
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the 5.0 `ConvaiCharacter` Inspector with **Session → Opening Context** expanded, **Initial Dynamic Info** enabled, and **Text** showing the scenario example below.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-initial-dynamic-info-5.png" alt="ConvaiCharacter Session section with Initial Dynamic Info enabled and its Text field visible"><figcaption><p>TODO: Replace with the 5.0 Opening Context controls and example scenario text.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-initial-dynamic-info-5.png" alt="ConvaiCharacter Session section with Initial Dynamic Info enabled and the Text field holding a one-line scenario"><figcaption><p>Opening Context with Initial Dynamic Info enabled. The Text field is a single line.</p></figcaption></figure>
 
 | Field | Type | Default | Description |
 |---|---|---|---|
 | **Initial Dynamic Info** | `bool` | `false` | Enables sending the configured text and sets the request's keep-in-context flag. |
-| **Text** | `string` | _(empty)_ | Scenario text included when the toggle is enabled. Write plain sentences or key-value lines. |
+| **Text** | `string` | _(empty)_ | Scenario text included when the toggle is enabled. The Inspector field is a single line, so separate facts with semicolons. |
 
 With **Initial Dynamic Info** disabled, the SDK sends an empty text value. Disabling it does not send the saved text for the first response only. The keep-in-context flag requests retention by Convai; it is not proof that every later response will mention these facts.
 
@@ -32,9 +28,7 @@ With **Initial Dynamic Info** disabled, the SDK sends an empty text value. Disab
 For a fire suppression certification drill, enable **Initial Dynamic Info** and set **Text** to:
 
 ```text
-Facility: Offshore Platform Alpha
-Scenario: Fire Suppression Certification Drill
-Trainee role: Operator under assessment
+Facility: Offshore Platform Alpha; Scenario: Fire Suppression Drill; Role: Operator under assessment
 ```
 
 Connect and ask the character about the facility and scenario. Check that the opening facts are available before adding runtime updates.

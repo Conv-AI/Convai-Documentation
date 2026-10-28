@@ -38,10 +38,6 @@ Choose **Export Report** to save the validation results. Enter Play Mode and tes
 {% endstep %}
 {% endstepper %}
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the reviewed 5.0 Lip Sync Mapping Validator with a real character component, selected Profile, Mapping Asset and Target Meshes, plus Validation Results showing recognizable mapped and missing-target rows. Use non-sensitive sample assets.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-lip-sync-validator.png" alt="Lip Sync Mapping Validator configuration and per-blendshape validation results"><figcaption><p>TODO: Profile-to-mesh mapping results with the controls needed to refresh and export.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-lip-sync-validator.png" alt="Lip Sync Mapping Validator with a sample character's Lip Sync Component, the CC4 Extended profile, its mapping asset, ten target meshes and validation results with OK, Multi and Disabled rows"><figcaption><p>Validation results for a sample character. Disabled rows are mappings switched off in the map asset, and Multi rows drive several targets.</p></figcaption></figure>
 
 If the face stays still despite valid target names, confirm that the session supplies the profile's expected facial data, the component is enabled and the correct renderers are assigned. See [Add lip sync](README.md) for playback and latency controls.

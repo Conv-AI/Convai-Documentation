@@ -15,7 +15,7 @@ Open the character's Body Animation Inspector and select **Advanced settings & c
 | Feel | Shows archetypes, personality sliders, and the complete config sections |
 | Live | Play-mode layer and action diagnostics, including Last Action Request |
 
-Live is a Play-mode view. Use Setup and Content in Edit mode to prepare the character; do not treat an asset assignment as runtime validation.
+The **Live** tab appears only in Play mode. Use Setup and Content in Edit mode to prepare the character; do not treat an asset assignment as runtime validation.
 
 ## Setup and content
 
@@ -35,11 +35,7 @@ In Play mode, inspect layer weights, selected content, and **Last Action Request
 
 Use **Diagnostic Detail** to increase trace detail only for the investigation. Compare reported state with actual character motion and navigation; this window does not validate backend behavior or a target device build.
 
-{% hint style="warning" %}
-Screenshot required before publishing: capture the reviewed Body Animation Editor with a selected test character, Content mode, animation pools, and locomotion coverage visible. Capture Live separately only if illustrating runtime diagnostics.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-body-animation-editor.png" alt="Body Animation Editor with a selected character, mode tabs, animation content, and locomotion coverage"><figcaption><p>Content mode organizes the selected character's animation library.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-body-animation-editor.png" alt="Body Animation Editor in Content mode for a sample character, showing the Idle, Talk, Listen and Think pools and the Locomotion Coverage grid"><figcaption><p>Body Animation Editor Content mode with animation pools and locomotion coverage.</p></figcaption></figure>
 
 ## Next steps
 

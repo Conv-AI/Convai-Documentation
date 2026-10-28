@@ -119,11 +119,7 @@ Advanced setups that bypass every `IVisionFrameSource` and assign a raw `RenderT
 
 The policy default is capped at `15` fps on WebGL; a positive **Max Publish FPS** override is used as configured. Policy bitrate still applies. See [WebGL vision](webgl.md) for selection and browser verification.
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture Convai Vision Publisher with Frame Source, WebGL Publishes, Track Name, Publish Policy, Max Publish FPS, and Max Bitrate visible with the WebGL build target active.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-vision-publisher.png" alt="Convai Vision Publisher with Frame Source, WebGL Publishes, Track Name, Publish Policy, Max Publish FPS, and Max Bitrate visible with the WebGL build target active"><figcaption><p>TODO: Replace with screenshot showing Convai Vision Publisher with Frame Source, WebGL Publishes, Track Name, Publish Policy, Max Publish FPS, and Max Bitrate visible with the WebGL build target active.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-vision-publisher.png" alt="Convai Vision Publisher Inspector showing the assigned frame source, Track Name, WebGL Publishes set to Frame Source, the Publish Policy mode, Max Publish FPS and Max Bitrate"><figcaption><p>Convai Vision Publisher with a camera frame source assigned. WebGL Publishes applies only to WebGL builds.</p></figcaption></figure>
 
 ## Next steps
 

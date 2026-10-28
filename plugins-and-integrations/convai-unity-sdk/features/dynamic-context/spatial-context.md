@@ -8,7 +8,7 @@ Spatial context gives each connected character a description of nearby registere
 
 ## Prepare the objects
 
-Start with a connected `ConvaiCharacter` and a scene object with `ConvaiObjectMetadata`, shown as **Convai World Object**. The object needs a non-empty **Object Name**, an active and enabled component, and **Include In Metadata** enabled.
+Start with a connected `ConvaiCharacter` and a scene object with `ConvaiObjectMetadata`, shown in the Inspector as **World Object** (**Add Component > Convai > World Object**). The object needs a non-empty **Object Name**, an active and enabled component, and **Include In Metadata** enabled.
 
 Spatial context is disabled by default. It works with the same physical-object projection used by scene metadata, including logical groups. A logical group's physical representative can change as the character moves.
 
@@ -19,11 +19,7 @@ Spatial context is disabled by default. It works with the same physical-object p
 3. Connect a character and place the object within 30 meters of it. The radius is measured from the character root to the resolved physical object's aim point.
 4. Move or turn the character, or move the object, and inspect the resulting context.
 
-{% hint style="warning" %}
-**Screenshot required before publishing:** Capture the 5.0 **Convai World Object** Inspector with **Object Name**, **Include In Metadata**, and **Include Spatial Context** visible and enabled for a named scene object.
-{% endhint %}
-
-<figure><img src="../../../../.gitbook/assets/TODO-unity-world-object-spatial-context.png" alt="Convai World Object Inspector with spatial context enabled for a named scene object"><figcaption><p>TODO: Replace with the 5.0 world-object spatial context settings.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-world-object-spatial-context.png" alt="World Object Inspector for a Supply Crate with Include Spatial Context and Include In Metadata enabled and its object name and description filled in"><figcaption><p>A World Object that contributes its name, description and spatial facts.</p></figcaption></figure>
 
 The equivalent runtime setting is `metadata.IncludeSpatialContext = true`, where `metadata` is the object's `ConvaiObjectMetadata` component.
 
