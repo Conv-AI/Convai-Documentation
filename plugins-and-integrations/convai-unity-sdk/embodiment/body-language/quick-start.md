@@ -1,7 +1,7 @@
 ---
 title: Body language quick start
 description: Add the Body Language component to a Convai character and see breathing, weight shift, and idle life running in Play mode.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Add `ConvaiBodyLanguageController` to an existing Convai character and confirm that it breathes, shifts its weight, and stays visibly alive between actions in Play mode. Use this page once you have a working `ConvaiCharacter` in your scene and want to see Body Language running before tuning any of its settings.
@@ -11,7 +11,7 @@ Add `ConvaiBodyLanguageController` to an existing Convai character and confirm t
 ## Prerequisites
 
 - A `ConvaiCharacter` in your scene that already connects and responds — complete [Validate your setup](../../getting-started/validate-your-setup.md) first if you have not.
-- A rig with a resolvable Spine bone. A **Humanoid** rig resolves one automatically; a Generic or animator-free rig works once you add a [character rig binding](../character-rig-setup.md) and map at least the spine.
+- A rig with a resolvable `Spine` bone. A **Humanoid** Animator resolves one automatically; a **Generic** or animator-free rig can use an explicit spine mapping in [Character rig setup](../character-rig-setup.md). The editor setup card still marks a missing Animator as blocked, even though the runtime can drive the mapped spine. Procedural arm gestures and hand motion need the Humanoid Animator chains.
 
 {% hint style="info" %}
 Body Language does not need a `ConvaiBodyLanguageProfile` asset to work. Adding the component alone runs it on the SDK's built-in `Natural` tuning — a profile is for reshaping the behavior afterward, not for turning the module on.
@@ -33,13 +33,13 @@ In the Hierarchy, select the `GameObject` that carries the `ConvaiCharacter` com
 
 In the Inspector, select **Add Component**, then **Convai > Embodiment > Body Language**. This adds `ConvaiBodyLanguageController` to the character.
 
-Convai also adds the shared infrastructure the module needs — an `EmbodimentContext` and a `StandardRigBinding` — automatically. You do not add these yourself.
+Convai also adds the shared infrastructure the module needs — an `EmbodimentContext` — automatically. The `StandardRigBinding` is added when the character starts in Play mode, or through **Convai > Embodiment Editor > Set Up This Character**.
 {% endstep %}
 
 {% step %}
 ### Read the This Character card
 
-Before pressing Play, the `ConvaiBodyLanguageController` Inspector's **This Character** card states what this rig offers — spine, torso, shoulders, stance, arms — and names anything that would stop the module. Only a missing Spine bone blocks it; a missing chest, shoulders, hips, or arm chain turns off only the behaviors that depend on that bone.
+Before pressing Play, the `ConvaiBodyLanguageController` Inspector's **This Character** card states what this rig offers — spine, torso, shoulders, stance, arms — and names anything that would stop the module. The card marks a missing Animator or unresolved Spine as blocked. For an animator-free rig with an explicit Spine, this card is stricter than the runtime; a missing chest, shoulders, hips, or arm chain turns off only the behaviors that depend on that bone.
 
 Body Language has no dedicated editor window like Gaze or Body Animation. All of its setup and live diagnostics live in this component's Inspector.
 {% endstep %}

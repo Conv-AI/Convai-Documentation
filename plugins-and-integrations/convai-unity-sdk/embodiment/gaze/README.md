@@ -1,7 +1,7 @@
 ---
 title: Gaze
 description: Find guides for adding eye contact, attention shifts, and full-body turns to a Convai character with the Gaze embodiment module.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Gaze is the Convai embodiment module that decides where a character looks: eye contact with the player, glances at objects and other characters, and full-body turns when the player moves out of view. One component, `ConvaiGazeController`, drives the eyes, head, and body together so the character's attention reads as a single coherent behavior instead of separate systems fighting for the same bones.
@@ -51,4 +51,13 @@ Gaze is one of five embodiment modules. Add Body Animation next to give the same
 
 {% content-ref url="../README.md" %}
 [Embodiment](../README.md)
+{% endcontent-ref %}
+
+
+{% content-ref url="gaze-editor.md" %}
+[Gaze Editor window](gaze-editor.md)
+{% endcontent-ref %}
+
+{% content-ref url="tune-gaze-personality.md" %}
+[Tune gaze personality](tune-gaze-personality.md)
 {% endcontent-ref %}

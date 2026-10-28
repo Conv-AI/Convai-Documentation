@@ -1,10 +1,10 @@
 ---
 title: Gaze targets and providers
 description: Mark scene objects as gaze candidates, add advanced provider components, and register a custom gaze target provider from code.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-Mark GameObjects as gaze candidates, add the eight advanced provider components for richer targeting behavior, and register a custom provider from code. Use this page after adding `ConvaiGazeController` to a character, when you want it to notice specific scene objects, other characters, or the player in a non-default way.
+Mark `GameObject`s as gaze candidates, add the eight advanced provider components for richer targeting behavior, and register a custom provider from code. Use this page after adding `ConvaiGazeController` to a character, when you want it to notice specific scene objects, other characters, or the player in a non-default way.
 
 ## Prerequisites
 
@@ -13,21 +13,23 @@ Mark GameObjects as gaze candidates, add the eight advanced provider components 
 
 ## Mark a scene object as a gaze target
 
-Add `ConvaiGazeTarget` (`Convai/Gaze/Target`) to any GameObject to make it a gaze candidate for every Convai character in the scene. No scene metadata is required.
+Add `ConvaiGazeTarget` (`Convai/Gaze/Target`) to any `GameObject` to make it a gaze candidate for every Convai character in the scene. No scene metadata is required.
 
 | Field | Default | Purpose |
 |---|---|---|
-| `Priority` | `5` | Priority tier. The player anchor publishes at `10`, so the default `5` yields to the player during conversation. Raise above `10` to outrank the player. |
-| `Base Relevance` | `0.75` | Relevance while inside `Full Relevance Distance`. |
-| `Max Distance` | `10` (meters) | Distance beyond which the target stops being a candidate. |
-| `Full Relevance Distance` | `3` (meters) | Distance below which relevance is at its maximum. |
-| `Aim Offset` | `(0, 0, 0)` | Local-space offset from the transform to the exact point the eyes aim at, such as the top of a painting. |
+| **More important than the player** | off | Switches priority between `5` and `15`. Use **Advanced > Priority** for a custom value. The player anchor normally publishes at `10`. |
+| **How interesting** (`baseRelevance`) | `0.75` | Relevance while inside **Fully interesting under**; range `0`–`1`. |
+| **Noticed within** (`maxDistance`) | `10` (meters) | Distance beyond which the target stops being a candidate. |
+| **Fully interesting under** (`fullRelevanceDistance`) | `3` (meters) | Distance below which relevance is at its maximum. |
+| **Aim at** (`aimOffset`) | `(0, 0, 0)` | Local-space offset from the transform to the exact point the eyes aim at, such as the top of a painting. |
 
 {% hint style="info" %}
 `ConvaiGazeTarget` is the general-purpose marker. Use `WorldObjectGazeTargetProvider`, described below, only when the object already carries `ConvaiObjectMetadata`.
 {% endhint %}
 
 ## Add advanced gaze providers
+
+The Gaze Editor's **Setup > Optional extras** checkboxes add or enable six optional capabilities. **Targets > Worth looking at > Mark the selected object** adds a scene target. Player Anchor and World Object Target are additional provider types, not entries in that six-capability list.
 
 The advanced providers live under `Convai/Gaze/Advanced/` in the Add Component menu. Each is opt-in — adding `ConvaiGazeController` gives a character eyes, a head, idle life, blinking, body turns, and conversational rhythm with no further setup; these components add further capabilities on top.
 
@@ -63,11 +65,11 @@ The advanced providers live under `Convai/Gaze/Advanced/` in the Add Component m
 
 ### Dynamic Context Bridge — attention grounding
 
-`GazeDynamicContextBridge` (`Convai/Gaze/Advanced/Dynamic Context Bridge`) mirrors the character's current gaze object into the Convai dynamic context key `current_attention_object`, so pronoun references such as "it" or "that" resolve against what the character is actually looking at.
+`GazeDynamicContextBridge` (`Convai/Gaze/Advanced/Dynamic Context Bridge`) mirrors the character's current gaze object into the Convai dynamic context key `current_attention_object`, to supply the object name for attention grounding. This is client context submission; it does not guarantee how a response will resolve a pronoun. In the current SDK, the named object must exist in the character's runtime action configuration. A missing action object is skipped quietly, with any previous attention cleared.
 
 | Field | Default | Purpose |
 |---|---|---|
-| `Engagement Threshold` | `0.5` | Minimum gaze engagement required before the object is published. |
+| **Report only when committed** (`_engagementThreshold`) | `0.5` | Minimum gaze engagement required before the object is published. |
 
 ### Joint Attention — notice what the player looks at
 
@@ -88,7 +90,7 @@ The advanced providers live under `Convai/Gaze/Advanced/` in the Add Component m
 
 ### Referential Glances — glance at mentioned objects
 
-`GazeReferentialGlances` (`Convai/Gaze/Advanced/Referential Glances`) makes the character glance at a registered world object when its own spoken line mentions it — "take a look at the painting". It matches on the character's final transcript and is built entirely on the public `GlanceAt` API.
+`GazeReferentialGlances` (`Convai/Gaze/Advanced/Referential Glances`) makes the character glance at a registered world object when its own spoken line mentions it — "take a look at the painting". It subscribes to `ConvaiCharacter.OnSpokenLine` and matches registered `ConvaiObjectMetadata.ObjectName` values, not plain `ConvaiGazeTarget` names. For a logical group it resolves a nearby physical member's interaction point. Call `NotifyUtterance(string)` to supply a line from another integration; the glance still uses the public `GlanceAt` API.
 
 | Field | Default | Purpose |
 |---|---|---|
@@ -134,14 +136,18 @@ The advanced providers live under `Convai/Gaze/Advanced/` in the Add Component m
 
 ### World Object Target — mark authored world objects
 
-`WorldObjectGazeTargetProvider` (`Convai/Gaze/Advanced/World Object Target`) marks an authored Convai world object — one that already carries `ConvaiObjectMetadata` (`RequireComponent`) — as an ambient gaze candidate. Nearby characters glance at it while idle, and the Dynamic Context Bridge reports it to Convai when it wins attention.
+`WorldObjectGazeTargetProvider` (`Convai/Gaze/Advanced/World Object Target`) marks an authored Convai world object — one that already carries `ConvaiObjectMetadata` (`RequireComponent`) — as an ambient gaze candidate. Its candidate aims at renderer bounds rather than assuming the pivot is the visible center. Both the member's and its logical group's **Gaze Enabled** values must be on; the field defaults to on. The candidate uses the logical group's object name. The Dynamic Context Bridge can submit that name only if the runtime action configuration contains it.
 
 | Field | Default | Purpose |
 |---|---|---|
 | `Priority` | `5` | Priority tier, kept below the player anchor (`10`) so the player wins during conversation. |
-| `Base Relevance` | `0.75` | Relevance while inside `Full Relevance Distance`. |
-| `Max Distance` | `10` (meters) | Distance beyond which the object stops being a candidate. |
-| `Full Relevance Distance` | `3` (meters) | Distance below which relevance is at its maximum. |
+| **How interesting** (`baseRelevance`) | `0.75` | Relevance while inside **Fully interesting under**; range `0`–`1`. |
+| **Noticed within** (`maxDistance`) | `10` (meters) | Distance beyond which the object stops being a candidate. |
+| **Fully interesting under** (`fullRelevanceDistance`) | `3` (meters) | Distance below which relevance is at its maximum. |
+
+The [Scene Auto Tagger](../../features/scene-metadata/scene-auto-tagger.md) **Gaze targets** option adds this provider and enables **Gaze Enabled** on tagged objects.
+
+Provider component Inspectors use readable titles: **Looks At Other Characters**, **Notices When You Look**, **Notices What You Look At**, **Looks At What It Mentions**, **Talks About What It Sees**, and **Pupil Response**. Their Add Component menu names remain the ones listed above.
 
 ## Extend targeting from code
 
@@ -182,10 +188,23 @@ public sealed class ScannerBeaconRegistrar : MonoBehaviour
 {
     [SerializeField] private Transform beaconTransform;
 
-    private void Start()
+    private ConvaiGazeController _gaze;
+    private ScannerBeaconProvider _provider;
+
+    private void OnEnable()
     {
-        ConvaiGazeController gaze = GetComponent<ConvaiGazeController>();
-        gaze.RegisterTargetProvider(new ScannerBeaconProvider(beaconTransform));
+        _gaze = GetComponent<ConvaiGazeController>();
+        if (_gaze == null || beaconTransform == null) return;
+        _provider = new ScannerBeaconProvider(beaconTransform);
+        _gaze.RegisterTargetProvider(_provider);
+    }
+
+    private void OnDisable()
+    {
+        if (_gaze != null && _provider != null)
+            _gaze.UnregisterTargetProvider(_provider);
+        _provider = null;
+        _gaze = null;
     }
 }
 ```
@@ -214,13 +233,27 @@ public sealed class OpenXrEyeTrackingSource : IPlayerGazeRaySource
 // Attached to the character:
 public sealed class XrGazeRaySetup : MonoBehaviour
 {
-    private void Start()
+    private PlayerAttentionSensor _sensor;
+    private OpenXrEyeTrackingSource _source;
+
+    private void OnEnable()
     {
-        PlayerAttentionSensor sensor = GetComponentInChildren<PlayerAttentionSensor>();
-        sensor.SetGazeRaySource(new OpenXrEyeTrackingSource());
+        _sensor = GetComponentInChildren<PlayerAttentionSensor>();
+        if (_sensor == null) return;
+        _source = new OpenXrEyeTrackingSource();
+        _sensor.SetGazeRaySource(_source);
+    }
+
+    private void OnDisable()
+    {
+        if (_sensor != null) _sensor.SetGazeRaySource(null);
+        _source = null;
+        _sensor = null;
     }
 }
 ```
+
+This example owns the sensor's gaze-ray override while enabled; use only one override owner per sensor. Disabling it restores the default source.
 
 Return `false` when no ray is available this frame — tracking lost, headset off — so the consumer falls back to the camera ray. The source is registered per component instance, not process-wide, so one scene's adapter never silently drives characters in another scene.
 
@@ -230,7 +263,7 @@ Every gaze target's aim point is smoothed before the head's movement detector se
 
 ## Verify targets are found
 
-Enter Play mode and open `Convai > Gaze Editor` while the character is selected. The window's live view lists the currently engaged target and its kind (`Player`, `WorldObject`, `Character`, `Scripted`, `Ambient`, or `TravelPath`). A target that never appears usually means its provider component is disabled, out of `Max Distance`, or below another provider's priority tier.
+Enter Play mode and open `Convai > Gaze Editor` while the character is selected. Select **Live** in Play mode. **Looking at** shows the target transform's name when available, otherwise its kind (`Player`, `WorldObject`, `Character`, `Scripted`, `Ambient`, or `TravelPath`). A target that never appears usually means its provider component is disabled, out of `Max Distance`, or below another provider's priority tier.
 
 ## Troubleshooting
 
@@ -240,7 +273,7 @@ Enter Play mode and open `Convai > Gaze Editor` while the character is selected.
 
 **Cause:** the target's `Priority` is at or below another candidate's tier, or the character is outside `Max Distance`.
 
-**Fix:** raise `Priority` above the competing tier, or increase `Max Distance` / `Full Relevance Distance`.
+**Fix:** enable **More important than the player**, or set **Advanced > Priority** above the competing tier. Adjust **Noticed within** and **Fully interesting under** if distance is the cause.
 
 **Verify:** re-open the Gaze Editor live view and confirm the target's name appears as the engaged target.
 
@@ -248,11 +281,11 @@ Enter Play mode and open `Convai > Gaze Editor` while the character is selected.
 
 **Symptom:** no console warning, but the behavior never fires.
 
-**Cause:** most advanced providers require `EmbodimentContext` and `ConvaiGazeController` in the parent hierarchy; a missing one logs a warning and disables the component.
+**Cause:** dependency handling differs. Joint Attention logs and disables itself if its context or Gaze controller is missing. Pupil Response logs and disables itself for a missing context; an empty shader-property name logs but leaves it enabled. Dynamic Context Bridge and Player Attention Sensor can remain enabled but do nothing without a context; Referential Glances can remain enabled without a controller. Character Target does not require a context to publish itself.
 
 **Fix:** check the Console for a `component is inert` warning naming the missing dependency, and confirm the component sits under the same character hierarchy as `ConvaiGazeController`.
 
-**Verify:** the warning stops appearing after the component re-enables successfully.
+**Verify:** fix the hierarchy and re-enable a component that disabled itself. Its chip should be **Live** in Play mode rather than **Off**, then verify the actual behavior. An enabled provider's **Live** chip alone does not prove it has its dependencies.
 
 ## Next steps
 

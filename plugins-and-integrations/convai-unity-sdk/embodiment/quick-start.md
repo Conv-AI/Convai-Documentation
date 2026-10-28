@@ -1,7 +1,7 @@
 ---
 title: Embodiment quick start
 description: Add the Gaze module to an existing Convai character so it makes eye contact with the player, visible immediately in Play mode.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Add the Gaze module to an existing Convai character and confirm that the character makes eye contact with the player in Play mode. Use this page once you have a working `ConvaiCharacter` in your scene and want to see embodiment behavior for the first time before configuring the other four modules.
@@ -33,7 +33,7 @@ In the Hierarchy, select the `GameObject` that carries the `ConvaiCharacter` com
 
 In the Inspector, select **Add Component**, then **Convai > Embodiment > Gaze**. This adds `ConvaiGazeController` to the character.
 
-Convai also adds the shared infrastructure the module needs — an `EmbodimentContext` and a `StandardRigBinding` — automatically. You do not add these yourself.
+Convai also adds the shared infrastructure the module needs — an `EmbodimentContext` — automatically. The `StandardRigBinding` appears when the character starts in Play mode, or immediately when you use **Set Up This Character** or **Set Up Rig Now** in the Embodiment Editor.
 {% endstep %}
 
 {% step %}
@@ -46,6 +46,8 @@ This step is optional — Gaze already works without it — but it is how you se
 {% endstepper %}
 
 ***
+
+<figure><img src="../../../.gitbook/assets/unity-embodiment-setup.png" alt="Embodiment Editor Setup with automatic rig setup and the five feature rows"><figcaption><p>This character has Conversation Flow and Gaze. The rig is scheduled for automatic setup when the character starts; this Ready status does not confirm that every bone or facial shape has resolved.</p></figcaption></figure>
 
 ## Verify the setup
 

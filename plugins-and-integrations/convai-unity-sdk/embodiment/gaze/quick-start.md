@@ -1,7 +1,7 @@
 ---
 title: Gaze quick start
 description: Add the Gaze module to an existing Convai character and confirm it makes eye contact with the player immediately in Play mode.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Add `ConvaiGazeController` to an existing Convai character and confirm that it makes eye contact with the player in Play mode. Use this page once you have a working `ConvaiCharacter` in your scene and want to see Gaze running before tuning any of its settings.
@@ -29,15 +29,19 @@ In the Hierarchy, select the `GameObject` that carries the `ConvaiCharacter` com
 
 In the Inspector, select **Add Component**, then **Convai > Embodiment > Gaze**. This adds `ConvaiGazeController` to the character.
 
-Convai also adds the infrastructure the module needs — an `EmbodimentContext`, a `StandardRigBinding`, and the internal `GazeAttentionRequests` component the controller requires — automatically. You do not add any of these yourself.
+Convai also adds the infrastructure the module needs — an `EmbodimentContext` and the internal `GazeAttentionRequests` component — automatically. A missing `StandardRigBinding` is provisioned in Play mode, or can be added from the rig setup tools before Play.
 {% endstep %}
 
 {% step %}
 ### Check the readiness state
 
-The `ConvaiGazeController` Inspector reports whether the component can run: **Ready** means Gaze resolved a head bone and will work when you press Play. **Not working** appears only when the rig has no head bone for Gaze to rotate, and the Inspector names the fix.
+The component header shows **Ready** in Edit mode, **Live** in Play mode, or **Action Needed** when blocked. A blocked character shows **Before this works** and **One thing needs you first**, with a fix such as **Add Rig Binding**. A missing Head or more than one Character Rig can block the setup; for duplicates, use **Show Me** and keep exactly one binding. **Not working** is the character-list label in the Gaze Editor, not the Inspector chip.
 {% endstep %}
 {% endstepper %}
+
+When offered under **Suggested**, use **Who it watches > Use This Camera** to select the intended camera, and **Personality > Add a Personality** to create settings you can tune. **Who It Looks At** contains **Who is the player?**, **Eye contact style**, and **Follows the conversation**. Leave the player reference empty to use the camera resolution shown beneath it.
+
+<figure><img src="../../../../.gitbook/assets/unity-gaze-setup.png" alt="Gaze Editor Setup showing a ready character, its camera and personality, and optional gaze capabilities"><figcaption><p>This sample has a resolved head but no eye bones or eye shapes. Ready means gaze can run with head motion; it does not mean every eye channel is available.</p></figcaption></figure>
 
 ## Verify the setup
 
@@ -49,7 +53,7 @@ Enter Play mode and start a conversation with the character. Gaze's default eye 
 
 ## Troubleshooting
 
-If the character's eyes and head do not move, open the `ConvaiGazeController` Inspector and check the readiness state first — **Not working** names the missing bone directly. If the state reads **Ready** but nothing moves in Play mode, see [Troubleshoot gaze](troubleshooting.md) for the remaining failure modes.
+If the character's eyes and head do not move, open the `ConvaiGazeController` Inspector and check the readiness state first — **Action Needed** leads to the setup checklist. If it reads **Live** but the character watches the wrong place, check **Who is the player?** and the resolved camera hint. With no `MainCamera` tag, the SDK can fall back to another enabled Game-view camera. For other causes, see [Troubleshoot gaze](troubleshooting.md) for the remaining failure modes.
 
 ## Next steps
 
