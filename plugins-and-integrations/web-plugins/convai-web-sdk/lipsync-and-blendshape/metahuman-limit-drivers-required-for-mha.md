@@ -1,7 +1,7 @@
 ---
 title: Apply MetaHuman limit drivers
 description: Apply the MetaHuman rig couplings, tuned gains, and fade envelope to the 251-channel stream so a character's lips stay closed while its jaw moves.
-last_reviewed: "2.0.1"
+last_reviewed: "2.0.2"
 ---
 
 Apply the MetaHuman rig couplings to every `mha` frame before you write it to a character's morph targets. Use this page when a character driven by the `mha` format shows its teeth on every jaw movement. At the end, the lips stay in contact while the jaw opens and the mouth reads as speech rather than flapping.

@@ -1,7 +1,7 @@
 ---
 title: Mute the character's voice
 description: Silence what the character says without stopping the conversation, build your own mute button, and mute one character in a multi-character session.
-last_reviewed: "2.0.1"
+last_reviewed: "2.0.2"
 icon: volume-xmark
 ---
 
@@ -52,7 +52,7 @@ const toggle = () => {
 return <button onClick={toggle}>{muted ? 'Unmute' : 'Mute'}</button>;
 ```
 
-The bundled `ConvaiWidget` already shows a mute button, and it calls this same method. A button of your own and the widget's icon therefore describe one shared state rather than two.
+`ConvaiWidget` from `@convai/web-widget` already shows a mute button, and it calls this same method. A button of your own and the widget's icon therefore describe one shared state rather than two.
 
 ## Mute before connecting
 

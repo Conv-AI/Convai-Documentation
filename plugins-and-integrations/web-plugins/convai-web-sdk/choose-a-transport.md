@@ -1,7 +1,7 @@
 ---
 title: Choose a transport
 description: Decide between SSE, WebRTC and WebSocket for a Convai Web SDK app, see the recommended SSE chat with a realtime voice mode and why, and set up any of them.
-last_reviewed: "2.0.1"
+last_reviewed: "2.0.2"
 icon: route
 ---
 
