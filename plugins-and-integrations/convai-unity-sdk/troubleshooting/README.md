@@ -1,13 +1,13 @@
 ---
 title: Troubleshooting
 description: Find the Convai Troubleshooter window plus troubleshooting guides for installation, API, audio, and debug tools in the Unity SDK.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-This section covers problems that occur at the SDK level — before or during the connection to Convai — regardless of which features you are using. Start with the Convai Troubleshooter window: it lists what is stopping a `ConvaiCharacter` from working, with a fix beside each finding, before you read a single Console line. If the SDK connects successfully but a specific feature like Actions, Emotion, or Vision is not working as expected, start with the troubleshooting page inside that feature's section instead. The pages here also address three categories of general issues: package installation and import, API key and connection failures, audio and microphone problems, and the full suite of built-in diagnostic tools.
+This section covers problems that occur at the SDK level — before or during the connection to Convai — regardless of which features you are using. Start with the Convai Troubleshooter window: it lists what is stopping a `ConvaiCharacter` from working, with a fix beside each finding, before you read a single Console line. If the SDK connects successfully but a specific feature like Actions, Emotion, or Vision is not working as expected, start with the troubleshooting page inside that feature's section instead. The pages here also address categories of general issues: package installation and import, API key and connection failures, audio and microphone problems, and the full suite of built-in diagnostic tools.
 
 {% hint style="info" %}
-**Not sure where to start?** Open `Convai → Troubleshooter`, select the character, and read what it reports — most setup mistakes surface there with a one-click fix. If the character is not the problem, open the Unity Console and look for the first error or warning tagged with `[Convai]`. If the message contains an error code in dot-notation format — for example `connection.connect_invalid_api_key` or `audio.mic_permission_denied` — go directly to the page that matches its prefix. If you see a plain English message from `Convai Bootstrapper`, start with Installation & Package Issues.
+**Not sure where to start?** Open `Convai → Troubleshooter`, select the character, and read what it reports — most setup mistakes surface there with a one-click fix. If the character is not the problem, open the Unity Console and look for the first relevant error or warning by category or source. The standard logger uses `[HH:mm:ss.fff][Level][Category][optional-correlation]: [Source] message`; some direct Editor or native messages use other prefixes. If the message contains an error code in dot-notation format — for example `connection.connect_invalid_api_key` or `audio.mic_permission_denied` — go directly to the page that matches its prefix. If you see a plain English message from `Convai Bootstrapper`, start with Installation & Package Issues.
 {% endhint %}
 
 ## Troubleshooting categories
@@ -20,18 +20,28 @@ Problems that occur after a successful connection — where the SDK is running b
 
 | Feature | Troubleshooting page |
 | --- | --- |
-| Actions | `features/character-actions/debugging-and-troubleshooting.md` |
-| Emotion | `embodiment/emotion/troubleshooting-and-diagnostics.md` |
-| Long-Term Memory | `features/long-term-memory/troubleshooting-and-diagnostics.md` |
-| Dynamic Context | `features/dynamic-context/troubleshoot-dynamic-context.md` |
-| Narrative Design | `features/narrative-design/troubleshooting-and-diagnostics.md` |
-| Vision | `features/vision/troubleshooting-and-diagnostics.md` |
-| Scene Metadata | `features/scene-metadata/troubleshooting-and-diagnostics.md` |
-| Embodiment | `embodiment/troubleshooting.md` |
-| Gaze | `embodiment/gaze/troubleshooting.md` |
-| Body Animation | `embodiment/body-animation/troubleshooting.md` |
-| Body Language | `embodiment/body-language/troubleshooting.md` |
-| Conversation Flow | `embodiment/conversation-flow/troubleshooting.md` |
+| Actions | [Actions troubleshooting](../features/character-actions/debugging-and-troubleshooting.md) |
+| Emotion | [Emotion troubleshooting](../embodiment/emotion/troubleshooting-and-diagnostics.md) |
+| Long-Term Memory | [Long-Term Memory troubleshooting](../features/long-term-memory/troubleshooting-and-diagnostics.md) |
+| Dynamic Context | [Dynamic Context troubleshooting](../features/dynamic-context/troubleshoot-dynamic-context.md) |
+| Narrative Design | [Narrative Design troubleshooting](../features/narrative-design/troubleshooting-and-diagnostics.md) |
+| Vision | [Vision troubleshooting](../features/vision/troubleshooting-and-diagnostics.md) |
+| Scene Metadata | [Scene Metadata troubleshooting](../features/scene-metadata/troubleshooting-and-diagnostics.md) |
+| Embodiment | [Embodiment troubleshooting](../embodiment/troubleshooting.md) |
+| Gaze | [Gaze troubleshooting](../embodiment/gaze/troubleshooting.md) |
+| Body Animation | [Body Animation troubleshooting](../embodiment/body-animation/troubleshooting.md) |
+| Body Language | [Body Language troubleshooting](../embodiment/body-language/troubleshooting.md) |
+| Conversation Flow | [Conversation Flow troubleshooting](../embodiment/conversation-flow/troubleshooting.md) |
+
+Other entry points address failures that cross feature boundaries:
+
+| Symptom | Guide |
+| --- | --- |
+| Token provider or endpoint fails | [Authentication troubleshooting](../authentication/troubleshooting.md) |
+| Roster or participant routing fails | [Multi-character troubleshooting](../features/multi-character-sessions/troubleshooting.md) |
+| The wrong character receives input | [Conversation targeting](../features/conversation-targeting/) |
+| Connected but input is refused | [Conversation availability](../features/conversation-availability/) |
+| An assistant cannot inspect or configure the scene | [AI assistant troubleshooting](../ai-coding-assistant/troubleshooting.md) |
 
 ## Next steps
 
