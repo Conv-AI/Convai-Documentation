@@ -3,12 +3,14 @@ title: Install the Convai Unity SDK
 description: >-
   Install the Convai Unity SDK into a Unity project using Package Manager or
   Asset Store so the SDK and its dependencies resolve correctly.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-The Convai Unity SDK is available through two channels. Use **Package Manager** for new projects or when you prefer not to manage Asset Store downloads — the package resolves directly from the Convai registry with no manual download. Use **Asset Store** if your project already sources packages from your Asset Store library or if your studio manages package versions through My Assets.
+These instructions describe the SDK <code class="expression">space.vars.unity_sdk_version</code> preview. Use the release package supplied for your preview, and confirm public channel availability before following either installation path.
 
-Both methods require Unity <code class="expression">space.vars.unity_min_version</code> and install SDK version **<code class="expression">space.vars.unity_sdk_version</code>** and the same four required dependencies.
+Use **Package Manager** when the intended package version is available in a registry already configured for your project, or install the preview package supplied by the release owner. Use **Asset Store** only after that version is listed in your library. This source snapshot does not establish that the 5.0 preview is available on either public channel.
+
+Both methods require Unity <code class="expression">space.vars.unity_min_version</code> and use the dependencies declared by the installed package. Confirm the version shown by each channel before installing; a Package Manager release and an Asset Store release can become available at different times.
 
 {% tabs %}
 {% tab title="Package Manager" %}
@@ -38,7 +40,7 @@ Type or paste the following identifier into the Name field, then click **Add**:
 com.convai.convai-sdk-for-unity
 ```
 
-Unity contacts the registry, resolves the package, and begins downloading. Four dependencies install automatically:
+If your configured registry contains the requested version, Unity resolves and downloads it. Otherwise use the package source or registry configuration supplied with that release. Seven dependencies install automatically:
 
 | Package                           | Version |
 | --------------------------------- | ------- |
@@ -46,17 +48,20 @@ Unity contacts the registry, resolves the package, and begins downloading. Four 
 | `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> |
 | `com.unity.ugui`                  | <code class="expression">space.vars.dep_ugui_version</code> |
 | `com.unity.inputsystem`           | <code class="expression">space.vars.dep_inputsystem_version</code> |
+| `com.unity.collections` | <code class="expression">space.vars.dep_collections_version</code> |
+| `com.unity.modules.ai` | <code class="expression">space.vars.dep_modules_ai_version</code> |
+| `com.unity.modules.xr` | <code class="expression">space.vars.dep_modules_xr_version</code> |
 
 Wait for the progress bar in the bottom-right of the Unity Editor to complete before continuing.
 {% endstep %}
 {% endstepper %}
 
 {% hint style="warning" %}
-**Dependency conflict:** If your project already pins any of these four packages to an older version in `Packages/manifest.json`, the install will fail or produce a version mismatch. Open `Packages/manifest.json`, remove or update the conflicting version entries, then retry.
+**Dependency conflict:** If your project already pins any of these packages to an older version in `Packages/manifest.json`, the install will fail or produce a version mismatch. Open `Packages/manifest.json`, remove or update the conflicting version entries, then retry.
 {% endhint %}
 
 {% hint style="success" %}
-**Installation complete** when the Convai SDK for Unity entry appears in the Package Manager list with a green checkmark and version <code class="expression">space.vars.unity_sdk_version</code>. You will also see a new **Convai** menu item in the Unity menu bar.
+**Installation complete** when the Convai SDK for Unity entry appears in the Package Manager list with the expected installed version. You will also see a new **Convai** menu item in the Unity menu bar.
 {% endhint %}
 {% endtab %}
 
@@ -89,7 +94,7 @@ Your Asset Store library loads. Locate **Convai SDK for Unity** in the list.
 
 Select **Convai SDK for Unity** in the list. Click **Download**, then click **Import** once the download completes.
 
-Unity imports the package and installs four dependencies automatically:
+Unity imports the package and installs seven dependencies automatically:
 
 | Package                           | Version |
 | --------------------------------- | ------- |
@@ -97,6 +102,9 @@ Unity imports the package and installs four dependencies automatically:
 | `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> |
 | `com.unity.ugui`                  | <code class="expression">space.vars.dep_ugui_version</code> |
 | `com.unity.inputsystem`           | <code class="expression">space.vars.dep_inputsystem_version</code> |
+| `com.unity.collections` | <code class="expression">space.vars.dep_collections_version</code> |
+| `com.unity.modules.ai` | <code class="expression">space.vars.dep_modules_ai_version</code> |
+| `com.unity.modules.xr` | <code class="expression">space.vars.dep_modules_xr_version</code> |
 
 Wait for the progress bar in the bottom-right of the Unity Editor to complete before continuing.
 {% endstep %}
@@ -104,7 +112,7 @@ Wait for the progress bar in the bottom-right of the Unity Editor to complete be
 
 To update the SDK to a newer version later, return to **My Assets** in the Package Manager, select the SDK, and click **Update**.
 
-Installation is complete when the Convai SDK for Unity entry appears in the Package Manager list with version <code class="expression">space.vars.unity_sdk_version</code>. You will also see a new **Convai** menu item in the Unity menu bar.
+Installation is complete when the Convai SDK for Unity entry appears in the Package Manager list with the expected installed version. You will also see a new **Convai** menu item in the Unity menu bar.
 {% endtab %}
 {% endtabs %}
 

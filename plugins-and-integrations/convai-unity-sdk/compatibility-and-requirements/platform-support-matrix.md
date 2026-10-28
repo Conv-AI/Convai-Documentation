@@ -1,43 +1,49 @@
 ---
 title: Platform support matrix
 description: Reference for Convai Unity SDK platform support, including feature availability across Windows, macOS, Android, iOS, Meta Quest, and WebGL.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-The Convai Unity SDK runs on all major Unity deployment targets. Feature availability varies by platform — use the matrix below to confirm support before building for a specific target.
+This matrix describes implemented platform paths in the reviewed 5.0 preview source. Feature availability depends on the device, browser, permissions and service configuration. Validate a built application on each target; this matrix is not a record of release qualification.
 
 ## Feature × platform matrix
 
 | Feature                    | Windows / macOS / Linux | Android                        | iOS                                    | Meta Quest            | WebGL                                  |
 | -------------------------- | ----------------------- | ------------------------------ | -------------------------------------- | --------------------- | -------------------------------------- |
-| Voice conversation         | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full                                 |
-| Microphone capture         | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full — HTTPS + user gesture required |
+| Voice conversation         | ✅ Available                  | ✅ Available                         | ✅ Available                                 | ✅ Available                | ✅ Available                                 |
+| Microphone capture         | ✅ Available                  | ✅ Available                         | ✅ Available                                 | ✅ Available                | ✅ Available — HTTPS + microphone permission required |
 | Remote audio playback      | ✅ Unity `AudioSource`   | ✅ Unity `AudioSource`          | ✅ Unity `AudioSource`                  | ✅ Unity `AudioSource` | ⚠️ Browser-routed                      |
-| Lip sync                   | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ⚠️ Known timing drift                  |
-| Spatial audio              | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ❌ Not supported                        |
-| Actions                    | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full                                 |
-| Emotion                    | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full                                 |
-| Long-Term Memory           | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full                                 |
-| Narrative Design           | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full                                 |
-| Dynamic Context            | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ✅ Full                                 |
-| Vision — Camera            | ✅ Full                  | ✅ Full                         | ✅ Full                                 | ✅ Full                | ⚠️ Canvas capture                      |
-| Vision — Webcam            | ✅ Full                  | ⚠️ Runtime permission required | ⚠️ `NSCameraUsageDescription` required | ❌ Not applicable      | ❌ Not supported                        |
-| Vision — Quest passthrough | ❌ Not supported         | ❌ Not supported                | ❌ Not supported                        | ✅ Full                | ❌ Not supported                        |
+| Lip sync                   | ✅ Available                  | ✅ Available                         | ✅ Available                                 | ✅ Available                | ⚠️ Browser playback clock                  |
+| Spatial audio              | ✅ Available                  | ✅ Available                         | ✅ Available                                 | ✅ Available                | ❌ Not supported                        |
+| Actions                    | ✅ Available                  | ✅ Available                         | ✅ Available                                 | ✅ Available                | ✅ Available                                 |
+| Emotion                    | ✅ Available                  | ✅ Available                         | ✅ Available                                 | ✅ Available                | ✅ Available                                 |
+| Long-Term Memory           | ✅ Available                  | ✅ Available                         | ✅ Available                                 | ✅ Available                | ✅ Available                                 |
+| Narrative Design           | ✅ Available                  | ✅ Available                         | ✅ Available                                 | ✅ Available                | ✅ Available                                 |
+| Dynamic Context            | ✅ Available                  | ✅ Available                         | ✅ Available                                 | ✅ Available                | ✅ Available                                 |
+| Vision — Camera            | ✅ Available                  | ✅ Available                         | ✅ Available                                 | ✅ Available                | ✅ Frame Source by default                      |
+| Vision — Webcam            | ✅ Available                  | ⚠️ Runtime permission required | ⚠️ `NSCameraUsageDescription` required | ❌ Not applicable      | ❌ Not supported                        |
+| Vision — Quest passthrough | ❌ Not supported         | ❌ Not supported                | ❌ Not supported                        | ✅ Available                | ❌ Not supported                        |
+| Text-only ordinary rooms | ✅ Available | ✅ Available | ✅ Available | ✅ Available | ✅ Available |
+| On-device Sentis/Silero voice detection | ✅ Native path | ✅ Native path | ✅ Native path | ✅ Native path | ❌ Excluded from build |
+| Push-to-talk finalization | Capture drain when supported | Capture drain when supported | Capture drain when supported | Capture drain when supported | Legacy release |
+| Group conversation | Correlated PTT required | Correlated PTT required | Correlated PTT required | Correlated PTT required | ❌ Legacy release cannot run group PTT |
+
+Scene Auto Tagger is an Editor authoring tool for Windows x64 and macOS, with separate native Core distribution gates. It is not a player-platform feature. See [Scene Auto Tagger](../features/scene-metadata/scene-auto-tagger.md).
 
 ## Platform-specific requirements
 
 {% tabs %}
 {% tab title="WebGL" %}
-WebGL is fully supported with the following constraints imposed by browser security policies:
+WebGL uses browser media and permission APIs:
 
-* **Microphone capture** requires HTTPS or `localhost`. HTTP deployments cannot access the microphone. Call `ConvaiManager.EnableAudioAndStartListening()` from a user gesture (button click) — do not start audio automatically on scene load.
-* **Remote audio playback** is routed through the browser's audio system, not Unity's `AudioSource`. Volume and spatialization controls on `AudioSource` components have no effect on WebGL.
-* **Vision — Camera** uses browser canvas capture (`CameraVisionFrameSource` is supported).
-* **Vision — Webcam** (`WebcamVisionFrameSource`) is not supported on WebGL — `AsyncGPUReadback` is unavailable in the browser runtime. Use `CameraVisionFrameSource` to stream the game canvas instead.
+* **Microphone capture** requires HTTPS or `localhost`. HTTP deployments cannot access the microphone. When playback is blocked, the default manager retries audio unlock on eligible non-UI clicks after connection. A UI button can call `ConvaiManager.EnableAudioAndStartListening()` explicitly.
+* **Remote audio playback** is routed through the browser's audio system, not Unity's `AudioSource`. Use `ConvaiAudioOutput.Volume` and `IsMuted` for browser playback control. Unity distance rolloff and listener volume do not apply; iOS Safari controls its own nonzero media volume.
+* **Vision — Camera** publishes the configured frame source by default. **WebGL Publishes > Game View** explicitly captures the visible Unity canvas, including its UI. A custom `IVisionPageCanvasSource` can provide a page canvas.
+* **Vision — Webcam** (`WebcamVisionFrameSource`) is not supported on WebGL — `AsyncGPUReadback` is unavailable in the browser runtime. Use the supported camera frame-source path instead.
 * **Spatial audio** is not supported on WebGL.
 
 {% hint style="warning" %}
-WebGL has a known audio/lip-sync timing drift defect — audio and lip-sync data arrive correctly, but playback timing can drift in browser builds. This is a tracked defect, not a missing feature. Validate in your target browser before shipping.
+WebGL aligns lip sync to measured browser voice onset, waiting up to two seconds through initial silence, and uses a realtime playback clock. Verify timing in the target browser and hosting environment.
 {% endhint %}
 
 {% hint style="info" %}
@@ -52,7 +58,7 @@ For detailed WebGL setup, browser compatibility, and deployment steps, see the W
 {% endtab %}
 
 {% tab title="Android" %}
-* **Microphone:** The SDK requests `RECORD_AUDIO` permission at runtime via `ConvaiPermissionService`. Declare the permission in your `AndroidManifest.xml` and handle both grant and denial cases in your app flow.
+* **Microphone:** The SDK requests `RECORD_AUDIO` permission at runtime via `ConvaiPermissionService`. Unity normally adds that manifest permission when microphone APIs are used. Verify a custom manifest does not remove it, and handle denial in your app flow.
 * **Vision — Webcam:** `android.permission.CAMERA` is requested at runtime by `WebcamVisionFrameSource`. Handle permission grant and denial in your app flow.
 
 For Android build configuration, permission handling, and microphone setup, see the iOS and Android platform guide.
@@ -63,8 +69,9 @@ For Android build configuration, permission handling, and microphone setup, see 
 {% endtab %}
 
 {% tab title="iOS" %}
-* **Microphone:** `NSMicrophoneUsageDescription` must be set in **Player Settings → Other Settings → iOS → Microphone Usage Description**. Omitting this causes a crash on first microphone access.
+* **Microphone:** The SDK requests access before opening capture. `NSMicrophoneUsageDescription` must be set in **Player Settings → Other Settings → iOS → Microphone Usage Description**. Omitting this causes a crash on first microphone access.
 * **Vision — Webcam:** `NSCameraUsageDescription` must be set in **Player Settings → Other Settings → iOS → Camera Usage Description** if you use `WebcamVisionFrameSource`. On iOS, `WebcamVisionFrameSource` accesses the device camera via Unity's `WebCamTexture` API.
+* Enable **Prepare iOS for Recording** and use **Setup Health** to check the microphone description.
 * Define your app's behavior when the user denies microphone or camera permission, and when the app is interrupted or backgrounded during a conversation.
 
 For iOS build configuration, permission setup, and Info.plist requirements, see the iOS and Android platform guide.

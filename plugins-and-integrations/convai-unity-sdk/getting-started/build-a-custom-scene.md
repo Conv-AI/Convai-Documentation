@@ -1,6 +1,6 @@
 ---
 title: Build a custom scene
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 description: >-
   Add required Convai components to a new Unity scene using the Setup Required
   Components command and configure your first character.
@@ -18,7 +18,7 @@ Every working Convai scene needs these three things:
 [Player GameObject]   → ConvaiPlayer
 ```
 
-The setup wizard creates the first and third automatically. You add the NPC components yourself.
+The setup command creates the manager object. You add the player and character components explicitly. You can also start with `Prefabs/Setup/Convai Character.prefab` for a character with audio output, or `Prefabs/Setup/ConvaiDefaults.prefab` for the manager, player and UI. Assign the character ID and verify the resulting scene references.
 
 {% stepper %}
 {% step %}
@@ -26,21 +26,27 @@ The setup wizard creates the first and third automatically. You add the NPC comp
 
 In the Unity Editor menu bar, select **GameObject > Convai > Setup Required Components**.
 
-Unity creates a **ConvaiManager** GameObject with `ConvaiManager` and `ConvaiRoomManager` attached, and a **ConvaiPlayer** GameObject with `ConvaiPlayer` attached. Both appear in the Hierarchy.
+Unity creates `[Convai Manager]` with `ConvaiManager` and `ConvaiRoomManager` attached, or adds the missing component to an existing manager. The command does not create a player or a character.
 
 `ConvaiRoomManager` always lives on the same GameObject as `ConvaiManager`. Do not move it to a separate GameObject.
 {% endstep %}
 
 {% step %}
+### Add the player
+
+Select the GameObject that represents the player and choose **Add Component > Convai > Convai Player**. Keep one local `ConvaiPlayer` in this scene.
+{% endstep %}
+
+{% step %}
 ### Add ConvaiCharacter to your NPC
 
-In the Hierarchy, select the NPC GameObject you want to make conversational. In the Inspector, click **Add Component** and add `ConvaiCharacter`.
+In the Hierarchy, select the NPC GameObject you want to make conversational. In the Inspector, choose **Add Component > Convai > Convai Character**.
 {% endstep %}
 
 {% step %}
 ### Add AudioSource and ConvaiAudioOutput
 
-On the same NPC GameObject, add `AudioSource`, then add `ConvaiAudioOutput`.
+On the same NPC GameObject, choose **Add Component > Convai > Convai Audio Output**. Unity also adds the required `AudioSource` if it is missing.
 
 All three components — `ConvaiCharacter`, `ConvaiAudioOutput`, and `AudioSource` — should now appear on the same GameObject in the Inspector.
 {% endstep %}
@@ -60,24 +66,9 @@ The Character ID field is required. If it is empty, the character cannot connect
 
 In the menu bar, select **GameObject > Convai > Validate Scene Setup**.
 
-A dialog appears listing errors, warnings, and recommended next steps.
+The dialog reports **ERRORS (must fix)**, **WARNINGS**, and **How to fix** when it finds problems. Fix missing components and empty character IDs before connecting. A missing player requires **Add Component > Convai > Convai Player**; running the setup command again does not add one.
 
-**Errors (must fix):**
-
-| Error                                 | Fix                                          |
-| ------------------------------------- | -------------------------------------------- |
-| No `ConvaiManager` found              | Run **Setup Required Components**            |
-| No `ConvaiCharacter` found            | Add `ConvaiCharacter` to your NPC GameObject |
-| `ConvaiCharacter` has no Character ID | Set the Character ID from your dashboard     |
-| No `ConvaiPlayer` found               | Run **Setup Required Components**            |
-
-**Warnings:**
-
-| Warning                | Fix                                          |
-| ---------------------- | -------------------------------------------- |
-| API key not configured | Open **Convai > Settings > Credentials** and enter your key |
-
-When the validator reports no errors, the scene is ready for Play Mode.
+See [Validate your setup](validate-your-setup.md) for the checks, including duplicate character IDs and inactive characters in a multi-character scene. A passing scene check establishes local wiring. You still need to test authentication and a conversation.
 {% endstep %}
 
 {% step %}
@@ -88,7 +79,7 @@ Press **Play**. The Unity Console logs:
 * `[ConvaiRuntime] Started successfully` — SDK initialized
 * `[RoomConnectionRuntimeAdapter] Room connection succeeded (mode=create).` — the room connected to Convai
 
-Speak into your microphone. The character responds within a few seconds.
+Speak into your microphone. Once the character becomes ready, confirm that it receives your speech and responds. Response time depends on the connection and character service.
 
 If you later add a Gaze, Body Animation, Body Language, or Emotion module component to the NPC, Convai adds supporting infrastructure components to the same GameObject automatically. See [Scene components reference](scene-components.md) for what each one does.
 {% endstep %}
@@ -127,7 +118,7 @@ The copy is created next to the character's prefab when it has one, or under `As
 
 **Expected outcome:** Both characters are discovered and registered automatically. There is no component to add and no field to fill: `ConvaiManager` keeps the conversation pointed at whichever character the player is addressing, and moves it there as the player's attention shifts. See [Conversation targeting](../features/conversation-targeting/README.md) for the rule that decides who is being addressed and the settings that tune it.
 
-Character A and Character B do not share conversation context unless your Convai character configuration explicitly links them.
+Use [multi-character sessions](../features/multi-character-sessions/README.md) for shared-room routing and readiness, or [group conversation](../features/group-conversation/README.md) for the preview where characters also talk to each other.
 
 ## Next steps
 
