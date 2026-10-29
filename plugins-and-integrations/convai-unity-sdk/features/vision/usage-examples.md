@@ -200,7 +200,7 @@ The previous examples all publish frames continuously through `ConvaiVisionPubli
 
 `RequestVisionStatus()` asks the backend to report the state of the session's frame buffer. `TriggerVision(ConvaiVisionTriggerRequest)` asks the backend to attach buffered frames to the next turn and, depending on the request's respond mode, invoke the model. `UpdateRespondMode(ConvaiRespondModeLane, ConvaiRespondMode)` changes how an entire input lane affects the character's speech for the rest of the session. All three return a local send-acceptance boolean and expose asynchronous acknowledgement events separately — see [Vision scripting API](scripting-api.md) for the full method signatures, request fields, and event payloads.
 
-**Expected outcome:** Calling `RequestLookNow()` logs the buffer status, then the character describes what changed and speaks its answer. Calling `SilenceVisionUntilAsked()` stops the character from reacting to new vision frames until `RequestLookNow()` is called again.
+**Expected outcome:** Calling `RequestLookNow()` logs the buffer status, then the character describes what changed and speaks its answer. Calling `AnswerEveryVisionTrigger()` changes the Vision lane from its `Silent` default to `MustRespond`, so later vision triggers that set no `RespondMode` also get a spoken answer. Sampled frames still never start a reply on their own.
 
 ```csharp
 using Convai.Domain.DomainEvents.Vision;
@@ -254,10 +254,10 @@ public class OnDemandVisionInspector : MonoBehaviour
         });
     }
 
-    // Call once, e.g. when the player enters an area where vision responses are a distraction
-    public void SilenceVisionUntilAsked()
+    // Call once, e.g. when the player enters an area where every vision trigger should get an answer
+    public void AnswerEveryVisionTrigger()
     {
-        _roomService?.UpdateRespondMode(ConvaiRespondModeLane.Vision, ConvaiRespondMode.Silent);
+        _roomService?.UpdateRespondMode(ConvaiRespondModeLane.Vision, ConvaiRespondMode.MustRespond);
     }
 
     private void OnVisionStatus(VisionContextStatusReceived status)
