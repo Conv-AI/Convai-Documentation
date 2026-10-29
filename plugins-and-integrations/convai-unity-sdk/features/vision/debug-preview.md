@@ -105,7 +105,7 @@ If you add the Sample Debug Hub prefab yourself, its **Vision** panel exposes th
 | **Vision Status** (ignores prompt and respond-mode inputs) | Calls `ConvaiRoomManager.RequestVisionStatus()`. The result text reports the backend's buffer outcome, active source, and frame age once Convai answers. |
 | **Vision prompt** and **Respond mode** inputs + **Vision Trigger** | Calls `ConvaiRoomManager.TriggerVision()` with the prompt text and the parsed respond mode. The result text reports whether frames were attached and whether the request was downgraded. |
 
-The **Respond mode** input accepts `silent`, `auto`, or `must_respond`. An unrecognized value is rejected before the request is sent. The result text then reads `Invalid respond mode '<value>' — use silent, auto or must_respond`.
+The **Respond mode** input accepts `silent`, `auto`, or `must_respond`. Leave it empty to send no mode; the trigger then follows the Vision lane default, `Silent`, and Convai attaches the frames without a reply. An unrecognized value is rejected before the request is sent. The result text then reads `Invalid respond mode '<value>' — use silent, auto or must_respond`.
 
 For example, after a successful trigger the result text reads:
 

@@ -169,7 +169,7 @@ A custom `IConvaiRoomConnectionService` implementation must implement all three 
 | Method | Returns | Description |
 | --- | --- | --- |
 | `RequestVisionStatus(string updateId = null)` | `bool` | Requests backend dynamic vision buffer/status diagnostics for the current session. The backend answers with [`VisionContextStatusReceived`](#visioncontextstatusreceived). |
-| `TriggerVision(ConvaiVisionTriggerRequest request)` | `bool` | Requests backend dynamic vision attachment/response behavior for the current session — asks the character to look at the buffered frames and, depending on the request, respond. The backend answers with [`VisionContextTriggerReceived`](#visioncontexttriggerreceived). |
+| `TriggerVision(ConvaiVisionTriggerRequest request)` | `bool` | Asks Convai to attach buffered frames to a turn for the current session and, depending on the request's `RespondMode`, respond. A request without a `RespondMode` uses the Vision lane default, `Silent`, so the frames are attached without a reply. The backend answers with [`VisionContextTriggerReceived`](#visioncontexttriggerreceived). |
 | `UpdateRespondMode(ConvaiRespondModeLane lane, ConvaiRespondMode mode, string updateId = null)` | `bool` | Changes one input lane's respond mode for the component's lifetime, including reconnects, without reconnecting. The backend acknowledges with [`RespondModeUpdateResultReceived`](#respondmodeupdateresultreceived). |
 
 Each method returns a send-acceptance boolean, not server confirmation. It can return `false` without a transport, without a selected target in a multi-character room, or for an oversized data message. `TriggerVision` and `UpdateRespondMode` also refuse group-room requests. `RequestVisionStatus` does not have that explicit group guard. Observe the response event separately.
@@ -231,7 +231,7 @@ new ConvaiVisionTriggerRequest(string updateId = null)
 | --- | --- | --- |
 | `UpdateId` | `string` | Idempotency key for this request, set by the constructor. |
 | `Text` | `string` | Optional prompt accompanying the frames, e.g. `"What changed on the table?"`. Empty leaves prompt selection to the service default; confirm the deployed service contract for the resulting behavior. |
-| `RespondMode` | `ConvaiRespondMode?` | How this trigger affects the character's speech. `null` uses the connect-time default for the trigger lane (`ConvaiVisionRespondModeSettings.Trigger`). |
+| `RespondMode` | `ConvaiRespondMode?` | How this trigger affects the character's speech. `null` uses the session default for the Vision lane (`ConvaiVisionRespondModeSettings.Vision`, `Silent` unless changed), so set `MustRespond` when the character should answer. |
 | `FrameWindowStart` | `int?` | Start of the relative frame window, set via `SetFrameWindow`. |
 | `FrameWindowEnd` | `int?` | End of the relative frame window, set via `SetFrameWindow`. |
 | `FramePtsIds` | `IReadOnlyList<long>` | Optional absolute frame selection by presentation timestamp (nanoseconds), as reported in acknowledgements (`attached_frame_pts`) and vision-status responses. Takes precedence over the frame window when both are set. |
@@ -257,9 +257,9 @@ Identifies which input lane's respond mode `UpdateRespondMode` changes. User tex
 
 | Value | Wire modality | Description |
 | --- | --- | --- |
-| `Vision` | `vision` | Newly sampled vision frames. |
+| `Vision` | `vision` | Vision triggers that don't set their own `RespondMode`. Sampled frames never start a reply on their own. |
 | `ContextUpdate` | `context_update` | Dynamic-context text updates. |
-| `Trigger` | `trigger` | Explicit vision triggers without a per-request mode. |
+| `Trigger` | `trigger` | Narrative Design trigger messages, such as `SendTrigger`. Does not apply to vision triggers. |
 | `SceneMetadata` | `scene_metadata` | Scene-metadata updates. |
 
 ## Domain events

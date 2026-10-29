@@ -52,10 +52,12 @@ The **When The Character Speaks Up** group contains per-lane respond-mode defaul
 
 | Lane | Default | Governs |
 |---|---|---|
-| New Frames | `Silent` | How newly sampled vision frames affect speech |
+| Vision Triggers | `Silent` | A `TriggerVision` request that doesn't set its own `RespondMode` |
 | Context Updates | `Auto` | How a dynamic-context text update affects speech |
-| Vision Triggers | `MustRespond` | The default behavior for an explicit vision trigger that doesn't set its own mode |
+| Narrative Triggers | `MustRespond` | How a Narrative Design trigger, such as `SendTrigger` or `ConvaiNarrativeDesignTrigger`, affects speech. It does not apply to vision triggers |
 | Scene Metadata | `Silent` | How scene-metadata updates affect speech |
+
+Sampled frames never start a reply on their own; Convai buffers them and attaches them to the next turn. Because a vision trigger without a `RespondMode` follows the **Vision Triggers** lane, it attaches frames silently by default. Set `RespondMode = ConvaiRespondMode.MustRespond` on the request when the character should answer.
 
 Use `UpdateRespondMode` to request a mid-session lane change. Check its boolean send result and the later acknowledgement; see [Vision scripting API](scripting-api.md).
 
