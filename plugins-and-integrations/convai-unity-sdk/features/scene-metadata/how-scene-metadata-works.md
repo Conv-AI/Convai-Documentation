@@ -10,23 +10,31 @@ Scene metadata gives a character names and descriptions for relevant Unity objec
 
 Enabled `ConvaiObjectMetadata` components register themselves. The registry excludes invalid names, objects with **Include In Metadata** off, physical members represented by an active logical group, and group roots with no active members.
 
-When a character becomes ready, it snapshots names already present in its action configuration and marks scene metadata pending. Its automatic payload also excludes those names to avoid duplicates. The character flushes only while connected and `IsInConversation`; in a multi-character room it must be the conversation target. An initially empty payload is omitted; a later empty payload can clear previously sent data.
+Every valid world object goes in the character's scene description, including objects that also have an action target. When the scene registers one `ConvaiCharacter`, a new room sends the list in its connect request. The connect request is not subject to the data-message limit below, and the SDK adds no limit of its own, so a large scene arrives whole. A scene that registers more than one character (including a group conversation), and any join to an existing room by name, including the automatic rejoin after a dropped connection, send no list in the connect request and use the data message instead. A scene with no valid world objects sends no scene description.
+
+When a character becomes ready, it marks scene metadata pending. The pending update goes out once the character is connected and `IsInConversation`, and only when the list differs from the one the room holds, so a list that arrived in the connect request is not repeated. The lists are compared entry by entry, so a change of order or count also counts as a difference. In a multi-character room the character must also be the conversation target. An empty list is not sent while the room holds no list; once the room holds one, a later empty list replaces it.
 
 ```mermaid
 flowchart TD
     A[Enabled World Object] --> B[Registry and logical-group filters]
-    B --> C[Exclude names already in character action config]
-    C --> D[Pending character update]
-    D --> E{Connected and current conversation target?}
+    B --> C{New room, one registered character?}
+    C -->|Yes| R[List sent in the connect request]
+    C -->|No| D
+    R --> D[Character ready: update pending]
+    D --> E{Connected and in conversation?}
     E -->|No| D
-    E -->|Yes| F{Serialized message fits transport limit?}
-    F -->|Yes| G[Local transport send]
-    F -->|No| H[Warning and refused send]
+    E -->|Yes| F{Differs from the list the room holds?}
+    F -->|No| X[Nothing sent]
+    F -->|Yes| T{Conversation target, in a multi-character room?}
+    T -->|No| X2[Not sent]
+    T -->|Yes| G{Message fits 15,360 bytes?}
+    G -->|Yes| S[Data message sent]
+    G -->|No| H[Warning and refused send]
 ```
 
-The collector reads the registry's full valid list without the character-specific action-name exclusion. **Collect On Start** attempts a send when the room connects. Manual collection sends to the current target, so it does not broadcast the scene to every member of a room.
+The collector reads the same full valid list and sends it as a data message each time it runs. **Collect On Start** attempts a send when the room connects. Manual collection sends to the current target, so it does not broadcast the scene to every member of a room.
 
-The full serialized data message, including its envelope, must fit within 15,360 UTF-8 bytes. The sender warns and refuses larger messages. Authoring text limits and the number of objects do not guarantee that the message fits.
+A data message, including its envelope, must fit within 15,360 UTF-8 bytes. The sender warns and refuses larger messages, and a refused scene description update leaves the room with the list it had. The limit applies to every update after connect, including the whole scene description when more than one character is registered or after a rejoin, and to collector sends. It does not apply to a scene description sent in the connect request. Authoring text limits and the number of objects do not guarantee that an update fits.
 
 ## Live description changes
 
@@ -46,7 +54,7 @@ In a group conversation, a non-`Silent` change updates members silently and send
 
 **Include Spatial Context** publishes changing distance, direction, visibility, and movement facts through Dynamic Context. On the same 0.25-second poll, the SDK selects objects within 30 metres for characters in a conversation, prioritizing visible objects and then nearer ones, up to 24 facts per character.
 
-Keys use `scene-object.{id}.spatial`. Distances are banded to reduce updates: half-metre steps below 5 metres, metre steps below 10 metres, and 5-metre steps farther away. A fact describes an object's relative position, visibility, and whether it is moving. These are client measurements, not proof of what the model perceived.
+Keys use `scene-object.{id}.spatial`. Distances are banded to reduce updates: half-metre steps below 5 metres, metre steps below 10 metres, and 5-metre steps farther away. A fact describes an object's relative position, visibility, and whether it is moving. It names the character it is measured from, as in `Chair: 3 m to Ava's left; visible to Ava; stationary`, and a logical group's fact says how many objects share its name. See [Spatial context from world objects](../dynamic-context/spatial-context.md) for the format. These are client measurements, not proof of what the model perceived.
 
 ## Logical groups and movement
 

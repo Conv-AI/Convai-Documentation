@@ -56,10 +56,10 @@ Instruction installation preserves text outside the `<!-- BEGIN CONVAI UNITY SDK
 
 ## Verify the tool count
 
-The **Convai MCP Tools** row reads `47/47 registered` once Unity's MCP registry has registered all 47 Convai tools under tool contract version 10. If the count is lower or the row lists a missing or unexpected tool name, click **Fix** next to **Convai MCP Tools** to refresh the registry and recompile.
+The **Convai MCP Tools** row reads `52/52 registered` once Unity's MCP registry has registered all 52 Convai tools under tool contract version 11. If the count is lower or the row lists a missing or unexpected tool name, click **Fix** next to **Convai MCP Tools** to refresh the registry and recompile.
 
 {% hint style="success" %}
-The Unity side is ready when the four readiness rows read **Ready** and **Convai MCP Tools** reads `47/47 registered`. From the coding client, call `Convai.GetProjectStatus` and confirm contract version `10`, then `Convai.InspectScene`. Those successful read-only calls verify the connection. Installation-detection rows need only match the client you use.
+The Unity side is ready when the four readiness rows read **Ready** and **Convai MCP Tools** reads `52/52 registered`. From the coding client, call `Convai.GetProjectStatus` and confirm contract version `11`, then `Convai.InspectScene`. Those successful read-only calls verify the connection. Installation-detection rows need only match the client you use.
 {% endhint %}
 
 ## Prompt the agent to build your scene
@@ -74,8 +74,11 @@ With managed instructions installed and the tool count verified, prompt your age
 | Add objects | "Add a red fire extinguisher GameObject next to the workbench." |
 | Enable vision | "Turn on vision for the Instructor character so it can see the workbench." |
 | Add a second character | "Add a second Convai Character named Trainee, and switch conversation targeting to Proximity." |
+| Tag scene objects | "Tag the props on the workbench so the Instructor can describe them." |
 
-Vision setup is not among Convai's 47 tools, so your agent configures it by editing `ConvaiRoomManager` and adding `ConvaiVisionPublisher` directly. See [Vision quick start](../features/vision/quick-start.md) for the exact fields it sets.
+Tagging uploads captured images to Convai Vision, so the packaged skill runs the Scene Auto Tagger tools only when you ask it to tag the scene. See the [Scene Auto Tagger tools](mcp-tools-reference.md#scene-auto-tagger) for the order they run in.
+
+Vision setup is not among Convai's 52 tools, so your agent configures it by editing `ConvaiRoomManager` and adding `ConvaiVisionPublisher` directly. See [Vision quick start](../features/vision/quick-start.md) for the exact fields it sets.
 
 ## What to try next
 

@@ -6,7 +6,7 @@ description: >-
 last_reviewed: "5.0.0-preview"
 ---
 
-The 5.0 preview changes transcript APIs, local player identity and media behavior. Upgrade a copy of your integration, resolve compile errors and verify saved scene bindings before replacing a deployed build.
+The 5.0 preview changes transcript APIs, local player identity, media behavior and how action parameters are read. Upgrade a copy of your integration, resolve compile errors and verify saved scene bindings before replacing a deployed build.
 
 {% hint style="warning" %}
 These instructions describe the reviewed 5.0 release branch, whose package manifest still says `4.6.1` and changelog says Unreleased. Confirm the final package, channel and release notes before upgrading a production project.
@@ -57,9 +57,18 @@ Test native spatial playback and voice volume after the audio migration. The car
 
 **Build target:** Activate WebGL before a WebGL build. The build guard rejects a mismatched active target.
 
-**Editor tools:** `Convai.ConfigureRoom` keeps fields you omit. Pass an explicit value when you want a reset. Tool results redact player identity and shorten session IDs; do not parse those fields as complete identifiers. The memory tools introduce remote service writes that preview by default.
+**Editor tools:** `Convai.ConfigureRoom` keeps fields you omit. Pass an explicit value when you want a reset. Tool results redact player identity and shorten session IDs; do not parse those fields as complete identifiers. The memory tools introduce remote service writes that preview by default. Five Scene Auto Tagger tools are new: `Convai.FindSceneTagCandidates`, `Convai.TagSceneObjects`, `Convai.GetSceneTagRun`, `Convai.ApplySceneTags` and `Convai.DescribeSceneView`. Tagging uploads captures, so the assistant skill runs it only when asked, and apply previews by default. The MCP tool contract version is now `11`; a client that checks it should expect that value.
 
-**Scene context:** Spatial facts use banded distances and a per-character object cap, and are published only while the character is in conversation. Attention references must exist in the action configuration. Update applications that parse old spatial fact text.
+**Scene context:** Spatial facts use banded distances and a per-character object cap, and are published only while the character is in conversation. A fact now names the character it is measured from. It reads `Chair: 3 m to Ava's left; visible to Ava; stationary` where it read `Chair: 3.0 m ahead`, so update applications that parse spatial fact text. A logical group's fact describes its nearest member and reads `Name (nearest of N): …`. Attention references must exist in the action configuration: give an object an action target, or list it in the action config, if it should receive attention. Every world object, action targets included, now goes in the scene description, and a new room for a scene with one character receives that description in its connect request. Scenes with more than one character, and rejoins, still send it as a data message limited to 15,360 bytes.
+
+## Review action parameters
+
+The SDK now reads more of what a character writes in an action command, which changes what an Action Behavior receives in four cases.
+
+* A String or Auto parameter whose value is a JSON object or array arrives whole, as the character wrote it. Before, it arrived empty.
+* Brace groups labelled with the action's slots fill the slots they name, in any order. `{high: 80} {low: 20}` no longer fills the slots by position.
+* `move_to {speed: run} Blue Sphere` reads each slot. Before, `speed` got `{speed:` and the target got `run} Blue Sphere`.
+* A one-slot action sent with nothing after its name has that parameter marked Missing, not Provided with an empty value. An Action Behavior can now tell no value from a blank one through `ConvaiActionParameterValue.Presence` for one-slot actions too. The template's empty slot (`{}`) still reads as Provided and blank.
 
 ## If upgrading from before 4.6.1
 
@@ -71,6 +80,7 @@ Remove the ignored reason argument from `DisconnectAsync`. Replace `SetExplicitC
 * [ ] Transcript rows update once per entry, handle corrections/removals and clear correctly.
 * [ ] A character reaches ready state and responds through every input mode the app exposes.
 * [ ] Memory identity and failure codes behave correctly for the app's provider.
+* [ ] Action Behaviors handle JSON, labelled and Missing parameter values.
 * [ ] Mic denial, text-only operation, reconnect and background recovery work on target devices.
 * [ ] Browser publishing, audio unlock and lip-sync timing pass in the deployed hosting environment.
 

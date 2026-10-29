@@ -53,11 +53,13 @@ Apply preserves manually authored metadata and reports conflicts for objects cha
 
 Inspect the resulting World Objects and groups. Enter Play mode, address the intended character, and verify collection and local delivery using [Scene metadata quick start](quick-start.md). Then test the actual conversation and any navigation separately.
 
-A successful Apply proves that scene components were authored. It does not prove a payload fits the 15,360-byte data limit, reaches every room member, or produces the intended reply.
+A successful Apply proves that scene components were authored. With one registered character, a new room receives the whole list in its connect request. More than one character, a rejoin, and later changes use a data message limited to 15,360 bytes, and Apply warns when the action targets or the world objects pass three quarters of that limit. Apply does not prove that the list reaches every room member or produces the intended reply.
 {% endstep %}
 {% endstepper %}
 
 <figure><img src="../../../../.gitbook/assets/unity-scene-auto-tagger-setup.png" alt="Scene Auto Tagger Setup tab with the character picker, scene description, description focus, Scope set to Current Scene, Quality set to Accurate, and the Vision ready status"><figcaption><p>Scene Auto Tagger Setup. The character cards are blurred because they show account characters.</p></figcaption></figure>
+
+Coding assistants connected through the Unity MCP Server can run the same tagging workflow; see the [MCP tools reference](../../ai-coding-assistant/mcp-tools-reference.md).
 
 ## Next steps
 

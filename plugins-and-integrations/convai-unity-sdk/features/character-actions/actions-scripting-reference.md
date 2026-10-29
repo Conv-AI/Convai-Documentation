@@ -51,7 +51,7 @@ public abstract class ConvaiActionExecutorBase : MonoBehaviour, IConvaiActionExe
 | --- | --- | --- |
 | `CharacterTransform` | `Transform` (protected) | The Convai Character's transform, resolved on first use by searching upward and cached. Falls back to this component's own transform (uncached) when no character is found above it |
 | `ResolvePlayer()` | `protected virtual Transform` | Where the player actually is; see `ConvaiPlayerBody` below. Override for split screen, multiple rigs, or a cutscene camera |
-| `DeclaredButNotSent(invocation, parameterName)` | `protected static bool` | Whether the action declares `parameterName` and the Convai Character sent no value for it — distinguishes "nothing was said about this" from a value that happens to be empty |
+| `DeclaredButNotSent(invocation, parameterName)` | `protected static bool` | Whether the action declares `parameterName` and its value is `Missing` or blank. Returns `false` when the action does not declare the parameter. Only `Presence` tells a deliberate blank, such as the template's empty slot `{}`, from `Missing` |
 
 ### `ConvaiTargetedActionExecutor`
 
@@ -109,7 +109,7 @@ public abstract class ConvaiActionExecutor<TParameters> : ConvaiActionExecutorBa
 }
 ```
 
-Binds public fields and properties of `TParameters` by parameter name (supported member types: `string`, `float`, `double`, `int`, `bool`, `ConvaiResolvedActionTarget`, `ConvaiActionParameterValue`). Use `[ConvaiActionParameter("name")]` when the DTO member name differs from the authored parameter name.
+Binds public fields and properties of `TParameters` by parameter name (supported member types: `string`, `float`, `double`, `int`, `bool`, `ConvaiResolvedActionTarget`, `ConvaiActionParameterValue`). Use `[ConvaiActionParameter("name")]` when the DTO member name differs from the authored parameter name. A `String` or `Auto` parameter that carries JSON binds to a `string` member as the whole JSON text.
 
 ## `ConvaiPlayerBody`
 
@@ -252,9 +252,9 @@ Typed execution context passed to executors and all dispatcher events.
 | Method | Signature | Description |
 | --- | --- | --- |
 | `TryGetParameter` | `bool TryGetParameter(string name, out ConvaiActionParameterValue value)` | Attempts to read a typed parameter by name (case-insensitive) |
-| `GetString` | `string GetString(string name, string fallback = "")` | Reads a string parameter, returning `fallback` when absent |
-| `GetNumber` | `float GetNumber(string name, float fallback = 0f)` | Reads a numeric parameter, returning `fallback` when absent |
-| `GetBool` | `bool GetBool(string name, bool fallback = false)` | Reads a boolean parameter, returning `fallback` when absent |
+| `GetString` | `string GetString(string name, string fallback = "")` | Reads a string parameter. Returns `fallback` only when the command has no such parameter; a declared parameter that is `Missing` returns `""` |
+| `GetNumber` | `float GetNumber(string name, float fallback = 0f)` | Reads a numeric parameter. Returns `fallback` only when the command has no such parameter; a declared parameter that is `Missing` returns `0` |
+| `GetBool` | `bool GetBool(string name, bool fallback = false)` | Reads a boolean parameter. Returns `fallback` only when the command has no such parameter; a declared parameter that is `Missing` returns `false` |
 | `GetReference` | `ConvaiResolvedActionTarget GetReference(string name)` | Resolves a reference parameter against the character's action config, falling back to the definition's target requirement when the parameter carries no explicit kind |
 
 ## `ConvaiResolvedActionTarget`
@@ -308,7 +308,7 @@ One typed action parameter after enrichment. Every representation is populated b
 
 | Property | Type | Description |
 | --- | --- | --- |
-| `Type` | `ConvaiActionParameterType` | Effective type after coercion. An authored `Auto` resolves to a concrete type |
+| `Type` | `ConvaiActionParameterType` | Effective type after coercion. An authored `Auto` resolves to a concrete type; a `String` or `Auto` parameter holding a JSON object or array resolves to `String` |
 | `RawValue` | `string` | Trimmed raw text this value was parsed from |
 | `StringValue` | `string` | The value as text (same as `RawValue` after trimming) |
 | `NumberValue` | `float` | Parsed float, or `0` when the text is not numeric |
@@ -319,6 +319,17 @@ One typed action parameter after enrichment. Every representation is populated b
 
 Read parameters through `ConvaiActionInvocation.TryGetParameter`, `GetString`, `GetNumber`, `GetBool`, or `GetReference` rather than indexing `ConvaiActionCommand.Parameters` directly.
 
+### How JSON and labelled values arrive
+
+A `String` or `Auto` parameter whose value is a JSON object or array reaches the executor whole, as text, exactly as the Convai Character wrote it. `Type` is `String` and `ResolvedReference` is `null`, even for an `Auto` parameter and even when the JSON contains a target name. This holds wherever the JSON appears in the command: in the target, in the name, filled into the parameter (`{steps: {...}}`), or as the next list entry after the bare action. The template's empty slot `{}` is the exception: it reads as a blank, `Provided` value. That entry is put back on the action when it starts with the parameter's name (`steps: {...}`) or when exactly one `String` or `Auto` parameter is still empty.
+
+Only RFC 8259 JSON counts. JavaScript notation with structure arrives as the strict JSON it means: for a parameter named `plan`, `{plan: {title: 'Morning', items: ['stretch', 'coffee']}}` arrives as `{"title":"Morning","items":["stretch","coffee"]}`. Loose slot notation (`{target: "The Rooms"}`), an object whose keys only name the action's parameters (`{"gesture": "wave"}`), and a one-value wrapper in an `Auto` parameter (`["Lid"]`, `{"value": 5}`) still read as the plain value. An object with one key that names the parameter itself and holds an object or array counts as JSON.
+
+* An action with several parameters also reads one JSON object keyed by every parameter name, whatever the parameter types: `{"low": 20, "high": 80}`. An action that needs a target but declares no `Auto` or `Reference` parameter has an implicit `target` slot, so its object needs a `target` key too.
+* JSON written after the other values fills the last parameter when it is `String` or `Auto`: `guided_tour m-7 {"steps": [...]}`.
+* Brace groups labelled with a parameter name fill that parameter in any order: `{high: 80} {low: 20}`. Unlabelled groups fill by position.
+* When the groups fill every slot but one, the plain text after them fills the slot no group names. For a `move_to` action with a required target and a `speed` choice of `walk` or `run`, `move_to {speed: run} Blue Sphere` reads `speed` as `run` and the implicit target as `Blue Sphere`.
+
 ## `ConvaiActionParameterPresence`
 
 `Convai.Shared.Types`
@@ -327,10 +338,10 @@ Whether a parameter's value came from the Convai Character at all. An action tha
 
 | Value | Integer | Description |
 | --- | --- | --- |
-| `Provided` | `0` | A value was supplied for this slot. The default |
-| `Missing` | `1` | No value reached this slot; the parameter exists only because the action declares it |
+| `Provided` | `0` | A value was supplied for this slot, even a blank one such as the template's empty slot `{}`. The default |
+| `Missing` | `1` | No value reached this slot; the parameter exists only because the action declares it. An action sent with nothing after its name leaves its parameters `Missing`, including an action with a single parameter |
 
-Check this before acting on an empty value: `Missing` means nothing was said about the parameter, and the executor should decide for itself — refuse, ask, or apply its own default — rather than read the emptiness as an instruction. `Missing` is also logged once through the `Actions` log category.
+Check this before acting on an empty value: `Missing` means nothing was said about the parameter, and the executor should decide for itself — refuse, ask, or apply its own default — rather than read the emptiness as an instruction. `Missing` is also logged as a warning in the `Actions` log category.
 
 ## `ConvaiActionParameterReference`
 
@@ -686,9 +697,9 @@ The action system's remaining enums, grouped here for reference.
 
 | Value | Integer | Description |
 | --- | --- | --- |
-| `Auto` | `0` | Infer reference, number, bool, or string best-effort, in that order. Default |
+| `Auto` | `0` | Infer reference, number, bool, or string best-effort, in that order. A JSON object or array with structure is `String`; a wrapper round one plain value, such as `["Lid"]` or `{"value": 5}`, reads as that value. Default |
 | `Reference` | `1` | Resolve an authored object or character target by name |
-| `String` | `2` | Keep the raw text |
+| `String` | `2` | Keep the raw text. A JSON object or array arrives whole; see [How JSON and labelled values arrive](#how-json-and-labelled-values-arrive) |
 | `Number` | `3` | Parse an invariant-culture float |
 | `Bool` | `4` | Parse `true`/`yes`/`1` or `false`/`no`/`0` |
 | `Choice` | `5` | Require one of the authored choice strings. A mismatch flags the value through `IsConstraintMatch` |

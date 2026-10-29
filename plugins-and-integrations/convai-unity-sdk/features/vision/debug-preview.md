@@ -27,7 +27,7 @@ The component auto-discovers the active frame source in the scene. No explicit a
 | **Show Preview** | `bool` | `true`  | Enables the camera feed overlay.      |
 | **Show Stats** (under **Statistics**)   | `bool` | `true`  | Enables the capture statistics panel. |
 
-**Source**
+**Source fields** (no heading in the Inspector)
 
 | Field                               | Type            | Default             | Description                                                                                                                                   |
 | ----------------------------------- | --------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -43,7 +43,7 @@ The component auto-discovers the active frame source in the scene. No explicit a
 | **Offset X**         | `int` (0–200)     | `10`          | Horizontal inset from the selected corner in pixels.                                                                |
 | **Offset Y**         | `int` (0–200)     | `10`          | Vertical inset from the selected corner in pixels.                                                                  |
 
-<figure><img src="../../../../.gitbook/assets/image (503).png" alt="Debug preview overlay positioning controls in the Inspector"><figcaption><p>Debug preview overlay positioning controls.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-vision-debug-preview-inspector.png" alt="Vision Debug Preview Inspector with Frame Source Component, Overlay Layout, Aspect Ratio, Preview Settings and Statistics fields"><figcaption><p>The Vision Debug Preview Inspector with its default values.</p></figcaption></figure>
 
 **Aspect Ratio**
 
@@ -52,16 +52,16 @@ The component auto-discovers the active frame source in the scene. No explicit a
 | **Use Source Aspect Ratio** | `bool`        | `true`         | When enabled, derives aspect ratio from the frame source's `FrameDimensions`. When disabled, uses **Custom Aspect Ratio**. |
 | **Custom Aspect Ratio**     | `float` (1–3) | `1.778` (16:9) | Aspect ratio used when **Use Source Aspect Ratio** is disabled.                                                            |
 
-Inspector sections are ordered **Source**, **Overlay Layout**, **Aspect Ratio**, **Preview Settings**, then **Statistics**.
+The two source fields come first with no heading, followed by **Overlay Layout**, **Aspect Ratio**, **Preview Settings**, then **Statistics**.
 
 ## Statistics overlay
 
-When **Show Stats** is enabled, a text box is drawn adjacent to the preview. The exact output:
+When **Show Stats** is enabled, a 180 × 122 pixel text box is drawn in the preview's corner, on top of the preview. It sits beside the preview only when the preview falls back to IMGUI drawing. The exact output:
 
 ```text
 Vision Capture Debug
 Status: Capturing
-Source: ConvaiVisionRoot/ConvaiVisionRoot [camera] (CameraVisionFrameSource)
+Source: [Convai Manager]/ConvaiVisionRoot [camera] (CameraVisionFrameSource)
 Resolution: 1280x720
 FPS: 14.9 (target: 15)
 Frames: 447
@@ -71,11 +71,11 @@ Frames: 447
 | ----------------------------- | ------------------------------------------------- | -------------------------------------------------- |
 | `Status: Capturing / Stopped` | `IsCapturing` on the frame source                 | Boolean string — not the `VisionSourceState` enum. |
 | `Source: ...`                 | Hierarchy path + SourceId + type name             | Full path from scene root for disambiguation.      |
-| `Resolution: WxH`             | `FrameDimensions`                                 | `(0, 0)` before capture starts.                    |
+| `Resolution: WxH`             | `FrameDimensions`                                 | `0x0` only for a source with no texture yet, such as Quest. A camera source shows its configured size and a webcam source its requested size before capture. |
 | `FPS: X.X (target: Y)`        | Measured over 0.5 s intervals + `TargetFrameRate` | Measured FPS updates every 0.5 seconds.            |
 | `Frames: N`                   | `FrameCount`                                      | Cumulative total since capture started.            |
 
-<figure><img src="../../../../.gitbook/assets/image (491).png" alt="Statistics panel showing FPS and frame metrics in the Vision Debug Preview overlay"><figcaption><p>Statistics panel showing FPS and frame metrics.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-vision-debug-overlay.png" alt="Game view in Play Mode with the vision preview in the bottom-right corner and the statistics panel over it"><figcaption><p>The preview and statistics panel in the Game view. A long <code>Source</code> line is cut off at the panel edge.</p></figcaption></figure>
 
 {% hint style="warning" %}
 **`IsCapturing` vs `IsPublishing`:** The statistics panel shows `IsCapturing` — whether the frame source is producing frames. This is distinct from `ConvaiVisionPublisher.IsPublishing`, which indicates whether a WebRTC video track is actively being sent to Convai. Both can be checked independently; a source may be capturing while publishing is paused or not yet started.

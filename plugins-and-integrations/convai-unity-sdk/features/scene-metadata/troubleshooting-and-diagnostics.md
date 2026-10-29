@@ -37,7 +37,7 @@ public class MetadataAudit : MonoBehaviour
 | --- | --- |
 | Object is absent from the registry | Enable its GameObject and World Object component. Inspect the **Live**/**Inactive** status chip or `IsRegistered` in code. |
 | Registered object is absent from the payload | Check nonblank name, **Include In Metadata**, logical-group membership, and active group members. |
-| Automatic payload omits a valid object | Names already in the character's action configuration are excluded by the automatic path. |
+| Object with an action target is missing from the payload | An action target does not exclude an object. Check the name, **Include In Metadata**, and logical-group conditions in the row above. |
 | Statistics show more valid objects than the payload | Statistics do not apply logical-group projection; inspect `GetValidMetadata()` or `GetCurrentMetadata()` instead. |
 | Name or description gets a warning | Stay within 64/320 UTF-16 code units. Oversized text warns but is not automatically excluded or truncated when authored manually. |
 | Play-mode Inspector edit does not update the character | Use the public properties in script or an intentional manual recollection. `OnValidate` is not the live setter path. |
@@ -51,9 +51,11 @@ In a multi-character room, a character's automatic metadata waits while it is no
 
 If the Console warns that a data message exceeds **15,360 bytes**, reduce the serialized payload: remove irrelevant objects, shorten text, or use logical groups for genuine duplicate copies. The limit includes the complete message envelope and UTF-8 encoding. A list that passes individual 64/320 authoring limits may still exceed it. Collection success does not bypass this refusal.
 
+With one registered character, a new room sends its scene description in the connect request, which is not subject to this limit, so the warning there comes from a later update, a rejoin after a dropped connection, or a collector send. With more than one registered character, the whole scene description goes in a data message, so trim descriptions or turn off **Include In Metadata** on decorative objects. A refused scene description update leaves the room with the list it had, and the SDK does not retry that update.
+
 If dependencies are missing, ensure an active `ConvaiManager` exists. Wait on `ConvaiManager.IsConnected` or a connection event before testing readiness once. Repeatedly polling `IsReadyToSendMetadata()` while disconnected produces warnings on every call.
 
-An initially empty automatic payload is omitted. Once a character has sent nonempty metadata, a later empty payload can remove the previous scene list. Inspect action-name exclusions and group filters before assuming an empty registry projection is an error.
+An empty list is not sent while the room holds no list. Once the room holds one, a later empty list replaces it. Inspect **Include In Metadata** and group filters before assuming an empty registry projection is an error.
 
 ## Diagnose Scene Auto Tagger separately
 

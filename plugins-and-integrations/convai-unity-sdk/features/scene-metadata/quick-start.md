@@ -44,7 +44,7 @@ Check for warnings, especially an oversized message or a missing target. In mult
 {% endstep %}
 {% endstepper %}
 
-The automatic character path works without a collector, and excludes names already in the character's action configuration. A collector uses the full valid registry list for its current-target send. See [How scene metadata works](how-scene-metadata-works.md) for the distinction.
+The automatic character path works without a collector. It sends every valid world object, action targets included: in the connect request when the scene has one character, otherwise once the character is ready. After that it sends the list again only when it changes. A collector sends the same full list to the current target each time it runs. See [How scene metadata works](how-scene-metadata-works.md) for the distinction.
 
 ## Next steps
 

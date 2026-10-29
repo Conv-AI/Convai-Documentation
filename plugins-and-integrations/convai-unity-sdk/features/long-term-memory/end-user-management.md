@@ -8,7 +8,7 @@ Manage end-user records in the **Long Term Memory** section of **Convai Editor**
 
 ## Use the editor
 
-Choose **Convai > Convai Editor**, then select **Long Term Memory**. The list loads 50 end users at a time. **Load More** fetches another page; **Search** filters loaded records, while **Find Exact ID** fetches a known ID directly. Clicking a row focuses that user's memories; its checkbox selects the user for **Deactivate Selected**.
+Choose **Convai > Convai Editor**, then select **Long Term Memory**. The list loads 50 end users at a time. **Load More** fetches another page; **Filter by name or ID** filters loaded records, while **Find Exact ID** fetches a known ID directly. Clicking a row focuses that user's memories; its checkbox selects the user for **Deactivate Selected**.
 
 Use [Inspect and manage long-term memories](long-term-memory-window.md) for the full window workflow. **Deactivate End User** and **Deactivate Selected** do not erase stored memories. If removal of memories is required, use **Forget End User…**, check the requests, and deactivate only after the checks finish successfully.
 

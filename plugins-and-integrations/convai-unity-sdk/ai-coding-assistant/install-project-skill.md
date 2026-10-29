@@ -31,7 +31,7 @@ Claude Code uses `.claude/skills/convai-unity-sdk/`; Codex uses `.agents/skills/
 
 ## Verify
 
-**Project skill** should read **Installed**. A successful status call with contract version `10` establishes that this 5.0 preview's tools are reachable; the skill's Installed status alone does not. Ask the client to run `Convai.InspectScene` before any target-specific configuration.
+**Project skill** should read **Installed**. A successful status call with contract version `11` establishes that this 5.0 preview's tools are reachable; the skill's Installed status alone does not. Ask the client to run `Convai.InspectScene` before any target-specific configuration.
 
 Use **Remove** on the relevant row to remove the managed skill copy or instruction block. They are separate operations; removing instructions does not disconnect Unity MCP or uninstall the SDK.
 
