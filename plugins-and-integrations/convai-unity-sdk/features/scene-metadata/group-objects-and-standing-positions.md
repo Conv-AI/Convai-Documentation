@@ -24,7 +24,7 @@ Create a root GameObject and add **Convai > Logical Object Group**. Its required
 
 The root represents the active group in scene metadata; its members are omitted from that payload. A root with no active member is omitted too. Inspect the collector's current list instead of comparing only registry statistics, which do not apply the same group filter.
 
-Runtime interaction resolves an active physical member using the observer position. Test near more than one copy, then disable a copy and test the remaining selection.
+Runtime interaction resolves an active physical member using the observer position. A request that names the group resolves to the member nearest the character, which is not always the one the user means, so keep objects separate when users need to tell them apart. Turn on **Include Spatial Context** on the group root's World Object; members produce no spatial facts of their own. With it on, the group's spatial fact describes that nearest member and says how many objects share the name; see [Spatial context from world objects](../dynamic-context/spatial-context.md). Test near more than one copy, then disable a copy and test the remaining selection.
 {% endstep %}
 {% endstepper %}
 

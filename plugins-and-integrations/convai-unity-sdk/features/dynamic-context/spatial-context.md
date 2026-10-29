@@ -4,7 +4,7 @@ description: Send object distance, direction, visibility, and movement to charac
 last_reviewed: "5.0.0-preview"
 ---
 
-Spatial context gives each connected character a description of nearby registered objects relative to that character. Enable it when dialogue needs facts such as which object is ahead or whether an object is moving. These facts use Dynamic Context; they are separate from camera-frame vision.
+Spatial context gives each connected character a description of nearby registered objects relative to that character. Enable it when dialogue needs facts such as which object is in front of the character or whether an object is moving. These facts use Dynamic Context; they are separate from camera-frame vision.
 
 ## Prepare the objects
 
@@ -30,15 +30,19 @@ The shared world-object polling loop runs at a default interval of 0.25 seconds.
 Each fact uses an owned key, `scene-object.<object-id>.spatial`, and a value with this shape:
 
 ```text
-Pressure valve: 2.5 m ahead; visible; stationary
+Pressure valve: 2.5 m in front of Ava; visible to Ava; stationary
 ```
+
+Every fact names the character it is measured from, so the model does not repeat a direction as the player's. The name is the character's `CharacterName`, or `the character` when that is blank.
 
 | Fact | Client calculation |
 |---|---|
-| Distance | Approximate bands: half-meter steps below 5 meters, one-meter steps below 10 meters, and five-meter steps farther away. A small hysteresis band prevents constant rewrites near boundaries. |
-| Direction | `ahead`, `right`, `behind`, or `left`, relative to the character root. Direction changes hold until the bearing passes the sector boundary by a margin. |
-| Visibility | A physics linecast from 1.6 meters above the character root to the aim point, ignoring triggers. A clear line or a hit on the physical object's descendants counts as visible. |
-| Movement | Aim-point movement greater than 0.02 meters between polls. The moving state is retained for four polls after movement to reduce flicker. |
+| Distance | Approximate bands: half-meter steps below 5 meters, one-meter steps below 10 meters, and five-meter steps farther away. A whole-meter band prints without a decimal (`3 m`); a half-meter band prints as `2.5 m`. A small hysteresis band prevents constant rewrites near boundaries. |
+| Direction | Written as `in front of Ava`, `to Ava's right`, `behind Ava`, or `to Ava's left`, relative to the character root. Direction changes hold until the bearing passes the sector boundary by a margin. |
+| Visibility | A physics linecast from 1.6 meters above the character root to the aim point, ignoring triggers. A clear line or a hit on the physical object or one of its descendants counts as visible. The fact reads `visible to Ava` or `hidden from Ava`. |
+| Movement | Aim-point movement greater than 0.02 meters between polls. The fact stays `moving` for four polls, counting the poll that detected the movement, to reduce flicker. The fact reads `moving` or `stationary`. |
+
+A logical group with more than one active member reports its nearest member and how many objects share its name, as in `Robotic arm (nearest of 3): 4 m to Ava's left; visible to Ava; stationary`.
 
 Visibility is a physics estimate, not a claim that a rendered object is on screen. Distance and direction are deliberately approximate descriptions, not navigation coordinates.
 

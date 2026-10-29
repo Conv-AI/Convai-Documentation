@@ -12,7 +12,7 @@ The Convai AI coding assistant integration adds Convai-specific tools to Unity's
 
 ## What the integration adds
 
-Unity's official MCP server, provided by the `com.unity.ai.assistant` package, gives a coding agent generic tools for GameObjects, scripts, assets, and scene operations, but no knowledge of Convai components. The Convai Unity SDK adds 47 SDK-aware tools (contract version 10) with a `Convai.*` name prefix — for example `Convai.ConfigureCharacter`, `Convai.ConfigureLipSync`, `Convai.ConfigureGaze`, `Convai.DiagnoseConversation`, and `Convai.ConfigureConversationTargeting` — that read and mutate only Convai components such as `ConvaiManager`, characters, actions, lip sync, embodiment modules (gaze, body animation, body language, emotion), transcripts, narrative sections, and which character in a multi-character room the player is addressing. Unity MCP tools continue to own generic GameObjects, scripts, and scene operations. Convai tools never accept or return API keys. Scene-authoring tools use Unity Undo and leave scenes unsaved. `Convai.SetCharacterMemorySettings` instead changes settings on the Convai service for every app using that character; it previews by default and has no Unity Undo.
+Unity's official MCP server, provided by the `com.unity.ai.assistant` package, gives a coding agent generic tools for GameObjects, scripts, assets, and scene operations, but no knowledge of Convai components. The Convai Unity SDK adds 52 SDK-aware tools (contract version 11) with a `Convai.*` name prefix — for example `Convai.ConfigureCharacter`, `Convai.ConfigureLipSync`, `Convai.ConfigureGaze`, `Convai.DiagnoseConversation`, and `Convai.ConfigureConversationTargeting` — that read and mutate only Convai components such as `ConvaiManager`, characters, actions, lip sync, embodiment modules (gaze, body animation, body language, emotion), transcripts, narrative sections, World Objects tagged by the Scene Auto Tagger, and which character in a multi-character room the player is addressing. Unity MCP tools continue to own generic GameObjects, scripts, and scene operations. Convai tools never accept or return API keys. Scene-authoring tools use Unity Undo and leave scenes unsaved. `Convai.SetCharacterMemorySettings` instead changes settings on the Convai service for every app using that character; it previews by default and has no Unity Undo. `Convai.TagSceneObjects` and `Convai.DescribeSceneView` upload captured images to Convai Vision, so the packaged skill runs them only when you ask the agent to tag or describe the scene.
 
 ## Supported coding agents
 
@@ -30,6 +30,7 @@ With a coding agent connected, prompt it in natural language instead of wiring c
 * Add chat UI to display the conversation transcript
 * Switch between push-to-talk and hands-free conversation input
 * Add objects to the scene for a character to reference
+* Tag scene objects with names and descriptions so a character knows what they are
 * Enable vision so a character can see the scene
 * Configure gaze, body animation, body language, or emotion for a character
 * Add a second character to a room and configure how the SDK decides which one the player is addressing

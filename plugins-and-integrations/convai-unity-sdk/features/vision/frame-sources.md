@@ -57,13 +57,13 @@ WebGL also supports this source, subject to browser camera access. Test a deploy
 
 ## QuestVisionFrameSource
 
-`QuestVisionFrameSource` streams the real-world passthrough feed from a Meta Quest 3 or 3S headset, giving Convai characters a live view of the physical environment. The component binds to Meta's `PassthroughCameraAccess` API via reflection so the SDK does not take a hard compile-time dependency on the Meta XR package. The Inspector shows a dedicated Live Status panel — resolution, target FPS, frame count, `State`, and `ErrorKind` — matching the panels shown by `CameraVisionFrameSource` and `WebcamVisionFrameSource`.
+`QuestVisionFrameSource` streams the real-world passthrough feed from a Meta Quest 3 or 3S headset, giving Convai characters a live view of the physical environment. The component binds to Meta's `PassthroughCameraAccess` API via reflection so the SDK does not take a hard compile-time dependency on the Meta XR package. In Play Mode, the Inspector's **Live** section shows whether it is capturing, plus **Resolution**, **Target FPS**, **Frames**, **Frame Ready**, **Identifier**, **State** and **Error**, with the source's status message below them when it has one, like the Live sections of `CameraVisionFrameSource` and `WebcamVisionFrameSource`. While **Passthrough Camera Access** is empty, an **Auto-Discovery** note explains that the component searches the scene for one when capture starts.
 
 **Component menu path:** `Convai/Vision/Quest Vision Frame Source`
 
-<figure><img src="../../../../.gitbook/assets/convai-quest-vision-frame-source-inspector.png" alt="QuestVisionFrameSource Inspector"><figcaption><p>QuestVisionFrameSource Inspector.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-quest-vision-frame-source.png" alt="Quest Vision Frame Source Inspector with the Auto-Discovery note, Quest Camera Access and Output Settings groups, and the Live section asking for Play Mode"><figcaption><p>The Quest Vision Frame Source Inspector in Edit Mode. The Live section fills in during Play Mode.</p></figcaption></figure>
 
-`QuestVisionFrameSource` requires **Meta Quest 3 or 3S** running Horizon OS with the Passthrough Camera API. Quest 2 and Quest Pro do not support `PassthroughCameraAccess`. In the Editor or on other platforms, `PassthroughCameraAccess` cannot be found or read, so the component enters `Failed` state with `ErrorKind = InvalidConfiguration` and produces no frames.
+`QuestVisionFrameSource` requires **Meta Quest 3 or 3S** running Horizon OS with the Passthrough Camera API. Quest 2 and Quest Pro do not support `PassthroughCameraAccess`. In the Editor or on other platforms it produces no frames. If no readable `PassthroughCameraAccess` is found when capture starts, the component enters `Failed` with `ErrorKind = InvalidConfiguration`. If one is found but never delivers a readable texture, the component retries the binding three times, one second apart, then enters `Failed` with `DeviceUnavailable` and the message "Quest passthrough source stopped producing readable frames."
 
 {% hint style="danger" %}
 **AndroidManifest.xml permissions required.** Your manifest must declare both `horizonos.permission.HEADSET_CAMERA` and `android.permission.CAMERA`. Verify permission grants on the target headset. A missing or unreadable `PassthroughCameraAccess` reports `Failed` / `InvalidConfiguration`; the client cannot establish device permission behavior from the Inspector alone.
@@ -80,12 +80,12 @@ WebGL also supports this source, subject to browser camera access. Test a deploy
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
 | **Source Id** | `string` | `"quest-passthrough"` | Identifier used in domain events. |
-| **Max Output Width** | `int` | `1280` | Maximum width of the output `RenderTexture`. |
-| **Max Output Height** | `int` | `720` | Maximum height of the output `RenderTexture`. |
+| **Max Output Width** | `int` | `1280` | Maximum width of the output `RenderTexture`. The output only scales down, keeping the aspect ratio; `0` keeps the source width. |
+| **Max Output Height** | `int` | `720` | Maximum height of the output `RenderTexture`. The output only scales down, keeping the aspect ratio; `0` keeps the source height. |
 | **Target Frame Rate** | `int` | `15` | Target frames per second for capture. |
-| **Flip Y** | `bool` | `true` | Flips the passthrough texture vertically. Required for correct video orientation — disable only if the Meta SDK changes its coordinate conventions. |
+| **Flip Y** | `bool` | `true` | Flips the passthrough texture vertically so the published texture is top-down. |
 
-The binding to `PassthroughCameraAccess` is established via reflection at runtime. If the Meta XR package is updated and `PassthroughCameraAccess` changes its API, the component logs an error and enters `Failed` state. Check for SDK updates in that case.
+The binding to `PassthroughCameraAccess` is established via reflection at runtime. If the Meta XR package is updated and `PassthroughCameraAccess` changes its API, the component enters `Failed` and sets `StatusMessage`, which the Inspector's **Live** section shows. It does not log the failure. Check for SDK updates in that case.
 
 ## Source state reference
 

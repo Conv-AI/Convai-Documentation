@@ -76,7 +76,7 @@ Use this only with your own Animator controller; Body Animation owns its charact
 | --- | --- | --- |
 | `CharacterTransform` | `Transform` (protected) | The Convai Character's transform, resolved once and cached. Use this instead of the executor's own `transform` for any world-space read or write |
 | `ResolvePlayer()` | `protected virtual Transform` | Where the player actually is — see [Resolve the player's position](#resolve-the-players-position) below |
-| `DeclaredButNotSent(invocation, parameterName)` | `protected static bool` | Whether the action declares `parameterName` and the Convai Character sent no value for it |
+| `DeclaredButNotSent(invocation, parameterName)` | `protected static bool` | Whether the action declares `parameterName` and its value is `Missing` or blank |
 
 ### Read the character's transform, not your own
 
@@ -148,6 +148,33 @@ This selects the nearest active member for ordinary targeted behaviors and retur
 ### Read parameters
 
 Use `invocation.GetString("mode")`, `GetNumber`, `GetBool`, `GetReference`, or `TryGetParameter` rather than parsing command text. `GetReference` returns a resolved parameter target, separate from the main `ResolvedTarget`. See the [scripting reference](actions-scripting-reference.md).
+
+A parameter the Convai Character did not fill in has `Presence` set to `Missing`, including the only parameter of an action sent with nothing after its name. `GetString` returns an empty string for it, so check before reading that emptiness as an instruction. `DeclaredButNotSent` is true for a `Missing` or blank value; only `Presence` tells a deliberate blank from `Missing`.
+
+A `String` or `Auto` parameter can also carry structured data. When its value is a JSON object or array, the parameter arrives whole as text, exactly as the Convai Character wrote it. Read it with `GetString` and parse it in the executor. This fragment runs inside an `async` `ExecuteAsync` or `ExecuteCoreAsync` of an executor derived from `ConvaiActionExecutorBase`, and uses `Newtonsoft.Json`, `Newtonsoft.Json.Linq`, and `Convai.Runtime.Actions`:
+
+```csharp
+if (DeclaredButNotSent(invocation, "steps"))
+    return ConvaiActionExecutionResult.Unhandled("The Convai Character sent no steps.");
+
+JToken plan;
+try
+{
+    plan = JToken.Parse(invocation.GetString("steps"));
+}
+catch (JsonReaderException)
+{
+    plan = null;
+}
+
+if (plan is not { Type: JTokenType.Object or JTokenType.Array })
+    return ConvaiActionExecutionResult.Failed(
+        "The steps were not a JSON plan.", ConvaiActionFailureReason.Custom);
+
+// Walk the plan here.
+```
+
+Plain text, a single number or a quoted string in the same parameter is not a plan, so keep both the `catch` and the type check. An assembly definition with **Override References** turned on must list `Newtonsoft.Json.dll`. See [How JSON and labelled values arrive](actions-scripting-reference.md#how-json-and-labelled-values-arrive) for the rules.
 
 ## Execution result types
 

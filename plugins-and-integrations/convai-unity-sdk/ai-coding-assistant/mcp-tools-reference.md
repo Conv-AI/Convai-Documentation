@@ -4,9 +4,9 @@ description: Reference for every Convai MCP tool exposed to a coding agent, incl
 last_reviewed: "5.0.0-preview"
 ---
 
-Unity's official MCP server exposes 47 Convai-specific tools under the `Convai.*` namespace, at tool contract version 10, so a connected coding agent can inspect, configure, or diagnose Convai components instead of you wiring them by hand in the Unity Editor. Unity AI Assistant calls a tool by its dot-separated name (for example `Convai.GetGuidance`); external MCP clients receive the same tool under an underscore-normalized name (`Convai_GetGuidance`). Seven of the 47 tools cover conversation targeting and multi-character rooms — deciding which of several characters the player is addressing, and adding, removing, or waiting on a character in a room that is already connected. This page documents every tool's purpose, parameters, default enabled state, and scene, project, or service mutation behavior, using the dot-separated name throughout.
+Unity's official MCP server exposes 52 Convai-specific tools under the `Convai.*` namespace, at tool contract version 11, so a connected coding agent can inspect, configure, or diagnose Convai components instead of you wiring them by hand in the Unity Editor. Unity AI Assistant calls a tool by its dot-separated name (for example `Convai.GetGuidance`); external MCP clients receive the same tool under an underscore-normalized name (`Convai_GetGuidance`). Seven of the 52 tools cover conversation targeting and multi-character rooms — deciding which of several characters the player is addressing, and adding, removing, or waiting on a character in a room that is already connected. Five run the Scene Auto Tagger, which names and describes scene props and applies the reviewed text as World Objects. This page documents every tool's purpose, parameters, default enabled state, and scene, project, or service mutation behavior, using the dot-separated name throughout.
 
-## All 47 tools
+## All 52 tools
 
 | Tool | Area | Enabled by default | Mutates |
 |---|---|---|---|
@@ -33,6 +33,11 @@ Unity's official MCP server exposes 47 Convai-specific tools under the `Convai.*
 | `Convai.ConfigureActions` | Character actions | Yes | Yes — Edit Mode only |
 | `Convai.DiagnoseActions` | Character actions | Yes | No |
 | `Convai.SimulateAction` | Character actions | Yes | Play Mode only, through the dispatcher |
+| `Convai.FindSceneTagCandidates` | Scene Auto Tagger | Yes | No — Edit Mode only; uploads nothing |
+| `Convai.DescribeSceneView` | Scene Auto Tagger | Yes | No — Edit Mode only; uploads a captured image to Convai Vision |
+| `Convai.TagSceneObjects` | Scene Auto Tagger | Yes | No — Edit Mode only; uploads captured images to Convai Vision; changes nothing in the scene |
+| `Convai.GetSceneTagRun` | Scene Auto Tagger | Yes | No — waits for, reads, or cancels a run |
+| `Convai.ApplySceneTags` | Scene Auto Tagger | Yes | Yes — Edit Mode only; `dryRun` defaults to `true`; one Undo step; never saves |
 | `Convai.ConfigureLipSync` | Lip sync | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
 | `Convai.DiagnoseLipSync` | Lip sync | Yes | No |
 | `Convai.ConfigureTranscripts` | Transcripts | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
@@ -90,6 +95,7 @@ Loads concise Convai SDK workflow guidance for one topic. Call it before configu
 | `MultiCharacter` | By default, a Convai room includes eligible active characters in the loaded scenes; an explicit connection selection can restrict that set; there is no multi-character mode to switch on. Configure targeting with `Convai.ConfigureConversationTargeting` and a group room with `Convai.ConfigureGroupConversation`. |
 | `Events` | Prefer `ConvaiManager.Events` for typed code and relay components for Inspector-driven `UnityEvent`s. |
 | `Runtime` | Use `ConvaiManager` for session ownership, Audio for room audio, and Transcripts for canonical history. |
+| `SceneTagging` | Have Convai Vision name and describe scene props, then apply the reviewed text as World Objects; tagging and drafting upload captured images, so run them only when the user asked to tag or describe the scene. |
 
 ## Foundation
 
@@ -136,7 +142,7 @@ Idempotently adds the required `ConvaiManager` and `ConvaiRoomManager` to the ac
 | `dryRun` | `bool` | `true` via Unity AI Assistant; `false` via the external MCP tool contract | Preview required changes without modifying the scene. |
 
 {% hint style="warning" %}
-`Convai.BootstrapScene` is the only one of the 47 tools disabled by default. Its `dryRun` default also depends on how the agent calls it: Unity AI Assistant's dot-named wrapper defaults `dryRun` to `true` like every other mutating tool, but the underlying MCP tool contract used by external MCP clients (the underscore-named `Convai_BootstrapScene`) defaults `dryRun` to `false` — those clients apply the change immediately unless they pass `dryRun: true` explicitly. Prefer `Convai.SetupConversationScene` for end-to-end setup; use `Convai.BootstrapScene` only for manager/room-only work.
+`Convai.BootstrapScene` is the only one of the 52 tools disabled by default. Its `dryRun` default also depends on how the agent calls it: Unity AI Assistant's dot-named wrapper defaults `dryRun` to `true` like every other mutating tool, but the underlying MCP tool contract used by external MCP clients (the underscore-named `Convai_BootstrapScene`) defaults `dryRun` to `false` — those clients apply the change immediately unless they pass `dryRun: true` explicitly. Prefer `Convai.SetupConversationScene` for end-to-end setup; use `Convai.BootstrapScene` only for manager/room-only work.
 {% endhint %}
 
 ### `Convai.ConfigureRoom`
@@ -441,6 +447,97 @@ Validates an action payload in Edit Mode, or dispatches it through the real runt
 | `timeoutSeconds` | `float` | `10` | Completion timeout, clamped between `0.1` and `60` seconds. |
 
 In Edit Mode the tool returns `executed=false` and `requiresPlayMode=true` after validating the payload. In Play Mode it enqueues the command on the character's dispatcher and waits for a `ConvaiActionStepReport`, returning `SIMULATION_TIMEOUT` if the step does not complete within `timeoutSeconds`.
+
+## Scene Auto Tagger
+
+These tools run the [Scene Auto Tagger](../features/scene-metadata/scene-auto-tagger.md) from a coding agent: Convai Vision names and describes scene props, and the reviewed text becomes World Objects (`ConvaiObjectMetadata`). The order is `Convai.FindSceneTagCandidates`, optionally `Convai.DescribeSceneView`, `Convai.TagSceneObjects`, `Convai.GetSceneTagRun` while the run is `Running`, then `Convai.ApplySceneTags`. Call `Convai.GetGuidance` with topic `SceneTagging` to load the same order.
+
+`Convai.TagSceneObjects` and `Convai.DescribeSceneView` upload captured images and guidance text to Convai Vision, and the tools do not show the window's first-run prompt. Call them only when the user asked to tag or describe the scene. The packaged `convai-unity-sdk` skill tags only when asked.
+
+A large run outlasts a client's tool-call timeout, so tagging continues in the background between calls. The starting call waits up to `waitSeconds` and, if the run is not finished, returns `state` `Running` with a `runId`; `Convai.GetSceneTagRun` waits again. Only one run can be active at a time: a second start returns `RUN_IN_PROGRESS` with the running `runId`. Runs last for the Editor session. A run stopped with `cancel` or by entering Play Mode returns `RUN_CANCELLED`. A script reload clears every run, so its `runId` then returns `RUN_NOT_FOUND`, as does a run older than the last eight.
+
+### `Convai.FindSceneTagCandidates`
+
+**Area:** Scene Auto Tagger · **Enabled by default:** Yes · **Mutates:** No
+
+Lists the objects in the active scene that the Scene Auto Tagger would name and describe, ranked by relevance, with any World Object text they already have. Uploads nothing. Characters and players are never candidates. Available only in Edit Mode — returns a `PLAY_MODE_ACTIVE` failure code if called during Play Mode.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `objectInstanceIds` | `long[]` | omit = scan the active scene | Check only these GameObjects, like the window's **Selected Objects**. The relevance, plain-shape and already-tagged filters do not apply, so `includeTagged` has no effect. |
+| `includeTagged` | `bool` | `false` | Also list objects that already have a World Object, to tag them again. |
+| `excludePlainShapes` | `bool` | `true` | Skip plain engine shapes such as cubes and planes. |
+| `minimumRelevance` | `float` | omit = the window's default | Skip objects below this relevance, from `0` to `1`. The Unity AI Assistant wrapper does not expose this parameter. |
+| `limit` | `int` | `100` | Most objects to return, most relevant first, from `1` to `300`. |
+
+Returns `candidates`, each with `instanceId`, `name`, `path`, `rendererCount`, `relevance`, `plainShape`, and `existing` World Object text. `existing.authoredByHand` marks text the tagger will not replace. Returns `skipped` counts for `alreadyTagged`, `plainShapes`, and `belowRelevance`.
+
+### `Convai.DescribeSceneView`
+
+**Area:** Scene Auto Tagger · **Enabled by default:** Yes · **Mutates:** No — uploads a captured image to Convai Vision
+
+Drafts a short `name` and a `description` of the environment that a camera or the last active Scene view shows. Review the draft, then pass it as `sceneDescription` to `Convai.TagSceneObjects`. Changes nothing in the scene. Available only in Edit Mode — returns a `PLAY_MODE_ACTIVE` failure code if called during Play Mode. Runs like `Convai.TagSceneObjects`, so it can return `Running`.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `characterInstanceId` | `long` | `0` | `ConvaiCharacter` GameObject instance ID whose knowledge and voice shape the text. `0` uses the only character in the active scene. |
+| `characterId` | `string` | `""` | Convai Character ID, for a character that is not in the scene. Overrides `characterInstanceId`. |
+| `cameraInstanceId` | `long` | `0` | `Camera` or camera GameObject instance ID. `0` uses the last active Scene view. |
+| `waitSeconds` | `float` | `40` | Seconds to wait for the run before returning, from `0` to `50`. A run still going is reported as `Running`. |
+
+A completed run returns `name`, `description`, and `confidence`. An unknown camera ID returns `CAMERA_NOT_FOUND`. With `cameraInstanceId` `0` and no Scene view open, the call returns `INVALID_REQUEST`. With `characterInstanceId` `0`, a scene with no character or several characters returns `INVALID_CHARACTER`. A scene character with no Character ID returns `CHARACTER_ID_MISSING`, and a `characterId` that is not a Convai Character ID fails with `INVALID_REQUEST`. The character rules apply to `Convai.TagSceneObjects` too.
+
+### `Convai.TagSceneObjects`
+
+**Area:** Scene Auto Tagger · **Enabled by default:** Yes · **Mutates:** No — uploads captured images to Convai Vision; changes nothing in the scene
+
+Starts a run that captures each target and asks Convai Vision for a name and description shaped by the character. Each target is every active mesh under its GameObject, stopping at children that are World Objects or other targets. Available only in Edit Mode — returns a `PLAY_MODE_ACTIVE` failure code if called during Play Mode.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `targets` | `array` | — (required) | One to 300 objects, each `{ instanceId, note }`. `instanceId` is a GameObject instance ID, for example from `Convai.FindSceneTagCandidates`. `note` is an optional correction of up to 300 characters, such as "This is a reading lamp, not a microphone." |
+| `characterInstanceId` | `long` | `0` | `ConvaiCharacter` GameObject instance ID whose knowledge and voice shape the text. `0` uses the only character in the active scene. |
+| `characterId` | `string` | `""` | Convai Character ID, for a character that is not in the scene. Overrides `characterInstanceId`. |
+| `sceneDescription` | `string` | `""` | Optional description of the whole scene, up to 800 characters. `Convai.DescribeSceneView` drafts one. |
+| `focus` | `string` | `""` | Optional guidance for every description, up to 400 characters, such as "function and material". |
+| `quality` | `enum ConvaiSceneTagQuality` | `Fast` | `Fast` sends up to 16 objects per vision request. `Accurate` sends larger images, up to 9 per request, and reads fine detail better. |
+| `includeLowInformation` | `bool` | `false` | Also analyze objects whose capture shows little detail, such as a plain box. |
+| `waitSeconds` | `float` | `40` | Seconds to wait for the run before returning, from `0` to `50`. A run still going is reported as `Running`. |
+
+A `Running` result reports `runId`, `kind`, and `progress` with `phase`, `completed`, and `total`. A completed result lists every target with `status` (`Tagged`, `NotAnalyzed`, `NotEligible`, `CaptureFailed`, `LowInformation`, or `AnalysisFailed`), the proposed `name` and `description`, `confidence`, and a `message` for objects that were not tagged. A run-level failure returns `success=false` with the same data and a code such as `MISSING_API_KEY`, `UNAUTHORIZED`, `USAGE_LIMIT_REACHED`, or `NATIVE_CORE_UNAVAILABLE`. An unknown instance ID returns `OBJECT_NOT_FOUND`.
+
+### `Convai.GetSceneTagRun`
+
+**Area:** Scene Auto Tagger · **Enabled by default:** Yes · **Mutates:** No
+
+Waits for, reads, or cancels a run started by `Convai.TagSceneObjects` or `Convai.DescribeSceneView`, and returns the results when the run has finished. Changes nothing in the scene.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `runId` | `string` | — (required) | The `runId` returned by `Convai.TagSceneObjects` or `Convai.DescribeSceneView`. |
+| `waitSeconds` | `float` | `40` | Seconds to wait before returning, from `0` to `50`. `0` reads the current state without waiting. |
+| `cancel` | `bool` | `false` | Stop the run. Objects already analyzed are not kept, and a vision request already in flight finishes before the run stops. |
+
+A failed run returns `RUN_FAILED`, and a run stopped with `cancel` returns `RUN_CANCELLED`. An unknown or expired `runId` returns `RUN_NOT_FOUND`; tag again.
+
+### `Convai.ApplySceneTags`
+
+**Area:** Scene Auto Tagger · **Enabled by default:** Yes · **Mutates:** Yes
+
+Previews or writes a finished tagging run's names and descriptions as World Objects, with optional action and gaze targets, in one Undo step. Applies through `ConvaiSceneTagger.Apply`, so hand-authored metadata is kept and objects that changed since capture are refused. Never saves the scene. Available only in Edit Mode — returns a `PLAY_MODE_ACTIVE` failure code if called during Play Mode.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `runId` | `string` | — (required) | The `runId` of a finished `Convai.TagSceneObjects` run. |
+| `objects` | `array` | omit = every tagged object | Objects to apply, each `{ instanceId, name, description }`. `name` and `description` are optional replacement text; omit one to keep the proposed text. |
+| `includeSpatialContext` | `bool` | `true` | Include each object's position relative to the character. |
+| `enableGaze` | `bool` | `true` | Let characters look at the objects. |
+| `createActionTargets` | `bool` | `true` | Add action targets so characters can act on the objects. |
+| `dryRun` | `bool` | `true` | Preview without changing the scene. |
+
+The preview lists, for each object, the `name` and `description` that would be written, fitted to the 64-character name and 320-character description limits (`shortened` reports a cut), and a `note` when a hand-authored World Object is kept. With `dryRun=false`, the result reports an `outcome` per object: `Applied`, `NotTagged`, `InvalidText`, `ObjectChanged`, `AuthoredMetadataPreserved`, `EditedComponentsPreserved`, or `LogicalGroupPreserved`. Tag an `ObjectChanged` object again; it moved or changed since capture. Edit a `LogicalGroupPreserved` object in the Scene Auto Tagger window. The result also reports `sceneDirty` and `sceneSaved`; save the scene yourself to keep the World Objects.
+
+A run that is not a finished tagging run returns `RUN_NOT_APPLICABLE`. A listed `instanceId` that is not in the run returns `OBJECT_NOT_IN_RUN`, a repeated one returns `DUPLICATE_OBJECT`, and a run with no tagged objects returns `NOTHING_TO_APPLY`. See [Scene Auto Tagger scripting API](../features/scene-metadata/scene-auto-tagger-scripting-api.md) for the C# equivalent.
 
 ## Lip sync
 

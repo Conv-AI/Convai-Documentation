@@ -23,7 +23,7 @@ Add `ConvaiObjectMetadata` to each anatomy model and equipment item:
 
 Add `ConvaiSceneMetadataCollector` to the `ConvaiManager` GameObject. Enable **Collect On Start**.
 
-No scripting required. Automatic delivery follows the connected/current-target route and action-name filters. Use the collector for a separate full-list send, then test the instructor's response.
+No scripting required. With one registered character, a new room sends the whole list in its connect request; with more than one character, after a rejoin, and for any later change, the list follows the connected/current-target route. Use the collector for a separate full-list send, then test the instructor's response.
 
 {% hint style="info" %}
 An illustrative test, not a guaranteed response: the trainee asks: "What models are available for study?" The instructor responds: "On the center table you have a life-size heart model showing all four chambers, and to your left on the display rack is an adult liver model with color-coded hepatic veins."
@@ -199,7 +199,7 @@ If the component is disabled and re-enabled, `DoorStatus` re-reads `LoadingBayDo
 
 Create a root World Object named `Fire Extinguisher` and add **Convai > Logical Object Group**. Add each physical extinguisher's World Object to **Physical Members**. The root supplies one description; active copies are represented through it. Runtime resolution selects a nearby active member rather than navigating to an empty group root.
 
-Enable **Include Spatial Context** on relevant World Objects when the conversation needs location, visibility, and motion facts. Verify the per-character 30-metre and 24-fact selection limits. Add standing positions to each physical copy when approach direction matters; see [Group objects and add standing positions](group-objects-and-standing-positions.md).
+Enable **Include Spatial Context** on relevant World Objects when the conversation needs location, visibility, and motion facts. For a logical group, enable it on the root's World Object; members produce no facts of their own. Verify the per-character 30-metre and 24-fact selection limits. Add standing positions to each physical copy when approach direction matters; see [Group objects and add standing positions](group-objects-and-standing-positions.md).
 
 ## Next steps
 

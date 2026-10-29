@@ -10,7 +10,7 @@ World Objects, logical groups, movement points, and the optional collector make 
 
 ## ConvaiObjectMetadata
 
-**Add Component path:** `Convai → World Object`
+**Add Component path:** `Convai > World Object`
 
 `ConvaiObjectMetadata` is a `MonoBehaviour` that describes a single GameObject to Convai. When enabled, it registers itself with `ConvaiMetadataRegistry`. When disabled or destroyed, it unregisters automatically — no manual cleanup is needed.
 
@@ -24,7 +24,6 @@ The World Object Inspector is titled **Scene Object Knowledge**. Its status chip
 | **Object Description**          | `string` | `""`                | Optional. Max 320 UTF-16 code units. | A factual, specific description — what the object is, where it is located, and any key attributes. The AI uses this text to ground its responses.                                            |
 | **Include In Metadata**         | `bool`   | `true`              | —                             | When unchecked, this object is excluded from the next metadata collection without removing or disabling the component. Use this to manage runtime inclusion.                                 |
 | **Tracked Properties**          | `List<ConvaiTrackedContextProperty>` | _(empty)_ | Optional. | Per-entry runtime properties exposed to all connected characters as dynamic context state keys. See [Tracked properties](#tracked-properties) below.                                          |
-
 | **Include Spatial Context** | `bool` | `false` | — | Publishes per-character spatial facts through Dynamic Context. |
 | **Gaze Enabled** | `bool` | `true` | — | Allows the gaze integration to target this object. |
 
@@ -73,7 +72,7 @@ Polling and delivery to connected characters are handled automatically by an int
 
 ### Spatial context
 
-Spatial facts are limited to 24 per character in a conversation, within 30 metres. Visible objects sort first, then nearer objects. Distances use bands rather than continuous precision. See [How scene metadata works](how-scene-metadata-works.md#spatial-context).
+Spatial facts are limited to 24 per character in a conversation, within 30 metres. Visible objects sort first, then nearer objects. Distances use bands rather than continuous precision. Each fact names the character it is measured from, and a logical group's fact says how many objects share its name. See [How scene metadata works](how-scene-metadata-works.md#spatial-context).
 
 ## ConvaiLogicalObjectGroup
 
