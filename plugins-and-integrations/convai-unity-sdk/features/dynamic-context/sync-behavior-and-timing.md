@@ -3,7 +3,7 @@ title: Sync behavior and timing
 description: >-
   Understand how the SDK batches dynamic context updates before sending them
   and how action and attention changes are confirmed by Convai.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Dynamic Context updates do not reach Convai the instant you call `SetState`, `AddEvent`, or any other tracked method. The SDK stages every call into a short-lived batch and sends one `context-update` message per batch, not one per call. This page explains why the SDK batches, exactly when a batch is sent, and how updates that carry an action config patch or an attention object are acknowledged before the SDK trusts them locally.
@@ -12,7 +12,7 @@ Dynamic Context updates do not reach Convai the instant you call `SetState`, `Ad
 
 A single gameplay frame can call several tracked methods at once — a hazard state, a location change, and an event firing together in one physics update. Sending an individual `context-update` message per call would multiply network traffic and could let Convai react to an intermediate state before the rest of the frame's changes land. Instead, `ConvaiCharacter` stages every call to `SetState`, `SetStates`, `AddEvent`, `RemoveState`, `SetCurrentAttentionObject`, and `ClearCurrentAttentionObject` into one pending batch and flushes that batch as a single message.
 
-The reason a shared batch also needs a shared reaction decision is that Convai only sees one message, so it can only apply one respond mode. When several calls in the same window request different `ConvaiRespondMode` values, the strongest request wins for the whole batch: `MustRespond` beats `Auto`, and `Auto` beats `Silent`. A single `MustRespond` call in a batch of otherwise-silent updates is enough to make the character react.
+The reason a shared batch also needs a shared reaction decision is that Convai only sees one message, so it can only apply one respond mode. When several calls in the same window request different `ConvaiRespondMode` values, the strongest request wins for the whole batch: `MustRespond` beats `Auto`, and `Auto` beats `Silent`. A single `MustRespond` call requests that reaction for the whole ordinary batch. Group-room context is sent silently.
 
 ```csharp
 using Convai.Runtime;
@@ -39,12 +39,14 @@ public sealed class HazardZoneContext : MonoBehaviour
 
 The SDK debounces staged changes for `ConvaiCharacter.DynamicContextBatchDelaySeconds` — a fixed `0.5` seconds. Every additional staged change during that window pushes the flush out by another `0.5` seconds from the moment it was staged, measured from when Unity last processed a change.
 
-A continuous stream of changes could in theory push the flush out indefinitely, so the SDK also enforces a ceiling: the wait can never exceed 3 seconds measured from the first staged change in the window. Whichever limit is reached first — the 0.5-second debounce settling, or the 3-second ceiling — triggers the flush.
+A continuous stream of changes could in theory push the flush out indefinitely, so the SDK also enforces a ceiling: the batching wait is capped at 3 seconds from the first staged change. Connection and room holds can postpone actual delivery beyond that. Whichever limit is reached first — the 0.5-second debounce settling, or the 3-second ceiling — triggers the flush.
 
 | Timing behavior | Value | Effect |
 |---|---|---|
 | Per-change debounce | 0.5 seconds (`DynamicContextBatchDelaySeconds`) | Each staged change resets the flush countdown |
 | Maximum wait per window | 3 seconds | The flush fires even while changes keep arriving |
+
+Runtime action-target changes made through `character.Actions` and scene metadata changes share this window with tracked context. Every flush starts a new window, including a flush that sent only action targets or scene metadata. A later burst of registrations or removals therefore waits for its own window and sends one sync instead of one per change.
 
 ```mermaid
 sequenceDiagram
@@ -64,25 +66,25 @@ sequenceDiagram
 `Reset()` goes through the same debounce window rather than sending immediately — calling `Reset()` does not bypass the 0.5-second wait.
 
 {% hint style="warning" %}
-A pending reset is not guaranteed to reach Convai as a reset. If `SetState`, `SetStates`, `AddEvent`, `RemoveState`, `SetCurrentAttentionObject`, or `ClearCurrentAttentionObject` is staged after `Reset()` but before the batch window flushes, the pending reset is dropped and replaced by a normal batch containing only the new call. Call `Flush()` immediately after `Reset()` if the reset must reach Convai before anything else can supersede it.
+In 5.0, changes staged after `Reset()` do not replace the pending reset. The SDK attempts the reset first, then the newer batch. A connection or target hold retains the reset; a local send refusal can drop it. This ordering concerns client submission, not confirmed server application.
 {% endhint %}
 
 ## What one flush sends
 
-A flush sends exactly one message, and its mode depends on what changed during the window. If any tracked state text changed — a new state, an updated value, or a removed state — the message mode is Replace, carrying the full canonical context plus a short delta tail describing what changed. If the only staged change in the window was an attention-object update with no state text change, the message mode is Append instead.
+A normal context batch uses one message; a pending reset followed by newer changes can produce two ordered submissions. A flush also sends a staged action-target sync before the context batch and pending scene metadata after it, each as a separate update. An action-target sync larger than 12 KiB is split into separate actions, objects, and characters updates; see [Check when a change reaches Convai](../character-actions/register-targets-from-code.md#check-when-a-change-reaches-convai). The normal context batch mode depends on what changed during the window. If any tracked state text changed — a new state, an updated value, or a removed state — the message mode is Replace, carrying the full canonical context plus a short delta tail describing what changed. If the only staged change in the window was an attention-object update with no state text change, the message mode is Append instead.
 
-This mirrors the single-call behavior documented on the [dynamic context scripting API](dynamic-context-scripting-api.md) page, with one difference: the SDK now coalesces every call in the window into that one message rather than sending a message per call.
+The [dynamic context scripting API](dynamic-context-scripting-api.md) lists which methods stage text, attention, or reset changes.
 
 ## Forcing a flush before the window closes
 
-Call `Flush()` on `IConvaiDynamicContext` to send the pending batch immediately instead of waiting out the debounce window. Use it when a change must reach Convai before the next line of scripted dialogue plays, rather than trusting the up-to-3-second window to settle in time.
+Call `Flush()` on `IConvaiDynamicContext` to send the pending batch, a staged action-target sync, and pending scene metadata immediately instead of waiting out the debounce window. Use it to skip the remaining batch delay. It is not a delivery acknowledgement or a barrier before scripted dialogue.
 
 ```csharp
 character.DynamicContext.SetState("Player location", "market square");
 character.DynamicContext.Flush();
 ```
 
-`Flush()` only sends when the character `IsInConversation`. If the character is not connected, the staged batch remains pending and is not force-sent — see the next section for what happens to it.
+`Flush()` requires a conversation and a usable connection. In an ordinary multi-character room, a non-target character's batch stays pending until targeted. Group rooms route silently to the member, with a hold during group start. See [room delivery rules](multi-character-and-group-rooms.md).
 
 ## Timing around connect, reconnect, and disconnect
 
@@ -96,9 +98,9 @@ When the character receives its ready signal — on initial connect or after a r
 
 Plain state and event updates are fire-and-forget once flushed — the SDK does not wait for Convai to confirm them, because a text update only needs to reflect the latest value. Updates that carry an action config patch or an attention object are different: they change what the character can actually reference and act on, so the SDK does not commit them to `ConvaiCharacter`'s resolved action state until Convai confirms them.
 
-Each such update is sent with an `update_id` and tracked while waiting for a matching `DynamicContextUpdateResultReceived` event. The SDK checks for a match once per second and gives up on any single update after 30 seconds without a matching acknowledgement, discarding the pending mutation and logging a warning rather than retrying it. Pending updates are committed in the order they were sent — an older update waiting on its acknowledgement blocks newer ones from committing, even if a newer update's acknowledgement arrives first.
+Each such update is sent with an `update_id` and tracked while waiting for a matching `DynamicContextUpdateResultReceived` event. Matching happens immediately when the acknowledgement event arrives. A separate once-per-second check expires pending mutations after 30 seconds without a usable acknowledgement and logs a warning. Pending updates are committed in the order they were sent — an older update waiting on its acknowledgement blocks newer ones from committing, even if a newer update's acknowledgement arrives first. An action-target sync that the SDK splits by size sends each part with its own `update_id`, and each part is tracked and committed in send order.
 
-An acknowledgement only commits when its status is `success` and its reported action, object, and character counts and current attention object match what the SDK expected. A mismatched or malformed acknowledgement is discarded the same way a timeout is, with a warning logged instead of an update applied.
+Ordinary action acknowledgements must report success and match the expected action, object, character, and attention values before the SDK commits the mutation. Group acknowledgements can omit verification counts; the SDK can then apply a successful matching update as unverified and log a warning. Mismatched values reject the mutation. See [room acknowledgement routing](multi-character-and-group-rooms.md#acknowledgement-routing).
 
 Subscribe to the event to observe acknowledgement outcomes directly:
 
@@ -117,11 +119,13 @@ If an acknowledgement reports its action generation strategy status as `requires
 
 ## Apply() bypasses batching
 
-`Apply()` sends its update directly to the transport, skipping the tracker and the debounce window described above. It does not bypass acknowledgement tracking: an `Apply()` call that carries an action-config patch or a current attention object still joins the same pending-update queue, with the same 30-second timeout and 1-second poll interval described in "Acknowledgement timing" above.
+`Apply()` sends its update directly to the transport, skipping the tracker and the debounce window described above. It does not bypass acknowledgement tracking: an `Apply()` call that carries an action-config patch or a current attention object still joins the same pending-update queue, with the same immediate matching and 30-second expiry described above.
 
 {% hint style="danger" %}
 If the character is not in an active conversation when `Apply()` is called, the update is discarded immediately — it is not staged, and it does not flush later when the character becomes ready. Use `SetState`, `SetStates`, `AddEvent`, `RemoveState`, `SetCurrentAttentionObject`, or `ClearCurrentAttentionObject` for anything that must survive being called before a conversation starts.
 {% endhint %}
+
+`Apply()` returns `true` when accepted for local submission and `false` on local refusal. It never adds a refused raw update to the tracked queue; `true` does not mean acknowledged or applied.
 
 `Apply()` exists for callers that already generate their own canonical context text — an external state machine, for example — and need direct control over exactly what is sent and when, without the SDK reshaping it into a batch.
 

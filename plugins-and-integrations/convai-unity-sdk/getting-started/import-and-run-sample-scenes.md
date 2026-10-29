@@ -3,16 +3,17 @@ title: Import and run sample scenes
 description: >-
   Import the bundled sample scenes and verify the SDK is installed and connected
   correctly before building your own scene.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-The Convai SDK for Unity ships with three sample scenes. Running one is the fastest way to confirm your installation, API key, and audio setup are working before you build your own scene.
+The Convai SDK for Unity declares four sample packages. Running one is the fastest way to confirm your installation, API key, and audio setup are working before you build your own scene.
 
 | Sample | Description |
 | --- | --- |
 | **Basic Sample** | Core setup and interaction flow with `Convai_Char_Robot`, a non-humanoid character |
-| **LipSync Sample** | High-quality character `Sofia` with real-time lip sync, plus a debug hub for inspecting emotion, dynamic context, and vision state during Play mode |
-| **Multi-Character Sample** | A shared-room sample demonstrating multiple Convai characters, interaction targeting, transcript UI, and runtime roster changes |
+| **LipSync Sample** | High-quality character `Sofia` with real-time lip sync |
+| **Multi-Character Sample** | A shared-room sample with interaction targeting, transcript UI, runtime roster changes, and a separate Group Conversation scene. Import **LipSync Sample** first for its shared character assets |
+| **Scene Auto Tagger** | An Editor authoring walkthrough. Generate its fixture with **Convai > Samples > Create Scene Tagger Fixture** after importing the sample |
 
 The steps for locating the samples differ depending on how you installed the SDK.
 
@@ -28,7 +29,7 @@ In the Unity Editor, open **Window > Package Manager**. In the top-left dropdown
 {% step %}
 ### Import a sample
 
-In the detail panel on the right, click the **Samples** tab. Click **Import** next to the sample you want to run.
+In the detail panel on the right, click the **Samples** tab. Click **Import** next to the sample you want to run. Import **LipSync Sample** before **Multi-Character Sample**.
 
 Unity copies the sample assets into `Assets/Samples/Convai SDK for Unity/<version>/`. A new folder appears under `Assets/Samples/` in the Project window.
 {% endstep %}
@@ -52,7 +53,7 @@ When installed via the Asset Store, all sample scenes are imported into your pro
 Assets/Convai SDK For Unity/Samples/
 ```
 
-Three folders are present: `BasicSample`, `LipSyncSample`, and `MultiCharacterSample`.
+Look for `BasicSample`, `LipSyncSample`, `MultiCharacterSample`, and `SceneTagger`. Verify the folders in your installed Asset Store package; its release can differ from Package Manager.
 {% endstep %}
 
 {% step %}
@@ -81,7 +82,9 @@ If no response appears and the Console shows warnings, check [Validate your setu
 {% endstep %}
 {% endstepper %}
 
-In the LipSync Sample, the **Sample Debug Hub** panel is already in the scene. Click its Emotion, Context, or Vision buttons in the Game view to open a drawer showing live state while the character talks.
+To inspect emotion, context, or vision state, optionally add `Sample Debug Hub.prefab` from the SDK shared sample assets. The hub is not already placed in the LipSync scene.
+
+The Multi-Character Sample also contains `GroupConversationSample.unity`. Follow the [group conversation sample guide](../features/group-conversation/run-the-sample.md) for its preview prerequisites and offline simulator. For Editor tagging, follow [Scene Auto Tagger](../features/scene-metadata/scene-auto-tagger.md).
 
 ## Sample render pipeline notes
 

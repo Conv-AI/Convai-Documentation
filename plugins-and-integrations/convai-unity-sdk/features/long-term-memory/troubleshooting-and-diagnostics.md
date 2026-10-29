@@ -1,206 +1,71 @@
 ---
 title: Troubleshoot long-term memory
-description: >-
-  Diagnose why long-term memory isn't persisting, verify end-user identity
-  stability across sessions, and resolve Memory Management API HTTP errors.
-last_reviewed: "4.5.0"
+description: Diagnose identity, character settings, connection status, and memory requests while keeping backend behavior and deletion completion separate.
+last_reviewed: "5.0.0-preview"
 ---
 
-Most LTM issues fall into three categories: memories not persisting between sessions, the wrong user receiving memories, and API calls failing with HTTP errors. Work through the diagnostic flow below before consulting the reference tables.
+Start with the identity and status reported for the current connection, then inspect the character's settings and stored records. A connection, a memory request, and a recalled fact establish different things.
 
-***
+## Check the connected identity and status
 
-## First-line investigation
+In Play mode, inspect `ConvaiManager` **End User** and **Memory**. In code, read `CurrentEndUserId` and `CurrentLongTermMemoryStatus`. Do not instantiate a new default provider to diagnose a connection that may use a custom provider or explicit options.
 
-Before checking anything else, run through these three steps in order:
+| Status | Meaning and next check |
+| --- | --- |
+| `Active` | The connection reported active memory. Check the intended character/user records and account availability if recall is unexpected. |
+| `SkippedNoEndUser` | The connection reported no end-user identity for memory. Supply a stable ID if persistence is needed. |
+| `NotReported` | No status was reported. This includes disconnected states and responses from multi-character/group paths that omit it; it does not establish that memory is disabled. |
 
-**1. Confirm memory is enabled for the character**
+Use **See What They Remember** to inspect the reported user and addressed character. Keep identifiers, metadata, and memory text out of public logs and screenshots.
 
-Sign in at [convai.com](https://convai.com), open the character, and verify the **Memory** tab shows **Long-Term Memory: On**. Memory is disabled by default — this is the single most common reason LTM appears not to work.
+## Resolve connection errors
 
-**2. Verify the end-user ID is stable across sessions**
+| Code | Action |
+| --- | --- |
+| `connection.connect_end_user_id_required` | Supply a valid stable ID or deliberately configure the character's requirement as Optional. |
+| `connection.connect_ltm_end_user_limit_reached` | Check account memory end-user availability with the account/service owner. Client changes do not grant more capacity. |
+| `connection.connect_ltm_not_configured` | Check character memory settings and service configuration with the owner. |
 
-Add the diagnostic script below to your scene. Run Play Mode, stop, then run again. The logged ID must be identical both times.
+A blank identity is not a universal anonymous-memory mode. **Required** and **Optional** express different connection contracts; see [Configure the end-user ID requirement](configure-end-user-id-requirement.md).
 
-```csharp
-using Convai.Runtime.Identity;
-using UnityEngine;
+## Diagnose missing or unexpected memories
 
-public class EndUserIdDebug : MonoBehaviour
-{
-    private void Start()
-    {
-        var provider = new DeviceEndUserIdProvider();
-        string id = provider.GetEndUserId();
-        Debug.Log($"[LTM] end_user_id this session: {id}");
-    }
-}
-```
+| Symptom | Check |
+| --- | --- |
+| A returning user appears new | Compare the resolved identity privately; account changes, device IDs, or cleared preferences can produce another ID. |
+| The display name differs | Typed `EndUserName` takes precedence, followed by metadata `name`, then the player's display-name fallback. Metadata `name` must be a string. |
+| Connection fails before a request | IDs are limited to 512 UTF-16 code units and display names to 255; metadata must serialize to JSON and must not have duplicate keys after trimming. |
+| Memory setting appears unchanged | Read it back; a pinned character version retains that version's enabled setting, while the ID requirement applies across versions. |
+| A session ended but no new record appears | The client does not specify extraction timing or guarantee every utterance becomes a memory. Inspect service results and reproduce with the backend owner. |
+| Stored facts exist but a response omits them | Record storage and conversational recall are separate checks. Reproduce in a fresh session with the same pair. |
+| A bulk deletion returned but records remain | Check again; the API contract permits background deletion. Preserve failure details and remaining counts. |
+| Memories disappeared after deactivation | Deactivation makes old memories unavailable through that user; it does not prove they were erased. |
 
-If the ID changes between sessions, memories cannot accumulate — the server treats each new ID as a new user.
+## Handle REST errors
 
-**3. Confirm the session connected successfully**
+Memory management calls throw `ConvaiRestException`. Inspect `Category`, `StatusCode`, and `StatusCodeInt` for classification. `RequestTraceId` and `RetryAfter` may be absent; use available trace IDs when reporting a failed request.
 
-Check the Console for Convai startup messages. A failed connection (invalid API key, network error) prevents all LTM operations regardless of stored data.
+| Error/category | Response |
+| --- | --- |
+| 400 or 422 / `BadRequest` | Correct the identifiers, request body, or configuration before retrying. |
+| 401 / `Unauthorized` | Check credentials in the trusted tool. |
+| 403 / `Forbidden` | Check character ownership and account permission. |
+| 404 / `NotFound` | Check the user, character, and record scope. |
+| 409 / `Conflict` | Read current state and resolve the reported conflict. |
+| 429 / `RateLimited` | Honor `RetryAfter` when supplied and retry with a bounded backoff. |
+| `Timeout` or `ServerError` | Retry reads with a bounded delay; inspect state before repeating a mutation whose result is unknown. |
 
-***
+Always support cancellation. Do not retry every error indefinitely, and do not turn a timeout into a claim that a mutation failed to reach the service.
 
-## Decision flow
+## Report a reproducible issue
 
-Use this flow when memory isn't persisting:
-
-```mermaid
-graph TD
-    A[LTM enabled on character dashboard?] -->|No| B[Enable it at convai.com and retry]
-    A -->|Yes| C[Same end_user_id logged across sessions?]
-    C -->|No| D[Identity source is changing — see Common issues]
-    C -->|Yes| E[Session connected successfully?]
-    E -->|No| F[Fix connection issue first — API key or network]
-    E -->|Yes| G[Conversation contained facts worth remembering?]
-    G -->|No| H[Have a more substantive conversation and retry]
-    G -->|Yes| I[Contact Convai support with character ID and session timestamp]
-```
-
-***
-
-## Common issues
-
-| Symptom | Likely cause | Fix |
-| --- | --- | --- |
-| Character never references previous sessions | LTM not enabled on character | Enable it in the character's Memory tab at [convai.com](https://convai.com) |
-| Memory works in editor, not in build | `DeviceEndUserIdProvider` returns different values in editor vs. build | Expected behavior — editor uses `PlayerPrefs` GUID; build uses device ID. Ensure the build's device ID is stable. For cross-context consistency, implement a custom `IEndUserIdentityProvider`. |
-| Memory lost after reinstall | `PlayerPrefs` cleared on reinstall | Use a server-assigned account ID via a custom provider. Device-based and GUID-based IDs do not survive reinstalls. |
-| Different users on the same device share memories | Multiple users sharing one device | Each user must receive a unique `end_user_id`. If `DeviceEndUserIdProvider` is in use, the device-scoped GUID is shared. Implement a custom provider that returns a per-user account ID. |
-| Custom provider not taking effect | Provider registered after `ConnectAsync` | Register in `Awake()`, before `ConvaiRoomManager.Start()` completes. If `ConvaiCharacter` has **Auto Connect** enabled, `Start()` may be too late. |
-| Memory facts look wrong or outdated | Stale records from testing | Use `client.Memory.DeleteAllAsync` to clear test data before starting a fresh evaluation. |
-| `GetEndUserId()` returns empty string | Custom provider returning null or whitespace | The SDK normalizes null/whitespace to `null` before sending, resulting in anonymous sessions. Ensure your provider always returns a non-empty value. |
-
-***
-
-## Runtime diagnostics
-
-### List all memories for a user
-
-Use this script to confirm what the server has stored. Run it from the Inspector via right-click → **List Memories**.
-
-```csharp
-using Convai.RestAPI;
-using Convai.RestAPI.Internal;
-using Convai.Runtime;
-using Convai.Runtime.Identity;
-using UnityEngine;
-
-public class MemoryDiagnostic : MonoBehaviour
-{
-    [SerializeField] private string _characterId;
-
-    [ContextMenu("List Memories")]
-    private async void ListMemories()
-    {
-        var provider = new DeviceEndUserIdProvider();
-        string endUserId = provider.GetEndUserId();
-
-        Debug.Log($"[LTM] Querying memories for end_user_id: {endUserId}");
-
-        using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
-
-        int page = 1;
-        bool hasMore = true;
-        int totalRecords = 0;
-
-        while (hasMore)
-        {
-            var response = await client.Memory.ListAsync(_characterId, endUserId, page);
-
-            Debug.Log($"[LTM] Page {page} — {response.Memories.Count} records (total: {response.TotalCount})");
-
-            foreach (MemoryRecord record in response.Memories)
-                Debug.Log($"  [{record.Id}] {record.Memory}");
-
-            totalRecords += response.Memories.Count;
-            hasMore = response.HasMore;
-            page++;
-        }
-
-        if (totalRecords == 0)
-            Debug.Log("[LTM] No memory records found for this user–character pair.");
-    }
-}
-```
-
-### Check memory enable state
-
-Confirm programmatically whether LTM is currently enabled for a character.
-
-```csharp
-[ContextMenu("Check Memory Enabled")]
-private async void CheckMemoryEnabled()
-{
-    using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
-
-    bool isEnabled = await client.Characters.GetMemoryEnabledAsync(_characterId);
-    Debug.Log($"[LTM] Memory enabled for character '{_characterId}': {isEnabled}");
-}
-```
-
-***
-
-## API error codes
-
-All Memory Management API errors throw `ConvaiRestException`. The `StatusCode` property maps to the causes below.
-
-| HTTP status | Cause | Fix |
-| --- | --- | --- |
-| `400 Bad Request` | Missing required parameter (`character_id`, `end_user_id`, or `memories`) | Verify all required arguments are non-null and non-empty before calling |
-| `401 Unauthorized` | Invalid or missing API key | Reconfigure your API key — see [Configure the API key](../../getting-started/configure-api-key.md) |
-| `403 Forbidden` | The character does not belong to the account that owns the API key | Verify the character ID belongs to the account associated with your API key |
-| `404 Not Found` | Invalid character ID, end-user ID, or memory ID | Double-check IDs against the Convai dashboard. If querying by `memoryId`, verify it from a prior `ListAsync` call. |
-| `429 Too Many Requests` | Rate limit exceeded | Implement exponential backoff. Example: retry after `2^attempt` seconds with a `CancellationToken` to abort after a maximum number of retries. |
-| `500 Internal Server Error` | Transient server error | Retry the request after a short delay. If errors persist, check the Convai status page and contact support with your character ID and timestamp. |
-
-### Exponential backoff pattern
-
-```csharp
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Convai.RestAPI;
-
-public static class MemoryRetryHelper
-{
-    public static async Task<T> WithRetry<T>(
-        Func<Task<T>> operation,
-        int maxAttempts = 3,
-        CancellationToken cancellationToken = default)
-    {
-        for (int attempt = 0; attempt < maxAttempts; attempt++)
-        {
-            try
-            {
-                return await operation();
-            }
-            catch (ConvaiRestException ex) when (ex.StatusCodeInt == 429 || ex.StatusCodeInt == 500)
-            {
-                if (attempt == maxAttempts - 1) throw;
-
-                int delayMs = (int)Math.Pow(2, attempt) * 1000;
-                await Task.Delay(delayMs, cancellationToken);
-            }
-        }
-
-        throw new InvalidOperationException("Unreachable.");
-    }
-}
-```
-
-***
+Include the SDK revision, platform, connection status, sanitized error category/code, available request trace ID, operation name, and whether the problem occurred on connect, record inspection, or recall. Share identity and memory content only through an appropriate private support channel when required.
 
 ## Next steps
 
-{% content-ref url="long-term-memory-scripting-reference.md" %}
-[Long-term memory scripting reference](long-term-memory-scripting-reference.md)
+{% content-ref url="end-user-identity.md" %}
+[End-user identity](end-user-identity.md)
 {% endcontent-ref %}
-
-{% content-ref url="configure-memory-for-a-character.md" %}
-[Configure memory for a character](configure-memory-for-a-character.md)
+{% content-ref url="long-term-memory-window.md" %}
+[Inspect and manage long-term memories](long-term-memory-window.md)
 {% endcontent-ref %}

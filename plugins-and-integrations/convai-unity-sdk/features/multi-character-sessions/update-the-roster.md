@@ -1,166 +1,73 @@
 ---
 title: Characters joining and leaving
-description: Understand how a Convai character joins or leaves a connected Unity room automatically, and when to edit the roster from code instead.
-last_reviewed: "4.6.0"
+description: Control automatic and scripted roster changes in an existing room, preserve a valid replacement target, and handle refused or ambiguous updates.
+last_reviewed: "5.0.0-preview"
 ---
 
-A `ConvaiCharacter` that appears in the scene while the room is connected joins it without a reconnect — instantiating a character prefab or enabling a character `GameObject` is the whole integration. Use this page to understand that automatic behaviour, and to reach for `AddCharacterAsync` or `RemoveCharacterAsync` only when a scene needs to edit the roster deliberately from a script.
+A connected multi-character room can accept new manager-owned, selected characters during play. Use the automatic roster for ordinary scene lifecycle changes; use explicit add/remove operations when application logic owns the transition.
 
-## A character that appears joins automatically
+## Automatic membership changes
 
-Nothing needs calling. Instantiate a second character prefab, or enable a `ConvaiCharacter` `GameObject` that was inactive, and the SDK adds it to the room as soon as the connection accepts the change. The Console confirms it:
+An active character selected in **Characters Joining the Room** can join without a reconnect. It still needs a unique Character ID, a **Live** character version, and account capacity. It enters as `Starting`; wait for readiness before routing input. A successful join logs `'<name>' joined the room without reconnecting.`
 
-```text
-'Sofia' joined the room without reconnecting.
-```
+Disabling a character keeps its existing seat while it remains owned and selected. Targeting skips the inactive local character; re-enabling reuses the seat. This does not establish any billing or service-capacity exemption.
 
-The character is discovered, injected, and ready the moment it appears — there is nothing else to set up for it to take a seat. It arrives in the roster as `Starting` until Convai announces it; see [Room readiness](readiness-and-partial-dispatch.md) for what that state means and how long it usually lasts.
+Destroying the character, dropping manager ownership, or unticking it in **Characters Joining the Room** removes it through the live roster. A successful removal logs `'<name>' left the room without reconnecting.` The automatic planner declines any change that would empty the room before sending it.
 
-## Disabling a character keeps its seat
+## A single-character room cannot grow
 
-`SetActive(false)` does not remove a character from the room. It keeps its membership and stops being addressable — targeting skips it and it cannot be spoken to — until it is enabled again, which needs no round trip and nothing to wait for. Use disabling for "behind a wall", "pooled", or "hidden for a beat"; it costs nothing to hold the seat open.
+A connection created with one active selected character has no roster. Activate at least two selected characters before connecting when the scene needs live additions. The Inspector warns **This room will not be able to grow** when selected inactive characters leave only one active entry; use **Enable It** or **Enable Them** before the next connection.
 
-A character leaves the room only when the project says so: destroyed, or dropped from ownership. Either way the Console confirms it:
+Changes to the player or **Initial Character** affect connection setup and queue a reconnect rather than a roster edit. Classic rooms and the opt-in [group conversation preview](../group-conversation/README.md) have different prerequisites.
 
-```text
-'Sofia' left the room without reconnecting.
-```
+## Add a character explicitly
 
-## A single-character room can't grow
-
-A room that connected with exactly one character is opened for that character alone and carries no roster, so nothing can join it later — it waits for the next connection instead. The Console reports this rather than staying silent:
-
-```text
-'James' cannot join this conversation: the room was opened for a single character, so it has no
-roster to join. It will be included the next time the room connects. To let characters come and go
-during play, have every character you want active in the scene before the room connects — a
-character that is present but disabled does not count, because the room is opened for the active
-ones.
-```
-
-To let characters come and go during play, have more than one character active in the scene **before** the room connects. A character that is present but inactive at connect time does not count toward that — the room is opened for whichever characters are active at that moment.
-
-Two other changes are never applied live, because they decide how the room was created rather than who is in it: a changed player, and a changed **Initial Character**. Either one queues a reconnect instead.
-
-## Edit the roster explicitly from code
-
-Reach for this when a script needs to add or remove a character deliberately — for example, spawning a character only after some other condition, or removing one and handing the conversation to a specific replacement in the same command. Retrieve `IConvaiRoomConnectionService` with `ConvaiManager.TryGetRoomConnectionService`.
-
-### Add a character to the roster
-
-Call `AddCharacterAsync(IConvaiCharacterAgent character, string characterSessionId = null, CancellationToken cancellationToken = default)`. The optional `characterSessionId` resumes that character instance's earlier conversation instead of starting a new one.
-
-Adding the same local character instance twice throws an `ArgumentException` with the message `This local character instance is already a member of the current room. Use another instance when adding a clone.`. To add a clone of a character already in the room, instantiate a second `ConvaiCharacter` component and add that instance instead — it becomes an independently addressable membership even though it shares a `CharacterId` with the original.
-
-The command shares a roster-mutation gate with `RemoveCharacterAsync`, so only one roster change is in flight at a time, and it faults with a `TimeoutException` carrying `Timed out waiting for the character-roster-update acknowledgement.` if no acknowledgement arrives within 15 seconds.
-
-{% code title="Assets/Scripts/RosterAdder.cs" %}
-```csharp
-using System;
-using Convai.Runtime.Components;
-using Convai.Runtime.Room;
-using UnityEngine;
-
-public class RosterAdder : MonoBehaviour
-{
-    public async void AddToRoom(IConvaiRoomConnectionService roomService, ConvaiCharacter character)
-    {
-        try
-        {
-            CharacterRosterUpdateResult result = await roomService.AddCharacterAsync(character);
-            foreach (CharacterRoomMembership membership in result.Added)
-                Debug.Log($"[MultiCharacter] Added {membership.CharacterId} as {membership.MembershipId}.");
-        }
-        catch (ArgumentException error)
-        {
-            Debug.LogError($"[MultiCharacter] {error.Message}");
-        }
-        catch (CharacterRosterUpdateException error)
-        {
-            Debug.LogError($"[MultiCharacter] Roster update rejected ({error.Code}): {error.Message}");
-        }
-        catch (InvalidOperationException error)
-        {
-            Debug.LogError($"[MultiCharacter] {error.Message}");
-        }
-        catch (TimeoutException error)
-        {
-            Debug.LogError($"[MultiCharacter] {error.Message}");
-        }
-    }
-}
-```
-{% endcode %}
-
-### Remove a character from the roster
-
-Call `RemoveCharacterAsync(IConvaiCharacterAgent character, string replacementTargetMembershipId = null, CancellationToken cancellationToken = default)` when you hold the local instance, or `RemoveCharacterAsync(string membershipId, string replacementTargetMembershipId = null, CancellationToken cancellationToken = default)` when you only have the membership ID.
-
-`replacementTargetMembershipId` is optional, but pass one whenever the membership you are removing currently holds the interaction target — otherwise the target clears to none, and player input stops being routed to anyone until you set a new target. When you do pass one, it must name a membership that is currently in the room and that is not the membership being removed; either violation throws an `ArgumentException` with `The replacement target is not part of the current room.` or `The replacement target cannot be the membership being removed.`.
+Retrieve `IConvaiRoomConnectionService` with `ConvaiManager.TryGetRoomConnectionService`, then await:
 
 ```csharp
-try
-{
-    CharacterRosterUpdateResult result = await roomService.RemoveCharacterAsync(
-        membershipId: assessorMembership.MembershipId,
-        replacementTargetMembershipId: trainerMembership.MembershipId);
-    Debug.Log($"[MultiCharacter] Active target is now {result.ActiveMembershipId}.");
-}
-catch (ArgumentException error)
-{
-    Debug.LogError($"[MultiCharacter] {error.Message}");
-}
-catch (CharacterRosterUpdateException error)
-{
-    Debug.LogError($"[MultiCharacter] Roster update rejected ({error.Code}): {error.Message}");
-}
-catch (InvalidOperationException error)
-{
-    Debug.LogError($"[MultiCharacter] {error.Message}");
-}
-catch (TimeoutException error)
-{
-    Debug.LogError($"[MultiCharacter] {error.Message}");
-}
+// Method-body fragment; roomService, incoming, and cancellationToken are supplied.
+CharacterRosterUpdateResult result = await roomService.AddCharacterAsync(
+    incoming, cancellationToken: cancellationToken);
+if (result.Added.Count == 0)
+    throw new InvalidOperationException("No membership was returned for the add.");
+await result.Added[0].WaitUntilReadyAsync(cancellationToken);
 ```
 
-`CharacterRosterUpdateException` carries a backend `Code`. Two values are confirmed: `roster_epoch_mismatch`, when another accepted command changed the roster first, and `unauthorized_sender`. Treat any other value as an unrecognized backend rejection and log both `Code` and `Message`.
+`characterSessionId` optionally resumes an earlier conversation. It does not permit duplicate Character IDs. Adding the same component twice or another component with the same ID is refused. Specific/pinned versions raise `ConvaiOperationException`; use **Live**.
+
+Choose one owner for the add. Do not activate a manager-owned selected object for automatic joining and simultaneously issue a competing explicit add. Read the current session first if another path may already have seated it. See [Multi-character usage examples](usage-examples.md) for a helper that handles an already-present member.
+
+## Remove a character from the roster
+
+Await `RemoveCharacterAsync(characterOrMembershipId, replacementTargetMembershipId, cancellationToken)`. Pass a Ready member's ID when the handover destination matters. It must be in the room and different from the outgoing member.
+
+With no explicit replacement, 5.0 chooses at send time: retain the current target if it remains, otherwise choose another Ready, enabled local member. The service can refuse the request with `replacement_target_required` or `replacement_target_unavailable`. Do not assume removal will clear the target or that it will be accepted without a replacement.
+
+An acknowledged removal with a replacement produces one `InteractionTargetChanged(outgoing, replacement)` event, then `CharacterRemoved`; there is no intermediate null callback. Explicit removal has no client-side last-member guard equivalent to the automatic planner, so handle the service's response.
+
+## Handle results and timeouts
+
+Catch `CharacterRosterUpdateException` before its base `InvalidOperationException`, and inspect `Code`. Also handle argument errors, `ConvaiOperationException`, timeout, and caller cancellation. Known roster codes include:
+
+| Code | Action |
+| --- | --- |
+| `roster_epoch_mismatch` | Read current state and reassess the intended edit |
+| `unauthorized_sender` | Resolve room-management permission |
+| `replacement_target_required` | Supply an eligible Ready replacement |
+| `replacement_target_unavailable` | Refresh the roster and select an available replacement |
+| `removed_before_seated` | The add lost its member before seating; reassess scene ownership and state |
+
+A 15-second caller timeout does not release the roster gate immediately. The SDK waits for authoritative evidence until the 30-second canonical deadline measured from registration. If the result or route remains ambiguous, it retires and disconnects the room; it does not automatically reconnect. See [Connection API reference](connection-api-reference.md#exceptions-and-timeouts).
 
 ## Roster limits
 
-A Convai room supports at most 50 characters. The SDK enforces this client-side ceiling on both paths into a roster: the full cast a room connects with, and a single character added later with `AddCharacterAsync`. Either path over the limit fails with the same message, naming the requested count and pointing at **Convai Manager > Characters Joining the Room**:
-
-```text
-A Convai room supports at most 50 characters, and this one asks for <count>. The Convai plan for this
-API key may allow fewer still; use Convai Manager > Characters Joining the Room to send only the
-characters this conversation needs.
-```
-
-At connect this surfaces as a `ConvaiOperationException`; from `AddCharacterAsync` it surfaces as a plain `InvalidOperationException`, since it is adding one membership to an already-accepted roster rather than validating a whole connect request.
-
-The roster cannot become empty. If a removal would leave the room with no memberships, Convai rejects it rather than accepting an empty room — see the [Live API roster update rules](../../../../api-reference/core-api-reference/live-apis-beta/multi-character-sessions.md#update-the-roster) for the protocol-level statement of that rule.
-
-## Troubleshooting
-
-| Symptom | Cause | Fix |
-| --- | --- | --- |
-| A character enabled during play never joins | The room was opened for a single character and carries no roster. Have every character you want active in the scene before it connects. | See [A single-character room can't grow](#a-single-character-room-cant-grow) above. |
-| `InvalidOperationException`: `No multi-character room session is active.` | The room connected as a single-character room, or the call ran before connect finished. | Check `CurrentMultiCharacterSession` is not `null` before calling. |
-| `ArgumentException`: `The character must have a character ID.` | The `ConvaiCharacter` passed to `AddCharacterAsync` has an empty **Character ID**. | Set the field before adding the character. |
-| `ArgumentException`: `This local character instance is already a member of the current room. Use another instance when adding a clone.` | The same component instance was passed to `AddCharacterAsync` twice. | Use a second `ConvaiCharacter` instance to add a clone. |
-| `InvalidOperationException`: message starting `A Convai room supports at most 50 characters` | The roster (at connect, or after this add) would exceed 50 characters. | Reduce the cast, or use **Characters Joining the Room** to send only the characters this conversation needs. |
-| `CharacterRosterUpdateException` with code `roster_epoch_mismatch` | Another accepted command changed the roster first. | Read `session.RosterEpoch` and retry the mutation. |
+The SDK caps a classic roster at 50 characters both at connect and on add. Account limits may be lower. Connect validation surfaces `ConvaiOperationException`; an add over this ceiling raises `InvalidOperationException`. Select only the characters needed for the conversation. The separate group mode supports 2–4 members, not the classic ceiling.
 
 ## Next steps
 
-{% content-ref url="../conversation-targeting/README.md" %}
-[Conversation targeting](../conversation-targeting/README.md)
+{% content-ref url="usage-examples.md" %}
+[Multi-character usage examples](usage-examples.md)
 {% endcontent-ref %}
-
 {% content-ref url="handle-roster-events.md" %}
 [Handle room events](handle-roster-events.md)
-{% endcontent-ref %}
-
-{% content-ref url="readiness-and-partial-dispatch.md" %}
-[Room readiness](readiness-and-partial-dispatch.md)
 {% endcontent-ref %}

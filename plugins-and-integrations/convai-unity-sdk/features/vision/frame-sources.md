@@ -1,142 +1,72 @@
 ---
 title: Vision frame sources
 description: Explains the frame sources that capture video for a character to see, covering scene cameras, webcams, and Meta Quest passthrough.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 A frame source captures images from your scene and exposes them as a Y-flipped `RenderTexture` for `ConvaiVisionPublisher` to stream. The Convai SDK ships three built-in frame sources: `CameraVisionFrameSource` for Unity scene cameras, `WebcamVisionFrameSource` for physical devices, and `QuestVisionFrameSource` for Meta Quest passthrough.
 
 | Frame source | Best for | Platforms |
 | --- | --- | --- |
-| `CameraVisionFrameSource` | Streaming any Unity scene camera — main camera, security camera, overhead view | PC, Mac, Android, iOS, console |
-| `WebcamVisionFrameSource` | Streaming a physical camera device attached to the player's machine or mobile device | PC, Mac, Android, iOS |
+| `CameraVisionFrameSource` | Streaming any Unity scene camera — main camera, security camera, overhead view | Native platforms and WebGL |
+| `WebcamVisionFrameSource` | Streaming a physical camera device attached to the player's machine or mobile device | Native platforms and WebGL |
 | `QuestVisionFrameSource` | Streaming the real-world passthrough feed on a Meta Quest 3 or 3S headset | Meta Quest 3 / 3S (requires Meta XR SDK) |
 
 Add a frame source via **Add Component** and type the class name, or navigate the component menu under **Convai → Vision**.
 
 ## CameraVisionFrameSource
 
-`CameraVisionFrameSource` captures a Unity `Camera`'s output into a `RenderTexture` and provides it to the publisher on every frame. It automatically selects the correct capture backend for the active render pipeline (Built-in or SRP/URP) when **Camera Capture Mode** is set to `Auto`.
+`CameraVisionFrameSource` captures a Unity Camera into a top-down `RenderTexture`. Add it through **Convai > Vision > Camera Vision Frame Source**.
 
-**Component menu path:** `Convai/Vision/Camera Vision Frame Source`
+| Inspector area | Controls |
+|---|---|
+| **Capture Settings** | Read-only **Capture Strategy**, **Preset** segments, and Custom **Width**, **Height**, **Target FPS**, and **Will Capture At**. |
+| **Camera Setup** | **Target Camera** and **Identifier** (default `camera`). A blank camera resolves to a Camera on the same object, then `Camera.main`. |
+| **Advanced** | Collapsed debugging controls, including **Internal Backend Override**. Leave automatic backend selection in place for normal use. |
 
-<figure><img src="../../../../.gitbook/assets/convai-camera-vision-frame-source-inspector.png" alt="CameraVisionFrameSource Inspector"><figcaption><p>CameraVisionFrameSource Inspector.</p></figcaption></figure>
+| Preset | Width | Height | FPS |
+|---|---|---|---|
+| `LowOverhead` | `640` | `480` | `10` |
+| `Balanced` | `1280` | `720` | `15` |
+| `HighDetail` | `1920` | `1080` | `30` |
+| `Custom` | At least `320` | At least `240` | `1`–`30` |
 
-**Capture Settings**
+Custom fields are serialized as zero before assignment; an untouched Custom preset therefore resolves to `320 × 240` at `1` fps. Assign deliberate values before using it.
 
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| **Capture Preset** | `CapturePreset` | `Balanced` | Selects a preconfigured resolution and frame-rate combination. Set to `Custom` to enter values manually. |
-| **Capture Width** | `int` | — | Output width in pixels. Active only when preset is `Custom`. |
-| **Capture Height** | `int` | — | Output height in pixels. Active only when preset is `Custom`. |
-| **Target Fps** | `int` | — | Target capture frame rate. Active only when preset is `Custom`. |
-| **Camera Capture Mode** | `CameraCaptureMode` | `Auto` | Selects the render-pipeline capture strategy. Leave at `Auto` unless the feed is black. |
+Automatic capture uses Built-in rendering hooks or the explicit compatibility path for SRP. `SrpNative` is unavailable in this implementation and reports `UnsupportedPlatform`; use the compatibility path when diagnosing SRP capture. The optional diagnostic health probe is exposed only in the Inspector's Debug mode, not this custom Inspector. See [Troubleshoot vision](troubleshooting-and-diagnostics.md).
 
-**Camera**
-
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| **Target Camera** | `Camera` | _(auto-resolved)_ | The camera to capture. If left blank, resolved to `Camera.main` at runtime. |
-
-If **Target Camera** is blank and no camera in the scene is tagged **MainCamera**, the frame source enters `Failed` state at runtime with `ErrorKind = InvalidConfiguration`. Always assign a camera explicitly or ensure one camera has the **MainCamera** tag.
-
-**Debug**
-
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| **Source Id** | `string` | `"camera"` | Identifier used in domain events and multi-source scenarios. |
-| **Enable Diagnostic Frame Health Probe** | `bool` | `false` | Performs a synchronous per-frame pixel readback to validate frame content. Use only when diagnosing black-frame issues; incurs a GPU readback cost every frame. Disable before shipping. |
-
-**Capture preset values**
-
-| Preset | Width | Height | FPS | Use case |
-| --- | --- | --- | --- | --- |
-| `LowOverhead` | 640 | 480 | 10 | High-volume deployments, mobile, or bandwidth-constrained environments |
-| `Balanced` | 1280 | 720 | 15 | General purpose — default for most scenarios |
-| `HighDetail` | 1920 | 1080 | 30 | Scenes where fine visual detail is critical to AI comprehension |
-| `Custom` | _(set manually)_ | _(set manually)_ | _(set manually)_ | Full control over dimensions and frame rate |
-
-<figure><img src="../../../../.gitbook/assets/convai-camera-vision-capture-preset-dropdown.png" alt="Capture preset options in the Inspector dropdown"><figcaption><p>Capture preset options in the Inspector dropdown.</p></figcaption></figure>
-
-**Camera capture mode values**
-
-| Mode | When to use |
-| --- | --- |
-| `Auto` | Default. On Built-in Render Pipeline, uses render hooks (`Camera.onPreRender` / `Camera.onPostRender`). On SRP/URP, uses the explicit render path (`TargetCamera.Render()` in `LateUpdate`). Select this first and override only if the feed is black. |
-| `BuiltInHooks` | Forces Built-in Render Pipeline capture hooks. Only compatible with the Built-in RP — selecting this on SRP/URP produces a black feed. |
-| `ExplicitRenderCompatibility` | Forces an explicit per-frame camera render. Use when `Auto` produces a black feed on SRP/URP, or with highly customised render setups. Adds a bounded extra camera render at the configured capture FPS. |
-| `SrpNative` | **Not available in this SDK build.** See note below. |
-
-{% hint style="danger" %}
-**`SrpNative` is not functional in the current SDK build.** Selecting it causes `CameraVisionFrameSource` to enter `Failed` state immediately with `ErrorKind = UnsupportedPlatform`. If `Auto` is producing a black feed on your SRP/URP project, use `ExplicitRenderCompatibility` instead.
-{% endhint %}
+<figure><img src="../../../../.gitbook/assets/unity-vision-camera.png" alt="Camera Vision Frame Source Inspector with the Balanced capture preset selected and Main Camera assigned as Target Camera with the identifier main-camera"><figcaption><p>Camera Vision Frame Source with the Balanced preset and an assigned target camera.</p></figcaption></figure>
 
 ## WebcamVisionFrameSource
 
-`WebcamVisionFrameSource` captures a physical camera device using Unity's `WebCamTexture` API and converts the output to a `RenderTexture`. It handles device selection, permission requests (on Android and iOS), automatic rotation correction, and resolution clamping.
+`WebcamVisionFrameSource` uses Unity's `WebCamTexture`, converts frames into a `RenderTexture`, and corrects rotation. Add it through **Convai > Vision > Webcam Vision Frame Source**.
 
-**Component menu path:** `Convai/Vision/Webcam Vision Frame Source`
+| Inspector area | Controls |
+|---|---|
+| **Webcam Device — N found** | **Device Name**, plus **Available Devices** with **Select** and **Clear**. Empty uses Unity's system-default camera, not a guaranteed first enumerated device. |
+| **Capture Settings** | **Requested Resolution** (default `640 × 480`), **Requested FPS** (default `15`), and **Identifier** (default `webcam`). Actual Resolution is shown in Play mode. |
 
-<figure><img src="../../../../.gitbook/assets/convai-webcam-vision-frame-source-inspector.png" alt="WebcamVisionFrameSource Inspector"><figcaption><p>WebcamVisionFrameSource Inspector.</p></figcaption></figure>
+The requested size and FPS are driver requests, not guaranteed output. Serialized maximum output dimensions default to `1280 × 720` but are not drawn in the normal custom Inspector. `GetAvailableDeviceNames()` lists devices for your own selection UI.
 
-**Webcam Settings**
+`SwitchWebcamAsync(deviceName)` stops capture before opening the new device. The room remains connected, but the publisher unpublishes when the source stops. After the switch succeeds, call `publisher.EnablePublishing(true)` to publish again, or reconnect the room.
 
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| **Webcam Device Name** | `string` | `""` | Name of the webcam device to open. An empty string selects the first available device. |
-| **Requested Width** | `int` | `640` | Requested capture width sent to the driver. Actual resolution may differ. |
-| **Requested Height** | `int` | `480` | Requested capture height sent to the driver. |
-| **Requested Fps** | `int` | `15` | Requested frame rate sent to the driver. |
-| **Max Output Width** | `int` | `1280` | Maximum width of the output `RenderTexture`. Frames wider than this are scaled down. Set to `0` to disable scaling. |
-| **Max Output Height** | `int` | `720` | Maximum height of the output `RenderTexture`. |
+Startup enters `Starting`, may pause in `AwaitingPermission`, returns to `Starting`, and becomes `Ready` on a copied frame. Denial reports `Failed` / `PermissionDenied`. A first-frame wait of `5` seconds can emit `Degraded` / `Timeout`, but the startup path then returns to `Starting`; do not assume that error remains latched. Monitor status and actual frame readiness.
 
-**Source Identification**
+WebGL also supports this source, subject to browser camera access. Test a deployed HTTPS build and permission handling; Editor success is not browser permission evidence. Mobile builds need their platform camera permission configuration.
 
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| **Source Id** | `string` | `"webcam"` | Identifier used in domain events and multi-source scenarios. |
-
-**Listing available devices**
-
-To enumerate connected webcam devices at runtime:
-
-```csharp
-string[] deviceNames = WebcamVisionFrameSource.GetAvailableDeviceNames();
-foreach (string name in deviceNames)
-    Debug.Log(name);
-```
-
-**Switching devices at runtime**
-
-To switch to a different webcam without stopping the session:
-
-```csharp
-WebcamVisionFrameSource webcam = GetComponent<WebcamVisionFrameSource>();
-await webcam.SwitchWebcamAsync("Front Camera");
-```
-
-**Permission flow (Android / iOS)**
-
-On Android and iOS the component requests camera permission asynchronously when `StartCapture()` is called. The `State` property transitions through:
-
-`Idle → AwaitingPermission → Starting → Ready`
-
-If the user denies permission, `State` becomes `Failed` and `ErrorKind` is set to `PermissionDenied`. Monitor this via `IVisionFrameSourceStatusProvider.StatusChanged` — see [Vision scripting API](scripting-api.md) for the state monitor pattern.
-
-On Android and iOS the system camera permission dialog appears the first time `StartCapture()` runs. Ensure your app's `AndroidManifest.xml` declares `android.permission.CAMERA` and your iOS `Info.plist` includes `NSCameraUsageDescription` before submitting to app stores.
 
 ## QuestVisionFrameSource
 
-`QuestVisionFrameSource` streams the real-world passthrough feed from a Meta Quest 3 or 3S headset, giving Convai characters a live view of the physical environment. The component binds to Meta's `PassthroughCameraAccess` API via reflection so the SDK does not take a hard compile-time dependency on the Meta XR package. The Inspector shows a dedicated Live Status panel — resolution, target FPS, frame count, `State`, and `ErrorKind` — matching the panels shown by `CameraVisionFrameSource` and `WebcamVisionFrameSource`.
+`QuestVisionFrameSource` streams the real-world passthrough feed from a Meta Quest 3 or 3S headset, giving Convai characters a live view of the physical environment. The component binds to Meta's `PassthroughCameraAccess` API via reflection so the SDK does not take a hard compile-time dependency on the Meta XR package. In Play Mode, the Inspector's **Live** section shows whether it is capturing, plus **Resolution**, **Target FPS**, **Frames**, **Frame Ready**, **Identifier**, **State** and **Error**, with the source's status message below them when it has one, like the Live sections of `CameraVisionFrameSource` and `WebcamVisionFrameSource`. While **Passthrough Camera Access** is empty, an **Auto-Discovery** note explains that the component searches the scene for one when capture starts.
 
 **Component menu path:** `Convai/Vision/Quest Vision Frame Source`
 
-<figure><img src="../../../../.gitbook/assets/convai-quest-vision-frame-source-inspector.png" alt="QuestVisionFrameSource Inspector"><figcaption><p>QuestVisionFrameSource Inspector.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-quest-vision-frame-source.png" alt="Quest Vision Frame Source Inspector with the Auto-Discovery note, Quest Camera Access and Output Settings groups, and the Live section asking for Play Mode"><figcaption><p>The Quest Vision Frame Source Inspector in Edit Mode. The Live section fills in during Play Mode.</p></figcaption></figure>
 
-`QuestVisionFrameSource` requires **Meta Quest 3 or 3S** running Horizon OS with the Passthrough Camera API. Quest 2 and Quest Pro do not support `PassthroughCameraAccess`. In the Editor or on other platforms, `PassthroughCameraAccess` cannot be found or read, so the component enters `Failed` state with `ErrorKind = InvalidConfiguration` and produces no frames.
+`QuestVisionFrameSource` requires **Meta Quest 3 or 3S** running Horizon OS with the Passthrough Camera API. Quest 2 and Quest Pro do not support `PassthroughCameraAccess`. In the Editor or on other platforms it produces no frames. If no readable `PassthroughCameraAccess` is found when capture starts, the component enters `Failed` with `ErrorKind = InvalidConfiguration`. If one is found but never delivers a readable texture, the component retries the binding three times, one second apart, then enters `Failed` with `DeviceUnavailable` and the message "Quest passthrough source stopped producing readable frames."
 
 {% hint style="danger" %}
-**AndroidManifest.xml permissions required.** Your manifest must declare both `horizonos.permission.HEADSET_CAMERA` and `android.permission.CAMERA`. Without these declarations, passthrough capture fails silently on device and the frame source enters `Failed` state. The device does not show a permission dialog — it denies access outright.
+**AndroidManifest.xml permissions required.** Your manifest must declare both `horizonos.permission.HEADSET_CAMERA` and `android.permission.CAMERA`. Verify permission grants on the target headset. A missing or unreadable `PassthroughCameraAccess` reports `Failed` / `InvalidConfiguration`; the client cannot establish device permission behavior from the Inspector alone.
 {% endhint %}
 
 **Quest Camera Access**
@@ -150,12 +80,12 @@ On Android and iOS the system camera permission dialog appears the first time `S
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
 | **Source Id** | `string` | `"quest-passthrough"` | Identifier used in domain events. |
-| **Max Output Width** | `int` | `1280` | Maximum width of the output `RenderTexture`. |
-| **Max Output Height** | `int` | `720` | Maximum height of the output `RenderTexture`. |
+| **Max Output Width** | `int` | `1280` | Maximum width of the output `RenderTexture`. The output only scales down, keeping the aspect ratio; `0` keeps the source width. |
+| **Max Output Height** | `int` | `720` | Maximum height of the output `RenderTexture`. The output only scales down, keeping the aspect ratio; `0` keeps the source height. |
 | **Target Frame Rate** | `int` | `15` | Target frames per second for capture. |
-| **Flip Y** | `bool` | `true` | Flips the passthrough texture vertically. Required for correct video orientation — disable only if the Meta SDK changes its coordinate conventions. |
+| **Flip Y** | `bool` | `true` | Flips the passthrough texture vertically so the published texture is top-down. |
 
-The binding to `PassthroughCameraAccess` is established via reflection at runtime. If the Meta XR package is updated and `PassthroughCameraAccess` changes its API, the component logs an error and enters `Failed` state. Check for SDK updates in that case.
+The binding to `PassthroughCameraAccess` is established via reflection at runtime. If the Meta XR package is updated and `PassthroughCameraAccess` changes its API, the component enters `Failed` and sets `StatusMessage`, which the Inspector's **Live** section shows. It does not log the failure. Check for SDK updates in that case.
 
 ## Source state reference
 
@@ -187,18 +117,18 @@ All three frame sources implement `IVisionFrameSourceStatusProvider`, which expo
 
 For scripting against these states and responding to `StatusChanged` events, see [Vision scripting API](scripting-api.md).
 
-## Platform compatibility matrix
+## Capture-path availability
 
 | Feature | PC / Mac | Android / iOS | WebGL | Meta Quest 3 / 3S |
 | --- | --- | --- | --- | --- |
-| `CameraVisionFrameSource` | ✅ | ✅ | ❌ (no frame source needed) | ✅ |
-| `WebcamVisionFrameSource` | ✅ | ✅ (permission flow) | ❌ | ❌ |
+| `CameraVisionFrameSource` | ✅ | ✅ | ✅ | ✅ |
+| `WebcamVisionFrameSource` | ✅ | ✅ (permission flow) | ✅ (browser permission) | Device-dependent |
 | `QuestVisionFrameSource` | ❌ | ❌ | ❌ | ✅ (Meta XR SDK required) |
 | WebGL canvas capture | ❌ | ❌ | ✅ (automatic) | ❌ |
-| `VisionDebugPreview` | ✅ (Editor only) | ✅ (Editor only) | ⚠️ blank | ✅ (Editor only) |
-| Max publish FPS | 30 | 30 | 15 | 30 |
+| `VisionDebugPreview` | ✅ (Editor only) | ✅ (Editor only) | ✅ (Editor only) | ✅ (Editor only) |
+| Inspector Max Publish FPS | `30` | `30` | `30` (explicit override) | `30` |
 
-On WebGL no frame source component is required or used. `ConvaiVisionPublisher` captures the visible browser canvas automatically via `canvas.captureStream()`. See [Publish policies](publishing-and-policies.md) for WebGL-specific behavior and the HTTPS requirement.
+WebGL uses the selected source by default, with Game View as an explicit choice or fallback when no source exists. See [WebGL vision](webgl.md). This table describes client paths, not device or release qualification.
 
 ## Next steps
 

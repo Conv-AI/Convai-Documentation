@@ -1,12 +1,15 @@
 ---
 title: Multi-Character Sample
 description: Import the Multi-Character Sample scene to see several Convai characters sharing one room, interaction targeting, and a live transcript.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 The **Multi-Character Sample** is a shared-room scene shipped with the Convai Unity SDK, showing several characters, interaction targeting, a transcript UI, and roster changes made while the scene is running. Import it to see a working multi-character room before building your own.
 
 ## Prerequisites
+
+- A project using the Universal Render Pipeline. The sample uses URP camera/light and volume components; URP is a sample prerequisite, not an SDK package dependency.
+- Import the **LipSync Sample** first for shared Sofia assets.
 
 - Convai Unity SDK <code class="expression">space.vars.unity_sdk_version</code> installed.
 - A configured API key and server environment in **Edit > Project Settings > Convai SDK**.
@@ -17,7 +20,7 @@ The **Multi-Character Sample** is a shared-room scene shipped with the Convai Un
 {% step %}
 ### Import the Multi-Character Sample
 
-In **Window > Package Manager**, select **Convai SDK for Unity**, open the **Samples** tab, and import **Multi-Character Sample**. It is self-contained: the `Sofia` character it uses ships with the package rather than with another sample, so nothing else needs importing first. Unity copies its scene and scripts into `Assets/Samples/Convai SDK for Unity/<version>/Multi-Character Sample/`, where `<version>` is the installed SDK version (<code class="expression">space.vars.unity_sdk_version</code>).
+In **Window > Package Manager**, select **Convai SDK for Unity**, open the **Samples** tab, and import **Multi-Character Sample**. Import **LipSync Sample** first; the multi-character scenes reuse its Sofia assets. Unity copies its scene and scripts into `Assets/Samples/Convai SDK for Unity/<version>/Multi-Character Sample/`, where `<version>` is the installed SDK version (<code class="expression">space.vars.unity_sdk_version</code>).
 {% endstep %}
 
 {% step %}
@@ -34,7 +37,7 @@ Accept Unity's prompt to import the TextMesh Pro Essential Resources if one appe
 {% endstepper %}
 
 {% hint style="warning" %}
-Multi-character rooms are a Convai account feature. If the account behind your API key does not have it, the room refuses to connect and the Console names the reason — there is nothing to check beforehand.
+Multi-character rooms are a Convai account feature. If the account behind your API key does not have it, the room refuses to connect and the Console names the reason . Confirm preview availability with the account/service owner before the live test.
 {% endhint %}
 
 ## What the scene shows
@@ -47,9 +50,9 @@ While the scene runs, select the `GameObject` holding **Convai Manager** and ope
 
 ## Changing the roster while playing
 
-A character that appears in the scene while the room is connected joins the conversation without a reconnect — nothing to call. Disabling a character does not remove its seat; it stops being addressable and becomes addressable again the instant it is re-enabled. A character leaves the room only when it is destroyed or dropped from ownership.
+A manager-owned, selected character that appears in a roster room can join without a reconnect, subject to validation and service acceptance. Disabling a character does not remove its seat; it stops being addressable and becomes addressable again the instant it is re-enabled. A character leaves the room only when it is destroyed, dropped from ownership, or unticked in **Characters Joining the Room**.
 
-This works because the sample connects with two characters active, which opens a room with a roster. A room that connects with a single character carries no roster and cannot grow later — have every character you want active in the scene before it connects.
+This works because the sample connects with three characters active, which opens a room with a roster. A room that connects with a single character carries no roster and cannot grow later — have every character you want active in the scene before it connects.
 
 ## How the sample reads targeting and availability
 
@@ -61,6 +64,10 @@ ConvaiConversationAvailability availability = _manager.ConversationAvailability;
 ```
 
 `AddressedCharacter` answers who the player is talking to. `ConversationAvailability` answers whether that character can hear the player yet — the value worth gating a chat field or microphone button on, rather than on the room being connected. `MultiCharacterSampleFirstPersonPlayer` supplies the movement and look input the scene needs so the player can turn toward one character or another; it is sample input plumbing, not part of the SDK.
+
+## Group conversation scene
+
+The same sample includes `Scenes/GroupConversationSample.unity`: three workshop characters with 3D audio, a Group Conversation component, simulator, and F9 diagnostic overlay. It opens offline with **Starts Connected** and each character's **Auto Connect** off; hold T to exercise the simulated player turn. See [Run the group conversation sample](../group-conversation/run-the-sample.md) before switching to the service-backed preview.
 
 ## Next steps
 

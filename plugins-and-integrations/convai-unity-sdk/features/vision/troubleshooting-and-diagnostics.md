@@ -1,174 +1,62 @@
 ---
 title: Troubleshoot vision
-description: Fix Vision publishing failures, blank feeds, permission errors, and platform-specific issues in Unity using a structured checklist and decision tree.
-last_reviewed: "4.5.0"
+description: Separate capture, publication, and response failures to diagnose camera feeds, source restarts, browser selection, and dynamic vision requests.
+last_reviewed: "5.0.0-preview"
 ---
 
-Work through this page top to bottom. Most Vision failures fall into one of four categories: connection misconfiguration, frame source failure, platform-specific restrictions, or WebGL origin policy.
+Check capture, publication, and service responses separately. A moving Editor preview proves local frames exist; `IsPublishing` proves a track was opened; a vision acknowledgement reports what Convai did with the request.
 
-## Quick checklist
-
-Before diving into specific issues, verify these five things in order:
+## Check the pipeline
 
 {% stepper %}
 {% step %}
-### Confirm Connection Type is Video
+### Confirm the effective room mode
 
-Select `ConvaiRoomManager` in the Hierarchy. Confirm **Connection Type** is set to **Video**. `ConvaiVisionPublisher` remains completely idle when Connection Type is `Audio` — it logs a message and returns without error.
+Use **Connection Type > Video**, or **Dynamic Vision > On** to resolve a configured Audio connection to Video. **Off** does not override an explicitly configured Video connection. Group conversation rooms remain Audio and do not publish vision.
 {% endstep %}
-
 {% step %}
-### Confirm the room has connected
+### Confirm the room and source
 
-`ConvaiVisionPublisher` does not publish until the room is connected. Check the Console for `[ConvaiRoomManager]` connection logs. Confirm `ConvaiManager.ActiveManager` is not null at runtime.
+Wait for room connection. On native platforms, assign a valid source or place it on the publisher object or beneath it. Runtime discovery does not search the whole scene. For WebGL, check **WebGL Publishes** and [browser source selection](webgl.md).
 {% endstep %}
-
 {% step %}
-### Confirm a frame source is present
+### Inspect frame readiness
 
-On native platforms (not WebGL), `ConvaiVisionPublisher` requires a frame source. Confirm `CameraVisionFrameSource`, `WebcamVisionFrameSource`, or a custom `IVisionFrameSource` is on the same GameObject or a child. Check the Console for:
-
-```text
-[ConvaiVisionPublisher] No IVisionFrameSource found.
-```
+Read the source's `State`, `ErrorKind`, `StatusMessage`, and usable-frame state. The publisher waits up to `2` active seconds for readiness, suspending that budget while permission is pending. A timeout can retry on a later frame event; a stopped or failed source needs explicit restart of publication.
 {% endstep %}
-
 {% step %}
-### Confirm the frame source is Ready
+### Verify publication and acknowledgement
 
-Open the frame source component in the Inspector at runtime. Confirm `State` is `Ready`. If it is `Failed`, check `ErrorKind` and `StatusMessage` in the Inspector or Console.
-{% endstep %}
-
-{% step %}
-### Add VisionDebugPreview
-
-Add `VisionDebugPreview` to any scene GameObject. Press Play. If the overlay shows a live image and `FPS > 0`, the feed is reaching the publisher. If the overlay is blank or FPS stays at zero, the frame source is not producing frames — continue to [Frame source issues](#frame-source-issues) below.
+Check `IsPublishing`, then request vision status. Inspect the boolean send result and the eventual response event. If a publisher uses a custom track name, align it with the room's resolved **Video Track Name**.
 {% endstep %}
 {% endstepper %}
 
-## Common issues
+## Match the failure
 
-| Symptom | Likely cause | Fix | Verify |
-| --- | --- | --- | --- |
-| `IsPublishing` stays `false` | Connection Type is `Audio` | Set **Connection Type** to **Video** on `ConvaiRoomManager`. | Confirm `IsPublishing` becomes `true` after switching Connection Type to Video and reconnecting. |
-| `IsPublishing` stays `false` | Room not connected | Wait for connection or check API key / network. | Check the Console for `[ConvaiRoomManager]` connection logs and confirm `ConvaiManager.ActiveManager` is not `null`. |
-| `IsPublishing` stays `false` | No frame source found | Add `CameraVisionFrameSource` to the same or child GameObject. | Confirm the Console no longer logs `[ConvaiVisionPublisher] No IVisionFrameSource found.` |
-| Debug overlay blank, FPS = 0 | Frame source in `Failed` state | Check `ErrorKind` — see [Frame source issues](#frame-source-issues). | Confirm `State` on the frame source component moves off `Failed` after applying the matching fix below. |
-| Feed is black | Wrong `CameraCaptureMode` for render pipeline | See [Black feed](#black-feed). | Confirm the `VisionDebugPreview` overlay shows a non-black image after switching mode. |
-| `SrpNative` selected | Unimplemented backend | `CameraVisionFrameSource` enters `Failed` immediately — use `ExplicitRenderCompatibility` on SRP/URP. | Confirm `State` no longer reports `Failed` with `ErrorKind = UnsupportedPlatform`. |
-| Webcam not opening | Permission denied (Android / iOS) | Declare `android.permission.CAMERA` in manifest; add `NSCameraUsageDescription` in Info.plist. | Confirm `State` no longer reports `PermissionDenied` and the webcam preview appears after the permission dialog is granted. |
-| Quest feed not starting | Missing manifest permissions | Declare both `horizonos.permission.HEADSET_CAMERA` and `android.permission.CAMERA`. | Confirm passthrough capture starts and `State` reaches `Ready` after redeploying with both entries declared. |
-| Quest feed not starting | Wrong hardware | `QuestVisionFrameSource` requires Quest 3 or 3S. Quest 2 and Quest Pro are not supported. | Confirm the target device is Quest 3 or 3S — `State` cannot reach `Ready` on unsupported hardware regardless of permissions. |
-| WebGL feed not publishing | Non-HTTPS origin | Deploy to HTTPS. `http://localhost` is the only exception. | Confirm the deployed URL uses `https://` (or is `http://localhost`). |
-| WebGL feed not publishing | Frame source assigned | On WebGL the frame source is ignored — remove or leave blank; publisher uses `canvas.captureStream()`. | Confirm `IsPublishing` becomes `true` after removing the frame source reference. |
-| Debug overlay blank on WebGL | Expected — no RenderTexture | `VisionDebugPreview` has no texture to display on WebGL. Verify via `IsPublishing` instead. | Confirm `IsPublishing` is `true` even though the overlay stays blank. |
-| Sampling window has no effect on frame selection | A **Sampling Windows** entry has **Count** set but **Interval Ms** left at `0` (or the reverse) | Set both **Count** and **Interval Ms** to nonzero values for every entry under **Sampling Windows** on `ConvaiRoomManager` (or the `ConvaiRoomManagerProfile` asset). Remove entries you are not using instead of leaving one field at `0`. | Confirm both fields show nonzero values in the Inspector. A dropped window logs no Console warning — the SDK only warns when window counts exceed the **Frames Per Turn** budget — so silence does not confirm the window was sent. |
-| Respond mode change has no visible effect | `UpdateRespondMode` returned `false`, or the backend rejected the request | Check the `bool` return value of `UpdateRespondMode` before assuming it applied; call it only while `IsConnected` is `true`. Subscribe to `RespondModeUpdateResultReceived` and check `Status` and `Message`. | Confirm `RespondModeUpdateResultReceived.Status` is `"success"` and `Modality` / `Mode` match the requested lane and mode. See [Vision scripting API](scripting-api.md) for the event subscription pattern. |
+| Symptom | Action | Verify |
+|---|---|---|
+| `Target camera became unavailable or was destroyed` / `vision.camera_not_found` | Assign **Target Camera**. A blank reference tries a same-object Camera, then `Camera.main`. | The source produces a usable frame. |
+| Black camera image | Confirm the intended camera, visible content, and render backend. Automatic SRP capture uses the explicit compatibility path; `SrpNative` is unavailable. | Preview the actual captured image. |
+| Webcam permission denied | Check platform declarations and the user's current grant. On WebGL, test HTTPS and browser permission. | `Ready` and increasing frame count, not only permission success. |
+| Webcam switched but publication stopped | After `SwitchWebcamAsync` succeeds, call `EnablePublishing(true)` or reconnect. | A new track publishes from the reopened source. |
+| `Frame source did not become ready within 2s` | Check startup, permission state, texture/canvas output, and frame events. | A usable output causes publication. |
+| `Frame source failed before publish. State=..., Error=...` | Fix the reported source failure, then explicitly enable publication again. | The source is usable and `IsPublishing` becomes true. |
+| Quest source fails with `InvalidConfiguration` | Check that `PassthroughCameraAccess` exists and is readable on the target device, with the required platform integration. | The source binds and produces frames on device. |
+| Browser shows the wrong picture | Choose Frame Source or Game View deliberately. An assigned page-canvas source uses its own canvas. | Inspect a browser vision response, not only the Editor preview. |
+| Debug preview absent in a player | Expected: `VisionDebugPreview` disables itself in every player build. | Use publish state and response diagnostics in the player. |
+| Sampling window omitted | Set both count and spacing above zero in **Custom Frame Spacing**. Keep totals within **Frames Per Reply**. | Inspect the requested settings and response. |
+| Respond-mode update has no effect | Check the send boolean, target selection, group restrictions, and response `Status`/`Message`. | The acknowledgement reports the intended lane and mode. |
 
-## Frame source issues
+## Diagnose persistent black frames
 
-### Black feed
+For `CameraVisionFrameSource`, the optional health probe is available through the Inspector's Debug mode, not its normal custom Inspector. It reads a `4 × 4` pixel block at most every `0.75` seconds after a `1.5`-second grace period, when render hooks are unhealthy or the explicit path is active. It warns after `5` consecutive invalid samples; on the explicit path it escalates after `30`. It is a diagnostic readback, not a per-frame image logger. Disable it when the investigation is complete.
 
-A black feed (overlay visible but all pixels black) on `CameraVisionFrameSource` indicates the wrong capture backend for the active render pipeline.
+## Enable targeted logs
 
-| Render pipeline | Recommended mode | Why |
-| --- | --- | --- |
-| Built-in Render Pipeline | `Auto` (uses `BuiltInHooks`) | `Camera.onPreRender` / `Camera.onPostRender` hooks work correctly. |
-| URP / SRP | `Auto` (uses `ExplicitRenderCompatibility`) | Explicit `Camera.Render()` in `LateUpdate` — works on all SRP versions. |
-| URP / SRP with black feed on Auto | `ExplicitRenderCompatibility` | Forces explicit render path; resolves black feeds on custom SRP configurations. |
+Open **Edit > Project Settings > Convai SDK > Diagnostics**. **Verbose** is a preset, not a log level. Set **Vision** under **Category Overrides** to Debug or Trace when needed, and reproduce once. Debug calls must also be present in the build: the Editor, a Development Build, or the Debug Logging feature flag provides them.
 
-{% hint style="danger" %}
-Do not select `SrpNative`. It is not implemented in this SDK build. Selecting it causes `CameraVisionFrameSource` to enter `Failed` state immediately with `ErrorKind = UnsupportedPlatform`.
-{% endhint %}
+Capture domain events are emitted by the camera source only. For webcam and Quest health, subscribe to `IVisionFrameSourceStatusProvider.StatusChanged`. Track unpublish reasons are coarse: normal unpublish uses `UserRequested`, even on session end, so retain the surrounding source state when diagnosing.
 
-### Camera not assigned
-
-If **Target Camera** is blank and no camera in the scene is tagged **MainCamera**, `CameraVisionFrameSource` enters `Failed` state at startup:
-
-```text
-ErrorKind = InvalidConfiguration
-StatusMessage = "No camera was assigned and Camera.main is null"
-```
-
-Fix: assign a camera to the **Target Camera** field, or tag one camera **MainCamera**.
-
-### Webcam permission denied
-
-On Android and iOS, `WebcamVisionFrameSource` requests camera permission on `StartCapture()`. If the user denies it:
-
-```text
-State = Failed
-ErrorKind = PermissionDenied
-```
-
-**Android:** Verify `AndroidManifest.xml` declares `android.permission.CAMERA`.  
-**iOS:** Verify `Info.plist` contains `NSCameraUsageDescription` with a non-empty string.
-
-If permission was previously denied by the user, the system will not show the dialog again. Direct the user to the device Settings app to re-enable it.
-
-### Quest passthrough not starting
-
-`QuestVisionFrameSource` requires both manifest permissions and the correct hardware.
-
-Required manifest entries:
-
-```xml
-<uses-permission android:name="horizonos.permission.HEADSET_CAMERA" />
-<uses-permission android:name="android.permission.CAMERA" />
-```
-
-Without both declarations, passthrough capture fails silently and the frame source enters `Failed` state. The device does not show a permission dialog — it denies access outright.
-
-Supported hardware: Meta Quest 3 and Quest 3S only. Quest 2 and Quest Pro do not expose `PassthroughCameraAccess`.
-
-## Decision tree
-
-```mermaid
-flowchart TD
-    A[IsPublishing = false?] --> B{Connection Type = Video?}
-    B -- No --> B1[Set Connection Type to Video on ConvaiRoomManager]
-    B -- Yes --> C{Room connected?}
-    C -- No --> C1[Check API key, network, Console for connection errors]
-    C -- Yes --> D{Frame source found?}
-    D -- No --> D1[Add CameraVisionFrameSource to same or child GameObject]
-    D -- Yes --> E{Frame source State = Ready?}
-    E -- No --> F{ErrorKind?}
-    F -- InvalidConfiguration --> F1[Assign Target Camera or tag MainCamera]
-    F -- PermissionDenied --> F2[Add manifest permissions; guide user to Settings]
-    F -- UnsupportedPlatform --> F3[Check SrpNative not selected; Quest 3/3S required for Quest source]
-    F -- DeviceUnavailable --> F4[Check webcam device name; verify hardware connected]
-    E -- Yes --> G{Feed black?}
-    G -- Yes --> G1[Switch Camera Capture Mode to ExplicitRenderCompatibility]
-    G -- No --> H[IsPublishing = true — check VisionDebugPreview overlay]
-```
-
-## Enable frame health probe
-
-For persistent blank or black frames that do not produce a `Failed` state, enable the diagnostic probe on `CameraVisionFrameSource`:
-
-1. Select the **ConvaiVisionRoot** GameObject.
-2. On `CameraVisionFrameSource`, enable **Enable Diagnostic Frame Health Probe**.
-3. Press Play and watch the Console.
-
-The probe performs a synchronous GPU-to-CPU pixel readback every frame and logs the result. This confirms whether the `RenderTexture` contains image data or is genuinely blank.
-
-{% hint style="warning" %}
-Disable **Enable Diagnostic Frame Health Probe** before shipping. It performs a synchronous GPU readback every frame, which causes a GPU pipeline stall and significantly reduces frame rate.
-{% endhint %}
-
-## Logging
-
-All Vision log messages use `LogCategory.Vision`. Set the log level to `Verbose` in **Tools → Convai → Configuration → Logging** to see all state transitions, frame source discovery, and publishing events.
-
-| Prefix | Component |
-| --- | --- |
-| `[ConvaiVisionPublisher]` | Publisher lifecycle, frame source discovery, policy changes |
-| `[VisionPublishCoordinator]` | Track open/close, frame routing |
-| `[CameraVisionFrameSource]` | Camera capture backend selection, state transitions |
-| `[WebcamVisionFrameSource]` | Device open, permission request, state transitions |
-| `[QuestVisionFrameSource]` | Passthrough API binding, state transitions |
-| `[VisionDebugPreview]` | Frame source discovery, fallback switches |
-
-## Next steps
-
-If the issue is not covered here, subscribe to `VisionCaptureStopped` and `VideoTrackUnpublished` and log the `Reason` and `ErrorMessage` fields. See [Vision scripting API](scripting-api.md) for the event subscription pattern.
+{% content-ref url="scripting-api.md" %}
+[Vision scripting API](scripting-api.md)
+{% endcontent-ref %}

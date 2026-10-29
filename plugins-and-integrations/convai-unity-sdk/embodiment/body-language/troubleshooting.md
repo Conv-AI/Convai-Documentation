@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot body language
 description: Diagnose why a Convai character's Body Language controller shows no motion, fights other modules, or reads too subtle or theatrical.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Diagnose the most common Body Language failure modes: no motion at all, motion that fights another module, a refused scripted gesture, motion that reads too subtle or too theatrical, and motion that scales oddly with camera distance.
@@ -10,12 +10,12 @@ Diagnose the most common Body Language failure modes: no motion at all, motion t
 
 | Symptom | Likely cause | Fix | Verify |
 |---|---|---|---|
-| No motion at all | Rig binding failed, or no `Spine` bone resolved | Confirm the character has a Humanoid `Animator` with the spine chain mapped | Console shows no `Rig binding has no Spine bone` error, and the character breathes and sways at rest |
-| Motion fights scripted animation | Another module is holding the pose — Body Animation playing a walk or full-body action, or gesture suppression | Check the Inspector's **Sharing This Body** card to see which module is reducing the motion | **Runtime Status** shows `GesticulationSuppression` return to `None` once the other module finishes |
+| No motion at all | Rig binding failed, or no `Spine` bone resolved | Confirm a Spine resolves from the Humanoid Animator or an explicit rig override; a Generic or animator-free rig can use an override | Console shows no `Rig binding has no Spine bone` error, and the character breathes and sways at rest |
+| Motion fights scripted animation | Another module is holding the pose — Body Animation playing a walk or full-body action, or gesture suppression | Check the Inspector's **Sharing This Body** card to see which module is reducing the motion | **Runtime Status > Body Shared With** reads "nothing is reducing this character's motion" once the other module finishes |
 | A `Nod`/`Shake`/`Tilt` request does nothing | `HeadGestureHandle.Refusal` is `Busy` or `Unavailable` | `Busy`: retry after a short delay. `Unavailable`: fix the rig or profile setup below | `handle.IsActive` is `true` on the next request, or `handle.Refusal` is `None` |
 | Motion reads too subtle | `Expressiveness Preset` is `Subtle`, or amplitude fields are set low | Raise `Expressiveness Preset` to `Natural` or higher, or raise the relevant profile amplitude fields | The character's posture pulses and sway become visible at a normal 2-meter camera distance |
 | Motion reads too theatrical | `Expressiveness Preset` is `Theatrical`, or amplitude fields are set high | Lower `Expressiveness Preset` to `Natural`, or lower the relevant profile amplitude fields | Gestures no longer look exaggerated at a normal conversational distance |
-| Motion scales oddly with camera distance | `Enable Camera Distance Lod` is on and the main camera moved far from or close to the character | Confirm the behavior is intentional (it never affects breathing, posture, or gestures — only sway and idle hand motion), or turn `Enable Camera Distance Lod` off | Sway and hand micro-motion amplitude stay constant regardless of camera distance once the toggle is off |
+| Motion scales oddly with camera distance | **Scale With Camera Distance** is on and the main camera moved far from or close to the character | Confirm the behavior is intentional (it never affects breathing, posture, or gestures — only sway and idle hand motion), or turn **Scale With Camera Distance** off | Sway and hand micro-motion amplitude stay constant regardless of camera distance once the toggle is off |
 
 ## No motion at all
 
@@ -27,23 +27,19 @@ The controller is inert when it cannot resolve a `Spine` bone. Two distinct fail
   [ConvaiBodyLanguageController] No rig binding could be resolved. Body language needs a Humanoid character with a StandardRigBinding (added automatically for Humanoid Animators). The module stays inert.
   ```
 
-  (`ConvaiBodyLanguageController.cs:1863-1865`)
-
 * A rig binding exists, but it has no `Spine` bone:
 
   ```text
   [ConvaiBodyLanguageController] Rig binding has no Spine bone. Check that the Animator avatar is Humanoid and the spine chain is mapped; the module stays inert until a Spine bone exists.
   ```
 
-  (`ConvaiBodyLanguageController.cs:1874-1876`)
-
 Before pressing Play, the `ConvaiBodyLanguageController` Inspector's **This Character** section runs the same check and states the same cause in Inspector text, without needing a Play session:
 
-* No `Animator` on the character: "no Animator on this character — Body Language layers motion onto an animated skeleton, so it has nothing to move" (`BodyLanguageSetupService.cs:451-454`).
-* A Humanoid avatar with no spine mapped: "Humanoid avatar, but no Spine bone is mapped — check the Avatar's spine chain" (`BodyLanguageSetupService.cs:459`).
-* A non-Humanoid avatar: "the avatar is not Humanoid, so no Spine bone can be resolved" (`BodyLanguageSetupService.cs:460`).
+* No `Animator` on the character: "no Animator on this character — Body Language layers motion onto an animated skeleton, so it has nothing to move".
+* A Humanoid avatar with no spine mapped: "Humanoid avatar, but no Spine bone is mapped — check the Avatar's spine chain".
+* A Generic rig with no resolved spine is blocked. With a spine override, the card reads "custom rig — spine found".
 
-Fix the Animator's Humanoid avatar mapping, then re-enter Play mode. Everything else on the rig — chest, shoulders, hips, legs, and arms — is optional: a missing optional bone disables only the behavior that depends on it (for example, missing shoulders disable shoulder tension, but posture and breath still run). The **This Character** card reports each optional gap without treating it as a fault.
+The no-Animator check is stricter than the runtime, which can use an explicit Spine without an Animator. Procedural arm and hand behavior still needs the Humanoid Animator chains. Fix the Humanoid avatar mapping or assign the rig's Spine override under **Character Rig > Custom Rig Setup**, then re-enter Play mode. Everything else on the rig — chest, shoulders, hips, legs, and arms — is optional: a missing optional bone disables only the behavior that depends on it (for example, missing shoulders disable shoulder tension, but posture and breath still run). The **This Character** card reports each optional gap without treating it as a fault.
 
 ## Motion fights scripted animation
 
@@ -76,13 +72,13 @@ Check, in order:
 
 1. `Expressiveness Preset` on the assigned `ConvaiBodyLanguageProfile` — `Subtle` removes optional behaviors (shrugs, hand micro-life) entirely and reduces amplitude; `Theatrical` maximizes them.
 2. The runtime `ConvaiBodyLanguageController.Expressiveness` override — it wins over the profile until the next profile hot-swap, so a script may have set it away from the profile's authored value.
-3. Individual amplitude fields in the profile — `Max Openness Degrees`, `Max Lean Degrees`, `Posture Pulse Amplitude`, and the other fields listed on [Body language profile reference](profile-reference.md).
+3. Individual amplitude fields in the profile — **Openness Range**, **Lean Range**, **Posture Accent Strength**, and the other fields listed on [Body language profile reference](profile-reference.md).
 
-The `ConvaiBodyLanguageController` Inspector's **Posture (target → current)** section shows the live target and current posture values. If the target never moves off near-zero, the state policy and emotion are not reaching the directors — check the profile's **State Policies** section. If the target moves but current does not follow, check **Master Weight**: `0` means the module has not ramped in yet, or the rig did not bind.
+The `ConvaiBodyLanguageController` Inspector's **Posture (target → current)** section shows the live target and current posture values. If the target never moves off near-zero, the state policy and emotion are not reaching the directors — check the profile's **Per-State Behavior** section. If the target moves but current does not follow, check **Master Weight**: `0` means the module has not ramped in yet, or the rig did not bind.
 
 ## Motion scales oddly with camera distance
 
-`Enable Camera Distance Lod` scales sway amplitude and idle hand-motion weight by how far the main camera is from the character — subtler close up, larger far away, neutral at a normal conversational distance. It never touches breathing, posture, or gestures. If a character's sway looks different depending on shot framing, this toggle is working as intended; turn it off on the profile if the scene requires constant amplitude regardless of camera distance.
+**Scale With Camera Distance** scales sway amplitude and idle hand-motion weight by how far the main camera is from the character — subtler close up, larger far away, neutral at a normal conversational distance. It never touches breathing, posture, or gestures. If a character's sway looks different depending on shot framing, this toggle is working as intended; turn it off on the profile if the scene requires constant amplitude regardless of camera distance.
 
 ## Next steps
 

@@ -1,7 +1,7 @@
 ---
 title: Facial composition
 description: Reference for the facial composition profile, including per-region blend configuration, blend modes, and layer priority.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 `ConvaiFacialCompositionProfile` is a `ScriptableObject` asset that configures how much of a character's face Emotion, LipSync, and a reserved Custom channel each control while idle and while speaking. Convai classifies every facial blendshape into one of six regions and composes each region's final weight from this profile before writing it to the character's face mesh.
@@ -18,7 +18,8 @@ Create menu: `Assets > Create > Convai > Embodiment > Facial Composition Profile
 |---|---|---|
 | `SpeechRampUpDuration` | `float` | Seconds to ramp the speech blend factor from `0` to `1` when speech starts. Default `0.15`. Minimum `0.01`. |
 | `SpeechRampDownDuration` | `float` | Seconds to ramp the speech blend factor from `1` to `0` when speech ends. Default `0.4`. Minimum `0.01`. |
-| `EnableGlobalNormalization` | `bool` | When enabled, composed values exceeding 100 are clamped after all layers contribute. Default `false`. |
+| `EmotionReturnDuration` | `float` | Seconds for Emotion and Custom weights to return after speech, with eased recovery. Default `1.2`; minimum `0.01`. Shown under **Speech Blend Timing**. |
+| `EnableGlobalNormalization` | `bool` | Optional upper clamp at `100`. Default `false`. Final output is always clamped to `0`–`100`, so this toggle does not currently change the output range. |
 | `MouthConfig`, `BrowConfig`, `EyeConfig`, `CheekConfig`, `JawConfig`, `OtherConfig` | `RegionBlendConfig` | Read-only access to each region's blend configuration. |
 
 ### Methods
@@ -27,6 +28,8 @@ Create menu: `Assets > Create > Convai > Embodiment > Facial Composition Profile
 |---|---|---|
 | `GetRegionConfig` | `RegionBlendConfig GetRegionConfig(FacialBlendshapeRegion region)` | Returns the blend configuration for a facial region. |
 | `ClassifyBlendshape` | `FacialBlendshapeRegion ClassifyBlendshape(string blendshapeName)` | Classifies a blendshape name into a region using the profile's configured name patterns. Matching ignores case and separators, so `Jaw_Open` also matches `jawOpen`. |
+| `GetMeshDiscoveryPriority` | `int GetMeshDiscoveryPriority(string meshName)` | Returns the discovery priority from the configured mesh-name patterns. |
+| `ComputeConfigurationHash` | `int ComputeConfigurationHash()` | Hash of the profile configuration, for detecting changes. |
 | `CreateDefault` | `static ConvaiFacialCompositionProfile CreateDefault()` | Creates an instance with the shipped default values. Used internally when no profile is assigned; the caller owns and must destroy the returned instance. |
 
 ## Facial regions
@@ -48,7 +51,7 @@ Each pattern list is a semicolon-separated string field on the profile (`Mouth P
 
 `RegionBlendConfig` — `Convai.Runtime.Animation`, serializable struct
 
-Each region has its own `RegionBlendConfig` with six weights (`0`–`1`) and a `FacialBlendMode`. Weights interpolate between `Idle*` and `Speaking*` values using the smoothed speech blend factor.
+Each region has its own `RegionBlendConfig` with six weights (`0`–`1`) and a `FacialBlendMode`. LipSync weights interpolate using the speech blend factor. Emotion and Custom weights use a separate factor that rises with speech but returns over `EmotionReturnDuration`, so the expression can recover more slowly than lip sync.
 
 | Field | Type | Description |
 |---|---|---|
@@ -59,7 +62,7 @@ Each region has its own `RegionBlendConfig` with six weights (`0`–`1`) and a `
 | `SpeakingLipSyncWeight` | `float` | LipSync layer weight while speaking |
 | `SpeakingCustomWeight` | `float` | Custom layer weight while speaking |
 | `Mode` | `FacialBlendMode` | How the three layers combine within this region. Default `WeightedAdditive`. |
-| `EnableNormalization` | `bool` | When enabled, this region's composed result is clamped to 100 and excess is proportionally reduced. |
+| `EnableNormalization` | `bool` | Optional upper clamp at `100`; it does not proportionally rescale layers. The compositor always clamps final output to `0`–`100`, so this toggle currently has no visible range effect. |
 
 ### Default region weights
 
@@ -83,6 +86,10 @@ Each region has its own `RegionBlendConfig` with six weights (`0`–`1`) and a `
 | `WeightedAdditive` | `0` | Each layer's value is multiplied by its interpolated weight and summed, then clamped to 0–100. Preserves subtle contributions from multiple sources. Default. |
 | `Max` | `1` | Each layer's value is multiplied by its interpolated weight; the largest result wins. |
 | `Override` | `2` | The highest-priority non-zero layer value, scaled by its weight, takes full control. Priority order: LipSync, then Emotion, then Custom. |
+
+## Gaze-owned shapes
+
+Shapes registered as head-look owned take the `HeadLook` layer directly and bypass region composition. For other shapes, the compositor takes the larger of the region result and the `Eyes` layer before its final clamp. Adjusting the region's weights therefore does not necessarily reduce eye motion driven by Gaze.
 
 ## Assign an override profile
 

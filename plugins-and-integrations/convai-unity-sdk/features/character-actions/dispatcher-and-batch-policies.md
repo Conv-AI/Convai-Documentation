@@ -3,7 +3,7 @@ title: Dispatcher and batch policies
 description: >-
   Configure the dispatcher's batch policy, failure policy, speech gate
   timeout, barge-in, and lifecycle events for character action execution.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 `ConvaiActionDispatcher` is the runtime execution layer of the action system. It listens for command batches from Convai, resolves each action and target against the current session's configuration, and calls the bound executor components one step at a time. Two policies control what happens when new batches arrive during execution and when a step fails. A speech gate can also hold the first action of a fresh batch until the character starts speaking, and the dispatcher can optionally cancel its own work when the player starts talking.
@@ -19,6 +19,19 @@ last_reviewed: "4.5.0"
 The dispatcher must be on the same `GameObject` as `ConvaiCharacter`. Only one dispatcher is allowed per character. In the Actions Editor's **Character Settings** tab, this component is labeled **Convai Action Runner** under **Actions Are Run By** — see [Configure character actions](configuring-actions.md#where-action-behaviors-live).
 
 ## Inspector fields
+
+The custom Inspector groups settings under **How Actions Run**, **Reactions & Interruptions**, and **Events**. Serialized names below identify source fields; use these labels in the Inspector:
+
+| Inspector label | Serialized field | Section |
+|---|---|---|
+| **While Busy**: **Queue**, **Replace Current**, **Drop Incoming** | `_batchPolicy` | **How Actions Run** |
+| **If A Step Fails**: **Stop Batch**, **Continue Batch** | `_failurePolicy` | **How Actions Run** |
+| **Speech Wait Limit (Seconds)** | `_speechGateTimeoutSeconds` | **How Actions Run** |
+| **Action Time Limit (Seconds)** | `_defaultStepTimeoutSeconds` | **How Actions Run** |
+| **Stop When Player Speaks** | `_cancelOnUserSpeech` | **Reactions & Interruptions** |
+| **Lifelike Reactions** | `_enablePerformanceReactions` | **Reactions & Interruptions** |
+
+Lifecycle callbacks are in the collapsible **Events** section.
 
 | Field               | Type                               | Default     | Description                                                                |
 | ------------------- | ---------------------------------- | ----------- | -------------------------------------------------------------------------- |
@@ -76,13 +89,17 @@ Failure policy controls what happens when an executor returns a non-success resu
 
 Use `ContinueBatch` when actions are independent — a failed "Point At" should not prevent a following "Nod Or Shake Head." Use `StopBatch` (the default) for dependent sequences — a failed "Walk To" should prevent a following action that expects the character to have arrived.
 
+### Per-action override
+
+The action's **If This Fails** setting takes precedence over **If A Step Fails** on the runner. The Look At, Scan Environment, Play Gesture, Point At, and Turn To Face catalog definitions default to continuing the batch after failure. Use **Use Dispatcher Default** to inherit the runner policy.
+
 ## Gate the first action on character speech
 
-Convai can mark an action so the dispatcher delays it until the character starts speaking. Two fields control this — one set by Convai on the command, one that can be authored locally on the matching action definition.
+Author **Wait For Speech To Finish** and **Delay After Speech (Seconds)** on the action's **Advanced** card. The SDK copies those settings onto incoming commands. For locally injected batches, set the corresponding command fields. Despite the label, the gate can release on speech start, speech stop, turn completion, or timeout, followed by the authored delay.
 
 | Field                         | Location                | Type    | Default | Description                                                                                  |
 | ------------------------------ | ------------------------ | ------- | ------- | ---------------------------------------------------------------------------------------------- |
-| `WaitForBotSpeech`             | `ConvaiActionCommand`    | `bool`  | `false` | Set by Convai on the backend command. `true` gates the first step of the batch.               |
+| `WaitForBotSpeech`             | `ConvaiActionCommand`    | `bool`  | `false` | Copied by the SDK from authored settings for incoming commands; set directly for local injection. `true` gates the first step of the batch.               |
 | `DelayAfterBotSpeechSeconds`   | `ConvaiActionCommand`    | `float` | `0`     | Extra delay applied after the gate releases. Used only when the command's `WaitForBotSpeech` is `true`. |
 | `WaitForBotSpeech`             | `ConvaiActionDefinition` | `bool`  | `false` | Local override authored on the action definition. Also gates the first step when `true`.      |
 | `DelayAfterBotSpeechSeconds`   | `ConvaiActionDefinition` | `float` | `0`     | Extra delay applied after the gate releases. Used only when the command's `WaitForBotSpeech` is `false` and the definition's is `true`. |
@@ -116,6 +133,8 @@ public sealed class BargeInFeedback : MonoBehaviour
         Debug.Log($"Barge-in cancelled: {interruptedAction}");
 }
 ```
+
+During an active group conversation, the room manager temporarily disables `CancelOnUserSpeech` on member root dispatchers and restores the prior values afterward. Existing actions can continue during group interruption. Late batches from interrupted or aborted replies, or during group push-to-talk suppression, are dropped before dispatch.
 
 `OnCancelledByUserSpeech` carries the display name of the action that was interrupted, or an empty string when nothing had started executing yet.
 
@@ -244,11 +263,17 @@ Bypassing the dispatcher means no automatic target resolution, no batch/failure 
 | Dispatcher disabled                  | Active work is canceled; queue is cleared                          |
 | Dispatcher destroyed                 | Same as disabled                                                   |
 | Empty batch received                 | Silently ignored — no events fire                                  |
-| Action name not in local definitions | Step fails: `OnStepFailed` fires; `StopBatch` aborts the batch     |
+| Incoming command with unknown or non-runnable action | Refused before dispatch against executable local definitions and resolution configuration; a Console explanation appears, with no dispatcher event |
+| Locally injected action name not in definitions | Step fails; `OnStepFailed` fires and the effective failure policy applies |
 | Executor field not assigned          | Step fails: `OnStepFailed` fires                                   |
-| Target requirement not met           | Step fails: `OnStepFailed` fires                                   |
+| Incoming target cannot resolve | Refused before dispatch against local resolution configuration, which can include scene-only bindings |
+| Locally injected target requirement not met | Step fails; `OnStepFailed` fires |
 | Executor returns `Unhandled`         | `OnStepUnhandled` fires; treated as failure for `StopBatch` policy |
-| Matched action definition has `Enabled = false` | Step is declined: `OnStepUnhandled` fires with a message naming the action as disabled, without running the executor |
+| Incoming disabled action | Refused before dispatch |
+| Locally injected disabled action | Declined as unhandled without running the executor |
+| Busy runner with `DropIncoming` | Incoming batch discarded with a warning; no step runs |
+| Late batch from an interrupted or aborted reply | Dropped before dispatcher events |
+| Active group conversation starts / ends | Member root runner speech-cancellation settings are temporarily disabled / restored |
 | First step of a batch has `WaitForBotSpeech` set (on the command or the definition) | `OnStepStarted` is delayed until character speech starts, stops, a turn completes, or `_speechGateTimeoutSeconds` elapses |
 | Player starts speaking with `_cancelOnUserSpeech` enabled | In-flight step is canceled and the queue is cleared; `OnCancelledByUserSpeech` fires |
 | An action step exceeds its timeout (its own `TimeoutSeconds`, or `_defaultStepTimeoutSeconds` when unset) | Step result is `TimedOut`; `OnStepFailed` fires |

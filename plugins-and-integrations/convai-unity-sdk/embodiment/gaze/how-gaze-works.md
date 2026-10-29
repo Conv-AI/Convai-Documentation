@@ -1,14 +1,14 @@
 ---
 title: How gaze works
 description: Understand how the Gaze module chooses a target, shares the look across eyes, head, and body, and reacts to the conversation's dialogue state.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 `ConvaiGazeController` decides what a character looks at and how committed the look is, then articulates it across the body in a fixed order so the eyes, head, and torso never disagree about the target. This page explains the pipeline behind that decision: how a target is chosen, how the character's [dialogue state](../../core-concepts/dialogue-state.md) changes how strongly it commits, and why an eye movement and a body turn feel like one gesture instead of two separate systems.
 
 ## The three-stage pipeline
 
-Every cognition tick, Gaze runs the same three stages in order.
+During `Cognition`, Gaze selects its target and policy. Its solvers apply the result in `LateUpdate`, after the animated skeleton pose.
 
 | Stage | Question | What decides it |
 | --- | --- | --- |
@@ -36,17 +36,17 @@ Because the player anchor publishes at the highest tier, the player is the chara
 | --- | --- | --- | --- |
 | `Idle` | Lowest | No — ambient looking-around instead | No |
 | `Attending` | High | Yes | Yes |
-| `Listening` | Highest | Yes | Yes |
+| `Listening` | `0.95` | Yes | Yes |
 | `Thinking` | Reduced | Yes | No |
-| `Speaking` | Full | Yes | Yes |
-| `Reacting` / `Interrupted` | Full / near-full | Yes | Yes |
+| `Speaking` | `1` | Yes | Yes |
+| `Reacting` / `Interrupted` | `1` / `0.95` | Yes | Yes |
 | `Settling` | Reduced | Yes | No |
 
 A state not listed in the profile's table falls back to the `Idle` row. This is why a character ignores the player while `Idle`, commits through `Attending`, `Listening`, and `Speaking`, and softens contact again during `Thinking` and `Settling` — the same table drives every state transition, rather than a hand-authored rule per state. [Configure eye contact](configure-eye-contact.md) covers the `GazeEyeContactMode` setting that can override this table entirely for a character that must always hold the player's gaze.
 
 ## How the look moves through the body
 
-Once a target and a commitment level are set, the solver stage moves the character toward it in a fixed order: torso first, then neck and head, then eyes, then eyelids. The eyes commit to a new target first, and the head follows a beat later — the same eyes-then-head sequence real people use, rather than the whole body snapping to a new heading at once. For a large enough angle — the player standing behind the character, for example — the body itself turns to bring the target back in front, using either the character's own turn-in-place animation or a smooth procedural rotation depending on which embodiment modules the character carries.
+Once a target and a commitment level are set, the solver stage moves the character toward it in a fixed order: torso first, then neck and head, then eyes, then eyelids. The eyes commit to a new target first, and the head follows a beat later — the same eyes-then-head sequence real people use, rather than the whole body snapping to a new heading at once. For a large enough angle — the player standing behind the character, for example — the body itself turns to bring the target back in front, using the controller's serialized `bodyTurnStyle` (`SteppingTurn` by default). A stepping turn needs Body Animation, turn clips, and **Enable Turn In Place**, which is off by default. If no animated turn can run, Gaze uses procedural rotation. Adding Body Animation alone does not enable animated turns.
 
 This layered order is also why gaze and the character's Animator pose never conflict: every solver stage runs after the Animator has posed the skeleton for that frame, so a gaze-driven head rotation adjusts the animated pose instead of racing it. See [How embodiment works](../how-embodiment-works.md) for the shared tick order every embodiment module runs in.
 
@@ -77,9 +77,15 @@ Every gaze target is smoothed before the movement detector evaluates it, so ordi
 
 ### Personalities author their own values
 
-Every personality preset on `ConvaiGazeProfile` — `Default`, `Confident`, `Warm`, `Attentive`, `Shy`, `Stoic` — authors its own values for the Conversation attention group, alongside every other field that carries feel. `Confident` reacts more slowly and holds its attention on a speaker longer than `Warm` does, for example, which is part of what makes the two presets read differently in a group scene.
+The editor's **Personality > Character Type** archetypes — `Default`, `Confident`, `Warm`, `Attentive`, `Shy`, `Stoic` — write values into the assigned `ConvaiGazeProfile` asset, including the Conversation attention group, alongside every other field that carries feel. `Confident` reacts more slowly and holds its attention on a speaker longer than `Warm` does, for example, which is part of what makes the two presets read differently in a group scene.
 
 In Play mode, the `ConvaiGazeController` Inspector's Live section, the Gaze editor window, and the `Convai.DiagnoseGaze` assistant tool each report one line naming who the character is watching, or which gate — distance, angle, or line of sight — turned a speaker away.
+
+## Gaze driven by a group conversation
+
+A `ConvaiGroupConversation` with **Drive Gaze** enabled (the default) adds its own internal gaze coordinator. During a line, listeners face the speaker and the speaker faces the member it answers or addresses. Each held look is a scripted request at priority `1`, above default `GazeAt` requests and automatic conversation attention. Looks release when the line ends, the conversation lulls, or it stops.
+
+Keep head-height colliders on participating characters in **Spatial Query Layers** so visibility checks can recognize them. Configure the group through [Multi-character sessions](../../features/multi-character-sessions/README.md); do not add the internal coordinator by hand.
 
 ## Next steps
 

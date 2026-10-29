@@ -1,43 +1,45 @@
 ---
 title: How narrative design works
 description: Understand the Narrative Design pipeline — how sections, triggers, and template keys connect at runtime to advance a story graph.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Narrative Design gives a Convai character a structured story to follow. You author a graph of sections and triggers in the Convai dashboard; at runtime, the SDK listens for section-change signals from Convai and fires the Unity Events you configured — no polling, no custom state machines. This page explains the underlying model: what the primitives are, how a trigger advances the graph, and which SDK component handles each part of the pipeline.
 
 ## How the runtime pipeline works
 
-When the player activates a trigger, the SDK sends a named signal to Convai. Convai advances the story graph and responds with a `behavior-tree-response` message that carries the new section ID. The SDK translates this into a `NarrativeSectionChanged` domain event and delivers it to `ConvaiNarrativeDesignManager`, which fires the per-section Unity Events you wired in the Inspector.
+When the player activates a trigger, the SDK sends a named signal to Convai. When Convai processes a section update, it responds with a `behavior-tree-response` message that carries the new section ID. The SDK translates this into a `NarrativeSectionChanged` domain event and delivers it to `ConvaiNarrativeDesignManager`, which fires the per-section Unity Events you wired in the Inspector.
 
 ```mermaid
 sequenceDiagram
     participant Player
     participant Trigger as ConvaiNarrativeDesignTrigger
-    participant Char as ConvaiCharacter (RTVI)
+    participant Char as Character narrative API
+    participant Handler as RTVI handler
     participant Backend as Convai
     participant Hub as Event hub
     participant Manager as ConvaiNarrativeDesignManager
     participant Scene as Your scene
 
     Player->>Trigger: enters zone / calls InvokeTrigger()
-    Trigger->>Char: InvokeTrigger(triggerName, message)
+    Trigger->>Char: InvokeTrigger(triggerName)
     Char->>Backend: trigger-message (RTVI)
-    Backend-->>Char: behavior-tree-response (sectionId, btCode)
-    Char->>Hub: publish NarrativeSectionChanged
+    Backend-->>Handler: behavior-tree-response (sectionId, btCode)
+    Handler->>Hub: publish NarrativeSectionChanged
+    Hub-->>Char: section update
     Hub-->>Manager: NarrativeSectionChanged event
     Manager->>Scene: UnitySectionEventConfig.OnSectionStart.Invoke()
 ```
 
 `ConvaiCharacter` also subscribes to `NarrativeSectionChanged` independently through the same event hub, alongside `ConvaiNarrativeDesignManager` — the diagram above shows only the path that reaches your scene's Unity Events.
 
-Triggers queue automatically if the character's real-time session is not yet open and are flushed when the connection is established. You do not need to check session state before calling `InvokeTrigger()`.
+The character API can accept a command locally and hold it until the character is ready and, in a multi-character room, selected as the conversation target. At most `16` triggers are held per character; older entries are dropped when that limit is exceeded. Group conversations refuse these narrative commands. A `true` return reports local acceptance, not server confirmation. See [Narrative design with multiple characters](narrative-design-multi-character.md).
 
 ## Sections and triggers
 
-**Sections** are named story beats defined in the Convai dashboard. The character's objectives, knowledge, and conversational behavior adapt to whichever section is active. A single character can play a neutral receptionist in an opening section and a strict examiner in an assessment section — all within one session — because the active section shapes what the backend returns.
+**Sections** are named story beats defined in the Convai dashboard. The character's objectives, knowledge, and conversational behavior adapt to whichever section is active. A single character can play a neutral receptionist in an opening section and a strict examiner in an assessment section — all within one session — because the active section shapes what Convai returns.
 
-**Triggers** are the directed edges in the story graph. Sending a trigger by name advances the graph from one section to the next along the matching edge. A trigger carries an optional message payload that provides context for the transition — for example, `"Player completed the safety checklist"` — which the character can incorporate into its next response.
+**Triggers** are the directed edges in the story graph. Sending a trigger by name advances the graph from one section to the next along the matching edge. Saved triggers send only `trigger_name`. Fetched trigger messages are display metadata. Send contextual text separately through `InvokeEvent`, which uses `trigger_message`.
 
 Template keys are runtime key-value pairs that fill placeholders in the dashboard's narrative objectives. Set `{PlayerName}` to `"Alex"` and every section that references `{PlayerName}` will use the current value without any graph changes.
 

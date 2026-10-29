@@ -1,13 +1,28 @@
 ---
 title: Scripting reference
-description: Reference for the Convai Unity SDK C# scripting APIs — events, transcripts, audio control, and async operation patterns.
-last_reviewed: "4.5.0"
+description: Find Unity SDK scripting references for scene managers, characters, audio, push-to-talk, transcript history, events, and REST clients.
+last_reviewed: "5.0.0-preview"
 ---
 
-The Convai Unity SDK exposes two complementary approaches for C# integration. `ConvaiSessionEventRelay`, `ConvaiCharacterEventRelay`, and `ConvaiTranscriptEventRelay` are MonoBehaviours that wire events directly in the Inspector — no code required. For scripted reactions and programmatic control, the `ConvaiEvents` typed event hub and each component's C# API give full access from any script. Both approaches observe the same underlying SDK events and can be combined freely.
+Use these references when connecting scene scripts to the SDK. Public scene components live in `Convai.Runtime.Components`; the event, audio, and transcript facades live in `Convai.Runtime.Facades`.
 
-<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Session events</strong><br>Connection state, errors, idle warnings, and participant changes via relay component or typed C# hub.</td><td><a href="session-events.md">session-events.md</a></td></tr><tr><td><strong>Character events</strong><br>Speech, emotion, transcript, turn lifecycle, and action events via relay component or typed C# hub.</td><td><a href="character-events.md">character-events.md</a></td></tr><tr><td><strong>Transcript API</strong><br>Pull-based facade for querying and subscribing to the live in-memory transcript timeline.</td><td><a href="transcript-api.md">transcript-api.md</a></td></tr><tr><td><strong>Character &#x26; Player API</strong><br>Full method, property, and event reference for <code>ConvaiCharacter</code> and <code>ConvaiPlayer</code>.</td><td><a href="character-and-player-api.md">character-and-player-api.md</a></td></tr><tr><td><strong>ConvaiManager API</strong><br>SDK entry point — connection control, facade accessors, conversation ownership, and service discovery.</td><td><a href="convaimanager-api.md">convaimanager-api.md</a></td></tr><tr><td><strong>Audio API</strong><br>Microphone muting, per-character audio control, audio playback unlock, and listening state.</td><td><a href="audio-api.md">audio-api.md</a></td></tr><tr><td><strong>Operation &#x26; stream types</strong><br>Type reference for <code>IConvaiOperation&#x3C;T></code>, <code>IConvaiStream&#x3C;T></code>, <code>ConvaiError</code>, <code>Unit</code>, and status enums.</td><td><a href="operation-and-stream-types.md">operation-and-stream-types.md</a></td></tr><tr><td><strong>Async patterns</strong><br>Six patterns for consuming SDK async types: async/await, coroutines, chaining, progress, cancellation, and streams.</td><td><a href="async-patterns.md">async-patterns.md</a></td></tr></tbody></table>
+<table data-view="cards"><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td><a href="convaimanager-api.md">ConvaiManager API</a></td><td>Connect, find services, select characters, and manage runtime ownership.</td></tr>
+<tr><td><a href="convairoommanager-api.md">ConvaiRoomManager API</a></td><td>Room policies, microphone permissions, diagnostics, and commands.</td></tr>
+<tr><td><a href="character-and-player-api.md">Character and player API</a></td><td>Readiness, identity, text input, and per-character behavior.</td></tr>
+<tr><td><a href="audio-api.md">Audio API</a></td><td>Microphone capture, mute, remote tracks, and browser playback unlock.</td></tr>
+<tr><td><a href="push-to-talk-api.md">Push-to-talk scripting reference</a></td><td>Press/release input, state changes, commit results, and recovery.</td></tr>
+<tr><td><a href="transcript-api.md">Transcript API</a></td><td>History entries, live captions, subscriptions, and export.</td></tr>
+<tr><td><a href="migrate-transcripts-to-5-0.md">Migrate transcript code to SDK 5.0</a></td><td>Replace removed turn APIs and relay payloads.</td></tr>
+<tr><td><a href="character-events.md">Character events</a></td><td>Speech, emotion, tool calls, and playback completion.</td></tr>
+<tr><td><a href="session-events.md">Session events</a></td><td>Connection state, errors, idle warnings, and session endings.</td></tr>
+<tr><td><a href="server-command-results.md">Server command results</a></td><td>Distinguish a sent command from an accepted command.</td></tr>
+<tr><td><a href="async-patterns.md">Async patterns</a></td><td>Await operations, use coroutines, and pass cancellation tokens.</td></tr>
+<tr><td><a href="operation-and-stream-types.md">Operation and stream types</a></td><td>Shared result types and producer contracts.</td></tr>
+<tr><td><a href="rest-api-client.md">REST API client reference</a></td><td>Client services, routing options, and transport ownership.</td></tr>
+</tbody></table>
 
-## Next steps
+## Related pages
 
-Start with [Session Events](session-events.md) and [Character Events](character-events.md) to wire SDK events to your scene logic, then explore the [ConvaiManager API](convaimanager-api.md) for connection control and the [Async Patterns](async-patterns.md) page for consumption guidance.
+- [Event system](../core-concepts/event-system.md)
+- [Runtime architecture](../core-concepts/runtime-architecture.md)

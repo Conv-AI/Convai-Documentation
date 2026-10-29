@@ -3,7 +3,7 @@ title: Character actions quick start
 description: >-
   Add a ready-made action to a Convai character from the Actions Editor's
   starter catalog, with no scripting, and confirm it runs in Play mode.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Open the Actions Editor and add one of its four ready-made starter actions to a Convai character, with no scripting required. By the end, the character responds to a natural-language request — such as "look at the chair" — by physically performing the behavior in your scene.
@@ -66,8 +66,8 @@ Switch the mode selector under the character picker from **Actions** to **Charac
 
 Switch back to the **Actions** mode and select the `Look At` action in the left pane. Its **Try It** box lets you run the action without starting a conversation:
 
-* **In Edit mode**, this is a **Preview**: type `chair` into the dry-run field and confirm it resolves to the target you marked.
-* **In Play mode**, this is a **Test Run**: pick `chair` from **Valid Targets** and click **Run Now**. The character should turn toward the chair immediately, with no conversation and no backend call involved.
+* **In Edit mode**, type `chair` into **Try A Target Name** and select **Check**. Confirm it resolves to the target you marked.
+* **In Play mode**, pick `chair` from **Target** and click **Run Now**. The character should turn toward the chair immediately, with no conversation and no backend call involved.
 
 {% hint style="success" %}
 **Expected result:** enter Play mode and say "look at the chair." The character's eyes, head, and body turn toward it, and the action reports success as soon as the gaze settles.

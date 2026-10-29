@@ -4,7 +4,7 @@ description: >-
   Fix common dynamic context problems in the Convai Unity SDK, including
   missed updates, delayed responses, and reset behavior that does not clear
   everything.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Most Dynamic Context problems in the relay and tracker flow come from one of three categories: a call made before the character entered a conversation, a reaction mode that produced an unexpected response, or a `ConvaiDynamicContextRelay` that cannot resolve a `ConvaiCharacter`. Work through the first-line investigation checklist below — most issues resolve within the first two or three steps.
@@ -23,15 +23,15 @@ If you see a warning, find the exact message in the [Console log reference](#con
 {% step %}
 ### Isolate the issue with the Sample Debug Hub
 
-Before debugging your own integration, confirm that Dynamic Context itself is working. Import the **LipSync Sample** from Package Manager and open its scene — the sample includes a **Sample Debug Hub** with a **Context** drawer that sends state, event, and attention-object updates to the scene's `ConvaiCharacter` without wiring your own UI.
+Before debugging your own integration, confirm that Dynamic Context itself is working. Add `SamplesShared/Prefabs/UI/Debug/Sample Debug Hub.prefab` to a test scene explicitly. The prefab's **Context** drawer sends state, event, and attention-object updates; sample scenes do not include this hub automatically.
 
-If the character responds correctly through the Debug Hub, the issue is in your own relay or scripting setup — not in Dynamic Context itself.
+Compare the same character and room state through the hub and your own integration. A difference helps isolate wiring or validation problems.
 {% endstep %}
 
 {% step %}
 ### Verify the character reference is resolved
 
-Select the `ConvaiDynamicContextRelay` component in the Inspector.
+Select `ConvaiDynamicContextRelay` in the Inspector and check its **Ready** / **Not Set Up** chip.
 
 * **Auto Resolve Character enabled:** confirm that `ConvaiDynamicContextRelay` and `ConvaiCharacter` are on the **same GameObject**.
 * **Auto Resolve Character disabled:** confirm that the **Character** field has a reference assigned.
@@ -64,13 +64,25 @@ If the character responded when you expected `Silent` to suppress a reply, anoth
 | A call made in `Awake()` or `Start()` seems to have no effect | Expected behavior — tracked calls stage locally and flush automatically once the character becomes ready | No action needed for tracked methods; avoid `Apply()` before a conversation starts, since it does not stage | The state or event appears in the character's response shortly after the conversation begins |
 | `ConvaiDynamicContextRelay` fires **On Skipped** instead of **On Queued** | No `ConvaiCharacter` resolved — **Auto Resolve Character** is disabled with no **Character** assigned, or the relay is on the wrong GameObject | Enable **Auto Resolve Character** and place the relay on the NPC's GameObject, or assign **Character** explicitly | **On Queued** fires and the Console shows no `Assign a ConvaiCharacter` warning |
 | **On Queued** fires but the character never references the update | An empty state name or a `null` value failed validation after dispatch — **On Queued** confirms dispatch, not that the value was accepted | Check the Console for a validation warning; see the [Console log reference](#console-log-reference) | The update appears in the character's context with no validation warning logged |
-| Character does not respond immediately after an update | The reaction requested for that call resolved to `Silent` | Use `Auto` or `MustRespond` — on the relay's **Reaction Mode** field, or as the `reaction` argument on the scripting call | Character references the update in its next turn (`Auto`/`Silent`) or responds immediately (`MustRespond`) |
-| `AddEvent` sent through the relay does not use its scripting default of `Auto` | The relay always passes its own **Reaction Mode** field explicitly for every call, overriding the method's scripting default | Set the relay's **Reaction Mode** field to `Auto` or `MustRespond` if the event should trigger a reply | Character reaction matches the relay's configured **Reaction Mode**, not `AddEvent`'s scripting default |
+| Character does not respond immediately after an update | The reaction requested for that call resolved to `Silent` | Use `Auto` or `MustRespond` — on the relay's **Reaction Mode** field, or as the `reaction` argument on the scripting call | Inspect the acknowledged requested and actual reaction; test dialogue separately |
+| `AddEvent` sent through the relay does not use its scripting default of `Auto` | The relay passes its own **Reaction Mode** field explicitly for state, event, and attention calls, overriding the method's scripting default | Set the relay's **Reaction Mode** field to `Auto` or `MustRespond` if the event should trigger a reply | Character reaction matches the relay's configured **Reaction Mode**, not `AddEvent`'s scripting default |
 | Character responds even though the call used `Silent` | Another call staged in the same batch window requested `Auto` or `MustRespond` — the strongest reaction in a batch wins for the whole batch | Separate calls that need independent reactions by more than the batch window, or call `Flush()` between them | The batch sends with the reaction you expect |
 | `Apply()` appears to have no effect | `Apply()` bypasses the local tracker and does not stage; a call made outside an active conversation is discarded with a warning | Use `SetState`, `AddEvent`, or another tracked method — they stage automatically | The update appears in the character's next response |
 | `TryGetStateValue` returns `false` after `Apply()` | `Apply()` never updates the local tracker | Use `SetState` if the value must be readable via `TryGetStateValue` | `TryGetStateValue` returns `true` after switching to `SetState` |
-| Character still references initial scenario facts after `Reset()` | Default `Reset()` clears the runtime tracker only — Initial Dynamic Info Text, system prompt facts, and in-session LLM memory are untouched | Call `Reset(removeStatic: true)` to also ask Convai to remove the static initial context for the session | Character no longer references facts that were only present in the static initial context |
+| Character still references initial scenario facts after `Reset()` | Default `Reset()` clears the runtime tracker and requests a reset without removing initial static context | Call `Reset(removeStatic: true)` to also ask Convai to remove the static initial context for the session | Inspect the reset acknowledgement; facts can still be present in other context sources |
 | Cannot add a second `ConvaiDynamicContextRelay` to the same GameObject | `[DisallowMultipleComponent]` restriction | Place additional relays on child GameObjects, disable **Auto Resolve Character**, and assign **Character** explicitly | Each relay operates independently on its assigned character |
+
+## Room holds and dropped batches
+
+| Symptom | Cause | Fix and verification |
+|---|---|---|
+| Ordinary non-target character keeps pending state | 5.0 holds tracked updates until that character is targeted | Target the character and inspect the Console and acknowledgement events. Raw `Apply` returns `false` instead of queuing. |
+| Group context does not provoke speech | Member context is deliberately sent silently | Use the group scene-event flow when a reaction is wanted; a volunteer request does not guarantee speech. |
+| Updates pause while a group starts | Member routes are not ready | Wait for group start to finish, then inspect submission. |
+| Old events disappear before delivery | More than 64 distinct events were staged in one pending batch | Check the first-drop warning; reduce event bursts or aggregate telemetry into state. |
+| Pending batch is dropped with a local send warning | Local serialization or sending refused the payload | Fix the warning, reduce oversized context, and restage. This is distinct from a server rejection. |
+
+See [Context in multi-character and group rooms](multi-character-and-group-rooms.md) for delivery and acknowledgement routing.
 
 ## `Apply()` discarded my update
 
@@ -80,7 +92,7 @@ If the character responded when you expected `Silent` to suppress a reply, anoth
 Use `Apply()` only for advanced cases that construct context text externally or combine a context update with an action-config patch. For anything that might run before a conversation starts, use `SetState`, `AddEvent`, or another tracked method — they stage automatically.
 {% endhint %}
 
-`Apply()` also bypasses the local tracker entirely: a value sent through `Apply()` does not update state that `TryGetStateValue` can read. See [`Apply`](dynamic-context-scripting-api.md#apply) in the scripting API reference for the full set of validation warnings.
+`Apply()` returns `false` on local refusal and `true` on local submission, not confirmed application. It also bypasses the local tracker entirely: a value sent through `Apply()` does not update state that `TryGetStateValue` can read. See [`Apply`](dynamic-context-scripting-api.md#apply) in the scripting API reference for the full set of validation warnings.
 
 ## `Reset()` left facts in place
 
@@ -88,9 +100,9 @@ Calling `Reset()` with no arguments clears only the runtime Dynamic Context trac
 
 * **Initial Dynamic Info Text**, sent once at connection time on `ConvaiCharacter`.
 * **System prompt facts** configured on the Convai dashboard.
-* **In-session LLM memory** retained by the model across turns.
+* **Conversation history**, which is separate from the local Dynamic Context tracker.
 
-Call `Reset(removeStatic: true)` to also ask Convai to remove the character's static initial dynamic context for the current session. System prompt facts and in-session memory are still unaffected — no runtime call clears either. See [Static context at connection time](static-context-at-connection-time.md) for how the static initial context is configured.
+Call `Reset(removeStatic: true)` to also ask Convai to remove the character's static initial dynamic context for the current session. This request is not an erasure guarantee for facts also present in dashboard configuration or conversation history. See [Static context at connection time](static-context-at-connection-time.md) for how the static initial context is configured.
 
 ## Character not responding
 

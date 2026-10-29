@@ -1,7 +1,7 @@
 ---
 title: Emotion output bindings
 description: Reference for the Emotion module's shader-property output binding, which drives effects such as blush, tear glisten, or sweat sheen.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Output bindings are the optional extra stage of the Emotion pipeline, for effects beyond the face itself. Facial expression is not authored through a binding — it is written automatically through the shared facial compositor. This page covers `MaterialPropertyEmotionBinding`, the one output binding a profile authors, for shader effects such as blush, tear glisten, or sweat sheen.
@@ -25,7 +25,7 @@ Emotion writes facial output through the shared facial compositor rather than th
 
 ### How it resolves and writes
 
-- Target renderers are resolved the same way the facial expression output is: the rig's facial meshes, falling back to a `SkinnedMeshRenderer` scan under the character root.
+- Target renderers are resolved the same way the facial expression output is: the rig's facial meshes, falling back to a `SkinnedMeshRenderer` scan under the character root. Only meshes with blendshapes qualify, so put shader effects on a resolved facial mesh's material; this does not scan arbitrary body renderers.
 - Writes go through a per-renderer `MaterialPropertyBlock` (get-modify-set), so the shared material asset is never mutated and any other system's own property-block writes on the same renderer are preserved.
 - **Max-combine rule.** When two or more slots target the same property on the same renderer — for example both `anger` and an `embarrassment`-labeled custom entry driving `_EmotionBlush` — their composed intensities are compared each frame and the strongest slot's `[minValue, maxValue]` range wins, independent of authoring order.
 - **Rest on unbind.** Disabling the controller or swapping profiles writes each touched property back to its slot's `minValue` rather than leaving the last emotional value stuck.
@@ -48,10 +48,9 @@ If none of the authored property names are found on any target material, the bin
 
 The Emotion module ships shared sample assets under `SamplesShared/Profiles/Embodiment/Modules/Emotion/`: `ConvaiSamplesShared_EmotionTaxonomy.asset`, and four named personality profile assets — `Warm`, `Composed`, `Energetic`, `Reserved`.
 
-1. Point a character's **Taxonomy** field at `SamplesShared/Profiles/Embodiment/Modules/Emotion/ConvaiSamplesShared_EmotionTaxonomy.asset`.
-2. Point its **Profile** field at whichever of the four named personality assets fits the character, or build your own with [character type presets](emotion-profile.md#character-type-presets).
-3. A character left with no taxonomy still runs, but every emotion dropdown that reads one comes up empty — this reads as a broken Inspector rather than as a missing reference, so check for it explicitly rather than waiting for a console warning.
-4. These shared assets live inside the package. To edit either one directly, copy it into your own `Assets/` folder first — an edit made inside the package does not persist across a package update.
+1. Assign a sample or project `ConvaiEmotionProfile` to the controller's **Personality** field.
+2. On that profile, assign the sample taxonomy under **Emotion Vocabulary → Emotion Vocabulary**, or leave it empty to use the nine built-in emotions. The dropdowns still work without a taxonomy asset.
+3. Edit through the character Inspector or Emotion Editor to have a package-owned profile copied and reassigned automatically. If editing the package asset's own Inspector, choose **Create A Project Copy**, then assign the resulting copy to the character yourself. See [Asset ownership](../../core-concepts/asset-ownership.md).
 
 ## Next steps
 

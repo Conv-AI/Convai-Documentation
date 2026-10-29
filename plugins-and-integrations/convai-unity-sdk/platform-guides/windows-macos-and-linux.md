@@ -1,35 +1,32 @@
 ---
 title: Windows, macOS, and Linux
 description: >-
-  Windows, macOS, and Linux builds require no extra SDK configuration — all
-  features including Vision, spatial audio, and screen share work after standard
-  setup.
-last_reviewed: "4.5.0"
+  Prepare Windows, macOS, and Linux builds with the right native transport
+  libraries, microphone permissions, voice output, and camera configuration.
+last_reviewed: "5.0.0-preview"
 ---
 
-Desktop builds have no platform-specific configuration requirements. All SDK features work without additional setup — no permission declarations, no manifest changes, no gesture handling. Microphone access, audio playback, spatial audio, Vision, and screen share all function immediately after the standard SDK setup.
+Desktop players use native transport libraries and Unity audio output. Install the library for the target architecture, configure microphone access and verify the built application. macOS also needs a microphone usage description before requesting access.
 
 ## Feature support
 
 | Feature                      | Windows | macOS  | Linux  |
 | ---------------------------- | ------- | ------ | ------ |
-| Voice conversation           | ✅ Full  | ✅ Full | ✅ Full |
-| Lip sync                     | ✅ Full  | ✅ Full | ✅ Full |
-| Actions                      | ✅ Full  | ✅ Full | ✅ Full |
-| Emotion                      | ✅ Full  | ✅ Full | ✅ Full |
-| Long-Term Memory             | ✅ Full  | ✅ Full | ✅ Full |
-| Narrative Design             | ✅ Full  | ✅ Full | ✅ Full |
-| Vision                       | ✅ Full  | ✅ Full | ✅ Full |
-| Spatial audio                | ✅ Full  | ✅ Full | ✅ Full |
-| Unity `AudioSource` playback | ✅ Full  | ✅ Full | ✅ Full |
-| Microphone device selection  | ✅ Full  | ✅ Full | ✅ Full |
-| Screen share                 | ✅ Full  | ✅ Full | ✅ Full |
+| Voice conversation           | ✅ Implemented  | ✅ Implemented | ✅ Implemented |
+| Lip sync                     | ✅ Implemented  | ✅ Implemented | ✅ Implemented |
+| Actions                      | ✅ Implemented  | ✅ Implemented | ✅ Implemented |
+| Emotion                      | ✅ Implemented  | ✅ Implemented | ✅ Implemented |
+| Long-Term Memory             | ✅ Implemented  | ✅ Implemented | ✅ Implemented |
+| Narrative Design             | ✅ Implemented  | ✅ Implemented | ✅ Implemented |
+| Vision                       | ✅ Implemented  | ✅ Implemented | ✅ Implemented |
+| Spatial audio                | ✅ Implemented  | ✅ Implemented | ✅ Implemented |
+| Unity `AudioSource` playback | ✅ Implemented  | ✅ Implemented | ✅ Implemented |
+| Microphone device selection  | ✅ Implemented  | ✅ Implemented | ✅ Implemented |
 
-Screen share is a desktop-exclusive capability — it is not available on WebGL, iOS, Android, or Android-based XR headsets.
 
 ## Platform and architecture support
 
-The SDK ships pre-built native libraries for the following desktop configurations:
+The Editor downloads prebuilt native libraries for these target architectures; they are not bundled in the package:
 
 | Platform | Supported architectures                           |
 | -------- | ------------------------------------------------- |
@@ -41,51 +38,44 @@ The SDK ships pre-built native libraries for the following desktop configuration
 **Linux arm64 is not supported.** If your deployment target includes Linux arm64 machines, the native transport library will fail to load and voice conversation will not work. Only x86\_64 is available on Linux.
 {% endhint %}
 
+The downloader installs libraries for the Editor and active build target under `Assets/Convai/Plugins/client-sdk-unity-livekit/Runtime/Plugins`. Windows defaults to x86_64; use **Convai > Platform Support > Download FFI Libraries (All Platforms)** when another listed architecture is needed. See [Native transport libraries](native-transport-libraries.md).
+
+The 5.0 macOS build processor combines arm64 and x86_64 slices for Universal players. Confirm the built app contains the resulting native plugin and test both target architectures; Editor playback does not prove the Universal build.
+
 ## Microphone and audio
 
-No permission declarations are required on desktop platforms. The operating system grants microphone access at the application level:
+Operating-system privacy settings and device availability still apply:
 
-* **Windows:** Access is managed through Windows Privacy Settings. Unity builds are recognized as desktop applications and receive microphone access without any manifest changes.
-* **macOS:** The OS presents a one-time system permission dialog when the application first accesses the microphone. Unity adds `NSMicrophoneUsageDescription` to the app's `Info.plist` automatically for macOS builds. No manual configuration is needed.
-* **Linux:** Microphone access is handled by the system audio stack (PulseAudio, PipeWire, ALSA). No application-level permission handling is required.
+* **Windows:** Check microphone privacy settings for desktop applications and select an available input device.
+* **macOS:** Set **Microphone Usage Description** and use **Convai > Settings > Setup Health** to verify it. The 5.0 SDK requests microphone authorization before opening capture; handle denial by directing the player to system settings.
+* **Linux:** Verify that the target machine's audio stack exposes a working microphone and playback device to Unity.
+
+<figure><img src="../../../.gitbook/assets/unity-setup-health.png" alt="Setup Health showing the macOS and iOS microphone usage-description check"><figcaption><p>The Apple usage-description check applies before building the application.</p></figcaption></figure>
+
+Use `ConvaiAudioOutput` for per-character volume and spatial audio. The 5.0 native playback path uses a carrier clip so Unity can apply direction and distance. Reserve that AudioSource for the voice; place other sounds on another source. Test microphone capture with and without echo cancellation on the actual device.
 
 ## Vision on desktop
 
-`CameraVisionFrameSource` works on all desktop platforms without additional configuration — add the component to a `Camera` GameObject, assign a `ConvaiVisionPublisher`, and Vision is active.
+Configure `CameraVisionFrameSource` with the scene camera and assign it to `ConvaiVisionPublisher`, or place it on the publisher's GameObject or a child for discovery. Configure the room for Vision and verify the preview and publishing status. Use `WebcamVisionFrameSource` for a physical camera; a Unity scene camera does not see the room around the computer.
 
 {% hint style="info" %}
 Camera capture applies a vertical pixel flip internally to ensure correct frame orientation. This is handled automatically on all desktop platforms — no configuration is required.
 {% endhint %}
 
-## Usage examples
+## Verify a desktop build
 
-### Military mission rehearsal on Windows
+* [ ] The native library matches the built player's architecture.
+* [ ] A fresh installation can request microphone access and handles denial.
+* [ ] A voice or text turn receives a response after the character becomes ready.
+* [ ] Moving the listener changes native spatial playback as expected.
+* [ ] The configured Vision source shows the intended image and orientation.
+* [ ] Suspend/resume and reconnect recover in the built application.
 
-A defense contractor runs mission rehearsal software on Windows workstations. Convai characters play opposing forces, local commanders, and civilian actors in a branching scenario. Trainees speak with characters using standard desktop microphones.
-
-**Setup:** Standard SDK configuration — no platform-specific steps. Spatial audio places character voices in 3D space relative to the player's position.
-
-**Outcome:** Trainees interact verbally with multiple characters across a mission simulation. The session records responses and branching decisions for after-action review.
-
-### Medical consultation training on macOS
-
-A medical school deploys a patient consultation trainer on faculty MacBook Pros. Residents practice taking patient histories with a Convai character that responds with realistic symptoms and adapts based on the resident's questions.
-
-**Setup:** Standard SDK configuration. The character uses Vision via `CameraVisionFrameSource` pointed at a physical model the resident is examining. macOS prompts for microphone access on first launch — no additional setup is needed.
-
-**Outcome:** The resident speaks with the character naturally. The macOS microphone permission dialog appears on first launch only. Vision enables the character to acknowledge and respond to what the resident is holding in-scene.
-
-### Compliance training kiosk on Linux
-
-A manufacturing company runs safety compliance training on Linux workstations in a secure facility. The same Unity build used on Windows deploys to Ubuntu x86\_64 machines with no modification.
-
-**Setup:** Standard SDK configuration. Ensure the deployment machines run x86\_64 Linux — arm64 is not supported. No audio configuration changes are required; PulseAudio or PipeWire handles microphone access automatically.
-
-**Outcome:** Operators complete verbal compliance assessments with Convai characters at the kiosk. The experience is identical to the Windows deployment.
+These checks should run on each desktop platform you distribute, including both architectures for a Universal macOS build.
 
 ## Next steps
 
-Desktop builds need no platform-specific work. Once your scene is validated, your build is ready to ship. If you are also targeting WebGL, iOS, Android, or XR headsets, review the relevant platform guide before building.
+A scene validation pass checks local setup. Native library loading, permissions and actual media behavior need a built-player check before distribution. If you are also targeting WebGL, iOS, Android, or XR headsets, review the relevant platform guide before building.
 
 {% content-ref url="webgl.md" %}
 [WebGL](webgl.md)

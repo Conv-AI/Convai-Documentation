@@ -1,79 +1,56 @@
 ---
 title: Scene metadata quick start
-description: Add object awareness to a Unity scene so a Convai character can reference named objects in conversation from the moment it connects.
-last_reviewed: "4.5.0"
+description: Name and describe relevant Unity objects, inspect the collected metadata, and test whether a connected character uses the intended scene information.
+last_reviewed: "5.0.0-preview"
 ---
 
-Set up Scene Metadata to give a Convai character awareness of named objects in your scene. By the end, your character knows what objects exist and can reference them in conversation — entirely from the Inspector.
+Add World Object metadata to a small set of scene objects, then verify collection, local delivery, and the character's response separately.
 
 ## Prerequisites
 
-Before starting, verify:
+- A working `ConvaiManager` and `ConvaiCharacter` that can converse in Play mode.
+- A few objects relevant to that conversation.
 
-* [ ] A `ConvaiCharacter` is in the scene and responds to speech in Play Mode
-
-## Tag scene objects and collect them
+## Tag and test the objects
 
 {% stepper %}
 {% step %}
-### Add ConvaiObjectMetadata to a scene object
+### Add a World Object
 
-Select any GameObject in your scene that the AI character should know about — a piece of equipment, a fire extinguisher, a door, an exhibit. In the Inspector, click **Add Component**, then browse to **Convai → World Object** or search for `Convai Object Metadata`.
+Select an object, then choose **Add Component > Convai > World Object**. The Inspector header is **Scene Object Knowledge**. Set **Object Name** to a clear label such as `Fire Extinguisher`; add a short factual **Object Description** with location and useful attributes.
 
-The **Object Name** field auto-fills from the GameObject's name. Edit it to a clear, human-readable label if the GameObject name is not descriptive — for example, change `Prop_FireExt_01` to `Fire Extinguisher`.
-
-Optionally fill in **Object Description** with one to two factual sentences: what the object is, where it is located, and any key attributes. Keep it under 200 characters.
-
-{% hint style="warning" %}
-**Object Name** is required. Leave it empty and the object is excluded from the payload — `Is Registered` shows `true`, but the object does not reach Convai.
-{% endhint %}
+Keep names within 64 UTF-16 code units and descriptions within 320. These authoring limits produce warnings rather than truncating manual input. A blank name fails validation and is excluded even if the object is registered.
 {% endstep %}
-
 {% step %}
-### Add ConvaiObjectMetadata to remaining objects
+### Tag the other relevant objects
 
-Add `ConvaiObjectMetadata` to each additional object the AI should know about. You do not need to add it to every GameObject — only to objects relevant to AI conversations.
+Repeat for the objects the character should describe. Leave **Include In Metadata** enabled. Registration follows component enable/disable automatically.
 
-Each component registers itself with `ConvaiMetadataRegistry` automatically when enabled. No manual wiring or registration calls are needed.
+For duplicate copies, use a [logical group](group-objects-and-standing-positions.md). For assisted authoring, see [Scene Auto Tagger](scene-auto-tagger.md), whose preview and native-library prerequisites must be met before analysis.
 {% endstep %}
-
 {% step %}
-### Add ConvaiSceneMetadataCollector and enable auto-collection
+### Inspect collection
 
-Registered objects reach the character automatically as soon as it's ready, even without this component — `ConvaiSceneMetadataCollector` is optional. Add it now for the **Log Statistics** confirmation used in the next step, and for manual re-collection later; see [How scene metadata works](how-scene-metadata-works.md) for the full delivery flow.
+Add `ConvaiSceneMetadataCollector` if you want a manual trigger or diagnostics. It can resolve dependencies from the active `ConvaiManager`; placing it on the same GameObject is a useful convention. Enable **Collect On Start** for a connection-time attempt.
 
-On any GameObject in your scene, click **Add Component** and search for `Convai Scene Metadata Collector`. Placing it on the same GameObject as `ConvaiManager` is a useful organizational convention.
-
-In the Inspector, enable **Collect On Start**. This tells the collector to send the full metadata payload automatically when the room session connects.
-
-Leave **Log Statistics** enabled — it writes a Console entry on each collection showing the object count and duration, which confirms everything is working.
-
-`ConvaiSceneMetadataCollector` resolves its dependencies automatically at startup by finding `ConvaiManager` in the scene — no manual wiring required.
+For the Console check, leave **Log Statistics** enabled and set **Global Log Level** to **Debug** in **Convai > Settings**. At the default Info level, the collection messages are hidden. `GetMetadataCount()` and `GetCurrentMetadata()` also inspect the registry without sending.
 {% endstep %}
-
 {% step %}
-### Enter Play Mode and verify
+### Verify local sending and conversation behavior
 
-Press Play. When the room connects, the collector fires automatically. Check the Console for a debug entry similar to:
+Enter Play mode and address the intended character. A `Collected N metadata objects` Debug line confirms assembly only. A separate `Sent N metadata objects to RTVI service` line records the local accepted send; it is not a backend acknowledgement.
 
-```text
-[ConvaiSceneMetadataCollector] Collected 4 metadata objects in 0.0010s. Registry stats: 4 total, 4 valid, 0 invalid
-```
-
-This confirms the payload was assembled and sent to Convai. Test the character by asking a question that requires scene awareness — for example: "What equipment is available on this floor?" or "Can you describe what's near the exit?"
+Check for warnings, especially an oversized message or a missing target. In multi-character rooms, the automatic path waits until that character is the current conversation target. Ask a question about a specific authored object and compare the reply with its description. Record an unexpected reply as a separate conversation test failure.
 {% endstep %}
 {% endstepper %}
 
-{% hint style="success" %}
-The character responds with information that reflects the names and descriptions you entered. Scene Metadata is working.
-{% endhint %}
+The automatic character path works without a collector. It sends every valid world object, action targets included: in the connect request when the scene has one character, otherwise once the character is ready. After that it sends the list again only when it changes. A collector sends the same full list to the current target each time it runs. See [How scene metadata works](how-scene-metadata-works.md) for the distinction.
 
 ## Next steps
 
 {% content-ref url="component-reference.md" %}
 [Scene metadata component reference](component-reference.md)
 {% endcontent-ref %}
-
 {% content-ref url="troubleshooting-and-diagnostics.md" %}
 [Troubleshoot scene metadata](troubleshooting-and-diagnostics.md)
 {% endcontent-ref %}

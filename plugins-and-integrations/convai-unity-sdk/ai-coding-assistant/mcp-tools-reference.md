@@ -1,12 +1,12 @@
 ---
 title: MCP tools reference
 description: Reference for every Convai MCP tool exposed to a coding agent, including default enablement and scene-mutation behavior.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-Unity's official MCP server exposes 44 Convai-specific tools under the `Convai.*` namespace, at tool contract version 7, so a connected coding agent can inspect, configure, or diagnose Convai components instead of you wiring them by hand in the Unity Editor. Unity AI Assistant calls a tool by its dot-separated name (for example `Convai.GetGuidance`); external MCP clients receive the same tool under an underscore-normalized name (`Convai_GetGuidance`). Seven of the 44 tools cover conversation targeting and multi-character rooms — deciding which of several characters the player is addressing, and adding, removing, or waiting on a character in a room that is already connected. This page documents every tool's purpose, parameters, default enabled state, and scene or project mutation behavior, using the dot-separated name throughout.
+Unity's official MCP server exposes 52 Convai-specific tools under the `Convai.*` namespace, at tool contract version 11, so a connected coding agent can inspect, configure, or diagnose Convai components instead of you wiring them by hand in the Unity Editor. Unity AI Assistant calls a tool by its dot-separated name (for example `Convai.GetGuidance`); external MCP clients receive the same tool under an underscore-normalized name (`Convai_GetGuidance`). Seven of the 52 tools cover conversation targeting and multi-character rooms — deciding which of several characters the player is addressing, and adding, removing, or waiting on a character in a room that is already connected. Five run the Scene Auto Tagger, which names and describes scene props and applies the reviewed text as World Objects. This page documents every tool's purpose, parameters, default enabled state, and scene, project, or service mutation behavior, using the dot-separated name throughout.
 
-## All 44 tools
+## All 52 tools
 
 | Tool | Area | Enabled by default | Mutates |
 |---|---|---|---|
@@ -27,9 +27,17 @@ Unity's official MCP server exposes 44 Convai-specific tools under the `Convai.*
 | `Convai.UpdateCharacterRoster` | Multi-character | Yes | Play Mode only; requires explicit `dryRun=false`; never changes Play Mode |
 | `Convai.WaitForCharacterReady` | Multi-character | Yes | No — waits only; never changes Play Mode |
 | `Convai.WaitForMultiCharacterState` | Multi-character | Yes | No — waits only; never changes Play Mode |
+| `Convai.ConfigureGroupConversation` | Group conversation | Yes | Yes — Edit Mode only; preview by default |
+| `Convai.GetCharacterMemorySettings` | Long-term memory | Yes | No — reads from Convai service |
+| `Convai.SetCharacterMemorySettings` | Long-term memory | Yes | Yes — Convai service; preview by default; no Unity Undo |
 | `Convai.ConfigureActions` | Character actions | Yes | Yes — Edit Mode only |
 | `Convai.DiagnoseActions` | Character actions | Yes | No |
 | `Convai.SimulateAction` | Character actions | Yes | Play Mode only, through the dispatcher |
+| `Convai.FindSceneTagCandidates` | Scene Auto Tagger | Yes | No — Edit Mode only; uploads nothing |
+| `Convai.DescribeSceneView` | Scene Auto Tagger | Yes | No — Edit Mode only; uploads a captured image to Convai Vision |
+| `Convai.TagSceneObjects` | Scene Auto Tagger | Yes | No — Edit Mode only; uploads captured images to Convai Vision; changes nothing in the scene |
+| `Convai.GetSceneTagRun` | Scene Auto Tagger | Yes | No — waits for, reads, or cancels a run |
+| `Convai.ApplySceneTags` | Scene Auto Tagger | Yes | Yes — Edit Mode only; `dryRun` defaults to `true`; one Undo step; never saves |
 | `Convai.ConfigureLipSync` | Lip sync | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
 | `Convai.DiagnoseLipSync` | Lip sync | Yes | No |
 | `Convai.ConfigureTranscripts` | Transcripts | Yes | Yes — Edit Mode only; `dryRun` defaults to `true` |
@@ -57,6 +65,8 @@ Unity's official MCP server exposes 44 Convai-specific tools under the `Convai.*
 
 Toggle any tool under **Edit > Project Settings > AI > Unity MCP Server**.
 
+None of the Convai tools saves a scene, enters or exits Play Mode, or bakes a NavMesh. The packaged skill and the managed instructions have the agent do these whenever the task needs them, unless you restrict them. See [Play Mode, scene saves, and NavMesh bakes](README.md#play-mode-scene-saves-and-navmesh-bakes). When an authoring tool returns `PLAY_MODE_ACTIVE`, the skill has the agent exit Play Mode and retry for an authorized authoring task, unless you restricted mode changes, and continue read-only diagnosis for a diagnosis-only request.
+
 ## Guidance
 
 ### `Convai.GetGuidance`
@@ -71,10 +81,10 @@ Loads concise Convai SDK workflow guidance for one topic. Call it before configu
 
 `ConvaiGuidanceTopic` values and what each returns:
 
-| Topic | Summary returned |
+| Topic | Guidance summary (paraphrased) |
 |---|---|
 | `Overview` (default) | Use Convai tools only for SDK-aware operations; compose official Unity MCP tools for generic project changes. |
-| `Setup` | Complete runnable Convai scene setup proactively; an explicit setup request authorizes safe, reversible defaults. |
+| `Setup` | Complete runnable Convai scene setup proactively; an explicit setup request authorizes safe, reversible defaults. The workflow ends by saving the scenes you changed, then verifying the connection in Play Mode when credentials are configured, honoring explicit user restrictions on saves and mode changes. |
 | `Actions` | Author explicit action affordances and bind local executors; never infer affordances from scene metadata. |
 | `DynamicContext` | Send state, events, and attention-object changes through the character dynamic-context facade. |
 | `Vision` | Configure a vision publisher and one frame source under the room hierarchy before enabling video mode. |
@@ -84,9 +94,12 @@ Loads concise Convai SDK workflow guidance for one topic. Call it before configu
 | `BodyAnimation` | Body animation is content-gated — several behaviours stay inert until the character's animation set carries clips for them, which is a content gap, not a setup fault. |
 | `BodyLanguage` | Body Language layers ambient nonverbal motion on top of Body Animation and Gaze, ducking itself automatically when either module is present. |
 | `Emotion` | Give a character a face that reacts to what is said, and tune its temperament without restyling every other character sharing its personality. |
-| `MultiCharacter` | A Convai room holds every active `ConvaiCharacter` in the loaded scenes; there is no multi-character mode to switch on. Configure only what the project wants changed with `Convai.ConfigureConversationTargeting`. |
+| `MultiCharacter` | By default, a Convai room includes eligible active characters in the loaded scenes; an explicit connection selection can restrict that set; there is no multi-character mode to switch on. Configure targeting with `Convai.ConfigureConversationTargeting` and a group room with `Convai.ConfigureGroupConversation`. |
 | `Events` | Prefer `ConvaiManager.Events` for typed code and relay components for Inspector-driven `UnityEvent`s. |
 | `Runtime` | Use `ConvaiManager` for session ownership, Audio for room audio, and Transcripts for canonical history. |
+| `SceneTagging` | Have Convai Vision name and describe scene props, then apply the reviewed text as World Objects; tagging and drafting upload captured images, so run them only when the user asked to tag or describe the scene. The workflow ends by saving the scenes you changed unless the user restricts saves. |
+
+The `Actions`, `Narrative`, and `Runtime` topics tell the agent how far to go: for a setup or fix request, preview and apply only missing or broken Convai configuration; for a diagnosis-only request, report the findings and the proposed repair without applying it. The agent honors explicit user restrictions in both cases.
 
 ## Foundation
 
@@ -98,13 +111,13 @@ Reads Convai SDK, Unity AI Assistant, and non-secret project configuration statu
 
 No input parameters.
 
-Returns `sdkVersion`, `unityVersion`, `assistantVersion`, `toolContractVersion`, `credentialsConfigured`, `serverUrl`, `transcriptSystemEnabled`, `notificationSystemEnabled`, `backgroundPolicy`, `defaultMicrophoneDeviceId`, `connectionTimeoutSeconds`, `isPlaying`, `isCompiling`, and `packageRoot`.
+Returns `sdkVersion`, `unityVersion`, `assistantVersion`, `toolContractVersion`, `credentialsConfigured`, `serverUrl`, `transcriptSystemEnabled`, `notificationSystemEnabled`, `backgroundPolicy`, `defaultMicrophoneDeviceId`, `connectionTimeoutSeconds`, `isPlaying`, `isCompiling`, and `packageRoot`. The server URL is redacted with `LogRedaction.Url`; status is not a source of credentials.
 
 ### `Convai.InspectScene`
 
 **Area:** Foundation · **Enabled by default:** Yes · **Mutates:** No
 
-Inspects open scenes for `ConvaiManager`, `ConvaiRoomManager`, `ConvaiPlayer`, and `ConvaiCharacter` components and returns exact instance IDs for later mutations.
+Inspects open scenes for `ConvaiManager`, `ConvaiRoomManager`, `ConvaiPlayer`, and `ConvaiCharacter` components and returns exact instance IDs for later mutations. Player presence is reported with flags such as `hasPlayerName`, not the name itself.
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
@@ -133,7 +146,7 @@ Idempotently adds the required `ConvaiManager` and `ConvaiRoomManager` to the ac
 | `dryRun` | `bool` | `true` via Unity AI Assistant; `false` via the external MCP tool contract | Preview required changes without modifying the scene. |
 
 {% hint style="warning" %}
-`Convai.BootstrapScene` is the only one of the 44 tools disabled by default. Its `dryRun` default also depends on how the agent calls it: Unity AI Assistant's dot-named wrapper defaults `dryRun` to `true` like every other mutating tool, but the underlying MCP tool contract used by external MCP clients (the underscore-named `Convai_BootstrapScene`) defaults `dryRun` to `false` — those clients apply the change immediately unless they pass `dryRun: true` explicitly. Prefer `Convai.SetupConversationScene` for end-to-end setup; use `Convai.BootstrapScene` only for manager/room-only work.
+`Convai.BootstrapScene` is the only one of the 52 tools disabled by default. Its `dryRun` default also depends on how the agent calls it: Unity AI Assistant's dot-named wrapper defaults `dryRun` to `true` like every other mutating tool, but the underlying MCP tool contract used by external MCP clients (the underscore-named `Convai_BootstrapScene`) defaults `dryRun` to `false` — those clients apply the change immediately unless they pass `dryRun: true` explicitly. Prefer `Convai.SetupConversationScene` for end-to-end setup; use `Convai.BootstrapScene` only for manager/room-only work.
 {% endhint %}
 
 ### `Convai.ConfigureRoom`
@@ -147,13 +160,15 @@ Previews or configures a Convai room — `ConvaiManager` and `ConvaiRoomManager`
 | `targetInstanceId` | `long` | — (required) | GameObject instance ID that owns or will own `ConvaiManager` and `ConvaiRoomManager`. |
 | `configurationMode` | `enum ConvaiToolConfigurationMode` | `Inline` | `Inline` or `ExistingProfile`. |
 | `profileAssetPath` | `string` | `""` | Existing `ConvaiRoomManagerProfile` asset path. Required in `ExistingProfile` mode. |
-| `connectionType` | `enum ConvaiConnectionType` | `Audio` | Inline connection type. |
-| `inputMode` | `enum ConversationInputMode` | `HandsFree` | Inline conversation input mode. |
-| `connectOnStart` | `bool` | `true` | Connect automatically when the scene starts. |
-| `serverEndpoint` | `enum ConvaiServerEndpoint` | `Connect` | Core-service endpoint. |
-| `visionMode` | `enum ConvaiVisionContextMode` | `Auto` | Dynamic vision policy. |
-| `pushToTalkKey` | `string` | `"T"` | Unity `KeyCode` name used by push-to-talk. |
+| `connectionType` | `enum ConvaiConnectionType` | omit = unchanged | Inline connection type. New room default: `Audio`. |
+| `inputMode` | `enum ConversationInputMode` | omit = unchanged | Inline conversation input mode. New room default: `HandsFree`. |
+| `connectOnStart` | `bool` | omit = unchanged | Connect automatically when the scene starts. `false` also blocks each character's **Auto Connect**, including characters enabled later; explicit connection calls still work. New room default: `true`. |
+| `serverEndpoint` | `enum ConvaiServerEndpoint` | omit = unchanged | Core-service endpoint. New room default: `Connect`. |
+| `visionMode` | `enum ConvaiVisionContextMode` | omit = unchanged | Dynamic vision policy. New room default: `Auto`. |
+| `pushToTalkKey` | `string` | omit = unchanged | Unity `KeyCode` name used by push-to-talk. New room default: `"T"`. |
 | `dryRun` | `bool` | `true` | Preview changes without modifying the scene. |
+
+Omitted inline settings keep their current values. The tool changes only requested room settings; it does not reset microphone processing, push-to-talk policy, or interruption options. The Unity AI Assistant wrapper accepts strings for optional enum settings: empty keeps the current value, and an unknown value returns `INVALID_ROOM_SETTING`.
 
 ### `Convai.ConfigurePlayer`
 
@@ -166,7 +181,7 @@ Previews or adds and configures `ConvaiPlayer` on an explicit target `GameObject
 | `targetInstanceId` | `long` | — (required) | Target player GameObject instance ID. |
 | `managerInstanceId` | `long` | `0` | Optional manager GameObject instance ID. Zero auto-resolves one manager in the target scene. |
 | `playerName` | `string` | `"Player"` | Player display name. |
-| `playerId` | `string` | `""` | Optional local transcript attribution ID. Defaults to the player name. |
+| `playerId` | `string` | `""` | Optional player attribution ID. An empty ID is initialized once from Player Name and then kept across renames; it is local scene identity, not an end-user ID. |
 | `dryRun` | `bool` | `true` | Preview changes without modifying the scene. |
 
 ### `Convai.ConfigureCharacter`
@@ -204,7 +219,7 @@ Previews or performs end-to-end Audio conversation setup in the active scene, us
 | `playerName` | `string` | `"Player"` | Player display name. |
 | `playerId` | `string` | `""` | Optional local transcript attribution ID. |
 | `inputMode` | `enum ConversationInputMode` | `HandsFree` | Recommended room input mode. |
-| `connectOnStart` | `bool` | `true` | Connect automatically when the scene starts. |
+| `connectOnStart` | `bool` | `true` | Connect automatically when the scene starts. `false` also blocks each character's **Auto Connect**, including characters enabled later; explicit connection calls still work. |
 | `createPlaceholders` | `bool` | `true` | Create standalone player and Capsule character placeholders when none exist. |
 | `dryRun` | `bool` | `true` | Preview changes without modifying the scene. |
 
@@ -222,11 +237,61 @@ Diagnoses active-scene Convai conversation readiness and runtime state with rank
 
 Returns `readyToRun`, configuration and runtime snapshots, and an `issues` array with stable codes, evidence, `autoFixable`, and `suggestedTool`/`suggestedArguments` for each issue.
 
-The `configuration` snapshot includes a `conversationTargeting` block reporting the targeting rule and its values — `mode`, `within` (range in metres), `lookAngle`, `switchMargin`, and `switchDelaySeconds` — plus `isShippedDefault`, which is `true` only when every value still matches the shipped defaults. The `runtime` snapshot reports `addressedCharacter` and `addressedCharacterInstanceId` for the character currently being addressed, `conversationAvailability` and `playerCanTalk` for the availability verdict, and a `multiCharacter` block. When no multi-character room is active, `multiCharacter` reports only `isMultiCharacterRoom: false`; when one is active, it also reports the room session ID, route and roster epochs, the active conversation target, the targeting mode and verdict, and the full roster with each character's membership status.
+The `configuration` snapshot includes a `conversationTargeting` block reporting the targeting rule and its values — `mode`, `within` (range in metres), `lookAngle`, `switchMargin`, and `switchDelaySeconds`, and `proximityMargin` — plus `isShippedDefault`, which is `true` only when every value still matches the shipped defaults. The `runtime` snapshot reports `addressedCharacter` and `addressedCharacterInstanceId` for the character currently being addressed, `conversationAvailability` and `playerCanTalk` for the availability verdict, and a `multiCharacter` block. When no multi-character room is active, `multiCharacter` reports only `isMultiCharacterRoom: false`; when one is active, it also reports the room session ID, route and roster epochs, the active conversation target, the targeting mode and verdict, and the roster with each character's membership status. Session IDs are shortened to eight-character prefixes. Player identity is reported as `hasPlayerName` and `hasPlayerId`; `runtime.hasEndUserId` is a presence flag. `runtime.longTermMemoryStatus` is `active`, `skipped_no_end_user`, or `not_reported`. Proximity-specific diagnostics include `appliesOnlyToProximity`.
+
+## Group conversation
+
+### `Convai.ConfigureGroupConversation`
+
+**Enabled by default:** Yes · **Mutates:** Edit Mode scene authoring with Undo; no automatic save.
+
+Previews or configures the [Group Conversation](../features/group-conversation/README.md) component. Omitted fields keep their authored values. This tool prepares the scene; it does not enable backend access or certify a live group session.
+
+| Parameter | Type | Default / behavior |
+|---|---|---|
+| `targetInstanceId` | `long` | Omit to use the existing group component, otherwise the only manager's GameObject. |
+| `sceneBrief` | `string` | Omit = unchanged; up to 4,000 characters; required before connection. |
+| `playerDisplayName` | `string` | Omit = unchanged; up to 64 characters; empty uses the server default. |
+| `topics` | `array` | Replaces the ordered list; at most 20 entries. Each has `id`, `text`, and optional `starterCharacterInstanceId` or `starterCharacterName`. Text is required, at most 500 characters; IDs are at most 64 characters and empty IDs become `t1`, `t2`, etc. |
+| `members` | `array` | Replaces member settings. Each has `characterInstanceId` and `aliases`; at most five aliases of 32 characters each. Members must join the room. |
+| `anchorInstanceId` | `long` | Omit = unchanged; GameObject from which group distance is measured. |
+| `clearAnchor` | `bool` | Clear the anchor to use the character centre at conversation start. |
+| `overrides` | `array` | Entries `{key, value, useServerDefault}`. Unlisted keys stay unchanged; `useServerDefault` removes that override. See the group [component reference](../features/group-conversation/component-reference.md) for contract keys. |
+| `driveGaze` | `bool` | Omit = unchanged; turn heads toward speakers and addressees. |
+| `dryRun` | `bool` | `true`; pass `false` to apply the previewed change. |
+
+## Character memory settings
+
+### `Convai.GetCharacterMemorySettings`
+
+**Enabled by default:** Yes · **Mutates:** No; reads the Convai service using the project's API key.
+
+Returns memory enablement, the end-user ID requirement, and pinned-version information. It never returns stored memories or end-user IDs.
+
+| Parameter | Type | Default / behavior |
+|---|---|---|
+| `characterInstanceId` | `long` | `0` resolves the only character in the active scene. |
+| `characterId` | `string` | Optional service Character ID; overrides `characterInstanceId`. |
+
+### `Convai.SetCharacterMemorySettings`
+
+**Enabled by default:** Yes · **Mutates:** Persistent Convai service settings, with no Unity Undo.
+
+Use for a requested memory-settings change. Preview first and review the affected character: the change applies to every app using that character from the next connection. A pinned character version retains that version's saved memory enablement; the end-user ID requirement still applies. A direct `characterId` lookup cannot infer a scene component's version pin.
+
+| Parameter | Type | Default / behavior |
+|---|---|---|
+| `characterInstanceId` | `long` | `0` resolves the only scene character. |
+| `characterId` | `string` | Optional service Character ID, overriding the instance target. |
+| `enabled` | `bool` | Omit = unchanged. |
+| `endUserIdRequirement` | `string` | `required` or `optional`; omit = unchanged. Required rejects connections without an end-user ID while memory is enabled; optional permits them without memory. |
+| `dryRun` | `bool` | `true`; `false` applies on the service. |
+
+Pass at least one setting; otherwise the tool returns `NO_MEMORY_CHANGE`. Failed reads return `MEMORY_SETTINGS_UNAVAILABLE`; failed writes return `MEMORY_SETTINGS_UPDATE_FAILED`. Neither tool exposes memory contents or end-user IDs. See [Configure the end-user ID requirement](../features/long-term-memory/configure-end-user-id-requirement.md).
 
 ## Conversation targeting
 
-A Convai room holds every active `ConvaiCharacter` in the loaded scenes, and the SDK works out which one the player is addressing. These tools configure that rule and preview it before a room connects; the [Multi-character](#multi-character) tools below operate a room that is already connected.
+By default, a Convai room includes eligible active characters in the loaded scenes; an explicit connection selection can restrict that set, and the SDK works out which included character the player is addressing. These tools configure that rule and preview it before a room connects; the [Multi-character](#multi-character) tools below operate a room that is already connected.
 
 ### `Convai.ConfigureConversationTargeting`
 
@@ -237,10 +302,11 @@ Previews or configures which characters join the next Convai room and how the SD
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `managerInstanceId` | `long` | `0` | The `ConvaiManager` to configure. Zero uses the only one in the loaded scenes. |
-| `targetingMode` | `enum ConversationTargetingMode` | omit = unchanged | How the character being addressed is chosen: `LookAt`, `Proximity`, or `Manual`. `LookAt` picks the character nearest the centre of view; `Proximity` picks the nearest character wherever the player is looking; `Manual` moves the conversation only when the game calls `ConvaiManager.TalkTo`. |
+| `targetingMode` | `enum ConversationTargetingMode` | omit = unchanged | How the character being addressed is chosen: `LookAt`, `Proximity`, or `Manual`. `LookAt` picks the character nearest the centre of view; `Proximity` picks the nearest character wherever the player is looking; `Manual` uses game calls to `ConvaiManager.TalkTo`, with recovery to a ready character if the active target leaves or fails. |
 | `maxDistance` | `float` | omit = unchanged | Range: how far away a character can be and still be addressed, in metres. Shipped default `30`. |
 | `maxAngle` | `float` | omit = unchanged | Look Angle: how far from the centre of view a character can be, in degrees. `LookAt` only. Shipped default `35` (a 70-degree cone). |
 | `switchMargin` | `float` | omit = unchanged | Switch Margin: how much better a different character must look before the conversation moves, in degrees. `LookAt` only. Shipped default `10`. |
+| `proximityMargin` | `float` | omit = unchanged | Fractional improvement needed to switch in Proximity mode; range `0`–`0.9`, shipped default `0.15` (15% nearer). The Assistant wrapper uses `-1` for unchanged; invalid values return `INVALID_PROXIMITY_MARGIN`. |
 | `switchDelaySeconds` | `float` | omit = unchanged | Switch Delay: how long a character must stay the best choice before the conversation moves. Shipped default `0.2`. |
 | `viewCameraInstanceId` | `long` | omit = unchanged | Player Camera: the `Camera` GameObject instance ID treated as the player's view. |
 | `clearViewCamera` | `bool` | omit = unchanged | Clear Player Camera so the main camera is used again. |
@@ -386,6 +452,97 @@ Validates an action payload in Edit Mode, or dispatches it through the real runt
 
 In Edit Mode the tool returns `executed=false` and `requiresPlayMode=true` after validating the payload. In Play Mode it enqueues the command on the character's dispatcher and waits for a `ConvaiActionStepReport`, returning `SIMULATION_TIMEOUT` if the step does not complete within `timeoutSeconds`.
 
+## Scene Auto Tagger
+
+These tools run the [Scene Auto Tagger](../features/scene-metadata/scene-auto-tagger.md) from a coding agent: Convai Vision names and describes scene props, and the reviewed text becomes World Objects (`ConvaiObjectMetadata`). The order is `Convai.FindSceneTagCandidates`, optionally `Convai.DescribeSceneView`, `Convai.TagSceneObjects`, `Convai.GetSceneTagRun` while the run is `Running`, then `Convai.ApplySceneTags`. Call `Convai.GetGuidance` with topic `SceneTagging` to load the same order.
+
+`Convai.TagSceneObjects` and `Convai.DescribeSceneView` upload captured images and guidance text to Convai Vision, and the tools do not show the window's first-run prompt. Call them only when the user asked to tag or describe the scene. The packaged `convai-unity-sdk` skill tags only when asked.
+
+A large run outlasts a client's tool-call timeout, so tagging continues in the background between calls. The starting call waits up to `waitSeconds` and, if the run is not finished, returns `state` `Running` with a `runId`; `Convai.GetSceneTagRun` waits again. Only one run can be active at a time: a second start returns `RUN_IN_PROGRESS` with the running `runId`. Runs last for the Editor session. A run stopped with `cancel` or by entering Play Mode returns `RUN_CANCELLED`. A script reload clears every run, so its `runId` then returns `RUN_NOT_FOUND`, as does a run older than the last eight.
+
+### `Convai.FindSceneTagCandidates`
+
+**Area:** Scene Auto Tagger · **Enabled by default:** Yes · **Mutates:** No
+
+Lists the objects in the active scene that the Scene Auto Tagger would name and describe, ranked by relevance, with any World Object text they already have. Uploads nothing. Characters and players are never candidates. Available only in Edit Mode — returns a `PLAY_MODE_ACTIVE` failure code if called during Play Mode.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `objectInstanceIds` | `long[]` | omit = scan the active scene | Check only these GameObjects, like the window's **Selected Objects**. The relevance, plain-shape and already-tagged filters do not apply, so `includeTagged` has no effect. |
+| `includeTagged` | `bool` | `false` | Also list objects that already have a World Object, to tag them again. |
+| `excludePlainShapes` | `bool` | `true` | Skip plain engine shapes such as cubes and planes. |
+| `minimumRelevance` | `float` | omit = the window's default | Skip objects below this relevance, from `0` to `1`. The Unity AI Assistant wrapper does not expose this parameter. |
+| `limit` | `int` | `100` | Most objects to return, most relevant first, from `1` to `300`. |
+
+Returns `candidates`, each with `instanceId`, `name`, `path`, `rendererCount`, `relevance`, `plainShape`, and `existing` World Object text. `existing.authoredByHand` marks text the tagger will not replace. Returns `skipped` counts for `alreadyTagged`, `plainShapes`, and `belowRelevance`.
+
+### `Convai.DescribeSceneView`
+
+**Area:** Scene Auto Tagger · **Enabled by default:** Yes · **Mutates:** No — uploads a captured image to Convai Vision
+
+Drafts a short `name` and a `description` of the environment that a camera or the last active Scene view shows. Review the draft, then pass it as `sceneDescription` to `Convai.TagSceneObjects`. Changes nothing in the scene. Available only in Edit Mode — returns a `PLAY_MODE_ACTIVE` failure code if called during Play Mode. Runs like `Convai.TagSceneObjects`, so it can return `Running`.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `characterInstanceId` | `long` | `0` | `ConvaiCharacter` GameObject instance ID whose knowledge and voice shape the text. `0` uses the only character in the active scene. |
+| `characterId` | `string` | `""` | Convai Character ID, for a character that is not in the scene. Overrides `characterInstanceId`. |
+| `cameraInstanceId` | `long` | `0` | `Camera` or camera GameObject instance ID. `0` uses the last active Scene view. |
+| `waitSeconds` | `float` | `40` | Seconds to wait for the run before returning, from `0` to `50`. A run still going is reported as `Running`. |
+
+A completed run returns `name`, `description`, and `confidence`. An unknown camera ID returns `CAMERA_NOT_FOUND`. With `cameraInstanceId` `0` and no Scene view open, the call returns `INVALID_REQUEST`. With `characterInstanceId` `0`, a scene with no character or several characters returns `INVALID_CHARACTER`. A scene character with no Character ID returns `CHARACTER_ID_MISSING`, and a `characterId` that is not a Convai Character ID fails with `INVALID_REQUEST`. The character rules apply to `Convai.TagSceneObjects` too.
+
+### `Convai.TagSceneObjects`
+
+**Area:** Scene Auto Tagger · **Enabled by default:** Yes · **Mutates:** No — uploads captured images to Convai Vision; changes nothing in the scene
+
+Starts a run that captures each target and asks Convai Vision for a name and description shaped by the character. Each target is every active mesh under its GameObject, stopping at children that are World Objects or other targets. Available only in Edit Mode — returns a `PLAY_MODE_ACTIVE` failure code if called during Play Mode.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `targets` | `array` | — (required) | One to 300 objects, each `{ instanceId, note }`. `instanceId` is a GameObject instance ID, for example from `Convai.FindSceneTagCandidates`. `note` is an optional correction of up to 300 characters, such as "This is a reading lamp, not a microphone." |
+| `characterInstanceId` | `long` | `0` | `ConvaiCharacter` GameObject instance ID whose knowledge and voice shape the text. `0` uses the only character in the active scene. |
+| `characterId` | `string` | `""` | Convai Character ID, for a character that is not in the scene. Overrides `characterInstanceId`. |
+| `sceneDescription` | `string` | `""` | Optional description of the whole scene, up to 800 characters. `Convai.DescribeSceneView` drafts one. |
+| `focus` | `string` | `""` | Optional guidance for every description, up to 400 characters, such as "function and material". |
+| `quality` | `enum ConvaiSceneTagQuality` | `Fast` | `Fast` sends up to 16 objects per vision request. `Accurate` sends larger images, up to 9 per request, and reads fine detail better. |
+| `includeLowInformation` | `bool` | `false` | Also analyze objects whose capture shows little detail, such as a plain box. |
+| `waitSeconds` | `float` | `40` | Seconds to wait for the run before returning, from `0` to `50`. A run still going is reported as `Running`. |
+
+A `Running` result reports `runId`, `kind`, and `progress` with `phase`, `completed`, and `total`. A completed result lists every target with `status` (`Tagged`, `NotAnalyzed`, `NotEligible`, `CaptureFailed`, `LowInformation`, or `AnalysisFailed`), the proposed `name` and `description`, `confidence`, and a `message` for objects that were not tagged. A run-level failure returns `success=false` with the same data and a code such as `MISSING_API_KEY`, `UNAUTHORIZED`, `USAGE_LIMIT_REACHED`, or `NATIVE_CORE_UNAVAILABLE`. An unknown instance ID returns `OBJECT_NOT_FOUND`.
+
+### `Convai.GetSceneTagRun`
+
+**Area:** Scene Auto Tagger · **Enabled by default:** Yes · **Mutates:** No
+
+Waits for, reads, or cancels a run started by `Convai.TagSceneObjects` or `Convai.DescribeSceneView`, and returns the results when the run has finished. Changes nothing in the scene.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `runId` | `string` | — (required) | The `runId` returned by `Convai.TagSceneObjects` or `Convai.DescribeSceneView`. |
+| `waitSeconds` | `float` | `40` | Seconds to wait before returning, from `0` to `50`. `0` reads the current state without waiting. |
+| `cancel` | `bool` | `false` | Stop the run. Objects already analyzed are not kept, and a vision request already in flight finishes before the run stops. |
+
+A failed run returns `RUN_FAILED`, and a run stopped with `cancel` returns `RUN_CANCELLED`. An unknown or expired `runId` returns `RUN_NOT_FOUND`; tag again.
+
+### `Convai.ApplySceneTags`
+
+**Area:** Scene Auto Tagger · **Enabled by default:** Yes · **Mutates:** Yes
+
+Previews or writes a finished tagging run's names and descriptions as World Objects, with optional action and gaze targets, in one Undo step. Applies through `ConvaiSceneTagger.Apply`, so hand-authored metadata is kept and objects that changed since capture are refused. Never saves the scene. Available only in Edit Mode — returns a `PLAY_MODE_ACTIVE` failure code if called during Play Mode.
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `runId` | `string` | — (required) | The `runId` of a finished `Convai.TagSceneObjects` run. |
+| `objects` | `array` | omit = every tagged object | Objects to apply, each `{ instanceId, name, description }`. `name` and `description` are optional replacement text; omit one to keep the proposed text. |
+| `includeSpatialContext` | `bool` | `true` | Include each object's position relative to the character. |
+| `enableGaze` | `bool` | `true` | Let characters look at the objects. |
+| `createActionTargets` | `bool` | `true` | Add action targets so characters can act on the objects. |
+| `dryRun` | `bool` | `true` | Preview without changing the scene. |
+
+The preview lists, for each object, the `name` and `description` that would be written, fitted to the 64-character name and 320-character description limits (`shortened` reports a cut), and a `note` when a hand-authored World Object is kept. With `dryRun=false`, the result reports an `outcome` per object: `Applied`, `NotTagged`, `InvalidText`, `ObjectChanged`, `AuthoredMetadataPreserved`, `EditedComponentsPreserved`, or `LogicalGroupPreserved`. Tag an `ObjectChanged` object again; it moved or changed since capture. Edit a `LogicalGroupPreserved` object in the Scene Auto Tagger window. The result also reports `sceneDirty` and `sceneSaved`, and `sceneSaved` stays `false` because the tool never saves. The scene must be saved to keep the World Objects; the packaged skill has the agent save the scenes it changed unless you restrict saves.
+
+A run that is not a finished tagging run returns `RUN_NOT_APPLICABLE`. A listed `instanceId` that is not in the run returns `OBJECT_NOT_IN_RUN`, a repeated one returns `DUPLICATE_OBJECT`, and a run with no tagged objects returns `NOTHING_TO_APPLY`. See [Scene Auto Tagger scripting API](../features/scene-metadata/scene-auto-tagger-scripting-api.md) for the C# equivalent.
+
 ## Lip sync
 
 ### `Convai.ConfigureLipSync`
@@ -429,8 +586,7 @@ Previews or configures the canonical transcript facade, event relay, or shipped 
 | `managerInstanceId` | `long` | `0` | Optional manager instance ID. |
 | `hostInstanceId` | `long` | `0` | Optional host GameObject instance ID. |
 | `mode` | `enum ConvaiTranscriptToolMode` | `EventRelay` | `EventRelay`, `ChatUI`, or `WorldSpaceChatUI`. |
-| `finalOnly` | `bool` | `false` | Forward final updates only. |
-| `ignoreInterim` | `bool` | `true` | Ignore interim updates. |
+| `speakerFilter` | `ConvaiTranscriptEventRelay.SpeakerFilter` | `Any` | Relay entries for any speaker, players, or characters. |
 | `characterIdFilter` | `string` | `""` | Optional character ID filter. |
 | `dryRun` | `bool` | `true` | Preview changes without modifying the scene. |
 
@@ -446,6 +602,8 @@ Diagnoses transcript enablement, facade readiness, relays, UIs, and sanitized ru
 |---|---|---|---|
 | `managerInstanceId` | `long` | `0` | Optional manager instance ID. |
 | `includeText` | `bool` | `false` | Include transcript text only when explicitly requested. |
+
+Runtime output includes the timeline `version`, `openEntryCount`, `finalEntryCount`, and health counts for retained, open, truncated, and evicted entries. It describes at most the newest 50 entries, in timeline order, with `conversationLineId` metadata. Text, player IDs, and speaker names stay hidden unless `includeText` is explicitly requested.
 
 ## Narrative
 
@@ -491,7 +649,7 @@ Starts, reads, clears, or stops a bounded editor-only Convai runtime event trace
 | `characterInstanceId` | `long` | `0` | Optional active-scene character instance ID filter. |
 | `eventFilters` | `string[]` | `[]` | Optional event type or category filters. |
 | `limit` | `int` | `100` | Entries to return, clamped between `1` and `256`. |
-| `captureTranscripts` | `bool` | `false` | Capture transcript events and text. Off by default. |
+| `captureTranscripts` | `bool` | `false` | Capture transcript-entry changes with text and spoken-line events with text length only. Off by default. |
 
 ## Embodiment
 
@@ -626,7 +784,7 @@ Lists what a character's Animation Set can actually perform — the idle, talk, 
 
 **Area:** Body animation · **Enabled by default:** Yes · **Mutates:** Yes
 
-Tunes how expressive and how calm a character is, and whether it keeps busy when alone. A Body Animation Config can be shared by many characters, so this tool makes a private copy for the named character before changing anything — the same **Give This Character Its Own Settings** command the Inspector offers — rather than editing a config that other characters or the SDK's shipped defaults still rely on. Available only in Edit Mode — returns a `PLAY_MODE_ACTIVE` failure code if called during Play Mode.
+Tunes how expressive and how calm a character is, and whether it keeps busy when alone. When the Body Animation Config is shared or SDK-owned, applying requires consent to create a private copy for the named character. A unique project-owned config is tuned in place. Preview reports which ownership path applies. Available only in Edit Mode — returns a `PLAY_MODE_ACTIVE` failure code if called during Play Mode.
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|

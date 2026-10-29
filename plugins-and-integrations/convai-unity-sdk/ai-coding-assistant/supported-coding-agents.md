@@ -1,16 +1,27 @@
 ---
 title: Supported coding agents
 description: Reference for the coding agents the Convai Unity SDK supports, including the exact instruction file path and install behavior for each agent.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-The Convai Unity SDK installs a managed instruction block into a project file for each supported coding agent — Codex, Claude Code, Cursor, Gemini, and VS Code Copilot. Use this reference to find the exact file path and install behavior for each agent.
+The Convai Unity SDK can install a managed instruction block into a project file for each supported coding agent — Codex, Claude Code, Cursor, Gemini, and VS Code Copilot. Use this reference to find the exact file path and install behavior for each agent.
+
+## Project skills
+
+The **Claude Code** and **ChatGPT / Codex** cards have separate **Project skill** and **Project instructions** rows. Project skills are copied from the installed SDK, including their references, and tracked by `.convai-skill.json`. They are independent of optional instruction blocks and the Unity MCP connection.
+
+| Client | Project skill directory |
+|---|---|
+| Claude Code | `.claude/skills/convai-unity-sdk/` |
+| ChatGPT / Codex | `.agents/skills/convai-unity-sdk/` |
+
+See [Install the project skill](install-project-skill.md). Cursor, Gemini, and VS Code Copilot appear under **Other AI Clients** and use managed instructions pointing to the packaged skill.
 
 ## Managed instruction files by agent
 
 | Agent | Managed file | Location |
 |---|---|---|
-| Codex | `AGENTS.md` | Project root |
+| ChatGPT / Codex | `AGENTS.md` | Project root |
 | Claude Code | `CLAUDE.md` | Project root |
 | Cursor | `.cursor/rules/convai-unity-sdk.mdc` | `.cursor/rules/` directory |
 | Gemini | `GEMINI.md` | Project root |
@@ -26,13 +37,17 @@ The install logic is identical for all five agents. When you trigger an install 
 Installing, updating, or removing the managed block is a manual action — it does not run automatically. Trigger it from the **AI Coding** section of the Convai Editor window, opened from **Convai > Convai Editor**.
 {% endhint %}
 
-The installed block instructs the agent to read `Packages/com.convai.convai-sdk-for-unity/AIAssistantSkills/convai-unity-sdk/SKILL.md` and its linked references for Convai-specific workflows, and to use Unity MCP tools for generic scene, GameObject, asset, script, console, and Play Mode operations, reserving [Convai's own tools](mcp-tools-reference.md) for SDK-specific configuration and diagnosis.
+For Claude Code and ChatGPT / Codex, the block names the installed `convai-unity-sdk` project skill when a copy is present. Otherwise it uses the resolved physical `SKILL.md` path from an embedded package, `Library/PackageCache`, or `Assets/Convai SDK For Unity`. It asks the agent to read that skill, then only references relevant to the task.
+
+The block assigns generic Editor operations to Unity MCP and SDK configuration to Convai tools. It describes authorization for reversible setup/fix work, keeps keys and transcript text hidden, and states that the agent enters or exits Play Mode, saves the scenes it changed, and bakes a NavMesh whenever the task needs it unless the user restricts it. Diagnosis-only requests do not authorize repairs. Your project instructions and explicit request can define the permitted work. The installer does not configure the MCP client connection.
+
+The project skill and the managed block are updated separately. Updating the skill does not rewrite an existing block. An instructions row reads **Installed** for any managed block, including one written by an earlier SDK build, so click **Update** on it to replace the block with the current text. The row is **Project instructions** in the **Claude Code** and **ChatGPT / Codex** cards and the client's own row under **Other AI Clients**. See [Install the project skill](install-project-skill.md).
 
 ## Agent-specific notes
 
 | Agent | Note |
 |---|---|
-| Codex | Created at the project root the first time you install. No additional directory is required. |
+| ChatGPT / Codex | Created at the project root the first time you install. No additional directory is required. |
 | Claude Code | Created at the project root the first time you install. No additional directory is required. |
 | Cursor | The SDK creates the `.cursor/rules/` directory if it does not exist. Any Cursor rule frontmatter already present above the managed block is preserved. |
 | Gemini | Created at the project root the first time you install. No additional directory is required. |

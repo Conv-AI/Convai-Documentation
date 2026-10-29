@@ -1,6 +1,6 @@
 ---
 title: Relay component reference
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 description: >-
   Reference for the Dynamic Context relay component, covering its Inspector
   fields, public methods, events, and character resolution behavior.
@@ -14,7 +14,7 @@ Add the component via **Convai → Dynamic Context → Convai Dynamic Context Re
 
 ### Target fields
 
-Controls which `ConvaiCharacter` the relay operates on.
+Controls which `ConvaiCharacter` the relay operates on. The **Ready** / **Not Set Up** chip reports whether the relay resolves a character; it does not report connection state.
 
 | Field | Type | Default | Description |
 |---|---|---|---|
@@ -27,18 +27,18 @@ Controls which `ConvaiCharacter` the relay operates on.
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `Reaction Mode` | `ConvaiRespondMode` | `Silent` | Applied to every method call on this relay. See [`ConvaiRespondMode`](relay-component-reference.md#convairespondmode) below. |
-| `Flush Immediately` | `bool` | `false` | When enabled, every method call other than `Flush` immediately sends the staged update instead of waiting for the character's normal batch window. |
+| `Reaction Mode` | `ConvaiRespondMode` | `Silent` | Passed to `SetState`, `AddEvent`, `SetCurrentAttentionObject`, and `ClearCurrentAttentionObject`. See [`ConvaiRespondMode`](relay-component-reference.md#convairespondmode) below. |
+| `Flush Immediately` | `bool` | `false` | Calls `Flush` after staging methods, including both `ResetContext` overloads. Connection and room delivery checks still apply. |
 
 {% hint style="warning" %}
-`Reaction Mode` defaults to `Silent` and applies to every method on the relay — there is no per-call override. Verify this matches the reaction you want before wiring the relay to a gameplay event; `Silent` never produces an immediate response.
+`Reaction Mode` defaults to `Silent` and has no per-call override on the four methods that accept a reaction. `ResetContext` and `Flush` have no reaction parameter. A stronger request in the same batch can change the batch reaction.
 {% endhint %}
 
 ## Methods
 
 All methods return `void`. Each method first resolves the character (see **Resolution order** above); if resolution fails, the method returns immediately and `On Skipped` fires. Otherwise, the method calls the matching member on the resolved character's `DynamicContext` and then fires `On Queued`.
 
-`Reaction Mode` and `Flush Immediately` only apply to `SetState`, `AddEvent`, `SetCurrentAttentionObject`, and `ClearCurrentAttentionObject`. `ResetContext()`, `ResetContext(bool)`, and `Flush()` take no reaction mode — there is nothing for a reaction mode to escalate, and `Flush()` always sends immediately regardless of the `Flush Immediately` field.
+`Reaction Mode` applies to the four state, event, and attention methods. `Flush Immediately` also applies to `ResetContext()` and `ResetContext(bool)`. Calling `Flush()` directly attempts a send regardless of that field, subject to connection and room readiness.
 
 Unity's Inspector persistent-listener panel only lists methods with zero or one parameter. `SetState` takes two parameters, so it cannot be wired as a persistent `UnityEvent` listener — call it from script instead.
 
@@ -50,7 +50,7 @@ Unity's Inspector persistent-listener panel only lists methods with zero or one 
 | `ClearCurrentAttentionObject()` | `void` | Clears the current attention object. |
 | `ResetContext()` | `void` | Clears all tracked states and events. Equivalent to `ResetContext(false)`. |
 | `ResetContext(bool removeStatic)` | `void` | Clears all tracked states and events. When `removeStatic` is `true`, also requests removal of the character's static initial dynamic context. |
-| `Flush()` | `void` | Sends any staged Dynamic Context and scene-metadata changes immediately. Unlike the other methods, `Flush` is not affected by `Flush Immediately` — the send always happens unconditionally. |
+| `Flush()` | `void` | Attempts to send staged Dynamic Context, a staged action-target sync, and scene-metadata changes without the batch delay. Held updates remain pending. |
 
 For the full set of Dynamic Context operations, including `SetStates`, `RemoveState`, `TryGetStateValue`, and `Apply`, see [Dynamic context scripting API](dynamic-context-scripting-api.md).
 
@@ -58,7 +58,7 @@ For the full set of Dynamic Context operations, including `SetStates`, `RemoveSt
 
 | Event | Type | Fires when |
 |---|---|---|
-| `On Queued` | `UnityEvent` | After a method call resolves the character and stages (or, with `Flush Immediately` enabled, sends) the update. Also fires after `Flush()` completes. |
+| `On Queued` | `UnityEvent` | After a character resolves and the relay invokes the operation, including `Flush`. It does not confirm validation, submission, or delivery. |
 | `On Skipped` | `UnityEvent` | When a method call cannot resolve a `ConvaiCharacter`. The Unity Console logs the reason. |
 
 ## `ConvaiRespondMode`
@@ -67,9 +67,9 @@ For the full set of Dynamic Context operations, including `SetStates`, `RemoveSt
 
 | Value | Behavior |
 |---|---|
-| `Silent` | The update is absorbed into the character's awareness. The character never generates an immediate response. |
+| `Silent` | Requests an update without starting a response. |
 | `Auto` | Convai decides whether the update warrants an immediate response. |
-| `MustRespond` | The update always triggers an immediate response. |
+| `MustRespond` | Requests a response; it does not guarantee speech. Group context is sent silently. |
 
 ## Multiple relays per NPC
 

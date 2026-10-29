@@ -1,7 +1,7 @@
 ---
 title: Authentication
 description: Compare Convai Unity SDK API Key and Auth Token authentication modes, understand when each applies, and see what ships in a player build.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Every connection from a Unity project to Convai needs a credential that proves the project is allowed to talk to Convai. The Convai SDK for Unity supports two ways to supply that credential: a saved account API key, or a short-lived token minted by a server you control. This section explains both modes and shows how to configure, extend, and troubleshoot each one.
@@ -13,7 +13,9 @@ Every connection from a Unity project to Convai needs a credential that proves t
 | Mode | How the credential is obtained | Where the credential lives |
 |---|---|---|
 | **API Key** | The SDK reads the account API key saved in Convai Project Settings. | Stored on disk in the `ConvaiSettings` asset, obfuscated but not encrypted. |
-| **Auth Token** | The SDK resolves a short-lived token from a registered `IConvaiAuthTokenProvider`, or from an HTTPS endpoint you configure. | Held in memory for a single connection attempt; never written to disk by the SDK. |
+| **Auth Token** | The SDK resolves a short-lived token from an explicit `ConnectWithAuthTokenAsync` call, a registered `IConvaiAuthTokenProvider`, or an HTTPS endpoint you configure. | Held in memory for a single connection attempt; never written to disk by the SDK. |
+
+In the Editor, a saved API key can supply an Editor-only registered token provider when no endpoint or other provider is configured. This fallback is absent from player builds. See [How authentication works](how-authentication-works.md).
 
 ## When each mode is appropriate
 
@@ -35,6 +37,8 @@ Obfuscation is not encryption. Anyone with the SDK source can reverse the stored
 ## Choose a page
 
 <table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>How authentication works</strong><br>Credential resolution order and the transport header each mode sends.</td><td><a href="how-authentication-works.md">how-authentication-works.md</a></td></tr><tr><td><strong>Configure Auth Token mode</strong><br>Switch to Auth Token mode and configure the token endpoint in Project Settings.</td><td><a href="configure-auth-token-mode.md">configure-auth-token-mode.md</a></td></tr><tr><td><strong>Write a custom token provider</strong><br>Implement IConvaiAuthTokenProvider to fetch a token from your own login flow.</td><td><a href="custom-token-provider.md">custom-token-provider.md</a></td></tr><tr><td><strong>Connect with an existing auth token</strong><br>Use ConnectWithAuthTokenAsync when your login layer already holds a token.</td><td><a href="connect-with-auth-token.md">connect-with-auth-token.md</a></td></tr><tr><td><strong>Authentication scripting reference</strong><br>Full interface, registry, and settings surface for authentication.</td><td><a href="scripting-reference.md">scripting-reference.md</a></td></tr><tr><td><strong>Ship a secure build</strong><br>What the build processor strips and the WebGL CORS requirements for a token endpoint.</td><td><a href="ship-a-secure-build.md">ship-a-secure-build.md</a></td></tr><tr><td><strong>Troubleshoot authentication</strong><br>Console messages and error codes for both authentication modes.</td><td><a href="troubleshooting.md">troubleshooting.md</a></td></tr></tbody></table>
+
+For the server-side response contract and the shipped local demo, see [Mint auth tokens on your backend](mint-tokens-on-your-backend.md).
 
 ## Next steps
 
