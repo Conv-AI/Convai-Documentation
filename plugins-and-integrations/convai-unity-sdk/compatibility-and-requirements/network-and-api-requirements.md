@@ -15,12 +15,12 @@ Runtime sessions use Convai service endpoints plus LiveKit hosts returned in the
 | Host | Port | Protocol | Purpose |
 | --- | --- | --- | --- |
 | <code class="expression">space.vars.live_server_url</code> | `443` | HTTPS | Connect API — session setup and room credentials |
-| `api.convai.com` | `443` | HTTPS | Legacy REST operations. |
+| `api.convai.com` | `443` | HTTPS | Legacy REST operations, and `POST /vision/object-autotag` from `ConvaiObjectAutotagClient`. |
 | `api2.convai.com` | `443` | HTTPS | Upgraded Character details and Narrative reads. |
 | `beta.convai.com`, `api2-stg.convai.com` | `443` | HTTPS | Beta environment service and upgraded Character API hosts, when selected. |
 | Your token endpoint | Usually `443` | HTTPS | Credential acquisition in endpoint-based Auth Token mode. |
 
-Custom environments need their configured endpoints instead. Emotion configuration travels in the room connect request; there is no separate WebGL emotion preflight.
+Custom environments need their configured endpoints instead. `ConvaiObjectAutotagClient` is the exception: it posts to `https://api.convai.com/` whatever the project Environment is, unless you pass another `baseUri`. See [Call Convai Vision directly](../features/scene-metadata/scene-auto-tagger-scripting-api.md#call-convai-vision-directly). Emotion configuration travels in the room connect request; there is no separate WebGL emotion preflight.
 
 The Editor also downloads native transport libraries from GitHub release assets. Allow `github.com` and the release-download destinations your network follows. Downloads are written under `Assets/Convai/Plugins/client-sdk-unity-livekit/Runtime/Plugins`; see [Native transport libraries](../platform-guides/native-transport-libraries.md).
 
@@ -85,6 +85,10 @@ Your project API key authenticates requests to Convai. Store it in **Edit > Proj
 | Connect, API Key mode | `X-API-Key` | Starting a realtime session. |
 | Connect, Auth Token mode | `API-AUTH-TOKEN` | Starting a session with a short-lived token from the endpoint or provider. |
 | REST using an API key | `CONVAI-API-KEY` | Legacy REST and upgraded Character API reads. |
+| `ConvaiObjectAutotagClient` with an API key | `CONVAI-API-KEY` | Sending your own images to Convai Vision. |
+| `ConvaiObjectAutotagClient` with an auth token | `API-AUTH-TOKEN` | Sending your own images to Convai Vision with a short-lived token. |
+
+`ConvaiObjectAutotagClient` does not read the project API key. It sends only the credential you pass to `ConvaiObjectAutotagOptions.WithApiKey` or `ConvaiObjectAutotagOptions.WithAuthToken`.
 
 The SDK resolves the selected credential before connecting. Auth Token player builds strip the project API key. A runtime Auth Token is not an upgraded Character API credential; see [Authentication](../authentication/README.md) for the supported paths.
 

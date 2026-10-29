@@ -13,12 +13,15 @@ last_reviewed: "5.0.0-preview"
 | `ConfigurationSource`, `RoomConfigAsset` | Inline or profile configuration |
 | `EffectiveTurnTakingOptions`, `EffectiveUserVadSettings` | Resolved room speech configuration |
 | `EffectiveConnectionType`, `EffectiveServerEndpoint`, `EffectiveConnectOnStart` | Resolved connection setup |
+| `AllowsCharacterAutoConnectOnStart` | Whether a character's **Auto Connect** may start a conversation; returns `EffectiveConnectOnStart` |
 | `EffectiveVisionContextEnabled`, `EffectiveVisionInputSettings`, `EffectiveVisionRespondModes` | Resolved Vision setup |
 | `CurrentState`, `IsConnected`, `HasRoomDetails` | Room state |
 | `CurrentRoomName`, `CurrentSessionId`, `CurrentCharacterSessionId` | Active identifiers |
 | `CurrentEndUserId`, `CurrentLongTermMemoryStatus` | Resolved identity/memory status |
 | `CurrentMultiCharacterSession`, `CurrentRoom` | Active room surfaces |
 | `Player`, `CharacterList`, `AgentRegistry` | Registered participants |
+
+`ConvaiRoomManager` implements `IConvaiRoomStartupConnectionPolicy` from `Convai.Runtime.Room`, whose only member is `AllowsCharacterAutoConnectOnStart`. A `ConvaiCharacter` reads it when **Auto Connect** would start a conversation after initialization or re-enable, and again immediately before it connects. If the policy reports `false` by then (for example, after an Inspector edit during Play), the character skips the automatic start. The policy covers only that automatic start: `ConnectAsync` and `StartConversationAsync` calls are not governed by it. A connection service that does not implement the interface does not block **Auto Connect**.
 
 `SetReconnectPolicy` applies a reconnect policy. `SessionResumeDeveloperNamespace` adds project-controlled isolation to persisted resume keys; set it consistently before connecting. See [Session lifecycle](../core-concepts/session-lifecycle.md).
 

@@ -39,7 +39,9 @@ Installing, updating, or removing the managed block is a manual action — it do
 
 For Claude Code and ChatGPT / Codex, the block names the installed `convai-unity-sdk` project skill when a copy is present. Otherwise it uses the resolved physical `SKILL.md` path from an embedded package, `Library/PackageCache`, or `Assets/Convai SDK For Unity`. It asks the agent to read that skill, then only references relevant to the task.
 
-The block assigns generic Editor operations to Unity MCP and SDK configuration to Convai tools. It describes authorization for reversible setup/fix work, keeps keys and transcript text hidden, and defaults to leaving scene saves, Play Mode, and NavMesh baking to an explicit request. Your project instructions and explicit request can define the permitted work. The installer does not configure the MCP client connection.
+The block assigns generic Editor operations to Unity MCP and SDK configuration to Convai tools. It describes authorization for reversible setup/fix work, keeps keys and transcript text hidden, and states that the agent enters or exits Play Mode, saves the scenes it changed, and bakes a NavMesh whenever the task needs it unless the user restricts it. Diagnosis-only requests do not authorize repairs. Your project instructions and explicit request can define the permitted work. The installer does not configure the MCP client connection.
+
+The project skill and the managed block are updated separately. Updating the skill does not rewrite an existing block. An instructions row reads **Installed** for any managed block, including one written by an earlier SDK build, so click **Update** on it to replace the block with the current text. The row is **Project instructions** in the **Claude Code** and **ChatGPT / Codex** cards and the client's own row under **Other AI Clients**. See [Install the project skill](install-project-skill.md).
 
 ## Agent-specific notes
 

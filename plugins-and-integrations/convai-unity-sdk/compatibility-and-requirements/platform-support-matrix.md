@@ -28,7 +28,9 @@ This matrix describes implemented platform paths in the reviewed 5.0 preview sou
 | Push-to-talk finalization | Capture drain when supported | Capture drain when supported | Capture drain when supported | Capture drain when supported | Legacy release |
 | Group conversation | Correlated PTT required | Correlated PTT required | Correlated PTT required | Correlated PTT required | ❌ Legacy release cannot run group PTT |
 
-Scene Auto Tagger is an Editor authoring tool for Windows x64 and macOS, with separate native Core distribution gates. It is not a player-platform feature. See [Scene Auto Tagger](../features/scene-metadata/scene-auto-tagger.md).
+The Scene Auto Tagger window and `ConvaiSceneTagger` are Editor authoring tools for Windows x64 and macOS, with separate native Core distribution gates. They are not player-platform features. See [Scene Auto Tagger](../features/scene-metadata/scene-auto-tagger.md).
+
+`ConvaiObjectAutotagClient` is separate. It sends your own images to Convai Vision from the Editor and from player builds, WebGL included, and needs no native libraries. See [Call Convai Vision directly](../features/scene-metadata/scene-auto-tagger-scripting-api.md#call-convai-vision-directly).
 
 ## Platform-specific requirements
 

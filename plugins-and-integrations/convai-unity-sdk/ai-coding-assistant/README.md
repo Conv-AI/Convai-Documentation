@@ -12,7 +12,7 @@ The Convai AI coding assistant integration adds Convai-specific tools to Unity's
 
 ## What the integration adds
 
-Unity's official MCP server, provided by the `com.unity.ai.assistant` package, gives a coding agent generic tools for GameObjects, scripts, assets, and scene operations, but no knowledge of Convai components. The Convai Unity SDK adds 52 SDK-aware tools (contract version 11) with a `Convai.*` name prefix — for example `Convai.ConfigureCharacter`, `Convai.ConfigureLipSync`, `Convai.ConfigureGaze`, `Convai.DiagnoseConversation`, and `Convai.ConfigureConversationTargeting` — that read and mutate only Convai components such as `ConvaiManager`, characters, actions, lip sync, embodiment modules (gaze, body animation, body language, emotion), transcripts, narrative sections, World Objects tagged by the Scene Auto Tagger, and which character in a multi-character room the player is addressing. Unity MCP tools continue to own generic GameObjects, scripts, and scene operations. Convai tools never accept or return API keys. Scene-authoring tools use Unity Undo and leave scenes unsaved. `Convai.SetCharacterMemorySettings` instead changes settings on the Convai service for every app using that character; it previews by default and has no Unity Undo. `Convai.TagSceneObjects` and `Convai.DescribeSceneView` upload captured images to Convai Vision, so the packaged skill runs them only when you ask the agent to tag or describe the scene.
+Unity's official MCP server, provided by the `com.unity.ai.assistant` package, gives a coding agent generic tools for GameObjects, scripts, assets, and scene operations, but no knowledge of Convai components. The Convai Unity SDK adds 52 SDK-aware tools (contract version 11) with a `Convai.*` name prefix — for example `Convai.ConfigureCharacter`, `Convai.ConfigureLipSync`, `Convai.ConfigureGaze`, `Convai.DiagnoseConversation`, and `Convai.ConfigureConversationTargeting` — that read and mutate only Convai components such as `ConvaiManager`, characters, actions, lip sync, embodiment modules (gaze, body animation, body language, emotion), transcripts, narrative sections, World Objects tagged by the Scene Auto Tagger, and which character in a multi-character room the player is addressing. Unity MCP tools continue to own generic GameObjects, scripts, and scene operations. Convai tools never accept or return API keys. Scene-authoring tools use Unity Undo and do not save scenes; the packaged skill has the agent save the scenes it changed, as [Play Mode, scene saves, and NavMesh bakes](#play-mode-scene-saves-and-navmesh-bakes) explains. `Convai.SetCharacterMemorySettings` instead changes settings on the Convai service for every app using that character; it previews by default and has no Unity Undo. `Convai.TagSceneObjects` and `Convai.DescribeSceneView` upload captured images to Convai Vision, so the packaged skill runs them only when you ask the agent to tag or describe the scene.
 
 ## Supported coding agents
 
@@ -37,7 +37,19 @@ With a coding agent connected, prompt it in natural language instead of wiring c
 * Configure a group conversation for an enabled preview deployment
 * Read a character's long-term memory settings, or preview an explicitly requested change
 
-The agent uses Convai tools for Convai components and Unity's own MCP tools for generic GameObjects, scripts, and scene operations, then reports which instance IDs it changed. See [MCP tools reference](mcp-tools-reference.md) for the complete list of Convai tools available to the agent.
+The agent uses Convai tools for Convai components and Unity's own MCP tools for generic GameObjects, scripts, and scene operations, then, for scene work, reports which instance IDs it changed, which scenes it saved, and any checks it could not verify. See [MCP tools reference](mcp-tools-reference.md) for the complete list of Convai tools available to the agent.
+
+## Play Mode, scene saves, and NavMesh bakes
+
+A setup or fix request authorizes a connected agent to enter and exit Play Mode, save the scenes it changed, and bake a NavMesh whenever the task needs it. The packaged skill and the managed instruction blocks state the same rule: "Enter or exit Play Mode, save the scenes you changed, and bake a NavMesh whenever the task needs it; these need no separate request unless the user restricts them." After a scene setup, the agent saves the scenes it changed and, when credentials are configured, enters Play Mode to confirm the connection, then exits.
+
+Explicit user restrictions still apply. If your prompt or project instructions forbid saving scenes or changing Play Mode, the agent honors that restriction.
+
+A diagnosis-only request, such as asking why a character connects but does not respond, may reproduce the problem in Play Mode. It does not authorize repairs or gameplay actions, so the agent reports ranked causes and a proposed fix instead. `Convai.SimulateAction` runs the real action in Play Mode, so the agent calls it only when you ask for execution.
+
+The **Fix** buttons in the AI Coding section follow a different rule: a repair refuses to start in Play Mode and never exits Play Mode for you. Exit Play Mode, then click **Fix** again.
+
+Copies of the skill and instruction block installed before this rule tell the agent to wait for an explicit request before each of these actions. Update the project skill and the managed instructions separately for each client. See [Install the project skill](install-project-skill.md).
 
 ## AI coding assistant pages
 

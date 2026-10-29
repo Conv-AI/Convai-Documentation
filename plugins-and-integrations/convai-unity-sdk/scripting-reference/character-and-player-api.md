@@ -29,6 +29,8 @@ last_reviewed: "5.0.0-preview"
 
 `StartConversationAsync`, `StopConversationAsync`, and `ResetAndRetryAsync` return `IConvaiOperation<Unit>`. `WaitForCharacterReadyAsync(float? timeoutSeconds, CancellationToken)` fails with `connection.timeout` on timeout or `session.invalid_state` when not connected. Await inside `try`/`catch`; checking an operation's error after a throwing await cannot handle that exception.
 
+`StartConversationAsync` is the explicit call. **Auto Connect** and the room's **Starts Connected** setting do not gate it. **Auto Connect** calls it after initialization or re-enable only when the room allows automatic connection; see [ConvaiRoomManager API](convairoommanager-api.md).
+
 `ToggleSpeech` and `ToggleSpeechAsync` control character speech. Narrative shortcuts are `SendTrigger`, `SendNarrativeEvent`, and `SendNarrativeSpeech`; template keys use `UpdateTemplateKeys`. For acknowledged outcomes, use the room APIs described in [Server command results](server-command-results.md).
 
 ## Remote audio

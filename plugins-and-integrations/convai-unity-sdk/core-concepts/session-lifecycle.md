@@ -12,6 +12,12 @@ The room moves through `Disconnected`, `Connecting`, `Connected`, `Reconnecting`
 
 Use conversation availability to decide whether input is allowed. See [Conversation availability](../features/conversation-availability/README.md).
 
+## Control automatic connection
+
+Two settings start a connection without your code. **Starts Connected** on `ConvaiRoomManager` (**Connect On Start** on a room profile) allows the room to connect during startup. A character's **Auto Connect** starts that character's conversation after initialization or re-enable.
+
+**Auto Connect** acts only while **Starts Connected** is on, including for characters enabled later during play. Turning **Starts Connected** off therefore blocks both. `ConnectAsync` and `StartConversationAsync` work with the setting on or off. See [ConvaiRoomManager API](../scripting-reference/convairoommanager-api.md).
+
 ## Session identifiers and resume
 
 The active room identifier and each character's conversation session identifier serve different purposes. Resume asks the service to continue a character session; it does not guarantee that the service still retains that session or its context.

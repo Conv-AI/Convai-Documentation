@@ -79,6 +79,8 @@ It is responsible for:
 
 `ConvaiManager.TryGetRoomConnectionService` exposes `IConvaiRoomConnectionService`: room state, events, and connection operations. It does not expose the internal diagnostics, audio, or ownership coordinators. Use the public room and facade APIs for advanced scripting.
 
+`ConvaiRoomManager` also implements `IConvaiRoomStartupConnectionPolicy`. Its `AllowsCharacterAutoConnectOnStart` property returns `EffectiveConnectOnStart`: **Starts Connected** on `ConvaiRoomManager`, or **Connect On Start** on its profile when the room reads one. A character reads `AllowsCharacterAutoConnectOnStart` before its **Auto Connect** starts a conversation.
+
 ## Agent tier
 
 The Agent tier contains the components you place on scene GameObjects.
@@ -90,6 +92,7 @@ Add `ConvaiCharacter` to each NPC or agent GameObject. One component per charact
 * Character ID — the unique ID from your Convai dashboard
 * Session state — `Disconnected`, `Connecting`, `Connected`, `Reconnecting`, `Disconnecting`, `Error`
 * Conversation lifecycle — `StartConversationAsync()`, `StopConversationAsync()`, `ToggleSpeech()`
+* Automatic connection — **Auto Connect** starts the conversation after initialization or re-enable when the room allows automatic connection (**Starts Connected** on `ConvaiRoomManager`, **Connect On Start** on its profile); explicit `StartConversationAsync()` calls do not depend on it
 * Transcript and event callbacks — `OnSpokenLine`, `OnEmotionChanged`, `OnActionsReceived`, `OnSpeechStarted`, `OnSpeechStopped`, `OnCharacterReady`
 * Action configuration — via `ConvaiActionConfigSource` component
 

@@ -67,7 +67,7 @@ ConvaiConversationAvailability availability = _manager.ConversationAvailability;
 
 ## Group conversation scene
 
-The same sample includes `Scenes/GroupConversationSample.unity`: three workshop characters with 3D audio, a Group Conversation component, simulator, and F9 diagnostic overlay. It opens offline with automatic connection disabled; hold T to exercise the simulated player turn. See [Run the group conversation sample](../group-conversation/run-the-sample.md) before switching to the service-backed preview.
+The same sample includes `Scenes/GroupConversationSample.unity`: three workshop characters with 3D audio, a Group Conversation component, simulator, and F9 diagnostic overlay. It opens offline with **Starts Connected** and each character's **Auto Connect** off; hold T to exercise the simulated player turn. See [Run the group conversation sample](../group-conversation/run-the-sample.md) before switching to the service-backed preview.
 
 ## Next steps
 

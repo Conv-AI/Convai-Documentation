@@ -14,7 +14,7 @@ Open `Scenes/GroupConversationSample.unity` in the imported sample directory. Ke
 
 ## Rehearse offline
 
-The scene has Tuesday, Friday, and Wednesday, with Friday as the initial character. Automatic connection is off. The group component, simulator, and overlay are enabled, and character audio is configured for 3D playback when used live.
+The scene has Tuesday, Friday, and Wednesday, with Friday as the initial character. Automatic connection is off: **Starts Connected** on the Room Manager and each character's **Auto Connect** are both off. Turning **Starts Connected** off also blocks each character's **Auto Connect**, including characters enabled later during play. Explicit `ConnectAsync` and `StartConversationAsync` calls still work with **Starts Connected** off. The group component, simulator, and overlay are enabled, and character audio is configured for 3D playback when used live.
 
 Enter Play mode. Use **F9** to show or hide the overlay and hold **T** to exercise a player turn. Move and look toward different characters to inspect spatial and addressing state. Expect canned lines without spoken character audio from the simulator.
 
@@ -22,9 +22,9 @@ Keep **Show Transcript** off for screenshots and recordings unless the user expl
 
 ## Prepare a live preview test
 
-Exit Play mode, disable the simulator, and verify that the selected 2–4 characters use distinct IDs accessible to the configured account and Live versions. Keep Push To Talk with a compatible correlated release policy and audio-only connection.
+Exit Play mode, disable the simulator, and turn **Starts Connected** on in the Room Manager. Turning on a character's **Auto Connect** alone does not connect while **Starts Connected** is off. Verify that the selected 2–4 characters use distinct IDs accessible to the configured account and Live versions. Keep Push To Talk with a compatible correlated release policy and audio-only connection.
 
-Confirm group-conversation preview availability with the service owner, then connect using the project's normal flow. Verify actual speech recognition, service state, each character's voice, player recipient decisions, pause/resume, and reconnect behavior. Do not report the offline run as live voice or account validation.
+Confirm group-conversation preview availability with the service owner, then enter Play mode. To connect from your own code instead, leave **Starts Connected** off and call `ConnectAsync` or `StartConversationAsync`. The [Simulator and debug overlay](simulator-and-debug-overlay.md) page covers how the simulator and **Starts Connected** interact. Verify actual speech recognition, service state, each character's voice, player recipient decisions, pause/resume, and reconnect behavior. Do not report the offline run as live voice or account validation.
 
 ## Verify the sample's two modes
 

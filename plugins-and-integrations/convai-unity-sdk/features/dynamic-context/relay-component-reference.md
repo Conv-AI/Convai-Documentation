@@ -50,7 +50,7 @@ Unity's Inspector persistent-listener panel only lists methods with zero or one 
 | `ClearCurrentAttentionObject()` | `void` | Clears the current attention object. |
 | `ResetContext()` | `void` | Clears all tracked states and events. Equivalent to `ResetContext(false)`. |
 | `ResetContext(bool removeStatic)` | `void` | Clears all tracked states and events. When `removeStatic` is `true`, also requests removal of the character's static initial dynamic context. |
-| `Flush()` | `void` | Attempts to send staged Dynamic Context and scene-metadata changes without the batch delay. Held updates remain pending. |
+| `Flush()` | `void` | Attempts to send staged Dynamic Context, a staged action-target sync, and scene-metadata changes without the batch delay. Held updates remain pending. |
 
 For the full set of Dynamic Context operations, including `SetStates`, `RemoveState`, `TryGetStateValue`, and `Apply`, see [Dynamic context scripting API](dynamic-context-scripting-api.md).
 

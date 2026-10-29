@@ -27,6 +27,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Connect without opening a microphone | Text-only session | [Run a text-only session](../getting-started/run-a-text-only-session.md) |
 | Drive push-to-talk from my own input | Input ownership | [Use your own push-to-talk input](../getting-started/use-your-own-push-to-talk-input.md) |
 | Understand release, commit and reply waiting | Push-to-talk lifecycle | [Push-to-talk lifecycle](../core-concepts/push-to-talk-lifecycle.md) |
+| Decide whether the room and my characters connect automatically | Automatic connection | [Scene components reference](../getting-started/scene-components.md) |
 
 ## Authentication
 
@@ -55,6 +56,8 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Know whether the player can talk right now, and gate my UI on it                          | Conversation Availability | [Conversation Availability](../features/conversation-availability/) |
 | Let several characters converse with each other | Group conversation | [Group conversation](../features/group-conversation/README.md) |
 | Generate and review scene descriptions | Scene Auto Tagger | [Tag a scene](../features/scene-metadata/scene-auto-tagger.md) |
+| Send my own images to Convai Vision from a script and read the objects it names | Convai Vision client | [Call Convai Vision directly](../features/scene-metadata/scene-auto-tagger-scripting-api.md#call-convai-vision-directly) |
+| Let a coding agent set up and diagnose Convai scenes in the Editor | AI coding assistant | [AI coding assistant](../ai-coding-assistant/README.md) |
 
 ## Embodiment
 

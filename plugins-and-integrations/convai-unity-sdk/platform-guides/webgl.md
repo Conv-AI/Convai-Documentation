@@ -133,6 +133,8 @@ In 5.0, **Convai Vision Publisher > WebGL Publishes > Frame Source** publishes t
 
 `WebcamVisionFrameSource` is not the supported WebGL webcam integration. Use a native player for that component. See [WebGL vision](../features/vision/webgl.md) for frame-source and page-canvas requirements.
 
+`ConvaiObjectAutotagClient` is a separate Vision call that also runs in WebGL players. By default in a WebGL player, it sends your own PNG images to Convai Vision with `UnityWebRequest`, publishes no frames, and does not use `ConvaiVisionPublisher`. Browsers hide the `Retry-After` header from a WebGL player, so a rate-limited (HTTP 429) request there waits the fixed `RetryDelay`, 20 seconds by default, before each retry. See [Call Convai Vision directly](../features/scene-metadata/scene-auto-tagger-scripting-api.md#call-convai-vision-directly).
+
 ## Microphone policy and playback
 
 Set **Allow Microphone** off for a text-only ordinary room. It prevents opening the microphone; remote character voice remains a separate setting. A denied browser prompt does not have to end the session: present `audio.mic_permission_denied`, `audio.mic_unavailable` or `audio.mic_publish_failed` and allow typed input where the room supports it.

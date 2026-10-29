@@ -16,7 +16,7 @@ Follow [Long-term memory quick start](quick-start.md) for the complete test.
 
 ## Use an authenticated account
 
-Disable automatic connection while sign-in is pending. After your authentication flow finishes, install a provider using `SetEndUserIdentityProvider` and, if needed, `SetEndUserMetadataProvider`; then connect. The SDK copies and validates identity and metadata for that connection attempt.
+Turn off **Starts Connected** on `ConvaiRoomManager` while sign-in is pending; it also blocks each character's **Auto Connect**. After your authentication flow finishes, install a provider using `SetEndUserIdentityProvider` and, if needed, `SetEndUserMetadataProvider`; then connect. The SDK copies and validates identity and metadata for that connection attempt.
 
 Use the complete `AccountIdentityInstaller` example in [End-user identity](end-user-identity.md). Your authentication layer supplies the actual account identifier. Do not generate a fresh ID per scene load or treat the room's participant `PlayerID` as the memory identity.
 
