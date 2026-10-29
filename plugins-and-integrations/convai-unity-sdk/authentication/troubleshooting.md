@@ -19,7 +19,7 @@ Start with the failed operation's `Code` and `Message`. Token acquisition and th
 | HTTP `401`, mapped to `connection.connect_invalid_api_key` | Read the response message. Confirm your provider returns a Convai auth token, not an account key or your game's login token. | A new connection succeeds with the correct credential. |
 | `connection.connect_end_user_id_required` | Supply an appropriate stable end-user ID and reconnect. | Inspect `CurrentEndUserId` without logging it and `CurrentLongTermMemoryStatus`. |
 | Works in the Editor but fails in a player | Supply a runtime provider, endpoint, or explicit token. The Editor's saved-key provider is not compiled into players. | Run the built player and connect. |
-| An explicit-token call leaves the old session unchanged | Disable **Starts Connected** or disconnect the existing session first. | A new connection consumes the supplied token. |
+| An explicit-token call leaves the old session unchanged | Disable **Starts Connected**, which also blocks each character's **Auto Connect**, or disconnect the existing session first. | A new connection consumes the supplied token. |
 
 ## Diagnose a token request
 

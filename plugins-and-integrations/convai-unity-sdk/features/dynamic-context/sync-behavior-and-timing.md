@@ -46,6 +46,8 @@ A continuous stream of changes could in theory push the flush out indefinitely, 
 | Per-change debounce | 0.5 seconds (`DynamicContextBatchDelaySeconds`) | Each staged change resets the flush countdown |
 | Maximum wait per window | 3 seconds | The flush fires even while changes keep arriving |
 
+Runtime action-target changes made through `character.Actions` and scene metadata changes share this window with tracked context. Every flush starts a new window, including a flush that sent only action targets or scene metadata. A later burst of registrations or removals therefore waits for its own window and sends one sync instead of one per change.
+
 ```mermaid
 sequenceDiagram
     participant Script
@@ -69,13 +71,13 @@ In 5.0, changes staged after `Reset()` do not replace the pending reset. The SDK
 
 ## What one flush sends
 
-A normal context batch uses one message; a pending reset followed by newer changes can produce two ordered submissions. Scene metadata and other pending mutations can also be flushed separately. The normal context batch mode depends on what changed during the window. If any tracked state text changed — a new state, an updated value, or a removed state — the message mode is Replace, carrying the full canonical context plus a short delta tail describing what changed. If the only staged change in the window was an attention-object update with no state text change, the message mode is Append instead.
+A normal context batch uses one message; a pending reset followed by newer changes can produce two ordered submissions. A flush also sends a staged action-target sync before the context batch and pending scene metadata after it, each as a separate update. An action-target sync larger than 12 KiB is split into separate actions, objects, and characters updates; see [Check when a change reaches Convai](../character-actions/register-targets-from-code.md#check-when-a-change-reaches-convai). The normal context batch mode depends on what changed during the window. If any tracked state text changed — a new state, an updated value, or a removed state — the message mode is Replace, carrying the full canonical context plus a short delta tail describing what changed. If the only staged change in the window was an attention-object update with no state text change, the message mode is Append instead.
 
 The [dynamic context scripting API](dynamic-context-scripting-api.md) lists which methods stage text, attention, or reset changes.
 
 ## Forcing a flush before the window closes
 
-Call `Flush()` on `IConvaiDynamicContext` to send the pending batch immediately instead of waiting out the debounce window. Use it to skip the remaining batch delay. It is not a delivery acknowledgement or a barrier before scripted dialogue.
+Call `Flush()` on `IConvaiDynamicContext` to send the pending batch, a staged action-target sync, and pending scene metadata immediately instead of waiting out the debounce window. Use it to skip the remaining batch delay. It is not a delivery acknowledgement or a barrier before scripted dialogue.
 
 ```csharp
 character.DynamicContext.SetState("Player location", "market square");
@@ -96,7 +98,7 @@ When the character receives its ready signal — on initial connect or after a r
 
 Plain state and event updates are fire-and-forget once flushed — the SDK does not wait for Convai to confirm them, because a text update only needs to reflect the latest value. Updates that carry an action config patch or an attention object are different: they change what the character can actually reference and act on, so the SDK does not commit them to `ConvaiCharacter`'s resolved action state until Convai confirms them.
 
-Each such update is sent with an `update_id` and tracked while waiting for a matching `DynamicContextUpdateResultReceived` event. Matching happens immediately when the acknowledgement event arrives. A separate once-per-second check expires pending mutations after 30 seconds without a usable acknowledgement and logs a warning. Pending updates are committed in the order they were sent — an older update waiting on its acknowledgement blocks newer ones from committing, even if a newer update's acknowledgement arrives first.
+Each such update is sent with an `update_id` and tracked while waiting for a matching `DynamicContextUpdateResultReceived` event. Matching happens immediately when the acknowledgement event arrives. A separate once-per-second check expires pending mutations after 30 seconds without a usable acknowledgement and logs a warning. Pending updates are committed in the order they were sent — an older update waiting on its acknowledgement blocks newer ones from committing, even if a newer update's acknowledgement arrives first. An action-target sync that the SDK splits by size sends each part with its own `update_id`, and each part is tracked and committed in send order.
 
 Ordinary action acknowledgements must report success and match the expected action, object, character, and attention values before the SDK commits the mutation. Group acknowledgements can omit verification counts; the SDK can then apply a successful matching update as unverified and log a warning. Mismatched values reject the mutation. See [room acknowledgement routing](multi-character-and-group-rooms.md#acknowledgement-routing).
 

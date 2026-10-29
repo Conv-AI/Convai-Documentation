@@ -98,7 +98,7 @@ public class JoinExistingSessionBootstrap : MonoBehaviour
 ```
 {% endcode %}
 
-Disable automatic connection on this companion client so this bootstrap owns its first connect. A Group Conversation component must not be enabled: group mode creates its own room and cannot use this join path.
+Turn off **Starts Connected** on `ConvaiRoomManager` on this companion client so this bootstrap owns its first connect. That setting also blocks each character's **Auto Connect**, including characters enabled later. A Group Conversation component must not be enabled: group mode creates its own room and cannot use this join path.
 
 ## Verify the join
 

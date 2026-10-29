@@ -53,7 +53,7 @@ Apply preserves manually authored metadata and reports conflicts for objects cha
 
 Inspect the resulting World Objects and groups. Enter Play mode, address the intended character, and verify collection and local delivery using [Scene metadata quick start](quick-start.md). Then test the actual conversation and any navigation separately.
 
-A successful Apply proves that scene components were authored. With one registered character, a new room receives the whole list in its connect request. More than one character, a rejoin, and later changes use a data message limited to 15,360 bytes, and Apply warns when the action targets or the world objects pass three quarters of that limit. Apply does not prove that the list reaches every room member or produces the intended reply.
+A successful Apply proves that scene components were authored. With one registered character, a new room receives the whole list in its connect request. More than one character, a rejoin, and later changes use a data message limited to 15,360 bytes. Action targets also reach the character through the action-target sync. A sync over 12 KiB is split into actions, objects and characters updates. Each list must fit in one update, or nothing is sent; see [Check when a change reaches Convai](../character-actions/register-targets-from-code.md#check-when-a-change-reaches-convai). Apply warns when the action targets or the world objects pass three quarters of the 15,360-byte limit. Apply does not prove that the list reaches every room member or produces the intended reply.
 {% endstep %}
 {% endstepper %}
 

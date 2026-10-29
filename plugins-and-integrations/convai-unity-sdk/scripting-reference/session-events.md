@@ -48,6 +48,12 @@ The facade exposes participant joined/left, ownership rebind, conversation targe
 
 `Events.Raw` is the typed domain event hub for events without a facade property. Keep its returned token and unsubscribe from the same hub during cleanup. Delivery options can request background execution, but WebGL has no thread pool and runs that delivery on the main thread. Do not assume a background option makes blocking work safe in a browser player.
 
+## Outbound message sent
+
+`OutboundRtviMessageSent` in `Convai.Domain.DomainEvents.Runtime` has no facade property; subscribe through `Events.Raw`. The payload carries `MessageType`, `MessageId`, and a UTC `Timestamp`.
+
+The SDK raises this event after the general outbound RTVI send completes at the transport, not when the message is queued. `Timestamp` is when that completion was observed. The event does not confirm that Convai received or acknowledged the message; for a backend answer, use the command results in [Server command results](server-command-results.md). Correlated push-to-talk controls use a separate send path and do not raise this event.
+
 ## Related pages
 
 - [Character events](character-events.md)

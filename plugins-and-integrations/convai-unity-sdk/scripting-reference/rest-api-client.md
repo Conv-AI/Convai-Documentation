@@ -34,12 +34,15 @@ last_reviewed: "5.0.0-preview"
 | Core connection | `x-api-key` | `API-AUTH-TOKEN` |
 | Legacy Platform | `CONVAI-API-KEY` | `API-AUTH-TOKEN` |
 | Character authoring/runtime read | `CONVAI-API-KEY` | `Authorization: Bearer` for its PAT credential kind |
+| Convai Vision object tagging (`ConvaiObjectAutotagClient`) | `CONVAI-API-KEY` | `API-AUTH-TOKEN` |
 
 A runtime connection token and a Character API personal access token are different contracts. Runtime Auth Token mode does not imply a Character authoring PAT. Keep developer credentials on trusted tooling/backends; use the runtime authentication flow for distributed applications.
 
 ## Lower-level clients
 
 `ConvaiCoreApiClient`, `ConvaiPlatformLegacyClient`, `ConvaiCharacterApiClient`, and `ConvaiCharacterNarrativeClient` expose their own transport/options. The Character API client includes typed resource groups and generic operation execution; some resources may require backend/account capabilities beyond this SDK snapshot.
+
+`ConvaiObjectAutotagClient` in `Convai.Runtime.SceneTagging` is not part of `ConvaiRestClient`. It sends your own images to `POST /vision/object-autotag` through the shared `IConvaiApiTransport` and takes its own options. See [Call Convai Vision directly](../features/scene-metadata/scene-auto-tagger-scripting-api.md#call-convai-vision-directly).
 
 A separate `ConvaiInteractionClient` handles the Interaction text contract. Its bearer credential and backend availability should be verified for the deployment. See [Interaction text client](../advanced-topics/interaction-text-client.md) rather than treating it as a replacement for room chat.
 

@@ -65,6 +65,8 @@ Unity's official MCP server exposes 52 Convai-specific tools under the `Convai.*
 
 Toggle any tool under **Edit > Project Settings > AI > Unity MCP Server**.
 
+None of the Convai tools saves a scene, enters or exits Play Mode, or bakes a NavMesh. The packaged skill and the managed instructions have the agent do these whenever the task needs them, unless you restrict them. See [Play Mode, scene saves, and NavMesh bakes](README.md#play-mode-scene-saves-and-navmesh-bakes). When an authoring tool returns `PLAY_MODE_ACTIVE`, the skill has the agent exit Play Mode and retry for an authorized authoring task, unless you restricted mode changes, and continue read-only diagnosis for a diagnosis-only request.
+
 ## Guidance
 
 ### `Convai.GetGuidance`
@@ -82,7 +84,7 @@ Loads concise Convai SDK workflow guidance for one topic. Call it before configu
 | Topic | Guidance summary (paraphrased) |
 |---|---|
 | `Overview` (default) | Use Convai tools only for SDK-aware operations; compose official Unity MCP tools for generic project changes. |
-| `Setup` | Complete runnable Convai scene setup proactively; an explicit setup request authorizes safe, reversible defaults. |
+| `Setup` | Complete runnable Convai scene setup proactively; an explicit setup request authorizes safe, reversible defaults. The workflow ends by saving the scenes you changed, then verifying the connection in Play Mode when credentials are configured, honoring explicit user restrictions on saves and mode changes. |
 | `Actions` | Author explicit action affordances and bind local executors; never infer affordances from scene metadata. |
 | `DynamicContext` | Send state, events, and attention-object changes through the character dynamic-context facade. |
 | `Vision` | Configure a vision publisher and one frame source under the room hierarchy before enabling video mode. |
@@ -95,7 +97,9 @@ Loads concise Convai SDK workflow guidance for one topic. Call it before configu
 | `MultiCharacter` | By default, a Convai room includes eligible active characters in the loaded scenes; an explicit connection selection can restrict that set; there is no multi-character mode to switch on. Configure targeting with `Convai.ConfigureConversationTargeting` and a group room with `Convai.ConfigureGroupConversation`. |
 | `Events` | Prefer `ConvaiManager.Events` for typed code and relay components for Inspector-driven `UnityEvent`s. |
 | `Runtime` | Use `ConvaiManager` for session ownership, Audio for room audio, and Transcripts for canonical history. |
-| `SceneTagging` | Have Convai Vision name and describe scene props, then apply the reviewed text as World Objects; tagging and drafting upload captured images, so run them only when the user asked to tag or describe the scene. |
+| `SceneTagging` | Have Convai Vision name and describe scene props, then apply the reviewed text as World Objects; tagging and drafting upload captured images, so run them only when the user asked to tag or describe the scene. The workflow ends by saving the scenes you changed unless the user restricts saves. |
+
+The `Actions`, `Narrative`, and `Runtime` topics tell the agent how far to go: for a setup or fix request, preview and apply only missing or broken Convai configuration; for a diagnosis-only request, report the findings and the proposed repair without applying it. The agent honors explicit user restrictions in both cases.
 
 ## Foundation
 
@@ -158,7 +162,7 @@ Previews or configures a Convai room — `ConvaiManager` and `ConvaiRoomManager`
 | `profileAssetPath` | `string` | `""` | Existing `ConvaiRoomManagerProfile` asset path. Required in `ExistingProfile` mode. |
 | `connectionType` | `enum ConvaiConnectionType` | omit = unchanged | Inline connection type. New room default: `Audio`. |
 | `inputMode` | `enum ConversationInputMode` | omit = unchanged | Inline conversation input mode. New room default: `HandsFree`. |
-| `connectOnStart` | `bool` | omit = unchanged | Connect automatically when the scene starts. New room default: `true`. |
+| `connectOnStart` | `bool` | omit = unchanged | Connect automatically when the scene starts. `false` also blocks each character's **Auto Connect**, including characters enabled later; explicit connection calls still work. New room default: `true`. |
 | `serverEndpoint` | `enum ConvaiServerEndpoint` | omit = unchanged | Core-service endpoint. New room default: `Connect`. |
 | `visionMode` | `enum ConvaiVisionContextMode` | omit = unchanged | Dynamic vision policy. New room default: `Auto`. |
 | `pushToTalkKey` | `string` | omit = unchanged | Unity `KeyCode` name used by push-to-talk. New room default: `"T"`. |
@@ -215,7 +219,7 @@ Previews or performs end-to-end Audio conversation setup in the active scene, us
 | `playerName` | `string` | `"Player"` | Player display name. |
 | `playerId` | `string` | `""` | Optional local transcript attribution ID. |
 | `inputMode` | `enum ConversationInputMode` | `HandsFree` | Recommended room input mode. |
-| `connectOnStart` | `bool` | `true` | Connect automatically when the scene starts. |
+| `connectOnStart` | `bool` | `true` | Connect automatically when the scene starts. `false` also blocks each character's **Auto Connect**, including characters enabled later; explicit connection calls still work. |
 | `createPlaceholders` | `bool` | `true` | Create standalone player and Capsule character placeholders when none exist. |
 | `dryRun` | `bool` | `true` | Preview changes without modifying the scene. |
 
@@ -535,7 +539,7 @@ Previews or writes a finished tagging run's names and descriptions as World Obje
 | `createActionTargets` | `bool` | `true` | Add action targets so characters can act on the objects. |
 | `dryRun` | `bool` | `true` | Preview without changing the scene. |
 
-The preview lists, for each object, the `name` and `description` that would be written, fitted to the 64-character name and 320-character description limits (`shortened` reports a cut), and a `note` when a hand-authored World Object is kept. With `dryRun=false`, the result reports an `outcome` per object: `Applied`, `NotTagged`, `InvalidText`, `ObjectChanged`, `AuthoredMetadataPreserved`, `EditedComponentsPreserved`, or `LogicalGroupPreserved`. Tag an `ObjectChanged` object again; it moved or changed since capture. Edit a `LogicalGroupPreserved` object in the Scene Auto Tagger window. The result also reports `sceneDirty` and `sceneSaved`; save the scene yourself to keep the World Objects.
+The preview lists, for each object, the `name` and `description` that would be written, fitted to the 64-character name and 320-character description limits (`shortened` reports a cut), and a `note` when a hand-authored World Object is kept. With `dryRun=false`, the result reports an `outcome` per object: `Applied`, `NotTagged`, `InvalidText`, `ObjectChanged`, `AuthoredMetadataPreserved`, `EditedComponentsPreserved`, or `LogicalGroupPreserved`. Tag an `ObjectChanged` object again; it moved or changed since capture. Edit a `LogicalGroupPreserved` object in the Scene Auto Tagger window. The result also reports `sceneDirty` and `sceneSaved`, and `sceneSaved` stays `false` because the tool never saves. The scene must be saved to keep the World Objects; the packaged skill has the agent save the scenes it changed unless you restrict saves.
 
 A run that is not a finished tagging run returns `RUN_NOT_APPLICABLE`. A listed `instanceId` that is not in the run returns `OBJECT_NOT_IN_RUN`, a repeated one returns `DUPLICATE_OBJECT`, and a run with no tagged objects returns `NOTHING_TO_APPLY`. See [Scene Auto Tagger scripting API](../features/scene-metadata/scene-auto-tagger-scripting-api.md) for the C# equivalent.
 

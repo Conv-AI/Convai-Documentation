@@ -24,7 +24,7 @@ A local Ready chip or clean validation result cannot establish entitlement or li
 
 ## State does not progress
 
-`Unknown` means no recognized service state arrived. Check whether a group session exists and whether you accidentally left automatic connection off after an offline rehearsal. `IsStarted` means the client-ready message was sent; its 15-second readiness fallback does not establish that all members started successfully.
+`Unknown` means no recognized service state arrived. Check whether a group session exists and whether you accidentally left **Starts Connected** off after an offline rehearsal. Turning it off also blocks each character's **Auto Connect**, including characters enabled later; explicit `ConnectAsync` and `StartConversationAsync` calls still work. `IsStarted` means the client-ready message was sent; its 15-second readiness fallback does not establish that all members started successfully.
 
 `Idle` can reflect out-of-range state. Check the group anchor, hearing range, active members, and spatial measurements. `Paused` requires resume. An apparent lull is not a local targeting failure: inspect the service's state and current topic before sending another command.
 

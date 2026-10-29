@@ -140,7 +140,7 @@ Stages a clear for the current attention object. Convai treats the character as 
 void Flush()
 ```
 
-Attempts to send staged context and pending scene-metadata changes without the batch delay. Connection and room holds retain staged data. Ordinary non-target characters wait for targeting; group members use a separate silent route. A local send refusal can drop the batch. See [room delivery rules](multi-character-and-group-rooms.md).
+Attempts to send staged context, a staged action-target sync, and pending scene-metadata changes without the batch delay. Connection and room holds retain staged data. Ordinary non-target characters wait for targeting; group members use a separate silent route. A local send refusal can drop the batch. See [room delivery rules](multi-character-and-group-rooms.md).
 
 ### `TryGetStateValue`
 

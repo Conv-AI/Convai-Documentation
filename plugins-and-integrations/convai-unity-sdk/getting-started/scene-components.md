@@ -67,6 +67,7 @@ See [Conversation targeting](../features/conversation-targeting/README.md) and [
 **Key behavior:**
 
 * Auto-connects on `Start()` when `ConnectOnStart` is `true` (default: `true`).
+* Applies the same setting to character **Auto Connect**, including characters enabled later during play. When Room Setup Source reads a profile asset, the profile's **Connect On Start** value applies instead of the inline one.
 * Reconnects automatically on transient failures, up to `_maxReconnectAttempts` (default: `3`).
 * Manages microphone startup according to **Allow Microphone**, input mode and **Prepare Microphone**. The configured startup delay defaults to `0.5s`; it does not override a disabled microphone or browser permission requirements.
 
@@ -76,7 +77,7 @@ See [Conversation targeting](../features/conversation-targeting/README.md) and [
 | --- | --- | --- | --- |
 | Room Setup Source | `_configurationSource` | Inline | Read settings from this component or a reusable profile. |
 | Room Manager Profile Asset | `_roomConfigAsset` | Empty | Settings asset used in Profile Asset mode. |
-| Starts Connected | `ConnectOnStart` | `true` | Connect when Play starts. |
+| Starts Connected | `ConnectOnStart` | `true` | Allows automatic room and character connections, including characters enabled later. Turn it off to connect from your own code. |
 | Connection Type | `_connectionType` | Audio | Use Video when sending camera frames. |
 | Push To Talk Key | `_pushToTalkKey` | `KeyCode.T` | Key used by built-in input. |
 | Retry Attempts | `_maxReconnectAttempts` | `3` | Reconnect attempt limit. |
@@ -107,12 +108,14 @@ Turn-taking settings are also configured here. See [Configure conversation input
 | Character Name | `_characterName` | Empty; display name. **Fetch** reads the dashboard name. |
 | Name Tag Color | `_nameTagColor` | White; transcript label color. |
 | Play Voice On Start | `_enableRemoteAudio` | On; enable voice playback. |
-| Auto Connect | `_autoConnect` | Off; start this character after room startup. |
+| Auto Connect | `_autoConnect` | Off; starts this character's conversation after initialization or re-enable while the room's **Starts Connected** (**Connect On Start** on a profile) is on. Explicit connection calls still work when **Starts Connected** is off. |
 | Owner ID | `_ownerId` | Empty; use the local player. |
 | Ready Timeout (s) | `_characterReadyTimeoutSeconds` | `30`; `0` waits indefinitely. |
 | Resume Last Conversation | `_enableSessionResume` | Off; resume the supplied session when enabled. |
 | Character Session ID | `_characterSessionId` | Empty; conversation to resume. |
 | Opening Context > Initial Dynamic Info / Text | `_initialDynamicInfoKeepInContext`, `_initialDynamicInfoText` | Initial context for the connection. See [Static context](../features/dynamic-context/static-context-at-connection-time.md) for room-specific routing. |
+
+**Auto Connect** acts only while the room's **Starts Connected** is on. With it off, no character starts a conversation automatically, including a character that is enabled or re-enabled later. `ConnectAsync` and `StartConversationAsync` calls are not affected. See [ConvaiRoomManager API](../scripting-reference/convairoommanager-api.md).
 
 The **Memory** card controls character-level service settings separately from these local fields. See [Configure memory](../features/long-term-memory/configure-memory-for-a-character.md).
 

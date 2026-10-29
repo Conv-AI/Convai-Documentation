@@ -55,7 +55,7 @@ public sealed class AccountIdentity : IEndUserIdentityProvider, IEndUserMetadata
 {% step %}
 ### Disable automatic connection
 
-Turn off **Starts Connected** on `ConvaiRoomManager`, or **Connect On Start** on its profile. Otherwise the scene can connect with the default identity before login completes.
+Turn off **Starts Connected** on `ConvaiRoomManager`, or **Connect On Start** on its profile. That setting also blocks each character's **Auto Connect**, including characters enabled later. Otherwise the scene can connect with the default identity before login completes.
 {% endstep %}
 {% step %}
 ### Connect after login

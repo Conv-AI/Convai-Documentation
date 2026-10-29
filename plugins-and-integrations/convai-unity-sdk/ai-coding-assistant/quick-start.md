@@ -76,13 +76,15 @@ With managed instructions installed and the tool count verified, prompt your age
 | Add a second character | "Add a second Convai Character named Trainee, and switch conversation targeting to Proximity." |
 | Tag scene objects | "Tag the props on the workbench so the Instructor can describe them." |
 
+A setup or fix prompt authorizes the agent to save the scenes it changed, bake a NavMesh when the task needs one, and use Play Mode when the task needs it, such as to verify a change that affects runtime behavior. After a scene setup, when credentials are configured, the agent enters Play Mode to confirm the character connects, then exits. State any restriction in the prompt, for example that the agent must not save scenes or change Play Mode. See [Play Mode, scene saves, and NavMesh bakes](README.md#play-mode-scene-saves-and-navmesh-bakes).
+
 Tagging uploads captured images to Convai Vision, so the packaged skill runs the Scene Auto Tagger tools only when you ask it to tag the scene. See the [Scene Auto Tagger tools](mcp-tools-reference.md#scene-auto-tagger) for the order they run in.
 
 Vision setup is not among Convai's 52 tools, so your agent configures it by editing `ConvaiRoomManager` and adding `ConvaiVisionPublisher` directly. See [Vision quick start](../features/vision/quick-start.md) for the exact fields it sets.
 
 ## What to try next
 
-Prompt your agent for two or three of the tasks above in your own project, and check the resulting scene in the Hierarchy before entering Play Mode.
+Prompt your agent for two or three of the tasks above in your own project, and check the resulting scene in the Hierarchy. Unless you restrict it, the agent has already saved the scenes it changed, and after a scene setup it has run Play Mode to confirm the connection when credentials are configured.
 
 {% content-ref url="README.md" %}
 [AI coding assistant](README.md)

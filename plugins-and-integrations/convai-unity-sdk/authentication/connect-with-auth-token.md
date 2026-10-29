@@ -18,7 +18,7 @@ If a scene component or a login-triggered flow can resolve the token itself, reg
 
 ## Start a new connection
 
-Turn off **Starts Connected** on `ConvaiRoomManager` (or **Connect On Start** on its profile), or disconnect an existing session before calling this method. A call made while already connected returns the existing session without using the new token.
+Turn off **Starts Connected** on `ConvaiRoomManager` (or **Connect On Start** on its profile), or disconnect an existing session before calling this method. Turning it off also blocks each character's **Auto Connect**, so no character opens a session before your call. A call made while already connected returns the existing session without using the new token.
 
 ## Call the connection method
 

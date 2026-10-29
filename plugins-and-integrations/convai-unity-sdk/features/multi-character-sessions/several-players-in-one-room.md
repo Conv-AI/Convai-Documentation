@@ -10,7 +10,7 @@ A second human client can join an existing classic multi-character room without 
 
 The creating client connects with its selected active characters. Share one authorized room locator with joining clients: `RoomSessionId` or `SharedSessionKey`. Each joining player uses a distinct stable `EndUserId` and can supply `EndUserName` for display metadata.
 
-Use [Join an existing room](join-an-existing-session.md) for the complete bootstrap. Disable automatic connection on the joining client so it does not create a separate room first. A joining scene need not have a local component for every character; memberships without a local `Character` are expected.
+Use [Join an existing room](join-an-existing-session.md) for the complete bootstrap. Turn off **Starts Connected** on `ConvaiRoomManager` on the joining client so it does not create a separate room first; that also blocks each character's **Auto Connect**. A joining scene need not have a local component for every character; memberships without a local `Character` are expected.
 
 The Group Conversation preview creates its own room and is refused on this join-existing path. Do not infer support for adding several human players to group mode from the classic-room join API.
 

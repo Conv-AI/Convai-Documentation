@@ -130,7 +130,7 @@ graph TD
     D --> E["DynamicContextUpdateResultReceived"]
 ```
 
-While a conversation is active, the first staged change opens a batch window. Every subsequent staged change resets a countdown of `ConvaiCharacter.DynamicContextBatchDelaySeconds` — 0.5 seconds by default. The SDK also enforces an internal ceiling of 3 seconds measured from the first staged change in the window, so a steady stream of changes cannot postpone delivery indefinitely. Calling `Flush()` attempts the pending send without the remaining countdown. Connection and room holds can extend delivery beyond the batching ceiling.
+While a conversation is active, the first staged change opens a batch window. Every subsequent staged change resets a countdown of `ConvaiCharacter.DynamicContextBatchDelaySeconds` — 0.5 seconds by default. The SDK also enforces an internal ceiling of 3 seconds measured from the first staged change in the window, so a steady stream of changes cannot postpone delivery indefinitely. Runtime action-target changes from `character.Actions` and scene metadata changes share this window, and every flush starts a new one. Calling `Flush()` attempts the pending send without the remaining countdown. Connection and room holds can extend delivery beyond the batching ceiling.
 
 If a call happens before the character is in conversation, it stages locally only — no countdown starts. When the session's character-ready signal arrives, the SDK attempts to flush the staged batch, subject to room routing. Calls made in `Awake` or `Start` therefore do not need their own readiness timer:
 

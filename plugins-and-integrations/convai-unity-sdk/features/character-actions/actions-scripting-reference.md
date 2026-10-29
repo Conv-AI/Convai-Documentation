@@ -437,14 +437,14 @@ Marks any `GameObject` as a runtime action grounding target with no code require
 
 ## `ConvaiCharacterActions`
 
-`Convai.Runtime.Actions` — obtained through `character.Actions`. Methods operate on that character's runtime state; they do not rewrite serialized action assets. Registrations and availability changes stage synchronization, subject to connection and room holds.
+`Convai.Runtime.Actions` — obtained through `character.Actions`. Methods operate on that character's runtime state; they do not rewrite serialized action assets. Registrations, removals, and availability changes stage a sync through the dynamic-context batching window (0.5 seconds after the latest change, at most 3 seconds after the first), subject to connection and room holds. A sync over 12 KiB is sent as separate actions, objects, and characters updates. See [Check when a change reaches Convai](register-targets-from-code.md#check-when-a-change-reaches-convai).
 
 | Member | Signature or type | Behavior |
 |---|---|---|
 | `RegisterTarget` | `void RegisterTarget(ConvaiActionTarget target)` | Copies the component's current values as a one-time explicit registration, independent of its enable lifecycle and scope. |
 | `RegisterObject` | `void RegisterObject(string name, string description, GameObject gameObject = null)` | Registers an object; provide a scene binding for physical actions. |
 | `RegisterCharacter` | `void RegisterCharacter(string name, string bio, GameObject gameObject = null)` | Registers another character as a target. |
-| `UnregisterTarget` | `void UnregisterTarget(string name)` | Removes all explicitly registered entries with that case-insensitive name. Does not remove authored or component-polled targets. |
+| `UnregisterTarget` | `void UnregisterTarget(string name)` | Removes all explicitly registered entries with that case-insensitive name. The next sync drops them, also after Convai acknowledged their registration. Does not remove authored or component-polled targets. |
 | `SetTargetAvailable` | `void SetTargetAvailable(string name, bool available)` | Per-character overlay affecting all target sources with that name. |
 | `SetActionAvailable` | `void SetActionAvailable(string actionName, bool available)` | Overrides authored action availability and stages a config sync. Does not create an executor or definition. |
 | `IsActionAvailable` | `bool IsActionAvailable(string actionName)` | Reads the override, then the authored definition flag; false for an unknown name without an override. Not proof an executor exists or an update was acknowledged. |

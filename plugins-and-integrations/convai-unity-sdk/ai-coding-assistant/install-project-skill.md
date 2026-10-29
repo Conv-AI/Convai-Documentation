@@ -26,12 +26,18 @@ Install the SDK and resolve the four readiness checks in the [AI coding quick st
 
 Claude Code uses `.claude/skills/convai-unity-sdk/`; Codex uses `.agents/skills/convai-unity-sdk/`. The `.convai-skill.json` stamp tracks the installed source and content. Do not edit the stamp to hide a local modification.
 
-4. Optionally install or update **Project instructions**. Once the skill is installed, the managed block names it. Updating that block preserves other instructions in the file.
+4. Optionally install or update **Project instructions**. Once the skill is installed, the managed block names it. Updating that block preserves other instructions in the file. The row reads **Installed** for any managed block, including one written by an earlier SDK build, so click **Update** to replace it with the current text.
 5. Click **Refresh**, reconnect your client if needed, and ask it to read the installed skill and call `Convai.GetProjectStatus`.
+
+{% hint style="info" %}
+The project skill and the managed instructions update separately for each client. Updating the skill does not update an existing instruction block. Copies that predate the current rule tell the agent to wait for an explicit request before entering or exiting Play Mode, saving a scene, or baking a NavMesh. The current rule has the agent do these when the task needs them, unless you restrict them. See [Play Mode, scene saves, and NavMesh bakes](README.md#play-mode-scene-saves-and-navmesh-bakes).
+{% endhint %}
 
 ## Verify
 
 **Project skill** should read **Installed**. A successful status call with contract version `11` establishes that this 5.0 preview's tools are reachable; the skill's Installed status alone does not. Ask the client to run `Convai.InspectScene` before any target-specific configuration.
+
+If you installed project instructions, open the client's instruction file and check that the block between `<!-- BEGIN CONVAI UNITY SDK -->` and `<!-- END CONVAI UNITY SDK -->` contains the sentence `Enter or exit Play Mode, save the scenes you changed, and bake a NavMesh whenever the task needs it`. A block without it is from an earlier SDK build.
 
 Use **Remove** on the relevant row to remove the managed skill copy or instruction block. They are separate operations; removing instructions does not disconnect Unity MCP or uninstall the SDK.
 
