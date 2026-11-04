@@ -4,6 +4,10 @@ description: Chat Overlay - PlayCanvas Plugin Guide for Convai integration.
 
 # Chat Overlay
 
+{% hint style="warning" %}
+**Deprecated.** This page describes the legacy PlayCanvas Editor template, built on the deprecated `convai-web-sdk` package. Start new projects from the [Web SDK template](start-from-the-web-sdk-template.md) or the [Convai Embody template](start-from-the-convai-embody-template.md).
+{% endhint %}
+
 Let's add a chat window to enhance user interaction and immersion. Create a New entity called Convai Chat.&#x20;
 
 ### Convai Chat script

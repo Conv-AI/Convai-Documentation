@@ -511,6 +511,8 @@
     * [Facial Expressions](plugins-and-integrations/web-plugins/convai-web-sdk-1/facial-expressions.md)
     * [Actions](plugins-and-integrations/web-plugins/convai-web-sdk-1/actions.md)
   * [PlayCanvas Plugin](plugins-and-integrations/web-plugins/playcanvas-plugin/README.md)
+    * [Start from the Web SDK template](plugins-and-integrations/web-plugins/playcanvas-plugin/start-from-the-web-sdk-template.md)
+    * [Start from the Convai Embody template](plugins-and-integrations/web-plugins/playcanvas-plugin/start-from-the-convai-embody-template.md)
     * [Adding External Script](plugins-and-integrations/web-plugins/playcanvas-plugin/adding-external-script.md)
     * [First Person View](plugins-and-integrations/web-plugins/playcanvas-plugin/first-person-view.md)
     * [Adding characters to scene](plugins-and-integrations/web-plugins/playcanvas-plugin/adding-characters-to-scene.md)

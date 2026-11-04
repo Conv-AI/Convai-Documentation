@@ -4,6 +4,10 @@ description: Adding External Script - PlayCanvas Plugin Guide for Convai integra
 
 # Adding External Script
 
+{% hint style="warning" %}
+**Deprecated.** This page describes the legacy PlayCanvas Editor template, built on the deprecated `convai-web-sdk` package. Start new projects from the [Web SDK template](start-from-the-web-sdk-template.md) or the [Convai Embody template](start-from-the-convai-embody-template.md).
+{% endhint %}
+
 Here we will add the [Convai Web SDK](https://www.npmjs.com/package/convai-web-sdk) to our project, a JavaScript library that enables integration of conversational AI capabilities.
 
 1. Create a blank project after loggin in.

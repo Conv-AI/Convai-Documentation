@@ -4,6 +4,10 @@ description: Convai Integration - PlayCanvas Plugin Guide for seamless integrati
 
 # Convai Integration
 
+{% hint style="warning" %}
+**Deprecated.** This page describes the legacy PlayCanvas Editor template, built on the deprecated `convai-web-sdk` package. Start new projects from the [Web SDK template](start-from-the-web-sdk-template.md) or the [Convai Embody template](start-from-the-convai-embody-template.md).
+{% endhint %}
+
 After the addition of Convai web-sdk-cdn to url section, ConvaiClient class will be available to the browser directly.
 
 {% hint style="info" %}
