@@ -13,6 +13,8 @@ The reason Convai Embody opens the connection itself, instead of asking the app 
 
 The connection asks Convai for MetaHuman blendshape frames by default. Without that request Convai sends no lip sync data, and the character would talk with a still face.
 
+The mouth follows the voice as it actually plays, not the clock the frames were sent on. The browser holds and stretches incoming audio to smooth over network jitter, so frames played on a fixed clock drift away from the voice during a reply. Convai Embody reads the playback position of the received audio and shows the frame for that moment, holding through network breaks so the mouth stays in sync after them.
+
 ## From character ID to body
 
 ```mermaid
@@ -33,23 +35,42 @@ The manifest can offer the same body for several rigs. Convai Embody picks the f
 
 Models are Draco-compressed, so the loader needs the Draco decoder. The model is then scaled to a standing human height and placed with its feet on the floor, and the idle clip starts, so a character is never left in its bind pose.
 
+The body's clips and any clips the app passes in `animations` are loaded by name, and an app's clip replaces the body's clip of the same name. After the idle clip starts, Convai Embody leaves clip changes to the app: speaking moves the mouth, not the body clip, so an app that wants a talking clip switches to it when the client reports that the character is speaking. See [Add your own animations to a character](add-your-own-animations.md).
+
+The manifest normally comes from Convai, but an app can supply its own resolver that returns a manifest for files it hosts. The rest of the flow is the same, because the body still connects to the character's Convai session. See [Use your own 3D model](use-your-own-3d-model.md).
+
 ## The frame pipeline
 
 Every frame, the systems that move the character run in a fixed order. The order is part of the design: each system writes to bones or morph targets that a later system reads or overrides.
 
 | Order | System | Why it runs here |
 |---|---|---|
-| 1 | Unit normalization | The model's scale must settle before anything reads positions in the scene. |
-| 2 | Animation clips | The clips pose the skeleton. |
-| 3 | Gaze | Gaze replaces the clip's head rotation instead of blending with it, so it runs after the clips. |
+| 1 | Gaze restore | Gaze removes last frame's turn from bones the clips will not rewrite, so turns never accumulate. The model's scale is measured once, when it loads. |
+| 2 | Animation clips, then grounding | The clips pose the skeleton, then the lowest point of the soles is placed on the floor. |
+| 3 | Gaze | Gaze turns the eyes, neck, and torso on top of the pose the clips wrote, so it runs after them. |
 | 4 | Breathing | Breathing is added on top of the pose the clips wrote, so it runs after them and never accumulates. |
-| 5 | Lip sync, then eye movement, then blinking | Blinking runs after lip sync so it controls the eyelid channels that both touch. |
+| 5 | Lip sync, then eye movement, then blinking, then face normals | Blinking runs after lip sync so it controls the eyelid channels that both touch. Last, the surface normals are recomputed where the face's shapes moved it, for models that ship blend-shape positions without normals; otherwise a closed eyelid is lit with its open-eye normals and shades black. |
 
-Gaze tracks the camera with the head and neck, drifts slightly at rest, and occasionally looks away. Breathing moves the chest before the waist. Blinks vary in timing and completeness, and the eyelids follow downward gaze.
+Gaze follows the camera the way people do. The eyes take small movements, the head follows larger ones, and the torso turns only when the camera stays far to one side. While listening, the character occasionally glances away. Breathing moves the chest before the waist. Blinks vary in timing and completeness, and the eyelids follow downward gaze.
+
+## How the body is shaded
+
+<figure><img src="assets/sample-avatars-busts.jpg" alt="Bust shots of four sample avatars, two women and two men, each lit by the same key light from the left with a soft shadow across the neck and under the chin"><figcaption><p>The same stage, four bodies: skin keeps its tone in shade, hair reads as strands, eyes catch the light, and cloth stays matte.</p></figcaption></figure>
+
+The body's materials are re-shaded at load so it responds to your scene's lights the way skin and hair do, whatever the lights are. Skin becomes a physically based dielectric with light wrapping softly past the shadow edge and pore detail; hair draws as coverage, darker toward the scalp, with faint hair-coloured highlights that fade at the silhouette; eyes get a measured iris, a dark pupil and a catchlight; teeth are lit and shaded by the mouth around them. A body whose manifest says `gender: 'male'` gets a male look: lashes at the texture's own alpha, a tighter and less pink skin response with more pore, and a `steady` resting expression. Your lights are never changed; `ConvaiCharacter`'s own canvas adds a portrait rig that follows the camera, and `createPortraitRig` gives a plain three.js scene the same rig. See `surfaces`, `faceMaterials` and `mouth` in the [createCharacter reference](createcharacter-reference.md).
+
+## Lip sync timing
+
+Convai sends mouth frames ahead of the voice, paced for the wall clock; the voice itself is played by WebRTC, which buffers and stretches it. Convai Embody therefore moves the mouth on the voice's own clock, read from the audio track:
+
+- A reply's mouth starts when its voice is first audible, paired with the stream's first mouth movement, so every reply has the same small lead whether it opens on a vowel or on closed lips.
+- A pause in the voice holds the mouth; a stall between the voice's chunks (some voices arrive in pieces) does not skip the next chunk's mouth shapes, and frames that arrive after a gap start with their own sound rather than in a burst.
+- If the stream runs dry while the voice still plays, the voice level keeps the mouth moving until frames return. The voice never plays on a still face.
+- A reply ends with one smooth close.
 
 ## Reduced motion
 
-When the user's system requests reduced motion through the `prefers-reduced-motion` media query, Convai Embody damps the additive motion layers, such as breathing and idle drift, and suppresses look-away shifts. Lip sync and animation clips are not damped, because they carry meaning: a muted mouth would make the character harder to understand without making it calmer to look at.
+When the user's system requests reduced motion through the `prefers-reduced-motion` media query, Convai Embody damps the additive motion layers, such as breathing, and suppresses glances away and small eye movements. Lip sync and animation clips are not damped, because they carry meaning: a muted mouth would make the character harder to understand without making it calmer to look at.
 
 ## Environments
 
