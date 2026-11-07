@@ -1,7 +1,7 @@
 ---
 title: Configuration and type reference
 description: Reference for the Convai Web SDK package entry points, every connection configuration field with its default, and the main exported types.
-last_reviewed: "2.0.1"
+last_reviewed: "2.0.2"
 ---
 
 This page lists the entry points of `@convai/web-sdk`, every field of `ConvaiConfig`, and the state, message, and acknowledgment types the client works with. The types are defined in the SDK's core and re-exported from `@convai/web-sdk/core`, `@convai/web-sdk/vanilla`, and `@convai/web-sdk/react`.
@@ -14,13 +14,15 @@ The package declares these import paths in its `exports` field. There is no othe
 |---|---|
 | `@convai/web-sdk` | Everything from `@convai/web-sdk/react` and `@convai/web-sdk/lipsync-helpers`. |
 | `@convai/web-sdk/core` | `ConvaiClient`, `MemoryManager`, `BlendshapeQueue`, `EventEmitter`, `AudioManager`, `VideoManager`, `ScreenShareManager`, `MessageHandler`, the model output helpers `parseModelOutputMessage`, `ModelOutputExtensionRegistry`, `isJsonValue`, and `isJsonObject`, and every core type. |
-| `@convai/web-sdk/vanilla` | `ConvaiClient`, the SDK's `AudioRenderer` class, `createConvaiWidget`, `destroyConvaiWidget`, the `VanillaWidget` and `VanillaWidgetOptions` types, and every core type. |
+| `@convai/web-sdk/vanilla` | `ConvaiClient`, the SDK's `AudioRenderer` class, `CharacterVersionManager`, the error classes, and every core type. The vanilla widget (`createConvaiWidget`, `destroyConvaiWidget`) is in `@convai/web-widget/vanilla`. |
 | `@convai/web-sdk/vanilla/websocket` | Registers the WebSocket transport when imported, and exports `WebSocketSession`. |
-| `@convai/web-sdk/react` | `useConvaiClient`, `ConvaiWidget`, `useCharacterInfo`, `useLocalCameraTrack`, `ConvaiClient`, `AudioRenderer` and `AudioContext` (aliases of LiveKit's `RoomAudioRenderer` and `RoomContext`), and every core type. |
+| `@convai/web-sdk/react` | `useConvaiClient`, `ConvaiClient`, and every core type. `ConvaiWidget`, `useCharacterInfo`, `useLocalCameraTrack`, `AudioRenderer` and `AudioContext` (LiveKit's `RoomAudioRenderer` and `RoomContext`) are in `@convai/web-widget/react`. |
 | `@convai/web-sdk/lipsync-helpers` | Channel order tables, mappers, queue factories, and the lip sync processor. See [Blendshape channel order reference](mappings-reference.md). |
 | `@convai/web-sdk/embed` | Helpers for loading a published chat: `fetchPublishedChatDescriptor`, `requestPublishedChatGrant`, `loadPublishedChatSession`, and their types. |
 
 `AudioRenderer` from `@convai/web-sdk/vanilla` and `AudioRenderer` from `@convai/web-widget/react` are different objects with one name: the first is a class you construct with a room, the second is a React component.
+
+`livekit-client` is a peer at `>=2.20.1 <3`. If your app calls LiveKit directly, note that from 2.20 `client.room.localParticipant.publishData()` takes a `Uint8Array<ArrayBuffer>`. Bytes from `new TextEncoder().encode(...)` already have that type with current TypeScript `lib` files; a `Uint8Array` that could be backed by a `SharedArrayBuffer`, or a structural LiveKit type your app declares, needs a type-only change such as `new Uint8Array(bytes)`.
 
 ## ConvaiConfig
 

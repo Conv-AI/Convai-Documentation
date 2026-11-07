@@ -1,7 +1,7 @@
 ---
 title: Get started with React
 description: Install the Convai Web SDK in a React app and add a ready-made chat and voice widget, with optional camera and screen sharing for your character.
-last_reviewed: "2.0.1"
+last_reviewed: "2.0.2"
 icon: react
 ---
 

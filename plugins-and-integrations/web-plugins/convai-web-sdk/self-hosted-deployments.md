@@ -1,7 +1,7 @@
 ---
 title: Connect to a self-hosted deployment
 description: Point the Web SDK at your own Convai deployment instead of Convai's hosted service, set every host it calls, and keep requests and API keys inside your network.
-last_reviewed: "2.0.1"
+last_reviewed: "2.0.2"
 icon: server
 ---
 

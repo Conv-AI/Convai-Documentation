@@ -1,7 +1,7 @@
 ---
 title: Host several characters in one room
 description: Connect a roster of Convai characters to one realtime room, choose which one answers, change the roster live, and let a second person join.
-last_reviewed: "2.0.1"
+last_reviewed: "2.0.2"
 icon: users
 ---
 

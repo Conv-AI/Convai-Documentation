@@ -1,7 +1,7 @@
 ---
 title: Use the WebSocket transport
 description: Connect a Convai character over a WebSocket instead of WebRTC, register the transport, and hear the character's voice in React or plain TypeScript.
-last_reviewed: "2.0.1"
+last_reviewed: "2.0.2"
 icon: webhook
 ---
 
