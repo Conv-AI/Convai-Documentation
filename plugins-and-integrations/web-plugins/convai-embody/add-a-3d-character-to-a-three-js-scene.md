@@ -1,7 +1,7 @@
 ---
 title: Add a 3D character to a three.js scene
 description: Add a Convai character to an existing 3D web scene with the framework-free Convai Embody API and update it from your own render loop.
-last_reviewed: "1.0.1"
+last_reviewed: "1.1.1"
 ---
 
 Add a Convai character to a three.js scene you already render, without React. Use this page when your app owns the renderer, scene, and camera. At the end, the character stands in your scene and speaks with lip sync, driven from your render loop.
@@ -58,6 +58,32 @@ If the character has Long-Term Memory turned on, the connection also needs an en
 {% hint style="warning" %}
 Without `character.camera`, gaze tracking does nothing and the character looks straight ahead. Set it once your camera exists.
 {% endhint %}
+
+## Light the character
+
+The character takes whatever lights your scene has. For a portrait that reads like the studio films, `createPortraitRig` returns the rig `ConvaiCharacter` uses in its own canvas (a key 45° to the left of the camera with soft shadows, a cool fill, a warm rim, a faint sky), and `placePortraitRig` turns it to follow the camera each frame. `PORTRAIT_TONE` is the matching tone mapping.
+
+{% code title="src/lights.ts" %}
+```typescript
+import * as THREE from 'three'
+import { createPortraitRig, placePortraitRig, PORTRAIT_TONE } from '@convai/embody'
+
+export function lightScene(scene: THREE.Scene, renderer: THREE.WebGLRenderer) {
+  renderer.toneMapping = PORTRAIT_TONE.toneMapping
+  renderer.toneMappingExposure = PORTRAIT_TONE.exposure
+  renderer.shadowMap.enabled = true
+
+  const rig = createPortraitRig()
+  scene.add(rig.key, rig.key.target, rig.fill, rig.fill.target, rig.rim, rig.rim.target, rig.sky)
+
+  // Call once per frame, before rendering: the key stays to the camera's left as it orbits.
+  const face = new THREE.Vector3(0, 1.6, 0)
+  return (camera: THREE.Camera) => placePortraitRig(rig, camera.position, face)
+}
+```
+{% endcode %}
+
+Skip this if your scene is already lit the way you want it; the character's skin, hair, eyes and teeth are shaded to take any lighting.
 
 ## Send a message to the character
 

@@ -1,7 +1,7 @@
 ---
 title: React API reference
 description: Reference for the Convai Embody React components and hooks, including every prop, its type and default, and what each hook returns.
-last_reviewed: "1.0.1"
+last_reviewed: "1.1.1"
 ---
 
 The React API is exported from `@convai/embody/react`. Every component and hook here also accepts the character options documented in the [createCharacter reference](createcharacter-reference.md), such as `characterId`, `token`, and `apiKey`.
@@ -10,7 +10,7 @@ Changing one of those options reloads the body, with one exception: a new `corre
 
 ## ConvaiCharacter
 
-A self-contained character view: a `<Canvas>`, a camera, lights, orbit controls, and the character. It is both a named export and the default export of `@convai/embody/react`.
+A self-contained character view: a `<Canvas>`, a camera, a portrait light rig, orbit controls, and the character. The key light sits 45° to the left of the camera, follows it as you orbit, and casts soft shadows; a fill, a rim and a dim environment complete it, with Neutral tone mapping. It is both a named export and the default export of `@convai/embody/react`.
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
@@ -35,6 +35,7 @@ The character alone, for use inside a `<Canvas>` you create. It adds no camera, 
 | `onReady` | `(character: CharacterHandle) => void` | none | Called once for each character that loads, when the body is loaded and the connection is live. An inline function is fine: re-renders do not call it again. |
 | `onError` | `(error: Error) => void` | none | Called with the error that stopped loading. |
 | `queue` | `BlendshapeQueue` | the character's own session | Overrides which turn this body lip-syncs to. |
+| `shadows` | `boolean` | `false` | Every mesh of the character casts and receives shadows. Your lights decide whether any are cast. |
 
 All [createCharacter options](createcharacter-reference.md#options) are accepted as props.
 

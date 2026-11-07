@@ -5,6 +5,8 @@ description: Find the setup guides, API reference, and design notes for Convai E
 
 Convai Embody renders a Convai character as a 3D body in a web page and drives its lip sync, gaze, breathing, and blinking while the character talks. It is built on the [Convai Web SDK](../convai-web-sdk/README.md) and uses one connection for both, so a page needs a credential and a character ID and nothing else. The current release is <code class="expression">space.vars.embody_version</code>.
 
+<figure><img src="assets/sample-avatars-busts.jpg" alt="Four Convai sample avatars rendered by Convai Embody in a dark studio: two women in patterned head wraps and two men, one in a cap and tunic and one in scrubs with a stethoscope, lit by one key light with soft shadows"><figcaption><p>Sample avatars rendered by Convai Embody under a single key light: skin, hair, eyes and cloth take the scene's lighting.</p></figcaption></figure>
+
 <table data-view="cards">
 <thead>
 <tr>

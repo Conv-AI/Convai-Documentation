@@ -1,7 +1,7 @@
 ---
 title: Use your own 3D model
 description: Render a Convai character with a MetaHuman GLB model that you host, including Full and Lite files and your own animation clips.
-last_reviewed: "1.0.1"
+last_reviewed: "1.1.1"
 ---
 
 Render a Convai character with a 3D model you host yourself, instead of the body Convai serves for the character. Use this page when you have your own MetaHuman exported to GLB. At the end, your model loads in place of the default body and talks with lip sync, gaze, and blinking through the character's normal Convai connection.
@@ -14,7 +14,7 @@ Render a Convai character with a 3D model you host yourself, instead of the body
 
 ## What the model needs
 
-Convai Embody drives a body through the names of its bones and blendshapes. The one rig it supports is `convai-mha-1`, the Unreal Engine MetaHuman rig, so the file needs the MetaHuman names exactly as Unreal Engine exports them.
+Convai Embody drives a body through the names of its bones and blendshapes. The rig it does everything on is `convai-mha-1`, the Unreal Engine MetaHuman rig; a file with the MetaHuman names exactly as Unreal Engine exports them gets lip sync, blinking, eye movement, gaze and breathing. Other faces and skeletons load with what they have (see [Models from other tools](#models-from-other-tools) below).
 
 | Part | Names | What uses it |
 |---|---|---|
@@ -25,9 +25,25 @@ Convai Embody drives a body through the names of its bones and blendshapes. The 
 
 Draco-compressed files load as they are; the decoder is fetched from `dracoDecoderPath`.
 
-{% hint style="warning" %}
-Models on other rigs, such as Ready Player Me, Mixamo, VRoid, or Character Creator, load but do not come alive: their head stays still and their face does not move, because none of these names match. Retarget the model to the MetaHuman rig in your 3D tool first.
-{% endhint %}
+### Models from elsewhere
+
+Models from other tools load and are checked when they do. Convai Embody reads what the model has and reports what it can and cannot do, with the fix for each problem:
+
+- **ARKit faces** (Ready Player Me, Apple face capture, most VRM and Character Creator exports) and **renamed MetaHuman faces** are mapped automatically, so lip sync, blinking and eye movement work. The map is in `character.report.face.morphMap`; pass it as `morphMap` to pin it or correct an entry.
+- **A model with no blendshapes** cannot move its face. The report says so; the body still animates.
+- **Animations** from Mixamo, the Unreal mannequin and Rigify are retargeted onto the body. Animations inside the model file are used when you declare none. A clip that is missing from its file, will not load, or moves none of the body's bones is reported by name.
+- **Gaze and breathing** need the MetaHuman head, neck and spine bone names; on other skeletons they are off, and the report says which bones are missing.
+
+Check a model before wiring a conversation to it:
+
+```typescript
+import { inspectModel, formatReport } from '@convai/embody'
+
+const report = await inspectModel('https://assets.example.com/my-model.glb', {
+  animations: { Idle: 'https://assets.example.com/idle.fbx' },
+})
+console.log(formatReport(report))
+```
 
 ## Describe your model with a resolver
 
@@ -163,7 +179,7 @@ Your model stands in the scene, `character.model.url` is your file, `character.r
 | The console warns `rig "convai-mha-1": missing required bone(s) — …` | The model lacks the head or spine bones listed in the warning, so gaze or breathing is off for them. Export the full MetaHuman skeleton with its Unreal Engine bone names. |
 | The body loads but the face stays still while the character talks | The model's blendshapes do not have MetaHuman `CTRL_expressions_*` names. Export the face's expression morph targets from the MetaHuman. |
 | The head is not drawn on some phones | The model has more blendshapes than the phone's GPU allows. Ship a Lite file, as in [Ship a Full and a Lite file](#ship-a-full-and-a-lite-file). |
-| The model is the wrong size or below the floor | The model is scaled to `targetHeight` (1.7 meters) and its feet placed at `groundY`. Set either option to change them. |
+| The model is the wrong size or below the floor | The model is scaled to `targetHeight` (1.7 meters) when it loads, and its soles are placed at `groundY`. Set either option to change them. |
 | The file never loads, or the Draco decoder fails | Read the browser's network panel. Files on another host need CORS, and a page whose content security policy blocks `gstatic.com` needs `dracoDecoderPath` pointed at a self-hosted decoder. |
 
 ## Next steps
