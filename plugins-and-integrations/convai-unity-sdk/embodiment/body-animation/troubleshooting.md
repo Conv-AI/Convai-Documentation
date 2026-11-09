@@ -1,117 +1,74 @@
 ---
 title: Troubleshoot body animation
-description: Diagnose no motion, a T-pose, locomotion desync, a fighting Animator Controller, actions that never fire, and misaimed pointing gestures.
-last_reviewed: "4.5.0"
+description: Resolve setup findings, missing clips, invisible actions, navigation problems, and optional movement performances using the Inspector and live diagnostics.
+last_reviewed: "5.0.0-preview"
 ---
 
-Most body animation problems trace back to one of a small number of setup gaps, and `ConvaiBodyAnimationController`'s inspector reports most of them by name before you ever open the console. This page covers the symptoms that checklist does not fully explain, the `AnimTraceVerbosity` dial for deeper diagnosis, and a complete reference for every common failure.
+Read the Body Animation Inspector's findings first, then use **Convai > Body Animation Editor > Live** during Play mode to inspect the active layers and latest action request.
 
-## Diagnose with AnimTraceVerbosity
+## Resolve setup findings
 
-`ConvaiBodyAnimationConfig`'s **Trace Verbosity** field controls how much a character writes to the console, through the `AnimTraceVerbosity` enum: `Off`, `State`, `Detail`, `Firehose`. It ships as `Off`, which still logs every warning and error — a character that walks and talks transitions constantly, so a console full of routine play-by-play is where a real warning goes unread.
+| Finding or symptom | Action | Verification |
+| --- | --- | --- |
+| Missing Animator or invalid Humanoid rig | Assign a valid Humanoid Animator | The rig blocker clears and setup becomes available |
+| No assigned content | Run **Set Up This Character** or assign a profile/set | The configured character shows Ready or actionable warnings |
+| Clip Measurements | Run **Measure Clips** after changing locomotion clips | The Clip Measurements finding disappears |
+| Animator Controller | Use **Clear Controller** if the existing controller is unnecessary | The Animator Controller finding disappears |
+| Overlay Mask | Use **Generate Mask** and inspect the resulting coverage | Upper-body overlays have the intended mask |
+| Talk | Add valid Talk entries | Speech can select an authored talk clip |
+| Locomotion Provider | Assign a component implementing `IConvaiLocomotionSource` | Provider validation passes |
+| Advanced Locomotion | Implement the managed-motion capability if advanced synchronization is required | Starts/stops/turns can coordinate with the mover |
+| Beat Gestures / Ambient Activities / Referential Gestures | Review the content and **Turn On** fix for a disabled feature | The intended feature has both content and an enabled switch |
+| Action Strength | Use **Restore Full Strength** when the config unintentionally suppresses actions | The Action layer has visible weight |
+| Gesture Action | Correct the Play Gesture name or add its entry | The behavior resolves an authored action |
 
-| Level | What it adds |
-|---|---|
-| `Off` | No trace output. Warnings and errors still log. |
-| `State` | State-machine transitions, layer ownership changes, action lifecycle, and clip selections — raise the one character you are diagnosing to this level. |
-| `Detail` | Adds selector decisions (angles, distances, foot phase), variant rolls with weights, and speed-warp clamps. |
-| `Firehose` | Adds throttled per-tick dumps of layer weights and blend positions. Extremely chatty; use only for short debugging sessions. |
+A missing assignment can return the Inspector to **Not Set Up**. A blocked rig is **Action Needed**. A configured character with findings can be **Needs Attention**; those labels are not interchangeable.
 
-Raise **Trace Verbosity** to `State` on the character you are diagnosing, reproduce the symptom, then put it back to `Off`. The SDK's own `ConvaiSettings` log level also has to allow the line through: `State` logs at `Info`, `Detail`/`Firehose` at `Debug`. The same entries also feed a ring buffer that backs the controller inspector's compact **Live** strip and the **Body Animation Editor** window's deeper Live mode — verbosity gates the ring buffer too, so at `Off` the Live surfaces still show dialogue state, movement state, and any warning, but the rolling transition log needs `State` or higher to populate.
+## No idle or talk motion
 
-## Symptom quick reference
+Confirm the graph is built with a valid Humanoid Animator, a resolved set, and playable idle/talk entries. A T-pose can mean the graph never built or no usable idle was authored. Use `RuntimeReady` or `IsRuntimeBuilt` before scripted requests rather than relying on unrelated `Awake`/`Start` order.
 
-| Symptom | Likely cause | Fix | Verify |
-|---|---|---|---|
-| Character never idles or reacts to speech | No `Animator`, a non-Humanoid avatar, or no `ConvaiBodyAnimationSet` assigned | Add a Humanoid `Animator`, or assign a set to the component or its profile | Controller inspector shows **Ready** instead of **Not Set Up** |
-| Character holds a T-pose | Same as above — the `PlayableGraph` never built, so the Animator falls back to its bind pose | Same fix as no motion | Character shows a looping idle in Play mode |
-| Character glides, slides its feet, or its legs desync from movement | Locomotion clips have no measured metadata, or a custom locomotion provider does not implement `IConvaiManagedLocomotion` | Run **Measure Clips** on the set, or implement the managed-locomotion capability | `LocomotionClipsMissingMetadata` in the Setup checklist reads `0` |
-| Legs or arms twitch or fight the intended pose | A Runtime Animator Controller is still assigned on the Animator | Clear the Animator's **Controller** field | The `rig.redundant-animator-controller` finding disappears from Setup |
-| An action or gesture never plays | Action name does not match any `ActionName`/alias in the set, or the call ran before the runtime was ready | Compare the requested name to the set's authored names (case-insensitive, space/dash/underscore-equivalent); call from `RuntimeReady` instead of `Awake`/`Start` | Console shows the matching name reach `_actionLayer.Play` instead of the "no matching action" warning |
-| Pointing arm aims at the wrong spot | Only one or a few directions are authored in the set's pointing table; `PointAt` snaps to the angularly closest one | Author more directional pointing clips covering the angles your scene needs | The played clip's authored yaw/pitch is close to the requested direction |
+An assigned Animator Controller is reported because the Body Animation graph replaces the Animator output while active. Clear it through the finding's **Clear Controller** control when it is not needed as a fallback; do not assume its presence alone proves the cause of every twitch.
 
-## No motion at all
+## The character cannot walk or slides its feet
 
-A character with no motion at all — no idle sway, no talk gestures, nothing — almost always fails one of three setup checks the controller's own inspector reports before you open the console:
+`MoveTo` returns false and warns when the character is off a baked NavMesh, no nearby walkable destination is found, or the agent refuses the destination. Cover the start and destination with connected navigation surfaces.
 
-- **No Animator was found under the character root.** `ConvaiBodyAnimationController` needs a Humanoid `Animator` to build its `PlayableGraph`, so with none present the module stays inactive (`BodyAnimationTroubleshooter.cs:228-230`).
-- **The Animator's avatar is not a valid Humanoid rig.** Set the model's **Animation Type** to **Humanoid** in its import settings (`BodyAnimationTroubleshooter.cs:238-239`).
-- **No Animation Set is assigned**, directly or through a profile — the character has content it could play but nothing wired to it (`BodyAnimationTroubleshooter.cs:264-267`).
+If movement works but the feet slide, run **Measure Clips** on the set or Content mode. Inspect the measured gait against the actual speed. A custom mover also needs the relevant synchronization interfaces for advanced starts and stops; reporting speed alone gives simpler blending.
 
-Open the controller's inspector or **Convai > Body Animation Editor**'s Setup mode; all three report as an error-severity finding that names the exact missing piece rather than a generic failure.
-
-## Character stuck in T-pose
-
-A T-pose is Unity's fallback when nothing is driving the Animator at all — it shares the same underlying cause as no motion at all, and reads more visibly wrong because the character has no authored idle to fall back to. Check the same three conditions: a Humanoid `Animator`, a valid Humanoid avatar, and an assigned `ConvaiBodyAnimationSet` with at least one looping idle entry. A set with no valid idle entry (`HasAnyIdle` false) leaves the character with nothing to blend to even once the graph itself builds successfully.
-
-## Locomotion out of sync with the NavMeshAgent
-
-Two distinct symptoms share this heading, and they have different causes.
-
-**The character does not walk at all.** `ConvaiNavMeshLocomotion.MoveTo` logs the exact reason and returns `false`:
-
-```text
-[ConvaiNavMeshLocomotion] '<name>' cannot walk: it is not standing on a baked NavMesh. Bake a NavMesh for the floor (Window > AI > Navigation), and check the character starts on it.
-```
-
-(`ConvaiNavMeshLocomotion.cs:238-242`.) A destination with no walkable floor nearby logs a second, similar warning naming the destination (`ConvaiNavMeshLocomotion.cs:248-252`), and a destination on a disconnected piece of NavMesh logs a third naming the connectivity problem (`ConvaiNavMeshLocomotion.cs:260-264`). Bake a NavMesh covering both the character's start position and every destination you send it to.
-
-**The character walks, but feet slide or the gait looks wrong at speed.** This is a measurement problem, not a NavMesh problem: locomotion clips assigned to the set need their ground speed measured by the Clip Motion Analyzer before the animation can track the agent's real speed. The Setup checklist reports this directly:
-
-```text
-{N} locomotion clip(s) have not been measured, so the character falls back to configured speeds instead of the clips' real ground speed — the usual cause of sliding feet. Directional starts and planted stops also stay off until their motion is measured.
-```
-
-(`BodyAnimationTroubleshooter.cs:359-363`.) Re-run **Measure Clips** — on the set's own inspector, or in the Body Animation Editor's Content mode — after any locomotion clip changes.
-
-## An Animator Controller fighting the graph
-
-`ConvaiBodyAnimationController`'s `PlayableGraph` replaces the Animator's output while active, but it does not clear a Runtime Animator Controller left assigned on the Animator component. When one is present, the Setup checklist reports it:
-
-```text
-An Animator Controller is assigned; the body animation PlayableGraph replaces its output while active. Remove it to avoid confusion, or leave it as an inert fallback.
-```
-
-(`BodyAnimationTroubleshooter.cs:247-249`.) In practice, a leftover controller most often surfaces as legs or arms twitching or briefly snapping toward a different pose than the graph intends. Clear the Animator's **Controller** field — the Setup checklist offers a one-click fix for this specific finding.
+**Enable Turn In Place** and **Enable Planted Stops** are off by default. Enable them only with appropriate authored, measured clips. With defaults, an arrival or graceful stop can correctly blend to idle without a planted-stop performance. **Planted Stops While Walking** is a separate switch.
 
 ## Actions not firing
 
-A `PlayAction` call that never plays fails in one of two ways, and the console tells you which:
+A no-match warning in 5.0 identifies the requested name and lists available actions:
 
-- **The runtime was not ready yet.** A call made from `Awake()`/`Start()`, before the `PlayableGraph` finishes building, is queued in a single deferred slot and replayed automatically — but only until it expires:
+```text
+PlayAction('<name>') — no action with that name or alias in set '<set>'. Actions in the set: ...
+```
 
-  ```text
-  PlayAction('<name>') requested before the animation graph was ready — it will be replayed automatically once the graph builds, or expire after 2s.
-  ```
+Without a set, it instead reports that the character has no Animation Set and therefore no actions to play. Match the entry's name or aliases, and inspect the source of a Play Gesture behavior's selected name. Merely receiving a service action with a matching name does not wire it to Body Animation; configure the **Play Gesture** behavior.
 
-  (`ConvaiBodyAnimationController.cs:462-465`.) Subscribe to `RuntimeReady`, or check `IsRuntimeBuilt`, instead of relying on the deferred slot for anything that must not be dropped.
+A request before runtime readiness can occupy a deferred slot and expire after 2 seconds. Check the returned handle's `Failed` and `FailureReason`. Verify `Failed == false` plus an `ActionEvent` Started result or a State-level action-start trace, then inspect actual visible motion.
 
-- **The name did not match any authored entry.** Matching is case-insensitive and treats spaces, dashes, and underscores as equivalent, but an unmatched name still fails:
+## An action runs but nothing moves
 
-  ```text
-  PlayAction('<name>') — no matching action in set '<set display name>'.
-  ```
+Open **Live > Last Action Request**. An accepted action can finish its lifecycle at imperceptible weight. Its peak weight uses config **Action Strength**, entry **Target Weight**, the normalized caller multiplier, and **Blend Easing**.
 
-  (`ConvaiBodyAnimationController.cs:472-473`.) Compare the exact name your code or a backend action sends against the `Action Name` and `Aliases` fields authored in the set.
-
-`PlayAction` never returns `null` in either case — check `handle.Failed` and read `handle.FailureReason` instead of expecting an exception.
+A zero config or entry weight suppresses visible motion. `ActionPlayOptions.WeightMultiplier <= 0` means unset and normalizes to 1; a small positive multiplier can make the action too weak. A curve ending near zero can suppress the final weight too. The SDK warns once per affected action and names the likely setting. Fix the setting deliberately, then verify the live Action layer and the character.
 
 ## Pointing looks wrong
 
-`ConvaiBodyAnimationController.PointAt` fails outright (`handle.Failed`) only when the target is `null`, the runtime is not built, or the set authors no pointing clips at all — each reports its own `FailureReason` (`ConvaiBodyAnimationController.cs:594-667`).
+Pointing selects the authored direction closest to the target; it does not continuously synthesize every possible arm angle. Add directional clips covering your scene and inspect the set's **Hold Normalized Time**. A missing target, missing content, or unbuilt runtime can fail the handle outright; read its reason before changing clip direction.
 
-A pointing gesture that plays but aims at the wrong spot is not a failure — it is expected behavior from how directions are selected. Each `PointingEntry` authors a fixed character-local yaw and pitch, and `PointAt` always plays whichever authored entry is angularly closest to the requested direction; it does not blend or procedurally aim between entries (`PointingEntry.cs:8-12,84-106`). A set with only a few authored directions snaps to the nearest one, which can be visibly off for a target well outside any authored angle. Author more directional pointing clips covering the range of angles your scene actually needs.
+## Choose diagnostic detail
+
+Set **Diagnostics > Diagnostic Detail** (`TraceVerbosity` in code) to State for lifecycle and transitions, Detail for selection decisions, or Firehose for a short per-tick investigation. Off suppresses routine trace only; warnings and errors still appear. Return to the usual level after collecting the needed evidence.
 
 ## Next steps
 
 {% content-ref url="play-actions-and-gestures.md" %}
 [Play actions and gestures](play-actions-and-gestures.md)
 {% endcontent-ref %}
-
 {% content-ref url="config-reference.md" %}
 [Body animation config reference](config-reference.md)
-{% endcontent-ref %}
-
-{% content-ref url="../../overview/release-notes.md" %}
-[Release notes](../../overview/release-notes.md)
 {% endcontent-ref %}

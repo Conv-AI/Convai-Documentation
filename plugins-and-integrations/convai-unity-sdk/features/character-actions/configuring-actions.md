@@ -3,7 +3,7 @@ title: Configure character actions
 description: >-
   Configure which actions, objects, and characters a Convai NPC can use, then
   update those affordances during an active session.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 `ConvaiActionConfigSource` is the Inspector authoring surface for everything Convai needs to know about your NPC's action capabilities at connect time: which actions to allow, which scene objects the backend can reference, which characters are targetable, and which object has the NPC's initial attention. Add it to any `GameObject` that already has `ConvaiCharacter` — or use the [Actions Editor](actions-editor.md), which authors the same component through a dedicated window. Use `ConvaiActionConfigPatch` to change those affordances after the session has already started.
@@ -16,20 +16,20 @@ last_reviewed: "4.5.0"
 | **Namespace**   | `Convai.Runtime.Components`                                      |
 | **Constraints** | `DisallowMultipleComponent`, `RequireComponent(ConvaiCharacter)` |
 
-The component has these Inspector sections:
+The **Convai Actions** Inspector is a summary card, with computed counts, action summaries, shortcuts, and behavior-host notices. Author the lists in the Actions Editor:
 
 | Section                   | Purpose                                                         |
 | ------------------------- | --------------------------------------------------------------- |
-| **Action Definitions**    | Reusable Action Sets merged with inline definitions that map backend action names to executor components |
-| **Actionable Objects**    | Scene objects the backend may reference as action targets       |
-| **Actionable Characters** | Other characters the backend may reference as action targets    |
-| **Initial Attention**     | The object name the NPC focuses on at the start of each session |
+| **Actions** | Inline definitions and assigned Action Sets; bind each action to an executor |
+| **Scene Knowledge → Known Objects** | Object names, descriptions, and local scene bindings |
+| **Scene Knowledge → Known Characters** | Character names, bios, and local scene bindings |
+| **Scene Knowledge → Initial Attention** | Initial object focus |
 
-Two further settings — **Actions Are Run By** and the action behaviors object — are authored in the Actions Editor's **Character Settings** tab rather than shown with a `Header` in the raw Inspector; see [Where action behaviors live](#where-action-behaviors-live) below.
+**Actions Are Run By** is in **Character Settings**; the behavior host is managed through the **Convai Actions** summary Inspector; see [Where action behaviors live](#where-action-behaviors-live) below.
 
 ## Action definitions
 
-Each entry in the **Action Definitions** list binds one backend action name to a Unity executor component. Definitions come from two sources, merged in this order: reusable **Action Sets** (`ConvaiActionSet` assets, assigned in the **Action Sets** list) first, then the **inline definitions** list. An inline definition always wins a name collision against any Action Set; an earlier Action Set wins against a later one.
+Each entry in the **Action Definitions** list binds one backend action name to a Unity executor component. Definitions are considered in order: inline definitions first, then assigned **Action Sets** in list order. After the executable-definition filter, the first eligible definition for a normalized name wins.
 
 ### Action definition fields
 
@@ -39,10 +39,15 @@ Each entry in the **Action Definitions** list binds one backend action name to a
 | `Description`       | `string`                        | Short sentence sent to Convai so the character understands what the action does and when to use it.     |
 | `TargetRequirement` | `ConvaiActionTargetRequirement` | Whether this action requires a target and what kind.                                                    |
 | `Executor`          | `MonoBehaviour`                 | The component that performs the behavior. Must implement `IConvaiActionExecutor`.                       |
-| `TimeoutSeconds`    | `float`                          | Maximum seconds the executor may run before it is automatically canceled. `0` = no timeout.             |
+| `TimeoutSeconds`    | `float`                          | Maximum seconds the executor may run before it is automatically canceled. A nonpositive value uses the runner's **Action Time Limit (Seconds)**, 60 seconds by default. Only a zero runner limit removes that fallback.             |
 | `FailurePolicyOverride` | `ConvaiActionFailurePolicyOverride` | Per-action override of the dispatcher's batch failure policy. Defaults to `UseDispatcherDefault`. |
 | `AnswerDelivery`    | `ConvaiActionAnswerDelivery`    | What the character does with an answer this action returns (see [Action executors](action-executors.md)). Only meaningful for an executor that returns `ConvaiActionExecutionResult.Answered`. |
 | `Enabled`           | `bool`                          | Whether Convai is told about this action. Defaults to `true`. A disabled action is excluded from the connect payload and any mid-session re-sync; a stale backend command for it is reported as unhandled rather than executed. |
+| `Parameters` | `List<ConvaiActionParameterDefinition>` | Typed parameter rows in **Advanced**. |
+| `ExecutorTypeHint` | `string` | Executor type hint used when rebinding reusable definitions. |
+| `WaitForBotSpeech` | `bool` | **Wait For Speech To Finish** in **Advanced**; the gate can release on speech start despite its label. |
+| `DelayAfterBotSpeechSeconds` | `float` | **Delay After Speech (Seconds)** after the gate releases. |
+| `Category` | `string` | Category used to group actions in the editor. |
 
 ### Target requirement values
 
@@ -55,13 +60,13 @@ Each entry in the **Action Definitions** list binds one backend action name to a
 
 One executor component can serve multiple action definitions. Add separate entries with different `ActionName` values but the same `Executor` reference when the same behavior applies to multiple backend commands.
 
-Duplicate `ActionName` values in the same list are silently deduplicated at runtime. The first entry is kept; subsequent duplicates are discarded with a console warning. Names are compared case-insensitively.
+Duplicate normalized names are deduplicated with a Console warning. The first eligible definition wins; an unusable definition filtered out earlier does not shadow a runnable one.
 
 ## Where action behaviors live
 
 By default, action executor components sit on the same `GameObject` as `ConvaiCharacter` — the setup flows and every sample use this arrangement, and it works for any number of behaviors. A character that uses much of the shipped [Action executors](action-executors.md) library can end up with twenty or more components, at which point moving them to a child object keeps the character's own Inspector readable.
 
-To adopt a child layout, assign the child `Transform` to the action behaviors object field on `ConvaiActionConfigSource` (authored in the Actions Editor's **Character Settings** tab). Convai finds behaviors either way — both layouts, and a character with some behaviors in each place, run identically, because behaviors are located by searching the whole character hierarchy.
+Use the behavior-host strip and its context menu in the **Convai Actions** Inspector to move executors or select the host. At six or more behaviors on the root, the summary offers to create a child host. Convai finds behaviors either way — both layouts, and a character with some behaviors in each place, run identically, because behaviors are located by searching the whole character hierarchy.
 
 The same **Character Settings** tab also carries **Actions Are Run By** (`ConvaiActionExecutionMode`): `Convai Action Runner` (default) tells the SDK's setup checks to expect a `ConvaiActionDispatcher` on this character; `Custom Code` tells them your own script handles `ConvaiCharacter.OnActionsReceived` or `ConvaiManager.Events.OnCharacterActionReceived` instead. The setting is declarative — it changes nothing at runtime — so it exists only to tell the setup checks whether a missing dispatcher is a mistake or your intention.
 
@@ -109,6 +114,12 @@ Each entry in **Actionable Characters** registers another NPC as a valid target 
 
 Both `ConvaiActionObjectDefinition` and `ConvaiActionCharacterDefinition` also expose a runtime `Available` flag, consulted by target resolution and never sent to the backend — see [Update character actions at runtime](update-actions-at-runtime.md) for how a mid-session patch withdraws or restores a target.
 
+## Targets placed in the scene
+
+A `ConvaiActionTarget` registers a scene binding independently of the inline Known Objects list. Its optional `MetadataSource` reads the World Object name and description. [Scene Auto Tagger](../scene-metadata/scene-auto-tagger.md) creates this binding for generated targets while preserving manually authored existing targets. [Object groups and standing positions](../scene-metadata/group-objects-and-standing-positions.md) explain how logical targets project to physical members and movement destinations.
+
+Use [runtime registration and availability](register-targets-from-code.md) for spawned or withdrawn targets.
+
 ## Initial attention
 
 The **Initial Attention** field accepts a single object name. When the session starts, Convai treats that object as the NPC's current focus — it pre-seeds reference grounding before the first player turn.
@@ -124,6 +135,8 @@ The Inspector action configuration is sent to Convai once at session start and c
 {% hint style="warning" %}
 Changes made to `ConvaiActionConfigSource` while in Play Mode do not take effect until you end the session and reconnect.
 {% endhint %}
+
+In a 5.0 group conversation, the client builds action configuration for each member and omits the shared top-level action configuration. A member excludes itself from its actionable characters. Service-side fallback behavior when a member has no usable actions is not established by this client configuration.
 
 ## Dynamic configuration at connect time
 
@@ -160,7 +173,7 @@ public sealed class DynamicActionSetup : MonoBehaviour
         {
             ActionConfigOverride = new ConvaiActionConfig
             {
-                Actions = new List<string> { "Walk To", "Pick Up" },
+                Actions = new List<string> { "Walk To" },
                 Objects = new List<ConvaiActionObjectDefinition>
                 {
                     new() { Name = "Helmet", Description = "Yellow hard hat on the equipment shelf" },

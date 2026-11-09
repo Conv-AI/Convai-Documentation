@@ -1,95 +1,71 @@
 ---
 title: Troubleshoot scene metadata
-description: Fix scene metadata problems including empty payloads, missing collection logs, dependency injection failures, and AI characters ignoring scene objects.
-last_reviewed: "4.5.0"
+description: Diagnose missing objects, logical-group filtering, runtime updates, conversation targeting, and oversized scene messages using local evidence.
+last_reviewed: "5.0.0-preview"
 ---
 
-Most Scene Metadata problems fall into one of three categories: the payload was never sent, the payload was sent but objects are excluded, or the descriptions are too vague for the AI to use effectively.
+Check the object, the projected payload, and the active conversation route separately. A valid registry entry proves neither a local send nor the character's response.
 
-## First-line investigation
+## Inspect objects and collection
 
-Enable **Log Statistics** on `ConvaiSceneMetadataCollector` (it is on by default) and check the Console after entering Play Mode. A successful collection logs a debug entry similar to:
+For collector logs, enable **Log Statistics** and set **Global Log Level** to **Debug** in **Convai > Settings**. The default Info level hides both the collected and sent messages. A missing Debug line alone does not prove collection failed.
 
-```text
-[ConvaiSceneMetadataCollector] Collected N metadata objects in X.XXXXs. Registry stats: Y total, Z valid, W invalid
-```
+`Collected N metadata objects` reports assembly. `Sent N metadata objects to RTVI service` reports an accepted local send. Neither is a backend acknowledgement. Use `GetCurrentMetadata()` to inspect the candidate list and `GetMetadataCount()` to inspect its count without sending.
 
-If this log does not appear, collection did not run. If it appears with `Collected 0 metadata objects`, the payload is empty.
-
-Call `ValidateAllMetadata()` from a temporary debug script to get a per-object breakdown:
+To validate from a script, use an assigned collector reference and an explicit Unity null check:
 
 ```csharp
-void Start()
+using Convai.Runtime.SceneMetadata;
+using UnityEngine;
+
+public class MetadataAudit : MonoBehaviour
 {
-    FindObjectOfType<ConvaiSceneMetadataCollector>()?.ValidateAllMetadata();
+    [SerializeField] private ConvaiSceneMetadataCollector collector;
+
+    [ContextMenu("Validate Scene Metadata")]
+    private void ValidateMetadata()
+    {
+        if (collector != null)
+            collector.ValidateAllMetadata();
+    }
 }
 ```
 
-## Symptom reference
+## Resolve missing or stale objects
 
-| Symptom                                       | Likely Cause                                                         | Fix                                                                                            | Verify |
-| --------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------ |
-| No collection log in Console                  | `Collect On Start` disabled and no manual call                       | Enable **Collect On Start** or call `CollectAndSendSceneMetadata()` after the session connects | Re-enter Play Mode and confirm the `[ConvaiSceneMetadataCollector] Collected N metadata objects...` entry appears in the Console |
-| `"Dependencies not injected"` error           | `ConvaiSceneMetadataCollector` is in a scene without `ConvaiManager` | Add `ConvaiManager` to the scene; the collector resolves it automatically                      | The error no longer appears on entering Play Mode |
-| `Collected 0 metadata objects` in the log    | All objects excluded from the payload                                | See [Empty payload](#empty-payload) below                                                      | `GetMetadataCount()` returns a value greater than `0` |
-| Object Name validation warning in Editor      | Name is empty or exceeds 50 characters                               | Set a non-empty name under 50 characters                                                       | The Console warning clears after the next `OnValidate` pass (deselect and reselect the GameObject) |
-| AI ignores objects despite confirmed send     | Descriptions are absent or too vague                                 | See [Improving descriptions](#improving-descriptions) below                                    | Ask the character a question that requires the rewritten detail and confirm it appears in the reply |
-| Object present in registry but not in payload | `Include In Metadata` is unchecked, or component is disabled         | Check the field in Inspector; re-enable the component if needed                                | The object appears in `GetValidMetadata()` or the next `ValidateAllMetadata()` pass |
-| `Is Registered` shows `false` in Inspector    | Component was added but `OnEnable` has not fired                     | Ensure the GameObject and component are both enabled                                           | `Is Registered` shows `true` in Play Mode |
-| Tracked property never updates on the character | **Source Member Name** does not match a property, field, or zero-argument method on **Source Component** | Fix the member name; a mismatch fails silently and the entry keeps its last known value instead of erroring | The character's response reflects the new value within one 0.25-second poll interval |
-| Static metadata edit does not reach a connected character | The session is not connected, or the character is not currently in a conversation | Live re-sync only flushes while the character is connected and in conversation — reconnect or wait for the next connect-time send | Ask the character about the edited object after reconnecting and confirm the updated text is used |
+| Symptom | Check and action |
+| --- | --- |
+| Object is absent from the registry | Enable its GameObject and World Object component. Inspect the **Live**/**Inactive** status chip or `IsRegistered` in code. |
+| Registered object is absent from the payload | Check nonblank name, **Include In Metadata**, logical-group membership, and active group members. |
+| Object with an action target is missing from the payload | An action target does not exclude an object. Check the name, **Include In Metadata**, and logical-group conditions in the row above. |
+| Statistics show more valid objects than the payload | Statistics do not apply logical-group projection; inspect `GetValidMetadata()` or `GetCurrentMetadata()` instead. |
+| Name or description gets a warning | Stay within 64/320 UTF-16 code units. Oversized text warns but is not automatically excluded or truncated when authored manually. |
+| Play-mode Inspector edit does not update the character | Use the public properties in script or an intentional manual recollection. `OnValidate` is not the live setter path. |
+| Renaming loses a pushed tracked value | Renaming removes old keys and resets the cache. Reapply the value or provide a runtime source. |
+| Spatial facts are absent | Enable **Include Spatial Context** and verify that the character is in a conversation, the object is within 30 metres, and it survives the 24-fact selection. |
+| A tracked change does not make every group member speak | Group changes update values silently and send one scene event for service arbitration. |
 
-## Empty payload
+## Resolve delivery failures
 
-When `Collected 0 metadata objects` appears, check these in order:
+In a multi-character room, a character's automatic metadata waits while it is not the current conversation target. Address that character and wait for the confirmed target change. The collector sends to the current target, not every character.
 
-**1. Is any `ConvaiObjectMetadata` component enabled?** Disabled components do not register. Select a target GameObject and check the component toggle in the Inspector.
+If the Console warns that a data message exceeds **15,360 bytes**, reduce the serialized payload: remove irrelevant objects, shorten text, or use logical groups for genuine duplicate copies. The limit includes the complete message envelope and UTF-8 encoding. A list that passes individual 64/320 authoring limits may still exceed it. Collection success does not bypass this refusal.
 
-**2. Is `Include In Metadata` checked?** This field is `true` by default, but runtime code may have set it to `false`. Check `ConvaiMetadataRegistry.GetStatistics()` for a count of excluded objects.
+With one registered character, a new room sends its scene description in the connect request, which is not subject to this limit, so the warning there comes from a later update, a rejoin after a dropped connection, or a collector send. With more than one registered character, the whole scene description goes in a data message, so trim descriptions or turn off **Include In Metadata** on decorative objects. A refused scene description update leaves the room with the list it had, and the SDK does not retry that update.
 
-**3. Is `Object Name` non-empty?** Objects with empty names pass `IsRegistered` but fail `IsValid` and are excluded from the send. Call `ValidateAllMetadata()` to identify these.
+If dependencies are missing, ensure an active `ConvaiManager` exists. Wait on `ConvaiManager.IsConnected` or a connection event before testing readiness once. Repeatedly polling `IsReadyToSendMetadata()` while disconnected produces warnings on every call.
 
-```csharp
-// Debug statistics breakdown
-var stats = ConvaiMetadataRegistry.GetStatistics();
-foreach (var kv in stats)
-    Debug.Log($"{kv.Key}: {kv.Value}");
-```
+An empty list is not sent while the room holds no list. Once the room holds one, a later empty list replaces it. Inspect **Include In Metadata** and group filters before assuming an empty registry projection is an error.
 
-## Improving descriptions
+## Diagnose Scene Auto Tagger separately
 
-The AI uses the `Object Description` field as ground truth. Vague descriptions produce vague responses.
-
-| Avoid                   | Use instead                                                                                                   |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `"A fire extinguisher"` | `"Red ABC dry-chemical fire extinguisher mounted at eye level on the south wall, next to the emergency exit"` |
-| `"Table"`               | `"Steel examination table in the center of the lab, 90 cm high, with adjustable leg rests"`                   |
-| `"Door"`                | `"Heavy steel pressure door with yellow warning stripe, leading to the cooling chamber"`                      |
-
-Guidelines:
-
-* Include location relative to landmarks or room features
-* Include visual identifiers — color, size, material
-* Include function or purpose where relevant
-* Stay under 200 characters
-
-## Decision tree
-
-Use this tree when the AI does not respond to scene objects:
-
-```text
-Is IsReadyToSendMetadata() returning true?
-├── No → Is ConvaiManager in the scene? Is the room connected?
-│         Fix: Add ConvaiManager, ensure session reaches Connected state
-└── Yes → Is GetMetadataCount() > 0?
-          ├── No → Run ValidateAllMetadata(). Check Include In Metadata and Object Name fields
-          └── Yes → Are descriptions factual and specific?
-                    ├── No → Rewrite with location and key attributes
-                    └── Yes → Check Convai dashboard character settings
-```
+**Core unavailable** concerns the native authoring library, not runtime object registration. **Vision ready** checks local credentials and native loading; it does not prove service authorization or customer release readiness. Follow the [Scene Auto Tagger window reference](scene-auto-tagger-window-reference.md) and preserve the reported failure category.
 
 ## Next steps
 
 {% content-ref url="scripting-api-reference.md" %}
 [Scene metadata scripting API](scripting-api-reference.md)
+{% endcontent-ref %}
+{% content-ref url="group-objects-and-standing-positions.md" %}
+[Group objects and add standing positions](group-objects-and-standing-positions.md)
 {% endcontent-ref %}

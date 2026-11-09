@@ -1,6 +1,6 @@
 ---
 title: Settings panel
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 description: >-
   Add a runtime settings panel so users can adjust microphone, transcript
   visibility, and notification preferences, or access the same settings
@@ -13,25 +13,25 @@ The settings panel is an optional scene-level UI that lets users adjust key conv
 
 | Setting                 | Description                                                                              |
 | ----------------------- | ---------------------------------------------------------------------------------------- |
-| **Player Display Name** | The name shown in transcript bubbles for the player                                      |
+| **Player Display Name** | The editable player name preference; the panel can display an effective name supplied by the player identity                                      |
 | **Transcript**          | Enable or disable the transcript UI entirely                                             |
 | **Notifications**       | Enable or disable in-scene notification popups                                           |
 | **Microphone**          | Select the active input device from available options                                    |
-| **Conversation Mode**   | Switch between Hands Free and Push to Talk (shown only when a room connection is active) |
+| **Conversation Mode**   | Switch between Hands Free and Push to Talk (shown when a room connection service is available) |
 
 Changes apply when the user clicks **Save**. The panel closes automatically on save. Clicking **Close** discards unsaved changes.
 
-The **Player Display Name** field initializes from the project-wide `ConvaiSettings.DefaultPlayerDisplayName` setting, configured in the **Runtime Defaults** section of **Convai → Settings**. Once a player saves their own value, the saved override takes precedence on future opens.
+The **Player Display Name** field initializes from the project-wide `ConvaiSettings.DefaultPlayerDisplayName` setting, configured in the **Runtime Defaults** section of **Convai → Settings**. Saved runtime overrides take precedence over this default. The built-in panel also reads the effective `ConvaiManager.Player.PlayerName`, so an identity provider can affect the name it displays.
 
 ## Add the settings panel to your scene
 
 {% stepper %}
 {% step %}
-### Add the prefab to your Canvas
+### Add the prefab to your scene
 
 Drag `SettingsPanel_Landscape.prefab` into your scene. Find it at `Prefabs/SettingsPanel/SettingsPanel_Landscape.prefab` in the <code class="expression">space.vars.sdk_package_id</code> package. The prefab includes its own `Canvas` — do not nest it inside an existing Canvas.
 
-`SettingsPanel` auto-resolves all required services from `ConvaiManager` on `OnEnable`. No additional Inspector wiring is required for the basic setup.
+`SettingsPanel` resolves services from `ConvaiManager`. Ensure the manager is initialized and the scene has an `EventSystem` with the input module appropriate to your project. The prefab does not include an `EventSystem`.
 {% endstep %}
 
 {% step %}
@@ -44,15 +44,19 @@ using Convai.Runtime.Components;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(Button))]
 public class SettingsButton : MonoBehaviour
 {
-    private void Start()
+    private Button button;
+    private void Awake() => button = GetComponent<Button>();
+    private void OnEnable() => button.onClick.AddListener(OpenSettings);
+    private void OnDisable() => button.onClick.RemoveListener(OpenSettings);
+
+    private void OpenSettings()
     {
-        GetComponent<Button>().onClick.AddListener(() =>
-        {
-            if (ConvaiManager.ActiveManager.TryGetSettingsPanelController(out var c))
-                c.Open();
-        });
+        var manager = ConvaiManager.ActiveManager;
+        if (manager != null && manager.TryGetSettingsPanelController(out var controller))
+            controller.Open();
     }
 }
 ```
@@ -61,7 +65,7 @@ public class SettingsButton : MonoBehaviour
 {% step %}
 ### Run your scene
 
-Click the trigger. The panel fades in (default 0.5s). Adjust settings and click **Save** — the panel fades out and changes apply immediately. The microphone dropdown populates from available system devices; the conversation mode dropdown appears only while a room connection is active.
+Click the trigger. The shipped prefab shows and hides instantly because it has no `CanvasFader`. If you add a `CanvasFader`, `fadeDuration` controls its transition, with a script default of `0.5` seconds. Adjust a toggle and click **Save**; reopen the panel to confirm the saved value. The conversation-mode dropdown depends on the room service being available, not on an active connection.
 {% endstep %}
 {% endstepper %}
 
@@ -73,7 +77,7 @@ When the panel opens correctly, the microphone dropdown is populated, the player
 
 | Field                       | Description                                                                                  |
 | --------------------------- | -------------------------------------------------------------------------------------------- |
-| `fadeDuration`              | Seconds for fade in/out animation (default `0.5`)                                            |
+| `fadeDuration`              | Seconds for transitions when a `CanvasFader` is present (default `0.5`)                                            |
 | `voiceInputDropdown`        | `TMP_Dropdown` listing available microphone devices                                          |
 | `conversationModeDropdown`  | `TMP_Dropdown` for Hands Free / Push to Talk                                                 |
 | `playerNameInputField`      | `TMP_InputField` for the player's display name                                               |
@@ -96,87 +100,36 @@ ConvaiManager.ActiveManager.TryGetSettingsPanelController(out var controller);
 | Member                                 | Description                                                               |
 | -------------------------------------- | ------------------------------------------------------------------------- |
 | `bool IsOpen`                          | `true` when the panel is currently visible                                |
-| `void Open()`                          | Show the panel with fade animation                                        |
-| `void Close()`                         | Hide the panel with fade animation                                        |
+| `void Open()`                          | Request that the panel is visible                                        |
+| `void Close()`                         | Request that the panel is hidden                                        |
 | `void Toggle()`                        | Open if closed, close if open                                             |
 | `event Action<bool> VisibilityChanged` | Fires when visibility changes. `bool` parameter is the new `IsOpen` value |
 
-## Usage examples
+## Open the panel from the sample UI
 
-### Safety training — pause menu integration
+Both shipped chat prefabs include `ConvaiSettingsClickArea`. Clicking that graphic calls `IConvaiSettingsPanelController.Open()`. Keep the settings panel in the scene so that request has a view to display.
 
-A safety training simulation exposes the settings panel through a pause menu and re-shows the menu when the panel closes:
+`OpenSettingsKey` defaults to `F10`, but a setting does not poll input by itself. The sample's `ConvaiSampleInteractionController` handles that shortcut. A custom scene must include the sample controller or supply its own input binding.
 
-```csharp
-using Convai.Runtime.Components;
-using Convai.Shared.Abstractions;
-using UnityEngine;
+## Test the selected microphone
 
-public class PauseMenu : MonoBehaviour
-{
-    [SerializeField] private GameObject _pauseMenuRoot;
-    private IConvaiSettingsPanelController _settingsController;
+The panel includes `MicrophoneTestController`. Press **Record**, speak, and press **Stop** to play the recorded audio. It also draws a waveform. The test supports a recording of up to 10 seconds.
 
-    private void Start()
-    {
-        ConvaiManager.ActiveManager.TryGetSettingsPanelController(out _settingsController);
-    }
+In a WebGL player it reports `Microphone test not supported on WebGL`. A session with microphone access disabled reports `Microphone Is Off In This Session` and does not request permission. Browser microphone troubleshooting is separate from this local test.
 
-    private void OnEnable()
-    {
-        if (_settingsController != null)
-            _settingsController.VisibilityChanged += OnPanelVisibilityChanged;
-    }
+## Defaults and saved overrides
 
-    private void OnDisable()
-    {
-        if (_settingsController != null)
-            _settingsController.VisibilityChanged -= OnPanelVisibilityChanged;
-    }
+Project runtime defaults enable transcript presentation and disable notifications. The microphone selection starts with the system default. Character audio volume is a project setting, not one of the four fields in the runtime settings snapshot or panel patch.
 
-    public void OpenSettings()
-    {
-        _pauseMenuRoot.SetActive(false);
-        _settingsController?.Open();
-    }
-
-    private void OnPanelVisibilityChanged(bool isOpen)
-    {
-        if (!isOpen)
-            _pauseMenuRoot.SetActive(true);
-    }
-}
-```
-
-At runtime, opening settings hides the pause menu. When the trainee saves and the panel closes, the pause menu reappears automatically.
-
-### Corporate onboarding — pre-populate settings from authentication
-
-A corporate onboarding experience pre-fills the player name from the authenticated user's profile and enables transcript before the first session:
-
-```csharp
-public void ApplyAuthenticatedProfile(string userName, bool showTranscripts)
-{
-    if (ConvaiManager.ActiveManager.TryGetRuntimeSettingsService(out var settings))
-    {
-        settings.Apply(new ConvaiRuntimeSettingsPatch
-        {
-            PlayerDisplayName = userName,
-            TranscriptEnabled = showTranscripts
-        });
-    }
-}
-```
-
-At runtime, the trainee's real name appears in transcript bubbles immediately, and transcript display is pre-configured to match the organization's preference.
+The service stores changed preferences as overrides in `PlayerPrefs` under `convai.runtime.settings.v1.*`. `ResetToDefaults()` clears those overrides and reads project defaults again. See [Runtime settings API](runtime-settings-api.md) for the four supported fields and change events.
 
 ## Troubleshooting
 
 | Symptom                           | Likely cause                                        | Fix                                                                                                                                     |
 | --------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Panel does not fade in            | `CanvasFader` missing from the prefab               | `SettingsPanel.Awake()` calls `EnsureFadeComponents()`, which adds a missing `CanvasGroup` automatically but only looks up an existing `CanvasFader` — it does not add one. If `CanvasFader` is missing, the panel falls back to an instant, non-animated show/hide; restore the component on the prefab. |
+| Panel does not fade in            | `CanvasFader` missing from the prefab               | `SettingsPanel.Awake()` calls `EnsureFadeComponents()`, which adds a missing `CanvasGroup` automatically but only looks up an existing `CanvasFader` — it does not add one. If `CanvasFader` is missing, the panel falls back to an instant, non-animated show/hide; add the component to a project-owned prefab if an animated transition is required. |
 | Microphone dropdown is empty      | No microphone devices detected or permission denied | Verify device is connected; check Player Settings for microphone permissions on mobile platforms                                        |
-| Conversation mode dropdown hidden | No room connection active                           | Expected — the dropdown only appears while `IConvaiRoomConnectionService` is available                                                  |
+| Conversation mode dropdown hidden | No room service available                           | Expected — the dropdown only appears while `IConvaiRoomConnectionService` is available                                                  |
 | Settings not persisted after save | Settings service unavailable at save time           | Ensure `ConvaiManager` is initialized before the panel opens; check `ConvaiManager.IsBootstrapped`                                      |
 
 ## Next steps

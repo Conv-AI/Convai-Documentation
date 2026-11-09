@@ -1,7 +1,7 @@
 ---
 title: How embodiment works
 description: Understand how Convai builds each character's embodiment infrastructure at runtime and the fixed order in which modules run every frame.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Every embodiment module a character carries shares one runtime object per character, and every frame Convai runs those modules in a fixed order so two modules never write the same bone or blendshape in conflicting ways. This page describes what happens at runtime: what appears in the hierarchy when a character starts running, the order modules tick in, and why writes to the Animator and the face never collide. For the composition-root model behind these mechanics, see [Character embodiment](../core-concepts/character-embodiment.md).
@@ -10,9 +10,9 @@ Every embodiment module a character carries shares one runtime object per charac
 
 ## What appears in the hierarchy when a character starts running
 
-The first embodiment module that resolves itself on a character creates an `EmbodimentContext` on that character's root, silently. You never add one yourself — it carries `[AddComponentMenu("")]`, so it does not appear in the Add Component menu — but once created it is an ordinary component: select it in the hierarchy and you can inspect what it resolved.
+The first embodiment module that resolves itself on a character creates an `EmbodimentContext` on that character's root, including in Edit mode. You never add one yourself — it carries `[AddComponentMenu("")]`, so it does not appear in the Add Component menu — but once created it is an ordinary component: select it in the hierarchy and you can inspect what it resolved.
 
-The context then provisions the infrastructure modules share, the first time a module needs each piece:
+In Play mode, the context provisions the infrastructure modules share when first needed. In Edit mode, **Set Up This Character** or **Set Up Rig Now** can add the rig binding explicitly:
 
 | Component | What it does | How you see it |
 | --- | --- | --- |
@@ -20,6 +20,8 @@ The context then provisions the infrastructure modules share, the first time a m
 | `AnimatorConductor` | The single writer of Animator parameters; modules submit named parameter writes through it instead of calling `Animator.SetFloat` directly. | Hidden (`[AddComponentMenu("")]`) — Convai adds this for you. |
 | `EmbodimentTickScheduler` | Runs every registered module through the tick order described below. | Hidden (`[AddComponentMenu("")]`) — Convai adds this for you. |
 | `FacialBlendshapeCompositorHost` | The single writer of facial blendshapes; composites every module's contribution into one set of values. | Hidden (`[AddComponentMenu("")]`) — Convai adds this for you. |
+
+Other visible helpers can appear as needed: `ConvaiConversationFlowController`, `ConvaiTravelIntent`, `ConvaiLipSyncSpeechEnergyAdapter`, `MoodCommandHandlerAdapter` (shown as **Mood Requests**), and `GazeAttentionRequests`. The context Inspector is titled **Character Features**, with **Features**, **Rig**, and **Advanced** sections; **Face Blending Override** is under **Advanced**.
 
 Convai deliberately does not hide these components from the hierarchy, even the ones absent from the Add Component menu: a component you cannot select and inspect is a component you cannot debug when a character's behavior looks wrong.
 
@@ -29,9 +31,9 @@ Convai deliberately does not hide these components from the hierarchy, even the 
 
 A module with per-frame work registers with the context as an `IEmbodimentTickable` instead of relying on Unity's own `Update` order. The scheduler runs every registered tickable through three phases, always in this order: `Cognition`, then `Expression`, then `Finalize`.
 
-In practice, this means Conversation Flow, Gaze, and Emotion sample their inputs and update their readings during `Cognition`, before any module writes to the rig. By the time Gaze's or Body Animation's actuator runs in `Expression`, the dialogue state it reads is already current for that frame — not a frame behind. `Finalize` runs last so the facial compositor and the Animator conductor apply their writes only after every module has had a chance to contribute.
+Conversation Flow, Gaze, Emotion, and Body Language register for `Cognition`; Body Animation registers for `Expression`. The shipped modules do not use `Finalize`. Bone and face writes happen separately in `LateUpdate`: Body Language at execution order `19300`, Gaze at `19400`, and the facial compositor at `20000`. The Animator conductor applies parameter writes when its write methods are called; it does not defer them to `Finalize`.
 
-Within a phase, a module declares its own position with a `TickOrder` value — lower runs first — rather than depending on where it sits in the hierarchy or when it happened to enable. Reparenting a `GameObject` or adding a module in a different order cannot change which one writes to a shared bone first.
+Within a phase, a module declares its own position with a `TickOrder` value — lower runs first — rather than depending on where it sits in the hierarchy or when it happened to enable. Equal `TickOrder` values keep registration order. These scheduler priorities are separate from the `LateUpdate` execution orders that apply the final bone and face output.
 
 ***
 

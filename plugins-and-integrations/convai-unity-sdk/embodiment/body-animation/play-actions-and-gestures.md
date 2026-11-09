@@ -1,7 +1,7 @@
 ---
 title: Play actions and gestures
 description: Play named actions, anchored actions, and pointing gestures on a Convai character from script, and read the handles each call returns.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Play a named action or gesture, walk a character to an anchor and perform an action there, or point at a target — all from script, through `ConvaiBodyAnimationController` and the handle each call returns. Use this page once Convai Body Animation is running on a character and its animation set authors the actions or pointing directions you want to trigger.
@@ -71,9 +71,11 @@ public sealed class WaveOnCue : MonoBehaviour
 
 Stop or interrupt the currently playing action from the controller directly with `StopAction()` (graceful, outro plays) or `StopActionImmediate(float blendOutSeconds = -1f)` (immediate cross-dissolve). `CurrentActionName` reads the name of the action playing now, empty when none.
 
-Backend-triggered gestures resolve through the same name/alias matching as `PlayAction`, so an action named `"pick_up"` in Convai's response triggers an entry named `"Pick Up"` or an alias `"pick-up"` with no extra wiring.
+Service-triggered gestures need an action authored with **Convai > Actions > Play Gesture**. It resolves the action's `gesture` argument, otherwise the behavior's **Default Gesture**, otherwise the action name. If the action declares `gesture` but receives no value, it plays nothing. **Hold Seconds** defaults to 8 and bounds hold-until-stopped gestures. See [Action executors](../../features/character-actions/action-executors.md).
 
 ***
+
+Visible action strength is config **Action Strength** × entry **Target Weight** × normalized caller `WeightMultiplier`, eased by **Blend Easing**. Config or entry weight 0 can let an action finish without visible motion. `WeightMultiplier <= 0` means unset and becomes 1; a small positive multiplier can still be too weak to see.
 
 ## Play an anchored action
 
@@ -102,7 +104,7 @@ public sealed class SitOnBench : MonoBehaviour
 | `PlayActionAt(Transform anchor, string actionNameOrAlias)` | Walk to `anchor`, align, and play. |
 | `PlayActionAt(Transform anchor, string actionNameOrAlias, ActionAnchorOptions anchorOptions, ActionPlayOptions playOptions = default)` | Same, with explicit approach/alignment tuning and action playback tweaks. The explicit `anchorOptions` overrides the action entry's own authored defaults. |
 
-`ActionAnchorOptions` has no public constructor for building one from script with custom values — its fields are set only through the Inspector, on the action entry's **Anchor Options** field in the animation set. Pass an existing authored instance to the overload only to reuse another entry's tuning; otherwise call the two-argument overload and let the entry's own authored defaults apply.
+`ActionAnchorOptions` has a public default constructor, but no public setters for custom values — its fields are set only through the Inspector, on the action entry's **Anchor Options** field in the animation set. Pass an existing authored instance to the overload only to reuse another entry's tuning; otherwise call the two-argument overload and let the entry's own authored defaults apply.
 
 The anchor's height is ignored for alignment — only its XZ position and yaw matter, so place anchors at the character's intended stand point, not at seat or prop height.
 
@@ -181,13 +183,13 @@ Stop the current pointing hold from the controller directly with `StopPointing()
 
 ## Face a direction and set the conversation anchor
 
-`FaceTowards(Vector3 worldDirection, string reason = "FaceTowards")` rotates the character to face a direction with the animated turn-in-place family — no `NavMeshAgent` required. It returns `false` when the request cannot be honored (feature disabled, clips missing, locomotion busy).
+`FaceTowards(Vector3 worldDirection, string reason = "FaceTowards")` rotates the character to face a direction with the animated turn-in-place family — no `NavMeshAgent` required. Enable **Enable Turn In Place** on the config (off by default) and author turn clips first. It returns `false` when the request cannot be honored (feature disabled, clips missing, locomotion busy).
 
 ```csharp
 bodyAnimation.FaceTowards(playerTransform.position - character.position, "greeting turn");
 ```
 
-`SetConversationAnchor(Transform anchor)` overrides the transform social spacing, proximity expressiveness, and ambient suppression treat as "the person this character is talking to" — the default resolution ladder ends at `Camera.main`, which is the wrong anchor for an XR rig, a second local player, or a cutscene camera with no `MainCamera` tag. `ClearConversationAnchor()` reverts to the default ladder.
+`SetConversationAnchor(Transform anchor)` overrides the transform social spacing, proximity expressiveness, and ambient suppression treat as "the person this character is talking to" — the default resolution ladder uses an explicit anchor, then `Camera.main`, then the first enabled Game-view camera (excluding render-texture/utility cameras), which is the wrong anchor for an XR rig, a second local player, or a cutscene camera with no `MainCamera` tag. `ClearConversationAnchor()` reverts to the default ladder.
 
 ***
 
@@ -204,6 +206,8 @@ bodyAnimation.FaceTowards(playerTransform.position - character.position, "greeti
 **Verify:** `handle.Failed` is `false` and `Completion` resolves once the gesture plays.
 
 ***
+
+If an action is accepted but invisible, open **Body Animation Editor > Live > Last Action Request** and inspect the warning naming the weak setting. A no-match warning lists available actions; a missing-set warning asks for an Animation Set. Play Gesture refusals also identify where the requested name came from.
 
 ## Next steps
 

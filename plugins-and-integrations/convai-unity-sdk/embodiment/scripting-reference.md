@@ -1,7 +1,7 @@
 ---
 title: Embodiment scripting reference
 description: Reference for the Convai embodiment scripting surface, including the character context, module base class, rig binding, and shared enums.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Reference for the public embodiment types a Unity script can use directly: `EmbodimentContext`, the `ConvaiCharacterModule<TProfile>` base class for a custom module, `StandardRigBinding`, `ConvaiTravelIntent`, `ModuleIds`, and the shared `CharacterDemeanor`, `StandardBone`, `StandardBlendshape`, and `RigConvention` enums. Cross-module contracts such as `IGazeSource` and `IEmotionStateSource` are internal and are not part of this surface — read each module's own controller reference instead.
@@ -21,6 +21,7 @@ Reference for the public embodiment types a Unity script can use directly: `Embo
 
 | Property | Type | Description |
 |---|---|---|
+| `FacialCompositionProfileOverride` | `ConvaiFacialCompositionProfile` | Read-only access to the Inspector override for facial composition. |
 | `CharacterRoot` | `Transform` | The character root transform. |
 | `EventHub` | `IEventHub` | Event bus for listening to domain events. |
 | `Logger` | `ILogger` | Logger for structured diagnostics. May be `null` if not yet injected. |
@@ -34,6 +35,14 @@ Reference for the public embodiment types a Unity script can use directly: `Embo
 | `RigBindingChanged` | `event Action<IStandardRigBinding>` | The semantic rig binding is rebuilt or replaced at runtime. Modules that cache bone or mesh references should resolve them again. |
 | `EmbodimentConfigurationChanged` | `event Action` | Embodiment-module configuration has been updated at runtime — for example, a preset was applied. |
 | `DependenciesPopulated` | `event Action` | Runtime-only dependencies such as `EventHub`, the tick scheduler, and the animator infrastructure become available. |
+
+### Configuration notifications
+
+| Method | Signature | Purpose |
+|---|---|---|
+| `NotifyRigBindingChanged` | `void NotifyRigBindingChanged(IStandardRigBinding rigBinding = null)` | Refreshes the cached binding when supplied and notifies modules to resolve rig references again. |
+| `NotifyEmbodimentConfigurationChanged` | `void NotifyEmbodimentConfigurationChanged()` | Notifies modules that their configuration changed. |
+| `Populate` | `void Populate(IEventHub eventHub, ILogger logger)` | Supplies SDK runtime dependencies. Normal character setup performs this wiring; application scripts do not need to call it. |
 
 ### Tickables
 
@@ -66,6 +75,12 @@ Reference for the public embodiment types a Unity script can use directly: `Embo
 
 `Awake`, `OnEnable`, `OnDisable`, and `OnDestroy` are `virtual` and handle context resolution and profile receiver registration in the base implementation — call the base method when overriding any of them.
 
+## Custom module registration and ticks
+
+`EmbodimentModuleAttribute` is in `Convai.Runtime.Embodiment`. Apply `[EmbodimentModule(id, displayName)]` to a concrete module and set its `Description`, `Absence`, and `Order` named arguments to make it discoverable in the Embodiment Editor, preset feature picker, and Character Features Inspector. The ID must match `ProfileModuleId` and remain stable after assets use it.
+
+`IEmbodimentTickable` is in `Convai.Runtime.Animation`. Implement `Phase`, optional `TickOrder` (default `0`), and `EmbodimentTick(float deltaTime)`, then register through the context. `EmbodimentTickPhase` defines `Cognition = 0`, `Expression = 1`, and `Finalize = 2`. Phase is read at registration; lower orders run first, with registration order breaking ties. The base module does not register your tick automatically. See [Create a custom embodiment module](custom-embodiment-module.md) for a complete lifecycle example.
+
 ## `StandardRigBinding`
 
 `StandardRigBinding` (`sealed class : MonoBehaviour, IStandardRigBinding`, `[AddComponentMenu("Convai/Embodiment/Character Rig")]`) inspects a character's hierarchy and resolves semantic bone and blendshape lookups against it. See [Character rig setup](character-rig-setup.md) for how detection and confidence work.
@@ -86,7 +101,7 @@ Reference for the public embodiment types a Unity script can use directly: `Embo
 |---|---|---|
 | `Rebuild` | `void Rebuild()` | Re-scans the hierarchy and rebuilds the bone and blendshape resolution tables. Call when outfits change, a mesh is replaced, or a convention override is applied at runtime. |
 | `TryGetBone` | `bool TryGetBone(StandardBone semantic, out Transform bone)` | Resolves a semantic bone. Logs a warning once per component lifetime when the bone cannot be found. |
-| `TryGetBlendshape` | `bool TryGetBlendshape(StandardBlendshape semantic, out SkinnedMeshRenderer mesh, out int blendshapeIndex)` | Resolves a semantic blendshape. Logs a warning once per component lifetime when it cannot be found. |
+| `TryGetBlendshape` | `bool TryGetBlendshape(StandardBlendshape semantic, out SkinnedMeshRenderer mesh, out int blendshapeIndex)` | Resolves a semantic blendshape. Participates in the batched missing-blendshape warning; the report is repeated when the missing set changes. |
 
 ## `ConvaiTravelIntent`
 

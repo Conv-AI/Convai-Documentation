@@ -1,7 +1,7 @@
 ---
 title: Emotion quick start
 description: Add the Convai Emotion component to a character, run its setup checklist, and see its face react to the conversation in Play mode.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Add `ConvaiEmotionController` to an existing Convai character, give it a character type, and confirm its face reacts to the conversation in Play mode. Use this page once you have a working `ConvaiCharacter` in your scene and want to see Emotion running before tuning any of its settings.
@@ -14,7 +14,7 @@ Add `ConvaiEmotionController` to an existing Convai character, give it a charact
 - A skinned facial mesh with blendshapes that follow a supported naming convention (ARKit, Reallusion CC3, Reallusion CC4 Extended, or MetaHuman). For any other convention, assign a `CustomRigConventionMap` first — see [Character rig setup](../character-rig-setup.md).
 
 {% hint style="info" %}
-Emotion does not need a `ConvaiEmotionProfile` asset to work. Adding the component alone runs it on the SDK's built-in defaults — running setup below gives the character a starting personality instead of leaving every setting at the default.
+Emotion does not need a `ConvaiEmotionProfile` asset to work. Adding the component alone uses a hidden Composed profile, with a `trust` resting mood at `0.45` — running setup below gives the character a starting personality instead of leaving every setting at the default.
 {% endhint %}
 
 ***
@@ -33,19 +33,19 @@ In the Hierarchy, select the `GameObject` that carries the `ConvaiCharacter` com
 
 In the Inspector, select **Add Component**, then **Convai > Embodiment > Emotion**. This adds `ConvaiEmotionController` to the character.
 
-Convai also adds the infrastructure the module needs — an `EmbodimentContext`, a `StandardRigBinding`, and the internal `MoodCommandHandlerAdapter` that lets Convai's response set this character's mood — automatically. You do not add any of these yourself.
+The SDK resolves `EmbodimentContext` on the owning `ConvaiCharacter`. At runtime it adds a `StandardRigBinding` if one is absent. The component also requires an internal mood adapter, but conversation-driven **Set Mood** and **React** actions use their action executors; you do not configure the adapter.
 {% endstep %}
 
 {% step %}
 ### Read the setup checklist
 
-The `ConvaiEmotionController` Inspector opens on a checklist: **Character**, **Face**, **Face Rig**, and **Personality**. Each row reports what it found; a row that cannot resolve names the fix.
+The `ConvaiEmotionController` Inspector opens on a checklist: **Character**, **Face**, **Face Rig**, and **Personality**. Each row reports what it found. A missing **Character** or a **Face** with no skinned blendshape mesh blocks setup; the disabled button reads **Resolve the blocked item above first**. An unrecognized **Face Rig** allows setup with limited expressions; assign a custom rig convention map for full coverage. A missing **Personality** is fixable by setup.
 {% endstep %}
 
 {% step %}
 ### Pick a character type and run setup
 
-Choose one of the four **Character Type** buttons — Composed, Warm, Energetic, or Reserved — then select **Set Up Emotions**. This creates a personality asset next to the character's prefab, assigns it to the **Personality** field, and reports what it found. Nothing else is required.
+Choose one of the four **Character Type** buttons — Composed, Warm, Energetic, or Reserved — then select **Set Up Emotions**. The picker starts on **Warm**. Setup creates `<Character>_Emotion.asset` beside a project-owned prefab, or under `Assets/Convai/Emotion/` for a scene-only or package-prefab character, and assigns it to **Personality**.
 {% endstep %}
 {% endstepper %}
 
@@ -59,7 +59,7 @@ Enter Play mode and talk to the character. As Convai's response arrives, the Ins
 **Expected result:** the character's expression changes as the conversation develops, then settles back toward its chosen character type's resting mood between turns. On Warm or Energetic, the face should read as visibly friendlier even when nothing is being said.
 {% endhint %}
 
-To preview an expression without talking to the character, use the Inspector's **Live** section: pick an emotion, set a strength, and select **Try It**; select **Stop** to release it.
+While still in Play mode, to try an expression without talking to the character, use the Inspector's **Live** section: pick an emotion, set a strength, and select **Try It**; select **Stop** to release it.
 
 ***
 
@@ -70,6 +70,8 @@ Talking to the character sent Convai an emotion signal with the reply. `ConvaiEm
 ***
 
 ## Troubleshooting
+
+Check **Advanced → Emotion detection** first. **Off** prevents conversation-driven emotion; select **Turn Emotions On** in the finding to use Responsive detection. Inspect **Advanced → Hold one expression** if the character stays on one feeling. See [Emotion Inspector](emotion-inspector.md) for the full surface.
 
 If the checklist reports **Face Rig** as unresolved, or nothing on the face moves once setup is complete, see [Troubleshoot emotion](troubleshooting-and-diagnostics.md).
 

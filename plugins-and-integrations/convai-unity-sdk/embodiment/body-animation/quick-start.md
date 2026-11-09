@@ -1,80 +1,58 @@
 ---
 title: Body animation quick start
-description: Add the Body Animation module to a Convai character with the shipped animation set and see idle and talk motion in Play mode.
-last_reviewed: "4.5.0"
+description: Set up a Humanoid character with the shipped body animation set, verify idle and talk motion, and create personal tuning only when you need it.
+last_reviewed: "5.0.0-preview"
 ---
 
-Add `ConvaiBodyAnimationController` to an existing Convai character and confirm that it idles and gestures on its own using the SDK's shipped animation content. Use this page once you have a working `ConvaiCharacter` in your scene and want to see body animation for the first time before authoring your own clips.
-
-***
+Add Body Animation to a working Convai character, use the shipped clips, and verify idle and talk motion in Play mode before authoring custom content.
 
 ## Prerequisites
 
-- A `ConvaiCharacter` in your scene that already connects and responds — complete [Validate your setup](../../getting-started/validate-your-setup.md) first if you have not.
-- A **Humanoid** rig with a valid `Animator` on the character. The component's own setup checklist checks for this before anything else.
+- A working `ConvaiCharacter` that connects and responds.
+- A valid Humanoid `Animator` on the character.
 
-***
-
-## Add the Body Animation module
+## Set up the character
 
 {% stepper %}
 {% step %}
-### Select the character
+### Add Body Animation
 
-In the Hierarchy, select the `GameObject` that carries the `ConvaiCharacter` component (or the child that carries its `Animator`).
+Select the character or its Animator-bearing child. Choose **Add Component > Convai > Embodiment > Body Animation**. The setup checklist inspects the rig, character, animation content, and optional movement.
+
+A missing assignment usually shows **Not Set Up**; a blocked rig shows **Action Needed** and **Resolve the blocked item above first**. Resolve blockers before setup.
 {% endstep %}
-
 {% step %}
-### Add the Body Animation component
+### Run setup
 
-In the Inspector, select **Add Component**, then **Convai > Embodiment > Body Animation**. This adds `ConvaiBodyAnimationController` to the character.
+Choose whether to enable **Include movement (walking, turns, stops)**, then select **Set Up This Character**. Setup creates a per-character `<Character>_BodyAnimation.asset` profile beside a project prefab, or under `Assets/Convai/BodyAnimation/` otherwise. It references the shipped Female animation set and leaves Config empty so runtime uses SDK defaults.
 
-The inspector opens in a **Not Set Up** state and shows a checklist: Humanoid rig, Convai Character, Animation content, and Movement. Movement is always optional — a character with no movement component still idles, talks, gestures, and points in place.
+Movement setup adds `ConvaiNavMeshLocomotion`; navigation still requires a baked NavMesh. Read the **Body Animation** result dialog and inspect the assignments.
 {% endstep %}
-
 {% step %}
-### Select "Set Up This Character"
+### Verify motion in Play mode
 
-Select the **Set Up This Character** button. This assigns the animation content the setup service finds in your project — normally the shipped `ConvaiBodyAnimationProfile_Female` — as one undo step. If you leave **Include movement** checked (the default), it also adds `ConvaiNavMeshLocomotion`.
+Enter Play mode and observe idle motion, then converse to test talk gestures. **Auto-Add Conversation Flow** is read from the assigned profile's Runtime section; without a profile it uses the controller's Advanced setting. The flow component is added at runtime.
 
-Convai also adds the shared infrastructure the module needs — an `EmbodimentContext` and a `StandardRigBinding` — automatically. You do not add these yourself. Because **Auto Create Conversation Flow** is enabled by default, Convai adds a [conversation flow](../conversation-flow/README.md) controller too, if the character does not already have one, so the talk layer has a dialogue state to read.
+Animated turn-in-place and planted-stop performances are off by default. They require authored, measured clips and their config toggles; checking movement during setup alone does not enable them.
+{% endstep %}
+{% step %}
+### Give the character personal tuning
+
+The **Personality** section shows **Using SDK Defaults** until a config is assigned. Select **Give This Character Its Own Settings** to create `<Character>_BodyAnimationSettings.asset`, then choose an archetype and tune expression, calmness, and ambient activity. See [Tune body animation personality](tune-personality.md).
 {% endstep %}
 {% endstepper %}
 
-{% hint style="info" %}
-The character does not need a baked NavMesh to see idle and talk motion. A NavMesh is only required once you send the character somewhere with locomotion — see [Configure locomotion](configure-locomotion.md).
-{% endhint %}
+## Interpret setup status
 
-***
+**Ready** means setup checks passed. **Needs Attention** means configured content has warnings or errors, such as missing clip measurements or overlay masks. Clearing content returns to **Not Set Up**; a non-Humanoid rig is a blocker. Play mode uses **Live**/**Inactive** status. Fix buttons name the action, such as **Measure Clips** or **Clear Controller**.
 
-## Verify the setup
-
-Enter Play mode and start a conversation with the character.
-
-{% hint style="success" %}
-**Expected result:** the character idles on its own between turns, and plays a talk gesture from the shipped set while it is speaking (`DialogueState.Speaking`).
-{% endhint %}
-
-If you left movement enabled and the scene has a baked NavMesh, calling `ConvaiNavMeshLocomotion.MoveTo` from your own code moves the character with synced footfall instead of sliding.
-
-***
-
-## Troubleshooting
-
-If the character does not move at all, open the inspector again — a regression (the set cleared, the rig changed) drops it back to a **Needs Attention** state naming the specific finding, with a **Fix** button where the fix is mechanical. See [Troubleshoot body animation](troubleshooting.md) for the full set of failure modes.
-
-***
+Open **Advanced settings & content →** for the [Body Animation Editor](body-animation-editor.md), where Content and Feel expose deeper authoring controls.
 
 ## Next steps
-
-{% content-ref url="how-body-animation-works.md" %}
-[How body animation works](how-body-animation-works.md)
-{% endcontent-ref %}
 
 {% content-ref url="build-an-animation-set.md" %}
 [Build an animation set](build-an-animation-set.md)
 {% endcontent-ref %}
-
-{% content-ref url="play-actions-and-gestures.md" %}
-[Play actions and gestures](play-actions-and-gestures.md)
+{% content-ref url="configure-locomotion.md" %}
+[Configure locomotion](configure-locomotion.md)
 {% endcontent-ref %}

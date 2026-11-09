@@ -3,12 +3,12 @@ title: Convai Unity SDK overview
 description: >-
   Find explanations of what the Convai Unity SDK is, how its four-tier
   architecture is organized, and what feature modules ship with the package.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 The Convai Unity SDK layers voice, structured actions, and long-term memory onto Unity characters. The embodiment modules — Gaze, Body Animation, Body Language, Conversation Flow, and Emotion — drive how a character looks, moves, and reacts while it speaks. The pages in this section explain the SDK fundamentals, system architecture, available features, and current release notes.
 
-<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>What is the Convai Unity SDK</strong><br>End-to-end voice pipeline, target audience, and what the SDK ships with.</td><td><a href="what-is-the-convai-unity-sdk.md">what-is-the-convai-unity-sdk.md</a></td></tr><tr><td><strong>Convai Unity SDK architecture</strong><br>Four-tier framework: Runtime, Room, Agent, and Module layers.</td><td><a href="convai-unity-sdk-architecture.md">convai-unity-sdk-architecture.md</a></td></tr><tr><td><strong>Feature map</strong><br>Find the right feature, tool, or guide for any development goal.</td><td><a href="feature-map.md">feature-map.md</a></td></tr><tr><td><strong>Release notes</strong><br>Release notes for v<code class="expression">space.vars.unity_sdk_version</code> and previous releases.</td><td><a href="release-notes.md">release-notes.md</a></td></tr></tbody></table>
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>What is the Convai Unity SDK</strong><br>End-to-end voice pipeline, target audience, and what the SDK ships with.</td><td><a href="what-is-the-convai-unity-sdk.md">what-is-the-convai-unity-sdk.md</a></td></tr><tr><td><strong>Convai Unity SDK architecture</strong><br>Four-tier framework: Runtime, Room, Agent, and Module layers.</td><td><a href="convai-unity-sdk-architecture.md">convai-unity-sdk-architecture.md</a></td></tr><tr><td><strong>Feature map</strong><br>Find the right feature, tool, or guide for any development goal.</td><td><a href="feature-map.md">feature-map.md</a></td></tr><tr><td><strong>Release notes</strong><br>Unreleased 5.0 preview changes and historical releases.</td><td><a href="release-notes.md">release-notes.md</a></td></tr><tr><td><strong>Migrate to SDK 5.0</strong><br>Review the preview migration, removed APIs, and validation checklist.</td><td><a href="migrate-to-5-0.md">migrate-to-5-0.md</a></td></tr></tbody></table>
 
 ## Next steps
 

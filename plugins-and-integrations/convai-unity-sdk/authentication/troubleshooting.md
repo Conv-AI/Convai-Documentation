@@ -1,94 +1,65 @@
 ---
 title: Troubleshoot authentication
-description: Fix Convai Unity SDK authentication failures using exact console messages, error codes, and causes for API Key and Auth Token mode.
-last_reviewed: "4.5.0"
+description: Diagnose failed token requests, missing credentials, and rejected connections using the messages returned by the Unity SDK.
+last_reviewed: "5.0.0-preview"
 ---
 
-Diagnose a failed connection in either authentication mode using the exact console message or `SessionErrorCodes` value the SDK returns. Use this page after a connection attempt fails, or when a token endpoint you configured is not being reached correctly.
+Start with the failed operation's `Code` and `Message`. Token acquisition and the later room connection are separate operations: a token endpoint can succeed while Convai rejects the room connection.
 
-## Symptom table
+## Match the failure
 
-| Symptom | Likely cause | Fix | Verify |
-|---|---|---|---|
-| `Auth token endpoint must use HTTPS, except for HTTP loopback URLs used during local development.` | The configured **Token Endpoint URL** is plain HTTP and not a loopback address. | Change the endpoint to HTTPS, or use an `http://127.0.0.1` / `http://localhost` address for local development only. | Reconnect; the endpoint request now succeeds instead of failing validation. |
-| `Auth token endpoint returned no response.` / `...transport failed.` | The endpoint is unreachable — wrong host, network failure, or the server is down. | Confirm the endpoint URL is correct and the server is running and reachable from the build target's network. | Reconnect and confirm the request reaches your server's access log. |
-| `Auth token endpoint returned HTTP {code}.` | The endpoint responded with a non-2xx status. | Check your server logs for the returned status code and fix the underlying failure (auth, rate limit, server error). | Reconnect after the server returns `200`. |
-| `Auth token endpoint returned malformed JSON.` | The endpoint's response body is not valid JSON. | Return a JSON object with the token field, for example `{"apiAuthToken": "..."}`. | Reconnect; the SDK parses the response without error. |
-| `Auth token response field '{field}' was not found.` | The response JSON does not contain the field configured in **Token Response Field** (default `apiAuthToken`). | Match **Token Response Field** to the actual JSON key your endpoint returns, including the dotted path for a nested field such as `data.token`. | Reconnect; the SDK reads the token from the corrected field. |
-| `...was empty.` (response field found but empty) | The response field exists but its value is an empty string. | Fix the server logic that mints the token — it returned successfully but with no token value. | Reconnect and confirm the field is populated. |
-| `...contained an invalid expirationTime.` | The optional `expirationTime` field is not a parseable timestamp. | Return `expirationTime` as an ISO-8601 string, or omit the field entirely if you are not using it. | Reconnect; the SDK accepts the response. |
-| `Auth token delegate returned no task.` / `...returned an empty token.` | A `DelegateAuthTokenProvider` lambda returned `null` or an empty string instead of a token. | Fix the delegate to always return a non-empty token string or throw/await a proper failure. | Reconnect; the delegate returns a valid token. |
-| `Auth token delegate failed ({ExceptionType}).` | The `DelegateAuthTokenProvider` lambda threw an exception. | Check the exception type in the message and fix the underlying failure in your delegate. | Reconnect after the delegate stops throwing. |
-| `Auth Token mode requires a registered IConvaiAuthTokenProvider or a configured endpoint URL.` (`ConfigAuthTokenProviderMissing`) | **Auth Mode** is **Auth Token**, but no provider is registered and no **Token Endpoint URL** is configured. | Register an `IConvaiAuthTokenProvider` before the first connection, or configure a **Token Endpoint URL** in **Convai > Settings > Credentials**. | Reconnect; the error no longer appears. |
-| `Auth token provider failed ({ExceptionType}).` / `...failed to resolve a token.` / `...returned an empty token.` | Your registered `IConvaiAuthTokenProvider` implementation threw, failed, or returned an empty token. | Check the exception type or failure reason and fix `GetTokenAsync` in your provider. | Reconnect after the provider returns a valid, non-empty token. |
-| `Explicit auth-token connections require Auth Token mode in Convai Project Settings.` (`ConfigAuthTokenModeRequired`) | `ConnectWithAuthTokenAsync` was called while **Auth Mode** is still **API Key**. | Set **Auth Mode** to **Auth Token** in **Convai > Settings > Credentials** before calling `ConnectWithAuthTokenAsync`. | Reconnect; the explicit token is accepted. |
-| `A non-empty Convai auth token is required.` | `ConnectWithAuthTokenAsync` was called with an empty or whitespace `authToken` argument. | Confirm your login flow fetched a token before calling `ConnectWithAuthTokenAsync`; do not call it with a placeholder value. | Reconnect with a real token. |
-| `A non-empty end-user ID is required.` / `A non-empty end-user name is required.` | `ConnectWithAuthTokenAsync` was called with an empty `endUserId` or `endUserName` argument. | Pass a non-empty, stable account ID and display name for every call. | Reconnect with both arguments populated. |
-| Connection fails with `Connection token is invalid` (`ConnectionInvalidToken`) | Convai rejected the token — it is expired, malformed, or was not the token your endpoint most recently issued. | Confirm your endpoint returns a freshly minted token on every request and that no caching layer is serving a stale one. | Reconnect; a fresh token is accepted. |
-| Connection fails with HTTP `401` | The room-connect request was rejected at the transport level, which the SDK maps to `ConnectionInvalidToken`. | Confirm the endpoint or provider is returning `apiAuthToken` — not the game-login token, a refresh token, or the Convai account API key — and that the token has not expired. | Reconnect; the connection succeeds. |
-| `An API key must be saved in Convai Project Settings before the Editor can mint an auth token.` | The Editor-only fallback provider tried to run, but no API key is saved. | Save an API key in **Convai > Settings > Credentials**, even in Auth Token mode, so the Editor fallback can mint a token locally. | Enter Play mode again; the fallback provider succeeds. |
-| Auth Token mode works in the Editor but fails immediately in a player build | The Editor-only fallback provider (`ConvaiEditorApiKeyAuthTokenProvider`) was silently covering for a missing provider or endpoint. It is compiled out of players. | Register a runtime `IConvaiAuthTokenProvider`, or configure a **Token Endpoint URL**, so the player build has a real credential source. | Run the build; the connection succeeds without the Editor fallback. |
-| Endpoint configuration change during Play mode has no effect on an active session | Credentials resolve once per connection attempt, not continuously. | End the session and reconnect after changing the endpoint, headers, or provider. | The next connection attempt uses the updated configuration. |
+| Symptom or code | Action | Verify |
+|---|---|---|
+| Character never connects and the Console shows no error | Register a token provider before `ConvaiRoomManager` starts, or configure a valid endpoint. If registration happens later, call `ConnectAsync` explicitly. | The next connection attempt reaches your token source. |
+| **Setup Health** reports an invalid or missing token endpoint | Correct **Credentials > Token Endpoint URL**, or use a runtime provider. Health checks configuration, not server acceptance. | The **Auth Token** row becomes **Healthy** for the configured endpoint. |
+| `connection.auth_token_fetch_failed` | Read the accompanying provider or endpoint message in the table below. | Token resolution completes and the connect request begins. |
+| `config.auth_token_mode_required` | Select **Auth Token** before calling `ConnectWithAuthTokenAsync`. | The call passes credential-mode validation. |
+| `connection.invalid_token` | Supply a non-empty Convai `apiAuthToken` to the explicit connection method. | The call passes local argument validation. |
+| `connection.bad_request` | Check required explicit identity arguments, the `512`-character ID limit, `255`-character name limit, and JSON-compatible metadata. | The call passes identity validation. |
+| HTTP `401`, mapped to `connection.connect_invalid_api_key` | Read the response message. Confirm your provider returns a Convai auth token, not an account key or your game's login token. | A new connection succeeds with the correct credential. |
+| `connection.connect_end_user_id_required` | Supply an appropriate stable end-user ID and reconnect. | Inspect `CurrentEndUserId` without logging it and `CurrentLongTermMemoryStatus`. |
+| Works in the Editor but fails in a player | Supply a runtime provider, endpoint, or explicit token. The Editor's saved-key provider is not compiled into players. | Run the built player and connect. |
+| An explicit-token call leaves the old session unchanged | Disable **Starts Connected**, which also blocks each character's **Auto Connect**, or disconnect the existing session first. | A new connection consumes the supplied token. |
 
-## Endpoint not HTTPS
+## Diagnose a token request
 
-**Symptom:** The Console logs `Auth token endpoint must use HTTPS, except for HTTP loopback URLs used during local development.`
+| Message | Cause and correction |
+|---|---|
+| `Auth Token mode requires a registered IConvaiAuthTokenProvider or a configured endpoint URL.` | No source exists when a manual connection resolves credentials. Register your provider again each Play session, or configure the endpoint. |
+| `Auth token endpoint must use HTTPS, except for HTTP loopback URLs used during local development.` | Use HTTPS. HTTP is accepted only for loopback development addresses. |
+| `Auth token endpoint returned no response.` or a transport-failed message | Check host, network, endpoint availability, and the target device's access to it. |
+| `Auth token endpoint request failed ({ExceptionType}).` | The request threw. Diagnose the exception type and endpoint transport. |
+| `Auth token endpoint returned HTTP {code}.` | Check the endpoint's access logs and error response. |
+| `Auth token endpoint returned malformed JSON.` | Return a JSON object with a string token field. |
+| `Auth token response field '{field}' was not found.` | Match **Token Response Field** to the response, including a dotted path if nested. The default is `apiAuthToken`. |
+| A token-field message ending in `was empty.` | Return a non-empty token string. |
+| An invalid `expirationTime` message | Supply a parseable timestamp at the top level or omit that optional field. |
+| `Auth token delegate returned no task.` | Return a task from the delegate. |
+| `Auth token delegate returned an empty token.` | Resolve a non-empty token string. |
+| `Auth token delegate failed ({ExceptionType}).` | Diagnose the exception in your delegate. Cancellation propagates separately. |
+| A provider-failed or empty-token message | Inspect `GetTokenAsync`. A failed registered provider does not fall through to the configured endpoint. |
 
-**Cause:** `EndpointAuthTokenProvider` validates the **Token Endpoint URL** before every request and rejects any scheme other than `https://`, unless the host is a loopback address (`127.0.0.1` or `localhost`) used for local development.
+## Restore Editor-only token access
 
-**Fix:** Change the endpoint to `https://`. If you are testing against a local server, use a loopback address instead of a LAN IP or a public HTTP tunnel.
+The Editor provider registers before scene load only when **Auth Token** is selected, a saved key exists, the endpoint is empty, and no other provider is registered. Any configured endpoint, including an invalid one, disables this fallback.
 
-**Verify:** Reconnect. The request reaches your server instead of failing validation before the request is sent.
+{% stepper %}
+{% step %}
+### Save the Editor key
 
-## Endpoint response is missing the token field
+Open **Convai > Settings**, scroll to **Credentials**, temporarily select **Api Key**, and use **Validate & Save** for your key. The key field is hidden in Auth Token mode.
+{% endstep %}
+{% step %}
+### Select Auth Token again
 
-**Symptom:** The Console logs `Auth token response field 'apiAuthToken' was not found.` (or whatever field name is configured).
+For Editor-only testing, clear **Token Endpoint URL**, select **Auth Token**, and enter Play mode again. A custom provider registered later replaces the fallback.
+{% endstep %}
+{% step %}
+### Verify the build separately
 
-**Cause:** `EndpointAuthTokenProvider` parses the JSON response and looks up **Token Response Field**, which defaults to `apiAuthToken` and supports dotted paths such as `data.token`. If your server's response uses a different key, or nests the token under a path the configured field does not match, resolution fails.
-
-**Fix:** Either change your server to return the token under `apiAuthToken` at the top level, or update **Token Response Field** in **Convai > Settings > Credentials** to match your server's actual response shape.
-
-**Verify:** Reconnect. The SDK reads the token from the response instead of reporting a missing field.
-
-## Provider registered too late
-
-**Symptom:** The first connection attempt after entering Play mode or after a build starts fails with `Auth Token mode requires a registered IConvaiAuthTokenProvider or a configured endpoint URL.`, even though your code registers a provider.
-
-**Cause:** `ConvaiAuthTokenProviderRegistry` is a process-local static registry that resets automatically on `RuntimeInitializeLoadType.SubsystemRegistration` — every domain reload and every Play mode entry clears it. A provider registered in a component that initializes after the SDK's first connection attempt, or a provider that was never re-registered after a reload, leaves the registry empty when the SDK needs it.
-
-**Fix:** Register the provider as early as possible, for example in a scene bootstrap component's `Awake` method, and register it again after any domain reload or scene reload that could have cleared it. If your login SDK initializes asynchronously, register the provider immediately and let your provider's own token-fetch logic await login initialization internally — do not delay registration itself.
-
-**Verify:** Reconnect after the fix. `IsRegistered` reflects the provider immediately after registration, and the connection resolves a token instead of reporting a missing provider.
-
-## Auth Token mode not selected for an explicit-token connect
-
-**Symptom:** `ConnectWithAuthTokenAsync` fails immediately with `Explicit auth-token connections require Auth Token mode in Convai Project Settings.`
-
-**Cause:** `RoomConnectionRuntimeAdapter` checks that the active credential provider implements the explicit-token contract, which only happens when **Auth Mode** is **Auth Token**. Calling `ConnectWithAuthTokenAsync` while the project is still in **API Key** mode fails this check before any network request is made.
-
-**Fix:** Set **Auth Mode** to **Auth Token** in **Convai > Settings > Credentials**. You do not need to configure a **Token Endpoint URL** or register a provider for this path — the caller supplies the token directly.
-
-**Verify:** Reconnect using `ConnectWithAuthTokenAsync`. The call proceeds past credential validation instead of failing immediately.
-
-## HTTP 401 on connect
-
-**Symptom:** The room-connect request returns HTTP `401`, which the SDK reports as `Connection token is invalid` (`ConnectionInvalidToken`).
-
-**Cause:** Convai rejected the token sent in the `API-AUTH-TOKEN` header. This happens when the token is expired, was already consumed, or is not actually a Convai `apiAuthToken` — for example if the endpoint or provider accidentally returned the game-login token or the Convai account API key instead.
-
-**Fix:** Confirm your endpoint or provider returns the value of the `apiAuthToken` field from Convai's own token-minting response, not any other credential, and that it is minted fresh for each connection rather than served from a cache that can go stale.
-
-**Verify:** Reconnect. A freshly minted, correctly sourced token connects successfully.
-
-## Editor-only fallback provider does not kick in
-
-**Symptom:** In the Unity Editor, Auth Token mode still fails with `Auth Token mode requires a registered IConvaiAuthTokenProvider or a configured endpoint URL.`, even though an API key is saved.
-
-**Cause:** `ConvaiEditorApiKeyAuthTokenProvider` only auto-registers when all three conditions hold: **Auth Mode** is **Auth Token**, an API key is saved, and no **Token Endpoint URL** is configured. If a **Token Endpoint URL** is set — even an invalid one — the fallback does not activate, because an explicit endpoint takes precedence.
-
-**Fix:** For local Editor testing without a real backend, clear **Token Endpoint URL** and confirm an API key is saved in **Convai > Settings > Credentials**. Do not rely on this fallback for anything other than Editor testing — it is compiled out of players entirely, so a build will fail this same way unless a runtime provider or endpoint is configured. See [Ship a secure build](ship-a-secure-build.md).
-
-**Verify:** Enter Play mode. The Editor mints a token from the saved API key and the connection succeeds.
+Configure a runtime source before distributing a player. Follow [Ship a secure build](ship-a-secure-build.md) and verify a connection in the built player.
+{% endstep %}
+{% endstepper %}
 
 ## Next steps
 

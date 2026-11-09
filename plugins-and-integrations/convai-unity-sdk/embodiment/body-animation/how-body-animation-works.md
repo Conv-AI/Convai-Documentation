@@ -1,7 +1,7 @@
 ---
 title: How body animation works
 description: Understand the layered animation graph that plays idle, talk, locomotion, action, and pointing motion, and how dialogue state drives it.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 `ConvaiBodyAnimationController` builds a layered `PlayableGraph` directly against a Humanoid `Animator` — no Animator Controller asset, no states, no transitions authored in the Animator window. This page describes what that graph looks like, what drives each layer, and how the layers resolve when more than one wants the arms at once.
@@ -19,7 +19,7 @@ The graph runs six layers, from the base pose up through the most specific overl
 | Action | Full body, upper body, or a custom mask per entry | `PlayAction` calls and Convai actions. A full-body action suspends locomotion and ducks the overlays above it. |
 | Pointing | Upper body | `PointAt`, with an apex hold and re-aiming while the target moves. |
 | Moving Talk | Arms and hands | An additive or softened-override walk-and-talk overlay, so a talk gesture does not freeze the arms mid-stride. |
-| Talk Beat | Arms and hands, additive | Short speech-onset and referential gesture accents. |
+| Talk Beat | Arms and hands, additive | Short speech-onset and referential gesture accents. In 5.0, referential/co-speech semantic input follows `ConvaiCharacter.OnSpokenLine`, once per spoken line rather than every word-timing update. |
 
 Every layer reports the weight it wants for a given tick; a single arbiter resolves the final port weights afterward, so no two layers can write conflicting weight to the same port in the same frame.
 
@@ -60,11 +60,15 @@ Action ownership outranks pointing and talk: a running full-body action ducks ev
 
 ***
 
+An action's peak visible weight is **Action Strength** × the entry's **Target Weight** × the normalized caller `WeightMultiplier`, shaped by **Blend Easing**. A zero config or entry weight makes the lifecycle run without visible movement. A caller multiplier at or below zero means unset and normalizes to 1; a small positive value can still be imperceptible.
+
 ## Locomotion is optional
 
 `ConvaiNavMeshLocomotion` drives layer 0's walk and jog states, but a character with no locomotion component is a complete, valid setup: idle, talk, actions, gestures, and pointing all work in place. Add locomotion only when the character needs to move — see [Configure locomotion](configure-locomotion.md).
 
 ***
+
+Authored starts and walk/jog changes use their enabled-by-default switches. Animated turns and planted stops also require **Enable Turn In Place** and **Enable Planted Stops**, both off by default, plus suitable measured clips.
 
 ## Next steps
 

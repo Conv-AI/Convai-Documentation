@@ -1,7 +1,7 @@
 ---
 title: Body language scripting reference
 description: Complete API reference for the Convai Body Language module, covering the controller, reading struct, handles, and every public enum type.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Complete API reference for the public types in the Convai Body Language module. Types live in `Convai.Modules.BodyLanguage.Components`, `Convai.Domain.Embodiment.Readings`, `Convai.Domain.Embodiment.Interfaces`, or `Convai.Domain.Embodiment.Semantics`, as noted per type. The cross-module contracts (`IBodyLanguageSource` and the internal directors) are `internal` and are not part of the public surface.
@@ -164,6 +164,18 @@ Semantic categories a scripted or backend-driven gesture request can carry.
 
 A cue built from a reserved value always resolves to "no mapping" and falls back to the head-beat/posture-pulse (and, on a complete arm chain, procedural arm/hand) primitives — see [Trigger gestures and reactions](gestures-and-reactions.md).
 
+## `GestureSuppression`
+
+`Convai.Domain.Embodiment.Interfaces` — Enum
+
+| Value | Integer | Meaning |
+|---|---|---|
+| `None` | `0` | No gesture-channel suppression. |
+| `UpperBody` | `1` | The upper body is shared: semantic gesture cues are refused and posture is reduced; head beats and breathing continue. |
+| `FullBody` | `2` | Authored motion owns the whole body; procedural posture and breathing fade out. |
+
+Read `Current.Suppression` or `BodyLanguageSnapshot.GesticulationSuppression` for the current value.
+
 ## `ReactionKind`
 
 `Convai.Domain.Embodiment.Semantics` — Enum
@@ -227,7 +239,7 @@ Mutable, reusable capture of the body language runtime state for HUDs and tests.
 | `Expressiveness` / `AmplitudeGain` / `FrequencyGain` / `RichnessGain` | `float` | Resolved expressiveness and its three derived gains. |
 | `RecentTrace` | `List<BodyLanguageTraceEntry>` | Recent trace log entries, oldest first. |
 
-The full field list mirrors what the `ConvaiBodyLanguageController` Inspector's **Runtime Status** section draws — see [Troubleshoot body language](troubleshooting.md).
+The Inspector displays a subset: **Runtime Status**, **Posture (target → current)**, **Breath**, and **Recent Trace**. Head-gesture, last-cue, reaction, and resolved-gain fields are available through `Current` or `CaptureSnapshot`, rather than all being drawn in **Runtime Status**. See [Troubleshoot body language](troubleshooting.md).
 
 ## Next steps
 

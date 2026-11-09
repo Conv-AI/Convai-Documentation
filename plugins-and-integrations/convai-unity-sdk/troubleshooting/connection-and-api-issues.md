@@ -1,10 +1,10 @@
 ---
 title: Connection and API issues
 description: Interpret Convai session error codes, read the room manager diagnostics, and resolve authentication, transport, and rate-limit failures.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-All session errors surface through `ConvaiSessionEventRelay.OnSessionError`. The event payload carries an `ErrorCode` string and a human-readable `Message`. Error codes follow a hierarchical dot-notation format: `{category}.{detail}`. The category prefix tells you which layer of the system failed.
+All session errors surface through `ConvaiSessionEventRelay.OnSessionError`. The event payload carries `ErrorCode`, `Message`, `SessionId`, `IsRecoverable`, `Stage`, `HttpStatusCode`, and `HasHttpStatusCode`. Check `HasHttpStatusCode` before using the status value. `IsRecoverable` is diagnostic information, not a promise of automatic retry. Error codes follow a hierarchical dot-notation format: `{category}.{detail}`. The category prefix tells you which layer of the system failed.
 
 | Category prefix | What failed |
 | --- | --- |
@@ -13,6 +13,9 @@ All session errors surface through `ConvaiSessionEventRelay.OnSessionError`. The
 | `transport.*` | WebRTC / LiveKit layer — ICE, peer connection, signal |
 | `server.*` | Convai's own pipeline — quota, fatal errors |
 | `session.*` | Session lifecycle — token expiry, state conflicts |
+| `audio.*` | Microphone capture, policy, or publication |
+| `vision.*` | Vision capture or publication |
+| `protocol.*` | Message validation or parsing |
 
 ## Subscribe to session errors
 
@@ -28,12 +31,12 @@ public class ErrorListener : MonoBehaviour
 
     private void OnEnable()
     {
-        _sessionRelay.OnSessionError.AddListener(OnError);
+        if (_sessionRelay != null) _sessionRelay.OnSessionError.AddListener(OnError);
     }
 
     private void OnDisable()
     {
-        _sessionRelay.OnSessionError.RemoveListener(OnError);
+        if (_sessionRelay != null) _sessionRelay.OnSessionError.RemoveListener(OnError);
     }
 
     private void OnError(SessionErrorRelayData data)
@@ -48,17 +51,22 @@ public class ErrorListener : MonoBehaviour
 `ConvaiRoomManager` stores the most recent error code and message as plain properties — no event subscription required. This is useful for logging diagnostic state on demand:
 
 ```csharp
-var room = FindFirstObjectByType<ConvaiRoomManager>();
-Debug.Log($"State:           {room.CurrentState}");
-Debug.Log($"Connected:       {room.IsConnected}");
-Debug.Log($"Last error code: {room.LastSessionErrorCode}");
-Debug.Log($"Last error msg:  {room.LastSessionErrorMessage}");
-Debug.Log($"Connect attempts:{room.ConnectAttemptCount}  Reconnects: {room.ReconnectCount}");
+// Inside a MonoBehaviour method; assign the scene's room component explicitly.
+// using Convai.Runtime.Adapters.Networking;
+// using UnityEngine;
+// [SerializeField] private ConvaiRoomManager room;
+// pseudocode: the field and using directives above belong in your component.
+if (room != null)
+{
+    Debug.Log($"State: {room.CurrentState}; connected: {room.IsConnected}");
+    Debug.Log($"Last error: {room.LastSessionErrorCode}");
+    Debug.Log($"Attempts: {room.ConnectAttemptCount}; reconnects: {room.ReconnectCount}");
+}
 ```
 
 ## Configuration errors
 
-Configuration errors fire immediately on connect — before any network traffic. Fix these first.
+Configuration gates validate the required local settings before connection. Fix the reported configuration problem before retrying.
 
 | Error code | Description | Fix |
 | --- | --- | --- |
@@ -69,39 +77,39 @@ Configuration errors fire immediately on connect — before any network traffic.
 | `config.auth_token_mode_required` | `ConnectWithAuthTokenAsync` was called while Auth Mode is still API Key | Set Auth Mode to Auth Token in Convai Project Settings before calling `ConnectWithAuthTokenAsync` — see [Troubleshoot authentication](../authentication/troubleshooting.md) |
 
 {% hint style="warning" %}
-The SDK emits a warning before any connect attempt if the API key is empty: `Convai Bootstrapper: API key not configured. Please set your API key in Edit > Project Settings > Convai SDK.` This fires on Play — fix it before testing connections.
+The SDK emits a warning before any connect attempt if the API key is empty: `Convai Bootstrapper: API key not configured. Please set your API key in Edit > Project Settings > Convai SDK.` This applies to API Key mode. Auth Token mode can instead report that it is awaiting a registered provider or valid endpoint before the first connection.
 {% endhint %}
 
 ## Connection errors
 
-These codes appear when Convai rejects or cannot fulfill the connect request. Most have a clear cause and a direct fix.
+These codes classify failures recognized by the client. Their messages guide the next check; account entitlement and service outcomes require confirmation from Convai. Retry selection depends on the thrown exception, not this code table.
 
-| Error code | Description | Retried automatically | Fix |
-| --- | --- | --- | --- |
-| `connection.connect_invalid_api_key` | The API key was rejected by Convai | No | Copy a fresh key from the Convai dashboard; check for trailing spaces |
-| `connection.auth_token_fetch_failed` | Auth Token mode failed to resolve a token before connecting (provider exception, empty token, or endpoint failure) | Yes | See [Troubleshoot authentication](../authentication/troubleshooting.md) for the exact console message and cause |
-| `connection.auth_failed` | Authentication failed (revoked token or bad credentials) | No | Re-enter your API key; check if the key has been revoked on the dashboard |
-| `connection.invalid_token` | The connection token provided is invalid | No | Tokens are generated internally — if this appears, reconnect to generate a fresh token |
-| `connection.connect_invalid_session_id` | Connect request used an invalid session identifier | No | Session IDs are generated internally — reconnect to reset the session |
-| `connection.connect_character_not_found` | The Character ID does not exist on your account | No | Verify the Character ID in the Convai dashboard matches exactly |
-| `connection.connect_realtime_not_allowed` | Realtime access is not enabled for this account | No | Upgrade your Convai plan or contact support |
-| `connection.connect_concurrency_limit_reached` | Your plan's simultaneous session limit is reached | Yes | Disconnect idle characters; upgrade plan for higher limits |
-| `connection.connect_speaker_limit_reached` | Backend speaker limit reached for this account | No | Reduce the number of concurrently active characters, or raise the limit on your account. The SDK does not retry this one — unlike the concurrency limit, it is treated as a hard limit rather than a transient condition. |
-| `connection.connect_bot_start_failed` | Convai pipeline failed to start (transient backend issue) | Yes | SDK retries automatically; if persistent, contact support |
-| `connection.connect_unhandled_server_exception` | Unhandled exception on Convai during connect | Yes | SDK retries automatically; check Convai status page if persistent |
-| `connection.timeout` | Connect did not complete within the timeout window | Yes | Check internet connection; increase **Connection Timeout** in settings (default 30 s, max 120 s) |
-| `connection.network_error` | DNS failure, socket error, or network unreachable | Yes | Verify internet connectivity; check that Convai domains are not blocked by firewall |
-| `connection.rate_limited` | Too many connect requests in a short window | Yes | Reduce frequency of reconnect attempts; add delay between retries in your code |
-| `connection.service_unavailable` | Convai temporarily unavailable (HTTP 503) | Yes | Wait and retry; SDK backs off automatically |
-| `connection.server_error` | Convai returned a 5xx error | Yes | Transient — SDK retries; check Convai status page if persistent |
-| `connection.not_found` | Resource (character or room) not found (HTTP 404) | No | Verify Character ID exists on your account |
-| `connection.bad_request` | Invalid parameters in the connect request | No | Check that CharacterId and other connection parameters contain no invalid characters |
-| `connection.connect_validation_error` | Connect request failed API validation (HTTP 422) | No | Inspect error message for which field failed validation |
-| `connection.failed` | Generic connection failure not covered by a specific code | Depends | Check `LastSessionErrorMessage` for details |
+| Error code | Description | Fix |
+| --- | --- | --- |
+| `connection.connect_invalid_api_key` | The API key was rejected by Convai | Copy a fresh key from the Convai dashboard; check for trailing spaces |
+| `connection.auth_token_fetch_failed` | Auth Token mode failed to resolve a token before connecting (provider exception, empty token, or endpoint failure) | See [Troubleshoot authentication](../authentication/troubleshooting.md) for the exact console message and cause |
+| `connection.auth_failed` | Authentication failed (revoked token or bad credentials) | Re-enter your API key; check if the key has been revoked on the dashboard |
+| `connection.invalid_token` | The connection token provided is invalid | Tokens are generated internally — if this appears, reconnect to generate a fresh token |
+| `connection.connect_invalid_session_id` | Connect request used an invalid session identifier | Session IDs are generated internally — reconnect to reset the session |
+| `connection.connect_character_not_found` | The Character ID does not exist on your account | Verify the Character ID in the Convai dashboard matches exactly |
+| `connection.connect_realtime_not_allowed` | Realtime access is not enabled for this account | Upgrade your Convai plan or contact support |
+| `connection.connect_concurrency_limit_reached` | Your plan's simultaneous session limit is reached | Disconnect idle characters; upgrade plan for higher limits |
+| `connection.connect_speaker_limit_reached` | Backend speaker limit reached for this account | Reduce the number of concurrently active characters, or raise the limit on your account. The reported limit must be resolved before another equivalent request can succeed. |
+| `connection.connect_bot_start_failed` | Convai pipeline failed to start (transient backend issue) | Inspect the detailed error; if persistent, contact support |
+| `connection.connect_unhandled_server_exception` | Unhandled exception on Convai during connect | Inspect the detailed error and service status if persistent |
+| `connection.timeout` | Connect did not complete within the timeout window | Check internet connection; increase **Connection Timeout** in settings (default 30 s, max 120 s) |
+| `connection.network_error` | DNS failure, socket error, or network unreachable | Verify internet connectivity; check that Convai domains are not blocked by firewall |
+| `connection.rate_limited` | Too many connect requests in a short window | Reduce frequency of reconnect attempts; add delay between retries in your code |
+| `connection.service_unavailable` | Convai temporarily unavailable (HTTP 503) | Wait before another attempt and inspect the error |
+| `connection.server_error` | Convai returned a 5xx error | Inspect the error and service status if persistent |
+| `connection.not_found` | Resource (character or room) not found (HTTP 404) | Verify Character ID exists on your account |
+| `connection.bad_request` | Invalid parameters in the connect request | Check that CharacterId and other connection parameters contain no invalid characters |
+| `connection.connect_validation_error` | Connect request failed API validation (HTTP 422) | Inspect error message for which field failed validation |
+| `connection.failed` | Generic connection failure not covered by a specific code | Check `LastSessionErrorMessage` for details |
 
 ## Transport errors
 
-Transport errors occur at the WebRTC / LiveKit layer, after Convai has accepted the connect request. They are almost always transient and the SDK retries automatically.
+Transport errors occur in the WebRTC / LiveKit layer. Inspect session state and transport diagnostics; a code alone does not establish whether a reconnect will run.
 
 | Error code | Description | What to check |
 | --- | --- | --- |
@@ -120,7 +128,7 @@ WebRTC requires UDP ports to be accessible. In corporate deployments, work with 
 | --- | --- | --- |
 | `server.usage_limit_reached` | Daily or monthly usage quota exceeded | Check usage in the Convai dashboard; upgrade your plan |
 | `server.fatal_error` | Fatal pipeline error — session terminated by Convai | Session cannot recover; initiate a new connect |
-| `server.error` | Non-fatal pipeline error reported by Convai | SDK retries; if persistent, report to Convai support |
+| `server.error` | Non-fatal pipeline error reported by Convai | Inspect the detailed error; if persistent, report to Convai support |
 
 ## Session and protocol errors
 
@@ -132,33 +140,25 @@ WebRTC requires UDP ports to be accessible. In corporate deployments, work with 
 | `protocol.message_invalid` | An invalid protocol message was received from Convai | Usually indicates an SDK/backend version mismatch; update the SDK |
 | `protocol.parse_failed` | SDK could not parse a message from Convai | Usually indicates an SDK/backend version mismatch; update the SDK |
 
+## Multi-character and memory rejections
+
+| Code | Client interpretation | Next check |
+| --- | --- | --- |
+| `connection.connect_multi_character_not_allowed` | The requested multi-character room is not permitted | Confirm account access and use a supported roster |
+| `connection.connect_multi_character_roster_limit` | Roster size exceeds the reported allowance | Reduce the roster or confirm the account allowance |
+| `connection.connect_end_user_id_required` | Memory configuration requires an end-user ID | Supply a stable application-owned end-user ID |
+| `connection.connect_ltm_end_user_limit_reached` | The long-term memory end-user allowance is exhausted | Inspect usage and account configuration |
+| `connection.connect_ltm_not_configured` | No long-term memory allowance is configured | Confirm the account's memory configuration |
+
+See [Multi-character sessions](../features/multi-character-sessions/) and [Long-term memory troubleshooting](../features/long-term-memory/troubleshooting-and-diagnostics.md). These mappings describe the client's handling of reported errors; they do not independently verify an account's limits.
+
 ## Retry behavior
 
-The SDK uses an exponential backoff policy for transient errors. After a failed attempt, it waits before trying again:
+The generic `RetryExecutor` uses exception-based `ExponentialBackoffPolicy`. Its default schedule is four attempts: immediately, then after delays of `1`, `2`, and `4` seconds. `TimeoutException` and `HttpRequestException`, including supported wrapped or aggregate cases, can qualify while attempts remain.
 
-| Attempt | Delay before this attempt |
-| --- | --- |
-| 1 (initial) | None — immediate |
-| 2 | 1 second |
-| 3 | 2 seconds |
-| 4 (final) | 4 seconds |
+The policy also recognizes `OperationCanceledException` as transient, but `RetryExecutor` explicitly excludes a directly thrown cancellation from its catch-and-retry loop. Cancellation is not a reason to promise another attempt. A `ConvaiOperationException` carrying a recoverable-looking code is not automatically retried solely because of that code.
 
-After four attempts, the SDK gives up and fires `OnSessionError` with the final error code. **Non-transient errors — such as invalid API key, character not found, or realtime not allowed — are not retried at all.** The SDK fires `OnSessionError` immediately.
-
-The following error codes trigger automatic retries:
-
-* `connection.timeout`
-* `connection.network_error`
-* `connection.server_error`
-* `connection.service_unavailable`
-* `connection.rate_limited`
-* `connection.connect_concurrency_limit_reached`
-* `connection.connect_bot_start_failed`
-* `connection.connect_unhandled_server_exception`
-* `connection.auth_token_fetch_failed`
-* `transport.ice_failed`
-* `transport.signal_disconnected`
-* `server.error`
+`SessionErrorCodes.IsRecoverable` supplies diagnostic classification. It is separate from exception retry and from transport reconnection. Check `ConnectAttemptCount`, `ReconnectCount`, and state changes to establish what actually happened.
 
 ## Runtime diagnostics
 
@@ -180,6 +180,7 @@ Read `ConvaiRoomManager` state properties to narrow down a connection failure. T
 | `transport.ice_failed` repeatedly | Strict firewall blocking UDP | Allow UDP; request TURN relay from network admin | Session connects; WebRTC negotiation completes |
 | `server.usage_limit_reached` | Quota exceeded | Check Convai dashboard usage page | Session connects after usage resets or plan upgrades |
 | Character connects once then never reconnects | `ReconnectPolicy` maxed out | SDK stops after 3 reconnect attempts (default `MaxReconnectAttempts`); call `ConnectAsync` again to retry | `ConnectAsync` call succeeds; character connects |
+| Nothing connects on Play and no error is logged | **Starts Connected** is off on `ConvaiRoomManager`, or **Connect On Start** is off on the assigned profile when **Room Setup Source** is **Profile Asset**; this also blocks every character's **Auto Connect**, including characters enabled later | Turn **Starts Connected** on, or turn **Connect On Start** on in the profile when **Room Setup Source** is **Profile Asset** (the Room Manager shows that value read-only), or call `ConnectAsync` or `StartConversationAsync` from your own code | `CurrentState` leaves `Disconnected` after Play starts or after your call |
 | `connection.rate_limited` | Too many connects in short time | Add a minimum delay between connect calls in your application logic | `connection.rate_limited` no longer fires |
 | `CurrentState` stuck at `Error` | Unrecoverable session failure | Call `DisconnectAsync()` then `ConnectAsync()` to reset | Session transitions to `Connected` |
 

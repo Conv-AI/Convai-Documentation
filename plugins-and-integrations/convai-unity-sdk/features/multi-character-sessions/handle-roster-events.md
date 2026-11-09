@@ -1,7 +1,7 @@
 ---
 title: Handle room events
 description: Subscribe to roster and interaction-target events in a shared Unity room, and rely on the order the SDK guarantees between them.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Subscribe to `ConvaiManager.Events.OnRoomRosterChanged` to react to a character joining or leaving a connected room, including a refused edit and its reason. Use this page when your scene needs to update UI, logging, or gameplay state as characters come and go instead of polling the roster.
@@ -22,21 +22,30 @@ Subscribe to `ConvaiManager.Events.OnRoomRosterChanged` to react to a character 
 | `CharacterId` | `string` | Convai Character ID of the character this is about. |
 | `CharacterName` | `string` | Display name, for logs and UI. |
 | `RosterSize` | `int` | How many characters the room holds after this change. |
+| `Timestamp` | `DateTime` | UTC event timestamp. |
 | `Reason` | `string` | Why the edit was refused. Empty unless `Change` is `Refused`. |
 
+These are member fragments for a MonoBehaviour. Import `Convai.Runtime.Components`, `Convai.Runtime.Facades`, `Convai.Domain.DomainEvents.Runtime`, and `UnityEngine`. Assign the manager in the Inspector. The example retries until it is initialized and caches the exact facade for cleanup.
+
 ```csharp
-private void OnEnable()
+[SerializeField] private ConvaiManager manager;
+private ConvaiEvents _events;
+
+private void OnEnable() => TrySubscribe();
+private void Update() => TrySubscribe();
+
+private void TrySubscribe()
 {
-    ConvaiManager manager = ConvaiManager.ActiveManager;
-    if (manager == null || !manager.IsInitialized) return;
-    manager.Events.OnRoomRosterChanged += HandleRosterChanged;
+    if (_events != null || manager == null || !manager.IsInitialized) return;
+    _events = manager.Events;
+    _events.OnRoomRosterChanged += HandleRosterChanged;
 }
 
 private void OnDisable()
 {
-    ConvaiManager manager = ConvaiManager.ActiveManager;
-    if (manager == null) return;
-    manager.Events.OnRoomRosterChanged -= HandleRosterChanged;
+    if (_events == null) return;
+    _events.OnRoomRosterChanged -= HandleRosterChanged;
+    _events = null;
 }
 
 private void HandleRosterChanged(RoomRosterChanged e)
@@ -56,11 +65,13 @@ private void HandleRosterChanged(RoomRosterChanged e)
 }
 ```
 
-`ConvaiManager.Events` throws while the manager is still starting up. It becomes available at the end of the manager's own `Awake`, so `OnEnable` and `Start` are both safe places to subscribe — another component's `Awake` is not, because Unity gives no ordering guarantee between two `Awake` calls. Guard on `ConvaiManager.IsInitialized` where you cannot control the order.
+`ConvaiManager.Events` throws while the manager is still starting up. It becomes available at the end of the manager's own `Awake`, so check initialization before subscribing; another component's `Awake` is not a reliable subscription point. Guard on `ConvaiManager.IsInitialized` where you cannot control the order.
 
 A character joining a live room is a world event, not a chat event — a nameplate over the character is usually the right place to show it, not the chat field. `ConvaiCharacter.RoomMembershipStatus` reports `Starting` while a given character is still being announced by the service, if you need the per-character state alongside the event.
 
 Also relevant on `ConvaiManager.Events`: `OnConversationTargetChanged` reports the conversation moving between characters, including its `Requested`/`Confirmed`/`Failed` phase, and `OnConversationAvailabilityChanged` reports whether the addressed character can hear the player yet. See [Conversation targeting](../conversation-targeting/README.md) and [Conversation availability](../conversation-availability/README.md).
+
+Refused edits also log an Error in the form `'<name>' could not join the room: <reason>` or `'<name>' could not leave the room: <reason>`, including a reported service code in the reason.
 
 ## The lower-level session events
 
@@ -124,13 +135,9 @@ public class MultiCharacterEventLogger : MonoBehaviour
 
 ## The ordering guarantee when the active character is removed
 
-Removing the membership that currently holds the interaction target produces two events in a fixed order: `InteractionTargetChanged` fires first, with the removed membership as `previous` and `null` as `current`, and `CharacterRemoved` fires second. Code that reacts to `CharacterRemoved` can rely on the interaction target already being cleared by the time it runs — no separate check of `ActiveMembershipId` is needed to avoid a stale read.
+An acknowledged removal with a replacement raises one atomic `InteractionTargetChanged(removed, replacement)` handover, then `CharacterRemoved`. There is no intermediate null-target callback. With no explicit replacement, 5.0 chooses a remaining Ready, enabled member at send time when possible. A service refusal can leave the original roster unchanged.
 
-{% hint style="warning" %}
-This cleared-target `InteractionTargetChanged` does not advance `RouteEpoch`. Removal clears `ActiveMembershipId` directly instead of going through the epoch-guarded target update, so a subscriber that reacts to target changes only by comparing `RouteEpoch` misses this event. Key any such logic off the event itself, not off a `RouteEpoch` change, if it must also react to a target cleared by removal.
-{% endhint %}
-
-Passing a replacement target does not suppress that first event. The SDK applies the removal before it applies the new target, so a removal with a replacement fires `InteractionTargetChanged` twice: once with `null` as `current`, then again with the replacement membership. Treat a `null` current target as a transition rather than a terminal state.
+A null current target can still occur when no replacement is applied, including unsolicited lifecycle removal. Subscribe to the event itself rather than inferring every change from `RouteEpoch`: acknowledged commands and lifecycle-driven removal do not have identical epoch behavior. An accepted acknowledgement of an already-current target can also raise a callback with the same membership as both arguments.
 
 A related ordering guarantee applies to additions: when a new membership is inserted, `CharacterAdded` fires before `CharacterStatusChanged` for that same membership. `CharacterAdded` also fires exactly once for a given membership even when Convai's lifecycle message for it arrives before the roster-update acknowledgement does — the SDK deduplicates the two paths rather than raising the event twice.
 
@@ -147,7 +154,7 @@ A related ordering guarantee applies to additions: when a new membership is inse
 | Symptom | Cause | Fix |
 | --- | --- | --- |
 | `CharacterAdded` never fires for a character the scene started with | Those memberships were populated when the session object was created, not through the runtime-addition code path. | Read `session.Characters` right after connecting instead of waiting for `CharacterAdded`. |
-| `InteractionTargetChanged` fires with `current` as `null` unexpectedly | The membership holding the target was removed. This event fires whether or not a replacement target was supplied. | Expected behavior. Pass `replacementTargetMembershipId` to [Characters joining and leaving](update-the-roster.md#remove-a-character-from-the-roster) so a second event immediately restores a target, and treat the `null` as a transition. |
+| `InteractionTargetChanged` fires with `current` as `null` unexpectedly | No replacement was applied, or this was an unsolicited lifecycle removal. | Inspect current session state. An accepted removal with a Ready replacement produces a single handover event. |
 | An event you expected does not fire at all | The underlying acknowledgement was a stale or duplicate one and was discarded because `RosterEpoch` or `RouteEpoch` had already advanced past it. | Read `session.RosterEpoch` / `session.RouteEpoch` and compare against the state you expected before assuming the event was lost. |
 
 ## Next steps

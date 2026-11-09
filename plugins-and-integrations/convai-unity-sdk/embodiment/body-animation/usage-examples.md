@@ -1,7 +1,7 @@
 ---
 title: Body animation usage examples
 description: Script a character that walks to a target and greets on arrival, plays gestures on cue, points at scene objects, and reports custom travel.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 These four scenarios script `ConvaiBodyAnimationController` and its companions directly, for characters that need behavior beyond what an authored `ConvaiBodyAnimationSet` and backend actions trigger on their own. Each example assumes the character already has a working `ConvaiBodyAnimationController` — see [Body animation quick start](quick-start.md) if it does not yet.

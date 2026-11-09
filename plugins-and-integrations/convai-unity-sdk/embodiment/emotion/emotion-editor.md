@@ -1,18 +1,18 @@
 ---
 title: Emotion editor windows
 description: Reference for the Emotion editor window, covering its four tabs and the Emotion Timeline recorder opened from the Live tab.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-`Convai > Emotion Editor` opens a depth-only workshop for Emotion — a wider surface than the Inspector for the same character, reached from the component inspector's **Advanced settings & expressions →** link or from the menu directly. This page documents its four tabs and the Emotion Timeline window opened from the Live tab.
+`Convai > Emotion Editor` opens the detailed Emotion editor for a character, reached from the component inspector's **Advanced settings & expressions →** link or from the menu directly. This page documents its four tabs and the Emotion Timeline window opened from the Live tab.
 
 ***
 
 ## Open the window
 
-`Convai > Emotion Editor` (`ConvaiEmotionEditorWindow`, window title **Convai Emotions**) opens the window, already showing whichever `ConvaiEmotionController` is selected in the scene, or the first one found. The component inspector's **Advanced settings & expressions →** link opens the same window already targeting that character. Opening the window is never a required step — the Inspector carries the common setup path on its own; this window carries everything that does not fit there.
+`Convai > Emotion Editor` (`ConvaiEmotionEditorWindow`, window title **Convai Emotions**) opens the window, targeting the first `ConvaiEmotionController` found in the open scenes. The component inspector's **Advanced settings & expressions →** link opens the same window already targeting that character. Opening the window is never a required step — the Inspector carries the common setup path on its own; this window carries everything that does not fit there.
 
-The left pane lists every `ConvaiEmotionController` in the open scenes with a status dot — **Ready**, **Needs attention**, or **Not set up** — so a scene of characters can be swept without hunting through the Hierarchy.
+Choose a character in the **CHARACTERS** pane to change the target. The left pane lists every `ConvaiEmotionController` in the open scenes with a status dot — **Ready**, **Needs attention**, or **Not set up** — so a scene of characters can be swept without hunting through the Hierarchy.
 
 ***
 
@@ -23,7 +23,9 @@ The left pane lists every `ConvaiEmotionController` in the open scenes with a st
 | **Setup** | The same setup checklist the Inspector shows, full width, plus every finding with its fix. |
 | **Feel** | Every setting on the assigned `ConvaiEmotionProfile`, grouped into sections — the complete surface behind the Inspector's handful of controls. |
 | **Expressions** | What Convai resolved on this character's own face — naming convention, match confidence, and shape counts per mesh — followed by the authored expression recipes and material effects. |
-| **Live** | The character's current feeling, strength, held-for duration, resting mood, mouth influence, and a bar per emotion carrying a non-zero score. Available only in Play mode. |
+| **Live** | The character's current feeling, strength, held-for duration, resting mood, mouth influence, and a bar per emotion carrying a non-zero score. Readings require Play mode. Outside Play mode this tab shows a prompt and still offers **Open Emotion Timeline**. |
+
+The **Feel** tab starts with **Character Type**, followed by the complete profile sections. Editing a package-owned profile through **Feel** or **Expressions** creates a project copy and assigns it to the selected character. A shared project profile remains shared unless you choose **Make Unique**.
 
 A character with no `ConvaiEmotionProfile` assigned shows a **No personality assigned** message on **Feel** and **Expressions** instead of empty fields, since there is nothing on that character to tune yet.
 
@@ -37,17 +39,20 @@ The timeline plots a Play-mode recording of one character's emotion life over ti
 
 | Control | What it does |
 | --- | --- |
-| **Start** | Begins recording. Only available in Play mode with a target assigned. |
-| **Stop** | Ends the capture without discarding it. |
+| **Character** / **Use Selection** | Choose the controller directly or resolve it from the Hierarchy selection. |
+| **Start** / **Stop** | One button begins or stops recording; Start requires a target. Recording controls appear in Play mode. Stopping retains the samples. |
+| **Window** | Display the most recent 5–60 seconds; the default is 20 seconds. |
 | **Clear** | Empties the plot. |
 
-Samples are pulled from the target's public `Current` reading at a fixed sampling interval — the recorder never touches per-frame runtime state directly. Use the timeline to tune a character's temperament by eye, or to debug a reported "the mood feels wrong" session after the fact.
+Samples are pulled from the target's public `Current` reading at a 0.1-second sampling interval, retaining up to 600 samples in memory — the recorder never touches per-frame runtime state directly. Use the timeline to tune a character's temperament by eye, or to debug a reported "the mood feels wrong" session after the fact.
 
 {% hint style="info" %}
 The timeline is editor-only tooling. It has no runtime API and changes nothing about how a character behaves in a build.
 {% endhint %}
 
 ***
+
+<figure><img src="../../../../.gitbook/assets/unity-emotion-editor.png" alt="Emotion Editor in Feel mode with a sample character selected under CHARACTERS, Character Type set to Warm, and the Personality and Resting Mood sections expanded"><figcaption><p>Emotion Editor Feel mode for a sample character.</p></figcaption></figure>
 
 ## Next steps
 

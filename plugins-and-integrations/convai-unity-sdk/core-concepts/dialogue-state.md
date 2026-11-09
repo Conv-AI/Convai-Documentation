@@ -1,7 +1,7 @@
 ---
 title: Dialogue state
 description: Understand the eight-value dialogue state every embodiment module reads to know whether a character is idle, listening, or speaking.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Every embodiment module — Gaze, Body Animation, Body Language, and Emotion — reads the same eight-value `DialogueState` to know what beat of the conversation a character is in. Conversation Flow is the one module that decides this value; every other module only reads it. Understanding what each state means makes the rest of the embodiment modules' behavior legible.
@@ -19,7 +19,7 @@ Every embodiment module — Gaze, Body Animation, Body Language, and Emotion —
 | `Attending` | `2` | The character is orienting toward a focus target — for example the player initiating a turn — before the player has started speaking, or it is holding a conversationally engaged stance between beats before cooling back to ambient idle. |
 | `Thinking` | `3` | The player has finished speaking and the character has not yet replied. Models the natural cognitive pause: gaze can break, micro-saccades increase, and brows lift. |
 | `Speaking` | `4` | The character is currently speaking. LipSync owns the mouth, and emotion and gesture intensity scale with speech energy. |
-| `Reacting` | `5` | A short reaction beat after a significant event — unexpected player input, a high-intensity emotion arrival. Lets a module play a one-shot without disturbing the primary state. |
+| `Reacting` | `5` | A short reaction beat after a significant event — an explicit call to `PulseReaction`. Lets a module play a one-shot without disturbing the primary state. |
 | `Interrupted` | `6` | The character was interrupted mid-turn. Expressed as a brief freeze and a quick settle before transitioning back to `Attending`. |
 | `Settling` | `7` | Post-turn cooldown: the character has finished speaking, gaze softens, and emotion gradually decays back to its resting tone before handing off to `Attending`. |
 
@@ -31,11 +31,12 @@ The model is deliberately richer than a coarse idle/listening/talking split. Eac
 
 `ConvaiConversationFlowController` (`SDK/Modules/ConversationFlow/Components/ConvaiConversationFlowController.cs`) is the single authored source of truth for a character's dialogue state. Every other embodiment module only reads it; none of them redefine or infer their own version of it.
 
-The controller exposes two members on its own public surface:
+The controller exposes these members on its own public surface:
 
 | Member | Type | Description |
 | --- | --- | --- |
 | `Current` | `DialogueStateReading` | The character's current reading: a `Primary` state, the `BlendTo` state being transitioned toward, a `BlendWeight` in `[0, 1]`, `TimeInState` in seconds, and a normalized `EnergyLevel` in `[0, 1]` used to scale gesture and micro-behavior intensity. |
+| `PulseReaction(float durationSeconds = 0.6f)` | `void` | Requests a short Reacting beat. Non-positive durations do nothing; duration is capped at 1.5 seconds. Requests outside a conversation are dropped. |
 | `Changed` | `event Action<DialogueStateReading>` | Raised whenever the reading changes. |
 
 A reading always describes a blend between two states rather than a hard cut, so a module can cross-fade its output instead of snapping. When no transition is in flight, `Primary` and `BlendTo` are equal and `BlendWeight` is `0`.
@@ -46,7 +47,7 @@ A reading always describes a blend between two states rather than a hard cut, so
 
 A `ConvaiConversationFlowController` does not always have to be added by hand. `ConvaiBodyAnimationController` asks for one, so a character with body animation and no authored controller gets one automatically, and Convai logs once naming the character and why. The auto-added controller behaves exactly like one you add yourself — configure it afterward if the shipped timing does not fit your character.
 
-The other modules do not ask for one. Gaze, Body Language, and Emotion read the dialogue state if it is there and fall back to `Idle` if it is not. A character with only those modules and no body animation therefore never leaves `Idle`, and its behavior stays flat and unresponsive to the conversation. If that is what you are seeing, add a `ConvaiConversationFlowController` yourself.
+Gaze and Body Language also ensure a Conversation Flow controller during Play Mode. Emotion requests one when any listening, thinking, reacting, or interrupted strength is nonzero; these strengths default to zero. A module can still read `Idle` when no flow source is available. `Reacting` is entered through `PulseReaction`; a high-intensity emotion alone does not trigger it.
 
 {% hint style="info" %}
 The contract behind this reading, `IConversationFlowSource`, is `internal` to the package. Read `ConvaiConversationFlowController.Current` and subscribe to `Changed` — do not implement the interface yourself.

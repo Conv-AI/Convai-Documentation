@@ -1,7 +1,7 @@
 ---
 title: Conversation availability
 description: Find guides for checking whether a Convai character can hear the player right now, and reacting in your UI when it cannot.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Conversation availability is how the Convai Unity SDK answers whether the player can talk to a character right now, and what is in the way when they cannot. A connected room does not mean the addressed character can hear anything — the service has to announce the character first, and `ConvaiManager.ConversationAvailability` is the single place that answer lives. Everything in the SDK that takes player input already asks it.
@@ -17,7 +17,7 @@ Conversation availability is how the Convai Unity SDK answers whether the player
 
 ## Where availability comes from
 
-Availability is not a room-wide flag. It answers for `ConvaiManager.AddressedCharacter` — whoever the player is currently talking to — so the same room can report one character `Ready` while another is still `Preparing`. The same answer is also available per character on `ConvaiCharacter.ConversationAvailability`, for UI tied to one specific character rather than to whoever is currently addressed. See [How conversation availability works](how-availability-works.md) for the model behind the states.
+Availability is not a room-wide flag. It answers for `ConvaiManager.AddressedCharacter` — whoever the player is currently talking to — so the same room can report one character `Ready` while another is still `Preparing`. Per-character availability is available on `ConvaiCharacter.ConversationAvailability`, for UI tied to one specific character rather than to whoever is currently addressed. The manager also closes input during an in-flight target switch, so its answer can differ from that character's own answer. Group rooms refuse typed text even while available and require correlated push-to-talk. See [How conversation availability works](how-availability-works.md).
 
 ## Next steps
 

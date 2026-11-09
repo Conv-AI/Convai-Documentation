@@ -1,7 +1,7 @@
 ---
 title: Route character audio
 description: Control the shared room microphone, bind and mute each character's audio by identity, and measure character playback in Unity.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Control microphone capture, bind an `AudioSource` per participant, mute or disable a character's playback, and read a character's playback position in a multi-character session with `IConvaiRoomAudioService`. Use this page once your room is connected and its memberships have started reporting participant identities.
@@ -47,7 +47,8 @@ public class MultiCharacterAudioBinder : MonoBehaviour
                 continue;
             }
 
-            audioService.BindParticipantAudioOutput(membership.ParticipantIdentity, _characterAudioSources[i]);
+            if (!audioService.BindParticipantAudioOutput(membership.ParticipantIdentity, _characterAudioSources[i]))
+                Debug.LogWarning("[MultiCharacter] Audio binding was refused.");
         }
     }
 }
@@ -66,6 +67,8 @@ Call `SetParticipantAudioEnabled(string participantIdentity, bool enabled)` to m
 // Silence a secondary character without unbinding it
 audioService.SetParticipantAudioEnabled(secondaryMembership.ParticipantIdentity, false);
 ```
+
+Reserve each character voice `AudioSource` for voice. On native platforms the SDK uses a LiveKit carrier clip for 3D positioning; do not assign unrelated clips or attach audio filters to that GameObject. Put effects on an AudioMixer group and use a separate source for other sounds. Validate browser audio and native audio separately; 5.0 includes WebGL mute/remote-audio control handling that was absent from the earlier path.
 
 ## Route audio for other humans in the room
 
@@ -87,9 +90,7 @@ manager.Audio.SetCharacterMuted(characterId, true);
 manager.Audio.SetRemoteAudioEnabled(characterId, false);
 ```
 
-{% hint style="warning" %}
-`SetCharacterMuted`, `IsCharacterMuted`, `SetRemoteAudioEnabled`, `IsRemoteAudioEnabled`, and `TryGetCharacterAudioPlayhead` are all keyed by `characterId`, which is not unique in a room containing two memberships that share a `CharacterId` — see [Why an ID cannot be shared](character-identity.md#why-an-id-cannot-be-shared). Each resolves to the first membership carrying that character ID, so none of them can target one instance once a clone is present in the room. Use `BindParticipantAudioOutput` and `SetParticipantAudioEnabled`, keyed by `ParticipantIdentity`, whenever the room may contain clones — they are the only participant-level controls precise enough for that case.
-{% endhint %}
+Character-ID controls are unambiguous for a roster the SDK builds because duplicate Character IDs are rejected. Prefer `ParticipantIdentity` for human participants and memberships without a local character binding.
 
 ## Enable playback on platforms that require a user gesture
 
@@ -105,7 +106,7 @@ public void OnEnableAudioButtonClicked()
 
 ## Measure a character's playback position
 
-`TryGetCharacterAudioPlayhead(string characterId, out double playedSeconds)` reads how many seconds of a character's audio have actually been rendered to the output device since its current playback signal started. Like the mute controls above, it is keyed by `characterId` and resolves to the first matching membership, so it cannot measure one clone separately from another. The playhead freezes during an underrun and accounts for any drift-correction skips, so it reflects what the player actually heard rather than a wall-clock estimate. The method returns `false` when the current platform's audio stream does not expose a playhead — fall back to a wall-clock timer in that case rather than treating `playedSeconds` as valid.
+`TryGetCharacterAudioPlayhead(string characterId, out double playedSeconds)` reads how many seconds of a character's audio have actually been rendered to the output device since its current playback signal started. Like the mute controls above, it is keyed by the unique `characterId` in an accepted SDK roster. The playhead freezes during an underrun and accounts for any drift-correction skips, so it reflects what the player actually heard rather than a wall-clock estimate. The method returns `false` when the current platform's audio stream does not expose a playhead — fall back to a wall-clock timer in that case rather than treating `playedSeconds` as valid.
 
 ```csharp
 if (audioService.TryGetCharacterAudioPlayhead(characterId, out double playedSeconds))
@@ -119,7 +120,6 @@ if (audioService.TryGetCharacterAudioPlayhead(characterId, out double playedSeco
 | `BindParticipantAudioOutput` returns `false` | `participantIdentity` was empty when the call ran. | Wait for the membership's `CharacterStatusChanged` or `CharacterAdded` event before binding, then read `ParticipantIdentity` again. |
 | `SetParticipantAudioEnabled` returns `false` | No `AudioSource` is bound for that participant identity. | Call `BindParticipantAudioOutput` for that identity first. |
 | A secondary character produces no audio even after binding | The bound identity does not match the membership's actual `ParticipantIdentity`, often from binding by `CharacterId` instead. | Re-read `CharacterRoomMembership.ParticipantIdentity` from `session.Characters` and rebind. |
-| `SetCharacterMuted` or `SetRemoteAudioEnabled` appears to affect the wrong instance | The room holds two memberships sharing one `CharacterId`, and the character-ID-keyed call cannot distinguish them. | Switch to `SetParticipantAudioEnabled`, keyed by `ParticipantIdentity`, for that character. |
 | `EnableAudioPlayback` has no effect | `CanEnableAudioPlayback` was `false` when the call ran. | Check `CanEnableAudioPlayback` before calling, and trigger `EnableAudioPlayback` from a UI click or tap handler on platforms where `RequiresUserGestureForAudio` is `true`. |
 | `TryGetCharacterAudioPlayhead` returns `false` | The current platform's audio stream does not expose a playhead. | Track elapsed time with a wall-clock timer instead. |
 

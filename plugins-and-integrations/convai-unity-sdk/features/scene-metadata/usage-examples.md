@@ -1,10 +1,10 @@
 ---
 title: Scene metadata usage examples
 description: Complete Scene Metadata setups for medical training, industrial drills, museum guides, runtime object updates, and tracked property state.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-The examples below cover realistic setups for training simulations and interactive experiences. Each is self-contained: Inspector configuration is described first, followed by any scripting needed to complete the behavior. Start with whichever matches your current complexity level.
+The examples below cover realistic setups for training simulations and interactive experiences. Inspector configuration is followed by scripts or explicitly marked member fragments. Actual responses must be tested; authored descriptions do not guarantee a particular answer. Start with whichever matches your current complexity level.
 
 ## Example 1: Medical training simulation — anatomy lab
 
@@ -23,10 +23,10 @@ Add `ConvaiObjectMetadata` to each anatomy model and equipment item:
 
 Add `ConvaiSceneMetadataCollector` to the `ConvaiManager` GameObject. Enable **Collect On Start**.
 
-No scripting required. The instructor character receives all descriptions at session start and can answer anatomy questions grounded in the actual scene.
+No scripting required. With one registered character, a new room sends the whole list in its connect request; with more than one character, after a rejoin, and for any later change, the list follows the connected/current-target route. Use the collector for a separate full-list send, then test the instructor's response.
 
-{% hint style="success" %}
-The trainee asks: "What models are available for study?" The instructor responds: "On the center table you have a life-size heart model showing all four chambers, and to your left on the display rack is an adult liver model with color-coded hepatic veins."
+{% hint style="info" %}
+An illustrative test, not a guaranteed response: the trainee asks: "What models are available for study?" The instructor responds: "On the center table you have a life-size heart model showing all four chambers, and to your left on the display rack is an adult liver model with color-coded hepatic veins."
 {% endhint %}
 
 ## Example 2: Industrial safety drill — phase-based metadata
@@ -72,7 +72,7 @@ public class SafetyDrillController : MonoBehaviour
 }
 ```
 
-Each phase sends only its relevant props to Convai. The instructor adapts its knowledge to the current drill context without knowing about props from other phases.
+The setters schedule updates and the collector attempts a current-target send. Disabling Collect On Start does not disable the automatic character path. Test that phase data is reflected in the intended conversation.
 
 ## Example 3: Interactive museum — exhibit guide
 
@@ -88,9 +88,9 @@ Add `ConvaiObjectMetadata` to each exhibit's root GameObject. Write descriptions
 | Roman Legionnaire Armor  | Full legionnaire battle armor on a mannequin in Room 3, left wall. Dated to 1st century AD.                                             |
 | Viking Longship Fragment | Preserved bow section of a 9th-century Viking longship, suspended from the ceiling in the Norse gallery.                                |
 
-Enable **Collect On Start**. When a visitor asks "What is in Room 2?", the guide responds with accurate, description-grounded information.
+Enable **Collect On Start**. Then test a question such as "What is in Room 2?" against the authored information.
 
-Write descriptions from the perspective of what a knowledgeable guide would say. Include room location, visual identifiers, and relevant context. The AI uses the `Object Description` field verbatim as grounding for its responses.
+Write descriptions from the perspective of what a knowledgeable guide would say. Include room location, visual identifiers, and relevant context. The description is supplied as scene context; verify factual accuracy and the resulting response.
 
 ## Example 4: Runtime context update — combining Scene Metadata and Dynamic Context
 
@@ -99,6 +99,7 @@ Write descriptions from the perspective of what a knowledgeable guide would say.
 ### Excluding a cleared object
 
 ```csharp
+// Member fragment in a MonoBehaviour with an assigned _collector.
 public void OnHazardCleared(ConvaiObjectMetadata hazardMetadata)
 {
     // Remove from AI context without destroying the GameObject
@@ -112,6 +113,7 @@ public void OnHazardCleared(ConvaiObjectMetadata hazardMetadata)
 ### Adding a new object at runtime
 
 ```csharp
+// Member fragment in the same MonoBehaviour.
 public void OnToolDelivered(GameObject toolObject, string toolName, string toolDescription)
 {
     // Add metadata component at runtime
@@ -185,15 +187,19 @@ public class DoorSensorMonitor : MonoBehaviour
 }
 ```
 
-`SetTrackedPropertyValue` builds the state key `LoadingBayDoor.SensorFault` and fans the new value out to every connected character immediately, bypassing the poll timer entirely.
+`SetTrackedPropertyValue` builds the state key `LoadingBayDoor.SensorFault` and updates registered characters' Dynamic Context state without waiting for the poll timer. Actual sending still follows the context transport and conversation route.
 
 ### Expected outcome
 
-When a trainee asks "Is the loading bay door open?", the trainer answers from the current `LoadingBayDoor.DoorStatus` value instead of a description written at session start. If `OnSensorJamDetected()` fires while the door is moving, the `MustRespond` reaction on `SensorFault` makes the trainer speak up immediately:
-
-> "Stop — the loading bay door sensor reported a jam. Do not proceed until maintenance clears it."
+Test whether the trainer answers a door-status question using the current value. `MustRespond` requests a reaction; it does not establish immediate speech or a specific line. In a group conversation, the SDK applies the changed value silently to members and emits one `LoadingBayDoor.SensorFault is now Jammed.` scene event. The service arbitrates the response.
 
 If the component is disabled and re-enabled, `DoorStatus` re-reads `LoadingBayDoorController.Status` through its **Source Component** again, while `SensorFault` — which has no runtime source — resets to its **Initial Value** of `None`. Disabling or destroying `ConvaiObjectMetadata` removes both state keys from every character that was tracking them.
+
+## Example 6: Several extinguishers as one object
+
+Create a root World Object named `Fire Extinguisher` and add **Convai > Logical Object Group**. Add each physical extinguisher's World Object to **Physical Members**. The root supplies one description; active copies are represented through it. Runtime resolution selects a nearby active member rather than navigating to an empty group root.
+
+Enable **Include Spatial Context** on relevant World Objects when the conversation needs location, visibility, and motion facts. For a logical group, enable it on the root's World Object; members produce no facts of their own. Verify the per-character 30-metre and 24-fact selection limits. Add standing positions to each physical copy when approach direction matters; see [Group objects and add standing positions](group-objects-and-standing-positions.md).
 
 ## Next steps
 

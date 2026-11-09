@@ -3,26 +3,28 @@ title: Profiles and mappings
 description: >-
   Reference for the profile and map assets that control how Convai blendshape
   data reaches your character's face mesh, and when to create custom ones.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 The lip sync system uses two `ScriptableObject` types to describe how blendshape data flows from Convai to your character's mesh: **profiles** and **maps**. Most setups work with the bundled assets — create custom ones only when your rig uses non-standard blendshape names or a transport format not covered by the built-in profiles.
 
+
+<figure><img src="../../../../.gitbook/assets/unity-lip-sync-map.png" alt="Bundled ARKit lip-sync map with coverage, read-only notice, and configuration fields"><figcaption><p>The bundled ARKit map is read-only. Create a project copy before editing; the displayed values belong to this shipped map.</p></figcaption></figure>
 ## What is a profile?
 
-A **profile** defines the transport format — it tells the SDK which blendshape channel names to expect in the data stream from Convai. The profile's ID (e.g., `arkit`, `metahuman`, `cc4_extended`) is what you enter in `ConvaiLipSyncComponent._lockedProfileId`.
+A **profile** defines the transport format — it tells the SDK which blendshape channel names to expect in the data stream from Convai. Choose its display name in the component's **Profile** popup. Profile ID identifies the local profile; the transport token is the format requested from Convai. They differ for MetaHuman.
 
 **Three profiles are bundled:**
 
-| ID             | Display name | Format                           |
-| -------------- | ------------ | --------------------------------- |
-| `arkit`        | ARKit        | 61 standard ARKit channels        |
-| `metahuman`    | MetaHuman    | 251 MetaHuman CTRL expressions    |
-| `cc4_extended` | CC4 Extended | 170 Character Creator 4 channels  |
+| ID | Display name | Transport token | Format |
+|---|---|---|---|
+| `arkit` | ARKit | `arkit` | 61 standard ARKit channels        |
+| `metahuman` | MetaHuman | `mha` | 251 MetaHuman CTRL expressions    |
+| `cc4_extended` | CC4 Extended | `cc4_extended` | 170 Character Creator 4 channels  |
 
-The three bundled profiles are built into the SDK — there is no `.asset` file to find in the Project window for them, and nothing to import. Type the ID directly into `_lockedProfileId`.
+The three bundled profiles are built into the SDK — there is no `.asset` file to find in the Project window for them, and nothing to import. Select the display name in **Profile**.
 
-Create a custom profile only if your character uses a proprietary blendshape format that Convai streams under a custom ID. In practice, this is rare — most pipelines use one of the three bundled formats.
+Create a custom profile only if your character uses a proprietary blendshape format that Convai streams under a custom transport token. In practice, this is rare — most pipelines use one of the three bundled formats.
 
 ## What is a map?
 
@@ -42,6 +44,12 @@ When `ConvaiLipSyncComponent._mapping` is left empty, the SDK selects the matchi
 `ConvaiLipSyncMapAsset.Mappings` exposes its entries as `IReadOnlyList<BlendshapeMappingEntry>` — code that reads a map at runtime cannot add, remove, or reorder entries. Author mappings in the Editor; see [Create a custom lip sync map](create-a-custom-blendshape-map.md).
 
 Create a custom map when your character's blendshape names differ from the expected names, or when you need to adjust weight multipliers to match your rig's calibration.
+
+## Registries
+
+`ConvaiLipSyncProfileRegistry` adds profiles to the catalog from `Resources/LipSync/ProfileRegistries/`. Lower priorities load first; a higher-priority registry can override the same profile ID. The three built-in profiles are available without importing a sample.
+
+`ConvaiLipSyncDefaultMapRegistry` supplies default maps for profiles. The resolver loads `Resources/LipSync/DefaultMaps/LipSyncDefaultMapRegistry`. An explicitly assigned compatible map takes precedence over the profile's default; if neither resolves, the SDK uses a disabled fallback map. For a single character, assign the map in **Mapping** instead of changing global default resolution.
 
 ## When to create custom assets
 

@@ -1,197 +1,104 @@
 ---
 title: Audio and microphone issues
-description: Fix microphone input failures and character voice playback issues on all Convai Unity SDK platforms, including Android, iOS, and WebGL.
-last_reviewed: "4.5.0"
+description: Diagnose microphone capture, permission, publication, and character playback failures, including native and browser audio differences.
+last_reviewed: "5.0.0-preview"
 ---
 
-Audio failures in the Convai Unity SDK fall into two categories: microphone input problems that prevent the SDK from capturing the player's voice, and audio output problems that prevent the character's voice from playing. Both categories produce specific error codes and console messages that point directly to the cause. This page covers both, with platform-specific guidance for Android, iOS, and WebGL.
+Separate microphone input from character playback when diagnosing audio. A published microphone does not prove that playback is unlocked, and a connected room does not prove that either path is ready. Read `ConvaiSessionEventRelay.OnSessionError` and its message before changing audio settings.
 
 ## First-line check
 
 {% stepper %}
 {% step %}
-### Check the console for audio error codes
+### Check the session's microphone policy
 
-Open the Unity Console and filter for `audio`. Audio failures surface as session errors on `ConvaiSessionEventRelay.OnSessionError`. Look for these error codes:
-
-* `audio.mic_unavailable` — no microphone device found
-* `audio.mic_permission_denied` — user denied permission, or platform requires a user gesture
-* `audio.mic_publish_failed` — microphone track could not be published to the room
-
-Also look for console messages prefixed with `[RoomAudioRuntimeAdapter]` or `[AudioTrackManager]` — these give more detail than the error code alone.
+A text-only session sets `LocalAudioPolicy.AllowMicrophone` to `false`. `SetMicrophoneAllowed(false)` can also turn off capture at runtime. A refused listening operation can report `audio.mic_not_allowed`; the capture path skips microphone creation and permission requests. If text-only behavior is intended, use typed input. Otherwise enable the policy before starting listening again.
 {% endstep %}
-
 {% step %}
-### Verify ConvaiAudioOutput is on the correct GameObject
+### Read the audio error and platform detail
 
-`ConvaiAudioOutput` must be on the **same** GameObject as `ConvaiCharacter`. The component has `[RequireComponent(typeof(ConvaiCharacter))]` — Unity enforces this when you add it via Add Component, but it may be violated by manual prefab editing or copy-paste.
-
-If `ConvaiAudioOutput` is on a different GameObject, you will see this error on Play:
-
-`[ConvaiAudioOutput] ConvaiCharacter component not found on {gameObjectName}`
-
-That GameObject also needs an `AudioSource` component. Unity adds it automatically via `[RequireComponent(typeof(AudioSource))]` when you add `ConvaiAudioOutput`, but verify it is present and enabled.
-
-`ConvaiAudioOutput` is used for character voice playback on native platforms (Windows, macOS, Linux, Android, iOS). On WebGL, audio is routed through the browser audio context — `ConvaiAudioOutput` is not used and does not need to be present on WebGL builds.
+Filter the Console for `Audio` or `RoomAudioRuntimeAdapter`. `audio.mic_permission_denied` indicates refused access; `audio.mic_unavailable` indicates no usable device; `audio.mic_publish_failed` covers other publication failures. Browser error messages retain the rejection reason and can identify a host-page permission policy.
 {% endstep %}
-
 {% step %}
-### Check the AudioSource settings
+### Inspect the character's output component
 
-Select the NPC GameObject and inspect the `AudioSource` component:
+Keep `ConvaiAudioOutput`, `ConvaiCharacter`, and `AudioSource` on the same `GameObject`. Unity's required-component attributes add the dependencies when you add the output component normally. On native platforms the voice plays through the `AudioSource`. On WebGL playback occurs in the browser, but `ConvaiAudioOutput` still exposes character gain, mute, and voice-level controls.
 
-* **Volume** must be greater than 0
-* **Mute** must be unchecked
-* **AudioMixer** output group (if assigned) must not be at −80 dB
-* **Spatial Blend** should be 0 (2D) for UI-style characters or 1 (3D) for in-scene positioned characters. A spatial blend of 1 with the camera far from the character will attenuate the audio.
-
-Also check `ConvaiAudioOutput` own fields on the NPC Inspector:
-
-| Field | Default | What it controls |
-| --- | --- | --- |
-| **Volume** | 1.0 | Character voice gain (0–1). Applied on top of the AudioSource volume. |
-| **Is Muted** | false | Mutes character voice independently of the AudioSource mute toggle. |
-| **Use 3D Audio** | true | Enables 3D spatial audio. Set to false for UI-style characters. |
-| **Min Distance** | 1 | Distance at which audio begins to attenuate. |
-| **Max Distance** | 50 | Distance at which audio reaches minimum volume. |
+Set volume and spatial settings on `ConvaiAudioOutput`. It writes `AudioSource.volume`, `spatialBlend`, minimum and maximum distance, logarithmic rolloff, and `playOnAwake = false`. Manually changing those `AudioSource` values can be overwritten. Also inspect `AudioSource.mute`, the assigned mixer group, and the scene's audio listener on native platforms.
 {% endstep %}
-
 {% step %}
-### Confirm a user gesture triggers the connection (WebGL)
+### Unlock browser playback when required
 
-Browsers block microphone access until the user has interacted with the page. In WebGL builds, `ConvaiManager.ConnectAsync()` must be called from within a user gesture handler (e.g., a button `onClick` event), not automatically on scene load.
+Microphone publication no longer aborts merely because browser playback requires a user gesture. Capture permission and playback autoplay are separate gates. If a WebGL conversation connects but the character is inaudible, use an explicit user interaction to call the scene room manager's `EnableAudioPlayback()` or `EnableAudioAndStartListening()`.
 
-If the SDK connects before a gesture, mic publishing is aborted with:
-
-`[RoomAudioRuntimeAdapter] Microphone publish aborted because audio playback requires a user gesture.`
+Check `CanEnableAudioPlayback`, `RequiresUserGestureForAudio`, and `IsAudioPlaybackActive` to drive that button. The SDK also handles the first qualifying interaction through its browser audio unlock path. Verify playback in the built page, not only in the Editor.
 {% endstep %}
 {% endstepper %}
 
 ## Audio error codes
 
-| Error code | Description | Common cause |
+| Code | Client interpretation | Fix and verification |
 | --- | --- | --- |
-| `audio.mic_unavailable` | No microphone device was found | No microphone connected to the machine |
-| `audio.mic_permission_denied` | Permission to access the microphone was denied | User rejected the system permission dialog; WebGL called before user gesture |
-| `audio.mic_publish_failed` | Microphone track could not be published to the LiveKit room | Room not connected; internal factory not registered |
+| `audio.mic_not_allowed` | The session forbids microphone capture | Keep text input for text-only use, or enable microphone policy and retry listening |
+| `audio.mic_permission_denied` | Platform or browser refused capture | Inspect system/site permission and the detailed message; retry after granting access |
+| `audio.mic_unavailable` | No usable microphone or the platform-default fallback failed | Connect/select a microphone and retry listening |
+| `audio.mic_publish_failed` | Source creation or track publication failed for another reason | Inspect the detailed exception and room state; retry after resolving it |
 
-## ConvaiAudioOutput setup errors
+`Microphone publish aborted because the room audio path is not initialized.` means the audio path is not ready. `Microphone publish failed: IMicrophoneSourceFactory not registered.` means the required source factory is missing. These are separate from browser autoplay.
 
-### Component on wrong GameObject
+## Character output settings
 
-**Console message:** `[ConvaiAudioOutput] ConvaiCharacter component not found on {gameObjectName}`
+| Field | Script default | Effect |
+| --- | --- | --- |
+| **Volume** | `1` | Replaces native source volume; it is not multiplied by a manually set source volume |
+| **Is Muted** | `false` | Silences this character's output |
+| **Use 3D Audio** | `true` | Uses native spatial attenuation |
+| **Min Distance** | `5` | Native distance within which voice is at full volume |
+| **Max Distance** | `50` | Native attenuation distance setting |
 
-**Cause:** `ConvaiAudioOutput` is not on the same GameObject as `ConvaiCharacter`.
-
-**Fix:** Select the NPC in the Hierarchy. Confirm `ConvaiAudioOutput`, `ConvaiCharacter`, and `AudioSource` are all on the same GameObject. Move `ConvaiAudioOutput` if needed.
-
-**Verify:** Re-enter Play Mode. The `[ConvaiAudioOutput] ConvaiCharacter component not found` error no longer appears in the Console.
+Browser voice playback does not apply Unity's distance rolloff or `AudioListener.volume`. Check the component's gain and mute controls there. [Connection and audio indicators](../ui-and-presentation/show-connection-and-audio-levels.md) explains the measurement availability properties.
 
 ## Platform permissions
 
 {% tabs %}
 {% tab title="Android" %}
-Android requires the `RECORD_AUDIO` permission. Without it, the microphone is unavailable and `audio.mic_permission_denied` fires.
+The permission service uses Android's `RECORD_AUDIO` permission. Verify that the built manifest includes `android.permission.RECORD_AUDIO`. The SDK requests access through its permission service when capture is allowed. After a denial, inspect the device's application permissions before retrying listening.
 
-**Step 1 — Add the permission to AndroidManifest.xml:**
-
-If you do not have a custom `AndroidManifest.xml`, create one at `Assets/Plugins/Android/AndroidManifest.xml`. Add the following line inside the `<manifest>` tag:
+If you maintain a custom manifest, the permission declaration is:
 
 ```xml
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
 ```
 
-**Step 2 — No Player Settings field to configure:**
-
-Android has no **Microphone Usage Description** field in Player Settings — that field exists only for iOS and macOS builds. The SDK requests the `RECORD_AUDIO` permission automatically at runtime through `ConvaiPermissionService`, using Unity's `Permission.RequestUserPermission` API. Beyond the manifest entry from Step 1, no additional Player Settings configuration is required.
-
-**Runtime behavior:** Android shows a system permission dialog the first time the microphone is requested. If the user denies it, `audio.mic_permission_denied` fires. The SDK does not re-request the permission automatically — your application must guide the user to grant it in device Settings if they denied it initially.
-
-If the permission dialog never appears, check that the `RECORD_AUDIO` permission is present in the manifest. A missing permission suppresses the dialog and silently denies access.
+Verify on the device that granting permission allows capture. The local Settings Panel microphone test can help distinguish capture from a conversation-routing issue.
 {% endtab %}
+{% tab title="macOS and iOS" %}
+Open **Convai → Settings → Setup Health** and inspect **macOS / iOS Microphone Usage Description**. Its **Setup** action fills the microphone usage description used by Apple builds. Review the text for your application before building. iOS also has **Prepare iOS for Recording** in Setup Health.
 
-{% tab title="iOS" %}
-iOS requires `NSMicrophoneUsageDescription` in `Info.plist`. Without it, the app crashes immediately when the microphone is first accessed.
-
-**Set the description in Player Settings:**
-
-Open **Edit → Project Settings → Player → iOS → Other Settings**. Set **Microphone Usage Description** to a user-facing explanation, for example: `"Used for voice interaction with AI characters."`
-
-Unity writes this value to `Info.plist` during the build.
-
-**Runtime behavior:** iOS shows a system permission dialog on first mic access. If the user denies it, `audio.mic_permission_denied` fires. The SDK does not re-request the permission — direct the user to iOS **Settings → Privacy & Security → Microphone** to re-enable it.
-
-{% hint style="danger" %}
-Submitting an iOS build to the App Store without `NSMicrophoneUsageDescription` causes an automatic rejection. Set this field even if microphone access is optional in your training simulation or experience.
-{% endhint %}
+If access was denied, inspect the application's microphone permission in system settings. A successful Editor conversation does not verify the built application's permission configuration. Rebuild and test capture on the target platform.
 {% endtab %}
-
 {% tab title="WebGL" %}
-WebGL has two constraints that affect microphone access:
+The browser decides capture permission. The SDK classifies `NotAllowedError`, `SecurityError`, and `PermissionDeniedError` as `audio.mic_permission_denied`. `NotFoundError`, `OverconstrainedError`, and `DevicesNotFoundError` become `audio.mic_unavailable`; other capture rejections become `audio.mic_publish_failed`.
 
-**1. Single placeholder device.** The SDK's WebGL microphone source factory (`WebGLMicrophoneSourceFactory.GetAvailableDevices()`) returns one placeholder entry, `"Default Microphone"`, instead of one entry per physical device. The browser handles actual device selection at its own `getUserMedia` permission prompt — the SDK cannot enumerate or select a specific physical microphone on this platform.
+When the page's Permissions Policy blocks the microphone, the SDK message says the browser refused access without asking. An embedding host must grant microphone access, such as `allow="microphone"` on its iframe, in addition to any applicable host policy. A host that does not grant access cannot provide voice input; text input can still work.
 
-**2. User gesture required.** Browsers enforce a policy that microphone access can only be requested within a user gesture handler (a button click, key press, etc.). Calling connect automatically on scene load — without a prior user interaction — results in:
-
-`[RoomAudioRuntimeAdapter] Microphone publish aborted because audio playback requires a user gesture.`
-
-**Recommended pattern for WebGL:**
-
-Add a **Start Conversation** button to your scene. Wire its `onClick` to call your connect logic. Do not connect on `Start()` or `Awake()`.
-
-```csharp
-// Called from a UI Button onClick event — this IS a user gesture
-[SerializeField] private ConvaiManager _convaiManager;
-
-public void OnStartButtonClicked()
-{
-    _ = _convaiManager.ConnectAsync();
-}
-```
-
-{% hint style="danger" %}
-**HTTPS is required for microphone access.** Browsers only grant microphone access on HTTPS pages. An HTTP deployment will silently fail to acquire the microphone, resulting in `audio.mic_permission_denied`. The only exception is `localhost` — most browsers allow microphone access on `http://localhost` for local development.
-{% endhint %}
+Check the browser's site permission and secure deployment configuration. The SDK exposes a default microphone placeholder on WebGL; browser capture controls the actual device. The Settings Panel's local recording test is not supported in a WebGL player. Validate capture and playback separately in the deployed page.
 {% endtab %}
 {% endtabs %}
 
 ## Troubleshoot audio failures
 
-| Symptom | Likely cause | Fix | Verify |
-| --- | --- | --- | --- |
-| `audio.mic_permission_denied` on Android | `RECORD_AUDIO` missing in `AndroidManifest.xml` | Add the permission; rebuild | App requests mic permission on launch; voice reaches character |
-| `audio.mic_permission_denied` on iOS | `NSMicrophoneUsageDescription` missing in Player Settings | Set the description; rebuild | App requests mic permission on first launch; voice reaches character |
-| `audio.mic_permission_denied` on WebGL | No user gesture before connect | Trigger connect from a UI button click | `audio.mic_permission_denied` no longer fires; mic input active |
-| `audio.mic_unavailable` | No microphone connected to the machine | Connect a microphone; check OS audio devices | `audio.mic_unavailable` no longer fires on connect |
-| `[ConvaiAudioOutput] ConvaiCharacter component not found on X` | `ConvaiAudioOutput` on wrong GameObject | Move it to the same GameObject as `ConvaiCharacter` | Error no longer appears in Console on Play |
-| Character transcript appears but no audio plays | `AudioSource` muted, volume 0, or mixer at −80 dB | Inspect the `AudioSource` component on the NPC | Character voice plays through NPC `AudioSource` |
-| Character audio plays on one ear only in 3D | `AudioSource.spatialBlend` set to 1 with camera too far | Reduce Max Distance on AudioSource or bring camera closer | Audio plays in both ears at appropriate distance |
-| `[RoomAudioRuntimeAdapter] Microphone publish aborted because the room audio path is not initialized.` | `ConnectAsync` not yet complete when mic publish was called | Wait for `OnSessionStateChanged` with `Connected` before publishing mic | Mic publishes without error after `Connected` state |
-| `[AudioTrackManager] PublishMicrophoneAsync aborted: LocalParticipant is null` | Room not connected when publish was attempted | Ensure full Connected state before any audio publish | Mic publishes without error |
-| `[AudioTrackManager] PublishMicrophoneAsync failed: track is null` | Track creation failed internally | Check SDK version; reinstall package | Mic publishes without error after reinstall |
-| `[RoomAudioRuntimeAdapter] Microphone publish failed: IMicrophoneSourceFactory not registered.` | Internal SDK wiring failure | Reinstall the SDK; verify package version is <code class="expression">space.vars.unity_sdk_version</code> | Mic publishes without error after reinstall |
-| Microphone works in Editor but not in a build | Missing build permissions | Check platform permission setup above | Mic activates in device build |
-
-## Console log reference
-
-These are the exact messages from the audio subsystem. Filtering the Console for `RoomAudioRuntimeAdapter` or `AudioTrackManager` shows them directly.
-
-| Message | Level | What it means |
+| Symptom | Cause to check | Fix and verification |
 | --- | --- | --- |
-| `[RoomAudioRuntimeAdapter] Microphone publish aborted because audio playback requires a user gesture.` | Warning | WebGL: connect triggered before a user gesture |
-| `[RoomAudioRuntimeAdapter] Microphone publish aborted because the room audio path is not initialized.` | Warning | Mic publish was called before the room audio path was ready |
-| `[RoomAudioRuntimeAdapter] Microphone publish failed: IMicrophoneSourceFactory not registered.` | Error | Internal factory missing — SDK installation issue |
-| `[RoomAudioRuntimeAdapter] Microphone publish failed while creating microphone source: {exception}` | Error | Exception during mic source creation — check exception message |
-| `[AudioTrackManager] PublishMicrophoneAsync aborted: LocalParticipant is null` | Error | Room not connected; no local participant |
-| `[AudioTrackManager] PublishMicrophoneAsync failed: track is null` | Error | Mic track creation returned null |
-| `[AudioTrackManager] Exception in PublishMicrophoneAsync: {exception}` | Error | Unexpected exception — check the exception details |
-| `[AudioTrackManager] SetMicMuted failed to set mute on MicrophoneSource: {exception}` | Error | Mute operation failed — usually a timing issue |
-| `[ConvaiAudioOutput] Registered AudioSource for character '{characterId}'` | Debug | AudioSource successfully registered (visible only in Editor or Development Build) |
-| `[ConvaiAudioOutput] ConvaiCharacter component not found on {name}` | Error | `ConvaiAudioOutput` is on the wrong GameObject |
+| No permission prompt in a text-only session | Microphone policy disables capture | Expected; verify typed input works |
+| No prompt in an embedded browser build | Host Permissions Policy blocks capture | Ask the host to grant microphone access; retry and inspect the detailed error |
+| Player transcript arrives but no character audio plays | Playback is locked, muted, or not routed | Unlock browser playback or inspect native output; verify a voice-level reading when available |
+| Native voice becomes quiet with distance | Spatial attenuation is enabled | Adjust output distance settings or disable 3D audio, then test from the same position |
+| Native source volume changes back | Output component owns its volume | Set **Volume** on `ConvaiAudioOutput`; verify the source reflects it |
+| Microphone is available but the character does not hear speech | Input policy, mute, or targeting is incorrect | Inspect conversation availability and microphone policy; test a complete turn |
+| Character output reports a missing character component | Components are on different objects | Place output and character together; re-enter Play Mode and check the error is gone |
 
 ## Next steps
-
-For how to enable verbose audio logging and use the `Audio` log category override to see all SDK audio messages, see the Debug Tools Reference.
 
 {% content-ref url="debug-tools-reference.md" %}
 [Debug tools reference](debug-tools-reference.md)

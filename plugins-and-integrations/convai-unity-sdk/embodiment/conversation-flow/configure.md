@@ -1,7 +1,7 @@
 ---
 title: Configure conversation flow
 description: Add the Conversation Flow module to a character, or let Convai auto-create it, then assign a profile to tune its timing.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Add `ConvaiConversationFlowController` to a character yourself, or let Convai add it automatically, then assign a `ConvaiConversationFlowProfile` to change how quickly it moves between dialogue states. Use this page once you want direct control over the module's timing instead of relying on its built-in defaults.
@@ -14,7 +14,7 @@ Add `ConvaiConversationFlowController` to a character yourself, or let Convai ad
 - Optional but recommended: an embodiment module that reads dialogue state — Gaze, Body Animation, Body Language, or Emotion — already added, so tuning Conversation Flow has a visible effect. Conversation Flow alone changes nothing about how the character looks; it only tracks state for the other modules to read.
 
 {% hint style="info" %}
-You rarely need this page for its first step. If your character already has Body Animation with `Auto Create Conversation Flow` enabled (the default), Convai adds the controller for you the first time it is needed. Skip to [Assign a profile](#assign-a-profile) if that is your situation.
+You rarely need this page for its first step. If your character already has Body Animation with **Auto-Add Conversation Flow** enabled (the default), Convai adds the controller for you the first time it is needed. Gaze and Body Language also request one automatically in Play mode. Skip to [Assign a profile](#assign-a-profile) if that is your situation.
 {% endhint %}
 
 ***
@@ -63,7 +63,7 @@ Select the character and drag the profile asset onto the **Flow Profile** field 
 {% step %}
 ### Tune the timing fields
 
-Open the profile asset and adjust its fields under **Transition**, **Dialogue Beats**, and **Energy** — for example, lower **Thinking Max Hold** for a character that should reply faster, or raise **Idle Return Delay** to keep the character attentive longer between turns. See [Conversation flow reference](reference.md) for every field, its range, and its default.
+Open the profile asset and adjust its fields under **Transition**, **Dialogue Beats**, and **Energy** — for example, lower **Thinking Max Hold** to return from the local Thinking presentation to Attending sooner, or raise **Idle Return Delay** to keep the character attentive longer between turns. These settings do not reduce backend response latency. See [Conversation flow reference](reference.md) for every field, its range, and its default.
 {% endstep %}
 {% endstepper %}
 
@@ -76,10 +76,12 @@ A profile asset can be shared across multiple characters. Editing it changes the
 Enter Play mode, select the character, and expand the **Live** section on the `ConvaiConversationFlowController` component (or open **Convai > Embodiment Editor**, select the **Live** tab). Start a conversation and confirm **State** moves through `Listening`, `Thinking`, and `Speaking` as the conversation progresses, instead of staying on `Idle`.
 
 {% hint style="success" %}
-**Expected result:** **State** changes away from `Idle` shortly after you start speaking, and **Time In State** resets to `0.0s` each time it changes.
+**Expected result:** **State** changes away from `Idle` shortly after you start speaking, and **Time In State** resets on each state change.
 {% endhint %}
 
 ***
+
+The component's **Live** section also shows **Blend To**, **Blend**, **Energy Level**, **Heard By**, **Ended By**, and **Service Late**. **Heard By** identifies Lip Sync, Voice, or Service Only evidence. **Ended By** identifies Voice, Lip Sync, or Service; **Service Late** reports the observed lag in milliseconds when available. These extra evidence fields belong to the component Inspector, not the Embodiment Editor's Conversation section.
 
 ## Troubleshooting
 

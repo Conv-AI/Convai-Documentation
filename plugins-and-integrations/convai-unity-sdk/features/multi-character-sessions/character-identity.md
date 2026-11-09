@@ -1,7 +1,7 @@
 ---
 title: Character identity
 description: Reference for assigning Character IDs to characters sharing a Convai room, and the checks that catch two characters using one ID.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Every `ConvaiCharacter` in a room needs its own Character ID. Two characters cannot share one, and the SDK checks for this both while editing the scene and when the room connects.
@@ -40,7 +40,17 @@ rather than each being answered separately. Give each character its own Characte
 dashboard.
 ```
 
-This check runs on both paths into a room's roster: the full cast submitted at connect, and a single character added later while the room is already up. Either way the room does not connect — or does not accept the addition — rather than connecting with the two characters colliding.
+At connect, this is a `ConvaiOperationException` surfaced with `ConnectionFailed`. `AddCharacterAsync` rejects a duplicate ID with `ArgumentException` for `character`. Both checks run before sending the invalid roster change.
+
+## Character versions in a shared room
+
+Every roster member must use **Character Version > Live**. Specific/pinned versions require a single-character connection. The Character Inspector shows a **Versioned connections** warning when a Specific version is used in a scene with several characters. Both roster creation and `AddCharacterAsync` refuse it:
+
+```text
+Pinned character versions require a single-character connection. Use Live for multi-character rosters, which accept only bare Character IDs.
+```
+
+A `CharacterSessionId` resumes a conversation; it is not a way to add a second copy of the same Character ID.
 
 ## Character ID format
 

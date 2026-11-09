@@ -1,7 +1,7 @@
 ---
 title: Character rig setup
 description: Configure a character's rig so Convai automatically detects its facial blendshape convention and bones, and resolve low-confidence detection.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Every embodied character needs a mapping from its skeleton and face mesh to the semantic bones and blendshapes the embodiment modules read. Use this page to check what Convai detected on a character's rig, fix a low-confidence result, or map a rig that uses a naming convention Convai does not recognize.
@@ -14,7 +14,7 @@ Every embodied character needs a mapping from its skeleton and face mesh to the 
 
 ## Let Convai detect the rig automatically
 
-Convai adds the `Character Rig` component (`Convai/Embodiment/Character Rig` in the Add Component menu) to a character's root the first time an embodiment module needs a rig binding. You do not add it yourself in the common case.
+In Play mode, Convai adds the `Character Rig` component (`Convai/Embodiment/Character Rig` in the Add Component menu) to a character's root the first time an embodiment module needs a rig binding. You do not add it yourself in the common case.
 
 When the component is added, it scans the character hierarchy for `SkinnedMeshRenderer` components with blendshapes and matches their names against four built-in conventions: **Apple ARKit**, **Reallusion Character Creator 3**, **Epic MetaHuman**, and **Reallusion Character Creator 4 (Extended)**. It also resolves the semantic bones (`Hips`, `Spine`, `Head`, and 15 others) from the character's humanoid avatar when one is present, falling back to name matching otherwise.
 
@@ -50,9 +50,15 @@ Use a custom convention map when a character's face mesh uses blendshape names t
 Bone resolution still runs through the humanoid avatar or name matching when **Rig Type** is `Custom` — only blendshape resolution reads the custom map. Assign bone overrides under **Custom Rig Setup** separately if the avatar does not resolve them.
 {% endhint %}
 
+## Choose face meshes and calibrate gaze axes
+
+Under **Character Type**, **Face Meshes** limits the meshes used for facial shape lookup. Leave the list empty to use all meshes with blendshapes under the character. Assign it when an outfit or duplicate mesh should not participate.
+
+For a custom rig whose root or eyes do not face local `+Z` with `+Y` up, expand **Gaze Axis Calibration** and turn on **Enable Calibration**. Set **Root Forward (Local)**, **Root Up (Local)**, **Left Eye Forward (Local)**, and **Right Eye Forward (Local)** to the rig's actual axes. Use the **Center**, **Left**, **Right**, **Up**, and **Down** eye previews to check the result, then **Stop Gaze Preview**. These controls correct axis interpretation; they do not replace missing bone mappings.
+
 ## Verify the rig setup
 
-Check **Bones Found** and **Face Shapes Found** in the Inspector header: a healthy rig shows all critical bones resolved and a recognized rig type with no warning box. From a script, read `DetectedConvention` and `DetectionConfidence` on the `Character Rig` component, or call `TryGetBone(StandardBone, out Transform)` and `TryGetBlendshape(StandardBlendshape, out SkinnedMeshRenderer, out int)` to confirm a specific semantic identifier resolves.
+Check the **Ready** chip in the Inspector header, then the found/total counts on **Bones Convai Found** and **Face Shapes Convai Found**. Expand **Face Shapes Convai Found**, which starts collapsed: a healthy rig shows all critical bones resolved and a recognized rig type with no warning box. From a script, read `DetectedConvention` and `DetectionConfidence` on the `Character Rig` component, or call `TryGetBone(StandardBone, out Transform)` and `TryGetBlendshape(StandardBlendshape, out SkinnedMeshRenderer, out int)` to confirm a specific semantic identifier resolves.
 
 Not every rig provides every bone or blendshape. `UpperChest` and the eye bones are optional — Gaze supports head-only aiming when eye bones are absent — so their absence alone does not indicate a setup problem.
 

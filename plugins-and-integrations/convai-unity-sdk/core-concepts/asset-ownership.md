@@ -1,7 +1,7 @@
 ---
 title: Asset ownership and copy-on-write
 description: Understand why editing a package-shipped Convai profile creates an editable project copy instead of changing the original asset.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Every settings asset an embodiment module ships with — a `ConvaiGazeProfile`, a `ConvaiEmotionProfile`, and the rest — lives inside the Convai package until you change it. The moment you edit one that ships with the package, Convai copies it into your project and points the character at the copy instead of writing to the original. Understanding why explains behavior that otherwise looks like a bug: your edit worked, but not on the file you expected.
@@ -24,8 +24,8 @@ Convai classifies every settings asset into one of four ownership kinds (`SDK/Ed
 | --- | --- | --- |
 | None | No asset is assigned. The character runs on the module's built-in defaults. | Nothing — this is the default, unconfigured state. |
 | Project-owned | A project asset only this character reads. | No notice. You are already editing exactly what you think you are editing. |
-| Project-shared | A project asset that other characters in the open scenes also read. | An info notice naming how many characters share it, with a **Make Unique For This Character** button. |
-| SDK-owned | An asset that ships inside the Convai package. | An info notice explaining that the settings ship with the SDK, with a **Create A Project Copy** button. |
+| Project-shared | A project asset that other characters in the open scenes also read. | A warning titled **Shared by N characters** naming how many characters share it, with a **Make Unique For This Character** button. |
+| SDK-owned | An assigned asset whose path is outside `Assets/`. | Character Inspector controls remain editable and copy on first edit without an SDK-owned notice. Selecting a saved asset itself shows a read-only info notice and **Create A Project Copy**. |
 
 Sharing is reported, not blocked — editing several characters that share a profile at once is a choice you can legitimately make. Only an SDK-owned asset requires a copy before an edit means anything.
 

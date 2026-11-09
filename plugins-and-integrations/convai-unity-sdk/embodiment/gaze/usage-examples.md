@@ -1,7 +1,7 @@
 ---
 title: Gaze usage examples
 description: Configure eye contact, script glances, and coordinate multi-character gaze with four complete Convai Gaze usage examples.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 These scenarios show how `ConvaiGazeController` and its supporting components combine to serve realistic application requirements. Each scenario is self-contained: Inspector setup is described first, followed by any runtime code needed to complete the behavior. Field references are in [Gaze profile reference](profile-reference.md); the full scripting surface is in [Gaze scripting reference](scripting-reference.md).
@@ -67,7 +67,9 @@ public sealed class NegotiationDocumentCue : MonoBehaviour
 
 Add `CharacterGazeTargetProvider` (**Add Component > Convai > Gaze > Advanced > Character Target**) to every participating character, alongside its `ConvaiGazeController`. Leave **Publish Self** and **Look At Others** on so each character both offers itself as a target and generates candidates for the rest. The default **Priority** of `7` sits between the player anchor's `10` and a world object's `5`, so listeners turn to a speaking colleague but a conversation with the player still wins.
 
-Leave each character's **Attend To Speaker** (`ConvaiGazeController.AttendToSpeaker`, a `GazeSpeakerAttention` value: `Off`, `Player`, `Characters`, or `Anyone`) on its default, `Anyone`. That is the setting that actually turns a listening character toward whoever currently holds the floor — the `CharacterGazeTargetProvider` above only makes a character eligible to be looked at. `Anyone` reacts to both the player's turn and another character's turn, which is what this scene needs.
+Leave each character's **Follows the conversation** (`ConvaiGazeController.AttendToSpeaker`, a `GazeSpeakerAttention` value: `Off`, `Player`, `Characters`, or `Anyone`) on its default, `Anyone`. That is the setting that actually turns a listening character toward whoever currently holds the floor — the `CharacterGazeTargetProvider` above only makes a character eligible to be looked at. `Anyone` reacts to both the player's turn and another character's turn, which is what this scene needs.
+
+For a scene using `ConvaiGroupConversation`, **Drive Gaze** (on by default) coordinates held looks for active lines at scripted priority `1`. Those looks take precedence over automatic `AttendToSpeaker` attention. Keep head-height colliders on the participating characters in **Spatial Query Layers**. When no group look is held, the automatic behavior described here can run.
 
 ### Verify every character has the provider
 
@@ -106,29 +108,44 @@ using Convai.Modules.Gaze.Components;
 using Convai.Runtime.Actions;
 using UnityEngine;
 
-public sealed class ReadGaugeActionExecutor : ConvaiActionExecutorBase
+public sealed class ReadGaugeActionExecutor : ConvaiTargetedActionExecutor
 {
     [SerializeField] private ConvaiGazeController gaze;
 
-    public override async Task<ConvaiActionExecutionResult> ExecuteAsync(
+    protected override async Task<ConvaiActionExecutionResult> ExecuteCoreAsync(
         ConvaiActionInvocation invocation, CancellationToken cancellationToken)
     {
-        Transform target = invocation.ResolvedTarget?.InteractionPoint;
+        cancellationToken.ThrowIfCancellationRequested();
+        if (gaze == null)
+            return ConvaiActionExecutionResult.Unhandled("No Gaze controller assigned.");
+        ResolvePhysicalTarget(invocation, gaze.transform.position, out Transform target);
         if (target == null)
             return ConvaiActionExecutionResult.Unhandled("No gauge target resolved.");
 
         GazeHandle look = gaze.GazeAt(target, new GazeOptions { Engagement = 1f, HoldSeconds = 4f });
-        using (cancellationToken.Register(look.Release))
+        try
         {
-            await look.Settled;
+            using (cancellationToken.Register(look.Release))
+            {
+                bool aligned = await look.Settled;
+                cancellationToken.ThrowIfCancellationRequested();
+                if (!aligned)
+                    return ConvaiActionExecutionResult.Unhandled("The gaze did not settle.");
+                // Replace this sample value with a reading from your gauge.
+                return ConvaiActionExecutionResult.Answered("The gauge reads 40 percent.");
+            }
+        }
+        finally
+        {
             look.Release();
-            return ConvaiActionExecutionResult.Answered("The gauge reads 40 percent.");
         }
     }
 }
 ```
 
-`GazeAt` with an explicit `Engagement` of `1` works in any dialogue state, including `Idle`, and outranks every automatic target. Awaiting `handle.Settled` gates the answer on the character actually having looked — `Settled` completes once gaze is visibly aligned on the target, so the reported value never arrives before the eyes do. `ConvaiActionExecutionResult.Answered` is the only part of the result the character itself is told; whether the answer is spoken is decided separately, per action, in the Actions Editor.
+`ResolvePhysicalTarget` selects a nearby active physical member when an action target is a logical object group, rather than aiming at its generated group root. The sample answer is illustrative; replace it with your own gauge reading.
+
+`GazeAt` with an explicit `Engagement` of `1` works in any dialogue state, including `Idle`, and outranks every automatic target. Awaiting `handle.Settled` gates the answer on the character actually having looked — `Settled` completes once gaze is visibly aligned on the target, so the reported value never arrives before the eyes do. `ConvaiActionExecutionResult.Answered` supplies the answer text for action feedback. Configure whether it is sent silently or requests a response through [Action feedback](../../features/character-actions/action-feedback.md).
 
 **Expected outcome:** The technician visibly looks at the gauge before reporting the reading — the answer is never returned before the character's gaze has settled on the target.
 

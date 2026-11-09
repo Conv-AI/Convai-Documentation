@@ -1,14 +1,14 @@
 ---
 title: Trigger gestures and reactions
 description: Trigger scripted head nods, semantic gesture cues, and one-shot reactions on a Convai character, and handle a refused or busy request.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Trigger a scripted head gesture, a semantic gesture cue, or a one-shot bodily reaction on a Convai character that has `ConvaiBodyLanguageController`, and handle the cases where the character cannot perform the gesture right now.
 
 ## Prerequisites
 
-* A Humanoid character with `ConvaiBodyLanguageController` (**Convai > Embodiment > Body Language**) already added and running. See [Body language quick start](quick-start.md).
+* A character with a resolved Spine and `ConvaiBodyLanguageController` (**Convai > Embodiment > Body Language**) already added and running. See [Body language quick start](quick-start.md).
 * A reference to the controller on the character, resolved with `GetComponent<ConvaiBodyLanguageController>()`.
 
 ## Trigger a scripted head gesture
@@ -88,6 +88,8 @@ Only four `GestureCueKind` values map to shipped animation content today: `Affir
 `TriggerReaction(ReactionKind kind, float intensity = 1f)` fires a one-shot bodily reaction. It is fire-and-forget — there is no handle, because every reaction envelope runs under two seconds.
 
 ```csharp
+using Convai.Domain.Embodiment.Semantics;
+
 _bodyLanguage.TriggerReaction(ReactionKind.AmusementBounce, intensity: 0.8f);
 ```
 
@@ -99,7 +101,7 @@ _bodyLanguage.TriggerReaction(ReactionKind.AmusementBounce, intensity: 0.8f);
 | `CatchBreath` (`3`) | Routes to the breathing system's catch-breath event. | Scripted only, via `TriggerReaction`. |
 | `Sigh` (`4`) | Routes to the breathing system's sigh event. | Scripted only, via `TriggerReaction`. |
 
-Exactly one of `SurpriseFlinch`/`AmusementBounce` plays at a time — a new trigger replaces whatever is currently playing. Each category respects its own profile toggle (`React To Sudden Emotion`, `Catch Breath When Interrupted`, `Sigh When Settling`); a disabled category is silently dropped.
+Exactly one of `SurpriseFlinch`/`AmusementBounce` plays at a time — a new trigger replaces whatever is currently playing. Each category respects its own profile toggle (`React To Sudden Emotion`, **Catch Breath If Interrupted**, `Sigh When Settling`); a disabled category is silently dropped.
 
 `TriggerReaction` is safe to call on a controller that cannot tick — disabled, not playing, or inert from a missing rig — it becomes a silent no-op, matching `Nod` and `PulseGesture`'s degradation behavior.
 
@@ -115,7 +117,7 @@ Autonomous programs already in flight are left running — only the controller's
 
 ## Verify the setup
 
-Enter Play mode and call `Nod`, `PulseGesture`, or `TriggerReaction` from a script or the Action Debug Window. The character plays the requested motion layered on top of whatever it is already doing — breathing, weight shifts, and gaze continue underneath. The `ConvaiBodyLanguageController` Inspector's **Runtime Status** section shows the active head gesture, the last gesture cue attempted, and the active reaction while the scene plays.
+Enter Play mode and call `Nod`, `PulseGesture`, or `TriggerReaction` from your script. The character plays the requested motion layered on top of whatever it is already doing — breathing, weight shifts, and gaze continue underneath. Use `Current.HasActiveHeadGesture`, `Current.LastGestureCueKind`, and `Current.ActiveReaction`, or `CaptureSnapshot()`, to inspect those requests. **Runtime Status** shows the module, dialogue state, rig, policy, and body-sharing status; it does not show every gesture or reaction field.
 
 ## Next steps
 

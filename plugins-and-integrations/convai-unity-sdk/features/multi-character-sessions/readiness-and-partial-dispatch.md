@@ -1,10 +1,10 @@
 ---
 title: Room readiness
 description: Understand when a shared Unity room is ready to take player input, why one slow character does not block the others, and how start failures are reported.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-Characters in a multi-character room start independently, so the room does not become usable all at once. Readiness is tracked per membership, while the session as a whole reports the readiness of one membership only. Understanding that split explains why a room can be ready while half its cast is still starting, and why a character that never becomes ready is a recoverable condition rather than a connection failure.
+Characters in a multi-character room start independently, so the room does not become usable all at once. Readiness is tracked per membership, while the session as a whole reports the readiness of one membership only. Understanding that split explains why a room can be ready while half its cast is still starting, and why a secondary character can fail without invalidating a successful initial-character startup.
 
 ***
 
@@ -26,7 +26,7 @@ The SDK raises `CharacterStatusChanged` on every transition into `Ready` or `Fai
 
 ## Why session readiness follows the initial character only
 
-`MultiCharacterRoomSession.IsReady` is true when the initial character's status is `Ready`, and is unaffected by every other membership. A ready secondary character does not make the session ready, and a failed secondary character does not make it un-ready.
+`MultiCharacterRoomSession.IsReady` is true while the session is active and the initial character's status is `Ready`, and is unaffected by every other membership. A ready secondary character does not make the session ready, and a failed secondary character does not make it un-ready.
 
 The reason for that definition is the room's routing model. The initial character is the membership the player addresses when the room opens, so it is the only one the room needs before a conversation can begin. Secondary characters are addressable later, on demand, and the session has no way of knowing which of them a given scene actually requires. Treating any of them as blocking would delay a room that is already usable.
 
@@ -44,16 +44,20 @@ That fault can arrive before the first `await`. If the connect response already 
 try
 {
     await session.WaitUntilReadyAsync(cancellationToken);
-    BeginConversation();
+    // Start your application interaction here.
 }
 catch (InvalidOperationException error)
 {
-    // The initial character failed to start; the rest of the roster may still be usable.
-    ShowInitialCharacterUnavailable(error.Message);
+    // Handle failed, removed, or retired initial membership.
+    Debug.LogWarning(error.Message);
 }
 ```
 
-Waiting for a specific secondary character is a different job. There is no per-membership wait method, so subscribe to `CharacterStatusChanged` and check `Status` on the membership you care about.
+For a specific character, await `membership.WaitUntilReadyAsync(cancellationToken)`. It completes on Ready and faults if the member fails, leaves before readiness, or the session retires. Keep `CharacterStatusChanged` for persistent UI updates.
+
+The session wait also faults when its initial member leaves before readiness or the session retires (`The multi-character room session is no longer active.`). A wait that already completed is not retroactively faulted by a later departure.
+
+A creating client's `ConnectAsync` waits for initial-character readiness using that character's **Character Ready Timeout** (30 seconds by default). It fails the connection when the initial member fails or times out. `JoinMultiCharacterRoomAsync` does not perform that initial wait; inspect and await the relevant membership after joining.
 
 ***
 
@@ -61,7 +65,7 @@ Waiting for a specific secondary character is a different job. There is no per-m
 
 `PartialDispatch` is set from the connect response and reports whether Convai accepted the roster in full. When it is `true`, at least one requested character did not dispatch, and the affected memberships carry a failed provisioning status and a failure code. The value is fixed for the life of the session — it describes what happened at connect, not the room's current health.
 
-A partially dispatched room is still a working room. The memberships that started are ready or starting normally, and the ones that did not are present in `Characters` with `Status` set to `Failed`. Inspect the roster rather than treating the flag as a connection failure:
+A partially dispatched room can remain usable when the initial character starts successfully. The memberships that started are ready or starting normally, and the ones that did not are present in `Characters` with `Status` set to `Failed`. Inspect the roster rather than treating the flag as a connection failure:
 
 ```csharp
 if (session.PartialDispatch)

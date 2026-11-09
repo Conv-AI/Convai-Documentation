@@ -1,196 +1,106 @@
 ---
 title: Manage end-user records
-last_reviewed: "4.5.0"
-description: Browse and manage end-user records from the Convai Editor window or from a script, covering the editor tool, every method, and pagination.
+description: Browse end-user records, page through results, update display metadata, and deactivate users while keeping memory deletion as a separate operation.
+last_reviewed: "5.0.0-preview"
 ---
 
-The Convai Unity SDK tracks every user who connects with a memory-enabled character as an **end-user record**. Each record stores the user's stable identifier, last activity timestamps, and any metadata you sent during connection. You can browse and delete these records from the Unity editor or manage them programmatically with `client.EndUsers`.
+Manage end-user records in the **Long Term Memory** section of **Convai Editor** or `client.EndUsers`. Each returned record contains an identifier, activity timestamps, and metadata. Deactivating a user is separate from deleting their memories.
 
-{% hint style="warning" %}
-**Beta API.** Method signatures are stable but may change in future SDK updates. Pin your SDK version in production and review the changelog before upgrading.
-{% endhint %}
+## Use the editor
 
-***
+Choose **Convai > Convai Editor**, then select **Long Term Memory**. The list loads 50 end users at a time. **Load More** fetches another page; **Filter by name or ID** filters loaded records, while **Find Exact ID** fetches a known ID directly. Clicking a row focuses that user's memories; its checkbox selects the user for **Deactivate Selected**.
 
-{% tabs %}
-{% tab title="Editor tool" %}
-Access the panel from the Unity menu bar: **Convai → Long Term Memory**.
+Use [Inspect and manage long-term memories](long-term-memory-window.md) for the full window workflow. **Deactivate End User** and **Deactivate Selected** do not erase stored memories. If removal of memories is required, use **Forget End User…**, check the requests, and deactivate only after the checks finish successfully.
 
-The panel shows all end-user records associated with your API key. It loads records in batches of 200, with cursor-based pagination fetching additional pages automatically for large sets.
+## Read end-user records
 
-**Available actions:**
-
-| Action                    | How                                     |
-| ------------------------- | --------------------------------------- |
-| Refresh the list          | Click **Refresh**                       |
-| Select individual records | Click a record row                      |
-| Select or deselect all    | Click **Select All** / **Unselect All** |
-| Delete selected records   | Click **Delete**                        |
-
-<figure><img src="../../../../.gitbook/assets/image (472).png" alt="Unity menu bar showing Convai → Long Term Memory navigation path"><figcaption><p>Open the end-user management panel from the Unity menu bar: Convai → Long Term Memory.</p></figcaption></figure>
-
-Deleting an end-user record from the editor removes **the record and all memory records for that user across every character**. This cannot be undone. A confirmation dialog appears before deletion proceeds.
-
-<figure><img src="../../../../.gitbook/assets/image (471).png" alt="End-user records with name and session count"><figcaption><p>End-user records with name and session count.</p></figcaption></figure>
-{% endtab %}
-
-{% tab title="Scripting" %}
-Access end-user operations through `client.EndUsers` on a `ConvaiRestClient` instance.
+Use an authorized `ConvaiRestClient` in a trusted administrative tool. Keep the account API key out of distributed player builds. The helper below returns records for private inspection and supports cancellation without logging identity data.
 
 ```csharp
-using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
-```
-
-See each method below for full examples.
-{% endtab %}
-{% endtabs %}
-
-***
-
-## `EndUserDetails` fields
-
-Each end-user record is represented by `EndUserDetails`:
-
-| Property         | Type                         | Description                                                                                                                                                                                           |
-| ---------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `EndUserId`      | `string`                     | The stable identifier sent by the SDK on connection                                                                                                                                                   |
-| `LastActiveTs`   | `string`                     | ISO 8601 timestamp of the last session                                                                                                                                                                |
-| `LastLtmUsageTs` | `string`                     | ISO 8601 timestamp of the last LTM interaction                                                                                                                                                        |
-| `Metadata`       | `Dictionary<string, object>` | Key–value data sent by `IEndUserMetadataProvider`                                                                                                                                                     |
-| `DisplayName`    | `string`                     | **Computed property** — reads `Metadata["name"]` if present and non-empty; otherwise `"User {EndUserId[..8]}"`, optionally suffixed with relative last-active time (e.g., `"User a1b2c3d4 (3d ago)"`) |
-| `ShortId`        | `string`                     | **Computed property** — truncated form of `EndUserId` for compact display (e.g., `"a1b2c3d4...ef01"`)                                                                                                 |
-
-`DisplayName` and `ShortId` are C# computed properties, not stored fields. They are not present in the JSON API response.
-
-***
-
-## Scripting API
-
-### List end users
-
-Retrieve all end-user records with cursor-based pagination. The default limit is 50 records per page.
-
-```csharp
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Convai.RestAPI;
 using Convai.RestAPI.Internal;
-using System.Collections.Generic;
-using UnityEngine;
 
-public class EndUserLister : MonoBehaviour
+public static class EndUserDirectory
 {
-    [ContextMenu("List All End Users")]
-    private async void ListAllEndUsers()
+    public static async Task<List<EndUserDetails>> ListAllAsync(
+        ConvaiRestClient client, CancellationToken cancellationToken = default)
     {
-        using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
-
+        var users = new List<EndUserDetails>();
         string cursor = null;
-        bool hasMore = true;
-        var allUsers = new List<EndUserDetails>();
-
-        while (hasMore)
+        do
         {
-            var response = await client.EndUsers.ListAsync(limit: 50, cursor: cursor);
-
-            if (response.EndUsers != null)
-                allUsers.AddRange(response.EndUsers);
-
-            hasMore = response.HasMore;
-            cursor = response.NextCursor;
-
-            if (!hasMore || string.IsNullOrEmpty(cursor))
-                break;
-        }
-
-        Debug.Log($"Total end users: {allUsers.Count}");
-        foreach (var user in allUsers)
-            Debug.Log($"  {user.EndUserId} — last active: {user.LastActiveTs}");
+            var page = await client.EndUsers.ListAsync(
+                limit: 50, cursor: cursor, cancellationToken: cancellationToken);
+            if (page.EndUsers != null)
+                users.AddRange(page.EndUsers);
+            if (!page.HasMore || string.IsNullOrEmpty(page.NextCursor))
+                return users;
+            cursor = page.NextCursor;
+        } while (true);
     }
 }
 ```
 
-**`EndUsersListResponse` fields:**
+`ListAsync` also accepts `activeAfter` and `activeBefore` as ISO 8601 date strings. `GetAsync(endUserId)` fetches a specific user without listing the entire directory. Both accept a cancellation token.
 
-| Property     | Type                   | Description                                                        |
-| ------------ | ---------------------- | ------------------------------------------------------------------ |
-| `EndUsers`   | `List<EndUserDetails>` | Records on this page                                               |
-| `TotalCount` | `int`                  | Total number of end-user records                                   |
-| `NextCursor` | `string`               | Cursor token for the next page; `null` when no further pages exist |
-| `HasMore`    | `bool`                 | Whether additional pages exist                                     |
+| Record field | Meaning |
+| --- | --- |
+| `EndUserId` | Stable identifier supplied at connection |
+| `LastActiveTs` | Reported last-activity timestamp |
+| `LastLtmUsageTs` | Reported last-memory-usage timestamp |
+| `Metadata` | End-user metadata dictionary |
+| `DisplayName` | Computed label using `name` metadata or an ID-based fallback |
+| `ShortId` | Computed abbreviated identifier for display |
 
-You can also filter by activity date using `activeAfter` and `activeBefore` (ISO 8601 strings):
+`DisplayName` and `ShortId` are computed C# properties, not extra JSON fields. List responses contain `EndUsers`, `TotalCount`, `NextCursor`, and `HasMore`.
 
-```csharp
-var response = await client.EndUsers.ListAsync(
-    limit: 50,
-    activeAfter: "2025-01-01T00:00:00Z",
-    activeBefore: "2025-06-01T00:00:00Z");
-```
+## Update display metadata
 
-***
-
-### Get a single end user
-
-Retrieve details for one specific user by their `endUserId`.
+`UpdateMetadataAsync` merges the keys supplied in the patch. Omitted keys are preserved; the method does not expose a remove-key operation. The following complete helper changes only the display name:
 
 ```csharp
-var user = await client.EndUsers.GetAsync("target-end-user-id");
-Debug.Log($"Last active: {user.LastActiveTs}");
-Debug.Log($"Display name: {user.DisplayName}");
-```
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Convai.RestAPI;
+using Convai.RestAPI.Internal;
 
-***
-
-### Update user metadata
-
-Update one or more metadata keys for a user. The patch operation preserves keys you do not include — it does not replace the entire metadata object.
-
-```csharp
-var patch = new Dictionary<string, object>
+public static class EndUserNames
 {
-    { "name", "Jordan Kim" },
-    { "department", "Facilities Management" }
-};
-
-var updated = await client.EndUsers.UpdateMetadataAsync("target-end-user-id", patch);
-Debug.Log($"Updated metadata for {updated.EndUserId}.");
+    public static Task<EndUserUpdateResponse> RenameAsync(
+        ConvaiRestClient client, string endUserId, string displayName,
+        CancellationToken cancellationToken = default)
+    {
+        var patch = new Dictionary<string, object> { ["name"] = displayName };
+        return client.EndUsers.UpdateMetadataAsync(endUserId, patch, cancellationToken);
+    }
+}
 ```
 
-***
+## Deactivate an end user
 
-### Delete an end user
+`client.EndUsers.DeleteAsync(endUserId)` deactivates the user. The SDK service contract says the stored memories remain but can no longer be listed through that deactivated user; a later connection using the same ID starts without those memories. Do not use this operation as proof that memory data was erased.
 
 {% hint style="danger" %}
-`DeleteAsync` removes the end-user record **and all memory records for that user across all characters**. Unlike `MemoryService.DeleteAllAsync`, which is scoped to one character, this operation removes the user globally. This cannot be undone.
+If memories must be removed, request deletion for every relevant character and verify the remaining records before deactivating the end user. A successful deactivation response is not a memory-deletion receipt.
 {% endhint %}
 
-```csharp
-var result = await client.EndUsers.DeleteAsync("target-end-user-id");
+| Operation | Scope | Result to check |
+| --- | --- | --- |
+| `Memory.DeleteAsync` | One record for one character and user | `Deleted` and a subsequent read |
+| `Memory.DeleteAllAsync` | All memories for one character and user | Request accepted; check subsequent lists |
+| `EndUsers.DeleteAsync` | End-user record | Deactivation response; does not erase memories |
 
-if (result.Deleted)
-    Debug.Log($"End user {result.EndUserId} deleted.");
-else
-    Debug.LogWarning("Deletion returned false — user may not have existed.");
-```
-
-***
-
-## `DeleteAllAsync` vs. `DeleteAsync`
-
-| Operation                                              | Scope                     | What is removed                                         |
-| ------------------------------------------------------ | ------------------------- | ------------------------------------------------------- |
-| `client.Memory.DeleteAllAsync(characterId, endUserId)` | One user + one character  | All memory records for that user–character pair         |
-| `client.EndUsers.DeleteAsync(endUserId)`               | One user + all characters | The user record and all memories across every character |
-
-Use `DeleteAllAsync` when you want to reset a user's memory for a specific character while keeping their records for other characters intact. Use `EndUsers.DeleteAsync` when you need to fully remove a user from the system.
-
-***
+For a multi-character forget workflow, use the editor's **Forget End User…** controls. That workflow enumerates the account's owned characters; incomplete coverage or a failed request must be resolved before claiming the user has been forgotten.
 
 ## Next steps
 
 {% content-ref url="memory-management-api.md" %}
 [Memory management API](memory-management-api.md)
 {% endcontent-ref %}
-
 {% content-ref url="long-term-memory-scripting-reference.md" %}
 [Long-term memory scripting reference](long-term-memory-scripting-reference.md)
 {% endcontent-ref %}

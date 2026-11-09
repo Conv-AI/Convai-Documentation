@@ -1,7 +1,7 @@
 ---
 title: Write a custom targeting rule
 description: Replace conversation targeting with your own rule when none of the built-in modes fit how your game chooses who to address.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Implement `IConversationTargetProvider` when none of the three built-in targeting modes fit your game — the character a UI list has selected, the one a quest is currently about, or the one standing in a trigger volume. Use this page instead of falling back to `Manual` and rebuilding the parts of targeting that already work correctly.
@@ -13,7 +13,7 @@ Implement `IConversationTargetProvider` when none of the three built-in targetin
 
 ## Implement the interface
 
-`IConversationTargetProvider` has a single method, `ResolveTarget`, called on every targeting evaluation.
+`IConversationTargetProvider` has a single method, `ResolveTarget`. Evaluations run at most 15 times per second in a connected, ready multi-character room. They require a view transform even when your provider does not use it. The SDK skips the provider when the current character can hear and there is no alternative ready character, or an active group conversation holds that target.
 
 ```csharp
 using System.Collections.Generic;
@@ -21,39 +21,40 @@ using Convai.Runtime.Components;
 using Convai.Runtime.Conversation;
 using UnityEngine;
 
-public sealed class QuestTargetProvider : MonoBehaviour, IConversationTargetProvider
+public sealed class QuestTargetProvider : IConversationTargetProvider
 {
+    public ConvaiCharacter Speaker { get; set; }
+
     public ConvaiCharacter ResolveTarget(
         IReadOnlyList<ConvaiCharacter> candidates, ConvaiCharacter current) =>
-        QuestState.CurrentSpeaker ?? current;
-
-    private void Start() =>
-        ConvaiManager.ActiveManager.SetConversationTargetProvider(this);
+        Speaker != null ? Speaker : current;
 }
 ```
 
-`candidates` lists every character currently in the room, in stable order, and is never null or empty when `ResolveTarget` is called. `current` is the character currently holding the conversation, or `null` when none does.
+`candidates` lists every ready, active, enabled character in the room, in stable order, and is never null or empty when `ResolveTarget` is called. `current` is the character currently holding the conversation, or `null` when none does.
 
-Return the character the player should be addressing. Return `null` to leave the conversation where it is. Returning a character that is not in `candidates` also leaves the conversation where it is.
+Return the character the player should be addressing. Returning `null` or a character outside `candidates` produces no proposal. A valid current target remains selected, but lost-target recovery can still choose a ready member.
 
 ## Register the provider
 
 ```csharp
 ConvaiManager manager = ConvaiManager.ActiveManager;
-manager.SetConversationTargetProvider(new QuestTargetProvider());
+var provider = new QuestTargetProvider();
+manager.SetConversationTargetProvider(provider);
+// Your quest code can assign provider.Speaker to a member of this room.
 ```
 
 Pass `null` to `SetConversationTargetProvider` to remove the custom provider and restore the behavior configured by `ConversationTargeting.Mode`.
 
 {% hint style="info" %}
-A registered provider replaces the built-in modes outright, including `LookAt` and `Proximity`. The `ConversationTargeting` settings on `ConvaiManager` have no effect while a provider is active.
+A registered provider replaces the built-in modes outright, including `LookAt` and `Proximity`. The provider replaces range, angle, and margin scoring, including in `Manual` mode. `SwitchDelaySeconds`, player-speech and pending-command gates still apply.
 {% endhint %}
 
 ## What still applies on top of your rule
 
-A provider only chooses which character to address. Everything that keeps the choice pleasant still applies on top of what the provider returns: the conversation still never moves mid-sentence, it still does not commit to a new target on the first frame it becomes a valid choice, and it still never leaves the player with nobody listening. See the three rules in [How conversation targeting works](how-conversation-targeting-works.md) for what this means in practice.
+A provider only chooses which character to address. Everything that keeps the choice pleasant still applies on top of what the provider returns: automatic commits wait while the player is speaking or a prior request is pending. The configured switch delay still applies, and the SDK can recover a lost target. Scripted and other-player moves can hold a target until your proposal changes. See the rules in [How conversation targeting works](how-conversation-targeting-works.md) for what this means in practice.
 
-If `ResolveTarget` throws, the SDK catches the exception, logs it, and leaves the conversation where it is rather than letting one faulty provider take the conversation down.
+If `ResolveTarget` throws, the SDK logs an Error and produces no proposal. A valid current target stays selected; lost-target recovery can still select a ready member. See [Targeting in group and shared rooms](group-and-shared-room-targeting.md).
 
 ## Verify the provider is active
 

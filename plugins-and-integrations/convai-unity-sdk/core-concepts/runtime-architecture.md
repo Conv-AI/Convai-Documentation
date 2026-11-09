@@ -1,212 +1,74 @@
 ---
 title: Runtime architecture
 description: Understand the layered Convai Unity SDK runtime — what each layer owns, the per-character embodiment layer, and how the runtime's lifecycle states are managed.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-The Convai Unity SDK is built in layers. Each layer has a defined responsibility and communicates inward — outer layers depend on inner ones, never the reverse. Understanding this structure tells you which parts of the SDK are developer-facing, which are replaceable, and which are internal implementation details you do not need to touch.
+The SDK separates scene components, room services, and character presentation. `ConvaiManager` builds and owns a `ConvaiRuntime`; scene scripts normally use the manager's facades instead of creating a second runtime.
 
-***
-
-## System layers
-
-The diagram below shows the main layers and how they relate. `ConvaiRuntime` holds four direct sub-systems at the second tier — `IRoomRuntime`, `IEventHub`, `IAgentRegistry`, and the module list. Characters and players surface beneath `IRoomRuntime` and `IAgentRegistry`. Runtime-level feature modules share a common module context; a character that carries embodiment modules also gets its own per-character composition root.
+## Runtime ownership
 
 ```mermaid
 graph TD
-    A[ConvaiRuntime<br/>IConvaiRuntime] --> B[IRoomRuntime<br/>Connection · Audio · Ownership · Diagnostics]
-    A --> C[IEventHub<br/>Decoupled pub/sub]
-    A --> D[IAgentRegistry<br/>Characters · Players]
-    A --> E[IReadOnlyList&lt;IConvaiModule&gt;<br/>Feature modules]
-    B --> F[ConvaiCharacter<br/>per-character session + state]
-    B --> G[ConvaiPlayer<br/>local participant identity]
-    F --> H[Module Context<br/>LipSync · Vision · Narrative]
-    G --> H
-    F --> I[EmbodimentContext<br/>per-character composition root]
-    I --> J[Embodiment modules<br/>Gaze · Body Animation · Body Language · Conversation Flow · Emotion]
+    Manager[ConvaiManager] --> Runtime[ConvaiRuntime]
+    Runtime --> Room[IRoomRuntime]
+    Runtime --> Events[IEventHub]
+    Runtime --> Registry[IAgentRegistry]
+    Runtime --> Modules[IConvaiModule list]
+    Room --> Connection[Connection and audio]
+    Registry --> Character[ConvaiCharacter and ConvaiPlayer]
+    Character --> Embodiment[EmbodimentContext]
 ```
 
-**`ConvaiRuntime` (top layer)** — owns every sub-system and coordinates the full lifecycle. Created once per application lifetime via `ConvaiRuntimeBuilder`. Exposes start, pause, resume, and stop operations that propagate to all registered modules. It holds four direct sub-systems:
+A multi-character room shares transport and connection state. Each character retains its membership, readiness, session identifier, and presentation state. These are different from the current conversation target.
 
-* **`IRoomRuntime`** — manages the real-time session: connecting, disconnecting, audio routing, character ownership, and diagnostics. Characters and the local player surface beneath this layer.
-* **`IEventHub`** — decoupled publish/subscribe bus used throughout the SDK for cross-system communication.
-* **`IAgentRegistry`** — registry of all active `ConvaiCharacter` and `ConvaiPlayer` instances.
-* **`IReadOnlyList<IConvaiModule>`** — the set of registered feature modules.
+| `IConvaiRuntime` member | Responsibility |
+| --- | --- |
+| `State` | Runtime lifecycle, separate from room connection state |
+| `Room` | `Connection`, `Audio`, `Ownership`, and `Diagnostics` coordinators |
+| `Events` | Shared typed event bus |
+| `Agents` | Character and player registry |
+| `Modules` | Registered feature modules |
+| `Transport` | Platform transport provider |
+| `Conversation` | Optional standalone conversation provider; null in the default manager setup |
+| `Config`, `RuntimePreferences` | Bootstrap configuration and runtime preferences |
+| `FeatureVariants`, `Telemetry` | Optional providers; null unless supplied |
 
-**Character / Player layer** — `ConvaiCharacter` and `ConvaiPlayer` register with `IAgentRegistry` and receive their per-session context through `IRoomRuntime`. Each character maintains its own session state. A character that carries embodiment modules — Gaze, Body Animation, Body Language, Conversation Flow, or Emotion — also gets its own `EmbodimentContext`; see Embodiment layer below.
+There is no `IConvaiRuntime.Persistence`, `IPersistenceProvider`, or `UsePersistence` builder method. See [Stored data](../advanced-topics/stored-data.md) for the stores actually used by the room and presentation services.
 
-**Module context layer** — runtime-level feature modules (`IConvaiModule`, such as LipSync, Vision, and Narrative) share an `IModuleContext` that provides access to runtime services. Modules can declare dependencies on each other's module IDs and services, but interact through `IEventHub` or a service registered on `IModuleContext` rather than holding direct references to each other's concrete types.
+## Runtime construction
 
-***
+`ConvaiRuntimeBuilder.Build()` requires a room runtime factory supplied through `UseRoomRuntime(Func<IRoomRuntime>)`. A bare builder does not provide the manager's room wiring. `ConvaiManager` supplies its deferred room runtime and the native or WebGL transport provider.
 
-## Runtime interface inventory
+| Builder method | Purpose |
+| --- | --- |
+| `UseRoomRuntime` | Required room runtime factory |
+| `UseTransport`, `UseConversation` | Transport and optional standalone conversation provider |
+| `UseConfig`, `WithRuntimePreferences` | Bootstrap configuration and runtime preferences |
+| `UseEventHub`, `UseAgentRegistry` | Event bus and registry |
+| `WithEndUserIdentityProvider`, `WithEndUserMetadataProvider` | Connection identity and metadata |
+| `UseTelemetry`, `WithFeatureVariants` | Optional telemetry and feature selection |
+| `UseLogger` | Runtime logger |
+| `AddModule`, `AddModule<T>` | Modules added before build |
 
-`IConvaiRuntime` exposes the following sub-systems as properties. Each property is the entry point for a specific domain of functionality.
+For scene customization, use the manager's supported provider setters and `RegisterModule`/`UnregisterModule`. A custom manager subclass can override `CreateRuntimeBuilder`, `BuildRuntime`, `GetPlatformTransportProvider`, or `GetConversationProvider` where appropriate. Creating a separate builder does not modify the runtime already owned by a scene manager.
 
-| Property             | Type                            | What It Owns                                  |
-| -------------------- | ------------------------------- | --------------------------------------------- |
-| `State`              | `RuntimeState`                  | Current lifecycle state of the runtime        |
-| `Room`               | `IRoomRuntime`                  | Connection, audio, ownership, and diagnostics |
-| `Events`             | `IEventHub`                     | Decoupled publish/subscribe communication     |
-| `Agents`             | `IAgentRegistry`                | Registry of all active characters and players |
-| `Modules`            | `IReadOnlyList<IConvaiModule>`  | All registered feature modules                |
-| `Transport`          | `ITransportProvider`            | Platform-specific real-time transport         |
-| `Conversation`       | `IConversationProvider`         | Communication with Convai                     |
-| `Config`             | `ConvaiBootstrapConfigSnapshot` | Immutable bootstrap configuration             |
-| `RuntimePreferences` | `IRuntimePreferences`           | Mutable runtime preferences                   |
-| `FeatureVariants`    | `IFeatureVariantProvider`       | Feature variant / A-B selection               |
-| `Persistence`        | `IPersistenceProvider`          | Runtime-owned data storage                    |
-| `Telemetry`          | `ITelemetryProvider`            | Observability and analytics                   |
+## Runtime modules and embodiment
 
-Developers interact with `Room`, `Agents`, and `Events` most frequently. `Transport`, `Conversation`, `Persistence`, `Telemetry`, and `FeatureVariants` are replaceable via `ConvaiRuntimeBuilder`.
+Lip sync, Vision, and Narrative Design components implement `IConvaiModule` and register with the runtime. A custom module receives an `IModuleContext`, declares dependencies through `RequiredModules`, and participates in start, pause, resume, and stop. Modules communicate through the event hub or registered module services. See [Implement a custom module](../advanced-topics/implement-a-custom-module.md).
 
-***
+Embodiment controllers share a per-character `EmbodimentContext`. Gaze, Body Animation, Body Language, Conversation Flow, and Emotion use its rig binding, events, and scheduler. This composition root is separate from the runtime builder's module list.
 
-## What you can replace
+The embodiment scheduler runs Cognition, Expression, and Finalize phases from `Update`. Lower `TickOrder` values run first within a phase; ties use registration order. The Animator conductor applies submitted parameter writes immediately. Facial composition and pose flushing run later in `LateUpdate`. See [Character embodiment](character-embodiment.md).
 
-`ConvaiRuntimeBuilder` is the fluent API for composing the runtime before it starts. Every method returns `this`, so calls chain.
+## Runtime lifecycle
 
-```csharp
-var runtime = new ConvaiRuntimeBuilder()
-    .UsePersistence(myPersistenceProvider)
-    .UseTelemetry(myTelemetryProvider)
-    .WithEndUserIdentityProvider(myIdentityProvider)
-    .AddModule<MyCustomModule>()
-    .Build();
-```
+The runtime passes through `Created`, `Starting`, `Running`, `Pausing`, `Paused`, `Resuming`, `Stopping`, `Stopped`, and `Disposed`. A stopped runtime cannot restart. Await lifecycle operations to observe completion and handle failures; merely creating an operation is not proof it succeeded.
 
-The table below lists what is replaceable vs. internal-only.
+The manager owns cleanup. If you build and own a concrete `ConvaiRuntime` yourself, stop it and call its `DisposeAsync()`. Do not dispose the scene manager's facades from consumer code.
 
-| Component                | Replaceable via Builder          | Default                                |
-| ------------------------ | -------------------------------- | -------------------------------------- |
-| Transport provider       | `UseTransport()`                 | Platform-default (WebSocket / LiveKit) |
-| Conversation provider    | `UseConversation()`              | Convai RTVI conversation provider      |
-| Persistence provider     | `UsePersistence()`               | `PlayerPrefs`-backed key-value store   |
-| Telemetry provider       | `UseTelemetry()`                 | No-op telemetry                        |
-| Feature variant provider | `WithFeatureVariants()`          | Static feature flags                   |
-| Runtime preferences      | `WithRuntimePreferences()`       | Defaults from `ConvaiSettings`         |
-| Event hub                | `UseEventHub()`                  | Default in-memory event hub            |
-| Agent registry           | `UseAgentRegistry()`             | Default registry                       |
-| End-user identity        | `WithEndUserIdentityProvider()`  | Device ID provider                     |
-| End-user metadata        | `WithEndUserMetadataProvider()`  | None                                   |
-| Modules                  | `AddModule()` / `AddModule<T>()` | SDK feature modules only               |
-| Room runtime             | `UseRoomRuntime()`               | Internal LiveKit-backed room           |
+## Related pages
 
-{% hint style="info" %}
-`ConvaiRuntime` is created by the `ConvaiManager` MonoBehaviour automatically. Most projects never call `ConvaiRuntimeBuilder` directly. Use it only when you need to replace a default provider or add a custom module.
-{% endhint %}
-
-***
-
-## `IRoomRuntime` sub-structure
-
-The room layer is itself composed of four coordinators, all accessible via `IConvaiRuntime.Room`.
-
-| Property      | Type                         | Responsibility                                |
-| ------------- | ---------------------------- | --------------------------------------------- |
-| `Connection`  | `IRoomConnectionCoordinator` | Connect, disconnect, session state            |
-| `Audio`       | `IRoomAudioCoordinator`      | Microphone capture, remote audio playback     |
-| `Ownership`   | `IRoomOwnershipCoordinator`  | Which characters this client owns and focuses |
-| `Diagnostics` | `IRoomDiagnostics`           | Session metrics, health monitoring            |
-
-Connection and audio are the coordinators you are most likely to call from scripting. Ownership is managed automatically when you have multiple characters in the scene. Diagnostics are used for performance monitoring and debugging.
-
-***
-
-## Module layer
-
-Modules are feature extensions that run inside the runtime lifecycle. They receive a shared `IModuleContext` and can register services that other modules or the presentation layer consume.
-
-Add a module via the builder before `Build()` is called:
-
-```csharp
-new ConvaiRuntimeBuilder()
-    .AddModule<LipSyncModule>()
-    .AddModule(new MyCustomModule(someConfig))
-    .Build();
-```
-
-Modules are started, paused, resumed, and stopped alongside the runtime. The `IConvaiModule` interface defines these lifecycle hooks. Declare a dependency with `RequiredModules`, and the runtime starts modules in dependency order and stops them in reverse — but a module still reaches another module's data through `IEventHub` or `IModuleContext.TryGetModuleService`, never through a direct reference to the other module's concrete type. See [Extending the SDK](../advanced-topics/extending-the-sdk.md) for the full module authoring reference.
-
-***
-
-## Embodiment layer
-
-A `ConvaiCharacter` that carries an embodiment module — Gaze, Body Animation, Body Language, Conversation Flow, or Emotion — gets its own `EmbodimentContext`. Convai adds this component automatically the first time an embodiment module resolves it on that character; you never add it from the Add Component menu, and it carries no menu entry of its own.
-
-`EmbodimentContext` is a per-character composition root, not a feature module registered with `ConvaiRuntimeBuilder`. It exposes the shared infrastructure every embodiment module plugs into:
-
-| Property | Type | What it owns |
-| -------- | ---- | ------------- |
-| `CharacterRoot` | `Transform` | The character's root transform |
-| `EventHub` | `IEventHub` | The same event bus exposed by `IConvaiRuntime.Events` |
-| `Logger` | `ILogger` | Structured diagnostics for embodiment modules |
-| `RigBinding` | `IStandardRigBinding` | Semantic bone and blendshape lookup for the detected rig |
-| `Character` | `ConvaiCharacter` | The owning character |
-
-Embodiment modules — `ConvaiGazeController`, `ConvaiBodyAnimationController`, `ConvaiBodyLanguageController`, `ConvaiConversationFlowController`, and `ConvaiEmotionController` — resolve the context on `OnEnable` and publish their own contract to it instead of holding direct references to each other. `EmbodimentContext` raises `RigBindingChanged`, `EmbodimentConfigurationChanged`, and `DependenciesPopulated` so a module can react when the rig is rebuilt, a preset is swapped, or runtime dependencies first become available. A project's own component can join the same tick as these modules through `RegisterTickable`/`UnregisterTickable`.
-
-### Deterministic tick
-
-Embodiment modules do not run on Unity's per-component `Update()` order. Each one registers with the context's tick scheduler, which ticks every registered module exactly once per frame in a declared `cognition → expression → finalize` order — ties within a phase are broken by registration order, not by hierarchy position or which module happened to enable first. The scheduler itself ticks from `Update`; the animator conductor and the facial compositor that consume its output run afterward from `LateUpdate`, once the Animator has posed the skeleton for the frame.
-
-### Single-writer Animator and facial blendshapes
-
-Two infrastructure components enforce single-writer access so two embodiment modules can never fight over the same output:
-
-* The **animator conductor** is the only component that calls `Animator.SetFloat` and related methods for embodiment-driven parameters. Modules submit named parameter writes through it instead of touching the `Animator` directly, and a second module registering an already-owned parameter is rejected rather than silently overwriting the first.
-* The **facial blendshape compositor** is the only component that writes to `SkinnedMeshRenderer` blendshapes for embodiment output. Modules submit per-region layer weights during the frame, and the compositor composes and writes the final result once, from `LateUpdate`.
-
-Both components are auto-provisioned by `EmbodimentContext` alongside it — treat them, and `EmbodimentContext` itself, as infrastructure Convai adds for a character rather than something you configure directly.
-
-***
-
-## `RuntimeState` lifecycle
-
-The runtime moves through the following states from creation to disposal.
-
-| State      | Meaning                                         |
-| ---------- | ----------------------------------------------- |
-| `Created`  | Runtime built but not yet started               |
-| `Starting` | `StartAsync()` in progress                      |
-| `Running`  | Fully operational                               |
-| `Pausing`  | `PauseAsync()` in progress                      |
-| `Paused`   | Paused; can be resumed                          |
-| `Resuming` | `ResumeAsync()` in progress                     |
-| `Stopping` | `StopAsync()` in progress                       |
-| `Stopped`  | Shut down; cannot restart                       |
-| `Disposed` | `DisposeAsync()` called; all resources released |
-
-```mermaid
-stateDiagram-v2
-    [*] --> Created
-    Created --> Starting : StartAsync()
-    Starting --> Running
-    Running --> Pausing : PauseAsync()
-    Pausing --> Paused
-    Paused --> Resuming : ResumeAsync()
-    Resuming --> Running
-    Running --> Stopping : StopAsync()
-    Stopping --> Stopped
-    Stopped --> [*] : DisposeAsync()
-```
-
-All state transitions are async operations wrapped in `IConvaiOperation<Unit>`. Check `Status` on the returned operation to confirm the transition completed before proceeding.
-
-{% hint style="info" %}
-`ConvaiManager` handles `DisposeAsync()` automatically on destroy. If you build a custom host using `ConvaiRuntimeBuilder` directly, call `DisposeAsync()` after `StopAsync()` to release all resources.
-{% endhint %}
-
-***
-
-## Next steps
-
-You now understand how the Convai runtime is composed and which parts are replaceable at each layer. Read Session lifecycle next to understand how each character's session is created, persisted, and recovered, then continue through Turn-taking modes and Event system.
-
-{% content-ref url="session-lifecycle.md" %}
-[Session lifecycle](session-lifecycle.md)
-{% endcontent-ref %}
-
-{% content-ref url="turn-taking-modes.md" %}
-[Turn-taking modes](turn-taking-modes.md)
-{% endcontent-ref %}
+- [Session lifecycle](session-lifecycle.md) explains room connection and resume.
+- [Event system](event-system.md) explains scene relays and typed events.
+- [Extending the SDK](../advanced-topics/extending-the-sdk.md) covers supported extension points.

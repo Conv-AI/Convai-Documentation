@@ -3,10 +3,10 @@ title: Vision debug preview
 description: >-
   Verify the vision camera feed and confirm that vision status requests and
   triggers reach Convai using Unity Editor debug tools.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-`VisionDebugPreview` is an Editor-only component that renders the live camera feed as a screen overlay and displays a capture statistics panel. Use it to answer "What does the AI actually see?" during development before shipping. The Sample Debug Hub's **Vision** panel complements it by confirming that vision status requests and triggers actually reach Convai.
+`VisionDebugPreview` is an Editor-only component that renders the live camera feed as a screen overlay and displays a capture statistics panel. Use it to inspect the locally captured image during development. It does not prove the service received or used that image. The sample vision diagnostic tools complement it by confirming that vision status requests and triggers actually reach Convai.
 
 ## Add the component
 
@@ -20,14 +20,14 @@ The component auto-discovers the active frame source in the scene. No explicit a
 
 ## Inspector reference
 
-**Preview Settings**
+**Preview Settings and Statistics**
 
 | Field            | Type   | Default | Description                           |
 | ---------------- | ------ | ------- | ------------------------------------- |
 | **Show Preview** | `bool` | `true`  | Enables the camera feed overlay.      |
-| **Show Stats**   | `bool` | `true`  | Enables the capture statistics panel. |
+| **Show Stats** (under **Statistics**)   | `bool` | `true`  | Enables the capture statistics panel. |
 
-**Source**
+**Source fields** (no heading in the Inspector)
 
 | Field                               | Type            | Default             | Description                                                                                                                                   |
 | ----------------------------------- | --------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -43,7 +43,7 @@ The component auto-discovers the active frame source in the scene. No explicit a
 | **Offset X**         | `int` (0–200)     | `10`          | Horizontal inset from the selected corner in pixels.                                                                |
 | **Offset Y**         | `int` (0–200)     | `10`          | Vertical inset from the selected corner in pixels.                                                                  |
 
-<figure><img src="../../../../.gitbook/assets/image (503).png" alt="Debug preview overlay positioning controls in the Inspector"><figcaption><p>Debug preview overlay positioning controls.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-vision-debug-preview-inspector.png" alt="Vision Debug Preview Inspector with Frame Source Component, Overlay Layout, Aspect Ratio, Preview Settings and Statistics fields"><figcaption><p>The Vision Debug Preview Inspector with its default values.</p></figcaption></figure>
 
 **Aspect Ratio**
 
@@ -52,14 +52,16 @@ The component auto-discovers the active frame source in the scene. No explicit a
 | **Use Source Aspect Ratio** | `bool`        | `true`         | When enabled, derives aspect ratio from the frame source's `FrameDimensions`. When disabled, uses **Custom Aspect Ratio**. |
 | **Custom Aspect Ratio**     | `float` (1–3) | `1.778` (16:9) | Aspect ratio used when **Use Source Aspect Ratio** is disabled.                                                            |
 
+The two source fields come first with no heading, followed by **Overlay Layout**, **Aspect Ratio**, **Preview Settings**, then **Statistics**.
+
 ## Statistics overlay
 
-When **Show Stats** is enabled, a text box is drawn adjacent to the preview. The exact output:
+When **Show Stats** is enabled, a 180 × 122 pixel text box is drawn in the preview's corner, on top of the preview. It sits beside the preview only when the preview falls back to IMGUI drawing. The exact output:
 
 ```text
 Vision Capture Debug
 Status: Capturing
-Source: ConvaiVisionRoot/ConvaiVisionRoot [camera] (CameraVisionFrameSource)
+Source: [Convai Manager]/ConvaiVisionRoot [camera] (CameraVisionFrameSource)
 Resolution: 1280x720
 FPS: 14.9 (target: 15)
 Frames: 447
@@ -69,11 +71,11 @@ Frames: 447
 | ----------------------------- | ------------------------------------------------- | -------------------------------------------------- |
 | `Status: Capturing / Stopped` | `IsCapturing` on the frame source                 | Boolean string — not the `VisionSourceState` enum. |
 | `Source: ...`                 | Hierarchy path + SourceId + type name             | Full path from scene root for disambiguation.      |
-| `Resolution: WxH`             | `FrameDimensions`                                 | `(0, 0)` before capture starts.                    |
+| `Resolution: WxH`             | `FrameDimensions`                                 | `0x0` only for a source with no texture yet, such as Quest. A camera source shows its configured size and a webcam source its requested size before capture. |
 | `FPS: X.X (target: Y)`        | Measured over 0.5 s intervals + `TargetFrameRate` | Measured FPS updates every 0.5 seconds.            |
 | `Frames: N`                   | `FrameCount`                                      | Cumulative total since capture started.            |
 
-<figure><img src="../../../../.gitbook/assets/image (491).png" alt="Statistics panel showing FPS and frame metrics in the Vision Debug Preview overlay"><figcaption><p>Statistics panel showing FPS and frame metrics.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-vision-debug-overlay.png" alt="Game view in Play Mode with the vision preview in the bottom-right corner and the statistics panel over it"><figcaption><p>The preview and statistics panel in the Game view. A long <code>Source</code> line is cut off at the panel edge.</p></figcaption></figure>
 
 {% hint style="warning" %}
 **`IsCapturing` vs `IsPublishing`:** The statistics panel shows `IsCapturing` — whether the frame source is producing frames. This is distinct from `ConvaiVisionPublisher.IsPublishing`, which indicates whether a WebRTC video track is actively being sent to Convai. Both can be checked independently; a source may be capturing while publishing is paused or not yet started.
@@ -91,19 +93,19 @@ These properties can be read from other scripts:
 | `FrameCount`  | `long`  | Cumulative frames from the current frame source.      |
 | `IsCapturing` | `bool`  | Whether the current frame source is capturing.        |
 
-## Verify vision requests with the Sample Debug Hub
+## Verify vision requests with the sample tools
 
-`VisionDebugPreview` confirms that a frame source is producing frames locally. It does not confirm that Convai receives the frames or that vision-specific requests get an answer. Import the **LipSync Sample** from Package Manager and open its scene to test that round trip. The sample instances a **Sample Debug Hub** with a **Vision** panel alongside its **Context** and **Emotion** panels.
+`VisionDebugPreview` confirms that a frame source is producing frames locally. It does not confirm that Convai receives the frames or that vision-specific requests get an answer. Import the **LipSync Sample** from Package Manager and open its scene to test that round trip. The scene includes **Dynamic Vision Context Rig** with `DynamicVisionContextSceneTool`, an IMGUI overlay for **Send Text Message**, **Request Vision Status**, and **Trigger Vision**. The Sample Debug Hub prefab exists separately but is not instanced in the shipped sample scenes.
 
-Open the **Vision** panel to reach these controls:
+If you add the Sample Debug Hub prefab yourself, its **Vision** panel exposes these controls:
 
 | Control | Action |
 | --- | --- |
 | **Text message** input + **Send Text** | Sends a plain text message through `ConvaiPlayer.SendTextMessage`. Use this first to confirm the character responds at all. |
-| **Vision prompt** and **Respond mode** inputs + **Vision Status** | Calls `ConvaiRoomManager.RequestVisionStatus()`. The result text reports the backend's buffer outcome, active source, and frame age once Convai answers. |
+| **Vision Status** (ignores prompt and respond-mode inputs) | Calls `ConvaiRoomManager.RequestVisionStatus()`. The result text reports the backend's buffer outcome, active source, and frame age once Convai answers. |
 | **Vision prompt** and **Respond mode** inputs + **Vision Trigger** | Calls `ConvaiRoomManager.TriggerVision()` with the prompt text and the parsed respond mode. The result text reports whether frames were attached and whether the request was downgraded. |
 
-The **Respond mode** input accepts `silent`, `auto`, or `must_respond`. An unrecognized value is rejected before the request is sent. The result text then reads `Invalid respond mode '<value>' — use silent, auto or must_respond`.
+The **Respond mode** input accepts `silent`, `auto`, or `must_respond`. Leave it empty to send no mode; the trigger then follows the Vision lane default, `Silent`, and Convai attaches the frames without a reply. An unrecognized value is rejected before the request is sent. The result text then reads `Invalid respond mode '<value>' — use silent, auto or must_respond`.
 
 For example, after a successful trigger the result text reads:
 
@@ -111,13 +113,13 @@ For example, after a successful trigger the result text reads:
 Vision trigger: status=success, outcome=frames_available, attach=attached, frames=5, downgraded=False
 ```
 
-For a scene-only check without the hub, add `DynamicVisionContextSceneTool` to any GameObject. It exposes the same three actions through an IMGUI overlay and equivalent context menu commands (**Send Text Message**, **Request Vision Status**, **Trigger Vision**). The LipSync sample scene also places a vision target rig — colored props in front of the character — for **Vision Trigger** requests to describe.
+For a scene-only check without the hub, add `DynamicVisionContextSceneTool` to any GameObject. It exposes the same three actions through an IMGUI overlay and equivalent context menu commands (**Send Text Message**, **Request Vision Status**, **Trigger Vision**). The scene does not place the separate VisionTargets materials as colored test props. Add your own distinct visible objects when testing what the camera sees.
 
 ## Known limitations
 
-* Editor only. `VisionDebugPreview` calls `enabled = false` in `Awake()` on non-Editor builds. No runtime overhead in shipped builds.
-* On WebGL the overlay is blank because `ConvaiVisionPublisher` bypasses frame sources and uses `canvas.captureStream()` directly. There is no `RenderTexture` to display. Verify the stream via `IsPublishing` instead.
-* The overlay is rendered via `OnGUI` (IMGUI). It cannot be positioned with UGUI or rendered in world space.
+* Editor only. `VisionDebugPreview` calls `enabled = false` in `Awake()` on non-Editor builds. It does not display a preview in shipped builds.
+* In Editor Play mode, the preview works with any build target, including WebGL. It disables itself in every player build. Verify browser publication separately.
+* The image uses a generated child Screen Space - Overlay Canvas named `Convai Vision Debug Preview` and a RawImage. Statistics and an image fallback use IMGUI. Inspector layout controls position the overlay.
 * Only one statistics panel is drawn per `VisionDebugPreview` component. Add multiple components if you need to compare two frame sources side by side.
 * `VisionContextDebugPanel` and `DynamicVisionContextSceneTool` are sample-only components under `SamplesShared/`. They are not part of the runtime SDK and are not included in shipped builds unless you import and keep the sample.
 
