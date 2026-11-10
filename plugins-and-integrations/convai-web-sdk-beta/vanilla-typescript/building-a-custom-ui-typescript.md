@@ -5,7 +5,7 @@ description: >-
 metaLinks:
   alternates:
     - >-
-      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/web-plugins/convai-web-sdk-beta/vanilla-typescript/building-a-custom-ui-typescript
+      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/building-a-custom-ui-typescript
 ---
 
 # Building a Custom UI (TypeScript)

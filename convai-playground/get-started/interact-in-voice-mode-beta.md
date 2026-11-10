@@ -5,7 +5,7 @@ description: >-
 metaLinks:
   alternates:
     - >-
-      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/convai-playground/get-started/interact-in-voice-mode-beta
+      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/convai-playground/get-started/interact-in-voice-mode
 ---
 
 # Interact in Voice Mode (Beta)

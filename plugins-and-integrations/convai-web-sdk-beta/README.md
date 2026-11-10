@@ -6,7 +6,7 @@ hidden: true
 metaLinks:
   alternates:
     - >-
-      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/web-plugins/convai-web-sdk-beta
+      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/web-plugins/convai-web-sdk
 ---
 
 # Convai Web SDK \[Beta]

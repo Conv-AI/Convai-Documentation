@@ -3,7 +3,7 @@ description: Begin building applications with our quick start guide for the Web 
 metaLinks:
   alternates:
     - >-
-      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/web-plugins/convai-web-sdk/getting-started
+      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/web-plugins/convai-web-sdk-1/getting-started
 ---
 
 # Getting Started

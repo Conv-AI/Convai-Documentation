@@ -42,9 +42,9 @@ A narrative graph is made of four building blocks:
 A Section contains:
 
 * **Objectives** – The goal the character aims to achieve in this part of the narrative.\
-  &#xNAN;_&#x45;xample:_ A virtual tour guide’s objective could be to welcome the user and ask if they want to begin the tour.
+  _&#x45;xample:_ A virtual tour guide’s objective could be to welcome the user and ask if they want to begin the tour.
 * **Decisions** – Choices based on user interaction that direct the character to different sections.\
-  &#xNAN;_&#x45;xample:_ If the user says “yes” to a tour, the next section might start the tour route; if “no,” the character might offer alternative information.
+  _&#x45;xample:_ If the user says “yes” to a tour, the next section might start the tour route; if “no,” the character might offer alternative information.
 
 {% hint style="warning" %}
 Ensure decisions are clear and unambiguous; otherwise, the intended section may not be triggered.

@@ -5,8 +5,7 @@ description: >-
 hidden: true
 metaLinks:
   alternates:
-    - >-
-      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/introduction
+    - /broken/spaces/EtUJA212Zc1S9ACc8T4l/pages/XTPNxcugwy3CRWB1Ghpb
 ---
 
 # Introduction

@@ -6,8 +6,7 @@ description: >-
 hidden: true
 metaLinks:
   alternates:
-    - >-
-      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/asset-uploader/migrate-your-unreal-engine-5.5-convai-assets-to-5.6
+    - /broken/spaces/EtUJA212Zc1S9ACc8T4l/pages/7QUJurtka1FQnPBNuAGj
 ---
 
 # Migrate Your Unreal Engine 5.5 Convai Assets to 5.6

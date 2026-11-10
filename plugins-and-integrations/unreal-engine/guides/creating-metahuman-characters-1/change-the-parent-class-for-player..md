@@ -2,8 +2,7 @@
 description: This gives the player the ability for conversation with the chat bot.
 metaLinks:
   alternates:
-    - >-
-      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/unreal-engine/guides/creating-metahuman-characters-1/change-the-parent-class-for-player.
+    - /broken/spaces/EtUJA212Zc1S9ACc8T4l/pages/Y0tZ6JdRmLWKIckVm4nd
 ---
 
 # Change the parent class for Player.

@@ -3,7 +3,7 @@ description: Build your own UI while using Convai’s audio pipelines and messag
 metaLinks:
   alternates:
     - >-
-      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/web-plugins/convai-web-sdk-beta/react/custom-ui-and-advanced-usage
+      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/web-plugins/convai-web-sdk/react/custom-ui-and-advanced-usage
 ---
 
 # Custom UI & Advanced Usage

@@ -3,7 +3,7 @@ description: ConvaiClient is the main class for managing Convai in vanilla TypeS
 metaLinks:
   alternates:
     - >-
-      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/web-plugins/convai-web-sdk-beta/vanilla-typescript/convaiclient-core-api
+      https://app.gitbook.com/s/EtUJA212Zc1S9ACc8T4l/plugins-and-integrations/web-plugins/convai-web-sdk/vanilla-typescript/convaiclient-core-api
 ---
 
 # ConvaiClient (Core API)
