@@ -44,7 +44,7 @@ curl --request POST "${LIVE_API_URL}/connect" \
   }'
 ```
 
-`room_brief` is the context every character in the room is given, including characters added later, up to 4,000 characters. It is fixed when the room is created, so a room that needs a different brief needs a new room. [Connect API](connect-api.md) documents `characters`, `group_chat`, and `room_brief` in full.
+`room_brief` is the context every character in the room is given, including characters added later, up to 5,000 characters. It is fixed when the room is created, so a room that needs a different brief needs a new room. [Connect API](connect-api.md) documents `characters`, `group_chat`, and `room_brief` in full.
 
 This response is shortened: it shows two of the three roster entries, omits the remaining standard `/connect` fields, and omits each entry's `session_id`, `character_session_id`, and `description`:
 

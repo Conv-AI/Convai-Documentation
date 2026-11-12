@@ -1,7 +1,7 @@
 ---
 title: Room controls reference
 description: Reference for the controls in a chat experience room's top bar and side panel, and what each one does to the conversation.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 A chat experience room carries controls in a top bar above the conversation and in the side panel down the left. This page lists both, in the order they appear on screen. The message box under the thread holds controls of its own—the respond chip and the paperclip—covered in [Choose who replies](choose-who-replies.md) and [Share files with the room](../share-files-with-the-room/README.md).
@@ -33,10 +33,11 @@ The three-dots menu sits at the right of the top bar and holds these actions:
 | **Rename experience** | Opens the same rename dialog as the pencil |
 | **Duplicate with a new brief** | Opens the create dialog prefilled from this experience, with every field editable. See [Why the brief cannot be changed](../the-room-brief/why-the-brief-cannot-be-changed.md) |
 | **Export transcript** | Downloads the conversation in this room as a Markdown file. See [Export a transcript](../sessions-and-transcripts/export-a-transcript.md) |
-| **Clear conversation** | Ends the conversation and empties the room: the thread, the characters, and the **Shared in room** list |
+| **Clear conversation** | Ends the conversation and empties the room: the thread, the characters, and the **Shared in room** list. You stay on the page |
+| **Leave room** | Ends the conversation, empties the room the same way, and returns you to **My Experiences** |
 
 {% hint style="warning" %}
-**Clear conversation** ends the conversation as soon as you select it. It does not ask you to confirm, and a conversation that has ended cannot be rejoined. The room stays open, emptied and waiting for characters, so the room you are looking at afterwards is a new one.
+**Clear conversation** and **Leave room** both end the conversation as soon as you select them. Neither asks you to confirm, and a conversation that has ended cannot be rejoined. After **Clear conversation** the room stays open, emptied and waiting for characters, so the room you are looking at afterwards is a new one. **Leave room** takes you back to **My Experiences**.
 {% endhint %}
 
 ## The room ID

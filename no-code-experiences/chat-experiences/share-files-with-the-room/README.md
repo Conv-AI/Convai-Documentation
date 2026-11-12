@@ -1,18 +1,16 @@
 ---
 title: Share files with the room
 description: Understand what reaches the characters when you attach a file to a message in a chat experience room, and what the room keeps afterwards.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
-A message you send in a [chat experience](../README.md) room can carry files. A file is never handed to the characters as a file: what reaches them is text—either the words the file already holds, or a description written for it. These pages cover what each kind of file becomes, what the room shows you about it, and what is kept once the conversation is over.
+A message you send in a [chat experience](../README.md) room can carry files. A PDF, a PowerPoint deck, a picture, or a video reaches the characters as the file itself, and a Word or plain-text file reaches them as its text. These pages cover what each kind of file becomes, what the room shows you about it, and what is kept once the conversation is over.
 
 ## What the characters receive
 
-A file goes to the characters that turn is addressed to. A character the message did not address is not given the file, and the replies that follow do not pass it on. If you want every character to have a file, address the message to everyone—tag `@everyone`, or set the respond chip to **Everyone must respond**—before you send it. See [Choose who replies](../running-the-room/choose-who-replies.md).
+A file goes to the characters that turn is addressed to. A character the message did not address is not given the file, and the replies that follow do not pass it on. A room opens on **Everyone must respond**, so a file reaches every character unless you narrow the turn with a tag or the respond chip. See [Choose who replies](../running-the-room/choose-who-replies.md).
 
-Those characters receive text, and only text. A room carries writing, so every file you attach becomes writing before it travels.
-
-There are two ways that happens. A file that holds words is shared as its own words: a PDF, a Word file, and every plain-text format reach the characters as the text they contain. A file that holds a picture cannot be shared that way, so a description of the picture is written and the characters receive the description instead. The characters are told that the words describe a picture you attached, and that description is all they have to answer from.
+A PDF, a PowerPoint deck, a picture, and a video are handed to the characters as they are: the characters read the PDF's pages and the deck's slides, look at the picture, and are given frames from the video along with a transcript of what is said in it. A Word file and every plain-text format are shared as the text they contain.
 
 A file you share belongs to the conversation you shared it in. Every new conversation starts with nothing shared.
 
@@ -20,37 +18,44 @@ A file you share belongs to the conversation you shared it in. Every new convers
 
 | What you attach | What reaches the characters |
 |---|---|
-| A plain-text file—`.txt`, `.md`, `.csv`, or `.json` | The file's own text |
+| A PDF | The document itself, page by page |
+| A PowerPoint deck—`.pptx` | The whole deck, slide by slide, with frames and a speech transcript for audio and video embedded in it |
+| A picture—`.png`, `.jpg`, `.jpeg`, or `.webp` | The picture |
+| A video—`.mp4`, `.webm`, `.mkv`, `.m4v`, or `.mov` | Frames taken from the video, and a transcript of its speech when it has any |
 | A Word file—`.docx` | The text of the document |
-| A PDF carrying a body of prose | The text of the document |
-| A PDF carrying little text of its own | Whatever text it does hold, then a description of its first pages, written in words |
-| A picture—`.png`, `.jpg`, or `.jpeg` | A description of the picture, written in words |
+| A plain-text file—`.txt`, `.md`, `.csv`, or `.json` | The file's own text |
 
-A PDF is the one format with two outcomes, and both are correct. [Share a document](share-a-document.md) sets out which one you get and how the room tells you.
+Each kind has its own size limit, and a message carries one video at most. See [File limits reference](file-limits-reference.md).
 
-## When a file cannot be read
+## When a file cannot be prepared
 
-A file the room could not read is still sent. Its name goes to the characters and nothing else, and the message is not held back.
+Every file you attach gets a chip above where you type, and the chip's second line settles once the file is ready. The send control waits until every chip has settled.
 
-Nothing tells you in advance whether a file's contents can be shared. You find out afterwards. Every file you attach gets a chip above where you type, and the chip's second line settles once the file has been dealt with. A file whose contents were not shared says so on that line, and a file the room could not read—or a picture it could not describe—also raises a message naming the file.
+A PDF, a deck, a picture, or a video that cannot be prepared says why on its chip and holds the message back until you retry the file or remove it. A Word or plain-text file that cannot be read is still sent, by name alone: its chip reads `could not read`, and a message names the file.
 
 The paperclip that attaches a file is greyed out only while the message box is locked. No file makes it unavailable. See [You cannot send a message](../troubleshooting/composer-is-locked.md) for every reason the box locks.
+
+## Drag files onto the conversation
+
+Dragging files from your computer onto the conversation attaches them exactly as the paperclip does: the same formats, the same size limit, and the same chips. Drop them on the top bar, the thread, or the message box. While you drag, the conversation reads "Drop files to attach them" and "They are added to your next message."
+
+While the message box is locked, the conversation reads "Files can't be attached right now" with the reason the box is locked, and a drop attaches nothing. A file dropped outside the conversation, such as on the side panel, is ignored.
 
 ## What the room keeps
 
 The room keeps file names, not file contents. Three places show a file after you send it:
 
 - **The thread.** The message you sent carries a chip for every file that went with it.
-- **The side panel.** Its **Shared in room** section lists the files sent so far in this conversation, each with its name, the same second line as the chip, and a note saying what the characters were given. [File limits reference](file-limits-reference.md) sets out what each note means, and [Running the room](../running-the-room/README.md) covers the panel's other sections.
+- **The side panel.** Its **Shared in room** section lists the files sent so far in this conversation, each with its name and the same second line as the chip. [File limits reference](file-limits-reference.md) sets out what each note means, and [Running the room](../running-the-room/README.md) covers the panel's other sections.
 - **A finished session's transcript.** It records the name of every file a turn carried, and a transcript you download lists those names under the turn they were sent with. See [Review a past session](../sessions-and-transcripts/review-a-past-session.md) and [Export a transcript](../sessions-and-transcripts/export-a-transcript.md).
 
-**Clear conversation** in the room's three-dots menu empties the **Shared in room** list along with the thread. See [Room controls reference](../running-the-room/room-controls-reference.md).
+The **Shared in room** list holds the files on the messages you have sent in the current conversation, so it empties when the conversation ends: **Clear conversation** and **Leave room** in the room's three-dots menu both empty it. A message that failed to send adds nothing to it. See [Room controls reference](../running-the-room/room-controls-reference.md).
 
 Because only names are kept, every file in a past session's thread is shown as a name, whatever happened to it at the time. A transcript records that a file was shared, not what the characters were given from it.
 
 ## Which page answers which question
 
-<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Share a document</strong><br>Attach a PDF, a Word file, or a plain-text file, and read what the chip reports about it.</td><td><a href="share-a-document.md">share-a-document.md</a></td></tr><tr><td><strong>Share an image</strong><br>Attach a picture, and understand what the characters are told about it.</td><td><a href="share-an-image.md">share-an-image.md</a></td></tr><tr><td><strong>File limits reference</strong><br>The accepted file types, the size and text limits, and what happens at each one.</td><td><a href="file-limits-reference.md">file-limits-reference.md</a></td></tr></tbody></table>
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Share a document</strong><br>Attach a PDF, a PowerPoint deck, a Word file, or a plain-text file, and read what the chip reports about it.</td><td><a href="share-a-document.md">share-a-document.md</a></td></tr><tr><td><strong>Share an image or a video</strong><br>Attach a picture or a video, and understand what the characters are given from it.</td><td><a href="share-an-image.md">share-an-image.md</a></td></tr><tr><td><strong>File limits reference</strong><br>The accepted file types, the size and length limits, and what happens at each one.</td><td><a href="file-limits-reference.md">file-limits-reference.md</a></td></tr></tbody></table>
 
 The message box, where a file is attached, is one of the room's three working parts.
 

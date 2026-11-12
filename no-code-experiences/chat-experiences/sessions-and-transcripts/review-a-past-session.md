@@ -1,7 +1,7 @@
 ---
 title: Review a past session
 description: Open a chat experience's previous sessions, pick one of its finished conversations, and read the whole thread, including what a saved transcript leaves out.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 A finished conversation stays with the chat experience that ran it and can be opened again as a read-only thread. Use this page to reach an experience's previous sessions, pick one, and read it.
@@ -62,18 +62,17 @@ If a session will not open, or nothing is listed where you expected a session, s
 
 A transcript records what was said, not every detail the room showed while it was being said. Three differences are worth knowing before you read one.
 
-**Auto and Anyone may respond read back the same.** A turn sent under either one carries the caption `Auto · room brief decides`. Read that caption as a description of who answered rather than as a record of the setting you chose. Every other mode is kept, so an **Everyone must respond** turn still reads `Everyone must respond` and a tagged turn still names who was tagged. A turn addressed to one character reads `Only ⟨name⟩` whichever way you addressed it, where a live room writes `Sent to ⟨name⟩` for a character picked under **Only one character**. See [Respond modes reference](../running-the-room/respond-modes-reference.md).
+**One character reads the same either way.** A turn addressed to one character reads `Only ⟨name⟩` whichever way you addressed it, where a live room writes `Sent to ⟨name⟩` for a character picked under **Only one character**. Every other mode reads as you set it. A session recorded while the menu still offered **Auto · room brief decides** shows those turns as `Anyone may respond`, because the two were kept the same way. See [Respond modes reference](../running-the-room/respond-modes-reference.md).
 
 **The quiet note is shorter.** A transcript names a character that said nothing and stops there. A live room says more, and how much more depends on the mode the turn ran under:
 
 | Where | What the note reads |
 |---|---|
-| A live room on **Auto** | "⟨names⟩ stayed quiet, as the brief asks. Tag them if you want their side." The last sentence reads "Tag one of them if you want their side." when more than one character is named |
 | A live room on **Anyone may respond** | "⟨names⟩ had nothing to add and passed." |
 | A live room on **Everyone must respond**, **Only the characters I tag**, or **Only one character** | "⟨names⟩ passed" |
 | A transcript, whatever the mode | "⟨names⟩ stayed quiet." |
 
-**A caption carries one count.** In a live room a caption can carry up to three: the replies, the characters still listening, and the characters that did not answer. A transcript caption carries the reply count alone, such as `2 of 4 responded`. See [How a turn works](../running-the-room/how-a-turn-works.md).
+**An open turn is counted, not named.** In a live room an **Anyone may respond** caption names the characters that replied. A transcript caption counts them, such as `Anyone may respond · 2 replied · 1 passed`, and reads `nobody replied` when none did. A turn addressed to one character that drew nothing reads `no reply`. See [How a turn works](../running-the-room/how-a-turn-works.md).
 
 ## Next steps
 

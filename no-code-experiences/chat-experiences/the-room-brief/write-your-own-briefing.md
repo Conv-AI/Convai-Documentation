@@ -1,7 +1,7 @@
 ---
 title: Write your own briefing
 description: Replace the briefing written for you in the create dialog with your own wording, and put the written-for-you version back when you want it.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 The briefing every character receives is written for you, and the create dialog is the one place where you can replace that wording with your own—creating the experience settles the briefing, and **Duplicate with a new brief** opens the same dialog on a copy when you want different wording later. Use this page to rewrite the briefing in the **What each character will be told** box, to put the written-for-you version back, and to understand what your own wording replaces.
@@ -31,7 +31,7 @@ What the box shows is the briefing for a room of two or more characters. A room 
 {% step %}
 ### Type your own briefing
 
-Select the text in the briefing field and replace it. The field takes up to 4,000 characters, the same cap the written-for-you briefing obeys.
+Select the text in the briefing field and replace it. The field takes up to 5,000 characters, the same cap the written-for-you briefing obeys.
 
 A **Reset to the written-for-you version** button appears directly under the briefing field, above the rules chips, as soon as the text is your own. That button is how you can tell the briefing is no longer being written for you.
 {% endstep %}

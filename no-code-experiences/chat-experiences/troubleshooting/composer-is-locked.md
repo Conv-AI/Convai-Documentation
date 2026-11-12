@@ -1,7 +1,7 @@
 ---
 title: You cannot send a message
 description: Work out why the message box in a chat experience room will not take a message, using the reason the room shows, and what clears each one.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 The message box in a chat experience room locks whenever the room cannot take a message, and it always says why. Use this page to read the reason the room gives you, to clear it, and to tell a locked box apart from a message that went nowhere.
@@ -38,9 +38,9 @@ Nothing reached the characters and no reply is coming. The box is unlocked and t
 
 ## You can type, but the send control is unavailable
 
-The message box takes your text and carries no reason, but the send control does not respond. A file you have attached is still being read: the chip carrying it reads `reading…` after the file size, and `describing…` while a picture or a set of PDF pages is being described.
+The message box takes your text and carries no reason, but the send control does not respond. A file you have attached is still being prepared: the chip carrying it reads `reading…`, `uploading`, `validating PDF…`, or `processing…` after the file size.
 
-Nothing is blocked. The send control returns on its own once every chip has settled, and a picture takes seconds rather than the instant a text file takes. A send control that stays unavailable when no chip is waiting means the box is locked for a reason of its own, and the box says which.
+Nothing is blocked. The send control returns on its own once every chip has settled, and a video takes longer than a text file does. A chip whose second line ends "Retry or remove." has failed instead, and the message stays held until you retry that file or remove it. A send control that stays unavailable when no chip is waiting means the box is locked for a reason of its own, and the box says which.
 
 {% content-ref url="../share-files-with-the-room/file-limits-reference.md" %}
 [File limits reference](../share-files-with-the-room/file-limits-reference.md)
@@ -58,7 +58,7 @@ Reloading the page while a room is open ends that conversation. Reloading to cle
 
 ## The message sent but nobody answered
 
-A character answers when it is addressed and stays quiet otherwise, so a message that addresses nobody in particular can draw no reply at all. To get an answer from a particular character, send another message that tags it with `@`.
+On the default respond mode every character replies. Nobody answers when the turn ran under **Anyone may respond** and every character passed, or when the characters the message addressed did not reply; either way a note under your message names them. To get an answer from a particular character, send another message that tags it with `@`.
 
 {% content-ref url="../running-the-room/how-a-turn-works.md" %}
 [How a turn works](../running-the-room/how-a-turn-works.md)

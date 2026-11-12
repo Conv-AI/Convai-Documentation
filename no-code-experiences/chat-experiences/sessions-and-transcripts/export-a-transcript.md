@@ -1,7 +1,7 @@
 ---
 title: Export a transcript
 description: Download a chat experience conversation as a Markdown file from a past session, from the sessions list, or from the room while it is still running.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 A conversation held in a chat experience can be downloaded as a Markdown file, whether it has finished or is still running. Use this page to export one, and to know what the file holds before you open it.
@@ -81,7 +81,7 @@ Maya, what did you think of the price?
 ```
 {% endcode %}
 
-Turns are numbered from the start of the conversation, and the word after the turn number is how the turn was addressed: `all` for a message everyone had to answer, `tagged` for one that named the characters it wanted, and `open` for one the room was free to answer or leave. That last word covers a turn sent under **Auto · room brief decides** and one sent under **Anyone may respond** alike, so the file does not say which of the two a turn ran under. See [what a transcript does not record](review-a-past-session.md#what-a-transcript-does-not-record) for the rest of what a saved conversation leaves behind.
+Turns are numbered from the start of the conversation, and the word after the turn number is how the turn was addressed: `all` for a message everyone had to answer, `tagged` for one that named the characters it wanted, and `open` for one the room was free to answer or leave, which is what **Anyone may respond** sends. See [what a transcript does not record](review-a-past-session.md#what-a-transcript-does-not-record) for the rest of what a saved conversation leaves behind.
 
 A character that stayed quiet on an `open` turn takes a line of its own reading `_passed_`, rather than the single note the session's page shows in its place. The attachments line names the files shared on a turn, and the names are all of them it keeps: no file contents travel with the transcript.
 

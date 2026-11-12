@@ -1,7 +1,7 @@
 ---
 title: How the room brief is written
 description: Understand how a room type and a purpose become the one briefing every character receives, and what is trimmed when that briefing runs long.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 The briefing a character receives is one paragraph, written from the room type and the purpose you set when you created the chat experience. A one-character room is briefed in different words from a room of two or more, and the two are labeled differently as well. Knowing how that paragraph is assembled tells you what the characters are working from, which wording they received, and what is shortened when the briefing grows too long.
@@ -56,11 +56,11 @@ In a one-character room, the chips read **One other person**, **Stay in characte
 
 ## When the briefing runs long
 
-A briefing is capped at 4,000 characters, and the purpose is the only part that is shortened to fit.
+A briefing is capped at 5,000 characters, and the purpose is the only part that is shortened to fit.
 
 The opening sentence and the closing rules are kept whole. The purpose is cut at the point where the paragraph would run past the cap, ending in an ellipsis.
 
-A briefing you write yourself obeys the same cap. The **What each character will be told** box in the **Create a chat experience** dialog stops accepting text at 4,000 characters, so the wording you can see in the box is the wording the characters receive. That same box holds the finished briefing while it is still being written for you, so you can read the whole paragraph, ellipsis and all, before you create the experience.
+A briefing you write yourself obeys the same cap. The **What each character will be told** box in the **Create a chat experience** dialog stops accepting text at 5,000 characters, so the wording you can see in the box is the wording the characters receive. That same box holds the finished briefing while it is still being written for you, so you can read the whole paragraph, ellipsis and all, before you create the experience.
 
 ## Related pages
 

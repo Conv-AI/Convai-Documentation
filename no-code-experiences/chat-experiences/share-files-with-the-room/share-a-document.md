@@ -1,10 +1,10 @@
 ---
 title: Share a document
-description: Attach a PDF, a Word file, or a plain-text file to a message in a chat experience room, and read what the chip reports about it.
-last_reviewed: "2026-09-10"
+description: Attach a PDF, a PowerPoint deck, a Word file, or a plain-text file to a message in a chat experience room, and read what the chip reports about it.
+last_reviewed: "2026-11-12"
 ---
 
-A document you attach reaches the characters your message addresses, as text. Use this page to attach a PDF, a Word file, or a plain-text file, to send it with a message, and to read what the room reports about the file once it has been read or described.
+A document you attach reaches the characters your message addresses: a PDF or a PowerPoint deck as the document itself, a Word or plain-text file as its text. Use this page to attach one, to send it with a message, and to read what the room reports about the file once it is ready.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ A document you attach reaches the characters your message addresses, as text. Us
 {% step %}
 ### Pick the file
 
-Select the paperclip at the left of the message box, below where you type, and pick the file. You can pick several files at once.
+Select the paperclip at the left of the message box, below where you type, and pick the file. You can pick several files at once. Or drag the files from your computer onto the conversation and drop them. See [Drag files onto the conversation](README.md#drag-files-onto-the-conversation).
 
 A chip appears above where you type, carrying the file's format, its name, and a second line reading `reading…` after the size.
 {% endstep %}
@@ -25,9 +25,9 @@ A chip appears above where you type, carrying the file's format, its name, and a
 {% step %}
 ### Wait for the chip to settle
 
-The second line changes once the file has been read or described, and what it reads then tells you what the characters will be given.
+The second line changes once the file is ready. A PDF is uploaded and checked first, so its chip passes through `uploading` and `validating PDF…` before it settles.
 
-The arrow button at the right of the message box stays unavailable while any chip still reads `reading…` or `describing…`, and comes back when every chip has settled. The message box also locks for reasons of its own, and always says which. See [You cannot send a message](../troubleshooting/composer-is-locked.md).
+The arrow button at the right of the message box stays unavailable while any chip is still waiting, and comes back when every chip is ready. The message box also locks for reasons of its own, and always says which. See [You cannot send a message](../troubleshooting/composer-is-locked.md).
 {% endstep %}
 
 {% step %}
@@ -35,11 +35,11 @@ The arrow button at the right of the message box stays unavailable while any chi
 
 Write your question and send the message as usual. The message carries the file with it, and the chip moves into the thread above your words.
 
-A message can carry files and no words at all. Add a question if you want the characters to answer about the file: under the default **Auto · room brief decides**, a message carrying nothing but a file usually draws no reply, while a respond chip that names who answers draws a reply whether or not you wrote anything.
+A message can carry files and no words at all. On the default, **Everyone must respond**, a message carrying nothing but a file is still addressed to every character. Add a question if you want them to answer about something in particular.
 
-Who the turn addresses also settles who has the document: it goes to the characters that turn is addressed to, and a character the message did not address is not given it. In a room of two or more, tag `@everyone` or set the respond chip beside the paperclip to **Everyone must respond** before you send. In a room of one there is no chip to set, and every message already goes to that character. See [Choose who replies](../running-the-room/choose-who-replies.md).
+Who the turn addresses also settles who has the document: it goes to the characters that turn is addressed to, and a character the message did not address is not given it. In a room of two or more, the default **Everyone must respond** already sends it to every character, and a tag or a narrower respond chip limits who gets it. In a room of one there is no chip to set, and every message already goes to that character. See [Choose who replies](../running-the-room/choose-who-replies.md).
 
-Once the message is away, the chip sits with it in the thread and the file joins the **Shared in room** section of the side panel, carrying the note `described` when the characters were given a description, `name only` when the name was all they got, and no note at all when the file's own text was shared.
+Once the message is away, the chip sits with it in the thread and the file joins the **Shared in room** section of the side panel.
 {% endstep %}
 {% endstepper %}
 
@@ -55,24 +55,26 @@ The chip's second line always opens with the file's size. What follows depends o
 | A CSV file | The size and the number of rows, for example `12 KB · 240 rows` |
 | A JSON file | The size and the file's shape—`8 keys` for a set of fields, `12 items` for a list |
 | A Word file | The size and `document`, for example `1.2 MB · document` |
-| A PDF whose text was read | The size and the page count, for example `1.2 MB · 14 pages` |
-| A PDF whose pages were described | The size, the page count, and how many pages were described, for example `574 B · 1 page · 1 page described` |
+| A PDF | The size, the page count, and `PDF ready`, for example `1.2 MB · 14 pages · PDF ready` |
+| A PowerPoint deck | The size, the slide count, the embedded media count, and `deck ready`, for example `8 MB · 20 slides · 2 embedded media · deck ready` |
 
-`truncated` is added to the end of that line when that one file held more text than the room shares from a single file. The text is cut at the limit and the rest is not sent. See [File limits reference](file-limits-reference.md).
+`truncated` is added to the end of that line when a Word or plain-text file held more text than the room shares from a single file. The text is cut at the limit and the rest is not sent. See [File limits reference](file-limits-reference.md).
 
 ## What happens to a Word file
 
-A `.docx` file reaches the characters as the document's text, and the chip reports `document` after the size rather than a page count. A Word file is never described the way a PDF carrying little text is: if its text cannot be read, the file goes with its name alone.
+A `.docx` file reaches the characters as the document's text, and the chip reports `document` after the size rather than a page count. If its text cannot be read, the file goes with its name alone.
 
 ## What happens to a PDF
 
-A PDF is read in one of two ways, and both are the room working correctly. The chip is what tells you which one you got.
+A PDF is handed to the characters as the document itself, so they read its pages as laid out, including pages that are scans or slides. The chip reports the page count and `PDF ready`.
 
-A PDF carrying a body of prose is shared as that prose. The characters receive the document's own words, and the chip reports the page count.
+A PDF can be up to 10 MB and 33 pages. A larger file is refused when you pick it, and one with more pages settles to a chip naming the problem, which you remove before sending.
 
-A PDF carrying little text of its own is described instead. Its first pages are described in words, up to four of them, and the chip reports how many were described. The characters receive those descriptions, and, where the file runs past the pages that were described, a line naming the pages that were not.
+## What happens to a PowerPoint deck
 
-A one-page PDF holding a single line is described rather than read, and its chip reads `1 page · 1 page described` after the size. To see a PDF's own text reach the characters, attach one with a real body of prose in it.
+A `.pptx` deck is handed to the characters whole: every slide, plus frames and a speech transcript for audio and video embedded in it. Videos the deck only links to are not fetched. The whole deck is prepared before you can send, so a large one takes a while to settle.
+
+A deck can be up to 50 MB and 33 slides, with at most 8 embedded audio or video files running 10 minutes in total. Sending a deck with no message asks the characters for their reactions to the complete deck.
 
 ## Plain-text formats
 
@@ -80,18 +82,18 @@ A one-page PDF holding a single line is described rather than read, and its chip
 
 A CSV file and a JSON file each add a count to the chip, so you can check that the file was read as the shape you expected before you send it. The CSV row count includes the header row. A JSON file that does not parse as a set of fields or a list shows the size alone, and its text is still shared as it stands.
 
-## When a document cannot be read
+## When a document cannot be read or prepared
 
-A document the room could not read is still sent, by name alone. The characters are given the file name and nothing else.
+A Word or plain-text file the room could not read is still sent, by name alone. The chip's second line settles to `could not read` after the size, a message reads "Could not read ⟨name⟩; only its name will be shared", and the side panel notes the file as `name only`.
 
-The room tells you as soon as the file settles, in two places. The chip's second line settles to `could not read` after the size, and a message reads "Could not read ⟨name⟩; only its name will be shared". A PDF that could be neither read nor described settles to `could not describe` instead, and its message reads "Could not describe ⟨name⟩; only its name will be shared". Either outcome sends the name on its own, and the side panel notes the file as `name only`.
+A PDF or a deck that could not be prepared is not sent. Its chip gives the reason, ending "Retry or remove.", and the message is held back until you retry the file or take it off.
 
 ## Next steps
 
-A picture follows different rules, and what the characters are told about one is worth reading before you attach it.
+A picture or a video is attached the same way and has limits of its own.
 
 {% content-ref url="share-an-image.md" %}
-[Share an image](share-an-image.md)
+[Share an image or a video](share-an-image.md)
 {% endcontent-ref %}
 
 For the accepted formats, the size and text limits, and what happens at each one:

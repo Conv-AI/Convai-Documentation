@@ -1,10 +1,10 @@
 ---
 title: Choose who replies
 description: Set who answers the next message in a chat experience room, tag individual characters, and address the whole room at once.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
-A chat experience room of two or more characters opens on **Auto · room brief decides**, where the [room brief](../the-room-brief/README.md) settles who answers. Two controls override it: the respond chip under the message box, which holds until you change it, and an `@` tag in the message, which applies to that message only. Use this page to set either one, to know which of them wins, and to see what a room holding a single character offers instead.
+A chat experience room of two or more characters opens on **Everyone must respond**, where every character replies to each message. Two controls change that: the respond chip under the message box, which holds until you change it, and an `@` tag in the message, which applies to that message only. Use this page to set either one, to know which of them wins, and to see what a room holding a single character offers instead.
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ In a room of two or more characters, the respond chip sits in the row under the 
 
 Select the chip. The menu opens under a section label asking who should respond.
 
-Four modes are listed: **Auto · room brief decides**, **Everyone must respond**, **Anyone may respond**, and, below a divider, **Only the characters I tag**. A fifth, **Only one character**, sits at the foot of the menu with a chip for each character in the room.
+Three modes are listed: **Everyone must respond**, **Anyone may respond**, and, below a divider, **Only the characters I tag**. A fourth, **Only one character**, sits at the foot of the menu with a chip for each character in the room.
 {% endstep %}
 
 {% step %}
@@ -29,7 +29,7 @@ Four modes are listed: **Auto · room brief decides**, **Everyone must respond**
 
 Select the mode you want. Each carries a line describing what it asks of the characters, and the mode in force carries a check mark.
 
-Selecting **Auto · room brief decides**, **Everyone must respond**, or **Anyone may respond** closes the menu and sets the chip. Selecting a character under **Only one character** sets the chip to **Only** followed by that name. Selecting **Only the characters I tag** closes the menu and types an `@` into the message box for you, which opens the tag list.
+Selecting **Everyone must respond** or **Anyone may respond** closes the menu and sets the chip. Selecting a character under **Only one character** sets the chip to **Only** followed by that name. Selecting **Only the characters I tag** closes the menu and types an `@` into the message box for you, which opens the tag list.
 {% endstep %}
 {% endstepper %}
 
@@ -39,7 +39,7 @@ For what each mode asks of the characters and what the thread shows afterwards, 
 
 ## Tag a character in the message
 
-Tagging names a character inside the message itself, and it asks that character for a reply rather than leaving the choice to it.
+Tagging names a character inside the message itself. The turn goes to the characters you tag, each of them has to reply, and every other character stays out of it.
 
 {% stepper %}
 {% step %}
@@ -68,7 +68,7 @@ The tag is written into the message as `@` followed by that name without its spa
 {% endstepper %}
 
 {% hint style="info" %}
-Naming a character in ordinary prose—"Maya, what did you think of the price?"—may draw that character out under Auto, but nothing holds it to a reply. A tag is the explicit form: it asks the character outright, and the room holds it to that rather than leaving the decision to the character.
+Naming a character in ordinary prose—"Maya, what did you think of the price?"—does not narrow the turn. On the default every character replies to that message, and under **Anyone may respond** Maya may answer but nothing holds her to it. A tag is the explicit form: only the tagged characters are asked, and each of them has to reply.
 {% endhint %}
 
 ## Address every character at once
@@ -86,14 +86,14 @@ The chip follows what you type, so it always reads what will happen to the messa
 Deleting the tags from the draft returns the chip to its own setting. Sending the message clears the draft, so the next message starts from the chip again.
 
 {% hint style="success" %}
-Read the chip before you send. If it names the mode you picked or the characters you tagged, the message is addressed the way you meant it. If it still reads **Auto · room brief decides**, nothing you have set or typed has taken effect.
+Read the chip before you send. If it names the mode you picked or the characters you tagged, the message is addressed the way you meant it. If it reads **Everyone must respond** when you meant something narrower, nothing you have set or typed has taken effect.
 {% endhint %}
 
 ## A one-character room has no respond chip
 
 A room holding one character shows a sentence where the chip would be: "One character in the room: every message goes to ⟨name⟩." There is no menu and no mode to set, because every message reaches the only character there.
 
-Typing `@` still opens the tag list with that one character in it, and `@everyone` is not offered. Tagging asks the character for a reply outright; left untagged, it answers when your message addresses it and stays quiet otherwise, which is what the briefing written for a single-character room tells it to do. See [How the room brief is written](../the-room-brief/how-the-room-brief-is-written.md).
+Typing `@` still opens the tag list with that one character in it, and `@everyone` is not offered. Tagging changes nothing in a room of one: tagged or not, every message asks that character for a reply.
 
 Seat a second character and the chip appears.
 

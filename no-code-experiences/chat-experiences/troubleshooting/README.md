@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot Chat Experiences
 description: Find the chat experience symptom you are seeing, from a room that will not connect to a transcript that will not download, and the page that answers it.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 Chat Experiences reports what is wrong where it happens: the message box says why it is locked, the character picker says why a character will not join, and anything else is reported on the page you were working on. Start from what you can see on screen, and these pages tell you what it means and what clears it.
@@ -17,7 +17,7 @@ Five things that look like faults are how a chat experience works:
 | What you see | Why | Where it is explained |
 |---|---|---|
 | The room opens with nobody in it | Characters are seated for each session, and the roster does not carry over from the last one | [Sessions and transcripts](../sessions-and-transcripts/README.md#what-carries-over-to-the-next-session) |
-| A character said nothing at all | A character answers when it is addressed and stays quiet otherwise | [How a turn works](../running-the-room/how-a-turn-works.md) |
+| A character said nothing at all | The turn did not address it, or the turn ran under **Anyone may respond** and the character passed | [How a turn works](../running-the-room/how-a-turn-works.md) |
 | There is no control that edits the brief | The room type, the purpose, and the briefing are settled when the experience is created | [Why the brief cannot be changed](../the-room-brief/why-the-brief-cannot-be-changed.md) |
 | A finished conversation cannot be continued | Every opening of a chat experience starts a new room | [Sessions and transcripts](../sessions-and-transcripts/README.md#why-every-opening-is-a-new-room) |
 | A room link does not open for a colleague | A chat experience and the rooms opened from it open only for the account that created them | [The room will not connect](room-will-not-connect.md#the-room-does-not-open-for-someone-else) |

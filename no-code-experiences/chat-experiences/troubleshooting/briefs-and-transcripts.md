@@ -1,7 +1,7 @@
 ---
 title: Briefs and transcripts
 description: Answers for a brief that cannot be edited, an experience that will not be created, and a past session or transcript that will not open or download.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 A chat experience settles its brief when you create it, and keeps every conversation it runs as a session you can read but not rejoin. Use this page when the brief will not do what you expect, or when a session or a transcript will not open, download, or hold what you thought it would.
@@ -66,7 +66,7 @@ A session longer than 200 [turns](../running-the-room/how-a-turn-works.md) expor
 
 ## What a transcript leaves out
 
-A transcript records what was said, not every detail the room showed while it was being said. The one setting it cannot tell you is which of two [respond modes](../running-the-room/respond-modes-reference.md) a turn ran under: **Auto · room brief decides** and **Anyone may respond** are kept the same way, so a turn sent under either reads back as Auto. Every other respond mode is kept as you set it, and a finished thread differs from a live room in a few other ways worth knowing before you read one.
+A transcript records what was said, not every detail the room showed while it was being said. The [respond mode](../running-the-room/respond-modes-reference.md) of each turn is kept, and a finished thread differs from a live room in a few ways worth knowing before you read one.
 
 A transcript also opens only for the account that recorded it, so a link to one does not open for anyone else. The exported file is how you hand a conversation to someone.
 
