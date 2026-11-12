@@ -1,7 +1,7 @@
 ---
 title: Add characters to the room
 description: Add characters to a chat experience room from the workspace you are in or by pasting a character ID, and see each one join and be briefed.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 A chat experience opens as an empty room, and the characters you seat in it are the ones that answer you. You add characters for each session: opening the experience again starts a new room with nobody in it. Use this page to add characters from your workspace or by character ID, and to recognize the point at which each one has joined and been briefed.
@@ -86,8 +86,6 @@ Select **Done** to close the dialog.
 Each character appears in the side panel straight away, with **Joining the room…** under its name, and settles into a normal row once it is in. While the room is connecting, the message box is locked and reads **Waiting for characters to join…**.
 
 The thread marks the moment the briefing lands. A divider names the characters and states that they joined and were briefed. A box titled **What each character was told on joining** holds the briefing itself, with a line per character noting that it also carries its own persona. In a one-character room the box is titled with that character's name instead. What the briefing contains, and how the room type and the purpose produce it, is covered in [The room brief](the-room-brief/README.md).
-
-In a room of two or more characters, a note under that box states that the respond mode is set to Auto and that the brief decides who answers.
 
 The side panel changes with the size of the room. With one character it labels your own row **You** and describes it as talking with that character; with two or more it labels the row **Moderator** and describes it as "You ask, they answer".
 

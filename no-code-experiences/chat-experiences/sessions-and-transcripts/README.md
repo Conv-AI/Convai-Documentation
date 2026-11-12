@@ -1,7 +1,7 @@
 ---
 title: Sessions and transcripts
 description: Understand why every opening of a chat experience is a new room, what carries over from the last one, and what is kept afterwards.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 A session is one conversation in a chat experience, from the characters taking their seats to the moment the conversation ends. Every opening starts a new session, and a finished one is kept as a transcript you can read but not continue.
@@ -12,7 +12,7 @@ Opening a chat experience always starts a new room. There is no control that reo
 
 The room opens empty. It becomes a session once the characters you seat have joined, and the experience records it from there. Opening an experience and going back without adding anyone records nothing. A session nobody wrote in is still recorded and still listed, with **No messages recorded** in place of its first question.
 
-Opening the experience is not the only thing that starts a session. **Clear conversation** ends the conversation you are in and keeps you in the same room, emptied, so seating characters there again starts another numbered session at the same address. See [Room controls reference](../running-the-room/room-controls-reference.md).
+Opening the experience is not the only thing that starts a session. **Clear conversation** ends the conversation you are in and keeps you in the same room, emptied, so seating characters there again starts another numbered session at the same address. **Leave room** ends the conversation as well and returns you to **My Experiences**. See [Room controls reference](../running-the-room/room-controls-reference.md).
 
 Sessions are numbered in the order they ran. `Session 1` is the first the experience recorded, and the newest one leads every list. A new session never renumbers the ones before it.
 
@@ -27,7 +27,7 @@ The brief carries over. The characters and the messages do not. The experience's
 | The [room ID](../running-the-room/room-controls-reference.md#the-room-id) | Yes. It belongs to the experience, so it is the same in every session |
 | The [characters you seated](../add-characters-to-the-room.md) | No. A new room opens with nobody in it, and you choose again |
 | The conversation | No. Messages belong to the session they were sent in |
-| The [respond mode](../running-the-room/respond-modes-reference.md) you set | No. A new room starts on **Auto · room brief decides**, whatever the last session ended on |
+| The [respond mode](../running-the-room/respond-modes-reference.md) you set | No. A new room starts on **Everyone must respond**, whatever the last session ended on |
 
 Seating four characters, running a long conversation, and coming back the next day gives you an empty room and the same brief.
 

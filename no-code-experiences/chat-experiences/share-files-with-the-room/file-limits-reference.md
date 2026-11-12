@@ -1,7 +1,7 @@
 ---
 title: File limits reference
 description: Reference for the file types a chat experience room accepts, the size and text limits on an attachment, and what each chip and side-panel note means.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 A chat experience room accepts a short list of file formats and limits how much of a file it shares with the characters. This page lists the formats, the limits, and what the room does when a file passes one.
@@ -80,7 +80,7 @@ Each file in the list carries at most one note:
 | `described` | A description written in words |
 | `name only` | The file name alone |
 
-**Clear conversation**, in the three-dots menu in the room's top bar, empties the list. See [Room controls reference](../running-the-room/room-controls-reference.md).
+The list empties when the conversation ends, which **Clear conversation** and **Leave room** in the three-dots menu in the room's top bar both do. A file on a message that failed to send is not listed. See [Room controls reference](../running-the-room/room-controls-reference.md).
 
 ## Related pages
 

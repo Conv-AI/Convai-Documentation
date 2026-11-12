@@ -1,7 +1,7 @@
 ---
 title: Running the room
 description: Understand what a chat experience room is made of, what the side panel, thread, and message box each do, and where the room's controls live.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 A [chat experience](../README.md) room has three working parts: a side panel down the left, the thread in the middle, and the message box at the bottom. Each answers a different question—who is in the room, what has been said, and what happens to the next message you send. These pages cover how a turn runs, how to choose who replies and in which mode, how to change the roster mid-conversation, and what every control in the room does.
@@ -39,13 +39,13 @@ It opens with the time the room was opened. While nobody is in the room, a pinne
 
 A one-character room is not briefed by its room type. The rules listed in that box always read **One other person**, **Stay in character**, and **Respond when addressed**, and the wording around your purpose is written for one character rather than taken from the type—unless you reworded the briefing yourself in the create dialog, in which case your wording stands.
 
-After that the thread carries the conversation. Your own messages sit to the right, each with a caption under it reporting what the turn asked for and what came back. Replies sit to the left under the character's name and role. Between them the room adds short notes: who stayed quiet, who did not answer, and who left the room.
+After that the thread carries the conversation. Your own messages sit to the right, each with a caption under it reporting what the turn asked for and what came back. Replies sit to the left under the character's name and role. Between them the room adds short notes: who passed, who did not answer, and who left the room.
 
 ## The message box
 
 The message box is where you write, and where you decide who answers.
 
-The prompt in the box invites you to write to the room, or to type @ to call on someone. Below the text is a row that starts with the paperclip for attaching files and then the respond chip, which shows what the next message will ask for—the respond mode, or the names when you have tagged someone—and opens the respond menu. A one-character room shows a sentence in place of the chip, because there is nobody to route between.
+The prompt in the box invites you to write to the room, or to type @ to call on someone. Below the text is a row that starts with the paperclip for attaching files, which you can also [drag onto the conversation](../share-files-with-the-room/README.md#drag-files-onto-the-conversation), and then the respond chip, which shows what the next message will ask for—the respond mode, or the names when you have tagged someone—and opens the respond menu. A one-character room shows a sentence in place of the chip, because there is nobody to route between.
 
 The box locks whenever the room cannot take a message—before any character is in the room, while the characters are joining, while a turn is running, and after the room fails to connect—and it always says why. See [You cannot send a message](../troubleshooting/composer-is-locked.md).
 

@@ -1,14 +1,14 @@
 ---
 title: Share files with the room
 description: Understand what reaches the characters when you attach a file to a message in a chat experience room, and what the room keeps afterwards.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 A message you send in a [chat experience](../README.md) room can carry files. A file is never handed to the characters as a file: what reaches them is text—either the words the file already holds, or a description written for it. These pages cover what each kind of file becomes, what the room shows you about it, and what is kept once the conversation is over.
 
 ## What the characters receive
 
-A file goes to the characters that turn is addressed to. A character the message did not address is not given the file, and the replies that follow do not pass it on. If you want every character to have a file, address the message to everyone—tag `@everyone`, or set the respond chip to **Everyone must respond**—before you send it. See [Choose who replies](../running-the-room/choose-who-replies.md).
+A file goes to the characters that turn is addressed to. A character the message did not address is not given the file, and the replies that follow do not pass it on. A room opens on **Everyone must respond**, so a file reaches every character unless you narrow the turn with a tag or the respond chip. See [Choose who replies](../running-the-room/choose-who-replies.md).
 
 Those characters receive text, and only text. A room carries writing, so every file you attach becomes writing before it travels.
 
@@ -36,6 +36,12 @@ Nothing tells you in advance whether a file's contents can be shared. You find o
 
 The paperclip that attaches a file is greyed out only while the message box is locked. No file makes it unavailable. See [You cannot send a message](../troubleshooting/composer-is-locked.md) for every reason the box locks.
 
+## Drag files onto the conversation
+
+Dragging files from your computer onto the conversation attaches them exactly as the paperclip does: the same formats, the same size limit, and the same chips. Drop them on the top bar, the thread, or the message box. While you drag, the conversation reads "Drop files to attach them" and "They are added to your next message."
+
+While the message box is locked, the conversation reads "Files can't be attached right now" with the reason the box is locked, and a drop attaches nothing. A file dropped outside the conversation, such as on the side panel, is ignored.
+
 ## What the room keeps
 
 The room keeps file names, not file contents. Three places show a file after you send it:
@@ -44,7 +50,7 @@ The room keeps file names, not file contents. Three places show a file after you
 - **The side panel.** Its **Shared in room** section lists the files sent so far in this conversation, each with its name, the same second line as the chip, and a note saying what the characters were given. [File limits reference](file-limits-reference.md) sets out what each note means, and [Running the room](../running-the-room/README.md) covers the panel's other sections.
 - **A finished session's transcript.** It records the name of every file a turn carried, and a transcript you download lists those names under the turn they were sent with. See [Review a past session](../sessions-and-transcripts/review-a-past-session.md) and [Export a transcript](../sessions-and-transcripts/export-a-transcript.md).
 
-**Clear conversation** in the room's three-dots menu empties the **Shared in room** list along with the thread. See [Room controls reference](../running-the-room/room-controls-reference.md).
+The **Shared in room** list holds the files on the messages you have sent in the current conversation, so it empties when the conversation ends: **Clear conversation** and **Leave room** in the room's three-dots menu both empty it. A message that failed to send adds nothing to it. See [Room controls reference](../running-the-room/room-controls-reference.md).
 
 Because only names are kept, every file in a past session's thread is shown as a name, whatever happened to it at the time. A transcript records that a file was shared, not what the characters were given from it.
 

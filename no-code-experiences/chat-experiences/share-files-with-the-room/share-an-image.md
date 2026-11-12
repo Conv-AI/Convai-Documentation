@@ -1,7 +1,7 @@
 ---
 title: Share an image
 description: Attach a picture to a message in a chat experience room, and understand that the characters receive a written description rather than the picture.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 A picture you attach to a message in a chat experience room reaches the characters as words. Use this page to attach a `.png`, `.jpg`, or `.jpeg` picture, to send it with a message, and to know exactly what the characters are told about it.
@@ -17,7 +17,7 @@ A picture you attach to a message in a chat experience room reaches the characte
 {% step %}
 ### Pick the picture
 
-Select the paperclip at the left of the message box, below where you type, and pick the file. You can pick several files at once.
+Select the paperclip at the left of the message box, below where you type, and pick the file. You can pick several files at once. Or drag the files from your computer onto the conversation and drop them. See [Drag files onto the conversation](README.md#drag-files-onto-the-conversation).
 
 A chip appears above where you type, carrying the format, the file name, and a second line reading `reading…` after the size.
 {% endstep %}
@@ -35,7 +35,7 @@ Describing a picture takes seconds rather than the instant a text file takes. Th
 
 Write your question and send the message as usual. The chip moves into the thread above your words, and the file is added to the **Shared in room** section of the side panel.
 
-Ask about the picture in the same message if you want an answer about it. Under **Auto · room brief decides**, the mode a room opens on, a picture sent with no question addresses nobody in particular, and a character that is not addressed stays quiet.
+Ask about the picture in the same message if you want an answer about something in particular. On the default, **Everyone must respond**, a picture sent with no question is still addressed to every character.
 {% endstep %}
 {% endstepper %}
 
@@ -45,7 +45,7 @@ The picture reached the characters when its chip in the thread reads `described`
 
 ## Who receives the picture
 
-Whoever the turn addresses is who gets the picture. A character the message did not address is not given the description, and the replies that follow do not pass it on. To put a picture in front of every character, tag `@everyone` or set the respond chip to **Everyone must respond** before you send. See [Choose who replies](../running-the-room/choose-who-replies.md).
+Whoever the turn addresses is who gets the picture. A character the message did not address is not given the description, and the replies that follow do not pass it on. To put a picture in front of every character, leave the respond chip on **Everyone must respond**, the mode a room opens on, or tag `@everyone`. See [Choose who replies](../running-the-room/choose-who-replies.md).
 
 ## What the characters are told
 

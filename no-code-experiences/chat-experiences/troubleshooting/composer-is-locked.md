@@ -1,7 +1,7 @@
 ---
 title: You cannot send a message
 description: Work out why the message box in a chat experience room will not take a message, using the reason the room shows, and what clears each one.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 The message box in a chat experience room locks whenever the room cannot take a message, and it always says why. Use this page to read the reason the room gives you, to clear it, and to tell a locked box apart from a message that went nowhere.
@@ -58,7 +58,7 @@ Reloading the page while a room is open ends that conversation. Reloading to cle
 
 ## The message sent but nobody answered
 
-A character answers when it is addressed and stays quiet otherwise, so a message that addresses nobody in particular can draw no reply at all. To get an answer from a particular character, send another message that tags it with `@`.
+On the default respond mode every character replies. Nobody answers when the turn ran under **Anyone may respond** and every character passed, or when the characters the message addressed did not reply; either way a note under your message names them. To get an answer from a particular character, send another message that tags it with `@`.
 
 {% content-ref url="../running-the-room/how-a-turn-works.md" %}
 [How a turn works](../running-the-room/how-a-turn-works.md)

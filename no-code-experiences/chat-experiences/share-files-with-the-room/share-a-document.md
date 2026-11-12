@@ -1,7 +1,7 @@
 ---
 title: Share a document
 description: Attach a PDF, a Word file, or a plain-text file to a message in a chat experience room, and read what the chip reports about it.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 A document you attach reaches the characters your message addresses, as text. Use this page to attach a PDF, a Word file, or a plain-text file, to send it with a message, and to read what the room reports about the file once it has been read or described.
@@ -17,7 +17,7 @@ A document you attach reaches the characters your message addresses, as text. Us
 {% step %}
 ### Pick the file
 
-Select the paperclip at the left of the message box, below where you type, and pick the file. You can pick several files at once.
+Select the paperclip at the left of the message box, below where you type, and pick the file. You can pick several files at once. Or drag the files from your computer onto the conversation and drop them. See [Drag files onto the conversation](README.md#drag-files-onto-the-conversation).
 
 A chip appears above where you type, carrying the file's format, its name, and a second line reading `reading…` after the size.
 {% endstep %}
@@ -35,9 +35,9 @@ The arrow button at the right of the message box stays unavailable while any chi
 
 Write your question and send the message as usual. The message carries the file with it, and the chip moves into the thread above your words.
 
-A message can carry files and no words at all. Add a question if you want the characters to answer about the file: under the default **Auto · room brief decides**, a message carrying nothing but a file usually draws no reply, while a respond chip that names who answers draws a reply whether or not you wrote anything.
+A message can carry files and no words at all. On the default, **Everyone must respond**, a message carrying nothing but a file is still addressed to every character. Add a question if you want them to answer about something in particular.
 
-Who the turn addresses also settles who has the document: it goes to the characters that turn is addressed to, and a character the message did not address is not given it. In a room of two or more, tag `@everyone` or set the respond chip beside the paperclip to **Everyone must respond** before you send. In a room of one there is no chip to set, and every message already goes to that character. See [Choose who replies](../running-the-room/choose-who-replies.md).
+Who the turn addresses also settles who has the document: it goes to the characters that turn is addressed to, and a character the message did not address is not given it. In a room of two or more, the default **Everyone must respond** already sends it to every character, and a tag or a narrower respond chip limits who gets it. In a room of one there is no chip to set, and every message already goes to that character. See [Choose who replies](../running-the-room/choose-who-replies.md).
 
 Once the message is away, the chip sits with it in the thread and the file joins the **Shared in room** section of the side panel, carrying the note `described` when the characters were given a description, `name only` when the name was all they got, and no note at all when the file's own text was shared.
 {% endstep %}

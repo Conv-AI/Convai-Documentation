@@ -1,7 +1,7 @@
 ---
 title: Send your first message
 description: Write and send a message in a chat experience room, address a character so it answers, and read the replies as they arrive.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 You are the moderator of a chat experience, and the characters answer you rather than talk among themselves. Use this page to send the first message in a room, to address a character so that it replies, and to read what the thread reports once the turn is over.
@@ -30,21 +30,17 @@ Your message appears in the thread, and the message box locks until the turn fin
 {% endstep %}
 {% endstepper %}
 
-{% hint style="warning" %}
-A message that addresses nobody in particular can produce no reply at all. Characters answer when they are addressed and stay quiet otherwise, so name a character or tag one when you want a specific answer.
+{% hint style="info" %}
+A room of two or more characters opens on **Everyone must respond**, so every character replies to your first message. To hear from one character only, tag it.
 {% endhint %}
 
-## Address a character so it answers
+## Address one character
 
-A room runs on **Auto** unless you change it, and under Auto the brief decides who answers—a character replies when it is addressed and stays quiet otherwise. The chip under what you are typing shows the mode the next message will use, and reads **Auto · room brief decides** until you change it.
+A room runs on **Everyone must respond** unless you change it: every character replies to each message, in turn. The chip under what you are typing shows the mode the next message will use.
 
-Before the first message in a room of two or more characters, the thread states the rule you are working under: "Respond mode is set to Auto: the brief decides who answers. Use @tags or the chip to override on any message." What each room type asks of its characters is set out in [How the room brief is written](the-room-brief/how-the-room-brief-is-written.md).
+To put a question to one character, tag it. Type `@` in the message box and pick the character you want from the list that opens. Writing a name in ordinary prose, as in "Maya, what did you think of the price?", does not narrow the turn; the tag does.
 
-Addressing a character means naming it. Writing "Maya, what did you think of the price?" addresses Maya; writing "What did you think of the price?" addresses nobody in the room.
-
-Tagging is the explicit version, and the only one the room enforces. Type `@` in the message box and pick the character you want from the list that opens.
-
-A tagged character is required to reply, and the room holds it to that rather than leaving the decision to the character. In a room of two or more characters, the chip changes to show who the message is going to, and every character you did not tag stays out of that turn.
+A tagged character is required to reply. In a room of two or more characters, the chip changes to show who the message is going to, and every character you did not tag stays out of that turn.
 
 For the rest of the tag list, and for setting the chip so that it holds from one message to the next, see [Choose who replies](running-the-room/choose-who-replies.md).
 
@@ -52,29 +48,21 @@ For the rest of the tag list, and for setting the chip so that it holds from one
 
 Every character in the room appears in the thread with its name and an animated typing indicator while the turn runs, whether or not it ends up answering. A reply replaces that character's indicator when it arrives, and the indicators still standing clear together when the turn finishes.
 
-Under your own message, a caption reports what the turn asked for and what came back. In a room of two or more characters running on Auto, the caption reads **Auto · room brief decides**, followed by an outcome built from up to three counts:
+Under your own message, a caption reports what the turn asked for and what came back. In a room of two or more characters left on the default, the caption reads **Everyone must respond**, followed by a count such as `3 of 4 replied`: how many of the characters in the room when you sent the message have replied, out of how many were in it.
 
-| Count | Meaning |
-|---|---|
-| `2 of 4 responded` | How many of the characters in the room when you sent the message have replied, out of how many were in it |
-| `1 listening` | How many have not replied and have not been reported as not answering. While the turn runs, these are the characters still to answer; once it is over, they are the ones that stayed quiet |
-| `1 did not answer` | How many the room reported as not answering |
-
-In a one-character room the caption names that character instead—**Sent to** followed by the name—and adds `replied` once the reply is in, or `waiting` while the turn is still running. If the character stays quiet, the caption carries no outcome at all.
+In a one-character room the caption names that character instead—**Sent to** followed by the name—and adds `replied` once the reply is in, or `waiting` while the turn is still running. If no reply comes, the caption carries no outcome at all.
 
 While the turn is running, the message box carries the wait in place of the usual prompt: **Waiting for 2 of 4…**, where the first number is how many replies are still outstanding rather than how many have arrived. It reads **Finishing the turn…** as the turn settles, and unlocks when the turn is over.
 
 For what the counts read in the other respond modes, see [How a turn works](running-the-room/how-a-turn-works.md).
 
-## When a character stays quiet
+## When a character does not reply
 
-A character that had nothing to answer is named in a note below the replies, and the note tells you how to get its side.
+On the default every character is asked to reply. A character that was asked and did not is named in a note below the replies: "⟨name⟩ did not answer".
 
-Under Auto, the note names the characters and reads "stayed quiet, as the brief asks. Tag them if you want their side." When more than one character stayed quiet, the last sentence reads "Tag one of them if you want their side." instead. A room where every character stayed quiet produces this note and no replies.
+Under **Anyone may respond**, a character may pass, and the note reads "⟨names⟩ had nothing to add and passed."
 
-A character named in that note is counted under `listening` in the caption, not under `did not answer`. The two are different outcomes: a quiet character chose to say nothing.
-
-To get an answer from a character named in that note, send another message that tags it.
+To get an answer from a character named in either note, send another message that tags it.
 
 ## Next steps
 
@@ -84,7 +72,7 @@ Once you have run a conversation, the experience is one of several on **My Exper
 [Manage your chat experiences](manage-your-chat-experiences.md)
 {% endcontent-ref %}
 
-To decide who answers rather than leaving it to the brief, read what each respond mode asks of the characters.
+To change who answers, read what each respond mode asks of the characters.
 
 {% content-ref url="running-the-room/respond-modes-reference.md" %}
 [Respond modes reference](running-the-room/respond-modes-reference.md)

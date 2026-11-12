@@ -1,7 +1,7 @@
 ---
 title: Chat Experiences
 description: Understand what a chat experience is, what a moderated text room does and does not do, and where to start in this section.
-last_reviewed: "2026-09-10"
+last_reviewed: "2026-11-12"
 ---
 
 A chat experience is a text room built from your own Convai characters. You name it, pick a room type, and write a purpose, and every character that joins is briefed with what you set. Read this page before you create one: it sets out what a room does, what it does not do, and what is kept once the conversation ends. Chat Experiences is in beta, so read **What a chat experience does not do** before you plan around it.
@@ -14,7 +14,7 @@ A chat experience is a text room built from your own Convai characters. You name
 
 A chat experience is a saved brief, not a saved conversation. Its name, its room type, and the purpose you write are stored together with the briefing each character receives the moment it joins. That briefing is written for you from the room type and the purpose, and the create dialog is the one place it is yours to reword. Open the experience as often as you like: every session starts a new room from the same brief.
 
-You write to the room and the characters answer in it. A character replies when it is addressed—by name, or because the brief says the turn is theirs—and otherwise stays quiet. The room notes who stayed quiet rather than filling with replies. A room holds one character or several; with one, it is a conversation between the two of you. The characters come from your own workspaces, or by character ID when someone has given you access to one.
+You write to the room and the characters answer in it. Unless you choose otherwise, every character replies to each message. You can tag the characters you want, pick one, or leave a question open so that only the characters with something to add answer. A room holds one character or several; with one, it is a conversation between the two of you. The characters come from your own workspaces, or by character ID when someone has given you access to one.
 
 Six room types are available: **Focus group**, **Classroom**, **Meeting simulation**, **Brainstorm**, **Friends chatting**, and **Custom**. Each type sets a different pattern for the conversation—some put you in charge and have the characters answer when they are called on, others have no leader at all—and the purpose you write tells the characters what the conversation is about.
 
