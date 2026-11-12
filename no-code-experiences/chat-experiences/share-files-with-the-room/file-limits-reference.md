@@ -11,6 +11,7 @@ A chat experience room accepts a short list of file formats and limits how much 
 | Kind | Extensions | What reaches the characters |
 |---|---|---|
 | PDF | `.pdf` | The document itself |
+| PowerPoint | `.pptx` | The whole deck, with frames and a speech transcript for embedded audio and video |
 | Pictures | `.png`, `.jpg`, `.jpeg`, `.webp` | The picture |
 | Video | `.mp4`, `.webm`, `.mkv`, `.m4v`, `.mov` | Frames taken from the video, and a transcript of its speech |
 | Word | `.docx` | The document's text |
@@ -18,7 +19,7 @@ A chat experience room accepts a short list of file formats and limits how much 
 
 Whatever the kind, a file goes to the characters that turn is addressed to, and a character the message did not address is not given it. See [Share files with the room](README.md) for how to address everyone.
 
-The room states the limits itself, on a line under the message box: "PDF: up to 10 MB, 33 pages. Video: MP4, WebM, MKV, M4V, MOV · up to 50 MB, 10 min. Images: PNG, JPG, WebP · up to 10 MB. Other documents: up to 25 MB."
+The room states the limits itself, on a line under the message box: "PDF: up to 10 MB, 33 pages. PowerPoint: PPTX · up to 50 MB, 33 slides, 8 embedded audio/video files. The whole deck is prepared before sending; linked videos are not fetched. Sending without a message asks for reactions to the complete deck. Video: MP4, WebM, MKV, M4V, MOV · up to 50 MB, 10 min. Images: PNG, JPG, WebP · up to 10 MB. Other documents: up to 25 MB."
 
 Anything not in the table is refused when you pick or drop it, and nothing about it is sent.
 
@@ -27,6 +28,7 @@ Anything not in the table is refused when you pick or drop it, and nothing about
 | Limit | Value |
 |---|---|
 | One PDF | 10 MB and 33 pages |
+| One PowerPoint deck | 50 MB, 33 slides, and 8 embedded audio or video files running 10 minutes in total |
 | One picture | 10 MB |
 | One video | 50 MB and 10 minutes |
 | Videos on one message | 1 |
@@ -45,7 +47,7 @@ A long PDF can leave less room than its page limit suggests, because the pages s
 | Picked a file whose format is not accepted | The file is not attached. A message reads "⟨name⟩ is not a supported file type." |
 | Picked a file over the size limit for its kind | The file is not attached. A message reads "⟨name⟩ is larger than ⟨limit⟩.", for example "larger than 10 MB." |
 | Added a second video to a message | The second video is not attached. A message reads "Attach one video per message. Send this one before adding another." |
-| Attached a PDF of more than 33 pages, or a video longer than 10 minutes | The chip settles to the reason, ending "Retry or remove.", and the message cannot be sent until you remove the file |
+| Attached a PDF of more than 33 pages, a deck past its slide or embedded-media limit, or a video longer than 10 minutes | The chip settles to the reason, ending "Retry or remove.", and the message cannot be sent until you remove the file |
 | Attached a Word or plain-text file holding more than 30,000 characters | The file is attached and sent. The text is cut at the limit, the rest is not shared, and `truncated` is added to the chip |
 | Attached Word or plain-text files that together pass 60,000 characters | The file that passed the limit is taken off the message. A message reads "⟨name⟩ would put this message over the 60,000-character limit for shared text. Send it on its own or remove another file." |
 | Attached a Word or plain-text file the room could not read | The file is sent by name alone. The chip reads `could not read` after the size |
@@ -59,15 +61,17 @@ Every file you attach carries a chip above where you type, and its second line o
 | Second line | What it means |
 |---|---|
 | `1.2 MB · reading…` | The file was attached a moment ago. The send control is waiting |
-| `1.2 MB · uploading 40%` | A PDF, picture, or video is being uploaded. The send control is waiting |
+| `1.2 MB · uploading 40%` | A PDF, deck, picture, or video is being uploaded. The send control is waiting |
 | `1.2 MB · validating PDF…` | A PDF is being checked. The send control is waiting |
 | `24 MB · processing…` | A picture or video is being prepared. The send control is waiting |
 | `1.2 MB · 14 pages · PDF ready` | A PDF, ready to send |
+| `8 MB · preparing slides and embedded media…` | A PowerPoint deck is being prepared. The send control is waiting |
+| `8 MB · 20 slides · 2 embedded media · deck ready` | A PowerPoint deck, ready to send. A deck with embedded audio also reports its speech transcript |
 | `1.1 MB · image ready` | A picture, ready to send |
 | `24 MB · 32 frames · speech transcript ready` | A video, ready to send, with its speech transcribed |
 | `24 MB · 32 frames · no speech transcript` | A video, ready to send, whose audio could not be transcribed |
 | `24 MB · 32 frames · no audio track` | A silent video, ready to send |
-| A reason ending `Retry or remove.` | A PDF, picture, or video that could not be prepared. The message cannot be sent until you retry the file or remove it |
+| A reason ending `Retry or remove.` | A PDF, deck, picture, or video that could not be prepared. The message cannot be sent until you retry the file or remove it |
 | `4 KB` | A text file, read |
 | `12 KB · 240 rows` | A CSV file, read. The count includes the header row |
 | `8 KB · 8 keys` | A JSON file holding a set of fields, read |

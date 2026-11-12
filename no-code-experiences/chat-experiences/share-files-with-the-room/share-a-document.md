@@ -1,10 +1,10 @@
 ---
 title: Share a document
-description: Attach a PDF, a Word file, or a plain-text file to a message in a chat experience room, and read what the chip reports about it.
+description: Attach a PDF, a PowerPoint deck, a Word file, or a plain-text file to a message in a chat experience room, and read what the chip reports about it.
 last_reviewed: "2026-11-12"
 ---
 
-A document you attach reaches the characters your message addresses: a PDF as the document itself, a Word or plain-text file as its text. Use this page to attach one, to send it with a message, and to read what the room reports about the file once it is ready.
+A document you attach reaches the characters your message addresses: a PDF or a PowerPoint deck as the document itself, a Word or plain-text file as its text. Use this page to attach one, to send it with a message, and to read what the room reports about the file once it is ready.
 
 ## Prerequisites
 
@@ -56,6 +56,7 @@ The chip's second line always opens with the file's size. What follows depends o
 | A JSON file | The size and the file's shape—`8 keys` for a set of fields, `12 items` for a list |
 | A Word file | The size and `document`, for example `1.2 MB · document` |
 | A PDF | The size, the page count, and `PDF ready`, for example `1.2 MB · 14 pages · PDF ready` |
+| A PowerPoint deck | The size, the slide count, the embedded media count, and `deck ready`, for example `8 MB · 20 slides · 2 embedded media · deck ready` |
 
 `truncated` is added to the end of that line when a Word or plain-text file held more text than the room shares from a single file. The text is cut at the limit and the rest is not sent. See [File limits reference](file-limits-reference.md).
 
@@ -69,6 +70,12 @@ A PDF is handed to the characters as the document itself, so they read its pages
 
 A PDF can be up to 10 MB and 33 pages. A larger file is refused when you pick it, and one with more pages settles to a chip naming the problem, which you remove before sending.
 
+## What happens to a PowerPoint deck
+
+A `.pptx` deck is handed to the characters whole: every slide, plus frames and a speech transcript for audio and video embedded in it. Videos the deck only links to are not fetched. The whole deck is prepared before you can send, so a large one takes a while to settle.
+
+A deck can be up to 50 MB and 33 slides, with at most 8 embedded audio or video files running 10 minutes in total. Sending a deck with no message asks the characters for their reactions to the complete deck.
+
 ## Plain-text formats
 
 `.txt`, `.md`, `.csv`, and `.json` files each reach the characters as their own text, unchanged up to the limit above.
@@ -79,7 +86,7 @@ A CSV file and a JSON file each add a count to the chip, so you can check that t
 
 A Word or plain-text file the room could not read is still sent, by name alone. The chip's second line settles to `could not read` after the size, a message reads "Could not read ⟨name⟩; only its name will be shared", and the side panel notes the file as `name only`.
 
-A PDF that could not be prepared is not sent. Its chip gives the reason, ending "Retry or remove.", and the message is held back until you retry the file or take it off.
+A PDF or a deck that could not be prepared is not sent. Its chip gives the reason, ending "Retry or remove.", and the message is held back until you retry the file or take it off.
 
 ## Next steps
 
