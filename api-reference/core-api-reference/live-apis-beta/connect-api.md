@@ -44,7 +44,7 @@ Multi-character rooms are available only to accounts with the feature enabled, a
 |---|---|---|
 | `characters` | JSON | Ordered list of `{ "character_id", "character_session_id" }` entries, one per character instance; the first entry is the initial instance. `character_id` is required and must be a bare UUID; `character_session_id` is optional and continues that instance's earlier conversation. Send either `character_id` or `characters`, not both. See [Use multi-character sessions](multi-character-sessions.md). |
 | `group_chat` | Bool | Opts the room into group chat, where several instances answer the same message. Default `false`. Fixed at create; a join inherits it. See [Build a group chat](build-a-group-chat.md). |
-| `room_brief` | String | Up to 4000 characters given to every character in the room as context, including characters added later. Fixed at create. Takes effect only with `group_chat: true`. |
+| `room_brief` | String | Up to 5000 characters given to every character in the room as context, including characters added later. Fixed at create. Takes effect only with `group_chat: true`. |
 
 **Character behavior and context**
 

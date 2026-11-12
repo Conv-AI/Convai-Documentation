@@ -38,9 +38,9 @@ Nothing reached the characters and no reply is coming. The box is unlocked and t
 
 ## You can type, but the send control is unavailable
 
-The message box takes your text and carries no reason, but the send control does not respond. A file you have attached is still being read: the chip carrying it reads `reading…` after the file size, and `describing…` while a picture or a set of PDF pages is being described.
+The message box takes your text and carries no reason, but the send control does not respond. A file you have attached is still being prepared: the chip carrying it reads `reading…`, `uploading`, `validating PDF…`, or `processing…` after the file size.
 
-Nothing is blocked. The send control returns on its own once every chip has settled, and a picture takes seconds rather than the instant a text file takes. A send control that stays unavailable when no chip is waiting means the box is locked for a reason of its own, and the box says which.
+Nothing is blocked. The send control returns on its own once every chip has settled, and a video takes longer than a text file does. A chip whose second line ends "Retry or remove." has failed instead, and the message stays held until you retry that file or remove it. A send control that stays unavailable when no chip is waiting means the box is locked for a reason of its own, and the box says which.
 
 {% content-ref url="../share-files-with-the-room/file-limits-reference.md" %}
 [File limits reference](../share-files-with-the-room/file-limits-reference.md)

@@ -70,7 +70,7 @@
     * [Export a transcript](no-code-experiences/chat-experiences/sessions-and-transcripts/export-a-transcript.md)
   * [Share files with the room](no-code-experiences/chat-experiences/share-files-with-the-room/README.md)
     * [Share a document](no-code-experiences/chat-experiences/share-files-with-the-room/share-a-document.md)
-    * [Share an image](no-code-experiences/chat-experiences/share-files-with-the-room/share-an-image.md)
+    * [Share an image or a video](no-code-experiences/chat-experiences/share-files-with-the-room/share-an-image.md)
     * [File limits reference](no-code-experiences/chat-experiences/share-files-with-the-room/file-limits-reference.md)
   * [Troubleshoot Chat Experiences](no-code-experiences/chat-experiences/troubleshooting/README.md)
     * [The room will not connect](no-code-experiences/chat-experiences/troubleshooting/room-will-not-connect.md)
