@@ -58,7 +58,7 @@ Every file you attach carries a chip above where you type, and its second line o
 
 | Second line | What it means |
 |---|---|
-| `1.2 MB · reading…` | The file has just been attached. The send control is waiting |
+| `1.2 MB · reading…` | The file was attached a moment ago. The send control is waiting |
 | `1.2 MB · uploading 40%` | A PDF, picture, or video is being uploaded. The send control is waiting |
 | `1.2 MB · validating PDF…` | A PDF is being checked. The send control is waiting |
 | `24 MB · processing…` | A picture or video is being prepared. The send control is waiting |
