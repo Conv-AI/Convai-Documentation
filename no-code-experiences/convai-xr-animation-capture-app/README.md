@@ -2,6 +2,7 @@
 description: >-
   Capture animations in VR using your Meta Quest and animate AI avatars—no mocap
   suit required.
+noIndex: true
 ---
 
 # Convai XR Animation Capture App

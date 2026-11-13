@@ -2,6 +2,7 @@
 description: >-
   Explore Convai’s Core APIs, divided into Character Crafting and Interaction
   APIs, to create, customize, and interact with intelligent AI characters.
+noIndex: true
 ---
 
 # Core API Reference
@@ -33,7 +34,7 @@ Misuse of this API for unethical or malicious purposes will result in an automat
 {% endhint %}
 
 {% hint style="info" %}
-For additional resources, you can also explore our [Python Notebook](https://colab.research.google.com/drive/17Bazf92ZsXQmJZ91CbVAhiPmnapIuTgS?usp=sharing).&#x20;
+For additional resources, you can also explore our [Python Notebook](https://colab.research.google.com/drive/17Bazf92ZsXQmJZ91CbVAhiPmnapIuTgS?usp=sharing).
 
 This notebook is a hands-on guide to using Convai’s Core APIs for creating responsive NPCs. It walks you through setting up a character, defining its narrative and backstory, and integrating voice capabilities effectively.
 {% endhint %}

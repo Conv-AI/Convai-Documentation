@@ -2,13 +2,14 @@
 description: >-
   A guided overview of the first steps in Convai Playground, including
   navigation, character creation, testing, and essential global controls.
+noIndex: true
 ---
 
 # Get Started
 
 ## Introduction
 
-## Welcome to Convai Playground!&#x20;
+## Welcome to Convai Playground!
 
 Your workspace for creating, customizing, and testing AI-powered characters. This page gives you a high-level overview of the core tools and workflows, helping you get productive quickly. Each section below links to a dedicated page where you can dive deeper.
 
