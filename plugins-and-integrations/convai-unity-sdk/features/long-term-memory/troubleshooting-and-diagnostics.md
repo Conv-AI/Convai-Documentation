@@ -73,7 +73,9 @@ graph TD
 | Different users on the same device share memories | Multiple users sharing one device | Each user must receive a unique `end_user_id`. If `DeviceEndUserIdProvider` is in use, the device-scoped GUID is shared. Implement a custom provider that returns a per-user account ID. |
 | Custom provider not taking effect | Provider registered after `ConnectAsync` | Register in `Awake()`, before `ConvaiRoomManager.Start()` completes. If `ConvaiCharacter` has **Auto Connect** enabled, `Start()` may be too late. |
 | Memory facts look wrong or outdated | Stale records from testing | Use `client.Memory.DeleteAllAsync` to clear test data before starting a fresh evaluation. |
-| `GetEndUserId()` returns empty string | Custom provider returning null or whitespace | The SDK normalizes null/whitespace to `null` before sending, resulting in anonymous sessions. Ensure your provider always returns a non-empty value. |
+| `GetEndUserId()` returns empty string | Custom provider returning null or whitespace | The SDK sends no end-user ID. With memory on and the end-user ID set to Required (the default), the connect is refused; with Optional, it connects but nothing is remembered. Ensure your provider always returns a non-empty value. |
+| Connect fails with HTTP 400 "Missing end_user_id" | Memory is on, the character's end-user ID requirement is Required, and the connect sent no end-user ID | Send an end-user ID, or set the requirement to Optional (see [Configure memory for a character](configure-memory-for-a-character.md)). In SDK 5.0 this failure has the code `connection.connect_end_user_id_required`. |
+| Everyone shares the same memories | A placeholder such as `-1`, or one constant, is sent as the end-user ID for every player | Convai treats every distinct value as one person and gives placeholders no special handling. Send a unique ID per person. |
 
 ***
 
@@ -142,6 +144,36 @@ private async void CheckMemoryEnabled()
     Debug.Log($"[LTM] Memory enabled for character '{_characterId}': {isEnabled}");
 }
 ```
+
+In SDK 5.0, use `client.Memory.GetSettingsAsync(_characterId)` instead. It returns `MemorySettings`, whose `IsEnabled` and `EndUserIdRequirement` give both settings.
+
+### Check memory status after connecting
+
+{% hint style="info" %}
+Requires Convai Unity SDK 5.0.
+{% endhint %}
+
+After a connect, `ConvaiManager.CurrentLongTermMemoryStatus` reports what Convai said about memory for that connection. In Play Mode, the **Convai Manager** Inspector shows the same value next to the confirmed end user.
+
+| Status | Meaning |
+| --- | --- |
+| `Active` | Memory is on and the connection has an end user, so the conversation is remembered. Convai doesn't check here whether your plan includes memory. |
+| `SkippedNoEndUser` | Memory is on, but no end-user ID was sent, so nothing is remembered. This only happens when the end-user ID requirement is Optional. The SDK logs it once (a warning in the Editor). |
+| `NotReported` | Memory is off for the character, the room isn't connected, or the room has several characters, which don't report a status (memory still runs per character there). |
+
+`ConvaiManager.CurrentEndUserId` is the end-user ID Convai confirmed for the room. Treat it as user data and don't log it.
+
+### Memory errors when connecting
+
+{% hint style="info" %}
+Requires Convai Unity SDK 5.0. Earlier versions report these failures with generic connection codes.
+{% endhint %}
+
+| Code | Cause | Fix |
+| --- | --- | --- |
+| `connection.connect_end_user_id_required` | Memory is on, the end-user ID requirement is Required, and no end-user ID was sent | Send one with `ConvaiManager.SetEndUserIdentityProvider` or `RoomSessionConnectOptions.EndUserId`, or set the requirement to Optional |
+| `connection.connect_ltm_end_user_limit_reached` | The plan's limit of end users with memory is reached, so this new end user can't be added. End users who already have memory still connect. | Raise the limit with Convai, or turn memory off for the character |
+| `connection.connect_ltm_not_configured` | The character has memory on, but the plan has no memory allowance | Ask Convai to add it to the plan, or turn memory off for the character |
 
 ***
 

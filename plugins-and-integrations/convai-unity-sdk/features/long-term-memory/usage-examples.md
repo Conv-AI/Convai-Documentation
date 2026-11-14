@@ -171,7 +171,7 @@ public class MemoryReset : MonoBehaviour
 }
 ```
 
-To remove only the memories while keeping LTM enabled, call `DeleteAllAsync` and skip the `SetMemoryEnabledAsync` step. To remove a user's records across every character rather than one, use `client.EndUsers.DeleteAsync(endUserId)` instead. See [Manage end-user records](end-user-management.md).
+To remove only the memories while keeping LTM enabled, call `DeleteAllAsync` and skip the `SetMemoryEnabledAsync` step. To remove a user with every character, call `DeleteAllAsync` for each character, then `client.EndUsers.DeleteAsync(endUserId)`; `DeleteAsync` alone deactivates the user and leaves their memories stored. See [Manage end-user records](end-user-management.md).
 
 **Expected outcome:** The next session for this user–character pair starts with no stored context. The character treats the user as a new contact.
 
