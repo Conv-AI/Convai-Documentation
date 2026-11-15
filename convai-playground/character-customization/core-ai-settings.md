@@ -70,7 +70,7 @@ Models marked as ✅ _Flagship_ are the providers’ top-tier, most capable mode
 
 #### Google
 
-<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini 2.5 Flash Live (beta)</td><td>gemini-2.5-flash-live</td><td>false</td></tr><tr><td>Gemma 4 31B Fast (beta)</td><td>realtime-gemma-4-31b-it</td><td>false</td></tr><tr><td>Gemma 4 26B A4B Fast (beta)</td><td>realtime-gemma-4-26b-a4b-it</td><td>false</td></tr></tbody></table>
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini 3.8 Live</td><td>gemini-3.8-live</td><td>false</td></tr><tr><td>Gemma 4 31B Fast (beta)</td><td>realtime-gemma-4-31b-it</td><td>false</td></tr><tr><td>Gemma 4 26B A4B Fast (beta)</td><td>realtime-gemma-4-26b-a4b-it</td><td>false</td></tr></tbody></table>
 
 ### Standard Models
 
@@ -84,32 +84,28 @@ Models marked as ✅ _Flagship_ are the providers’ top-tier, most capable mode
 
 #### Google
 
-<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini 3.5 Flash</td><td>gemini-3.5-flash</td><td>false</td></tr><tr><td>Gemini Flash (latest)</td><td>gemini-flash</td><td>true</td></tr><tr><td>Gemini 3.1 Flash Lite</td><td>gemini-3.1-flash-lite</td><td>false</td></tr><tr><td>Gemini Flash Lite (latest)</td><td>gemini-flash-lite</td><td>true</td></tr><tr><td>Gemini 2.5 Flash</td><td>gemini-2.5-flash</td><td>false</td></tr><tr><td>Gemini 2.5 Flash Lite</td><td>gemini-2.5-flash-lite</td><td>false</td></tr></tbody></table>
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini Flash (latest)</td><td>gemini-flash</td><td>true</td></tr><tr><td>Gemini 3.1 Flash Lite</td><td>gemini-3.1-flash-lite</td><td>false</td></tr><tr><td>Gemini Flash Lite (latest)</td><td>gemini-flash-lite</td><td>true</td></tr><tr><td>Gemini 2.5 Flash</td><td>gemini-2.5-flash</td><td>false</td></tr><tr><td>Gemini 2.5 Flash Lite</td><td>gemini-2.5-flash-lite</td><td>false</td></tr></tbody></table>
 
 <!-- Release draft: publish Gemini 3.8 only after public availability and serving API credit verification. Flagship/entitlement classification needs release-owner confirmation; no classification is asserted for these profiles. The measurements below are reconciled staging results; production performance is not asserted. -->
 
-Gemini 3.8 Flash offers these reasoning profiles:
+Gemini 3.8 Flash is available with the Low reasoning profile:
 
 | Model | Model code |
 | --- | --- |
 | Gemini 3.8 Flash (Low) | `gemini-3.8-flash-low` |
-| Gemini 3.8 Flash (Medium) | `gemini-3.8-flash-medium` |
-| Gemini 3.8 Flash (High) | `gemini-3.8-flash-high` |
 
-The Low, Medium, and High profiles select how much reasoning Gemini 3.8 Flash performs. Their provider token prices are the same; additional reasoning increases output-token usage.
+The Low profile sets how much reasoning Gemini 3.8 Flash performs. Reasoning counts toward output-token usage.
 
-All three profiles use **0.75 Convai credits per 1,000 input tokens** and **3.75 credits per 1,000 output tokens**, including reasoning. Each turn also includes the **Platform Fee** of <code class="expression">space.vars.platform_fee_credits</code> credits. Speech, session duration, memory, knowledge retrieval, and other enabled services add their own usage, and Convai rounds each turn's total up to the next whole credit. See [How Convai credits work](../../convai-credits/how-convai-credits-work.md).
+Gemini 3.8 Flash (Low) uses **0.75 Convai credits per 1,000 input tokens** and **3.75 credits per 1,000 output tokens**, including reasoning. Each turn also includes the **Platform Fee** of <code class="expression">space.vars.platform_fee_credits</code> credits. Speech, session duration, memory, knowledge retrieval, and other enabled services add their own usage, and Convai rounds each turn's total up to the next whole credit. See [How Convai credits work](../../convai-credits/how-convai-credits-work.md).
 
 <details>
 <summary>Gemini 3.8 Flash latency and credit measurements</summary>
 
-These staging measurements use 30 synthetic requests per profile across conversation, questions using supplied reference notes, and planning, with approximately 3,900 input tokens per request, on September 5, 2026. Requests run one at a time. Latency measures the language-model request to the first text response, including reasoning. It excludes connection setup, speech recognition, speech synthesis, and delivery to your device:
+These staging measurements use 30 synthetic requests across conversation, questions using supplied reference notes, and planning, with approximately 3,900 input tokens per request, on September 5, 2026. Requests run one at a time. Latency measures the language-model request to the first text response, including reasoning. It excludes connection setup, speech recognition, speech synthesis, and delivery to your device:
 
 | Profile | First text, median | First text, 95th percentile | Mean LLM credits | Mean generation credits |
 | --- | ---: | ---: | ---: | ---: |
 | Low | 1.06 s | 3.65 s | 4.03 | 10.03 |
-| Medium | 4.26 s | 7.49 s | 8.63 | 14.63 |
-| High | 5.57 s | 9.28 s | 11.03 | 17.03 |
 
 The LLM column quotes the language model in isolation, using measured input, visible output, and reasoning tokens. The generation column shows observed staging charges including the six-credit **Platform Fee**. Both columns exclude session duration charges and other services. These workload averages do not guarantee production costs or response times.
 
