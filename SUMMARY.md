@@ -486,6 +486,7 @@
     * [Use character emotions](plugins-and-integrations/web-plugins/convai-web-sdk/emotions.md)
     * [Update character context at runtime](plugins-and-integrations/web-plugins/convai-web-sdk/dynamic-context.md)
     * [Mute the character's voice](plugins-and-integrations/web-plugins/convai-web-sdk/mute-the-characters-voice.md)
+    * [Audio over the data channel](plugins-and-integrations/web-plugins/convai-web-sdk/audio-over-the-data-channel.md)
     * [Host several characters in one room](plugins-and-integrations/web-plugins/convai-web-sdk/multi-character-rooms.md)
     * [Connect to a character version](plugins-and-integrations/web-plugins/convai-web-sdk/character-versioning.md)
     * [Use long-term memory](plugins-and-integrations/web-plugins/convai-web-sdk/long-term-memory.md)

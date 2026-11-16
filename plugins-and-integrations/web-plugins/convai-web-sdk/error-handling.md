@@ -1,7 +1,7 @@
 ---
 title: Handle errors and disconnects
 description: Catch connection failures, react to dropped sessions with your own reconnect logic, and read the acknowledgments Convai returns for each message.
-last_reviewed: "2.0.2"
+last_reviewed: "2.1.0"
 icon: cloud-xmark
 ---
 
