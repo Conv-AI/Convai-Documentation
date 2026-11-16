@@ -501,6 +501,7 @@
     * [Read raw transport messages](plugins-and-integrations/web-plugins/convai-web-sdk/raw-messages.md)
     * [Web SDK event reference](plugins-and-integrations/web-plugins/convai-web-sdk/event-reference.md)
   * [Convai Embody](plugins-and-integrations/web-plugins/convai-embody/README.md)
+    * [Get started with Convai Embody](plugins-and-integrations/web-plugins/convai-embody/get-started.md)
     * [Add a 3D character to a React app](plugins-and-integrations/web-plugins/convai-embody/add-a-3d-character-to-a-react-app.md)
     * [Add a 3D character to a three.js scene](plugins-and-integrations/web-plugins/convai-embody/add-a-3d-character-to-a-three-js-scene.md)
     * [Add a chat widget to a character](plugins-and-integrations/web-plugins/convai-embody/add-a-chat-widget-to-a-character.md)

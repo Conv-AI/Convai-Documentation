@@ -1,7 +1,7 @@
 ---
 title: Add your own animations to a character
 description: Load your own animation clips onto a Convai Embody character, including Mixamo FBX files, play and crossfade them, and switch to a talking clip while the character speaks.
-last_reviewed: "1.1.1"
+last_reviewed: "1.2.0"
 ---
 
 Give a Convai Embody character animations of your own, such as a wave, a gesture, or a different idle, from your own GLB files or straight from Mixamo. Use this page when the clips that come with the character's body are not the ones you want. At the end, the character plays your clips, crossfades between them, and switches to a talking clip while it speaks.
