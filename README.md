@@ -3,11 +3,12 @@ description: >-
   Start here to create, customize, test, and share interactive AI characters
   with Convai, covering Playground, no-code experiences, plugins and
   integrations, and API reference.
+noIndex: true
 ---
 
 # Welcome
 
-## **Welcome to the Official Convai Documentation**&#x20;
+## **Welcome to the Official Convai Documentation**
 
 Your platform for building, customizing, and deploying intelligent, interactive AI characters across various environments and platforms.
 

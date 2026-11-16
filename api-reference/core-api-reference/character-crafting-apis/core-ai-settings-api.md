@@ -24,7 +24,7 @@ Update API can be used to change the LLM to be used for Character. Currently fol
 
 #### Google
 
-<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini 2.5 Flash Live (beta)</td><td>gemini-2.5-flash-live</td><td>false</td></tr><tr><td>Gemma 4 31B Fast (beta)</td><td>realtime-gemma-4-31b-it</td><td>false</td></tr><tr><td>Gemma 4 26B A4B Fast (beta)</td><td>realtime-gemma-4-26b-a4b-it</td><td>false</td></tr></tbody></table>
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini 3.8 Live</td><td>gemini-3.8-live</td><td>false</td></tr><tr><td>Gemma 4 31B Fast (beta)</td><td>realtime-gemma-4-31b-it</td><td>false</td></tr><tr><td>Gemma 4 26B A4B Fast (beta)</td><td>realtime-gemma-4-26b-a4b-it</td><td>false</td></tr></tbody></table>
 
 ### Standard Models
 
@@ -38,7 +38,7 @@ Update API can be used to change the LLM to be used for Character. Currently fol
 
 #### Google
 
-<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini 3.5 Flash</td><td>gemini-3.5-flash</td><td>false</td></tr><tr><td>Gemini Flash (latest)</td><td>gemini-flash</td><td>true</td></tr><tr><td>Gemini 3.1 Flash Lite</td><td>gemini-3.1-flash-lite</td><td>false</td></tr><tr><td>Gemini Flash Lite (latest)</td><td>gemini-flash-lite</td><td>true</td></tr><tr><td>Gemini 2.5 Flash</td><td>gemini-2.5-flash</td><td>false</td></tr><tr><td>Gemini 2.5 Flash Lite</td><td>gemini-2.5-flash-lite</td><td>false</td></tr></tbody></table>
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Gemini Flash (latest)</td><td>gemini-flash</td><td>true</td></tr><tr><td>Gemini 3.1 Flash Lite</td><td>gemini-3.1-flash-lite</td><td>false</td></tr><tr><td>Gemini Flash Lite (latest)</td><td>gemini-flash-lite</td><td>true</td></tr><tr><td>Gemini 2.5 Flash</td><td>gemini-2.5-flash</td><td>false</td></tr><tr><td>Gemini 2.5 Flash Lite</td><td>gemini-2.5-flash-lite</td><td>false</td></tr></tbody></table>
 
 #### Qwen
 

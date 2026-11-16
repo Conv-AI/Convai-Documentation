@@ -1,7 +1,12 @@
 ---
 title: Convai credits
-description: Find out how Convai credits work, how your balance changes during a billing cycle, and how to estimate the credits a project will use.
+description: >-
+  Find out how Convai credits work, how your balance changes during a billing
+  cycle, and how to estimate the credits a project will use.
+noIndex: true
 ---
+
+# Convai credits
 
 Convai measures usage in credits. Every turn of a conversation, every connected session, and every file you process draws from your plan's credit balance. If you are new to credits, start with [How Convai credits work](how-convai-credits-work.md).
 

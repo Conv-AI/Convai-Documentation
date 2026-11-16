@@ -2,6 +2,7 @@
 description: >-
   Learn how to refine your AI character’s personality, appearance, knowledge,
   and behavior to create consistent and engaging interactions.
+noIndex: true
 ---
 
 # Character Customization

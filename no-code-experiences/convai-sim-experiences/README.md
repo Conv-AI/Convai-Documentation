@@ -2,9 +2,10 @@
 description: >-
   Create AI-powered avatars and deploy them in interactive 3D
   environments—directly from your browser.
+noIndex: true
 ---
 
-# Convai Sim
+# Convai Sim Experiences
 
 ## **Introduction**
 
@@ -57,4 +58,3 @@ Whether you're designing a futuristic training program or a playful game level, 
   Easily arrange avatars and elements using drag-and-drop tools.
 * **Versatile Use Cases**\
   Perfect for education, training, tourism, gaming, and more.
-

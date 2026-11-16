@@ -1,7 +1,7 @@
 ---
 title: Update character context at runtime
 description: Give a character live information about the scene, the session, and the person it is talking to, and control whether each update makes it respond.
-last_reviewed: "2.0.2"
+last_reviewed: "2.1.0"
 icon: connectdevelop
 ---
 

@@ -2,6 +2,7 @@
 description: >-
   Convai introduces a Modding Framework, enabling easy integration of AI-driven
   NPCs into games across engines like Unreal, Unity, and more.
+noIndex: true
 ---
 
 # Modding Framework
@@ -19,7 +20,7 @@ We'll be use the following tools:
 
 Let's get started by setting up the Convai SDK. First, go to the repository's readme and follow the instructions for installing Bazel and building the project.\
 \
-If you encounter a "_roots.pem_" error, go to the file "_convai-sdk-cpp\bazel-convai-sdk-cpp\external\com\_github\_grpc\_grpc\src\core\lib\security\security\_connector\ssl\_utils.cc_" and find line 60. Change the path to only "_roots.pem_". Then, copy the "_roots.pem_" file from "_convai-sdk-cpp/bazel-convai-sdk-cpp/external/com\_github\_grpc\_grpc/etc/_" and paste it next to the "_main.exe_" file in the "_convai-sdk-cpp\bazel-bin_" directory or whichever directory you're using to execute "_main.exe_" from. When packaging your mod, ensure that you include the "_roots.pem_" file with  "_main.exe_".\
+If you encounter a "_roots.pem_" error, go to the file "_convai-sdk-cpp\bazel-convai-sdk-cpp\external\com\_github\_grpc\_grpc\src\core\lib\security\security\_connector\ssl\_utils.cc_" and find line 60. Change the path to only "_roots.pem_". Then, copy the "_roots.pem_" file from "_convai-sdk-cpp/bazel-convai-sdk-cpp/external/com\_github\_grpc\_grpc/etc/_" and paste it next to the "_main.exe_" file in the "_convai-sdk-cpp\bazel-bin_" directory or whichever directory you're using to execute "_main.exe_" from. When packaging your mod, ensure that you include the "_roots.pem_" file with "_main.exe_".\
 \
 If you've installed the mod, UE4SS should already be installed.\
 \
@@ -35,7 +36,7 @@ Once we have the "_main.exe_," we execute it only when the player interacts with
 \
 Next, we use os.execute to run "main.exe." The execution completes after playing the dialogue. We parse the dialogue text and action value to display as subtitles. For the action value, we save it to a global variable. In the blueprint Mod, we create an empty function named "actionfunction" in the ModActor with one output pin. In the Lua mod, we create a custom event with the same name, setting the output value to the action value. When the blueprint mod calls the empty function, it instead triggers the custom event defined in the Lua mod, providing the action value. The blueprint mod will then use this to trigger the right action.\
 \
-To add Lipsync, Create a function in your blueprint mod that prints the curve names, this will give a list of blendshapes you can move. Check which blendshapes are related to lips. Use the setmorphtarget node to create a function in blueprint mod to move a blendshape by a given value. Once you have a list of blendshape names and a function that takes a blendshape name and value and moves it by that value, the next step is to make a function in your lua mod that essentially uses a couple of equations to figure out how much to move a given blendshape by and then calls the function you made above for each blendshapes that is needed for Lipsync.  \
+To add Lipsync, Create a function in your blueprint mod that prints the curve names, this will give a list of blendshapes you can move. Check which blendshapes are related to lips. Use the setmorphtarget node to create a function in blueprint mod to move a blendshape by a given value. Once you have a list of blendshape names and a function that takes a blendshape name and value and moves it by that value, the next step is to make a function in your lua mod that essentially uses a couple of equations to figure out how much to move a given blendshape by and then calls the function you made above for each blendshapes that is needed for Lipsync.\
 \
 To create lua mods with UE4SS, Go to this folder _Phoenix\Binaries\Win64\Mods_ and then make a folder with your mod name and then open _Phoenix\Binaries\Win64\Mods\mods.txt_ and enable your mod. Make a _Scripts\main.lua_ file which will house the logic of your lua mod.\
 \
@@ -48,7 +49,7 @@ To call functions from the blueprint mod in our Lua mod, we use "_FindFirstOf_" 
 * [https://www.nexusmods.com/hogwartslegacy/articles/132](https://www.nexusmods.com/hogwartslegacy/articles/132)
 * [https://modding.wiki/en/hogwartslegacy/developers/hlblueprintex](https://modding.wiki/en/hogwartslegacy/developers/hlblueprintex)
 * [https://modding.wiki/en/hogwartslegacy](https://modding.wiki/en/hogwartslegacy)
-* [https://github.com/LongerWarrior/FModel/releases/tag/HW\_1.0.0.0](https://github.com/LongerWarrior/FModel/releases/tag/HW\_1.0.0.0)
+* [https://github.com/LongerWarrior/FModel/releases/tag/HW\_1.0.0.0](https://github.com/LongerWarrior/FModel/releases/tag/HW_1.0.0.0)
 * [https://modding.wiki/en/hogwartslegacy/developers/PhoenixUProjGuide](https://modding.wiki/en/hogwartslegacy/developers/PhoenixUProjGuide)
 * [https://modding.wiki/en/hogwartslegacy/developers/luaexamples](https://modding.wiki/en/hogwartslegacy/developers/luaexamples)
 * [https://docs.ue4ss.com/dev/index.html](https://docs.ue4ss.com/dev/index.html)

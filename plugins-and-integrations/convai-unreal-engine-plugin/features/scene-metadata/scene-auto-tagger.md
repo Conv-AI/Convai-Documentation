@@ -57,7 +57,7 @@ Choose **Accurate** for higher-detail analysis of artwork, text, or specific sub
 
 Clear **Re-analyze existing tagged objects** if you want to skip objects that already have a Convai Object Component.
 
-<figure><img src="../../../../.gitbook/assets/.gitbookassetsunreal-scene-auto-tagger-scope (1).jpg" alt="Analysis options with Current Level and Accurate selected, plus the Explore current level button."><figcaption><p>Choose the objects to scan and the analysis quality before exploring.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/.gitbookassetsunreal-scene-auto-tagger-scope.jpg" alt="Analysis options with Current Level and Accurate selected, plus the Explore current level button."><figcaption><p>Choose the objects to scan and the analysis quality before exploring.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -73,7 +73,7 @@ Your level remains unchanged until you apply the suggestions.
 
 Select a row to inspect the object's captured image, **Name**, and **Description**. Edit the text directly to match your scene. Use a short, natural name, such as `Bronze horse`, and a description that helps your character talk about the object.
 
-<figure><img src="../../../../.gitbook/assets/.gitbookassetsunreal-scene-auto-tagger-review (1).jpg" alt="Scene Auto Tagger review list beside the captured image of a museum statue."><figcaption><p>Select an object to inspect the image used for its suggestion.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/.gitbookassetsunreal-scene-auto-tagger-review.jpg" alt="Scene Auto Tagger review list beside the captured image of a museum statue."><figcaption><p>Select an object to inspect the image used for its suggestion.</p></figcaption></figure>
 
 ### Correct a detail
 
