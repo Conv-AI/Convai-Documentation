@@ -1,7 +1,7 @@
 ---
 title: Use your own 3D model
 description: Render a Convai character with a MetaHuman GLB model that you host, including Full and Lite files and your own animation clips.
-last_reviewed: "1.1.1"
+last_reviewed: "1.2.0"
 ---
 
 Render a Convai character with a 3D model you host yourself, instead of the body Convai serves for the character. Use this page when you have your own MetaHuman exported to GLB. At the end, your model loads in place of the default body and talks with lip sync, gaze, and blinking through the character's normal Convai connection.
