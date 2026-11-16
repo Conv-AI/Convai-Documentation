@@ -1,7 +1,7 @@
 ---
 title: ConvaiClient reference
 description: Reference for the framework-free Convai Web SDK client, including its properties, methods, media controls, lip sync queue, and errors.
-last_reviewed: "2.0.2"
+last_reviewed: "2.1.0"
 ---
 
 `ConvaiClient` is the framework-free client of the Convai Web SDK. It is exported from `@convai/web-sdk/core` and `@convai/web-sdk/vanilla`, implements the `IConvaiClient` interface, and extends the SDK's `EventEmitter`. The React hook `useConvaiClient` wraps the same class.
@@ -122,12 +122,12 @@ Unless a row says otherwise, these methods return `void` and do nothing when the
 | `sendInterruptMessage()` | Asks Convai to stop the current response and stops local lip sync playback. |
 | `sendActionResult(result: ActionResult)` | Returns the result of a client tool call. Throws instead of doing nothing: `Cannot send an action result before the session is ready` when the transport is not ready, and a validation error for an empty `id`, an unknown `status`, `error` on a `completed` result, or non-JSON values. See [Handle character actions](../actions.md). |
 | `updateContext(options: ContextUpdateOptions)` | Appends, replaces, or resets the runtime context, or sets `current_attention_object`. Logs a warning and sends nothing when there is no text and no attention object and `mode` is not `"reset"`. |
-| `updateDynamicInfo(dynamicInfo: string)` | Sends dynamic information text. Ignores empty text. |
+| `updateDynamicInfo(dynamicInfo: string)` | Sends dynamic information text. Ignores empty text. Recorded for `reconnect()` even when not connected. |
 | `updateTemplateKeys(templateKeys: Record<string, string>)` | Replaces the Narrative Design template keys of the live session. Ignores an empty object. |
 | `updateEmotion(stateOfMind: string \| null)` | Sets the character's temporary state of mind without triggering a response. `null`, an empty string, or `"neutral"` clears it. The value is also stored for the next `connect()`, even when no session is open. |
 | `updateSceneMetadata(items: Array<{ name: string; description: string }>, options?: UpdateSceneMetadataOptions)` | Describes what is visible or nearby. Does not change `actionConfig`. `options.respondMode` sets whether the update may trigger a response. |
-| `toggleTts(enabled: boolean)` | Turns the character's speech on or off. |
-| `toggleStt(enabled: boolean)` | Turns speech-to-text on or off. Sent to Convai as `muted: !enabled`. |
+| `toggleTts(enabled: boolean)` | Turns the character's speech on or off. Recorded in every connection state; `reconnect()` and `connect()` without a config start the next session with it. On LiveKit it is sent once the character can receive it (`botReady`, or its first speech or transcription event on a backend without `botReady`); until then only the latest value is held. |
+| `toggleStt(enabled: boolean)` | Turns speech-to-text on or off. Sent to Convai as `muted: !enabled`. On LiveKit it is held like `toggleTts()`, latest value only. Not kept for the next session, which starts with speech-to-text on. |
 | `resetIdleTimer()` | Resets Convai's idle timer for the session. |
 
 See [Update character context at runtime](../dynamic-context.md) for how these fit together.
@@ -140,7 +140,7 @@ Each returns the update ID it sent, or `null` when the transport is not ready. W
 |---|---|
 | `visionStatus(options?: VisionStatusOptions): string \| null` | Requests a server acknowledgment that reports the vision frame buffer. `options.updateId` is optional. |
 | `visionTrigger(options?: VisionTriggerOptions): string \| null` | Attaches buffered frames to the conversation and optionally triggers a response. `options` accepts `updateId`, `text`, `respondMode`, `frameIndices` (`[start, end]`), and `frameIds`. |
-| `respondModeUpdate(options: RespondModeUpdateOptions): string \| null` | Changes the session's respond mode for one modality. `options` takes `modality` (`"text"`, `"audio"`, `"vision"`, `"context_update"`, `"trigger"`, or `"scene_metadata"`), `mode` (`"must_respond"`, `"auto"`, or `"silent"`), and an optional `updateId`. |
+| `respondModeUpdate(options: RespondModeUpdateOptions): string \| null` | Changes the session's respond mode for one modality. `options` takes `modality` (`"text"`, `"audio"`, `"vision"`, `"context_update"`, `"trigger"`, or `"scene_metadata"`), `mode` (`"must_respond"`, `"auto"`, or `"silent"`), and an optional `updateId`. Returns `null` when not connected. A mode the connect request accepts is still recorded for `reconnect()`; `"auto"` and `"silent"` for `text` and `audio` are runtime-only and not replayed, because the connect request does not allow user input below `"must_respond"`. |
 
 Convai acknowledges each of these on the `serverResponse` event.
 

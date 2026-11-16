@@ -1,7 +1,7 @@
 ---
 title: Web SDK event reference
 description: Reference for every event the Convai Web SDK client and its media controls emit, with the payload each one carries and when it fires.
-last_reviewed: "2.0.2"
+last_reviewed: "2.1.0"
 icon: arrow-up-small-big
 ---
 
@@ -54,7 +54,8 @@ unsubscribe();
 
 | Event | Payload | Fires when |
 |---|---|---|
-| `speakingChange` | `boolean` | The character starts (`true`) or stops (`false`) speaking. A reset or interruption also emits `false`. |
+| `speakingChange` | `boolean` | The character starts (`true`) or stops (`false`) speaking. A reset or interruption also emits `false`. With `audioRouting: 'data_only'` it follows what is heard; see [Audio over the data channel](audio-over-the-data-channel.md). |
+| `serverSpeakingChange` | `boolean` | With `audioRouting: 'data_only'`: the server's own speaking flags, which follow when it sent the audio rather than when it is heard. |
 | `botOutput` | `{ text: string; spoken: boolean; aggregatedBy: string; segmentId?: number \| string; spokenStatus?: string }` | Convai sends an aggregated output segment. `aggregatedBy` is `"sentence"` when Convai does not specify it. The same `segmentId` can repeat as speech progresses. |
 | `botTtsText` | `{ text: string }` | Convai sends text as it is spoken. |
 | `botTtsStarted` | none | Speech synthesis for a response starts. |

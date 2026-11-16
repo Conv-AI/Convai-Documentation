@@ -1,7 +1,7 @@
 ---
 title: Use character emotions
 description: Receive the emotion Convai detects in a character's replies, choose how it is detected, and set the character's temporary state of mind.
-last_reviewed: "2.0.2"
+last_reviewed: "2.1.0"
 icon: face-smile-plus
 ---
 
