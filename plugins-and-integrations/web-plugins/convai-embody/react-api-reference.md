@@ -1,7 +1,7 @@
 ---
 title: React API reference
 description: Reference for the Convai Embody React components and hooks, including every prop, its type and default, and what each hook returns.
-last_reviewed: "1.1.1"
+last_reviewed: "1.2.0"
 ---
 
 The React API is exported from `@convai/embody/react`. Every component and hook here also accepts the character options documented in the [createCharacter reference](createcharacter-reference.md), such as `characterId`, `token`, and `apiKey`.
@@ -80,7 +80,7 @@ Loads a character and returns it. `UseCharacterOptions` is every [createCharacte
 
 ## When the character reloads
 
-The components and `useCharacter` load the character again, and close and reopen its connection, only when one of these props changes: `characterId`, `token`, `authToken`, `apiKey`, `baseUrl`, `resolver`, or `modelVariant`. Compare `resolver` by identity: define it outside the component or memoize it.
+The components and `useCharacter` load the character again, and close and reopen its connection, only when one of these props changes: `characterId`, `token`, `authToken`, `apiKey`, `baseUrl`, `onPrem`, `resolver`, or `modelVariant`. Compare `resolver` by identity: define it outside the component or memoize it.
 
 `camera` and `correctiveMap` apply to the loaded character without a reload. Every other option, such as `animations`, `idleClip`, `session`, `client`, and `decorators`, is read once when the character loads; to change one, remount the component with a new `key`.
 

@@ -1,7 +1,7 @@
 ---
 title: Add a 3D character to a React app
 description: Install Convai Embody in a React app and render a Convai character that speaks with lip sync, gaze, and blinking from its character ID.
-last_reviewed: "1.1.1"
+last_reviewed: "1.2.0"
 ---
 
 Render a Convai character as a 3D body in a React app with one component. Use this page when adding Convai Embody to a project for the first time. At the end, the character stands on the page, follows the camera with its eyes, and moves its mouth in sync with its voice.
@@ -55,7 +55,7 @@ export default function App() {
 ```
 {% endcode %}
 
-The component fills its parent and is at least as tall as the viewport. Drag to turn around the character and scroll to move closer. Pass `orbit={false}` for a fixed camera.
+The component fills its parent and is at least as tall as the viewport. The camera sits at the character's eye level and orbits its eyes: drag to turn around the character and scroll to move closer. Pass `orbit={false}` for a fixed camera, or an `orbit` object to change the limits, whose defaults are exported as `ORBIT_DEFAULTS`.
 
 If the character has Long-Term Memory turned on, the connection also needs an end-user id so the character can tell your users apart. Pass a stable id for the person using your app: `session={{ endUserId: user.id }}`. Without it, connecting fails with "Missing end\_user\_id".
 
@@ -74,7 +74,7 @@ import { CharacterModel } from '@convai/embody/react'
 
 export function Scene({ token }: { token: string }) {
   return (
-    <Canvas camera={{ position: [0, 1.45, 3.6], fov: 35 }}>
+    <Canvas camera={{ position: [0, 1.58, 2.2], fov: 35 }}>
       <ambientLight intensity={0.6} />
       <directionalLight position={[2, 3, 2]} />
       <CharacterModel token={token} characterId="YOUR_CHARACTER_ID" />

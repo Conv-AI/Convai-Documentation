@@ -1,7 +1,7 @@
 ---
 title: createCharacter reference
 description: Reference for the createCharacter function in Convai Embody, including every option, its default, and the character handle it returns.
-last_reviewed: "1.1.1"
+last_reviewed: "1.2.0"
 ---
 
 `createCharacter` is exported from `@convai/embody`. It resolves a character's body, loads it, opens a Convai Web SDK connection, and resolves to a `CharacterHandle`. The React components accept the same options as props.
@@ -23,6 +23,7 @@ function createCharacter(options: CreateCharacterOptions): Promise<CharacterHand
 | `authToken` | `string` | none | The same as `token`, under the name the Convai Web SDK uses. |
 | `apiKey` | `string` | none | A Convai API key. Use only in trusted contexts. |
 | `baseUrl` | `string` | the release's Convai host | Backend host. Change only to point at a different Convai environment. |
+| `onPrem` | `string` | — | The Middleman URL of an on-prem install (`https://api-<env>.<domain>`). Points the embodiment manifest and the character info at it and derives the install's `live-<env>` and `character-apis-<env>` hosts for the connection; values named in `session` or `baseUrl` win. |
 | `session` | `SessionOptions` without `characterId`, `apiKey`, `authToken` | none | Extra Convai Web SDK connection options, such as voice, memory, transport, and `endUserId`. |
 | `client` | `ConvaiClient` | none | A client your app already created and connected. Convai Embody drives lip sync from it and never disconnects it. Read once, when the character is created. |
 | `connect` | `boolean` | `true` | `false` renders the body with no connection, no audio, and no lip sync. `client` on the handle is then `null`. |
@@ -52,8 +53,8 @@ function createCharacter(options: CreateCharacterOptions): Promise<CharacterHand
 |---|---|---|---|
 | `motion` | `boolean` | `true` | `false` turns off gaze, breathing, eye movement, and blinking, keeping only animation clips and lip sync. |
 | `gaze` | `GazeConfig` | built-in tuning | Head, neck, and torso gaze tracking. `lookAways: false` stops the glances away, `torso: false` keeps the torso still, and `headLimit` sets how far the head turns. |
-| `eyeGaze` | `EyeGazeConfig` | built-in tuning | Eye movement. Each eye is aimed at the camera by measuring the body's own eye shapes, with small saccades while it holds eye contact. `saccades: false` holds the eyes still. |
-| `blink` | `BlinkConfig` | built-in tuning | Blinking and eyelids. |
+| `eyeGaze` | `EyeGazeConfig` | built-in tuning | Eye movement. Each eye is aimed at the camera by measuring the body's own eye shapes, with small saccades while it holds eye contact. `saccades: false` holds the eyes still. With no camera, or while the character is not attending, the eyes keep the world direction they last looked along — a head turn is countered on the same frame — and settle on the head's forward over about half a second, instead of riding the head. |
+| `blink` | `BlinkConfig` | built-in tuning | Blinking and eyelids. A blink is one of 36 recorded passages — both lids on their own curves, a double blink kept whole — played by time at the recording's 60 Hz, so every frame rate draws the same shape, scaled so the fullest closes a lid. The schedule, partial and double blinks and the resting droop are embody's own; `asymmetry` (default 0.3) is how much of the recording's left/right difference the lids keep. `envelope: 'procedural'` keeps the earlier sine/cosine envelope; `enabled: false` hands the lids to the animation. |
 | `breathing` | `BreathingConfig` | built-in tuning | Additive chest and spine breathing. |
 | `morphNormals` | `boolean` | `true` | Recompute surface normals where the face's blend shapes move it, for models that ship blend-shape positions without blend-shape normals (every published MetaHuman body). Without it a closed eyelid is lit with its open-eye normals and shades black. Sparse: only the vertices a shape moves, only when a weight changes. |
 | `mouth` | `MouthTuning` | built-in tuning | Lip sync tuning. The mouth follows the voice's own playback clock, closes the lips on m, b, and p, settles in the voice's pauses, closes once at the end of a reply, and keeps a resting expression between sentences. `expression` sets that expression's mood (`'neutral'`, `'warm'`, `'curious'`, `'focused'`, or `'steady'`, the default for a male body: brows a touch down and no smile) or turns it off with `false`. `voiceLeadSeconds` sets how far the mouth leads the voice, and `finish: false` turns off the closures, pauses, and smoothing. |
