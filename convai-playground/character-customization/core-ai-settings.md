@@ -80,7 +80,7 @@ Models marked as ✅ _Flagship_ are the providers’ top-tier, most capable mode
 
 #### Anthropic
 
-<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Claude 4.5 Sonnet (beta)</td><td>claude-4-5-sonnet</td><td>false</td></tr><tr><td>Claude 4.5 Haiku (beta)</td><td>claude-4-5-haiku</td><td>false</td></tr><tr><td>Claude Sonnet (latest)</td><td>claude-sonnet</td><td>true</td></tr><tr><td>Claude Haiku (latest)</td><td>claude-haiku</td><td>true</td></tr></tbody></table>
+<table><thead><tr><th>Model</th><th>Model Code</th><th data-type="checkbox">Flagship</th></tr></thead><tbody><tr><td>Claude 4.5 Haiku (beta)</td><td>claude-4-5-haiku</td><td>false</td></tr><tr><td>Claude Sonnet (latest)</td><td>claude-sonnet</td><td>true</td></tr><tr><td>Claude Haiku (latest)</td><td>claude-haiku</td><td>true</td></tr></tbody></table>
 
 #### Google
 
