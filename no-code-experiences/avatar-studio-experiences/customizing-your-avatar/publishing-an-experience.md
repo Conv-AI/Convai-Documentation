@@ -4,7 +4,7 @@ description: >-
   across web, kiosks, apps, and more.
 ---
 
-# Publishing an Experience
+# Publishing an Avatar Studio Experience
 
 ## **Ready to Share Your Experience with the World?**
 
@@ -47,11 +47,6 @@ Select how and with whom the experience should be shared:
   * Not listed publicly, but can be accessed via a direct link
 * **Embed on Your Site** _(Enterprise-only)_
   * Publish your experience directly to your own website
-
-{% hint style="danger" %}
-**Convai Pixel Streaming Embed** is currently accessible only with the **Enterprise plan**.\
-To learn how to embed an avatar into your own platform, check out the [Embedding Documentation](../../../plugins-and-integrations/convai-pixel-streaming-embed/).
-{% endhint %}
 
 ***
 
