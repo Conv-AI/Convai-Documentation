@@ -6,7 +6,7 @@ description: >-
   Components command and configure your first character.
 ---
 
-A new Unity scene needs three Convai components wired together before a character can hear a player and respond: a manager, a character, and a player. Build that hierarchy in an empty scene using the **Setup Required Components** command, then add and configure the character itself.
+A new Unity scene needs three Convai components wired together before a character can hear a player and respond: a manager, a character, and a player. Build that hierarchy in an empty scene using the **Add Required Components** command, then add and configure the character itself.
 
 ## Minimum required hierarchy
 
@@ -24,7 +24,7 @@ The setup command creates the manager object. Add the player and character compo
 {% step %}
 ### Add the required manager components
 
-In the Unity Editor menu bar, select **GameObject > Convai > Setup Required Components**.
+In the Unity Editor menu bar, select **GameObject > Convai > Add Required Components**.
 
 Unity creates `[Convai Manager]` with `ConvaiManager` and `ConvaiRoomManager` attached, or adds the missing component to an existing manager. The command does not create a player or a character.
 

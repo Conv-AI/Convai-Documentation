@@ -47,7 +47,7 @@ The SDK macOS build processor combines arm64 and x86_64 slices for Universal pla
 Operating-system privacy settings and device availability still apply:
 
 * **Windows:** Check microphone privacy settings for desktop applications and select an available input device.
-* **macOS:** Set **Microphone Usage Description** and use **Convai > Settings > Setup Health** to verify it. The SDK requests microphone authorization before opening capture; handle denial by directing the player to system settings.
+* **macOS:** Set **Microphone Usage Description** and use **Convai > Home > Welcome > Setup Health** to verify it. The SDK requests microphone authorization before opening capture; handle denial by directing the player to system settings.
 * **Linux:** Verify that the target machine's audio stack exposes a working microphone and playback device to Unity.
 
 Use `ConvaiAudioOutput` for per-character volume and spatial audio. The SDK native playback path uses a carrier clip so Unity can apply direction and distance. Reserve that AudioSource for the voice; place other sounds on another source. Test microphone capture with and without echo cancellation on the actual device.

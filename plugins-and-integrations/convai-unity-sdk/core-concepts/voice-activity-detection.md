@@ -65,6 +65,8 @@ These log lines come from the SDK's internal logger and only appear if your proj
 
 To send custom detection thresholds instead of Convai's defaults, use **Listening > Voice Detection > Thresholds > Custom** on the **Convai Room Manager**. The next connect request carries the **Confidence**, **Speech Start (s)**, **Speech Stop (s)**, and **Minimum Volume** values.
 
+<figure><img src="../../../.gitbook/assets/unity-room-voice-detection-thresholds.png" alt="The Listening section with Custom Voice Detection thresholds selected and Confidence, Speech Start, Speech Stop, and Minimum Volume visible."><figcaption><p>(1) Select <strong>Custom</strong> under <strong>Thresholds</strong>. (2) <strong>Confidence</strong> sets how sure Convai must be that the audio contains speech. (3) <strong>Speech Start (s)</strong> and <strong>Speech Stop (s)</strong> set timing thresholds.</p></figcaption></figure>
+
 {% hint style="warning" %}
 `UserVadSettings` has no public setter and no per-connect override on `RoomSessionConnectOptions`. Set it on `ConvaiRoomManager` before the scene connects — changes made while a session is already `Connected` do not apply until the next connect attempt.
 {% endhint %}

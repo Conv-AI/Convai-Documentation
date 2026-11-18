@@ -119,7 +119,7 @@
       * [Validate a lip-sync map](plugins-and-integrations/convai-unity-sdk/getting-started/add-lip-sync/validate-a-lip-sync-map.md)
     * [Use your own push-to-talk input](plugins-and-integrations/convai-unity-sdk/getting-started/use-your-own-push-to-talk-input.md)
     * [Project Settings reference](plugins-and-integrations/convai-unity-sdk/getting-started/project-settings-reference.md)
-    * [The Convai Editor window](plugins-and-integrations/convai-unity-sdk/getting-started/convai-editor-window.md)
+    * [Convai Home](plugins-and-integrations/convai-unity-sdk/getting-started/convai-editor-window.md)
     * [Pin a character version](plugins-and-integrations/convai-unity-sdk/getting-started/pin-a-character-version.md)
     * [Run a text-only session](plugins-and-integrations/convai-unity-sdk/getting-started/run-a-text-only-session.md)
   * [Authentication](plugins-and-integrations/convai-unity-sdk/authentication/README.md)

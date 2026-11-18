@@ -11,14 +11,14 @@ last_reviewed: "5.0.0-pre.1"
 | Member | Purpose |
 | --- | --- |
 | `ServerEndpoint`, `CoreServerURL` | Configured connect endpoint and resolved URL |
-| `ConnectOnStart` | Reflects the Inspector's **Starts Connected** toggle |
+| `ConnectOnStart` | Reflects the Inspector's **Connect On Start** toggle |
 | `EffectiveConnectionType`, `EffectiveTurnTakingOptions`, `EffectiveUserVadSettings` | Resolved connection type and speech settings |
 | `EffectiveVisionContextMode`, `EffectiveVisionContextEnabled`, `EffectiveVisionInputSettings`, `EffectiveRespondModes` | Resolved Vision and respond-mode setup |
 | `PushToTalkKey`, `ActiveConversationInputMode`, `ConversationInputModeChanged` | Configured input key and live room mode |
 | `SetReconnectPolicy(policy)` | Apply a `ReconnectPolicy` |
 | `SessionResumeDeveloperNamespace` | Add application-controlled scope to saved resume keys. Set before connecting |
 
-Room settings are on the component. To control the first connection from your code, turn off **Starts Connected** and invoke `ConvaiManager.ConnectAsync` when ready.
+Room settings are on the component. To control the first connection from your code, turn off **Connect On Start** and invoke `ConvaiManager.ConnectAsync` when ready.
 
 ## Read diagnostics
 

@@ -14,7 +14,7 @@ Use conversation availability to decide whether input is allowed. See [Conversat
 
 ## Control automatic connection
 
-**Starts Connected** on `ConvaiRoomManager` controls startup connection. If no character is available when the scene starts, the room can connect when one appears. Turn off **Starts Connected** when login or a UI decision must come first. `ConvaiManager.ConnectAsync` and `ConvaiCharacter.StartConversationAsync` remain available for explicit connection.
+**Connect On Start** on `ConvaiRoomManager` controls startup connection. If no character is available when the scene starts, the room can connect when one appears. Turn off **Connect On Start** when login or a UI decision must come first. `ConvaiManager.ConnectAsync` and `ConvaiCharacter.StartConversationAsync` remain available for explicit connection.
 
 ## Session identifiers and resume
 

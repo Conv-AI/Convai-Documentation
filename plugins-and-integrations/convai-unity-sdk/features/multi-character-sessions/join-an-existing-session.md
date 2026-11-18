@@ -100,7 +100,7 @@ public class JoinExistingSessionBootstrap : MonoBehaviour
 ```
 {% endcode %}
 
-Turn off **Starts Connected** on the joining client so the script makes the first connection. A Group Conversation component must not be enabled: group mode creates its own room and cannot use this join path.
+Turn off **Connect On Start** on the joining client so the script makes the first connection. A Group Conversation component must not be enabled: group mode creates its own room and cannot use this join path.
 
 ## Verify the join
 

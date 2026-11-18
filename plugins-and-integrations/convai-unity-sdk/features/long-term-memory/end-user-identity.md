@@ -24,7 +24,7 @@ Generated fallback GUIDs use 32 hexadecimal characters without hyphens. Deleting
 
 ## Implement a custom identity provider
 
-Install providers before connecting. If sign-in completes asynchronously, turn off **Starts Connected** on `ConvaiRoomManager`. Initiate the connection after the signed-in identity is ready.
+Install providers before connecting. If sign-in completes asynchronously, turn off **Connect On Start** on `ConvaiRoomManager`. Initiate the connection after the signed-in identity is ready.
 
 The following component is called by your application's sign-in flow. It does not assume a particular authentication library:
 

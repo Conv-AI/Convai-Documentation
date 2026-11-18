@@ -160,7 +160,7 @@ See [Debug tools reference](debug-tools-reference.md) for the room Inspector, co
 | `transport.ice_failed` repeatedly | Strict firewall blocking UDP | Allow UDP; request TURN relay from network admin | Session connects; WebRTC negotiation completes |
 | `server.usage_limit_reached` | Quota exceeded | Check Convai dashboard usage page | Session connects after usage resets or plan upgrades |
 | Room disconnects and stays disconnected | Recovery failed or did not apply | Inspect the last error and the actual session transitions. Resolve the cause before reconnecting. | The room connects and the character accepts input. |
-| Nothing connects on Play and no error is logged | **Starts Connected** is off on `ConvaiRoomManager` | Enable **Starts Connected**, or call `ConvaiManager.ConnectAsync()` or the character's `StartConversationAsync()` from your own code | A connection attempt starts |
+| Nothing connects on Play and no error is logged | **Connect On Start** is off on `ConvaiRoomManager` | Enable **Connect On Start**, or call `ConvaiManager.ConnectAsync()` or the character's `StartConversationAsync()` from your own code | A connection attempt starts |
 | `connection.rate_limited` | Too many connects in short time | Add a minimum delay between connect calls in your application logic | `connection.rate_limited` no longer fires |
 | Session remains in `Error` | A session operation failed | Read the last error, resolve its cause, then disconnect and connect again. | The room connects and the character accepts input. |
 

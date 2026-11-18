@@ -14,7 +14,7 @@ Choose **GameObject > Convai > Validate Scene Setup**. If the scene uses Convai 
 
 | Finding | What to do |
 | --- | --- |
-| No manager, no player, or no character | Use **GameObject > Convai > Setup Required Components** for the manager and room. Add `ConvaiPlayer` to the player and `ConvaiCharacter` to a character. |
+| No manager, no player, or no character | Use **GameObject > Convai > Add Required Components** for the manager and room. Add `ConvaiPlayer` to the player and `ConvaiCharacter` to a character. |
 | Missing or duplicate Character ID | Set the ID for each character that will join. Confirm each character in the room has its own ID. |
 | Several players and none assigned | Set **Player** on `ConvaiManager`. Inactive players also count when the SDK checks for ambiguity. |
 | Room component missing on the manager | If no room component exists, the manager adds one with defaults at startup. A room component on a different GameObject emits a warning because its settings will be ignored. Put the configured room on the manager. |
@@ -27,4 +27,4 @@ Select the character and open **Convai > Troubleshooter**. Review errors and war
 
 ## Verify a conversation
 
-Enter Play Mode. Let **Starts Connected** open the room or use your application's connection control. Wait for the addressed character to be ready, send a typed message or speak, and check for a reply. Local validation can confirm wiring while an unavailable character, refused credential, or device permission still prevents a turn. Use [Connection and API issues](../troubleshooting/connection-and-api-issues.md) or [Audio and microphone issues](../troubleshooting/audio-and-microphone-issues.md) for those cases.
+Enter Play Mode. Let **Connect On Start** open the room or use your application's connection control. Wait for the addressed character to be ready, send a typed message or speak, and check for a reply. Local validation can confirm wiring while an unavailable character, refused credential, or device permission still prevents a turn. Use [Connection and API issues](../troubleshooting/connection-and-api-issues.md) or [Audio and microphone issues](../troubleshooting/audio-and-microphone-issues.md) for those cases.

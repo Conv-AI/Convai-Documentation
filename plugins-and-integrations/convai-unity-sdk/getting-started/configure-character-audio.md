@@ -24,11 +24,9 @@ These are defaults for newly added components. Existing scenes keep their saved 
 
 Disable **Use 3D Audio** for non-positional scenarios — for example, a kiosk interface where the character always sounds "present" regardless of where the player stands.
 
+<figure><img src="../../../.gitbook/assets/unity-audio-output.png" alt="Convai Audio Output Inspector with Volume set to 1 and Use 3D Audio unchecked in the LipSync Sample"><figcaption><p>(1) Use Volume to set this character’s playback level. (2) Enable Use 3D Audio to make playback fall off with distance.</p></figcaption></figure>
+
 In WebGL, the browser plays character speech outside Unity's AudioSource. `Volume` and `IsMuted` also control this browser playback in 5.0, but Unity distance rolloff and `AudioListener.volume` do not. On iOS Safari, the browser controls media volume; mute and a volume of zero still silence the voice.
-
-<figure><img src="../../../.gitbook/assets/unity-audio-output.png" alt="Convai Audio Output Inspector showing Volume 1, Is Muted off and 3D audio distances 5 and 50"><figcaption><p>Each character has its own playback controls.</p></figcaption></figure>
-
-
 
 ## Audio facade
 

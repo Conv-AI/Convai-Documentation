@@ -32,7 +32,7 @@ Use **Copy End-User ID** only in your private debugging workflow. Do not include
 {% step %}
 ### Share a test fact and inspect records
 
-Tell the character a non-sensitive test fact, such as `My name is Jordan, and I work the night shift.` Then choose **See What They Remember** in the manager's **Live** section, which offers it while connected when an end-user ID was sent and the addressed character has a Character ID, or choose **Convai > Convai Editor**, then select **Long Term Memory** and select the same character and end user.
+Tell the character a non-sensitive test fact, such as `My name is Jordan, and I work the night shift.` Then choose **See What They Remember** in the manager's **Live** section, which offers it while connected when an end-user ID was sent and the addressed character has a Character ID, or choose **Convai > Home > Long-Term Memory** and pick the same character and end user.
 
 Choose **Refresh** in the **Memories** pane and inspect the returned records. A record may not appear immediately. Do not stop Play mode on the assumption that stopping triggers extraction.
 {% endstep %}

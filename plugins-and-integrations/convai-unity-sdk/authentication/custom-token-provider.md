@@ -58,7 +58,7 @@ Supply your login service's token request delegate when constructing this provid
 
 ## Register the provider before connecting
 
-Register the provider with `ConvaiAuthTokenProviderRegistry.Register(provider)` before the first connection attempt. You can register it from a scene component's `Awake` when the scene connects on startup. If registration follows login, turn off **Starts Connected** and call `ConvaiManager.ConnectAsync` when login and registration are complete. Call `ConvaiAuthTokenProviderRegistry.Unregister(provider)` when its owner is destroyed or the user signs out.
+Register the provider with `ConvaiAuthTokenProviderRegistry.Register(provider)` before the first connection attempt. You can register it from a scene component's `Awake` when the scene connects on startup. If registration follows login, turn off **Connect On Start** and call `ConvaiManager.ConnectAsync` when login and registration are complete. Call `ConvaiAuthTokenProviderRegistry.Unregister(provider)` when its owner is destroyed or the user signs out.
 
 `ConvaiAuthTokenProviderRegistry.Register` replaces whichever provider is currently registered. `Unregister(provider)` removes it only if it is still the active registration; `Clear()` removes whichever provider is active.
 

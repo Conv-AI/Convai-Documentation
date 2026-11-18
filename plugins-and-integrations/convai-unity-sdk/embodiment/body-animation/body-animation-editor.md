@@ -23,7 +23,7 @@ Resolve blocked rig/character checks before **Set Up This Character**. Setup cre
 
 Use **Create Animation Set…** for a clip library, then inspect proposals before building. **Measure Clips** updates locomotion measurements. Review **Overlay Mask**, **Talk**, **Clip Measurements**, and action findings after content changes. See [Build an animation set](build-an-animation-set.md).
 
-<figure><img src="../../../../.gitbook/assets/unity-body-animation-editor.png" alt="Body Animation Editor in Content mode for a sample character, showing the Idle, Talk, Listen and Think pools and the Locomotion Coverage grid"><figcaption><p>Body Animation Editor Content mode with animation pools and locomotion coverage.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-body-animation-content-clip-pools.png" alt="Body Animation Editor Content tab with an Idle clip and a Talk clip in the LipSync Sample"><figcaption><p>(1) Open Content to manage clips. (2) The Idle pool contains Anim_F_Idle. (3) Select Preview With Idle to preview the Talk clip layered over the idle pose.</p></figcaption></figure>
 
 ## Feel and ownership
 

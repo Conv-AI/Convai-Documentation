@@ -28,7 +28,7 @@ The room owns the shared connection, microphone policy, and input mode. A charac
 | --- | --- | --- |
 | Project | **Convai > Settings** | Credentials, service environment, logging, and runtime defaults |
 | Scene | `ConvaiManager` | Player selection, character roster, and initial conversation target |
-| Room | `ConvaiRoomManager` | **Starts Connected**, hands-free or push-to-talk input, microphone access, and vision |
+| Room | `ConvaiRoomManager` | **Connect On Start**, hands-free or push-to-talk input, microphone access, and vision |
 | Character | `ConvaiCharacter` | Character ID, version selection, session resume, and voice playback |
 | Character feature | The relevant module or profile | Lip sync mapping, emotion bindings, body animation, and gaze |
 

@@ -27,11 +27,9 @@ Choose a character in the **CHARACTERS** pane to change the target. The left pan
 
 The **Feel** tab starts with **Character Type**, followed by the complete profile sections. Editing a package-owned profile through **Feel** or **Expressions** creates a project copy and assigns it to the selected character. A shared project profile remains shared unless you choose **Make Unique**.
 
+<figure><img src="../../../../.gitbook/assets/unity-emotion-feel-character-type.png" alt="Emotion Editor Feel tab with Warm selected and the Personality and Resting Mood sections expanded"><figcaption><p>(1) Open Feel to tune emotion. (2) Character Type is set to Warm in the LipSync Sample. (3) Personality controls how strongly and how quickly the character shows and fades emotions.</p></figcaption></figure>
+
 A character with no `ConvaiEmotionProfile` assigned shows a **No personality assigned** message on **Feel** and **Expressions** instead of empty fields, since there is nothing on that character to tune yet.
-
-***
-
-<figure><img src="../../../../.gitbook/assets/unity-emotion-editor.png" alt="Emotion Editor in Feel mode with a sample character selected under CHARACTERS, Character Type set to Warm, and the Personality and Resting Mood sections expanded"><figcaption><p>Emotion Editor Feel mode for a sample character.</p></figcaption></figure>
 
 ## Emotion Timeline window
 

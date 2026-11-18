@@ -8,7 +8,7 @@ Install a project copy of the `convai-unity-sdk` skill so Claude Code or Codex c
 
 ## Install or update the project copy
 
-1. In Unity, select **Convai > Convai Editor > AI Coding**.
+1. In Unity, select **Convai > Home > AI Coding**.
 2. Open **Claude Code** or **ChatGPT / Codex**. On **Project skill**, select **Install**. Select **Update** if the row shows **Stale**.
 3. If you also use **Project instructions**, select its **Install** or **Update** separately.
 4. Open a new agent session in the Unity project and invoke `/convai-unity-sdk` in Claude Code or `$convai-unity-sdk` in Codex. Confirm that the agent can load its task guidance. Verify the tool connection separately with `Convai_GetProjectStatus`.

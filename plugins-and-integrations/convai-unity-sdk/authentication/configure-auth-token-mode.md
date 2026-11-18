@@ -21,7 +21,7 @@ If your integration uses a custom `IConvaiAuthTokenProvider` instead of a Projec
 {% step %}
 ### Open the Credentials section
 
-In the Unity Editor menu bar, open **Convai > Settings** (or **Edit > Project Settings > Convai SDK**), then scroll to the **Credentials** card below **Setup Health**.
+In the Unity Editor menu bar, open **Convai > Settings** (or **Edit > Project Settings > Convai SDK**), then open **Credentials**.
 {% endstep %}
 
 {% step %}
@@ -73,7 +73,7 @@ The request timeout comes from **Advanced > Connection Timeout (s)**, which defa
 
 ## Verify the configuration
 
-Check the **Auth Token** row in **Setup Health** first. **Healthy** means a runtime source is configured; it does not validate a token. Resolve a **Blocked** row before testing.
+Check the **Auth Token** row under **Convai > Home > Welcome > Setup Health**. A green status means a runtime source is configured. The check does not validate a token. Resolve a blocking finding before testing.
 
 Enter Play mode with a scene that connects a `ConvaiCharacter`. With no provider registered, a successful connection confirms the configured endpoint supplied a token accepted by Convai. If the connection fails, check the Console for the exact error message and see [Troubleshoot authentication](troubleshooting.md).
 

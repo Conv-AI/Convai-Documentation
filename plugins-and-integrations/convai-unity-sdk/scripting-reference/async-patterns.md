@@ -8,7 +8,7 @@ SDK connection and audio methods return `IConvaiOperation<T>`. Awaiting an opera
 
 ## Await a connection
 
-Turn off **Starts Connected** on `ConvaiRoomManager` when your script owns the initial connection. Assign the scene manager to the component below. It waits for bootstrap, connects, and cancels if you disable it.
+Turn off **Connect On Start** on `ConvaiRoomManager` when your script owns the initial connection. Assign the scene manager to the component below. It waits for bootstrap, connects, and cancels if you disable it.
 
 ```csharp
 using System;

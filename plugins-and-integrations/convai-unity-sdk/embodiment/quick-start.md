@@ -39,15 +39,14 @@ Convai also adds the shared infrastructure the module needs — an `EmbodimentCo
 {% step %}
 ### Review the rig detection
 
-Open **Convai > Embodiment Editor** and select the **Setup** tab. Select **Set Up This Character** to see which face-blendshape convention Convai detected and how confident that detection was, and which bones resolved.
+Open **Convai > Embodiment Editor** and select the **Setup** tab. Open **Rig** to check which bones Convai detected. Select **Set Up Rig Now** to see the detected face-blendshape convention and how confident Convai is in the result.
 
 This step is optional — Gaze already works without it — but it is how you see what Convai worked out before you enter Play mode.
+
+<figure><img src="../../../.gitbook/assets/unity-embodiment-rig-detection.png" alt="Embodiment Editor Setup tab showing the Rig panel, the Set Up Rig Now button, and the detected head, neck, and eye bones"><figcaption><p>(1) Open Rig to review detection. (2) Select Set Up Rig Now to add the rig component and see the resolved face rig. (3) Check which bones Convai detected.</p></figcaption></figure>
+
 {% endstep %}
 {% endstepper %}
-
-***
-
-<figure><img src="../../../.gitbook/assets/unity-embodiment-setup.png" alt="Embodiment Editor Setup with automatic rig setup and the five feature rows"><figcaption><p>This character has Conversation Flow and Gaze. The rig is scheduled for automatic setup when the character starts; this Ready status does not confirm that every bone or facial shape has resolved.</p></figcaption></figure>
 
 ## Verify the setup
 

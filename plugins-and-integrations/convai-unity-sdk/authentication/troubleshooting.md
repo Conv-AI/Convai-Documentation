@@ -11,7 +11,7 @@ Start with the failed operation's `Code` and `Message`. Token acquisition and th
 | Symptom or code | Action | Verify |
 |---|---|---|
 | Character never connects and the Console shows no error | Register a token provider before `ConvaiRoomManager` starts, or configure a valid endpoint. If registration happens later, call `ConnectAsync` explicitly. | The next connection attempt reaches your token source. |
-| **Setup Health** reports an invalid or missing token endpoint | Correct **Credentials > Token Endpoint URL**, or use a runtime provider. Health checks configuration, not server acceptance. | The **Auth Token** row becomes **Healthy** for the configured endpoint. |
+| **Convai > Home > Welcome > Setup Health** reports an invalid or missing token endpoint | Correct **Credentials > Token Endpoint URL**, or use a runtime provider. Health checks configuration, not server acceptance. | The **Auth Token** row shows a green status for the configured source. |
 | `connection.auth_token_fetch_failed` | Read the accompanying provider or endpoint message in the table below. | Token resolution completes and the connect request begins. |
 | `config.auth_token_mode_required` | Select **Auth Token** before connecting with options that contain an explicit token. | The call passes credential-mode validation. |
 | `connection.invalid_token` | Supply a non-empty Convai `apiAuthToken` with `RoomSessionConnectOptions.SetAuthToken`. | The call passes local argument validation. |
@@ -19,7 +19,7 @@ Start with the failed operation's `Code` and `Message`. Token acquisition and th
 | HTTP `401`, mapped to `connection.connect_invalid_api_key` | Read the response message. Confirm your provider returns a Convai auth token, not an account key or your game's login token. | A new connection succeeds with the correct credential. |
 | `connection.connect_end_user_id_required` | Supply an appropriate stable end-user ID and reconnect. | Inspect `CurrentEndUserId` without logging it and `CurrentLongTermMemoryStatus`. |
 | Works in the Editor but fails in a player | Supply a runtime provider, endpoint, or explicit token. The Editor's saved-key provider is not compiled into players. | Run the built player and connect. |
-| An explicit-token call leaves the old session unchanged | Turn off **Starts Connected** for login-driven connections. If an old session is still active, disconnect it first. | A new connection consumes the supplied token. |
+| An explicit-token call leaves the old session unchanged | Turn off **Connect On Start** for login-driven connections. If an old session is still active, disconnect it first. | A new connection consumes the supplied token. |
 
 ## Diagnose a token request
 

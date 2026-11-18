@@ -22,11 +22,11 @@ If the editor is older, upgrade before installing the SDK — the package depend
 {% step %}
 ### Run the Setup Health checks
 
-Go to **Edit → Project Settings → Convai SDK**. The **Setup Health** section opens first and runs a set of project-configuration checks automatically — each item shows a colored status badge, a title, and a message.
+Open **Convai > Home > Welcome > Setup Health** to run the project configuration checks. Each finding shows a colored status badge, a title, and a message.
 
 The checks include `Settings Asset` (flags a missing `ConvaiSettings.asset`), credentials for the selected authentication mode, `macOS / iOS Microphone Usage Description` (flags an empty `Info.plist` description), `Prepare iOS for Recording` (flags the iOS audio session setting used for Convai microphone recording and speaker playback), `Android Microphone Permission` (informational), `WebGL Platform` (browser-path caveats when WebGL is active), and a `Define Drift` check for each Convai feature-flag scripting define that differs across build target groups.
 
-Use the action shown on the finding. Review the microphone description before keeping it in a build. Select **Refresh** in the section header to re-run every check after making changes manually.
+Use the action shown on the finding. Review the microphone description before keeping it in a build. Select **Recheck** to rerun the checks after making changes manually.
 
 A passing check confirms only that check. The WebGL caveat can remain a warning without indicating a broken setup. Continue with compilation and runtime checks.
 {% endstep %}
@@ -57,7 +57,7 @@ If the file is missing, open **Edit → Project Settings → Convai SDK**. Openi
 {% step %}
 ### Confirm the settings window opens
 
-Go to **Edit → Project Settings → Convai SDK**. The window opens with six sections: **Setup Health**, **Credentials**, **Runtime Defaults**, **Diagnostics**, **Advanced**, and **About**.
+Go to **Edit → Project Settings → Convai SDK**. The panel includes **Credentials**, **Runtime Defaults**, **Diagnostics**, and **Connection & Scripting Defines**.
 
 * If the window is blank or shows no sections, there is a compiler error in the project. Fix all script errors first — the settings provider only renders when all editor scripts compile cleanly.
 * In **Credentials**, check the selected **Auth Mode**. For API Key mode in local development, enter the key and select **Validate & Save**. For Auth Token mode, check the endpoint or registered provider. See [Authentication](../authentication/README.md).
@@ -156,7 +156,7 @@ Deleting `Assets/Convai/` also deletes these downloaded binaries and any project
 | Symptom | Likely cause | Fix | Verify |
 | --- | --- | --- | --- |
 | Unity refuses to open the project, or Package Manager reports an incompatible editor version | Editor is below the Unity <code class="expression">space.vars.unity_min_version</code> floor | Upgrade to Unity <code class="expression">space.vars.unity_min_version</code> or newer — check the documented Unity support range | `Help → About Unity` reports a build at or above the floor |
-| Setup Health section shows a **Warning** or **Blocked** item | A required project setting is missing or has drifted — settings asset, API key, iOS microphone usage description, iOS recording preparation, or a scripting define | Open Edit → Project Settings → Convai SDK → Setup Health and select **Fix** next to the item, or correct it manually and select **Refresh** | The item's status badge turns healthy (green) |
+| Setup Health shows a warning or blocker | A required project setting is missing or has drifted — settings asset, API key, iOS microphone usage description, iOS recording preparation, or a scripting define | Open **Convai > Home > Welcome > Setup Health** and use the action beside the finding. If you make changes manually, select **Recheck**. | The item's status badge turns healthy (green) |
 | `Convai Bootstrapper: ConvaiSettings not found!` in Console | `ConvaiSettings.asset` missing or deleted | Open Edit → Project Settings → Convai SDK to recreate it automatically | Re-enter Play Mode — `Convai Bootstrapper: Initialization complete.` appears |
 | `API key not configured` warning on Play | API key field is empty | Paste key from Convai dashboard into Edit → Project Settings → Convai SDK → Credentials, then select **Validate & Save** | Re-enter Play Mode — the `API key not configured` warning is gone |
 | `The type or namespace 'Newtonsoft' could not be found` | Newtonsoft.Json package missing | Install `com.unity.nuget.newtonsoft-json` via Package Manager | Project compiles without Newtonsoft namespace errors |

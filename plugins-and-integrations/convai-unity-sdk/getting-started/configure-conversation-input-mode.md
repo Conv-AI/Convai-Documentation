@@ -17,7 +17,9 @@ Edit these values on the room component. Save them on a prefab to use the same d
 
 ## Configure hands-free input
 
-Set **How The Player Talks** to **Hands Free**. In **Listening > End Of Turn**, choose **SDK Default** or **Custom** for **Turn Detection**. Custom exposes:
+Set **How The Player Talks** to **Hands Free**. In **Listening > End Of Turn**, choose **SDK Default** or **Custom** for **Turn Detection**. The screenshot shows the fields available with **Custom**.
+
+<figure><img src="../../../.gitbook/assets/unity-room-custom-end-of-turn.png" alt="The Room Manager Listening section with Custom Turn Detection selected and Silence Before Reply, Longest Turn, and Pre-Speech Audio visible."><figcaption><p>(1) Select <strong>Custom</strong> under <strong>Turn Detection</strong> to edit end-of-turn timing. (2) <strong>Silence Before Reply (s)</strong> sets the quiet period before the turn ends. (3) <strong>Longest Turn (s)</strong> caps the turn duration. <strong>Pre-Speech Audio (ms)</strong> keeps audio from before speech starts.</p></figcaption></figure>
 
 | Inspector label | API property | Default | Purpose |
 |---|---|---|---|
@@ -33,6 +35,8 @@ For a training exercise where learners pause before answering, try a five-second
 
 Set **How The Player Talks** to **Push To Talk**, then choose **Push To Talk Key**. The default is `T`.
 
+<figure><img src="../../../.gitbook/assets/unity-room-push-to-talk.png" alt="The Room Manager Conversation section with Push To Talk selected and T assigned to the Push To Talk Key."><figcaption><p>(1) Find <strong>How The Player Talks</strong> in <strong>Conversation</strong>. (2) Select <strong>Push To Talk</strong> so the player holds a control to speak. (3) Choose a <strong>Push To Talk Key</strong>.</p></figcaption></figure>
+
 | Inspector label | API property | Default | Behavior |
 |---|---|---|---|
 | **Interrupt On Press** | `PushToTalkPolicy.InterruptBotOnPress` | `true` | A valid press can interrupt the character |
@@ -44,7 +48,7 @@ For XR controllers, select `JoystickButton0` for right-hand primary/A, `Joystick
 
 For a UI button or your own input framework, use the public `ConvaiPushToTalkController` methods described in [Use your own push-to-talk input](use-your-own-push-to-talk-input.md). Its input ownership prevents the room's built-in polling from also handling the same press. Code that polls another input source can acquire `ConvaiManager.AcquirePushToTalkInput()` and dispose the returned lease when done.
 
-The SDK assigns each release an ID. When the microphone reports that its captured audio has been sent, the release can proceed immediately. On an untracked microphone, including WebGL, **Release Tail (ms)** allows the last audio to be captured before muting. The default is `1000` ms. Group conversation uses the same release protocol and requires the selected member to own the microphone route.
+The SDK assigns each release an ID. When the microphone reports that its captured audio has been sent, the release can proceed immediately. When the microphone cannot report sent audio, as on WebGL, **Release Tail (ms)** allows time to capture the last audio before muting. The setting appears under **Conversation > Developer** when Inspector developer settings are visible. The default is `1000` ms. Group conversation uses the same release protocol and requires the selected member to own the microphone route.
 
 ## Configure capture and interruption
 
@@ -57,7 +61,7 @@ Use **Listening > Microphone** for the device's capture policy:
 | **Noise Suppression** | On | Reduces background noise in native capture |
 | **Automatic Gain Control** | Off | Adjusts native microphone gain |
 
-Processing changes apply on the next connection. WebGL uses browser processing. For hands-free input through a phone speaker, enable echo cancellation or use headphones to avoid the character hearing its own voice.
+Reconnect to apply native processing changes. On WebGL, the browser manages microphone processing and the Inspector disables the three native processing controls. For hands-free input through a phone speaker, enable echo cancellation or use headphones to avoid the character hearing its own voice.
 
 **Interruptions** includes **Fade Out When Interrupted**, **Fade Duration (s)**, and **On-Device Detection**. Fade duration defaults to `0.12` seconds. See [Configure speech interruptions](configure-speech-interruptions.md) to enable local detection, check echo cancellation, and test how an interrupted reply sounds.
 

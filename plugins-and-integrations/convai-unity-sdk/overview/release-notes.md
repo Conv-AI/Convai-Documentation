@@ -14,7 +14,7 @@ The release branch identifies the package as <code class="expression">space.vars
 
 | Area | What changes for an existing integration |
 | --- | --- |
-| Scene setup | Configure room and character components directly. Use prefabs for reuse and **Starts Connected** on the room for automatic connection. [Scene components](../getting-started/scene-components.md) |
+| Scene setup | Configure room and character components directly. Use prefabs for reuse and **Connect On Start** on the room for automatic connection. [Scene components](../getting-started/scene-components.md) |
 | Authentication and API clients | Project Settings owns credentials and the service environment. Saved API keys are checked again when their validation expires. Projects that used a shared REST client, a REST mode switch, or the room-less text client have new integration paths. [Migration guide](migrate-to-5-0.md) |
 | Conversations and transcripts | The manager exposes typed connection, audio, event, and transcript APIs. Transcript history uses entry IDs, revisions, and batched changes. Shared rooms can switch the addressed character. Group conversation adds an offline simulator and a separate live voice path. [Scripting reference](../scripting-reference/README.md) |
 | Media | Native builds use the matching LiveKit FFI bridge. Push-to-talk tracks releases across capture and server results. Lip sync follows indexed response frames and writes through facial composition. [Platform guides](../platform-guides/README.md) |

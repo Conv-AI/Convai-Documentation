@@ -14,7 +14,7 @@ Open `Scenes/GroupConversationSample.unity` in the imported sample directory. Ke
 
 ## Rehearse offline
 
-The scene has Tuesday, Friday, and Wednesday, with Friday as the initial character. The Room Manager has **Starts Connected** off. Call `ConvaiManager.ConnectAsync` to start a session manually. The group component, simulator, and overlay are enabled, and character audio is configured for 3D playback when used live.
+The scene has Tuesday, Friday, and Wednesday, with Friday as the initial character. The Room Manager has **Connect On Start** off. Call `ConvaiManager.ConnectAsync` to start a session manually. The group component, simulator, and overlay are enabled, and character audio is configured for 3D playback when used live.
 
 Enter Play mode. Use **F9** to show or hide the overlay and hold **T** to exercise a player turn. Move and look toward different characters to inspect spatial and addressing state. Expect canned lines without spoken character audio from the simulator.
 
@@ -22,9 +22,9 @@ Keep **Show Transcript** off for screenshots and recordings unless the user expl
 
 ## Prepare a live preview test
 
-Exit Play mode, disable the simulator, and turn **Starts Connected** on in the Room Manager. Verify that the selected 2–4 characters use distinct IDs accessible to the configured account and Live versions. Use **Push To Talk** with **Vision** off.
+Exit Play mode, disable the simulator, and turn **Connect On Start** on in the Room Manager. Verify that the selected 2–4 characters use distinct IDs accessible to the configured account and Live versions. Use **Push To Talk** with **Vision** off.
 
-Confirm group-conversation preview availability with the service owner, then enter Play mode. To connect from your own code instead, leave **Starts Connected** off and call `ConvaiManager.ConnectAsync`. The [Simulator and debug overlay](simulator-and-debug-overlay.md) page covers how the simulator and **Starts Connected** interact. Verify actual speech recognition, service state, each character's voice, player recipient decisions, pause/resume, and reconnect behavior. Do not report the offline run as live voice or account validation.
+Confirm group-conversation preview availability with the service owner, then enter Play mode. To connect from your own code instead, leave **Connect On Start** off and call `ConvaiManager.ConnectAsync`. The [Simulator and debug overlay](simulator-and-debug-overlay.md) page covers how the simulator and **Connect On Start** interact. Verify actual speech recognition, service state, each character's voice, player recipient decisions, pause/resume, and reconnect behavior. Do not report the offline run as live voice or account validation.
 
 ## Verify the sample's two modes
 

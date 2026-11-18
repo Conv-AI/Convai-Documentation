@@ -22,7 +22,7 @@ The Convai Unity SDK adds project-specific tools to Unity CLI MCP, Unity's Model
 | Piece | Responsibility |
 | --- | --- |
 | Unity CLI MCP (`unity mcp`) with the `com.unity.pipeline` package | Connects the client to the open Editor and exposes Unity's general-purpose commands and the SDK's `Convai_*` tools. |
-| Project skill and managed instructions | Give the agent the SDK workflows and project rules. Install or update each from **Convai > Convai Editor > AI Coding**. |
+| Project skill and managed instructions | Give the agent the SDK workflows and project rules. Install or update each from **Convai > Home > AI Coding**. |
 | Standalone Convai Unity coding-agent plugin | Offers a separate setup skill for preparing a new or existing project and packages a particular SDK skill snapshot. Install the SDK separately in Unity and check tool compatibility against the project you open. [Convai Unity coding-agent plugin repository](https://github.com/Conv-AI/convai-unity-agent-plugin) |
 
 ## Play Mode, scene saves, and NavMesh bakes

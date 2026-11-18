@@ -16,6 +16,8 @@ Turn off **Allow Microphone** to connect without opening or publishing a local m
 
 On `ConvaiRoomManager`, expand **Listening > Microphone** and turn off **Allow Microphone**.
 
+<figure><img src="../../../.gitbook/assets/unity-room-microphone-disabled.png" alt="The Room Manager Microphone group with Allow Microphone unchecked and a note about enabling it through code."><figcaption><p>(1) Find the <strong>Microphone</strong> group in <strong>Listening</strong>. (2) Clear <strong>Allow Microphone</strong> before connecting.</p></figcaption></figure>
+
 This policy is stronger than muting: it prevents the SDK from opening the microphone. Muting an allowed microphone can leave its capture device active.
 
 {% endstep %}

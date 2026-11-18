@@ -8,7 +8,7 @@ Use `RoomSessionConnectOptions.SetAuthToken` when your login layer already holds
 
 ## Prerequisites
 
-Select **Auth Token** in [Convai Project Settings](configure-auth-token-mode.md). Turn off **Starts Connected** on the room manager when your login flow owns the first connection. If the scene has an active session, disconnect it before switching accounts or opening a session with a different token.
+Select **Auth Token** in [Convai Project Settings](configure-auth-token-mode.md). Turn off **Connect On Start** on the room manager when your login flow owns the first connection. If the scene has an active session, disconnect it before switching accounts or opening a session with a different token.
 
 ## Pass the token and identity to the manager
 

@@ -4,7 +4,7 @@ description: Inspect a character's memories of an end user in Unity, add test fa
 last_reviewed: "5.0.0-preview"
 ---
 
-Use the **Long Term Memory** section of **Convai Editor** to inspect records returned by Convai for one character and end user. The window also provides separate controls for memory deletion and end-user deactivation.
+Use the **Long-Term Memory** section of **Convai Home** to inspect records returned by Convai for one character and end user. The window also provides separate controls for memory deletion and end-user deactivation.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ Use the **Long Term Memory** section of **Convai Editor** to inspect records ret
 {% step %}
 ### Open Long Term Memory
 
-Choose **Convai > Convai Editor** from the Unity menu, then select **Long Term Memory** in the window's navigation. It is a section of this window, not a separate top-level menu command.
+In the Unity Editor, choose **Convai > Home > Long-Term Memory**.
 {% endstep %}
 {% step %}
 ### Choose the character

@@ -84,9 +84,9 @@ Add a microphone usage description to your `Info.plist`. In Unity, set this via 
 "This app uses the microphone to support voice conversations with AI characters."
 ```
 
-Open **Convai > Settings > Setup Health** and use **Setup** beside **macOS / iOS Microphone Usage Description**. For iOS, also enable **Prepare iOS for Recording**. The SDK requests microphone authorization on macOS and iOS when capture needs it.
+Open **Convai > Home** and go to **Welcome > Setup Health**. If **macOS / iOS Microphone Usage Description** is missing, select **Set Up** next to that check. For iOS, select **Enable** under **Prepare iOS for Recording** if it is disabled. Select **Recheck** after changing these settings. The SDK requests microphone authorization on macOS and iOS when capture needs it.
 
-<figure><img src="../../../.gitbook/assets/unity-setup-health.png" alt="Setup Health card showing Apple microphone usage, iOS recording, and Android permission checks"><figcaption><p>Project health checks for microphone permissions and recording configuration.</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/unity-convai-home-setup-health.png" alt="Setup Health in Convai Home with microphone checks, an Enable action for iOS recording, and a Recheck button."><figcaption><p>(1) Select <strong>Enable</strong> to prepare iOS for recording and speaker playback. (2) Select <strong>Recheck</strong> after changing project settings.</p></figcaption></figure>
 
 {% hint style="danger" %}
 Set a microphone usage description before building an app that records on macOS or iOS. If permission was denied, enable it in the operating system privacy settings before testing again.
@@ -118,7 +118,9 @@ If browser playback remains blocked, click the scene or your start button and ch
 
 ## Microphone processing and level
 
-Under **Convai Room Manager > Listening > Microphone**, configure **Echo Cancellation**, **Noise Suppression**, and **Automatic Gain Control**. Native defaults are off, on, and off respectively. Processing changes apply on the next connection. WebGL uses browser processing.
+Under **Convai Room Manager > Listening > Microphone**, configure **Echo Cancellation**, **Noise Suppression**, and **Automatic Gain Control**. Native defaults are off, on, and off respectively. Reconnect to apply changes. On WebGL, the browser manages microphone processing and the Inspector disables these three controls.
+
+<figure><img src="../../../.gitbook/assets/unity-room-microphone-processing.png" alt="The Room Manager Microphone group with Allow Microphone, Echo Cancellation, and Noise Suppression checked."><figcaption><p>(1) Keep <strong>Allow Microphone</strong> checked to permit capture. (2) <strong>Echo Cancellation</strong> reduces speaker echo in the microphone input. (3) <strong>Noise Suppression</strong> reduces background noise.</p></figcaption></figure>
 
 Read `manager.Audio.MicrophoneLevel` for a continuous audio level, and check `IsMicrophoneLevelAvailable` before interpreting zero as silence. A level meter is separate from the speech-detection decision.
 
@@ -131,5 +133,3 @@ With audio configured, add a transcript UI to display conversation text.
 {% content-ref url="add-chat-ui.md" %}
 [Add chat UI](add-chat-ui.md)
 {% endcontent-ref %}
-
-<figure><img src="../../../.gitbook/assets/unity-room-listening.png" alt="Room Listening card with microphone policy and processing controls above Interruptions"><figcaption><p>This existing sample enables echo cancellation. Newly configured policies default to echo cancellation off; choose processing for your application.</p></figcaption></figure>

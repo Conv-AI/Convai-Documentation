@@ -6,14 +6,18 @@ description: >-
 last_reviewed: "5.0.0-pre.1"
 ---
 
-A conversation scene needs one `ConvaiManager`, a player, and at least one character with a Character ID. The room manager belongs on the same GameObject as the manager. Run **GameObject > Convai > Setup Required Components** to create that pair, then add the player and characters.
+A conversation scene needs one `ConvaiManager`, a player, and at least one character with a Character ID. The room manager belongs on the same GameObject as the manager. Run **GameObject > Convai > Add Required Components** to create that pair, then add the player and characters.
 
 ## Manager and room
 
 | Component | What to configure |
 | --- | --- |
 | `ConvaiManager` | Assign **Player** when the scene contains several `ConvaiPlayer` components. Use **Initial Character** when the room should start with a specific character. Scripts use this manager for connection, audio, events, and transcripts. |
-| `ConvaiRoomManager` | Set **Starts Connected**, choose how the player talks, and configure microphone access, interruptions, and vision. If the manager starts without a room component on its own GameObject, it adds one with default settings. |
+| `ConvaiRoomManager` | Set **Connect On Start** under **Connection**, choose how the player talks, and configure microphone access, interruptions, and vision. If the manager starts without a room component on its own GameObject, it adds one with default settings. |
+
+<figure><img src="../../../.gitbook/assets/unity-manager-scene-setup.png" alt="Convai Manager Inspector showing the room manager, one character joining, and assigned player and initial character fields."><figcaption><p>(1) <strong>Room Manager</strong> identifies the component that holds connection and input settings. (2) <strong>Characters In Scene</strong> and <strong>Joining The Room</strong> show that the sample has one character and that it joins the room. (3) <strong>Player</strong> and <strong>Initial Character</strong> show the assigned scene objects.</p></figcaption></figure>
+
+<figure><img src="../../../.gitbook/assets/unity-room-connect-on-start.png" alt="Convai Room Manager Connection section with Connect On Start checked and Vision set to Off."><figcaption><p>(1) Open <strong>Connection</strong> on the <strong>Convai Room Manager</strong>. (2) Enable <strong>Connect On Start</strong> to connect automatically when the scene starts.</p></figcaption></figure>
 
 Edit room settings on the component. To share a setup across scenes, make the manager GameObject a prefab. See [Configure conversation input mode](configure-conversation-input-mode.md).
 

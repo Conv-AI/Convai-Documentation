@@ -40,12 +40,12 @@ Set the room's conversation input mode to **Push To Talk**. Resolve the Group Co
 {% step %}
 ### Rehearse offline
 
-Turn off **Starts Connected** on `ConvaiRoomManager` and add **Convai > Group Conversation Simulator** and **Convai > Group Conversation Debug Overlay**. Enter Play mode, observe the state, and hold/release the manager's push-to-talk key (T by default). The simulator uses canned text and produces no character voice.
+Turn off **Connect On Start** on `ConvaiRoomManager` and add **Convai > Group Conversation Simulator** and **Convai > Group Conversation Debug Overlay**. Enter Play mode, observe the state, and hold/release the manager's push-to-talk key (T by default). The simulator uses canned text and produces no character voice.
 {% endstep %}
 {% step %}
 ### Test with the service
 
-Exit Play mode, disable the simulator, and turn **Starts Connected** back on, or call `ConvaiManager.ConnectAsync` from your own code. Observe reported state and command results, verify each voice and gaze target, and test an actual press, transcript, recipient decision, and reply. Record service refusals separately from local setup errors.
+Exit Play mode, disable the simulator, and turn **Connect On Start** back on, or call `ConvaiManager.ConnectAsync` from your own code. Observe reported state and command results, verify each voice and gaze target, and test an actual press, transcript, recipient decision, and reply. Record service refusals separately from local setup errors.
 {% endstep %}
 {% endstepper %}
 

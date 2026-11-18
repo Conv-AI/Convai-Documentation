@@ -73,7 +73,7 @@ For Android build configuration, permission handling, and microphone setup, see 
 {% tab title="iOS" %}
 * **Microphone:** The SDK requests access before opening capture. `NSMicrophoneUsageDescription` must be set in **Player Settings → Other Settings → iOS → Microphone Usage Description**. Check this string in the built app before requesting access.
 * **Vision — Webcam:** `NSCameraUsageDescription` must be set in **Player Settings → Other Settings → iOS → Camera Usage Description** if you use `WebcamVisionFrameSource`. On iOS, `WebcamVisionFrameSource` accesses the device camera via Unity's `WebCamTexture` API.
-* Enable **Prepare iOS for Recording** and use **Setup Health** to check the microphone description.
+* Enable **Prepare iOS for Recording** and use **Convai > Home > Welcome > Setup Health** to check the microphone description.
 * Define your app's behavior when the user denies microphone or camera permission, and when the app is interrupted or backgrounded during a conversation.
 
 For iOS build configuration, permission setup, and Info.plist requirements, see the iOS and Android platform guide.

@@ -73,7 +73,7 @@ If you maintain a custom manifest, the permission declaration is:
 Verify on the device that granting permission allows capture. The local Settings Panel microphone test can help distinguish capture from a conversation-routing issue.
 {% endtab %}
 {% tab title="macOS and iOS" %}
-Open **Convai → Settings → Setup Health** and inspect **macOS / iOS Microphone Usage Description**. Its **Setup** action fills the microphone usage description used by Apple builds. Review the text for your application before building. iOS also has **Prepare iOS for Recording** in Setup Health.
+Open **Convai > Home > Welcome > Setup Health** and inspect **macOS / iOS Microphone Usage Description**. Its **Set Up** action fills the microphone usage description used by Apple builds. Review the text for your application before building. iOS also has **Prepare iOS for Recording** in Setup Health.
 
 If access was denied, inspect the application's microphone permission in system settings. A successful Editor conversation does not verify the built application's permission configuration. Rebuild and test capture on the target platform.
 {% endtab %}

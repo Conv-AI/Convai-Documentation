@@ -45,7 +45,7 @@ Optional helpers that run entirely in Unity without Convai communication:
 
 ### Editor tooling
 
-**Convai > Convai Editor** and **Convai > Settings** provide project configuration. The Convai menu also exposes Actions, Body Animation, Emotion, Gaze and Embodiment editors, the Troubleshooter, scene setup and validation, documentation links and Platform Support tools for native transport libraries. The [Scene Auto Tagger](../features/scene-metadata/scene-auto-tagger.md) has separate distribution prerequisites. Not every SDK component has a custom Inspector.
+**Convai > Home** and **Convai > Settings** provide project configuration. The Convai menu also exposes Actions, Body Animation, Emotion, Gaze and Embodiment editors, the Troubleshooter, scene setup and validation, documentation links and Platform Support tools for native transport libraries. The [Scene Auto Tagger](../features/scene-metadata/scene-auto-tagger.md) has separate distribution prerequisites. Not every SDK component has a custom Inspector.
 
 ## Voice → Convai → Character flow
 

@@ -1,10 +1,10 @@
 ---
 title: Supported coding agents
-description: Find the Unity connection options, project skills, and managed instruction files available for each coding agent in the Convai Editor.
+description: Find the Unity connection options, project skills, and managed instruction files available for each coding agent in Convai Home.
 last_reviewed: "5.0.0-pre.1"
 ---
 
-The Convai Editor provides Unity CLI setup commands, project skill installation, and local configuration checks for Claude Code and Codex. It also provides managed project instructions for Cursor, Gemini, and VS Code Copilot. Configure the MCP connection in your client separately.
+Open **Convai > Home > AI Coding** for Unity CLI setup commands, project skill installation, and local configuration checks for Claude Code and Codex. The same page provides managed project instructions for Cursor, Gemini, and VS Code Copilot. Configure the MCP connection in your client separately.
 
 ## Client integration
 
@@ -20,7 +20,7 @@ The Claude Code and ChatGPT / Codex cards show the exact `unity mcp configure` c
 
 ## Configuration detection
 
-**Setup Health** checks Claude Code and Codex configuration when the section opens and when you select **Refresh**. These checks read local files. **Configured** means the scan found an effective `unity mcp` entry for this project or an entry with no project path. **Other project** means all matching entries point to another project.
+**Setup Health** checks Claude Code and Codex configuration when the section opens and when you select **Recheck**. These checks read local files. **Configured** means the scan found an effective `unity mcp` entry for this project or an entry with no project path. **Other project** means all matching entries point to another project.
 
 - Claude Code checks project-local and user entries in `~/.claude.json` and the project-shared `.mcp.json`. For the same server name, local entries take precedence over project-shared entries, which take precedence over user entries.
 - Codex checks `config.toml` in `CODEX_HOME`, or in `~/.codex/` when that variable is unset, and the project's `.codex/config.toml`. The project value takes precedence at the same key. Codex requires trust for project configuration. Convai's scan reports presence independently of trust.

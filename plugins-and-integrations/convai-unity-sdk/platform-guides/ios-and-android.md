@@ -45,7 +45,7 @@ iOS requires usage description strings before your app can request microphone or
 
 The SDK requests microphone permission before opening capture. Handle denial in your UI and do not repeatedly start capture after access is refused. For an application-owned onboarding flow, you can request access before enabling the room. The permission service exposes `GetMicrophoneAccess()` and `RequestMicrophoneAccess`. Use the result to distinguish granted access, denial, and an unavailable microphone.
 
-Enable **Prepare iOS for Recording**. **Convai > Settings > Setup Health** checks this setting and the combined **macOS / iOS Microphone Usage Description**. Use its Setup action when the description is missing.
+Enable **Prepare iOS for Recording**. **Convai > Home > Welcome > Setup Health** checks this setting and the combined **macOS / iOS Microphone Usage Description**. Select **Set Up** when the description is missing.
 
 {% hint style="warning" %}
 **iOS one-time prompts cannot be re-triggered.** If a user denies microphone permission, iOS will not show the prompt again. Your app must guide the user to **Settings → Privacy & Security → Microphone** to re-enable access manually. Add in-app messaging for this case — for example, detect denied permission via `Application.HasUserAuthorization(UserAuthorization.Microphone)` and display instructions before attempting to start a session.

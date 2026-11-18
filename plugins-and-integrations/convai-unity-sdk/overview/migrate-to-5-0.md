@@ -22,7 +22,7 @@ Recreate Action Set definitions in the character’s **Convai Actions** list and
 
 ## Check automatic connection
 
-Set **Starts Connected** on `ConvaiRoomManager`. It controls automatic connection for the room. The per-character **Auto Connect** switch is gone. For a user-initiated session, turn **Starts Connected** off and call `manager.ConnectAsync()` or `character.StartConversationAsync()`. Close the room with `manager.DisconnectAsync()`.
+Set **Connect On Start** on `ConvaiRoomManager`. It controls automatic connection for the room. The per-character **Auto Connect** switch is gone. For a user-initiated session, turn **Connect On Start** off and call `manager.ConnectAsync()` or `character.StartConversationAsync()`. Close the room with `manager.DisconnectAsync()`.
 
 Re-enabling a character after a failed or manually closed connection leaves the room closed. Have your retry button start the connection explicitly. Use `manager.ReconnectAsync()` to reconnect with the scene settings and configured providers. If you need to supply a fresh token, a room to join, or per-connection input settings, wait for `manager.DisconnectAsync()` to finish, then call `manager.ConnectAsync(options)`. The options overload requires a room that is neither connected nor connecting. See [Session lifecycle](../core-concepts/session-lifecycle.md).
 

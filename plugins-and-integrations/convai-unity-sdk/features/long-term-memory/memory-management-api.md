@@ -10,7 +10,7 @@ Use `ConvaiPlatformClient` to manage memories for a specific character and end u
 
 Use these administrative APIs from a trusted tool with an authorized client. Set the Platform API host in `ConvaiPlatformOptions`. See [Long-term memory scripting reference](long-term-memory-scripting-reference.md#configure-the-platform-client).
 
-For a no-code workflow, open **Convai > Convai Editor**, then select **Long Term Memory**. See [Inspect and manage long-term memories](long-term-memory-window.md).
+For a no-code workflow, open **Convai > Home > Long-Term Memory**. See [Inspect and manage long-term memories](long-term-memory-window.md).
 
 ## List stored memories
 

@@ -18,7 +18,7 @@ Connect a coding agent to an existing Unity project with the Convai Unity SDK in
 {% step %}
 ### Install Pipeline
 
-Open the project in the Unity Editor. Select **Convai > Convai Editor > AI Coding** and check **Unity CLI MCP** under **Setup Health**. If the row reports **Pipeline missing** or **Pipeline version unsupported**, select **Fix** and wait for Unity to compile. The button installs `com.unity.pipeline` <code class="expression">space.vars.unity_pipeline_version</code>.
+Open the project in the Unity Editor. Select **Convai > Home > AI Coding** and check **Unity CLI MCP** under **Setup Health**. If the row reports **Pipeline missing** or **Pipeline version unsupported**, select **Fix** and wait for Unity to compile. The button installs `com.unity.pipeline` <code class="expression">space.vars.unity_pipeline_version</code>.
 
 To install the same version from a terminal, use `unity pipeline install --project-path "<path-to-project>" --version <version>` and replace `<version>` with <code class="expression">space.vars.unity_pipeline_version</code>. The command assembly accepts versions at or above that value and strictly below <code class="expression">space.vars.unity_pipeline_upper_bound</code>.
 {% endstep %}
@@ -35,7 +35,7 @@ unity mcp configure claude-code --project-path "<path-to-project>"
 
 Use `codex` in place of `claude-code` for Codex. Its configure command also changes Codex's network sandbox settings so the Unity CLI can reach the Editor over localhost. Review the dry run before applying. For a client that already uses the legacy Unity MCP relay, add `--replace-legacy` when you configure it.
 
-Select **Refresh** in **AI Coding**. The client launches `unity mcp` when needed. Keep the Unity Editor open to the project.
+Select **Recheck** in **AI Coding**. The client launches `unity mcp` when needed. Keep the Unity Editor open to the project.
 {% endstep %}
 
 {% step %}
@@ -47,7 +47,7 @@ In the same client card, select **Install** next to **Project skill**. Open a ne
 {% step %}
 ### Verify a Convai tool call
 
-Ask the agent to run `Convai_GetProjectStatus`. Confirm that `pipelineVersion` matches the installed package and that `toolContractVersion` matches the entry in `AgentSkills/convai-unity-sdk/skill-manifest.json` inside the SDK package. Refresh **Setup Health**. **Unity CLI MCP** reads **Verified** after a Convai command reaches the active Editor session.
+Ask the agent to run `Convai_GetProjectStatus`. Confirm that `pipelineVersion` matches the installed package and that `toolContractVersion` matches the entry in `AgentSkills/convai-unity-sdk/skill-manifest.json` inside the SDK package. Select **Recheck** in **AI Coding**. **Unity CLI MCP** reads **Verified** after a Convai command reaches the active Editor session.
 
 To inspect the command catalog from the terminal, keep the project open in Unity and run:
 

@@ -1,16 +1,16 @@
 ---
 title: Troubleshoot AI coding assistant setup
-description: Resolve Unity command registration, coding agent connection, and project skill problems by following the status shown in the Convai Editor.
+description: Resolve Unity command registration, coding agent connection, and project skill problems by following the status shown in Convai Home.
 last_reviewed: "5.0.0-pre.1"
 ---
 
-Open **Convai > Convai Editor > AI Coding** to see which check needs attention. A configured client, an installed skill, and a verified tool call are separate checks.
+Open **Convai > Home > AI Coding** to see which check needs attention. A configured client, an installed skill, and a verified tool call are separate checks.
 
 ## Unity CLI MCP status
 
 | Status | What to check | How to verify |
 | --- | --- | --- |
-| **Unity CLI not found** | Install the Unity CLI, then select **Refresh**. The scan checks PATH, `~/.unity/bin`, and common platform install directories. | The row advances to the Pipeline or client check. |
+| **Unity CLI not found** | Install the Unity CLI, then select **Recheck**. The scan checks PATH, `~/.unity/bin`, and common platform install directories. | The row advances to the Pipeline or client check. |
 | **Pipeline missing** or **Pipeline version unsupported** | Sign in to Unity, exit Play Mode, and select **Fix**. The SDK installs the supported `com.unity.pipeline` version. | Unity recompiles and finds the expected Convai commands. |
 | **Scripts compiling** | Wait for compilation to finish. | The route row updates to the next check. |
 | **Convai commands absent** | Check the Unity Console for compilation errors. If commands remain missing after the errors clear, reimport the SDK and refresh. | Run `unity command --query Convai` with the project open and check that Convai commands appear. |

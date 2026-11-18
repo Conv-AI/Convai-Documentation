@@ -24,7 +24,10 @@ Leave **On-Device Detection** set to **Off** to rely on Convai's speech detectio
 {% step %}
 ### Enable echo cancellation for local interruptions
 
-Under **Listening > Microphone**, enable **Echo Cancellation** and reconnect. This helps distinguish the player's voice from character audio coming through the speakers. The detector can lower playback volume on a speech candidate. It can commit an interruption locally only when the capture source reports active acoustic echo cancellation. Otherwise Convai still decides when to interrupt.
+On native builds, enable **Echo Cancellation** under **Listening > Microphone** or select **Turn On Echo Cancellation** in the **Interruptions** warning. Reconnect to apply the change. This helps distinguish the player's voice from character audio coming through the speakers. The detector can lower playback volume on a speech candidate. It can commit an interruption locally only when the capture source reports active acoustic echo cancellation. Otherwise Convai still decides when to interrupt.
+
+<figure><img src="../../../.gitbook/assets/unity-room-silero-echo-cancellation.png" alt="The Room Manager Interruptions section with Silero selected and a warning that it only lowers volume while Echo Cancellation is off."><figcaption><p>(1) Select <strong>Silero</strong> under <strong>On-Device Detection</strong>. (2) The warning explains that Silero only lowers playback volume while echo cancellation is off. (3) Select <strong>Turn On Echo Cancellation</strong> to update the microphone setting.</p></figcaption></figure>
+
 {% endstep %}
 {% endstepper %}
 

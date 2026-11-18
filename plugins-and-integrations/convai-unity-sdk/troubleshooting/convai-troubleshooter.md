@@ -57,9 +57,11 @@ A finding row shows up to four actions, depending on what the module that raised
 * **Open** — opens the authoring surface that answers the finding, such as the Actions Editor, focused on the relevant action
 * **Learn More** — opens the finding's documentation link, when one is set
 
+<figure><img src="../../../.gitbook/assets/unity-troubleshooter-enable-actions-finding.png" alt="Convai Troubleshooter showing two Actions findings for the LipSync Sample character and a Recheck button in the footer"><figcaption><p>(1) Read the Actions Enabled finding. (2) Select Enable Actions to repair that finding. (3) Select Recheck to run the checks again.</p></figcaption></figure>
+
 ## Re-check and fix everything
 
-The footer shows how long ago the report was built (`Checked just now`, `Checked N seconds ago`, or `Checked N min ago`) and a **Re-check** button that reruns every check immediately, ignoring the cached report.
+The footer shows how long ago the report was built (`Checked just now`, `Checked N seconds ago`, or `Checked N min ago`) and a **Recheck** button that reruns every check immediately, ignoring the cached report.
 
 A **Fix All** button appears in the footer whenever more than one finding across the whole report has a one-click fix. Pressing it opens a confirmation dialog listing every fix it is about to apply, then applies all of them as a single Undo step — `Ctrl+Z` reverts every one of them together. A module's own section shows a smaller **Fix These (N)** button under the same rule, scoped to the fixable findings visible in that section.
 

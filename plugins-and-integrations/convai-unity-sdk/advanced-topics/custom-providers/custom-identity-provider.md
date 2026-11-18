@@ -55,7 +55,7 @@ public sealed class AccountIdentity : IEndUserIdentityProvider, IEndUserMetadata
 {% step %}
 ### Disable automatic connection
 
-Turn off **Starts Connected** on `ConvaiRoomManager` before entering Play mode. This gives your login flow time to provide an identity before it connects.
+Turn off **Connect On Start** on `ConvaiRoomManager` before entering Play mode. This gives your login flow time to provide an identity before it connects.
 {% endstep %}
 {% step %}
 ### Connect after login
