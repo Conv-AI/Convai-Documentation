@@ -1,7 +1,7 @@
 ---
 title: Body language
 description: Find guides for adding ambient posture, breathing, weight shifts, and small reactive movements that keep a Convai character's body alive between animations.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Body Language is the Convai embodiment module that gives a character continuous, ambient nonverbal behavior: breathing, weight shifts, small gestures, and reactive flinches that never stop between authored actions. Body Animation plays authored clips — a walk cycle, a wave — and Body Language never owns a clip; it only adds small procedural motion on top of whatever the character is already doing. One component, `ConvaiBodyLanguageController`, drives all of it.

@@ -1,15 +1,12 @@
 ---
+title: Convai XR Animation Capture App
 description: >-
-  Capture animations in VR using your Meta Quest and animate AI avatars—no mocap
-  suit required.
+  Record gestures and other motions using a Meta Quest headset, upload clips to
+  your Convai account, and use the recordings to animate AI avatars.
 noIndex: true
 ---
 
-# Convai XR Animation Capture App
-
-## Introduction
-
-The **Convai XR Animation Capture** app allows you to record high-quality animations directly in virtual reality using a **Meta Quest** headset. These animations can be uploaded to your Convai account and used seamlessly across platforms like **Unity**, **Unreal Engine**, or within no-code tools like **Avatar Studio** and **Convai Sim**.
+Use the **Convai XR Animation Capture** app to record gestures and other motions on a **Meta Quest** headset and upload them to your Convai account.
 
 {% embed url="https://youtu.be/S6RQBh--DsQ?t=117" %}
 
@@ -56,13 +53,13 @@ Whether you’re building a virtual assistant, NPC, tour guide, or performer —
     Animations are automatically synced to your Convai account—no manual transfer needed.
 *   **Cross-Platform Support**
 
-    Use animations in Unity, Unreal Engine, Convai Sim, and Avatar Studio — no extra setup required.
+    Use animations in Unreal Engine, Convai Sim, and Avatar Studio. In Unity, import the recording as a clip and configure how the character plays it. See [Adding Your Recorded Animations to AI Avatars Inside Unity](adding-your-recorded-animations-to-ai-avatars-inside-unity.md).
 *   **AI-Driven Animation Triggers**
 
     Let your avatars perform animations intelligently based on dialogue and context.
 *   **No Mocap Suit Needed**
 
-    Capture high-quality animation using just your VR headset — no external trackers or suits required.
+    Capture animation with your VR headset, without external trackers or a motion capture suit.
 *   **Works with No-Code Tools**
 
     Deploy intelligent, animated avatars directly in browser-based platforms like Avatar Studio and Convai Sim.

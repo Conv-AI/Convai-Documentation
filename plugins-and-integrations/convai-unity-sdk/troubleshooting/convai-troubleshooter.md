@@ -1,10 +1,10 @@
 ---
 title: Convai Troubleshooter
 description: Reference for the Convai Troubleshooter window, including how it reports findings, applies fixes, and lets a project add its own checks.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-The Convai Troubleshooter is an Editor window that lists what is stopping a `ConvaiCharacter` from working, module by module, with a fix beside each finding. Open it from `Convai → Troubleshooter` before reading the Unity Console when a character does not behave as expected — it is the SDK's first-line diagnostic.
+The Convai Troubleshooter is an Editor window that lists what is stopping a `ConvaiCharacter` from working, module by module, with actions where the reporting module supplies them. Open it from `Convai → Troubleshooter` before reading the Unity Console when a character does not behave as expected — it is the SDK's first-line diagnostic.
 
 ## Open the Troubleshooter
 
@@ -46,9 +46,7 @@ A module's section header shows a right-aligned summary. When the module has no 
 
 The window's header chip mirrors this at the character level — `Nothing to fix`, or `1 to fix` / `N to fix` for the current character's combined issue count.
 
-{% hint style="info" %}
-`ConvaiActionSetupHealthProvider` (`SDK/Editor/Actions/ConvaiActionSetupHealthProvider.cs`) is the only module that reports through the full `IConvaiSetupHealthProvider` interface, so Actions findings are the only ones that can carry a **Fix**, **Show Me**, or **Open** button. Gaze, Body Animation, Body Language, Emotion, and Embodiment still register only as the older, read-only `IConvaiModuleSurveyor`. The Troubleshooter still shows a section for each of these when the module applies to the selected character — their findings are informational text, with no button attached.
-{% endhint %}
+Actions, Embodiment, Gaze, Body Animation, Body Language, and Emotion register through the shared setup health system. A finding can include a repair, an object to inspect, or an Editor window to open.
 
 ## Act on a finding
 
@@ -69,7 +67,7 @@ Everything that passed — `Ok` and `Info` findings — collapses into a **Check
 
 ## Report your own findings
 
-A project can add its own checks to the Troubleshooter by implementing `IConvaiSetupHealthProvider` and registering it with `ConvaiSetupHealthRegistry.Register`. A registered provider's findings appear beside Convai's own, with the same **Fix**, **Show Me**, and **Open** support when the provider supplies them. Registration also makes the findings visible to the `Convai.InspectScene` and `Convai.ValidateSetup` MCP tools, so an AI coding assistant reads the same report a person sees in the window.
+A project can add its own checks to the Troubleshooter by implementing `IConvaiSetupHealthProvider` and registering it with `ConvaiSetupHealthRegistry.Register`. A registered provider's findings appear beside Convai's own, with the same **Fix**, **Show Me**, and **Open** support when the provider supplies them. Registration also makes the findings visible to the `Convai_InspectScene` and `Convai_ValidateSetup` MCP tools, so an AI coding assistant reads the same report a person sees in the window.
 
 `IConvaiSetupHealthProvider` requires:
 
@@ -83,7 +81,7 @@ A project can add its own checks to the Troubleshooter by implementing `IConvaiS
 
 {% code title="Assets/Editor/MyCustomSetupHealthProvider.cs" %}
 ```csharp
-using Convai.Editor.AI;
+// pseudocode: QuestGiver and its quest properties are application-owned types.
 using Convai.Editor.Diagnostics;
 using UnityEditor;
 using UnityEngine;

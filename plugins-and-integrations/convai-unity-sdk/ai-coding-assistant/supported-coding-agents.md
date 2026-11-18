@@ -1,57 +1,39 @@
 ---
 title: Supported coding agents
-description: Reference for the coding agents the Convai Unity SDK supports, including the exact instruction file path and install behavior for each agent.
-last_reviewed: "4.6.0"
+description: Find the Unity connection options, project skills, and managed instruction files available for each coding agent in the Convai Editor.
+last_reviewed: "5.0.0-pre.1"
 ---
 
-The Convai Unity SDK installs a managed instruction block into a project file for each supported coding agent — Codex, Claude Code, Cursor, Gemini, and VS Code Copilot. Use this reference to find the exact file path and install behavior for each agent.
+The Convai Editor provides Unity CLI setup commands, project skill installation, and local configuration checks for Claude Code and Codex. It also provides managed project instructions for Cursor, Gemini, and VS Code Copilot. Configure the MCP connection in your client separately.
 
-## Managed instruction files by agent
+## Client integration
 
-| Agent | Managed file | Location |
-|---|---|---|
-| Codex | `AGENTS.md` | Project root |
-| Claude Code | `CLAUDE.md` | Project root |
-| Cursor | `.cursor/rules/convai-unity-sdk.mdc` | `.cursor/rules/` directory |
-| Gemini | `GEMINI.md` | Project root |
-| VS Code Copilot | `.github/copilot-instructions.md` | `.github/` directory |
+| Client | Project skill copy | Managed instructions |
+| --- | --- | --- |
+| Claude Code | `.claude/skills/convai-unity-sdk/` | `CLAUDE.md` |
+| ChatGPT desktop / Codex | `.agents/skills/convai-unity-sdk/` | `AGENTS.md` |
+| Cursor | Reads the packaged skill through the instruction pointer | `.cursor/rules/convai-unity-sdk.mdc` |
+| Gemini | Reads the packaged skill through the instruction pointer | `GEMINI.md` |
+| VS Code Copilot | Reads the packaged skill through the instruction pointer | `.github/copilot-instructions.md` |
 
-The SDK resolves each path relative to the Unity project root, not the package folder.
+The Claude Code and ChatGPT / Codex cards show the exact `unity mcp configure` command for the open project. In Unity CLI, `claude-code` refers to Claude Code and `claude` refers to Claude Desktop. For another client, use its Unity CLI MCP configuration and verify that it can call `Convai_GetProjectStatus`.
 
-## How the SDK installs the managed block
+## Configuration detection
 
-The install logic is identical for all five agents. When you trigger an install or update, the SDK reads the target file if it exists, removes any block already delimited by `<!-- BEGIN CONVAI UNITY SDK -->` and `<!-- END CONVAI UNITY SDK -->`, and appends a fresh block at the end of the file. If the file does not exist, the SDK creates it, including any missing parent directory such as `.cursor/rules/` or `.github/`. Content outside the sentinel markers is preserved, and the write matches the file's existing line ending (`\r\n` or `\n`).
+**Setup Health** checks Claude Code and Codex configuration when the section opens and when you select **Refresh**. These checks read local files. **Configured** means the scan found an effective `unity mcp` entry for this project or an entry with no project path. **Other project** means all matching entries point to another project.
 
-{% hint style="info" %}
-Installing, updating, or removing the managed block is a manual action — it does not run automatically. Trigger it from the **AI Coding** section of the Convai Editor window, opened from **Convai > Convai Editor**.
-{% endhint %}
+- Claude Code checks project-local and user entries in `~/.claude.json` and the project-shared `.mcp.json`. For the same server name, local entries take precedence over project-shared entries, which take precedence over user entries.
+- Codex checks `config.toml` in `CODEX_HOME`, or in `~/.codex/` when that variable is unset, and the project's `.codex/config.toml`. The project value takes precedence at the same key. Codex requires trust for project configuration. Convai's scan reports presence independently of trust.
+- For other clients, verify the connection with a tool call. The SDK has no configuration scan for those clients.
 
-The installed block instructs the agent to read `Packages/com.convai.convai-sdk-for-unity/AIAssistantSkills/convai-unity-sdk/SKILL.md` and its linked references for Convai-specific workflows, and to use Unity MCP tools for generic scene, GameObject, asset, script, console, and Play Mode operations, reserving [Convai's own tools](mcp-tools-reference.md) for SDK-specific configuration and diagnosis.
+## Managed instructions
 
-## Agent-specific notes
-
-| Agent | Note |
-|---|---|
-| Codex | Created at the project root the first time you install. No additional directory is required. |
-| Claude Code | Created at the project root the first time you install. No additional directory is required. |
-| Cursor | The SDK creates the `.cursor/rules/` directory if it does not exist. Any Cursor rule frontmatter already present above the managed block is preserved. |
-| Gemini | Created at the project root the first time you install. No additional directory is required. |
-| VS Code Copilot | The SDK creates the `.github/` directory if it does not exist. |
-
-## Next steps
-
-{% content-ref url="README.md" %}
-[AI coding assistant](README.md)
-{% endcontent-ref %}
+The **Project instructions** action adds, updates, or removes the Convai block in the client's file. The SDK preserves other instructions and points to the verified project skill copy when one exists. Otherwise it links to the resolved `AgentSkills/convai-unity-sdk/SKILL.md` inside the installed SDK. The block also states the rules for protecting API keys and transcript text. Update the skill and the project instructions through their separate controls.
 
 {% content-ref url="quick-start.md" %}
 [AI coding assistant quick start](quick-start.md)
 {% endcontent-ref %}
 
-{% content-ref url="mcp-tools-reference.md" %}
-[MCP tools reference](mcp-tools-reference.md)
-{% endcontent-ref %}
-
-{% content-ref url="troubleshooting.md" %}
-[Troubleshoot AI coding assistant setup](troubleshooting.md)
+{% content-ref url="install-project-skill.md" %}
+[Install the project skill](install-project-skill.md)
 {% endcontent-ref %}
