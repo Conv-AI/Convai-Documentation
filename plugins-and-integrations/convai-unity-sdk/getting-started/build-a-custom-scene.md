@@ -59,6 +59,9 @@ In the `ConvaiCharacter` component, set the **Character ID** field to the ID of 
 {% hint style="warning" %}
 The Character ID field is required. If it is empty, the character cannot connect to Convai and the Scene Validator will report an error.
 {% endhint %}
+
+<figure><img src="../../../.gitbook/assets/unity-character-identity-live.png" alt="Convai Character Identity section for an example Guide character with the Live version selected."><figcaption><p>(1) Enter your own <strong>Character ID</strong>. (2) Check the character name. (3) Use <strong>Character Version</strong> to choose the release this scene loads.</p></figcaption></figure>
+
 {% endstep %}
 
 {% step %}

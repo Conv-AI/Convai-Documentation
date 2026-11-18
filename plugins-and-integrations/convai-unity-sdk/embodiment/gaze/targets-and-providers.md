@@ -15,6 +15,8 @@ Mark scene objects as gaze candidates, configure advanced gaze components, or re
 
 Add `ConvaiGazeTarget` (`Convai/Gaze/Target`) to any `GameObject` to make it a gaze candidate for every Convai character in the scene. No scene metadata is required.
 
+<figure><img src="../../../../.gitbook/assets/unity-gaze-marked-prop.png" alt="Gaze Editor with Targets selected. The Display Block prop is listed under Worth Looking At and is already marked."><figcaption><p>Open <strong>Targets</strong> (1), select a prop in the Hierarchy, and choose <strong>Mark The Selected Object</strong> (2). The marked prop appears under <strong>Worth Looking At</strong> (3).</p></figcaption></figure>
+
 | Field | Default | Purpose |
 |---|---|---|
 | **More important than the player** | off | Switches priority between `5` and `15`. Use **Advanced > Priority** for a custom value. The player anchor normally publishes at `10`. |

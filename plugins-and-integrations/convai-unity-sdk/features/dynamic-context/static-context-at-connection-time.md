@@ -14,6 +14,8 @@ Use this mechanism for facts that are true before the conversation begins and wi
 
 Select `ConvaiCharacter`, open **Session → Opening Context**, and enable **Initial Dynamic Info**. The **Text** field appears only while the toggle is enabled.
 
+<figure><img src="../../../../.gitbook/assets/unity-character-opening-context.png" alt="Session section of Convai Character with Initial Dynamic Info checked and Station: Training Lobby in the Text field."><figcaption><p>(1) Find <strong>Opening Context</strong> under <strong>Session</strong>. (2) Enable <strong>Initial Dynamic Info</strong> to show the saved field and retain its contents through later context updates. (3) Enter the opening facts in <strong>Text</strong>.</p></figcaption></figure>
+
 | Field | Type | Default | Description |
 |---|---|---|---|
 | **Initial Dynamic Info** | `bool` | `false` | Sets the keep-in-context flag and reveals the saved text. |

@@ -15,6 +15,8 @@ Add vision to an existing single-character scene that already supports conversat
 Select `ConvaiRoomManager`. Under **Connection**, set **Vision** to **On**. The setup dialog can offer **Add Components**, creating a `ConvaiVisionRoot` child with a publisher and camera source.
 
 If components are still missing, the camera-feed warning offers **Add Missing Components**. That action adds the components to the room manager's own GameObject. Select the object actually created by your chosen path.
+
+<figure><img src="../../../../.gitbook/assets/unity-room-vision-on.png" alt="Connection section of Convai Room Manager with Vision set to On."><figcaption><p>(1) Open <strong>Connection</strong> on the room manager. (2) Set <strong>Vision</strong> to <strong>On</strong>.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Assign the captured camera
@@ -22,6 +24,8 @@ If components are still missing, the camera-feed warning offers **Add Missing Co
 On `CameraVisionFrameSource`, open **Camera Setup** and assign **Target Camera**. When blank, the source tries a Camera on the same object, then `Camera.main`. **Use Main Camera** is available with the missing-camera warning. Explicit assignment avoids ambiguity.
 
 In **Capture Settings**, leave **Preset** at **Balanced** for `1280 × 720` capture at `15` fps. The publisher's policy separately controls the transmitted frame budget.
+
+<figure><img src="../../../../.gitbook/assets/unity-vision-camera-source.png" alt="Camera Vision Frame Source Inspector with Balanced selected in Capture Settings and Convai Orbit Camera assigned under Camera Setup."><figcaption><p>(1) Open <strong>Camera Setup</strong>. (2) Assign the camera in <strong>Target Camera</strong>. (3) <strong>Balanced</strong> is selected in <strong>Capture Settings</strong>.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Verify capture and publication

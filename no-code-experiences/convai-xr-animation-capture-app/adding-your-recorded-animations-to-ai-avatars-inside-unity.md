@@ -29,6 +29,8 @@ Open **Convai > Actions Editor** and select the character. For a character witho
 1. Open **Convai > Body Animation Editor** and select the character. In **Content > Actions & Gestures**, add an entry to the character's Animation Set. Give it a name and assign the imported clip.
 2. In the Actions Editor, add **Play Gesture**. Use the Animation Set entry's name as the `gesture` value.
 
+<figure><img src="../../.gitbook/assets/unity-body-animation-gesture-clip.png" alt="Body Animation Editor showing a named wave entry, its assigned clip, and the Greeting cue."><figcaption><p>The sample <strong>wave</strong> entry (1) pairs a name with an animation clip (2) and an optional cue (3). Use the same fields for your imported recording.</p></figcaption></figure>
+
 See [Build an animation set](../../plugins-and-integrations/convai-unity-sdk/embodiment/body-animation/build-an-animation-set.md) for clip and loop settings.
 
 ### Character with its own Animator Controller

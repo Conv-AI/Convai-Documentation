@@ -22,15 +22,17 @@ Set **Vision** to **On** under **Connection** and use a `ConvaiVisionPublisher`.
 In the publisher's **Frame Source** section, set **WebGL Publishes** to **Frame Source** or **Game View**. Frame Source is the default. With no source, the publisher falls back to the game view. Game View includes the game's rendered UI.
 
 A source implementing `IVisionPageCanvasSource` always publishes its own `PageCanvasElementId`, even when Game View is selected. It is a source interface, not a third dropdown choice.
+
+<figure><img src="../../../../.gitbook/assets/unity-vision-publisher.png" alt="Convai Vision Publisher with a camera frame source assigned, WebGL Publishes set to Frame Source, and Publish Mode set to Auto Compatible."><figcaption><p>(1) <strong>Source</strong> shows the assigned frame source. (2) <strong>WebGL Publishes</strong> selects what browser builds capture. (3) <strong>Publish Mode</strong> shows the selected policy.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Deploy and verify
 
 Serve the build over HTTPS. For webcam capture, grant browser camera permission and wait for a usable frame. Check `IsPublishing`, then request vision status or a trigger and inspect the response. Confirm the content matches the intended source.
+
+<figure><img src="../../../../.gitbook/assets/unity-webgl-browser-test-camera.png" alt="Unity WebGL test player showing the camera source Ready and a synthetic browser color-bar pattern."><figcaption><p>(1) The local webcam source reports <strong>Ready</strong>. (2) The player shows a synthetic browser camera frame. This verifies local capture in Chrome for Testing.</p></figcaption></figure>
 {% endstep %}
 {% endstepper %}
-
-<figure><img src="../../../../.gitbook/assets/unity-vision-publisher.png" alt="Convai Vision Publisher Inspector showing the assigned frame source, Track Name, WebGL Publishes set to Frame Source, the Publish Policy mode, Max Publish FPS and Max Bitrate"><figcaption><p>Convai Vision Publisher with a camera frame source assigned. WebGL Publishes applies only to WebGL builds.</p></figcaption></figure>
 
 ## Frame-source path
 

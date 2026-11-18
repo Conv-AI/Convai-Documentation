@@ -10,6 +10,8 @@ Output bindings are the optional extra stage of the Emotion pipeline, for effect
 
 Emotion writes facial output through the shared facial compositor rather than through a directly-authored binding. Expression recipes are compiled once, resolved against the character's rig, and submitted to the compositor's emotion layers alongside LipSync and the micro-expression life layer. See [Facial composition](../facial-composition.md) for the compositor's layer model, blend modes, and the LipSync-over-Emotion priority rule.
 
+<figure><img src="../../../../.gitbook/assets/unity-emotion-face-shapes.png" alt="Emotion Editor Expressions tab with numbered markers beside the detected rig type, the available shape count, and the mesh list."><figcaption><p><strong>This Character’s Face</strong> lists the detected rig type (1), the number of available shapes (2), and the meshes the Editor found (3).</p></figcaption></figure>
+
 ## MaterialPropertyEmotionBinding
 
 `MaterialPropertyEmotionBinding` drives arbitrary shader float properties — blush, tear glisten, sweat sheen, or any other custom shader effect — from composed emotion scores, with no built-in shader knowledge in the SDK. It is authored in the **Material Effects** field on `ConvaiEmotionProfile`, as a list of `MaterialPropertyEmotionSlot` entries.

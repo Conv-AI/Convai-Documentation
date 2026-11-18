@@ -21,6 +21,8 @@ A diagnostic result message and an answer serve different purposes. `ConvaiActio
 
 The relay Inspector has **When An Action Fails**, **When Everything Succeeds**, **Timing**, and conditional **Scripted Lines** sections. Its mode buttons are **Off**, **Silent**, **Narrate**, and **Scripted**. In the Actions Editor, **Character Settings → Action Feedback** shows the same modes as **Failure Feedback Mode** and **Success Feedback Mode** dropdowns with the options **Off**, **Silent Context**, **Narrate In Character**, and **Scripted Speech**.
 
+<figure><img src="../../../../.gitbook/assets/unity-action-feedback.png" alt="Action Feedback Inspector with Scripted failure feedback, Silent success feedback, and the Scripted Lines editor."><figcaption><p>(1) <strong>Scripted</strong> selects authored speech for failures. (2) <strong>Silent</strong> selects context updates for successes. (3) <strong>Scripted Lines</strong> holds the authored failure lines.</p></figcaption></figure>
+
 | Mode | Ordinary-room behavior |
 |---|---|
 | **Off** | Does not submit ordinary outcome feedback. A per-action answer setting can override it. |

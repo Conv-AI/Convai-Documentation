@@ -88,6 +88,8 @@ Drag your `ConvaiCharacter` into **Character** before fetching. **Auto Find** op
 
 In the Trigger component's Inspector, click **Fetch** to load the named triggers from the dashboard. The picker is already present; select the trigger that should advance the graph to your first section. Selection shows read-only **ID**, **Message**, and **Destination** rows.
 
+<figure><img src="../../../../.gitbook/assets/unity-narrative-trigger.png" alt="Narrative Design Trigger showing Guide as Character, the Fetch button, and Enter Lobby selected in the picker."><figcaption><p>(1) Assign a <strong>Character</strong>. (2) Use <strong>Fetch</strong> to load that character’s triggers. (3) Select the named trigger. <strong>Enter Lobby</strong> is a local example.</p></figcaption></figure>
+
 {% endstep %}
 
 {% step %}

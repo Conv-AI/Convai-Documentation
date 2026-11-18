@@ -14,7 +14,7 @@ Open `Scenes/GroupConversationSample.unity` in the imported sample directory. Ke
 
 ## Rehearse offline
 
-The scene has Tuesday, Friday, and Wednesday, with Friday as the initial character. The Room Manager has **Connect On Start** off. Call `ConvaiManager.ConnectAsync` to start a session manually. The group component, simulator, and overlay are enabled, and character audio is configured for 3D playback when used live.
+The scene has Tuesday, Friday, and Wednesday, with Friday as the initial character. The Room Manager has **Connect On Start** off. Call `ConvaiManager.ConnectAsync` to start a session manually. The group component and debug overlay are enabled. Enable **Convai Group Conversation Simulator** on the manager for the offline rehearsal. Character audio uses 3D playback in a live session.
 
 Enter Play mode. Use **F9** to show or hide the overlay and hold **T** to exercise a player turn. Move and look toward different characters to inspect spatial and addressing state. Expect canned lines without spoken character audio from the simulator.
 

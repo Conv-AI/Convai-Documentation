@@ -28,6 +28,9 @@ Select the new character's `ConvaiCharacter` component. Its Inspector reports **
 Select the `GameObject` holding `ConvaiManager` and open its Inspector. The **Scene Setup** section now reports **Characters in Scene** as `2` and **Joining the Room** as `All 2` — both characters count toward the next room connection.
 
 Scroll down to **Characters Joining the Room**. It lists one row per character with a ticked checkbox, since every character joins by default — nothing needs enabling by hand. If either checkbox is cleared, click **Include Everyone** to send both.
+
+<figure><img src="../../../../.gitbook/assets/unity-characters-joining-room.png" alt="Convai Manager in Edit Mode with two of three characters included in the room."><figcaption><p>(1) <strong>Joining The Room</strong> counts the characters selected for the next connection. (2) Expand the membership list. (3) In this example Guide and Engineer are included. The unchecked character stays in the scene.</p></figcaption></figure>
+
 {% endstep %}
 
 {% step %}

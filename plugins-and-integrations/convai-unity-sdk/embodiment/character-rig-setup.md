@@ -20,22 +20,24 @@ When the component is added, it scans the character hierarchy for `SkinnedMeshRe
 
 Open the **Character Rig** component in the Inspector to see the result:
 
-- **Character Type** reports the detected **Rig type** and a **Match** strength — `Strong`, `Partial`, or `Weak` — or `Set by you` if you picked a type manually
+- **Rig Type** reports the detected **Detected Rig Type** and a **Match** strength — `Strong`, `Partial`, or `Weak` — or `Set by you` if you picked a type manually
 - **Bones Convai Found** lists all 18 semantic bones and what each resolved to
-- **Face Shapes Convai Found** lists every semantic blendshape and the mesh and index it resolved to, or `not found on this rig`
+- **Blendshapes Convai Found** lists every semantic blendshape and the mesh and index it resolved to, or `not found on this rig`
 
 {% hint style="success" %}
-Detection succeeded when **Character Type** shows a recognized rig type and neither the Hips, Spine, nor Head bone is reported missing. The Inspector header reads **Ready** in that state.
+Detection succeeded when **Rig Type** shows a recognized rig type and neither the Hips, Spine, nor Head bone is reported missing. The Inspector header reads **Ready** in that state.
 {% endhint %}
 
 ## Fix a low-confidence detection
 
+<figure><img src="../../../.gitbook/assets/unity-character-rig-report.png" alt="Character Rig Inspector with markers beside Match, Bones Convai Found, and Blendshapes Convai Found."><figcaption><p>Check <strong>Match</strong> (1), then inspect <strong>Bones Convai Found</strong> (2) and <strong>Blendshapes Convai Found</strong> (3). This sample resolved 18 of 18 bones and 58 of 58 blendshapes.</p></figcaption></figure>
+
 If the Inspector warns that face shapes were only partially recognized, or that no convention matched at all, you have two options before falling back to a custom map:
 
-1. **Pick the rig type yourself.** Open the **Rig Type** field under **Character Type** and select the correct convention (**Apple ARKit**, **Reallusion Character Creator 3**, **Epic MetaHuman**, or **Reallusion Character Creator 4 (Extended)**) instead of leaving it on **Detect automatically**. This skips detection and applies that convention's name table directly.
+1. **Pick the rig type yourself.** Open the **Rig Type** field under **Rig Type** and select the correct convention (**Apple ARKit**, **Reallusion Character Creator 3**, **Epic MetaHuman**, or **Reallusion Character Creator 4 (Extended)**) instead of leaving it on **Detect automatically**. This skips detection and applies that convention's name table directly.
 2. **Assign missing bones manually.** If **Bones Convai Found** reports a missing `Hips`, `Spine`, or `Head` bone, expand **Custom Rig Setup** and assign the correct `Transform` to the matching override field. The transform must belong to the character's own hierarchy. Click **Lock In What Convai Found** to copy every bone Convai already resolved into these override fields, so they stay fixed even if the model is re-imported or renamed.
 
-After any change, click **Re-scan This Character** to rebuild the resolution tables, or call `Rebuild()` from a script.
+After any change, click **Rescan This Character** to rebuild the resolution tables, or call `Rebuild()` from a script.
 
 ## Map a custom rig convention
 
@@ -44,7 +46,7 @@ Use a custom convention map when a character's face mesh uses blendshape names t
 1. Create a `CustomRigConventionMap` asset: **Assets > Create > Convai > Embodiment > Custom Rig Convention Map**.
 2. Add one entry per semantic blendshape from the `StandardBlendshape` enum you want to drive, and set each entry's blendshape name to the name on your mesh. Leave an entry's name empty to skip that semantic blendshape on this rig.
 3. On the **Character Rig** component, set **Rig Type** to **Custom — I will map the names myself**, then assign the asset to the **Custom Convention Map** field.
-4. Click **Re-scan This Character**.
+4. Click **Rescan This Character**.
 
 {% hint style="warning" %}
 Bone resolution still runs through the humanoid avatar or name matching when **Rig Type** is `Custom` — only blendshape resolution reads the custom map. Assign bone overrides under **Custom Rig Setup** separately if the avatar does not resolve them.
@@ -52,13 +54,13 @@ Bone resolution still runs through the humanoid avatar or name matching when **R
 
 ## Choose face meshes and calibrate gaze axes
 
-Under **Character Type**, **Face Meshes** limits the meshes used for facial shape lookup. Leave the list empty to use all meshes with blendshapes under the character. Assign it when an outfit or duplicate mesh should not participate.
+Under **Rig Type**, **Face Meshes** limits the meshes used for facial shape lookup. Leave the list empty to use all meshes with blendshapes under the character. Assign it when an outfit or duplicate mesh should not participate.
 
 For a custom rig whose root or eyes do not face local `+Z` with `+Y` up, expand **Gaze Axis Calibration** and turn on **Enable Calibration**. Set **Root Forward (Local)**, **Root Up (Local)**, **Left Eye Forward (Local)**, and **Right Eye Forward (Local)** to the rig's actual axes. Use the **Center**, **Left**, **Right**, **Up**, and **Down** eye previews to check the result, then **Stop Gaze Preview**. These controls correct axis interpretation; they do not replace missing bone mappings.
 
 ## Verify the rig setup
 
-Check the **Ready** chip in the Inspector header, then the found/total counts on **Bones Convai Found** and **Face Shapes Convai Found**. Expand **Face Shapes Convai Found**, which starts collapsed: a healthy rig shows all critical bones resolved and a recognized rig type with no warning box. From a script, read `DetectedConvention` and `DetectionConfidence` on the `Character Rig` component, or call `TryGetBone(StandardBone, out Transform)` and `TryGetBlendshape(StandardBlendshape, out SkinnedMeshRenderer, out int)` to confirm a specific semantic identifier resolves.
+Check the **Ready** chip in the Inspector header, then the found/total counts on **Bones Convai Found** and **Blendshapes Convai Found**. Expand **Blendshapes Convai Found**, which starts collapsed: a healthy rig shows all critical bones resolved and a recognized rig type with no warning box. From a script, read `DetectedConvention` and `DetectionConfidence` on the `Character Rig` component, or call `TryGetBone(StandardBone, out Transform)` and `TryGetBlendshape(StandardBlendshape, out SkinnedMeshRenderer, out int)` to confirm a specific semantic identifier resolves.
 
 Not every rig provides every bone or blendshape. `UpperChest` and the eye bones are optional — Gaze supports head-only aiming when eye bones are absent — so their absence alone does not indicate a setup problem.
 

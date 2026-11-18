@@ -18,6 +18,8 @@ Add **Convai > World Object** to each physical object. Keep each active copy's m
 ### Create the shared object
 
 Create a root GameObject and add **Convai > Logical Object Group**. Its required World Object component supplies the group's shared name and description. Populate **Physical Members** with the metadata components on the physical copies.
+
+<figure><img src="../../../../.gitbook/assets/unity-logical-object-physical-members.png" alt="Logical Object Group on Exhibit Stands with East Exhibit Stand and West Exhibit Stand in Physical Members."><figcaption><p>The (1) <strong>Exhibit Stands</strong> root lists (3) two physical copies under (2) <strong>Physical Members</strong>.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Check the projected result
@@ -42,6 +44,8 @@ On each physical target, add **Convai > Object Movement Points**. Add entries to
 | `WorldSpace` | Use a world position instead of transforming a local one |
 | `Position` | Where the character should stand |
 | `Rotation` | Authored orientation |
+
+<figure><img src="../../../../.gitbook/assets/unity-object-standing-position.png" alt="Standing Positions Inspector on East Exhibit Stand with the Front approach entry enabled and World Space and Position marked."><figcaption><p>On (1) <strong>East Exhibit Stand</strong>, enable (2) <strong>World Space</strong> to interpret (3) <strong>Position</strong> as world coordinates.</p></figcaption></figure>
 
 Place points on reachable navigation surfaces with room for the character. The runtime movement path selects a complete reachable approach; an authored point alone does not establish a valid NavMesh path.
 

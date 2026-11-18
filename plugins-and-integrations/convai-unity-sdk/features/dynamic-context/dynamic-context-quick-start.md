@@ -31,6 +31,9 @@ The component shows a **Ready** or **Not Set Up** status chip and three sections
 In the **Target** section, confirm that **Auto Resolve Character** is enabled (the default). The relay looks for a `ConvaiCharacter` on the same GameObject at call time.
 
 If `ConvaiCharacter` is on a different GameObject, disable **Auto Resolve Character** and drag the correct `ConvaiCharacter` into the **Character** field. An assigned **Character** always takes precedence over auto-resolve. Confirm the status chip reads **Ready**; this confirms character resolution, not a network connection.
+
+<figure><img src="../../../../.gitbook/assets/unity-dynamic-context-updater-target.png" alt="Dynamic Context Updater showing Ready and an explicit Guide character target."><figcaption><p>(1) Check the local <strong>Ready</strong> status. (2) Assign the target character. (3) With <strong>Auto Resolve Character</strong> enabled, the updater can use the character on the same GameObject if the field is empty.</p></figcaption></figure>
+
 {% endstep %}
 
 {% step %}
@@ -52,6 +55,9 @@ Click **+** to add a listener, drag the NPC's GameObject into the object field, 
 ```text
 The player entered the fire exit corridor.
 ```
+
+<figure><img src="../../../../.gitbook/assets/unity-dynamic-context-button-listener.png" alt="A Unity Button calls the Guide character’s Dynamic Context relay with the event text Visitor entered the lobby."><figcaption><p>(1) Open <strong>On Click ()</strong> on the Button. (2) Assign the object with the relay. (3) Select <code>ConvaiDynamicContextRelay.AddEvent</code> and enter the line the button should send.</p></figcaption></figure>
+
 {% endstep %}
 
 {% step %}

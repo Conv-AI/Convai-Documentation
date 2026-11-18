@@ -25,6 +25,8 @@ Changing the assigned character triggers a sync. If another character ID replace
 ### Add scene listeners
 
 Expand a section under **Narrative Sections (N)**. Its title uses the section name or ID. The entry exposes a disabled **Section ID**, **On Section Start**, and **On Section End**. Add a listener to a compatible public Unity Event method, such as your door controller's `Unlock()`.
+
+<figure><img src="../../../../.gitbook/assets/unity-narrative-manager.png" alt="Narrative Design Manager showing Sync With Backend, Narrative Sections, and the On Section Start event in a sample Welcome section."><figcaption><p>(1) <strong>Sync With Backend</strong> imports configured sections. (2) Expand the section under <strong>Narrative Sections</strong>. (3) Add an <strong>On Section Start</strong> listener. The Welcome section is a local example.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Verify a real transition
@@ -32,8 +34,6 @@ Expand a section under **Narrative Sections (N)**. Its title uses the section na
 Enter Play mode and invoke the corresponding saved trigger. Confirm the old section's end event and new section's start event after a changed section ID arrives. Repeated updates for the same ID do not re-run those per-section events.
 {% endstep %}
 {% endstepper %}
-
-<figure><img src="../../../../.gitbook/assets/unity-narrative-manager.png" alt="Narrative Design Manager Inspector with the character assigned, Sync Status showing two sections, the Welcome section expanded with its Section ID and On Section Start and On Section End events, and a player_name template key"><figcaption><p>The Narrative Design Manager after a sync, with one section expanded and a template key.</p></figcaption></figure>
 
 ## Read sync status
 

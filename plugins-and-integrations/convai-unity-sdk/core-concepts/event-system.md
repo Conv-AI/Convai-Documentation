@@ -18,6 +18,8 @@ Add a relay from **Add Component > Convai > Events**. Manager and character auto
 
 Each event name above has an `On` prefix. Relays subscribe while enabled and unsubscribe when disabled. Session and transcript relays retry manager initialization in `LateUpdate`; the character relay resolves its character at enable time.
 
+<figure><img src="../../../.gitbook/assets/unity-session-connected-listener.png" alt="Session Events relay with the manager assigned and an On Connected listener that activates a connection banner."><figcaption><p>(1) Assign the manager. (2) Add a listener under <strong>On Connected</strong>. (3) In this example the listener calls <code>GameObject.SetActive(true)</code> on a banner.</p></figcaption></figure>
+
 ## Character relay payloads
 
 | Payload | Fields |
@@ -34,6 +36,8 @@ Each event name above has an `On` prefix. Relays subscribe while enabled and uns
 **Speaker Filter** is `Any`, `Player`, or `Character`. **Character Id Filter** applies to character entries. `FinalOnly`, `IgnoreInterimUpdates`, and the old player/character transcript payload types are removed.
 
 Entry callbacks receive `TranscriptEntryRelayData`, including entry ID, speaker type/ID/name, participant ID, text, finality, and outcome. `OnEntryRemoved` allows a view to discard evicted rows; `OnReset` clears it. Enabling the relay replays retained history. It continues delivering when transcript presentation is disabled or paused, so custom UI must honor `IsPresentationEnabled` and `PresentationEnabledChanged` itself.
+
+<figure><img src="../../../.gitbook/assets/unity-transcript-finalized-filter.png" alt="Transcript Events relay filters by Character and activates a reply indicator when an entry is finalized."><figcaption><p>(1) Choose <strong>Character</strong> to receive character entries. (2) Leave <strong>Character ID Filter</strong> empty to include all characters. (3) Add the listener under <strong>Entry Finalized</strong> to run it when an entry is final.</p></figcaption></figure>
 
 ## Typed event hub
 

@@ -8,11 +8,14 @@ Use the simulator to exercise client behavior without a service connection, and 
 
 ## Run the simulator
 
-Add `ConvaiGroupConversationSimulator` from **Convai > Group Conversation Simulator** beside a configured group component. Turn off **Connect On Start** on `ConvaiRoomManager` and enter Play mode in the Editor or a development build. The selected roster must contain 2–4 active characters with distinct Character IDs.
+Add `ConvaiGroupConversationSimulator` from **Convai > Group Conversation Simulator** beside a configured group component. In the shipped Group Conversation sample the simulator is already attached. Enable it, turn off **Connect On Start** on `ConvaiRoomManager`, and enter Play Mode in the Editor or a development build. The selected roster must contain 2–4 active characters with distinct Character IDs.
 
 To use the service, disable the simulator, then turn **Connect On Start** on or connect with your project's normal flow.
 
 The simulator uses synthetic membership IDs, canned text, and the manager's push-to-talk key (T by default). It exercises client events, head-turn behavior, and the overlay but produces no character voice. Hold and release the key while looking toward a member or standing near one to rehearse player-turn handling.
+
+<figure><img src="../../../../.gitbook/assets/unity-group-simulator-overlay.png" alt="Group Conversation overlay with the offline simulator running, a floor holder, and member distances and visibility."><figcaption><p>(1) Check that the state is <strong>running</strong>. (2) <strong>Floor</strong> shows which simulated member holds the turn. (3) The member rows show player distance and whether each character is in view.</p></figcaption></figure>
+
 
 It refuses ordinary release builds and disables itself when a live connection or group session exists. A reconnecting live session also keeps ownership; the simulator must not replace it.
 

@@ -84,6 +84,8 @@ Category overrides let you increase verbosity for one subsystem without flooding
 
 All other categories remain at the global level. The foldout title shows the active override count, for example **Category Overrides (1)**. Set a category's dropdown back to `Inherit` to remove that override.
 
+<figure><img src="../../../.gitbook/assets/unity-diagnostics-category-overrides.png" alt="Diagnostics settings showing Info as the global log level, Transport set to Debug, and UI set to Inherit."><figcaption><p>(1) <strong>Global Log Level</strong> is <strong>Info</strong>. (2) <strong>Transport</strong> overrides it with <strong>Debug</strong>. (3) <strong>UI</strong> keeps <strong>Inherit</strong> and uses the global level.</p></figcaption></figure>
+
 ### Log category reference
 
 | Category | Subsystem it covers |
@@ -204,19 +206,16 @@ Optional `ClientBargeIn` details describe local interruption-detector activity. 
 
 Custom runtime sink injection is not supported — the SDK has no public extension seam for it. Drive lip sync through a supported map or profile on `ConvaiLipSyncComponent` instead. The related types `SkinnedMeshBlendshapeSink`, `LipSyncDriftMonitor`, `LipSyncDriftSample`, and `LipSyncDriftEvent` exist in the SDK but are internal, not part of the public API.
 
-Open the drift monitor from a character's `ConvaiLipSyncComponent` Inspector: select **Open Drift Monitor** near the latency settings. The window opens titled **LipSync Drift**.
+Open the drift monitor from a character's `ConvaiLipSyncComponent` Inspector: select **Open Lip Sync Drift Monitor** under **Streaming & Latency**. The window opens titled **Lip Sync Drift Monitor**.
 
 Monitoring is opt-in: enable the **Monitor** toggle, enter Play mode, and talk to a character to populate data. Select a character from the dropdown when more than one is registered — samples and events are tracked per character.
 
-The window shows:
+The window reports the playback state, audio activity and clock mode, buffer and headroom, and the audio target time while audio is active. It also has a live audio/visual offset override and a timestamped event log.
 
-* The live drift error, in milliseconds, between the measured audio playhead and the visual (blendshape) clock; a positive value means the mouth is behind the audio
-* A chart plotting drift error and the monitor's cumulative correction over a configurable time window (3-30 seconds), with lifecycle event markers overlaid
-* Mean absolute error, max absolute error, and the correction rate, computed over the visible window
-* A live audio/visual offset override slider for calibrating perceived sync by eye
-* An event log listing lifecycle events (for example gate open, anchor, cancel) with timestamps
+<figure><img src="../../../.gitbook/assets/unity-lip-sync-drift-readout.png" alt="Lip Sync Drift Monitor excerpt with buffering and idle audio state, clock mode, buffer and headroom, and a timestamped cancellation event."><figcaption><p>Read the state, audio activity, and clock together (1), then check the buffer and headroom (2). The event list (3) shows when playback events occurred. The example shows a buffering sample and a retained cancellation event.</p></figcaption></figure>
 
-Click **Export CSV** to save the current samples and events to a file. The save dialog title is **Export drift samples**, and the default file name is `lipsync-drift-<characterId>.csv`. The exported file contains a sample table with columns `time_s`, `error_ms`, `audio_target_s`, `visual_clock_s`, `cumulative_correction_ms`, `buffered_s`, `headroom_s`, `state`, and `audio_active`, followed by a blank line and an event table with columns `event_time_s` and `label`.
+Click **Export CSV** to save the current samples and events. The sample table contains `time_s`, `audio_target_s`, `buffered_s`, `headroom_s`, `state`, `clock_mode`, and `audio_active`. The event table contains `event_time_s` and `label`.
+
 
 ## Quick reference
 

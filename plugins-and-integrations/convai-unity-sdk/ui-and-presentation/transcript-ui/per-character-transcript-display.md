@@ -25,6 +25,9 @@ Assign **Transcript Text** to a `TMP_Text` component. A world-space label can si
 Choose **Captions** for text as the character speaks, or **History** for the complete latest entry, including a reply still arriving. Captions is the default.
 
 In Captions mode, **Clear After Seconds** sets a timeout after the last caption update. Its default `0` keeps text until another caption or an explicit clear. History ignores this timeout. Choose a positive timeout longer than the spoken lines you expect; it counts from the last update, not from audio completion.
+
+<figure><img src="../../../../.gitbook/assets/unity-transcript-caption-binding.png" alt="Transcript Display using a Guide Subtitle text label in Captions mode with a two-second clear timeout."><figcaption><p>(1) Assign the subtitle label to <strong>Transcript Text</strong>. (2) Choose <strong>Captions</strong>. (3) Set how long the label stays visible after its last update.</p></figcaption></figure>
+
 {% endstep %}
 {% step %}
 ### Verify one spoken reply

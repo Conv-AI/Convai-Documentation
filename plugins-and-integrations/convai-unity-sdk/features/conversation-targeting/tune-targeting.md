@@ -27,7 +27,9 @@ Adjust `ConversationTargetingOptions` on `ConvaiManager` when the default range,
 
 {% tabs %}
 {% tab title="Inspector" %}
-Select the `ConvaiManager` GameObject and open **Who The Player Talks To**. Both automatic modes show **Range (Metres)**, **Switch Delay (Seconds)**, and **Player Camera**. **Look At** adds **Look Angle (Degrees)** and **Switch Margin (Degrees)**. **Proximity** adds **Proximity Margin (Fraction)**. **Manual** hides these controls.
+Select the `ConvaiManager` GameObject and open **Who The Player Talks To**. Both automatic modes show **Range (m)**, **Switch Delay (s)**, and **Player Camera**. **Look At** adds **Look Angle (°)** and **Switch Margin (°)**. **Proximity** adds **Proximity Margin (Fraction)**. **Manual** hides these controls.
+
+<figure><img src="../../../../.gitbook/assets/unity-targeting-look-at-settings.png" alt="Who The Player Talks To settings with Look At selected, a look angle of 35 degrees, and Player Camera assigned."><figcaption><p>(1) Choose <strong>Look At</strong>. (2) <strong>Look Angle (°)</strong> controls how far a character can be from the center of the view. (3) <strong>Player Camera</strong> defines that view.</p></figcaption></figure>
 {% endtab %}
 
 {% tab title="C#" %}

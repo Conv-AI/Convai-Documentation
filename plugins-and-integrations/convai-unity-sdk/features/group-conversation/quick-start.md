@@ -31,6 +31,8 @@ Before connecting, add **Convai > Group Conversation**, preferably to the manage
 Fill **Scene Brief** with where the characters are, their relationship, and the current situation. Add optional **Topics** and per-member aliases. Keep every optional starter and member reference inside the selected room roster.
 
 Use **Player Display Name** for how the group refers to the player. Set **Anchor** if the group's centre should be fixed to a scene transform; otherwise the character centre at session start is used.
+
+<figure><img src="../../../../.gitbook/assets/unity-group-conversation-inspector.png" alt="Group Conversation Inspector with a training-drill Scene Brief, one topic with Guide as Starter, and Guide and Engineer as members."><figcaption><p>(1) <strong>Scene Brief</strong> sets the situation. (2) <strong>Topics</strong> can assign a starter. (3) <strong>Members</strong> shows the two example characters.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Check input and validation
@@ -48,8 +50,6 @@ Turn off **Connect On Start** on `ConvaiRoomManager` and add **Convai > Group Co
 Exit Play mode, disable the simulator, and turn **Connect On Start** back on, or call `ConvaiManager.ConnectAsync` from your own code. Observe reported state and command results, verify each voice and gaze target, and test an actual press, transcript, recipient decision, and reply. Record service refusals separately from local setup errors.
 {% endstep %}
 {% endstepper %}
-
-<figure><img src="../../../../.gitbook/assets/unity-group-conversation-inspector.png" alt="Group Conversation Inspector from the Group Conversation Sample showing the scene brief, three topics with starters, three members, the Spatial section and a Ready status"><figcaption><p>Group Conversation configured in the bundled Group Conversation Sample.</p></figcaption></figure>
 
 ## Configure the group with a coding assistant
 

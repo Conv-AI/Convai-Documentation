@@ -44,6 +44,8 @@ The timeline plots a Play-mode recording of one character's emotion life over ti
 | **Window** | Display the most recent 5–60 seconds; the default is 20 seconds. |
 | **Clear** | Empties the plot. |
 
+<figure><img src="../../../../.gitbook/assets/unity-emotion-timeline-recording.png" alt="Emotion Timeline in Play Mode with a character selected, the Stop button, and several changing emotion score lines."><figcaption><p>The <strong>Character</strong> field (1) identifies the recorded controller. <strong>Stop</strong> (2) ends recording and retains the scores plotted over time (3). This example uses local demo emotion changes.</p></figcaption></figure>
+
 Samples are pulled from the target's public `Current` reading at a 0.1-second sampling interval, retaining up to 600 samples in memory — the recorder never touches per-frame runtime state directly. Use the timeline to tune a character's temperament by eye, or to debug a reported "the mood feels wrong" session after the fact.
 
 {% hint style="info" %}

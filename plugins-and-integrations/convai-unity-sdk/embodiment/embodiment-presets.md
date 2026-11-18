@@ -52,11 +52,15 @@ Call `Apply(ConvaiEmbodimentPreset)` from a script to switch presets at runtime;
 
 ## Swap presets at runtime with a library
 
-Assign a `ConvaiEmbodimentPresetLibrary` asset (**Assets > Create > Convai > Embodiment > Preset Library**) to **Preset Library** under the collapsed **Advanced** section to enable id-based swapping at runtime. A library holds an ordered list of presets and resolves one by `Find(id)`, matching each preset's `PresetId` case-insensitively.
+Assign a `ConvaiEmbodimentPresetLibrary` asset (**Assets > Create > Convai > Embodiment > Preset Library**) to **Preset Library** under **Runtime Preset Swap** to enable id-based swapping at runtime. A library holds an ordered list of presets and resolves one by `Find(id)`, matching each preset's `PresetId` case-insensitively.
 
 {% hint style="info" %}
-Assigning a library does not apply anything by itself. In Play mode, use **Advanced > Runtime Preset Swap**, choose a **Preset**, and select **Apply**. Alternatively, call `ApplyPresetById(string id)` on the `Preset` component to look up a preset in the library and apply it — the library is a lookup table, not an active binding.
+Assigning a library does not apply anything by itself. In Play mode, open **Runtime Preset Swap**, choose a **Preset**, and select **Apply**. Alternatively, call `ApplyPresetById(string id)` on the `Preset` component to look up a preset in the library and apply it — the library is a lookup table, not an active binding.
 {% endhint %}
+
+<figure><img src="../../../.gitbook/assets/unity-embodiment-runtime-preset-swap.png" alt="Runtime Preset Swap showing Demo Library, the reserved preset, and the Apply button."><figcaption><p>In the binding Inspector, assign <strong>Preset Library</strong> (1), choose a <strong>Preset</strong> (2), and select <strong>Apply</strong> (3).</p></figcaption></figure>
+
+<figure><img src="../../../.gitbook/assets/unity-embodiment-applied-emotion-profile.png" alt="Emotion Inspector showing Demo Reserved in the Emotion Profile field and a selected Reserved character type."><figcaption><p>After the swap, <strong>Emotion Profile</strong> (1) shows the Demo Reserved profile assigned by the selected preset.</p></figcaption></figure>
 
 ## Verify a preset applied
 

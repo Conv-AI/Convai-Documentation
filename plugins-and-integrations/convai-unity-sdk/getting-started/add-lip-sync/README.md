@@ -44,7 +44,9 @@ In the Inspector, choose the matching **Profile**:
 {% step %}
 ### Assign target meshes
 
-Use **Auto-Find** to locate the child meshes, then check that the **Renderers** list contains the `SkinnedMeshRenderer` components with facial blendshapes. Use **Validator** to inspect the effective map before entering Play Mode.
+Use **Auto-Find** to locate the child meshes, then check that **Target Meshes** contains the `SkinnedMeshRenderer` components with facial blendshapes. Select **Open Lip Sync Validator** to inspect the effective map before entering Play Mode.
+
+<figure><img src="../../../../.gitbook/assets/unity-lip-sync-target-meshes.png" alt="Convai Lip Sync Inspector with numbered markers beside Auto-Find, Target Meshes, and Open Lip Sync Validator. The sample list includes body and tongue renderers."><figcaption><p>Select <strong>Auto-Find</strong> (1), check the renderers under <strong>Target Meshes</strong> (2), then select <strong>Open Lip Sync Validator</strong> (3).</p></figcaption></figure>
 {% endstep %}
 
 {% step %}

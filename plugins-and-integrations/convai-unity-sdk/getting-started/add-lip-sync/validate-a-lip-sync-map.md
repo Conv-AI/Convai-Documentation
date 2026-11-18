@@ -35,6 +35,8 @@ Correct target names in the [mapping asset](create-a-custom-blendshape-map.md), 
 ### Verify motion and retain evidence
 
 Choose **Export Report** to save the validation results. Enter Play Mode and test a short conversation with the character. Inspect mouth movement, settling and timing; a structurally valid map can still use unsuitable multipliers or the wrong facial mesh.
+
+<figure><img src="../../../../.gitbook/assets/unity-lip-sync-live-mouth-shapes.png" alt="Three close-ups of the LipSync Sample character captured before, during, and after a live reply."><figcaption><p>Compare the mouth before the reply (1), while the character speaks (2), and after playback ends (3). To assess timing, watch the mouth while listening to the reply.</p></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 

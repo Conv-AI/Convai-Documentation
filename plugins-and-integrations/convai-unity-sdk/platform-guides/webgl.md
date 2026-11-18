@@ -34,6 +34,8 @@ Convai-Powered Unity 6 Web Projects (previously referred to as WebGL builds)
 **HTTPS is required for microphone access.** Browsers block microphone capture on non-secure origins. Serve your WebGL build over HTTPS. `localhost` is also suitable for local testing. A denied or unavailable microphone is reported through the session error path. Your UI should explain the failure and keep typed input available in an ordinary room.
 {% endhint %}
 
+<figure><img src="../../../.gitbook/assets/unity-webgl-browser-microphone-prompt.png" alt="Chrome for Testing microphone prompt for the local Unity WebGL test player, showing Allow while visiting the site, Allow this time, and Never allow. The device preview is hidden."><figcaption><p>(1) Chrome identifies the local test origin. (2) The Unity test player requested microphone permission through the SDK. (3) <strong>Allow this time</strong> is one option in Chrome for Testing on macOS. The device preview is hidden.</p></figcaption></figure>
+
 **iframe embedding.** For a cross-origin build, delegate microphone access to the iframe. The embedding page's Permissions Policy must also permit access for the frame. If the build uses a physical webcam, use `allow="camera; microphone"` and permit camera access in the parent policy as well.
 
 ```html

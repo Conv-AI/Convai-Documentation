@@ -40,11 +40,19 @@ Choose **Explore current scene** or **Explore selected objects**. Captures and c
 In **Review**, inspect the saved image, proposed **Name**, and **Description**. Correct inaccurate text. A row's include control determines whether Apply uses it; the separate checked state selects batch operations.
 
 For a poor image, use **Edit view**, then **Use view** to save locally or **Use & analyze** to submit it. **Analyze saved image** reuses the retained capture. **Auto recapture & analyze** takes a fresh one. A correction note affects the next analysis of that object and is not stored in the scene.
+
+<figure><img src="../../../../.gitbook/assets/unity-scene-tagger-view-before.png" alt="Scene Auto Tagger Adjust View shows the front face of a red exhibit in the local preview."><figcaption><p>Before orbiting in (1) <strong>Adjust View</strong>, the local preview shows mostly the front face.</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-scene-tagger-edit-view.png" alt="Scene Auto Tagger displays the red exhibit from an angle after orbiting, with Use View and Use &amp; Analyze marked."><figcaption><p>After orbiting, more sides of the exhibit are visible. Choose (1) <strong>Use View</strong> to save the capture locally or (2) <strong>Use &amp; Analyze</strong> to submit it for analysis.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Apply approved results
 
 Review **Settings** for duplicate grouping, spatial context, action targets, gaze companions, and standing positions. Apply only the intended objects. The tool records Undo and marks scenes dirty; save the scene after inspecting the result.
+
+<figure><img src="../../../../.gitbook/assets/unity-scene-tagger-apply-before.png" alt="Scene Auto Tagger review footer with its Apply 1 button enabled."><figcaption><p>In this local example, (1) <strong>Apply 1</strong> will write metadata for one included object.</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-scene-tagger-apply-after.png" alt="Scene Auto Tagger review footer reports that it applied one object and prompts the reader to save the scene."><figcaption><p>After Apply, (1) the summary reports one changed object and reminds you to save the scene.</p></figcaption></figure>
 
 Apply preserves manually authored metadata and reports conflicts for objects changed since capture or edited companion components. Re-analyze a changed object rather than assuming an old capture still describes it.
 {% endstep %}

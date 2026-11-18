@@ -45,12 +45,16 @@ Select **Convai > Actions Editor**. The window opens with the scene's only `Conv
 ### Enable actions on the character
 
 If this is the character's first action, the window shows a one-step prompt: click **Enable Actions**. This adds `ConvaiActionConfigSource` (labeled **Convai Actions** in the Inspector) to the character — one click, fully undoable.
+
+<figure><img src="../../../../.gitbook/assets/unity-actions-enable-character.png" alt="Actions Editor showing the selected Convai Character and the Enable Actions button in the One Step Before Actions prompt."><figcaption><p>(1) Select a <strong>Character</strong>. (2) Click <strong>Enable Actions</strong> to enable its action configuration.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
 ### Add the Look At Target starter
 
 With no actions yet, the window shows four starter cards: **Walk To Target**, **Follow The Player**, **Look At Target**, and **Play Gesture**. Select **Look At Target**.
+
+<figure><img src="../../../../.gitbook/assets/unity-actions-first-starter.png" alt="Add Your First Action view showing Walk To Target, Follow The Player, Look At Target, and Play Gesture starter cards."><figcaption><p>(1) <strong>Add Your First Action</strong> appears when this character has no actions. (2) Select <strong>Look At Target</strong> to add the starter.</p></figcaption></figure>
 
 Convai creates a `Look At` action pre-filled from the starter, adds `ConvaiLookAtActionExecutor` to the character, and — since the character has no `ConvaiGazeController` yet — adds that too, in the same undoable step.
 {% endstep %}

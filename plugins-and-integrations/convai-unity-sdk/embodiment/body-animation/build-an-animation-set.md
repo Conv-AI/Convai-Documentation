@@ -43,6 +43,8 @@ Assign a **Folder** and select **Scan Folder** to pull in every animation clip u
 ### Review the matched proposals
 
 Use **Fix Clip Import Settings** when the clips need normalized root-motion locks/take names or removal of facial curves; review these asset changes before proceeding. Then select **Match Clip(s) By Name**. Clips named with the Convai convention are proposed against a slot — Idle, Talk, Locomotion, Pointing, or Action — each as an editable row with a confidence badge (**Match**, **Guess**, **Review**, or **Unrecognised**). Nothing is written to any asset yet. Clips the matcher does not recognise are listed and excluded by default; assign a category yourself to include one.
+
+<figure><img src="../../../../.gitbook/assets/unity-body-animation-matching.png" alt="Create Animation Set wizard with three matching proposals and a Guess badge on the clap clip."><figcaption><p>In <strong>Matching</strong> (1), review the <strong>Guess</strong> badge (2) for the clap clip and check the proposed <strong>Action</strong> slot (3).</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -109,6 +111,8 @@ Each slot pairs a clip with measured motion metadata (authored speed, distance, 
 Turn-in-place and planted-stop clips also need their config toggles enabled; both are off by default.
 
 ### Actions and gestures
+
+<figure><img src="../../../../.gitbook/assets/unity-body-animation-gesture-clip.png" alt="Action Clips &amp; Gestures list with markers beside wave, its Anim_F_Hi clip, and its Greeting cue."><figcaption><p>In <strong>Content</strong>, the <strong>wave</strong> entry (1) uses the <strong>Anim_F_Hi</strong> clip (2) and the <strong>Greeting</strong> cue (3).</p></figcaption></figure>
 
 | Field | Purpose |
 | --- | --- |
