@@ -68,6 +68,8 @@ The roster also marks `· opened the room` for the initial character, shows **No
 
 Before Play, resolve **This room will not be able to grow** if several characters are selected but only one is active. **Enable It** or **Enable Them** activates the selected inactive characters so the next connection can open with a roster. Set every character's version to **Live**.
 
+<figure><img src="../../../../.gitbook/assets/unity-room-ready-seats.png" alt="The live manager shows three characters in the room, Tuesday NPC under Talking To, and Tuesday marked Ready and addressed."><figcaption><p>(1) Read <strong>Talking To</strong> to see which character receives player input. (2) Find that character’s <strong>Ready · addressed</strong> row in the roster.</p></figcaption></figure>
+
 ## Next steps
 
 {% content-ref url="how-multi-character-sessions-work.md" %}

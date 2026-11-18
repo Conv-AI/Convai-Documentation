@@ -38,7 +38,7 @@ The Editor downloads prebuilt native libraries for these target architectures; t
 **Linux arm64 is not supported.** If your deployment target includes Linux arm64 machines, the native transport library will fail to load and voice conversation will not work. Only x86\_64 is available on Linux.
 {% endhint %}
 
-The downloader installs libraries for the Editor and active build target under `Assets/Convai/Plugins/client-sdk-unity-livekit/Runtime/Plugins`. Windows defaults to x86_64; use **Convai > Platform Support > Download FFI Libraries (All Platforms)** when another listed architecture is needed. See [Native transport libraries](native-transport-libraries.md).
+The downloader installs libraries for the Editor and active build target under `Assets/Convai/Plugins/client-sdk-unity-livekit/Runtime/Plugins`. Windows defaults to x86_64; use **Convai > Platform Support > Download Native Libraries (All Platforms)** when another listed architecture is needed. See [Native transport libraries](native-transport-libraries.md).
 
 The SDK macOS build processor combines arm64 and x86_64 slices for Universal players. Confirm the built app contains the resulting native plugin and test both target architectures; Editor playback does not prove the Universal build.
 

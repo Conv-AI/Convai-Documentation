@@ -92,7 +92,9 @@ The Multi-Character Sample also contains `GroupConversationSample.unity`. Follow
 
 ## Sample render pipeline notes
 
-Sample scenes are built with the Universal Render Pipeline (URP). If your project uses a different render pipeline, materials may appear pink after import. Convert the materials to match your active render pipeline using **Edit > Rendering > Materials**, then select the appropriate conversion option for your pipeline.
+Sample scenes are built with the Universal Render Pipeline (URP). In a project that uses the Built-in Render Pipeline, URP materials can appear bright pink. Use URP for the sample, or assign materials that use shaders compatible with your project. Preserve the material properties you need, such as its base color and texture.
+
+<figure><img src="../../../.gitbook/assets/unity-basic-sample-pipeline-mismatch-and-fix.png" alt="The same Basic Sample cube and camera in the Built-in Render Pipeline. The cube renders magenta with URP Lit and shows its material color after switching to Standard."><figcaption><p>(1) The imported cube’s <strong>URP Lit</strong> shader renders magenta in a Built-in project. (2) A <strong>Standard</strong> material using the same base color restores the cube’s shading in that project.</p></figcaption></figure>
 
 ## Next steps
 

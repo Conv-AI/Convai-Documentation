@@ -62,6 +62,10 @@ Enter Play mode with two or more characters registered. Under `LookAt` or `Proxi
 The Live section reports the addressed character changing as you move between characters. If it never changes, see [Troubleshoot conversation targeting](troubleshooting.md).
 {% endhint %}
 
+<figure><img src="../../../../.gitbook/assets/unity-target-look-at.png" alt="Fixed Game view with Tuesday closer on the left and Friday in the center. The Look At mode addresses Friday."><figcaption><p>(1) <strong>Talking to</strong> shows Friday. (2) In <strong>Look At</strong> mode, Friday is the ready character in the center of the camera view.</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-target-proximity.png" alt="The same Game view in Proximity mode, with Tuesday named as the addressed character."><figcaption><p>(1) <strong>Talking to</strong> now shows Tuesday. (2) With the camera and characters in the same positions, <strong>Proximity</strong> chose the nearer character on the left.</p></figcaption></figure>
+
 ## Next steps
 
 {% content-ref url="tune-targeting.md" %}

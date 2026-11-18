@@ -27,6 +27,10 @@ Convai classifies every settings asset into one of four ownership kinds (`SDK/Ed
 | Project-shared | A project asset that other characters in the open scenes also read. | A warning titled **Shared by N characters** naming how many characters share it, with a **Make Unique For This Character** button. |
 | SDK-owned | An assigned asset whose path is outside `Assets/`. | Character Inspector controls remain editable and copy on first edit without an SDK-owned notice. Selecting a saved asset itself shows a read-only info notice and **Create A Project Copy**. |
 
+<figure><img src="../../../.gitbook/assets/unity-gaze-shared-project-profile.png" alt="Nova's Gaze Inspector shows that two characters share the assigned Gaze profile and offers Make Unique For This Character."><figcaption><p>In Nova’s Gaze Inspector, the notice identifies the two users of this profile (1). Select <strong>Make Unique For This Character</strong> (2) to give Nova a separate copy.</p></figcaption></figure>
+
+<figure><img src="../../../.gitbook/assets/unity-gaze-profile-after-make-unique.png" alt="Nova uses the Nova_Gaze copy while Rowan still uses Shared Gaze."><figcaption><p>After the copy, Nova uses <strong>Nova_Gaze</strong> (1). Rowan still uses <strong>Shared Gaze</strong> (2).</p></figcaption></figure>
+
 Sharing is reported, not blocked — editing several characters that share a profile at once is a choice you can legitimately make. Only an SDK-owned asset requires a copy before an edit means anything.
 
 ***

@@ -26,6 +26,9 @@ If you see a warning, find the exact message in the [Console log reference](#con
 Before debugging your own integration, confirm that Dynamic Context itself is working. Add `SamplesShared/Prefabs/UI/Debug/Sample Debug Hub.prefab` to a test scene explicitly. The prefab's **Context** drawer sends state, event, and attention-object updates; sample scenes do not include this hub automatically.
 
 Compare the same character and room state through the hub and your own integration. A difference helps isolate wiring or validation problems.
+
+<figure><img src="../../../../.gitbook/assets/unity-dynamic-context-local-read.png" alt="The Context drawer shows the example state station set to lobby and confirms the same value in the local readout."><figcaption><p>(1) Enter the key <code>station</code> and the value <code>lobby</code>. (2) Select <strong>Set</strong>. (3) Enter the same key under the buttons and select <strong>Read Local State</strong>. The result shows <code>station=lobby</code>.</p></figcaption></figure>
+
 {% endstep %}
 
 {% step %}

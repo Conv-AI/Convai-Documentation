@@ -55,6 +55,10 @@ Review **Settings** for duplicate grouping, spatial context, action targets, gaz
 <figure><img src="../../../../.gitbook/assets/unity-scene-tagger-apply-after.png" alt="Scene Auto Tagger review footer reports that it applied one object and prompts the reader to save the scene."><figcaption><p>After Apply, (1) the summary reports one changed object and reminds you to save the scene.</p></figcaption></figure>
 
 Apply preserves manually authored metadata and reports conflicts for objects changed since capture or edited companion components. Re-analyze a changed object rather than assuming an old capture still describes it.
+
+<figure><img src="../../../../.gitbook/assets/unity-scene-tagger-prop-before-apply.png" alt="Red Exhibit Inspector before Apply with only the Transform, mesh, and collider components shown."><figcaption><p>Before Apply, (1) <strong>Red Exhibit</strong> has geometry and a collider.</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-scene-tagger-prop-after-apply.png" alt="Red Exhibit Inspector after Apply showing its added World Object and the written Object Name and Object Description."><figcaption><p>After Apply, the same (1) <strong>Red Exhibit</strong> has a (2) <strong>World Object</strong> with the example’s approved name and description under (3) <strong>Object Metadata</strong>.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Test runtime delivery

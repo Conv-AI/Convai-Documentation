@@ -53,6 +53,10 @@ A manager-owned, selected character that appears in a roster room can join witho
 
 This works because the sample connects with three characters active, which opens a room with a roster. A room that connects with a single character carries no roster and cannot grow later — have every character you want active in the scene before it connects.
 
+<figure><img src="../../../../.gitbook/assets/unity-room-disabled-seat.png" alt="Three seats remain in Room Roster after the Friday character GameObject was disabled."><figcaption><p>(1) After disabling Friday’s GameObject, <strong>Characters In Room</strong> still reads three. (2) Friday still has a seat in the roster.</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-room-removed-seat.png" alt="Two characters remain in the room after removing Friday from the live connection list."><figcaption><p>(1) After removing Friday from the connection list, <strong>Characters In Room</strong> drops to two. (2) Only Tuesday and Wednesday remain in the roster.</p></figcaption></figure>
+
 ## How the sample reads targeting and availability
 
 Nothing in the sample scripts makes the multi-character conversation work — that is the SDK's job and needs no setup. `MultiCharacterSampleController` only reads the result, through the two members a project's own indicator should read:

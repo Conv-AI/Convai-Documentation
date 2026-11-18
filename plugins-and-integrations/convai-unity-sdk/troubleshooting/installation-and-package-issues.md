@@ -144,10 +144,10 @@ If a native build reports a missing FFI library, inspect download errors and cho
 
 | Menu | Purpose |
 | --- | --- |
-| **Convai → Platform Support → Download FFI Libraries (Current Platform)** | Fetch the Editor host platform |
-| **Convai → Platform Support → Download FFI Libraries (Active Build Target)** | Fetch the selected build target |
-| **Convai → Platform Support → Download FFI Libraries (All Platforms)** | Fetch every supported native platform |
-| **Convai → Platform Support → Clear FFI Libraries** | Remove downloaded libraries before a controlled re-download |
+| **Convai → Platform Support → Download Native Libraries (Current Platform)** | Fetch the Editor host platform |
+| **Convai → Platform Support → Download Native Libraries (Active Build Target)** | Fetch the selected build target |
+| **Convai → Platform Support → Download Native Libraries (All Platforms)** | Fetch every supported native platform |
+| **Convai → Platform Support → Clear Native Libraries** | Remove downloaded libraries before a controlled re-download |
 
 Deleting `Assets/Convai/` also deletes these downloaded binaries and any project-owned content there. A package reinstall alone does not prove a native target's files have been restored. Verify that the target's libraries import before building. See [Native transport libraries](../platform-guides/native-transport-libraries.md).
 

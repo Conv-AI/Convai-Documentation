@@ -115,6 +115,8 @@ Vision trigger: status=Succeeded, outcome=frames_available, attach=attached, fra
 
 For a scene-only check without the hub, add `DynamicVisionContextSceneTool` to any GameObject. It exposes the same three actions through an IMGUI overlay and equivalent context menu commands (**Send Text Message**, **Request Vision Status**, **Trigger Vision**). The scene does not place the separate VisionTargets materials as colored test props. Add your own distinct visible objects when testing what the camera sees.
 
+<figure><img src="../../../../.gitbook/assets/unity-vision-trigger-no-frames.png" alt="The Vision Debug drawer reports a successful command with outcome vision_not_enabled and zero attached frames."><figcaption><p>(1) Select <strong>Vision Trigger</strong> to request a frame. (2) In this room, <code>vision_not_enabled</code> and <code>frames=0</code> explain why the command attached no image.</p></figcaption></figure>
+
 ## Known limitations
 
 * Editor only. `VisionDebugPreview` calls `enabled = false` in `Awake()` on non-Editor builds. It does not display a preview in shipped builds.

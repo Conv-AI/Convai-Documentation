@@ -45,6 +45,10 @@ Select the `GameObject` carrying `ChatTranscriptUI` and find the **Input Availab
 
 Enter Play mode and step through the states — disconnected, connecting, and connected before the character is confirmed — confirming each shows the prompt you set. Type a message before the field opens and confirm the refusal notice, if assigned, shows your expected wording.
 
+<figure><img src="../../../../.gitbook/assets/unity-availability-ready-prompt.png" alt="Tuesday is addressed and the enabled chat input displays the example prompt Ask Tuesday a question."><figcaption><p>(1) Tuesday is the addressed character. (2) The ready prompt <code>Ask {0} a question</code> inserts her name when the field accepts input.</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-availability-offline-prompt.png" alt="The same demo session is offline and the disabled chat input displays the custom prompt Connect to start chatting."><figcaption><p>(1) The sample reports <strong>Offline</strong> after disconnecting. (2) The disabled field shows the configured offline prompt, <strong>Connect to start chatting</strong>.</p></figcaption></figure>
+
 ## Next steps
 
 {% content-ref url="gate-your-ui.md" %}

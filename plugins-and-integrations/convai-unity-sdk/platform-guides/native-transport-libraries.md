@@ -20,13 +20,15 @@ The SDK pins LiveKit FFI <code class="expression">space.vars.unity_native_ffi_ve
 {% step %}
 ### Select a download scope
 
-The downloader runs on Editor load for the Editor platform and active build target. To retry or prepare another target, use **Convai > Platform Support**:
+The downloader runs on Editor load for the Editor platform and active build target. To retry or prepare another target, use **Convai > Platform Support**.
+
+<figure><img src="../../../.gitbook/assets/unity-native-library-platform-menu.png" alt="Convai Platform Support submenu showing three Download Native Libraries scopes and Clear Native Libraries."><figcaption><p>Open (1) <strong>Platform Support</strong> from the <strong>Convai</strong> menu, then choose the download scope for your project.</p></figcaption></figure>
 
 | Menu action | Scope |
 | --- | --- |
-| Download FFI Libraries (Current Platform) | The current Editor platform. |
-| Download FFI Libraries (Active Build Target) | Architectures selected for the active player target. |
-| Download FFI Libraries (All Platforms) | Every architecture listed in the package manifest. |
+| Download Native Libraries (Current Platform) | The current Editor platform. |
+| Download Native Libraries (Active Build Target) | Architectures selected for the active player target. |
+| Download Native Libraries (All Platforms) | Every architecture listed in the package manifest. |
 
 Wait for download and import before connecting or building. Newly downloaded libraries stay disabled until the Editor applies platform and architecture settings. Redownloading preserves existing importer metadata.
 {% endstep %}

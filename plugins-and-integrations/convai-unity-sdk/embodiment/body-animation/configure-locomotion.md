@@ -22,6 +22,8 @@ Add `ConvaiNavMeshLocomotion` to a Convai character so it can walk and jog acros
 ### Bake a NavMesh for the floor
 
 With `com.unity.ai.navigation` installed, add a `NavMeshSurface` that includes the walkable geometry and select **Bake**. The character must stand on the baked mesh.
+
+<figure><img src="../../../../.gitbook/assets/unity-navmesh-surface-baked.png" alt="Unity Inspector showing the baked NavMesh Surface on Exhibit Floor and its assigned NavMesh Data."><figcaption><p>In the (1) <strong>NavMesh Surface</strong>, select (2) <strong>Bake</strong>. Unity populates (3) <strong>NavMesh Data</strong> when the bake completes.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -40,6 +42,8 @@ Enter Play mode and call `MoveTo` from script (see **Move the character from scr
 {% endstepper %}
 
 ***
+
+<figure><img src="../../../../.gitbook/assets/unity-navmesh-obstacle-route.png" alt="Scene view of a selected NavMesh agent following a path around a crate. Markers show the walkable floor, route, and destination."><figcaption><p>With Scene view gizmos visible, the floor shows the walkable area (1). The selected agent’s path bends around the crate (2) toward the destination sphere (3).</p></figcaption></figure>
 
 ## Configure movement speed and turning
 

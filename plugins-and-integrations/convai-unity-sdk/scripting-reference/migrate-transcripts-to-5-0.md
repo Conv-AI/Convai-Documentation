@@ -34,6 +34,8 @@ Use `TranscriptEntry.Id` as the key. For Added, Updated, Finalized, and Correcte
 
 <figure><img src="../../../.gitbook/assets/unity-character-event-relay.png" alt="Character Events Inspector with a target character and the empty On Spoken Line event showing the CharacterSpokenLineRelayData payload type and an Add Listener button."><figcaption><p>(1) Check the target <strong>Character</strong>. (2) <strong>On Spoken Line</strong> shows the <code>CharacterSpokenLineRelayData</code> payload type. (3) Use <strong>+</strong> to add the new listener.</p></figcaption></figure>
 
+<figure><img src="../../../.gitbook/assets/unity-character-spoken-line-receiver.png" alt="On Spoken Line UnityEvent with a persistent text-widget receiver accepting CharacterSpokenLineRelayData."><figcaption><p>In this example, (1) <strong>On Spoken Line</strong> invokes (3) <code>DemoTranscriptLineReceiver.ReceiveLine</code> on (2) the transcript label object. The method accepts <code>CharacterSpokenLineRelayData</code> and copies its <code>Text</code> to the label.</p></figcaption></figure>
+
 `ConvaiTranscriptEventRelay` now emits entry updated/finalized/corrected/removed callbacks plus reset. Set **Speaker Filter** and **Character Id Filter**. Replace code that used `FinalOnly`, `IgnoreInterimUpdates`, or the previous player and character transcript payloads.
 
 ## Apply lifecycle and presentation rules

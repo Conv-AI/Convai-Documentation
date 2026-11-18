@@ -39,6 +39,10 @@ Backend frame-sampling configuration for dynamic vision context, sent as `vision
 
 The Inspector shows **Custom Frame Spacing** rows as **N frames, M ms apart**, with **Add Window**. Its caption explains that zero-count or zero-spacing windows are skipped, and it warns when the total exceeds **Frames Per Reply**.
 
+<figure><img src="../../../../.gitbook/assets/unity-vision-frame-budget-warning.png" alt="Room Manager Vision settings with Frames Per Reply set to 5, windows requesting 3 and 4 frames, and a warning that later windows are trimmed."><figcaption><p>(1) <strong>Frames Per Reply</strong> sets a budget of five. (2) The two windows ask for three and four frames. (3) The Inspector warns that later windows are trimmed to fit.</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-vision-frame-budget-cleared.png" alt="The same Room Manager Vision settings with a budget of 5 and windows requesting 3 and 2 frames. The warning is gone."><figcaption><p>(1) The budget is still five. (2) Lowering the second count from four to two clears the local warning.</p></figcaption></figure>
+
 A sampling window picks a fixed count of frames spaced a fixed interval apart, so a project can combine dense recent motion with sparse older context — for example a `6`-frame window at `300` ms spacing plus a `6`-frame window at `1000` ms spacing (with `Frames Per Reply` set to at least `12`). When no window is configured, the backend samples uniformly at `Frame Interval (s)` instead.
 
 Each window's `Count` and `Interval Ms` default to `0`, and a window is either fully configured or dropped entirely — there is no partial state. Setting only one of `Count` or `Interval Ms` leaves the window at `0` on the other field, and the SDK drops that window before sending `vision_input_config`; it never clamps a `0` ms interval up to the `1` ms floor. This matters because the request can ask for densely spaced frames, so a stray `1` ms window would request maximal capture load for the whole session. A window only reaches the backend when both `Count` (1–20) and `Interval Ms` (1–60000) are set.

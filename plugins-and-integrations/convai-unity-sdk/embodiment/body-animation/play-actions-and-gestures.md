@@ -125,6 +125,8 @@ The anchor's height is ignored for alignment — only its XZ position and yaw ma
 
 `PointAt` raises the arm toward a world position or a moving transform, holds at the apex, then lowers.
 
+<figure><img src="../../../../.gitbook/assets/unity-body-animation-held-point.png" alt="Three views of the same character raising an arm toward an orange block, holding the point, and lowering the arm."><figcaption><p>The arm raises (1), holds at the apex (2), then lowers (3). This example sets <code>HoldSeconds</code> to 1.7 seconds and uses <code>Release()</code> to end the pose.</p></figcaption></figure>
+
 ```csharp
 using Convai.Modules.BodyAnimation;
 using Convai.Modules.BodyAnimation.Components;

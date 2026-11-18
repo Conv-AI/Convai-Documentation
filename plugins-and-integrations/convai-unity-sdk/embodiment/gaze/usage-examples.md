@@ -59,6 +59,8 @@ public sealed class NegotiationDocumentCue : MonoBehaviour
 
 **Expected outcome:** The negotiator glances down at the contract for two seconds without turning its body, then returns its attention to the trainee automatically once the hold ends.
 
+<figure><img src="../../../../.gitbook/assets/unity-gaze-glance-and-return.png" alt="The sample character looks toward the blue visitor marker, glances down at the orange document on the table, and looks back."><figcaption><p>From one fixed camera, the character looks toward the visitor marker (1), glances down at the orange document (2), and looks back (3). Its feet stay in place.</p></figcaption></figure>
+
 ## Scenario 3: Multi-character listening in a group scene
 
 **Situation:** A corporate-onboarding scene has three NPCs standing together. While one is speaking, the other two should turn to listen; while all three are idle, they should exchange occasional glances instead of staring blankly ahead.

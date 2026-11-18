@@ -51,6 +51,8 @@ Body Language has no dedicated editor window like Gaze or Body Animation. All of
 
 Enter Play mode and start a conversation with the character. Even standing idle, the character should breathe, periodically shift its weight and sway on the spot, and its posture should visibly settle differently as the conversation moves between listening, thinking, and speaking. While it speaks, small head beats and posture pulses should ride its speech rhythm.
 
+<figure><img src="../../../../.gitbook/assets/unity-body-language-listening-posture.png" alt="Two waist-up frames from the same camera show the character before and during active listening."><figcaption><p>The same character moves from <strong>Attending</strong> (1) to <strong>Listening</strong> (2). The Body Language readout recorded a lean of 0.26 before the transition and 0.49 during listening. The example uses a local demonstration signal.</p></figcaption></figure>
+
 {% hint style="success" %}
 **Expected result:** the character breathes continuously, shifts its weight every so often instead of standing rigid, and its posture noticeably opens or leans as the conversation moves from idle to listening to speaking.
 {% endhint %}

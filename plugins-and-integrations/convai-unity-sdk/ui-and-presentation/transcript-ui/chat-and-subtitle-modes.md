@@ -92,6 +92,8 @@ For one character, attach the [Per-character transcript display](per-character-t
 
 Keep captions keyed by speaker and match the turn before clearing a cue. Remove a matching `Cleared` cue immediately. The display chooses how long to hold a completed caption. Caption changes can contain a full sentence. For replay, presentation visibility, and cleanup, see [Transcript API](../../scripting-reference/transcript-api.md).
 
+<figure><img src="../../../../.gitbook/assets/unity-live-chat-and-captions.png" alt="During Tuesday’s spoken reply, the chat history contains the player’s greeting and Tuesday’s reply. A separate caption label shows the same spoken words."><figcaption><p>(1) The player’s message stays in chat. (2) Tuesday’s reply appears in the next bubble. (3) A separate caption label displays Tuesday’s words during playback.</p></figcaption></figure>
+
 ## Plain text and font coverage
 
 Chat bubbles disable rich text for both names and messages. `Use System Font Fallback` adds available device fonts to TextMesh Pro's fallback list. It does not add fonts in a WebGL player, so include suitable font assets for the languages your browser build needs. Device font availability does not guarantee complete language coverage.
