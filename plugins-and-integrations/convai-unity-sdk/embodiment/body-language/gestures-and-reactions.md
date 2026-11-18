@@ -1,14 +1,14 @@
 ---
 title: Trigger gestures and reactions
 description: Trigger scripted head nods, semantic gesture cues, and one-shot reactions on a Convai character, and handle a refused or busy request.
-last_reviewed: "5.0.0-pre.1"
+last_reviewed: "4.5.0"
 ---
 
 Trigger a scripted head gesture, a semantic gesture cue, or a one-shot bodily reaction on a Convai character that has `ConvaiBodyLanguageController`, and handle the cases where the character cannot perform the gesture right now.
 
 ## Prerequisites
 
-* A character with a resolved Spine and `ConvaiBodyLanguageController` (**Convai > Embodiment > Body Language**) already added and running. See [Body language quick start](quick-start.md).
+* A Humanoid character with `ConvaiBodyLanguageController` (**Convai > Embodiment > Body Language**) already added and running. See [Body language quick start](quick-start.md).
 * A reference to the controller on the character, resolved with `GetComponent<ConvaiBodyLanguageController>()`.
 
 ## Trigger a scripted head gesture
@@ -72,10 +72,13 @@ The shipped action executor `ConvaiHeadResponseActionExecutor` (menu path **Conv
 
 ## Trigger a semantic gesture cue
 
-`PulseGesture(GestureCue cue)` asks the gesture performer to play a matching clip. Its Boolean result reports whether the performer accepted the request. A refused cue can still produce a procedural head beat and posture pulse.
+`PulseGesture(GestureCue cue)` requests a semantic gesture with priority over automatic gesticulation. It returns a `GestureCueHandle` whose `Completion` resolves as soon as the cue's dispatch outcome is known — accepted for performance, or refused and substituted. It does not track the resulting clip through to its visual end.
 
 ```csharp
-bool accepted = _bodyLanguage.PulseGesture(new GestureCue(GestureCueKind.Affirmative));
+using Convai.Domain.Embodiment.Interfaces;
+
+GestureCueHandle cue = _bodyLanguage.PulseGesture(new GestureCue(GestureCueKind.Affirmative));
+await cue.Completion;
 ```
 
 Only four `GestureCueKind` values map to shipped animation content today: `Affirmative`, `Negative`, `Greeting`, and `Uncertain`. The remaining values — `Emphatic`, `Beat`, `PalmToPlayer`, `HandToChest`, `IndicateObject`, and `Enumerate` — are reserved data-model slots for future co-speech and referential-gesture content. No shipped animation set tags a clip with any of them, so a cue built from a reserved value always resolves to "no mapping": the request falls back to the same head-beat and posture-pulse primitives `PulseGesture` uses for any refused cue, and on a complete Humanoid arm chain, a short procedural arm/hand gesture. `GestureCueKind.None` is always refused.
@@ -85,8 +88,6 @@ Only four `GestureCueKind` values map to shipped animation content today: `Affir
 `TriggerReaction(ReactionKind kind, float intensity = 1f)` fires a one-shot bodily reaction. It is fire-and-forget — there is no handle, because every reaction envelope runs under two seconds.
 
 ```csharp
-using Convai.Domain.Embodiment.Semantics;
-
 _bodyLanguage.TriggerReaction(ReactionKind.AmusementBounce, intensity: 0.8f);
 ```
 
@@ -98,7 +99,7 @@ _bodyLanguage.TriggerReaction(ReactionKind.AmusementBounce, intensity: 0.8f);
 | `CatchBreath` (`3`) | Routes to the breathing system's catch-breath event. | Scripted only, via `TriggerReaction`. |
 | `Sigh` (`4`) | Routes to the breathing system's sigh event. | Scripted only, via `TriggerReaction`. |
 
-Exactly one of `SurpriseFlinch`/`AmusementBounce` plays at a time — a new trigger replaces whatever is currently playing. Each category respects its own profile toggle (`React To Sudden Emotion`, **Catch Breath If Interrupted**, `Sigh When Settling`); a disabled category is silently dropped.
+Exactly one of `SurpriseFlinch`/`AmusementBounce` plays at a time — a new trigger replaces whatever is currently playing. Each category respects its own profile toggle (`React To Sudden Emotion`, `Catch Breath When Interrupted`, `Sigh When Settling`); a disabled category is silently dropped.
 
 `TriggerReaction` is safe to call on a controller that cannot tick — disabled, not playing, or inert from a missing rig — it becomes a silent no-op, matching `Nod` and `PulseGesture`'s degradation behavior.
 
@@ -114,7 +115,7 @@ Autonomous programs already in flight are left running — only the controller's
 
 ## Verify the setup
 
-Enter Play mode and call `Nod`, `PulseGesture`, or `TriggerReaction` from your script. The character plays the requested motion layered on top of whatever it is already doing — breathing, weight shifts, and gaze continue underneath. Use `Current.HasActiveHeadGesture`, `Current.LastGestureCueKind`, and `Current.ActiveReaction`, or `CaptureSnapshot()`, to inspect those requests. **Runtime Status** shows the module, dialogue state, rig, policy, and body-sharing status; it does not show every gesture or reaction field.
+Enter Play mode and call `Nod`, `PulseGesture`, or `TriggerReaction` from a script or the Action Debug Window. The character plays the requested motion layered on top of whatever it is already doing — breathing, weight shifts, and gaze continue underneath. The `ConvaiBodyLanguageController` Inspector's **Runtime Status** section shows the active head gesture, the last gesture cue attempted, and the active reaction while the scene plays.
 
 ## Next steps
 

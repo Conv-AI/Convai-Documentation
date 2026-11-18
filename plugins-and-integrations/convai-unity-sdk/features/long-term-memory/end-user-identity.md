@@ -1,114 +1,148 @@
 ---
 title: End-user identity
-description: Supply a stable identity for character memory, choose per-connection overrides or a provider, and verify which identity the connection confirms.
-last_reviewed: "5.0.0-pre.1"
+description: Understand how the SDK identifies users for long-term memory scoping and how to implement a custom authentication-backed identity provider.
+last_reviewed: "4.5.0"
 ---
 
-Supply a stable `end_user_id` so successive memory requests identify the same person. Use an application account ID when people sign in; the default `DeviceEndUserIdProvider` identifies the Editor environment or device instead.
+Every long-term memory session requires a stable `end_user_id` — a string the SDK sends to Convai on every connection. Convai uses it to scope stored memories: facts extracted from a conversation are stored under the combination of `end_user_id` and `character_id`. If the identifier changes between sessions, the server treats the user as a new person and no memories carry over.
+
+The SDK provides `DeviceEndUserIdProvider` as a zero-config default. For applications with user authentication, you can replace it with a custom provider that returns your account IDs.
+
+***
 
 ## Default identity: `DeviceEndUserIdProvider`
 
-`DeviceEndUserIdProvider` implements `IEndUserIdProvider` and `IEndUserIdentityProvider`. The default runtime uses it when your application does not supply an identity provider.
+`DeviceEndUserIdProvider` implements both `IEndUserIdProvider` and `IEndUserIdentityProvider`. It is registered automatically — no configuration required.
 
-| Context | Identity source |
-|---|---|
-| Unity Editor | Reads or creates a GUID in `PlayerPrefs` under `convai.end_user_id`. |
-| Player build | Uses `SystemInfo.deviceUniqueIdentifier` when nonblank, supported, and not entirely zeroes. |
-| Player build without a usable device ID | Reads or creates the same persisted GUID fallback. |
+**In the Unity Editor:** Always reads or creates a GUID stored in `PlayerPrefs` under the key `"convai.end_user_id"`. Every Play Mode session on the same machine shares this GUID, so memories accumulate as expected during development and testing.
 
-Generated fallback GUIDs use 32 hexadecimal characters without hyphens. Deleting the stored fallback can change identity; device identifiers have platform-dependent lifetimes. Neither source represents a signed-in account. Use an account identifier when identity must follow a person across devices.
+**In player builds:** First attempts `SystemInfo.deviceUniqueIdentifier`. If that value is unavailable, empty, equals `SystemInfo.unsupportedIdentifier`, or consists entirely of zeros, it falls back to a `PlayerPrefs` GUID — generated once and reused across all subsequent sessions on that device.
+
+The GUID is formatted as a 32-character hex string without hyphens (e.g., `a1b2c3d4e5f6789012345678abcdef01`). You will see this format in console logs and when inspecting `EndUserDetails.EndUserId`.
+
+`PlayerPrefs` does not survive reinstalls. Clearing `PlayerPrefs` or reinstalling the application generates a new GUID. Convai treats the new GUID as a new user — all previously stored memories become inaccessible under the new ID (though they remain on the server under the old ID). For applications where data continuity across reinstalls matters, use a server-assigned account ID via a custom provider. See [Implement a custom identity provider](#implement-a-custom-identity-provider) below.
+
+***
 
 ## Player ID is not end-user ID
 
-`ConvaiPlayer.PlayerId` is local presentation identity. Changing it does not set the connection's `end_user_id`. `ConvaiPlayer.PlayerName` can supply a display-name fallback, but the name and durable ID are separate fields.
+**Setting Player ID on the `ConvaiPlayer` component does not change the `end_user_id` used for memory scoping.** Player ID controls only how the local player's name appears in transcripts and debug logs. Memory scoping is always determined by `IEndUserIdentityProvider`, not by `ConvaiPlayer`.
+
+***
 
 ## Implement a custom identity provider
 
-Install providers before connecting. If sign-in completes asynchronously, turn off **Starts Connected** on `ConvaiRoomManager`. Initiate the connection after the signed-in identity is ready.
+If your application authenticates users, implement `IEndUserIdentityProvider` to return a stable, server-assigned account identifier. This ensures memories follow a user across devices and reinstalls.
 
-The following component is called by your application's sign-in flow. It does not assume a particular authentication library:
+### Implement the interface
 
-{% code title="Assets/Scripts/AccountIdentityInstaller.cs" %}
 ```csharp
-using System;
-using System.Collections.Generic;
 using Convai.Domain.Identity;
-using Convai.Runtime.Components;
-using UnityEngine;
 
-public sealed class AccountIdentityInstaller : MonoBehaviour
+public class AccountIdentityProvider : IEndUserIdentityProvider
 {
-    [SerializeField] private ConvaiManager _manager;
+    private readonly string _accountId;
 
-    // Call before ConnectAsync, using your authenticated account's stable ID.
-    public void SetSignedInUser(string accountId, string displayName)
+    public AccountIdentityProvider(string accountId)
     {
-        if (_manager == null)
-            throw new InvalidOperationException("Assign the Convai Manager first.");
-        if (string.IsNullOrWhiteSpace(accountId))
-            throw new ArgumentException("A signed-in account ID is required.", nameof(accountId));
-
-        var identity = new AccountIdentity(accountId, displayName);
-        _manager.SetEndUserIdentityProvider(identity);
-        _manager.SetEndUserMetadataProvider(identity);
+        _accountId = accountId;
     }
 
-    private sealed class AccountIdentity : IEndUserIdentityProvider, IEndUserMetadataProvider
+    public string GetEndUserId()
     {
-        private readonly string _id;
-        private readonly IReadOnlyDictionary<string, object> _metadata;
-
-        public AccountIdentity(string id, string name)
-        {
-            _id = id;
-            _metadata = new Dictionary<string, object> { ["name"] = name ?? string.Empty };
-        }
-
-        public string GetEndUserId() => _id;
-        public IReadOnlyDictionary<string, object> GetEndUserMetadata() => _metadata;
+        return _accountId;
     }
 }
 ```
-{% endcode %}
 
-Assign the manager in the Inspector, call `SetSignedInUser` after authentication, and then connect. Provider changes affect the next connection; they do not change a connection already in progress or connected.
+Use your backend-assigned account ID as the identifier. Do not use email addresses or display names — they can change, which would cause the server to treat the user as a new person.
 
 ### Optionally attach metadata
 
-`IEndUserMetadataProvider` returns a dictionary of JSON-compatible values. The `name` entry provides display text and is separate from the stable ID. The connection copies the metadata, so changing your original dictionary afterward does not modify an in-flight request.
+Implement `IEndUserMetadataProvider` to send display information alongside the identity. Convai stores this metadata in `EndUserDetails.Metadata` and uses the `"name"` key to populate the display name in the editor's Long-Term Memory panel.
+
+```csharp
+using System.Collections.Generic;
+using Convai.Domain.Identity;
+
+public class AccountMetadataProvider : IEndUserMetadataProvider
+{
+    private readonly string _displayName;
+    private readonly string _department;
+
+    public AccountMetadataProvider(string displayName, string department)
+    {
+        _displayName = displayName;
+        _department = department;
+    }
+
+    public IReadOnlyDictionary<string, object> GetEndUserMetadata()
+    {
+        return new Dictionary<string, object>
+        {
+            { "name", _displayName },
+            { "department", _department }
+        };
+    }
+}
+```
 
 ### Register before the first connection
 
-Registration can happen in `Awake` if your identity is already available then. If it is not, use explicit connection ordering rather than relying on the relative order of unrelated `Start` methods. When a different person signs in, disconnect the previous session before connecting with the next identity.
+Call `SetEndUserIdentityProvider` and `SetEndUserMetadataProvider` on `ConvaiManager` **before the first session connects**. If `ConvaiCharacter` has **Auto Connect** enabled, the connection starts immediately after `ConvaiRoomManager.Start()` completes — register your provider in `Awake()`, not `Start()`, to guarantee correct ordering.
 
-## Per-connection identity and display names
+```csharp
+using Convai.Runtime.Components;
+using UnityEngine;
 
-`RoomSessionConnectOptions` accepts `EndUserId`, `EndUserMetadata`, and `EndUserName`. Explicit values let a connection use a caller-supplied identity instead of the provider. For runtime token authentication, use the [Auth Token setup](../../authentication/README.md) with the same connection identity fields.
+public class IdentityRegistrar : MonoBehaviour
+{
+    [SerializeField] private ConvaiManager _convaiManager;
 
-For the resolved display name, the SDK uses this order:
+    private void Awake()
+    {
+        // Called before ConvaiRoomManager.Start() — safe for Auto Connect characters
+        string accountId = AuthService.CurrentUser.AccountId;
+        string displayName = AuthService.CurrentUser.DisplayName;
+        string department = AuthService.CurrentUser.Department;
 
-1. A nonblank `EndUserName` supplied for the connection.
-2. A nonblank string in the metadata's `name` entry.
-3. `ConvaiPlayer.PlayerName` as a fallback.
+        _convaiManager.SetEndUserIdentityProvider(new AccountIdentityProvider(accountId));
+        _convaiManager.SetEndUserMetadataProvider(new AccountMetadataProvider(displayName, department));
+    }
+}
+```
 
-An end-user ID longer than 512 UTF-16 units or a name longer than 255 is rejected. Metadata keys are trimmed; duplicate keys after trimming and values that cannot be copied as JSON are rejected. The connection captures the validated values once and reuses them for retries.
+{% hint style="danger" %}
+If you call `SetEndUserIdentityProvider` after `ConnectAsync` has already been called for the current session, the provider change has no effect on the active connection. The new provider is used starting with the next `ConnectAsync` call. Always register before connecting.
+{% endhint %}
+
+***
 
 ## Empty or whitespace end-user ID
 
-A blank provider ID is normalized to no ID. Whether that connection is accepted depends on the character's [end-user ID requirement](configure-end-user-id-requirement.md). Handle `connection.connect_end_user_id_required` when returned, and inspect `CurrentLongTermMemoryStatus` after a successful connection.
+{% hint style="danger" %}
+If `GetEndUserId()` returns an empty string, a whitespace-only string, or `null`, the SDK sends no end-user ID. When the character has memory on, what happens next depends on its end-user ID requirement. With **Required** (the default), Convai refuses the connect with HTTP 400 "Missing end_user_id". With **Optional**, the session runs but **no memories are stored or retrieved**. Always ensure your identity source returns a non-empty, non-whitespace value. See [Configure memory for a character](configure-memory-for-a-character.md).
+{% endhint %}
 
-Do not infer that a blank ID always creates an anonymous session. `SkippedNoEndUser` means the service reported a connection without memory; `NotReported` does not establish either outcome.
+***
 
-## Verify the resolved identity
+## Identity source comparison
 
-Read `ConvaiManager.CurrentEndUserId` after connecting, or use **End User** and **Copy End-User ID** on the manager Inspector. Compare the value privately with your intended account ID. Avoid logging identifiers, metadata, or memory text into shared diagnostics.
+| Scenario | Recommended source | Survives reinstall | Survives device switch |
+|---|---|---|---|
+| Development / testing | `DeviceEndUserIdProvider` (default) | No | No |
+| Consumer app, no accounts | `DeviceEndUserIdProvider` (default) | No | No |
+| Consumer app with accounts | Custom provider → server account ID | Yes | Yes |
+| Enterprise / training platform | Custom provider → server account ID | Yes | Yes |
+
+***
 
 ## Next steps
 
-{% content-ref url="configure-end-user-id-requirement.md" %}
-[Configure the end-user ID requirement](configure-end-user-id-requirement.md)
-{% endcontent-ref %}
-
 {% content-ref url="end-user-management.md" %}
 [Manage end-user records](end-user-management.md)
+{% endcontent-ref %}
+
+{% content-ref url="memory-management-api.md" %}
+[Memory management API](memory-management-api.md)
 {% endcontent-ref %}

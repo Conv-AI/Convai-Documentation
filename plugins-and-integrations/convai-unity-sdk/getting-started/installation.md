@@ -3,48 +3,42 @@ title: Install the Convai Unity SDK
 description: >-
   Install the Convai Unity SDK into a Unity project using Package Manager or
   Asset Store so the SDK and its dependencies resolve correctly.
-last_reviewed: "5.0.0-pre.1"
+last_reviewed: "4.6.0"
 ---
 
-Install the Convai SDK for Unity <code class="expression">space.vars.unity_sdk_version</code> in Unity <code class="expression">space.vars.unity_min_version</code>. Choose the source that supplies this exact preview. If you received a package file from Convai, you can install it directly.
+The Convai Unity SDK is available through two channels. Use **Package Manager** for new projects or when you prefer not to manage Asset Store downloads — the package resolves directly from the Convai registry with no manual download. Use **Asset Store** if your project already sources packages from your Asset Store library or if your studio manages package versions through My Assets.
+
+Both methods require Unity <code class="expression">space.vars.unity_min_version</code> and install SDK version **<code class="expression">space.vars.unity_sdk_version</code>** and the same four required dependencies.
 
 {% tabs %}
-{% tab title="Package file (.tgz)" %}
-Open **Window > Package Manager**. Select **+ > Install package from tarball**, then choose the supplied `.tgz` file. Wait for Unity to resolve the package and its dependencies. In **In Project**, select **Convai SDK for Unity** and confirm its installed version matches <code class="expression">space.vars.unity_sdk_version</code>. [Unity's tarball installation guide](https://docs.unity3d.com/6000.0/Documentation/Manual/upm-ui-tarball.html)
-{% endtab %}
-
-{% tab title="Package registry" %}
-Use this route if the registry configured for your project provides the preview.
-
+{% tab title="Package Manager" %}
 {% stepper %}
 {% step %}
 ### Open Package Manager
 
-In Unity, open **Window > Package Manager** and select **+ > Install package by name**.
+In the Unity Editor menu bar, select **Window > Package Manager**.
+
+The Package Manager window opens. Confirm you are connected to the internet before proceeding.
 {% endstep %}
 
 {% step %}
-### Enter the package name and version
+### Add package by name
 
-Enter `com.convai.convai-sdk-for-unity` in **Name**. Enter <code class="expression">space.vars.unity_sdk_version</code> in **Version** and select **Install**. Specifying the version selects the preview even if a different release is available. [Unity's package installation guide](https://docs.unity3d.com/6000.0/Documentation/Manual/upm-ui-quick.html)
+Click the **+** button in the top-left corner of the Package Manager window. Select **Add package by name** from the dropdown.
+
+A text field appears prompting for the package name.
 {% endstep %}
 
 {% step %}
-### Confirm the installed version
+### Enter the package name
 
-Select **Convai SDK for Unity** under **In Project**. If the registry cannot resolve this version, check the registry settings supplied with your preview or use the supplied package file.
-{% endstep %}
-{% endstepper %}
-{% endtab %}
+Type or paste the following identifier into the Name field, then click **Add**:
 
-{% tab title="Asset Store" %}
-Use this route only if your Asset Store library lists this SDK version. In **Window > Package Manager**, open **My Assets**, select the Convai package, and follow the install or import action for that listing. Confirm the version before importing it into your project.
-{% endtab %}
-{% endtabs %}
+```text
+com.convai.convai-sdk-for-unity
+```
 
-## Package dependencies
-
-The SDK package declares these seven dependencies. If Package Manager reports a conflict, compare your project's `Packages/manifest.json` with these versions and resolve the conflicting requirement.
+Unity contacts the registry, resolves the package, and begins downloading. Four dependencies install automatically:
 
 | Package                           | Version |
 | --------------------------------- | ------- |
@@ -52,9 +46,67 @@ The SDK package declares these seven dependencies. If Package Manager reports a 
 | `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> |
 | `com.unity.ugui`                  | <code class="expression">space.vars.dep_ugui_version</code> |
 | `com.unity.inputsystem`           | <code class="expression">space.vars.dep_inputsystem_version</code> |
-| `com.unity.collections` | <code class="expression">space.vars.dep_collections_version</code> |
-| `com.unity.modules.ai` | <code class="expression">space.vars.dep_modules_ai_version</code> |
-| `com.unity.modules.xr` | <code class="expression">space.vars.dep_modules_xr_version</code> |
+
+Wait for the progress bar in the bottom-right of the Unity Editor to complete before continuing.
+{% endstep %}
+{% endstepper %}
+
+{% hint style="warning" %}
+**Dependency conflict:** If your project already pins any of these four packages to an older version in `Packages/manifest.json`, the install will fail or produce a version mismatch. Open `Packages/manifest.json`, remove or update the conflicting version entries, then retry.
+{% endhint %}
+
+{% hint style="success" %}
+**Installation complete** when the Convai SDK for Unity entry appears in the Package Manager list with a green checkmark and version <code class="expression">space.vars.unity_sdk_version</code>. You will also see a new **Convai** menu item in the Unity menu bar.
+{% endhint %}
+{% endtab %}
+
+{% tab title="Asset Store" %}
+{% stepper %}
+{% step %}
+### Add the SDK to your Asset Store account
+
+Open the [Unity Asset Store](https://assetstore.unity.com/) in your browser. Search for **Convai SDK for Unity** and open the listing. Click **Add to My Assets**, signing in with your Unity ID if prompted.
+
+The button changes to **Open in Unity** when the asset has been added to your account.
+{% endstep %}
+
+{% step %}
+### Open Package Manager
+
+In the Unity Editor menu bar, select **Window > Package Manager**.
+{% endstep %}
+
+{% step %}
+### Switch to My Assets
+
+In the Package Manager window, click the packages source dropdown in the top-left (it shows **Packages: In Project** or similar) and select **My Assets**.
+
+Your Asset Store library loads. Locate **Convai SDK for Unity** in the list.
+{% endstep %}
+
+{% step %}
+### Download and import
+
+Select **Convai SDK for Unity** in the list. Click **Download**, then click **Import** once the download completes.
+
+Unity imports the package and installs four dependencies automatically:
+
+| Package                           | Version |
+| --------------------------------- | ------- |
+| `com.unity.ai.inference`          | <code class="expression">space.vars.dep_ai_inference_version</code> |
+| `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> |
+| `com.unity.ugui`                  | <code class="expression">space.vars.dep_ugui_version</code> |
+| `com.unity.inputsystem`           | <code class="expression">space.vars.dep_inputsystem_version</code> |
+
+Wait for the progress bar in the bottom-right of the Unity Editor to complete before continuing.
+{% endstep %}
+{% endstepper %}
+
+To update the SDK to a newer version later, return to **My Assets** in the Package Manager, select the SDK, and click **Update**.
+
+Installation is complete when the Convai SDK for Unity entry appears in the Package Manager list with version <code class="expression">space.vars.unity_sdk_version</code>. You will also see a new **Convai** menu item in the Unity menu bar.
+{% endtab %}
+{% endtabs %}
 
 ## Next steps
 

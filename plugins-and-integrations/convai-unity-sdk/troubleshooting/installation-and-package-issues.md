@@ -1,20 +1,20 @@
 ---
 title: Installation and package issues
 description: Fix Convai Unity SDK import failures, unsupported Unity versions, missing package dependencies, and bootstrapper startup warnings.
-last_reviewed: "5.0.0-pre.1"
+last_reviewed: "4.6.0"
 ---
 
-Check the Editor version, package dependencies, project settings, and native transport libraries when the SDK fails to import or initialize. A successful bootstrap log confirms that initialization ran; it does not prove authentication, transport, or character readiness.
+Package import and initial configuration problems account for the majority of first-run failures with the Convai Unity SDK. Most produce a clear message in the Unity Console the moment you enter Play Mode — or even before that, as compiler errors. An unsupported Unity version is the single most common root cause and produces no clear message at all, so confirm it first, then work through the Setup Health checks and the remaining first-line checks below.
 
 ## First-line check
 
-Work through these steps before diving into specific issues. They separate package compilation from runtime configuration.
+Work through these steps before diving into specific issues. They cover the most common root causes and take under three minutes.
 
 {% stepper %}
 {% step %}
 ### Confirm the Unity version
 
-Open `Help → About Unity` (Windows) or `Unity → About Unity` (macOS) and read the exact build number. The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code>. Compare the complete Editor version, including its patch number. See [Unity versions and render pipelines](../compatibility-and-requirements/unity-versions-and-render-pipelines.md) for the documented support range.
+Open `Help → About Unity` (Windows) or `Unity → About Unity` (macOS) and read the exact build number. The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code> — this is a hard floor on the exact patch, not a rounded version: an earlier `6000.0` patch such as `6000.0.20f1` is refused, and there is no supported configuration on Unity 2023 or earlier. Every `6000.0` through `6000.5` stream is supported once the editor is at or above the minimum patch.
 
 If the editor is older, upgrade before installing the SDK — the package depends on packages that only exist on Unity 6.
 {% endstep %}
@@ -24,11 +24,11 @@ If the editor is older, upgrade before installing the SDK — the package depend
 
 Go to **Edit → Project Settings → Convai SDK**. The **Setup Health** section opens first and runs a set of project-configuration checks automatically — each item shows a colored status badge, a title, and a message.
 
-The checks include `Settings Asset` (flags a missing `ConvaiSettings.asset`), credentials for the selected authentication mode, `macOS / iOS Microphone Usage Description` (flags an empty `Info.plist` description), `Prepare iOS for Recording` (flags the iOS audio session setting used for Convai microphone recording and speaker playback), `Android Microphone Permission` (informational), `WebGL Platform` (browser-path caveats when WebGL is active), and a `Define Drift` check for each Convai feature-flag scripting define that differs across build target groups.
+The checks include `Settings Asset` (flags a missing `ConvaiSettings.asset`), `API Key` (flags a missing key), `iOS Microphone Usage Description` (flags an empty `Info.plist` description), `Prepare iOS for Recording` (flags the iOS audio session setting used for Convai microphone recording and speaker playback), `Android Microphone Permission` (informational), and a `Define Drift` check for each Convai feature-flag scripting define that differs across build target groups.
 
-Use the action shown on the finding. Review the microphone description before keeping it in a build. Select **Refresh** in the section header to re-run every check after making changes manually.
+Select **Fix** next to any flagged item to apply the automated correction — for example **Create** adds the missing `ConvaiSettings.asset`, and **Sync All** aligns a drifting scripting define across build target groups. Select **Refresh** in the section header to re-run every check after making changes manually.
 
-A passing check confirms only that check. The WebGL caveat can remain a warning without indicating a broken setup. Continue with compilation and runtime checks.
+If every item shows a healthy (green) badge, the project-level setup is correct and the issue lies elsewhere — continue to the next check below.
 {% endstep %}
 
 {% step %}
@@ -38,8 +38,8 @@ Press **Ctrl+Shift+C** (Windows) or **Cmd+Shift+C** (Mac) to open the Console. T
 
 Look for either of these two exact messages — they appear the moment you press Play:
 
-* `Convai Bootstrapper: ConvaiSettings not found! Please configure settings via Edit > Project Settings > Convai SDK.` → The `ConvaiSettings` asset is missing or was not created. Inspect settings creation before attempting a connection.
-* `Convai Bootstrapper: API key not configured. Please set your API key in Edit > Project Settings > Convai SDK.` → The settings asset exists but API Key mode has no key. Auth Token mode instead waits for a provider or valid endpoint.
+* `Convai Bootstrapper: ConvaiSettings not found! Please configure settings via Edit > Project Settings > Convai SDK.` → The `ConvaiSettings` asset is missing or was not created. The SDK cannot start.
+* `Convai Bootstrapper: API key not configured. Please set your API key in Edit > Project Settings > Convai SDK.` → The settings asset exists but the API key field is empty.
 
 If you see compiler errors instead of these runtime messages, the assembly chain is broken — see [Missing or broken assemblies](#missing-or-broken-assemblies) below before entering Play Mode.
 {% endstep %}
@@ -60,7 +60,7 @@ If the file is missing, open **Edit → Project Settings → Convai SDK**. Openi
 Go to **Edit → Project Settings → Convai SDK**. The window opens with six sections: **Setup Health**, **Credentials**, **Runtime Defaults**, **Diagnostics**, **Advanced**, and **About**.
 
 * If the window is blank or shows no sections, there is a compiler error in the project. Fix all script errors first — the settings provider only renders when all editor scripts compile cleanly.
-* In **Credentials**, check the selected **Auth Mode**. For API Key mode in local development, enter the key and select **Validate & Save**. For Auth Token mode, check the endpoint or registered provider. See [Authentication](../authentication/README.md).
+* If the window opens but the **Credentials** section shows no API key, select **Credentials**, paste your key from the [Convai developer dashboard](https://convai.com/), then select **Validate & Save**.
 
 When everything is configured correctly, pressing Play shows `Convai Bootstrapper: Initialization complete.` in the Console.
 {% endstep %}
@@ -76,17 +76,14 @@ When everything is configured correctly, pressing Play shows `Convai Bootstrappe
 
 ### Required dependencies
 
-All seven dependencies are pulled in automatically by UPM when you install the Convai SDK package. If any is missing or at the wrong version, assembly compilation fails.
+All four dependencies are pulled in automatically by UPM when you install the Convai SDK package. If any is missing or at the wrong version, assembly compilation fails.
 
-| Dependency | Declared version | Notes |
+| Dependency | Minimum version | Notes |
 | --- | --- | --- |
 | `com.unity.ai.inference` | <code class="expression">space.vars.dep_ai_inference_version</code> | Client-side voice activity detection |
 | `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> | JSON serialization — required by all SDK communication |
-| `com.unity.ugui` | <code class="expression">space.vars.dep_ugui_version</code> | Canvas/uGUI UI and TextMesh Pro, not UI Toolkit |
-| `com.unity.inputsystem` | <code class="expression">space.vars.dep_inputsystem_version</code> | Input System for conversation controls |
-| `com.unity.collections` | <code class="expression">space.vars.dep_collections_version</code> | Native collections used by the package |
-| `com.unity.modules.ai` | <code class="expression">space.vars.dep_modules_ai_version</code> | Built-in navigation types |
-| `com.unity.modules.xr` | <code class="expression">space.vars.dep_modules_xr_version</code> | Built-in XR input types |
+| `com.unity.ugui` | <code class="expression">space.vars.dep_ugui_version</code> | UI Toolkit module — required by all UI components |
+| `com.unity.inputsystem` | <code class="expression">space.vars.dep_inputsystem_version</code> | New Input System — required by conversation input |
 
 To verify installed versions: **Window → Package Manager → In Project**.
 
@@ -98,7 +95,7 @@ Assembly definition errors prevent the project from entering Play Mode. The Cons
 
 **Error:** `The type or namespace name 'Newtonsoft' could not be found`
 
-**Fix:** Open **Window → Package Manager**. Click **+** → **Install package by name**. Enter `com.unity.nuget.newtonsoft-json` in **Name** and <code class="expression">space.vars.dep_newtonsoft_json_version</code> in **Version**, then select **Install**.
+**Fix:** Open **Window → Package Manager**. Click **+** → **Add package by name**. Enter `com.unity.nuget.newtonsoft-json` and confirm. Unity installs version <code class="expression">space.vars.dep_newtonsoft_json_version</code> or higher automatically.
 
 **Verify:** Open the Console. Newtonsoft namespace errors are gone and the project compiles cleanly.
 
@@ -114,7 +111,7 @@ Assembly definition errors prevent the project from entering Play Mode. The Cons
 
 **Error:** `The type or namespace name 'InferenceEngine' does not exist in the namespace 'Unity'`
 
-**Fix:** Open **Window → Package Manager**. Click **+** → **Install package by name**. Enter `com.unity.ai.inference` in **Name** and <code class="expression">space.vars.dep_ai_inference_version</code> in **Version**, then select **Install**.
+**Fix:** Open **Window → Package Manager**. Click **+** → **Add package by name**. Enter `com.unity.ai.inference` and confirm. Unity installs version <code class="expression">space.vars.dep_ai_inference_version</code> or higher automatically.
 
 **Verify:** Open the Console. `Unity.InferenceEngine` namespace errors are gone and the project compiles cleanly.
 
@@ -122,7 +119,7 @@ Assembly definition errors prevent the project from entering Play Mode. The Cons
 
 **Error:** `The type or namespace name 'XR' does not exist in the namespace 'UnityEngine'`
 
-**Fix:** `com.unity.modules.xr` is a built-in Unity module rather than a registry package, and the SDK explicitly declares it. If it is missing, restore the module dependency and let Unity resolve the package again. XR push-to-talk input needs it.
+**Fix:** `com.unity.modules.xr` is a built-in Unity module rather than a registry package, and the SDK does not list it as a dependency. It ships enabled by default; if a project's `Packages/manifest.json` explicitly excludes it, remove the exclusion and let Unity reimport. XR push-to-talk input needs it.
 
 **Verify:** Open the Console. `UnityEngine.XR` namespace errors are gone and the project compiles cleanly.
 
@@ -136,26 +133,11 @@ Deleting the `Library/` folder forces Unity to reimport the entire project from 
 
 **Verify:** Unity completes asset import without entering another recompile loop.
 
-## Native transport libraries
-
-The LiveKit native FFI libraries download on first import instead of being bundled for every target. The downloader writes them under `Assets/Convai/Plugins/client-sdk-unity-livekit/Runtime/Plugins` and validates downloads against its checksum manifest. The writable Assets destination also works with a read-only Package Cache installation.
-
-If a native build reports a missing FFI library, inspect download errors and choose the relevant menu action:
-
-| Menu | Purpose |
-| --- | --- |
-| **Convai → Platform Support → Download FFI Libraries (Current Platform)** | Fetch the Editor host platform |
-| **Convai → Platform Support → Download FFI Libraries (Active Build Target)** | Fetch the selected build target |
-| **Convai → Platform Support → Download FFI Libraries (All Platforms)** | Fetch every supported native platform |
-| **Convai → Platform Support → Clear FFI Libraries** | Remove downloaded libraries before a controlled re-download |
-
-Deleting `Assets/Convai/` also deletes these downloaded binaries and any project-owned content there. A package reinstall alone does not prove a native target's files have been restored. Verify that the target's libraries import before building. See [Native transport libraries](../platform-guides/native-transport-libraries.md).
-
 ## Troubleshoot installation failures
 
 | Symptom | Likely cause | Fix | Verify |
 | --- | --- | --- | --- |
-| Unity refuses to open the project, or Package Manager reports an incompatible editor version | Editor is below the Unity <code class="expression">space.vars.unity_min_version</code> floor | Upgrade to Unity <code class="expression">space.vars.unity_min_version</code> or newer — check the documented Unity support range | `Help → About Unity` reports a build at or above the floor |
+| Unity refuses to open the project, or Package Manager reports an incompatible editor version | Editor is below the Unity <code class="expression">space.vars.unity_min_version</code> floor | Upgrade to Unity <code class="expression">space.vars.unity_min_version</code> or newer — any `6000.0` through `6000.5` build at or above the minimum patch is supported | `Help → About Unity` reports a build at or above the floor |
 | Setup Health section shows a **Warning** or **Blocked** item | A required project setting is missing or has drifted — settings asset, API key, iOS microphone usage description, iOS recording preparation, or a scripting define | Open Edit → Project Settings → Convai SDK → Setup Health and select **Fix** next to the item, or correct it manually and select **Refresh** | The item's status badge turns healthy (green) |
 | `Convai Bootstrapper: ConvaiSettings not found!` in Console | `ConvaiSettings.asset` missing or deleted | Open Edit → Project Settings → Convai SDK to recreate it automatically | Re-enter Play Mode — `Convai Bootstrapper: Initialization complete.` appears |
 | `API key not configured` warning on Play | API key field is empty | Paste key from Convai dashboard into Edit → Project Settings → Convai SDK → Credentials, then select **Validate & Save** | Re-enter Play Mode — the `API key not configured` warning is gone |
@@ -164,7 +146,7 @@ Deleting `Assets/Convai/` also deletes these downloaded binaries and any project
 | `The type or namespace name 'InferenceEngine' does not exist in the namespace 'Unity'` | `com.unity.ai.inference` missing or old version | Install `com.unity.ai.inference` <code class="expression">space.vars.dep_ai_inference_version</code>+ via Package Manager | Project compiles without `Unity.InferenceEngine` namespace errors |
 | `The type or namespace name 'XR' does not exist in the namespace 'UnityEngine'` | `com.unity.modules.xr` excluded from `Packages/manifest.json` | Remove the exclusion in `Packages/manifest.json` and let Unity reimport | Project compiles without `UnityEngine.XR` namespace errors |
 | Package not found when adding via UPM name | Scoped registry not configured | Follow the UPM installation guide to add the Convai scoped registry to `manifest.json` | SDK package appears in Package Manager |
-| Asset Store import fails with conflict errors | Files from a previous SDK version still present | Back up project-owned content and remove only conflicting old SDK files before reimporting | Package imports without conflict errors |
+| Asset Store import fails with conflict errors | Files from a previous SDK version still present | Remove the old `Assets/Convai/` folder before reimporting | Package imports without conflict errors |
 | Project Settings → Convai SDK window is blank | Script compilation errors exist | Fix all CS errors in the Console; the settings UI only renders when editor scripts compile cleanly | Edit → Project Settings → Convai SDK displays all six sections |
 | Settings asset exists but window shows no key | Asset is in wrong path | `ConvaiSettings.asset` must be at exactly `Assets/Resources/ConvaiSettings.asset` — no subfolders | Edit → Project Settings → Convai SDK → Credentials shows the API Key field |
 | Errors about `UGUI` or `UI/Default` shader | `com.unity.ugui` missing or wrong version | Install `com.unity.ugui` <code class="expression">space.vars.dep_ugui_version</code>+ via Package Manager | Project compiles without UGUI shader errors |
@@ -179,10 +161,10 @@ These are the exact messages the SDK bootstrapper emits during initialization. T
 | `Convai Bootstrapper: Initializing...` | Info | SDK initialization has started |
 | `Convai Bootstrapper: ConvaiSettings not found! Please configure settings via Edit > Project Settings > Convai SDK.` | **Error** | `ConvaiSettings.asset` not found at `Assets/Resources/ConvaiSettings.asset` |
 | `Convai Bootstrapper: API key not configured. Please set your API key in Edit > Project Settings > Convai SDK.` | Warning | Settings asset found but API key field is empty |
-| `Convai Bootstrapper: Initialization complete.` | Info | Initializer finished; this does not validate a live connection |
+| `Convai Bootstrapper: Initialization complete.` | Info | All settings loaded successfully; SDK is ready |
 
 {% hint style="warning" %}
-The `ConvaiSettings not found` error is non-blocking — the SDK logs it and continues. The initializer continues, but scene startup can fail configuration validation. Always resolve bootstrapper errors before testing conversations.
+The `ConvaiSettings not found` error is non-blocking — the SDK logs it and continues. Your scene will load, but any connection attempt will immediately fail with `config.api_key_missing`. Always resolve bootstrapper errors before testing conversations.
 {% endhint %}
 
 ## Next steps

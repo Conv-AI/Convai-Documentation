@@ -1,50 +1,188 @@
 ---
 title: Long-term memory usage examples
-description: Choose a memory workflow for local testing, signed-in accounts, seeded facts, or a controlled reset, using stable identities and verified results.
-last_reviewed: "5.0.0-pre.1"
+description: Four complete long-term memory patterns for Unity — zero-config persistence, authenticated identity, memory seeding, and memory reset.
+last_reviewed: "4.5.0"
 ---
 
-Choose the pattern that matches your application's identity and administration model. These examples use the 5.0 identity snapshot and memory settings API; they do not prove backend extraction, retention, or recall timing.
+These examples cover the four most common long-term memory integration patterns. Each example is self-contained and shows the full setup, the relevant code, and the expected runtime outcome.
 
-## Test with the default identity
+## Pattern 1 — Zero-config persistence
 
-For a local test, enable memory on a test character and connect without a custom identity provider. The Editor reads or creates a GUID in `PlayerPrefs["convai.end_user_id"]`. A player build uses a valid `SystemInfo.deviceUniqueIdentifier`, falling back to the saved GUID when that value is unavailable.
+Use `DeviceEndUserIdProvider` (the SDK default) when you do not need per-account memory. No code is required. Enable LTM on the dashboard and the SDK handles identity and storage automatically.
 
-Reconnect with the same resolved identity. Inspect **End User** and **Memory** on `ConvaiManager` in Play mode, then use **See What They Remember** to inspect returned records. Verify recall separately with a fresh conversation. Device identifiers and preference storage have platform-specific lifetimes; use an account ID when identity must survive device or installation changes.
+**When to use:** Consumer applications without user accounts, rapid prototypes, or editor-based testing.
 
-Follow [Long-term memory quick start](quick-start.md) for the complete test.
+**Limitations:** Memory is scoped to the device. Clearing `PlayerPrefs` or reinstalling the application generates a new identity — no memories carry over.
 
-## Use an authenticated account
+**Setup:**
 
-Turn off **Starts Connected** on `ConvaiRoomManager` while sign-in is pending. After your authentication flow finishes, install a provider using `SetEndUserIdentityProvider` and, if needed, `SetEndUserMetadataProvider`; then connect. The SDK copies and validates identity and metadata for that connection attempt.
+1. Sign in at [convai.com](https://convai.com), open the character, and toggle **Long-Term Memory** to **On** in the **Memory** tab.
+2. Add `ConvaiManager` and `ConvaiCharacter` to your scene with the character ID configured.
+3. Enter Play Mode and have a conversation. Stop Play Mode to trigger memory extraction.
+4. Re-enter Play Mode and verify the character recalls what was shared.
 
-Use the complete `AccountIdentityInstaller` example in [End-user identity](end-user-identity.md). Your authentication layer supplies the actual account identifier. Do not generate a fresh ID per scene load or treat the room's participant `PlayerID` as the memory identity.
+No `IEndUserIdentityProvider` registration is needed. The SDK uses `DeviceEndUserIdProvider` by default.
 
-If the user signs out or changes accounts, disconnect and establish the next connection using the new provider values. Changing a provider does not migrate stored memory records.
+**Expected outcome:** The character references facts from previous sessions automatically. The same GUID in `PlayerPrefs["convai.end_user_id"]` is used each session on the same machine.
 
-## Seed a test user's facts
+***
 
-Call `client.AddMemoriesAsync` from a trusted administrative tool, using the intended character and end-user pair. Inspect the result and list records again before testing the conversation. The complete helper in [Memory management API](memory-management-api.md#add-and-retrieve-facts) adds a test onboarding fact without exposing account credentials in a player script.
+## Pattern 2 — Authenticated identity
 
-A successful add response verifies that request's result. It does not guarantee that every later response will mention the fact or that repeated inputs will produce a specific deduplication event.
+Use a custom `IEndUserIdentityProvider` when users log in with accounts. This ensures memories follow a user across devices and reinstalls.
 
-## Reset a memory test deliberately
+**When to use:** Applications with user authentication — enterprise training platforms, onboarding systems, consumer apps with accounts.
 
-Use this sequence when resetting a known test pair:
+```csharp
+using Convai.Domain.Identity;
 
-1. Disconnect the test session so that it is not producing further interactions during the reset.
-2. Request `client.DeleteAllMemoriesAsync(characterId, endUserId)`.
-3. List the same pair again and check for remaining records. A request response alone is insufficient.
-4. If needed, disable memory separately with `client.UpdateMemorySettingsAsync(characterId, enabled: false)`. This does not delete records.
-5. Re-enable memory and reconnect only when ready to start another test.
+public class AccountIdentityProvider : IEndUserIdentityProvider
+{
+    private readonly string _accountId;
 
-For all owned characters, use **Forget End User…** in the [Long Term Memory window](long-term-memory-window.md). Check each deletion request and coverage before deactivation. `client.DeleteEndUserAsync` deactivates an end user; it must not replace the memory-deletion steps above.
+    public AccountIdentityProvider(string accountId)
+    {
+        _accountId = accountId;
+    }
+
+    public string GetEndUserId()
+    {
+        return _accountId;
+    }
+}
+```
+
+Register the provider in `Awake()` before `ConvaiRoomManager.Start()` completes:
+
+```csharp
+using Convai.Runtime.Components;
+using UnityEngine;
+
+public class IdentityRegistrar : MonoBehaviour
+{
+    [SerializeField] private ConvaiManager _convaiManager;
+
+    private void Awake()
+    {
+        string accountId = AuthService.CurrentUser.AccountId;
+        _convaiManager.SetEndUserIdentityProvider(new AccountIdentityProvider(accountId));
+    }
+}
+```
+
+Optionally, attach a display name so the editor's Long-Term Memory panel shows a readable label instead of a raw ID:
+
+```csharp
+using System.Collections.Generic;
+using Convai.Domain.Identity;
+
+public class AccountMetadataProvider : IEndUserMetadataProvider
+{
+    private readonly string _displayName;
+
+    public AccountMetadataProvider(string displayName)
+    {
+        _displayName = displayName;
+    }
+
+    public IReadOnlyDictionary<string, object> GetEndUserMetadata()
+    {
+        return new Dictionary<string, object> { { "name", _displayName } };
+    }
+}
+```
+
+```csharp
+_convaiManager.SetEndUserMetadataProvider(
+    new AccountMetadataProvider(AuthService.CurrentUser.DisplayName));
+```
+
+**Expected outcome:** Each user's memories are stored under their account ID. Memories persist across devices and reinstalls. The editor panel shows the user's display name.
+
+***
+
+## Pattern 3 — Memory seeding before a first session
+
+Pre-load facts for a user before their first conversation so the character can reference completed modules, certifications, or onboarding status from the start.
+
+{% hint style="danger" %}
+**Do not ship this pattern in a player-facing build.** `ConvaiRestClient` requires your API key. Embedding an API key in a distributed application exposes it to extraction. Run memory seeding from a server-side service or editor tool only.
+{% endhint %}
+
+```csharp
+using Convai.RestAPI;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class OnboardingMemorySeeder : MonoBehaviour
+{
+    // Editor-only / server-side usage only — never ship with an embedded API key
+    [ContextMenu("Seed New Employee Memory")]
+    private async void SeedEmployeeMemory()
+    {
+        string characterId = "onboarding-assistant-id";
+        string employeeAccountId = "emp-00421";
+
+        var certifications = new List<string>
+        {
+            "The employee completed Fire Safety Level 1 on 2025-04-10.",
+            "The employee completed Hazardous Materials Handling on 2025-04-15.",
+            "The employee has not yet completed Confined Space Entry certification."
+        };
+
+        using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
+        var response = await client.Memory.AddAsync(characterId, employeeAccountId, certifications);
+
+        Debug.Log($"Seeded {response.Memories.Count} memory records.");
+    }
+}
+```
+
+**Expected outcome:** On the employee's first conversation with the onboarding assistant, the character already knows their certification status and guides them to the next required module.
+
+***
+
+## Pattern 4 — Reset a user's memory
+
+Clear all stored facts for a user–character pair, then optionally disable LTM. Use this when a user's records are stale or when resetting between test sessions.
+
+```csharp
+using Convai.RestAPI;
+using UnityEngine;
+
+public class MemoryReset : MonoBehaviour
+{
+    [ContextMenu("Purge Memories Then Disable LTM")]
+    private async void PurgeAndDisable()
+    {
+        string characterId = "your-character-id";
+        string endUserId = "target-end-user-id";
+
+        using var client = new ConvaiRestClient(ConvaiSettings.Instance.ApiKey);
+
+        // Step 1: Delete all memories for this user–character pair
+        await client.Memory.DeleteAllAsync(characterId, endUserId);
+        Debug.Log("Memories purged.");
+
+        // Step 2: Disable LTM on the character
+        await client.Characters.SetMemoryEnabledAsync(characterId, false);
+        Debug.Log("Long-term memory disabled.");
+    }
+}
+```
+
+To remove only the memories while keeping LTM enabled, call `DeleteAllAsync` and skip the `SetMemoryEnabledAsync` step. To remove a user with every character, call `DeleteAllAsync` for each character, then `client.EndUsers.DeleteAsync(endUserId)`; `DeleteAsync` alone deactivates the user and leaves their memories stored. See [Manage end-user records](end-user-management.md).
+
+**Expected outcome:** The next session for this user–character pair starts with no stored context. The character treats the user as a new contact.
+
+***
 
 ## Next steps
 
-{% content-ref url="troubleshooting-and-diagnostics.md" %}
-[Troubleshoot long-term memory](troubleshooting-and-diagnostics.md)
+{% content-ref url="memory-management-api.md" %}
+[Memory management API](memory-management-api.md)
 {% endcontent-ref %}
+
 {% content-ref url="long-term-memory-scripting-reference.md" %}
 [Long-term memory scripting reference](long-term-memory-scripting-reference.md)
 {% endcontent-ref %}

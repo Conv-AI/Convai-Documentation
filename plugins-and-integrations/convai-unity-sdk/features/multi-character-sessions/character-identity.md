@@ -1,7 +1,7 @@
 ---
 title: Character identity
 description: Reference for assigning Character IDs to characters sharing a Convai room, and the checks that catch two characters using one ID.
-last_reviewed: "5.0.0-pre.1"
+last_reviewed: "4.6.0"
 ---
 
 Every `ConvaiCharacter` in a room needs its own Character ID. Two characters cannot share one, and the SDK checks for this both while editing the scene and when the room connects.
@@ -26,7 +26,7 @@ Convai dashboard.
 The message names every other character sharing the ID, not only the first one found. The check runs whether or not a multi-character session is active — a duplicate ID is wrong in any scene, because the registry keys routing by it regardless of room shape.
 
 {% hint style="info" %}
-`Convai_ValidateSetup` reports the same conflict as an error, so a continuous integration run or an editor script can catch it without opening the Inspector.
+`Convai.ValidateSetup` reports the same conflict as an error, so a continuous integration run or an editor script can catch it without opening the Inspector.
 {% endhint %}
 
 ## Refusal when the room connects
@@ -40,17 +40,7 @@ rather than each being answered separately. Give each character its own Characte
 dashboard.
 ```
 
-At connect, this is a `ConvaiOperationException` surfaced with `ConnectionFailed`. The live roster also refuses a duplicate ID. Inspect `OnRoomRosterChanged` for the outcome. Both checks run before sending the invalid roster change.
-
-## Character versions in a shared room
-
-Every roster member must use **Character Version > Live**. Specific/pinned versions require a single-character connection. The Character Inspector shows a **Versioned connections** warning when a Specific version is used in a scene with several characters. The SDK refuses a pinned version when creating or adding to a roster:
-
-```text
-Pinned character versions require a single-character connection. Use Live for multi-character rosters, which accept only bare Character IDs.
-```
-
-A `CharacterSessionId` resumes a conversation; it is not a way to add a second copy of the same Character ID.
+This check runs on both paths into a room's roster: the full cast submitted at connect, and a single character added later while the room is already up. Either way the room does not connect — or does not accept the addition — rather than connecting with the two characters colliding.
 
 ## Character ID format
 

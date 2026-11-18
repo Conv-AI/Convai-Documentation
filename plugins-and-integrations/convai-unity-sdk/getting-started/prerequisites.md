@@ -3,7 +3,7 @@ title: Prerequisites
 description: >-
   Confirm the Unity version, package dependencies, and Convai account the
   Convai Unity SDK requires before you begin installation.
-last_reviewed: "5.0.0-pre.1"
+last_reviewed: "4.6.0"
 ---
 
 Before installing the Convai Unity SDK, confirm that your environment meets the requirements below. Missing any of these causes installation errors or runtime failures that are harder to diagnose after the fact.
@@ -22,7 +22,7 @@ Unity <code class="expression">space.vars.unity_min_version</code> is a hard flo
 
 ## Required Unity packages
 
-The SDK depends on seven Unity packages. Package Manager resolves the versions declared in the package manifest. For an Asset Store import, check your project has the dependencies the distribution requires.
+The SDK depends on four Unity packages. Both installation methods (Package Manager and Asset Store) install these automatically — you do not need to add them manually unless you encounter a version conflict.
 
 | Package                           | Minimum version |
 | --------------------------------- | ---------------- |
@@ -30,11 +30,8 @@ The SDK depends on seven Unity packages. Package Manager resolves the versions d
 | `com.unity.nuget.newtonsoft-json` | <code class="expression">space.vars.dep_newtonsoft_json_version</code> |
 | `com.unity.ugui`                  | <code class="expression">space.vars.dep_ugui_version</code> |
 | `com.unity.inputsystem`           | <code class="expression">space.vars.dep_inputsystem_version</code> |
-| `com.unity.collections` | <code class="expression">space.vars.dep_collections_version</code> |
-| `com.unity.modules.ai` | <code class="expression">space.vars.dep_modules_ai_version</code> |
-| `com.unity.modules.xr` | <code class="expression">space.vars.dep_modules_xr_version</code> |
 
-If Package Manager reports a dependency conflict, compare the resolved version in your project with the SDK manifest. Before testing input, set **Active Input Handling** to **Input System Package (New)** or **Both** in Player Settings. Scenes with Convai UI also need **Window > TextMeshPro > Import TMP Essential Resources**.
+If your project already pins any of these packages to an older version in `Packages/manifest.json`, the automatic install fails silently or produces a version conflict. Remove or update the existing version pins before installing the SDK.
 
 ## Supported render pipelines
 

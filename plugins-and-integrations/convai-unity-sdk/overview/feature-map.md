@@ -3,7 +3,7 @@ title: Feature map
 description: >-
   Find the right Convai Unity SDK feature, module, guide, or reference page for
   any development goal, indexed by use case.
-last_reviewed: "5.0.0-pre.1"
+last_reviewed: "4.6.0"
 ---
 
 Use this table when you know the outcome you want but are not sure which SDK feature, module, or guide covers it.
@@ -19,16 +19,11 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Run a working example with several characters in one session | Multi-Character Sample | [Multi-Character Sample](../features/multi-character-sessions/multi-character-sample.md) |
 | Understand what each component in the scene does     | Component reference | [Scene components reference](../getting-started/scene-components.md)                         |
 | Choose between push-to-talk and hands-free input     | Input mode          | [Configure conversation input mode](../getting-started/configure-conversation-input-mode.md) |
-| Let the player interrupt a speaking character | Voice interruptions | [Configure speech interruptions](../getting-started/configure-speech-interruptions.md) |
 | Configure character audio output                     | Audio setup         | [Configure character audio](../getting-started/configure-character-audio.md)                 |
 | Configure microphone device and platform permissions | Audio setup         | [Configure microphone](../getting-started/configure-microphone.md)                           |
 | Add a chat or subtitle transcript display            | Transcript UI       | [Add chat UI](../getting-started/add-chat-ui.md)                                             |
 | Add real-time lip sync to my character               | Lip sync            | [Add lip sync](../getting-started/add-lip-sync/)                                             |
 | Verify my scene is set up correctly before shipping  | Scene Validator     | [Validate your setup](../getting-started/validate-your-setup.md)                             |
-| Connect without opening a microphone | Text-only session | [Run a text-only session](../getting-started/run-a-text-only-session.md) |
-| Drive push-to-talk from my own input | Input ownership | [Use your own push-to-talk input](../getting-started/use-your-own-push-to-talk-input.md) |
-| Understand release, commit and reply waiting | Push-to-talk lifecycle | [Push-to-talk lifecycle](../core-concepts/push-to-talk-lifecycle.md) |
-| Decide whether the room and my characters connect automatically | Automatic connection | [Scene components reference](../getting-started/scene-components.md) |
 
 ## Authentication
 
@@ -55,10 +50,6 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Give my character vision through a camera or webcam                                       | Vision           | [Vision](../features/vision/)                     |
 | Decide which character the player is talking to                                           | Conversation Targeting | [Conversation Targeting](../features/conversation-targeting/) |
 | Know whether the player can talk right now, and gate my UI on it                          | Conversation Availability | [Conversation Availability](../features/conversation-availability/) |
-| Let several characters converse with each other | Group conversation | [Group conversation](../features/group-conversation/README.md) |
-| Generate and review scene descriptions | Scene Auto Tagger | [Tag a scene](../features/scene-metadata/scene-auto-tagger.md) |
-| Automate an Editor scene-tagging run and review its results | Scene Auto Tagger | [Scene Auto Tagger scripting API](../features/scene-metadata/scene-auto-tagger-scripting-api.md) |
-| Let a coding agent set up and diagnose Convai scenes in the Editor | AI coding assistant | [AI coding assistant](../ai-coding-assistant/README.md) |
 
 ## Embodiment
 
@@ -82,7 +73,6 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Add a runtime settings panel (mic, transcript, notifications, input) | Settings panel      | [Settings panel](../ui-and-presentation/settings-panel/)                                                 |
 | Read or apply runtime settings from code                             | Runtime settings    | [Runtime settings API](../ui-and-presentation/settings-panel/runtime-settings-api.md)                    |
 | Customize the look and layout of UI components                       | UI customization    | [Customizing UI components](../ui-and-presentation/customizing-ui-components.md)                         |
-| Show microphone, voice and connection quality | Runtime diagnostics | [Show connection and audio levels](../ui-and-presentation/show-connection-and-audio-levels.md) |
 
 ## Core concepts
 
@@ -100,10 +90,10 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Subscribe to session connected / disconnected / error events | Session events       | [Session Events](../scripting-reference/session-events.md)       |
 | Subscribe to transcript, emotion, and turn events            | Character events     | [Character Events](../scripting-reference/character-events.md)   |
 | Read and clear transcript history at runtime                 | Transcript API       | [Transcript API](../scripting-reference/transcript-api.md)       |
-| Read static `ConvaiSDK` metadata and use the `ConvaiManager.Audio` instance facade         | Conversation facades | [ConvaiManager API](../scripting-reference/convaimanager-api.md) |
-| Await a typed operation and handle cancellation | Asynchronous operations | [Operation results](../scripting-reference/operation-and-stream-types.md) |
+| Use the `ConvaiSDK` and `ConvaiAudio` static facades         | Conversation facades | [ConvaiManager API](../scripting-reference/convaimanager-api.md) |
+| Understand `IConvaiOperation<T>` and async patterns          | Async patterns       | [Async Patterns](../scripting-reference/async-patterns.md)       |
 | Use the `ConvaiCharacter` and `ConvaiPlayer` API surface      | Character and player API | [Character and Player API](../scripting-reference/character-and-player-api.md) |
-| Await a typed operation and handle cancellation | Asynchronous operations | [Operation results](../scripting-reference/operation-and-stream-types.md) |
+| Understand `IConvaiOperation<T>` and stream result types      | Operation and stream types | [Operation & Stream Types](../scripting-reference/operation-and-stream-types.md) |
 
 ## Compatibility and requirements
 
@@ -133,14 +123,11 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 
 | I want to...                                                     | Topic            | Documentation                                                                                     |
 | ---------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------- |
-| Migrate a custom credential provider | Authentication | [Migrate custom credential providers](../advanced-topics/custom-providers/custom-credential-provider.md) |
+| Replace the API credential provider                              | Custom providers | [Custom Credential Provider](../advanced-topics/custom-providers/custom-credential-provider.md)   |
 | Replace the end-user identity provider                           | Custom providers | [Custom Identity Provider](../advanced-topics/custom-providers/custom-identity-provider.md)       |
-| Upgrade a custom persistence integration | Storage | [Migrate custom persistence integrations](../advanced-topics/custom-providers/custom-persistence-provider.md) |
+| Replace the session persistence provider                         | Custom providers | [Custom Persistence Provider](../advanced-topics/custom-providers/custom-persistence-provider.md) |
 | Measure latency and interpret session metrics                    | Performance      | [Performance and Optimization](../advanced-topics/performance-and-optimization.md)                |
 | Extend the SDK with a custom module or replace internal services | Extension points | [Extending the SDK](../advanced-topics/extending-the-sdk.md)                                      |
-| Select a client for character, runtime, or account requests | REST clients | [REST API client reference](../scripting-reference/rest-api-client.md) |
-| Install native transport dependencies | Platform Support | [Native transport libraries](../platform-guides/native-transport-libraries.md) |
-| Inspect a sanitized connection response | Connection diagnostics | [Network and API requirements](../compatibility-and-requirements/network-and-api-requirements.md) |
 
 ## Next steps
 

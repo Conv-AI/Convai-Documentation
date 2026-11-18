@@ -1,7 +1,7 @@
 ---
 title: Scripted gaze
 description: Direct a Convai character's gaze at a transform or point from code, and await the result to gate a follow-up action on it landing.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "4.6.0"
 ---
 
 Direct a character's gaze at a transform or a world-space point from code, and use the returned handle to know when the look has landed. Use this page when a cutscene beat, an action executor, or a UI event needs to control where a character looks, outside the automatic targeting the gaze policy already provides.
@@ -43,7 +43,7 @@ Use `GlanceAt` for a shorter, lower-priority look that never turns the body and 
 gaze.GlanceAt(displayCase, durationSeconds: 1.5f);
 ```
 
-Scripted requests always outrank automatic targets. A default-priority `GazeAt` (`0`) outranks `GlanceAt` (`-5`). A custom `Priority` changes that ordering.
+Scripted requests always outrank automatic targets. `GazeAt` requests outrank `GlanceAt` requests: any explicit `GazeAt` preempts a glance in progress.
 
 ## `GazeOptions` fields
 
@@ -56,22 +56,6 @@ Scripted requests always outrank automatic targets. A default-priority `GazeAt` 
 
 `GlanceAt` builds its own `GazeOptions` internally: `HoldSeconds` from its `durationSeconds` parameter (default `1.2f`, clamped to at least `0.2f`), `Engagement` fixed at `1`, and `AllowBodyTurn` fixed at `false`.
 
-## Coordinate with built-in requests
-
-Scripted priority is separate from provider priority. Higher scripted values win, with the newest request breaking ties:
-
-| Request | Scripted priority |
-|---|---|
-| Look At / Scan actions | `10` |
-| Watch Player action | `5` |
-| Look at the current action target | `2` |
-| Active group-conversation look | `1` |
-| Default `GazeAt` | `0` |
-| `GlanceAt` | `-5` |
-| Travel check-in glance | `-50` |
-
-Use a priority above `10` only when your request should preempt all those action looks, then release the handle when finished. A default request can wait while group gaze holds its priority-`1` look; membership in a group alone does not block requests when no group look is active. Priority selects the current winner without removing other live requests. A lower-priority request can resume after the winner releases, provided it has not expired, lost its target, or otherwise ended.
-
 ## Await a handle in Unity
 
 `GazeHandle.Settled` completes with `true` once gaze is aligned on the target, or `false` when the request ended before alignment. `GazeHandle.Completion` completes when the request ends — hold elapsed, released, or target lost. Await `Settled` before a follow-up action that depends on the character visibly looking first, such as a pick-up gesture.
@@ -83,51 +67,24 @@ using UnityEngine;
 
 public sealed class LookThenReach : MonoBehaviour
 {
-    private GazeHandle _activeGaze;
-
-    private void OnDisable()
-    {
-        _activeGaze?.Release();
-        _activeGaze = null;
-    }
-
     public async Task LookAtAndReachAsync(ConvaiGazeController gaze, Transform target)
     {
-        if (!isActiveAndEnabled || gaze == null || target == null) return;
-        _activeGaze?.Release();
-        GazeHandle handle = gaze.GazeAt(target, new GazeOptions
-        {
-            Engagement = 1f,
-            AllowBodyTurn = true,
-            HoldSeconds = 5f
-        });
-        _activeGaze = handle;
+        GazeHandle handle = gaze.GazeAt(target, new GazeOptions { Engagement = 1f, AllowBodyTurn = true });
         if (handle == null) return;
 
-        try
+        bool aligned = await handle.Settled;
+        if (!aligned)
         {
-            bool aligned = await handle.Settled;
-            if (!this || !isActiveAndEnabled || _activeGaze != handle) return;
-            if (!aligned)
-            {
-                Debug.Log($"Gaze at '{handle.TargetName}' did not settle: {handle.Outcome}.");
-                return;
-            }
+            Debug.Log($"Gaze at '{handle.TargetName}' did not settle: {handle.Outcome}.");
+            return;
+        }
 
-            // Await your reach or pick-up animation here while the look is held.
-        }
-        finally
-        {
-            handle.Release();
-            if (_activeGaze == handle) _activeGaze = null;
-        }
+        // Aligned — safe to start a reach or pick-up animation here.
     }
 }
 ```
 
 {% hint style="warning" %}
-The example limits the whole request to five seconds and releases its own handle on disable or replacement. Adjust that duration for the alignment and animation you need. An indefinite request needs an equivalent cancellation path.
-
 `Settled` can complete `false` for a request that was deliberately not taken — see `GazeOutcome.HeldEyeContactInstead` below — not only for a genuine failure. Branch on `Outcome` rather than the boolean alone before treating a `false` result as an error.
 {% endhint %}
 
@@ -138,12 +95,12 @@ Call `handle.Release()` to end a request early. `Release` is safe to call multip
 | Value | Integer | Meaning |
 |---|---|---|
 | `Taken` | `0` | The request is live, or it arrived on its target. Default until something says otherwise. |
-| `Interrupted` | `1` | The request ended before gaze arrived — released, expired, cleared by a reset, or its target was destroyed. |
+| `Interrupted` | `1` | The request ended before gaze arrived — released, expired, superseded by a higher-priority look, or its target was destroyed. |
 | `HeldEyeContactInstead` | `2` | The character deliberately held eye contact and the glance was folded into it instead of taken, because `LockBlocksGlances` is on. Nothing went wrong — the character chose the person over the thing. |
 
 ## How eye-contact locking changes scripted requests
 
-`AllowScriptedOverridesDuringExactFocus` and `LockBlocksGlances`, both on `ConvaiGazeController`, decide whether a scripted request is honored while an eye-contact lock (`ConversationLock`, `AlwaysLock`, or the active speaking period of `SpeakingFocus`) is in force:
+`AllowScriptedOverridesDuringExactFocus` and `LockBlocksGlances`, both on `ConvaiGazeController`, decide whether a scripted request is honored while an eye-contact lock (`ConversationLock` or `AlwaysLock` `EyeContactMode`) is in force:
 
 * While `FocusFidelity` is `Exact`, an explicit `GazeAt` request is rejected outright unless `AllowScriptedOverridesDuringExactFocus` is `true`. A rejected request returns a handle whose `Completion` is already finished and whose `Settled` resolves `false`.
 * While `FocusFidelity` is `Social`, an explicit `GazeAt` request always preempts the lock.
@@ -155,9 +112,9 @@ Call `handle.Release()` to end a request early. `Release` is safe to call multip
 
 **Symptom:** `handle.Settled` awaits and returns `false`.
 
-**Cause:** the request expired or was released/reset before alignment, its target was destroyed, or `Exact` focus rejected it. A higher-priority request alone does not complete a lower-priority handle; that handle can remain pending until it wins or ends.
+**Cause:** the request was interrupted by a higher-priority scripted request, its target was destroyed, or `Exact` focus rejected it.
 
-**Fix:** check `handle.Outcome` after `Settled` resolves to distinguish `Interrupted` from `HeldEyeContactInstead`. Check the hold duration, owner cleanup, and target lifetime; enable `AllowScriptedOverridesDuringExactFocus` only when the request should override that focus. For a request still waiting behind another look, adjust priority deliberately and retain a timeout or cancellation path.
+**Fix:** check `handle.Outcome` after `Settled` resolves to distinguish `Interrupted` from `HeldEyeContactInstead`, and raise `Priority` or set `AllowScriptedOverridesDuringExactFocus` if the request should win.
 
 **Verify:** the follow-up action only runs once `Settled` resolves `true`.
 
