@@ -32,6 +32,8 @@ Enter **Scene description (optional)** and **Description focus (optional)**. **D
 
 Choose **Current Scene** or **Selected Objects** and **Fast** or **Accurate** quality. Accurate uses more image detail but does not guarantee identification. Use **Re-analyze tagged objects** when existing tags should be considered; manually authored metadata is protected during Apply.
 
+<figure><img src="../../../../.gitbook/assets/unity-scene-auto-tagger-setup.png" alt="Scene Auto Tagger Setup controls with Scope set to Current Scene and Quality set to Accurate."><figcaption><p>(1) <strong>Scope</strong> chooses which objects to consider. (2) <strong>Quality</strong> controls the image detail used for analysis.</p></figcaption></figure>
+
 Choose **Explore current scene** or **Explore selected objects**. Captures and context are sent to the configured service. Keep private scene content out of a test run unless you intend to send it.
 {% endstep %}
 {% step %}
@@ -68,8 +70,6 @@ Inspect the resulting World Objects and groups. Enter Play mode, address the int
 A new-room connect request includes the projected World Objects. A join without a roster and later replacements use a room data message limited to 15,360 bytes. Action targets also reach the character through the action-target sync. A sync over 12 KiB is split into actions, objects and characters updates. Each list must fit in one update, or nothing is sent; see [Check when a change reaches Convai](../character-actions/register-targets-from-code.md#check-when-a-change-reaches-convai). Apply warns when the action targets or the world objects pass three quarters of the 15,360-byte limit. Apply does not prove that the list reaches every room member or produces the intended reply.
 {% endstep %}
 {% endstepper %}
-
-<figure><img src="../../../../.gitbook/assets/unity-scene-auto-tagger-setup.png" alt="Scene Auto Tagger Setup tab with the character picker, scene description, description focus, Scope set to Current Scene, Quality set to Accurate, and the Vision ready status"><figcaption><p>Scene Auto Tagger Setup. The character cards are blurred because they show account characters.</p></figcaption></figure>
 
 ## Tag objects with a coding assistant
 

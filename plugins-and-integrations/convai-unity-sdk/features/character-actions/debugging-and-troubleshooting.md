@@ -32,6 +32,12 @@ This is not the complete finding set — the Troubleshooter also reports on targ
 
 In the Actions Editor, choose **Live** and inspect **Timeline** for step results or **Commands That Never Ran** for intake rejections. Enable the Actions log category when you need Console output. In code, subscribe to `ConvaiManager.Events.OnCharacterActionReceived` to observe accepted command batches, `ConvaiActionDispatcher.OnStepCompleted` to inspect the executor result, and `BatchEnded` to learn why the dispatcher ended the batch. See [Action runner and batch policies](dispatcher-and-batch-policies.md).
 
+<figure><img src="../../../../.gitbook/assets/unity-actions-live-timeline.png" alt="Live Timeline displaying a completed Show Or Hide Object step for Notice Board with a Try It badge and duration."><figcaption><p>(1) The <strong>Try It</strong> badge identifies a local test. (2) The step shows the action and target. (3) <strong>Duration</strong> records how long the step took.</p></figcaption></figure>
+
+After exiting Play mode, open **Session Review** to inspect the retained timeline. The next Play session clears the recording.
+
+<figure><img src="../../../../.gitbook/assets/unity-actions-session-review.png" alt="Session Review after Play Mode ends, showing the same completed Show Or Hide Object step for Notice Board."><figcaption><p>(1) Open <strong>Session Review</strong> after exiting Play mode. (2) The same <strong>Try It</strong> batch remains visible. (3) The completed step still shows its action and target.</p></figcaption></figure>
+
 ## Test actions from the Actions Editor
 
 `EditorWindow` — `Convai.Editor.Actions`

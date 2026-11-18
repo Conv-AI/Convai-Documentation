@@ -38,10 +38,14 @@ See [Build an animation set](../../plugins-and-integrations/convai-unity-sdk/emb
 1. Use the imported clip in a state in the character's Animator Controller. Add an Animator Trigger parameter and a transition that enters the state when that trigger is set. If the clip should repeat, enable **Loop Time** on the clip.
 2. In the Actions Editor, add **Play Animator State**. In the executor's Inspector, add a binding from the action name to the Animator Trigger parameter.
 
+<figure><img src="../../.gitbook/assets/unity-xr-animator-trigger-binding.png" alt="Unity Animator Parameters shows a Wave Trigger beside the Play Animator State Inspector binding from action Play Wave to trigger Wave."><figcaption><p>(1) Add the <strong>Wave</strong> Trigger in the Animator Controller. In the executor binding, (2) set <strong>Action Name</strong> to <strong>Play Wave</strong> and (3) set <strong>Trigger Name</strong> to <strong>Wave</strong>. This locally tested example uses the SDK’s bundled wave animation.</p></figcaption></figure>
+
 See [Play Animator State](../../plugins-and-integrations/convai-unity-sdk/features/character-actions/action-executors.md#play-animator-state) for the binding fields.
 
 ## Verify the animation
 
 Enter Play mode. In the Actions Editor, select the action and open **Try It**. For **Play Gesture**, enter the Animation Set entry's name in **Values To Send**. Select **Run Now** and confirm that the character plays the recorded motion.
+
+<figure><img src="../../.gitbook/assets/unity-actions-try-gesture.png" alt="Actions Editor Try It card for Play Gesture showing wave entered in Values To Send, Run Now, and Done after the local run."><figcaption><p>(1) Enter the Animation Set’s <strong>wave</strong> gesture name. (2) Select <strong>Run Now</strong>. (3) <strong>Done</strong> reports completion. This local example uses the SDK’s bundled wave animation on Sofia.</p></figcaption></figure>
 
 After the local test passes, start a conversation and give the character a request that should trigger the action. Check that the same clip plays when the action runs.

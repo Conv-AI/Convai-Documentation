@@ -31,6 +31,9 @@ Edit room settings on the component. To share a setup across scenes, make the ma
 
 <figure><img src="../../../.gitbook/assets/unity-player-identity.png" alt="Convai Player Inspector showing Player Name, Player ID, and Name Tag Color in the Identity section."><figcaption><p>(1) <strong>Player Name</strong> is the display name. (2) <strong>Player ID</strong> is the stable local transcript identifier. (3) <strong>Name Tag Color</strong> sets the display color.</p></figcaption></figure>
 
+<figure><img src="../../../.gitbook/assets/unity-room-memory-identity.png" alt="Live manager End User and Memory rows with the identity value concealed and the memory control below."><figcaption><p>(1) <strong>End User</strong> identifies the connected end user. The value is hidden here. (2) <strong>Memory</strong> shows what the room reported. This multi-character room shows <strong>Not reported</strong>. (3) <strong>See What They Remember</strong> opens the memory view when it is available.</p></figcaption></figure>
+
+
 The manager discovers scene agents. A scene with several possible players needs an explicit assignment even if only one of them is active. Character availability and room membership can change during play. Use [Conversation availability](../features/conversation-availability/README.md) when deciding whether to enable player input.
 
 ## Verify the scene

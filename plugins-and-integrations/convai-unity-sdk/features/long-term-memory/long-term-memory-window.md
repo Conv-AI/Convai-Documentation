@@ -39,7 +39,7 @@ The **Memories** pane sits beside **End Users**, or below it in a narrow window.
 {% endstep %}
 {% endstepper %}
 
-<figure><img src="../../../../.gitbook/assets/unity-long-term-memory-window.png" alt="Long Term Memory section of the Convai Editor with a test character chosen, the End Users pane filtered to a test player beside the Memories pane with three test memories, and the This End User actions"><figcaption><p>The Long Term Memory section for a test character and a test end user. Actions that remove data are outlined in red.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-long-term-memory-window.png" alt="The fictional Museum Visitor row is highlighted in End Users, and the Memories pane shows an example fact about the space exhibit."><figcaption><p>(1) Click the user’s name to show their memories. (2) The checkbox selects a row for a bulk operation. (3) Read the fact under <strong>Memories</strong>. The visitor and fact in this example are fictional.</p></figcaption></figure>
 
 ## Add or remove individual facts
 

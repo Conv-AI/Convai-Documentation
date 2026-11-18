@@ -12,11 +12,7 @@ last_reviewed: "5.0.0-pre.1"
 
 On any scene GameObject, click **Add Component** → **Convai/Vision/Vision Debug Preview (Editor Only)**.
 
-The component auto-discovers the active frame source in the scene. No explicit assignment is required unless multiple frame sources are present.
-
-{% hint style="info" %}
-`VisionDebugPreview` discovers frame sources in priority order: same GameObject, children, parents, then scene-wide search. Assign the **Frame Source Component** field explicitly when multiple frame sources are present to avoid ambiguity.
-{% endhint %}
+Assign the scene camera’s frame source to **Frame Source Component** to preview it. With the field empty, the preview follows the source used by the active Vision publisher.
 
 ## Inspector reference
 
@@ -27,12 +23,11 @@ The component auto-discovers the active frame source in the scene. No explicit a
 | **Show Preview** | `bool` | `true`  | Enables the camera feed overlay.      |
 | **Show Stats** (under **Statistics**)   | `bool` | `true`  | Enables the capture statistics panel. |
 
-**Source fields** (no heading in the Inspector)
+**Frame source** (no heading in the Inspector)
 
 | Field                               | Type            | Default             | Description                                                                                                                                   |
 | ----------------------------------- | --------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Frame Source Component**          | `MonoBehaviour` | _(auto-discovered)_ | The frame source to preview. Leave blank to auto-discover.                                                                                    |
-| **Fallback To Active Frame Source** | `bool`          | `true`              | When the assigned source has no texture, searches the scene for another active frame source. Useful when the source starts after the preview. |
+| **Frame Source Component**          | `MonoBehaviour` | _(unassigned)_ | Assign an <code>IVisionFrameSource</code> component or leave the field blank to follow the publisher’s source.                                                                                    |
 
 **Overlay Layout**
 
@@ -43,7 +38,7 @@ The component auto-discovers the active frame source in the scene. No explicit a
 | **Offset X**         | `int` (0–200)     | `10`          | Horizontal inset from the selected corner in pixels.                                                                |
 | **Offset Y**         | `int` (0–200)     | `10`          | Vertical inset from the selected corner in pixels.                                                                  |
 
-<figure><img src="../../../../.gitbook/assets/unity-vision-debug-preview-inspector.png" alt="Vision Debug Preview Inspector with Frame Source Component, Overlay Layout, Aspect Ratio, Preview Settings and Statistics fields"><figcaption><p>The Vision Debug Preview Inspector with its default values.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-vision-debug-preview-inspector.png" alt="Vision Debug Preview with a Camera Vision Frame Source assigned and both Show Preview and Show Stats enabled."><figcaption><p>(1) Assign the camera source to <strong>Frame Source Component</strong>. (2) Enable <strong>Show Preview</strong> for the local image. (3) Enable <strong>Show Stats</strong> to see frame counts and capture speed.</p></figcaption></figure>
 
 **Aspect Ratio**
 
@@ -52,7 +47,7 @@ The component auto-discovers the active frame source in the scene. No explicit a
 | **Use Source Aspect Ratio** | `bool`        | `true`         | When enabled, derives aspect ratio from the frame source's `FrameDimensions`. When disabled, uses **Custom Aspect Ratio**. |
 | **Custom Aspect Ratio**     | `float` (1–3) | `1.778` (16:9) | Aspect ratio used when **Use Source Aspect Ratio** is disabled.                                                            |
 
-The two source fields come first with no heading, followed by **Overlay Layout**, **Aspect Ratio**, **Preview Settings**, then **Statistics**.
+The source field comes first with no heading, followed by **Overlay Layout**, **Aspect Ratio**, **Preview Settings**, then **Statistics**.
 
 ## Statistics overlay
 
@@ -75,7 +70,7 @@ Frames: 447
 | `FPS: X.X (target: Y)`        | Measured over 0.5 s intervals + `TargetFrameRate` | Measured FPS updates every 0.5 seconds.            |
 | `Frames: N`                   | `FrameCount`                                      | Cumulative total since capture started.            |
 
-<figure><img src="../../../../.gitbook/assets/unity-vision-debug-overlay.png" alt="Game view in Play Mode with the vision preview in the bottom-right corner and the statistics panel over it"><figcaption><p>The preview and statistics panel in the Game view. A long <code>Source</code> line is cut off at the panel edge.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-vision-debug-overlay.png" alt="Bottom-right corner of the running LipSync Sample, with the local scene camera image and capture statistics at 1280 by 720."><figcaption><p>(1) This is the local scene camera preview in the bottom-right corner of the Game view. (2) <strong>Status: Capturing</strong> means the source is producing frames. (3) <strong>Frames</strong> counts the frames received by this preview.</p></figcaption></figure>
 
 {% hint style="warning" %}
 **`IsCapturing` vs `IsPublishing`:** The statistics panel shows `IsCapturing` — whether the frame source is producing frames. This is distinct from `ConvaiVisionPublisher.IsPublishing`, which indicates whether a WebRTC video track is actively being sent to Convai. Both can be checked independently; a source may be capturing while publishing is paused or not yet started.

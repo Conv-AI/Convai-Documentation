@@ -19,7 +19,7 @@ Spatial context is disabled by default. It works with the same physical-object p
 3. Connect a character and place the object within 30 meters of it. The radius is measured from the character root to the resolved physical object's aim point.
 4. Move or turn the character, or move the object, and inspect the resulting context.
 
-<figure><img src="../../../../.gitbook/assets/unity-world-object-spatial-context.png" alt="World Object Inspector for a Supply Crate with Include Spatial Context and Include In Metadata enabled and its object name and description filled in"><figcaption><p>A World Object that contributes its name, description and spatial facts.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-world-object-spatial-context.png" alt="World Object Inspector for Red exhibit with Include Spatial Context and Include In Metadata checked and a short object description."><figcaption><p>(1) <strong>Object Name</strong> and its description identify the exhibit. (2) Enable <strong>Include Spatial Context</strong> to include spatial facts. (3) Leave <strong>Include In Metadata</strong> enabled.</p></figcaption></figure>
 
 The equivalent runtime setting is `metadata.IncludeSpatialContext = true`, where `metadata` is the object's `ConvaiWorldObject` component.
 

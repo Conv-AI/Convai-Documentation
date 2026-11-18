@@ -28,3 +28,9 @@ Select the character and open **Convai > Troubleshooter**. Review errors and war
 ## Verify a conversation
 
 Enter Play Mode. Let **Connect On Start** open the room or use your application's connection control. Wait for the addressed character to be ready, send a typed message or speak, and check for a reply. Local validation can confirm wiring while an unavailable character, refused credential, or device permission still prevents a turn. Use [Connection and API issues](../troubleshooting/connection-and-api-issues.md) or [Audio and microphone issues](../troubleshooting/audio-and-microphone-issues.md) for those cases.
+
+
+<figure><img src="../../../.gitbook/assets/unity-confirm-room-connection.png" alt="Live manager reports Connected, Tuesday NPC as the addressed character, and Player Can Talk set to Yes."><figcaption><p>(1) Check that <strong>Connected</strong> reads Yes. (2) Read <strong>Talking To</strong> to identify the character. (3) <strong>Player Can Talk</strong> reads Yes when the addressed character can receive input.</p></figcaption></figure>
+
+
+<figure><img src="../../../.gitbook/assets/unity-room-connected-video.png" alt="Live Room Manager Inspector with Session State Connected, Connected Yes, and Connection Type Video."><figcaption><p>(1) A joined room reports <strong>Session State</strong> as Connected. (2) <strong>Connected</strong> reads Yes. (3) Check <strong>Connection Type</strong> under <strong>Settings In Effect</strong>. This sample used Video.</p></figcaption></figure>

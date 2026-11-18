@@ -41,7 +41,9 @@ The component header shows **Ready** in Edit mode, **Live** in Play mode, or **A
 
 When offered under **Suggested**, use **Who it watches > Use This Camera** to select the intended camera, and **Personality > Add a Personality** to create settings you can tune. **Who It Looks At** contains **Who is the player?**, **Eye contact style**, and **Follows the conversation**. Leave the player reference empty to use the camera resolution shown beneath it.
 
-<figure><img src="../../../../.gitbook/assets/unity-gaze-setup.png" alt="Gaze Editor Setup showing a ready character, its camera and personality, and optional gaze capabilities"><figcaption><p>This sample has a resolved head but no eye bones or eye shapes. Ready means gaze can run with head motion; it does not mean every eye channel is available.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-gaze-setup.png" alt="Gaze Editor Setup showing Ready, the resolved head, neck and both eyes, and the camera watched by the character."><figcaption><p>In <strong>Setup</strong>, check that the character is <strong>Ready</strong> (1). This rig reports its head, neck, and both eyes (2). The example watches the main camera (3).</p></figcaption></figure>
+
+For the detailed report, see [Character rig setup](../character-rig-setup.md).
 
 ## Verify the setup
 

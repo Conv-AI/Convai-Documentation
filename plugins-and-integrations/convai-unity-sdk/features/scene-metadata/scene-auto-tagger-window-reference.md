@@ -40,6 +40,8 @@ Open **Convai > Scene Auto Tagger** in Edit mode. This reference describes the r
 | Generate standing positions | Queries the existing NavMesh for best-effort approach points |
 | Back to setup | Discards the current review; already applied scene objects remain |
 
+<figure><img src="../../../../.gitbook/assets/unity-scene-auto-tagger-review.png" alt="Scene Auto Tagger Review row for Red Exhibit with an unchecked batch checkbox, a checked Include box, and Apply 1 in the footer."><figcaption><p>(1) The left checkbox selects the row for batch operations. (2) The right checkbox includes the object in Apply. (3) <strong>Apply 1</strong> shows one object is ready to apply in this local example.</p></figcaption></figure>
+
 Cancellation stops remaining work, but an in-flight native request must finish before cleanup completes. The window may wait for that request during cancellation or Editor shutdown.
 
 ## Settings
@@ -63,8 +65,6 @@ The grouping plan is retained after the first Apply. Generated movement position
 ## Apply outcomes
 
 Apply records an Undo step and marks scenes dirty without saving. It preserves manual metadata and edited owned companions. Changes to geometry, transforms, or materials since capture can make a result stale; capture again. Inspect the applied components before saving and verify runtime delivery separately.
-
-<figure><img src="../../../../.gitbook/assets/unity-scene-auto-tagger-review.png" alt="Scene Auto Tagger Review tab with one included object, its analysis image, the editable name and description, the row check box and include toggle, and Apply 1"><figcaption><p>Review after analyzing one test object. Nothing changes in the scene until Apply.</p></figcaption></figure>
 
 ## Failure handling
 

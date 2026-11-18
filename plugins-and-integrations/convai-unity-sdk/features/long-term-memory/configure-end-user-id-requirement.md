@@ -41,7 +41,7 @@ Start a fresh connection with the intended identity source. On `ConvaiManager`, 
 {% endstep %}
 {% endstepper %}
 
-<figure><img src="../../../../.gitbook/assets/unity-character-memory-settings.png" alt="Memory card of the ConvaiCharacter Inspector with Long-Term Memory enabled and End-User ID set to Required"><figcaption><p>Long-Term Memory on with End-User ID set to Required. Choose Optional in the same drop-down to allow connects without an ID.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-character-memory-settings.png" alt="Example Character Inspector settings with Long-Term Memory enabled and End-User ID set to Required."><figcaption><p>(1) Enable <strong>Long-Term Memory</strong> to see the identity requirement. (2) Choose <strong>Required</strong> to refuse a connection that has no end-user ID.</p></figcaption></figure>
 
 ## Set the requirement from a script
 

@@ -10,8 +10,6 @@ Configure long-term memory in the **Memory** section of the `ConvaiCharacter` In
 Memory settings belong to the character on Convai, so changing them affects other applications that use it. A connection pinned to a character version keeps that version's memory enabled setting; the end-user ID requirement applies across versions. Use a test character when evaluating changes.
 {% endhint %}
 
-<figure><img src="../../../../.gitbook/assets/unity-character-memory.png" alt="Character Inspector Memory card with Long-Term Memory unchecked and Refresh and Manage Memories controls"><figcaption><p>The Memory card with memory disabled. Enable Long-Term Memory to reveal the end-user ID requirement.</p></figcaption></figure>
-
 ## Prerequisites
 
 - Install the Convai Unity SDK and [configure credentials](../../getting-started/configure-api-key.md) for an account that can manage the character.
@@ -32,6 +30,8 @@ Select the GameObject containing `ConvaiCharacter`, then expand **Memory**. Wait
 ### Set Long-Term Memory
 
 Change **Long-Term Memory** and confirm the dialog for the character you intend to edit. The change is saved through Convai; editing a scene asset alone does not configure character memory.
+
+<figure><img src="../../../../.gitbook/assets/unity-character-memory.png" alt="Memory controls on an example character with Long-Term Memory enabled."><figcaption><p>(1) Enable <strong>Long-Term Memory</strong> on the character you intend to configure. The example shows the enabled state.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Check the end-user requirement

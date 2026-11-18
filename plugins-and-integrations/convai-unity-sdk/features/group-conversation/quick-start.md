@@ -32,12 +32,14 @@ Fill **Scene Brief** with where the characters are, their relationship, and the 
 
 Use **Player Display Name** for how the group refers to the player. Set **Anchor** if the group's centre should be fixed to a scene transform; otherwise the character centre at session start is used.
 
-<figure><img src="../../../../.gitbook/assets/unity-group-conversation-inspector.png" alt="Group Conversation Inspector with a training-drill Scene Brief, one topic with Guide as Starter, and Guide and Engineer as members."><figcaption><p>(1) <strong>Scene Brief</strong> sets the situation. (2) <strong>Topics</strong> can assign a starter. (3) <strong>Members</strong> shows the two example characters.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-group-conversation-inspector.png" alt="Group Conversation Inspector showing a training-drill Scene Brief, safety-checklist topic, and Guide as Starter."><figcaption><p>(1) <strong>Scene Brief</strong> sets the situation. (2) <strong>Text</strong> tells the characters what to discuss. (3) <strong>Starter</strong> names the character who opens the topic.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Check input and validation
 
 Set the room's conversation input mode to **Push To Talk**. Resolve the Group Conversation Inspector warnings, including a missing scene brief, an invalid member count, and **Vision** being on. A Ready chip means the local checks passed, not that the service approved the account.
+
+<figure><img src="../../../../.gitbook/assets/unity-group-conversation-validation.png" alt="Group Conversation Inspector with a Ready status and a Members section listing Guide and Engineer."><figcaption><p>(1) <strong>Ready</strong> indicates that local checks passed. (2) <strong>Members</strong> lists the two example characters.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Rehearse offline

@@ -27,7 +27,7 @@ In Play mode, the live row shows:
 
 Choose an expression and strength, then select **Try It** to hold it. Select **Stop** to release it before testing conversation. These buttons are disabled outside Play mode. To inspect all emotion scores, open **Emotion Editor → Live → Everything it is feeling**, or read `Current.AllScores` from code.
 
-<figure><img src="../../../../.gitbook/assets/unity-emotion-inspector.png" alt="Emotion Controller Inspector in Play mode with the Personality field, and Live showing Feeling joy, Strength 0.80, Mood joy, Held For, and the Try It and Stop row"><figcaption><p>The Emotion Controller in Play mode, holding joy from Try It.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-emotion-inspector.png" alt="Close-up of the Emotion Inspector Live panel showing Try It, Joy, and the reported strength of 0.80."><figcaption><p>Choose a feeling (2) and use <strong>Try It</strong> (1). In this Play Mode example the <strong>Strength</strong> readout is 0.80 (3).</p></figcaption></figure>
 
 ## Advanced
 

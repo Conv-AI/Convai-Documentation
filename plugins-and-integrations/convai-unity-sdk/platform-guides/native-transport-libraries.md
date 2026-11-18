@@ -42,6 +42,8 @@ Check the project-local directory:
 Assets/Convai/Plugins/client-sdk-unity-livekit/Runtime/Plugins
 ```
 
+<figure><img src="../../../.gitbook/assets/unity-native-macos-library-folders.png" alt="The Plugins folder shows liblivekit_ffi.dylib in the macOS ARM64 and Intel folders, with the LiveKit FFI lockfile beneath them."><figcaption><p>This macOS project has (1) an ARM64 library, (2) an Intel x86_64 library, and (3) the <code>livekit-ffi.lock.json</code> lockfile.</p></figcaption></figure>
+
 Confirm the expected architecture is present and the Console has no download, checksum or import failure. Build for the intended target, launch that player and complete a voice or text turn. A successful Editor connection only tests the Editor's native library.
 {% endstep %}
 {% endstepper %}

@@ -20,13 +20,15 @@ Select the character GameObject and add **Convai > Narrative Design Manager**. T
 In **Sync Status**, click **Sync with Backend**. The button reads **Syncing...** while busy and is disabled without a character ID. The request respects the selected character reference. For a `ConvaiCharacter` with Live or a pinned release selected, that selection is preserved; the SDK reads the selected version through the Character API. A bare custom character reference may use the draft authoring read.
 
 Changing the assigned character triggers a sync. If another character ID replaces one with existing section bindings, **Character Change Detected** asks whether to clear them with **Yes, Clear and Switch**. Review those bindings before accepting.
+
+<figure><img src="../../../../.gitbook/assets/unity-narrative-manager.png" alt="Narrative Design Manager with Guide assigned, a Sync With Backend button, and the Welcome section in the list."><figcaption><p>(1) Assign the <strong>Character</strong>. (2) Use <strong>Sync With Backend</strong> to import its configured sections. (3) The section list shows the locally prepared <strong>Welcome</strong> example.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Add scene listeners
 
 Expand a section under **Narrative Sections (N)**. Its title uses the section name or ID. The entry exposes a disabled **Section ID**, **On Section Start**, and **On Section End**. Add a listener to a compatible public Unity Event method, such as your door controller's `Unlock()`.
 
-<figure><img src="../../../../.gitbook/assets/unity-narrative-manager.png" alt="Narrative Design Manager showing Sync With Backend, Narrative Sections, and the On Section Start event in a sample Welcome section."><figcaption><p>(1) <strong>Sync With Backend</strong> imports configured sections. (2) Expand the section under <strong>Narrative Sections</strong>. (3) Add an <strong>On Section Start</strong> listener. The Welcome section is a local example.</p></figcaption></figure>
+<figure><img src="../../../../.gitbook/assets/unity-narrative-section-start.png" alt="An expanded Welcome section with an empty On Section Start Unity Event and its plus button."><figcaption><p>(1) Find <strong>On Section Start</strong> in the expanded section. (2) Select <strong>+</strong> to add the listener.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Verify a real transition

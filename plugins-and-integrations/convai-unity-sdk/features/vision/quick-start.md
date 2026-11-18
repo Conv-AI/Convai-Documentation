@@ -17,6 +17,10 @@ Select `ConvaiRoomManager`. Under **Connection**, set **Vision** to **On**. The 
 If components are still missing, the camera-feed warning offers **Add Missing Components**. That action adds the components to the room manager's own GameObject. Select the object actually created by your chosen path.
 
 <figure><img src="../../../../.gitbook/assets/unity-room-vision-on.png" alt="Connection section of Convai Room Manager with Vision set to On."><figcaption><p>(1) Open <strong>Connection</strong> on the room manager. (2) Set <strong>Vision</strong> to <strong>On</strong>.</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-vision-setup-dialog.png" alt="Convai Vision Setup dialog offering to add the publisher and camera frame source."><figcaption><p>When setup prompts for the camera feed, choose <strong>Add Components</strong> (1).</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-vision-generated-hierarchy.png" alt="Hierarchy with ConvaiVisionRoot selected under the demo room."><figcaption><p>The dialog creates <strong>ConvaiVisionRoot</strong> (1) under the room. Its components are <strong>Convai Vision Publisher</strong> and <strong>Camera Vision Frame Source</strong>.</p></figcaption></figure>
 {% endstep %}
 {% step %}
 ### Assign the captured camera

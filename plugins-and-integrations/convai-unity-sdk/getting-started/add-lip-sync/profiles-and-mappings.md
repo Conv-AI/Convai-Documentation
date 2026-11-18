@@ -9,7 +9,6 @@ last_reviewed: "5.0.0-pre.1"
 The lip sync system uses two kinds of data to describe how blendshape data flows from Convai to your character's mesh: **profiles** and **maps**. Choose a built-in profile for the incoming stream. Create a map if your mesh uses different blendshape names.
 
 
-<figure><img src="../../../../.gitbook/assets/unity-lip-sync-map.png" alt="Bundled ARKit lip-sync map with coverage, read-only notice, and configuration fields"><figcaption><p>The bundled ARKit map is read-only. Create a project copy before editing; the displayed values belong to this shipped map.</p></figcaption></figure>
 ## What is a profile?
 
 A **profile** defines the transport format — it tells the SDK which blendshape channel names to expect in the data stream from Convai. Choose its display name in the component's **Profile** popup. Profile ID identifies the local profile; the transport token is the format requested from Convai. They differ for MetaHuman.
@@ -26,6 +25,8 @@ The three bundled profiles are built into the SDK — there is no `.asset` file 
 
 
 ## What is a map?
+
+<figure><img src="../../../../.gitbook/assets/unity-lip-sync-map.png" alt="Bundled Lip Sync Map with ARKit as the target profile, full coverage of enabled mappings, and a Create A Project Copy button."><figcaption><p>The bundled map targets <strong>ARKit</strong> (1) and reports full coverage of its enabled mappings (2). Choose <strong>Create A Project Copy</strong> (3) to edit your own asset.</p></figcaption></figure>
 
 A **map** routes the source blendshape channels (from the profile) to the actual blendshape names on your character's `SkinnedMeshRenderer`. It also lets you apply per-channel multipliers, offsets, and clamps.
 

@@ -71,6 +71,8 @@ Use **Copy Mapping JSON** to export the current asset's mappings in this same fo
 
 **Other mapping actions:** **Initialize Defaults** clears all existing mappings and creates one enabled, passthrough entry per known source channel for the asset's **Target Profile** — each entry's **Target Name(s)** is set to the source channel's own name. **Clear All** removes every mapping entry. **Sort A-Z** reorders entries alphabetically by source channel. In **Mappings**, **+ Add Entry** adds a blank entry, and the search box filters source and target blendshape names.
 
+<figure><img src="../../../../.gitbook/assets/unity-lip-sync-map-entries.png" alt="Editable ARKit map filtered to the JawOpen row with its advanced mapping settings expanded."><figcaption><p>The example project copy maps the <strong>JawOpen</strong> source (1) to the named target (2). Use the row disclosure (3) to view its response curve and other overrides.</p></figcaption></figure>
+
 Each entry maps one source channel to one or more target names. Expand its **Per-blendshape overrides** for Response Curve, clamp, override-value, and global-modifier controls. The table names the full properties; the compact row abbreviates Multiplier and Offset as **Mult** and **Offs**.
 
 | Entry field                 | Default        | Description                                                               |
@@ -110,7 +112,6 @@ Enter Play Mode and speak to the character. All mapped blendshapes animate. Chec
 {% endstepper %}
 
 
-<figure><img src="../../../../.gitbook/assets/unity-lip-sync-map-entries.png" alt="Lip Sync Mapping entries with source names, target names, multipliers, offsets, and per-entry disclosure controls"><figcaption><p>Mappings in the shipped ARKit asset. Its controls are disabled because it is read-only; use your project-owned map for the steps below.</p></figcaption></figure>
 ## Usage examples
 
 ### Example 1: ARKit stream to a custom rig

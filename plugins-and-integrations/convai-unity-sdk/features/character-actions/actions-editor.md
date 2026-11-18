@@ -84,6 +84,10 @@ The selected action's **Try It** box runs the real dispatch path with no backend
 * **In Edit mode**, enter a phrase in **Try A Target Name** and select **Check** to inspect the target-resolution result.
 * **In Play mode**, choose **Target**, fill **Values To Send**, and select **Run Now**. This runs local dispatch and reports the result and duration. The explicit test can bypass **Offer This Action** being disabled; that does not make the action available to normal incoming commands.
 
+<figure><img src="../../../../.gitbook/assets/unity-actions-try-it-completed.png" alt="The Actions Editor Try It card showing Notice Board as Target, hide as the mode, and Done after running Show Or Hide Object locally."><figcaption><p>(1) Choose the <strong>Notice Board</strong> target. (2) Set <strong>mode</strong> to <strong>hide</strong>. (3) <strong>Done</strong> reports the local result. <strong>Show In Timeline</strong> opens that run.</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-actions-try-gesture.png" alt="Actions Editor Try It card for Play Gesture showing wave entered in Values To Send, Run Now, and Done after the local run."><figcaption><p>(1) Enter the Animation Set’s <strong>wave</strong> gesture name. (2) Select <strong>Run Now</strong>. (3) <strong>Done</strong> reports completion. This local example uses the SDK’s bundled wave animation on Sofia.</p></figcaption></figure>
+
 ## Author actions with a coding assistant
 
 Use `Convai_ConfigureActions` to preview supported authoring changes, then apply the reviewed changes in Edit mode. `Convai_DiagnoseActions` checks the selected character’s action setup without changing it. See the [Actions tools reference](../../ai-coding-assistant/mcp-tools-reference.md#character-actions) for inputs and returned findings.
