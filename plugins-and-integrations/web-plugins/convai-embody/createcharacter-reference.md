@@ -1,7 +1,7 @@
 ---
 title: createCharacter reference
 description: Reference for the createCharacter function in Convai Embody, including every option, its default, and the character handle it returns.
-last_reviewed: "1.2.0"
+last_reviewed: "1.3.0"
 ---
 
 `createCharacter` is exported from `@convai/embody`. It resolves a character's body, loads it, opens a Convai Web SDK connection, and resolves to a `CharacterHandle`. The React components accept the same options as props.
@@ -9,6 +9,8 @@ last_reviewed: "1.2.0"
 ```typescript
 function createCharacter(options: CreateCharacterOptions): Promise<CharacterHandle>
 ```
+
+It rejects with an `EmbodyError` (exported from `@convai/embody` and `@convai/embody/react`): `code` names what failed, `stage` where (`credentials`, `resolve`, `download`, `connect`, `setup`, `render`), `retryable` whether trying again can help, `message` what to tell the user, and `cause` the original error. A connection opened before a later step failed is closed first. If the connection fails on a slow link while the body downloads, it is opened once more after the body has loaded.
 
 ## Options
 
@@ -27,6 +29,7 @@ function createCharacter(options: CreateCharacterOptions): Promise<CharacterHand
 | `session` | `SessionOptions` without `characterId`, `apiKey`, `authToken` | none | Extra Convai Web SDK connection options, such as voice, memory, transport, and `endUserId`. |
 | `client` | `ConvaiClient` | none | A client your app already created and connected. Convai Embody drives lip sync from it and never disconnects it. Read once, when the character is created. |
 | `connect` | `boolean` | `true` | `false` renders the body with no connection, no audio, and no lip sync. `client` on the handle is then `null`. |
+| `signal` | `AbortSignal` | none | Abandons the creation: its connection is closed at once instead of when the body finishes loading. `ConvaiCharacter` passes one when it switches characters. |
 | `resolver` | `CharacterResolver` | an HTTP resolver built from the credential | Resolves the body manifest yourself: a model you host, a private asset backend, a test fixture, or a prefetched manifest. See [Resolvers and the body manifest](#resolvers-and-the-body-manifest). |
 
 ### Body and loading
