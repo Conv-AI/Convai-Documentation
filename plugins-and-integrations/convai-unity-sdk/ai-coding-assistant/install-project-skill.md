@@ -25,6 +25,9 @@ Install a project copy of the `convai-unity-sdk` skill so Claude Code or Codex c
 
 Claude Code's copy lives in `.claude/skills/convai-unity-sdk/` and Codex's in `.agents/skills/convai-unity-sdk/`. Each copy has a `.convai-skill.json` stamp that records the SDK and skill versions and the copied files' hashes. If your team commits a project copy, include the stamp with the rest of the folder.
 
+<figure><img src="../../../.gitbook/assets/unity-ai-coding-project-skill.png" alt="The Codex client card shows a stale project skill with an Update button and separately installed project instructions."><figcaption><p>(1) Read the <strong>Project Skill</strong> status. (2) Select <strong>Update</strong> when the skill is stale. (3) Check <strong>Project Instructions</strong> separately.</p></figcaption></figure>
+
+
 {% content-ref url="supported-coding-agents.md" %}
 [Supported coding agents](supported-coding-agents.md)
 {% endcontent-ref %}

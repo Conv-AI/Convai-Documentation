@@ -38,6 +38,9 @@ The status badge next to the button reports the result: **Key valid** when Conva
 
 Confirm that the Credentials badge reads **Key valid**. When you reopen settings, the Editor checks the saved key in the background if its cached result is missing or older than 24 hours. If the service does not answer, the Editor limits retries for the same key to one every five minutes. Scene validation checks whether a key is configured; it does not authenticate that key with Convai.
 
+<figure><img src="../../../.gitbook/assets/unity-credentials-key-valid.png" alt="Masked API Key field, Validate and Save button, and green Key valid status."><figcaption><p>(1) Paste the key in the masked field. (2) Select <strong>Validate &amp; Save</strong>. (3) Check for <strong>Key valid</strong>.</p></figcaption></figure>
+
+
 {% endstep %}
 {% endstepper %}
 

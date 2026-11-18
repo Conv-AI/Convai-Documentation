@@ -23,13 +23,15 @@ The steps for locating the samples differ depending on how you installed the SDK
 {% step %}
 ### Open Package Manager
 
-In the Unity Editor, open **Window > Package Manager**. In the top-left dropdown, select **In Project**, then select **Convai SDK for Unity** from the list.
+In the Unity Editor, open **Window > Package Manager**. Select **In Project**, then select **Convai SDK for Unity** from the package list.
 {% endstep %}
 
 {% step %}
 ### Import a sample
 
 In the detail panel on the right, click the **Samples** tab. Click **Import** next to the sample you want to run.
+
+<figure><img src="../../../.gitbook/assets/unity-package-manager-basic-sample.png" alt="Unity Package Manager showing Convai SDK for Unity 5.0.0-pre.1 under In Project, with the Samples tab and the Basic Sample Import button marked."><figcaption><p>Select (1) <strong>Samples</strong>, find (2) <strong>Basic Sample</strong>, and click (3) <strong>Import</strong> on that row.</p></figcaption></figure>
 
 Unity copies the sample assets into `Assets/Samples/Convai SDK for Unity/<version>/`. A new folder appears under `Assets/Samples/` in the Project window.
 {% endstep %}
@@ -76,7 +78,9 @@ Press **Play**. The Unity Console logs the following lines as the SDK initialize
 * `[ConvaiRuntime] Started successfully` — SDK initialized all internal services
 * `[RoomConnectionRuntimeAdapter] Room connection succeeded (mode=create).` — the room connected to Convai
 
-Speak into your microphone. The character responds with voice and text output.
+In the **Basic Sample**, focus the Game view. When the chat field reads **Message Robot**, type a greeting and press **Enter**. To speak using the sample’s default push-to-talk control, hold **T** while speaking and release it when you finish. Listen for the Robot’s reply and check that it appears in the chat.
+
+<figure><img src="../../../.gitbook/assets/unity-basic-sample-first-exchange.png" alt="The Basic Sample chat shows a player greeting, a Robot reply, and the Message Robot field ready for another turn."><figcaption><p>(1) Your message appears on the right. (2) The Robot’s reply appears on the left. (3) When <strong>Message Robot</strong> returns, you can send another message.</p></figcaption></figure>
 
 If no response appears and the Console shows warnings, check [Validate your setup](validate-your-setup.md) for a diagnostic checklist.
 {% endstep %}

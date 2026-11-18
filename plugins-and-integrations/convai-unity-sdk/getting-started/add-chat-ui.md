@@ -40,6 +40,8 @@ Keep **Convai > Settings > Runtime Defaults > Transcript System** enabled. A run
 
 The chat UI overlay appears in the Game view. The component finds `ConvaiManager` automatically when the scene starts — no manual wiring is needed.
 
+<figure><img src="../../../.gitbook/assets/unity-basic-sample-ready-prompt.png" alt="Game view in the Basic Sample with the enabled Message Robot field beside the Robot."><figcaption><p>(1) The chat field shows <strong>Message Robot</strong> when it can accept input. (2) The Robot is the character addressed by this field.</p></figcaption></figure>
+
 The chat input field requires an `EventSystem` in the scene. If your scene does not already have one, add it via **GameObject > UI > Event System**.
 
 {% hint style="warning" %}
@@ -86,8 +88,6 @@ If `chatContainer` is not assigned, messages will not appear and the Console log
 **Fonts > Use System Font Fallback** defaults to on. It uses available operating-system fonts for missing glyphs on native platforms. It does not provide complex script shaping or right-to-left layout. For WebGL, supply suitable TextMeshPro font assets and fallback fonts in your project.
 
 If the prefab is present but no messages appear, check **Transcript System**, its runtime override and the component references. If only the input is disabled, inspect the availability prompt: room connection alone does not mean the character is ready.
-
-<figure><img src="../../../.gitbook/assets/unity-chat-ready.png" alt="Chat transcript panel of the Basic Sample in Play mode showing a player message, a Robot reply and the Message Robot input prompt"><figcaption><p>TranscriptUI_Chat in Play mode with one exchange and the ready input prompt.</p></figcaption></figure>
 
 ## Usage examples
 

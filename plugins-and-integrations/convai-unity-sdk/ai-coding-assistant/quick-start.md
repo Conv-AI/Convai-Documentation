@@ -49,6 +49,9 @@ In the same client card, select **Install** next to **Project skill**. Open a ne
 
 Ask the agent to run `Convai_GetProjectStatus`. Confirm that `pipelineVersion` matches the installed package and that `toolContractVersion` matches the entry in `AgentSkills/convai-unity-sdk/skill-manifest.json` inside the SDK package. Select **Recheck** in **AI Coding**. **Unity CLI MCP** reads **Verified** after a Convai command reaches the active Editor session.
 
+<figure><img src="../../../.gitbook/assets/unity-ai-coding-verified.png" alt="Setup Health in Convai Home reports a verified Unity CLI MCP call."><figcaption><p>(1) Open <strong>Setup Health</strong> in AI Coding. (2) Check the time of the last verified Convai tool call through the Unity CLI.</p></figcaption></figure>
+
+
 To inspect the command catalog from the terminal, keep the project open in Unity and run:
 
 ```bash

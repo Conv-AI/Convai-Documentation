@@ -46,6 +46,9 @@ Set **HTTP Method** to **Get** or **Post** to match how your endpoint expects th
 ### Confirm the Token Response Field
 
 Leave **Token Response Field** at its default, `apiAuthToken`, unless your endpoint returns the token under a different JSON field. This field supports dotted paths, so a nested field such as `data.token` resolves correctly.
+
+<figure><img src="../../../.gitbook/assets/unity-auth-token-endpoint.png" alt="Credentials in Auth Token mode showing an example HTTPS token endpoint, HTTP method, and response field."><figcaption><p>(1) Select <strong>Auth Token</strong>. (2) Enter the HTTPS URL for your own token endpoint. (3) Set <strong>Token Response Field</strong> to the JSON field your endpoint returns.</p></figcaption></figure>
+
 {% endstep %}
 
 {% step %}

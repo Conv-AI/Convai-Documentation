@@ -118,6 +118,8 @@ The sample’s `ConvaiSampleInteractionController` binds `F10` to open settings 
 
 The panel includes `MicrophoneTestController`. Press **Record**, speak, and press **Stop** to play the recorded audio. It also draws a waveform. The test supports a recording of up to 10 seconds.
 
+<figure><img src="../../../../.gitbook/assets/unity-play-mode-microphone-controls.png" alt="Audio Settings in the Basic Sample showing the microphone selector, push-to-talk mode and Record button for Test Input."><figcaption><p>(1) Choose the microphone under <strong>Input</strong>. (2) Check the current <strong>Input Mode</strong>. (3) Select <strong>Record</strong> to start the local microphone test.</p></figcaption></figure>
+
 In a WebGL player it reports `Microphone test not supported on WebGL`. A session with microphone access disabled reports `Microphone Is Off In This Session` and does not request permission. Browser microphone troubleshooting is separate from this local test.
 
 ## Defaults and saved overrides

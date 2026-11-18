@@ -30,6 +30,9 @@ Create an asset with **Create → Convai → Notification System → Notificatio
 ### Test an alert
 
 Assign the asset to the component below and invoke `ShowAlert()` from a scene button. Confirm that its title and message appear, then clear after the animation cycle. `DismissAll()` clears visible and queued alerts.
+
+<figure><img src="../../../../.gitbook/assets/unity-play-mode-custom-alert.png" alt="A Checkpoint reached notification in the Game view with the message You can continue from here."><figcaption><p>(1) The sample displays the title and message from the notification asset in the upper-right corner of the Game view.</p></figcaption></figure>
+
 {% endstep %}
 {% endstepper %}
 

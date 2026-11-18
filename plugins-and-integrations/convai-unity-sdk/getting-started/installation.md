@@ -11,6 +11,8 @@ Install the Convai SDK for Unity <code class="expression">space.vars.unity_sdk_v
 {% tabs %}
 {% tab title="Package file (.tgz)" %}
 Open **Window > Package Manager**. Select **+ > Install package from tarball**, then choose the supplied `.tgz` file. Wait for Unity to resolve the package and its dependencies. In **In Project**, select **Convai SDK for Unity** and confirm its installed version matches <code class="expression">space.vars.unity_sdk_version</code>. [Unity's tarball installation guide](https://docs.unity3d.com/6000.0/Documentation/Manual/upm-ui-tarball.html)
+
+<figure><img src="../../../.gitbook/assets/unity-package-manager-installed-version.png" alt="Unity Package Manager showing Convai SDK for Unity 5.0.0-pre.1 labeled Local and Pre-Release."><figcaption><p>Under (1) <strong>In Project</strong>, select (2) <strong>Convai SDK for Unity</strong> and check (3) the installed version below the package name. Unity labels a local tarball installation <strong>Local</strong>.</p></figcaption></figure>
 {% endtab %}
 
 {% tab title="Package registry" %}
@@ -27,12 +29,14 @@ In Unity, open **Window > Package Manager** and select **+ > Install package by 
 ### Enter the package name and version
 
 Enter `com.convai.convai-sdk-for-unity` in **Name**. Enter <code class="expression">space.vars.unity_sdk_version</code> in **Version** and select **Install**. Specifying the version selects the preview even if a different release is available. [Unity's package installation guide](https://docs.unity3d.com/6000.0/Documentation/Manual/upm-ui-quick.html)
+
+<figure><img src="../../../.gitbook/assets/unity-package-manager-install-by-name.png" alt="Unity Package Manager Install package by name form with the Convai package name, version 5.0.0-pre.1, and Install button."><figcaption><p>Enter (1) the package <strong>Name</strong> and (2) the preview <strong>Version</strong>, then click (3) <strong>Install</strong>.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
 ### Confirm the installed version
 
-Select **Convai SDK for Unity** under **In Project**. If the registry cannot resolve this version, check the registry settings supplied with your preview or use the supplied package file.
+Select **Convai SDK for Unity** under **In Project** and confirm the version shown below the package name. See the Package Manager screenshot in [Import a sample](import-and-run-sample-scenes.md#import-a-sample). If the registry cannot resolve this version, check the registry settings supplied with your preview or use the supplied package file.
 {% endstep %}
 {% endstepper %}
 {% endtab %}
