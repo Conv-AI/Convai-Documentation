@@ -17,6 +17,8 @@ Add `ConvaiGazeTarget` (`Convai/Gaze/Target`) to any `GameObject` to make it a g
 
 <figure><img src="../../../../.gitbook/assets/unity-gaze-marked-prop.png" alt="Gaze Editor with Targets selected. The Display Block prop is listed under Worth Looking At and is already marked."><figcaption><p>Open <strong>Targets</strong> (1), select a prop in the Hierarchy, and choose <strong>Mark The Selected Object</strong> (2). The marked prop appears under <strong>Worth Looking At</strong> (3).</p></figcaption></figure>
 
+<figure><img src="../../../../.gitbook/assets/unity-gaze-selected-prop.png" alt="Display Block is selected in the Unity Hierarchy, and the Inspector shows its enabled Gaze Target component."><figcaption><p>(1) Select a prop in the Hierarchy. (2) Its <strong>Gaze Target</strong> component lets you check range, relevance, and the aim point.</p></figcaption></figure>
+
 | Field | Default | Purpose |
 |---|---|---|
 | **More important than the player** | off | Switches priority between `5` and `15`. Use **Advanced > Priority** for a custom value. The player anchor normally publishes at `10`. |

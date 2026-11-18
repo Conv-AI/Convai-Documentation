@@ -33,6 +33,10 @@ In the Hierarchy, select the `GameObject` that carries the `ConvaiCharacter` com
 
 In the Inspector, select **Add Component**, then **Convai > Embodiment > Gaze**. This adds `ConvaiGazeController` to the character.
 
+Alternatively, open **Convai > Embodiment Editor**, select **Setup**, and select **Add** beside **Gaze**.
+
+<figure><img src="../../../.gitbook/assets/unity-embodiment-before-add-gaze.png" alt="Embodiment Editor Setup with Demo Character selected and an Add button on the Gaze row."><figcaption><p>Confirm the selected character (1), then select <strong>Add</strong> on the <strong>Gaze</strong> row (2).</p></figcaption></figure>
+
 Convai also adds the shared infrastructure the module needs — an `EmbodimentContext` — automatically. The `StandardRigBinding` appears when the character starts in Play mode, or immediately when you use **Set Up This Character** or **Set Up Rig Now** in the Embodiment Editor.
 {% endstep %}
 

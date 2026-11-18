@@ -23,6 +23,8 @@ Configure your Editor API key under **Convai > Settings > Credentials**. Set **C
 Select the character and open **Identity > Character Version**. Use **Refresh** to reload releases, then choose a version from the popup. The latest release is labeled **Latest release**. If the service has no releases, **Live** is the only available choice.
 
 To reuse the pin across scenes, set the version on the character prefab.
+
+<figure><img src="../../../.gitbook/assets/unity-character-version.png" alt="Identity settings showing the example character pinned to version 1.0 (Latest release) with a Refresh button."><figcaption><p>(1) Choose a numbered <strong>Character Version</strong> to pin the character. This capture shows <strong>1.0 (Latest release)</strong>. (2) Select <strong>Refresh</strong> to reload the available releases.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}
@@ -31,8 +33,6 @@ To reuse the pin across scenes, set the version on the character prefab.
 Save the changed scene or prefab. Select it again and confirm the chosen release remains selected. Connect with that configuration and check for version-related connection errors before distributing the application.
 {% endstep %}
 {% endstepper %}
-
-<figure><img src="../../../.gitbook/assets/unity-character-version.png" alt="Identity card of the ConvaiCharacter Inspector with Character Version set to the released version 1.0 (Latest release) next to Refresh, with the Character ID blurred"><figcaption><p>A character pinned to its released version 1.0. The drop-down also lists Live and every release the API returns.</p></figcaption></figure>
 
 ## Resolve a saved-version warning
 

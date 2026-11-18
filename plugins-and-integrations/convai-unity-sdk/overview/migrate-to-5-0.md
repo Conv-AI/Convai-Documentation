@@ -60,4 +60,7 @@ Rewire saved spoken-line listeners. Use `character.OnSpokenLine` for a character
 
 Import the package and check that your scripts compile. Reopen saved scenes and prefabs, run **GameObject > Convai > Validate Scene Setup**, then complete a turn using each input your app offers. Test reconnect, mic denial, audio playback, transcript corrections, and any changes to the addressed character in a player build. For an IL2CPP player, use the [stripping and validation checks](../compatibility-and-requirements/platform-support-matrix.md#il2cpp-stripping-and-validation) with the stripping level you plan to ship. Test group conversation and memory against the account and service configuration you intend to deploy.
 
+<figure><img src="../../../.gitbook/assets/unity-scene-validation-passed.png" alt="The scene validator reports Validation Passed and finds one Convai Character in the configured sample."><figcaption><p>(1) <strong>Validation Passed</strong> confirms that the local scene checks passed. (2) Compare the reported character count with your scene. This sample contained one character.</p></figcaption></figure>
+
+
 If you automate the Editor, [set up Unity CLI MCP](../ai-coding-assistant/quick-start.md) and refresh each assistant's project skill and managed instructions. Check tool names, inputs, and outputs against the [MCP tools reference](../ai-coding-assistant/mcp-tools-reference.md).
