@@ -1,10 +1,10 @@
 ---
 title: Embodiment scripting reference
 description: Reference for the Convai embodiment scripting surface, including the character context, module base class, rig binding, and shared enums.
-last_reviewed: "5.0.0-pre.1"
+last_reviewed: "4.5.0"
 ---
 
-Reference for the public embodiment types a Unity script can use directly: `EmbodimentContext`, the `ConvaiCharacterModule<TProfile>` base class for a custom module, `StandardRigBinding`, `ConvaiTravelIntent`, `ModuleIds`, and the shared `CharacterDemeanor`, `StandardBone`, `StandardBlendshape`, and `RigConvention` enums. Cross-module contracts such as `IGazeSource` and `IEmotionStateFrameSource` are internal and are not part of this surface — read each module's own controller reference instead.
+Reference for the public embodiment types a Unity script can use directly: `EmbodimentContext`, the `ConvaiCharacterModule<TProfile>` base class for a custom module, `StandardRigBinding`, `ConvaiTravelIntent`, `ModuleIds`, and the shared `CharacterDemeanor`, `StandardBone`, `StandardBlendshape`, and `RigConvention` enums. Cross-module contracts such as `IGazeSource` and `IEmotionStateSource` are internal and are not part of this surface — read each module's own controller reference instead.
 
 ## `EmbodimentContext`
 
@@ -21,7 +21,6 @@ Reference for the public embodiment types a Unity script can use directly: `Embo
 
 | Property | Type | Description |
 |---|---|---|
-| `FacialCompositionProfileOverride` | `ConvaiFacialCompositionProfile` | Read-only access to the Inspector override for facial composition. |
 | `CharacterRoot` | `Transform` | The character root transform. |
 | `EventHub` | `IEventHub` | Event bus for listening to domain events. |
 | `Logger` | `ILogger` | Logger for structured diagnostics. May be `null` if not yet injected. |
@@ -34,15 +33,7 @@ Reference for the public embodiment types a Unity script can use directly: `Embo
 |---|---|---|
 | `RigBindingChanged` | `event Action<IStandardRigBinding>` | The semantic rig binding is rebuilt or replaced at runtime. Modules that cache bone or mesh references should resolve them again. |
 | `EmbodimentConfigurationChanged` | `event Action` | Embodiment-module configuration has been updated at runtime — for example, a preset was applied. |
-| `DependenciesPopulated` | `event Action` | Runtime-only dependencies such as `EventHub` and the tick scheduler become available. |
-
-### Configuration notifications
-
-| Method | Signature | Purpose |
-|---|---|---|
-| `NotifyRigBindingChanged` | `void NotifyRigBindingChanged(IStandardRigBinding rigBinding = null)` | Refreshes the cached binding when supplied and notifies modules to resolve rig references again. |
-| `NotifyEmbodimentConfigurationChanged` | `void NotifyEmbodimentConfigurationChanged()` | Notifies modules that their configuration changed. |
-| `Populate` | `void Populate(IEventHub eventHub, ILogger logger)` | Supplies SDK runtime dependencies. Normal character setup performs this wiring; application scripts do not need to call it. |
+| `DependenciesPopulated` | `event Action` | Runtime-only dependencies such as `EventHub`, the tick scheduler, and the animator infrastructure become available. |
 
 ### Tickables
 
@@ -75,12 +66,6 @@ Reference for the public embodiment types a Unity script can use directly: `Embo
 
 `Awake`, `OnEnable`, `OnDisable`, and `OnDestroy` are `virtual` and handle context resolution and profile receiver registration in the base implementation — call the base method when overriding any of them.
 
-## Custom module registration and ticks
-
-`EmbodimentModuleAttribute` is in `Convai.Runtime.Embodiment`. Apply `[EmbodimentModule(id, displayName)]` to a concrete module and set its `Description`, `Absence`, and `Order` named arguments to make it discoverable in the Embodiment Editor, preset feature picker, and Character Features Inspector. The ID must match `ProfileModuleId` and remain stable after assets use it.
-
-`IEmbodimentTickable` is in `Convai.Runtime.Embodiment`. Implement `Phase`, optional `TickOrder` (default `0`), and `EmbodimentTick(float deltaTime)`. `EmbodimentTickPhase` defines `Cognition = 0` and `Expression = 1`. Lower orders run first, with registration order breaking ties. `ConvaiCharacterModule<TProfile>` registers implementations on enable and drops the registration on disable. See [Create a custom embodiment module](custom-embodiment-module.md) for a complete lifecycle example.
-
 ## `StandardRigBinding`
 
 `StandardRigBinding` (`sealed class : MonoBehaviour, IStandardRigBinding`, `[AddComponentMenu("Convai/Embodiment/Character Rig")]`) inspects a character's hierarchy and resolves semantic bone and blendshape lookups against it. See [Character rig setup](character-rig-setup.md) for how detection and confidence work.
@@ -101,7 +86,7 @@ Reference for the public embodiment types a Unity script can use directly: `Embo
 |---|---|---|
 | `Rebuild` | `void Rebuild()` | Re-scans the hierarchy and rebuilds the bone and blendshape resolution tables. Call when outfits change, a mesh is replaced, or a convention override is applied at runtime. |
 | `TryGetBone` | `bool TryGetBone(StandardBone semantic, out Transform bone)` | Resolves a semantic bone. Logs a warning once per component lifetime when the bone cannot be found. |
-| `TryGetBlendshape` | `bool TryGetBlendshape(StandardBlendshape semantic, out SkinnedMeshRenderer mesh, out int blendshapeIndex)` | Resolves a semantic blendshape. Participates in the batched missing-blendshape warning; the report is repeated when the missing set changes. |
+| `TryGetBlendshape` | `bool TryGetBlendshape(StandardBlendshape semantic, out SkinnedMeshRenderer mesh, out int blendshapeIndex)` | Resolves a semantic blendshape. Logs a warning once per component lifetime when it cannot be found. |
 
 ## `ConvaiTravelIntent`
 
@@ -146,7 +131,7 @@ Travel is resolved from three sources, best first: an explicit report through `R
 
 ## `CharacterDemeanor`
 
-`CharacterDemeanor` is a shared authoring vocabulary used by the Gaze, Emotion, Body Animation, and Body Language editors so that picking the same demeanor on each module's asset describes one consistent character. A demeanor is authoring-only: applying one writes plain values into the asset being edited, and nothing at runtime reads this enum. Each module interprets the same word in its own terms.
+`CharacterDemeanor` is a shared authoring vocabulary used by the Emotion, Body Animation, and Body Language editors so that picking the same demeanor on each module's asset describes one consistent character. A demeanor is authoring-only: applying one writes plain values into the asset being edited, and nothing at runtime reads this enum. Each module interprets the same word in its own terms.
 
 | Value | Number | Description |
 |---|---|---|

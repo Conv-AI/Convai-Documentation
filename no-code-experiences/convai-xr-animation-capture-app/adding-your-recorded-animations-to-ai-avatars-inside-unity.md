@@ -1,45 +1,65 @@
 ---
-title: Adding Your Recorded Animations to AI Avatars Inside Unity
 description: >-
-  Set up a recorded animation clip in the Convai Unity SDK and test a character
-  action using a Body Animation Set or an Animator Controller.
+  Learn how to import animations recorded in VR and apply them to your AI
+  avatars in Unity.
 ---
 
-Configure a Convai character to play a clip recorded with the **Convai XR Animation Capture** app. The Unity steps start once you have the recording in a format Unity can import.
+# Adding Your Recorded Animations to AI Avatars Inside Unity
+
+## **Overview**
+
+Bring your Convai avatars to life inside Unity by integrating animations recorded via the **Convai XR Animation Capture App**. This guide walks you through importing those animations and attaching them to AI-powered characters in your Unity project.
 
 {% embed url="https://youtu.be/dI3xf4gQPRE" %}
-Recording a motion on Meta Quest
-{% endembed %}
 
-## Prerequisites
+## **How to Add Recorded Animations to AI Avatars in Unity**
 
-* A scene with a working Convai character. Follow [Unity SDK getting started](../../plugins-and-integrations/convai-unity-sdk/getting-started/README.md) to set up a project.
-* A recording available as a Unity-importable animation file or a clip already in your project's **Assets**. The [recording guide](creating-animations-for-ai-avatars.md) covers capture and upload to your Convai account.
+### **Step 1: Set Up Unity & Convai**
 
-## Import the animation clip
+Before importing animations, ensure your Unity project is correctly set up with Convai:
 
-If the clip is already in your project, continue to [Configure the character action](#configure-the-character-action). Otherwise, put the animation file in the project's `Assets/` folder. Select the imported clip in the **Project** window and preview it on the intended avatar.
+* Install the **Convai Unity SDK**.
+* Retrieve your **API key** from the Convai Playground.
+* Add the API key to your project settings.
 
-## Configure the character action
+{% hint style="success" %}
+**Need help setting up the SDK?**\
+Check out our [Unity SDK Documentation](https://docs.convai.com/api-docs/plugins-and-integrations/unity-plugin) or follow the [video](https://youtu.be/anb9ityi0MQ) walkthrough above.
+{% endhint %}
 
-Open **Convai > Actions Editor** and select the character. For a character without actions, enable actions and add a **Convai Action Runner**. Follow the [character actions quick start](../../plugins-and-integrations/convai-unity-sdk/features/character-actions/quick-start.md) for those setup steps.
+***
 
-### Character with Body Animation
+### **Step 2: Import the Animation**
 
-1. Open **Convai > Body Animation Editor** and select the character. In **Content > Actions & Gestures**, add an entry to the character's Animation Set. Give it a name and assign the imported clip.
-2. In the Actions Editor, add **Play Gesture**. Use the Animation Set entry's name as the `gesture` value.
+1. Go to the **Convai Dashboard** and navigate to the **Server Animations** tab.
+2. Locate the animations you recorded in VR.
+3. Click **Import** and select a location **within your Unity project's `Assets/` directory**.
 
-See [Build an animation set](../../plugins-and-integrations/convai-unity-sdk/embodiment/body-animation/build-an-animation-set.md) for clip and loop settings.
+{% hint style="warning" %}
+The files **must be placed inside the Unity project folder** for them to be detected and used properly.
+{% endhint %}
 
-### Character with its own Animator Controller
+***
 
-1. Use the imported clip in a state in the character's Animator Controller. Add an Animator Trigger parameter and a transition that enters the state when that trigger is set. If the clip should repeat, enable **Loop Time** on the clip.
-2. In the Actions Editor, add **Play Animator State**. In the executor's Inspector, add a binding from the action name to the Animator Trigger parameter.
+### **Step 3: Apply the Animation to a Character**
 
-See [Play Animator State](../../plugins-and-integrations/convai-unity-sdk/features/character-actions/action-executors.md#play-animator-state) for the binding fields.
+1. In Unity, drag your AI character model into the **scene hierarchy**.
+2. Adjust the character’s position if needed.
+3. Open or create an **Animator Controller**.
+4. Drag the imported animation clip into the **Animator Controller**.
+5. If the animation should repeat, enable **Loop Time** in the Animation settings.
 
-## Verify the animation
+***
 
-Enter Play mode. In the Actions Editor, select the action and open **Try It**. For **Play Gesture**, enter the Animation Set entry's name in **Values To Send**. Select **Run Now** and confirm that the character plays the recorded motion.
+### **Step 4: Test the Scene**
 
-After the local test passes, start a conversation and give the character a request that should trigger the action. Check that the same clip plays when the action runs.
+1. Run your Unity scene.
+2. Start a conversation with the avatar or trigger the assigned action.
+3. Watch your AI avatar perform the recorded animation in real-time!
+
+***
+
+#### **Done!**
+
+You’ve now successfully connected a custom VR-recorded animation to an AI-powered avatar in Unity.\
+Repeat the process to add more animations and create rich, expressive characters in your simulations or games.

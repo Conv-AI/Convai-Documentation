@@ -1,7 +1,7 @@
 ---
 title: Character actions examples
-description: Progressive examples for the Convai character actions system — Inspector setup, event subscriptions, scripted action batches, and an observation action.
-last_reviewed: "5.0.0-pre.1"
+description: Progressive examples for the Convai character actions system — Inspector setup, event subscriptions, scripted batch injection, and an observation action.
+last_reviewed: "4.6.0"
 ---
 
 These six examples progress from the simplest possible configuration to full scripting control. Each example is self-contained — you can follow any one of them without reading the others first.
@@ -12,17 +12,17 @@ These six examples progress from the simplest possible configuration to full scr
 
 **Prerequisites:** NavMesh baked in the scene.
 
-### Actions Editor setup
+### Inspector configuration
 
 On the instructor NPC's `GameObject`, add these components:
 
 * `ConvaiCharacter`
 * `ConvaiActionConfigSource`
 * `ConvaiActionDispatcher` (leave both policies at defaults: Queue, StopBatch)
-* `ConvaiWalkToActionExecutor` — **Arrive Distance** = `0.6`, with `ConvaiNavMeshLocomotion` and `NavMeshAgent`
+* `ConvaiWalkToActionExecutor` — `_arriveDistance = 0.6`
 * `ConvaiPointAtActionExecutor` — leave `Hold Seconds` at `3`. It drives the arm through `ConvaiBodyAnimationController`, so the character needs that component too.
 
-Open **Convai > Actions Editor > Actions**. Set **Name**, **Target**, and the bound **Scene Behavior** for each action. Add objects in **Scene Knowledge**, or place a `ConvaiActionTarget` on each object:
+In `ConvaiActionConfigSource`:
 
 **Action definitions:**
 
@@ -45,7 +45,11 @@ Open **Convai > Actions Editor > Actions**. Set **Name**, **Target**, and the bo
 * "Retrieve the alarm" → Convai correctly resolves "alarm" to "Alarm Panel" based on the description.
 
 {% hint style="success" %}
-Confirm the step succeeds in **Actions Editor > Live > Timeline**.
+Open the Console and filter by `ConvaiActionDebugProbe` (if the probe is added). You should see:
+
+```text
+[ConvaiActionDebugProbe] Step succeeded #1: cmd='Retrieve Extinguisher', def='Retrieve', target=Object:Extinguisher
+```
 {% endhint %}
 
 ## Example 2 — Onboarding checklist integration (event subscription)
@@ -54,7 +58,7 @@ Confirm the step succeeds in **Actions Editor > Live > Timeline**.
 
 ### C# setup
 
-Add `ConvaiGazeController` for `ConvaiLookAtActionExecutor`, and the locomotion peer for walking; adding these actions through the catalog provisions missing peers. Wire the example’s Inspector events to your checklist UI.
+Wire `OnBatchCompleted` to the checklist manager. No additional code on the dispatcher side is required if you wire it in the Inspector. For code-driven wiring:
 
 ```csharp
 using Convai.Runtime.Actions;
@@ -63,8 +67,7 @@ using UnityEngine;
 public sealed class OnboardingTourController : MonoBehaviour
 {
     [SerializeField] private ConvaiActionDispatcher _dispatcher;
-    [SerializeField] private UnityEngine.Events.UnityEvent _advanceChecklist;
-    [SerializeField] private UnityEngine.Events.UnityEvent _showFailure;
+    [SerializeField] private TrainingChecklistUI _checklist;
 
     private void OnEnable()
     {
@@ -80,12 +83,13 @@ public sealed class OnboardingTourController : MonoBehaviour
 
     private void HandleTourStepCompleted()
     {
-        _advanceChecklist.Invoke();
+        _checklist.MarkCurrentStepComplete();
+        _checklist.AdvanceToNextStep();
     }
 
     private void HandleTourStepFailed()
     {
-        _showFailure.Invoke();
+        _checklist.MarkCurrentStepIncomplete();
     }
 }
 ```
@@ -111,7 +115,6 @@ Subscribe to `OnStepFailed` and inject a dynamic context event so the NPC speaks
 
 ```csharp
 using Convai.Runtime.Actions;
-using Convai.Runtime.Components;
 using UnityEngine;
 
 public sealed class ActionFailureHandler : MonoBehaviour
@@ -127,7 +130,7 @@ public sealed class ActionFailureHandler : MonoBehaviour
 
     private void HandleStepFailed(ConvaiActionInvocation invocation)
     {
-        if (invocation.Command.Name != "Walk To") return;
+        if (invocation.Command.Name != "Move To") return;
 
         string targetName = string.IsNullOrEmpty(invocation.Command.Target)
             ? "that location"
@@ -150,12 +153,12 @@ Set `FailurePolicy` to `StopBatch` (default) so subsequent steps in the same bat
 
 ### C# setup
 
-Author `Walk To` and `Point At` definitions and their named targets in the Actions Editor. Add their executors and required peers. Use `ConvaiActionDispatcher.EnqueueActions` to submit the batch from a timeline trigger or UI button. The dispatcher still validates the definitions, executors, and targets before running each step.
+Use `ConvaiActionDispatcher.EnqueueActions` to inject a multi-step sequence from a timeline trigger or UI button:
 
 ```csharp
 using System.Collections.Generic;
 using Convai.Runtime.Actions;
-using Convai.Domain.Types;
+using Convai.Shared.Types;
 using UnityEngine;
 
 public sealed class DemonstrationTrigger : MonoBehaviour
@@ -167,9 +170,9 @@ public sealed class DemonstrationTrigger : MonoBehaviour
     {
         _dispatcher.EnqueueActions(new List<ConvaiActionCommand>
         {
-            new ConvaiActionCommand("Walk To", "Equipment Cart"),
-            new ConvaiActionCommand("Point At", "Defibrillator"),
-            new ConvaiActionCommand("Walk To", "Patient Bed"),
+            new ConvaiActionCommand("Move To", "Equipment Cart"),
+            new ConvaiActionCommand("Pick Up", "Defibrillator"),
+            new ConvaiActionCommand("Move To", "Patient Bed"),
             new ConvaiActionCommand("Point At", "Patient Bed")
         });
     }
@@ -178,7 +181,7 @@ public sealed class DemonstrationTrigger : MonoBehaviour
 
 Wire `RunDefibrillatorDemo` to a `UnityEngine.Timeline` signal, a UI button `OnClick`, or any other trigger in your scene.
 
-**Expected outcome:** The instructor NPC navigates to the equipment cart, points at the defibrillator, walks to the patient bed, and points at it — all without the trainee saying anything. `OnBatchCompleted` fires when the sequence finishes, which you can use to advance the training stage.
+**Expected outcome:** The instructor NPC navigates to the equipment cart, picks up the defibrillator, walks to the patient bed, and points at it — all without the trainee saying anything. `OnBatchCompleted` fires when the sequence finishes, which you can use to advance the training stage.
 
 {% hint style="info" %}
 `BatchPolicy = Queue` ensures this scripted sequence waits politely if the trainee is mid-conversation with an active action batch. Switch to `BatchPolicy = ReplaceCurrent` if the demonstration should interrupt any ongoing action.
@@ -195,7 +198,7 @@ Set `WaitForBotSpeech` and `DelayAfterBotSpeechSeconds` on the command before en
 ```csharp
 using System.Collections.Generic;
 using Convai.Runtime.Actions;
-using Convai.Domain.Types;
+using Convai.Shared.Types;
 using UnityEngine;
 
 public sealed class ExhibitPointerTrigger : MonoBehaviour
@@ -218,26 +221,34 @@ public sealed class ExhibitPointerTrigger : MonoBehaviour
 
 **Expected outcome:** `pointAction` is the first step of a fresh batch, so `ConvaiActionDispatcher` holds it at the speech gate before running it. The gate releases as soon as the character's `OnSpeechStarted`, `OnSpeechStopped`, or `OnTurnCompleted` event fires — whichever happens first — then waits the additional 0.3 seconds set on `DelayAfterBotSpeechSeconds` before the point gesture executes.
 
-Only the batch's first step is gated this way. If none of those events fire, the dispatcher's `_speechGateTimeoutSeconds` field releases the step anyway (2 seconds by default, shown as **Speech Wait Limit (Seconds)** under **How Actions Run** in the **Convai Action Runner** Inspector), so a silent turn never stalls the batch.
+Only the batch's first step is gated this way. If none of those events fire, the dispatcher's `_speechGateTimeoutSeconds` field releases the step anyway (2 seconds by default, shown as "Speech Gate Timeout Seconds" under the Dispatch header in the Inspector), so a silent turn never stalls the batch.
 
 ## Example 6 — Distance check for a museum exhibit (observation action)
 
 **Scenario:** A museum tour simulation. A visitor asks how far away an exhibit is, and the NPC answers with a distance instead of performing a motion. This is a different shape of action from the first five examples: the executor's job is to compose an answer, not to move or gesture.
 
-### Actions Editor setup
+### Inspector configuration
 
-In **Convai > Actions Editor > Actions**, add **Measure Distance** from the **+ Add Action** catalog. It binds a `ConvaiMeasureDistanceActionExecutor` and configures **Target** as **No target**, with an optional `target` parameter of type **Auto**. The executor needs no peer component. Register the exhibit in **Scene Knowledge** or add `ConvaiActionTarget` to its GameObject.
+On the instructor NPC's `GameObject`, add `ConvaiMeasureDistanceActionExecutor` (`Add Component > Convai > Actions > Measure Distance`). It requires no peer component — with no target resolved, it measures the distance to the player instead.
 
-Leave **Within Reach Metres** at `1.2`, **A Few Steps Metres** at `3.5`, and **Across Area Metres** at `9`, and leave **Include Metres** checked so the spoken answer includes the measured value.
+In `ConvaiActionConfigSource`:
 
-**When It Finishes** is already **Tell The Player** when added from the catalog. In **Character Settings**, select **Add Action Feedback** to add the optional `ConvaiActionFeedbackRelay` that submits the answer. See [Report action results](action-feedback.md).
+**Action definitions:**
+
+| Action name | Target requirement | Executor |
+| --- | --- | --- |
+| `Measure Distance` | `Either` | `ConvaiMeasureDistanceActionExecutor` |
+
+Leave the executor's **Distance Bands** fields at their defaults (`Within Reach` `1.2`, `A Few Steps` `3.5`, `Across The Area` `9`), and leave **Include Metres** checked so the spoken answer includes the measured value.
+
+On the action definition, set **Answer Delivery** to `Tell The Player` — the setting the SDK recommends for any action that answers a question, such as reading a gauge, counting things, or measuring a distance.
 
 **Expected outcome:**
 
-* "How far is the dinosaur skeleton?" → the executor resolves the target, measures the ground-plane distance, and returns an answered result such as `The Dinosaur Skeleton is a few steps away. About 2.8 metres.` — the relay submits the answer with a request to tell the player.
-* "How far are you from me?" → when the action omits `target`, the executor measures the distance to the player.
+* "How far is the dinosaur skeleton?" → the executor resolves the target, measures the ground-plane distance, and returns an answered result such as `The Dinosaur Skeleton is a few steps away. About 2.8 metres.` — Convai speaks the answer back to the visitor.
+* "How far away am I?" → with no target resolved, the executor measures the distance to the player instead and answers `You are within reach. About 0.9 metres.`
 
-`ConvaiMeasureDistanceActionExecutor` returns `ConvaiActionExecutionResult.Answered(...)` rather than `Succeeded(...)`. An answered result carries the measured sentence that the feedback relay can submit to Convai. `ConvaiCountTargetGroupActionExecutor` (`Convai/Actions/Count Target Group`) follows the same pattern for counting the available members of a `ConvaiActionTargetGroup`.
+`ConvaiMeasureDistanceActionExecutor` returns `ConvaiActionExecutionResult.Answered(...)` rather than `Succeeded(...)`. An answered result carries the sentence Convai is allowed to say; nothing else about the result reaches the character's model of the world. `ConvaiCountTargetGroupActionExecutor` (`Convai/Actions/Count Target Group`) follows the same pattern for counting the available members of a `ConvaiActionTargetGroup`.
 
 ## Next steps
 

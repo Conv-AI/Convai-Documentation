@@ -3,43 +3,13 @@ title: Release notes
 description: >-
   Release notes for the Convai Unity SDK — current version highlights,
   previous release notes, bug fixes, and migration guidance for each release.
-last_reviewed: "5.0.0-pre.1"
+last_reviewed: "4.6.0"
 ---
 
-Read the prerelease changes first if you are preparing a 5.0 project. The dated entries below describe earlier SDK releases.
-
-## SDK 5.0 preview — unreleased
-
-The release branch identifies the package as <code class="expression">space.vars.unity_sdk_version</code>. These notes describe the prerelease source. Check the version in the distribution you install.
-
-| Area | What changes for an existing integration |
-| --- | --- |
-| Scene setup | Configure room and character components directly. Use prefabs for reuse and **Starts Connected** on the room for automatic connection. [Scene components](../getting-started/scene-components.md) |
-| Authentication and API clients | Project Settings owns credentials and the service environment. Saved API keys are checked again when their validation expires. Projects that used a shared REST client, a REST mode switch, or the room-less text client have new integration paths. [Migration guide](migrate-to-5-0.md) |
-| Conversations and transcripts | The manager exposes typed connection, audio, event, and transcript APIs. Transcript history uses entry IDs, revisions, and batched changes. Shared rooms can switch the addressed character. Group conversation adds an offline simulator and a separate live voice path. [Scripting reference](../scripting-reference/README.md) |
-| Media | Native builds use the matching LiveKit FFI bridge. Push-to-talk tracks releases across capture and server results. Lip sync follows indexed response frames and writes through facial composition. [Platform guides](../platform-guides/README.md) |
-| Scene authoring | Use the Actions Editor and World Objects for authored scene behavior. Scene Auto Tagger is an Editor workflow with its own native Core requirements. [Scene metadata](../features/scene-metadata/README.md) |
-| Editor automation | Coding agents connect through Unity CLI MCP. Setup and feature-authoring commands can preview changes, and diagnosis reports what prevents a scene from running. [AI coding assistant](../ai-coding-assistant/README.md) |
-
-### Changes to existing scenes
-
-* **Actions.** A missing argument stays distinguishable from an explicitly supplied value. Object and array parameters keep their JSON content. Runtime target additions and removals are batched. If one action configuration update grows beyond 12 KiB, the SDK can send separate action, object, and character lists. An individual oversized list still needs fewer entries or shorter descriptions. See [Register targets from code](../features/character-actions/register-targets-from-code.md).
-* **Scene knowledge.** The single-character create request can carry the initial scene description. A later change uses the room's data-message path, which has a size limit. See [Scene metadata](../features/scene-metadata/README.md).
-* **Audio and UI.** The native transport uses the matching FFI libraries. Browser voice volume and mute use the browser playback path. Chat follows new messages while the reader is at the bottom and keeps their place when they scroll up.
-
-Use the [5.0 migration guide](migrate-to-5-0.md) before replacing a production integration. Device media behavior, live service access, and the packages supplied through each distribution channel require verification in the deployment you use.
+Track changes to the Convai Unity SDK across releases, including new features, bug fixes, and configuration changes. The current release is <code class="expression">space.vars.unity_sdk_version</code>.
 
 {% updates format="full" %}
-{% update date="2026-09-28" tags="v4.6.1" %}
-## v4.6.1
-
-The source changelog records this release on 28 September 2026. It added Scene Auto Tagger authoring and its sample, push-to-talk finalization, project API Mode and workspace configuration, released character version selection, revised Inspectors and copied connection diagnostics. It also updated echo cancellation, browser lip-sync onset timing and Unity 6000.6 identity compatibility. Availability of a particular native tool distribution still depends on its own release gate.
-
-**Migration from 4.6.0:** remove the ignored `DisconnectReason` argument from room disconnect calls; use `SetInitialCharacter` or `TalkTo` instead of `SetExplicitConversationTarget`; migrate from `NarrativeDesignFetcher` to `NarrativeDesignDataService`; remove usage of the placeholder `ConvaiConversationProvider` and deleted participant-builder/persistence scaffolding. Custom logging integrations must follow `Log(in LogEntry)`.
-
-Transcript text is no longer printed by routine handler diagnostics. Use subscriptions rather than parsing Console output. New Audio Output components use a 5 m minimum distance; existing scenes retain saved values. The manifest declares the AI and XR engine modules in addition to the other package dependencies.
-{% endupdate %}
-{% update date="2026-09-04" tags="v4.6.0" %}
+{% update date="2026-09-04" tags="v4.6.0,Current" %}
 ## v4.6.0
 
 **Breaking this release:** `SetExplicitConversationTarget` renames to `SetInitialCharacter`, three Gaze profile Conversation Attention fields are removed and replaced, `headStabilityDegrees` is removed, two Gaze profile defaults changed, and the microphone open timing in multi-character scenes changed. See **Breaking changes and migration** below.

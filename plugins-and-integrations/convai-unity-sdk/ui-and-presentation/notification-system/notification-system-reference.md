@@ -1,7 +1,9 @@
 ---
 title: Notification system reference
-last_reviewed: "5.0.0-pre.1"
-description: Look up notification asset fields, controller timing, error matching, and services for showing automatic and application-defined alerts.
+last_reviewed: "4.5.0"
+description: >-
+  Reference for SONotification, SONotificationGroup, UINotificationController,
+  and SONotificationErrorMap — fields, methods, and configuration options.
 ---
 
 Reference for the ScriptableObject assets and the controller component that make up the notification system. For setup instructions and triggering notifications from code, see [Notification system](./).
@@ -21,7 +23,7 @@ Each notification is a `ScriptableObject` asset containing the content to displa
 | `notificationMessage` | `string` | Body text. Supports multi-line content                                                                           |
 | `Id`                  | `string` | Stable string identifier used for error mapping and deduplication cooldowns. Defaults to the asset name if empty |
 
-**Fluent setters for an existing asset:**
+**Fluent setters for runtime creation:**
 
 | Method                       | Return type      | Description                      |
 | ---------------------------- | ---------------- | -------------------------------- |
@@ -29,7 +31,48 @@ Each notification is a `ScriptableObject` asset containing the content to displa
 | `SetMessage(string message)` | `SONotification` | Set the notification body text   |
 | `SetIcon(Sprite newIcon)`    | `SONotification` | Set the notification icon sprite |
 
-Methods return and modify the same object. Pass the notification asset directly to the service.
+Methods return `this`, enabling chaining:
+
+```csharp
+var notification = ScriptableObject.CreateInstance<SONotification>();
+notification
+    .SetTitle("Scenario Complete")
+    .SetMessage("All required steps have been completed. Proceed to debrief.")
+    .SetIcon(successIcon);
+```
+
+## `SONotificationGroup`
+
+`SONotificationGroup` registers all `SONotification` assets the scene recognizes. `NotificationHandler` resolves notification IDs against this group at runtime.
+
+**Create:** Right-click → **Create → Convai → Notification System → Notification Group**
+
+**Fields:**
+
+| Field             | Type               | Description                                                      |
+| ----------------- | ------------------ | ---------------------------------------------------------------- |
+| `soNotifications` | `SONotification[]` | All `SONotification` assets available to the notification system |
+
+**Static lookup methods:**
+
+| Method                                                               | Return type | Description                                                                                   |
+| -------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------- |
+| `GetGroup(out SONotificationGroup group)`                            | `bool`      | Loads the group from `Resources/SONotificationGroup`. Returns `false` if the asset is missing |
+| `TryGetById(string notificationId, out SONotification notification)` | `bool`      | Finds a notification by its `Id` field. Returns `false` if no match                           |
+
+```csharp
+if (SONotificationGroup.GetGroup(out SONotificationGroup group))
+{
+    if (group.TryGetById("scenario-complete", out SONotification notification))
+    {
+        // use notification
+    }
+}
+```
+
+{% hint style="danger" %}
+The group asset must be saved to `Assets/Resources/SONotificationGroup.asset`. The path string used at runtime is `"SONotificationGroup"` — no file extension, no subdirectory. If the asset is missing, `NotificationHandler` logs `"[NotificationHandler] SONotificationGroup asset could not be resolved."` and no notifications display.
+{% endhint %}
 
 ## `UINotificationController`
 
@@ -45,24 +88,20 @@ Manages the pool of reusable `UINotification` elements and controls the slide an
 | `deactivatedNotificationPos` | `Vector2`        | —       | Anchored position where hidden notifications wait off-screen |
 | `activeDuration`             | `float`          | `4.0`   | Seconds a notification remains visible before sliding out    |
 | `slipDuration`               | `float`          | `0.3`   | Seconds for slide-in and slide-out animations                |
-| `delay`                      | `float`          | `0.3`   | Extra time held at the end of each slide              |
+| `delay`                      | `float`          | `0.3`   | Delay seconds before the slide animation begins              |
 | `slipAnimationCurve`         | `AnimationCurve` | —       | Easing curve for the slide animation                         |
 
-The script default for `spacing` is `100`; the shipped controller prefab uses `110`. Its active position is `(0, -100)` and hidden position is `(500, -100)`.
+**Concurrency and queuing:** Up to 3 notifications display simultaneously. When a 4th notification is requested while 3 are active, it queues and displays as soon as one of the active notifications dismisses.
 
-**Concurrency and queuing:** the controller pools three items. A request joins the queue while a slide animation is active, even if another item is free. Queued requests are reconsidered after the full cycle finishes. A fresh request during the visible hold can start immediately if a pooled item is free.
-
-**Animation sequence:** move in for `slipDuration + delay` → remain active for `activeDuration` → move out for `slipDuration + delay`. The position reaches its endpoint after `slipDuration` and holds for `delay`. The controller also fades its canvas in over `0.35` seconds and out over `0.2` seconds.
-
-`Notify(SONotification)` queues an asset; `ClearAll()` stops animations, clears the queue, and hides the pooled notifications.
+**Animation sequence per notification:** slide in (`slipDuration`) → visible for `activeDuration` → delay (`delay`) → slide out (`slipDuration`) → next queued notification starts.
 
 ## `SONotificationErrorMap`
 
-Maps session error code strings to `SONotification` assets using an ordered rule list. The built-in runtime bridge loads the packaged `Resources/SONotificationErrorMap` automatically. There is no Inspector replacement field on `NotificationHandler`.
+Maps session error code strings to `SONotification` assets using an ordered rule list. Load from `Resources/SONotificationErrorMap` automatically, or assign manually.
 
 **Create:** Right-click → **Create → Convai → Notification System → Session Error Map**
 
-Use an explicit map only in a notification bridge you own. Do not add a second resource with the same name or a second automatic bridge alongside the runtime host without accounting for duplicate handling.
+Save to `Assets/Resources/SONotificationErrorMap.asset` for automatic loading.
 
 **Fields:**
 
@@ -78,28 +117,15 @@ Use an explicit map only in a notification bridge you own. Do not add a second r
 | `MatchType`    | `SessionErrorMatchType` | `Exact` — full string equality. `Prefix` — error code starts with this pattern |
 | `Notification` | `SONotification`        | `SONotification` asset to display when this rule matches                       |
 
-Rules use ordinal, case-insensitive matching and run top-to-bottom. A rule with a missing notification or blank pattern does not match; neither does a blank error code. Place specific exact rules before a broad prefix. `SessionErrorMatchType` belongs to `Convai.Shared.Notifications`.
+Rules are evaluated top-to-bottom. Place more specific rules above broader prefix matches.
 
 **Example rule configuration:**
 
 | ErrorPattern  | MatchType | Notification                   |
 | ------------- | --------- | ------------------------------ |
-| `connection.auth_failed` | `Exact`   | `Notification_AuthError`       |
-| `connection.rate_limited`  | `Exact`   | `Notification_RateLimit`       |
-| `connection.` | `Prefix`  | `Notification_ConnectionError` |
-
-## Service and handler
-
-`IConvaiNotificationService` is in `Convai.Shared.Notifications`. Resolve it with `ConvaiManager.TryGetNotificationService`.
-
-| Member | Purpose |
-| --- | --- |
-| `RequestNotification(SONotification)` | Raise a request; no service-level cooldown |
-| `DismissNotification()` | Raise a dismissal request |
-| `OnNotificationRequested` | `Action<SONotification>` event |
-| `OnNotificationDismissed` | `Action` event |
-
-`NotificationHandler` displays the requested asset through its child `UINotificationController` or instantiates the assigned `notificationControllerPrefab` when needed. The runtime error bridge checks the notification setting and applies a 10-second per-ID cooldown. Application code can check the preference before requesting an alert.
+| `AUTH_FAILED` | `Exact`   | `Notification_AuthError`       |
+| `CONNECTION_` | `Prefix`  | `Notification_ConnectionError` |
+| `RATE_LIMIT`  | `Exact`   | `Notification_RateLimit`       |
 
 ## Next steps
 

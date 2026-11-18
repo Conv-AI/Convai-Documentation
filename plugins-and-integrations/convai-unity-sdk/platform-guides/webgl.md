@@ -1,12 +1,12 @@
 ---
 title: WebGL
-last_reviewed: "5.0.0-pre.1"
+last_reviewed: "4.5.0"
 description: >-
   Deploy the Convai Unity SDK to WebGL, covering HTTPS, browser audio
-  gestures, frame-source Vision, microphone failures, and browser lip-sync timing.
+  gestures, Vision canvas capture, and the known lip-sync drift issue.
 ---
 
-WebGL uses the browser for microphone access, voice playback, and Vision publishing. Configure a secure origin and a playback button, then verify capture and playback in the page that hosts the build.
+The Convai Unity SDK supports voice conversation, lip sync, actions, dynamic context, emotion, Vision, and long-term memory on WebGL. The browser introduces three constraints that do not exist on native platforms: a mandatory HTTPS origin for microphone access, a user-gesture requirement before audio playback or microphone capture can begin, and a canvas-based Vision capture path instead of Unity `RenderTexture`. All three are covered on this page.
 
 {% embed url="https://youtu.be/SbQ-Kfi7yg4" %}
 Convai-Powered Unity 6 Web Projects (previously referred to as WebGL builds)
@@ -16,97 +16,132 @@ Convai-Powered Unity 6 Web Projects (previously referred to as WebGL builds)
 
 | Feature                      | WebGL                                               |
 | ---------------------------- | --------------------------------------------------- |
-| Voice conversation           | ✅ Implemented                                              |
-| Lip sync                     | ✅ Browser playback timing         |
-| Actions                      | ✅ Implemented                                              |
-| Dynamic Context              | ✅ Implemented                                              |
-| Emotion                      | ✅ Implemented                                              |
-| Vision                       | ✅ Configured Frame Source by default                |
-| Long-Term Memory             | ✅ Implemented                                              |
+| Voice conversation           | ✅ Full                                              |
+| Lip sync                     | ✅ Full (see known issue in Troubleshooting)         |
+| Actions                      | ✅ Full                                              |
+| Dynamic Context              | ✅ Full                                              |
+| Emotion                      | ✅ Full                                              |
+| Vision                       | ✅ Canvas capture (browser game view)                |
+| Long-Term Memory             | ✅ Full                                              |
 | Spatial audio                | ❌ Not supported                                     |
-| Microphone device selection  | Browser default only |
+| Screen share                 | ❌ Not supported                                     |
+| Microphone device selection  | ❌ Not available — browser controls device selection |
 | Unity `AudioSource` playback | ❌ Not supported — browser audio path only           |
 | Microphone test / pre-check  | ❌ Not supported                                     |
 
 ## Browser requirements
 
 {% hint style="danger" %}
-**HTTPS is required for microphone access.** Browsers block microphone capture on non-secure origins. Serve your WebGL build over HTTPS. `localhost` is also suitable for local testing. A denied or unavailable microphone is reported through the session error path. Your UI should explain the failure and keep typed input available in an ordinary room.
+**HTTPS is required for microphone access.** Browsers block microphone capture on non-secure origins. Serve your WebGL build over HTTPS. The only exception is `localhost`, which browsers treat as a secure origin. Deploying to `http://` causes the browser to silently deny microphone permission — no error is shown to the user and voice conversation will not start.
 {% endhint %}
 
-**iframe embedding.** For a cross-origin build, delegate microphone access to the iframe. The embedding page's Permissions Policy must also permit access for the frame. If the build uses a physical webcam, use `allow="camera; microphone"` and permit camera access in the parent policy as well.
+**iframe embedding:** When embedding your WebGL build in an iframe, the parent page must include `allow="microphone"` on the `<iframe>` element. Without it, the browser blocks microphone access regardless of HTTPS status.
 
 ```html
 <iframe src="https://your-host.com/build/" allow="microphone" width="960" height="600"></iframe>
 ```
 
-The browser controls microphone devices. The SDK exposes one entry, `Default Microphone`. Device switching and the Settings Panel's local recording test are unavailable on WebGL. For embedding and permission details, see [Browser media permissions](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia).
+**Microphone device selection:** The browser controls all microphone device selection. When conversation starts, the browser displays its own permission prompt and allows the user to select a microphone device. The SDK returns an empty device list on WebGL — the Settings Panel microphone dropdown will show no entries. This is expected behavior, not an error. The microphone test functionality available on native platforms is not supported on WebGL.
+
+### Example: LMS iframe embed
+
+A manufacturing company embeds a safety compliance drill in their Learning Management System. The LMS iframe loads the WebGL build from `https://sim.company.com/safety-drill`. The Convai character plays a site safety officer who tests operator responses to in-scene hazard scenarios.
+
+**Setup:**
+
+1.  The LMS page includes the `allow="microphone"` attribute on the `<iframe>` element:
+
+    ```html
+    <iframe src="https://sim.company.com/safety-drill/" allow="microphone" width="1280" height="720"></iframe>
+    ```
+2. The WebGL build is served over HTTPS.
+3. An explicit **Begin Drill** button is placed on the scene load screen, wired to `ConvaiManager.EnableAudioAndStartListening()`.
+
+**Outcome:** Operators click **Begin Drill**, grant microphone permission in the browser prompt, and begin the verbal compliance assessment.
 
 ## Audio gesture handling
 
-Browser autoplay policy can block audio playback until a user interacts. Microphone capture separately requires a secure origin and permission; this SDK no longer gates capture on the playback gesture flag. To unlock blocked playback:
+Browsers require a user interaction before allowing audio playback or microphone capture. The SDK handles this in two ways:
 
-After connection, the manager checks eligible pointer gestures outside UI and retries browser playback when it is blocked. For a full-screen menu or welcome screen, add a button that calls the audio facade directly from its click callback.
+**Automatic gesture detection:** After connecting, the SDK listens for the first click or touch that lands outside a UI element and calls `EnableAudioAndStartListening()` on `ConvaiManager` automatically. This works for scenes where users interact directly with the 3D view.
 
-Attach this script to a GameObject and assign the scene's manager. In the Button's **On Click ()** list, add that GameObject and select **WebGLStartButton > EnableVoice**.
+**Explicit Start button (recommended for UI-heavy scenes):** For scenes with full-screen overlays, loading screens, or any UI that covers the view on load, automatic detection may not fire reliably. Add an explicit Start button and wire it to `ConvaiManager.EnableAudioAndStartListening()`.
 
+The automatic gesture detection and the explicit Start button are not mutually exclusive — both can be active at the same time. The Start button approach is more reliable when UI covers the scene on load.
+
+{% tabs %}
+{% tab title="Inspector" %}
+1. Add a **Button** component to a UI GameObject.
+2. In the **On Click ()** list, click **+**.
+3. Drag your `ConvaiManager` GameObject into the object field.
+4. In the function dropdown, select **ConvaiManager → EnableAudioAndStartListening**.
+{% endtab %}
+
+{% tab title="C#" %}
 ```csharp
 using Convai.Runtime.Components;
 using UnityEngine;
+using UnityEngine.UI;
 
-public sealed class WebGLStartButton : MonoBehaviour
+public class WebGLStartButton : MonoBehaviour
 {
-    [SerializeField] private ConvaiManager manager;
+    [SerializeField] private ConvaiManager _convaiManager;
+    [SerializeField] private Button _startButton;
 
-    public void EnableVoice()
+    private void Start()
     {
-        if (manager != null && manager.IsInitialized)
-            manager.Audio.EnableAudioAndStartListening();
+        _startButton.onClick.AddListener(OnStartClicked);
+    }
+
+    private void OnStartClicked()
+    {
+        _convaiManager.EnableAudioAndStartListening();
+        _startButton.gameObject.SetActive(false);
     }
 }
 ```
+{% endtab %}
+{% endtabs %}
 
-Check `manager.Audio.RequiresUserGesture`, `CanEnableAudioPlayback`, and `IsAudioPlaybackActive` when deciding whether the button is needed and when to dismiss its overlay. For playback only, call `manager.Audio.EnableAudioPlayback()`. A session with microphone capture disabled still uses the normal browser playback unlock when required.
+### Example: Corporate onboarding training
+
+An enterprise L\&D team hosts a company policy training simulation on their corporate intranet at `https://training.company.internal/onboarding`. A Convai character plays an HR representative who guides new hires through policy scenarios.
+
+**Setup:**
+
+1. Build is served over HTTPS from the corporate intranet server.
+2. A **Start Conversation** button is placed on a welcome screen using the Inspector approach above. `ConvaiManager.EnableAudioAndStartListening()` is wired to the button's **On Click ()** event.
+3. Standard SDK configuration — no additional WebGL-specific steps.
+
+**Outcome:** Employees click **Start Conversation** on the welcome screen. The browser displays a microphone permission prompt. After granting permission, the Convai character begins the onboarding dialogue. The welcome screen hides automatically after the button is clicked.
 
 ## Vision on WebGL
 
-In 5.0, **Convai Vision Publisher > WebGL Publishes > Frame Source** publishes the configured source. **Game View** explicitly publishes the visible Unity canvas, including chat, menus and other UI. With Frame Source selected but no source assigned or discovered, the publisher falls back to the Game view. A source implementing `IVisionPageCanvasSource` publishes its own page canvas.
+On WebGL, Vision captures the Unity game view as rendered in the browser canvas. The SDK uses an internal `WebGLCanvasVideoSource` to publish the browser canvas as the vision frame source — standard `CameraVisionFrameSource` components are not used on this platform.
 
-| Setting | WebGL behavior |
-| --- | --- |
-| Frame Source with a supported source | Publishes the source's picture. |
-| Game View | Publishes the Unity canvas; does not start the assigned frame source. |
-| Frame Source with no source | Falls back to the Unity canvas, including UI. |
-| Publish Frame Rate Override | `0` follows policy; explicit overrides range up to 30 fps. |
-| Default policy rates | Auto Compatible 10 fps, High Responsiveness 15 fps, Low Overhead 5 fps. |
+Key differences from native Vision:
 
-To publish a physical webcam with `WebcamVisionFrameSource`, request camera access with `Application.RequestUserAuthorization(UserAuthorization.WebCam)` and wait for permission before starting the source. Serve the build from HTTPS or `localhost`. See [Unity’s WebCamTexture API](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/WebCamTexture.html) and [Vision in WebGL](../features/vision/webgl.md).
+| Behavior                   | Native                                                 | WebGL                 |
+| -------------------------- | ------------------------------------------------------ | --------------------- |
+| Frame source               | `CameraVisionFrameSource` or `WebcamVisionFrameSource` | Browser canvas        |
+| Max frame rate             | Configurable                                           | 15 fps (fixed)        |
+| Webcam access              | Supported                                              | Not available via SDK |
+| `RenderTexture` publishing | Supported                                              | Not used              |
 
-Texture publishing uses the WebGL 2 graphics path or asynchronous GPU readback on other graphics backends that support it. If the SDK reports that it cannot read the configured source’s texture, use a WebGL 2 build or choose **Game View** when publishing the visible Unity canvas is appropriate.
-
-For a texture source, the publisher waits for a fresh frame before publishing and unpublishes if frames stall. A new frame allows it to publish again. The visible Game view and browser-owned page canvas paths do not use this texture-source stall check. See [WebGL vision](../features/vision/webgl.md).
-
-## Microphone policy and playback
-
-Set **Allow Microphone** off for a text-only ordinary room. It prevents opening the microphone; remote character voice remains a separate setting. A denied browser prompt does not have to end the session: present `audio.mic_permission_denied`, `audio.mic_unavailable` or `audio.mic_publish_failed` and allow typed input where the room supports it.
-
-`ConvaiAudioOutput.Volume` and `IsMuted` control browser playback. Unity's distance rolloff and `AudioListener.volume` do not. iOS Safari controls nonzero media volume itself, although mute and zero volume still silence playback.
-
-Push-to-talk release remains correlated on WebGL. The browser microphone lacks native capture drain, so the SDK keeps capturing for `ReleaseTailMs`, then mutes the published track and leaves it available for the next press. The tail does not confirm that the server received the last audio samples. Validate ordinary and group push-to-talk from the hosted build you plan to distribute.
+WebGL Vision captures what the player sees in the browser — the game view. For scenarios where the character needs to see the learner's physical environment via webcam, use a desktop or mobile build with `WebcamVisionFrameSource` instead.
 
 ## Build validation checklist
 
 Before shipping a WebGL build, verify each item:
 
-* [ ] WebGL is the active build target before building, including in CI or an automated build script
-* [ ] Build is served over HTTPS or from `localhost` for testing
-* [ ] If embedded in an iframe: embedding permissions allow microphone access for the frame
+* [ ] Build is served over HTTPS (or tested on `localhost`)
+* [ ] If embedded in an iframe: parent page includes `allow="microphone"` on the `<iframe>` element
 * [ ] Explicit Start button present (especially for UI-heavy scenes)
 * [ ] Microphone permission prompt tested in Chrome, Firefox, and Safari
 * [ ] Character audio confirmed playing (browser audio path — not `AudioSource`)
-* [ ] Settings Panel shows the browser default microphone
+* [ ] Microphone dropdown empty in Settings Panel — confirm this is expected, not an error
 * [ ] Lip-sync timing evaluated visually in-browser across a full conversation turn
-* [ ] Vision response validated if Vision is enabled using the intended source, with no unintended UI in the published image
+* [ ] Vision response validated if Vision is enabled (canvas capture path)
 
 ## Troubleshooting
 
@@ -114,24 +149,28 @@ Before shipping a WebGL build, verify each item:
 | ------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | Microphone never activates; character does not hear input     | Build is served over HTTP, not HTTPS                     | Serve the build over HTTPS. `localhost` is exempt.                                    |
 | Microphone blocked in iframe; permission prompt never appears | Missing `allow="microphone"` on the `<iframe>` element   | Add `allow="microphone"` to the iframe tag on the embedding page.                     |
-| Character audio is silent; no playback                        | No user gesture received before audio playback attempted | Add an explicit Start button wired to `ConvaiManager.Audio.EnableAudioAndStartListening()`. |
-| Only Default Microphone appears in Settings Panel                | The browser controls device selection    | No fix needed. The browser permission prompt handles device selection.                |
+| Character audio is silent; no playback                        | No user gesture received before audio playback attempted | Add an explicit Start button wired to `ConvaiManager.EnableAudioAndStartListening()`. |
+| Microphone dropdown is empty in Settings Panel                | Expected — browser controls device selection on WebGL    | No fix needed. The browser permission prompt handles device selection.                |
 | Microphone test fails or is unavailable                       | Not supported on WebGL                                   | Expected behavior — inform users that mic testing is unavailable on browser builds.   |
 | No spatial audio; voices lack 3D positioning                  | Spatial audio not supported on WebGL                     | Expected. Consider communicating this in UI (e.g., headphone prompt).                 |
 
-### Lip-sync timing
+### Lip-sync timing drift
 
-The WebGL path uses the browser media clock and measured voice onset. When the browser audio analyser detects silence, the SDK waits up to two seconds for audible speech before starting from a fallback time.
+{% hint style="warning" %}
+**Lip-sync timing drift is a known defect on WebGL.** No workaround currently exists. Validate your WebGL build visually in a browser before shipping and account for this limitation in your production timeline.
+{% endhint %}
 
-If speech and mouth motion diverge, confirm browser audio has been unlocked, inspect the lip-sync playback status and test several complete turns in the target hosting environment. Record the browser, device and reproduction; native Editor playback is not evidence for browser timing.
+**Symptom:** Visible desynchronization between speech audio and mouth animation, particularly on longer utterances.
 
-### Build target mismatch
+**Cause:** On WebGL, the SDK uses `RealtimePlaybackClock` (based on `Time.realtimeSinceStartupAsDouble`) instead of the hardware DSP clock used on native platforms. The DSP clock is tied to the audio hardware and provides sample-accurate timing. `Time.realtimeSinceStartupAsDouble` runs independently of the audio pipeline, which causes drift to accumulate over time.
 
-The SDK build guard rejects builds across the WebGL and native boundary when the Editor target differs. Switch to the intended Build Profile. For automation, start Unity with `-buildTarget WebGL` or call `EditorUserBuildSettings.SwitchActiveBuildTarget` before building.
+**Fix:** No workaround currently exists.
+
+**Verify:** Evaluate lip-sync timing visually in a browser across a full conversation turn before shipping.
 
 ## Next steps
 
-Use the checklist as a browser validation baseline, then complete your application's deployment checks. If you are also deploying to iOS, Android, or XR headsets, those platforms have their own permission requirements.
+Your WebGL build is ready once HTTPS is confirmed, the gesture requirement is handled, and the validation checklist passes. If you are also deploying to iOS, Android, or XR headsets, those platforms have their own permission requirements.
 
 {% content-ref url="ios-and-android.md" %}
 [iOS and Android](ios-and-android.md)

@@ -1,7 +1,7 @@
 ---
 title: Narrative design usage examples
 description: Four worked Narrative Design examples from a single-trigger welcome sequence to an adaptive multi-section scenario with dynamic feedback.
-last_reviewed: "5.0.0-pre.1"
+last_reviewed: "4.5.0"
 ---
 
 The following examples show how to compose `ConvaiNarrativeDesignManager`, `ConvaiNarrativeDesignTrigger`, and `IConvaiNarrativeDesign` into complete, working setups. They are ordered from simple to advanced and cover different domains to illustrate the breadth of what Narrative Design supports. Each example is self-contained — start from whichever matches your current complexity level.
@@ -27,22 +27,14 @@ Add `ConvaiNarrativeDesignManager` to the character GameObject and sync sections
 Before starting the session, send a template key so the character can reference the visitor by name:
 
 ```csharp
-using System;
-using System.Collections.Generic;
-using Convai.Modules.Narrative;
-using Convai.Runtime.Components;
-using Convai.Runtime.NarrativeDesign;
-using TMPro;
-using UnityEngine;
-
 public class ReceptionController : MonoBehaviour
 {
-    [SerializeField] private ConvaiCharacter _character;
+    [SerializeField] private ConvaiNarrativeDesignManager _narrativeManager;
     [SerializeField] private string _visitorName;
 
     private void Start()
     {
-        _character.NarrativeDesign.SetTemplateKey("VisitorName", _visitorName);
+        _narrativeManager.UpdateAndSendTemplateKey("VisitorName", _visitorName);
     }
 }
 ```
@@ -57,19 +49,7 @@ Add `ConvaiNarrativeDesignTrigger` to any GameObject (it won't be in the world �
 {% step %}
 ### Wire the UI button
 
-In the Button component's **On Click ()** event, assign the `ConvaiNarrativeDesignTrigger` and select a public `void` wrapper such as `NarrativeButton.Invoke` below. `InvokeTrigger` returns `bool`, so Unity's event picker cannot bind it directly.
-
-```csharp
-using Convai.Modules.Narrative;
-using Convai.Runtime.NarrativeDesign;
-using UnityEngine;
-
-public sealed class NarrativeButton : MonoBehaviour
-{
-    [SerializeField] private ConvaiNarrativeDesignTrigger trigger;
-    public void Invoke() => trigger.InvokeTrigger();
-}
-```
+In the Button component's **On Click ()** event, assign the `ConvaiNarrativeDesignTrigger` and select `ConvaiNarrativeDesignTrigger.InvokeTrigger`.
 {% endstep %}
 
 {% step %}
@@ -92,14 +72,6 @@ In the Manager's **Narrative Sections** list, find the welcome section entry and
 Sync all topic sections in the Manager. No `ConvaiNarrativeDesignTrigger` component is needed — triggers are sent directly via `IConvaiNarrativeDesign`.
 
 ```csharp
-using System;
-using System.Collections.Generic;
-using Convai.Modules.Narrative;
-using Convai.Runtime.Components;
-using Convai.Runtime.NarrativeDesign;
-using TMPro;
-using UnityEngine;
-
 public class OrientationController : MonoBehaviour
 {
     [SerializeField] private ConvaiCharacter _character;
@@ -122,16 +94,17 @@ public class OrientationController : MonoBehaviour
         _character.NarrativeDesign.InvokeTrigger(triggerName);
     }
 
-    // Called when the scene reports a story event.
-    public void ReportStoryEvent(string eventText)
+    // Called by a free-text input field's submit event — plain text context injection
+    // The character responds naturally in its own words
+    public void AskFollowUp(string userQuestion)
     {
-        _character.NarrativeDesign.InvokeEvent(eventText);
+        _character.NarrativeDesign.InvokeSpeech(userQuestion);
     }
 
     // Called when a scripted announcement is needed — character says this verbatim
     public void AnnounceToUser(string announcement)
     {
-        _character.NarrativeDesign.InvokeSpeech(announcement);
+        _character.NarrativeDesign.InvokeSpeech($"<speak>{announcement}</speak>");
     }
 
     private void OnSectionChanged(string previous, string next)
@@ -145,13 +118,13 @@ public class OrientationController : MonoBehaviour
 
 Assign trigger names to buttons in the Inspector: `"TopicFacilities"`, `"TopicSystemsAccess"`, `"TopicPolicies"`.
 
-Set template keys (`UserName`, `Department`) from a form with `character.NarrativeDesign.SetTemplateKeys` before the narrative needs them.
+Set `TriggerOnce = false` on all triggers so the user can revisit any topic. Send template keys (`UserName`, `Department`) from a form before the session opens using `UpdateTemplateKeys`.
 
-`InvokeEvent` sends contextual text for a response. `InvokeSpeech` sends scripted text and always adds `<speak>` tags internally. Do not add those tags yourself. Neither sends a saved trigger name. See [Control character speech](scripting-narrative-design.md#control-character-speech) for the full reference.
+`InvokeSpeech` has two modes: plain text makes the character respond naturally in its own words (useful for free-text follow-up questions); wrapping the message in `<speak>` tags makes the character say that text verbatim (useful for scripted announcements or exact prompts). Neither mode advances the graph. See [Control character speech](scripting-narrative-design.md#control-character-speech) for the full reference.
 
 ## Example 3: proximity-triggered exhibit tour
 
-**Complexity:** Intermediate | **Activation mode:** Proximity | **Features used:** Manager, Trigger, batch template keys
+**Complexity:** Intermediate | **Activation mode:** Proximity | **Features used:** Manager, Trigger (Proximity), zone events, batch template keys
 
 **Scenario:** A product showroom has five display stations. As the visitor walks toward each station, a host character begins narrating that product. Each station is independent and can be visited in any order.
 
@@ -159,19 +132,14 @@ Set template keys (`UserName`, `Department`) from a form with `character.Narrati
 
 Create one `ConvaiNarrativeDesignTrigger` per station. For each:
 
-- **Mode:** `Proximity`
-- **Radius:** adjust per station size (visible as green sphere gizmo in Scene view)
+- **Activation Mode:** `Proximity`
+- **Proximity Radius:** adjust per station size (visible as green sphere gizmo in Scene view)
 - **Trigger Once:** `true`
-- **Reset On Scene Load:** `true` (so the component re-arms when a scene loads)
+- **Reset On Scene Load:** `true` (so the tour resets on each visit)
 
-Wire station-specific context via template keys. Apply them when this station is selected, then send its saved trigger. Do not let every station overwrite the same manager keys in `Start()`. Set the trigger to Manual when a station selector owns activation:
+Wire station-specific context via template keys. Populate them from a `ScriptableObject` at `Start()`:
 
 ```csharp
-using System.Collections.Generic;
-using Convai.Modules.Narrative;
-using Convai.Runtime.Components;
-using UnityEngine;
-
 [CreateAssetMenu(menuName = "Showroom/Station Data")]
 public class StationData : ScriptableObject
 {
@@ -182,12 +150,12 @@ public class StationData : ScriptableObject
 
 public class StationController : MonoBehaviour
 {
-    [SerializeField] private ConvaiCharacter _character;
+    [SerializeField] private ConvaiNarrativeDesignManager _narrativeManager;
     [SerializeField] private StationData _data;
 
-    public void SelectStation()
+    private void Start()
     {
-        _character.NarrativeDesign.SetTemplateKeys(new Dictionary<string, string>
+        _narrativeManager.UpdateTemplateKeys(new Dictionary<string, string>
         {
             { "ProductName", _data.ProductName },
             { "LaunchYear",  _data.LaunchYear  },
@@ -197,7 +165,7 @@ public class StationController : MonoBehaviour
 }
 ```
 
-For enter/exit highlights, use a trigger collider and its zone events; the proximity distance check does not raise them. Coordinate station selection, key delivery, and trigger invocation in one application flow.
+Use `OnPlayerEnterZone` to highlight the product model (for example, enable an outline shader). Use `OnPlayerExitZone` to remove the highlight.
 
 {% hint style="warning" %}
 If station proximity radii overlap, two triggers may fire in the same frame, sending two graph transitions before the backend can respond to the first. Space your stations so proximity zones do not intersect, or use Collision mode with physically separated trigger colliders.
@@ -207,17 +175,17 @@ If station proximity radii overlap, two triggers may fire in the same frame, sen
 
 **Complexity:** Advanced | **Activation mode:** Code-driven | **Features used:** Manager, `IConvaiNarrativeDesign`, `OnSectionDataReceived`, `BehaviorTreeConstants`, dynamic template keys, retake flow
 
-**Scenario:** A technical skills evaluator runs a multi-step scenario. After each step, the learner's performance is scored. The character's level of guidance and the scenario's challenge level adapt dynamically based on the running score. A retake needs an authored reset transition or an application-controlled new session; resetting the local manager alone does not reset the graph.
+**Scenario:** A technical skills evaluator runs a multi-step scenario. After each step, the learner's performance is scored. The character's level of guidance and the scenario's challenge level adapt dynamically based on the running score. The scenario can be retaken, resetting all state.
 
 ### Session lifecycle
 
 ```mermaid
 flowchart TD
-    A[Session starts] --> B["SetTemplateKey\n(DifficultyLevel, Foundation)"]
+    A[Session starts] --> B["UpdateAndSendTemplateKey\n(DifficultyLevel, Foundation)"]
     B --> C[Character enters conversation\n→ FlushPending → keys sent]
     C --> D[Scenario begins\nfirst section active]
     D --> E[Learner completes step\n→ scored by ScenarioController]
-    E --> F["SetTemplateKey\n(DifficultyLevel, score > 80 ? Advanced : Foundation)"]
+    E --> F["UpdateAndSendTemplateKey\n(DifficultyLevel, score > 80 ? Advanced : Foundation)"]
     F --> G[InvokeTrigger StepCompleted]
     G --> H[Section changes\n→ OnSectionDataReceived]
     H --> I[Deserialize BehaviorTreeConstants\napply scenario params]
@@ -225,23 +193,16 @@ flowchart TD
     E --> J{Final step?}
     J -- Yes --> K[OnSectionStart Assessment Complete\n→ show score summary]
     K --> L{Retake?}
-    L -- Yes --> M[Authored reset or new session\n→ restart]
+    L -- Yes --> M[ResetController + FetchAndSyncFromBackend\n→ restart]
     L -- No --> N[End session]
 ```
 
 ### Implementation
 
 ```csharp
-using System;
-using System.Collections.Generic;
-using Convai.Modules.Narrative;
-using Convai.Runtime.Components;
-using Convai.Runtime.NarrativeDesign;
-using TMPro;
-using UnityEngine;
-
 public class ScenarioController : MonoBehaviour
 {
+    [SerializeField] private ConvaiNarrativeDesignManager _narrativeManager;
     [SerializeField] private ConvaiCharacter _character;
 
     private int _totalScore;
@@ -261,11 +222,12 @@ public class ScenarioController : MonoBehaviour
     {
         _totalScore = 0;
         _stepCount  = 0;
-        _character.NarrativeDesign.SetTemplateKeys(new Dictionary<string, string>
+        _narrativeManager.UpdateTemplateKeys(new Dictionary<string, string>
         {
             { "LearnerName",    learnerName   },
             { "DifficultyLevel", "Foundation" }
         });
+        _narrativeManager.SendTemplateKeysUpdate();
     }
 
     public void OnStepCompleted(int stepScore)
@@ -274,7 +236,7 @@ public class ScenarioController : MonoBehaviour
         _stepCount++;
 
         string level = (_totalScore / _stepCount) > 80 ? "Advanced" : "Foundation";
-        _character.NarrativeDesign.SetTemplateKey("DifficultyLevel", level);
+        _narrativeManager.UpdateAndSendTemplateKey("DifficultyLevel", level);
         _character.NarrativeDesign.InvokeTrigger("StepCompleted");
     }
 
@@ -288,10 +250,11 @@ public class ScenarioController : MonoBehaviour
         ApplyScenarioParameters(constants);
     }
 
-    public void RetakeScenario()
+    public async void RetakeScenario()
     {
-        // Define this reset trigger in your narrative and confirm its resulting section.
-        _character.NarrativeDesign.InvokeTrigger("RestartScenario");
+        _narrativeManager.ResetController();
+        await _narrativeManager.FetchAndSyncFromBackendAsync();
+        StartScenario("LearnerName");
     }
 
     private void ApplyScenarioParameters(ScenarioConstants constants)
@@ -314,8 +277,6 @@ public class ScenarioController : MonoBehaviour
 {% hint style="info" %}
 `BehaviorTreeCode` and `BehaviorTreeConstants` are read-only from the SDK side. They carry data authored in the Convai dashboard and are not modifiable at runtime from Unity.
 {% endhint %}
-
-Fetching again refreshes the saved narrative configuration. Use authored triggers to advance or revisit sections in the running narrative. In these examples, follow command acceptance with a section update before treating a transition as complete.
 
 ## Next steps
 

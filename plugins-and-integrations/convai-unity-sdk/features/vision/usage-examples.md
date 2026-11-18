@@ -1,7 +1,7 @@
 ---
 title: Vision usage examples
 description: Find code patterns for common Vision setups, including safety training, webcam selection, look-at activation, on-demand triggers, and WebGL deployment.
-last_reviewed: "5.0.0-pre.1"
+last_reviewed: "4.5.0"
 ---
 
 These examples cover the most common Vision integration patterns. Each example is self-contained — copy the relevant script, attach it to the appropriate GameObject, and configure the serialized fields in the Inspector.
@@ -49,11 +49,10 @@ public class SafetyTrainingVisionController : MonoBehaviour
 
 A desktop onboarding application where the user selects which physical camera to use before a session starts. Useful when the user's workstation has multiple cameras (built-in webcam, USB camera, etc.).
 
-**Expected outcome:** The dropdown populates on Start with all detected camera names. Changing the dropdown swaps devices without disconnecting the room. The source stops during the switch, so re-enable publication after the operation succeeds.
+**Expected outcome:** The dropdown populates on Start with all detected camera names. Selecting a camera name and clicking **Switch** swaps the capture device without stopping the session.
 
 ```csharp
 using System.Collections.Generic;
-using Convai.Modules.Vision;
 using Convai.Runtime.Vision.Sources;
 using TMPro;
 using UnityEngine;
@@ -65,25 +64,20 @@ using UnityEngine;
 public class WebcamSelectorUI : MonoBehaviour
 {
     [SerializeField] private WebcamVisionFrameSource _webcamSource;
-    [SerializeField] private ConvaiVisionPublisher _publisher;
     [SerializeField] private TMP_Dropdown _deviceDropdown;
 
     private List<string> _deviceNames = new();
 
-    void Start()
+    async void Start()
     {
-        foreach (WebCamDevice device in WebcamVisionFrameSource.AvailableDevices)
-            _deviceNames.Add(device.name);
+        _deviceNames = new List<string>(WebcamVisionFrameSource.GetAvailableDeviceNames());
         _deviceDropdown.ClearOptions();
         _deviceDropdown.AddOptions(_deviceNames);
 
         _deviceDropdown.onValueChanged.AddListener(async index =>
         {
             if (index >= 0 && index < _deviceNames.Count)
-            {
                 await _webcamSource.SwitchWebcamAsync(_deviceNames[index]);
-                _publisher.EnablePublishing(true);
-            }
         });
     }
 }
@@ -165,9 +159,9 @@ public class LookAtVisionTrigger : MonoBehaviour
 
 ## Configure Vision for WebGL
 
-To publish the game view, set **WebGL Publishes > Game View**. With no source this is also the fallback. With a source and the default **Frame Source** choice, the browser build publishes the source texture instead. See [WebGL vision](webgl.md).
+On WebGL, no frame source component is required. `ConvaiVisionPublisher` captures the browser canvas automatically via `canvas.captureStream()`. Set **Connection Type** to **Video** and the publish policy as needed — everything else is automatic.
 
-**Expected outcome:** The character receives a live feed of the browser canvas. This example deliberately publishes the game view, including its UI.
+**Expected outcome:** The character receives a live feed of the browser canvas. No frame source component is on the scene.
 
 ```csharp
 using Convai.Modules.Vision;
@@ -175,9 +169,9 @@ using Convai.Runtime.Vision.Publishing;
 using UnityEngine;
 
 /// <summary>
-/// WebGL-specific setup. Select Game View in the publisher before building.
+/// WebGL-specific setup. No frame source needed — publisher uses canvas.captureStream().
 /// Attach to the same GameObject as ConvaiVisionPublisher.
-/// Set Vision to On in the room Inspector before Play.
+/// Set ConvaiRoomManager.ConnectionType = Video before Play.
 /// </summary>
 public class WebGLVisionSetup : MonoBehaviour
 {
@@ -185,7 +179,7 @@ public class WebGLVisionSetup : MonoBehaviour
 
     void Awake()
     {
-        // LowOverhead supplies a 5 fps default budget.
+        // LowOverhead is appropriate for WebGL — canvas capture is capped at 15 fps
         _publisher.SetPublishPolicy(VisionPublishPolicy.LowOverhead);
     }
 }
@@ -197,44 +191,86 @@ public class WebGLVisionSetup : MonoBehaviour
 
 ## Trigger vision on demand and adjust respond mode
 
-Use `ConvaiManager` to query the buffer, select the freshest frames, and inspect what the service attached. Assign the manager in the Inspector and wire `InspectScene` to a UI button. Connect with **Vision** set to **On** before pressing it.
+The previous examples all publish frames continuously through `ConvaiVisionPublisher`. A separate, lower-level surface on `IConvaiRoomConnectionService` lets you ask the backend to inspect the buffered frames on demand — independent of the publisher's own cadence — and control whether that inspection makes the character speak. This pattern fits a "Look now" button, an inspection tool the player triggers manually, or a step in a scripted sequence that needs a vision check at a precise moment.
+
+`RequestVisionStatus()` asks the backend to report the state of the session's frame buffer. `TriggerVision(ConvaiVisionTriggerRequest)` asks the backend to attach buffered frames to the next turn and, depending on the request's respond mode, invoke the model. `UpdateRespondMode(ConvaiRespondModeLane, ConvaiRespondMode)` changes how an entire input lane affects the character's speech for the rest of the session. All three are acknowledged asynchronously through domain events rather than a return value — see [Vision scripting API](scripting-api.md) for the full method signatures, request fields, and event payloads.
+
+**Expected outcome:** Calling `RequestLookNow()` logs the buffer status, then the character describes what changed and speaks its answer. Calling `SilenceVisionUntilAsked()` stops the character from reacting to new vision frames until `RequestLookNow()` is called again.
 
 ```csharp
 using Convai.Domain.DomainEvents.Vision;
+using Convai.Domain.EventSystem;
 using Convai.Runtime;
 using Convai.Runtime.Components;
 using Convai.Runtime.Room;
 using Convai.Runtime.Vision.Context;
 using UnityEngine;
 
-public sealed class InspectVision : MonoBehaviour
+/// <summary>
+/// Requests an on-demand vision check outside the publisher's regular frame cadence,
+/// then reports the buffer status and the trigger outcome. Attach anywhere in the scene.
+/// </summary>
+public class OnDemandVisionInspector : MonoBehaviour
 {
-    [SerializeField] private ConvaiManager _manager;
+    private IConvaiRoomConnectionService _roomService;
+    private SubscriptionToken _statusToken;
+    private SubscriptionToken _triggerToken;
 
-    public async void InspectScene()
+    void OnEnable()
     {
-        ServerCommandResult statusResult = await _manager.RequestVisionStatusAsync().AsTask();
-        var status = VisionContextStatusReceived.Create(null, null, statusResult.Extras);
-        if (statusResult.Status != ServerCommandStatus.Succeeded || status.Outcome != "frames_available")
-        {
-            Debug.Log($"Vision status: {statusResult.Status}, {status.Outcome}");
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.TryGetRoomConnectionService(out _roomService))
             return;
-        }
 
-        var request = new ConvaiVisionTriggerRequest
+        if (!manager.TryGetEventHub(out IEventHub hub))
+            return;
+
+        _statusToken = hub.Subscribe<VisionContextStatusReceived>(OnVisionStatus, EventDeliveryPolicy.MainThread);
+        _triggerToken = hub.Subscribe<VisionContextTriggerReceived>(OnVisionTriggerAck, EventDeliveryPolicy.MainThread);
+    }
+
+    void OnDisable()
+    {
+        if (ConvaiManager.ActiveManager == null || !ConvaiManager.ActiveManager.TryGetEventHub(out IEventHub hub))
+            return;
+
+        hub.Unsubscribe(_statusToken);
+        hub.Unsubscribe(_triggerToken);
+    }
+
+    // Call from a "Look now" UI button
+    public void RequestLookNow()
+    {
+        _roomService?.RequestVisionStatus();
+        _roomService?.TriggerVision(new ConvaiVisionTriggerRequest
         {
-            Text = "What changed on the table?",
+            Text = "What changed on the workbench since I last looked?",
             RespondMode = ConvaiRespondMode.MustRespond
-        };
-        request.SetFrameWindow(-5, -1);
-        ServerCommandResult result = await _manager.TriggerVisionAsync(request).AsTask();
-        var trigger = VisionContextTriggerReceived.Create(null, null, result.Extras);
-        Debug.Log($"Vision trigger: {result.Status}, frames={trigger.FramesAttached}, downgraded={trigger.Downgraded}");
+        });
+    }
+
+    // Call once, e.g. when the player enters an area where vision responses are a distraction
+    public void SilenceVisionUntilAsked()
+    {
+        _roomService?.UpdateRespondMode(ConvaiRespondModeLane.Vision, ConvaiRespondMode.Silent);
+    }
+
+    private void OnVisionStatus(VisionContextStatusReceived status)
+    {
+        Debug.Log($"[Vision] {status.Outcome} — last frame age: {status.LastFrameAgeMs} ms (source: {status.ActiveSourceLabel})");
+    }
+
+    private void OnVisionTriggerAck(VisionContextTriggerReceived ack)
+    {
+        if (ack.Downgraded)
+            Debug.Log($"[Vision] Trigger downgraded to {ack.ActualRespondMode}: {ack.DowngradeReason}");
+        else if (ack.LlmTriggered)
+            Debug.Log($"[Vision] Character responded using {ack.FramesAttached} frame(s).");
     }
 }
 ```
 
-To change the default for vision triggers that omit `RespondMode`, await `manager.UpdateRespondModeAsync(ConvaiRespondModeLane.Vision, ConvaiRespondMode.Auto).AsTask()`. Inspect the result before depending on the change.
+`RequestLookNow()` above builds a new `ConvaiVisionTriggerRequest` with no explicit `UpdateId` on every call, so calling it again after a dropped acknowledgement sends a distinct trigger, not a safe replay — each call gets its own generated ID. To make a retry idempotent, generate one `UpdateId` up front, pass it to the constructor, and reuse the same value across retries; the backend then replays the original acknowledgement for that ID instead of triggering again. See [Vision scripting API](scripting-api.md#convaivisiontriggerrequest) for the constructor signature.
 
 ## Next steps
 

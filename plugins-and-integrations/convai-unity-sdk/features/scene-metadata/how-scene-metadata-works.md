@@ -1,79 +1,78 @@
 ---
 title: How scene metadata works
-description: Understand how object descriptions, tracked values, spatial facts, and logical groups reach a conversation, including delivery and message limits.
-last_reviewed: "5.0.0-pre.1"
+description: Understand the registration and delivery flow for scene object metadata, and learn when to use Scene Metadata versus Dynamic Context.
+last_reviewed: "4.5.0"
 ---
 
-Scene metadata gives a character names and descriptions for relevant Unity objects. Registration, payload selection, local sending, and conversational use are separate stages. `ConvaiCharacter` drives automatic delivery.
+`ConvaiObjectMetadata` and `ConvaiMetadataRegistry` form the core pipeline that collects object descriptions from your scene and delivers them to Convai as each character becomes ready. That pipeline also keeps a connected character's object awareness current afterward — a registered object can re-sync its static description on change, or report changing runtime state through tracked properties. `ConvaiSceneMetadataCollector` is an optional companion component for manual control, statistics, and auditing — it is not required for the automatic delivery described below. Understanding both paths helps you configure the system correctly and debug it when objects are not reaching the character.
 
-## Registration and automatic delivery
+## Connect-time delivery flow
 
-Enabled `ConvaiWorldObject` components register themselves. The registry excludes invalid names, objects with **Include In Metadata** off, physical members represented by an active logical group, and group roots with no active members.
+Every `ConvaiObjectMetadata` component registers itself with `ConvaiMetadataRegistry` when enabled. This happens independently of any `ConvaiSceneMetadataCollector` in the scene.
 
-Every valid projected world object goes in the scene description, including objects that also have an action target. A new-room connect request sends this list over HTTP. A join request without a character roster sends no initial scene description and uses the room data message once the addressed character is ready. For a connection with a shared-session key, the SDK treats the room's stored list as unknown and can send the projected list after connect, even if it also sent a connect-time list.
-
-After a character becomes ready, the SDK checks for a pending difference once that character is active, enabled, and in conversation and the room is connected. In a multi-character room it holds an update until that character is the confirmed target. It compares entries in order by name and description. Once a nonempty list has been sent, an empty list can replace it.
+The automatic connect-time send is driven by `ConvaiCharacter` itself, not by the collector. When a character receives its ready signal from Convai, it captures a snapshot of its action-config objects and characters, seeds any tracked-property values, and marks scene metadata pending. That pending flag is flushed on the character's next batched update — the same batching window used for dynamic context updates — which reads the registry and sends the payload as an `update-scene-metadata` RTVI message.
 
 ```mermaid
 flowchart TD
-    A[Enabled World Object] --> B[Registry and logical-group filters]
-    B --> C{Connect sends the list?}
-    C -->|Yes| R[List sent in the connect request]
-    C -->|No| D
-    R --> D[Character ready: update pending]
-    D --> E{Connected and in conversation?}
-    E -->|No| D
-    E -->|Yes| F{Differs from the list the room holds?}
-    F -->|No| X[Nothing sent]
-    F -->|Yes| T{Conversation target, in a multi-character room?}
-    T -->|No| D
-    T -->|Yes| G{Message fits 15,360 bytes?}
-    G -->|Yes| S[Data message sent]
-    G -->|No| H[Warning and refused send]
+    A[ConvaiObjectMetadata\nOnEnable] -->|registers| B[ConvaiMetadataRegistry\nstatic, O&#40;1&#41; lookup]
+    C[ConvaiCharacter\nreceives character-ready signal] -->|MarkPendingSceneMetadataSync| D[Batched flush\nsame window as dynamic context]
+    D -->|GetSceneMetadataList| B
+    D --> E[RTVIUpdateSceneMetadata\nupdate-scene-metadata]
+    E --> F([Convai])
 ```
 
-A data message, including its envelope, must fit within 15,360 UTF-8 bytes. The sender warns and refuses larger messages, and a refused scene description update leaves the room with the list it had. The limit applies to every data update after connect. It does not apply to a scene description sent in the connect request. Authoring text limits and the number of objects do not guarantee that an update fits.
+Objects register and unregister themselves as they are enabled and disabled — no manual cleanup is needed. Convai receives the current state of all registered objects once the character is ready, with no `ConvaiSceneMetadataCollector` required. Any change made after that point is delivered through the live re-sync path described below.
 
-## Live description changes
+`ConvaiSceneMetadataCollector`'s **Collect On Start** option also sends the full payload on connect if enabled — this duplicates the automatic send above and is redundant for basic setups. Use the collector when you want the statistics logging, a manual trigger point (`CollectAndSendSceneMetadata()`), or a pre-send audit (`ValidateAllMetadata()`), not because it is required for objects to reach the character. See [Scene metadata component reference](component-reference.md) for its full field list.
 
-Setting `ObjectName`, `ObjectDescription`, or `IncludeInMetadata` through the public properties marks registered metadata dirty. Enabling, disabling, registering, or unregistering an object also schedules updates. Each character still follows the connection and target gates above.
+## Live re-sync and tracked properties
 
-Inspector and Undo edits to registered objects during Play mode also mark the metadata dirty. Renaming retires tracked state under the old name.
+Two mechanisms keep a character's object awareness current after the initial connect-time send.
 
-## Tracked values
+### Live re-sync of static metadata
 
-Tracked properties describe changing object state through Dynamic Context. The internal poll driver evaluates sources every 0.25 seconds. A key combines the trimmed object and property names, such as `LoadingBayDoor.DoorStatus`. A source can be a property, field, or zero-argument method; an entry without a source starts from **Initial Value**.
+Setting `ObjectName`, `ObjectDescription`, or `IncludeInMetadata` from script on a `ConvaiObjectMetadata` that is currently registered marks `ConvaiMetadataRegistry` dirty and notifies every connected character. Registering or unregistering a `ConvaiObjectMetadata` component while a session is connected — for example enabling or disabling its `GameObject`, or adding the component at runtime — has the same effect. Each notified character automatically sends a follow-up `update-scene-metadata` message on its next flush, without a manual `CollectAndSendSceneMetadata()` call.
 
-`SetTrackedPropertyValue` pushes a value without waiting for the poll. Renaming the object removes its old keys and resets the tracked-value cache. The next evaluation reads sourced values again and restores initial values for entries without a source; pushed values must be supplied again if they still matter.
+### Tracked properties
 
-In a group conversation, a non-`Silent` change updates members silently and sends one scene event in the form `LoadingBayDoor.SensorFault is now Jammed.` The service chooses whether and who reacts. This is not a promise of simultaneous or immediate speech from every character.
+`ConvaiObjectMetadata` can also declare tracked properties: a list of `ConvaiTrackedContextProperty` entries, each naming a property, an initial value, an optional runtime source (a `Component` and member name read through reflection on each poll), and a `ConvaiRespondMode` reaction. An internal poll driver checks every registered object's tracked properties every 0.25 seconds and pushes any changed value to every connected character through `DynamicContext.SetState`, keyed as `{ObjectName}.{PropertyName}`.
 
-## Spatial context
+```mermaid
+flowchart TD
+    A[ConvaiWorldObjectPollDriver\nevery 0.25s] -->|EvaluateTrackedProperties| B[ConvaiTrackedContextProperty\nread runtime source]
+    B -->|value changed| C[DynamicContext.SetState\nObjectName.PropertyName]
+    C --> D([Convai])
+```
 
-**Include Spatial Context** publishes changing distance, direction, visibility, and movement facts through Dynamic Context. On the same 0.25-second poll, the SDK selects objects within 30 metres for characters in a conversation, prioritizing visible objects and then nearer ones, up to 24 facts per character.
+Tracked properties do not travel as an `update-scene-metadata` message. They use the same dynamic-context transport as a manual `SetState` call, keeping a scene object's own state in sync without any polling code in your own scripts.
 
-Keys use `scene-object.{id}.spatial`. Distances are banded to reduce updates: half-metre steps below 5 metres, metre steps below 10 metres, and 5-metre steps farther away. A fact describes an object's relative position, visibility, and whether it is moving. It names the character it is measured from, as in `Chair: 3 m to Ava's left; visible to Ava; stationary`, and a logical group's fact says how many objects share its name. See [Spatial context from world objects](../dynamic-context/spatial-context.md) for the format. These are client measurements, not proof of what the model perceived.
+{% hint style="info" %}
+Tracked properties ride the Dynamic Context channel, but they are authored declaratively on the world object in the Inspector rather than pushed imperatively from a script. Use them when an object's own state should stay in sync with the character automatically. Use a manual `SetState` call for events and state that do not belong to any single scene object.
+{% endhint %}
 
-## Logical groups and movement
+## Scene metadata vs. dynamic context
 
-A logical group represents several physical copies with one shared name and description. Its members leave the metadata payload; the root represents them while at least one member is active. Runtime resolution chooses a nearby active physical member for interaction. Standing positions are separate approach points, and gaze aim is a separate target calculation.
+Both systems inject information into a character's context, but they serve different purposes:
 
-See [Group objects and add standing positions](group-objects-and-standing-positions.md).
+|                       | Scene Metadata                                   | Dynamic Context                           |
+| --------------------- | ------------------------------------------------ | ----------------------------------------- |
+| **Who populates it**  | SDK auto-discovers objects                       | Developer manually injects state          |
+| **What it describes** | Physical objects and entities in the scene       | Runtime state, events, player actions     |
+| **When it's sent**    | At room connection, then re-sent automatically whenever a registered object's name, description, or inclusion changes | Anytime, on demand — including continuously for tracked properties, which poll every 0.25 s |
+| **Typical use**       | "There is a fire extinguisher on the south wall" | "The trainee failed the valve check" |
 
-## Choose the context mechanism
+Use both together for the most context-rich AI experience.
 
-| Mechanism | Describes | Authoring and updates |
-| --- | --- | --- |
-| Scene metadata | What an object is | World Object name and description; pending updates through the character route |
-| Tracked properties | A value owned by an object | Inspector source or explicit `SetTrackedPropertyValue` call |
-| Spatial context | Where an object is relative to a character | Opt in per object; automatic limited polling |
-| Other Dynamic Context | Application state and events | Explicit state/event APIs |
+{% hint style="info" %}
+Scene Metadata describes the static world — what exists. Dynamic Context describes the dynamic world — what is happening. They are complementary, not competing.
+{% endhint %}
 
 ## Next steps
 
 {% content-ref url="quick-start.md" %}
 [Scene metadata quick start](quick-start.md)
 {% endcontent-ref %}
-{% content-ref url="component-reference.md" %}
-[Scene metadata component reference](component-reference.md)
+
+{% content-ref url="usage-examples.md" %}
+[Scene metadata usage examples](usage-examples.md)
 {% endcontent-ref %}
