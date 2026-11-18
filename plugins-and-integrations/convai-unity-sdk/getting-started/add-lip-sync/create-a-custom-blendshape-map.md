@@ -3,7 +3,7 @@ title: Create a custom lip sync map
 description: >-
   Create a lip sync map that routes incoming blendshape channels to your
   character's mesh, with per-channel weight and clamp tuning.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 A lip sync map routes source blendshape channels (from the transport stream) to the actual blendshape names on your character's `SkinnedMeshRenderer`. Create a custom map when your rig uses different blendshape names than the bundled passthrough maps expect, or when you need to tune weights for your specific character.
@@ -22,7 +22,7 @@ Select the new asset to open it in the Inspector, and expand the **Configuration
 
 | Field           | Default   | Description                                                                                                                  |
 | --------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **Target Profile** | _(none)_ | Popup listing the registered lip sync profiles this map targets (e.g., `arkit`, `metahuman`, or your custom profile). If no profiles are registered, the Inspector falls back to a **Target Profile ID** text field instead. |
+| **Target Profile** | **ARKit** (`arkit`) | Popup listing the registered lip sync profiles this map targets (e.g., `arkit`, `metahuman`, or your custom profile). If no profiles are registered, the Inspector falls back to a **Target Profile ID** text field instead. |
 | **Description** | _(empty)_ | Optional designer notes — not used at runtime                                                                                |
 
 Below **Description**, a **Global Modifiers** subheading groups three fields:
@@ -69,14 +69,14 @@ Expand the **Tools** section in the same Inspector to add mapping entries. Every
 
 Use **Copy Mapping JSON** to export the current asset's mappings in this same format, for example to share a map between assets or check it into version control as text.
 
-**Other mapping actions:** **Initialize Defaults** clears all existing mappings and creates one enabled, passthrough entry per known source channel for the asset's **Target Profile** — each entry's **Target Names** is set to the source channel's own name. **Clear All** removes every mapping entry. **Sort A-Z** reorders entries alphabetically by source channel. **+ Add Entry** adds a single blank entry to hand-edit.
+**Other mapping actions:** **Initialize Defaults** clears all existing mappings and creates one enabled, passthrough entry per known source channel for the asset's **Target Profile** — each entry's **Target Name(s)** is set to the source channel's own name. **Clear All** removes every mapping entry. **Sort A-Z** reorders entries alphabetically by source channel. In **Mappings**, **+ Add Entry** adds a blank entry, and the search box filters source and target blendshape names.
 
-Each entry — however it was added — maps one source channel to one or more target blendshape names, with the following fields:
+Each entry maps one source channel to one or more target names. Expand its **Per-blendshape overrides** for Response Curve, clamp, override-value, and global-modifier controls. The table names the full properties; the compact row abbreviates Multiplier and Offset as **Mult** and **Offs**.
 
 | Entry field                 | Default        | Description                                                               |
 | --------------------------- | -------------- | ------------------------------------------------------------------------- |
 | **Source Blendshape**       | _(empty)_      | Name of the channel as it arrives from Convai (e.g., `jawOpen`)           |
-| **Target Names**            | _(empty list)_ | Names of the blendshapes on your `SkinnedMeshRenderer` to drive           |
+| **Target Name(s)**            | _(empty list)_ | Names of the blendshapes on your `SkinnedMeshRenderer` to drive           |
 | **Multiplier**              | `1.0`          | Per-entry scale applied before the global multiplier (0–5)                |
 | **Offset**                  | `0.0`          | Per-entry offset (-1–1)                                                   |
 | **Response Curve**          | `1.0`          | Exponent applied to the incoming value before scaling (0.25–4)            |
@@ -109,6 +109,8 @@ Enter Play Mode and speak to the character. All mapped blendshapes animate. Chec
 {% endstep %}
 {% endstepper %}
 
+
+<figure><img src="../../../../.gitbook/assets/unity-lip-sync-map-entries.png" alt="Lip Sync Mapping entries with source names, target names, multipliers, offsets, and per-entry disclosure controls"><figcaption><p>Mappings in the shipped ARKit asset. Its controls are disabled because it is read-only; use your project-owned map for the steps below.</p></figcaption></figure>
 ## Usage examples
 
 ### Example 1: ARKit stream to a custom rig
@@ -141,7 +143,7 @@ Enter Play Mode and speak to the character. All mapped blendshapes animate. Chec
 * Find the `jawOpen` entry
 * Set **Multiplier** to `0.6` and **Clamp Max** to `0.7`
 
-**Expected outcome:** The character's jaw opens only 60–70% as much as the raw stream value, resulting in more restrained, naturalistic mouth movement.
+**Expected outcome:** The entry scales the incoming jaw value by `0.6` and caps the result at `0.7`, after the curve, multipliers, and offsets. Compare the result on the mesh and adjust for the rig.
 
 ## Next steps
 

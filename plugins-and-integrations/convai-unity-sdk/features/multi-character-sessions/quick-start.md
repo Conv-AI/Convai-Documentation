@@ -1,10 +1,10 @@
 ---
 title: Build your first multi-character session
 description: Add a second Convai character to a working Unity scene and confirm the room lets you talk to either one by looking at them.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
-Add a second `ConvaiCharacter` to a scene that already has one working character, and confirm the room lets you talk to either one depending on where you look. There is no multi-character mode to switch on, no component to add, and no field to fill: a room holds every active Convai character in the loaded scenes automatically.
+Add a second `ConvaiCharacter` to a scene that already has one working character, and confirm the room lets you talk to either one depending on where you look. A classic multi-character room needs no extra component. It includes the manager-owned, active characters selected in **Characters Joining the Room**.
 
 ## Prerequisites
 
@@ -56,10 +56,14 @@ Select `ConvaiManager` again while still in Play mode. Its **Live** section is t
 * **Characters in Room** reads the number the room actually opened for.
 * **Talking To** names the character you are addressing right now, and updates as you turn your head.
 * **Player Can Talk** reads **Yes** once that character can hear you — it reads **Not yet — this character is still joining** for the brief moment right after it joins the room.
-* **Room Holds** reads **Several characters** once the room has grown past one.
+* **Room Holds** reads **Several characters** when the connection opened with a roster, even if its current count later changes. **One character only** identifies a room that cannot grow.
 * **Room Roster**, below that, lists one row per character. The one you are addressing is marked `· addressed`, and a character that can currently hold the conversation reads `Ready`.
 
-If **Talking To** never changes when you look at the other character, check **Range** and **Look Angle** in **Who The Player Talks To** first, then confirm the second character's row in **Room Roster** actually reads `Ready`.
+If **Talking To** never changes when you look at the other character, check **Range (Metres)** and **Look Angle (Degrees)** in **Who The Player Talks To** first, then confirm the second character's row in **Room Roster** actually reads `Ready`.
+
+The roster also marks `· opened the room` for the initial character, shows **Not in the scene** for an absent local character whose seat remains, and displays a failure code below a Failed row.
+
+Before Play, resolve **This room will not be able to grow** if several characters are selected but only one is active. **Enable It** or **Enable Them** activates the selected inactive characters so the next connection can open with a roster. Set every character's version to **Live**.
 
 ## Next steps
 

@@ -1,7 +1,7 @@
 ---
 title: Tune expressiveness
 description: Make a Convai character's body language read as subtle or theatrical using the expressiveness preset, a runtime override, and per-behavior gains.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Set how big, how frequent, and how rich a character's body language reads by choosing an `ExpressivenessPreset` on its `ConvaiBodyLanguageProfile`, or by overriding the dial at runtime through `ConvaiBodyLanguageController.Expressiveness`. Use this page when the shipped `Natural` tuning reads as too flat for a theatrical performer or too busy for a calm, understated character.
@@ -73,7 +73,7 @@ Breathing rate is never scaled by expressiveness. It is treated as physiology ra
 
 ## Apply a demeanor preset for a one-time personality pass
 
-The profile Inspector's **Demeanor** row — `Composed`, `Warm`, `Energetic`, `Reserved` — applies a one-shot multiplier pass over the profile's posture bias, fidget, sway, beat-intensity, and weight-shift-cadence fields when you select it. It is an ordinary, undoable asset edit, not a live-swappable runtime mode like `Expressiveness`.
+The profile Inspector's **Demeanor** row — `Composed`, `Warm`, `Energetic`, `Reserved` — applies a one-shot multiplier pass over the profile's posture bias, fidget, sway, beat-intensity, and weight-shift-cadence fields when you select **Apply**. Changing the dropdown alone does nothing. Each press multiplies the values currently on the asset, so repeated applications compound; undo the prior application or restore the asset before trying a different baseline. It is an ordinary, undoable asset edit, not a live-swappable runtime mode like `Expressiveness`.
 
 {% hint style="info" %}
 The same four demeanor names appear on the Emotion profile and the Body Animation config, so `Warm` is one word across all three inspectors. Each module still interprets a demeanor in its own terms, and applying one on this profile does not apply it anywhere else.

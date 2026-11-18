@@ -1,7 +1,7 @@
 ---
 title: Body animation scripting reference
 description: Reference for the Convai Body Animation public API, including the controller, action and pointing handles, and locomotion types.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Complete reference for the public types in Convai Body Animation. Types live in the `Convai.Modules.BodyAnimation`, `Convai.Modules.BodyAnimation.Components`, `Convai.Modules.BodyAnimation.Data`, `Convai.Modules.BodyAnimation.Core.Locomotion`, `Convai.Modules.BodyAnimation.Core.Diagnostics`, and `Convai.Runtime.Embodiment` namespaces, as noted per type.
@@ -188,9 +188,11 @@ Complete, allocation-friendly view of the body animation system for one frame: l
 | `RateWarp` | `float` | Current playback-rate warp applied to locomotion. |
 | `GraphPlayableCount` | `int` | Number of live playables in the `PlayableGraph`. |
 | `Layers` | `List<BodyAnimationLayerSnapshot>` | Per-layer state (name, active state, clip, weight, mask, owner) for every port in the layer stack. |
-| `RecentTrace` | `List<AnimTraceEntry>` | Recent transition log copied from the trace ring buffer, oldest first. |
+| `RecentTrace` | `List<TraceEntry>` | Recent transition log copied from the trace ring buffer, oldest first. |
 
 `Clear()` resets every field to its disengaged default. `BodyAnimationLayerSnapshot` is a public struct carrying `Name`, `State`, `Clip`, `Weight`, `DesiredWeight`, `EnvelopeWeight`, `ArbiterTargetWeight`, `FinalWeight`, `Owner`, `Mask`, `Additive`, and `NormalizedTime` for one layer port.
+
+The snapshot table above lists common fields. Additional diagnostics include `CoSpeechQuality`, `CoSpeechPhase`, `CoSpeechGeneration`, `CoSpeechGestureSequence`, `CoSpeechGesture`, `MotionPreviousNormalizedTime`, `MotionCurrentNormalizedTime`, `SharedGaitPhase`, `AppliedTurnYaw`, `ExpectedTurnYaw`, `HandoffMarker`, and `StopDistanceError`.
 
 ## `BodyAnimationFeatureAvailability`
 
@@ -212,32 +214,13 @@ Build-time snapshot of what a given animation set and config pair can actually p
 
 `BodyAnimationFeatureState` carries `Enabled`, `HasContent`, and the derived `IsEffective`, `IsEnabledWithoutContent`, and `IsContentWithoutEnable` properties. `Compute(ConvaiBodyAnimationSet set, ConvaiBodyAnimationConfig config)` returns every feature disabled/without content when either argument is `null`.
 
-## `IConvaiLocomotionSource`
-
-Interface — `Convai.Modules.BodyAnimation.Core.Locomotion`
-
-Minimal public movement data Body Animation reads from a locomotion provider. Implemented by `ConvaiNavMeshLocomotion`; implement it on a `MonoBehaviour` assigned to a controller's **Locomotion Provider Override** field to drive animation sync from a custom movement system.
-
-| Member | Type | Description |
-|---|---|---|
-| `IsMoving` | `bool` | Whether the character is currently displacing. |
-| `PathPending` | `bool` | Whether a path is still being computed. |
-| `Speed` | `float` | Live horizontal speed (m/s). |
-| `DesiredSpeed` | `float` | Commanded travel speed (m/s) for the current move. |
-| `RemainingDistance` | `float` | Remaining travel distance, `0` when idle. |
-| `SignedAngleToSteering` | `float` | Signed yaw (degrees) from the character's forward to the current steering direction. |
-| `Destination` | `Vector3` | Current destination while moving. |
-| `MoveEnded` | `event Action<bool>` | Raised when movement ends. `true` = destination reached, `false` = canceled. |
-
-Three optional interfaces — `IConvaiLocomotionCommands`, `IConvaiManagedLocomotion`, `IConvaiAnchorAlignment` — are discovered on the same component when present, each unlocking one additional capability. See [Configure locomotion](configure-locomotion.md) for what each adds.
-
 ## `ConvaiTravelIntent`
 
 `MonoBehaviour` — `Convai.Runtime.Embodiment`
 
 Menu path: `Convai/Embodiment/Travel Intent`. `DisallowMultipleComponent`.
 
-Says where a character is going, so peers — Convai Gaze watching the path while walking, for example — can behave differently while it travels. Provisioned automatically the moment a character actually moves; add it by hand only to change detection thresholds or switch automatic detection off.
+Says where a character is going, so peers — Convai Gaze watching the path while walking, for example — can behave differently while it travels. NavMesh locomotion and gaze can provision it when travel is detected. A standalone custom mover should get or add the component before reporting travel.
 
 ### Properties
 
@@ -260,18 +243,48 @@ Says where a character is going, so peers — Convai Gaze watching the path whil
 | `SetSubject` | `void SetSubject(Vector3 worldPosition)` | Declares that the journey is about a fixed place. |
 | `ClearSubject` | `void ClearSubject()` | Forgets what the journey was about. The character keeps watching the road. |
 
-## `AnimTraceVerbosity`
+## `TraceVerbosity`
 
-Enum — `Convai.Modules.BodyAnimation.Core.Diagnostics`
+Enum in `Convai.Runtime.Diagnostics`
 
 Verbosity levels for body animation diagnostics, set on `ConvaiBodyAnimationConfig.TraceVerbosity`. Each level includes everything below it.
 
 | Value | Integer | Description |
 |---|---|---|
-| `Off` | `0` | No trace output. Warnings and errors still log. The shipped default. |
+| `Off` | `0` | No trace output in the Console. Warnings and errors still log, and the Live view records state and detail entries. The shipped default. |
 | `State` | `1` | State-machine transitions, layer ownership changes, action lifecycle, clip selections, and startup feature summaries. |
 | `Detail` | `2` | Adds selector decisions, variant rolls with weights, speed-warp clamps, and executor begin/end markers. |
 | `Firehose` | `3` | Adds throttled per-tick dumps of layer weights and blend positions. Extremely chatty; short debugging sessions only. |
+
+## `ConvaiNavMeshLocomotion`
+
+Namespace `Convai.Modules.BodyAnimation.Components`; **Add Component > Convai > Embodiment > NavMesh Locomotion**. Requires a `NavMeshAgent`.
+
+| Members | Purpose |
+| --- | --- |
+| `MoveTo(Vector3)` | Samples and requests the destination. Returns `false` if the move cannot start. |
+| `MoveToAsync(Vector3 destination, CancellationToken token)` | Waits for the end of the move and returns `ConvaiMoveResult.Arrived`, `Interrupted`, or `NoPath`. Cancelling the token calls `Stop()` and throws `OperationCanceledException`. |
+| `Stop()`, `StopGracefully()` | Immediate interruption or braking runout; graceful stop returns bool |
+| `Warp(Vector3)` | Teleport and clear movement |
+| `SetSpeedProfile(LocomotionSpeedProfile)` | Walk (0), Jog (1), or Auto (2) |
+| `ConfigureSpeeds(float, float)` | Set walk/jog speeds |
+| `MoveStarted`, `MoveEnded` | `Action<Vector3>` sampled destination and `Action<bool>` reached/cancelled result |
+| `Agent`, `IsMoving`, `IsStoppingGracefully` | Agent reference and current movement flags |
+| `Speed`, `DesiredSpeed`, `RemainingDistance`, `Destination` | Movement readings |
+| `WalkSpeed`, `JogSpeed` | Configured speeds |
+
+## Content and configuration assets
+
+Create **Body Animation Set**, **Body Animation Profile**, and **Body Animation Config** through **Assets > Create > Convai > Embodiment**. Types are in `Convai.Modules.BodyAnimation.Data`.
+
+| Type | Public surface |
+| --- | --- |
+| `ConvaiBodyAnimationSet` | `DisplayName`, `Idles`, `Talks`, `Listens`, `Thinks`, `Actions`, `Locomotion`, `Pointing`, `UpperBodyMask`, `HasAnyIdle/Talk/Listen/Think/Action`, `TryGetAction`, `CollectFindings` |
+| `ConvaiBodyAnimationProfile` | `AnimationSet`, `Config`, `AutoCreateConversationFlow`, `CreateDefault` |
+| `ConvaiBodyAnimationConfig` | Tuning getters and `CreateDefault`; see the config reference |
+| `ActionAnchorOptions` | Read-only approach/alignment fields authored in the Inspector; see action guide |
+
+Related enums: `ActionFacingMode` (AnchorForward, FaceAnchor, None), `MovingTalkMode` (Auto, SoftenedOverride, Suppress), `ActionMaskMode` (FullBody, UpperBody, CustomMask), and `ActionLoopMode` (PlayOnce, LoopCount, HoldUntilStopped).
 
 ## Related reference
 

@@ -1,185 +1,109 @@
 ---
 title: Configure conversation input mode
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-pre.1"
 description: >-
-  Choose between hands-free voice activation and push-to-talk, configure the
-  trigger key or controller button, and switch between the two modes at runtime.
+  Choose hands-free or push-to-talk input, configure microphone and interruption
+  behavior, and change the active mode during a connected session.
 ---
 
-The Convai SDK for Unity supports two conversation input modes: **Hands Free** (the player speaks naturally, the SDK detects when they stop) and **Push to Talk** (the player holds a key to speak). Both modes are configured on `ConvaiRoomManager` in the Inspector.
+Choose **Hands Free** when speech detection should end the player's turn, or **Push To Talk** when the player holds a control to speak. Set the input mode on `ConvaiRoomManager`. Group conversation requires push-to-talk.
 
-## Where to find the settings
+## Find the room settings
 
-Select the `ConvaiManager` GameObject in the Hierarchy. In the Inspector, find `ConvaiRoomManager`. The **Turn-Taking Options** section contains all input mode settings.
+Select the manager object and find **Convai Room Manager** in its Inspector. **Conversation** contains **How The Player Talks** and the push-to-talk controls. **Listening** is a separate card below the everyday connection controls; it contains turn detection, voice detection, speech recognition, and microphone processing. **Interruptions** controls how a reply stops when the player cuts in.
 
-<figure><img src="../../../.gitbook/assets/image (6).png" alt="ConvaiRoomManager Inspector with the Turn-Taking Options section expanded, showing the Mode dropdown for Hands Free and Push to Talk"><figcaption></figcaption></figure>
 
-## Input mode comparison
+Edit these values on the room component. Save them on a prefab to use the same defaults across scenes.
 
-|                   | Hands Free                                  | Push to Talk                                     |
-| ----------------- | ------------------------------------------- | ------------------------------------------------ |
-| **How it works**  | SDK detects end-of-speech automatically     | Player holds a key to speak, releases to send    |
-| **Best for**      | Natural conversation, kiosk experiences, VR | Noisy environments, multiplayer, precise control |
-| **Latency**       | Slightly higher (silence detection delay)   | Lower (send on key release)                      |
-| **Player effort** | None                                        | Must hold a key                                  |
+## Configure hands-free input
 
-## Hands free mode
+Set **How The Player Talks** to **Hands Free**. In **Listening > End Of Turn**, choose **SDK Default** or **Custom** for **Turn Detection**. Custom exposes:
 
-Hands Free is the default. Set **Mode** to `HandsFree`.
+| Inspector label | API property | Default | Purpose |
+|---|---|---|---|
+| **Silence Before Reply (s)** | `CustomTurnDetection.StopSecs` | `3` | Silence threshold for ending the turn |
+| **Longest Turn (s)** | `CustomTurnDetection.MaxDurationSecs` | `8` | Upper turn duration |
+| **Pre-Speech Audio (ms)** | `CustomTurnDetection.PreSpeechMs` | `0` | Audio retained before speech onset |
 
-### Turn detection
+For a training exercise where learners pause before answering, try a five-second silence threshold and a 30-second turn limit, then test with representative speech. Larger values let the player pause longer but delay the reply.
 
-Control how the SDK decides the player has finished speaking.
+**Voice Detection > Thresholds** is separate from end-of-turn detection. **Server Default** leaves speech-detection thresholds to Convai. **Custom** exposes confidence, speech-start and speech-stop timing, and minimum volume. Under **Speech Recognition**, **At Session Start** selects `Automatic`, `On`, or `Off`. Automatic starts recognition for hands-free input and keeps it off until a press in push-to-talk.
 
-| Setting         | Default      | Description                                                                              |
-| --------------- | ------------ | ---------------------------------------------------------------------------------------- |
-| `TurnDetection` | `UseDefault` | `UseDefault` = server default, `Disabled` = always-on stream, `Custom` = configure below |
+## Configure push-to-talk
 
-When `TurnDetection` is set to `Custom`, the **Smart Turn Settings** appear:
+Set **How The Player Talks** to **Push To Talk**, then choose **Push To Talk Key**. The default is `T`.
 
-| Setting           | Default | Description                                          |
-| ----------------- | ------- | ---------------------------------------------------- |
-| `StopSecs`        | `3.0`   | Seconds of silence before the turn ends              |
-| `MaxDurationSecs` | `8.0`   | Maximum turn length before forced end                |
-| `PreSpeechMs`     | `0`     | Milliseconds of audio before speech onset to include |
+| Inspector label | API property | Default | Behavior |
+|---|---|---|---|
+| **Interrupt On Press** | `PushToTalkPolicy.InterruptBotOnPress` | `true` | A valid press can interrupt the character |
+| **Wait For Reply To Finish** | `PushToTalkPolicy.RequireTurnCompletionBeforeNextPress` | `true` | Holds the next turn while waiting for the reply |
+| **Wait Timeout (ms)** | `PushToTalkPolicy.TurnCompletionTimeoutMs` | `5000` | Unlocks after inactivity; the wait pauses while the character speaks |
+| **Prepare Microphone** | `LocalAudioPolicy.PushToTalkStartupMode` | `PrewarmMuted` | **Before First Press** prepares muted capture at connect; **On First Press** waits for the control |
 
-{% hint style="info" %}
-Increasing `StopSecs` gives players more time to pause mid-sentence without triggering a turn end. Useful for training simulations where learners think before answering.
-{% endhint %}
+For XR controllers, select `JoystickButton0` for right-hand primary/A, `JoystickButton1` for right-hand secondary/B, `JoystickButton2` for left-hand primary/X, or `JoystickButton3` for left-hand secondary/Y. Once a controller has supplied a press, losing that controller releases it instead of keeping capture open.
 
-## Push to talk mode
+For a UI button or your own input framework, use the public `ConvaiPushToTalkController` methods described in [Use your own push-to-talk input](use-your-own-push-to-talk-input.md). Its input ownership prevents the room's built-in polling from also handling the same press. Code that polls another input source can acquire `ConvaiManager.AcquirePushToTalkInput()` and dispose the returned lease when done.
 
-Set **Mode** to `PushToTalk`. The default key is **T** — change it via `_pushToTalkKey` on `ConvaiRoomManager`.
+The SDK assigns each release an ID. When the microphone reports that its captured audio has been sent, the release can proceed immediately. On an untracked microphone, including WebGL, **Release Tail (ms)** allows the last audio to be captured before muting. The default is `1000` ms. Group conversation uses the same release protocol and requires the selected member to own the microphone route.
 
-On Meta Quest, push-to-talk reads the A, B, X, and Y buttons through Unity's XR input API instead of a keyboard key. If the active XR controller cannot be read, or disconnects mid-press, the SDK fails closed and stops microphone capture rather than leaving it open. Keyboard and non-XR joystick behavior is unchanged.
+## Configure capture and interruption
 
-### Local audio policy
+Use **Listening > Microphone** for the device's capture policy:
 
-Controls microphone behavior on the player's device.
+| Inspector label | Default | Behavior |
+|---|---|---|
+| **Allow Microphone** | On | Turn off for typed input without capture or a permission request |
+| **Echo Cancellation** | Off | Reduces the character's speaker output being captured by the microphone |
+| **Noise Suppression** | On | Reduces background noise in native capture |
+| **Automatic Gain Control** | Off | Adjusts native microphone gain |
 
-| Setting                          | Default        | Description                                                                                                   |
-| -------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------- |
-| `StartMutedInPushToTalk`         | `true`         | Microphone starts muted; activates on key press                                                               |
-| `EnableAcousticEchoCancellation` | `false`        | Enable AEC for speakerphone use (Android/iOS)                                                                 |
-| `PushToTalkStartupMode`          | `PrewarmMuted` | `PrewarmMuted` = mic open but muted from start; `OpenOnFirstPress` = mic opens only when key is first pressed |
+Processing changes apply on the next connection. WebGL uses browser processing. For hands-free input through a phone speaker, enable echo cancellation or use headphones to avoid the character hearing its own voice.
 
-### Push to talk policy
+**Interruptions** includes **Fade Out When Interrupted**, **Fade Duration (s)**, and **On-Device Detection**. Fade duration defaults to `0.12` seconds. See [Configure speech interruptions](configure-speech-interruptions.md) to enable local detection, check echo cancellation, and test how an interrupted reply sounds.
 
-Controls what happens when the player presses and releases the push-to-talk key.
+## Switch mode during a session
 
-| Setting                                      | Default | Description                                                                                                                                                                   |
-| -------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `InterruptBotOnPress`                        | `true`  | Pressing the key while the character is speaking interrupts it immediately                                                                                                    |
-| `EnableServerSttToggle`                      | `true`  | Pauses Convai's speech-to-text on the server while the player is not holding the key. Reduces server processing cost; disable if you observe recognition delays on key press. |
-| `RequireTurnCompletionBeforeNextPress`       | `true`  | Player must wait for the character to finish before speaking again                                                                                                            |
-| `TurnCompletionTimeoutMs`                    | `5000`  | Fallback timeout (ms) to unlock push-to-talk if the completion event never arrives                                                                                            |
-| `AllowSpeechStoppedFallbackAfterSpeechStart` | `false` | Allow a speech-stopped event to clear the waiting state after speech has started                                                                                              |
-
-## Runtime mode switching
-
-`SetConversationInputModeAsync()` switches the active input mode for the current connected session — **no reconnection required**. The switch takes effect immediately on the live session and does not mutate configured defaults or room profile assets.
+`SetConversationInputModeAsync()` changes the mode of a connected session without editing the saved room defaults. Check the connection, handle a rejected operation, and keep group conversation in push-to-talk:
 
 ```csharp
-using System.Threading;
+using System;
 using Convai.Runtime.Components;
 using Convai.Runtime.Room;
 using UnityEngine;
 
-public sealed class InputModeSwitcher : MonoBehaviour
+public class InputModeSwitcher : MonoBehaviour
 {
-    // Switch to Hands Free — call from a UI button or game event
-    public async void SwitchToHandsFree()
+    public void UseHandsFree() => ChangeMode(ConversationInputMode.HandsFree);
+    public void UsePushToTalk() => ChangeMode(ConversationInputMode.PushToTalk);
+
+    private async void ChangeMode(ConversationInputMode mode)
     {
-        await ConvaiManager.ActiveManager
-            .SetConversationInputModeAsync(ConversationInputMode.HandsFree, CancellationToken.None)
-            .AsTask();
-    }
-
-    // Switch to Push to Talk — call from a UI button or game event
-    public async void SwitchToPushToTalk()
-    {
-        await ConvaiManager.ActiveManager
-            .SetConversationInputModeAsync(ConversationInputMode.PushToTalk, CancellationToken.None)
-            .AsTask();
-    }
-}
-```
-
-To read the current active mode or react to changes:
-
-```csharp
-using Convai.Runtime.Room;
-
-// Read current mode
-ConversationInputMode current =
-    ConvaiManager.ActiveManager.ActiveConversationInputMode;
-
-// Subscribe to changes via the room connection service
-if (ConvaiManager.ActiveManager.TryGetRoomConnectionService(out IConvaiRoomConnectionService roomService))
-    roomService.ConversationInputModeChanged += OnModeChanged;
-
-void OnModeChanged(ConversationInputMode newMode)
-{
-    // Update UI, analytics, tutorial prompts, etc.
-}
-```
-
-{% hint style="warning" %}
-`SetConversationInputModeAsync()` is valid only while the room is actively **Connected**. Calls made while the room is `Disconnected`, `Connecting`, `Reconnecting`, or `Disconnecting` fail with `SessionErrorCodes.SessionInvalidState`. Check `ConvaiManager.IsConnected` before calling.
-{% endhint %}
-
-Connect-time `TurnTakingOptions` define the session's baseline policy (custom turn detection thresholds, push-to-talk startup behavior, AEC preference). Runtime switching changes only the active mode — all other options carry over from the connected session's configuration.
-
-## Usage examples
-
-### Example 1: Medical training — hands free with extended silence
-
-**Scenario:** Nursing students answer scenario questions. They often pause while thinking, so the default 3-second silence threshold causes premature turn ends.
-
-**Setup in Inspector:**
-
-* Mode: `HandsFree`
-* TurnDetection: `Custom`
-* StopSecs: `5.0`
-* MaxDurationSecs: `30.0`
-
-**Expected outcome:** Students can pause for up to 5 seconds mid-answer without the turn ending. The character waits until the student finishes.
-
-### Example 2: Industrial site inspection — push to talk
-
-**Scenario:** Workers in a noisy manufacturing environment use push-to-talk to avoid accidental voice activation. They press **T** to ask questions about equipment status.
-
-**Setup in Inspector:**
-
-* Mode: `PushToTalk`
-* `_pushToTalkKey` on ConvaiRoomManager: `KeyCode.T`
-* `InterruptBotOnPress`: `true` (workers can cut off a long response to ask a follow-up)
-* `EnableAcousticEchoCancellation`: `true` (machine noise present)
-
-**Expected outcome:** Only intentional key presses send audio to Convai. Background noise does not trigger responses. Workers can interrupt long answers with a new press.
-
-### Example 3: Cinematic to gameplay mode switch
-
-**Scenario:** An onboarding cinematic uses Hands Free. When gameplay starts, the game switches to Push to Talk without reloading the scene.
-
-```csharp
-public async void OnCinematicEnd()
-{
-    if (ConvaiManager.ActiveManager.IsConnected)
-    {
-        await ConvaiManager.ActiveManager
-            .SetConversationInputModeAsync(ConversationInputMode.PushToTalk, CancellationToken.None)
-            .AsTask();
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.IsConnected) return;
+        try
+        {
+            await manager.SetConversationInputModeAsync(mode);
+        }
+        catch (Exception error)
+        {
+            Debug.LogWarning($"Input mode did not change: {error.Message}");
+        }
     }
 }
 ```
 
-**Expected outcome:** Mode switches seamlessly mid-session. The character continues without interruption. Push-to-talk controls become active immediately.
+Assign either public method to a UI button. Existing turn-detection, capture, and interruption settings remain the session's baseline.
 
-## Next steps
+Read `ActiveConversationInputMode` from the manager after the awaited change. A group room rejects switching to hands-free input.
 
-With input mode configured, tune character voice volume and audio playback settings.
+## Verify and continue
+
+In hands-free mode, speak and pause to confirm the selected end-of-turn behavior. In push-to-talk, hold and release the configured control, wait for the reply, and confirm that a subsequent press works. A successful mode switch alone does not prove microphone permission or device capture.
 
 {% content-ref url="configure-character-audio.md" %}
 [Configure character audio](configure-character-audio.md)
+{% endcontent-ref %}
+
+{% content-ref url="configure-microphone.md" %}
+[Configure microphone](configure-microphone.md)
 {% endcontent-ref %}

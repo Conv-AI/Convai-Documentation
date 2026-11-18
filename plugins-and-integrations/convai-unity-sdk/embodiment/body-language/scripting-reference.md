@@ -1,10 +1,10 @@
 ---
 title: Body language scripting reference
 description: Complete API reference for the Convai Body Language module, covering the controller, reading struct, handles, and every public enum type.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Complete API reference for the public types in the Convai Body Language module. Types live in `Convai.Modules.BodyLanguage.Components`, `Convai.Domain.Embodiment.Readings`, `Convai.Domain.Embodiment.Interfaces`, or `Convai.Domain.Embodiment.Semantics`, as noted per type. The cross-module contracts (`IBodyLanguageSource` and the internal directors) are `internal` and are not part of the public surface.
+Complete API reference for the public types in the Convai Body Language module. Types live in `Convai.Modules.BodyLanguage.Components`, `Convai.Domain.Embodiment.Readings`, `Convai.Domain.Embodiment.Interfaces`, or `Convai.Domain.Embodiment.Semantics`, as noted per type. The cross-module contracts (the internal directors) are `internal` and are not part of the public surface.
 
 ## `ConvaiBodyLanguageController`
 
@@ -26,9 +26,9 @@ Constraints: `DisallowMultipleComponent`
 | Method | Signature | Description |
 | --- | --- | --- |
 | `Nod` | `HeadGestureHandle Nod(HeadGestureKind kind, float intensity = 1f)` | Requests a scripted one-shot head gesture. Returns a handle whose `Completion` resolves when the program ends. A refused or unavailable request returns an already-completed handle with `IsActive == false` — never `null`, never throws. |
-| `PulseGesture` | `GestureCueHandle PulseGesture(GestureCue cue)` | Requests a scripted semantic gesture cue with priority over automatic gesticulation. Returns a handle whose `Completion` resolves as soon as the dispatch outcome is known. Never `null`, never throws. |
+| `PulseGesture` | `bool PulseGesture(GestureCue cue)` | Requests a scripted semantic gesture cue with priority over automatic gesticulation. Returns `true` when the performer accepts the cue and `false` when it refuses or the controller cannot act. |
 | `TriggerReaction` | `void TriggerReaction(ReactionKind kind, float intensity = 1f)` | Fire-and-forget one-shot bodily reaction. No handle. Safe to call on a controller that cannot tick — silent no-op. |
-| `ClearScriptedOverrides` | `void ClearScriptedOverrides()` | Completes every outstanding `Nod`/`PulseGesture` handle and hands the head-gesture channel back to the automatic directors. Idempotent. |
+| `ClearScriptedOverrides` | `void ClearScriptedOverrides()` | Completes every outstanding `Nod` handle and hands the head-gesture channel back to the automatic directors. Idempotent. |
 | `CaptureSnapshot` | `void CaptureSnapshot(BodyLanguageSnapshot snapshot)` | Fills a caller-owned, reusable `BodyLanguageSnapshot` with the full live diagnostic state. |
 | `CaptureSnapshot` | `BodyLanguageSnapshot CaptureSnapshot()` | Allocating convenience overload of the above. |
 
@@ -38,7 +38,7 @@ See [Trigger gestures and reactions](gestures-and-reactions.md) for usage and th
 
 `Convai.Domain.Embodiment.Readings` — Readonly struct
 
-Immutable snapshot of the character's current nonverbal state, published through the internal `IBodyLanguageSource` contract and exposed on the controller as `Current`. Engine-free (no `UnityEngine` references).
+Immutable snapshot of the character's current nonverbal state, available as `ConvaiBodyLanguageController.Current`. Engine-free (no `UnityEngine` references).
 
 ### Properties
 
@@ -96,26 +96,6 @@ Why a scripted head-gesture request did not become a live program.
 | `Busy` | `1` | The character is already performing a head gesture, with one more queued behind it. Transient — the same request a moment later normally succeeds. |
 | `Unavailable` | `2` | The character cannot perform head gestures at all right now: no usable rig, no Body Language profile, or the component is disabled or not playing. |
 
-## `GestureCueHandle`
-
-`Convai.Modules.BodyLanguage.Components` — Sealed class
-
-Live handle for one scripted `PulseGesture` request. All operations are idempotent and never throw.
-
-### Properties
-
-| Property | Type | Description |
-| --- | --- | --- |
-| `Kind` | `GestureCueKind` | The requested cue kind. |
-| `IsActive` | `bool` | Whether the request is still awaiting its dispatch outcome. Always `false` immediately for a refused or substituted cue. |
-| `Completion` | `Task` | Completes as soon as the cue's dispatch outcome is known (accepted for performance, or refused/substituted). Does not track the resulting clip to its visual end. |
-
-### Methods
-
-| Method | Signature | Description |
-| --- | --- | --- |
-| `Release` | `void Release()` | Gives up interest in this request. Safe to call multiple times. |
-
 ## `GestureCue`
 
 `Convai.Domain.Embodiment.Interfaces` — Readonly struct
@@ -164,6 +144,18 @@ Semantic categories a scripted or backend-driven gesture request can carry.
 
 A cue built from a reserved value always resolves to "no mapping" and falls back to the head-beat/posture-pulse (and, on a complete arm chain, procedural arm/hand) primitives — see [Trigger gestures and reactions](gestures-and-reactions.md).
 
+## `GestureSuppression`
+
+`Convai.Domain.Embodiment.Interfaces` — Enum
+
+| Value | Integer | Meaning |
+|---|---|---|
+| `None` | `0` | No gesture-channel suppression. |
+| `UpperBody` | `1` | The upper body is shared: semantic gesture cues are refused and posture is reduced; head beats and breathing continue. |
+| `FullBody` | `2` | Authored motion owns the whole body; procedural posture and breathing fade out. |
+
+Read `Current.Suppression` or `BodyLanguageSnapshot.GesticulationSuppression` for the current value.
+
 ## `ReactionKind`
 
 `Convai.Domain.Embodiment.Semantics` — Enum
@@ -192,7 +184,7 @@ Scripted one-shot head-gesture kinds Body Language can request.
 
 ## `ExpressivenessPreset`
 
-`Convai.Domain.Embodiment.Semantics` — Enum
+`Convai.Modules.BodyLanguage` — Enum
 
 Body Language's single expressiveness dial: one authored or runtime knob that coherently scales how big, how frequent, and how varied the whole nonverbal system reads.
 
@@ -225,9 +217,9 @@ Mutable, reusable capture of the body language runtime state for HUDs and tests.
 | `LastGestureCueKind` / `LastGestureCueAccepted` | `GestureCueKind` / `bool` | The last semantic cue attempted, and whether it was accepted. |
 | `ReactionFlinch` / `ReactionBounce` | `float` | Current flinch and bounce reaction envelope values. |
 | `Expressiveness` / `AmplitudeGain` / `FrequencyGain` / `RichnessGain` | `float` | Resolved expressiveness and its three derived gains. |
-| `RecentTrace` | `List<BodyLanguageTraceEntry>` | Recent trace log entries, oldest first. |
+| `RecentTrace` | `List<TraceEntry>` | Recent trace log entries, oldest first. |
 
-The full field list mirrors what the `ConvaiBodyLanguageController` Inspector's **Runtime Status** section draws — see [Troubleshoot body language](troubleshooting.md).
+The Inspector displays a subset: **Runtime Status**, **Posture (target → current)**, **Breath**, and **Recent Trace**. Head-gesture, last-cue, reaction, and resolved-gain fields are available through `Current` or `CaptureSnapshot`, rather than all being drawn in **Runtime Status**. See [Troubleshoot body language](troubleshooting.md).
 
 ## Next steps
 

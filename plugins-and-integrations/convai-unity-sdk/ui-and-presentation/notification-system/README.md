@@ -1,203 +1,96 @@
 ---
 title: Notification system
-last_reviewed: "4.5.0"
-description: Add toast-style alerts that surface session errors automatically, and raise your own in-scene alerts from code using notification assets.
+last_reviewed: "5.0.0-pre.1"
+description: Add toast-style alerts for session errors and in-scene events, enable notifications, and register the assets your scene displays.
 ---
 
-The notification system displays transient, toast-style popups in your scene. It handles session error alerts automatically — when Convai reports a connection or authentication error, the system maps the error code to a notification asset and queues it for display. You can also trigger custom notifications from code at any point during a session.
+The notification system displays toast-style alerts from `SONotification` assets. Automatic alerts are disabled in the project runtime defaults. This guide assumes a scene with an initialized `ConvaiManager`.
 
-Up to three notifications appear on screen simultaneously. Additional notifications queue internally and display as space becomes available.
-
-For field-level reference on `SONotification`, `SONotificationGroup`, `UINotificationController`, and `SONotificationErrorMap`, see [Notification system reference](notification-system-reference.md).
-
-## How the notification system works
-
-The following diagram shows the system's data flow:
-
-```mermaid
-graph TD
-    A[IConvaiNotificationService] -->|RequestNotification| B[NotificationHandler]
-    B -->|resolves via SONotificationGroup| C[UINotificationController]
-    C -->|pool of 3| D[UINotification]
-    E[Session error] -->|SONotificationErrorMap| A
-    F[Your script] -->|RequestNotification| A
-    G[Runtime settings\nNotificationsEnabled=false] -->|RuntimeSettingsNotificationApplier| A
-```
-
-`IConvaiNotificationService` is the single entry point for all notification requests. `NotificationHandler` resolves the notification asset by ID using `SONotificationGroup`, then passes it to `UINotificationController`, which manages a pool of reusable `UINotification` elements. Session errors route through `SONotificationErrorMap` to map error codes to notification assets automatically.
-
-## Add the notification system to your scene
+## Add the notification system
 
 {% stepper %}
 {% step %}
-### Create your notification assets
+### Add the shipped prefab
 
-Create one `SONotification` asset per alert type. Give each a unique `Id` string that matches what your error map or scripts reference.
+Drag `Prefabs/Notifications/NotificationSystem.prefab` from the <code class="expression">space.vars.sdk_package_id</code> package into your scene. It supplies `NotificationHandler` and the notification controller.
+
 {% endstep %}
-
 {% step %}
-### Create and populate a notification group
+### Enable notifications
 
-Create an `SONotificationGroup` asset. Add all your `SONotification` assets to its `soNotifications` array. Save to `Assets/Resources/SONotificationGroup.asset`.
+Enable **Notifications** in the runtime settings panel, or set the project default in **Convai → Settings → Runtime Defaults**. Saved runtime overrides take precedence over project defaults. You can also apply `ConvaiRuntimeSettingsPatch.NotificationsEnabled = true` from code.
 {% endstep %}
-
 {% step %}
-### Add the NotificationSystem prefab
+### Create a custom alert
 
-Drag `NotificationSystem.prefab` into your scene. Find it at `Prefabs/Notifications/NotificationSystem.prefab` in the <code class="expression">space.vars.sdk_package_id</code> package. This prefab contains both `NotificationHandler` and `UINotificationController`.
+Create an asset with **Create → Convai → Notification System → Notification**. Set its title, message, optional icon, and a unique ID. An empty serialized ID falls back to the asset name.
 
-In `NotificationHandler`'s Inspector, assign your `SONotificationGroup` asset to the `notificationGroup` field.
 {% endstep %}
-
 {% step %}
-### Configure timing (optional)
+### Test an alert
 
-Adjust `UINotificationController` Inspector fields to match your project's visual pacing. The defaults are suitable starting points for most scenarios.
-
-When setup is correct, triggering a notification causes the panel to slide in from `activeNotificationPos`. The slide-in animation runs for `slipDuration` seconds (default `0.3`s).
+Assign the asset to the component below and invoke `ShowAlert()` from a scene button. Confirm that its title and message appear, then clear after the animation cycle. `DismissAll()` clears visible and queued alerts.
 {% endstep %}
 {% endstepper %}
 
 ## Trigger notifications from code
 
-Access `IConvaiNotificationService` through `ConvaiManager`:
+The example resolves the service at the moment you request an alert:
 
 ```csharp
 using Convai.Runtime.Components;
-using Convai.Runtime.Presentation.Views.Notifications;
+using Convai.Shared.Notifications;
 using UnityEngine;
 
 public class ScenarioNotifier : MonoBehaviour
 {
-    [SerializeField] private SONotification _stepCompleteNotification;
-    [SerializeField] private SONotification _failureNotification;
+    [SerializeField] private SONotification alert;
 
-    public void NotifyStepComplete()
+    public void ShowAlert()
     {
-        if (ConvaiManager.ActiveManager.TryGetNotificationService(out var service))
-            service.RequestNotification(_stepCompleteNotification);
-    }
-
-    public void NotifyFailure()
-    {
-        if (ConvaiManager.ActiveManager.TryGetNotificationService(out var service))
-            service.RequestNotification(_failureNotification);
+        var manager = ConvaiManager.ActiveManager;
+        if (manager != null && alert != null &&
+            manager.TryGetRuntimeSettingsService(out var settings) &&
+            settings.Current.NotificationsEnabled &&
+            manager.TryGetNotificationService(out var service))
+            service.RequestNotification(alert);
     }
 
     public void DismissAll()
     {
-        if (ConvaiManager.ActiveManager.TryGetNotificationService(out var service))
+        var manager = ConvaiManager.ActiveManager;
+        if (manager != null && manager.TryGetNotificationService(out var service))
             service.DismissNotification();
     }
 }
 ```
 
-`DismissNotification()` clears all currently displayed notifications immediately, including any animations in progress.
+The handler displays the asset you pass. The example checks the runtime preference before requesting a custom alert. The service itself delivers explicit requests without applying that preference.
 
-{% hint style="info" %}
-The notification service enforces a **10-second cooldown** per notification `Id`. Duplicate requests within 10 seconds are silently discarded. This prevents error floods from filling the screen. The cooldown resets automatically after 10 seconds.
-{% endhint %}
+## Automatic error notifications
 
-## Automatic error-to-notification mapping
+The runtime notification bridge maps session errors through the packaged `Resources/SONotificationErrorMap` asset. Its 19 ordered rules choose the first matching notification. For example, exact `connection.auth_failed` and `connection.rate_limited` rules should precede a broader `connection.` prefix rule.
 
-Session errors automatically trigger notifications via `SONotificationErrorMap`. This asset maps error code strings to `SONotification` assets using an ordered rule list. The **first matching rule wins**.
+The bridge suppresses repeated automatic notifications with the same ID for 10 seconds. Direct `IConvaiNotificationService.RequestNotification` calls do not have that cooldown; add application-level deduplication if your event can fire repeatedly.
 
-**Create:** Right-click → **Create → Convai → Notification System → Session Error Map**
+The built-in runtime host owns its bridge. There is no `NotificationHandler` Inspector field for replacing the host's error map. Creating a second `Resources/SONotificationErrorMap` asset risks an ambiguous load. A separately constructed bridge can receive an explicit map, but adding one alongside the built-in bridge can duplicate alerts. For a custom error presentation, subscribe to session errors and own that presentation deliberately; see [Connection and API issues](../../troubleshooting/connection-and-api-issues.md).
 
-Save to `Assets/Resources/SONotificationErrorMap.asset` for automatic loading.
+## Visibility and timing
 
-For the complete `SessionErrorNotificationRule` field reference, see [Notification system reference](notification-system-reference.md).
+Turning off notifications dismisses existing alerts and suppresses future automatic alerts. Explicit requests follow any preference check in the application code. Re-enabling notifications does not replay suppressed alerts.
 
-**Example rule configuration:**
-
-| ErrorPattern  | MatchType | Notification                   |
-| ------------- | --------- | ------------------------------ |
-| `AUTH_FAILED` | `Exact`   | `Notification_AuthError`       |
-| `CONNECTION_` | `Prefix`  | `Notification_ConnectionError` |
-| `RATE_LIMIT`  | `Exact`   | `Notification_RateLimit`       |
-
-Rules are evaluated top-to-bottom. Place more specific rules above broader prefix matches.
-
-## Respect the notifications runtime setting
-
-The notification system respects the **Notifications** toggle in the built-in Settings Panel. When the user disables notifications:
-
-* Any currently displayed notification dismisses immediately
-* Subsequent `RequestNotification` calls are silently ignored
-* The log records: `"Cannot send notification because notifications are disabled in runtime settings."`
-
-To toggle notifications from script:
-
-```csharp
-if (ConvaiManager.ActiveManager.TryGetRuntimeSettingsService(out var settings))
-{
-    settings.Apply(new ConvaiRuntimeSettingsPatch { NotificationsEnabled = false });
-}
-```
-
-## Usage examples
-
-### Corporate onboarding — step completion alerts
-
-A corporate onboarding simulation notifies the trainee each time they complete a required dialogue checkpoint with the AI HR representative:
-
-* Create an `SONotification` asset with `Id = "checkpoint-complete"`, a checkmark icon, and the message "Checkpoint complete. Move to the next topic."
-* Call `service.RequestNotification(checkpointNotification)` from the checkpoint evaluation handler
-* The notification appears for 4 seconds and dismisses without interrupting the ongoing conversation
-* The 10-second cooldown prevents duplicate notifications if the evaluation logic fires multiple times
-
-At runtime, each checkpoint completion produces a brief confirmation that appears and clears without pausing the dialogue.
-
-### Connection error in firewall-restricted environments
-
-A training simulation running on a corporate network requires informative error messages when the connection fails:
-
-* Create an `SONotificationErrorMap` with a rule: `ErrorPattern = "CONNECTION_"`, `MatchType = Prefix`
-* Set `Notification` to an asset with the message "Connection failed. Please contact IT support at ext. 4400."
-* The error map fires automatically on any `CONNECTION_` prefixed error — no additional code required
-
-At runtime, any connection failure produces a clear, actionable notification instead of a silent failure.
-
-### Multi-scenario reset — dismiss all on scenario change
-
-A multi-scenario simulation clears any lingering notifications when transitioning between scenarios:
-
-```csharp
-public void TransitionToNextScenario()
-{
-    if (ConvaiManager.ActiveManager.TryGetNotificationService(out var service))
-        service.DismissNotification();
-
-    LoadNextScenario();
-}
-```
-
-At runtime, calling `DismissNotification()` immediately clears the screen before the next scenario loads, ensuring stale alerts do not appear in the wrong context.
+`UINotificationController` pools three items. Requests queue while a slide animation is running, even if a pooled item is free. Queued requests are reconsidered after a complete slide-in, visible hold, and slide-out cycle. A fresh request during the visible hold can start immediately if a pooled item is free. See [Notification system reference](notification-system-reference.md) for exact timing fields.
 
 ## Troubleshooting
 
-| Symptom                                                                                                                               | Likely cause                                                                            | Fix                                                                                                                                   |
-| ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| No notifications appear; console shows `"[NotificationHandler] SONotificationGroup asset could not be resolved."`                     | Group asset not in `Resources/`                                                         | Save to `Assets/Resources/SONotificationGroup.asset`                                                                                  |
-| Console shows `"[NotificationHandler] No UINotificationController found and no prefab set."`                                          | `NotificationSystem.prefab` not in scene or `notificationControllerPrefab` not assigned | Add the prefab to the scene or assign a controller prefab in `NotificationHandler` Inspector                                          |
-| Console shows `"[NotificationHandler] Notification service not available; notifications will be deferred until services initialize."` | Notification triggered before `ConvaiManager` finishes initialization                   | Delay notification calls until `ConvaiManager.IsInitialized` is `true`                                                                |
-| Console shows `"[NotificationHandler] No notification registered in the notification group for id: {id}"`                             | Notification `Id` in script does not match any asset in `SONotificationGroup`           | Check the `Id` field on the `SONotification` asset and update the group                                                               |
-| Console shows `"[NotificationHandler] UINotificationController is null, cannot display notification."`                                | Controller reference lost or not found in scene                                         | Verify `NotificationSystem.prefab` is in the scene                                                                                    |
-| Notification requested but not shown; no console errors                                                                               | 10-second cooldown active for this notification                                         | Wait 10 seconds or use a different notification asset with a unique `Id`                                                              |
-| Notifications disabled after Settings Panel interaction                                                                               | User toggled **Notifications** off                                                      | Re-enable via Settings Panel or `IConvaiRuntimeSettingsService.Apply(new ConvaiRuntimeSettingsPatch { NotificationsEnabled = true })` |
-| 4th notification not showing immediately                                                                                              | Max 3 concurrent — 4th is queued                                                        | Expected behavior — it displays as soon as an active notification dismisses                                                           |
+| Symptom | Cause | Fix and verification |
+| --- | --- | --- |
+| No alert appears | Notifications are disabled by default or a saved override | Enable Notifications and request the alert again |
+| An automatic error does not repeat immediately | The bridge's 10-second cooldown applies | Wait for the cooldown and reproduce the error |
+| A direct custom alert repeats | The raw service does not deduplicate | Gate the calling event or add your own cooldown; reproduce it twice |
+| An alert starts later than expected | A notification animation cycle is in progress | Wait through the cycle and confirm the queued alert appears |
 
 ## Next steps
-
-With the notification system in place, you can surface connection errors, scenario events, and custom alerts without interrupting the AI conversation. To give users control over whether notifications appear, wire the Settings Panel. To restyle the notification visuals, see Customizing UI Components.
-
-{% content-ref url="../settings-panel/" %}
-[settings-panel](../settings-panel/)
-{% endcontent-ref %}
-
-{% content-ref url="../customizing-ui-components.md" %}
-[Customizing UI components](../customizing-ui-components.md)
-{% endcontent-ref %}
 
 {% content-ref url="notification-system-reference.md" %}
 [Notification system reference](notification-system-reference.md)
