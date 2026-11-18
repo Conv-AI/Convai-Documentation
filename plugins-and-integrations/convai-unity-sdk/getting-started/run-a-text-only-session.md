@@ -18,7 +18,6 @@ On `ConvaiRoomManager`, expand **Listening > Microphone** and turn off **Allow M
 
 This policy is stronger than muting: it prevents the SDK from opening the microphone. Muting an allowed microphone can leave its capture device active.
 
-<figure><img src="../../../.gitbook/assets/unity-room-listening.png" alt="Listening controls showing the Allow Microphone toggle and microphone processing options"><figcaption><p>Turn off Allow Microphone for text input. The image shows an existing sample with microphone access enabled.</p></figcaption></figure>
 {% endstep %}
 
 {% step %}

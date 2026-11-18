@@ -28,7 +28,7 @@ This lets a property change request group participation without forcing each mem
 
 ## Initial context and resets
 
-An ordinary multi-character connection includes the active character's enabled initial context. Group connection uses empty shared initial text, then seeds each member's kept opening context separately. Runtime group updates preserve the relevant member's kept opening context unless removal is requested.
+An ordinary multi-character connection sends the active character's saved opening text. A group connects with empty shared text, then sends each member its own nonblank opening text. Turning off **Initial Dynamic Info** leaves the saved text available for that first send. The toggle controls whether later updates retain it. To stop sending a member’s opening text, clear its **Text** field while the field is visible.
 
 In 5.0, `Reset()` followed by newer tracked changes preserves the pending reset. The client attempts the reset before the newer batch. Connection and routing holds can postpone this sequence; local refusal can drop a submission. `Reset(removeStatic: true)` requests removal of static initial context as well as runtime context. It does not guarantee erasure of facts from conversation history or dashboard configuration.
 

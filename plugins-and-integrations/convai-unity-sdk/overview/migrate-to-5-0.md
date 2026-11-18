@@ -39,6 +39,8 @@ Re-enabling a character after a failed or manually closed connection leaves the 
 
 `ConvaiPlayer.PlayerId` identifies the local player for ownership and attribution. Use an end-user identity for memory and read the identity confirmed by the service. See [Long-term memory](../features/long-term-memory/README.md).
 
+If your 4.x code used `Characters.SetMemoryEnabledAsync`, check each character's end-user ID requirement before upgrading. That setter could reset **Optional** to **Required**. In 5.0, use the Platform client's memory settings methods and read back the saved values. [Configure memory for a character](../features/long-term-memory/configure-memory-for-a-character.md)
+
 ## Replace transcript integrations
 
 Use `manager.Transcripts.GetEntries()` for history. Key each rendered row by entry ID and replace its text with the newest revision. A subscription can deliver several changes together. Use `SubscribeFinalized` for completed entries and `SubscribeCaptions` for live captions. A finalized entry can still be corrected. A final transcript is also distinct from the end of audio playback.

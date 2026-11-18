@@ -23,6 +23,8 @@ Resolve blocked rig/character checks before **Set Up This Character**. Setup cre
 
 Use **Create Animation Set…** for a clip library, then inspect proposals before building. **Measure Clips** updates locomotion measurements. Review **Overlay Mask**, **Talk**, **Clip Measurements**, and action findings after content changes. See [Build an animation set](build-an-animation-set.md).
 
+<figure><img src="../../../../.gitbook/assets/unity-body-animation-editor.png" alt="Body Animation Editor in Content mode for a sample character, showing the Idle, Talk, Listen and Think pools and the Locomotion Coverage grid"><figcaption><p>Body Animation Editor Content mode with animation pools and locomotion coverage.</p></figcaption></figure>
+
 ## Feel and ownership
 
 Feel edits a config. If no config exists, use **Give This Character Its Own Settings** in the controller Inspector first. Editing shipped assets through supported character controls uses the ownership flow; a shared project config may affect multiple characters. Read the ownership notice and use **Make Unique For This Character** when only this character should change.
@@ -34,8 +36,6 @@ Archetypes write expression, calmness, and ambient interval values. They do not 
 In Play mode, inspect layer weights, selected content, and **Last Action Request**. An accepted request can still be visually weak; the display and warning identify Action Strength, Target Weight, multiplier, or curve concerns. A no-match request lists the set's available actions.
 
 Use **Diagnostic Detail** to increase trace detail only for the investigation. Compare reported state with actual character motion and navigation; this window does not validate backend behavior or a target device build.
-
-<figure><img src="../../../../.gitbook/assets/unity-body-animation-editor.png" alt="Body Animation Editor in Content mode for a sample character, showing the Idle, Talk, Listen and Think pools and the Locomotion Coverage grid"><figcaption><p>Body Animation Editor Content mode with animation pools and locomotion coverage.</p></figcaption></figure>
 
 ## Next steps
 

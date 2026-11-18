@@ -6,7 +6,7 @@ description: >-
 last_reviewed: "5.0.0-pre.1"
 ---
 
-Initial Dynamic Info supplies fixed scenario facts when a character connects. Enable it on the character to include its text in the connection flow; runtime Dynamic Context handles facts that change afterward.
+Initial Dynamic Info supplies saved scenario facts when a character connects. Use the character's toggle to edit the text and choose whether later context updates retain it. Use runtime Dynamic Context for facts that change during the conversation.
 
 Use this mechanism for facts that are true before the conversation begins and will not change during the session: the facility name, the character's role, the training scenario type, or the starting conditions of a drill. Use runtime Dynamic Context (`ConvaiDynamicContextRelay` or `IConvaiDynamicContext`) for everything that evolves as the session progresses.
 
@@ -42,7 +42,7 @@ Initial context and runtime Dynamic Context are complementary — not alternativ
 | **Suitable for** | Facility name, scenario type, character role | Trainee location, equipment state, hazard level |
 | **Modifiable at runtime** | No — sent once per connection | Yes — via `SetState`, `AddEvent`, `Reset` |
 
-In an ordinary multi-character room, the connection request includes the active character's initial text. Group conversations use an empty shared initial text and seed each member separately. Do not assume one shared connection request sends every character's private opening text. See [Context in multi-character and group rooms](multi-character-and-group-rooms.md).
+In an ordinary multi-character room, the connection request includes the active character's saved text. A group opens with empty shared text, then the SDK sends each member its own nonblank text. The retention setting controls how later updates treat those opening facts. See [Context in multi-character and group rooms](multi-character-and-group-rooms.md).
 
 ```csharp
 // These complement the initial context — not replace it

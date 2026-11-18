@@ -31,6 +31,8 @@ A character with no `ConvaiEmotionProfile` assigned shows a **No personality ass
 
 ***
 
+<figure><img src="../../../../.gitbook/assets/unity-emotion-editor.png" alt="Emotion Editor in Feel mode with a sample character selected under CHARACTERS, Character Type set to Warm, and the Personality and Resting Mood sections expanded"><figcaption><p>Emotion Editor Feel mode for a sample character.</p></figcaption></figure>
+
 ## Emotion Timeline window
 
 The **Open Emotion Timeline** button on the **Live** tab opens `ConvaiEmotionTimelineWindow` (window title **Emotion Timeline**) already watching the character selected in the Emotion editor window. It has no menu item of its own — the timeline only makes sense once a character is already picked, which the Live tab has already done.
@@ -51,8 +53,6 @@ The timeline is editor-only tooling. It has no runtime API and changes nothing a
 {% endhint %}
 
 ***
-
-<figure><img src="../../../../.gitbook/assets/unity-emotion-editor.png" alt="Emotion Editor in Feel mode with a sample character selected under CHARACTERS, Character Type set to Warm, and the Personality and Resting Mood sections expanded"><figcaption><p>Emotion Editor Feel mode for a sample character.</p></figcaption></figure>
 
 ## Next steps
 
