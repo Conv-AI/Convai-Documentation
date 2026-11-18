@@ -1,18 +1,20 @@
 ---
 title: Vision in WebGL
 description: Choose the image a browser build publishes, configure a scene or webcam source, and verify capture permissions and vision responses after deployment.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 A WebGL build can publish a scene-camera texture, webcam texture, game view, or an application-owned page canvas. Choose the intended picture before building; Editor Play mode always previews the frame source and cannot prove the browser selected the same image.
+
+For a physical webcam, request `Application.RequestUserAuthorization(UserAuthorization.WebCam)` in your WebGL app and wait for the result before starting the source. Serve the build over HTTPS or localhost. An embedded player also needs camera access delegated by its host page. [WebGL deployment](../../platform-guides/webgl.md) covers hosting permissions and fallback behavior.
 
 ## Choose the browser picture
 
 {% stepper %}
 {% step %}
-### Configure a Video room
+### Enable vision in the room
 
-Use an effective Video connection and a `ConvaiVisionPublisher`. Group conversation rooms do not publish vision. Keep the publisher track name aligned with the room's **Video Track Name**.
+Set **Vision** to **On** under **Connection** and use a `ConvaiVisionPublisher`. The room uses the registered publisher's track name. Group conversation uses audio only.
 {% endstep %}
 {% step %}
 ### Select WebGL Publishes

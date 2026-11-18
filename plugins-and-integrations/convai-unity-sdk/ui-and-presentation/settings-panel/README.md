@@ -1,6 +1,6 @@
 ---
 title: Settings panel
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 description: >-
   Add a runtime settings panel so users can adjust microphone, transcript
   visibility, and notification preferences, or access the same settings
@@ -94,7 +94,10 @@ When the panel opens correctly, the microphone dropdown is populated, the player
 Access the panel controller through `ConvaiManager`:
 
 ```csharp
-ConvaiManager.ActiveManager.TryGetSettingsPanelController(out var controller);
+// Inside a UI callback with using Convai.Runtime.Components
+var manager = ConvaiManager.ActiveManager;
+if (manager != null && manager.TryGetSettingsPanelController(out var controller))
+    controller.Open();
 ```
 
 | Member                                 | Description                                                               |
@@ -109,7 +112,7 @@ ConvaiManager.ActiveManager.TryGetSettingsPanelController(out var controller);
 
 Both shipped chat prefabs include `ConvaiSettingsClickArea`. Clicking that graphic calls `IConvaiSettingsPanelController.Open()`. Keep the settings panel in the scene so that request has a view to display.
 
-`OpenSettingsKey` defaults to `F10`, but a setting does not poll input by itself. The sample's `ConvaiSampleInteractionController` handles that shortcut. A custom scene must include the sample controller or supply its own input binding.
+The sample’s `ConvaiSampleInteractionController` binds `F10` to open settings by default. A custom scene must include the sample controller or supply its own input binding.
 
 ## Test the selected microphone
 
@@ -119,7 +122,7 @@ In a WebGL player it reports `Microphone test not supported on WebGL`. A session
 
 ## Defaults and saved overrides
 
-Project runtime defaults enable transcript presentation and disable notifications. The microphone selection starts with the system default. Character audio volume is a project setting, not one of the four fields in the runtime settings snapshot or panel patch.
+Project runtime defaults enable transcript presentation and disable notifications. The microphone selection starts with the system default. Use `ConvaiAudioOutput.Volume` to control a character’s output level.
 
 The service stores changed preferences as overrides in `PlayerPrefs` under `convai.runtime.settings.v1.*`. `ResetToDefaults()` clears those overrides and reads project defaults again. See [Runtime settings API](runtime-settings-api.md) for the four supported fields and change events.
 
@@ -130,7 +133,7 @@ The service stores changed preferences as overrides in `PlayerPrefs` under `conv
 | Panel does not fade in            | `CanvasFader` missing from the prefab               | `SettingsPanel.Awake()` calls `EnsureFadeComponents()`, which adds a missing `CanvasGroup` automatically but only looks up an existing `CanvasFader` — it does not add one. If `CanvasFader` is missing, the panel falls back to an instant, non-animated show/hide; add the component to a project-owned prefab if an animated transition is required. |
 | Microphone dropdown is empty      | No microphone devices detected or permission denied | Verify device is connected; check Player Settings for microphone permissions on mobile platforms                                        |
 | Conversation mode dropdown hidden | No room service available                           | Expected — the dropdown only appears while `IConvaiRoomConnectionService` is available                                                  |
-| Settings not persisted after save | Settings service unavailable at save time           | Ensure `ConvaiManager` is initialized before the panel opens; check `ConvaiManager.IsBootstrapped`                                      |
+| Settings not persisted after save | Settings service unavailable at save time           | Ensure `ConvaiManager` is initialized before the panel opens; check `ConvaiManager.IsInitialized`                                      |
 
 ## Next steps
 

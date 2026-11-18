@@ -1,7 +1,7 @@
 ---
 title: Gaze profile reference
 description: Reference for every setting group and field in the Convai Gaze profile asset, including defaults and value ranges for each entry.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 `ConvaiGazeProfile` (`Convai/Embodiment/Gaze Profile`) is the single authoring asset for the Convai Gaze system: targeting, per-state policies, head/torso solving, the oculomotor eye model, blinking, body turns, idle life, emotion modulation, conversation attention, and diagnostics. The asset Inspector uses **Personality**, **Who It Looks At**, **While Walking**, **Head & Body**, **Eyes & Blinking**, **Reactions**, and **Advanced** sections. The tables below keep the existing API groups and show the displayed label beside every public property. Public property names stay the same regardless of the serialized block that stores each value.
@@ -262,7 +262,6 @@ How the character attends whoever else currently holds the floor while it is not
 | `ConversationReactionSpread` |**How Much Reactions Vary**| `float` | `0.35` | `0`–`1` | How wide the reaction-delay draw spreads around the median. `0` makes every listener react at the same instant. |
 | `ConversationAttentionDecaySeconds` |**Attention Fade Time**| `float` | `6` | `1`–`30` | How long a listener's attention keeps fading toward whoever it last attended before drifting to idle life. Not a timeout — the fade is continuous. |
 | `ConversationReactionMinSeparationSeconds` |**Stagger Between Listeners**| `float` | `0.35` | `0`–`0.5` | Shortest gap enforced between two listeners' reactions to the same speech onset, so the room never turns as one. |
-| `SpeakerAttentionHoldSeconds` |**Keeps The Floor For**| `float` | `2.5` | `0`–`8` | How long a speaker keeps the floor after they stop talking, carrying a listener's look across the pauses in a turn. |
 | `SpeakerAttentionAversionStrength` |**How Much Its Gaze Wanders**| `float` | `0.2` | `0`–`1` | How much a listener lets its gaze wander while attending. `0` is an unbroken stare. |
 | `SpeakerAttentionInterruptionSeconds` |**Time To Take The Floor**| `float` | `0.6` | `0.05`–`5` | How long somebody else has to keep talking to take the floor from whoever holds it. Below this it is an interjection and the room's heads stay put. |
 | `EnableAudienceChecks` |**Glances At The Addressee**| `bool` | `true` | — | Also allow a rarer glance at the person being spoken to in the middle of a turn, in addition to the end-of-turn look. |
@@ -286,7 +285,7 @@ What this character's gaze writes to the console.
 
 | Public property | Inspector label | Type | Default | Description |
 |---|---|---|---|---|
-| `TraceVerbosity` |**Diagnostic Detail**| `GazeTraceVerbosity` | `Off` | Diagnostics verbosity for this character's gaze trace. `Off` is the shipping default — warnings and errors are always logged regardless. Values: `Off`, `State`, `Detail`, `Firehose`. |
+| `TraceVerbosity` |**Diagnostic Detail**| `TraceVerbosity` | `Off` | Diagnostics verbosity for this character's gaze trace. `Off` is the shipping default — warnings and errors are always logged regardless. Values: `Off`, `State`, `Detail`, `Firehose`. |
 | `FirehoseHz` |**Per-Frame Report Rate**| `float` | `10` | Range `1`–`60`. Maximum firehose dump rate, only relevant at `Firehose` verbosity. |
 
 ## Related reference

@@ -1,10 +1,10 @@
 ---
 title: Gaze targets and providers
 description: Mark scene objects as gaze candidates, add advanced provider components, and register a custom gaze target provider from code.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Mark `GameObject`s as gaze candidates, add the eight advanced provider components for richer targeting behavior, and register a custom provider from code. Use this page after adding `ConvaiGazeController` to a character, when you want it to notice specific scene objects, other characters, or the player in a non-default way.
+Mark scene objects as gaze candidates, configure advanced gaze components, or register a custom provider from code. Use this page after adding `ConvaiGazeController` to a character, when you want it to notice specific scene objects, other characters, or the player in a non-default way.
 
 ## Prerequisites
 
@@ -23,19 +23,15 @@ Add `ConvaiGazeTarget` (`Convai/Gaze/Target`) to any `GameObject` to make it a g
 | **Fully interesting under** (`fullRelevanceDistance`) | `3` (meters) | Distance below which relevance is at its maximum. |
 | **Aim at** (`aimOffset`) | `(0, 0, 0)` | Local-space offset from the transform to the exact point the eyes aim at, such as the top of a painting. |
 
-{% hint style="info" %}
-`ConvaiGazeTarget` is the general-purpose marker. Use `WorldObjectGazeTargetProvider`, described below, only when the object already carries `ConvaiObjectMetadata`.
-{% endhint %}
-
 ## Add advanced gaze providers
 
-The Gaze Editor's **Setup > Optional extras** checkboxes add or enable six optional capabilities. **Targets > Worth looking at > Mark the selected object** adds a scene target. Player Anchor and World Object Target are additional provider types, not entries in that six-capability list.
+The Gaze Editor's **Setup > Optional extras** checkboxes add or enable six optional capabilities. **Targets > Worth looking at > Mark the selected object** adds a scene target. Player Anchor is a separate provider.
 
 The advanced providers live under `Convai/Gaze/Advanced/` in the Add Component menu. Each is opt-in — adding `ConvaiGazeController` gives a character eyes, a head, idle life, blinking, body turns, and conversational rhythm with no further setup; these components add further capabilities on top.
 
 ### Character Target — mutual gaze between characters
 
-`CharacterGazeTargetProvider` (`Convai/Gaze/Advanced/Character Target`) makes a character look at, and be looked at by, other Convai characters. Add one component per participating character; identity, dialogue state, and the eye-line point all come from the character's embodiment context.
+`CharacterGazeTargetProvider` (`Convai/Gaze/Advanced/Character Target`) changes the defaults for looking at other characters and being visible to them. Characters running Gaze already participate in mutual gaze. Add **Character Target** to change those settings or to expose a character without a Gaze controller as a target.
 
 | Field | Default | Purpose |
 |---|---|---|
@@ -90,7 +86,7 @@ The advanced providers live under `Convai/Gaze/Advanced/` in the Add Component m
 
 ### Referential Glances — glance at mentioned objects
 
-`GazeReferentialGlances` (`Convai/Gaze/Advanced/Referential Glances`) makes the character glance at a registered world object when its own spoken line mentions it — "take a look at the painting". It subscribes to `ConvaiCharacter.OnSpokenLine` and matches registered `ConvaiObjectMetadata.ObjectName` values, not plain `ConvaiGazeTarget` names. For a logical group it resolves a nearby physical member's interaction point. Call `NotifyUtterance(string)` to supply a line from another integration; the glance still uses the public `GlanceAt` API.
+`GazeReferentialGlances` (`Convai/Gaze/Advanced/Referential Glances`) makes the character glance at a registered world object when its own spoken line mentions it — "take a look at the painting". It subscribes to `ConvaiCharacter.OnSpokenLine` and matches registered `ConvaiWorldObject.ObjectName` values, not plain `ConvaiGazeTarget` names. For a logical group it resolves a nearby physical member's interaction point. Call `NotifyUtterance(string)` to supply a line from another integration; the glance still uses the public `GlanceAt` API.
 
 | Field | Default | Purpose |
 |---|---|---|
@@ -106,7 +102,7 @@ The advanced providers live under `Convai/Gaze/Advanced/` in the Add Component m
 | Field | Default | Purpose |
 |---|---|---|
 | `Priority` | `10` | Static priority tier compared across providers. |
-| `Explicit Anchor` | none | When empty, resolves `Camera.main`, then the first eligible enabled Game-view camera. |
+| `Explicit Anchor` | none | When empty, resolves the manager's conversation view camera, `Camera.main`, the first enabled Game camera, then the `ConvaiPlayer` transform. |
 | `Eye Line Offset` | `1.6` (meters) | Vertical lift applied to explicit non-camera anchors. |
 | `Aim Mode` | `Auto` | `GazeAnchorAimMode` — where on the anchor gaze aims. |
 | `Face Presence` | `Auto` | `GazeAnchorFacePresence` — whether the character treats the anchor as a face and looks around it (its eyes, its mouth) instead of aiming exactly at it. `Auto` decides from the anchor: one assigned by hand is treated as a face, while a camera the SDK resolved on its own is a viewpoint and is aimed at exactly. `Face` always treats the anchor as a face — correct in VR, where the camera sits between the player's eyes. `Point` always aims exactly at the anchor. |
@@ -120,7 +116,7 @@ The advanced providers live under `Convai/Gaze/Advanced/` in the Add Component m
 
 ### Player Attention Sensor — know when the player is looking back
 
-`PlayerAttentionSensor` (`Convai/Gaze/Advanced/Player Attention Sensor`) tells the character whether the player is looking at it. The default signal is the main camera's forward ray; XR eye tracking plugs in through `IPlayerGazeRaySource` (see [Supply a custom player gaze ray for XR](#supply-a-custom-player-gaze-ray-for-xr)) without any XR package dependency. The smoothed signal publishes to the Convai dynamic context key `player_attention` (`looking_at_me` / `away`, edge-triggered).
+`PlayerAttentionSensor` (`Convai/Gaze/Advanced/Player Attention Sensor`) tells the character whether the player is looking at it. The default signal is the resolved player view's forward ray. XR eye tracking plugs in through `IPlayerGazeRaySource` (see [Supply a custom player gaze ray for XR](#supply-a-custom-player-gaze-ray-for-xr)) without any XR package dependency. The smoothed signal publishes to the Convai dynamic context key `player_attention` (`looking_at_me` / `away`, edge-triggered).
 
 | Field | Default | Purpose |
 |---|---|---|
@@ -132,22 +128,12 @@ The advanced providers live under `Convai/Gaze/Advanced/` in the Add Component m
 | `Rise Seconds` / `Fall Seconds` | `0.5` / `1.5` | Time constants for the attention signal to build and decay. |
 | `Enter Threshold` / `Exit Threshold` | `0.6` / `0.35` | Hysteresis thresholds for publishing `looking_at_me` / `away`. |
 | `Publish To Context` | `true` | Publish the looking/away state to the Convai dynamic context. |
-| `Gaze Ray Source Component` | none | Optional component implementing `IPlayerGazeRaySource`. Leave empty to aim from the player camera. |
 
-### World Object Target — mark authored world objects
+### Gaze targets on world objects
 
-`WorldObjectGazeTargetProvider` (`Convai/Gaze/Advanced/World Object Target`) marks an authored Convai world object — one that already carries `ConvaiObjectMetadata` (`RequireComponent`) — as an ambient gaze candidate. Its candidate aims at renderer bounds rather than assuming the pivot is the visible center. Both the member's and its logical group's **Gaze Enabled** values must be on; the field defaults to on. The candidate uses the logical group's object name. The Dynamic Context Bridge can submit that name only if the runtime action configuration contains it.
+Add `ConvaiGazeTarget` to a `ConvaiWorldObject` to make it a candidate. The object and its logical group must both have **Gaze Enabled** on. The candidate uses the logical object's name and, when **Aim at** has no offset, aims at the object's visible bounds.
 
-| Field | Default | Purpose |
-|---|---|---|
-| `Priority` | `5` | Priority tier, kept below the player anchor (`10`) so the player wins during conversation. |
-| **How interesting** (`baseRelevance`) | `0.75` | Relevance while inside **Fully interesting under**; range `0`–`1`. |
-| **Noticed within** (`maxDistance`) | `10` (meters) | Distance beyond which the object stops being a candidate. |
-| **Fully interesting under** (`fullRelevanceDistance`) | `3` (meters) | Distance below which relevance is at its maximum. |
-
-The [Scene Auto Tagger](../../features/scene-metadata/scene-auto-tagger.md) **Gaze targets** option adds this provider and enables **Gaze Enabled** on tagged objects.
-
-Provider component Inspectors use readable titles: **Looks At Other Characters**, **Notices When You Look**, **Notices What You Look At**, **Looks At What It Mentions**, **Talks About What It Sees**, and **Pupil Response**. Their Add Component menu names remain the ones listed above.
+The [Scene Auto Tagger](../../features/scene-metadata/scene-auto-tagger.md) can add `ConvaiGazeTarget` while applying tags. If a scene still has the old World Object Target component, replace it with **Convai > Gaze > Target**.
 
 ## Extend targeting from code
 
@@ -156,6 +142,7 @@ Provider component Inspectors use readable titles: **Looks At Other Characters**
 Implement `IGazeTargetProvider` and call `ConvaiGazeController.RegisterTargetProvider` for candidates that do not come from a `MonoBehaviour` on the character hierarchy — a systems-level source, a netcode-synced target, or a test double.
 
 ```csharp
+using System.Collections.Generic;
 using Convai.Domain.Embodiment.Semantics;
 using Convai.Modules.Gaze.Components;
 using Convai.Modules.Gaze.Providers;
@@ -167,19 +154,17 @@ public sealed class ScannerBeaconProvider : IGazeTargetProvider
 
     public ScannerBeaconProvider(Transform beacon) => _beacon = beacon;
 
-    public bool TryGetCandidate(Transform characterRoot, out GazeTargetCandidate candidate)
+    public void CollectCandidates(in GazeObserver observer, List<GazeTargetCandidate> into)
     {
-        candidate = default;
-        if (_beacon == null) return false;
+        if (_beacon == null) return;
 
-        candidate = new GazeTargetCandidate(
+        into.Add(new GazeTargetCandidate(
             GazeTargetKind.WorldObject,
             priority: 6,
             relevance: 0.8f,
             target: _beacon,
             worldPoint: _beacon.position,
-            debugName: "Scanner Beacon");
-        return true;
+            debugName: observer.WantsNames ? "Scanner Beacon" : null));
     }
 }
 
@@ -209,14 +194,14 @@ public sealed class ScannerBeaconRegistrar : MonoBehaviour
 }
 ```
 
-`TryGetCandidate` runs every cognition tick, so keep implementations cheap. Returning `false` (or a relevance of `0`) removes the candidate for that frame; the arbiter handles acquisition and release smoothing. Call `UnregisterTargetProvider` when the provider is no longer valid.
+`CollectCandidates` runs every cognition tick. Append zero or more candidates to the supplied list. Leave the list untouched when you have no candidate, and use `WantsNames` before constructing debug labels. Call `UnregisterTargetProvider` when the provider is no longer valid.
 
 ### Supply a custom player gaze ray for XR
 
-`IPlayerGazeRaySource` supplies the world-space ray the player is currently looking along, so `PlayerAttentionSensor` and `GazeJointAttention` can tell whether the player is looking at something without a hard XR package dependency in the SDK. Implement it over an OpenXR or vendor eye-tracking adapter and register it per component:
+`IPlayerGazeRaySource` supplies the world-space ray the player is currently looking along, so `PlayerAttentionSensor` and `GazeJointAttention` can tell whether the player is looking at something without a hard XR package dependency in the SDK. Implement it over an OpenXR or vendor eye-tracking adapter and register it once on the character's Gaze controller. The example leaves the eye-tracking call for your XR adapter.
 
 ```csharp
-using Convai.Domain.Embodiment.Interfaces;
+using Convai.Modules.Gaze.Components;
 using Convai.Modules.Gaze.Providers;
 using UnityEngine;
 
@@ -233,29 +218,29 @@ public sealed class OpenXrEyeTrackingSource : IPlayerGazeRaySource
 // Attached to the character:
 public sealed class XrGazeRaySetup : MonoBehaviour
 {
-    private PlayerAttentionSensor _sensor;
+    private ConvaiGazeController _gaze;
     private OpenXrEyeTrackingSource _source;
 
     private void OnEnable()
     {
-        _sensor = GetComponentInChildren<PlayerAttentionSensor>();
-        if (_sensor == null) return;
+        _gaze = GetComponentInChildren<ConvaiGazeController>();
+        if (_gaze == null) return;
         _source = new OpenXrEyeTrackingSource();
-        _sensor.SetGazeRaySource(_source);
+        _gaze.SetGazeRaySource(_source);
     }
 
     private void OnDisable()
     {
-        if (_sensor != null) _sensor.SetGazeRaySource(null);
+        if (_gaze != null) _gaze.SetGazeRaySource(null);
         _source = null;
-        _sensor = null;
+        _gaze = null;
     }
 }
 ```
 
-This example owns the sensor's gaze-ray override while enabled; use only one override owner per sensor. Disabling it restores the default source.
+The Player Attention and Joint Attention components read the same source from the character's Gaze controller. Disabling this setup resets the controller to its default source.
 
-Return `false` when no ray is available this frame — tracking lost, headset off — so the consumer falls back to the camera ray. The source is registered per component instance, not process-wide, so one scene's adapter never silently drives characters in another scene.
+Return `false` when no ray is available this frame — tracking lost, headset off — so the consumer falls back to the camera ray. Register a source on each character that needs it.
 
 ## How target movement is filtered
 
@@ -281,7 +266,7 @@ Enter Play mode and open `Convai > Gaze Editor` while the character is selected.
 
 **Symptom:** no console warning, but the behavior never fires.
 
-**Cause:** dependency handling differs. Joint Attention logs and disables itself if its context or Gaze controller is missing. Pupil Response logs and disables itself for a missing context; an empty shader-property name logs but leaves it enabled. Dynamic Context Bridge and Player Attention Sensor can remain enabled but do nothing without a context; Referential Glances can remain enabled without a controller. Character Target does not require a context to publish itself.
+**Cause:** dependency handling differs. Joint Attention logs and disables itself if its context or Gaze controller is missing. Pupil Response logs and disables itself for a missing context; an empty shader-property name logs but leaves it enabled. Dynamic Context Bridge and Player Attention Sensor can remain enabled but do nothing without a context; Referential Glances can remain enabled without a controller. Character Target resolves the owning character using its embodiment context.
 
 **Fix:** check the Console for a `component is inert` warning naming the missing dependency, and confirm the component sits under the same character hierarchy as `ConvaiGazeController`.
 

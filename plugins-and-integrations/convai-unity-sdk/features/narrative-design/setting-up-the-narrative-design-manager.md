@@ -1,7 +1,7 @@
 ---
 title: Configure the narrative design manager
 description: Sync a character’s narrative sections, preserve local event bindings, and connect section updates to scene actions through the Unity Inspector.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Add `ConvaiNarrativeDesignManager` to the character GameObject to translate section updates into Unity Events. Keep one manager per character and assign the intended character before synchronizing.
@@ -17,7 +17,7 @@ Select the character GameObject and add **Convai > Narrative Design Manager**. T
 {% step %}
 ### Sync the selected character
 
-In **Sync Status**, click **Sync with Backend**. The button reads **Syncing...** while busy and is disabled without a character ID. The request respects the selected character reference. For a `ConvaiCharacter` with Live or a pinned release selected, that selection is preserved; qualified reads require **API Mode > Upgraded**. A bare custom character reference may use the draft authoring read.
+In **Sync Status**, click **Sync with Backend**. The button reads **Syncing...** while busy and is disabled without a character ID. The request respects the selected character reference. For a `ConvaiCharacter` with Live or a pinned release selected, that selection is preserved; the SDK reads the selected version through the Character API. A bare custom character reference may use the draft authoring read.
 
 Changing the assigned character triggers a sync. If another character ID replaces one with existing section bindings, **Character Change Detected** asks whether to clear them with **Yes, Clear and Switch**. Review those bindings before accepting.
 {% endstep %}

@@ -1,7 +1,7 @@
 ---
 title: How gaze works
 description: Understand how the Gaze module chooses a target, shares the look across eyes, head, and body, and reacts to the conversation's dialogue state.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 `ConvaiGazeController` decides what a character looks at and how committed the look is, then articulates it across the body in a fixed order so the eyes, head, and torso never disagree about the target. This page explains the pipeline behind that decision: how a target is chosen, how the character's [dialogue state](../../core-concepts/dialogue-state.md) changes how strongly it commits, and why an eye movement and a body turn feel like one gesture instead of two separate systems.
@@ -77,15 +77,15 @@ Every gaze target is smoothed before the movement detector evaluates it, so ordi
 
 ### Personalities author their own values
 
-The editor's **Personality > Character Type** archetypes — `Default`, `Confident`, `Warm`, `Attentive`, `Shy`, `Stoic` — write values into the assigned `ConvaiGazeProfile` asset, including the Conversation attention group, alongside every other field that carries feel. `Confident` reacts more slowly and holds its attention on a speaker longer than `Warm` does, for example, which is part of what makes the two presets read differently in a group scene.
+The editor's **Personality > Character Type** presets (**Composed**, **Warm**, **Energetic**, and **Reserved**) write tuning values into the assigned `ConvaiGazeProfile`. Select **Reset to SDK defaults** to restore the SDK's original settings.
 
-In Play mode, the `ConvaiGazeController` Inspector's Live section, the Gaze editor window, and the `Convai.DiagnoseGaze` assistant tool each report one line naming who the character is watching, or which gate — distance, angle, or line of sight — turned a speaker away.
+In Play mode, the `ConvaiGazeController` Inspector's Live section, the Gaze editor window, and the `Convai_DiagnoseGaze` assistant tool each report one line naming who the character is watching, or which gate — distance, angle, or line of sight — turned a speaker away.
 
 ## Gaze driven by a group conversation
 
-A `ConvaiGroupConversation` with **Drive Gaze** enabled (the default) adds its own internal gaze coordinator. During a line, listeners face the speaker and the speaker faces the member it answers or addresses. Each held look is a scripted request at priority `1`, above default `GazeAt` requests and automatic conversation attention. Looks release when the line ends, the conversation lulls, or it stops.
+When **Drive Gaze** is enabled on `ConvaiGroupConversation`, listeners follow the speaker they can hear. The speaker can look at the member it answers or addresses. Explicit scripted requests can take precedence while they are active. When the line ends or the conversation stops, the group releases its look.
 
-Keep head-height colliders on participating characters in **Spatial Query Layers** so visibility checks can recognize them. Configure the group through [Multi-character sessions](../../features/multi-character-sessions/README.md); do not add the internal coordinator by hand.
+Keep head-height colliders on participants in **Spatial Query Layers** so visibility checks can recognize them. See [Group conversation](../../features/group-conversation/README.md).
 
 ## Next steps
 

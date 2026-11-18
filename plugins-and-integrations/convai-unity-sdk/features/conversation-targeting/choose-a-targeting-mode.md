@@ -1,7 +1,7 @@
 ---
 title: Choose a targeting mode
 description: Pick the conversation targeting mode that matches your camera and control scheme so the right character responds to the player.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Set `ConversationTargetingMode` on `ConvaiManager` so the SDK picks the right character in a room with more than one — the mode that fits a first-person view is not the one that fits a top-down camera or a dialogue menu. Use this page when you have two or more `ConvaiCharacter` components in a scene and need to decide how the player addresses one of them.
@@ -18,7 +18,7 @@ Set `ConversationTargetingMode` on `ConvaiManager` so the SDK picks the right ch
 
 {% tabs %}
 {% tab title="Look At (default)" %}
-`LookAt` addresses the character nearest the centre of the player's view. It scores every eligible character by the angle from the view direction, with distance as a tiebreak, so it works identically on mouse, gamepad, touch screen, and head-mounted display — it reads the view transform, not the input device. Assign **Player Camera** for an XR head camera or a specific player view. The fallback order is **Player Camera**, the camera tagged `MainCamera`, then the `ConvaiPlayer` transform.
+`LookAt` addresses the character nearest the centre of the player's view. It scores every eligible character by the angle from the view direction, with distance as a tiebreak, so it works identically on mouse, gamepad, touch screen, and head-mounted display — it reads the view transform, not the input device. Assign **Player Camera** for an XR head camera or a specific player view. The fallback order is **Player Camera**, the camera tagged `MainCamera`, the first eligible enabled Game camera, then the `ConvaiPlayer` transform.
 
 Use `LookAt` for first-person and VR scenes, and for any scene where the camera direction is the player's gaze.
 {% endtab %}

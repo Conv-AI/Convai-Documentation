@@ -1,7 +1,7 @@
 ---
 title: Dynamic context
 description: Find guides for sending live scene state to Convai characters through the dynamic context relay, scripting API, and synced world-object properties.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Dynamic context gives Convai characters real-time awareness of what is happening in a Unity scene. A character can reference a trainee's current station, an item recently picked up, or an alarm that fired, and weave that information into dialogue as it happens. Two entry points write to the same tracked state and produce identical network behavior: the `ConvaiDynamicContextRelay` Inspector component for event-driven bindings, and the `DynamicContext` property on `ConvaiCharacter` for code-driven systems.
@@ -10,7 +10,7 @@ Dynamic context gives Convai characters real-time awareness of what is happening
 
 ## Synced world-object context
 
-A `ConvaiObjectMetadata` component can expose tracked properties on a scene object. Each tracked property stages a dynamic context state for connected characters without an explicit `SetState` call in your code. Delivery follows the [multi-character and group-room rules](multi-character-and-group-rooms.md). See [Scene metadata](../scene-metadata/README.md) for how to register objects and configure tracked properties.
+A `ConvaiWorldObject` component can expose tracked properties on a scene object. Each tracked property stages a dynamic context state for connected characters without an explicit `SetState` call in your code. Delivery follows the [multi-character and group-room rules](multi-character-and-group-rooms.md). See [Scene metadata](../scene-metadata/README.md) for how to register objects and configure tracked properties.
 
 ## Next steps
 

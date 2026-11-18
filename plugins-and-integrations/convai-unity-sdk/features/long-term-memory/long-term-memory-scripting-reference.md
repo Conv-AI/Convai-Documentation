@@ -1,301 +1,61 @@
 ---
 title: Long-term memory scripting reference
 description: "Complete memory and end-user API reference: method signatures, parameters, return types, identity interfaces, and the data models each one returns."
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Complete reference for all long-term memory scripting APIs in the Convai Unity SDK. Covers the `ConvaiRestClient` entry points, every method on `MemoryService` and `EndUsersService`, the memory-related methods on `CharacterService`, identity interfaces, and all data model types.
+Use `ConvaiPlatformClient` to manage character memory settings, memory records, and end-user records from trusted administrative tooling. For live conversation identity, use the room connection options or an end-user provider.
 
-Memory records and end-user operations use `ConvaiRestClientOptions.PlatformBaseUrl`, falling back to the selected environment when unset. Memory settings use the environment base URL. The default environment is production. Use an authorized client in trusted administrative tooling; do not embed the account API key in a player build.
+## Configure the Platform client
 
-The code blocks below show API declarations and method-body fragments, not standalone scripts. Namespaces identify where each type lives.
-
-***
-
-## `ConvaiRestClient` entry points
-
-```text
-namespace Convai.RestAPI
-
-public sealed class ConvaiRestClient : IDisposable
-```
-
-The main entry point for all LTM operations. Dispose the client when the owning tool is finished; do not dispose a shared client while requests are outstanding.
-
-**Constructors:**
+Reference `Convai.PlatformApi` and `Convai.Api.Transport` from your tool’s Unity assembly definition. The `ConvaiPlatformOptions` constructor takes an absolute `Uri`, a `ConvaiCredential`, and an optional positive `TimeSpan` timeout that defaults to 30 seconds. Supply the Platform API host explicitly. `ConvaiPlatformClient` implements `IDisposable` and disposes the transport it creates.
 
 ```csharp
-// Initialize with API key string (uses default options)
-public ConvaiRestClient(string apiKey)
+using System;
+using Convai.Api.Transport;
+using Convai.PlatformApi;
 
-// Initialize with full options (custom timeout, transport)
-public ConvaiRestClient(ConvaiRestClientOptions options)
+public static class MemoryAdministration
+{
+    public static ConvaiPlatformClient Create(Uri platformBaseUri, string apiKey)
+    {
+        var options = new ConvaiPlatformOptions(platformBaseUri, ConvaiCredential.ApiKey(apiKey));
+        return new ConvaiPlatformClient(options);
+    }
+}
 ```
 
-**LTM-relevant properties:**
+Keep account API keys in trusted tooling. The credential type also supports short-lived tokens, but access to administrative operations depends on the credential and account permissions.
 
-| Property | Type | Description |
-|---|---|---|
-| `Memory` | `MemoryService` | Character-scoped long-term memory operations |
-| `EndUsers` | `EndUsersService` | End-user identity and record management |
-| `Characters` | `CharacterService` | Character configuration; legacy memory methods delegate to `Memory` |
+## Character memory settings
 
-**Usage pattern:**
+| Method | Result | Scope |
+| --- | --- | --- |
+| `GetMemorySettingsAsync(characterId, cancellationToken)` | `Task<MemorySettings>` | Reads settings from the character record. |
+| `UpdateMemorySettingsAsync(characterId, enabled, endUserIdRequirement, cancellationToken)` | `Task<MemorySettings>` | Reads the current settings and preserves values you omit. When both options are omitted, it only reads. |
 
-```csharp
-// Always use 'using' — ConvaiRestClient is IDisposable
-// Method-body fragment; client is an authorized ConvaiRestClient.
-var response = await client.Memory.ListAsync(characterId, endUserId);
-```
+`enabled` and `endUserIdRequirement` are nullable. `EndUserIdRequirement` exposes `Required` and `Optional`. `MemorySettings.IsEnabled` holds the enabled flag. `EndUserMode` holds the raw mode, and `EndUserIdRequirement` interprets it as `Optional` only when the raw mode equals `"optional"` after trimming and ignoring case. The memory-enabled setting may differ for a pinned character version. The ID requirement applies across versions.
 
-***
+## Memory record operations
 
-## `MemoryService`
+Every operation accepts an optional `CancellationToken`.
 
-```text
-namespace Convai.RestAPI.Services
+| Method | Result | Behavior |
+| --- | --- | --- |
+| `AddMemoriesAsync(characterId, endUserId, memories, metadata, cancellationToken)` | `Task<AddMemoriesResponse>` | Submits an `IReadOnlyList<string>` of facts and optional `IReadOnlyDictionary<string, object>` metadata. |
+| `ListMemoriesAsync(characterId, endUserId, page, pageSize, cancellationToken)` | `Task<MemoryListResponse>` | Defaults to page `1` and page size `50`. |
+| `GetMemoryAsync(characterId, endUserId, memoryId, cancellationToken)` | `Task<MemoryRecord>` | Reads a single record for the character and end user. |
+| `DeleteMemoryAsync(characterId, endUserId, memoryId, cancellationToken)` | `Task<MemoryDeleteResponse>` | Requests removal of one record. Check `Deleted` and read back the affected scope. |
+| `DeleteAllMemoriesAsync(characterId, endUserId, cancellationToken)` | `Task<MemoryDeleteAllResponse>` | Requests removal for the pair. The service can process the request in the background. |
 
-public sealed class MemoryService
-```
+## End-user operations
 
-Accessed via `ConvaiRestClient.Memory`. All methods are async and support cancellation.
-
-***
-
-### `GetSettingsAsync` and `UpdateSettingsAsync`
-
-```csharp
-public Task<MemorySettings> GetSettingsAsync(
-    string characterId, CancellationToken cancellationToken = default)
-
-public Task<MemorySettings> UpdateSettingsAsync(
-    string characterId,
-    bool? enabled = null,
-    EndUserIdRequirement? endUserIdRequirement = null,
-    CancellationToken cancellationToken = default)
-```
-
-The update reads current settings, preserves omitted settings, and writes only when a change was supplied. Changes apply across applications using the character. A pinned character version retains its enabled snapshot; the end-user ID requirement applies across versions. These calls do not delete memories.
-
-***
-
-### `AddAsync`
-
-Submits natural-language facts for a user–character pair. Inspect the returned records and `Event` fields; the client does not guarantee a particular deduplication result.
-
-```csharp
-public Task<AddMemoriesResponse> AddAsync(
-    string characterId,
-    string endUserId,
-    IReadOnlyList<string> memories,
-    IReadOnlyDictionary<string, object>? metadata = null,
-    CancellationToken cancellationToken = default)
-```
-
-| Parameter | Type | Description |
-|---|---|---|
-| `characterId` | `string` | Character ID from the Convai dashboard |
-| `endUserId` | `string` | Stable user identifier |
-| `memories` | `IReadOnlyList<string>` | Natural-language fact strings to store |
-| `metadata` | `IReadOnlyDictionary<string, object>?` | Optional key–value data attached to all added records |
-| `cancellationToken` | `CancellationToken` | Optional cancellation support |
-
-**Returns:** `Task<AddMemoriesResponse>`
-
-***
-
-### `ListAsync`
-
-Retrieves stored memory records for a user–character pair with page-number pagination.
-
-```csharp
-public Task<MemoryListResponse> ListAsync(
-    string characterId,
-    string endUserId,
-    int page = 1,
-    int pageSize = 50,
-    CancellationToken cancellationToken = default)
-```
-
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `characterId` | `string` | — | Character ID |
-| `endUserId` | `string` | — | User identifier |
-| `page` | `int` | `1` | Page number (1-based) |
-| `pageSize` | `int` | `50` | Records per page |
-| `cancellationToken` | `CancellationToken` | — | Optional cancellation |
-
-**Returns:** `Task<MemoryListResponse>`
-
-***
-
-### `GetAsync`
-
-Retrieves a single memory record by ID.
-
-```csharp
-public Task<MemoryRecord> GetAsync(
-    string characterId,
-    string endUserId,
-    string memoryId,
-    CancellationToken cancellationToken = default)
-```
-
-**Returns:** `Task<MemoryRecord>`
-
-***
-
-### `DeleteAsync`
-
-Removes a single memory record by ID.
-
-```csharp
-public Task<MemoryDeleteResponse> DeleteAsync(
-    string characterId,
-    string endUserId,
-    string memoryId,
-    CancellationToken cancellationToken = default)
-```
-
-**Returns:** `Task<MemoryDeleteResponse>`
-
-***
-
-### `DeleteAllAsync`
-
-{% hint style="danger" %}
-Requests deletion of all memory records for the specified user–character pair. The contract permits background processing; list records again to verify completion. Deleted records cannot be restored through this API.
-{% endhint %}
-
-```csharp
-public Task<MemoryDeleteAllResponse> DeleteAllAsync(
-    string characterId,
-    string endUserId,
-    CancellationToken cancellationToken = default)
-```
-
-**Returns:** `Task<MemoryDeleteAllResponse>`
-
-***
-
-## `EndUsersService`
-
-```text
-namespace Convai.RestAPI.Services
-
-public sealed class EndUsersService
-```
-
-Accessed via `ConvaiRestClient.EndUsers`. All methods are async and support cancellation.
-
-***
-
-### `GetAsync`
-
-Retrieves a single end-user record by identifier.
-
-```csharp
-public Task<EndUserDetails> GetAsync(
-    string endUserId,
-    CancellationToken cancellationToken = default)
-```
-
-**Returns:** `Task<EndUserDetails>`
-
-***
-
-### `ListAsync`
-
-Lists end-user records with cursor-based pagination and optional date filters.
-
-```csharp
-public Task<EndUsersListResponse> ListAsync(
-    int limit = 50,
-    string? cursor = null,
-    string? activeAfter = null,
-    string? activeBefore = null,
-    CancellationToken cancellationToken = default)
-```
-
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `limit` | `int` | `50` | Records per page |
-| `cursor` | `string?` | `null` | Pagination cursor from previous response |
-| `activeAfter` | `string?` | `null` | ISO 8601 — only return users active after this date |
-| `activeBefore` | `string?` | `null` | ISO 8601 — only return users active before this date |
-| `cancellationToken` | `CancellationToken` | — | Optional cancellation |
-
-**Returns:** `Task<EndUsersListResponse>`
-
-***
-
-### `UpdateMetadataAsync`
-
-Patches the metadata dictionary for an end-user record. Keys not included in the patch are preserved.
-
-```csharp
-public Task<EndUserUpdateResponse> UpdateMetadataAsync(
-    string endUserId,
-    IReadOnlyDictionary<string, object> metadataPatch,
-    CancellationToken cancellationToken = default)
-```
-
-**Returns:** `Task<EndUserUpdateResponse>`
-
-***
-
-### `DeleteAsync`
-
-{% hint style="danger" %}
-Deactivates the end user. Stored memories remain but can no longer be listed through that deactivated user. Request and verify memory deletion for each character before deactivation when memory removal is required.
-{% endhint %}
-
-```csharp
-public Task<EndUserDeleteResponse> DeleteAsync(
-    string endUserId,
-    CancellationToken cancellationToken = default)
-```
-
-**Returns:** `Task<EndUserDeleteResponse>`
-
-***
-
-## `CharacterService` — memory methods
-
-```text
-namespace Convai.RestAPI.Services
-
-public sealed class CharacterService
-```
-
-Accessed via `ConvaiRestClient.Characters`. These methods are marked obsolete in 5.0 and delegate to `Memory.GetSettingsAsync` and `Memory.UpdateSettingsAsync`. Use those settings methods for new code.
-
-***
-
-### `GetMemoryEnabledAsync`
-
-Returns `true` if long-term memory is enabled for the character.
-
-```csharp
-public Task<bool> GetMemoryEnabledAsync(
-    string characterId,
-    CancellationToken cancellationToken = default)
-```
-
-***
-
-### `SetMemoryEnabledAsync`
-
-Enables or disables long-term memory for the character. Affects all deployments of that character globally.
-
-```csharp
-public Task SetMemoryEnabledAsync(
-    string characterId,
-    bool enabled,
-    CancellationToken cancellationToken = default)
-```
-
-***
+| Method | Result | Behavior |
+| --- | --- | --- |
+| `GetEndUserAsync(endUserId, cancellationToken)` | `Task<EndUserDetails>` | Reads one end-user record. |
+| `ListEndUsersAsync(limit, cursor, activeAfter, activeBefore, cancellationToken)` | `Task<EndUsersListResponse>` | Defaults to limit `50` with no cursor or activity filters. |
+| `UpdateEndUserMetadataAsync(endUserId, metadataPatch, cancellationToken)` | `Task<EndUserUpdateResponse>` | Merges the supplied `IReadOnlyDictionary<string, object>`. Omitted keys remain. |
+| `DeleteEndUserAsync(endUserId, cancellationToken)` | `Task<EndUserDeleteResponse>` | Deactivates the end-user record. Delete and verify memory records separately when required. |
 
 ## Identity interfaces
 
@@ -375,7 +135,7 @@ Connection identity includes a typed `EndUserName`. The SDK copies metadata at c
 ### `MemoryRecord`
 
 ```text
-namespace Convai.RestAPI.Internal
+namespace Convai.PlatformApi
 
 public class MemoryRecord
 ```
@@ -496,22 +256,7 @@ Extends `EndUserDetails` with an additional field:
 
 ## Error handling
 
-Failed operations throw `ConvaiRestException`:
-
-```csharp
-try
-{
-    var response = await client.Memory.ListAsync(characterId, endUserId);
-}
-catch (ConvaiRestException ex)
-{
-    Debug.LogError($"LTM API error: {ex.Category}, HTTP {ex.StatusCodeInt}");
-}
-```
-
-Also inspect `Category`, `StatusCodeInt`, nullable `RequestTraceId`, and nullable `RetryAfter`. Categories include `Conflict` and `Timeout`; 422 is classified as `BadRequest`. Avoid logging private response contents. See [Troubleshoot long-term memory](troubleshooting-and-diagnostics.md) for retry and reporting guidance.
-
-***
+`ConvaiApiException` in `Convai.Api.Transport` exposes `Category`, nullable `StatusCode`, `RequestTraceId`, and `RetryAfter`. `IsRetryable` classifies transport, timeout, rate-limit, and server failures. Treat response bodies as private. After an uncertain write outcome, read the affected state before issuing the write again.
 
 ## Next steps
 

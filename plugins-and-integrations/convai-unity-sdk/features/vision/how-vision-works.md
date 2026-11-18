@@ -1,7 +1,7 @@
 ---
 title: How vision works
 description: Understand the Vision pipeline architecture, including frame sources, publish policy, the WebRTC track to Convai, and how dynamic vision context fits in.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Vision streams a live camera feed from Unity to Convai, where it is processed alongside the audio conversation. This page explains the pipeline architecture, the role of each component, and what the SDK does at runtime when Vision starts.
@@ -42,10 +42,10 @@ WebGL publishes a frame source texture through a hidden page canvas by default. 
 | **Frame Source** | A `MonoBehaviour` that captures frames and exposes them as a Y-flipped `RenderTexture`. Three built-in implementations cover Unity cameras, physical webcams, and Meta Quest passthrough. |
 | **Publish Policy** | Controls the client-side frame rate and bitrate used when streaming to Convai. Does not control which AI model or vision provider is used on the backend. |
 | **Video Track** | A WebRTC video track published to the active Convai room. Identified by the **Track Name** field on `ConvaiVisionPublisher` (default: `"unity-scene"`). |
-| **Room Connection** | Vision needs an effective Video connection. Dynamic Vision On can upgrade configured Audio; group rooms remain Audio. Audio-only requests send `vision_prompt_mode: disabled`. |
+| **Room Connection** | Set **Vision** to **On** to open a video connection. Group rooms use audio only. With vision off the request sends `vision_prompt_mode: disabled`. |
 | **Dynamic Vision Context** | An additive, backend-driven sampling mode. Instead of every published frame being processed as it arrives, Convai samples the video track into a rolling buffer and decides which frames reach the model and when. Configured through `ConvaiVisionContextMode` on `ConvaiRoomManager`. |
 
-The room also requests a video track name: a profile or inline **Video Track Name** wins, then a publisher on the room manager or its children, then `unity-scene`. Keep that name aligned with the publisher's **Track Name**, especially if you place the publisher elsewhere.
+The room requests the first nonblank **Track Name** reported by a registered Vision publisher, with `unity-scene` as the fallback.
 
 ## Component placement
 
@@ -62,13 +62,13 @@ Understanding which component belongs where prevents the most common setup mista
 
 ## Startup sequence
 
-When `ConvaiRoomManager` connects with **Connection Type** set to **Video**, the following occurs automatically for `AutoCompatible`, `HighResponsiveness`, and `LowOverhead` policies. If **Dynamic Vision** in the Vision card is set to **On** (`Enabled`), `ConvaiRoomManager` resolves its effective connection type to Video automatically at connect time, even when **Connection Type** is configured as `Audio`.
+When the room connects with **Vision** set to **On**, these steps run automatically for `AutoCompatible`, `HighResponsiveness`, and `LowOverhead`.
 
 1. `ConvaiRoomManager` establishes a Video connection to Convai.
 2. `ConvaiVisionPublisher` detects the active room and resolves the frame source via `GetComponent` or `GetComponentsInChildren`.
 3. The frame source starts capture and signals `Ready`. For `CameraVisionFrameSource`, this renders the assigned camera (or a Camera on the same object, then `Camera.main`) into a `RenderTexture`.
 4. `VisionPublishCoordinator` applies the selected publish policy (for example, `AutoCompatible`: 10 fps, 750 kbps) and begins forwarding frames to the video pipeline.
-5. A WebRTC video track named `"unity-scene"` is published to the Convai room. `ConvaiVisionPublisher.IsPublishing` becomes `true` and the `VideoTrackPublished` domain event fires.
+5. A WebRTC video track named `"unity-scene"` is published to the Convai room. `ConvaiVisionPublisher.IsPublishing` becomes `true`.
 
 For the `Manual` policy, step 5 does not happen automatically — call `EnablePublishing(true)` from a script to start publishing.
 
@@ -82,13 +82,9 @@ The reason this exists is token cost, not network transport. An attached frame c
 
 `ConvaiVisionContextMode` on `ConvaiRoomManager` controls whether this backend sampling is requested at connect time:
 
-| Mode | Effect |
-| --- | --- |
-| **Auto** (`Auto`, default) | Vision context is enabled only when **Connection Type** is already Video. Audio-only rooms are never upgraded automatically. |
-| **On** (`Enabled`) | Always enables vision context and forces the room's effective connection type to Video. |
-| **Off** (`Disabled`) | Never sends vision context configuration. **Connection Type** is left untouched, so the standard frame-source publishing path keeps publishing without backend sampling. |
+The **Vision** setting under **Connection** selects audio with vision disabled or video with vision enabled. Start a new session to apply a change.
 
-When enabled, `ConvaiRoomManager` sends a `vision_input_config` payload on room connect that describes the sampling interval, frames-per-turn budget, buffer size, staleness window, and resolution cap. Convai then decides which buffered frames to attach to a turn. Whether a vision trigger that sets no `RespondMode`, a context update, a narrative trigger, or a scene-metadata update asks for a reply is configured per lane through `ConvaiVisionRespondModeSettings`.
+When enabled, `ConvaiRoomManager` sends a `vision_input_config` payload on room connect that describes the sampling interval, frames-per-turn budget, buffer size, staleness window, and resolution cap. Convai then decides which buffered frames to attach to a turn. Whether a vision trigger that sets no `RespondMode`, a context update, a narrative trigger, or a scene-metadata update asks for a reply is configured per lane through `ConvaiRespondModeSettings`.
 
 {% hint style="info" %}
 The client requests sampling and exposes status and trigger acknowledgements, including `vision_not_enabled` when returned. Availability, model support, response timing, and billing depend on the service; inspect the actual response before relying on them.

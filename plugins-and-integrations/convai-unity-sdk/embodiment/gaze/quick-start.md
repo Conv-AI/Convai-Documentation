@@ -1,7 +1,7 @@
 ---
 title: Gaze quick start
 description: Add the Gaze module to an existing Convai character and confirm it makes eye contact with the player immediately in Play mode.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Add `ConvaiGazeController` to an existing Convai character and confirm that it makes eye contact with the player in Play mode. Use this page once you have a working `ConvaiCharacter` in your scene and want to see Gaze running before tuning any of its settings.
@@ -29,7 +29,7 @@ In the Hierarchy, select the `GameObject` that carries the `ConvaiCharacter` com
 
 In the Inspector, select **Add Component**, then **Convai > Embodiment > Gaze**. This adds `ConvaiGazeController` to the character.
 
-Convai also adds the infrastructure the module needs — an `EmbodimentContext` and the internal `GazeAttentionRequests` component — automatically. A missing `StandardRigBinding` is provisioned in Play mode, or can be added from the rig setup tools before Play.
+Convai also adds the infrastructure the module needs — an `EmbodimentContext` — automatically. A missing `StandardRigBinding` is provisioned in Play mode, or can be added from the rig setup tools before Play.
 {% endstep %}
 
 {% step %}

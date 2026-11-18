@@ -1,7 +1,7 @@
 ---
 title: How authentication works
 description: Understand the credential resolution order the Convai Unity SDK follows and the transport header each authentication mode sends.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The Convai SDK for Unity resolves a credential fresh for every room connection attempt — it does not cache a token across connections. Understanding the resolution order helps you decide whether to register a provider, configure an endpoint, or pass a token explicitly.
@@ -10,7 +10,7 @@ The Convai SDK for Unity resolves a credential fresh for every room connection a
 
 In Auth Token mode, `AuthTokenCredentialProvider.EnsureCredentialsAsync` runs once per connection attempt and checks three sources, in order:
 
-1. **An explicit one-shot token.** If the current connection was started with `ConvaiManager.ConnectWithAuthTokenAsync`, the SDK consumes that token and skips the other two sources.
+1. **An explicit one-shot token.** If the caller set a token with `RoomSessionConnectOptions.SetAuthToken` before calling `ConvaiManager.ConnectAsync`, the SDK consumes that token and skips the other two sources.
 2. **A registered `IConvaiAuthTokenProvider`.** If no explicit token was supplied, the SDK checks `ConvaiAuthTokenProviderRegistry` for a provider and calls `GetTokenAsync` on it.
 3. **The endpoint configured in Project Settings.** If no provider is registered, the SDK falls back to `EndpointAuthTokenProvider`, built from the **Token Endpoint URL**, **HTTP Method**, **Token Response Field**, and **Request Headers** saved under **Edit > Project Settings > Convai SDK**.
 
@@ -44,9 +44,9 @@ In API Key mode, resolution is simpler: `ProjectSettingsCredentialProvider` read
 
 | Your situation | Applicable source |
 |---|---|
-| Your login layer already holds a Convai auth token before connecting | Explicit one-shot token via `ConnectWithAuthTokenAsync` |
+| Your login layer already holds a Convai auth token before connecting | Explicit one-shot token via `RoomSessionConnectOptions.SetAuthToken` |
 | You want per-player tokens tied to your own login system | A registered `IConvaiAuthTokenProvider` |
-| Your token endpoint accepts unauthenticated requests, or you are prototyping | The endpoint configured in Project Settings |
+| Your token endpoint uses the static request shape configured in the project | The endpoint configured in Project Settings |
 
 An explicit token always wins when both an explicit token and a registered provider are present for the same connection attempt — the provider is not consulted in that case.
 

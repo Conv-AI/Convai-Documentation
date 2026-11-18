@@ -1,10 +1,10 @@
 ---
 title: Body animation
 description: Find guides for giving a Convai character idles, talk motion, walking, and gestures with the code-driven Body Animation module.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Body Animation is the Convai embodiment module that plays a character's idle, talk, locomotion, action, and pointing motion. One component, `ConvaiBodyAnimationController`, builds and runs a layered `PlayableGraph` directly against a Humanoid `Animator` — there is no Animator Controller asset to author. Content comes from a `ConvaiBodyAnimationSet` you assign, and behavior is tuned in a `ConvaiBodyAnimationConfig`.
+Body Animation is the Convai embodiment module that plays a character's idle, talk, locomotion, action, and pointing motion. One component, `ConvaiBodyAnimationController`, builds and runs a layered `PlayableGraph` directly against a Humanoid `Animator` — there is no Animator Controller asset to author. Assign a `ConvaiBodyAnimationProfile` to choose a `ConvaiBodyAnimationSet` for clips and a `ConvaiBodyAnimationConfig` for behavior.
 
 ***
 

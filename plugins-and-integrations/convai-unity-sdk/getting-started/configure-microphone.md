@@ -3,48 +3,44 @@ title: Configure microphone
 description: >-
   Select an active microphone device at runtime, set a project-wide default, and
   configure platform permissions for Android, iOS, and WebGL builds.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The Convai SDK for Unity opens the microphone according to the room's input policy, when microphone capture is allowed. Select a device and configure platform permissions before testing voice. For a session that never requests microphone permission, turn off **Allow Microphone** before connecting.
 
 ## Microphone device selection
 
-To list available microphone devices and let the player choose one:
+Choose a device from the list reported by the active transport. Apply its stable ID as a runtime preference before starting the next capture. If the transport reports no devices, use the system or browser default.
 
 ```csharp
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Convai.Domain.Types;
 using Convai.Runtime.Components;
-using Convai.Shared.Abstractions;
-using Convai.Shared.Types;
 using UnityEngine;
 
-public class MicrophoneDevicePicker : MonoBehaviour
+public sealed class MicrophoneDevicePicker : MonoBehaviour
 {
-    public async Task SwitchToDeviceAsync(int deviceIndex)
+    public bool SelectForNextCapture(int index)
     {
-        ConvaiManager manager = ConvaiManager.ActiveManager;
-        if (manager == null || !manager.TryGetMicrophoneDeviceService(out IMicrophoneDeviceService service))
+        var manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.IsInitialized ||
+            !manager.TryGetMicrophoneDeviceService(out var devices) ||
+            !manager.TryGetRuntimeSettingsService(out var settings))
+            return false;
+
+        var available = devices.GetAvailableDevices();
+        if (index < 0 || index >= available.Count) return false;
+
+        return settings.Apply(new ConvaiRuntimeSettingsPatch
         {
-            Debug.LogWarning("Start the Convai runtime before selecting a microphone.");
-            return;
-        }
-
-        IReadOnlyList<ConvaiMicrophoneDevice> devices = service.GetAvailableDevices();
-        foreach (ConvaiMicrophoneDevice device in devices)
-            Debug.Log($"{device.Name} (Index: {device.Index})");
-
-        await manager.Audio.StartListeningAsync(microphoneIndex: deviceIndex);
+            PreferredMicrophoneDeviceId = available[index].Id
+        }).Success;
     }
 }
 ```
 
-On WebGL, `GetAvailableDevices()` returns an empty list outside the Editor. Microphone access on WebGL goes through the browser's Web Audio API and does not support Unity's native device enumeration.
-
 ## Set the project-wide default device
 
-`ConvaiSettings.DefaultMicrophoneDeviceId` sets the microphone the SDK uses before any script calls `StartListeningAsync` with a specific device index. An empty string resolves to the system default device.
+`ConvaiSettings.DefaultMicrophoneDeviceId` sets the microphone the SDK uses before a runtime settings override. An empty string resolves to the system default device.
 
 {% stepper %}
 {% step %}
@@ -101,7 +97,7 @@ Set a microphone usage description before building an app that records on macOS 
 A browser may require a gesture for blocked audio playback. Microphone capture separately requires HTTPS (or localhost) and permission. On each eligible scene click or tap after connection, the manager rechecks playback and calls `EnableAudioAndStartListening()` if needed; pointer events over UI are excluded. For a dedicated start button or when the automatic option is disabled, use one of these methods:
 
 * **`Audio.EnableAudioPlayback()`** — unlocks browser audio output only. Use this when you want character voice to play but are not yet starting the microphone (for example, during a tutorial before the player speaks).
-* **`ConvaiManager.EnableAudioAndStartListening()`** — unlocks browser audio output **and** opens the microphone. Use this when the player is ready to begin a full conversation.
+* **`manager.Audio.EnableAudioAndStartListening()`** — unlocks browser playback and requests capture if the room allows the microphone. Use this when the player is ready to begin a full conversation.
 
 ```csharp
 using Convai.Runtime.Components;
@@ -113,7 +109,7 @@ public class BrowserVoiceStartButton : MonoBehaviour
     public void StartVoice()
     {
         ConvaiManager manager = ConvaiManager.ActiveManager;
-        if (manager != null) manager.EnableAudioAndStartListening();
+        if (manager != null && manager.IsInitialized) manager.Audio.EnableAudioAndStartListening();
     }
 }
 ```
@@ -124,7 +120,7 @@ If browser playback remains blocked, click the scene or your start button and ch
 
 Under **Convai Room Manager > Listening > Microphone**, configure **Echo Cancellation**, **Noise Suppression**, and **Automatic Gain Control**. Native defaults are off, on, and off respectively. Processing changes apply on the next connection. WebGL uses browser processing.
 
-Read `ConvaiRoomManager.MicrophoneLevel` for a continuous audio level, and check `IsMicrophoneLevelAvailable` before interpreting zero as silence. A level meter is separate from the speech-detection decision.
+Read `manager.Audio.MicrophoneLevel` for a continuous audio level, and check `IsMicrophoneLevelAvailable` before interpreting zero as silence. A level meter is separate from the speech-detection decision.
 
 Turn off **Allow Microphone** before connecting for text input with voice replies. Use `SetMicrophoneAllowed(false)` to stop capture during an active session, or `SetMicrophoneAllowed(true)` to permit it again. See [Run a text-only session](run-a-text-only-session.md).
 

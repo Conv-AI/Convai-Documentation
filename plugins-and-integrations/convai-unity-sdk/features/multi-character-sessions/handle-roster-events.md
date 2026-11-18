@@ -1,7 +1,7 @@
 ---
 title: Handle room events
 description: Subscribe to roster and interaction-target events in a shared Unity room, and rely on the order the SDK guarantees between them.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Subscribe to `ConvaiManager.Events.OnRoomRosterChanged` to react to a character joining or leaving a connected room, including a refused edit and its reason. Use this page when your scene needs to update UI, logging, or gameplay state as characters come and go instead of polling the roster.
@@ -13,7 +13,7 @@ Subscribe to `ConvaiManager.Events.OnRoomRosterChanged` to react to a character 
 
 ## Subscribe to OnRoomRosterChanged
 
-`ConvaiManager.Events.OnRoomRosterChanged` is `Action<RoomRosterChanged>`, and fires every time a connected room's roster is edited during play — whether the change came from a character appearing or disappearing in the scene, or from an explicit `AddCharacterAsync`/`RemoveCharacterAsync` call.
+`ConvaiManager.Events.OnRoomRosterChanged` is `Action<RoomRosterChanged>`, and fires every time a connected room's roster is edited during play — whether the change came from a character appearing or disappearing in the scene, or from a change to the manager’s selected characters.
 
 | `RoomRosterChanged` field | Type | Description |
 | --- | --- | --- |
@@ -75,7 +75,7 @@ Refused edits also log an Error in the form `'<name>' could not join the room: <
 
 ## The lower-level session events
 
-`MultiCharacterRoomSession` — read from `IConvaiRoomConnectionService.CurrentMultiCharacterSession` — exposes the same facts as plain C# events, one level below `ConvaiManager.Events`. Reach for these only when a script already holds a `MultiCharacterRoomSession` reference and needs `CharacterRoomMembership` objects directly rather than the IDs `OnRoomRosterChanged` reports.
+`MultiCharacterRoomSession` — read from `ConvaiRoomManager.CurrentMultiCharacterSession` — exposes the same facts as plain C# events, one level below `ConvaiManager.Events`. Reach for these only when a script already holds a `MultiCharacterRoomSession` reference and needs `CharacterRoomMembership` objects directly rather than the IDs `OnRoomRosterChanged` reports.
 
 | Event | Signature | Raised when |
 | --- | --- | --- |
@@ -147,7 +147,7 @@ A related ordering guarantee applies to additions: when a new membership is inse
 
 ## Unsubscribe when the session ends
 
-`MultiCharacterRoomSession` is replaced on every reconnect, so a handler attached to one session instance stops receiving events once that instance is discarded. Detach in `OnDisable` or `OnDestroy`, and reattach to the new `CurrentMultiCharacterSession` after `IConvaiRoomConnectionService.Connected` fires again.
+`MultiCharacterRoomSession` is replaced on every reconnect, so a handler attached to one session instance stops receiving events once that instance is discarded. Detach in `OnDisable` or `OnDestroy`, and reattach to the new `CurrentMultiCharacterSession` after `ConvaiManager.Events.OnConnected` fires again.
 
 ## Troubleshooting
 

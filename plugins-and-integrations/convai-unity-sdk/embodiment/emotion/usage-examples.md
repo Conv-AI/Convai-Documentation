@@ -1,7 +1,7 @@
 ---
 title: Emotion examples
 description: Seven complete scenarios covering hazard overrides, locked expressions, mood shifts, distress branching, analytics logging, and a small UI event receiver.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 These scenarios show how the Emotion system's configuration and scripting API combine to serve realistic application requirements. Each scenario is self-contained: Inspector setup is described first, followed by any runtime code needed to complete the behavior. Profile field references are in [Emotion profile](emotion-profile.md); the full scripting surface is in [Emotion scripting API](scripting-api.md).
@@ -31,18 +31,18 @@ public sealed class HazardZoneTrigger : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Trainee"))
-            instructorEmotion.SetEmotionOverride("fear", 0.9f);
+            instructorEmotion.LockEmotion("fear", 0.9f);
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Trainee"))
-            instructorEmotion.ClearEmotionOverride();
+            instructorEmotion.UnlockEmotion();
     }
 }
 ```
 
-`SetEmotionOverride` replaces the transient target with fear and ignores server emotions until cleared. The accumulator smooths the change at the configured `lerpSpeed`. `ClearEmotionOverride` on trigger exit sets a neutral target until the next accepted server signal. The face itself needs no per-slot authoring — expression recipes resolve `"fear"` against the character's rig automatically.
+`LockEmotion` replaces the transient target with fear and ignores server emotions until cleared. Pass a positive `transitionSeconds` value to ease into the expression. This example applies the lock immediately. `UnlockEmotion` on trigger exit sets a neutral target until the next accepted server signal. The face itself needs no per-slot authoring — expression recipes resolve `"fear"` against the character's rig automatically.
 
 ***
 
@@ -109,7 +109,7 @@ public sealed class RapportDirector : MonoBehaviour
 }
 ```
 
-`SetMood` changes the character's **resting mood** — the mood the face settles to between transient reactions — rather than injecting a one-off expression. The four-second transition reads as a gradual warm-up rather than a sudden mood swing. `ClearMood` on session reset returns the character to its authored baseline. See [Moods](moods.md) for how a resting mood differs from a transient emotion, and [Emotion scripting API](scripting-api.md#runtime-mood-control) for the full precedence rules.
+`SetMood` changes the character's **resting mood** — the mood the face settles to between transient reactions — rather than injecting a one-off expression. The four-second transition reads as a gradual warm-up rather than a sudden mood swing. `ClearMood` on session reset returns the character to its authored baseline. See [Moods](moods.md) for how a resting mood differs from a transient emotion, and [Emotion scripting API](scripting-api.md#control-emotion-and-mood) for the full precedence rules.
 
 ***
 
@@ -211,32 +211,7 @@ public sealed class EmotionSessionLogger : MonoBehaviour
 
 ## Scenario 6: Display the raw emotion in a UI label
 
-**Situation:** A UI label should update when an accepted emotion signal arrives. The relay sends a `CharacterEmotionRelayData` object, so use a receiver to read its `Emotion` string.
-
-```csharp
-using Convai.Runtime.Presentation.Events;
-using TMPro;
-using UnityEngine;
-
-public sealed class EmotionLabelDisplay : MonoBehaviour
-{
-    [SerializeField] private TMP_Text label;
-
-    public void Show(CharacterEmotionRelayData data)
-    {
-        if (label != null) label.text = data.Emotion;
-    }
-}
-```
-
-1. Add `ConvaiCharacterEventRelay` to the NPC. Leave **Auto Resolve Character** enabled when it shares the `ConvaiCharacter` GameObject, or assign **Character** explicitly.
-2. Add `EmotionLabelDisplay` to a scene object and assign its TextMeshPro label. This script needs TextMeshPro installed in the project.
-3. Add an entry to **On Emotion Changed**, drag the receiver object into it, and choose the dynamic **EmotionLabelDisplay.Show** method.
-4. Enter Play mode and converse with the character. The label shows raw values such as `happy`; resolve through the taxonomy if you need canonical values such as `joy`.
-
-A direct dynamic `Text.text` or `TMP_Text.text` binding cannot extract a string from this payload. For the smoothed visible state, read `Current` or subscribe to `DominantEmotionChanged` instead.
-
-***
+Subscribe to `ConvaiManager.Events.OnCharacterEmotionChanged` using the same setup and cleanup as [the session logger](#scenario-5-session-analytics-logging). Filter by the displayed character's `CharacterId` and pass the payload's `Emotion` string to your UI label. To show the resolved expression instead, assign the label from `ConvaiEmotionController.Current.DominantLabel` and update it through `DominantEmotionChanged`.
 
 ## Scenario 7: Test expressions in Play mode
 

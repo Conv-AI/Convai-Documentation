@@ -1,7 +1,7 @@
 ---
 title: Write a custom action executor
 description: Connect custom movement, inventory, UI, or physics behaviors to the Convai action pipeline by writing your own executor component.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 When the built-in executors don't match your project's movement system, interaction model, or gameplay rules, implement `IConvaiActionExecutor`. A custom executor is a standard C# `MonoBehaviour` with a single async method. The dispatcher treats it identically to any built-in executor — all policies, events, and cancellation behavior apply automatically.
@@ -18,7 +18,7 @@ Build a custom executor when:
 
 ## The IConvaiActionExecutor interface
 
-```csharp
+```text
 public interface IConvaiActionExecutor
 {
     Task<ConvaiActionExecutionResult> ExecuteAsync(
@@ -42,9 +42,8 @@ Every shipped executor derives from `ConvaiActionExecutorBase` rather than imple
 | `ConvaiActionExecutorBase` | You want full manual control over the invocation | `CharacterTransform`, `ResolvePlayer()`, `DeclaredButNotSent(...)` | `public ExecuteAsync(invocation, token)` |
 | `ConvaiTargetedActionExecutor` | The behavior acts on a resolved target through a hierarchy peer (a controller, locomotion, or rig) | Target validation, peer resolution/caching, once-logged missing-peer diagnostics, invocation parameter overrides | `protected ExecuteCoreAsync(invocation, token)` |
 | `ConvaiCharacterActionExecutor<TPeer>` | The behavior only ever needs one specific component on the character | Everything `ConvaiTargetedActionExecutor` adds, plus the resolved `TPeer` component handed straight to your method | `protected ExecuteCoreAsync(peer, invocation, token)` |
-| `ConvaiActionExecutor<TParameters>` | You want a typed parameter DTO instead of manual dictionary access | Binds invocation parameters onto a `TParameters` object by name before your method runs | `protected ExecuteAsync(invocation, parameters, token)` |
 
-`ConvaiTargetedActionExecutor`, `ConvaiCharacterActionExecutor<TPeer>`, and `ConvaiActionExecutor<TParameters>` all derive from `ConvaiActionExecutorBase`, so every one of them already gets the Convai inspector and the members in the next section. Group inspector fields with `ConvaiInspectorSectionAttribute` and give every serialized field a `[Tooltip]` — the Convai inspector renders both on any `ConvaiActionExecutorBase`-derived component.
+Both targeted base classes inherit the same Convai Inspector support from `ConvaiActionExecutorBase`. Read invocation parameters with the typed accessors below. Group inspector fields with `ConvaiInspectorSectionAttribute` and give every serialized field a `[Tooltip]` — the Convai inspector renders both on any `ConvaiActionExecutorBase`-derived component.
 
 For example, this character-only behavior receives an `Animator` peer and does not require a target:
 
@@ -96,20 +95,20 @@ Using your own `transform` for anything that genuinely means "this component's o
 
 `ResolvePlayer()` returns the transform to measure the player by. It is `protected virtual` , so override it once if your project has split screen, several rigs, or a cutscene camera, and every executor in that hierarchy agrees about who "the player" is.
 
-The underlying lookup lives on `ConvaiPlayerBody`, a `public static` class  available to scene code that is not an executor:
+Scene code can use `ConvaiPlayerView` directly. The following example uses `Convai.Runtime.Components`.
 
 ```csharp
-Transform player = ConvaiPlayerBody.Resolve();
+Transform player = ConvaiPlayerView.ResolveBody();
 
 // Flatten onto a given height — cameras sit at head height, and a character
 // measuring distance to one stands slightly too far away otherwise.
-if (ConvaiPlayerBody.TryResolveFloorPosition(CharacterTransform.position.y, out Vector3 floorPosition))
+if (ConvaiPlayerView.TryResolveFloorPosition(CharacterTransform.position.y, out Vector3 floorPosition))
 {
     // use floorPosition
 }
 ```
 
-`ConvaiPlayerBody.Resolve()` prefers a `ConvaiPlayer` in the scene, then falls back to `Camera.main`. When it finds a `ConvaiPlayer`, it resolves the transform the player's rig actually moves — a `CharacterController` or `Rigidbody` inside the rig, not the prefab root — because first-person controllers commonly leave the root parked at the spawn point for the whole session. Reading the root instead reports where the player *started*: a character leading somebody somewhere stops to wait, the player walks up beside it, and it stays put, with nothing logged to explain why.
+`ConvaiPlayerView.ResolveBody()` prefers a `ConvaiPlayer` in the scene, then falls back to the resolved view camera or anchor. When it finds a `ConvaiPlayer`, it resolves the transform the player's rig actually moves — a `CharacterController` or `Rigidbody` inside the rig, not the prefab root — because first-person controllers commonly leave the root parked at the spawn point for the whole session. Reading the root instead reports where the player *started*: a character leading somebody somewhere stops to wait, the player walks up beside it, and it stays put, with nothing logged to explain why.
 
 ## The ConvaiActionInvocation object
 
@@ -246,7 +245,7 @@ finally
 
 ## Complete example: highlight object executor
 
-This executor enables your project's `OutlineEffect` component on the physical target, waits three seconds, then disables it. Supply that component from your rendering system before compiling the example.
+This example shows how an executor can use your rendering system’s `OutlineEffect` component. Replace that project-specific type with your outline component before compiling.
 
 ```csharp
 using System.Threading;
@@ -254,10 +253,11 @@ using System.Threading.Tasks;
 using Convai.Runtime.Actions;
 using UnityEngine;
 
+// pseudocode: replace OutlineEffect with the outline component from your project.
 [AddComponentMenu("MyProject/Actions/Highlight Object Executor")]
 [ConvaiActionArchetype("Highlight Object", ActionName = "Highlight",
     Description = "Highlight a scene object.", TargetRequirement = ConvaiActionTargetRequirement.Object,
-    RequiredTargetComponent = "OutlineEffect", Family = "Project Interactions")]
+    RequiredTargetComponent = typeof(OutlineEffect), Family = "Project Interactions")]
 public sealed class HighlightObjectExecutor : ConvaiTargetedActionExecutor
 {
     [SerializeField] private float _highlightDuration = 3f;

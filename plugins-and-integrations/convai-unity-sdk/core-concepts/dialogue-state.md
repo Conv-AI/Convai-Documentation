@@ -1,7 +1,7 @@
 ---
 title: Dialogue state
 description: Understand the eight-value dialogue state every embodiment module reads to know whether a character is idle, listening, or speaking.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Every embodiment module — Gaze, Body Animation, Body Language, and Emotion — reads the same eight-value `DialogueState` to know what beat of the conversation a character is in. Conversation Flow is the one module that decides this value; every other module only reads it. Understanding what each state means makes the rest of the embodiment modules' behavior legible.
@@ -47,7 +47,7 @@ A reading always describes a blend between two states rather than a hard cut, so
 
 A `ConvaiConversationFlowController` does not always have to be added by hand. `ConvaiBodyAnimationController` asks for one, so a character with body animation and no authored controller gets one automatically, and Convai logs once naming the character and why. The auto-added controller behaves exactly like one you add yourself — configure it afterward if the shipped timing does not fit your character.
 
-Gaze and Body Language also ensure a Conversation Flow controller during Play Mode. Emotion requests one when any listening, thinking, reacting, or interrupted strength is nonzero; these strengths default to zero. A module can still read `Idle` when no flow source is available. `Reacting` is entered through `PulseReaction`; a high-intensity emotion alone does not trigger it.
+Gaze, Body Language, and Emotion also ensure a Conversation Flow controller during Play Mode. A module can still read `Idle` when no flow source is available. `Reacting` is entered through `PulseReaction`; a high-intensity emotion alone does not trigger it.
 
 {% hint style="info" %}
 The contract behind this reading, `IConversationFlowSource`, is `internal` to the package. Read `ConvaiConversationFlowController.Current` and subscribe to `Changed` — do not implement the interface yourself.

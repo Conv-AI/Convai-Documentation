@@ -1,7 +1,7 @@
 ---
 title: Body animation config reference
 description: Reference for every setting group and field in the Convai Body Animation config asset, including defaults and value ranges for each entry.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 `ConvaiBodyAnimationConfig` (`Convai/Embodiment/Body Animation Config`) is the runtime-tuning asset for Convai Body Animation: transition timings, layer behavior, locomotion synchronization, feature toggles, and diagnostics. Content lives in a separate `ConvaiBodyAnimationSet`; this asset only shapes behavior, so one config can be shared across many characters. Its tuning fields are grouped into named sections, one `##` per section below, matching the config asset's own Inspector and the Body Animation Editor window's Feel mode.
@@ -120,7 +120,6 @@ Travel speeds, when the character turns in place, and which arrival performances
 | `Turn180MinAngle` | **Use A 180° Turn Above** | `float` | `135` (deg) | `>= 90`, `>= TurnInPlaceMinAngle + 5` | Yaw error above which the 180° turn/start variants are used. |
 | `RateWarpMin` | **Slowest Playback Adjustment** | `float` | `0.85` | `0.5`–`1` | Lower clamp for playback-rate warping (agent speed ÷ authored clip speed). |
 | `RateWarpMax` | **Fastest Playback Adjustment** | `float` | `1.2` | `1`–`1.5`, `>= RateWarpMin` | Upper clamp for playback-rate warping. |
-| `MotionHandoffNormalizedTime` | **Transition Point** | `float` | `0.85` | `0.5`–`0.98` | Normalized clip time where start/turn/speed-change one-shots crossfade into their follow-up state. |
 | `LowSpeedStopFraction` | **Slow-Arrival Threshold** | `float` | `0.6` | `0.1`–`1` | Fraction of walk speed below which the low-speed stop clip is chosen. |
 | `PlantedStopMinTravel` | **Min Distance For Full Stop** | `float` | `1.2` (m) | `>= 0` | Distance a leg must cover at cruise speed before a planted-stop clip may play; shorter repositions settle with agent braking and a plain idle blend. |
 | `EnableTurnInPlace` | **Enable Turn In Place** | `bool` | `false` | — | Play an authored turn clip when the character must face a new direction before setting off. Needs turn clips in the set. |
@@ -157,12 +156,7 @@ Procedural speech-timed accents. Off by default; the values below only apply whi
 
 | Field | Inspector label | Type | Default | Range | Description |
 |---|---|---|---|---|---|
-| `EnableAdvancedCoSpeech` | **Procedural Speech Accents** | `bool` | `false` | — | Derive speculative accents from the speech-energy envelope alone, with no semantic evidence behind them, and publish those for peer performers too. Cues the character actually meant are always published regardless of this setting. |
-| `CoSpeechMinimumAccentEnergy` | **Minimum Accent Volume** | `float` | `0.42` | `0.1`–`1` | How loud speech has to get before it counts as an accent. |
-| `CoSpeechEmphasisDerivative` | **Emphasis Sensitivity** | `float` | `1.2` | `0.1`–`5` | How sharply the volume has to rise to read as emphasis. |
-| `CoSpeechAccentProbability` | **Accent Frequency** | `float` | `0.48` | `0`–`1` | Chance that a qualifying moment actually becomes an accent. |
 | `CoSpeechAccentRefractorySeconds` | **Min Gap Between Accents** | `float` | `0.85` | `0.3`–`3` | Minimum seconds between two accents. |
-| `CoSpeechPhraseEnergyMargin` | **Phrase Detection Margin** | `float` | `0.08` | `0.01`–`0.3` | How far volume must fall below the running average to count as a phrase break. |
 | `CoSpeechPreparationSeconds` | **Wind-Up Time** | `float` | `0.22` | `0.05`–`0.6` | Wind-up before the accent lands. |
 | `CoSpeechStrokeSeconds` | **Stroke Time** | `float` | `0.16` | `0.05`–`0.5` | Length of the accent itself, the fast part of the movement. |
 | `CoSpeechReferentialHoldSeconds` | **Hold Time** | `float` | `0.28` | `0`–`1` | How long the pose is held at full extension after the accent lands, before settling. |
@@ -184,10 +178,10 @@ How much this character reports to the console while it runs.
 
 | Field | Inspector label | Type | Default | Description |
 |---|---|---|---|---|
-| `TraceVerbosity` | **Diagnostic Detail** | `AnimTraceVerbosity` | `Off` | Console/log verbosity for this character's body animation trace. Warnings and errors are always logged regardless. |
+| `TraceVerbosity` | **Diagnostic Detail** | `TraceVerbosity` | `Off` | Console/log verbosity for this character's body animation trace. Warnings and errors are always logged regardless. |
 | `FirehoseIntervalSeconds` | **Per-Frame Report Interval** | `float` | `0.25` | `>= 0.05` — seconds between `Firehose`-level per-tick dumps. |
 
-`AnimTraceVerbosity` values, each including everything below it:
+`TraceVerbosity` values, each including everything below it:
 
 | Value | Integer | Description |
 |---|---|---|

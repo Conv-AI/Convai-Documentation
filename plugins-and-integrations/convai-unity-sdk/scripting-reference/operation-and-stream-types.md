@@ -1,10 +1,10 @@
 ---
-title: Operation and stream types
-description: Reference the Unity SDK operation and stream contracts, including completion state, structured errors, cancellation, and custom producers.
-last_reviewed: "5.0.0-preview"
+title: Asynchronous operation reference
+description: Check the result of an asynchronous SDK operation, handle cancellation and errors, and observe its completion from an async method or coroutine.
+last_reviewed: "5.0.0-pre.1"
 ---
 
-`IConvaiOperation<T>` represents one asynchronous result. `IConvaiStream<T>` represents a producer-owned sequence. These types are in `Convai.Runtime.Core.Async`; `Unit` and `RoomSession` are in `Convai.Runtime.Core.Coordinators`.
+`IConvaiOperation<T>` in `Convai.Runtime.Core.Async` represents one asynchronous result. `RoomSession` and `Unit` are in `Convai.Runtime.Core.Coordinators`. `Unit` represents completion without a value.
 
 ## Operation members
 
@@ -12,45 +12,29 @@ last_reviewed: "5.0.0-preview"
 | --- | --- |
 | `Status` | `Created`, `Running`, `Succeeded`, `Faulted`, or `Canceled` |
 | `IsCompleted`, `IsSuccessful`, `IsCanceled`, `HasError` | State checks on the wrapped task |
-| `Error` | Structured fault information; not the result value |
-| `Progress` | Producer-reported progress, or zero until success and one afterward |
-| `GetAwaiter()`, `AsTask()` | Await the result; rethrow the original task exception |
-| `ToCoroutine(onSuccess, onError)` | Unity coroutine adapter |
-| `ContinueWith(selector)` | Transform a successful value, with synchronous or task-returning selectors |
-| `Cancel()` | Cancels only the source supplied when constructing the wrapper |
+| `Error` | Structured fault information |
+| `GetAwaiter()`, `AsTask()` | Await the result and propagate the underlying exception |
+| `Cancel()` | Request cancellation when the wrapper owns a cancellation source |
 
-SDK methods normally wrap tasks without a cancellation source. Pass cancellation to the method's token parameter. No SDK operation supplies intermediate progress through `ReportProgress`, so use a busy indicator rather than a percentage estimate.
-
-Await can throw `ConvaiOperationException`, `OperationCanceledException`, or ordinary argument/state exceptions. Catch the cases your call can produce. `ToCoroutine` maps a fault to `ConvaiError`; it logs an unhandled fault when `onError` is absent and passes `canceled` when cancellation has an error callback.
+Pass a cancellation token to SDK methods that accept one. SDK methods normally wrap tasks without a wrapper-owned cancellation source.
 
 ## Error types
 
-`ConvaiError` contains `Code`, `Message`, `Exception`, and `IsEmpty`. `FromException` preserves the code of a `ConvaiOperationException`; other exceptions use the supplied fallback code, defaulting to `exception`.
+`ConvaiError` contains `Code`, `Message`, `Exception`, and `IsEmpty`. `FromException` preserves the code of a `ConvaiOperationException`. For other exceptions it uses the supplied fallback code, which defaults to `exception`.
 
-`ConvaiOperationException.Code` is the SDK's machine-readable operation error. It falls back to `operation.failed` for an empty code. Do not assume every failed task throws this type.
+`ConvaiOperationException.Code` is the SDK's machine-readable operation error. It falls back to `operation.failed` for an empty code. Also handle cancellation and ordinary argument or state exceptions where applicable.
 
 ## Producer APIs
 
-Use these when implementing your own operation, not when consuming an SDK operation.
-
-| Type/member | Purpose |
+| Member | Purpose |
 | --- | --- |
-| `ConvaiOperation<T>.FromTask(task)` | Wrap a task without wrapper-owned cancellation |
-| `FromTask(task, cts)` | Give `Cancel()` a source to cancel |
-| `Succeeded`, `Failed`, `Canceled` | Create already-completed operations |
-| `ConvaiOperationSource<T>.Operation` | Operation exposed to consumers |
-| `Token` | Producer's cancellation token |
-| `ReportProgress` | Publish intermediate progress |
-| `SetResult`, `SetException`, `SetCanceled` | Complete the operation |
-| `TrySetResult`, `TrySetException`, `TrySetCanceled` | Complete without throwing if already completed |
+| `ConvaiOperation<T>.FromTask(task)` | Wrap a task |
+| `ConvaiOperation<T>.FromTask(task, cts)` | Wrap a task and give `Cancel()` a source to cancel |
+| `ConvaiOperation<T>.Succeeded`, `Failed`, `Canceled` | Create completed operations |
 
-A producer must actually observe its token for cancellation to stop its work.
+## Migrate progress, coroutines, and streams
 
-## Streams
-
-`IConvaiStream<T>` exposes `Status`, `Error`, `ReadAllAsync(CancellationToken)`, and asynchronous disposal. `StreamStatus` is `Created`, `Streaming`, `Completed`, `Faulted`, or `Canceled`. `ConvaiStream<T>` is the concrete implementation for custom producers.
-
-The room transcript API does not return this type. The standalone `IConversationSession.OpenResponseStream` contract returns `IConvaiStream<ConversationResponsePart>` for a custom provider; the default manager does not install a standalone conversation provider.
+For coroutines, poll `IsCompleted` and handle success, failure, and cancellation. For chaining, await the result and pass it to the next method. Show a busy indicator while an SDK operation is pending. Use the [Transcript API](transcript-api.md) for room history and live captions. Integrations that previously used the standalone text stream can follow [Migrate from the standalone text client](../advanced-topics/interaction-text-client.md) to move to room chat.
 
 ## Related pages
 

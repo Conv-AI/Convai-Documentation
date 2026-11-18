@@ -1,16 +1,12 @@
 ---
 title: Runtime settings API
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 description: Read runtime preferences, apply partial changes, observe changed fields, and reset saved overrides to the defaults set by your project.
 ---
 
 `IConvaiRuntimeSettingsService` is the scripting layer beneath the built-in Settings Panel. A script with access to the initialized manager can read the current settings snapshot, apply patches atomically, and subscribe to change events — without the panel being present in the scene.
 
-Access the service through `ConvaiManager`:
-
-```csharp
-ConvaiManager.ActiveManager.TryGetRuntimeSettingsService(out var settings);
-```
+Resolve the service with `ConvaiManager.TryGetRuntimeSettingsService(out settings)`.
 
 ## `IConvaiRuntimeSettingsService`
 
@@ -83,7 +79,7 @@ A `[Flags]` enum used in `AppliedMask` and `ConvaiRuntimeSettingsChanged.Mask`. 
 
 Player names are trimmed; a blank name falls back to the project default. Microphone selection is normalized against the available device list. Always read the returned `Snapshot` instead of assuming that every requested value was stored verbatim.
 
-The default store saves differences from project defaults in `PlayerPrefs` keys under `convai.runtime.settings.v1.*`. `ResetToDefaults()` deletes those overrides and reconstructs the normalized defaults. The four fields above are the complete snapshot; conversation input mode belongs to the room connection service, and character audio volume remains a separate project setting.
+The default store saves differences from project defaults in `PlayerPrefs` keys under `convai.runtime.settings.v1.*`. `ResetToDefaults()` deletes those overrides and reconstructs the normalized defaults. The four fields above are the complete snapshot; use `ConvaiManager.SetConversationInputModeAsync` for input mode and `ConvaiAudioOutput.Volume` for a character’s output level.
 
 ## Read, apply, and observe settings
 
@@ -91,8 +87,8 @@ This component waits for a usable manager, subscribes once, and detaches when di
 
 ```csharp
 using Convai.Runtime.Components;
-using Convai.Shared.Abstractions;
-using Convai.Shared.Types;
+using Convai.Domain.Abstractions;
+using Convai.Domain.Types;
 using UnityEngine;
 
 public class RuntimePreferences : MonoBehaviour

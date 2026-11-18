@@ -1,6 +1,6 @@
 ---
 title: Transcript UI
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 description: Choose chat history, speech captions, or a label for one character, and understand how transcript visibility differs from retained history.
 ---
 
@@ -29,9 +29,9 @@ History is bounded in memory. The default limits are 500 closed entries and 1,00
 
 ## Choose a display
 
-<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Chat and subtitle modes</strong><br>Add the shipped chat prefab or the sample subtitle component.</td><td><a href="chat-and-subtitle-modes.md">chat-and-subtitle-modes.md</a></td></tr><tr><td><strong>Per-character transcript display</strong><br>Show one character's latest entry or caption in a text label.</td><td><a href="per-character-transcript-display.md">per-character-transcript-display.md</a></td></tr><tr><td><strong>Transcript history and queries</strong><br>Page through entries, subscribe to changes, and export retained history.</td><td><a href="transcript-history-and-queries.md">transcript-history-and-queries.md</a></td></tr></tbody></table>
+<table data-view="cards"><thead><tr><th></th><th data-hidden data-card-target data-type="content-ref"></th></tr></thead><tbody><tr><td><strong>Chat and subtitle modes</strong><br>Add the shipped chat prefab or a separate caption display.</td><td><a href="chat-and-subtitle-modes.md">chat-and-subtitle-modes.md</a></td></tr><tr><td><strong>Per-character transcript display</strong><br>Show one character's latest entry or caption in a text label.</td><td><a href="per-character-transcript-display.md">per-character-transcript-display.md</a></td></tr><tr><td><strong>Transcript history and queries</strong><br>Page through entries, subscribe to changes, and export retained history.</td><td><a href="transcript-history-and-queries.md">transcript-history-and-queries.md</a></td></tr></tbody></table>
 
-The chat prefabs are `Prefabs/TranscriptUI/TranscriptUI_Chat.prefab` and `TranscriptUI_Chat_WorldSpace.prefab` in the <code class="expression">space.vars.sdk_package_id</code> package. `SubtitleTranscriptUI` is sample reference code under `SamplesShared/Scripts/UI/Transcript/Subtitle/`; it has no companion prefab.
+The chat prefabs are `Prefabs/TranscriptUI/TranscriptUI_Chat.prefab` and `TranscriptUI_Chat_WorldSpace.prefab` in the <code class="expression">space.vars.sdk_package_id</code> package. Use `ConvaiTranscriptDisplay` for one character’s captions, or subscribe to `SubscribeCaptions` for a room-wide caption display.
 
 For Inspector callbacks, add `ConvaiTranscriptEventRelay`. Its **Entry Updated** event includes replayed history; **Entry Finalized** reports finalization, while **Entry Corrected**, **Entry Removed**, and **Reset** handle later changes. These callbacks carry full entry text, not a text delta. The relay forwards while presentation is disabled.
 

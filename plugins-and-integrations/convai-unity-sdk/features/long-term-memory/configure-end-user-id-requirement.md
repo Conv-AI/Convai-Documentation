@@ -1,7 +1,7 @@
 ---
 title: Configure the end-user ID requirement
 description: Choose whether a memory-enabled character requires an end-user identity, preserve its other settings, and check the next connection result.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Set **End-User ID** in the character's **Memory** section to declare whether a memory-enabled connection requires an end-user identifier. The setting belongs to the character on Convai and applies across its versions.
@@ -45,22 +45,21 @@ Start a fresh connection with the intended identity source. On `ConvaiManager`, 
 
 ## Set the requirement from a script
 
-In a trusted administrative tool, pass the requirement to `UpdateSettingsAsync`. Omitted settings are preserved:
+In a trusted administrative tool, pass the requirement to `UpdateMemorySettingsAsync`. Omitted settings are preserved:
 
 ```csharp
 using System.Threading;
 using System.Threading.Tasks;
-using Convai.RestAPI;
-using Convai.RestAPI.Internal;
+using Convai.PlatformApi;
 
 public static class EndUserRequirementSettings
 {
     public static Task<MemorySettings> RequireIdentityAsync(
-        ConvaiRestClient client,
+        ConvaiPlatformClient client,
         string characterId,
         CancellationToken cancellationToken = default)
     {
-        return client.Memory.UpdateSettingsAsync(
+        return client.UpdateMemorySettingsAsync(
             characterId,
             endUserIdRequirement: EndUserIdRequirement.Required,
             cancellationToken: cancellationToken);
@@ -68,7 +67,7 @@ public static class EndUserRequirementSettings
 }
 ```
 
-Read the settings again with `GetSettingsAsync` and check `EndUserIdRequirement`. Do not publish an account API key in a player build to run this administrative operation.
+Read the settings again with `GetMemorySettingsAsync` and check `EndUserIdRequirement`. Do not publish an account API key in a player build to run this administrative operation.
 
 ## Troubleshooting
 

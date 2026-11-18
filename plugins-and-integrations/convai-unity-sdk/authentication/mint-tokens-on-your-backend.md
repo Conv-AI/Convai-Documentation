@@ -1,14 +1,14 @@
 ---
 title: Mint auth tokens on your backend
 description: Connect your server's token endpoint to a Unity build while keeping the account key on the server and checking the client response contract.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Keep the Convai account API key on your server and return an `apiAuthToken` to the Unity client. This guide covers the request and response shape used by the shipped client and local server example. Your service must decide who may request a token and enforce that access before minting one.
 
 ## Use the shipped local example
 
-The package contains `Documentation~/Examples/AuthTokenServer/server.py` and `SamplesShared/Scripts/Runtime/LocalServerAuthTokenProviderExample.cs`. The Python server reads `CONVAI_API_KEY` from its environment, calls Convai's `/user/connect` endpoint with a `CONVAI-API-KEY` header, and returns the token response. Keep that environment value on the server; do not put it into Unity settings headers or client code.
+The package contains `Documentation~/examples/auth-token-server/server.py` in the SDK source. The Python server reads `CONVAI_API_KEY` from its environment, calls Convai's `/user/connect` endpoint with a `CONVAI-API-KEY` header, and returns the token response. Keep that environment value on the server; do not put it into Unity settings headers or client code.
 
 Treat this as a local integration example. Its HTTP handler and origin checks are not a replacement for your application's production login, authorization, rate limiting, and deployment controls.
 
@@ -31,7 +31,7 @@ Return a JSON object containing `apiAuthToken` as a non-empty string. An optiona
 
 For the built-in endpoint client, select **Auth Token** and configure **Token Endpoint URL**, **HTTP Method**, and **Token Response Field** in **Credentials**. `Get` sends no body; `Post` sends `{}`. Use HTTPS outside loopback development.
 
-For a per-player login credential, register an `IConvaiAuthTokenProvider` that performs your authenticated request. Static **Request Headers** ship in the build and must not contain secrets. The local example component registers itself early in `Awake`.
+For a per-player login credential, register an `IConvaiAuthTokenProvider` that performs your authenticated request. Static **Request Headers** ship in the build and must not contain secrets.
 {% endstep %}
 {% step %}
 ### Verify a new connection

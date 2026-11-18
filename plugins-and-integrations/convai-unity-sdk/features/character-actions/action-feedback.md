@@ -1,7 +1,7 @@
 ---
 title: Report action results to the character
 description: Configure action feedback so characters can use completed results, explain failures, and submit answers from observation actions during conversation.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Action feedback tells a character what actually happened after Unity ran an action. Add the optional relay when the character needs an observation answer or should react to a failure. Actions still execute without feedback.
@@ -29,8 +29,6 @@ The relay Inspector has **When An Action Fails**, **When Everything Succeeds**, 
 | **Scripted** | Requests speech using an authored line. Failure templates support `{action}`, `{target}`, and `{reason}`. |
 
 Defaults are **Narrate** for hard failures and **Silent** for success. `DroppedCommandFeedbackMode` is `Off` by default and controls feedback for commands refused before dispatch. It is also available through C#.
-
-<figure><img src="../../../../.gitbook/assets/unity-action-feedback-settings.png" alt="Actions Editor Character Settings for a character with an Action Feedback relay, showing Failure Feedback Mode, Success Feedback Mode, Dropped Command Feedback, Speech Cooldown and Edit On Component"><figcaption><p>Character Settings with the Action Feedback section for a character that has a relay.</p></figcaption></figure>
 
 ## Return and deliver an answer
 

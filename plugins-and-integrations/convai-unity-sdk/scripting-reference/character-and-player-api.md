@@ -1,68 +1,56 @@
 ---
 title: Character and player API
 description: Reference character readiness, identity, session control, speech, actions, and typed player input through the Unity scene components.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-`ConvaiCharacter` and `ConvaiPlayer` live in `Convai.Runtime.Components`. A character describes one scene embodiment; the room provides its connection. A player provides local display identity and typed input.
+`ConvaiCharacter` and `ConvaiPlayer` live in `Convai.Runtime.Components`. A character represents a scene participant. The player component supplies local display identity and typed input.
 
 ## Character identity and readiness
 
 | Member | Meaning |
 | --- | --- |
-| `CharacterId`, `CharacterName`, `NameTagColor` | Character identity and display metadata |
+| `CharacterId`, `CharacterName`, `NameTagColor` | Character identity and display data |
 | `CharacterVersionMode`, `CharacterVersion` | Live or pinned-release selection |
-| `SelectedCharacterReference`, `CharacterReference` | Selected/effective reference used by connection routing |
-| `ConfigurationSource`, `CharacterConfigAsset` | Inline or profile-backed configuration |
-| `OwnerId` | Multi-character owner ID; empty means local ownership |
-| `SessionState`, `IsSessionConnected` | Shared room connection state |
-| `IsCharacterReady` | Character-specific readiness |
-| `IsInConversation` | Connected and character ready; does not mean this character is the target |
-| `ConversationAvailability`, `CanAcceptPlayerInput` | Whether the character can receive input now |
+| `SelectedCharacterReference`, `CharacterReference` | Selected and effective reference used by connection routing |
+| `SessionState`, `IsCharacterReady` | Shared room state and character-specific readiness |
+| `IsInConversation` | Room connected and character ready |
+| `ConversationAvailability`, `CanAcceptPlayerInput` | Whether this character can receive input now |
 | `RoomMembershipStatus` | Nullable membership status |
-| `CharacterSessionId`, `EnableSessionResume` | Current conversation session and resume gate |
-| `IsInjected` | Runtime dependencies supplied |
+| `CharacterSessionId`, `EnableSessionResume` | Current conversation session identifier and resume setting |
+| `IsInjected` | Whether the runtime supplied this character's dependencies |
 
-`Configure(characterId, characterName)` requires a disconnected session. `SetCharacterSessionId` and `ClearCharacterSessionId` change the character's current value; they do not guarantee removal of scoped persisted resume state. See [Session lifecycle](../core-concepts/session-lifecycle.md).
+`Configure(characterId, characterName)` requires a disconnected session. Character session identifiers are assigned by the runtime. See [Session lifecycle](../core-concepts/session-lifecycle.md) to start a fresh session.
 
-## Session and speech methods
+## Start and end a conversation
 
-`StartConversationAsync`, `StopConversationAsync`, and `ResetAndRetryAsync` return `IConvaiOperation<Unit>`. `WaitForCharacterReadyAsync(float? timeoutSeconds, CancellationToken)` fails with `connection.timeout` on timeout or `session.invalid_state` when not connected. Await inside `try`/`catch`; checking an operation's error after a throwing await cannot handle that exception.
+`StartConversationAsync(token)` connects if needed and waits for the character. `WaitForCharacterReadyAsync(float? timeoutSeconds, CancellationToken)` waits while the room is connecting or connected. `ResetAndRetryAsync(token)` retries after the session enters `Error`. These operations return `IConvaiOperation<Unit>`. Use `ConvaiManager.DisconnectAsync` to end the shared room connection.
 
-`StartConversationAsync` is the explicit call. **Auto Connect** and the room's **Starts Connected** setting do not gate it. **Auto Connect** calls it after initialization or re-enable only when the room allows automatic connection; see [ConvaiRoomManager API](convairoommanager-api.md).
+### Character audio
 
-`ToggleSpeech` and `ToggleSpeechAsync` control character speech. Narrative shortcuts are `SendTrigger`, `SendNarrativeEvent`, and `SendNarrativeSpeech`; template keys use `UpdateTemplateKeys`. For acknowledged outcomes, use the room APIs described in [Server command results](server-command-results.md).
+Use `SetRemoteAudioEnabled(bool)` to change the character's track subscription and `IsRemoteAudioEnabled` to read it. `EnableRemoteAudioOnStart` reflects **Play Voice On Start**. For local playback mute, use `manager.Audio.SetCharacterMuted`. For a server-side voice request, use `manager.SetTtsEnabled`. See [Audio API](audio-api.md).
 
-## Remote audio
-
-`EnableRemoteAudio`, `DisableRemoteAudio`, and `ToggleRemoteAudio` control track subscription. Disabling stops the character's remote audio subscription and releases playback; enabling resumes it. The WebGL adapter also applies this through its controllable remote track. `ToggleRemoteAudio()` returns void. Use `SetRemoteAudioEnabled(bool)` and its boolean result when you need to detect a refusal; dependencies and an audio service must be available.
-
-`EnableRemoteAudioOnStart` is read-only. Configure **Play Voice On Start** in the character Inspector or profile. Per-character methods raise `OnRemoteAudioEnabledChanged`; changes made directly through `manager.Audio` raise the facade event instead.
-
-## Events and actions
+## Character events and actions
 
 | Character event | Payload |
 | --- | --- |
-| `OnSpokenLine` | `string`, once per spoken sentence |
-| `OnSpeechStarted`, `OnSpeechStopped`, `OnCharacterReady` | No payload |
-| `OnTurnCompleted` | `bool` indicating a cut-short response, including abort/disconnect cases |
-| `OnSessionStateChanged` | `SessionState` |
-| `OnRemoteAudioEnabledChanged` | `bool` |
-| `OnEmotionChanged` | Emotion name and intensity |
+| `OnSpokenLine` | `string` for a spoken sentence |
+| `OnSpeechStarted`, `OnSpeechStopped`, `OnCharacterReady` | None |
+| `OnTurnCompleted` | `bool` indicating a cut-short response |
+| `OnRemoteAudioEnabledChanged` | `bool` for track subscription state |
 | `OnActionsReceived` | `IReadOnlyList<ConvaiActionCommand>` |
 
-`OnTranscriptReceived` is removed. Use the transcript facade for history or [Character events](character-events.md) for typed speech and turn details.
-
-`Actions`, `ActionConfig`, `ActionDefinitions`, and `GetActionConfigSource` expose action configuration/runtime surfaces. `EmotionDetectionMode` follows the attached emotion source; without one it is off. Use the feature references before changing these systems.
+Use `manager.Events` for typed room-wide events, including emotion and session state. Use `manager.Transcripts` for history or captions. The character exposes `Actions`, `DynamicContext`, and `NarrativeDesign` for those features.
 
 ## Player input and identity
 
-`PlayerId` is a stable local transcript/display ID, not the server speaker ID or Long-Term Memory end-user ID. It is established from the name once and survives renames. `Configure(playerName, playerId: null)` keeps the existing ID. `PlayerName`, `NameTagColor`, and `SetRuntimeDisplayName` control display data; connection identity comes from `RoomSessionConnectOptions.EndUserId` or the configured provider.
+`PlayerId` is the local transcript and display ID. Convai assigns speaker IDs and resolves end-user identity separately. The player derives its ID from its name once. `Configure(playerName, playerId: null)` preserves the existing ID. `PlayerName`, `NameTagColor`, and `SetRuntimeDisplayName` control display data.
 
-Prefer `TrySendTextMessage(message, out reason)` so UI can show why a message was refused. Input requires conversation availability `Ready` or `Answering`. Group voice conversations refuse typed text. `SendTextMessage` logs a refusal instead; `OnTextMessageSent` reports locally accepted text submission.
+Use `TrySendTextMessage(message, out reason)` so your UI can show a local refusal. Input requires conversation availability `Ready` or `Answering`. Group voice conversations refuse typed input. `SendTextMessage` logs a refusal. `OnTextMessageSent` reports that the room accepted a local send for processing.
 
 ## Related pages
 
+- [Character events](character-events.md)
 - [Pin a character version](../getting-started/pin-a-character-version.md)
 - [Conversation availability](../features/conversation-availability/README.md)
 - [Character actions](../features/character-actions/README.md)

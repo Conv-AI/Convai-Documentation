@@ -1,7 +1,7 @@
 ---
 title: Gaze usage examples
 description: Configure eye contact, script glances, and coordinate multi-character gaze with four complete Convai Gaze usage examples.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 These scenarios show how `ConvaiGazeController` and its supporting components combine to serve realistic application requirements. Each scenario is self-contained: Inspector setup is described first, followed by any runtime code needed to complete the behavior. Field references are in [Gaze profile reference](profile-reference.md); the full scripting surface is in [Gaze scripting reference](scripting-reference.md).
@@ -65,35 +65,13 @@ public sealed class NegotiationDocumentCue : MonoBehaviour
 
 ### Component setup
 
-Add `CharacterGazeTargetProvider` (**Add Component > Convai > Gaze > Advanced > Character Target**) to every participating character, alongside its `ConvaiGazeController`. Leave **Publish Self** and **Look At Others** on so each character both offers itself as a target and generates candidates for the rest. The default **Priority** of `7` sits between the player anchor's `10` and a world object's `5`, so listeners turn to a speaking colleague but a conversation with the player still wins.
+Add `ConvaiGazeController` to the participating characters and leave **Follows the conversation** on **Anyone**. Gaze registers each character as a potential target for the others. If a character needs different distance, priority, or idle-glance settings, add **Convai > Gaze > Advanced > Character Target** to that character.
 
-Leave each character's **Follows the conversation** (`ConvaiGazeController.AttendToSpeaker`, a `GazeSpeakerAttention` value: `Off`, `Player`, `Characters`, or `Anyone`) on its default, `Anyone`. That is the setting that actually turns a listening character toward whoever currently holds the floor — the `CharacterGazeTargetProvider` above only makes a character eligible to be looked at. `Anyone` reacts to both the player's turn and another character's turn, which is what this scene needs.
+For a scene using `ConvaiGroupConversation`, leave **Drive Gaze** enabled and include the participants' head-height colliders in **Spatial Query Layers**. The group follows the active heard line. Release any scripted gaze when it should hand control back to the group.
 
-For a scene using `ConvaiGroupConversation`, **Drive Gaze** (on by default) coordinates held looks for active lines at scripted priority `1`. Those looks take precedence over automatic `AttendToSpeaker` attention. Keep head-height colliders on the participating characters in **Spatial Query Layers**. When no group look is held, the automatic behavior described here can run.
+### Verify gaze in Play Mode
 
-### Verify every character has the provider
-
-```csharp
-using Convai.Modules.Gaze.Providers;
-using Convai.Runtime.Components;
-using UnityEngine;
-
-public sealed class MultiCharacterGazeAudit : MonoBehaviour
-{
-    private void Start()
-    {
-        foreach (ConvaiCharacter character in ConvaiManager.ActiveManager.Characters)
-        {
-            if (character.GetComponentInChildren<CharacterGazeTargetProvider>(true) == null)
-                Debug.LogWarning($"{character.name} has no Character Gaze Target Provider and will not join mutual gaze.");
-        }
-    }
-}
-```
-
-`ConvaiManager.ActiveManager.Characters` lists every `ConvaiCharacter` the manager currently owns, which makes this a convenient one-shot audit for a scene with several NPCs added at different times. A speaking character is always fully relevant to the others regardless of distance-based relevance falloff, which is what makes listeners turn toward whoever currently holds the floor; **Idle Glances** (on by default) governs the occasional exchange between characters that are all idle at once.
-
-**Expected outcome:** The two listening characters turn to face whoever is speaking, and all three characters exchange occasional glances instead of staring blankly ahead once the scene goes idle.
+Start the conversation. Watch the two listeners turn toward the speaker, then check that idle characters exchange occasional glances during quiet periods. Open **Convai > Gaze Editor > Live** to see the active target and any visibility blocker.
 
 ## Scenario 4: Answer a question after looking at the target
 

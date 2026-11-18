@@ -1,7 +1,7 @@
 ---
 title: End-user identity
 description: Supply a stable identity for character memory, choose per-connection overrides or a provider, and verify which identity the connection confirms.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Supply a stable `end_user_id` so successive memory requests identify the same person. Use an application account ID when people sign in; the default `DeviceEndUserIdProvider` identifies the Editor environment or device instead.
@@ -24,7 +24,7 @@ Generated fallback GUIDs use 32 hexadecimal characters without hyphens. Deleting
 
 ## Implement a custom identity provider
 
-Install providers before connecting. If sign-in completes asynchronously, turn off **Starts Connected** on `ConvaiRoomManager` (or **Connect On Start** on its profile). That setting also blocks each character's **Auto Connect**, including characters enabled later. Initiate the connection after the signed-in identity is ready.
+Install providers before connecting. If sign-in completes asynchronously, turn off **Starts Connected** on `ConvaiRoomManager`. Initiate the connection after the signed-in identity is ready.
 
 The following component is called by your application's sign-in flow. It does not assume a particular authentication library:
 
@@ -83,7 +83,7 @@ Registration can happen in `Awake` if your identity is already available then. I
 
 ## Per-connection identity and display names
 
-`RoomSessionConnectOptions` and `MultiCharacterJoinOptions` accept `EndUserId`, `EndUserMetadata`, and `EndUserName`. Explicit values let a connection use a caller-supplied identity instead of the provider. `ConnectWithAuthTokenAsync(authToken, endUserId, endUserName)` also accepts identity for that connection.
+`RoomSessionConnectOptions` accepts `EndUserId`, `EndUserMetadata`, and `EndUserName`. Explicit values let a connection use a caller-supplied identity instead of the provider. For runtime token authentication, use the [Auth Token setup](../../authentication/README.md) with the same connection identity fields.
 
 For the resolved display name, the SDK uses this order:
 

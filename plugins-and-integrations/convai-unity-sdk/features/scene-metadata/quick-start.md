@@ -1,7 +1,7 @@
 ---
 title: Scene metadata quick start
 description: Name and describe relevant Unity objects, inspect the collected metadata, and test whether a connected character uses the intended scene information.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Add World Object metadata to a small set of scene objects, then verify collection, local delivery, and the character's response separately.
@@ -31,20 +31,18 @@ For duplicate copies, use a [logical group](group-objects-and-standing-positions
 {% step %}
 ### Inspect collection
 
-Add `ConvaiSceneMetadataCollector` if you want a manual trigger or diagnostics. It can resolve dependencies from the active `ConvaiManager`; placing it on the same GameObject is a useful convention. Enable **Collect On Start** for a connection-time attempt.
-
-For the Console check, leave **Log Statistics** enabled and set **Global Log Level** to **Debug** in **Convai > Settings**. At the default Info level, the collection messages are hidden. `GetMetadataCount()` and `GetCurrentMetadata()` also inspect the registry without sending.
+Use `ConvaiWorldObjectRegistry.GetValidMetadata()` in Play mode to inspect which objects pass the SDK’s name, inclusion, and logical-group filters. Use `GetSceneMetadataList()` to read the projected names and descriptions before sending.
 {% endstep %}
 {% step %}
 ### Verify local sending and conversation behavior
 
-Enter Play mode and address the intended character. A `Collected N metadata objects` Debug line confirms assembly only. A separate `Sent N metadata objects to RTVI service` line records the local accepted send; it is not a backend acknowledgement.
+Enter Play mode and address the intended character. Ask about a specific authored object and compare the reply with its description. If the list looks correct locally and the reply differs, check the session’s target and scene metadata command results.
 
-Check for warnings, especially an oversized message or a missing target. In multi-character rooms, the automatic path waits until that character is the current conversation target. Ask a question about a specific authored object and compare the reply with its description. Record an unexpected reply as a separate conversation test failure.
+Check for warnings, especially an oversized message or a missing target. In multi-character rooms, the automatic path waits until that character is the current conversation target.
 {% endstep %}
 {% endstepper %}
 
-The automatic character path works without a collector. It sends every valid world object, action targets included: in the connect request when the scene has one character, otherwise once the character is ready. After that it sends the list again only when it changes. A collector sends the same full list to the current target each time it runs. See [How scene metadata works](how-scene-metadata-works.md) for the distinction.
+The SDK includes projected world objects in new-room connect requests. After connect, it sends a replacement list when the projection changes. See [How scene metadata works](how-scene-metadata-works.md) for the distinction.
 
 ## Next steps
 

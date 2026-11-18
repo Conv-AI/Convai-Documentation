@@ -1,7 +1,7 @@
 ---
 title: Conversation flow
 description: Understand what the Conversation Flow module tracks in a conversation and why every other embodiment module depends on its timing.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Conversation Flow is the embodiment module that decides a character's dialogue state — idle, listening, thinking, or speaking — and every other embodiment module reads that state instead of tracking its own version of it. You rarely add it by hand: Convai adds a controller automatically the moment another module needs a dialogue state to read. This page explains what the module owns and why the modules that depend on it behave the way they do.
@@ -16,16 +16,14 @@ Conversation Flow is the embodiment module that decides a character's dialogue s
 
 ## How a speaking turn ends
 
-A speaking turn ends the moment the character's own voice stops, not when Convai confirms the turn is over. Convai's turn-completed confirmation is sent after the sound has already finished, so a character that waited for it kept performing for as long as that message took to arrive. The controller instead watches locally and leaves `Speaking` as soon as it has local evidence the response is over, and every module that reads `Speaking` — Body Animation's talk layer among them — winds down from that same moment.
+Conversation Flow ends the local speaking performance from the service state or from playback on the device. Body Animation and other embodiment modules use the same dialogue state.
 
-Two sources of local evidence feed this, and the controller acts on whichever reports the end first:
+When local endings are enabled, the controller uses two sources of playback evidence.
 
-- **The character's voice.** A gap between two sentences sounds the same as an ending, so the controller waits `0.4` seconds before treating silence as the turn's end.
-- **Lip Sync, when the character has it.** Speech animation arrives ahead of the audio it belongs to, so Lip Sync knows where a response ends before the sound gets there, with no hold needed.
+- **LipSync playback.** If the playback witness reports that the response has finished, Conversation Flow ends the speaking performance immediately. Frames still ahead of the playhead keep it in the speaking state through a pause.
+- **Voice audibility.** Without a conclusive LipSync reading, the controller can wait for silence. The default hold is `0.4` seconds. If sound resumes during the hold, the speaking performance continues.
 
-These are the shipped defaults. The standard profile Inspector does not expose the serialized controls, but they can be changed through Unity's Debug Inspector or editor code using `SerializedObject`. The controller also notices you the moment it has local evidence you have started talking, ahead of Convai's own confirmation that it heard you — the opposite edge of a turn, controlled by the serialized `noticeYouLocally` field. See [Conversation flow reference](reference.md#fixed-behavior) for both behaviors.
-
-`ConvaiCharacter.IsSpeaking`, `OnSpeechStopped`, and `OnTurnCompleted` are unaffected — they still report Convai's own verdict, not the controller's local one.
+A service end or interruption takes effect immediately. With no local evidence or with local ending disabled, Conversation Flow follows the service state. This timing governs local presentation. Use character and manager events for the conversation lifecycle. See [Conversation flow reference](reference.md#fixed-behavior).
 
 ***
 

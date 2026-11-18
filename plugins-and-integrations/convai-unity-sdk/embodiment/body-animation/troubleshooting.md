@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot body animation
 description: Resolve setup findings, missing clips, invisible actions, navigation problems, and optional movement performances using the Inspector and live diagnostics.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Read the Body Animation Inspector's findings first, then use **Convai > Body Animation Editor > Live** during Play mode to inspect the active layers and latest action request.
@@ -16,8 +16,6 @@ Read the Body Animation Inspector's findings first, then use **Convai > Body Ani
 | Animator Controller | Use **Clear Controller** if the existing controller is unnecessary | The Animator Controller finding disappears |
 | Overlay Mask | Use **Generate Mask** and inspect the resulting coverage | Upper-body overlays have the intended mask |
 | Talk | Add valid Talk entries | Speech can select an authored talk clip |
-| Locomotion Provider | Assign a component implementing `IConvaiLocomotionSource` | Provider validation passes |
-| Advanced Locomotion | Implement the managed-motion capability if advanced synchronization is required | Starts/stops/turns can coordinate with the mover |
 | Beat Gestures / Ambient Activities / Referential Gestures | Review the content and **Turn On** fix for a disabled feature | The intended feature has both content and an enabled switch |
 | Action Strength | Use **Restore Full Strength** when the config unintentionally suppresses actions | The Action layer has visible weight |
 | Gesture Action | Correct the Play Gesture name or add its entry | The behavior resolves an authored action |

@@ -3,7 +3,7 @@ title: Vision debug preview
 description: >-
   Verify the vision camera feed and confirm that vision status requests and
   triggers reach Convai using Unity Editor debug tools.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 `VisionDebugPreview` is an Editor-only component that renders the live camera feed as a screen overlay and displays a capture statistics panel. Use it to inspect the locally captured image during development. It does not prove the service received or used that image. The sample vision diagnostic tools complement it by confirming that vision status requests and triggers actually reach Convai.
@@ -102,15 +102,15 @@ If you add the Sample Debug Hub prefab yourself, its **Vision** panel exposes th
 | Control | Action |
 | --- | --- |
 | **Text message** input + **Send Text** | Sends a plain text message through `ConvaiPlayer.SendTextMessage`. Use this first to confirm the character responds at all. |
-| **Vision Status** (ignores prompt and respond-mode inputs) | Calls `ConvaiRoomManager.RequestVisionStatus()`. The result text reports the backend's buffer outcome, active source, and frame age once Convai answers. |
-| **Vision prompt** and **Respond mode** inputs + **Vision Trigger** | Calls `ConvaiRoomManager.TriggerVision()` with the prompt text and the parsed respond mode. The result text reports whether frames were attached and whether the request was downgraded. |
+| **Vision Status** (ignores prompt and respond-mode inputs) | Awaits `ConvaiManager.RequestVisionStatusAsync()`. The result text reports the backend's buffer outcome, active source, and frame age once Convai answers. |
+| **Vision prompt** and **Respond mode** inputs + **Vision Trigger** | Awaits `ConvaiManager.TriggerVisionAsync()` with the prompt text and the parsed respond mode. The result text reports whether frames were attached and whether the request was downgraded. |
 
 The **Respond mode** input accepts `silent`, `auto`, or `must_respond`. Leave it empty to send no mode; the trigger then follows the Vision lane default, `Silent`, and Convai attaches the frames without a reply. An unrecognized value is rejected before the request is sent. The result text then reads `Invalid respond mode '<value>' — use silent, auto or must_respond`.
 
 For example, after a successful trigger the result text reads:
 
 ```text
-Vision trigger: status=success, outcome=frames_available, attach=attached, frames=5, downgraded=False
+Vision trigger: status=Succeeded, outcome=frames_available, attach=attached, frames=5, downgraded=False
 ```
 
 For a scene-only check without the hub, add `DynamicVisionContextSceneTool` to any GameObject. It exposes the same three actions through an IMGUI overlay and equivalent context menu commands (**Send Text Message**, **Request Vision Status**, **Trigger Vision**). The scene does not place the separate VisionTargets materials as colored test props. Add your own distinct visible objects when testing what the camera sees.

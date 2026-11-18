@@ -1,7 +1,7 @@
 ---
 title: Custom identity provider
 description: Connect with a stable user identity from your login system, validate optional metadata, and inspect the identity reported for a Unity session.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Use `IEndUserIdentityProvider` to associate connections with an account in your application instead of the default device identity. Register the provider before connecting, and disconnect before switching users on a shared device.
@@ -55,7 +55,7 @@ public sealed class AccountIdentity : IEndUserIdentityProvider, IEndUserMetadata
 {% step %}
 ### Disable automatic connection
 
-Turn off **Starts Connected** on `ConvaiRoomManager`, or **Connect On Start** on its profile. That setting also blocks each character's **Auto Connect**, including characters enabled later. Otherwise the scene can connect with the default identity before login completes.
+Turn off **Starts Connected** on `ConvaiRoomManager` before entering Play mode. This gives your login flow time to provide an identity before it connects.
 {% endstep %}
 {% step %}
 ### Connect after login
@@ -69,7 +69,6 @@ Read `ConvaiManager.CurrentEndUserId` without logging it, and inspect `CurrentLo
 {% endstep %}
 {% endstepper %}
 
-For a custom manager subclass, the equivalent builder hooks are `WithEndUserIdentityProvider` and `WithEndUserMetadataProvider` in `CreateRuntimeBuilder`. They configure identity; they do not replace credentials or persistence.
 
 ## Default device identity
 

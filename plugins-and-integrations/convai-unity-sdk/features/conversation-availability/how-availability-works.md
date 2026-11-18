@@ -1,7 +1,7 @@
 ---
 title: How conversation availability works
 description: Understand how the Convai Unity SDK decides whether a character can hear the player, and why a connected room is not enough.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 A room can report itself connected before the character the player is addressing has been announced by Convai. Conversation availability answers a narrower question than "is the room connected" — it asks "can this specific character hear the player right now" — and it is what every input surface in the SDK checks before it lets the player speak or type.
@@ -41,7 +41,7 @@ Two extension methods answer the questions a UI actually has:
 
 ## Moving through a target switch
 
-`ConvaiManager.ConversationAvailabilityChanged` fires whenever the verdict moves — including when the player starts addressing a different character whose availability differs from the one they left. While a targeting switch is in flight, availability reports `Preparing` even for a character that was `Ready` a moment earlier, so input closes for the moment the conversation is actually moving between characters rather than accepting a message that lands on neither.
+`ConvaiManager.Events.OnConversationAvailabilityChanged` reports a change in availability and includes the addressed character when one exists. While a targeting switch is in flight, availability reports `Preparing` even for a character that was `Ready` a moment earlier, so input closes for the moment the conversation is actually moving between characters rather than accepting a message that lands on neither.
 
 ## Availability is one input gate
 

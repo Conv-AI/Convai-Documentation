@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot gaze
 description: Fix static eyes, heads that will not turn, unselected gaze targets, and refused scripted gaze on Convai Gaze characters.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Start with the `ConvaiGazeController` Inspector: it has **Personality**, **Who It Looks At**, and **Live** sections, with **Before this works** when blocked. Open **Convai > Gaze Editor > Setup** for the full **Rig report**, **Facing direction**, and **Worth knowing** findings.
@@ -29,7 +29,7 @@ When no semantic rig binding resolves at all, `ConvaiGazeController` logs `No se
 
 ## A target is never selected
 
-Targets compete in priority tiers before relevance or distance is considered: the player anchor publishes at `10`, other Convai characters at `7`, and `ConvaiGazeTarget`/`WorldObjectGazeTargetProvider` world objects at a default of `5`. A world object below the player's tier never wins while the character is engaged in conversation — that is expected, not a bug. Confirm the object actually carries `ConvaiGazeTarget` (drag-drop, no other setup required), that it sits inside its configured **Noticed within**, and that its **How interesting** is above zero. Enable **More important than the player** (priority `15`) or use **Advanced > Priority** only when the object should outrank the player entirely (a "focus here" story). With no target provider on the character at all and **Create A Player Anchor Automatically** off in **Gaze Editor > Targets > Advanced targeting**, the Setup tab reports `No target provider exists and auto-creation is off — the character will only show ambient idle life`; enable that toggle or add a target provider by hand.
+Targets compete in priority tiers before relevance or distance is considered: the player anchor publishes at `10`, other Convai characters at `7`, and `ConvaiGazeTarget` world objects at a default of `5`. A world object below the player's tier never wins while the character is engaged in conversation — that is expected, not a bug. Confirm the object actually carries `ConvaiGazeTarget` (drag-drop, no other setup required), that it sits inside its configured **Noticed within**, and that its **How interesting** is above zero. Enable **More important than the player** (priority `15`) or use **Advanced > Priority** only when the object should outrank the player entirely (a "focus here" story). With no target provider on the character at all and **Create A Player Anchor Automatically** off in **Gaze Editor > Targets > Advanced targeting**, the Setup tab reports `No target provider exists and auto-creation is off — the character will only show ambient idle life`; enable that toggle or add a target provider by hand.
 
 ## Scripted gaze is refused or absorbed
 
@@ -39,9 +39,9 @@ Targets compete in priority tiers before relevance or distance is considered: th
 
 ## Rig convention is not detected
 
-`ConvaiGazeController` resolves bones through `StandardRigBinding`, falling back to Humanoid Avatar mapping, then to a built-in generic name list. For a Generic rig, the Setup **Rig** row identifies a custom rig and the bones or eye backend it resolved. Candidate-versus-authored details are available from `Convai.DiagnoseGaze`; they are not an Info-level Candidate row in the editor window. Add **Convai > Embodiment > Character Rig**, use **Custom Rig Setup > Lock In What Convai Found** as a starting point, and verify each Head/Eye assignment before shipping. Keep exactly one `StandardRigBinding` under the character's `EmbodimentContext` root: a duplicate is rejected with `Multiple Character Rig components exist under this character. Keep exactly one on the Embodiment Context root`, because a root binding is authoritative and ambiguous authoring is refused rather than guessed at.
+`ConvaiGazeController` resolves bones through `StandardRigBinding`, falling back to Humanoid Avatar mapping, then to a built-in generic name list. For a Generic rig, the Setup **Rig** row identifies a custom rig and the bones or eye backend it resolved. Candidate-versus-authored details are available from `Convai_DiagnoseGaze`; they are not an Info-level Candidate row in the editor window. Add **Convai > Embodiment > Character Rig**, use **Custom Rig Setup > Lock In What Convai Found** as a starting point, and verify each Head/Eye assignment before shipping. Keep exactly one `StandardRigBinding` under the character's `EmbodimentContext` root: a duplicate is rejected with `Multiple Character Rig components exist under this character. Keep exactly one on the Embodiment Context root`, because a root binding is authoritative and ambiguous authoring is refused rather than guessed at.
 
-If the rig's head bone does not have local +Z as the character's visual forward and +Y up, the character aims sideways regardless of which convention matched. Use the Setup tab's rig report to measure the angle, and the Scene view's forward-ray gizmo in Edit Mode to confirm the fix before shipping.
+If the rig's head bone does not have local +Z as the character's visual forward and +Y up, the character aims sideways regardless of which convention matched. Select **Open Rig Report** from the Gaze Editor's **Setup** tab to measure the angle, and the Scene view's forward-ray gizmo in Edit Mode to confirm the fix before shipping.
 
 ## The character watches the wrong camera
 
@@ -49,7 +49,7 @@ With **Who is the player?** empty, the player anchor tries the camera tagged `Ma
 
 ## A listener ignores another character
 
-Check **Follows the conversation** first. **Off** prevents following other participants. For character-to-character attention, every speaker needs **Character Target** with **Publish Self** on, and a listener needs **Look At Others** on. The Setup report identifies these missing conditions. Distance, angle, and line-of-sight limits still apply, and active focus or scripted group looks can take priority.
+Check **Follows the conversation** first. **Off** prevents following other participants. Characters running Gaze participate without extra setup. If you added **Character Target** to tune that behavior, check **Publish Self** on the speaker and **Look At Others** on the listener. Distance, angle, and line-of-sight limits still apply, and active focus or scripted looks can take priority.
 
 ## Body turn does not happen
 
@@ -57,7 +57,7 @@ A full-body turn is the last stage of the Head & Body ladder — feet only activ
 
 ## Find out who a character is watching
 
-The `ConvaiGazeController` inspector's **Live** section, the **Live** tab of **Convai > Gaze Editor**, and the `Convai.DiagnoseGaze` MCP tool all report the same two facts, so any of the three answers "why isn't it looking at me":
+The `ConvaiGazeController` inspector's **Live** section, the **Live** tab of **Convai > Gaze Editor**, and the `Convai_DiagnoseGaze` MCP tool all report the same two facts, so any of the three answers "why isn't it looking at me":
 
 * **Off target** is the angle, in degrees, between where the eyes actually point and where the current target is. A small number under a few degrees is normal saccade and fixation noise; a number that stays large points at a target the character cannot actually reach, or a target that never resolved.
 * **Following the conversation** names who the character is watching because of `AttendToSpeaker`, or names the gate that turned a would-be speaker away — for example "beyond the attention distance", "too far behind this character", or "they publish no gaze target". A character that should be turning to a speaking colleague but is not will name the gate that is blocking it, rather than staying silent about the failure.

@@ -1,7 +1,7 @@
 ---
 title: Trigger gestures and reactions
 description: Trigger scripted head nods, semantic gesture cues, and one-shot reactions on a Convai character, and handle a refused or busy request.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Trigger a scripted head gesture, a semantic gesture cue, or a one-shot bodily reaction on a Convai character that has `ConvaiBodyLanguageController`, and handle the cases where the character cannot perform the gesture right now.
@@ -72,13 +72,10 @@ The shipped action executor `ConvaiHeadResponseActionExecutor` (menu path **Conv
 
 ## Trigger a semantic gesture cue
 
-`PulseGesture(GestureCue cue)` requests a semantic gesture with priority over automatic gesticulation. It returns a `GestureCueHandle` whose `Completion` resolves as soon as the cue's dispatch outcome is known — accepted for performance, or refused and substituted. It does not track the resulting clip through to its visual end.
+`PulseGesture(GestureCue cue)` asks the gesture performer to play a matching clip. Its Boolean result reports whether the performer accepted the request. A refused cue can still produce a procedural head beat and posture pulse.
 
 ```csharp
-using Convai.Domain.Embodiment.Interfaces;
-
-GestureCueHandle cue = _bodyLanguage.PulseGesture(new GestureCue(GestureCueKind.Affirmative));
-await cue.Completion;
+bool accepted = _bodyLanguage.PulseGesture(new GestureCue(GestureCueKind.Affirmative));
 ```
 
 Only four `GestureCueKind` values map to shipped animation content today: `Affirmative`, `Negative`, `Greeting`, and `Uncertain`. The remaining values — `Emphatic`, `Beat`, `PalmToPlayer`, `HandToChest`, `IndicateObject`, and `Enumerate` — are reserved data-model slots for future co-speech and referential-gesture content. No shipped animation set tags a clip with any of them, so a cue built from a reserved value always resolves to "no mapping": the request falls back to the same head-beat and posture-pulse primitives `PulseGesture` uses for any refused cue, and on a complete Humanoid arm chain, a short procedural arm/hand gesture. `GestureCueKind.None` is always refused.

@@ -1,7 +1,7 @@
 ---
 title: Conversation targeting reference
 description: Reference for every field, default, and event that controls how the Convai Unity SDK chooses which character the player is addressing.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Reference for the public types and `ConvaiManager` members that drive conversation targeting, including every field, default, and event.
@@ -27,7 +27,7 @@ Exposed as `ConvaiManager.ConversationTargeting`. Never `null`. Every field has 
 | `SwitchDelaySeconds` | `float` | `0.2` | `≥ 0` | How long a different character must stay the best choice before the conversation moves to them. Applies to both automatic modes and custom providers. |
 | `ProximityMargin` | `float` | `0.15` | `0` to `0.9` | Fraction by which a challenger must be nearer under `Proximity`. |
 
-Inspector labels are **Chosen By**, **Range (Metres)**, **Look Angle (Degrees)**, **Switch Margin (Degrees)**, **Proximity Margin (Fraction)**, and **Switch Delay (Seconds)**. The angle fields appear only in **Look At**; the fractional margin appears only in **Proximity**. **Player Camera** is a serialized camera reference on the manager, with `MainCamera` then `ConvaiPlayer` as fallbacks. **Manual** shows only **Chosen By**.
+Inspector labels are **Chosen By**, **Range (Metres)**, **Look Angle (Degrees)**, **Switch Margin (Degrees)**, **Proximity Margin (Fraction)**, and **Switch Delay (Seconds)**. The angle fields appear only in **Look At**; the fractional margin appears only in **Proximity**. **Player Camera** is a serialized camera reference on the manager, with the `MainCamera`-tagged camera, first eligible enabled Game camera, then `ConvaiPlayer` as fallbacks. **Manual** shows only **Chosen By**.
 
 Out-of-range values assigned to `MaxAngle`, `SwitchMargin`, `ProximityMargin`, `MaxDistance`, or `SwitchDelaySeconds` are clamped to their valid range rather than throwing.
 
@@ -68,22 +68,25 @@ Returned by `ConvaiManager.ConversationTargetingStatus`. Names the reason the la
 | `ConversationTargeting` | `ConversationTargetingOptions ConversationTargeting { get; }` | Tuning for automatic conversation targeting. Never `null`. |
 | `ConversationTarget` | `ConvaiCharacter ConversationTarget { get; }` | The character the player is currently addressing, or `null` when the room holds no multi-character session. |
 | `ConversationTargetingStatus` | `ConversationTargetSwitchVerdict ConversationTargetingStatus { get; }` | The outcome of the most recent targeting evaluation. |
-| `InitialCharacter` | `ConvaiCharacter InitialCharacter { get; }` | The character the room opens on, or `null` when nothing has been chosen. The read half of `SetInitialCharacter`. |
+| `InitialCharacter` | `ConvaiCharacter InitialCharacter { get; }` | The explicitly assigned opening character, or `null` when the SDK resolves the opening character at connect time. |
 | `TalkTo` | `void TalkTo(ConvaiCharacter character)` | Points the conversation at one character. Reports a Failed phase for an invalid request. |
 | `TalkToAsync` | `IConvaiOperation<InteractionTargetResult> TalkToAsync(ConvaiCharacter character)` | Completes on confirmation and faults on failure. |
 | `ClearConversationTargetAsync` | `IConvaiOperation<InteractionTargetResult> ClearConversationTargetAsync()` | Requests an empty route and completes on confirmation. |
-| `AddressedCharacter` | `ConvaiCharacter AddressedCharacter { get; }` | Includes pending and pre-connect UI targeting state. |
+| `AddressedCharacter` | `ConvaiCharacter AddressedCharacter { get; }` | UI target, including a pending move, a pre-connect proposal, or a looked-at character whose roster membership is still starting. |
 | `SetInitialCharacter` | `void SetInitialCharacter(ConvaiCharacter character)` | Chooses which character speaks first when the room connects. Calling it on a connected room queues a reconnect rather than moving the current conversation. |
 | `SetConversationTargetProvider` | `void SetConversationTargetProvider(IConversationTargetProvider provider)` | Replaces the SDK's targeting rule. Pass `null` to restore the behavior configured by `ConversationTargeting`. |
 
 ## Events
 
-| Event | Signature | Raised when |
-|---|---|---|
-| `ConversationTargetRequested` | `event Action<ConvaiCharacter> ConversationTargetRequested` | After the SDK closes player input and immediately before it attempts to send the target change. The send can still fail. |
-| `ConversationTargetChanged` | `event Action<ConvaiCharacter> ConversationTargetChanged` | When an authoritative response from Convai reconciles the target — normally after a local request, but also independently when another player changes the route. The argument can be `null` when the authoritative response clears the route. |
+`ConvaiManager.Events.OnConversationTargetChanged` is an `Action<ConversationTargetChanged>`. The event in `Convai.Domain.DomainEvents.Runtime` carries `Phase`, `CharacterId`, `CharacterName`, `MembershipId`, `Reason`, and `Timestamp`.
 
-These two `ConvaiManager` events are the shortest path to a single reaction to a target move. A project that has standardized on the domain event hub instead reaches for `ConvaiEvents.OnConversationTargetChanged` — `Action<ConversationTargetChanged>` — which carries the phase (`Requested`, `Confirmed`, `Failed`) and, on `Failed`, the reason the move was refused. See [Event system](../../core-concepts/event-system.md) for the full field reference and a subscription example.
+| Phase | When it is raised |
+|---|---|
+| `Requested` | The SDK has claimed the routing window and is about to send a target change. Player input is paused. |
+| `Confirmed` | The SDK has reconciled the authoritative route. This can also occur after a remote route change or roster handover. Identity fields can be empty when the route is clear or no local character is bound. |
+| `Failed` | A requested change was unsuccessful. `Reason` describes the failure. If the refusal also reconciles a newer route, the SDK publishes that route as `Confirmed` first. |
+
+An invalid request or a deferred request superseded before sending can fail without a `Requested` phase. Use the operation returned by `TalkToAsync` or `ClearConversationTargetAsync` to track your specific request.
 
 ## Errors and constraints
 
@@ -92,7 +95,7 @@ These two `ConvaiManager` events are the shortest path to a single reaction to a
 | `TalkTo` called with a character not in the current room | The call is refused; the Console logs a warning naming the character. |
 | `TalkTo` called while the player is mid-utterance | The request is held until the utterance ends, then sent. |
 | A registered `IConversationTargetProvider.ResolveTarget` throws | An Error is logged and no proposal is produced; lost-target recovery can still apply. |
-| No authored camera, `MainCamera`, or `ConvaiPlayer` is available | Automatic/provider targeting warns that there is no camera or player to measure from. |
+| The SDK cannot resolve a view camera or player transform | Automatic/provider targeting warns that there is no camera or player to measure from. |
 | `TalkToAsync(null)` | The operation faults with `ArgumentNullException`; the Failed phase is reported. |
 | A room holds only one character | Targeting logic never runs — the single character holds the conversation. |
 

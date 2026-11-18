@@ -1,7 +1,7 @@
 ---
 title: Gate your UI on availability
 description: Gate a custom chat field or microphone button on conversation availability so player input waits until a character can hear it.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Bind your own chat field, microphone button, or send action to `ConvaiManager.ConversationAvailability` so it only accepts input once the addressed character can actually hear it. Use this page when you are building custom input UI rather than using the shipped chat field, which already gates itself — see [Customise the chat field prompts](customise-chat-prompts.md) if that is what you are configuring.
@@ -41,7 +41,7 @@ Set **Group Conversation Mode** to match the room your application connects. For
 
 ## React to availability changes
 
-`ConvaiManager.ConversationAvailabilityChanged` fires when the verdict changes. An event-based UI must also refresh on initialization and room-mode changes; the group text restriction can change independently of the availability value. The polling example above checks both every frame. A microphone button should call `ConvaiPushToTalkController.Press()` and display `BlockedReason` when refused rather than use the text-send gate.
+`ConvaiManager.Events.OnConversationAvailabilityChanged` reports a change in availability and includes the addressed character when one exists. An event-based UI must also refresh on initialization, target changes, and room-mode changes; the group text restriction can change independently of the availability value. The polling example above checks both every frame. A microphone button should call `ConvaiPushToTalkController.Press()` and display `BlockedReason` when refused rather than use the text-send gate.
 
 ## Gate on a specific character instead of the addressed one
 

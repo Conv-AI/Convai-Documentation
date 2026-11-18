@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot group conversation
 description: Diagnose group preview setup, input correlation, state, commands, and audio while separating simulated client evidence from live service validation.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 First identify whether the room is simulated or connected to the service. Then check the Group Conversation Inspector warnings, the manager's selected roster, and the reported command/state results.
@@ -14,7 +14,7 @@ First identify whether the room is simulated or connected to the service. Then c
 | Group member count refused | Select 2–4 active characters with distinct IDs and Live versions |
 | Scene brief refused | Supply nonblank text within 4,000 characters |
 | Topic or alias validation fails | Check IDs, limits, reserved `free-` prefix, and that starters/members belong to the roster |
-| Push To Talk refusal | Set Push To Talk and use compatible correlated release; Legacy release or disabled server STT toggling is incompatible |
+| Push To Talk refusal | Set **Push To Talk** and check whether the group has started, the target is ready, or the prior capture is still finishing |
 | Join-existing request refused | Group mode creates its own room; use the classic-room join path without an enabled group component |
 | Video warning | Group conversation connects audio-only; dynamic vision is outside this mode |
 | Several enabled group components | Keep one; the newest enabled component takes ownership |
@@ -24,15 +24,15 @@ A local Ready chip or clean validation result cannot establish entitlement or li
 
 ## State does not progress
 
-`Unknown` means no recognized service state arrived. Check whether a group session exists and whether you accidentally left **Starts Connected** off after an offline rehearsal. Turning it off also blocks each character's **Auto Connect**, including characters enabled later; explicit `ConnectAsync` and `StartConversationAsync` calls still work. `IsStarted` means the client-ready message was sent; its 15-second readiness fallback does not establish that all members started successfully.
+`Unknown` means no recognized service state arrived. Check whether a group session exists and whether you accidentally left **Starts Connected** off after an offline rehearsal. `IsStarted` means the client-ready message was sent; its 15-second readiness fallback does not establish that all members started successfully.
 
 `Idle` can reflect out-of-range state. Check the group anchor, hearing range, active members, and spatial measurements. `Paused` requires resume. An apparent lull is not a local targeting failure: inspect the service's state and current topic before sending another command.
 
 ## Player turn or recipient is unexpected
 
-Verify press and release through the SDK controller, microphone availability, and the compatible release policy. Compare the press ID and `PlayerUtteranceResolved` decision without exposing the transcript. A glance alone is insufficient evidence of the final recipient; the service receives gaze duration and spatial context alongside the utterance.
+Verify press and release through the SDK controller. Check microphone permission, that the group started, and that a ready member holds the microphone route. Compare the press ID and `PlayerUtteranceResolved` decision without exposing the transcript. A glance alone is insufficient evidence of the final recipient; the service receives gaze duration and spatial context alongside the utterance.
 
-For release/capture failures, use the platform's supported input path. A successful simulator press does not test microphone drain, browser permissions, speech recognition, or backend correlation.
+For a release failure, inspect the active capture route and the commit outcome. The simulator does not verify microphone capture, release timing, browser permissions, speech recognition, or service correlation.
 
 ## Commands complete without the intended result
 
@@ -56,7 +56,7 @@ For gaze, enable **Drive Gaze**, verify the installed gaze integration and chara
 
 ## Report the evidence
 
-Include SDK revision, platform, simulated/live mode, selected member count, input/release policy, sanitized error code, command status/reason, and observed state transition. State which parts were verified in Unity, with the backend, and on the target device separately.
+Include SDK revision, platform, simulated/live mode, selected member count, input mode, sanitized error code, command status/reason, and observed state transition. State which parts were verified in Unity, with the backend, and on the target device separately.
 
 ## Next steps
 

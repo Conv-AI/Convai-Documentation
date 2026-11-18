@@ -1,7 +1,7 @@
 ---
 title: How multi-character sessions work
 description: Understand how a Unity scene with several Convai characters becomes one shared room and how the room decides who the player is addressing.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 A Convai room can hold more than one character. This page explains how a scene with several `ConvaiCharacter` components becomes one shared room, how that room decides who the player is talking to, and why one character speaks at a time.
@@ -17,7 +17,7 @@ The **Convai Manager** component reflects this directly. Its **Scene Setup** sec
 The room opens on one character before the player has looked at or said anything, because a conversation has to start somewhere. Two things can decide which one:
 
 - An assigned **Initial Character** in the Convai Manager inspector wins outright. The room opens on that character regardless of scene order or where the player's camera happens to be facing.
-- With no **Initial Character** assigned, the room opens on the first character in scene order.
+- With no **Initial Character** assigned, the built-in **Look At** or **Proximity** rule can choose an eligible character. If there is no proposal, the room opens on the first connectable character in scene order.
 
 An assigned **Initial Character** only chooses where the conversation *starts*. From the moment the room is ready, the rule below re-evaluates who is being addressed roughly 15 times a second, so the conversation moves on to whoever the active Look At or Proximity rule selects, unless **Chosen By** is **Manual**. Look At follows the view; Proximity chooses the nearest eligible character.
 

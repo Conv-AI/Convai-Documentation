@@ -1,7 +1,7 @@
 ---
 title: Vision frame sources
 description: Explains the frame sources that capture video for a character to see, covering scene cameras, webcams, and Meta Quest passthrough.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 A frame source captures images from your scene and exposes them as a Y-flipped `RenderTexture` for `ConvaiVisionPublisher` to stream. The Convai SDK ships three built-in frame sources: `CameraVisionFrameSource` for Unity scene cameras, `WebcamVisionFrameSource` for physical devices, and `QuestVisionFrameSource` for Meta Quest passthrough.
@@ -35,9 +35,9 @@ Custom fields are serialized as zero before assignment; an untouched Custom pres
 
 Automatic capture uses Built-in rendering hooks or the explicit compatibility path for SRP. `SrpNative` is unavailable in this implementation and reports `UnsupportedPlatform`; use the compatibility path when diagnosing SRP capture. The optional diagnostic health probe is exposed only in the Inspector's Debug mode, not this custom Inspector. See [Troubleshoot vision](troubleshooting-and-diagnostics.md).
 
-<figure><img src="../../../../.gitbook/assets/unity-vision-camera.png" alt="Camera Vision Frame Source Inspector with the Balanced capture preset selected and Main Camera assigned as Target Camera with the identifier main-camera"><figcaption><p>Camera Vision Frame Source with the Balanced preset and an assigned target camera.</p></figcaption></figure>
-
 ## WebcamVisionFrameSource
+
+In a browser build, ask for camera access and wait for the result before starting the webcam. The SDK's built-in camera permission request handles Android and iOS. See [Vision in WebGL](webgl.md) for the browser permission step.
 
 `WebcamVisionFrameSource` uses Unity's `WebCamTexture`, converts frames into a `RenderTexture`, and corrects rotation. Add it through **Convai > Vision > Webcam Vision Frame Source**.
 
@@ -46,7 +46,7 @@ Automatic capture uses Built-in rendering hooks or the explicit compatibility pa
 | **Webcam Device — N found** | **Device Name**, plus **Available Devices** with **Select** and **Clear**. Empty uses Unity's system-default camera, not a guaranteed first enumerated device. |
 | **Capture Settings** | **Requested Resolution** (default `640 × 480`), **Requested FPS** (default `15`), and **Identifier** (default `webcam`). Actual Resolution is shown in Play mode. |
 
-The requested size and FPS are driver requests, not guaranteed output. Serialized maximum output dimensions default to `1280 × 720` but are not drawn in the normal custom Inspector. `GetAvailableDeviceNames()` lists devices for your own selection UI.
+The requested size and FPS are driver requests, not guaranteed output. Serialized maximum output dimensions default to `1280 × 720` but are not drawn in the normal custom Inspector. Read `WebcamVisionFrameSource.AvailableDevices` for your own selection UI.
 
 `SwitchWebcamAsync(deviceName)` stops capture before opening the new device. The room remains connected, but the publisher unpublishes when the source stops. After the switch succeeds, call `publisher.EnablePublishing(true)` to publish again, or reconnect the room.
 

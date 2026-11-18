@@ -1,7 +1,7 @@
 ---
 title: Publish policies
 description: Reference for Vision publish policies, including FPS and bitrate budgets, runtime control methods, auto-publish behavior, and WebGL-specific behavior.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 `ConvaiVisionPublisher` manages the WebRTC video track that carries the camera feed from Unity to Convai. A publish policy controls the client-side frame rate and bitrate budget; it does not configure any AI model or backend vision provider.
@@ -15,7 +15,7 @@ The Inspector contains **Frame Source**, **Publish Policy**, and **Live**. Valid
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
 | **Source** | `MonoBehaviour` | _(auto-discovered)_ | The `IVisionFrameSource` to publish. Leave blank to auto-discover from the same GameObject or its children. On WebGL a local page-canvas source is preferred; otherwise a same-object camera source precedes other sources. Assign explicitly when multiple frame sources are present. |
-| **Track Name** | `string` | `"unity-scene"` | The name of the WebRTC track as it appears in the LiveKit room. Match the room's resolved **Video Track Name**. Its profile or inline value wins, otherwise it uses a child publisher's name, then `unity-scene`. |
+| **Track Name** | `string` | `"unity-scene"` | The name of the WebRTC track as it appears in the LiveKit room. The room uses the registered publisher’s track name. |
 
 ### Publish policy
 
@@ -90,7 +90,7 @@ ConvaiVisionPublisher publisher = GetComponent<ConvaiVisionPublisher>();
 if (publisher.IsPublishing)
     Debug.Log($"Publishing on track '{publisher.VideoTrackName}'");
 else
-    Debug.Log("Not publishing — check Connection Type and frame source state.");
+    Debug.Log("Not publishing — check the room’s Vision setting and frame source state.");
 ```
 
 `IsPublishing` becomes `true` after the room connects with effective connection type Video, the frame source reaches the `Ready` state, and the coordinator successfully opens the WebRTC video track.
@@ -105,7 +105,7 @@ The sequence on room connect:
 2. `ConvaiVisionPublisher` starts and resolves the frame source.
 3. The frame source starts capture and signals `Ready`.
 4. The coordinator opens a WebRTC video track named `videoTrackName`.
-5. `IsPublishing` becomes `true` and the `VideoTrackPublished` domain event fires.
+5. `IsPublishing` becomes `true`.
 
 ## Raw RenderTexture bypass orientation
 

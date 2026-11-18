@@ -1,22 +1,22 @@
 ---
 title: Join an existing room
 description: Bring a second human participant into a Unity multi-character room another client already created, using exactly one room locator.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Bring a second human participant into a room that already exists with `JoinMultiCharacterRoomAsync`, using exactly one room locator. Use this page when a companion client needs to join a session another client already created, rather than creating a new roster.
+Bring a second human participant into a room that already exists with `ConvaiManager.ConnectAsync` and one room locator. The joining client uses the existing room’s roster.
 
 ## Prerequisites
 
 - A multi-character session already created by another client, with its `RoomSessionId` or `SharedSessionKey` available to the joining client.
-- `IConvaiRoomConnectionService`, retrieved with `ConvaiManager.TryGetRoomConnectionService`.
+- A configured `ConvaiManager` and its `ConvaiRoomManager` on the joining client.
 - A distinct `EndUserId` for the joining participant.
 
 ## Join the room
 
-Call `JoinMultiCharacterRoomAsync(MultiCharacterJoinOptions options, CancellationToken cancellationToken = default)`. Under the hood it builds a `RoomSessionConnectOptions` with `JoinExistingMultiCharacterRoom` set, so no roster is sent — the join reuses the roster the creating client already established.
+Pass `RoomSessionConnectOptions` to `ConvaiManager.ConnectAsync` with `JoinExistingMultiCharacterRoom = true`. Assign the scene manager and room manager in the Inspector before running the example.
 
-| `MultiCharacterJoinOptions` field | Use it for |
+| `RoomSessionConnectOptions` field | Use it for |
 | --- | --- |
 | `RoomSessionId` | The durable room identifier returned to the creating client's `/connect` call. |
 | `SharedSessionKey` | An alternative, developer-controlled locator for the same room. |
@@ -38,6 +38,8 @@ using UnityEngine;
 
 public class JoinExistingSessionBootstrap : MonoBehaviour
 {
+    [SerializeField] private ConvaiManager _manager;
+    [SerializeField] private ConvaiRoomManager _roomManager;
     [SerializeField] private string _roomSessionId;
     [SerializeField] private string _endUserId;
     [SerializeField] private string _endUserName;
@@ -46,15 +48,15 @@ public class JoinExistingSessionBootstrap : MonoBehaviour
 
     private async void Start()
     {
-        ConvaiManager manager = ConvaiManager.ActiveManager;
-        if (manager == null || !manager.TryGetRoomConnectionService(out IConvaiRoomConnectionService roomService))
+        if (_manager == null || _roomManager == null)
         {
-            Debug.LogError("[MultiCharacter] Add a ConvaiManager to the scene before joining a room.");
+            Debug.LogError("[MultiCharacter] Assign the manager and room manager before joining.");
             return;
         }
 
-        var joinOptions = new MultiCharacterJoinOptions
+        var joinOptions = new RoomSessionConnectOptions
         {
+            JoinExistingMultiCharacterRoom = true,
             RoomSessionId = _roomSessionId,
             EndUserId = _endUserId,
             EndUserName = _endUserName
@@ -62,7 +64,7 @@ public class JoinExistingSessionBootstrap : MonoBehaviour
 
         try
         {
-            await roomService.JoinMultiCharacterRoomAsync(joinOptions, _lifetime.Token);
+            await _manager.ConnectAsync(joinOptions, _lifetime.Token).AsTask();
         }
         catch (ConvaiOperationException error)
         {
@@ -79,7 +81,7 @@ public class JoinExistingSessionBootstrap : MonoBehaviour
             return;
         }
 
-        MultiCharacterRoomSession session = roomService.CurrentMultiCharacterSession;
+        MultiCharacterRoomSession session = _roomManager.CurrentMultiCharacterSession;
         if (session == null)
         {
             Debug.LogWarning("[MultiCharacter] Joined, but no multi-character session was returned.");
@@ -98,7 +100,7 @@ public class JoinExistingSessionBootstrap : MonoBehaviour
 ```
 {% endcode %}
 
-Turn off **Starts Connected** on `ConvaiRoomManager` on this companion client so this bootstrap owns its first connect. That setting also blocks each character's **Auto Connect**, including characters enabled later. A Group Conversation component must not be enabled: group mode creates its own room and cannot use this join path.
+Turn off **Starts Connected** on the joining client so the script makes the first connection. A Group Conversation component must not be enabled: group mode creates its own room and cannot use this join path.
 
 ## Verify the join
 

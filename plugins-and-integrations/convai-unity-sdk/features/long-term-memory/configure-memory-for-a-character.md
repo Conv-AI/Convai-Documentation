@@ -1,10 +1,10 @@
 ---
 title: Configure memory for a character
 description: Turn character memory on or off from the Unity Inspector or a script, preserve other settings, and verify the configuration before connecting.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Configure long-term memory in the **Memory** section of the `ConvaiCharacter` Inspector or through `client.Memory`. Read the saved settings before changing a shared character.
+Configure long-term memory in the **Memory** section of the `ConvaiCharacter` Inspector or through `ConvaiPlatformClient`. Read the saved settings before changing a shared character.
 
 {% hint style="warning" %}
 Memory settings belong to the character on Convai, so changing them affects other applications that use it. A connection pinned to a character version keeps that version's memory enabled setting; the end-user ID requirement applies across versions. Use a test character when evaluating changes.
@@ -41,31 +41,30 @@ Leave **End-User ID** on **Required** when every conversation must have an ident
 {% endstepper %}
 {% endtab %}
 {% tab title="Scripting" %}
-Use `MemoryService.GetSettingsAsync` and `UpdateSettingsAsync` from a trusted Editor tool or service. `UpdateSettingsAsync` reads the character's existing settings and preserves settings you omit. The older `client.Characters` memory methods are deprecated.
+Use `ConvaiPlatformClient.GetMemorySettingsAsync` and `UpdateMemorySettingsAsync` from a trusted Editor tool or service. `UpdateMemorySettingsAsync` reads the character's existing settings and preserves settings you omit.
 
 The following method is a complete helper for an existing administrative tool. Pass a client configured with credentials your tool is allowed to use:
 
 ```csharp
 using System.Threading;
 using System.Threading.Tasks;
-using Convai.RestAPI;
-using Convai.RestAPI.Internal;
+using Convai.PlatformApi;
 
 public static class CharacterMemorySettings
 {
     public static Task<MemorySettings> SetEnabledAsync(
-        ConvaiRestClient client,
+        ConvaiPlatformClient client,
         string characterId,
         bool enabled,
         CancellationToken cancellationToken = default)
     {
-        return client.Memory.UpdateSettingsAsync(
+        return client.UpdateMemorySettingsAsync(
             characterId, enabled: enabled, cancellationToken: cancellationToken);
     }
 }
 ```
 
-Await the operation and handle `ConvaiRestException` in the calling tool. Read back `client.Memory.GetSettingsAsync(characterId)` to verify `IsEnabled`. Keep account API keys out of distributed player builds.
+Await the operation and handle `ConvaiApiException` in the calling tool. Read back `client.GetMemorySettingsAsync(characterId)` to verify `IsEnabled`. Keep account API keys out of distributed player builds.
 {% endtab %}
 {% endtabs %}
 
@@ -77,9 +76,9 @@ For a concrete memory check, open the [Long Term Memory window](long-term-memory
 
 ## Disable memory without deleting records
 
-Changing the enabled setting does not call a memory-deletion API. Treat disabling memory and deleting records as separate actions. To request deletion for one character and end user, use `client.Memory.DeleteAllAsync(characterId, endUserId)` and check the result afterward.
+Changing the enabled setting does not call a memory-deletion API. Treat disabling memory and deleting records as separate actions. To request deletion for one character and end user, use `client.DeleteAllMemoriesAsync(characterId, endUserId)` and check the result afterward.
 
-`client.EndUsers.DeleteAsync(endUserId)` deactivates an end user. It is not a replacement for deleting memory records. If you need to request deletion across owned characters, use **Forget End User…** in the [Long Term Memory window](long-term-memory-window.md) before deactivation.
+`client.DeleteEndUserAsync(endUserId)` deactivates an end user. It is not a replacement for deleting memory records. If you need to request deletion across owned characters, use **Forget End User…** in the [Long Term Memory window](long-term-memory-window.md) before deactivation.
 
 ## Troubleshooting
 

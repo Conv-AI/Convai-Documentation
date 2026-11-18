@@ -1,7 +1,7 @@
 ---
 title: Group objects and add standing positions
 description: Represent repeated physical objects with one shared description, then author approach positions and verify movement toward an active reachable copy.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Use a logical group when several physical copies should share one name and description. Add standing positions when a character should approach a particular side of a physical object. These controls are separate from action tour groups and gaze targets.
@@ -22,7 +22,7 @@ Create a root GameObject and add **Convai > Logical Object Group**. Its required
 {% step %}
 ### Check the projected result
 
-The root represents the active group in scene metadata; its members are omitted from that payload. A root with no active member is omitted too. Inspect the collector's current list instead of comparing only registry statistics, which do not apply the same group filter.
+The root represents the active group in scene metadata; its members are omitted from that payload. A root with no active member is omitted too. Inspect `ConvaiWorldObjectRegistry.GetValidMetadata()` to see the projected objects.
 
 Runtime interaction resolves an active physical member using the observer position. A request that names the group resolves to the member nearest the character, which is not always the one the user means, so keep objects separate when users need to tell them apart. Turn on **Include Spatial Context** on the group root's World Object; members produce no spatial facts of their own. With it on, the group's spatial fact describes that nearest member and says how many objects share the name; see [Spatial context from world objects](../dynamic-context/spatial-context.md). Test near more than one copy, then disable a copy and test the remaining selection.
 {% endstep %}

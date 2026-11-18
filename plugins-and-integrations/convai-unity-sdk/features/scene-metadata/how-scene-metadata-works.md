@@ -1,23 +1,23 @@
 ---
 title: How scene metadata works
 description: Understand how object descriptions, tracked values, spatial facts, and logical groups reach a conversation, including delivery and message limits.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Scene metadata gives a character names and descriptions for relevant Unity objects. Registration, payload selection, local sending, and conversational use are separate stages. `ConvaiCharacter` drives automatic delivery; `ConvaiSceneMetadataCollector` is optional for manual collection and diagnostics.
+Scene metadata gives a character names and descriptions for relevant Unity objects. Registration, payload selection, local sending, and conversational use are separate stages. `ConvaiCharacter` drives automatic delivery.
 
 ## Registration and automatic delivery
 
-Enabled `ConvaiObjectMetadata` components register themselves. The registry excludes invalid names, objects with **Include In Metadata** off, physical members represented by an active logical group, and group roots with no active members.
+Enabled `ConvaiWorldObject` components register themselves. The registry excludes invalid names, objects with **Include In Metadata** off, physical members represented by an active logical group, and group roots with no active members.
 
-Every valid world object goes in the character's scene description, including objects that also have an action target. When the scene registers one `ConvaiCharacter`, a new room sends the list in its connect request. The connect request is not subject to the data-message limit below, and the SDK adds no limit of its own, so a large scene arrives whole. A scene that registers more than one character (including a group conversation), and any join to an existing room by name, including the automatic rejoin after a dropped connection, send no list in the connect request and use the data message instead. A scene with no valid world objects sends no scene description.
+Every valid projected world object goes in the scene description, including objects that also have an action target. A new-room connect request sends this list over HTTP. A join request without a character roster sends no initial scene description and uses the room data message once the addressed character is ready. For a connection with a shared-session key, the SDK treats the room's stored list as unknown and can send the projected list after connect, even if it also sent a connect-time list.
 
-When a character becomes ready, it marks scene metadata pending. The pending update goes out once the character is connected and `IsInConversation`, and only when the list differs from the one the room holds, so a list that arrived in the connect request is not repeated. The lists are compared entry by entry, so a change of order or count also counts as a difference. In a multi-character room the character must also be the conversation target. An empty list is not sent while the room holds no list; once the room holds one, a later empty list replaces it.
+After a character becomes ready, the SDK checks for a pending difference once that character is active, enabled, and in conversation and the room is connected. In a multi-character room it holds an update until that character is the confirmed target. It compares entries in order by name and description. Once a nonempty list has been sent, an empty list can replace it.
 
 ```mermaid
 flowchart TD
     A[Enabled World Object] --> B[Registry and logical-group filters]
-    B --> C{New room, one registered character?}
+    B --> C{Connect sends the list?}
     C -->|Yes| R[List sent in the connect request]
     C -->|No| D
     R --> D[Character ready: update pending]
@@ -26,21 +26,19 @@ flowchart TD
     E -->|Yes| F{Differs from the list the room holds?}
     F -->|No| X[Nothing sent]
     F -->|Yes| T{Conversation target, in a multi-character room?}
-    T -->|No| X2[Not sent]
+    T -->|No| D
     T -->|Yes| G{Message fits 15,360 bytes?}
     G -->|Yes| S[Data message sent]
     G -->|No| H[Warning and refused send]
 ```
 
-The collector reads the same full valid list and sends it as a data message each time it runs. **Collect On Start** attempts a send when the room connects. Manual collection sends to the current target, so it does not broadcast the scene to every member of a room.
-
-A data message, including its envelope, must fit within 15,360 UTF-8 bytes. The sender warns and refuses larger messages, and a refused scene description update leaves the room with the list it had. The limit applies to every update after connect, including the whole scene description when more than one character is registered or after a rejoin, and to collector sends. It does not apply to a scene description sent in the connect request. Authoring text limits and the number of objects do not guarantee that an update fits.
+A data message, including its envelope, must fit within 15,360 UTF-8 bytes. The sender warns and refuses larger messages, and a refused scene description update leaves the room with the list it had. The limit applies to every data update after connect. It does not apply to a scene description sent in the connect request. Authoring text limits and the number of objects do not guarantee that an update fits.
 
 ## Live description changes
 
 Setting `ObjectName`, `ObjectDescription`, or `IncludeInMetadata` through the public properties marks registered metadata dirty. Enabling, disabling, registering, or unregistering an object also schedules updates. Each character still follows the connection and target gates above.
 
-Editing serialized fields in the Inspector during Play mode does not use those setters. `OnValidate` fills a blank name and warns about text length; it does not perform the same live synchronization. Use the public properties for runtime edits or deliberately recollect through the collector.
+Inspector and Undo edits to registered objects during Play mode also mark the metadata dirty. Renaming retires tracked state under the old name.
 
 ## Tracked values
 

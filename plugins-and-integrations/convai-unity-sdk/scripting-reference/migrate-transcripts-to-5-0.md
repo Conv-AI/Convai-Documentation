@@ -1,7 +1,7 @@
 ---
 title: Migrate transcript code to SDK 5.0
 description: Migrate custom transcript views and Inspector listeners to history entries, batched updates, live captions, and explicit subscription cleanup.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Update custom transcript UI and Inspector listeners when moving to the current SDK. History now exposes immutable entries and change batches; captions remain a separate view of speech.
@@ -30,15 +30,15 @@ Use `TranscriptEntry.Id` as the key. For Added, Updated, Finalized, and Correcte
 
 ## Rewire Inspector listeners
 
-`ConvaiCharacterEventRelay.OnSpokenLine` uses `CharacterSpokenLineRelayData`. The old serialized field name can migrate, but listeners expecting the removed payload need rewiring.
+`ConvaiCharacterEventRelay.OnSpokenLine` uses `CharacterSpokenLineRelayData`. Reassign persistent Inspector listeners that used the old event or payload.
 
-`ConvaiTranscriptEventRelay` now emits entry updated/finalized/corrected/removed callbacks plus reset. Set Speaker Filter and Character Id Filter. Remove code that depends on FinalOnly, IgnoreInterimUpdates, or removed player/character transcript payloads.
+`ConvaiTranscriptEventRelay` now emits entry updated/finalized/corrected/removed callbacks plus reset. Set **Speaker Filter** and **Character Id Filter**. Replace code that used `FinalOnly`, `IgnoreInterimUpdates`, or the previous player and character transcript payloads.
 
 ## Apply lifecycle and presentation rules
 
 Subscribe, dispose subscriptions, and clear history on Unity's main thread. The facade belongs to the manager; do not dispose it. Custom views must honor `IsPresentationEnabled` and `PresentationEnabledChanged`, because the relay and data subscriptions continue while presentation is off.
 
-Handle caption Cleared immediately. For other final captions, choose a hold duration in the view. For paged history, use `NextBeforeOrder` and respect retention boundaries.
+Remove the matching cue when you receive a `Cleared` caption. For other final captions, choose a hold duration in the view. For paged history, use `NextBeforeOrder` and respect retention boundaries.
 
 ## Verify the migration
 

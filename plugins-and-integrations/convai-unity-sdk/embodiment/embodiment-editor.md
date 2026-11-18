@@ -1,7 +1,7 @@
 ---
 title: Embodiment Editor window
 description: Reference for the Convai Embodiment Editor window, covering the Setup, Presets, and Live tabs and what each one shows about a character.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The Convai Embodiment Editor is a `Convai/Embodiment Editor` window with three tabs: `Setup`, `Presets`, and `Live`. Its subtitle reads "Set up a character's gaze, emotion and body." Use it to check whether a character's rig and modules are configured correctly, to see every `ConvaiEmbodimentPreset` in the project, and to watch a running character's conversation and emotion state during Play mode.
@@ -28,7 +28,7 @@ The `Rig` section header shows one of three status words, taken from the worst f
 | `Needs Attention` | The character still works, but not as well as it could — for example, a low-confidence face rig detection. |
 | `Not Set Up` | The character will not behave correctly until the listed issue is fixed — for example, no `ConvaiCharacter` component. |
 
-Below the header, the tab lists each finding as a short title and message. Findings include: the face rig's detected `RigConvention` and its detection confidence, whether facial meshes were found, and whether the `Head`, `LeftEye`, and `RightEye` bones resolved. A finding that can be corrected automatically shows a fix button next to it, such as **Set Up Rig Now** or **Add Convai Character**.
+Below the header, the tab lists each finding as a short title and message. Findings include: the face rig's detected `RigConvention` and its detection confidence, whether facial meshes were found, and whether the head, neck, and eye bones resolve and whether the head faces the character's forward direction. Head, neck, and eye findings can appear before a `StandardRigBinding` exists. A finding that can be corrected automatically shows a fix button next to it, such as **Set Up Rig Now** or **Add Convai Character**.
 
 A **Set Up This Character** button at the bottom of the section adds a `StandardRigBinding` component if the character does not already have one, then rebuilds it.
 
@@ -37,9 +37,7 @@ A **Set Up This Character** button at the bottom of the section adds a `Standard
 The `Features` section lists every embodiment module registered in the project — `Conversation Flow`, `Gaze`, `Emotion`, `Body Animation`, and `Body Language`, in that order — one row per module. Each row shows the module's display name, a one-line description of its behavior, and a status indicator for whether the module's controller component is present on the character:
 
 - **Present** — the row shows a **Select** button that selects the component in the Inspector.
-- **Absent** — the row shows an **Add** button that adds the module's controller component to the character.
-
-<figure><img src="../../../.gitbook/assets/unity-embodiment-setup.png" alt="Embodiment Editor Setup with automatic rig setup and the five feature rows"><figcaption><p>This character has Conversation Flow and Gaze. The rig is scheduled for automatic setup when the character starts; this Ready status does not confirm that every bone or facial shape has resolved.</p></figcaption></figure>
+- **Absent** — select **Add** to install the module. For Gaze, this runs the Gaze setup with the recommended Player Attention and Attention Grounding options and assigns the scene camera when there is one unambiguous choice.
 
 ## Presets tab
 

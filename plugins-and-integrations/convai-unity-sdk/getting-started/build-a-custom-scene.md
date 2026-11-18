@@ -1,6 +1,6 @@
 ---
 title: Build a custom scene
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 description: >-
   Add required Convai components to a new Unity scene using the Setup Required
   Components command and configure your first character.
@@ -18,7 +18,7 @@ Every working Convai scene needs these three things:
 [Player GameObject]   → ConvaiPlayer
 ```
 
-The setup command creates the manager object. You add the player and character components explicitly. You can also start with `Prefabs/Setup/Convai Character.prefab` for a character with audio output, or `Prefabs/Setup/ConvaiDefaults.prefab` for the manager, player and UI. Assign the character ID and verify the resulting scene references.
+The setup command creates the manager object. Add the player and character components explicitly. Set the Character ID on the character and verify the scene before entering Play Mode.
 
 {% stepper %}
 {% step %}

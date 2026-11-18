@@ -1,7 +1,7 @@
 ---
 title: Conversation availability reference
 description: Reference for the conversation availability states, events, and methods used to gate player input in the Convai Unity SDK.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Every public member involved in checking whether a character can hear the player, in lifecycle and call order.
@@ -34,7 +34,7 @@ Values are listed in lifecycle order. Use `CanAcceptPlayerInput()` instead of re
 | Member | Type | Description |
 | --- | --- | --- |
 | `ConversationAvailability` | `ConvaiConversationAvailability` | Whether the player can talk to `AddressedCharacter` right now, and if not, what is in the way. |
-| `ConversationAvailabilityChanged` | `event Action<ConvaiConversationAvailability>` | Raised when `ConversationAvailability` changes — including when the player starts addressing a different character whose availability may differ. |
+| `Events.OnConversationAvailabilityChanged` | `event Action<ConversationAvailabilityChanged>` | Raised when the availability value changes. It carries the currently addressed character’s ID and name when available. |
 | `AddressedCharacter` | `ConvaiCharacter` | The character the player is talking to, in either shape of room and before either exists. |
 
 ## `ConvaiCharacter` members
@@ -47,7 +47,7 @@ Values are listed in lifecycle order. Use `CanAcceptPlayerInput()` instead of re
 
 ## `ConversationAvailabilityChanged` domain event
 
-Published on the SDK's event hub, and exposed as a typed property on `ConvaiEvents.OnConversationAvailabilityChanged`.
+Subscribe through `ConvaiManager.Events.OnConversationAvailabilityChanged`.
 
 | Member | Type | Description |
 | --- | --- | --- |

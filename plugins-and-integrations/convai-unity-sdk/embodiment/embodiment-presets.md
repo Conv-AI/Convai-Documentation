@@ -1,7 +1,7 @@
 ---
 title: Embodiment presets
 description: Bundle multiple embodiment modules' profiles into one reusable preset and apply it to a character so every module's settings travel together.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 An embodiment preset bundles one profile per module — Gaze, Body Animation, Body Language, Conversation Flow, and Emotion — into a single asset, so a character archetype's whole personality ships and updates as one unit instead of five separate profile assignments. Use this page to build a preset and apply it to a character.
@@ -32,7 +32,7 @@ Under **Features**, click **Add Feature** to add one profile slot. Each row offe
 Add one row per module you want the preset to control. You do not need a row for every module — a preset that only bundles Gaze and Emotion is valid. Click **Remove Last** to delete the most recently added row, or the **×** button on a row to delete that one.
 
 {% hint style="warning" %}
-Two rows with the same feature are a configuration error: `HasDuplicateModuleIds(out string message)` returns `true`, and the **Setup Check** section reports it as a fixable finding. Only the first matching slot is used at runtime.
+Use one row per feature. **Setup Check** flags duplicate rows. At runtime, the binding uses the first matching row.
 {% endhint %}
 
 Read a slot's profile from a script with `TryGetProfile(string moduleId, out ScriptableObject profile)`, which returns `false` when no slot matches the given module id.
@@ -41,14 +41,14 @@ Read a slot's profile from a script with `TryGetProfile(string moduleId, out Scr
 
 Add the **Preset** component (`Convai/Embodiment/Preset` in the Add Component menu) to the character root and assign the preset asset to **Embodiment Preset** in the **Preset** section.
 
-**Keep Unmatched Profiles** is under **Advanced**; its scripting property is `PreserveMissingSlots`. On `Awake`, the component finds every component on the character that receives an embodiment profile, and applies the matching slot from the preset to each one by its module id. A module with no matching slot either keeps its Inspector-assigned profile or receives no profile, depending on **Keep Unmatched Profiles**:
+**Keep Unmatched Profiles** is under **Advanced**; its scripting property is `PreserveMissingSlots`. When enabled, the binding applies the matching slot to each profile receiver registered with the character's `EmbodimentContext`. A module with no matching slot either keeps its Inspector-assigned profile or receives no profile, depending on **Keep Unmatched Profiles**:
 
 | **Keep Unmatched Profiles** (`PreserveMissingSlots` in code) | Behavior for a module with no matching preset slot |
 |---|---|
 | `true` (default) | Keeps the profile already assigned on that module in the Inspector |
 | `false` | Clears the module to no profile |
 
-Call `Apply(ConvaiEmbodimentPreset)` from a script to switch presets at runtime; it re-scans the character's receivers and re-applies every slot. The binding also applies its current preset when a new profile receiver registers later, so modules added after `Awake` receive their matching settings.
+Call `Apply(ConvaiEmbodimentPreset)` from a script to switch presets at runtime; it applies the preset to the receivers registered at the time. The binding also applies its current preset when a module enables and registers later. Derive custom modules from `ConvaiCharacterModule<TProfile>` so they register with the context.
 
 ## Swap presets at runtime with a library
 
@@ -62,7 +62,7 @@ Assigning a library does not apply anything by itself. In Play mode, use **Advan
 
 Open the preset asset's **Setup Check** section: it lists findings such as duplicate feature rows, empty entries, unselected or uninstalled features, and wrong settings types. An entry without settings is informational. These checks inspect the asset, not characters that use it. Use individual fixes or **Fix Everything Above** where offered. A preset with no findings shows a clean status.
 
-After entering Play mode, check each module's profile field in the Inspector on the character: it should show the profile from the preset's matching slot, or the module's own profile if **Keep Unmatched Profiles** left it untouched. If a slot's profile did not apply, the **Preset** component logs a warning naming the module id and the reason — a profile type mismatch, a missing receiver, or a duplicate slot.
+After entering Play mode, check each module's profile field in the Inspector on the character: it should show the profile from the preset's matching slot, or the module's own profile if **Keep Unmatched Profiles** left it untouched. A receiver that cannot accept a profile logs a warning naming the module and profile. Use **Setup Check** on the preset asset to find invalid or duplicate slots.
 
 ## Next steps
 

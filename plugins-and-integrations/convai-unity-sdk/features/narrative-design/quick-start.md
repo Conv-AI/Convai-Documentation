@@ -3,7 +3,7 @@ title: Narrative design quick start
 description: >-
   Add a Narrative Design Manager and a collision trigger to a Convai character
   and confirm a section change in Play Mode — no code required.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 This guide walks you through the fastest path to a working Narrative Design setup. By the end, a character reacts to a section change when the player walks through a trigger zone — entirely through the Inspector, no code required.
@@ -33,7 +33,7 @@ The Manager auto-detects the `ConvaiCharacter` on the same GameObject. If your c
 
 In the Manager's Inspector, click **Sync with Backend**. The SDK fetches your narrative sections and populates the **Narrative Sections** list. Each entry shows the section's name from the dashboard.
 
-If the list stays empty, confirm that the character ID is set on `ConvaiCharacter` and that your API key is valid — see [Configure the API key](../../getting-started/configure-api-key.md). A failed request appears as a **Sync failed** box in **Sync Status**. Selected character version reads require **API Mode > Upgraded**.
+If the list stays empty, confirm that the character ID is set on `ConvaiCharacter` and that your API key is valid — see [Configure the API key](../../getting-started/configure-api-key.md). A failed request appears as a **Sync failed** box in **Sync Status**.
 
 {% endstep %}
 
@@ -114,11 +114,9 @@ Missing any of these is the most common reason the trigger appears to do nothing
 
 Enter Play Mode and move the player through the collider zone.
 
-Confirm the configured section event fires after Convai reports the new section. If the trigger is only queued or accepted locally, this response has not yet been confirmed.
+Check **Activation Runtime > Has Triggered** for local acceptance. A character that is still starting can hold the request. Confirm the configured section event fires after Convai reports the new section.
 {% endstep %}
 {% endstepper %}
-
-<figure><img src="../../../../.gitbook/assets/unity-narrative-trigger.png" alt="Narrative Design Trigger Inspector with the character assigned, the EnterLab trigger selected with its ID, message and destination, Activation Settings set to Collision, and Auto-Recovery Settings expanded"><figcaption><p>A Narrative Design Trigger with a fetched trigger selected and Collision activation.</p></figcaption></figure>
 
 ## What the setup produced
 

@@ -1,7 +1,7 @@
 ---
 title: Tag a scene with Scene Auto Tagger
 description: Create and review object descriptions from captured scene images, apply approved metadata with Undo, and verify runtime delivery separately.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Scene Auto Tagger captures scene objects, asks Convai Vision for suggested names and descriptions, and lets you review them before applying World Object metadata. Analysis does not change the scene; **Apply** does.
@@ -53,13 +53,17 @@ Apply preserves manually authored metadata and reports conflicts for objects cha
 
 Inspect the resulting World Objects and groups. Enter Play mode, address the intended character, and verify collection and local delivery using [Scene metadata quick start](quick-start.md). Then test the actual conversation and any navigation separately.
 
-A successful Apply proves that scene components were authored. With one registered character, a new room receives the whole list in its connect request. More than one character, a rejoin, and later changes use a data message limited to 15,360 bytes. Action targets also reach the character through the action-target sync. A sync over 12 KiB is split into actions, objects and characters updates. Each list must fit in one update, or nothing is sent; see [Check when a change reaches Convai](../character-actions/register-targets-from-code.md#check-when-a-change-reaches-convai). Apply warns when the action targets or the world objects pass three quarters of the 15,360-byte limit. Apply does not prove that the list reaches every room member or produces the intended reply.
+A new-room connect request includes the projected World Objects. A join without a roster and later replacements use a room data message limited to 15,360 bytes. Action targets also reach the character through the action-target sync. A sync over 12 KiB is split into actions, objects and characters updates. Each list must fit in one update, or nothing is sent; see [Check when a change reaches Convai](../character-actions/register-targets-from-code.md#check-when-a-change-reaches-convai). Apply warns when the action targets or the world objects pass three quarters of the 15,360-byte limit. Apply does not prove that the list reaches every room member or produces the intended reply.
 {% endstep %}
 {% endstepper %}
 
 <figure><img src="../../../../.gitbook/assets/unity-scene-auto-tagger-setup.png" alt="Scene Auto Tagger Setup tab with the character picker, scene description, description focus, Scope set to Current Scene, Quality set to Accurate, and the Vision ready status"><figcaption><p>Scene Auto Tagger Setup. The character cards are blurred because they show account characters.</p></figcaption></figure>
 
-Coding assistants connected through the Unity MCP Server can run the same tagging workflow; see the [MCP tools reference](../../ai-coding-assistant/mcp-tools-reference.md).
+## Tag objects with a coding assistant
+
+In Edit mode, discover candidates with `Convai_FindSceneTagCandidates`. Review the list before calling `Convai_TagSceneObjects` to upload captures for analysis. Larger runs can return a run ID while processing continues. Read the results with `Convai_GetSceneTagRun`, then preview the changes with `Convai_ApplySceneTags`. Apply only the approved results. The tools leave the scene dirty after applying, so review the changes before saving.
+
+See the [Scene Auto Tagger tools](../../ai-coding-assistant/mcp-tools-reference.md#scene-auto-tagger) for request fields and failure results.
 
 ## Next steps
 

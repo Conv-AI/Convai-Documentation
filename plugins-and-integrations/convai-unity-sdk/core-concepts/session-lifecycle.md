@@ -1,7 +1,7 @@
 ---
 title: Session lifecycle
 description: Explains how a character's connection moves between states, keeps its session across reconnects, and can be paused, resumed, or backgrounded.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 A room owns the connection shared by its characters. `ConvaiCharacter.SessionState` reflects that shared room state; per-character readiness and `CharacterSessionId` remain separate. A transport connection alone does not mean every character can accept input.
@@ -14,19 +14,15 @@ Use conversation availability to decide whether input is allowed. See [Conversat
 
 ## Control automatic connection
 
-Two settings start a connection without your code. **Starts Connected** on `ConvaiRoomManager` (**Connect On Start** on a room profile) allows the room to connect during startup. A character's **Auto Connect** starts that character's conversation after initialization or re-enable.
-
-**Auto Connect** acts only while **Starts Connected** is on, including for characters enabled later during play. Turning **Starts Connected** off therefore blocks both. `ConnectAsync` and `StartConversationAsync` work with the setting on or off. See [ConvaiRoomManager API](../scripting-reference/convairoommanager-api.md).
+**Starts Connected** on `ConvaiRoomManager` controls startup connection. If no character is available when the scene starts, the room can connect when one appears. Turn off **Starts Connected** when login or a UI decision must come first. `ConvaiManager.ConnectAsync` and `ConvaiCharacter.StartConversationAsync` remain available for explicit connection.
 
 ## Session identifiers and resume
 
-The active room identifier and each character's conversation session identifier serve different purposes. Resume asks the service to continue a character session; it does not guarantee that the service still retains that session or its context.
+A room ID identifies the connection. A character session ID identifies the conversation with one character. Resume asks Convai to continue that character's conversation using the ID.
 
-The default room persistence uses `KeyValueStoreSessionPersistence` over `PlayerPrefsKeyValueStore`. `ConvaiSessionData` and its `sessions.json` API are not the active room persistence path.
+The default room stores resumable session IDs in Unity `PlayerPrefs`. Its hashed key starts with `convai.session.convai-session-v3:`. The key includes the character, end-user identity, service origin, environment, and application namespace. It also includes create or join mode, room and shared-session identifiers, version, and roster where applicable.
 
-Resume keys are scoped to character, end-user identity, create/join mode, room identifiers, shared-session key, character version and roster where applicable. Service origin, environment, and developer namespace also scope the key. The stored key starts with `convai.session.convai-session-v3:` when service scoping is present, or `convai.session.convai-session-v2:` otherwise, followed by a hash. Do not construct or clear a key using only a raw Character ID.
-
-**Enable Session Resume** on the character gates reuse. The inline character field defaults to off; a `ConvaiCharacterProfile` defaults to on, so inspect the source your character uses. `ClearCharacterSessionId()` clears the character's current serialized/in-memory value, but a later connection can reload persisted state. To request a fresh conversation, disable resume or use `ResumePolicy.AlwaysFresh`. This does not erase separately configured Long-Term Memory.
+**Resume Last Conversation** on the character gates reuse and defaults to off. Turn it off to request a fresh session for that character, or use `ResumePolicy.AlwaysFresh` to set that policy for the room. Long-Term Memory remains a separate service.
 
 ## Reconnect policy
 
@@ -36,14 +32,13 @@ Configure the room's **Reconnect** settings or apply a `ReconnectPolicy` with `C
 | --- | --- | --- |
 | `RoomRejoinTtlSeconds` | `60` | Window for rejoining a remembered room after an unexpected drop |
 | `ResumePolicy` | `ResumeIfPossible` | Whether to request reuse of character session state |
-| `MaxReconnectAttempts` | `3` | Retained policy data; no runtime consumer enforces this limit in the reviewed preview |
 | `SpawnAgentOnRejoin` | `true` | Request agent spawning on rejoin |
 | `StartWaitTimeoutMs` | `5000` | Start-phase wait timeout |
 | `AutoMicStartDelaySeconds` | `0.5` | Delay before automatic microphone start |
 
-`AlwaysFresh` requests a fresh character session. `ResumeIfPossible` and `AlwaysResume` attempt to reuse stored session state. If no saved session exists, `AlwaysResume` logs a warning but does not locally reject the connection. Applications that require strict resume must check eligible saved state and the resulting connection themselves. Backend retention and eligibility still determine whether a stored session can resume.
+`ResumeIfPossible` and `AlwaysResume` allow the SDK to reuse saved session state when available. If Convai rejects an SDK-supplied resume ID with HTTP `403` or `404`, the SDK retries once with that saved resume state removed from the request. If you pass a resume ID explicitly, the service's rejection of that ID stands. The application can inspect the error before deciding whether to request a fresh session.
 
-An explicit `DisconnectAsync()` or `ReconnectAsync()` drops the remembered room context, so the next connection creates a new room. A character session identifier may still be reused when resume is enabled. The room rejoin window applies to unexpected drops, not an explicit disconnect.
+Explicit disconnect clears the remembered room context. `ReconnectAsync()` disconnects and calls the overload of `ConnectAsync` that uses scene settings and configured providers. To reconnect with a per-call identity, roster join, token, or turn-taking override, await `DisconnectAsync()` and call `ConnectAsync(options)` with those values. Character session resume remains possible when the character enables it. The room rejoin window applies to unexpected drops.
 
 ## Pause and reconnect controls
 
@@ -59,6 +54,7 @@ An explicit `DisconnectAsync()` or `ReconnectAsync()` drops the remembered room 
 `RuntimeBackgroundPolicy` controls what keeps running while the Unity application is backgrounded — for example, when a player alt-tabs or a mobile app moves to the background. Set the project default under **Edit > Project Settings > Convai SDK > Runtime Defaults > Background Policy**, or change the active manager at runtime:
 
 ```csharp
+// Inside an async method with an initialized manager and using Convai.Runtime.Core
 await manager.SetBackgroundPolicyAsync(RuntimeBackgroundPolicy.MuteButCatchUp);
 ```
 
@@ -73,10 +69,14 @@ await manager.SetBackgroundPolicyAsync(RuntimeBackgroundPolicy.MuteButCatchUp);
 Subscribe to `OnRuntimeBackgroundStateChanged` to observe the requested and effective policy, since they can differ when a platform cannot implement the requested behavior. The manager applies the selected policy on both `OnApplicationPause` and focus-loss transitions, without double-pausing when Unity reports both callbacks.
 
 ```csharp
+// Inside a MonoBehaviour with using Convai.Runtime.Events and using UnityEngine
 [SerializeField] private ConvaiSessionEventRelay _relay;
 
 private void OnEnable() =>
     _relay.OnRuntimeBackgroundStateChanged.AddListener(HandleBackgroundStateChanged);
+
+private void OnDisable() =>
+    _relay.OnRuntimeBackgroundStateChanged.RemoveListener(HandleBackgroundStateChanged);
 
 private void HandleBackgroundStateChanged(RuntimeBackgroundStateRelayData data)
 {
@@ -88,11 +88,15 @@ private void HandleBackgroundStateChanged(RuntimeBackgroundStateRelayData data)
 
 ## Idle warnings and server endings
 
-`OnUserIdleWarningReceived` carries the service's remaining-seconds countdown. `OnUserIdleTimeoutElapsed` is the client's derived deadline and does not itself prove the transport closed. `ResetIdleTimer()` and its alias `ExtendIdleTimeout()` return false when no connected room can accept the request.
+`OnUserIdleWarningReceived` carries the service's remaining-seconds countdown. `OnUserIdleTimeoutElapsed` is the client's derived deadline and does not itself prove the transport closed. `ConvaiManager.ResetIdleTimer()` returns a `ServerCommandResult`. Check `WasSent` and `Status` to distinguish an unsent reset from Convai’s reply.
 
 The service can also send `OnSessionEndingReceived`. The single-character room handler records the notice and disconnects; a related drop is recognized for ten seconds. When that notice says the session is not reconnectable, the handler clears saved resume state. This single-character ending handler returns early for multi-character sessions; do not assume it closes the entire shared room for one character's notice.
 
 Observe connection events for actual room state and the ending notice for its supplied reason. A local timeout, a backend ending notice, and a transport disconnect are distinct signals.
+
+## Reset the idle timer from UI activity
+
+Add `ConvaiIdleResetDriver` from **Convai > Convai Idle Reset Driver** when UI activity should keep a warned session open. The optional component monitors key presses, mouse clicks, and touch taps by default. It starts monitoring after an idle warning while the room is connected and the player is not speaking. For a custom UI input, call `ReportUiActivity()` on the driver. Retrying an unavailable send uses a three-second cooldown by default.
 
 ## Related pages
 

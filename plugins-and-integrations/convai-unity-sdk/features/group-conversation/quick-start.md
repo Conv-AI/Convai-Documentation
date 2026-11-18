@@ -1,7 +1,7 @@
 ---
 title: Set up group conversation
 description: Prepare two to four characters for the group voice preview, configure correlated push-to-talk, and verify client readiness and live behavior separately.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Configure a small group, rehearse its client behavior, then perform a live test only when the service owner has confirmed preview access.
@@ -14,7 +14,7 @@ Group conversation is an opt-in 5.0 preview. The SDK's validation rules describe
 
 - A working manager, room manager, player, and 2–4 active selected `ConvaiCharacter` components.
 - A distinct Character ID and **Live** version for every member.
-- Push To Talk input with correlated release support. Keep **Release Mode** on **Auto** and **Enable Server Stt Toggle** enabled unless the service owner provides a supported alternative.
+- Set the room’s input mode to **Push To Talk**. The SDK correlates the capture, transcript, and player turn on release.
 - Audio-only configuration and confirmed service access for the later live test.
 
 ## Configure and verify
@@ -35,21 +35,25 @@ Use **Player Display Name** for how the group refers to the player. Set **Anchor
 {% step %}
 ### Check input and validation
 
-Set the room's conversation input mode to **Push To Talk**. Resolve the Group Conversation Inspector warnings, including missing brief, member count, legacy release, and Video configuration. A Ready chip means the local checks passed, not that the service approved the account.
+Set the room's conversation input mode to **Push To Talk**. Resolve the Group Conversation Inspector warnings, including a missing scene brief, an invalid member count, and **Vision** being on. A Ready chip means the local checks passed, not that the service approved the account.
 {% endstep %}
 {% step %}
 ### Rehearse offline
 
-Turn off **Starts Connected** on `ConvaiRoomManager`, which also blocks each character's **Auto Connect**, and add **Convai > Group Conversation Simulator** and **Convai > Group Conversation Debug Overlay**. Enter Play mode, observe the state, and hold/release the manager's push-to-talk key (T by default). The simulator uses canned text and produces no character voice.
+Turn off **Starts Connected** on `ConvaiRoomManager` and add **Convai > Group Conversation Simulator** and **Convai > Group Conversation Debug Overlay**. Enter Play mode, observe the state, and hold/release the manager's push-to-talk key (T by default). The simulator uses canned text and produces no character voice.
 {% endstep %}
 {% step %}
 ### Test with the service
 
-Exit Play mode, disable the simulator, and turn **Starts Connected** back on, or call `ConnectAsync` or `StartConversationAsync` from your own code. Observe reported state and command results, verify each voice and gaze target, and test an actual press, transcript, recipient decision, and reply. Record service refusals separately from local setup errors.
+Exit Play mode, disable the simulator, and turn **Starts Connected** back on, or call `ConvaiManager.ConnectAsync` from your own code. Observe reported state and command results, verify each voice and gaze target, and test an actual press, transcript, recipient decision, and reply. Record service refusals separately from local setup errors.
 {% endstep %}
 {% endstepper %}
 
 <figure><img src="../../../../.gitbook/assets/unity-group-conversation-inspector.png" alt="Group Conversation Inspector from the Group Conversation Sample showing the scene brief, three topics with starters, three members, the Spatial section and a Ready status"><figcaption><p>Group Conversation configured in the bundled Group Conversation Sample.</p></figcaption></figure>
+
+## Configure the group with a coding assistant
+
+On a project with the Unity CLI MCP tools installed, use `Convai_ConfigureGroupConversation` to preview the group setup and then apply the approved changes. Run `Convai_ValidateSetup` afterward. See the [group conversation tools](../../ai-coding-assistant/mcp-tools-reference.md#group-conversation).
 
 ## Next steps
 

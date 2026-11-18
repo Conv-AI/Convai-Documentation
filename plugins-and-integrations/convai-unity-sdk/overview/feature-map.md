@@ -3,7 +3,7 @@ title: Feature map
 description: >-
   Find the right Convai Unity SDK feature, module, guide, or reference page for
   any development goal, indexed by use case.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Use this table when you know the outcome you want but are not sure which SDK feature, module, or guide covers it.
@@ -19,6 +19,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Run a working example with several characters in one session | Multi-Character Sample | [Multi-Character Sample](../features/multi-character-sessions/multi-character-sample.md) |
 | Understand what each component in the scene does     | Component reference | [Scene components reference](../getting-started/scene-components.md)                         |
 | Choose between push-to-talk and hands-free input     | Input mode          | [Configure conversation input mode](../getting-started/configure-conversation-input-mode.md) |
+| Let the player interrupt a speaking character | Voice interruptions | [Configure speech interruptions](../getting-started/configure-speech-interruptions.md) |
 | Configure character audio output                     | Audio setup         | [Configure character audio](../getting-started/configure-character-audio.md)                 |
 | Configure microphone device and platform permissions | Audio setup         | [Configure microphone](../getting-started/configure-microphone.md)                           |
 | Add a chat or subtitle transcript display            | Transcript UI       | [Add chat UI](../getting-started/add-chat-ui.md)                                             |
@@ -56,7 +57,7 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Know whether the player can talk right now, and gate my UI on it                          | Conversation Availability | [Conversation Availability](../features/conversation-availability/) |
 | Let several characters converse with each other | Group conversation | [Group conversation](../features/group-conversation/README.md) |
 | Generate and review scene descriptions | Scene Auto Tagger | [Tag a scene](../features/scene-metadata/scene-auto-tagger.md) |
-| Send my own images to Convai Vision from a script and read the objects it names | Convai Vision client | [Call Convai Vision directly](../features/scene-metadata/scene-auto-tagger-scripting-api.md#call-convai-vision-directly) |
+| Automate an Editor scene-tagging run and review its results | Scene Auto Tagger | [Scene Auto Tagger scripting API](../features/scene-metadata/scene-auto-tagger-scripting-api.md) |
 | Let a coding agent set up and diagnose Convai scenes in the Editor | AI coding assistant | [AI coding assistant](../ai-coding-assistant/README.md) |
 
 ## Embodiment
@@ -100,9 +101,9 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 | Subscribe to transcript, emotion, and turn events            | Character events     | [Character Events](../scripting-reference/character-events.md)   |
 | Read and clear transcript history at runtime                 | Transcript API       | [Transcript API](../scripting-reference/transcript-api.md)       |
 | Read static `ConvaiSDK` metadata and use the `ConvaiManager.Audio` instance facade         | Conversation facades | [ConvaiManager API](../scripting-reference/convaimanager-api.md) |
-| Understand `IConvaiOperation<T>` and async patterns          | Async patterns       | [Async Patterns](../scripting-reference/async-patterns.md)       |
+| Await a typed operation and handle cancellation | Asynchronous operations | [Operation results](../scripting-reference/operation-and-stream-types.md) |
 | Use the `ConvaiCharacter` and `ConvaiPlayer` API surface      | Character and player API | [Character and Player API](../scripting-reference/character-and-player-api.md) |
-| Understand `IConvaiOperation<T>` and stream result types      | Operation and stream types | [Operation & Stream Types](../scripting-reference/operation-and-stream-types.md) |
+| Await a typed operation and handle cancellation | Asynchronous operations | [Operation results](../scripting-reference/operation-and-stream-types.md) |
 
 ## Compatibility and requirements
 
@@ -132,12 +133,12 @@ Use this table when you know the outcome you want but are not sure which SDK fea
 
 | I want to...                                                     | Topic            | Documentation                                                                                     |
 | ---------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------- |
-| Replace the API credential provider                              | Custom providers | [Custom Credential Provider](../advanced-topics/custom-providers/custom-credential-provider.md)   |
+| Migrate a custom credential provider | Authentication | [Migrate custom credential providers](../advanced-topics/custom-providers/custom-credential-provider.md) |
 | Replace the end-user identity provider                           | Custom providers | [Custom Identity Provider](../advanced-topics/custom-providers/custom-identity-provider.md)       |
-| Replace the session persistence provider                         | Custom providers | [Custom Persistence Provider](../advanced-topics/custom-providers/custom-persistence-provider.md) |
+| Upgrade a custom persistence integration | Storage | [Migrate custom persistence integrations](../advanced-topics/custom-providers/custom-persistence-provider.md) |
 | Measure latency and interpret session metrics                    | Performance      | [Performance and Optimization](../advanced-topics/performance-and-optimization.md)                |
 | Extend the SDK with a custom module or replace internal services | Extension points | [Extending the SDK](../advanced-topics/extending-the-sdk.md)                                      |
-| Select Legacy or Upgraded REST APIs | API Mode | [Choose a REST API mode](../advanced-topics/choose-a-rest-api-mode.md) |
+| Select a client for character, runtime, or account requests | REST clients | [REST API client reference](../scripting-reference/rest-api-client.md) |
 | Install native transport dependencies | Platform Support | [Native transport libraries](../platform-guides/native-transport-libraries.md) |
 | Inspect a sanitized connection response | Connection diagnostics | [Network and API requirements](../compatibility-and-requirements/network-and-api-requirements.md) |
 

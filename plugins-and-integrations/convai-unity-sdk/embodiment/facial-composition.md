@@ -1,14 +1,14 @@
 ---
 title: Facial composition
 description: Reference for the facial composition profile, including per-region blend configuration, blend modes, and layer priority.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 `ConvaiFacialCompositionProfile` is a `ScriptableObject` asset that configures how much of a character's face Emotion, LipSync, and a reserved Custom channel each control while idle and while speaking. Convai classifies every facial blendshape into one of six regions and composes each region's final weight from this profile before writing it to the character's face mesh.
 
 ## `ConvaiFacialCompositionProfile`
 
-`ScriptableObject` — `Convai.Runtime.Animation`
+`ScriptableObject` — `Convai.Runtime.Embodiment.Face`
 
 Create menu: `Assets > Create > Convai > Embodiment > Facial Composition Profile`
 
@@ -28,7 +28,6 @@ Create menu: `Assets > Create > Convai > Embodiment > Facial Composition Profile
 |---|---|---|
 | `GetRegionConfig` | `RegionBlendConfig GetRegionConfig(FacialBlendshapeRegion region)` | Returns the blend configuration for a facial region. |
 | `ClassifyBlendshape` | `FacialBlendshapeRegion ClassifyBlendshape(string blendshapeName)` | Classifies a blendshape name into a region using the profile's configured name patterns. Matching ignores case and separators, so `Jaw_Open` also matches `jawOpen`. |
-| `GetMeshDiscoveryPriority` | `int GetMeshDiscoveryPriority(string meshName)` | Returns the discovery priority from the configured mesh-name patterns. |
 | `ComputeConfigurationHash` | `int ComputeConfigurationHash()` | Hash of the profile configuration, for detecting changes. |
 | `CreateDefault` | `static ConvaiFacialCompositionProfile CreateDefault()` | Creates an instance with the shipped default values. Used internally when no profile is assigned; the caller owns and must destroy the returned instance. |
 
@@ -45,11 +44,11 @@ Every blendshape is classified into exactly one of six regions. Classification c
 | `Cheek` | `Cheek`, `Nose`, `Sneer` | Cheek puff, cheek squint, and nose sneer shapes |
 | `Other` | None (fallback) | Any blendshape that matches no configured pattern |
 
-Each pattern list is a semicolon-separated string field on the profile (`Mouth Patterns`, `Jaw Patterns`, `Brow Patterns`, `Eye Patterns`, `Cheek Patterns`), editable per project. Mesh discovery uses a separate set of name patterns (`Head Mesh Patterns`, `Secondary Mesh Patterns`, `Tertiary Mesh Patterns`) to prioritize which `SkinnedMeshRenderer` blendshapes resolve from first.
+Each pattern list is a semicolon-separated string field on the profile (`Mouth Patterns`, `Jaw Patterns`, `Brow Patterns`, `Eye Patterns`, `Cheek Patterns`), editable per project.
 
 ## Per-region composition
 
-`RegionBlendConfig` — `Convai.Runtime.Animation`, serializable struct
+`RegionBlendConfig` — `Convai.Runtime.Embodiment.Face`, serializable struct
 
 Each region has its own `RegionBlendConfig` with six weights (`0`–`1`) and a `FacialBlendMode`. LipSync weights interpolate using the speech blend factor. Emotion and Custom weights use a separate factor that rises with speech but returns over `EmotionReturnDuration`, so the expression can recover more slowly than lip sync.
 
@@ -79,7 +78,7 @@ Each region has its own `RegionBlendConfig` with six weights (`0`–`1`) and a `
 
 ## Blend modes
 
-`FacialBlendMode` — `Convai.Runtime.Animation`
+`FacialBlendMode` — `Convai.Runtime.Embodiment.Face`
 
 | Value | Integer | Description |
 |---|---|---|
@@ -95,9 +94,7 @@ Shapes registered as head-look owned take the `HeadLook` layer directly and bypa
 
 Convai's auto-added character context resolves a built-in default profile with the values above when no profile is assigned. To rebalance composition or classify blendshapes with unusual names, assign a `ConvaiFacialCompositionProfile` asset to the **Face Blending Override** field under the **Advanced** section of that context's Inspector.
 
-{% hint style="info" %}
-If a profile is explicitly assigned as `null`, the compositing behavior degrades to a max-blend fallback across all active layers and logs a one-time warning. This only happens when a profile has been deliberately cleared — Convai supplies a built-in default otherwise.
-{% endhint %}
+Clear **Face Blending Override** to return to the default profile. LipSync reports local speech playback to the facial compositor, which uses it to ramp speech and expression weights. Conversation Flow uses its own [playback evidence](conversation-flow/README.md#how-a-speaking-turn-ends) to manage dialogue state.
 
 ## Related reference
 

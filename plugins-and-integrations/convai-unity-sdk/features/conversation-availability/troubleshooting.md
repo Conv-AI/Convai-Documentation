@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot player input
 description: Fix a refused message, a permanently disabled chat field, or a microphone that never opens in a Convai Unity SDK conversation.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Most player input problems trace back to conversation availability: a message, a push-to-talk press, or an open microphone was refused because the addressed character could not hear it yet. Find the exact message or symptom below.
@@ -55,7 +55,6 @@ Additional press and routing refusals:
 | `Push-to-talk could not enable backend speech recognition.` | Inspect connection state and the service's speech-recognition toggle result. |
 | `Push-to-talk is unavailable while the application is holding the player's speech.` | Release the application's `HoldPlayerSpeech` lease when its activity ends. |
 | `Push-to-talk is unavailable in a text-only session: the microphone is not allowed.` | Use text input or explicitly configure microphone access for the intended session. |
-| `Group conversation needs correlated push-to-talk. <reason>` | Inspect `PttCompatibilityReason`; group conversations cannot use Legacy PTT. |
 | `Push-to-talk is waiting for its current turn.` or a room-specific refusal | Inspect the current `PttRefusalReason`, then `PttError`, and [PTT lifecycle](../../core-concepts/push-to-talk-lifecycle.md). |
 | `Push-to-talk is finishing its capture; retry the change after commit.` | A target/routing change raced with capture; wait for commit, then retry the change. |
 

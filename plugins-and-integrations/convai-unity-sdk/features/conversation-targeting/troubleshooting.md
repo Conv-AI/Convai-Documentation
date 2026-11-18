@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot conversation targeting
 description: Fix a conversation target that will not switch, flickers between characters, or never moves in a Convai multi-character room.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Diagnose why conversation targeting is not choosing the character you expect in a multi-character room. Each entry below covers one symptom you can observe in Play mode.
@@ -9,7 +9,7 @@ Diagnose why conversation targeting is not choosing the character you expect in 
 ## Before you start
 
 - Select `ConvaiManager` in the Inspector during Play mode and open the Live section. It names the character currently addressed, whether the player can talk to them, and the verdict behind the last targeting decision.
-- With a coding assistant, use `Convai.DiagnoseConversation` for room state and `Convai.SimulateConversationTargeting` for the geometric proposal. Simulation is read-only and does not prove a target change was sent. Set **Global Log Level** to **Debug** to see changes in targeting verdicts.
+- With a coding assistant, use `Convai_DiagnoseConversation` for room state and `Convai_SimulateConversationTargeting` for the geometric proposal. Simulation is read-only and does not prove a target change was sent. Set **Global Log Level** to **Debug** to see changes in targeting verdicts.
 - Confirm the scene has two or more `ConvaiCharacter` components registered — targeting logic never runs for a single-character room.
 
 ## Looking at a character does not switch the conversation to them

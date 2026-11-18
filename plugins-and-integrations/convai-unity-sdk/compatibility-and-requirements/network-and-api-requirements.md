@@ -1,54 +1,45 @@
 ---
 title: Network and API requirements
 description: Explains which network hosts, ports, and firewall rules a Unity project must allow before it can connect to Convai over the internet.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-The Convai Unity SDK requires outbound internet access during runtime. Speech, language understanding, and text-to-speech run through Convai over HTTPS and LiveKit WebRTC — there is no offline or LAN mode. Use this page when preparing a corporate network, validating a firewall allowlist, or confirming that a Play mode session reached the correct LiveKit room.
+The Convai Unity SDK requires outbound internet access during runtime. Live conversations use Convai over HTTPS and LiveKit WebRTC. The offline Group Conversation simulator is available for local rehearsal. See [Run the Group Conversation sample](../features/group-conversation/run-the-sample.md). Use this page when preparing a corporate network, validating a firewall allowlist, or confirming that a Play mode session reached the correct LiveKit room.
 
 ## Required outbound access
 
-Runtime sessions use Convai service endpoints plus LiveKit hosts returned in the connect response. The selected Environment and API Mode determine which REST hosts are needed. Allow outbound traffic from the machine running Unity to the hosts below.
+Runtime sessions use Convai service endpoints plus LiveKit hosts returned in the connect response. The selected **Environment** and operations determine which service hosts are needed. Allow outbound traffic from the machine running Unity to the hosts below.
 
 ### Convai endpoints
 
 | Host | Port | Protocol | Purpose |
 | --- | --- | --- | --- |
 | <code class="expression">space.vars.live_server_url</code> | `443` | HTTPS | Connect API — session setup and room credentials |
-| `api.convai.com` | `443` | HTTPS | Legacy REST operations, and `POST /vision/object-autotag` from `ConvaiObjectAutotagClient`. |
-| `api2.convai.com` | `443` | HTTPS | Upgraded Character details and Narrative reads. |
+| `api.convai.com` | `443` | HTTPS | Platform API operations and Editor development token acquisition. |
+| `api2.convai.com` | `443` | HTTPS | Character API operations. |
 | `beta.convai.com`, `api2-stg.convai.com` | `443` | HTTPS | Beta environment service and upgraded Character API hosts, when selected. |
 | Your token endpoint | Usually `443` | HTTPS | Credential acquisition in endpoint-based Auth Token mode. |
 
-Custom environments need their configured endpoints instead. `ConvaiObjectAutotagClient` is the exception: it posts to `https://api.convai.com/` whatever the project Environment is, unless you pass another `baseUri`. See [Call Convai Vision directly](../features/scene-metadata/scene-auto-tagger-scripting-api.md#call-convai-vision-directly). Emotion configuration travels in the room connect request; there is no separate WebGL emotion preflight.
+For a custom environment, allow the configured endpoints. Scene Auto Tagger runs through its [Editor authoring workflow](../features/scene-metadata/scene-auto-tagger.md). Runtime Vision publishes through the room.
 
 The Editor also downloads native transport libraries from GitHub release assets. Allow `github.com` and the release-download destinations your network follows. Downloads are written under `Assets/Convai/Plugins/client-sdk-unity-livekit/Runtime/Plugins`; see [Native transport libraries](../platform-guides/native-transport-libraries.md).
 
-### LiveKit minimum requirements
+### LiveKit signaling and media
 
-After Convai accepts the connect request, the SDK joins a LiveKit room using the `room_url` and `token` from the response. The wildcard rules below cover signaling and TURN/TLS for LiveKit Cloud:
+After Convai accepts the connection request, the SDK joins the LiveKit room using the returned URL and token. Use that URL to identify the deployment, then use LiveKit's current hostname list when you need a restricted allowlist. [LiveKit firewall configuration](https://docs.livekit.io/deploy/admin/firewall/)
 
-| Host | Port | Protocol | Purpose |
-| --- | --- | --- | --- |
-| `convai-technologies-lfslae7c.livekit.cloud` | `443` | TCP | Convai LiveKit signaling endpoint |
-| `*.livekit.cloud` | `443` | TCP | LiveKit WebSocket signaling |
-| `*.turn.livekit.cloud` | `443` | TCP | TURN/TLS fallback when UDP is blocked |
+| Destination | Outbound access | Purpose |
+| --- | --- | --- |
+| `*.livekit.cloud` | TCP `443` | Secure WebSocket signaling. |
+| `*.turn.livekit.cloud` | TCP `443` | TURN relay over TLS when a direct UDP path is unavailable. |
+| `*.host.livekit.cloud` | UDP `3478` | TURN over UDP. |
+| LiveKit media hosts | UDP `50000`–`60000`, TCP `7881` | LiveKit's recommended media paths. |
 
-### Optional direct media paths
-
-LiveKit documents these paths for direct WebRTC media and TCP fallback. Add them when your network policy permits UDP or when the LiveKit connection test shows that the minimum TCP rules are not enough.
-
-| Host | Port | Protocol | Purpose |
-| --- | --- | --- | --- |
-| `*.host.livekit.cloud` | `3478` | UDP | TURN/UDP connectivity |
-| All LiveKit hosts | `50000`–`60000` | UDP | WebRTC media transport |
-| All LiveKit hosts | `7881` | TCP | WebRTC TCP fallback |
-
-No inbound ports are required on the client machine. If wildcard domains are disallowed, use the current deployment-specific and regional hostname list in the LiveKit reference rather than allowing only the example Convai hostname. For the full firewall reference, see [Configuring firewalls](https://docs.livekit.io/deploy/admin/firewall/) in the LiveKit documentation.
+Keep regional subdomains in scope. When wildcard rules are unavailable, use the regional and deployment-specific names published by LiveKit. Test the selected path from the network on which your application runs.
 
 ## How realtime sessions connect
 
-Each character session follows this sequence:
+Unity establishes a room before it can exchange audio, video, or data.
 
 ```mermaid
 sequenceDiagram
@@ -66,11 +57,11 @@ sequenceDiagram
 | --- | --- |
 | `session_id` | Convai session ID for the live session |
 | `character_session_id` | Conversation continuity across reconnects |
-| `room_url` | LiveKit WebSocket endpoint — for example `wss://convai-technologies-lfslae7c.livekit.cloud` |
+| `room_url` | LiveKit WebSocket endpoint returned for this room |
 | `room_name` | LiveKit room name the client joins |
 | `token` | Temporary LiveKit room token used to join the room |
 
-The SDK reads `room_url` from the connect response and passes it to the transport layer. It does not hardcode a LiveKit hostname. The example host `convai-technologies-lfslae7c.livekit.cloud` is one Convai deployment; your logs may show a different `room_url` for the same account over time.
+The SDK uses the `room_url` in the response. Use the returned hostname when debugging a deployment.
 
 ## Authentication
 
@@ -84,13 +75,9 @@ Your project API key authenticates requests to Convai. Store it in **Edit > Proj
 | --- | --- | --- |
 | Connect, API Key mode | `X-API-Key` | Starting a realtime session. |
 | Connect, Auth Token mode | `API-AUTH-TOKEN` | Starting a session with a short-lived token from the endpoint or provider. |
-| REST using an API key | `CONVAI-API-KEY` | Legacy REST and upgraded Character API reads. |
-| `ConvaiObjectAutotagClient` with an API key | `CONVAI-API-KEY` | Sending your own images to Convai Vision. |
-| `ConvaiObjectAutotagClient` with an auth token | `API-AUTH-TOKEN` | Sending your own images to Convai Vision with a short-lived token. |
+| REST using an API key | `CONVAI-API-KEY` | Platform and Character API operations that use an API key. |
 
-`ConvaiObjectAutotagClient` does not read the project API key. It sends only the credential you pass to `ConvaiObjectAutotagOptions.WithApiKey` or `ConvaiObjectAutotagOptions.WithAuthToken`.
-
-The SDK resolves the selected credential before connecting. Auth Token player builds strip the project API key. A runtime Auth Token is not an upgraded Character API credential; see [Authentication](../authentication/README.md) for the supported paths.
+The SDK resolves the selected credential before connecting. Auth Token player builds strip the project API key. The Character API uses its own credential rules; see [Authentication](../authentication/README.md) for the supported paths.
 
 ### LiveKit room token
 
@@ -98,7 +85,7 @@ Each successful connect response includes a temporary `token`. The SDK passes th
 
 ## Inspect connection details
 
-Enable **Transport** logging at **Debug** under **Convai > Settings > Diagnostics**, then connect. The 5.0 room summary reports the room name, URL without its query, a shortened session ID and whether a token is present. It does not print a reusable token.
+Enable **Transport** logging at **Debug** under **Convai > Settings > Diagnostics**, then connect. The room summary reports the room name, URL without its query, a shortened session ID and whether a token is present. It does not print a reusable token.
 
 For a structured view, use **Convai Character > Session > Diagnostics > Connect Response > Copy JSON**, or the room manager's **Runtime > Connect Response** control after a connect response exists. The copied response replaces the token with its length. Review the remaining room, session and trace identifiers before sharing it.
 
@@ -108,27 +95,21 @@ Debug log calls compile out of non-development builds unless `CONVAI_DEBUG_LOGGI
 
 Use a live Unity session to confirm that signaling, media and data work together. Check the connection state and exchange a short voice or text turn.
 
-The [LiveKit connection test](https://livekit.com/webrtc/connection-test) requires a room URL and valid test credential. The sanitized SDK logs and copied response cannot supply that credential. If your team maintains a diagnostic workflow, obtain a dedicated test token through that authorized workflow; do not re-enable token logging. This test checks LiveKit connectivity, not Convai authentication or character configuration.
+The [LiveKit connection test](https://livekit.com/webrtc/connection-test) requires a room URL and valid test credential. Use a test room and a dedicated test credential from your team. The SDK logs omit the room token. This test checks LiveKit connectivity, not Convai authentication or character configuration.
 
 ## Firewall validation checklist
 
-Work through this checklist with your network or IT team before deploying to a restricted environment.
-
-1. Confirm outbound TCP `443` to <code class="expression">space.vars.live_server_url</code> and the REST or token hosts selected by your configuration.
-2. Confirm outbound TCP `443` to `convai-technologies-lfslae7c.livekit.cloud`, `*.livekit.cloud`, and `*.turn.livekit.cloud`.
-3. When UDP is permitted, allow UDP `3478` to `*.host.livekit.cloud` and outbound UDP `50000`–`60000`.
-4. Exclude Convai and LiveKit hostnames from TLS inspection if your proxy performs man-in-the-middle decryption on HTTPS or WSS traffic.
-5. Enter Play mode, enable **Transport** logs at **Debug**, and confirm a sanitized `Room details received` summary appears with the expected room URL.
-6. Confirm the room connects, the character becomes ready and a voice or text turn receives a response.
-
-If steps 5 or 6 fail with `transport.ice_failed` or `transport.signal_disconnected`, see [Connection and API issues](../troubleshooting/connection-and-api-issues.md).
+1. Verify HTTPS access from the client to the Connect, REST, and token endpoints that its configuration uses.
+2. Allow the LiveKit signaling and media paths required for your deployment. Ask your network administrator to check TLS inspection and regional endpoint rules if the room cannot exchange media.
+3. Connect from the target build on that network. Check the sanitized room URL and whether the character becomes ready.
+4. Complete a voice or text turn and verify the reply plays. When the session connects but voice or video fails, inspect the device and media path independently.
 
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix | Verify |
 | --- | --- | --- | --- |
 | `connection.network_error` or `connection.timeout` | Convai endpoints blocked on TCP `443` | Allow <code class="expression">space.vars.live_server_url</code> and `api.convai.com` | Session reaches `Connected` state |
-| `transport.ice_failed` or `transport.peer_connection_failed` | LiveKit UDP or TURN hosts blocked | Add the LiveKit minimum rules and optional direct media paths from this page | `Room details received` log appears; character responds in Play mode |
+| `transport.ice_failed` or `transport.peer_connection_failed` | LiveKit UDP or TURN hosts blocked | Check the LiveKit signaling and media paths from this page | `Room details received` log appears; character responds in Play mode |
 | No `Room details received` log line | Transport logging below **Debug** | Open **Diagnostics** in Project Settings; set **Transport** category override to **Debug** | Sanitized room summary appears in the Console |
 | LiveKit connection test fails after connect succeeds | UDP media or TURN fallback path blocked | Allow UDP `50000`–`60000`, UDP `3478` to `*.host.livekit.cloud`, and TCP `443` to `*.turn.livekit.cloud` | A Unity session exchanges media, or a separately authorized LiveKit test succeeds |
 | `connection.connect_invalid_api_key` | Invalid or revoked API key | Copy a fresh key from the [Convai dashboard](https://convai.com) into Project Settings | Connect error no longer fires |

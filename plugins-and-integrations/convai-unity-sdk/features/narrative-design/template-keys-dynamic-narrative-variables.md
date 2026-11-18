@@ -3,7 +3,7 @@ title: Configure narrative template keys
 description: >-
   Set narrative template keys so a Convai character can reference runtime values
   — player name, scenario parameters, or session state — in its objectives.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Template keys are runtime key-value pairs that fill placeholders in your character's narrative objectives. Define placeholders in the [Convai dashboard](https://convai.com) using curly-brace syntax — for example, `{PlayerName}` or `{CurrentTask}` — and the SDK sends the actual values from Unity at runtime, so the character can reference them naturally in conversation. A single narrative graph can then serve many sessions with different participants or dynamic state without editing the graph each time.
@@ -21,113 +21,26 @@ Click **+** to add an entry. Each entry has two fields:
 
 See the current manager Inspector in [Configure the narrative design manager](setting-up-the-narrative-design-manager.md).
 
-`Awake` copies Inspector values into the manager's local controller only. Call `SendTemplateKeysUpdate()` or `UpdateAndSendTemplateKey()` to pass them to the character API. `UpdateTemplateKey` and `UpdateTemplateKeys` alone do not send.
-
-The **Send to Server** button calls `SendTemplateKeysUpdate()` and is disabled outside Play mode. This is useful for testing value changes mid-session without writing code.
+At startup, the manager sends named Inspector entries through the character’s narrative API. In Play mode, select **Send to Server** to send the Inspector values again.
 
 ## Update keys at runtime
 
-Use any of the following methods on `ConvaiNarrativeDesignManager` to update keys from code:
-
-**Update a single key:**
+Use `character.NarrativeDesign.SetTemplateKey` for one value or `SetTemplateKeys` for a batch. The character API merges values by key. This example sets two values before the narrative uses them.
 
 ```csharp
-narrativeManager.UpdateTemplateKey("PlayerName", "Alex");
-```
-
-**Update and send immediately (one call):**
-
-```csharp
-narrativeManager.UpdateAndSendTemplateKey("ScenarioPhase", "Handwashing");
-```
-
-Use `UpdateAndSendTemplateKey` to request delivery after updating a value. Acceptance is local and does not guarantee which response will use it.
-
-**Update multiple keys at once:**
-
-```csharp
-narrativeManager.UpdateTemplateKeys(new Dictionary<string, string>
+// Method-body fragment. Import System.Collections.Generic.
+bool accepted = character.NarrativeDesign.SetTemplateKeys(new Dictionary<string, string>
 {
-    { "PlayerName", "Alex" },
-    { "Department",  "Facilities" },
-    { "CompletedSteps", "3" }
-});
-narrativeManager.SendTemplateKeysUpdate();
-```
-
-**Read the current key dictionary:**
-
-```csharp
-Dictionary<string, string> current = narrativeManager.GetTemplateKeys();
-```
-
-## How keys are sent
-
-```mermaid
-flowchart TD
-    A["UpdateAndSendTemplateKey(key, value)"] --> B[UpdateTemplateKey\nupdates _templateKeys list + Controller]
-    B --> C[SendTemplateKeysUpdate\nSyncTemplateKeysToController]
-    C --> D[Controller.SendTemplateKeysUpdate\nfires OnTemplateKeysUpdateRequested]
-    D --> E[ConvaiCharacter.NarrativeDesign.SetTemplateKeys]
-    E --> F{Ready and selected target?}
-    F -- Yes --> G[Character-scoped UpdateTemplateKeys\nsend operation]
-    F -- No --> H[_hasPendingTemplateKeySync = true\nqueued for FlushPending]
-    H --> I[Character ready and selected\nFlushPending sends keys]
-```
-
-If the character disconnects and reconnects, the SDK calls `MarkPendingReplayAfterDisconnect` internally so the latest key values are re-sent on the next connection. You never need to re-send keys manually after a reconnect.
-
-## Key naming rules
-
-| Rule                                                          | Example                                                          |
-| ------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Must match the dashboard placeholder exactly (case-sensitive) | Dashboard: `{playerName}` → Key: `playerName` (not `PlayerName`) |
-| No leading or trailing whitespace                             | `"PlayerName"` ✓ — `" PlayerName"` ✗                             |
-| No empty key string                                           | Empty names are invalid and logged                                         |
-| Values can be empty strings                                   | Key `"OptionalField"` with value `""` is valid                   |
-
-**Good key names:**
-
-| Key                    | Value example |
-| ---------------------- | ------------- |
-| `PlayerName`           | `"Maria"`     |
-| `ScenarioLevel`        | `"Advanced"`  |
-| `CompletedCheckpoints` | `"4"`         |
-| `SessionStartTime`     | `"09:15"`     |
-
-**Problematic key names:**
-
-| Key             | Problem                                                                                          |
-| --------------- | ------------------------------------------------------------------------------------------------ |
-| `player name`   | Space in name — will not match `{player name}` placeholders if the dashboard uses `{playerName}` |
-| `"PlayerName "` | Trailing space — silent mismatch                                                                 |
-| `""`            | Empty — invalid                                                                                  |
-
-{% hint style="danger" %}
-Template key values are sent as strings and may appear in dialogue. The manager also logs each updated key and value at Info, visible at the default log level. Do not include passwords, personal identification numbers, API secrets, or any other sensitive data in template key values.
-{% endhint %}
-
-## Set keys on the character directly
-
-If you are working without a `ConvaiNarrativeDesignManager`, you can set template keys directly through the character API:
-
-```csharp
-ConvaiCharacter character = GetComponent<ConvaiCharacter>();
-
-// Single key
-character.NarrativeDesign.SetTemplateKey("PlayerName", "Alex");
-
-// Multiple keys
-character.NarrativeDesign.SetTemplateKeys(new Dictionary<string, string>
-{
-    { "PlayerName", "Alex" },
-    { "Department", "Engineering" }
+    ["PlayerName"] = "Alex",
+    ["ScenarioPhase"] = "Handwashing"
 });
 ```
 
-An empty manager key logs a warning but may remain as a serialized row. Remove invalid rows; the character API rejects blank or whitespace-only key names. In multi-character rooms, values are held until that character is selected.
+`TemplateKeys` exposes the character’s locally tracked values. Use the exact case and spelling from the narrative placeholder, without the braces. Blank names are refused. An empty value is valid.
 
-The character API and the Manager API both converge on the same character-scoped `ConnectionService.UpdateTemplateKeys` operation internally. You can use either path in the same project, but avoid calling both paths for the same key in the same frame, as this may send redundant updates.
+## Verify the update
+
+The character sends the values when it can. In an ordinary shared room, it holds them until ready and selected. The SDK replays tracked keys on the next connection after disconnect. A `true` return means the update was sent or held locally. Check `Events.OnServerCommandResultReceived` for `update-template-keys` and exercise the relevant narrative objective to verify the result.
 
 ## Next steps
 

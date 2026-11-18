@@ -1,7 +1,7 @@
 ---
 title: Event system
 description: Reference for Convai event relay components, including available events, payload fields, and subscription patterns for scene logic.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The SDK exposes typed events through `ConvaiManager.Events` and Inspector-friendly UnityEvents through relay components. Use character events for speech and behavior, transcript subscriptions for displayed text, and room events for connection and membership changes.
@@ -13,7 +13,7 @@ Add a relay from **Add Component > Convai > Events**. Manager and character auto
 | Component | Scope | Events |
 | --- | --- | --- |
 | `ConvaiSessionEventRelay` | Active room | Connected, Disconnected, Reconnecting, Reconnected, UsageLimitReached, UserIdleWarning, UserIdleTimeout, RuntimeBackgroundStateChanged, SessionStateChanged, SessionError |
-| `ConvaiCharacterEventRelay` | Assigned character, or character on the same GameObject | SpokenLine, SpeechStarted, SpeechStopped, TurnCompleted, CharacterReady, EmotionChanged |
+| `ConvaiCharacterEventRelay` | Assigned character, or character on the same GameObject | SpokenLine, SpeechStarted, SpeechStopped, TurnCompleted, CharacterReady |
 | `ConvaiTranscriptEventRelay` | Transcript history with speaker/character filters | EntryUpdated, EntryFinalized, EntryCorrected, EntryRemoved, Reset |
 
 Each event name above has an `On` prefix. Relays subscribe while enabled and unsubscribe when disabled. Session and transcript relays retry manager initialization in `LateUpdate`; the character relay resolves its character at enable time.
@@ -24,7 +24,6 @@ Each event name above has an `On` prefix. Relays subscribe while enabled and uns
 | --- | --- |
 | `CharacterSpokenLineRelayData` | `CharacterId`, `Text` |
 | `CharacterTurnCompletedRelayData` | `CharacterId`, `CharacterName`, `WasInterrupted` |
-| `CharacterEmotionRelayData` | `CharacterId`, `CharacterName`, `Emotion`, `Intensity` |
 
 `OnSpokenLine` replaces `OnTranscriptReceived` and fires once per spoken sentence. Rewire persistent Inspector listeners that used the removed payload. For chat history, corrections, or export, use the transcript facade.
 
@@ -47,7 +46,7 @@ Wait until manager initialization before accessing `Events`: `ActiveManager` can
 | Playback | `OnCharacterAudioPlaybackStateChanged`, `OnCharacterTurnPlaybackCompleted` |
 | Input and membership | `OnPlayerSpeakingStateChanged`, `OnMicMuteChanged`, `OnParticipantJoined`, `OnParticipantLeft` |
 | Routing | `OnConversationTargetChanged`, `OnConversationAvailabilityChanged`, `OnRoomRosterChanged` |
-| Commands | `OnServerCommandResultReceived`, `OnDynamicContextUpdateResultReceived` |
+| Commands | `OnServerCommandResultReceived` |
 
 The facade no longer exposes raw character/player transcript events. Use `Transcripts.Subscribe`, `SubscribeFinalized`, or `SubscribeCaptions`. Low-level domain events remain available through `Events.Raw` for integrations that need protocol-level signals.
 
@@ -58,7 +57,7 @@ A session error's `IsRecoverable` classifies it; it does not promise an automati
 Store the facade or subscription token you subscribed through and remove the same handler during cleanup. For relays, use `AddListener` and `RemoveListener`; for typed events, use `+=` and `-=`. Do not put a null-conditional expression on the left of either event assignment in Unity C#.
 
 ```csharp
-using Convai.Runtime.Presentation.Events;
+using Convai.Runtime.Events;
 using UnityEngine;
 
 public sealed class ConnectedPanel : MonoBehaviour

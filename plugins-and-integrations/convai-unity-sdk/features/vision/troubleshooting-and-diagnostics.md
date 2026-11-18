@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot vision
 description: Separate capture, publication, and response failures to diagnose camera feeds, source restarts, browser selection, and dynamic vision requests.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Check capture, publication, and service responses separately. A moving Editor preview proves local frames exist; `IsPublishing` proves a track was opened; a vision acknowledgement reports what Convai did with the request.
@@ -12,7 +12,7 @@ Check capture, publication, and service responses separately. A moving Editor pr
 {% step %}
 ### Confirm the effective room mode
 
-Use **Connection Type > Video**, or **Dynamic Vision > On** to resolve a configured Audio connection to Video. **Off** does not override an explicitly configured Video connection. Group conversation rooms remain Audio and do not publish vision.
+Set **Vision** to **On** under **Connection**. Start a new room to apply the policy. Group conversation uses audio only.
 {% endstep %}
 {% step %}
 ### Confirm the room and source
@@ -27,7 +27,7 @@ Read the source's `State`, `ErrorKind`, `StatusMessage`, and usable-frame state.
 {% step %}
 ### Verify publication and acknowledgement
 
-Check `IsPublishing`, then request vision status. Inspect the boolean send result and the eventual response event. If a publisher uses a custom track name, align it with the room's resolved **Video Track Name**.
+Check `IsPublishing`, then request vision status. Await `ConvaiManager.RequestVisionStatusAsync()` and inspect its result. Check the source reported by the service against the publisher’s configured track name.
 {% endstep %}
 {% endstepper %}
 

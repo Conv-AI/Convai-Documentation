@@ -1,10 +1,10 @@
 ---
 title: Embodiment scripting reference
 description: Reference for the Convai embodiment scripting surface, including the character context, module base class, rig binding, and shared enums.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Reference for the public embodiment types a Unity script can use directly: `EmbodimentContext`, the `ConvaiCharacterModule<TProfile>` base class for a custom module, `StandardRigBinding`, `ConvaiTravelIntent`, `ModuleIds`, and the shared `CharacterDemeanor`, `StandardBone`, `StandardBlendshape`, and `RigConvention` enums. Cross-module contracts such as `IGazeSource` and `IEmotionStateSource` are internal and are not part of this surface — read each module's own controller reference instead.
+Reference for the public embodiment types a Unity script can use directly: `EmbodimentContext`, the `ConvaiCharacterModule<TProfile>` base class for a custom module, `StandardRigBinding`, `ConvaiTravelIntent`, `ModuleIds`, and the shared `CharacterDemeanor`, `StandardBone`, `StandardBlendshape`, and `RigConvention` enums. Cross-module contracts such as `IGazeSource` and `IEmotionStateFrameSource` are internal and are not part of this surface — read each module's own controller reference instead.
 
 ## `EmbodimentContext`
 
@@ -34,7 +34,7 @@ Reference for the public embodiment types a Unity script can use directly: `Embo
 |---|---|---|
 | `RigBindingChanged` | `event Action<IStandardRigBinding>` | The semantic rig binding is rebuilt or replaced at runtime. Modules that cache bone or mesh references should resolve them again. |
 | `EmbodimentConfigurationChanged` | `event Action` | Embodiment-module configuration has been updated at runtime — for example, a preset was applied. |
-| `DependenciesPopulated` | `event Action` | Runtime-only dependencies such as `EventHub`, the tick scheduler, and the animator infrastructure become available. |
+| `DependenciesPopulated` | `event Action` | Runtime-only dependencies such as `EventHub` and the tick scheduler become available. |
 
 ### Configuration notifications
 
@@ -79,7 +79,7 @@ Reference for the public embodiment types a Unity script can use directly: `Embo
 
 `EmbodimentModuleAttribute` is in `Convai.Runtime.Embodiment`. Apply `[EmbodimentModule(id, displayName)]` to a concrete module and set its `Description`, `Absence`, and `Order` named arguments to make it discoverable in the Embodiment Editor, preset feature picker, and Character Features Inspector. The ID must match `ProfileModuleId` and remain stable after assets use it.
 
-`IEmbodimentTickable` is in `Convai.Runtime.Animation`. Implement `Phase`, optional `TickOrder` (default `0`), and `EmbodimentTick(float deltaTime)`, then register through the context. `EmbodimentTickPhase` defines `Cognition = 0`, `Expression = 1`, and `Finalize = 2`. Phase is read at registration; lower orders run first, with registration order breaking ties. The base module does not register your tick automatically. See [Create a custom embodiment module](custom-embodiment-module.md) for a complete lifecycle example.
+`IEmbodimentTickable` is in `Convai.Runtime.Embodiment`. Implement `Phase`, optional `TickOrder` (default `0`), and `EmbodimentTick(float deltaTime)`. `EmbodimentTickPhase` defines `Cognition = 0` and `Expression = 1`. Lower orders run first, with registration order breaking ties. `ConvaiCharacterModule<TProfile>` registers implementations on enable and drops the registration on disable. See [Create a custom embodiment module](custom-embodiment-module.md) for a complete lifecycle example.
 
 ## `StandardRigBinding`
 
@@ -146,7 +146,7 @@ Travel is resolved from three sources, best first: an explicit report through `R
 
 ## `CharacterDemeanor`
 
-`CharacterDemeanor` is a shared authoring vocabulary used by the Emotion, Body Animation, and Body Language editors so that picking the same demeanor on each module's asset describes one consistent character. A demeanor is authoring-only: applying one writes plain values into the asset being edited, and nothing at runtime reads this enum. Each module interprets the same word in its own terms.
+`CharacterDemeanor` is a shared authoring vocabulary used by the Gaze, Emotion, Body Animation, and Body Language editors so that picking the same demeanor on each module's asset describes one consistent character. A demeanor is authoring-only: applying one writes plain values into the asset being edited, and nothing at runtime reads this enum. Each module interprets the same word in its own terms.
 
 | Value | Number | Description |
 |---|---|---|

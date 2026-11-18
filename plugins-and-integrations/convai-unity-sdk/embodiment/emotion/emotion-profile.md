@@ -1,7 +1,7 @@
 ---
 title: Emotion profile
 description: Every setting on a character emotion profile, covering resting mood, drift, contagion, blending, and the micro-expression life that keeps a face alive.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 `ConvaiEmotionProfile` is the authoring asset for the Emotion module. It controls how quickly expressions transition, whether a character rests on a mood between server signals, how many emotions can show at once, and the optional shader output for effects such as blush or tears. Facial expression itself needs no per-rig authoring on this asset — the profile's expression recipes are resolved automatically against the character's rig. Start from a character type and adjust it. The defaults below describe a newly created blank asset; applying a character type replaces its personality values. With **Personality** empty, runtime uses a hidden Composed profile resting at `trust` with strength `0.45`.
@@ -65,7 +65,7 @@ A blank asset has no resting mood. Character types and the hidden Composed runti
 | `baselineEmotionLabel` | **Resting Mood** | Canonical taxonomy label | _(empty — no baseline)_ | The resting mood's canonical label (for example `joy`). Empty or `neutral` means no baseline. |
 | `baselineIntensity` | **Resting Mood Strength** | 0 – 1 | **0** | Resting strength of the mood. `0` disables the resting mood entirely. |
 
-Baseline intensity drives the smile blendshapes directly, so calibrate by eye: `0.2` is measurable but nearly invisible, `0.45`–`0.6` reads as friendly, and above `0.7` starts to read as a fixed grin. `ConvaiEmotionController.CurrentMoodLabel`/`CurrentMoodScore` report the resolved resting mood; an active baseline never appears as the character's dominant (transient) emotion. `ConvaiEmotionController` also exposes a **This character rests at** per-character override on the component itself, and `SetMood`/`ClearMood` change the resting mood at runtime — see [Emotion scripting API](scripting-api.md).
+Adjust the baseline strength while observing the character in Play Mode. The visible result depends on the expression recipe and the rig. `ConvaiEmotionController.Current.MoodLabel`/`Current.MoodScore` report the resolved resting mood; an active baseline never appears as the character's dominant (transient) emotion. `ConvaiEmotionController` also exposes a **This character rests at** per-character override on the component itself, and `SetMood`/`ClearMood` change the resting mood at runtime — see [Emotion scripting API](scripting-api.md).
 
 ### Per-emotion overrides
 
@@ -89,7 +89,7 @@ An optional, fully automatic channel: sustained conversational emotions slowly t
 | `moodRecoveryRate` | **How Long Mood Lingers** | 0.001 – 1 | **0.05** | Exponential rate/s drift decays back toward `0` once the sustaining transient fades or changes label. |
 | `moodDriftMaxIntensity` | **How Far Mood Can Shift** | 0 – 1 | **0.25** | Hard cap on drift intensity, regardless of how strong or long the sustaining transient runs. |
 
-Drift never appears via `CurrentResolvedEmotion`/`DominantLabel`. It contributes to `CurrentMoodLabel`/`CurrentMoodScore` alongside the persona baseline and any runtime `SetMood` override; ties favor the explicit anchor over drift. A session reset always clears drift.
+Drift never appears via `Current.DominantLabel`. It contributes to `Current.MoodLabel`/`Current.MoodScore` alongside the persona baseline and any runtime `SetMood` override; ties favor the explicit anchor over drift. A session reset always clears drift.
 
 ## Emotional contagion
 
@@ -104,17 +104,16 @@ An optional low-intensity, capped facial echo of a nearby other Convai character
 | `contagionRadius` | **Within This Distance** | 0.5 – 20 m | **4 m** | Maximum distance at which another character's emotion can be witnessed. Falls off linearly to `0` at this radius. |
 | `contagionMaxIntensity` | **Never Stronger Than** | 0 – 1 | **0.2** | Hard cap on the echoed intensity. |
 
-The echo folds into the rendered face only. It never appears via `CurrentResolvedEmotion`/`DominantLabel` or `CurrentMoodLabel`/`CurrentMoodScore`, and it is cleared on a session reset.
+The echo folds into the rendered face only. It never appears via `Current.DominantLabel` or `Current.MoodLabel`/`Current.MoodScore`, and it is cleared on a session reset.
 
 ## Emotion blending
 
 Inspector section: **Mixing Emotions**.
 
-With blending off, the transient (server-driven) state is winner-takes-all: one non-neutral emotion at a time. With blending on, a character can express a primary emotion plus related taxonomy complements at once, with hysteresis so noisy or rapidly alternating server labels do not make the face flicker.
+A character can express a primary emotion with related taxonomy complements. Set **Most Emotions At Once** to `1` to show only the primary emotion. **Hold Before Switching** and **Cut In If Stronger By** control how the primary label responds to competing scores.
 
 | Serialized field | Inspector label | Range | Default | Description |
 | --- | --- | --- | --- | --- |
-| `enableEmotionBlending` | **Show Mixed Emotions** | — | **true** | Whether more than one emotion can show at once. |
 | `emotionSwitchDwell` | **Hold Before Switching** | 0 – 2 s | **0.35 s** | Minimum time the current primary emotion is protected before a weaker new label may replace it. |
 | `emotionSwitchMargin` | **Cut In If Stronger By** | 0 – 1 | **0.15** | A new label bypasses the dwell if its score exceeds the current primary's by at least this margin. |
 | `complementBlendScale` | **Secondary Emotion Strength** | 0 – 1 | **0.35** | Weight of a co-occurring taxonomy complement relative to the primary emotion's score. |
@@ -133,7 +132,7 @@ A perfectly still expression reads as frozen even with smoothing and a resting m
 | `microExpressionsEnabled` | **Never Sits Perfectly Still** | — | **true** | Whether the layer runs at all. Off means the director and its compositor submission are never created. |
 | `microExpressionAmplitude` | **How Much Movement** | 0 – 1 | **0.15** | Idle-drift amplitude. |
 | `speechAccentStrength` | **Brow Accent While Speaking** | 0 – 1 | **0.3** | Strength of the brow-raise accent triggered by rising speech energy. |
-| `microExpressionStillness` | **How Settled** | 0 – 1 | **0.5** | In this preview's runtime, `0` removes idle drift and `1` uses the full authored amplitude. This runs opposite to the **How Settled** tooltip; tune while watching the face in Play mode. |
+| `microExpressionStillness` | **How Settled** | 0 – 1 | **0.5** | At runtime, `0` removes idle drift and `1` uses the full authored amplitude. This runs opposite to the **How Settled** tooltip; tune while watching the face in Play mode. |
 | `listeningReactionStrength` | **Attentive While Listening** | 0 – 1 | **0** | Sustained attentive brow/squint lift while the player is speaking. `0` disables it. Needs the Conversation Flow module. |
 | `thinkingReactionStrength` | **Concentrating While Thinking** | 0 – 1 | **0** | Sustained concentration look during the pause before the character replies. `0` disables it. Needs the Conversation Flow module. |
 | `reactingAccentStrength` | **Reaction Flash** | 0 – 1 | **0** | One-shot brow flash on entering the `Reacting` dialogue state. `0` disables it. |

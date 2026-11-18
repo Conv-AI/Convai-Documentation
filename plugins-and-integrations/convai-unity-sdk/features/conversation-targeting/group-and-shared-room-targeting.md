@@ -1,7 +1,7 @@
 ---
 title: Targeting in group and shared rooms
 description: Understand why a group conversation, another player, or a scripted move can hold the conversation target despite an unchanged local proposal.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 A targeting proposal is a local choice about whom to address. The confirmed room route can remain different because a group conversation, another player, or your own code has priority over an unchanged proposal.
@@ -24,9 +24,9 @@ In `Manual`, a missing or failed target membership can recover to the first read
 
 ## UI state and events
 
-Use `ConversationTarget` for the confirmed room target. `AddressedCharacter` also includes a pending move and the pre-connect look target. Use `ConversationAvailability` to decide whether an input control can submit player speech or text.
+Use `ConversationTarget` for the confirmed room target. `AddressedCharacter` can reflect a pending move, a pre-connect proposal, or a looked-at character whose membership is still starting. Use `ConversationAvailability` to decide whether an input control can submit player speech or text.
 
-`ConversationTargetChanged` can arrive without a local `ConversationTargetRequested` when another player changes the shared route. Do not require a local request before accepting an authoritative change.
+`Events.OnConversationTargetChanged` can report `Confirmed` without a local `Requested` phase when another player changes the route or a roster edit hands it over. Use the current `ConversationTarget` for the authoritative route and await your own operation for its outcome.
 
 ## Related guides
 

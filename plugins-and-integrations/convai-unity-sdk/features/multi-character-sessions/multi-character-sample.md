@@ -1,7 +1,7 @@
 ---
 title: Multi-Character Sample
 description: Import the Multi-Character Sample scene to see several Convai characters sharing one room, interaction targeting, and a live transcript.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The **Multi-Character Sample** is a shared-room scene shipped with the Convai Unity SDK, showing several characters, interaction targeting, a transcript UI, and roster changes made while the scene is running. Import it to see a working multi-character room before building your own.
@@ -9,7 +9,6 @@ The **Multi-Character Sample** is a shared-room scene shipped with the Convai Un
 ## Prerequisites
 
 - A project using the Universal Render Pipeline. The sample uses URP camera/light and volume components; URP is a sample prerequisite, not an SDK package dependency.
-- Import the **LipSync Sample** first for shared Sofia assets.
 
 - Convai Unity SDK <code class="expression">space.vars.unity_sdk_version</code> installed.
 - A configured API key and server environment in **Edit > Project Settings > Convai SDK**.
@@ -20,7 +19,7 @@ The **Multi-Character Sample** is a shared-room scene shipped with the Convai Un
 {% step %}
 ### Import the Multi-Character Sample
 
-In **Window > Package Manager**, select **Convai SDK for Unity**, open the **Samples** tab, and import **Multi-Character Sample**. Import **LipSync Sample** first; the multi-character scenes reuse its Sofia assets. Unity copies its scene and scripts into `Assets/Samples/Convai SDK for Unity/<version>/Multi-Character Sample/`, where `<version>` is the installed SDK version (<code class="expression">space.vars.unity_sdk_version</code>).
+In **Window > Package Manager**, select **Convai SDK for Unity**, open the **Samples** tab, and import **Multi-Character Sample**. Unity copies its scene and scripts into `Assets/Samples/Convai SDK for Unity/<version>/Multi-Character Sample/`, where `<version>` is the installed SDK version (<code class="expression">space.vars.unity_sdk_version</code>).
 {% endstep %}
 
 {% step %}
@@ -67,7 +66,7 @@ ConvaiConversationAvailability availability = _manager.ConversationAvailability;
 
 ## Group conversation scene
 
-The same sample includes `Scenes/GroupConversationSample.unity`: three workshop characters with 3D audio, a Group Conversation component, simulator, and F9 diagnostic overlay. It opens offline with **Starts Connected** and each character's **Auto Connect** off; hold T to exercise the simulated player turn. See [Run the group conversation sample](../group-conversation/run-the-sample.md) before switching to the service-backed preview.
+The same sample includes `Scenes/GroupConversationSample.unity`: three workshop characters with 3D audio, a Group Conversation component, simulator, and F9 diagnostic overlay. It opens offline with **Starts Connected** off; hold T to exercise the simulated player turn. See [Run the group conversation sample](../group-conversation/run-the-sample.md) before switching to the service-backed preview.
 
 ## Next steps
 

@@ -1,7 +1,7 @@
 ---
 title: Emotion editor windows
 description: Reference for the Emotion editor window, covering its four tabs and the Emotion Timeline recorder opened from the Live tab.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 `Convai > Emotion Editor` opens the detailed Emotion editor for a character, reached from the component inspector's **Advanced settings & expressions →** link or from the menu directly. This page documents its four tabs and the Emotion Timeline window opened from the Live tab.
@@ -23,7 +23,7 @@ Choose a character in the **CHARACTERS** pane to change the target. The left pan
 | **Setup** | The same setup checklist the Inspector shows, full width, plus every finding with its fix. |
 | **Feel** | Every setting on the assigned `ConvaiEmotionProfile`, grouped into sections — the complete surface behind the Inspector's handful of controls. |
 | **Expressions** | What Convai resolved on this character's own face — naming convention, match confidence, and shape counts per mesh — followed by the authored expression recipes and material effects. |
-| **Live** | The character's current feeling, strength, held-for duration, resting mood, mouth influence, and a bar per emotion carrying a non-zero score. Readings require Play mode. Outside Play mode this tab shows a prompt and still offers **Open Emotion Timeline**. |
+| **Live** | The character's current feeling, strength, held-for duration, resting mood, and a bar per emotion carrying a non-zero score. Readings require Play mode. Outside Play mode this tab shows a prompt and still offers **Open Emotion Timeline**. |
 
 The **Feel** tab starts with **Character Type**, followed by the complete profile sections. Editing a package-owned profile through **Feel** or **Expressions** creates a project copy and assigns it to the selected character. A shared project profile remains shared unless you choose **Make Unique**.
 

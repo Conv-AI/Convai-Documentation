@@ -1,77 +1,84 @@
 ---
 title: ConvaiManager API
 description: Reference the scene manager APIs for initialization, connection, character selection, conversation targeting, facades, and service discovery.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-`ConvaiManager` in `Convai.Runtime.Components` owns the scene's runtime and exposes its high-level services. The SDK maintains one active manager. `Awake` assigns `ActiveManager` and builds its host synchronously. Normal scene scripts can use the facades after that bootstrap; `IsInitialized` and the `TryGet` methods provide explicit availability checks. Facade properties throw if their service is unavailable rather than returning null.
+`ConvaiManager` in `Convai.Runtime.Components` owns the scene runtime. `Awake` assigns `ActiveManager` and builds its host. Wait for `IsInitialized` before using its facades. Accessing a facade before its service is available throws.
 
 ## State and facades
 
 | Member | Meaning |
 | --- | --- |
-| `ActiveManager`, `IsBootstrapped` | Static active instance and bootstrap state |
-| `IsInitialized`, `IsConnected` | Service initialization and room connection |
+| `ActiveManager`, `ActiveManagerChanged` | Current manager and notification when it changes |
+| `IsInitialized`, `IsConnected` | Runtime service initialization and room connection |
 | `Events`, `Audio`, `Transcripts` | Event, audio, and transcript facades |
-| `TryGetTranscripts(out transcripts)` | Non-throwing transcript availability check |
-| `Characters`, `Player` | Registered scene components |
-| `ActiveConversationCharacter`, `ConversationTarget` | Current character routing surfaces |
-| `ConversationAvailability` | Input readiness; see availability documentation |
+| `TryGetTranscripts(out transcripts)` | Check whether the transcript facade is available |
+| `Characters`, `Player` | Scene characters and the selected local player |
+| `ConversationTarget`, `AddressedCharacter` | Selected target and character the player is addressing |
+| `ConversationAvailability` | Whether player input can reach the addressed character |
 | `ActiveConversationInputMode` | Live room input mode |
-| `CurrentEndUserId`, `CurrentLongTermMemoryStatus` | Resolved connection identity and memory result |
-| `ConvaiRuntime`, `IsUsingRuntimeBuilder` | Manager-owned runtime |
+| `ConnectionQuality`, `IsAwaitingReply` | Live readings for connection and reply-wait UI |
+| `CurrentEndUserId`, `CurrentLongTermMemoryStatus` | Resolved connection identity and reported memory status |
+| `BackgroundPolicy`, `EffectiveBackgroundPolicy`, `IsApplicationBackgrounded`, `IsRuntimePaused` | Requested and effective presentation policy and current state |
 
-`ConversationMode` is a legacy scene-migration field. Use `ActiveConversationInputMode` for the current room mode.
+Use [conversation availability](../features/conversation-availability/README.md) to gate input. Observe `Events.OnConnectionQualityChanged` and `Events.OnAwaitingReplyChanged` for changes to the two live readings.
 
 ## Connection and runtime operations
 
-| Method | Return / behavior |
+| Method | Return or behavior |
 | --- | --- |
 | `ConnectAsync(token)` | `IConvaiOperation<RoomSession>` |
 | `ConnectAsync(options, token)` | Connect with `RoomSessionConnectOptions` |
-| `ConnectWithAuthTokenAsync(...)` | Connect with a runtime auth token; see authentication reference |
 | `DisconnectAsync(token)` | `IConvaiOperation<Unit>` |
-| `ReconnectAsync(token)` | Explicit disconnect/connect cycle |
-| `PauseAsync`, `ResumeAsync` | Local runtime presentation pause/resume |
-| `SetBackgroundPolicyAsync` | Set requested background policy |
-| `SetConversationInputModeAsync` | Change regular-room input mode |
-| `ResetIdleTimer`, `ExtendIdleTimeout` | Return whether a connected room accepted the send |
-| `StartRuntimeAsync()` | Manager lifecycle entry point; returns `void`, not an awaitable operation |
+| `ReconnectAsync(token)` | Disconnect and connect with scene defaults and configured providers. Returns `IConvaiOperation<RoomSession>` |
+| `PauseAsync`, `ResumeAsync` | Pause or resume local runtime presentation |
+| `SetBackgroundPolicyAsync` | Change the requested background policy |
+| `SetConversationInputModeAsync` | Change the input mode in a connected regular room |
 
-Awaiting connect returns `RoomSession`; failures throw. See [Async patterns](async-patterns.md) for complete error handling. `BackgroundPolicy`, `EffectiveBackgroundPolicy`, `IsApplicationBackgrounded`, and `IsRuntimePaused` expose background/pause state.
+Awaiting connect returns `RoomSession`. An options-bearing connection fails with `session.invalid_state` while the room is connecting or connected. To apply different options, disconnect first. Catch errors from the await as shown in [Async patterns](async-patterns.md).
 
 ## Connect options
 
 `RoomSessionConnectOptions` is in `Convai.Runtime.Room`.
 
-| Field | Purpose |
+| Member | Purpose |
 | --- | --- |
 | `TurnTaking` | Per-connect turn-taking options, subject to room restrictions |
-| `EndUserId` | Stable application user identity |
-| `EndUserName` | Trimmed display name; takes precedence over metadata `name` and `ConvaiPlayer.PlayerName` |
-| `EndUserMetadata` | Additional user metadata |
-| `CharacterSessionId` | Explicit identity-scoped character session to request for resume |
+| `EndUserId`, `EndUserName`, `EndUserMetadata` | Application identity and metadata. A supplied display name takes precedence over metadata `name` and then `ConvaiPlayer.PlayerName` |
+| `CharacterSessionId`, `RosterCharacterSessionIds` | Explicit session identifiers for the active character and other roster characters |
 | `SharedSessionKey`, `MaxNumParticipants` | Shared-room request settings |
-| `RoomSessionId`, `JoinExistingMultiCharacterRoom` | Existing-room join; prefer the dedicated multi-character join API |
-| `ActionConfigOverride`, `ActionDefinitionsOverride` | Per-connect action configuration |
+| `RoomSessionId`, `JoinExistingMultiCharacterRoom` | Join an existing multi-character room |
+| `SetAuthToken(token)` | Supply a one-use token in Auth Token mode |
+
+For the token flow, see [Connect with an existing auth token](../authentication/connect-with-auth-token.md).
 
 ## Character selection and targeting
 
-`SetExplicitPlayer`, `SetExplicitCharacters`, and `RefreshReferences` control scene references. `SetCharactersToConnect`, `UseAllCharactersForConnection`, `CharactersToConnect`, `UsesCharacterConnectionSelection`, and `IsCharacterSelectedForConnection` control the connection roster. Set `InitialCharacter` with `SetInitialCharacter` before connecting.
+Use `SetExplicitPlayer` to choose the local player and `RefreshReferences` to rescan scene references. Use `SetCharactersToConnect` to replace the connection roster or `UseAllCharactersForConnection` to restore scene-wide selection. Inspect `CharactersToConnect`, `UsesCharacterConnectionSelection`, and `IsCharacterSelectedForConnection` to read the selection. Use `SetInitialCharacter` to set `InitialCharacter` before connecting.
 
-`TalkToAsync(character)` returns `IConvaiOperation<InteractionTargetResult>` so code can inspect the routing result. It has no cancellation parameter. `TalkTo(character)` is a fire-and-forget wrapper. `ClearConversationTargetAsync()` releases the target. Use `ConversationTargetingStatus`, `ConversationTargetRequested`, and `ConversationTargetChanged` to observe routing, and `SetConversationTargetProvider` for a custom selection rule. See [Script the conversation target](../features/conversation-targeting/script-the-conversation-target.md).
+`TalkToAsync(character)` and `ClearConversationTargetAsync()` return `IConvaiOperation<InteractionTargetResult>`. `TalkTo(character)` starts the switch without waiting. Read `ConversationTargetingStatus` or subscribe to `Events.OnConversationTargetChanged` for routing changes. See [Script the conversation target](../features/conversation-targeting/script-the-conversation-target.md).
+
+## Room commands
+
+The following calls return `IConvaiOperation<ServerCommandResult>`. Await the operation and inspect the result to distinguish local refusal, a reply from Convai, and a missing answer.
+
+| Method | Purpose |
+| --- | --- |
+| `ResetIdleTimer()` | Send activity to reset the idle timer |
+| `SetTtsEnabled(bool)` | Request synthesis or native voice on or off |
+| `InterruptBot()` | Interrupt the addressed character's reply |
+| `RequestVisionStatusAsync(updateId)` | Query the Vision buffer |
+| `TriggerVisionAsync(request)` | Attach buffered Vision frames to a turn |
+| `UpdateRespondModeAsync(lane, mode, updateId)` | Set how a voice, text, or Vision input lane responds |
+
+Group conversations refuse TTS changes, targeted interruption, Vision triggers, and respond-mode changes through these room calls. See [Server command results](server-command-results.md).
 
 ## Input and extension points
 
-`AcquirePushToTalkInput()` returns an `IDisposable` lease that suppresses manager-owned input polling while custom input owns it. Dispose the lease when disabled. The controller still owns press/release state. `StartListening`, `ToggleMicMute`, and `EnableAudioAndStartListening` are convenience wrappers.
+`AcquirePushToTalkInput()` returns an `IDisposable` lease. Hold it while your code drives the push-to-talk controller, then dispose it when disabled. Use `Audio` for microphone and playback controls.
 
-`RegisterModule` and `UnregisterModule` manage runtime modules. `SetEndUserIdentityProvider` and `SetEndUserMetadataProvider` customize connection identity. Set providers before the connection that needs them.
-
-## Service discovery
-
-Each accessor returns `bool` and an `out` service: `TryGetEventHub`, `TryGetRoomConnectionService`, `TryGetRoomAudioService`, `TryGetAgentRegistry`, `TryGetRuntimeSettingsService`, `TryGetSettingsPanelController`, `TryGetMicrophoneDeviceService`, `TryGetPermissionService`, `TryGetNotificationService`, `TryGetPlayerInputService`, `TryGetVisibleCharacterService`, and `TryGetTransportProvider`.
-
-Store the service or facade used for event subscriptions so cleanup unsubscribes from the same object. Do not dispose services owned by the manager.
+Use `RegisterModule` and `UnregisterModule` to register runtime modules. Set `SetEndUserIdentityProvider` and `SetEndUserMetadataProvider` before connecting. Public service accessors include `TryGetAgentRegistry`, `TryGetRuntimeSettingsService`, `TryGetSettingsPanelController`, `TryGetMicrophoneDeviceService`, `TryGetPermissionService`, `TryGetNotificationService`, and `TryGetTransportProvider`. For domain event subscriptions use `Events.Raw`. Keep the same facade or service for cleanup.
 
 ## Related pages
 

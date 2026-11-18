@@ -1,7 +1,7 @@
 ---
 title: Script the conversation target
 description: Move the conversation to a specific character from a script, and choose which character a room opens on when it connects.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Move the conversation to a specific character from a script with `ConvaiManager.TalkTo`, or choose which character a room opens on with `ConvaiManager.SetInitialCharacter`. Use this page when a dialogue menu, a quest step, or a trigger volume needs to decide who the player is addressing, rather than the player's view or position.
@@ -32,14 +32,14 @@ Use `TalkToAsync(character).AsTask()` when subsequent work depends on confirmati
 
 ## Choose which character a room opens on
 
-`SetInitialCharacter` chooses which character speaks first when the room connects — a different job from `TalkTo`. It is setup, not steering: it decides where a conversation starts, and calling it on an already-connected room queues a reconnect rather than moving the current conversation. Leaving it unset is normal — the first character in scene order takes the first turn.
+`SetInitialCharacter` chooses which character speaks first when the room connects — a different job from `TalkTo`. It is setup, not steering: it decides where a conversation starts, and calling it on an already-connected room queues a reconnect rather than moving the current conversation. Leave it unset to let the built-in **Look At** or **Proximity** rule select an eligible opening character before connection. Without an eligible proposal, the first connectable character in scene order opens the room. This fallback also applies in **Manual** and when a custom provider is registered.
 
 ```csharp
 manager.SetInitialCharacter(receptionist);
 ```
 
 {% hint style="warning" %}
-`SetInitialCharacter` only decides who takes the first turn. Under `LookAt` and `Proximity`, the conversation is re-evaluated from the moment the room is ready and moves off this character as soon as another one scores better. To move the conversation in a live room, call `TalkTo`, not `SetInitialCharacter`.
+`SetInitialCharacter` only decides who takes the first turn. Once the room is ready, automatic targeting can move the route after another character passes the eligibility, margin, and delay checks. To move the conversation in a live room, call `TalkTo`, not `SetInitialCharacter`.
 {% endhint %}
 
 ## Read the current target
@@ -49,19 +49,58 @@ ConvaiCharacter target = manager.ConversationTarget;
 ConversationTargetSwitchVerdict why = manager.ConversationTargetingStatus;
 ```
 
-`ConversationTarget` is the confirmed room route. For UI, `AddressedCharacter` also reflects a pending move or a pre-connect look target. Bind input availability to `ConversationAvailability` and `ConversationAvailabilityChanged`; see [Conversation availability](../conversation-availability/README.md).
+`ConversationTarget` is the confirmed room route. For UI, `AddressedCharacter` can reflect a pending move, a pre-connect proposal, or a character the player is looking at whose membership is still starting. Bind input availability to `ConversationAvailability` and `Events.OnConversationAvailabilityChanged`; see [Conversation availability](../conversation-availability/README.md).
 
 `ConversationTargetingStatus` names the reason the last targeting decision went the way it did — useful for telling a held target apart from a stuck one, since from the outside they look identical.
 
 ## Subscribe to targeting events
 
+Subscribe to `ConvaiManager.Events.OnConversationTargetChanged`. The event carries `Phase`, `CharacterId`, `CharacterName`, `MembershipId`, and a `Reason` on failure. A cleared route can have empty identity fields.
+
 ```csharp
-// pseudocode: ShowHint and Confirm are your UI callbacks.
-manager.ConversationTargetRequested += character => ShowHint(character);
-manager.ConversationTargetChanged   += character => Confirm(character);
+using Convai.Domain.DomainEvents.Runtime;
+using Convai.Runtime.Components;
+using Convai.Runtime.Facades;
+using UnityEngine;
+
+public sealed class TargetChangeStatus : MonoBehaviour
+{
+    [SerializeField] private ConvaiManager _manager;
+    private ConvaiEvents _events;
+
+    private void OnDisable()
+    {
+        if (_events == null) return;
+        _events.OnConversationTargetChanged -= HandleTargetChange;
+        _events = null;
+    }
+
+    private void Update()
+    {
+        if (_events != null || _manager == null || !_manager.IsInitialized) return;
+        _events = _manager.Events;
+        _events.OnConversationTargetChanged += HandleTargetChange;
+    }
+
+    private static void HandleTargetChange(ConversationTargetChanged change)
+    {
+        switch (change.Phase)
+        {
+            case ConversationTargetChangePhase.Requested:
+                Debug.Log($"Switching to {change.CharacterName}");
+                break;
+            case ConversationTargetChangePhase.Confirmed:
+                Debug.Log($"Confirmed target: {change.CharacterName}");
+                break;
+            case ConversationTargetChangePhase.Failed:
+                Debug.LogWarning($"Target switch failed: {change.Reason}");
+                break;
+        }
+    }
+}
 ```
 
-`ConversationTargetRequested` fires after the SDK closes player input and immediately before it attempts to send the target change; the send can still fail. `ConversationTargetChanged` fires when an authoritative response from Convai reconciles the route — a round trip later. In a shared room, `ConversationTargetChanged` can also arrive without a local `ConversationTargetRequested` when another player changes the route.
+`Requested` fires after the SDK pauses player input and before it attempts the send. `Confirmed` reports the authoritative route. Another player's change or a roster handover can be confirmed without a local request. `Failed` reports a refused, superseded, or unsuccessful request and can arrive without a `Requested` phase. A refusal can also carry a newer authoritative route, which the SDK reports as `Confirmed` before reporting the failed request. Await the operation to track the outcome of one specific request.
 
 ## One character speaks at a time
 

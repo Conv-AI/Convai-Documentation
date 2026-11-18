@@ -1,7 +1,7 @@
 ---
 title: Voice activity detection
 description: Understand how the Convai Unity SDK resolves user voice activity detection settings once, at connect time, using either Convai's defaults or your custom values.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Voice activity detection (VAD) is how Convai decides whether the audio arriving from a user's microphone contains speech. The Convai Unity SDK exposes `UserVadSettings` so a scene can tune that decision — confidence, timing, and volume thresholds — instead of always relying on Convai's built-in defaults. The SDK resolves these settings once, at the moment a session connects, and sends them as part of the connect request.
@@ -14,7 +14,7 @@ Voice activity detection (VAD) is how Convai decides whether the audio arriving 
 
 `UserVadSettings` tunes Convai's audio pipeline rather than a value a scene needs to change moment-to-moment. A factory-floor training simulation with background noise needs a higher `MinVolume` and `Confidence` threshold than a quiet home-office scene, but neither scenario needs to change that threshold while a conversation is already in progress. The SDK reflects this: it reads `UserVadSettings` once, immediately before it builds the connect request for a session, and does not expose any API to push updated values into a session that is already `Connected`.
 
-This also means `UserVadSettings` behaves differently from `TurnTakingOptions`. `RoomSessionConnectOptions` — the per-invocation override object passed to a connect call — carries a `TurnTaking` field, so turn-taking behavior can be overridden per connection attempt. It has no equivalent field for `UserVadSettings`. The only sources the SDK reads from are the `ConvaiRoomManagerProfile` asset or the equivalent inline field on `ConvaiRoomManager` — there is no per-connect override.
+This also means `UserVadSettings` behaves differently from `TurnTakingOptions`. `RoomSessionConnectOptions` — the per-invocation override object passed to a connect call — carries a `TurnTaking` field, so turn-taking behavior can be overridden per connection attempt. It has no equivalent field for `UserVadSettings`. The SDK reads the field on `ConvaiRoomManager`.
 
 ***
 
@@ -38,12 +38,12 @@ Each time a session connects, the SDK resolves `UserVadSettings` from its config
 
 ```mermaid
 graph TD
-    A["Session connect requested"] --> B["Resolve UserVadSettings from ConvaiRoomManagerProfile or scene defaults"]
+    A["Session connect requested"] --> B["Resolve UserVadSettings from ConvaiRoomManager"]
     B --> C{"UseServerDefault?"}
     C -->|"true (default)"| D["Omit vad_params from the connect request"]
     C -->|"false"| E["Build vad_params from Confidence, StartSecs, StopSecs, MinVolume"]
-    D --> F["Convai applies its own defaults"]
-    E --> G["Backend receives custom values"]
+    D --> F["Request leaves threshold selection to Convai"]
+    E --> G["Connect request carries the custom values"]
 ```
 
 When `UseServerDefault` is `true`, the connect request's `vad_params` field is left `null`, and the SDK's request serializer omits `null` fields entirely — `vad_params` does not appear in the payload sent to Convai at all. When `UseServerDefault` is `false`, the SDK sends `vad_params` as an object with `confidence`, `start_secs`, `stop_secs`, and `min_volume`.
@@ -59,14 +59,14 @@ These log lines come from the SDK's internal logger and only appear if your proj
 
 ***
 
-## Author custom values with `ConvaiRoomManagerProfile`
+## Where the room gets its thresholds
 
-`ConvaiRoomManagerProfile` is a `ScriptableObject` asset that stores a serialized `UserVadSettings` field, defaulting to `UseServerDefault = true`. Its public `UserVadSettings` property returns a clone of that field, so reading it never lets a caller mutate the asset's stored values by reference.
+`ConvaiRoomManager` stores `UserVadSettings` on the scene component. `EffectiveUserVadSettings` returns a clone.
 
-To send custom detection thresholds instead of Convai's defaults, open the `ConvaiRoomManagerProfile` asset in the Inspector, open **Listening > Voice Detection**, choose **Thresholds > Custom**, and set **Confidence**, **Speech Start (s)**, **Speech Stop (s)**, and **Minimum Volume** to the values your scene needs. Any `ConvaiRoomManager` that references this profile as its configuration source sends those values on its next connect. Choose **Room Setup Source > Inline** for component settings or **Profile Asset** for a shared profile. The same fields also exist inline on `ConvaiRoomManager` itself, for scenes that configure room settings directly on the component instead of through a shared profile asset.
+To send custom detection thresholds instead of Convai's defaults, use **Listening > Voice Detection > Thresholds > Custom** on the **Convai Room Manager**. The next connect request carries the **Confidence**, **Speech Start (s)**, **Speech Stop (s)**, and **Minimum Volume** values.
 
 {% hint style="warning" %}
-`UserVadSettings` has no public setter and no per-connect override on `RoomSessionConnectOptions`. Set it on the `ConvaiRoomManagerProfile` asset or the inline field on `ConvaiRoomManager` before the scene connects — changes made while a session is already `Connected` do not apply until the next connect attempt.
+`UserVadSettings` has no public setter and no per-connect override on `RoomSessionConnectOptions`. Set it on `ConvaiRoomManager` before the scene connects — changes made while a session is already `Connected` do not apply until the next connect attempt.
 {% endhint %}
 
 ***

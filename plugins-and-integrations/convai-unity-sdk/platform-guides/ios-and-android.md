@@ -3,7 +3,7 @@ title: iOS and Android
 description: >-
   Configure iOS and Android permissions, native libraries, echo cancellation,
   and camera capture, then verify voice and recovery on physical devices.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 iOS and Android builds use the native transport path. Voice, lip sync, actions, emotion, spatial audio and supported Vision sources have native implementations. Configure permissions and audio policy, then validate on each device; OS audio behavior and recovery are not identical.
@@ -43,11 +43,9 @@ iOS requires usage description strings before your app can request microphone or
 
 ### Runtime permission handling
 
-The 5.0 SDK requests microphone permission before opening capture. Handle denial in your UI and do not repeatedly start capture after access is refused. For an application-owned onboarding flow, you can request access before enabling the room. The permission service exposes `GetMicrophoneAccess()` and `RequestMicrophoneAccess`; states include Unknown, NotRequested, Granted, Denied, NoMicrophone and Unavailable.
+The SDK requests microphone permission before opening capture. Handle denial in your UI and do not repeatedly start capture after access is refused. For an application-owned onboarding flow, you can request access before enabling the room. The permission service exposes `GetMicrophoneAccess()` and `RequestMicrophoneAccess`. Use the result to distinguish granted access, denial, and an unavailable microphone.
 
 Enable **Prepare iOS for Recording**. **Convai > Settings > Setup Health** checks this setting and the combined **macOS / iOS Microphone Usage Description**. Use its Setup action when the description is missing.
-
-<figure><img src="../../../.gitbook/assets/unity-setup-health.png" alt="Setup Health checks for Apple microphone description, recording preparation and Android permission"><figcaption><p>Review these project checks before testing on a device.</p></figcaption></figure>
 
 {% hint style="warning" %}
 **iOS one-time prompts cannot be re-triggered.** If a user denies microphone permission, iOS will not show the prompt again. Your app must guide the user to **Settings → Privacy & Security → Microphone** to re-enable access manually. Add in-app messaging for this case — for example, detect denied permission via `Application.HasUserAuthorization(UserAuthorization.Microphone)` and display instructions before attempting to start a session.
@@ -133,9 +131,11 @@ A manufacturing company deploys a safety inspector training app on Android table
 
 `WebcamVisionFrameSource` functions on both iOS and Android. Add the component to a GameObject and assign it as the publisher's frame source. Its Inspector displays a fixed reminder for the active build target; it does not inspect the built application and prove a permission is present.
 
-On iOS, Vision requires `NSCameraUsageDescription` in Player Settings — the component calls `Application.RequestUserAuthorization(UserAuthorization.WebCam)` automatically at runtime to request the permission. On Android, Vision requires `android.permission.CAMERA` in the manifest — the component calls `Permission.RequestUserPermission(Permission.Camera)` automatically at runtime. You do not need to request camera permission manually; declaring it in Player Settings (iOS) or the manifest (Android) is sufficient.
+Set `NSCameraUsageDescription` in iOS Player Settings, or include `android.permission.CAMERA` in the merged Android manifest. `WebcamVisionFrameSource` requests permission and waits for the answer. While its state is `AwaitingPermission`, the publisher does not count this wait toward its readiness timeout. A refusal reports `Failed` with `VisionSourceErrorKind.PermissionDenied` and `vision.permission_denied`. Android also distinguishes dismissal from a refusal that requires a change in system settings.
 
-When audio plays through the phone speakers, enable **Room Manager > Listening > Microphone > Echo Cancellation**. The default is off. Hands Free on phone targets shows a warning when echo cancellation is disabled. Test interruption, background/foreground transitions and reconnect on physical devices; recovery depends on both the OS and your session policy.
+When audio plays through the phone speakers, enable **Echo Cancellation** under **Room Manager > Listening > Microphone** and test a voice turn on the device. This option defaults to off and applies on the next connection. Hands Free on phone targets shows a warning when echo cancellation is disabled. Test interruption, background/foreground transitions and reconnect on physical devices; recovery depends on both the OS and your session policy.
+
+Vision pauses when the app goes to the background or the runtime is paused. Focus loss alone, such as a permission prompt, leaves capture eligible. A stalled texture source loses its published track until it delivers a fresh frame. See [Vision frame sources](../features/vision/frame-sources.md).
 
 ## Troubleshooting
 

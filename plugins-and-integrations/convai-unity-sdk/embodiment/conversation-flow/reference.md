@@ -1,7 +1,7 @@
 ---
 title: Conversation flow reference
 description: Full reference for the Conversation Flow controller's public API, the dialogue-state reading it returns, and every timing field on its profile asset.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Reference for the public conversation-flow surface: `ConvaiConversationFlowController`, the `DialogueStateReading` struct it returns, and every field on `ConvaiConversationFlowProfile`. For what each `DialogueState` value means, see [Dialogue state](../../core-concepts/dialogue-state.md). The cross-module contract `IConversationFlowSource` is internal and is not part of this surface — read the controller's own members instead.
@@ -86,7 +86,7 @@ Three profile fields — `noticeYouLocally`, `stopWhenTheVoiceStops`, and `voice
 
 - The character reacts the moment it has local evidence you have started talking, ahead of Convai's own confirmation that it heard you.
 - With `stopWhenTheVoiceStops` enabled, local voice or lip-sync evidence can end the speaking performance before the service confirmation.
-- Before the controller treats silence as the end of a turn, it waits `0.4` seconds, since a pause between two sentences sounds the same as an ending. This hold only applies when the character has no Lip Sync reading; Lip Sync, when present, marks a response's end with no hold needed.
+- Before the controller treats silence as the end of a turn, it waits `0.4` seconds, since a pause between two sentences sounds the same as an ending. The hold applies when voice is the best available evidence. A finished LipSync response can end the local speaking performance with no hold, while pending LipSync frames keep it active through silence.
 
 See [How a speaking turn ends](README.md#how-a-speaking-turn-ends) for the full model both behaviors are part of.
 

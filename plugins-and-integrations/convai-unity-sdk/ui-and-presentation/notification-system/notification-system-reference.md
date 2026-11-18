@@ -1,7 +1,7 @@
 ---
 title: Notification system reference
-last_reviewed: "5.0.0-preview"
-description: Look up notification asset fields, ID resolution, controller timing, error matching, and the services used by custom alert displays.
+last_reviewed: "5.0.0-pre.1"
+description: Look up notification asset fields, controller timing, error matching, and services for showing automatic and application-defined alerts.
 ---
 
 Reference for the ScriptableObject assets and the controller component that make up the notification system. For setup instructions and triggering notifications from code, see [Notification system](./).
@@ -29,38 +29,7 @@ Each notification is a `ScriptableObject` asset containing the content to displa
 | `SetMessage(string message)` | `SONotification` | Set the notification body text   |
 | `SetIcon(Sprite newIcon)`    | `SONotification` | Set the notification icon sprite |
 
-Methods return `this` and mutate that shared asset. They do not register a notification or assign an ID. A runtime-created instance with a blank ID cannot display through the standard handler. If its ID matches a registered asset, the handler displays the registered asset's content.
-
-## `SONotificationGroup`
-
-`SONotificationGroup` registers all `SONotification` assets the scene recognizes. `NotificationHandler` resolves notification IDs against this group at runtime.
-
-**Create:** Right-click → **Create → Convai → Notification System → Notification Group**
-
-**Fields:**
-
-| Field             | Type               | Description                                                      |
-| ----------------- | ------------------ | ---------------------------------------------------------------- |
-| `soNotifications` | `SONotification[]` | All `SONotification` assets available to the notification system |
-
-**Lookup methods:**
-
-| Method                                                               | Return type | Description                                                                                   |
-| -------------------------------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------- |
-| `GetGroup(out SONotificationGroup group)`                            | `bool`      | Static. Loads the group from `Resources/SONotificationGroup`. Returns `false` if the asset is missing |
-| `TryGetById(string notificationId, out SONotification notification)` | `bool`      | Instance method. Finds a notification by its `Id` field. Returns `false` if no match                           |
-
-```csharp
-if (SONotificationGroup.GetGroup(out SONotificationGroup group))
-{
-    if (group.TryGetById("scenario-complete", out SONotification notification))
-    {
-        // use notification
-    }
-}
-```
-
-`NotificationHandler.notificationGroup` takes precedence over the resource fallback. The shipped prefab assigns the packaged group. A custom group can live outside `Resources` when explicitly assigned. Avoid a duplicate `SONotificationGroup` resource name. `TryResolve(SONotification, out SONotification)` also resolves by ID. Group IDs use ordinal, case-sensitive matching; the first registered duplicate wins.
+Methods return and modify the same object. Pass the notification asset directly to the service.
 
 ## `UINotificationController`
 
@@ -109,19 +78,19 @@ Use an explicit map only in a notification bridge you own. Do not add a second r
 | `MatchType`    | `SessionErrorMatchType` | `Exact` — full string equality. `Prefix` — error code starts with this pattern |
 | `Notification` | `SONotification`        | `SONotification` asset to display when this rule matches                       |
 
-Rules use ordinal, case-insensitive matching and run top-to-bottom. A rule with a missing notification or blank pattern does not match; neither does a blank error code. Place specific exact rules before a broad prefix. `SessionErrorMatchType` belongs to `Convai.Shared.Types`.
+Rules use ordinal, case-insensitive matching and run top-to-bottom. A rule with a missing notification or blank pattern does not match; neither does a blank error code. Place specific exact rules before a broad prefix. `SessionErrorMatchType` belongs to `Convai.Shared.Notifications`.
 
 **Example rule configuration:**
 
 | ErrorPattern  | MatchType | Notification                   |
 | ------------- | --------- | ------------------------------ |
 | `connection.auth_failed` | `Exact`   | `Notification_AuthError`       |
-| `connection.` | `Prefix`  | `Notification_ConnectionError` |
 | `connection.rate_limited`  | `Exact`   | `Notification_RateLimit`       |
+| `connection.` | `Prefix`  | `Notification_ConnectionError` |
 
 ## Service and handler
 
-`IConvaiNotificationService` is in `Convai.Shared.Interfaces`. Resolve it with `ConvaiManager.TryGetNotificationService`.
+`IConvaiNotificationService` is in `Convai.Shared.Notifications`. Resolve it with `ConvaiManager.TryGetNotificationService`.
 
 | Member | Purpose |
 | --- | --- |
@@ -130,7 +99,7 @@ Rules use ordinal, case-insensitive matching and run top-to-bottom. A rule with 
 | `OnNotificationRequested` | `Action<SONotification>` event |
 | `OnNotificationDismissed` | `Action` event |
 
-`NotificationHandler` bridges those events to the scene controller. Its serialized `notificationGroup` and `notificationControllerPrefab` select the assets it uses. Its public `Inject` method supports explicitly supplied services. Disabled runtime notifications are dropped at the handler; automatic bridge alerts also check that setting. The bridge alone applies the 10-second per-ID cooldown.
+`NotificationHandler` displays the requested asset through its child `UINotificationController` or instantiates the assigned `notificationControllerPrefab` when needed. The runtime error bridge checks the notification setting and applies a 10-second per-ID cooldown. Application code can check the preference before requesting an alert.
 
 ## Next steps
 

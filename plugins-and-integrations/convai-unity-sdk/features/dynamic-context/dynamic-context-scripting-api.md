@@ -3,7 +3,7 @@ title: Dynamic context scripting API
 description: >-
   Reference for the Convai Unity SDK dynamic context scripting interface,
   including every method, the respond mode enum, and the attention object API.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 `ConvaiCharacter.DynamicContext` returns the `IConvaiDynamicContext` interface — the scripting surface for tracked state, chronological events, attention-object updates, and raw context sends. This page documents every interface member, the `ConvaiRespondMode` enum that controls whether an update triggers a spoken reply, and the `ConvaiDynamicContextUpdate` type used by `Apply`.
@@ -140,7 +140,7 @@ Stages a clear for the current attention object. Convai treats the character as 
 void Flush()
 ```
 
-Attempts to send staged context, a staged action-target sync, and pending scene-metadata changes without the batch delay. Connection and room holds retain staged data. Ordinary non-target characters wait for targeting; group members use a separate silent route. A local send refusal can drop the batch. See [room delivery rules](multi-character-and-group-rooms.md).
+Attempts to send staged context, a staged action-target sync, and pending scene-metadata changes without the batch delay. A disabled character retains staged data until re-enabled. Connection and room holds also retain staged data. Ordinary non-target characters wait for targeting; group members use a separate silent route. A local send refusal can drop the batch. See [room delivery rules](multi-character-and-group-rooms.md).
 
 ### `TryGetStateValue`
 
@@ -182,7 +182,7 @@ Attempts a raw typed update directly, bypassing the local tracker and batch queu
 | `update.Mode` is not `Reset`, and `Text`, `ActionConfig`, and `CurrentAttentionObject` are all `null` | Warning: `Raw dynamic context updates require text, action_config, current_attention_object, or Reset mode`. Call returns without sending. |
 | Character is not in an active conversation | Warning: `Cannot apply raw dynamic context update: not in conversation`. Returns `false`. |
 | Ordinary multi-character room targets another character | Returns `false`; no raw update is queued. Group rooms use member routing instead. |
-| Transport unavailable, connection not ready, invalid action patch, or local send refusal | Returns `false`; inspect the Console warning and correct the cause before resubmitting. |
+| Transport unavailable, connection not ready, character disabled, invalid action patch, or local send refusal | Returns `false`; inspect the Console warning and correct the cause before resubmitting. |
 
 {% hint style="danger" %}
 **`Apply` does not queue or batch.** If the character is not in an active conversation, Convai discards the update and logs a warning — nothing is sent and nothing is retried. Values sent through `Apply` bypass the local tracker: `TryGetStateValue` returns `false` for keys sent this way. Use the tracked methods (`SetState`, `SetStates`, `AddEvent`, `RemoveState`, `Reset`) for all standard context management.

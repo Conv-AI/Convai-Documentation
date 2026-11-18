@@ -1,7 +1,7 @@
 ---
 title: Transcript API
 description: Reference transcript entries, paged history, change batches, live captions, presentation state, export formats, and retained-history limits.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 `ConvaiTranscripts` in `Convai.Runtime.Facades` provides room history and live captions. Access it through `ConvaiManager.Transcripts` after initialization, or `TryGetTranscripts`. The manager owns the facade: dispose your subscriptions, not the facade.
@@ -39,9 +39,15 @@ Subscribe, dispose subscriptions, and clear history on Unity's main thread. Read
 | `Correlation`, `Segments`, `Flags` | Correlation IDs, assembly parts, and content qualifiers |
 | `CreatedAtUtc`, `UpdatedAtUtc` | Observation timestamps |
 
-Finality does not prove audio or the logical turn finished; a final entry can still be corrected. Unchanged entries may retain object identity across timeline versions. Use `Revision` or change kinds to detect an update.
+Finality means transcript assembly has closed. Audio and logical turn completion have separate events, and the entry can still be corrected. Unchanged entries may retain object identity across timeline versions. Use `Revision` or change kinds to detect an update.
 
 `TranscriptSpeakerType` is `Unknown`, `Player`, `Character`, or `System`. Speaker filters can match player/character ID or server speaker ID; use `ParticipantId` to narrow a shared-room participant.
+
+### Typed delivery and group lines
+
+For a typed input entry, `Flags` can include `TranscriptEntryFlags.DeliveryUnknown` when the SDK does not receive the service echo in time. A later matching echo can clear the flag. A confirmed transport send failure updates the entry with `AbortReason` set to `send_failed`.
+
+In a group conversation, `Correlation.ConversationLineId` ties the first character reply after that character receives the floor to the corresponding group line. The SDK matches by speaker and order. This property is null for player entries and outside group conversations.
 
 ## Change batches
 
@@ -69,7 +75,7 @@ Finality does not prove audio or the logical turn finished; a final entry can st
 
 ## Retention and export
 
-The engine bounds history to 500 final entries, 1,000,000 characters, 32,768 characters per entry, and at most 64 open entries. Eviction publishes Removed changes; inspect `Health` to see truncation and eviction. Export before data leaves retention if your application requires an archive.
+The engine defaults to a retention budget of `500` closed entries and `1,000,000` retained UTF-16 text units. It caps an entry at `32,768` text units. At `64` open turns, it can close the oldest eligible turn to make room, while preserving character replies in progress. Eviction publishes Removed changes; inspect `Health` to see truncation and eviction. Export before data leaves retention if your application requires an archive.
 
 `TranscriptExportOptions` supports `PlainText`, `Markdown`, or `Json`, speaker filters, and `IncludeOpen` (false by default). JSON includes `schemaVersion` and `entries`. Export only when your application needs the transcript, and store it according to your application's data policy.
 

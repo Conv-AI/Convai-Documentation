@@ -1,7 +1,7 @@
 ---
 title: Custom frame sources
 description: Implement IVisionFrameSource to publish a custom video pipeline to Convai, including the Y-flip requirement, lifecycle state pattern, and auto-discovery rules.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Implement `IVisionFrameSource` to publish any custom video pipeline — a video file, a custom render texture, or a screen capture utility — without modifying the publishing layer. Once your component is on the scene, `ConvaiVisionPublisher` discovers and streams it automatically.
@@ -10,7 +10,7 @@ Implement `IVisionFrameSource` to publish any custom video pipeline — a video 
 
 `IVisionFrameSource` is the minimal contract required for video streaming via `ConvaiVisionPublisher` and live feed display via `VisionDebugPreview`.
 
-```csharp
+```text
 public interface IVisionFrameSource
 {
     bool IsCapturing { get; }

@@ -3,7 +3,7 @@ title: Static context at connection time
 description: >-
   Configure fixed scenario facts a character receives once at the start of a
   conversation, separate from updates sent while the conversation is running.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Initial Dynamic Info supplies fixed scenario facts when a character connects. Enable it on the character to include its text in the connection flow; runtime Dynamic Context handles facts that change afterward.
@@ -14,14 +14,12 @@ Use this mechanism for facts that are true before the conversation begins and wi
 
 Select `ConvaiCharacter`, open **Session → Opening Context**, and enable **Initial Dynamic Info**. The **Text** field appears only while the toggle is enabled.
 
-<figure><img src="../../../../.gitbook/assets/unity-initial-dynamic-info-5.png" alt="ConvaiCharacter Session section with Initial Dynamic Info enabled and the Text field holding a one-line scenario"><figcaption><p>Opening Context with Initial Dynamic Info enabled. The Text field is a single line.</p></figcaption></figure>
-
 | Field | Type | Default | Description |
 |---|---|---|---|
-| **Initial Dynamic Info** | `bool` | `false` | Enables sending the configured text and sets the request's keep-in-context flag. |
-| **Text** | `string` | _(empty)_ | Scenario text included when the toggle is enabled. The Inspector field is a single line, so separate facts with semicolons. |
+| **Initial Dynamic Info** | `bool` | `false` | Sets the keep-in-context flag and reveals the saved text. |
+| **Text** | `string` | _(empty)_ | Scenario text included in the request when the field has a value. The Inspector field is a single line, so separate facts with semicolons. |
 
-With **Initial Dynamic Info** disabled, the SDK sends an empty text value. Disabling it does not send the saved text for the first response only. The keep-in-context flag requests retention by Convai; it is not proof that every later response will mention these facts.
+Turning the toggle off hides **Text** and clears the keep-in-context flag. The SDK can still send the saved text. To remove opening text entirely, clear **Text** while visible, then turn the toggle off.
 
 ### Example configuration
 

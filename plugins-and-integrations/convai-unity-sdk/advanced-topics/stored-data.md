@@ -1,35 +1,35 @@
 ---
 title: What the SDK stores on the device
 description: Inspect the local preference and session keys written by the default runtime, and distinguish clearing device data from deleting server records.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-The default runtime uses Unity `PlayerPrefs` for runtime setting overrides and saved session identifiers. Device fallback identity also uses `PlayerPrefs`. These values are local client data, separate from server-side conversations and long-term memory.
+The runtime uses Unity `PlayerPrefs` for settings overrides, saved character session identifiers, and the device fallback identity.
 
 ## Keys written by the default runtime
 
 | Key | Value |
-|---|---|
-| `convai.runtime.settings.v1.player_display_name` | Runtime display-name override. |
-| `convai.runtime.settings.v1.transcript_enabled` | Transcript preference, stored as `1` or `0`. |
-| `convai.runtime.settings.v1.notifications_enabled` | Notification preference, stored as `1` or `0`. |
-| `convai.runtime.settings.v1.preferred_microphone_device_id` | Preferred microphone identifier. |
-| `convai.session.<scoped storage ID>` | Saved session identifier for a character. |
-| `convai.session.__keys` | Index of known character session keys. |
-| `convai.end_user_id` | Persisted fallback GUID: used in the Editor and when a player device identifier is unusable. |
+| --- | --- |
+| `convai.runtime.settings.v1.player_display_name` | Display-name override |
+| `convai.runtime.settings.v1.transcript_enabled` | Transcript preference as `1` or `0` |
+| `convai.runtime.settings.v1.notifications_enabled` | Notification preference as `1` or `0` |
+| `convai.runtime.settings.v1.preferred_microphone_device_id` | Preferred microphone identifier |
+| `convai.session.convai-session-v3:<hash>` | Scoped saved character session identifier |
+| `convai.end_user_id` | Fallback ID when no usable device identifier is available and when running in the Editor |
 
-A null setting override removes its key. `ConvaiRuntimeSettingsStore.ClearOverrides()` removes only the four runtime preference keys and saves the store. There is no `convai.prefs.*` key family in this implementation.
+A null settings override removes its key. `ConvaiRuntimeSettingsStore.ClearOverrides()` removes the four setting keys and saves the store.
 
-## Session clearing
+## Session clearing and scope
 
-`KeyValueStoreSessionPersistence.ClearSession(characterId)` removes that character's cached and stored session. `ClearAllSessions()` removes known indexed sessions and the index; it does not delete unrelated preferences or device identity. These operations affect local state, not Convai's server-side records.
+The hash includes character and end-user identity, service origin, environment, application namespace, and room context, including a selected character version or roster where applicable. The active room passes this scoped ID to `KeyValueStoreSessionPersistence`. Its `ClearSession` method clears the cache and the matching local preference.
 
-The default runtime constructs its own `PlayerPrefsKeyValueStore`. Standalone store constructors accept `IKeyValueStore`, but constructing a replacement does not install it into the manager. See [Custom persistence provider](custom-providers/custom-persistence-provider.md) for migration guidance.
+To start a fresh conversation, turn off **Resume Last Conversation** on the character or use `ResumePolicy.AlwaysFresh`. Local keys and Convai’s stored conversations and Long-Term Memory have separate lifecycles. See [Session lifecycle](../core-concepts/session-lifecycle.md).
 
-## Credentials are separate
+## Credentials
 
-The saved account key belongs to `ConvaiSettings`, not these runtime preference keys. Auth tokens are resolved for connections and are not written to this store. See [Authentication](../authentication/README.md) for build stripping and token handling.
+The saved account key belongs to `ConvaiSettings`. Auth tokens are resolved in memory for connections. See [Authentication](../authentication/README.md) for how the build processor handles the saved key.
 
-## Resume-key scope
+## Related pages
 
-The active room uses a hashed storage ID scoped to character, end-user identity, room/join context, and version/roster where applicable. Service origin, environment, and developer namespace add a service scope. The prefix is `convai-session-v3:` with service scope and `convai-session-v2:` otherwise, beneath `convai.session.`. A raw Character ID is not sufficient to address these entries. `ClearCharacterSessionId()` only clears the character's current value; disable resume or choose `AlwaysFresh` when a new conversation is required.
+- [Runtime settings API](../ui-and-presentation/settings-panel/runtime-settings-api.md)
+- [Migrate custom persistence integrations](custom-providers/custom-persistence-provider.md)

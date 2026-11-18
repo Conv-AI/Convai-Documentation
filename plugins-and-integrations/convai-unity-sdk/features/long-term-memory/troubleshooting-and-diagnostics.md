@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot long-term memory
 description: Diagnose identity, character settings, connection status, and memory requests while keeping backend behavior and deletion completion separate.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Start with the identity and status reported for the current connection, then inspect the character's settings and stored records. A connection, a memory request, and a recalled fact establish different things.
@@ -43,17 +43,17 @@ A blank identity is not a universal anonymous-memory mode. **Required** and **Op
 
 ## Handle REST errors
 
-Memory management calls throw `ConvaiRestException`. Inspect `Category`, `StatusCode`, and `StatusCodeInt` for classification. `RequestTraceId` and `RetryAfter` may be absent; use available trace IDs when reporting a failed request.
+Memory management calls throw `ConvaiApiException`. Inspect `Category` and nullable `StatusCode` for classification. `RequestTraceId` and `RetryAfter` may be absent; use available trace IDs when reporting a failed request.
 
 | Error/category | Response |
 | --- | --- |
 | 400 or 422 / `BadRequest` | Correct the identifiers, request body, or configuration before retrying. |
-| 401 / `Unauthorized` | Check credentials in the trusted tool. |
-| 403 / `Forbidden` | Check character ownership and account permission. |
+| 401 / `Authentication` | Check credentials in the trusted tool. |
+| 403 / `Authorization` | Check character ownership and account permission. |
 | 404 / `NotFound` | Check the user, character, and record scope. |
 | 409 / `Conflict` | Read current state and resolve the reported conflict. |
 | 429 / `RateLimited` | Honor `RetryAfter` when supplied and retry with a bounded backoff. |
-| `Timeout` or `ServerError` | Retry reads with a bounded delay; inspect state before repeating a mutation whose result is unknown. |
+| `Timeout` or `Server` | Retry reads with a bounded delay; inspect state before repeating a mutation whose result is unknown. |
 
 Always support cancellation. Do not retry every error indefinitely, and do not turn a timeout into a claim that a mutation failed to reach the service.
 

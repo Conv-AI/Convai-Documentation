@@ -1,55 +1,27 @@
 ---
-title: Interaction text client
-description: Reference the opt-in text interaction client, its explicit identity and session fields, response validation, streaming callbacks, and disposal behavior.
-last_reviewed: "5.0.0-preview"
+title: Migrate from the standalone text client
+description: Move typed Unity conversations from the retired standalone text client to a scene room with readiness checks, transcript updates, and captions.
+last_reviewed: "5.0.0-pre.1"
 ---
 
-`Convai.CoreApi.ConvaiInteractionClient` is an opt-in text client for a specific JSON and server-sent event contract. It is separate from the room-based Unity conversation flow. You must obtain the intended endpoint and credential from your service configuration; the class does not discover them or establish account access.
+Use the scene room to exchange typed messages with a Convai character. The room handles readiness, player identity, and transcript history.
 
-## Construction and ownership
+{% hint style="warning" %}
+SDK 5.0 removes the standalone `ConvaiInteractionClient` and its response stream. Migrate Unity chat integrations to `ConvaiPlayer` and `ConvaiManager.Transcripts`.
+{% endhint %}
 
-The constructor accepts `Uri endpoint`, `string credential`, optional `IConvaiApiTransport transport`, and optional `TimeSpan timeout`. It requires an absolute HTTP or HTTPS URI, a non-empty credential, and a positive timeout. The default timeout is `30` seconds. Requests use HTTP POST with `Authorization: Bearer`, a JSON body, and the appropriate Accept header.
+## Move the conversation into a scene room
 
-Use an HTTPS endpoint for deployed traffic. Supplying an endpoint and bearer string satisfies local constructor validation only; it does not prove that the service accepts that credential.
+Set up a `ConvaiManager`, a `ConvaiPlayer`, and at least one `ConvaiCharacter`. Connect with `ConvaiManager.ConnectAsync`. For typed input with the microphone kept closed, follow [Run a text-only session](../getting-started/run-a-text-only-session.md). Group voice rooms require voice input.
 
-The client creates and owns a transport when none is supplied. `Dispose()` cancels its active operations and disposes only a transport it created. Calls after disposal throw `ObjectDisposedException`.
+## Send text and render the answer
 
-## Request fields
+Read `manager.ConversationAvailability` and observe `manager.Events.OnConversationAvailabilityChanged` to update input state. Call `manager.Player.TrySendTextMessage(message, out reason)` and show `reason` when the room refuses the input.
 
-`ConvaiInteractionTextRequest` requires non-empty `characterId` and `text` arguments:
+Replace response stream parsing with `manager.Transcripts.Subscribe`. Check typed entries for `DeliveryUnknown` or a `send_failed` abort when the UI should report delivery. For each change, use `Entry.Id` as the row key and assign the complete `Entry.Text`. `SubscribeFinalized` lets gameplay react when the transcript finishes assembling. Use `SubscribeCaptions` for temporary captions timed to speech.
 
-| Argument | Wire field | Client behavior |
-|---|---|---|
-| `characterId` | `character_id` | Required; passed as supplied. |
-| `text` | `text` | Required; passed as supplied. |
-| `characterSessionId` | `character_session_id` | Blank becomes null. Supply the previous character session to request continuation. |
-| `endUserId` | `end_user_id` | Blank becomes null. No device-identity fallback is added. |
-| `endUserMetadata` | `end_user_metadata` | Copied only when a non-empty end-user ID and non-empty metadata are supplied. |
+Dispose subscriptions when the view is disabled. For a custom UI and replay example, see [Transcript history and queries](../ui-and-presentation/transcript-ui/transcript-history-and-queries.md).
 
-Identity and session are explicit on each call. The client rejects a response that changes a requested character session. These checks do not define server retention or memory policy.
+## Verify the migration
 
-## JSON response path
-
-`SendTextAsync(request, cancellationToken)` returns `Task<ConvaiInteractionResult>`. It requires successful transport status, a JSON object, non-empty `character_session_id` and `session_id`, an event list with a terminal semantic event, and a text field. A terminal event is `bot-turn-completed` or `llm-no-response`. An error event or an event after completion fails the operation.
-
-The result exposes the execution and character session identifiers, terminal event, text, optional request trace ID, and event data. Keep returned text and identity out of diagnostic logs unless your application explicitly permits that content.
-
-## Streaming response path
-
-`StreamTextAsync(request, Action<ConvaiApiSseEvent> onEvent, cancellationToken)` requires a non-null callback and a transport whose capabilities include incremental SSE, or server-sent events. It validates this sequence:
-
-1. A `session` event establishes the character session.
-2. Incremental events precede a terminal semantic event.
-3. A final `done` event confirms the same character session and supplies the execution session ID.
-
-An early end, repeated session event, error event, or event after completion fails the call. The method completes only after semantic completion and `done`. Consume text and actions incrementally in your callback; the result does not retain the whole stream for you.
-
-Callbacks run on the transport callback context. Do not assume they can call Unity scene APIs directly; marshal application UI work to the Unity main thread. A callback exception cancels the request and is rethrown from the operation.
-
-## Error handling
-
-HTTP failures become `ConvaiApiException`. Invalid response shape or event order uses the Contract error category; a stream error event uses Server. Caller cancellation and client disposal cancel pending work. This reference describes the client validation contract, not endpoint availability, entitlement, or production service qualification.
-
-{% content-ref url="../authentication/README.md" %}
-[Authentication](../authentication/README.md)
-{% endcontent-ref %}
+Send a message in a ready room. Confirm that the chat shows one player entry and updates a reply entry in place. Disconnect with `ConvaiManager.DisconnectAsync`, then check that further sends are refused.

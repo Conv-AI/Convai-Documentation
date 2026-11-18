@@ -1,16 +1,20 @@
 ---
 title: How conversation targeting works
 description: Understand how the Convai Unity SDK scores view direction to decide who a player is addressing, and why the decision holds steady between switches.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Conversation targeting is the rule `ConvaiManager` runs, fifteen times a second, to decide which character in a multi-character room the player is currently addressing. Understanding the model behind it — how a character is scored, and why the target does not move the instant a better candidate appears — explains why targeting behaves the way it does in training simulations, interactive experiences, and games where a player faces more than one character at once.
 
 ## Why targeting lives on the manager, not a component
 
-A scene where one character works must keep working the moment a second one is dropped into it. A rule that only takes effect once somebody finds and adds a targeting component is a manual step by another name, so the policy lives on `ConvaiManager`, the component every working scene already has. There is no collider to add, no layer mask to configure, and no field that must be filled in — a ready room with two active `ConvaiCharacter` components also needs a view transform. The SDK uses **Player Camera**, then `MainCamera`, then the `ConvaiPlayer` transform. Without one, automatic targeting logs a warning and waits.
+A scene where one character works must keep working the moment a second one is dropped into it. A rule that only takes effect once somebody finds and adds a targeting component is a manual step by another name, so the policy lives on `ConvaiManager`, the component every working scene already has. There is no collider to add, no layer mask to configure, and no field that must be filled in — a ready room with two active `ConvaiCharacter` components also needs a view transform. The SDK uses **Player Camera**, then the camera tagged `MainCamera`, then the first eligible enabled Game camera, then the `ConvaiPlayer` transform. Without one, automatic targeting logs a warning and waits.
 
-Rooms with a single character never reach any of this logic. The one character holds the conversation, and there is nothing to decide.
+A room opened without a roster has one character and no target to switch. In an active roster room, the SDK checks ready and enabled members so it can also recover when the previous target can no longer hear.
+
+## Decide which character opens the room
+
+An explicit **Initial Character** takes precedence when eligible. When no character is assigned, the SDK can open on the character selected by the built-in **Look At** or **Proximity** rule. That proposal considers active characters selected for connection. If there is no eligible proposal, the room opens on the first connectable character in scene order. **Manual** and custom providers use this same fallback when there is no explicit assignment.
 
 ## Scoring the view direction
 

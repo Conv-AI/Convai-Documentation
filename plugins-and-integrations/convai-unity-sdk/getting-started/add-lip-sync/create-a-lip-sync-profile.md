@@ -1,55 +1,33 @@
 ---
-title: Create a lip sync profile
-description: >-
-  Explains how to create a custom lip sync profile asset for a blendshape
-  format beyond the three profiles the SDK bundles by default.
-last_reviewed: "5.0.0-preview"
+title: Choose a built-in lip sync profile
+description: Choose the facial data format for a character, replace an older custom profile selection, and verify the mapping against the character mesh.
+last_reviewed: "5.0.0-pre.1"
 ---
 
-A lip sync profile defines the transport format identifier — it tells the SDK which blendshape channel names to expect from Convai.
+Choose a built-in lip sync profile for the facial data Convai sends. To animate a mesh with different blendshape names, keep that profile and create a mapping asset for the mesh.
 
 {% hint style="warning" %}
-The bundled profiles request transport tokens `arkit`, `mha`, and `cc4_extended`. A custom profile is useful only when Convai supports its transport format for your deployment. Creating a local asset does not add a server-side format.
+Older SDK versions supported custom profile assets and registries. The 5.0 profile catalog contains the built-in profiles. Replace a custom registry selection on each affected character before testing playback.
 {% endhint %}
 
-For all standard setups, use one of the three bundled profiles and leave this page for advanced or future use.
+## Choose a profile for the character
 
 {% stepper %}
 {% step %}
-### Create the asset
+### Select the incoming format
 
-In the Project window, navigate to the folder where you want to store the profile. Right-click and select **Create > Convai > Lip Sync > Profile**. Name the asset descriptively — for example, `ConvaiLipSyncProfile_MyRig`.
+Select the character's `ConvaiLipSyncComponent` and choose the built-in **Profile** that matches the incoming stream. [Lip sync profiles and mappings](profiles-and-mappings.md) lists the formats.
 {% endstep %}
 
 {% step %}
-### Configure the fields
+### Map the channels to the face
 
-Select the new asset to open it in the Inspector.
-
-| Field                | Description                                                                              |
-| -------------------- | ---------------------------------------------------------------------------------------- |
-| **Profile ID**       | Canonical local profile identifier, used to select the profile and its map. |
-| **Display Name**     | Human-readable name shown in the Inspector. Does not affect runtime behavior.            |
-| **Transport Token** | Token sent to Convai and expected on incoming data. It defaults to Profile ID; enable **Override default token** if it differs.                      |
-
-{% hint style="danger" %}
-**Transport Token** must match the format Convai sends. The bundled MetaHuman profile demonstrates the distinction: its Profile ID is `metahuman`, while its Transport Token is `mha`.
-{% endhint %}
+Assign the facial renderers. If their blendshape names differ from the built-in map, [create a custom lip sync map](create-a-custom-blendshape-map.md) for the selected profile and assign it under **Mapping**.
 {% endstep %}
 
 {% step %}
-### Register and select the profile
+### Verify the mouth moves
 
-Create a **Convai > Lip Sync > Profile Registry** asset from the Project window's **Create** menu under `Assets/Resources/LipSync/ProfileRegistries/`. Add your profile to its **Profiles** list. The catalog loads registry assets from that Resources path; an unregistered profile asset is not enough.
-
-Return to the character's Convai Lip Sync component and select your profile in **Profile**. Assign a compatible map, then verify it with **Validator**. Higher-priority registries are applied after lower-priority registries.
+[Validate the map](validate-a-lip-sync-map.md) to find missing targets. Enter Play Mode and check that the mouth follows an audible reply and settles at the end.
 {% endstep %}
 {% endstepper %}
-
-## Next steps
-
-After creating the profile, create a map to route its channels to your rig's blendshape names.
-
-{% content-ref url="create-a-custom-blendshape-map.md" %}
-[Create a custom lip sync map](create-a-custom-blendshape-map.md)
-{% endcontent-ref %}

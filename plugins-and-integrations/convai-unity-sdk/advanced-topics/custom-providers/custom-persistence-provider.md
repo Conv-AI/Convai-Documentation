@@ -1,7 +1,7 @@
 ---
-title: Custom persistence provider
+title: Migrate custom persistence integrations
 description: Migrate retired persistence-provider examples and understand which local stores the default Unity runtime owns before adding application storage.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Remove integrations based on `IPersistenceProvider`, `PersistenceResult`, `PersistenceOptions`, `ConflictResolutionStrategy`, or `ConvaiRuntimeBuilder.UsePersistence`. These APIs are absent from the current SDK, so older examples using them do not compile.
@@ -12,7 +12,7 @@ For the SDK version documented here, follow the [current integration guidance](.
 
 ## Keep application storage separate
 
-The default runtime constructs `PlayerPrefsKeyValueStore` for runtime settings and session identifiers. There is no public builder hook that replaces this store across the default runtime. `IKeyValueStore` still exists, and standalone classes such as `ConvaiRuntimeSettingsStore` and `KeyValueStoreSessionPersistence` accept it in their constructors. Constructing one of those objects does not install it into `ConvaiManager`.
+The default runtime constructs `PlayerPrefsKeyValueStore` for runtime settings and session identifiers. `IKeyValueStore` still exists, and standalone classes such as `ConvaiRuntimeSettingsStore` and `KeyValueStoreSessionPersistence` accept it in their constructors. Constructing one of those objects does not install it into `ConvaiManager`.
 
 If your application needs cloud saves or encrypted local data, keep that application state in your own storage service. Use the SDK's public identity, settings, and session APIs at the integration boundary. Do not claim that a standalone store redirects SDK writes.
 

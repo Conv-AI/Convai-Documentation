@@ -1,7 +1,7 @@
 ---
 title: Tune gaze personality
 description: Give a character a distinct gaze personality using an authored profile, character archetypes, and controls for eye contact and movement.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Tune how a character holds eye contact, moves its eyes, and recruits its head by editing its gaze personality. Use these controls for the character's usual behavior; use [Configure eye contact](configure-eye-contact.md) when a scene needs an explicit focus mode such as a presenter holding the player's gaze.
@@ -33,7 +33,7 @@ Read the sharing notice before editing. A project-owned profile shared by severa
 
 ## Apply a character type
 
-Choose **Default**, **Confident**, **Warm**, **Attentive**, **Shy**, or **Stoic** in **Character Type**, then confirm **Apply** in the dialog. These are editor archetypes that write profile values, not runtime enum modes.
+Choose **Composed**, **Warm**, **Energetic**, or **Reserved** under **Character Type**, then confirm **Apply** in the dialog. Select **Reset to SDK defaults** to restore the original tuning. The choice writes values into the profile.
 
 Applying an archetype replaces its authored conversation-state, idle-life, blink, face-scan, and conversation-attention settings. Use Undo to compare against the previous profile. The selected type reflects the values currently on the asset; after tuning away from an archetype, the profile is shown as customized.
 

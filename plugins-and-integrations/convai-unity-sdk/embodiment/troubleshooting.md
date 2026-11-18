@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot embodiment
 description: Diagnose rig detection, preset slot, module tick, and facial compositing problems in the Convai embodiment system, with fixes and verification steps.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Use this page when a character's rig is not detected correctly, an embodiment preset is not applying the way you expect, a module never seems to update, or two modules appear to fight over the same facial expression. Start with the [Embodiment Editor window](embodiment-editor.md) — its `Setup` tab and `Presets` tab surface most of these problems directly, with a one-click fix where one exists.
@@ -17,14 +17,14 @@ Use this page when a character's rig is not detected correctly, an embodiment pr
 | "Head", "Left eye", or "Right eye" bone finding shows a warning | The rig's humanoid avatar has no bone mapped for that semantic, or the rig is not Humanoid | Set the model's Rig type to `Humanoid` in its import settings, or assign an explicit bone override on `StandardRigBinding` | `StandardRigBinding.TryGetBone` for that bone returns `true`, and the corresponding warning stops appearing in the Console |
 | Console repeats a rig bone or blendshape warning every time you touch the character | Normal for the first miss — this is a rig gap, not a bug | Fill the gap (see the two rows above), or ignore it if the feature that needs it is not in use | Bone misses log once per bone; the batched missing-shape warning recurs only when the missing set changes |
 | A `ConvaiEmbodimentPreset` shows `Not Set Up` in the Embodiment Editor's `Presets` tab | The preset has duplicate module IDs, a slot with no module chosen, or a slot pointing at the wrong profile type | Open the preset and use the finding's fix button, such as `Remove Duplicate` or `Clear Settings` | The preset's status in the `Presets` tab changes to `Ready` or `Needs Attention` |
-| A module's settings do not match what the assigned preset says they should be | **Keep Unmatched Profiles** is enabled and the preset has no slot for that module, so the module kept its own inspector-assigned profile | Add a slot for the module in the preset, or disable **Keep Unmatched Profiles** if you want every unlisted module to fall back to its default profile instead | The Console's preset diagnostics message for that character no longer lists the module under "Active receivers without a preset slot" |
+| A module's settings do not match what the assigned preset says they should be | **Keep Unmatched Profiles** is enabled and the preset has no slot for that module, so the module kept its own inspector-assigned profile | Add a slot for the module in the preset, or disable **Keep Unmatched Profiles** if you want every unlisted module to fall back to its default profile instead | The module Inspector shows the matching assigned profile or the expected fallback |
 | A module never seems to update — its state never changes at runtime | The component is not on the same `GameObject` hierarchy as `ConvaiCharacter`, so it disabled itself | Move the component onto the character's `GameObject` or one of its children | The Console error naming the component and "is not on a Convai character" stops appearing, and the component stays enabled after entering Play mode |
 | A module updates correctly for a while, then silently stops | The module's tick threw an exception, which is reported once; the scheduler retries that module on later frames | Check the Console for the "threw during its embodiment tick" message and fix the underlying exception in that module | The module resumes updating once code that raised the exception is corrected and the scene is re-entered |
 | Two modules appear to fight over the same facial expression | Two modules are driving blendshapes in the same facial region with conflicting weights | Check the per-region weights on the character's `ConvaiFacialCompositionProfile` rather than disabling either module — facial output is a weighted blend of Emotion, LipSync, and Custom layers per region, not an exclusive lock | The region's blendshapes settle into one consistent expression instead of visibly oscillating |
 
 ## Rig not detected or low confidence
 
-The Embodiment Editor's `Setup` tab reports the state of a character's `StandardRigBinding` under the `Rig` section. If the character has no `StandardRigBinding` component yet, the tab reports "Rig will be worked out automatically" — Convai resolves it the moment the character starts, so this by itself is not a problem.
+The Embodiment Editor's `Setup` tab reports the state of a character's `StandardRigBinding` under the `Rig` section. If the character has no `StandardRigBinding` component yet, the report can still find head, neck, and eye bones through the avatar or supported bone names. Select **Set Up This Character** to create and inspect the binding in Edit Mode.
 
 Once a `StandardRigBinding` exists (either added manually or by the **Set Up This Character** button), its `DetectedConvention` and `DetectionConfidence` come from inspecting the character's facial meshes. Detection confidence below `50%` is treated as a guess worth checking:
 
@@ -54,33 +54,9 @@ These diagnostics follow `StandardRigBinding.TryGetBone` and `TryGetBlendshape` 
 
 ## Preset slot mismatches
 
-A `ConvaiEmbodimentPreset` maps module IDs to profile assets. Two problems come from the preset asset itself:
+Open the preset asset from **Convai > Embodiment Editor > Presets**. Its **Setup Check** lists duplicate slots, uninstalled or unset features, and profiles of the wrong type. Correct each finding using the asset Inspector. At runtime, the first matching slot supplies the profile.
 
-- **Duplicate module IDs.** If a preset lists the same module twice, only the first matching slot is used. The Console logs:
-
-  ```text
-  Duplicate module profile slots: <ids>. First matching slot is used.
-  ```
-
-  Open the preset in the Embodiment Editor's `Presets` tab and remove the duplicate entry.
-
-- **A slot naming a module the project does not have installed**, a slot with no module chosen, or a slot whose assigned profile is the wrong type for the module. Each of these appears as its own finding in the `Presets` tab, with a fix button that removes or clears the offending slot.
-
-Separately, `ConvaiEmbodimentPresetBinding` compares the preset against the modules actually present on the character and logs a combined diagnostics message when anything is off:
-
-```text
-[ConvaiEmbodimentPresetBinding] Preset '<preset name>' diagnostics on '<character name>': <report>
-```
-
-The `<report>` portion can include any of:
-
-- `Profile slots without an active receiver: <ids>.` — the preset configures a module the character does not have.
-- `Profile slots with null profiles: <ids>.` — a slot exists but has no profile asset assigned.
-- `Active receivers without a preset slot; inspector profiles will be preserved: <ids>.` — shown when **Keep Unmatched Profiles** is enabled: modules with no matching slot keep whatever profile is assigned on their own component.
-- `Active receivers without a preset slot; null profiles will be applied: <ids>.` — shown when **Keep Unmatched Profiles** is disabled: modules with no matching slot fall back to `null`, which resolves to their built-in default profile.
-- `Blank profile slot indices: <indices>.` — a slot entry has no module ID at all.
-
-If a module's behavior does not match what you expect from the preset, check **Keep Unmatched Profiles** on `ConvaiEmbodimentPresetBinding` first — it decides whether an unlisted module keeps its own settings or is reset to defaults.
+Check that the module is enabled and registered on the same character as `ConvaiEmbodimentPresetBinding`. If the preset has no entry for the module, **Keep Unmatched Profiles** determines whether the binding preserves or clears its assigned profile. The module's own defaults apply when no profile resolves. A rejected profile type logs a warning naming the profile and module.
 
 ## A module is not ticking
 

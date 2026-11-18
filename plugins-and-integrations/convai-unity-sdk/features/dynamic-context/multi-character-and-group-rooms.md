@@ -1,7 +1,7 @@
 ---
 title: Context in multi-character and group rooms
 description: Understand when each character can receive context, how group updates stay silent, and how to distinguish submission from acknowledgement.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Dynamic Context belongs to an individual character's local tracker, but its delivery depends on the room. Ordinary multi-character rooms use the current conversation target. Group conversations have a separate member-addressed context route, so context can reach a member without making that member the target.
@@ -22,7 +22,7 @@ The reason group context is silent is that the group conversation controls who r
 
 ## World-object reactions
 
-Tracked properties on `ConvaiObjectMetadata` stage values in character context. During an active group conversation, a non-silent property reaction becomes silent per-character updates plus one scene-event submission with `volunteer: true`.
+Tracked properties on `ConvaiWorldObject` stage values in character context. During an active group conversation, a non-silent property reaction becomes silent per-character updates plus one scene-event submission with `volunteer: true`.
 
 This lets a property change request group participation without forcing each member to speak. Submission is not a guarantee that a member volunteers, that the event is accepted, or that speech follows. [Spatial context](spatial-context.md) already uses `Silent` and does not itself create that scene event.
 

@@ -1,27 +1,27 @@
 ---
 title: Spatial context from world objects
 description: Send object distance, direction, visibility, and movement to characters, and verify how spatial facts enter the normal context update flow.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Spatial context gives each connected character a description of nearby registered objects relative to that character. Enable it when dialogue needs facts such as which object is in front of the character or whether an object is moving. These facts use Dynamic Context; they are separate from camera-frame vision.
 
 ## Prepare the objects
 
-Start with a connected `ConvaiCharacter` and a scene object with `ConvaiObjectMetadata`, shown in the Inspector as **World Object** (**Add Component > Convai > World Object**). The object needs a non-empty **Object Name**, an active and enabled component, and **Include In Metadata** enabled.
+Start with a connected `ConvaiCharacter` and a scene object with `ConvaiWorldObject`, shown in the Inspector as **World Object** (**Add Component > Convai > World Object**). The object needs a non-empty **Object Name**, an active and enabled component, and **Include In Metadata** enabled.
 
 Spatial context is disabled by default. It works with the same physical-object projection used by scene metadata, including logical groups. A logical group's physical representative can change as the character moves.
 
 ## Enable spatial facts
 
-1. Select the object's `ConvaiObjectMetadata` component.
+1. Select the object's `ConvaiWorldObject` component.
 2. Under **Settings**, leave **Include In Metadata** enabled and enable **Include Spatial Context**.
 3. Connect a character and place the object within 30 meters of it. The radius is measured from the character root to the resolved physical object's aim point.
 4. Move or turn the character, or move the object, and inspect the resulting context.
 
 <figure><img src="../../../../.gitbook/assets/unity-world-object-spatial-context.png" alt="World Object Inspector for a Supply Crate with Include Spatial Context and Include In Metadata enabled and its object name and description filled in"><figcaption><p>A World Object that contributes its name, description and spatial facts.</p></figcaption></figure>
 
-The equivalent runtime setting is `metadata.IncludeSpatialContext = true`, where `metadata` is the object's `ConvaiObjectMetadata` component.
+The equivalent runtime setting is `metadata.IncludeSpatialContext = true`, where `metadata` is the object's `ConvaiWorldObject` component.
 
 ## Understand the generated facts
 

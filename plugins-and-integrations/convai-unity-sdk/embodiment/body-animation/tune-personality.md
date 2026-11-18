@@ -1,7 +1,7 @@
 ---
 title: Tune body animation personality
 description: Give one character its own animation settings, choose an archetype, and tune gestures, calmness, and ambient activity without changing shared content.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Use the Body Animation Inspector's **Personality** controls for everyday tuning. The animation set supplies clips; the config controls how they are selected and blended.
@@ -17,7 +17,7 @@ Complete [Body animation quick start](quick-start.md), then open **Personality**
 {% step %}
 ### Give the character its own settings
 
-Select **Give This Character Its Own Settings** to create `<Character>_BodyAnimationSettings.asset` and assign it through the character's profile/config path. Inspect the copy receipt for the actual project location.
+Select **Give This Character Its Own Settings** to create `<Character>_BodyAnimationSettings.asset` and assign it through a profile for this character. The profile references the existing animation set and the new config. Inspect the copy receipt for the actual project location.
 
 If a project config is shared, read the ownership notice. Choose **Make Unique For This Character** when the change should affect only this character. Editing package content through the supported controls creates an editable project copy rather than changing the package asset.
 {% endstep %}

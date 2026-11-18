@@ -1,7 +1,7 @@
 ---
 title: Troubleshoot emotion
 description: Diagnose missing emotion signals, unmoving expressions, unknown vocabulary labels, profile ownership, and action reactions in the Unity SDK.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Start in Play mode with the Emotion Controller's **Live** section. **Feeling** and **Strength** describe the transient expression; **Mood** is separate. A resting mood can move the face even when no server emotion arrives, so a visible smile alone does not confirm that detection is working.
@@ -30,7 +30,7 @@ If the status shows **Off**, use **Turn Emotions On** or select a detection prov
 {% step %}
 ### Check holds and component placement
 
-Turn off **Advanced → Hold one expression**. If application code called `SetEmotionOverride`, call `ClearEmotionOverride`; this releases the override to neutral until the next accepted signal. Place the controller on the owning `ConvaiCharacter` or one of its children. A child is supported; a controller with no `ConvaiCharacter` ancestor cannot match character events.
+Turn off **Advanced → Hold one expression**. If application code called `LockEmotion`, call `UnlockEmotion`. The transient target returns to neutral and the next accepted signal can update it. Place the controller on the owning `ConvaiCharacter` or one of its children. A child is supported; a controller with no `ConvaiCharacter` ancestor cannot match character events.
 {% endstep %}
 
 {% step %}
@@ -74,7 +74,7 @@ The profile's **Unknown emotions** diagnostics help catch invalid authored label
 
 ## Late emotion after interruption
 
-The 5.0 receive path drops emotion effects for interrupted or aborted replies and group lines cut off by a push-to-talk press. Those events do not reach the manager event, character event, or relay. A missing callback for an obsolete reply is expected; verify callbacks with a newly accepted reply.
+The receive path drops emotion effects for interrupted or aborted replies and group lines cut off by a push-to-talk press. Those events do not reach the manager event. A missing callback for an obsolete reply is expected; verify callbacks with a newly accepted reply.
 
 ## Facial expression and LipSync
 
@@ -88,11 +88,11 @@ A package profile's own Inspector is read-only. **Create A Project Copy** saves 
 
 Editing a package profile through a character's Inspector or the Emotion Editor instead creates and assigns a copy for that character. Shared project profiles affect all characters that use them unless you choose **Make Unique**. See [Asset ownership](../../core-concepts/asset-ownership.md).
 
-## Relay callbacks and UI labels
+## Emotion callbacks and UI labels
 
-Confirm **Auto Resolve Character** finds a `ConvaiCharacter` on the relay's GameObject, or explicitly assign **Character**. Keep the relay enabled and verify detection, connection, and an accepted reply.
+Subscribe to `ConvaiManager.Events.OnCharacterEmotionChanged` after the manager initializes. Filter each event by `CharacterId` to display the raw `Emotion` label for one character. Use `DominantEmotionChanged` on the controller for smoothed label changes and `MoodChanged` for resting mood changes.
 
-The event sends `CharacterEmotionRelayData`, not a string. Use a receiver method to extract `Emotion`; directly wiring a dynamic UI `text` property cannot do that. See the [UI receiver example](usage-examples.md#scenario-6-display-the-raw-emotion-in-a-ui-label). Mood transitions use the controller's C# `MoodChanged` event, not the relay.
+See [Emotion usage examples](usage-examples.md#scenario-6-display-the-raw-emotion-in-a-ui-label) for a UI receiver.
 
 ## Console messages
 
@@ -102,7 +102,7 @@ The event sends `CharacterEmotionRelayData`, not a string. Use a receiver method
 | `The backend sent the emotion` | The server label is absent from the vocabulary; neutral is used. Add an alias if appropriate. |
 | `Ignored an emotion event without a character id` | An unscoped event is rejected to prevent cross-character effects. Fix the event producer. |
 | `has no ConvaiCharacter on itself or any parent` | Move the controller to its character or a child. |
-| `SetEmotionOverride was given` / `SetMood was given` | A scripted label is unknown. Validate with `TryResolveEmotionLabel` before calling. |
+| `PlayEmotionBeat was given` / `SetMood was given` | A scripted label is unknown. Validate with `TryResolveEmotionLabel` before calling. |
 | `Mood After Actions uses` | An outcome label is unknown and the reaction is skipped. Choose a defined label. |
 | `none of the authored shader properties` | Material-property names missed every resolved target material. Check spelling and material assignment. |
 | `marks no emotion as the neutral one` | Set exactly one taxonomy entry as neutral; runtime otherwise uses a stand-in. |

@@ -1,7 +1,7 @@
 ---
 title: Audio and microphone issues
 description: Diagnose microphone capture, permission, publication, and character playback failures, including native and browser audio differences.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Separate microphone input from character playback when diagnosing audio. A published microphone does not prove that playback is unlocked, and a connected room does not prove that either path is ready. Read `ConvaiSessionEventRelay.OnSessionError` and its message before changing audio settings.
@@ -17,7 +17,7 @@ A text-only session sets `LocalAudioPolicy.AllowMicrophone` to `false`. `SetMicr
 {% step %}
 ### Read the audio error and platform detail
 
-Filter the Console for `Audio` or `RoomAudioRuntimeAdapter`. `audio.mic_permission_denied` indicates refused access; `audio.mic_unavailable` indicates no usable device; `audio.mic_publish_failed` covers other publication failures. Browser error messages retain the rejection reason and can identify a host-page permission policy.
+Filter the Console for `Audio` and check the error code. `audio.mic_permission_denied` indicates refused access; `audio.mic_unavailable` indicates no usable device; `audio.mic_publish_failed` covers other publication failures. Browser error messages retain the rejection reason and can identify a host-page permission policy.
 {% endstep %}
 {% step %}
 ### Inspect the character's output component
@@ -29,9 +29,9 @@ Set volume and spatial settings on `ConvaiAudioOutput`. It writes `AudioSource.v
 {% step %}
 ### Unlock browser playback when required
 
-Microphone publication no longer aborts merely because browser playback requires a user gesture. Capture permission and playback autoplay are separate gates. If a WebGL conversation connects but the character is inaudible, use an explicit user interaction to call the scene room manager's `EnableAudioPlayback()` or `EnableAudioAndStartListening()`.
+Microphone publication no longer aborts merely because browser playback requires a user gesture. Capture permission and playback autoplay are separate gates. If a WebGL conversation connects but the character is inaudible, call `manager.Audio.EnableAudioPlayback()` or `manager.Audio.EnableAudioAndStartListening()` from a button click.
 
-Check `CanEnableAudioPlayback`, `RequiresUserGestureForAudio`, and `IsAudioPlaybackActive` to drive that button. The SDK also handles the first qualifying interaction through its browser audio unlock path. Verify playback in the built page, not only in the Editor.
+Check `CanEnableAudioPlayback`, `RequiresUserGesture`, and `IsAudioPlaybackActive` to drive that button. The SDK also handles the first qualifying interaction through its browser audio unlock path. Verify playback in the built page, not only in the Editor.
 {% endstep %}
 {% endstepper %}
 

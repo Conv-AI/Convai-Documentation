@@ -1,7 +1,7 @@
 ---
 title: How long-term memory works
 description: Understand how character memory uses end-user identity, what the SDK sends and reports, and how stored records differ from conversation state.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Long-term memory associates stored records with an end user and a character. The Unity SDK supplies identity when it connects and exposes APIs for inspecting the records returned by Convai. Memory extraction and response generation happen outside the Unity client.
@@ -38,7 +38,7 @@ Memory operations take a `characterId` and an `endUserId`. A query for a differe
 
 `MemoryRecord` contains an `Id`, a natural-language `Memory` string, timestamps, and optional metadata. For example, an application might submit the test fact `Jordan completed the fire safety module.` The text is application data, not an instruction to the SDK's connection state machine.
 
-`MemoryService.AddAsync` returns operation results that include an `Event` string. Read the returned result instead of assuming every submitted fact creates one record or that repeated writes are always merged in a particular way.
+`ConvaiPlatformClient.AddMemoriesAsync` returns operation results that include an `Event` string. Read the returned result instead of assuming every submitted fact creates one record or that repeated writes are always merged in a particular way.
 
 ## Reported memory status
 

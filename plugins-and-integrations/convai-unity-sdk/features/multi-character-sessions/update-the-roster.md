@@ -1,10 +1,10 @@
 ---
 title: Characters joining and leaving
 description: Control automatic and scripted roster changes in an existing room, preserve a valid replacement target, and handle refused or ambiguous updates.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-A connected multi-character room can accept new manager-owned, selected characters during play. Use the automatic roster for ordinary scene lifecycle changes; use explicit add/remove operations when application logic owns the transition.
+A connected multi-character room can accept new manager-owned, selected characters during play. Change scene ownership or the manager’s selected character list to add or remove a character.
 
 ## Automatic membership changes
 
@@ -20,48 +20,26 @@ A connection created with one active selected character has no roster. Activate 
 
 Changes to the player or **Initial Character** affect connection setup and queue a reconnect rather than a roster edit. Classic rooms and the opt-in [group conversation preview](../group-conversation/README.md) have different prerequisites.
 
-## Add a character explicitly
+## Change the selected characters from code
 
-Retrieve `IConvaiRoomConnectionService` with `ConvaiManager.TryGetRoomConnectionService`, then await:
+Call `ConvaiManager.SetCharactersToConnect` with the full set that should remain in the room. An active selected character owned by the manager can join. To remove one, omit it from the list. The SDK retains the current target if it remains eligible, or chooses a ready replacement when removing it. Keep at least one eligible member selected.
 
 ```csharp
-// Method-body fragment; roomService, incoming, and cancellationToken are supplied.
-CharacterRosterUpdateResult result = await roomService.AddCharacterAsync(
-    incoming, cancellationToken: cancellationToken);
-if (result.Added.Count == 0)
-    throw new InvalidOperationException("No membership was returned for the add.");
-await result.Added[0].WaitUntilReadyAsync(cancellationToken);
+// In a method that has the manager and these scene character references:
+manager.SetCharactersToConnect(new[] { currentCharacter, incomingCharacter });
 ```
 
-`characterSessionId` optionally resumes an earlier conversation. It does not permit duplicate Character IDs. Adding the same component twice or another component with the same ID is refused. Specific/pinned versions raise `ConvaiOperationException`; use **Live**.
-
-Choose one owner for the add. Do not activate a manager-owned selected object for automatic joining and simultaneously issue a competing explicit add. Read the current session first if another path may already have seated it. See [Multi-character usage examples](usage-examples.md) for a helper that handles an already-present member.
-
-## Remove a character from the roster
-
-Await `RemoveCharacterAsync(characterOrMembershipId, replacementTargetMembershipId, cancellationToken)`. Pass a Ready member's ID when the handover destination matters. It must be in the room and different from the outgoing member.
-
-With no explicit replacement, 5.0 chooses at send time: retain the current target if it remains, otherwise choose another Ready, enabled local member. The service can refuse the request with `replacement_target_required` or `replacement_target_unavailable`. Do not assume removal will clear the target or that it will be accepted without a replacement.
-
-An acknowledged removal with a replacement produces one `InteractionTargetChanged(outgoing, replacement)` event, then `CharacterRemoved`; there is no intermediate null callback. Explicit removal has no client-side last-member guard equivalent to the automatic planner, so handle the service's response.
+Wait for `OnRoomRosterChanged` and handle `Refused` before treating a character as seated. When the new character is ready, call `TalkToAsync` if it should receive the player’s next input. See [Multi-character usage examples](usage-examples.md#scripted-roster-handover).
 
 ## Handle results and timeouts
 
-Catch `CharacterRosterUpdateException` before its base `InvalidOperationException`, and inspect `Code`. Also handle argument errors, `ConvaiOperationException`, timeout, and caller cancellation. Known roster codes include:
+A roster edit can fail because the roster changed, the sender lacks permission, or the outgoing target has no eligible replacement. Read `RoomRosterChanged.Reason` for the refusal. The SDK reconciles a `stale_roster_epoch` refusal once before reporting a second refusal for that character.
 
-| Code | Action |
-| --- | --- |
-| `roster_epoch_mismatch` | Read current state and reassess the intended edit |
-| `unauthorized_sender` | Resolve room-management permission |
-| `replacement_target_required` | Supply an eligible Ready replacement |
-| `replacement_target_unavailable` | Refresh the roster and select an available replacement |
-| `removed_before_seated` | The add lost its member before seating; reassess scene ownership and state |
-
-A 15-second caller timeout does not release the roster gate immediately. The SDK waits for authoritative evidence until the 30-second canonical deadline measured from registration. If the result or route remains ambiguous, it retires and disconnects the room; it does not automatically reconnect. See [Connection API reference](connection-api-reference.md#exceptions-and-timeouts).
+If lifecycle and route events establish the outcome of a roster edit with a missing acknowledgement, the SDK uses that authoritative state at the deadline. If the outcome remains ambiguous, the SDK retires and disconnects the room. Call `ConvaiManager.ConnectAsync` if the application should begin a new connection.
 
 ## Roster limits
 
-The SDK caps a classic roster at 50 characters both at connect and on add. Account limits may be lower. Connect validation surfaces `ConvaiOperationException`; an add over this ceiling raises `InvalidOperationException`. Select only the characters needed for the conversation. The separate group mode supports 2–4 members, not the classic ceiling.
+The SDK caps an ordinary roster at 50 characters. Account limits can be lower. The separate [group conversation preview](../group-conversation/README.md) accepts two to four characters.
 
 ## Next steps
 

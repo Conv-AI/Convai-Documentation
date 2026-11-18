@@ -1,36 +1,39 @@
 ---
-title: Choose a REST API mode
-description: Select the client routes used for character and narrative reads, preserve a selected character version, and distinguish API routing from authentication.
-last_reviewed: "5.0.0-preview"
+title: Migrate from the REST API mode setting
+description: Migrate character and narrative requests to the Character API and choose the Unity client that owns each REST operation after upgrading.
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Choose **API Mode** in the **Credentials** card to control character and narrative REST reads. This setting is separate from **Auth Mode**, which selects credentials for room connections.
+Character details and narrative reads use the Character API. The SDK selects the route for each task.
 
-## Select routes for your reads
+{% hint style="warning" %}
+SDK 5.0 removes the **API Mode** setting. Replace code that selects `ConvaiApiMode.Legacy` or `Upgraded` with the client that owns the task.
+{% endhint %}
 
-{% stepper %}
-{% step %}
-### Open Credentials
+## Update project settings
 
-Open **Convai > Settings** or **Edit > Project Settings > Convai SDK**, then scroll to **Credentials**. **Environment** selects Production, Beta, or a configured custom host; it does not establish access to that environment.
-{% endstep %}
-{% step %}
-### Choose the mode
+Open **Convai > Settings** or **Edit > Project Settings > Convai SDK**. In **Credentials**, use **Environment** to select the host preset, or configure your custom host settings. **Character Workspace ID** supplies workspace context for Character API reads. **Auth Mode** controls credentials for room connections.
 
-Use **Legacy** for the legacy routes. Use **Upgraded** for the Character API routes used by character details and narrative reads. Qualified character references, including selected versions, require Upgraded mode. **Character Workspace ID** supplies workspace read context where required by your service configuration.
-{% endstep %}
-{% step %}
-### Verify the selected character
+Keep a selected Live or pinned character reference when reading a specific version. See [Pin a character version](../getting-started/pin-a-character-version.md).
 
-Refresh character details and narrative data with the intended character selection. Treat a failed read as an API response to diagnose; selecting Upgraded does not grant access or guarantee an environment's availability.
-{% endstep %}
-{% endstepper %}
+## Select the client in code
 
-## Preserve settings in scripts
+| Task | Client |
+| --- | --- |
+| Read a character, its sections, or its triggers | `ConvaiCharacterNarrativeClient` |
+| Edit character resources in trusted tooling | `ConvaiCharacterApiClient` |
+| Read account usage or manage end users and memory | `ConvaiPlatformClient` |
+| Connect as a scene player | `ConvaiManager.ConnectAsync` |
 
-Construct `ConvaiRestClient` with `ConvaiRestOptionsFactory.Create()` so project environment and API mode apply. Use `CreateForCharacterRead(characterReference, apiKey, useDraft, preserveSelectedReference)` for character-aware reads. Editor authoring can request draft data for bare references while preserving a selected Live or pinned reference.
+Use `ConvaiRestOptionsFactory.CreateCharacterReadOptions(characterReference, apiKey, useDraft, preserveSelectedReference)` to apply the project's environment and workspace. A draft read is requested only when the reference is bare and you allow it to change. Use `CreatePlatformOptions` for the project's Platform API settings.
 
-Animation, memory, and room-connect operations continue through their legacy routes. Runtime short-lived auth tokens also retain compatible legacy routes; they are not Character API personal access tokens.
+## Verify your migration
+
+Read the intended character and its narrative data. Confirm you are reading the published or pinned character reference you requested. If a read fails, inspect the response from that API.
+
+{% content-ref url="../scripting-reference/rest-api-client.md" %}
+[REST API client reference](../scripting-reference/rest-api-client.md)
+{% endcontent-ref %}
 
 {% content-ref url="../authentication/README.md" %}
 [Authentication](../authentication/README.md)

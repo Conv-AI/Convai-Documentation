@@ -1,7 +1,7 @@
 ---
 title: How body language works
 description: Understand how Body Language directs a Convai character's posture, breathing, and gestures every tick, and how it yields to scripted gestures.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Every tick, `ConvaiBodyLanguageController` reads the character's dialogue state and emotion, resolves what its behavior should look like right now, and composes that behavior onto the skeleton alongside whatever Body Animation and Gaze are already writing. This page describes what drives that decision, the pieces that produce the motion, and the rule that keeps Body Language from fighting a scripted gesture. For the composition-root model these mechanics build on, see [Character embodiment](../../core-concepts/character-embodiment.md).
@@ -51,15 +51,15 @@ The contracts behind this coordination — how Gaze registers its torso-aim entr
 
 ## How it yields to scripted gestures
 
-Body Animation's talk-clip system can report a suppression level every tick, and Body Language's entire co-speech system reads it before deciding how much to do:
+Body Language reads the motion budget from Body Animation. Upper-body talk uses a graded occupancy value, so posture and shoulder motion back off as the clip takes over. Locomotion and actions can also report hard suppression. Without Body Animation, Body Language runs with no motion-budget suppression.
 
-| Suppression | Head beats | Posture pulses | Semantic gesture cues | Posture and breathing |
-| --- | --- | --- | --- | --- |
-| None (or no performer registered) | Full | Full | Eligible | Full weight |
-| Upper body (an upper-body talk clip or locomotion is playing) | Full | Reduced | Refused | Posture reduced, breathing stays at full weight |
-| Full body (a full-body action or turn is playing) | None | None | Refused | Both fade to zero |
+| Motion budget | Body Language behavior |
+| --- | --- |
+| No suppression | Posture, breathing, and head beats can run at their normal weights. A gesture cue needs a performer to play a clip. |
+| Upper-body suppression | Posture and hand motion back off while breathing and head motion can continue. |
+| Full-body suppression | The shared procedural motion weight fades down to give the full-body animation control. |
 
-This is why the two modules never look like they are fighting: while Body Animation plays an authored upper-body gesture, Body Language keeps the character breathing and keeps its head beats going, but steps back from adding its own posture pulses on top of the same motion. Breathing stays at full weight under upper-body suppression. Full-body suppression fades the shared master weight, which also fades procedural breathing while the authored motion owns the body.
+Speech-driven body movement reads the character's measured voice level. The SDK shares that reading across embodiment features.
 
 ***
 

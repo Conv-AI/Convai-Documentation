@@ -1,6 +1,6 @@
 ---
 title: Configure the API key
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 description: >-
   Enter and validate your Convai API key for local development in the Unity
   Editor so a Convai character can authenticate while you build a scene.
@@ -22,7 +22,7 @@ Log in to your [Convai dashboard](https://convai.com), navigate to **Account Set
 {% step %}
 ### Open the Credentials section
 
-In the Unity Editor menu bar, open **Convai > Settings** (or **Edit > Project Settings > Convai SDK**), then scroll to the **Credentials** card. Leave **Auth Mode** set to **Api Key**, its default. Keep **Environment** on **Production**. Keep **API Mode** on **Legacy** unless your integration is configured for the upgraded REST contract. The screenshot shows a project using **Upgraded**; it is not the default.
+In the Unity Editor menu bar, open **Convai > Settings** (or **Edit > Project Settings > Convai SDK**), then scroll to the **Credentials** card. Leave **Auth Mode** set to **Api Key**, its default. Keep **Environment** on **Production**.
 {% endstep %}
 
 {% step %}
@@ -36,17 +36,16 @@ The status badge next to the button reports the result: **Key valid** when Conva
 {% step %}
 ### Verify the key is accepted
 
-Confirm that the Credentials badge reads **Key valid**. Scene validation checks whether a key is configured; it does not authenticate that key with Convai.
+Confirm that the Credentials badge reads **Key valid**. When you reopen settings, the Editor checks the saved key in the background if its cached result is missing or older than 24 hours. If the service does not answer, the Editor limits retries for the same key to one every five minutes. Scene validation checks whether a key is configured; it does not authenticate that key with Convai.
 
-<figure><img src="../../../.gitbook/assets/unity-sdk-credentials.png" alt="Credentials card with a masked API key, validation controls, environment, and API mode"><figcaption><p>The Credentials card before validation. After validation succeeds, the badge reads Key valid.</p></figcaption></figure>
 {% endstep %}
 {% endstepper %}
 
 ## How the key is used at runtime
 
-The SDK reads the key from `ConvaiSettings` via the `ICredentialProvider` interface before initiating any connection to Convai. You do not need to pass the key manually in code — the SDK resolves it automatically on startup.
+In API Key mode, the SDK reads the saved key from `ConvaiSettings` when it connects. Your scene scripts can start the conversation without passing credentials.
 
-`Assets/Resources/ConvaiSettings.asset` stores the key obfuscated (XOR plus Base64), not encrypted — anyone with the SDK source can reverse it. Decide whether to commit this file to source control based on your team's security policy. If the project previously stored the key in plain text, the SDK migrates it to the obfuscated format automatically the first time the Unity Editor loads.
+`Assets/Resources/ConvaiSettings.asset` stores the key obfuscated (XOR plus Base64), not encrypted — anyone with the SDK source can reverse it. Decide whether to commit this file to source control based on your team's security policy. If an older project kept only a plaintext key, enter it again with **Validate & Save**.
 
 ## Move to Auth Token mode before you ship
 
@@ -57,7 +56,7 @@ API Key mode has no equivalent of a server-issued, short-lived credential — th
 {% endcontent-ref %}
 
 {% content-ref url="../advanced-topics/custom-providers/custom-credential-provider.md" %}
-[Custom credential provider](../advanced-topics/custom-providers/custom-credential-provider.md)
+[Migrate custom credential providers](../advanced-topics/custom-providers/custom-credential-provider.md)
 {% endcontent-ref %}
 
 ## Next steps

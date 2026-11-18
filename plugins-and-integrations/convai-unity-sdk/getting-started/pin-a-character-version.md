@@ -3,7 +3,7 @@ title: Pin a character version
 description: >-
   Choose a released character version in the Unity Inspector, preserve that
   selection across sessions, and resolve missing or unavailable versions.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Choose a released **Character Version** to keep a scene tied to a particular character release. **Live** uses the current character. This selects a character configuration version, independently of the Unity SDK package version.
@@ -14,7 +14,7 @@ Choose a released **Character Version** to keep a scene tied to a particular cha
 {% step %}
 ### Prepare access to released versions
 
-Configure your API key and set **Convai > Settings > Credentials > API Mode** to **Upgraded** for a workspace that supports the upgraded Character API. Enter a valid **Character ID** on the character. See [Choose a REST API mode](../advanced-topics/choose-a-rest-api-mode.md) for this setting's scope.
+Configure your Editor API key under **Convai > Settings > Credentials**. Set **Character Workspace ID** if the character belongs to a specific workspace, then enter its **Character ID** on the character component.
 {% endstep %}
 
 {% step %}
@@ -22,13 +22,13 @@ Configure your API key and set **Convai > Settings > Credentials > API Mode** to
 
 Select the character and open **Identity > Character Version**. Use **Refresh** to reload releases, then choose a version from the popup. The latest release is labeled **Latest release**. If the service has no releases, **Live** is the only available choice.
 
-When **Character Setup Source** is **Profile Asset**, edit the version on the assigned Character Profile asset. The component shows the selected profile value as read-only.
+To reuse the pin across scenes, set the version on the character prefab.
 {% endstep %}
 
 {% step %}
 ### Save and verify the selection
 
-Save the changed scene, prefab or profile asset. Select it again and confirm the chosen release remains selected. Connect with that configuration and check for version-related connection errors before distributing the application.
+Save the changed scene or prefab. Select it again and confirm the chosen release remains selected. Connect with that configuration and check for version-related connection errors before distributing the application.
 {% endstep %}
 {% endstepper %}
 
@@ -40,7 +40,7 @@ The SDK saves the exact release reference returned by the API. Do not manufactur
 
 | State | Meaning and action |
 | --- | --- |
-| Released versions unavailable | Check API Mode, credentials, workspace, environment and API URL, then Refresh. |
+| Released versions unavailable | Check credentials, workspace, environment, and the Character API URL, then Refresh. |
 | No released versions yet | Publish an appropriate character release through your character-management workflow, or use Live. |
 | Saved version marked unavailable | The saved reference is absent from the fetched list. It is preserved; choose an available release or Live deliberately. |
 | Reselect required | The saved version has no API reference. Choose the release again from the API-backed list. |

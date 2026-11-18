@@ -1,7 +1,7 @@
 ---
 title: Configure eye contact
 description: Configure how strongly a Convai character commits to eye contact with the player, from natural behavior to a permanent lock.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Configure how strongly a Convai character commits to the player's eye contact by setting `GazeEyeContactMode`, `GazeFocusFidelity`, and the player anchor aim mode on `ConvaiGazeController`. Use this page when the default per-state behavior is too soft for a presenter or kiosk character, or when a character needs to look at something other than the main camera.
@@ -65,9 +65,9 @@ In **Gaze Editor > Targets > Advanced targeting**, **Aim Point** offers **Automa
 | `ExactTransform` | Uses the anchor's exact world position, with no lift applied. |
 | `LocalOffset` | Transforms `PlayerAnchorAimOffset` from anchor-local space to world space, so the aim point moves with the anchor. |
 
-Set the mode on `ConvaiGazeController` as `PlayerAnchorAimMode`, and set `PlayerAnchorAimOffset` when using `LocalOffset`. `LocalOffset` is recommended for a rotated custom anchor or an XR or cutscene rig, where `Auto`'s camera-position assumption does not apply.
+Set **Aim Point** and **Aim Offset** on the character's **Player Anchor**. The controller's `PlayerAnchorAimMode` and `PlayerAnchorAimOffset` properties also write to that component. `LocalOffset` is recommended for a rotated custom anchor or an XR or cutscene rig, where `Auto`'s camera-position assumption does not apply.
 
-For split-screen, multiplayer, or cutscene setups where the character should not follow `Camera.main`, assign **Who It Looks At > Who is the player?**, or set `PlayerAnchorOverride`, to the intended transform. The caption beneath an empty field reports the resolved camera or that no camera has been found.
+For split-screen, multiplayer, or cutscenes, assign **Who It Looks At > Who is the player?** on the Gaze component. Unity stores the override on the **Player Anchor**. Without an override, the lookup uses the character's **Explicit Anchor**, the manager's conversation view camera, `Camera.main`, the first enabled Game camera, then the `ConvaiPlayer` transform.
 
 ## Verify the setting
 

@@ -1,7 +1,7 @@
 ---
 title: Vision quick start
 description: Add a scene-camera feed to a working character, check the captured image and published track, and verify a vision response in the Unity Editor.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Add vision to an existing single-character scene that already supports conversation. This walkthrough uses a Unity camera and automatic publication. Group conversation rooms do not publish vision.
@@ -10,11 +10,11 @@ Add vision to an existing single-character scene that already supports conversat
 
 {% stepper %}
 {% step %}
-### Enable a Video connection
+### Enable vision for the room
 
-Select `ConvaiRoomManager`. In **Connection**, choose **Video**. With **Dynamic Vision** set to Auto or On, the setup dialog can offer **Add Components**, creating a `ConvaiVisionRoot` child with a publisher and camera source.
+Select `ConvaiRoomManager`. Under **Connection**, set **Vision** to **On**. The setup dialog can offer **Add Components**, creating a `ConvaiVisionRoot` child with a publisher and camera source.
 
-If components are still missing, the **Video needs a camera feed** warning offers **Add Missing Components**. That action adds the components to the room manager's own GameObject. Select the object actually created by your chosen path.
+If components are still missing, the camera-feed warning offers **Add Missing Components**. That action adds the components to the room manager's own GameObject. Select the object actually created by your chosen path.
 {% endstep %}
 {% step %}
 ### Assign the captured camera
@@ -35,13 +35,11 @@ Request vision status or a vision trigger through the [sample debug tool](debug-
 {% endstep %}
 {% endstepper %}
 
-<figure><img src="../../../../.gitbook/assets/unity-vision-camera.png" alt="Camera Vision Frame Source Inspector with the Balanced capture preset selected and Main Camera assigned as Target Camera with the identifier main-camera"><figcaption><p>Camera Vision Frame Source with the Balanced preset and an assigned target camera.</p></figcaption></figure>
-
 ## Manual placement
 
 Add `ConvaiVisionPublisher` to the room manager or a child, then add a frame source on that object or beneath it. Assign **Source** explicitly when there are multiple candidates. Runtime discovery does not search the whole scene.
 
-Keep the publisher's **Track Name** aligned with the room's **Video Track Name**. A room-level name overrides the discovered publisher name. For browser builds, choose the picture deliberately in [WebGL vision](webgl.md).
+Set the track name on the publisher. The room uses the name reported by the registered publisher. For browser builds, choose the picture deliberately in [WebGL vision](webgl.md).
 
 {% content-ref url="publishing-and-policies.md" %}
 [Publish policies](publishing-and-policies.md)

@@ -1,7 +1,7 @@
 ---
 title: Installation and package issues
 description: Fix Convai Unity SDK import failures, unsupported Unity versions, missing package dependencies, and bootstrapper startup warnings.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Check the Editor version, package dependencies, project settings, and native transport libraries when the SDK fails to import or initialize. A successful bootstrap log confirms that initialization ran; it does not prove authentication, transport, or character readiness.
@@ -14,7 +14,7 @@ Work through these steps before diving into specific issues. They separate packa
 {% step %}
 ### Confirm the Unity version
 
-Open `Help → About Unity` (Windows) or `Unity → About Unity` (macOS) and read the exact build number. The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code> — this is a hard floor on the exact patch, not a rounded version: an earlier `6000.0` patch such as `6000.0.20f1` is refused, and there is no supported configuration on Unity 2023 or earlier. The preview includes compatibility handling for the Unity object-identity changes in the `6000.6` stream. See [Unity versions and render pipelines](../compatibility-and-requirements/unity-versions-and-render-pipelines.md) for the documented support range.
+Open `Help → About Unity` (Windows) or `Unity → About Unity` (macOS) and read the exact build number. The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code>. Compare the complete Editor version, including its patch number. See [Unity versions and render pipelines](../compatibility-and-requirements/unity-versions-and-render-pipelines.md) for the documented support range.
 
 If the editor is older, upgrade before installing the SDK — the package depends on packages that only exist on Unity 6.
 {% endstep %}
@@ -24,9 +24,9 @@ If the editor is older, upgrade before installing the SDK — the package depend
 
 Go to **Edit → Project Settings → Convai SDK**. The **Setup Health** section opens first and runs a set of project-configuration checks automatically — each item shows a colored status badge, a title, and a message.
 
-The checks include `Settings Asset` (flags a missing `ConvaiSettings.asset`), `API Key` (flags a missing key), `macOS / iOS Microphone Usage Description` (flags an empty `Info.plist` description), `Prepare iOS for Recording` (flags the iOS audio session setting used for Convai microphone recording and speaker playback), `Android Microphone Permission` (informational), `WebGL Platform` (browser-path caveats when WebGL is active), and a `Define Drift` check for each Convai feature-flag scripting define that differs across build target groups.
+The checks include `Settings Asset` (flags a missing `ConvaiSettings.asset`), credentials for the selected authentication mode, `macOS / iOS Microphone Usage Description` (flags an empty `Info.plist` description), `Prepare iOS for Recording` (flags the iOS audio session setting used for Convai microphone recording and speaker playback), `Android Microphone Permission` (informational), `WebGL Platform` (browser-path caveats when WebGL is active), and a `Define Drift` check for each Convai feature-flag scripting define that differs across build target groups.
 
-Use the action offered by each flagged item to apply its correction — for example **Create** adds the missing `ConvaiSettings.asset`, **Setup** fills the Apple microphone usage description, and **Sync All** aligns a drifting scripting define across build target groups. Select **Refresh** in the section header to re-run every check after making changes manually.
+Use the action shown on the finding. Review the microphone description before keeping it in a build. Select **Refresh** in the section header to re-run every check after making changes manually.
 
 A passing check confirms only that check. The WebGL caveat can remain a warning without indicating a broken setup. Continue with compilation and runtime checks.
 {% endstep %}
@@ -60,7 +60,7 @@ If the file is missing, open **Edit → Project Settings → Convai SDK**. Openi
 Go to **Edit → Project Settings → Convai SDK**. The window opens with six sections: **Setup Health**, **Credentials**, **Runtime Defaults**, **Diagnostics**, **Advanced**, and **About**.
 
 * If the window is blank or shows no sections, there is a compiler error in the project. Fix all script errors first — the settings provider only renders when all editor scripts compile cleanly.
-* If the window opens but the **Credentials** section shows no API key, select **Credentials**, paste your key from the [Convai developer dashboard](https://convai.com/), then select **Validate & Save**.
+* In **Credentials**, check the selected **Auth Mode**. For API Key mode in local development, enter the key and select **Validate & Save**. For Auth Token mode, check the endpoint or registered provider. See [Authentication](../authentication/README.md).
 
 When everything is configured correctly, pressing Play shows `Convai Bootstrapper: Initialization complete.` in the Console.
 {% endstep %}
@@ -98,7 +98,7 @@ Assembly definition errors prevent the project from entering Play Mode. The Cons
 
 **Error:** `The type or namespace name 'Newtonsoft' could not be found`
 
-**Fix:** Open **Window → Package Manager**. Click **+** → **Add package by name**. Enter `com.unity.nuget.newtonsoft-json` and confirm. Unity installs version <code class="expression">space.vars.dep_newtonsoft_json_version</code> or higher automatically.
+**Fix:** Open **Window → Package Manager**. Click **+** → **Install package by name**. Enter `com.unity.nuget.newtonsoft-json` in **Name** and <code class="expression">space.vars.dep_newtonsoft_json_version</code> in **Version**, then select **Install**.
 
 **Verify:** Open the Console. Newtonsoft namespace errors are gone and the project compiles cleanly.
 
@@ -114,7 +114,7 @@ Assembly definition errors prevent the project from entering Play Mode. The Cons
 
 **Error:** `The type or namespace name 'InferenceEngine' does not exist in the namespace 'Unity'`
 
-**Fix:** Open **Window → Package Manager**. Click **+** → **Add package by name**. Enter `com.unity.ai.inference` and confirm. Unity installs version <code class="expression">space.vars.dep_ai_inference_version</code> or higher automatically.
+**Fix:** Open **Window → Package Manager**. Click **+** → **Install package by name**. Enter `com.unity.ai.inference` in **Name** and <code class="expression">space.vars.dep_ai_inference_version</code> in **Version**, then select **Install**.
 
 **Verify:** Open the Console. `Unity.InferenceEngine` namespace errors are gone and the project compiles cleanly.
 

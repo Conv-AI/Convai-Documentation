@@ -1,6 +1,6 @@
 ---
 title: Customizing UI components
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 description: Restyle chat bubbles, notifications, and settings controls, or build your own transcript display with filtered runtime subscriptions.
 ---
 
@@ -60,17 +60,15 @@ Duplicate `Notification.prefab` from `Prefabs/Notifications/` and assign your co
 | `notificationTitleText` | `TextMeshProUGUI` | Title |
 | `notificationMessageText` | `TextMeshProUGUI` | Body |
 
-Trigger an assigned notification after enabling notifications in runtime settings. Confirm that the copied skin appears and clears. See [Notification system](notification-system/) for asset registration and queuing.
+Trigger an assigned notification after enabling notifications in runtime settings. Confirm that the copied skin appears and clears. See [Notification system](notification-system/) for alert setup and queuing.
 
 ## Build a custom settings view
 
-Implement `ISettingsPanelView` from `Convai.Runtime.Presentation.Services.Settings`. Create your own `SettingsPanelPresenter`; the presenter inside `SettingsPanel` is private and cannot be retrieved for reuse.
+Use `ConvaiManager.TryGetRuntimeSettingsService` after initialization. Populate your UI from `Current`, read available microphones with `TryGetMicrophoneDeviceService` and `GetAvailableDevices()`, then call `Apply` with a `ConvaiRuntimeSettingsPatch` when the player saves. Subscribe to `Changed` while your view is enabled.
 
-Resolve the required services with `ConvaiManager.TryGetRuntimeSettingsService`, `TryGetSettingsPanelController`, and `TryGetMicrophoneDeviceService`. Pass them to the constructor in that order. You may also pass the result of `TryGetRoomConnectionService` and a `Func<string>` providing the effective player name.
+Use `ConvaiManager.SetConversationInputModeAsync` separately for an active room mode change. Read back `ActiveConversationInputMode` after the operation. Use `TryGetSettingsPanelController` if your custom view shares the existing panel's open and close controls.
 
-Call `Bind(yourView)` after the services and view are ready. Call `Unbind()` when temporarily detaching the view and `Dispose()` when its owner is destroyed. The presenter subscribes to the view's save/close events, renders settings, applies patches, and requests conversation-mode changes when a room service is supplied.
-
-Verify that saving changes `IConvaiRuntimeSettingsService.Current`, closes the panel, and persists the settings override. See [Runtime settings API](settings-panel/runtime-settings-api.md) for normalization and persistence behavior.
+Verify that saving updates `Current` and that a later scene uses the saved preference. See [Runtime settings API](settings-panel/runtime-settings-api.md) for normalization and persistence.
 
 ## Troubleshooting
 
@@ -78,8 +76,8 @@ Verify that saving changes `IConvaiRuntimeSettingsService.Current`, closes the p
 | --- | --- | --- |
 | A copied bubble is blank | Missing text references | Assign `senderUI` and `messageUI`, then send another message |
 | A custom display shows text while transcripts are off | It treats an event subscription as a presentation toggle | Observe `IsPresentationEnabled` and its change event; toggle Transcript and confirm the display hides |
-| A custom settings view does not save | Its presenter is not bound | Bind after service initialization; save and inspect `Current` |
-| A notification still uses the default skin | The controller references the package prefab | Assign your copied notification prefab and trigger a registered asset |
+| A custom settings view does not save | The UI has no settings service or did not apply a patch | Resolve the service, apply changes, and inspect the result |
+| A notification still uses the default skin | The controller references the package prefab | Assign your copied notification prefab and request the assigned asset |
 
 ## Next steps
 

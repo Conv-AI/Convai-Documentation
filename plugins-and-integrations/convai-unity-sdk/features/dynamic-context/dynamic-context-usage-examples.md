@@ -3,7 +3,7 @@ title: Dynamic context usage examples
 description: >-
   Five Dynamic Context examples show a relay-driven trigger, a batched update,
   an event log, an emergency transition, and synced world-object context.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The following examples progress from a single relay-driven trigger to scripted batch updates and synced world-object context. Each example lists the scenario context, the concrete Inspector or script setup, and the expected runtime outcome.
@@ -24,7 +24,7 @@ All examples assume `ConvaiManager` is in the scene with a valid API key configu
 4. Add a small trigger script to each station's trigger volume, pointing every instance at the same relay:
 
 ```csharp
-using Convai.Runtime.Presentation.DynamicContext;
+using Convai.Runtime.DynamicContext;
 using UnityEngine;
 
 public class StationZoneTrigger : MonoBehaviour
@@ -184,7 +184,7 @@ Calling `SetStates` for the three simultaneous transitions, instead of three seq
 
 ### Setup (World object with a tracked property)
 
-1. Add `ConvaiObjectMetadata` to the valve's GameObject (**Convai → World Object**, or search "Convai World Object" in **Add Component**).
+1. Add `ConvaiWorldObject` to the valve's GameObject (**Convai → World Object**, or search "Convai World Object" in **Add Component**).
 2. Set **Object Name** to `PressureValve` and **Object Description** to a factual description of the valve's location.
 3. In **Tracked Properties**, add one `ConvaiTrackedContextProperty` entry:
    * **Property Name:** `Status`
@@ -206,10 +206,10 @@ public class ValveController : MonoBehaviour
 }
 ```
 
-The SDK polls every tracked property that has a **Source Component** on a shared timer. When `ValveController.Status` changes, `ConvaiObjectMetadata` stages the state key `PressureValve.Status` for connected characters. Ordinary non-target characters hold the update until targeted. During an active group conversation, non-silent property reactions become silent per-character context updates plus one scene-event submission with `volunteer: true`; that does not guarantee a spoken reaction.
+The SDK polls every tracked property that has a **Source Component** on a shared timer. When `ValveController.Status` changes, `ConvaiWorldObject` stages the state key `PressureValve.Status` for connected characters. Ordinary non-target characters hold the update until targeted. During an active group conversation, non-silent property reactions become silent per-character context updates plus one scene-event submission with `volunteer: true`; that does not guarantee a spoken reaction.
 
 {% hint style="info" %}
-To push a value without a polled **Source Component**, call `SetTrackedPropertyValue("Status", "Open", ConvaiRespondMode.Auto)` on the `ConvaiObjectMetadata` component from your own script instead of wiring a reflection source. Use this when you already know exactly when the value changes and want to avoid polling that property through reflection.
+To push a value without a polled **Source Component**, call `SetTrackedPropertyValue("Status", "Open", ConvaiRespondMode.Auto)` on the `ConvaiWorldObject` component from your own script instead of wiring a reflection source. Use this when you already know exactly when the value changes and want to avoid polling that property through reflection.
 {% endhint %}
 
 ### Expected outcome
@@ -220,7 +220,7 @@ Once the valve opens, inspect both characters' local state. Each should stage:
 PressureValve.Status is Open
 ```
 
-After each update reaches Convai, test whether the NPC references the valve — for example, the supervisor: "The pressure valve is open — hold position until it's confirmed closed." Disabling or removing `ConvaiObjectMetadata` stages removal of its owned state; those removals use the same delivery rules.
+After each update reaches Convai, test whether the NPC references the valve — for example, the supervisor: "The pressure valve is open — hold position until it's confirmed closed." Disabling or removing `ConvaiWorldObject` stages removal of its owned state; those removals use the same delivery rules.
 
 ## Next steps
 

@@ -1,12 +1,10 @@
 ---
 title: Configure character audio
-description: >-
-  Configure per-character and project-wide voice volume, spatial audio, and
-  audio feedback, and control playback in script with mute and unmute calls.
-last_reviewed: "5.0.0-preview"
+description: Set voice volume, mute, and distance for each character in your Unity scene, and control microphone input or character playback from a script.
+last_reviewed: "5.0.0-pre.1"
 ---
 
-The `ConvaiAudioOutput` component controls how a character's voice plays back in the scene, while `ConvaiSettings` sets the project-wide default volume and audio feedback behavior. Pair either with the `ConvaiAudio` facade on `ConvaiManager` for scripted runtime control of mute state, per-character volume, and audio events.
+Add `ConvaiAudioOutput` to each character whose voice needs volume, mute, or spatial controls. For runtime microphone and character playback controls, use `ConvaiManager.Audio`.
 
 ## Character audio output
 
@@ -28,34 +26,9 @@ Disable **Use 3D Audio** for non-positional scenarios — for example, a kiosk i
 
 In WebGL, the browser plays character speech outside Unity's AudioSource. `Volume` and `IsMuted` also control this browser playback in 5.0, but Unity distance rolloff and `AudioListener.volume` do not. On iOS Safari, the browser controls media volume; mute and a volume of zero still silence the voice.
 
-<figure><img src="../../../.gitbook/assets/unity-audio-output.png" alt="Convai Audio Output Inspector showing Volume 1, Is Muted off and 3D audio distances 5 and 50"><figcaption><p>Per-character voice controls are separate from project Runtime Defaults.</p></figcaption></figure>
+<figure><img src="../../../.gitbook/assets/unity-audio-output.png" alt="Convai Audio Output Inspector showing Volume 1, Is Muted off and 3D audio distances 5 and 50"><figcaption><p>Each character has its own playback controls.</p></figcaption></figure>
 
-## Project-wide audio defaults
 
-`ConvaiSettings` exposes two project-wide defaults that apply until a script overrides them.
-
-| Field                   | Default | Description                                                         |
-| ----------------------- | ------- | -------------------------------------------------------------------- |
-| `CharacterAudioVolume`  | `1`     | Default master volume for character audio (`0`–`1`)                  |
-| `AudioFeedbackEnabled`  | `true`  | Plays feedback sounds, such as the listening indicator, by default   |
-
-Configure both fields in the Convai Settings window's **Runtime Defaults** section (**Convai > Settings > Runtime Defaults**), or the equivalent **Edit > Project Settings > Convai SDK > Runtime Defaults** page — both surface the same fields.
-
-These defaults seed `RuntimePreferences` when `ConvaiManager` builds its runtime. Read or change the effective value while a session is running through `ConvaiManager.ActiveManager.ConvaiRuntime.RuntimePreferences`:
-
-```csharp
-// Read the current project-wide defaults
-float volume = ConvaiManager.ActiveManager.ConvaiRuntime.RuntimePreferences.CharacterAudioVolume;
-bool audioFeedbackOn = ConvaiManager.ActiveManager.ConvaiRuntime.RuntimePreferences.AudioFeedbackEnabled;
-
-// Override at runtime — CharacterAudioVolume clamps to the 0-1 range
-ConvaiManager.ActiveManager.ConvaiRuntime.RuntimePreferences.CharacterAudioVolume = 0.5f;
-ConvaiManager.ActiveManager.ConvaiRuntime.RuntimePreferences.AudioFeedbackEnabled = false;
-```
-
-{% hint style="warning" %}
-`CharacterAudioVolume` does not change `ConvaiAudioOutput.Volume` on existing characters automatically. Read `RuntimePreferences.CharacterAudioVolume` in your own volume-control script and apply it to `ConvaiAudioOutput` or an audio mixer.
-{% endhint %}
 
 ## Audio facade
 
@@ -81,10 +54,10 @@ await ConvaiManager.ActiveManager.Audio.StartListeningAsync();
 string characterId = character.CharacterId;
 
 // Mute a specific character
-ConvaiManager.ActiveManager.Audio.MuteCharacter(characterId);
+ConvaiManager.ActiveManager.Audio.SetCharacterMuted(characterId, true);
 
 // Unmute
-ConvaiManager.ActiveManager.Audio.UnmuteCharacter(characterId);
+ConvaiManager.ActiveManager.Audio.SetCharacterMuted(characterId, false);
 
 // Check mute state
 bool muted = ConvaiManager.ActiveManager.Audio.IsCharacterMuted(characterId);

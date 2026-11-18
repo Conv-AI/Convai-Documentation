@@ -1,6 +1,6 @@
 ---
 title: Configure conversation input mode
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 description: >-
   Choose hands-free or push-to-talk input, configure microphone and interruption
   behavior, and change the active mode during a connected session.
@@ -12,9 +12,8 @@ Choose **Hands Free** when speech detection should end the player's turn, or **P
 
 Select the manager object and find **Convai Room Manager** in its Inspector. **Conversation** contains **How The Player Talks** and the push-to-talk controls. **Listening** is a separate card below the everyday connection controls; it contains turn detection, voice detection, speech recognition, and microphone processing. **Interruptions** controls how a reply stops when the player cuts in.
 
-<figure><img src="../../../.gitbook/assets/unity-room-conversation.png" alt="Room Manager Conversation card with Push To Talk selected and its key and waiting controls"><figcaption><p>Conversation controls on the sample room. Listening and Interruptions are separate cards below.</p></figcaption></figure>
 
-If the room uses an asset under **Room Setup Source**, edit the referenced profile to change its read-only values. The component still owns **Push To Talk Key**.
+Edit these values on the room component. Save them on a prefab to use the same defaults across scenes.
 
 ## Configure hands-free input
 
@@ -39,14 +38,13 @@ Set **How The Player Talks** to **Push To Talk**, then choose **Push To Talk Key
 | **Interrupt On Press** | `PushToTalkPolicy.InterruptBotOnPress` | `true` | A valid press can interrupt the character |
 | **Wait For Reply To Finish** | `PushToTalkPolicy.RequireTurnCompletionBeforeNextPress` | `true` | Holds the next turn while waiting for the reply |
 | **Wait Timeout (ms)** | `PushToTalkPolicy.TurnCompletionTimeoutMs` | `5000` | Unlocks after inactivity; the wait pauses while the character speaks |
-| **Start Muted** | `LocalAudioPolicy.StartMutedInPushToTalk` | `true` | Starts the microphone muted |
 | **Prepare Microphone** | `LocalAudioPolicy.PushToTalkStartupMode` | `PrewarmMuted` | **Before First Press** prepares muted capture at connect; **On First Press** waits for the control |
 
 For XR controllers, select `JoystickButton0` for right-hand primary/A, `JoystickButton1` for right-hand secondary/B, `JoystickButton2` for left-hand primary/X, or `JoystickButton3` for left-hand secondary/Y. Once a controller has supplied a press, losing that controller releases it instead of keeping capture open.
 
 For a UI button or your own input framework, use the public `ConvaiPushToTalkController` methods described in [Use your own push-to-talk input](use-your-own-push-to-talk-input.md). Its input ownership prevents the room's built-in polling from also handling the same press. Code that polls another input source can acquire `ConvaiManager.AcquirePushToTalkInput()` and dispose the returned lease when done.
 
-The normal Inspector hides developer policy fields. In code, `PushToTalkPolicy.ReleaseMode` defaults to `Auto`, which uses media drain and commit results where supported. `Legacy` uses `ReleaseTailMs`, whose default is `1000` per bounded finalization window. `AllowSpeechStoppedFallbackAfterSpeechStart` defaults to `false`; when enabled, speech ending is followed by a 1.5-second quiet period before the wait unlocks. See [Push-to-talk lifecycle](../core-concepts/push-to-talk-lifecycle.md) for release failures and recovery.
+The SDK assigns each release an ID. When the microphone reports that its captured audio has been sent, the release can proceed immediately. On an untracked microphone, including WebGL, **Release Tail (ms)** allows the last audio to be captured before muting. The default is `1000` ms. Group conversation uses the same release protocol and requires the selected member to own the microphone route.
 
 ## Configure capture and interruption
 
@@ -61,7 +59,7 @@ Use **Listening > Microphone** for the device's capture policy:
 
 Processing changes apply on the next connection. WebGL uses browser processing. For hands-free input through a phone speaker, enable echo cancellation or use headphones to avoid the character hearing its own voice.
 
-**Interruptions** includes **Fade Out When Interrupted**, **Fade Duration (s)**, and **On-Device Detection**. Fade duration defaults to `0.12` seconds. On-device speech detection is distinct from the server's voice-detection thresholds.
+**Interruptions** includes **Fade Out When Interrupted**, **Fade Duration (s)**, and **On-Device Detection**. Fade duration defaults to `0.12` seconds. See [Configure speech interruptions](configure-speech-interruptions.md) to enable local detection, check echo cancellation, and test how an interrupted reply sounds.
 
 ## Switch mode during a session
 
@@ -94,37 +92,9 @@ public class InputModeSwitcher : MonoBehaviour
 }
 ```
 
-Assign either public method to a UI button. Read `ConvaiManager.ActiveConversationInputMode` from the manager instance after the operation. Existing turn-detection, capture, and interruption settings remain the session's baseline.
+Assign either public method to a UI button. Existing turn-detection, capture, and interruption settings remain the session's baseline.
 
-To observe mode changes, subscribe to the room connection service and unsubscribe from the same instance:
-
-```csharp
-using Convai.Runtime.Components;
-using Convai.Runtime.Room;
-using UnityEngine;
-
-public class InputModeObserver : MonoBehaviour
-{
-    private IConvaiRoomConnectionService room;
-
-    private void OnEnable()
-    {
-        ConvaiManager manager = ConvaiManager.ActiveManager;
-        if (manager != null && manager.TryGetRoomConnectionService(out room))
-            room.ConversationInputModeChanged += HandleModeChanged;
-    }
-
-    private void OnDisable()
-    {
-        if (room != null) room.ConversationInputModeChanged -= HandleModeChanged;
-        room = null;
-    }
-
-    private void HandleModeChanged(ConversationInputMode mode) => Debug.Log(mode);
-}
-```
-
-Enable the observer after the scene's manager has initialized. Calls made outside the connected state fail with `SessionErrorCodes.SessionInvalidState`. A group room also rejects switching to hands-free input.
+Read `ActiveConversationInputMode` from the manager after the awaited change. A group room rejects switching to hands-free input.
 
 ## Verify and continue
 

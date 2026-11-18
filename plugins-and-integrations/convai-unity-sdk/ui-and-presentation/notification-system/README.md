@@ -1,10 +1,10 @@
 ---
 title: Notification system
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 description: Add toast-style alerts for session errors and in-scene events, enable notifications, and register the assets your scene displays.
 ---
 
-The notification system displays toast-style alerts from registered `SONotification` assets. Notifications are disabled in the project runtime defaults, so adding the prefab alone does not show alerts. This guide assumes a scene with an initialized `ConvaiManager`.
+The notification system displays toast-style alerts from `SONotification` assets. Automatic alerts are disabled in the project runtime defaults. This guide assumes a scene with an initialized `ConvaiManager`.
 
 ## Add the notification system
 
@@ -14,7 +14,6 @@ The notification system displays toast-style alerts from registered `SONotificat
 
 Drag `Prefabs/Notifications/NotificationSystem.prefab` from the <code class="expression">space.vars.sdk_package_id</code> package into your scene. It supplies `NotificationHandler` and the notification controller.
 
-The prefab already references the packaged `SONotificationGroup`, which contains six notifications. Keep that assignment for the standard alerts. `NotificationHandler` uses `Resources/SONotificationGroup` only when its serialized group is empty.
 {% endstep %}
 {% step %}
 ### Enable notifications
@@ -22,16 +21,15 @@ The prefab already references the packaged `SONotificationGroup`, which contains
 Enable **Notifications** in the runtime settings panel, or set the project default in **Convai → Settings → Runtime Defaults**. Saved runtime overrides take precedence over project defaults. You can also apply `ConvaiRuntimeSettingsPatch.NotificationsEnabled = true` from code.
 {% endstep %}
 {% step %}
-### Register custom alerts
+### Create a custom alert
 
 Create an asset with **Create → Convai → Notification System → Notification**. Set its title, message, optional icon, and a unique ID. An empty serialized ID falls back to the asset name.
 
-For a custom alert set, create a project-owned notification group, include every notification your scene needs, and assign it to `NotificationHandler.notificationGroup`. Keep any standard alerts that the error map still references. Do not create another resource with the same `SONotificationGroup` resource name as the packaged asset; explicit assignment avoids an ambiguous resource lookup.
 {% endstep %}
 {% step %}
 ### Test an alert
 
-Assign one registered asset to the component below and invoke `ShowAlert()` from a scene button. Confirm that its title and message appear, then clear after the animation cycle. `DismissAll()` clears visible and queued alerts.
+Assign the asset to the component below and invoke `ShowAlert()` from a scene button. Confirm that its title and message appear, then clear after the animation cycle. `DismissAll()` clears visible and queued alerts.
 {% endstep %}
 {% endstepper %}
 
@@ -41,7 +39,7 @@ The example resolves the service at the moment you request an alert:
 
 ```csharp
 using Convai.Runtime.Components;
-using Convai.Runtime.Presentation.Views.Notifications;
+using Convai.Shared.Notifications;
 using UnityEngine;
 
 public class ScenarioNotifier : MonoBehaviour
@@ -52,6 +50,8 @@ public class ScenarioNotifier : MonoBehaviour
     {
         var manager = ConvaiManager.ActiveManager;
         if (manager != null && alert != null &&
+            manager.TryGetRuntimeSettingsService(out var settings) &&
+            settings.Current.NotificationsEnabled &&
             manager.TryGetNotificationService(out var service))
             service.RequestNotification(alert);
     }
@@ -65,7 +65,7 @@ public class ScenarioNotifier : MonoBehaviour
 }
 ```
 
-The handler resolves the requested notification's ID to the asset registered in its group. Creating an unregistered notification at runtime does not bypass this lookup. To change content at runtime, take care with the registered asset: the fluent setters mutate the shared `ScriptableObject`, including its Editor asset state.
+The handler displays the asset you pass. The example checks the runtime preference before requesting a custom alert. The service itself delivers explicit requests without applying that preference.
 
 ## Automatic error notifications
 
@@ -77,7 +77,7 @@ The built-in runtime host owns its bridge. There is no `NotificationHandler` Ins
 
 ## Visibility and timing
 
-When notifications are disabled, the runtime settings applier dismisses existing alerts and the handler drops subsequent requests. Re-enabling notifications does not replay those dropped requests.
+Turning off notifications dismisses existing alerts and suppresses future automatic alerts. Explicit requests follow any preference check in the application code. Re-enabling notifications does not replay suppressed alerts.
 
 `UINotificationController` pools three items. Requests queue while a slide animation is running, even if a pooled item is free. Queued requests are reconsidered after a complete slide-in, visible hold, and slide-out cycle. A fresh request during the visible hold can start immediately if a pooled item is free. See [Notification system reference](notification-system-reference.md) for exact timing fields.
 
@@ -85,10 +85,7 @@ When notifications are disabled, the runtime settings applier dismisses existing
 
 | Symptom | Cause | Fix and verification |
 | --- | --- | --- |
-| No alert appears | Notifications are disabled by default or a saved override | Enable Notifications; request a registered alert again |
-| `SONotificationGroup asset could not be resolved.` | Neither an assigned group nor a resource fallback exists | Assign your group; retry the alert |
-| `No notification registered in the notification group for id:` | The request's ID is absent from the assigned group | Add the asset with that exact ID; retry |
-| A custom alert shows different text | ID resolution selects the registered asset | Inspect the group asset matching that ID and request it directly |
+| No alert appears | Notifications are disabled by default or a saved override | Enable Notifications and request the alert again |
 | An automatic error does not repeat immediately | The bridge's 10-second cooldown applies | Wait for the cooldown and reproduce the error |
 | A direct custom alert repeats | The raw service does not deduplicate | Gate the calling event or add your own cooldown; reproduce it twice |
 | An alert starts later than expected | A notification animation cycle is in progress | Wait through the cycle and confirm the queued alert appears |

@@ -3,7 +3,7 @@ title: Update character actions at runtime
 description: >-
   Send an action configuration patch mid-session, track its update ID, and
   confirm the backend's acknowledgement before assuming the change applied.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Use `ConvaiActionConfigPatch` with `ConvaiCharacter.DynamicContext.Apply` to replace a connected character's actions, objects, characters, or attention target without disconnecting the session. Use this when scene state changes after connect — a new object appears, a target becomes unavailable — and the character's affordances need to catch up. The patch only takes effect after Convai returns a successful acknowledgement for its update ID.
@@ -89,10 +89,11 @@ Subscribe before submitting, retain the unique `updateId` in your component, and
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
-using Convai.Runtime.Components;
-
-ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived += result =>
+// Method-body fragment with a configured manager.
+manager.Events.OnServerCommandResultReceived += answer =>
 {
+    if (answer.CommandType is not ("context-update" or "character-context-update")) return;
+    var result = DynamicContextUpdateResultReceived.Create(answer);
     if (result.UpdateId != updateId)
         return;
 
@@ -137,7 +138,7 @@ Use **Runtime Session State & Patch Composer** under **Advanced** in the Actions
 
 **Fix:** Correct the field named in the warning and resend the patch with a new `updateId`.
 
-**Verify:** The console shows no rejection warning and `OnDynamicContextUpdateResultReceived` later fires for the same `updateId`.
+**Verify:** The console shows no rejection warning and `OnServerCommandResultReceived` later fires for the same `updateId`.
 
 ### Connection or target refuses the update
 
@@ -145,13 +146,13 @@ If `Apply` returns `false`, inspect warnings for `Cannot apply raw dynamic conte
 
 ### No acknowledgement ever arrives
 
-**Symptom:** `OnDynamicContextUpdateResultReceived` never fires for the `updateId` you sent, and `ConvaiCharacter.ActionConfig` never reflects the patch.
+**Symptom:** `OnServerCommandResultReceived` never fires for the `updateId` you sent, and `ConvaiCharacter.ActionConfig` never reflects the patch.
 
 **Cause:** The update was discarded after the 30-second acknowledgement timeout, an ACK error, or malformed/mismatched acknowledgement metadata — the Console logs `Runtime action mutation discarded update_id=<id> reason=<reasonCode>` in these cases. A session disconnect before Convai responded also discards the update, but silently, with no Console message. Do not equate this local reconciliation outcome with the transport's safe resend behavior for identified commands.
 
 **Fix:** Resend the patch with a new `updateId` once the character is confirmed connected (`IsInConversation` is `true`).
 
-**Verify:** `OnDynamicContextUpdateResultReceived` fires with `Status == "success"` for the new `updateId`.
+**Verify:** `OnServerCommandResultReceived` fires with `Status == "success"` for the new `updateId`.
 
 ## Next steps
 

@@ -1,74 +1,48 @@
 ---
 title: Runtime architecture
 description: Understand the layered Convai Unity SDK runtime — what each layer owns, the per-character embodiment layer, and how the runtime's lifecycle states are managed.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-The SDK separates scene components, room services, and character presentation. `ConvaiManager` builds and owns a `ConvaiRuntime`; scene scripts normally use the manager's facades instead of creating a second runtime.
+`ConvaiManager` owns the runtime for a Unity scene. The runtime connects scene characters and the local player to a room and exposes separate facades for commands, audio, events, and transcripts.
 
 ## Runtime ownership
 
 ```mermaid
 graph TD
-    Manager[ConvaiManager] --> Runtime[ConvaiRuntime]
-    Runtime --> Room[IRoomRuntime]
-    Runtime --> Events[IEventHub]
-    Runtime --> Registry[IAgentRegistry]
-    Runtime --> Modules[IConvaiModule list]
-    Room --> Connection[Connection and audio]
-    Registry --> Character[ConvaiCharacter and ConvaiPlayer]
+    Scene[ConvaiManager] --> Room[ConvaiRoomManager]
+    Scene --> Registry[Scene characters and local player]
+    Scene --> Events[Events facade]
+    Scene --> Audio[Audio facade]
+    Scene --> Transcripts[Transcripts facade]
+    Room --> Transport[Native or WebGL transport]
+    Registry --> Character[ConvaiCharacter]
     Character --> Embodiment[EmbodimentContext]
 ```
 
-A multi-character room shares transport and connection state. Each character retains its membership, readiness, session identifier, and presentation state. These are different from the current conversation target.
+A multi-character room shares transport and connection state. Each character retains its own membership, readiness, session identifier, and presentation state. The conversation target identifies the route for the next player turn. See [Session lifecycle](session-lifecycle.md) for the difference between connection and readiness.
 
-| `IConvaiRuntime` member | Responsibility |
+## Public entry points
+
+| Surface | Responsibility |
 | --- | --- |
-| `State` | Runtime lifecycle, separate from room connection state |
-| `Room` | `Connection`, `Audio`, `Ownership`, and `Diagnostics` coordinators |
-| `Events` | Shared typed event bus |
-| `Agents` | Character and player registry |
-| `Modules` | Registered feature modules |
-| `Transport` | Platform transport provider |
-| `Conversation` | Optional standalone conversation provider; null in the default manager setup |
-| `Config`, `RuntimePreferences` | Bootstrap configuration and runtime preferences |
-| `FeatureVariants`, `Telemetry` | Optional providers; null unless supplied |
+| `ConvaiManager` | Connect, disconnect, select the roster and initial character, and route the conversation |
+| `ConvaiRoomManager` | Configure the room in the Inspector and read room diagnostics |
+| `ConvaiManager.Events` | Subscribe to typed events or the subscription-only raw event interface |
+| `ConvaiManager.Audio` | Control local capture, playback, and track subscriptions |
+| `ConvaiManager.Transcripts` | Read history entries and live captions |
+| `ConvaiPlayer` and `ConvaiCharacter` | Supply display identity, submit typed player input, and act on character-specific features |
 
-There is no `IConvaiRuntime.Persistence`, `IPersistenceProvider`, or `UsePersistence` builder method. See [Stored data](../advanced-topics/stored-data.md) for the stores actually used by the room and presentation services.
-
-## Runtime construction
-
-`ConvaiRuntimeBuilder.Build()` requires a room runtime factory supplied through `UseRoomRuntime(Func<IRoomRuntime>)`. A bare builder does not provide the manager's room wiring. `ConvaiManager` supplies its deferred room runtime and the native or WebGL transport provider.
-
-| Builder method | Purpose |
-| --- | --- |
-| `UseRoomRuntime` | Required room runtime factory |
-| `UseTransport`, `UseConversation` | Transport and optional standalone conversation provider |
-| `UseConfig`, `WithRuntimePreferences` | Bootstrap configuration and runtime preferences |
-| `UseEventHub`, `UseAgentRegistry` | Event bus and registry |
-| `WithEndUserIdentityProvider`, `WithEndUserMetadataProvider` | Connection identity and metadata |
-| `UseTelemetry`, `WithFeatureVariants` | Optional telemetry and feature selection |
-| `UseLogger` | Runtime logger |
-| `AddModule`, `AddModule<T>` | Modules added before build |
-
-For scene customization, use the manager's supported provider setters and `RegisterModule`/`UnregisterModule`. A custom manager subclass can override `CreateRuntimeBuilder`, `BuildRuntime`, `GetPlatformTransportProvider`, or `GetConversationProvider` where appropriate. Creating a separate builder does not modify the runtime already owned by a scene manager.
+The manager builds its services during `Awake` and disposes them when the runtime ends. Use `IsInitialized` before accessing facade properties. Register listeners for only as long as their consumers need them.
 
 ## Runtime modules and embodiment
 
-Lip sync, Vision, and Narrative Design components implement `IConvaiModule` and register with the runtime. A custom module receives an `IModuleContext`, declares dependencies through `RequiredModules`, and participates in start, pause, resume, and stop. Modules communicate through the event hub or registered module services. See [Implement a custom module](../advanced-topics/implement-a-custom-module.md).
+Lip sync, Vision, and Narrative Design register functionality with the runtime. A custom `IConvaiModule` receives an `IModuleContext`, declares module dependencies, and participates in start, pause, resume, and stop. Use the manager's `RegisterModule` and `UnregisterModule` methods for the module's lifetime.
 
-Embodiment controllers share a per-character `EmbodimentContext`. Gaze, Body Animation, Body Language, Conversation Flow, and Emotion use its rig binding, events, and scheduler. This composition root is separate from the runtime builder's module list.
-
-The embodiment scheduler runs Cognition, Expression, and Finalize phases from `Update`. Lower `TickOrder` values run first within a phase; ties use registration order. The Animator conductor applies submitted parameter writes immediately. Facial composition and pose flushing run later in `LateUpdate`. See [Character embodiment](character-embodiment.md).
-
-## Runtime lifecycle
-
-The runtime passes through `Created`, `Starting`, `Running`, `Pausing`, `Paused`, `Resuming`, `Stopping`, `Stopped`, and `Disposed`. A stopped runtime cannot restart. Await lifecycle operations to observe completion and handle failures; merely creating an operation is not proof it succeeded.
-
-The manager owns cleanup. If you build and own a concrete `ConvaiRuntime` yourself, stop it and call its `DisposeAsync()`. Do not dispose the scene manager's facades from consumer code.
+Embodiment controllers share a per-character `EmbodimentContext`. The context supplies rig bindings and schedules Cognition, Expression, and Finalize phases. Facial composition and pose flushing run in `LateUpdate`. See [Character embodiment](character-embodiment.md).
 
 ## Related pages
 
-- [Session lifecycle](session-lifecycle.md) explains room connection and resume.
-- [Event system](event-system.md) explains scene relays and typed events.
-- [Extending the SDK](../advanced-topics/extending-the-sdk.md) covers supported extension points.
+- [ConvaiManager API](../scripting-reference/convaimanager-api.md)
+- [Event system](event-system.md)
+- [Runtime module system](../advanced-topics/extending-the-sdk.md)

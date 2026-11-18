@@ -1,10 +1,10 @@
 ---
 title: Turn-taking modes
 description: Configure hands-free and push-to-talk conversation modes, including turn detection, release timing, and barge-in interruption behavior.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Turn-taking settings choose whether speech is hands-free or controlled by a push-to-talk input. They belong to the room and are shared by all its character memberships. Configure **Convai Room Manager** or its profile, then inspect the active policy when diagnosing a conversation.
+Turn-taking settings choose whether speech is hands-free or controlled by a push-to-talk input. They belong to the room and are shared by all its character memberships. Configure **Convai Room Manager**, then inspect the active policy when diagnosing a conversation.
 
 ## Modes and end-of-turn detection
 
@@ -23,30 +23,27 @@ Custom turn-detection values are sent to the service; they are not a guarantee o
 
 | `PushToTalkPolicy` field | Default | Meaning |
 | --- | --- | --- |
-| `ReleaseMode` | `Auto` | Use correlated release when supported; `Legacy` forces compatibility release |
-| `ReleaseTailMs` | `1000` | Legacy finalization window, clamped to 0–5000 ms |
-| `EnableServerSttToggle` | `true` | Toggle server speech recognition around a press |
+| `ReleaseTailMs` | `1000` | Capture tail for transports that cannot report sender drain, clamped to `0`–`5000` ms |
 | `InterruptBotOnPress` | `true` | Request interruption when a press is accepted |
 | `RequireTurnCompletionBeforeNextPress` | `true` | Gate the next press while awaiting the reply |
 | `TurnCompletionTimeoutMs` | `5000` | Inaudible wait budget; zero disables this timeout |
 | `AllowSpeechStoppedFallbackAfterSpeechStart` | `false` | Allow speech-stopped fallback after speech began |
 
-`Auto` needs server STT toggling and a capture-drain-capable transport. Native capture can provide this; the active format/provider must support it. WebGL uses the Legacy path. `CompatibilityReason` on the push-to-talk controller explains a fallback. See [Push-to-talk lifecycle](push-to-talk-lifecycle.md) before tuning release timing.
+The SDK toggles Convai speech recognition around each press. A native microphone that reports sender drain can signal when its last samples reached the sender. The SDK waits the capture tail on other sources, including WebGL, before sending the same correlated stop request. See [Push-to-talk lifecycle](push-to-talk-lifecycle.md).
 
-In the Inspector, the relevant sections are **Advanced Room Control**, **Listening**, **Interruptions**, **Vision**, and **Reconnect**. Push-to-talk labels include **Interrupt On Press**, **Wait For Reply To Finish**, **Wait Timeout (ms)**, **Start Muted**, and **Prepare Microphone**. Developer settings expose release mode and the legacy tail controls.
+In the Inspector, the relevant sections are **Advanced Room Control**, **Listening**, **Interruptions**, **Vision**, and **Reconnect**. Push-to-talk labels include **Interrupt On Press**, **Wait For Reply To Finish**, **Wait Timeout (ms)**, and **Prepare Microphone**. Use **Release Tail (ms)** to tune the bounded capture tail where sender drain is unavailable.
 
 ## Local microphone policy
 
 | `LocalAudioPolicy` field | Default | Meaning |
 | --- | --- | --- |
 | `AllowMicrophone` | `true` | Whether this session may open microphone capture |
-| `StartMutedInPushToTalk` | `true` | Start push-to-talk muted |
 | `PushToTalkStartupMode` | `PrewarmMuted` | Prepare capture before the first press; `OpenOnFirstPress` waits until it is needed |
 | `EnableAcousticEchoCancellation` | `false` | Request native echo cancellation |
 | `EnableNoiseSuppression` | `true` | Request native noise suppression |
 | `EnableAutomaticGainControl` | `false` | Request native automatic gain control |
 
-Audio-processing settings apply when connecting. WebGL uses browser capture processing. Disabling `AllowMicrophone` makes the session text-only: microphone start fails with `audio.mic_not_allowed`. A per-connect option cannot override a room-level prohibition to enable capture. Use `ConvaiRoomManager.SetMicrophoneAllowed` for the runtime policy surface.
+Audio-processing settings apply when connecting. WebGL uses browser capture processing. Disabling `AllowMicrophone` makes the session text-only: microphone start fails with `audio.mic_not_allowed`. A per-connect option cannot override a room-level prohibition to enable capture. Use `ConvaiManager.Audio.SetMicrophoneAllowed` to change the policy in the current room.
 
 ## Interruption
 
@@ -56,7 +53,7 @@ Local detection and server confirmation are different. A local candidate can duc
 
 ## Runtime mode changes
 
-Await `ConvaiManager.SetConversationInputModeAsync(ConversationInputMode.PushToTalk)` or `HandsFree` to change a regular room's mode. Read `ActiveConversationInputMode` afterward. A group voice conversation requires supported native correlated push-to-talk: WebGL, hands-free, and Legacy release are refused by that flow.
+Await `ConvaiManager.SetConversationInputModeAsync(ConversationInputMode.PushToTalk)` or `HandsFree` to change a regular room's mode. Read `ActiveConversationInputMode` afterward. A live group stays in push-to-talk mode. It uses the same correlated release on both sender-drain and release-tail microphones.
 
 ## Related pages
 

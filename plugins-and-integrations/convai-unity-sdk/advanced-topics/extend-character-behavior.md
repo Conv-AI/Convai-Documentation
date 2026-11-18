@@ -1,68 +1,48 @@
 ---
 title: Extend character behavior
-description: Handle character events in priority order with behavior components, and choose when later behaviors in the same dispatcher should receive an event.
-last_reviewed: "5.0.0-preview"
+description: Move character behavior callbacks to Unity SDK events, choose a character or room listener, and control how long each subscription stays active.
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Add `CharacterBehaviorDispatcher` and components derived from `ConvaiCharacterBehaviorBase` to the same GameObject as `ConvaiCharacter`. The dispatcher discovers behaviors and calls them in descending priority order.
+Subscribe to character events to drive application behavior when one character becomes ready, speaks, or completes a turn.
 
-## Add a behavior
+{% hint style="warning" %}
+SDK 5.0 removes the character behavior dispatcher and its priority callbacks. Subscribe to the character or manager event that matches the behavior you need.
+{% endhint %}
 
-The following component updates a scene indicator without reading or logging transcript text. Assign an indicator GameObject in the Inspector.
+## Listen to one character
 
-{% code title="Assets/Scripts/SpeakingIndicator.cs" %}
+Add this script to a scene object and assign the character. It subscribes while enabled and removes the same handler on disable.
+
+{% code title="Assets/Scripts/ReadyCharacterPanel.cs" %}
 ```csharp
-using Convai.Runtime.Behaviors;
+using Convai.Runtime.Components;
 using UnityEngine;
 
-public sealed class SpeakingIndicator : ConvaiCharacterBehaviorBase
+public sealed class ReadyCharacterPanel : MonoBehaviour
 {
-    [SerializeField] private GameObject indicator;
+    [SerializeField] private ConvaiCharacter character;
+    [SerializeField] private GameObject readyPanel;
 
-    public override bool OnSpeechStarted(IConvaiCharacterAgent agent)
+    private void OnEnable()
     {
-        if (indicator != null) indicator.SetActive(true);
-        return false;
+        character.OnCharacterReady += ShowPanel;
+        readyPanel.SetActive(character.IsCharacterReady);
     }
 
-    public override bool OnSpeechStopped(IConvaiCharacterAgent agent)
-    {
-        if (indicator != null) indicator.SetActive(false);
-        return false;
-    }
+    private void OnDisable() => character.OnCharacterReady -= ShowPanel;
 
-    public override void OnCharacterShutdown(IConvaiCharacterAgent agent)
-    {
-        if (indicator != null) indicator.SetActive(false);
-    }
+    private void ShowPanel() => readyPanel.SetActive(true);
 }
 ```
 {% endcode %}
 
-{% stepper %}
-{% step %}
-### Add the dispatcher and behavior
+Put ordered application decisions inside one handler when the order matters. For reactions across the room, subscribe through `ConvaiManager.Events` and filter by character or participant. Use `ConvaiCharacterEventRelay` for reactions configured in the Inspector.
 
-Add **Convai > Character Behavior Dispatcher** to the character GameObject, then add `SpeakingIndicator`. Child objects are not searched for behavior components.
-{% endstep %}
-{% step %}
-### Set priority and references
+## Verify the behavior
 
-Assign the indicator and set **Priority**. Higher values run first. Keep `false` returns when other behaviors should also receive the event.
-{% endstep %}
-{% step %}
-### Verify event handling
+Connect the character and confirm the panel becomes visible when that character is ready. Disable the listener and check that it stops receiving callbacks. For input gating across reconnects, observe [Conversation availability](../features/conversation-availability/README.md).
 
-Run a conversation and confirm the indicator follows speech start and stop. After adding behaviors or changing their order dynamically, call `DiscoverBehaviors()` to refresh the dispatcher's list.
-{% endstep %}
-{% endstepper %}
-
-## Understand the dispatch boundary
-
-Returning `true` from `OnSpokenLine`, `OnSpeechStarted`, `OnSpeechStopped`, or `OnTurnCompleted` stops lower-priority behaviors in this dispatcher. The dispatcher subscribes to public character events; the return value does not cancel audio playback or suppress other event subscribers.
-
-`OnCharacterInitialized` is called when the dispatcher enables; it is not proof the remote character is ready. Use `OnCharacterReady` for the ready notification. Shutdown is called when the dispatcher disables. `OnTurnCompleted` may run while buffered audio is still playing, and its interruption flag reports a cut-short reply. A callback exception is logged and the dispatcher continues to the next behavior.
-
-{% content-ref url="extending-the-sdk.md" %}
-[Runtime module system](extending-the-sdk.md)
+{% content-ref url="../scripting-reference/character-events.md" %}
+[Character events](../scripting-reference/character-events.md)
 {% endcontent-ref %}

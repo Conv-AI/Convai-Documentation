@@ -1,13 +1,13 @@
 ---
-title: Custom credential provider
+title: Migrate custom credential providers
 description: Migrate older credential-provider examples to the supported token endpoint, token provider, or explicit connection flow in a Unity application.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Use Auth Token mode to connect a distributed Unity application without embedding the Convai account API key. Older examples on this URL used `ConvaiRuntimeBuilder.UseConfig` to supply credentials. That snapshot is stored, but the default room connection still creates its credential provider from `ConvaiSettings`; changing the snapshot does not replace runtime credentials.
+Use Auth Token mode to connect a distributed Unity application without embedding the Convai account API key. Use the token endpoint, a registered provider, or explicit connection options to supply runtime credentials.
 
 {% hint style="warning" %}
-For the SDK version documented here, follow the [current integration guidance](../../authentication/README.md). The older examples on this URL do not describe the shipped runtime.
+For the SDK version documented here, follow the [current integration guidance](../../authentication/README.md). SDK 5.0 uses the selected authentication mode and its token sources in place of older runtime builder configuration.
 {% endhint %}
 
 ## Migrate your integration
@@ -16,7 +16,7 @@ For the SDK version documented here, follow the [current integration guidance](.
 {% step %}
 ### Keep the account key on your server
 
-Move environment-variable or vault access to your server. Return a Convai `apiAuthToken` to the client. An account API key is not an auth token and must not be passed to `ConnectWithAuthTokenAsync`.
+Move environment-variable or vault access to your server. Return a Convai `apiAuthToken` to the client. An account API key is not an auth token and belongs on your backend.
 {% endstep %}
 {% step %}
 ### Choose a supported token source

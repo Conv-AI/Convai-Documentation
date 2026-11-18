@@ -1,7 +1,7 @@
 ---
 title: Vision
 description: Find guides for adding real-time scene vision to Convai characters in Unity, including frame sources, publish policies, scripting, and troubleshooting.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Vision gives Convai characters the ability to see what is happening inside your Unity scene. A frame source captures images from a Unity camera, physical webcam, or Meta Quest passthrough feed, and the SDK streams them to Convai over WebRTC alongside the audio conversation.
@@ -16,7 +16,7 @@ Vision gives Convai characters the ability to see what is happening inside your 
 | Meta Quest 3 / 3S | `QuestVisionFrameSource` | Requires Meta XR SDK and `horizonos.permission.HEADSET_CAMERA` |
 
 {% hint style="info" %}
-Vision needs an effective Video connection. **Dynamic Vision > On** resolves Audio to Video; **Off** preserves the configured connection type. Group conversation rooms resolve to Audio and do not publish vision.
+Set **Vision** to **On** under the room’s **Connection** controls to request video. **Off** opens an audio connection. Group conversation uses audio only.
 {% endhint %}
 
 {% hint style="danger" %}

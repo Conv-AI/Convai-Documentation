@@ -1,10 +1,10 @@
 ---
 title: Unity versions and render pipelines
 description: Reference for Convai Unity SDK environment requirements, including the minimum Unity version, required package dependencies, and render pipeline support.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code>. There is no supported configuration on an earlier Unity release, and the source includes compatibility handling through Unity `6000.6` for its scene-identity API changes. The runtime supports Built-in, URP and HDRP through pipeline-specific capture paths. Confirm package resolution after installation; an Asset Store distribution may differ from this preview source.
+The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_min_version</code>. Check the installed package version and dependencies in Package Manager. Vision has separate camera capture paths for the Built-in Render Pipeline, URP, and HDRP.
 
 ## Unity version requirements
 
@@ -17,7 +17,7 @@ The Convai Unity SDK requires Unity <code class="expression">space.vars.unity_mi
 The minimum is a hard floor. Convai supports no configuration below Unity <code class="expression">space.vars.unity_min_version</code>, including earlier LTS releases. Upgrade the project before installing the SDK.
 {% endhint %}
 
-On Unity 6000.6, legacy 32-bit instance IDs no longer resolve through the SDK tools. Pass the full ID returned by the current tool inspection; do not reuse IDs across Editor sessions.
+Pass the full instance ID returned by the current tool inspection. Keep it as a string when passing it to a command, and inspect again after switching scenes or restarting the Editor.
 
 ## Required package dependencies
 
@@ -49,9 +49,9 @@ The Vision module selects a capture path for Built-in, URP or HDRP. Use the fram
 | URP | Supported pipeline-specific capture. |
 | HDRP | Supported pipeline-specific capture. |
 
-See [Camera vision](../features/vision/frame-sources.md) for the current capture controls. Scene Auto Tagger has its own isolated Editor capture path, supporting Built-in, URP 17.x and HDRP 17.x; its distribution prerequisites remain separate.
+See [Camera vision](../features/vision/frame-sources.md) for the current capture controls. The [Scene Auto Tagger](../features/scene-metadata/scene-auto-tagger.md) uses an isolated Editor capture path and has its own requirements.
 
-The included sample scenes use URP materials. If your project uses the Built-in or HDRP pipeline, sample scene materials require reassignment. The optional depth-of-field camera scripts in `SamplesShared/Camera/` support URP and HDRP; on the Built-in pipeline they skip depth-of-field and log a warning instead. None of these scripts are required for SDK functionality.
+The included sample scenes use URP materials. If your project uses the Built-in or HDRP pipeline, sample scene materials require reassignment. The optional sample camera effects are separate from SDK capture.
 
 ## Next steps
 

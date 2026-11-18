@@ -1,7 +1,7 @@
 ---
 title: Emotion taxonomy
 description: Explains the built-in emotion set, how server labels map to it, and how to author a custom emotion taxonomy for a character.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The taxonomy translates Convai's raw emotion strings into the canonical labels the rest of the Emotion module uses. When Convai sends `"happy"`, the taxonomy resolves that alias to `"joy"` so that the accumulator and expression pipeline — which are keyed on canonical labels — know exactly which score to update. The SDK ships with a nine-emotion Plutchik-inspired default; author a custom `EmotionTaxonomyAsset` when you need a different vocabulary or additional server aliases.
@@ -10,21 +10,19 @@ The taxonomy translates Convai's raw emotion strings into the canonical labels t
 
 When the `taxonomy` field on a `ConvaiEmotionProfile` is left empty, the system synthesizes the following set at runtime. This provides the SDK's built-in vocabulary without requiring an asset.
 
-| Canonical label | Server aliases | Default mouth influence |
-| --- | --- | --- |
-| `neutral` | `calm`, `idle` | 0.0 |
-| `joy` | `happy`, `happiness`, `ecstasy`, `serenity`, `excited`, `enthusiastic` | 0.6 |
-| `trust` | `acceptance`, `admiration`, `confident`, `reassured` | 0.3 |
-| `fear` | `afraid`, `apprehension`, `terror`, `fearful`, `worried`, `anxious`, `nervous` | 0.4 |
-| `surprise` | `amazement`, `distraction`, `surprised` | 0.5 |
-| `sadness` | `sad`, `pensiveness`, `grief` | 0.3 |
-| `disgust` | `disgusted`, `loathing`, `boredom`, `bored` | 0.4 |
-| `anger` | `angry`, `annoyance`, `rage` | 0.55 |
-| `anticipation` | `interest`, `vigilance`, `curious`, `curiosity`, `eager`, `hopeful` | 0.45 |
+| Canonical label | Server aliases |
+| --- | --- |
+| `neutral` | `calm`, `idle` |
+| `joy` | `happy`, `happiness`, `ecstasy`, `serenity`, `excited`, `enthusiastic` |
+| `trust` | `acceptance`, `admiration`, `confident`, `reassured` |
+| `fear` | `afraid`, `apprehension`, `terror`, `fearful`, `worried`, `anxious`, `nervous` |
+| `surprise` | `amazement`, `distraction`, `surprised` |
+| `sadness` | `sad`, `pensiveness`, `grief` |
+| `disgust` | `disgusted`, `loathing`, `boredom`, `bored` |
+| `anger` | `angry`, `annoyance`, `rage` |
+| `anticipation` | `interest`, `vigilance`, `curious`, `curiosity`, `eager`, `hopeful` |
 
-**Default mouth influence** is a per-emotion hint (0–1) that tells the facial compositor how much an emotion-driven mouth shape should contribute when the character is not speaking. During active speech, LipSync owns the mouth blendshapes; outside of speech, this value controls how strongly the emotional pose shapes the mouth region.
-
-Every non-neutral entry in the built-in set also carries a **complement** — a related emotion that comes along at reduced strength when [emotion blending](emotion-profile.md#emotion-blending) is on. `joy` and `trust` are mutual complements; `fear` and `surprise` are mutual; `sadness` complements `disgust`; `disgust` complements `anger`; `anger` complements `disgust`; `anticipation` complements `joy`.
+Every non-neutral entry in the built-in set also carries a **complement** — a related emotion that comes along at reduced strength according to the [emotion blending settings](emotion-profile.md#emotion-blending). `joy` and `trust` are mutual complements; `fear` and `surprise` are mutual; `sadness` complements `disgust`; `disgust` complements `anger`; `anger` complements `disgust`; `anticipation` complements `joy`.
 
 ## How alias resolution works
 
@@ -53,8 +51,7 @@ A new asset named `EmotionTaxonomy` appears, prefilled with the nine built-in em
 | --- | --- | --- |
 | `label` | `string` | The canonical, lowercase label used throughout the pipeline (e.g. `"joy"`). Must be unique within the taxonomy. |
 | `aliases` | `List<string>` | All server-side strings that should resolve to this entry (e.g. `"happy"`, `"happiness"`). |
-| `complements` | `List<string>` | Canonical labels of emotions that read naturally alongside this one and come along at reduced strength when [emotion blending](emotion-profile.md#emotion-blending) is on — for example `joy` with a trace of `trust`. Only consulted when the character's profile has blending enabled. |
-| `defaultMouthInfluence` | `float` (0–1) | Mouth influence hint for LipSync blending. See the built-in table above for reference values. |
+| `complements` | `List<string>` | Canonical labels of emotions that read naturally alongside this one and come along at reduced strength according to the [emotion blending settings](emotion-profile.md#emotion-blending). For example, `joy` can carry a trace of `trust`. |
 | `isNeutral` | `bool` | Marks this entry as the taxonomy's neutral baseline — what the face relaxes to between feelings, and the accumulator's decay anchor. |
 | `useCustomDimensions` | `bool` | When enabled, this entry's `valence`/`arousal`/`agency`/`approach` fields override the built-in dimension defaults for the label. When disabled, the values are resolved from `EmotionDimensionDefaults` for known labels. |
 | `valence`, `arousal`, `agency`, `approach` | `float` (-1 – 1) | The `EmotionDimensions` this emotion carries: how pleasant, how worked up, how in control, and whether it moves the character toward or away from what caused it. Consumed by Gaze, Body Language, and locomotion as one shared modulation signal alongside the categorical label. Only used when `useCustomDimensions` is `true`. |
@@ -94,7 +91,6 @@ Start with the built-in set. Create a custom taxonomy when:
 
 - Your Convai configuration uses custom emotion labels that differ from the built-in aliases.
 - You want to use a different conceptual model — for example, Ekman's six basic emotions — and map multiple server aliases onto fewer canonical buckets.
-- You want to adjust `defaultMouthInfluence` values for specific emotions to better suit your character's rig.
 - You need to define `complements` relationships for emotion blending, or author `valence`/`arousal`/`agency`/`approach` dimensions that differ from the built-in defaults.
 
 ## Next steps

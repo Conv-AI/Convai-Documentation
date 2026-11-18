@@ -3,7 +3,7 @@ title: What is the Convai Unity SDK
 description: >-
   Real-time conversational AI characters for Unity — voice pipeline, opt-in
   feature modules, supported platforms, and minimum requirements.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The Convai Unity SDK connects Unity characters to Convai so they can speak, listen, reason, and act in real time. A player speaks into a microphone; the SDK captures audio, streams it to Convai for speech recognition and language understanding, generates a response with text-to-speech, and plays it back on the character with synchronized lip sync, facial emotion, and optional in-scene actions. The SDK targets Unity developers building training simulations, interactive experiences, and games.
@@ -32,7 +32,7 @@ Optional features, configured through scene components, room policy or service s
 * **Vision** — character sees through a Unity camera, webcam, or Meta Quest passthrough
 * **Dynamic context** — inject runtime state and events into the character's knowledge at any time
 
-The SDK also supports [multi-character rooms](../features/multi-character-sessions/README.md), [target selection](../features/conversation-targeting/README.md), [input availability](../features/conversation-availability/README.md), and [scene metadata](../features/scene-metadata/README.md). Native on-device voice detection uses the optional Sentis/Silero implementation selected in room policy. The 5.0 preview adds [group conversation](../features/group-conversation/README.md) and [text-only sessions](../getting-started/run-a-text-only-session.md).
+The SDK also supports [multi-character rooms](../features/multi-character-sessions/README.md), [target selection](../features/conversation-targeting/README.md), [input availability](../features/conversation-availability/README.md), and [scene metadata](../features/scene-metadata/README.md). On native platforms, the `ClientVoiceActivity` module can detect an interruption locally using Silero and Unity Inference Engine. Enable it from the room, as described in [Configure speech interruptions](../getting-started/configure-speech-interruptions.md). The 5.0 preview adds [group conversation](../features/group-conversation/README.md) and [text-only sessions](../getting-started/run-a-text-only-session.md).
 
 ### Utilities
 

@@ -1,4 +1,8 @@
-unity_sdk_version: 5.0.0
+unity_sdk_version: 5.0.0-pre.1
+unity_native_ffi_version: 0.13.2
+unity_pipeline_version: 0.10.0-exp.1
+unity_pipeline_upper_bound: 0.11.0-0
+unity_cli_tested_version: 1.0.0-beta.17
 unity_min_version: 6000.0.80f1 or later
 unity_recommended_version: Unity 6 (6000.x)
 dep_ai_inference_version: 2.2.1

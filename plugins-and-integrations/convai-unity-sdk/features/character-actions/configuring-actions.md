@@ -3,7 +3,7 @@ title: Configure character actions
 description: >-
   Configure which actions, objects, and characters a Convai NPC can use, then
   update those affordances during an active session.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 `ConvaiActionConfigSource` is the Inspector authoring surface for everything Convai needs to know about your NPC's action capabilities at connect time: which actions to allow, which scene objects the backend can reference, which characters are targetable, and which object has the NPC's initial attention. Add it to any `GameObject` that already has `ConvaiCharacter` — or use the [Actions Editor](actions-editor.md), which authors the same component through a dedicated window. Use `ConvaiActionConfigPatch` to change those affordances after the session has already started.
@@ -20,16 +20,16 @@ The **Convai Actions** Inspector is a summary card, with computed counts, action
 
 | Section                   | Purpose                                                         |
 | ------------------------- | --------------------------------------------------------------- |
-| **Actions** | Inline definitions and assigned Action Sets; bind each action to an executor |
+| **Actions** | Inline definitions; bind each action to an executor |
 | **Scene Knowledge → Known Objects** | Object names, descriptions, and local scene bindings |
 | **Scene Knowledge → Known Characters** | Character names, bios, and local scene bindings |
 | **Scene Knowledge → Initial Attention** | Initial object focus |
 
-**Actions Are Run By** is in **Character Settings**; the behavior host is managed through the **Convai Actions** summary Inspector; see [Where action behaviors live](#where-action-behaviors-live) below.
+Use the **Convai Actions** summary Inspector to configure the [behavior host](#where-action-behaviors-live).
 
 ## Action definitions
 
-Each entry in the **Action Definitions** list binds one backend action name to a Unity executor component. Definitions are considered in order: inline definitions first, then assigned **Action Sets** in list order. After the executable-definition filter, the first eligible definition for a normalized name wins.
+Each entry in the **Action Definitions** list binds one backend action name to a Unity executor component. Inline definitions are considered in list order. The first eligible definition for a normalized name wins.
 
 ### Action definition fields
 
@@ -44,7 +44,6 @@ Each entry in the **Action Definitions** list binds one backend action name to a
 | `AnswerDelivery`    | `ConvaiActionAnswerDelivery`    | What the character does with an answer this action returns (see [Action executors](action-executors.md)). Only meaningful for an executor that returns `ConvaiActionExecutionResult.Answered`. |
 | `Enabled`           | `bool`                          | Whether Convai is told about this action. Defaults to `true`. A disabled action is excluded from the connect payload and any mid-session re-sync; a stale backend command for it is reported as unhandled rather than executed. |
 | `Parameters` | `List<ConvaiActionParameterDefinition>` | Typed parameter rows in **Advanced**. |
-| `ExecutorTypeHint` | `string` | Executor type hint used when rebinding reusable definitions. |
 | `WaitForBotSpeech` | `bool` | **Wait For Speech To Finish** in **Advanced**; the gate can release on speech start despite its label. |
 | `DelayAfterBotSpeechSeconds` | `float` | **Delay After Speech (Seconds)** after the gate releases. |
 | `Category` | `string` | Category used to group actions in the editor. |
@@ -68,7 +67,7 @@ By default, action executor components sit on the same `GameObject` as `ConvaiCh
 
 Use the behavior-host strip and its context menu in the **Convai Actions** Inspector to move executors or select the host. At six or more behaviors on the root, the summary offers to create a child host. Convai finds behaviors either way — both layouts, and a character with some behaviors in each place, run identically, because behaviors are located by searching the whole character hierarchy.
 
-The same **Character Settings** tab also carries **Actions Are Run By** (`ConvaiActionExecutionMode`): `Convai Action Runner` (default) tells the SDK's setup checks to expect a `ConvaiActionDispatcher` on this character; `Custom Code` tells them your own script handles `ConvaiCharacter.OnActionsReceived` or `ConvaiManager.Events.OnCharacterActionReceived` instead. The setting is declarative — it changes nothing at runtime — so it exists only to tell the setup checks whether a missing dispatcher is a mistake or your intention.
+Add a **Convai Action Runner** to run each bound executor. For custom execution, subscribe to `ConvaiCharacter.OnActionsReceived` and omit the runner so a command executes once.
 
 ## Actionable objects
 
@@ -138,85 +137,11 @@ Changes made to `ConvaiActionConfigSource` while in Play Mode do not take effect
 
 In a 5.0 group conversation, the client builds action configuration for each member and omits the shared top-level action configuration. A member excludes itself from its actionable characters. Service-side fallback behavior when a member has no usable actions is not established by this client configuration.
 
-## Dynamic configuration at connect time
+## Configure actions before connecting
 
-For procedurally generated scenes or multi-level games where action targets change between sessions, override the Inspector configuration via `RoomSessionConnectOptions` when calling `ConnectAsync`.
+Set the character’s inline definitions and known targets before connecting. In code, obtain its `ConvaiActionConfigSource` and call `SetDefinitions`, `SetObjects`, `SetCharacters`, or `SetInitialAttentionObject`. Bind each definition to an executor on that character’s hierarchy. Then call `ConvaiManager.ConnectAsync`.
 
-Two independent override fields are available:
-
-| Field                       | Type                           | Effect                                                                                                           |
-| --------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `ActionConfigOverride`      | `ConvaiActionConfig`           | Replaces the full connect-time affordances sent to Convai (action names, objects, characters, initial attention) |
-| `ActionDefinitionsOverride` | `List<ConvaiActionDefinition>` | Replaces the local Unity executor bindings for this session only                                                 |
-
-{% tabs %}
-{% tab title="Both overrides" %}
-Use when both the backend affordances and the local executor bindings should differ from the Inspector configuration:
-
-```csharp
-using System.Collections.Generic;
-using Convai.Modules.BodyAnimation.Executors;
-using Convai.Runtime.Actions;
-using Convai.Runtime.Components;
-using Convai.Runtime.Room;
-using Convai.Shared.Actions;
-using UnityEngine;
-
-public sealed class DynamicActionSetup : MonoBehaviour
-{
-    [SerializeField] private ConvaiManager _manager;
-    [SerializeField] private ConvaiWalkToActionExecutor _walkTo;
-
-    public async void ConnectWithOverrides()
-    {
-        var options = new RoomSessionConnectOptions
-        {
-            ActionConfigOverride = new ConvaiActionConfig
-            {
-                Actions = new List<string> { "Walk To" },
-                Objects = new List<ConvaiActionObjectDefinition>
-                {
-                    new() { Name = "Helmet", Description = "Yellow hard hat on the equipment shelf" },
-                    new() { Name = "Locker", Description = "Green metal locker near the exit" }
-                },
-                CurrentAttentionObject = "Helmet"
-            },
-            ActionDefinitionsOverride = new List<ConvaiActionDefinition>
-            {
-                new()
-                {
-                    ActionName = "Walk To",
-                    TargetRequirement = ConvaiActionTargetRequirement.Object,
-                    Executor = _walkTo
-                }
-            }
-        };
-
-        await _manager.ConnectAsync(options);
-    }
-}
-```
-{% endtab %}
-
-{% tab title="Config override only" %}
-Use when the backend affordances should change but the Inspector's local executor bindings remain correct:
-
-```csharp
-var options = new RoomSessionConnectOptions
-{
-    ActionConfigOverride = new ConvaiActionConfig
-    {
-        Actions = new List<string> { "Walk To" },
-        Objects = BuildObjectListFromCurrentLevel()
-    }
-};
-
-await _manager.ConnectAsync(options);
-```
-{% endtab %}
-{% endtabs %}
-
-`ActionDefinitionsOverride` is filtered against `ActionConfigOverride.Actions`. Only definitions whose `ActionName` appears in the config's action list are active for that session. Definitions for unlisted action names are silently ignored.
+Use `character.Actions` to [register targets and toggle availability](register-targets-from-code.md) as the scene changes. For changes to the active session’s offered configuration, use the patch workflow below.
 
 ## Update actions during an active session
 

@@ -1,7 +1,7 @@
 ---
 title: Narrative design scripting reference
 description: Reference for controlling a character's narrative flow from code, covering section events, trigger invocation, scripted speech, and data fetching.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The Inspector workflow covers the majority of use cases. This page documents the full C# surface for situations where you need programmatic control — dynamic character switching, async data fetching at runtime, runtime-generated narrative flows, or deep integration with your own game systems.
@@ -16,9 +16,7 @@ using Convai.Runtime.Components;
 using Convai.Runtime.Behaviors;
 using Convai.Runtime.NarrativeDesign;
 using Convai.Modules.Narrative;
-using Convai.Domain.Narrative;
 using Convai.Domain.Abstractions;
-using Convai.Infrastructure.Services;
 using UnityEngine;
 ```
 
@@ -86,7 +84,7 @@ The character's narrative section handler subscribes through the event hub with 
 bool accepted = character.NarrativeDesign.InvokeTrigger("CheckpointReached");
 ```
 
-`InvokeTrigger` sends a saved Narrative Design trigger by name. The SDK trims whitespace, rejects an empty name, and sends only `trigger_name` over RTVI. It returns `true` when sent or held locally, not when acknowledged by Convai. Empty values and refused commands return `false`. Group conversations refuse saved triggers, inline events, and scripted speech. A multi-character room holds requests until this character is selected, with at most `16` queued triggers.
+`InvokeTrigger` sends a saved Narrative Design trigger by name. The SDK trims whitespace, rejects an empty name, and sends only `trigger_name` over RTVI. It returns `true` when sent or held locally, not when acknowledged by Convai. Empty values and refused commands return `false`. Group conversations refuse saved triggers, inline events, and scripted speech. The character holds up to `16` requests while it is starting or waiting for its shared-room route. It discards any held request later refused by the connected room.
 
 Use `InvokeEvent` when you want to send contextual event text instead of a saved graph trigger:
 
@@ -187,25 +185,13 @@ else Debug.LogError(result.Error);
 
 `NarrativeTriggerInfo` fields: `TriggerId`, `TriggerName`, `TriggerMessage`, `DestinationSection`.
 
-### Via a data service
-
-Use `NarrativeDesignDataService` in `Convai.Infrastructure.Services` without a component reference. Construct it with `Func<string> apiKeyProvider`, `bool useDraft = false`, and optionally `bool preserveSelectedReference`. `FetchSectionsAsync(characterReference)` and `FetchTriggersAsync(characterReference)` return `NarrativeFetchResult<List<NarrativeSectionInfo>>` and `NarrativeFetchResult<List<NarrativeTriggerInfo>>`. Check `Success` before reading `Data`; failures contain `Error` and default/null data. There is no combined fetch method.
-
-The result and info types are in `Convai.Domain.Abstractions`. `NarrativeDesignFetcher` and `FetchResult<T>` are retired APIs.
+The character facade resolves the selected Live or released version. The result and info types are in `Convai.Domain.Abstractions`.
 
 ## Advanced runtime control
 
-### Reset controller state
-
-```csharp
-// Reset controller state only (clears CurrentSectionID and CurrentSectionData)
-// Does NOT touch the section configs list or Unity Event wiring
-narrativeManager.ResetController();
-```
-
 ### Reconfigure ConvaiNarrativeDesignTrigger from code
 
-Setters exist for character, trigger selection/name, activation mode, radius, delay, player transform, and diagnostics. Other Inspector settings, including tag/layer, queuing, timeout, and Trigger Once, have no public setter:
+Setters cover the character, trigger selection and name, activation mode, radius, delay, player transform, and diagnostics. Configure player tag, player layer, and **Trigger Once** in the Inspector.
 
 ```csharp
 ConvaiNarrativeDesignTrigger trigger = GetComponent<ConvaiNarrativeDesignTrigger>();
@@ -223,12 +209,10 @@ trigger.SetPlayerTransform(playerController.transform);
 // Switch the target character
 trigger.SetCharacter(otherCharacter.GetComponent<IConvaiCharacterAgent>());
 
-// Validate before a critical trigger
-if (!trigger.ValidateConfiguration())
-{
-    foreach (string warning in trigger.ValidationWarnings)
-        Debug.LogWarning(warning);
-}
+// Check both the result and warnings before using the trigger.
+bool valid = trigger.ValidateConfiguration();
+foreach (string warning in trigger.ValidationWarnings)
+    Debug.LogWarning(warning);
 ```
 
 {% hint style="warning" %}
@@ -241,26 +225,30 @@ if (!trigger.ValidateConfiguration())
 narrativeManager.ClearAllSectionConfigs();
 ```
 
-`ResetController()` clears only the manager's local section state. It does not reset Convai's graph or the character facade's section state.
+## Trigger activation and status
+
+`InvokeTrigger()` and `TryInvokeTrigger()` return `true` when the character sends or holds the trigger. A held invocation raises `OnTriggerQueued` before `OnTriggerActivated` and sets `HasTriggered`. `OnTriggerFailed` carries local component errors. Observe `ConvaiManager.Events.OnServerCommandResultReceived` for service results.
+
+`CurrentStatus` uses `TriggerStatus` in `Convai.Modules.Narrative`. The values are `Ready`, `AlreadyFired`, `ConfigurationError`, and `Disabled`. `IsCharacterReady` checks whether the assigned `ConvaiCharacter` is in conversation. `ResetTrigger()` re-arms the component without removing a request the character already holds.
 
 ## Additional component members
 
 | Component | Members |
 |---|---|
 | Manager | `CurrentSectionID`, `CurrentSectionData`, `FindSectionConfig`, `SetCharacter`, `ClearFetchError`, `GetCharacterReadReference`, `LastSyncedCharacterReference` |
-| Manager sync | `FetchAndSyncFromBackend(bool useDraft, string apiKey = null)` and `FetchAndSyncFromBackendAsync(bool useDraft, string apiKey = null)`; default overloads use `useDraft: false` |
-| Trigger | `CurrentStatus`, `LastErrorMessage`, `IsCharacterReady`, `SetTimeDelay`, `SetTriggerName`, `SelectTriggerByIndex`, `GetCharacterReadReference`, `LastFetchedCharacterReference` |
-| Trigger cache | `SetAvailableTriggers(List<TriggerData> triggers, string characterReference)` |
+| Manager sync | `FetchAndSyncFromBackendAsync(bool useDraft = false, string apiKey = null)` |
+| Trigger | `CurrentStatus`, `LastErrorMessage`, `IsCharacterReady`, `SetTimeDelay`, `SetTriggerName`, `GetCharacterReadReference`, `LastFetchedCharacterReference` |
+| Trigger cache | `SetAvailableTriggers(IReadOnlyList<NarrativeTriggerInfo> triggers, string characterReference)` |
 
-The lower-level room methods take an `IConvaiCharacterAgent` and return `IConvaiOperation<ServerCommandResult>`. Their completion is separate from the character facade's local acceptance boolean.
+Use `ConvaiManager.Events.OnServerCommandResultReceived` to inspect acknowledged narrative commands. The character facade reports local acceptance.
 
 ## Component relationships
 
 ```mermaid
 classDiagram
     class ConvaiNarrativeDesignManager {
-        +UpdateTemplateKey(key, value)
-        +FetchAndSyncFromBackend()
+        +SendTemplateKeysUpdate()
+        +FetchAndSyncFromBackendAsync()
         +OnAnySectionChanged UnityEvent
     }
     class ConvaiNarrativeDesignTrigger {

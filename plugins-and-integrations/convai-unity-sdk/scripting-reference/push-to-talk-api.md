@@ -1,7 +1,7 @@
 ---
 title: Push-to-talk scripting reference
 description: Drive push-to-talk from custom Unity input, observe capture and commit state, interpret release results, and recover a failed connection.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Use `ConvaiPushToTalkController` in `Convai.Runtime.Components` for custom input. It keeps capture, target ownership, and response waiting together. `PttState`, `PttCommitResult`, and release policy types live in `Convai.Runtime.Room`.
@@ -18,13 +18,12 @@ Use `ConvaiPushToTalkController` in `Convai.Runtime.Components` for custom input
 | `IsAwaitingTurnCompletion` | Whether reply waiting gates input |
 | `State`, `ReleaseId` | PTT lifecycle and correlated release identifier |
 | `BlockedReason` | Why a press was refused |
-| `CompatibilityReason` | Why the Legacy path is in use |
-| `ActiveTargetCharacterId`, `ActiveTargetParticipantId` | Target captured for the active press |
+| `ActiveTargetCharacterId` | Target captured for the active press |
 | `StateChanged` | `Action<PttState>` |
 | `CommitCompleted` | `Action<PttCommitResult>`; correlated release only |
 | `RetryAsync(CancellationToken)` | Recovery connection operation returning `RoomSession` |
 
-State values are `Idle`, `Preparing`, `Capturing`, `Draining`, `AwaitingCommit`, `AwaitingBotTurn`, and `Error`. A true return from `Release()` only accepts the release path. For correlated release, observe `CommitCompleted` separately. The Legacy compatibility path, including unsupported Auto capture such as WebGL, does not emit that event or a `PttCommitResult`. Use `StateChanged`, `IsAwaitingTurnCompletion`, and `CompatibilityReason` to follow local compatibility progress without treating it as a server commit receipt.
+State values are `Idle`, `Preparing`, `Capturing`, `Draining`, `AwaitingCommit`, `AwaitingBotTurn`, and `Error`. A true return from `Release()` only accepts the release path. For correlated release, observe `CommitCompleted` separately. Native sender-drain capture and WebGL capture both use this correlated result.
 
 A press requires a connected, microphone-enabled room in push-to-talk mode, available targeting, and no conflicting capture/release. A held press ends on pause, disable, disconnect, target/mode changes, or input holds even if it was created with `Press(true)`.
 
@@ -34,7 +33,7 @@ A press requires a connected, microphone-enabled room in push-to-talk mode, avai
 
 ## Commit result
 
-`ReleaseId`, `CommitCompleted`, and `PttCommitResult` describe the correlated release protocol. Do not wait for them when the controller uses Legacy compatibility release.
+`ReleaseId`, `CommitCompleted`, and `PttCommitResult` describe the correlated release protocol.
 
 | Property | Meaning |
 | --- | --- |
@@ -48,7 +47,7 @@ Committed means speech submission was accepted by this protocol; it does not mea
 
 ## Room-level API
 
-`ConvaiRoomManager` in `Convai.Runtime.Adapters.Networking` exposes `PttState`, `PttReleaseId`, `PttError`, `LastPttCommitResult`, `PttCompatibilityReason`, `PttStateChanged`, and `PttCommitCompleted`.
+`ConvaiRoomManager` in `Convai.Runtime.Room` exposes `PttState`, `PttReleaseId`, `PttError`, `LastPttCommitResult`, `PttStateChanged`, and `PttCommitCompleted`.
 
 `ForceUserStoppedSpeakingAsync(string releaseId, CancellationToken)` returns `IConvaiOperation<PttCommitResult>` for correlated stop handling. `RetryPttAsync(CancellationToken)` returns a recovery connection operation. These are lower-level services; ordinary input should use the controller so capture and target cleanup remain coordinated.
 

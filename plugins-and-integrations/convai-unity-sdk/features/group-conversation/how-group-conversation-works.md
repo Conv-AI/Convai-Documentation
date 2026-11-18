@@ -1,7 +1,7 @@
 ---
 title: How group conversation works
 description: Understand the group voice preview, service-controlled turns, player push-to-talk, spatial updates, and the limits of offline simulation.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Group conversation is an opt-in voice preview layered on a multi-character room. The client supplies a shared situation, topics, member aliases, and spatial measurements. Service events report who has the floor and how the player's utterance was addressed.
@@ -32,9 +32,13 @@ Line events identify the speaker and addressee by membership. Immutable snapshot
 
 ## Join with push-to-talk
 
-A press has a correlated release identifier so the service can associate its transcript and addressing decision with that press. Legacy release or disabling server speech-recognition toggling is incompatible and causes connect refusal. Use the SDK push-to-talk controller and supported release policy.
+Group voice requires **Push To Talk**, a started group, and an eligible microphone route to the current target. The SDK correlates each press and its release with the transcript and addressing decision. When the capture source supports sender drain, the SDK drains the last samples before closing speech recognition. Other capture sources, including the WebGL path, use `PushToTalkPolicy.ReleaseTailMs` and mute before sending the same correlated commit. Use `ConvaiPushToTalkController` for custom controls.
 
 The client samples position and gaze at 10 Hz, and every frame during a press. `LastSnapshot` is the newest measurement, not necessarily the last update sent. Gaze duration, distance, aliases, and the service's current turn state contribute to addressing; inspect `PlayerUtteranceResolved` instead of guessing the recipient from a raycast alone.
+
+## Follow the audible speaker with gaze
+
+**Drive Gaze** uses the character’s installed `ConvaiGazeController`. The SDK creates its internal `ConvaiGroupConversationGaze` component at runtime when group gaze is needed. It follows the audible speaker and uses the line’s addressee when one is available. When the service reports the addressee late, the SDK can use the speaker’s English form of address or resolve whom the line replies to. After the player speaks, gaze uses the reported answer queue. The room’s input target only identifies which character receives speech recognition.
 
 ## Send world events deliberately
 

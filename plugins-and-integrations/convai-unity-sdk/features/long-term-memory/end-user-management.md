@@ -1,10 +1,10 @@
 ---
 title: Manage end-user records
 description: Browse end-user records, page through results, update display metadata, and deactivate users while keeping memory deletion as a separate operation.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Manage end-user records in the **Long Term Memory** section of **Convai Editor** or `client.EndUsers`. Each returned record contains an identifier, activity timestamps, and metadata. Deactivating a user is separate from deleting their memories.
+Manage end-user records in the **Long Term Memory** section of **Convai Editor** or `ConvaiPlatformClient`. Each returned record contains an identifier, activity timestamps, and metadata. Deactivating a user is separate from deleting their memories.
 
 ## Use the editor
 
@@ -14,25 +14,24 @@ Use [Inspect and manage long-term memories](long-term-memory-window.md) for the 
 
 ## Read end-user records
 
-Use an authorized `ConvaiRestClient` in a trusted administrative tool. Keep the account API key out of distributed player builds. The helper below returns records for private inspection and supports cancellation without logging identity data.
+Use an authorized `ConvaiPlatformClient` in a trusted administrative tool. Keep the account API key out of distributed player builds. The helper below returns records for private inspection and supports cancellation without logging identity data.
 
 ```csharp
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Convai.RestAPI;
-using Convai.RestAPI.Internal;
+using Convai.PlatformApi;
 
 public static class EndUserDirectory
 {
     public static async Task<List<EndUserDetails>> ListAllAsync(
-        ConvaiRestClient client, CancellationToken cancellationToken = default)
+        ConvaiPlatformClient client, CancellationToken cancellationToken = default)
     {
         var users = new List<EndUserDetails>();
         string cursor = null;
         do
         {
-            var page = await client.EndUsers.ListAsync(
+            var page = await client.ListEndUsersAsync(
                 limit: 50, cursor: cursor, cancellationToken: cancellationToken);
             if (page.EndUsers != null)
                 users.AddRange(page.EndUsers);
@@ -44,7 +43,7 @@ public static class EndUserDirectory
 }
 ```
 
-`ListAsync` also accepts `activeAfter` and `activeBefore` as ISO 8601 date strings. `GetAsync(endUserId)` fetches a specific user without listing the entire directory. Both accept a cancellation token.
+`ListEndUsersAsync` also accepts `activeAfter` and `activeBefore` as ISO 8601 date strings. `GetEndUserAsync(endUserId)` fetches a specific user without listing the entire directory. Both accept a cancellation token.
 
 | Record field | Meaning |
 | --- | --- |
@@ -59,30 +58,29 @@ public static class EndUserDirectory
 
 ## Update display metadata
 
-`UpdateMetadataAsync` merges the keys supplied in the patch. Omitted keys are preserved; the method does not expose a remove-key operation. The following complete helper changes only the display name:
+`UpdateEndUserMetadataAsync` merges the keys supplied in the patch. Omitted keys are preserved; the method does not expose a remove-key operation. The following complete helper changes only the display name:
 
 ```csharp
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Convai.RestAPI;
-using Convai.RestAPI.Internal;
+using Convai.PlatformApi;
 
 public static class EndUserNames
 {
     public static Task<EndUserUpdateResponse> RenameAsync(
-        ConvaiRestClient client, string endUserId, string displayName,
+        ConvaiPlatformClient client, string endUserId, string displayName,
         CancellationToken cancellationToken = default)
     {
         var patch = new Dictionary<string, object> { ["name"] = displayName };
-        return client.EndUsers.UpdateMetadataAsync(endUserId, patch, cancellationToken);
+        return client.UpdateEndUserMetadataAsync(endUserId, patch, cancellationToken);
     }
 }
 ```
 
 ## Deactivate an end user
 
-`client.EndUsers.DeleteAsync(endUserId)` deactivates the user. The SDK service contract says the stored memories remain but can no longer be listed through that deactivated user; a later connection using the same ID starts without those memories. Do not use this operation as proof that memory data was erased.
+`client.DeleteEndUserAsync(endUserId)` deactivates the user. The SDK service contract says the stored memories remain but can no longer be listed through that deactivated user; a later connection using the same ID starts without those memories. Do not use this operation as proof that memory data was erased.
 
 {% hint style="danger" %}
 If memories must be removed, request deletion for every relevant character and verify the remaining records before deactivating the end user. A successful deactivation response is not a memory-deletion receipt.
@@ -90,9 +88,9 @@ If memories must be removed, request deletion for every relevant character and v
 
 | Operation | Scope | Result to check |
 | --- | --- | --- |
-| `Memory.DeleteAsync` | One record for one character and user | `Deleted` and a subsequent read |
-| `Memory.DeleteAllAsync` | All memories for one character and user | Request accepted; check subsequent lists |
-| `EndUsers.DeleteAsync` | End-user record | Deactivation response; does not erase memories |
+| `DeleteMemoryAsync` | One record for one character and user | `Deleted` and a subsequent read |
+| `DeleteAllMemoriesAsync` | All memories for one character and user | Request accepted; check subsequent lists |
+| `DeleteEndUserAsync` | End-user record | Deactivation response; does not erase memories |
 
 For a multi-character forget workflow, use the editor's **Forget End User…** controls. That workflow enumerates the account's owned characters; incomplete coverage or a failed request must be resolved before claiming the user has been forgotten.
 

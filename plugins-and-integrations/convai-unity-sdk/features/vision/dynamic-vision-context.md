@@ -1,10 +1,10 @@
 ---
 title: Dynamic vision context
 description: Reference for the dynamic vision context types that configure backend-driven camera frame sampling and per-lane respond-mode defaults.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Field-level reference for the three types that configure dynamic vision context: `ConvaiVisionContextMode` enables it per room, `ConvaiVisionInputSettings` tunes backend frame sampling, and `ConvaiVisionRespondModeSettings` sets per-lane respond-mode defaults. See [How vision works](how-vision-works.md#dynamic-vision-context) for what dynamic vision context is, why it exists, and how to enable it on a room.
+Field-level reference for the three types that configure dynamic vision context: `ConvaiVisionContextMode` enables it per room, `ConvaiVisionInputSettings` tunes backend frame sampling, and `ConvaiRespondModeSettings` sets per-lane respond-mode defaults. See [How vision works](how-vision-works.md#dynamic-vision-context) for what dynamic vision context is, why it exists, and how to enable it on a room.
 
 {% hint style="info" %}
 These settings request service behavior. Account availability, model compatibility, timing, and cost must be confirmed from actual responses and your service configuration.
@@ -12,17 +12,16 @@ These settings request service behavior. Account availability, model compatibili
 
 ## `ConvaiVisionContextMode`
 
-Controls whether a room requests dynamic vision context. In the room manager's **Vision** card or profile, **Dynamic Vision** displays **Auto**, **On**, and **Off** for `Auto`, `Enabled`, and `Disabled`. Other sampling controls are shown when vision is on. Group rooms remain Audio.
+Select **Vision** under **Connection** on the room manager. A new room uses this setting to select its connection type and vision policy. A join to an existing room uses that room's configuration. Group conversation uses audio only.
 
-| Value | Description |
-|---|---|
-| `Auto` | Follows the configured `Connection Type`: vision is enabled only when the room is already set to `Video`. Never upgrades an `Audio` room on its own. |
-| `Enabled` | Always enables dynamic vision context; forces the room connection to `Video`. |
-| `Disabled` | Never sends dynamic-vision config. The configured `Connection Type` is left untouched, so other video-dependent paths keep working. |
+| Setting | Connection | Vision fields in the connect request |
+| --- | --- | --- |
+| `Off` (default) | Audio | Omits `vision_input_config` and sets `vision_prompt_mode` to `disabled`. |
+| `On` | Video | Sends `vision_input_config` and leaves the prompt mode to Convai. |
 
 ## `ConvaiVisionInputSettings`
 
-Backend frame-sampling configuration for dynamic vision context, sent as `vision_input_config` on room connect. The client clamps values before serialization. This does not guarantee that the service accepts the configuration. These settings are read once at connect time — changing a sampling field requires a reconnect. Respond modes are the exception; see [`ConvaiVisionRespondModeSettings`](#convaivisionrespondmodesettings).
+Backend frame-sampling configuration for dynamic vision context, sent as `vision_input_config` on room connect. The client clamps values before serialization. This does not guarantee that the service accepts the configuration. These settings are read once at connect time — changing a sampling field requires a reconnect. Respond modes are the exception; see [`ConvaiRespondModeSettings`](#convairespondmodesettings).
 
 | Field | Wire field | Type | Default | Range |
 |---|---|---|---|---|
@@ -46,20 +45,20 @@ Each window's `Count` and `Interval Ms` default to `0`, and a window is either f
 
 If the total `Count` across configured windows exceeds `Frames Per Reply`, the SDK fills windows in order until the budget is used and trims the rest, logging a warning once, instead of sending a configuration the backend would reject.
 
-## `ConvaiVisionRespondModeSettings`
+## `ConvaiRespondModeSettings`
 
 The **When The Character Speaks Up** group contains per-lane respond-mode defaults sent as `respond_modes` on room connect. User text and voice always respond and cannot be lowered; only the four lanes below are configurable. Values use the same `ConvaiRespondMode` enum documented in [Dynamic context scripting API](../dynamic-context/dynamic-context-scripting-api.md#convairespondmode) — `Silent`, `Auto`, and `MustRespond` mean the same thing here as they do for dynamic context.
 
 | Lane | Default | Governs |
 |---|---|---|
-| Vision Triggers | `Silent` | A `TriggerVision` request that doesn't set its own `RespondMode` |
+| Vision Triggers | `Silent` | A `TriggerVisionAsync` request that doesn't set its own `RespondMode` |
 | Context Updates | `Auto` | How a dynamic-context text update affects speech |
-| Narrative Triggers | `MustRespond` | How a Narrative Design trigger, such as `SendTrigger` or `ConvaiNarrativeDesignTrigger`, affects speech. It does not apply to vision triggers |
+| Narrative Triggers | `MustRespond` | How a Narrative Design trigger, such as `NarrativeDesign.InvokeTrigger` or `ConvaiNarrativeDesignTrigger`, affects speech. It does not apply to vision triggers |
 | Scene Metadata | `Silent` | How scene-metadata updates affect speech |
 
 Sampled frames never start a reply on their own; Convai buffers them and attaches them to the next turn. Because a vision trigger without a `RespondMode` follows the **Vision Triggers** lane, it attaches frames silently by default. Set `RespondMode = ConvaiRespondMode.MustRespond` on the request when the character should answer.
 
-Use `UpdateRespondMode` to request a mid-session lane change. Check its boolean send result and the later acknowledgement; see [Vision scripting API](scripting-api.md).
+Use `ConvaiManager.UpdateRespondModeAsync` to change a lane for the active session. Await the operation and inspect the result; see [Vision scripting API](scripting-api.md).
 
 ## Next steps
 

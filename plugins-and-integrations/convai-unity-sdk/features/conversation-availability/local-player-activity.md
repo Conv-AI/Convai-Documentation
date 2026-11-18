@@ -1,7 +1,7 @@
 ---
 title: React to the player starting to speak
 description: React locally to the player starting to talk or pressing push-to-talk, before the service confirms it over the network connection.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Whether the player is speaking has always been Convai's own call, announced back over the network — so a character did nothing until that round trip landed, and looked like it noticed the player late. The SDK also watches locally now and publishes `LocalPlayerActivityChanged` the moment it sees local evidence, in both turn-taking modes.
@@ -23,11 +23,13 @@ using UnityEngine;
 public class LocalSpeechActivity : MonoBehaviour
 {
     private SubscriptionToken _token;
-    private IEventHub _hub;
+    private IEventSubscriberHub _hub;
 
     private void OnEnable()
     {
-        _hub = ConvaiManager.ActiveManager?.Events?.Raw;
+        ConvaiManager manager = ConvaiManager.ActiveManager;
+        if (manager == null || !manager.IsInitialized) return;
+        _hub = manager.Events.Raw;
         if (_hub == null) return;
 
         _token = _hub.Subscribe<LocalPlayerActivityChanged>(HandleLocalActivity);

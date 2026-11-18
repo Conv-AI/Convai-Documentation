@@ -1,7 +1,7 @@
 ---
 title: Configure Auth Token mode
 description: Switch a Convai Unity SDK project to Auth Token mode and configure the token endpoint in Project Settings for a shipped build.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Configure Auth Token mode so a player build resolves a short-lived credential from your backend instead of shipping the Convai account API key. Use this page when you have a token endpoint ready, or when you are configuring a public token endpoint directly in Project Settings.
@@ -59,8 +59,6 @@ Add entries to **Request Headers** only for static values that are safe to inclu
 Project Settings headers are static and ship inside the player build. Never put a player token, refresh token, server secret, or Convai API key into the Request Headers list. If your token request needs a per-player credential, use a registered `IConvaiAuthTokenProvider` instead — see [Write a custom token provider](custom-token-provider.md).
 {% endhint %}
 
-<figure><img src="../../../.gitbook/assets/unity-sdk-credentials.png" alt="Convai Credentials card showing the Auth Mode selector and masked API key"><figcaption><p>The Credentials card before switching from Api Key to Auth Token. The example key is not validated; API Mode is a separate project setting.</p></figcaption></figure>
-
 ## Check the endpoint contract
 
 The built-in endpoint client sends no body for `GET` and `{}` for `POST`. The response must contain a non-empty string at **Token Response Field**. It optionally reads a top-level `expirationTime` timestamp. Expiry is informational; it does not schedule token refresh.
@@ -79,7 +77,7 @@ Check the **Auth Token** row in **Setup Health** first. **Healthy** means a runt
 
 Enter Play mode with a scene that connects a `ConvaiCharacter`. With no provider registered, a successful connection confirms the configured endpoint supplied a token accepted by Convai. If the connection fails, check the Console for the exact error message and see [Troubleshoot authentication](troubleshooting.md).
 
-Your saved API key remains available to Editor tools after switching to Auth Token mode, but both stored key fields are cleared automatically while an Auth Token player build is produced, and restored afterward.
+Your saved API key remains available to Editor tools after switching to Auth Token mode, while the build processor clears the saved settings key for the duration of an Auth Token player build.
 
 ## Next steps
 

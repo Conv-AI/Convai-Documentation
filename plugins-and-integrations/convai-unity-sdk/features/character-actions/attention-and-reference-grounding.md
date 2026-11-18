@@ -1,7 +1,7 @@
 ---
 title: How action target resolution works
 description: Understand how a spoken reference resolves to a specific scene object or character, from Convai's language match to Unity's local lookup.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 When a player says "pick up that cylinder" or "go to it," two separate systems have to agree on what "that" or "it" means: Convai, which matches the words to a target name, and Unity, which matches that name to a real `GameObject` in the scene. This page explains both steps and the current attention object that steers ambiguous references.
@@ -38,7 +38,7 @@ The `Description` field on each `ConvaiActionObjectDefinition` is the most impor
 Vague descriptions cause Convai to pick the wrong target or fail to resolve ambiguous references.
 
 {% hint style="warning" %}
-`ConvaiActionConfigSource` descriptions are fixed once a session connects. For scenes known in advance, build alternate descriptions with `RoomSessionConnectOptions.ActionConfigOverride` before connecting. For scenes that change during an active session — objects moved, spawned, or destroyed — send a `ConvaiActionConfigPatch` through `character.DynamicContext.Apply(...)` instead of reconnecting. See [Configure character actions](configuring-actions.md) for override and patch semantics.
+Author names and descriptions through the character’s action source before connecting. To change a description during a session, [patch the action configuration](update-actions-at-runtime.md).
 {% endhint %}
 
 ## How Unity matches a target name to a scene object

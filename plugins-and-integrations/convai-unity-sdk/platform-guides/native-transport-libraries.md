@@ -3,7 +3,7 @@ title: Native transport libraries
 description: >-
   Install the native transport libraries needed by the Unity Editor and player
   builds, select target architectures, and diagnose missing-library failures.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Native players need a LiveKit FFI library, the native bridge used by the managed SDK. The Editor downloader installs it into the project; it is not shipped inside the SDK package. WebGL uses its browser transport instead.
@@ -14,7 +14,7 @@ Native players need a LiveKit FFI library, the native bridge used by the managed
 {% step %}
 ### Allow release downloads
 
-The reviewed 5.0 source pins LiveKit FFI `0.12.80` and archive checksums. The downloader retrieves release assets from `github.com/livekit/rust-sdks/releases/download`. Allow GitHub and its release-download redirects on the development or build machine.
+The SDK pins LiveKit FFI <code class="expression">space.vars.unity_native_ffi_version</code> and archive checksums. The downloader retrieves release assets from `github.com/livekit/rust-sdks/releases/download`. Allow GitHub and its release-download redirects on the development or build machine.
 {% endstep %}
 
 {% step %}
@@ -28,7 +28,7 @@ The downloader runs on Editor load for the Editor platform and active build targ
 | Download FFI Libraries (Active Build Target) | Architectures selected for the active player target. |
 | Download FFI Libraries (All Platforms) | Every architecture listed in the package manifest. |
 
-Wait for download and import to finish before connecting or building.
+Wait for download and import before connecting or building. Newly downloaded libraries stay disabled until the Editor applies platform and architecture settings. Redownloading preserves existing importer metadata.
 {% endstep %}
 
 {% step %}
@@ -44,7 +44,7 @@ Confirm the expected architecture is present and the Console has no download, ch
 {% endstep %}
 {% endstepper %}
 
-## Architectures in the 5.0 source
+## Architectures in the SDK manifest
 
 | Platform | Manifest architectures |
 | --- | --- |

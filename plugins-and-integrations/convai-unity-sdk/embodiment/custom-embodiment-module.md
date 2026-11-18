@@ -1,7 +1,7 @@
 ---
 title: Create a custom embodiment module
 description: Add a character feature with its own profile, preset entry, and scheduled updates while keeping its runtime work safe outside Play mode.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Create a custom module when a character needs a feature with reusable settings and the same lifecycle as the shipped embodiment modules. This example pulses a dedicated light on a character. It demonstrates profile routing and scheduled updates without taking ownership of bones or blendshapes already driven by Convai.
@@ -36,7 +36,6 @@ Save the following as `CharacterLightModule.cs`. The attribute makes the feature
 {% code title="CharacterLightModule.cs" %}
 ```csharp
 using System;
-using Convai.Runtime.Animation;
 using Convai.Runtime.Embodiment;
 using UnityEngine;
 
@@ -69,14 +68,6 @@ public sealed class CharacterLightModule : ConvaiCharacterModule<CharacterLightP
             _originalIntensity = characterLight.intensity;
             _ownsLight = true;
         }
-        Context.DependenciesPopulated += RegisterForTicks;
-        RegisterForTicks();
-    }
-
-    private void RegisterForTicks()
-    {
-        if (UnityEngine.Application.isPlaying && isActiveAndEnabled)
-            Context?.RegisterTickable(this);
     }
 
     public void EmbodimentTick(float deltaTime)
@@ -96,11 +87,6 @@ public sealed class CharacterLightModule : ConvaiCharacterModule<CharacterLightP
 
     protected override void OnDisable()
     {
-        if (Context != null)
-        {
-            Context.DependenciesPopulated -= RegisterForTicks;
-            Context.UnregisterTickable(this);
-        }
         if (_ownsLight && characterLight != null)
             characterLight.intensity = _originalIntensity;
         _ownsLight = false;
@@ -110,9 +96,7 @@ public sealed class CharacterLightModule : ConvaiCharacterModule<CharacterLightP
 ```
 {% endcode %}
 
-The base class uses `[ExecuteAlways]`: its callbacks also run in Edit mode. Call the base implementations when overriding `Awake`, `OnEnable`, `OnDisable`, or `OnDestroy`, and guard your runtime work with `UnityEngine.Application.isPlaying`. The base handles profile receiver registration and default-profile cleanup; your module handles its own tick registration, event subscriptions, and output cleanup.
-
-`RegisterTickable` returns `false` when no scheduler is available, normally outside Play mode. Duplicate registration is harmless. The example also retries registration when runtime dependencies are populated and removes that subscription on disable.
+The base class uses `[ExecuteAlways]`: its callbacks also run in Edit mode. Call the base implementations when overriding `Awake`, `OnEnable`, `OnDisable`, or `OnDestroy`, and guard your runtime work with `UnityEngine.Application.isPlaying`. The base class registers the module as a profile receiver and as a tickable. It unregisters both on disable and releases its default profile on destroy. The module in this example restores the light intensity on disable.
 
 ## Add settings to a character and preset
 

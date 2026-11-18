@@ -1,6 +1,6 @@
 ---
 title: Show connection and audio levels
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 description: Show character readiness, microphone and voice levels, connection quality, and the waiting period before a reply in your scene interface.
 ---
 
@@ -8,13 +8,13 @@ Use character availability for a ready-to-talk indicator, audio levels for meter
 
 ## Add the built-in indicators
 
-`ConnectionStatusIndicator` and `PlayerSpeakingIndicator` are in `Convai.Runtime.Presentation.Views.Transcript`. Both shipped chat prefabs include them.
+`ConnectionStatusIndicator` and `PlayerSpeakingIndicator` are in `Convai.Runtime.UI.Transcript`. Both shipped chat prefabs include them.
 
 {% stepper %}
 {% step %}
 ### Assign connection indicator references
 
-Add `ConnectionStatusIndicator` to your UI and assign `statusIndicator` (`Image`) and `statusText` (`TMP_Text`). Keep **Report Character Availability** enabled for ready-to-talk feedback. It shows **Getting ready** while the character is preparing and **Connected** for ready or answering states. Turning that option off makes the display report session transport state instead.
+Add `ConnectionStatusIndicator` to your UI and assign `statusIndicator` (`Image`) and `statusText` (`TMP_Text`). The indicator reads the addressed character’s conversation availability. It shows **Getting ready** while the character is preparing and **Connected** for ready or answering states.
 {% endstep %}
 {% step %}
 ### Assign the speaking indicator
@@ -30,19 +30,19 @@ Ensure `ConvaiManager` is initialized when the indicators resolve their services
 
 ## Draw microphone and character meters
 
-Assign the scene's public `ConvaiRoomManager` component directly to your script. Assign the character's `ConvaiAudioOutput` separately. Do not access the manager's internal room reference.
+Assign the scene manager and the character’s `ConvaiAudioOutput` to the script.
 
 The following example displays linear readings in sliders configured with a `0..1` range. It hides unavailable meters instead of labeling them as silence:
 
 ```csharp
-using Convai.Runtime.Adapters.Networking;
+using Convai.Runtime.Facades;
 using Convai.Runtime.Components;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ConversationMeters : MonoBehaviour
 {
-    [SerializeField] private ConvaiRoomManager room;
+    [SerializeField] private ConvaiManager manager;
     [SerializeField] private ConvaiAudioOutput voice;
     [SerializeField] private Slider microphoneMeter;
     [SerializeField] private Slider voiceMeter;
@@ -50,12 +50,13 @@ public class ConversationMeters : MonoBehaviour
 
     private void Update()
     {
-        SetMeter(microphoneMeter, room != null && room.IsMicrophoneLevelAvailable,
-            room != null ? room.MicrophoneLevel : 0f);
+        ConvaiAudio audio = manager != null && manager.IsInitialized ? manager.Audio : null;
+        SetMeter(microphoneMeter, audio != null && audio.IsMicrophoneLevelAvailable,
+            audio?.MicrophoneLevel ?? 0f);
         SetMeter(voiceMeter, voice != null && voice.IsVoiceLevelAvailable,
             voice != null ? voice.VoiceLevel : 0f);
         if (waitingIndicator != null)
-            waitingIndicator.SetActive(room != null && room.IsAwaitingReply);
+            waitingIndicator.SetActive(manager != null && manager.IsAwaitingReply);
     }
 
     private static void SetMeter(Slider meter, bool available, float value)
@@ -77,13 +78,13 @@ The smoothing rate `12` is an example UI choice. Both readings are linear and un
 
 ## Report connection quality
 
-`ConvaiRoomManager.ConnectionQuality` returns the local participant's reported media connection quality: `Unknown`, `Lost`, `Poor`, `Good`, or `Excellent` from `Convai.Infrastructure.Networking`. Observe `ConnectionQualityChanged` for changes on the main thread, and unsubscribe when your UI is disabled.
+`ConvaiManager.ConnectionQuality` returns the local participant's reported media connection quality: `Unknown`, `Lost`, `Poor`, `Good`, or `Excellent` from `Convai.Runtime.Networking.Connection`. Observe `ConvaiManager.Events.OnConnectionQualityChanged` for changes on the main thread, and unsubscribe when your UI is disabled.
 
 Treat `Unknown` as unavailable information. It can occur before the first report and after a session ends. The value describes the player's link, not the character's connection or guaranteed response latency. Pair a low-quality label with the existing readiness indicator instead of using it as a send-permission check.
 
 ## Show the wait before a reply
 
-`IsAwaitingReply` and `AwaitingReplyChanged` describe the interval after a player turn finishes and before its addressed reply starts. A typed send starts the wait immediately. Voice waits for a non-empty final transcript and the end of the player's turn, including release of push-to-talk.
+`ConvaiManager.IsAwaitingReply` and `ConvaiManager.Events.OnAwaitingReplyChanged` describe the interval after a player turn finishes and before its addressed reply starts. A typed send starts the wait immediately. Voice waits for a non-empty final transcript and the end of the player's turn, including release of push-to-talk.
 
 The wait ends on reply speech or completion, relevant no-reply or failure signals, leaving the connected session state, or the no-progress timeout. The timeout is 30 seconds without a reply signal and is held while a reply tool runs. It is evaluated in the enabled room manager's `Update`. This indicator is separate from animation Thinking state and from push-to-talk's whole-turn completion state.
 
@@ -91,7 +92,7 @@ The wait ends on reply speech or completion, relevant no-reply or failure signal
 
 | Symptom | Cause | Fix and verification |
 | --- | --- | --- |
-| Connected is shown before the character can answer | Indicator reports transport state | Enable **Report Character Availability** and verify the preparing state |
+| Custom UI shows ready before the character can answer | It reads transport connection state | Read `ConversationAvailability` and verify the preparing state |
 | A meter always reads zero | Unavailable measurement, mute, or silence | Inspect its availability property, microphone policy, and mute state; speak after availability becomes true |
 | WebGL voice meter is unavailable | Browser audio has not been unlocked or cannot be measured | Use the audio-enable interaction, then inspect availability again |
 | Quality is Unknown after connection | No quality report has arrived | Keep an unknown state until the event supplies a report |

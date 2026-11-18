@@ -3,7 +3,7 @@ title: Sync behavior and timing
 description: >-
   Understand how the SDK batches dynamic context updates before sending them
   and how action and attention changes are confirmed by Convai.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Dynamic Context updates do not reach Convai the instant you call `SetState`, `AddEvent`, or any other tracked method. The SDK stages every call into a short-lived batch and sends one `context-update` message per batch, not one per call. This page explains why the SDK batches, exactly when a batch is sent, and how updates that carry an action config patch or an attention object are acknowledged before the SDK trusts them locally.
@@ -106,11 +106,13 @@ Subscribe to the event to observe acknowledgement outcomes directly:
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
-using Convai.Runtime.Components;
 using UnityEngine;
 
-ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived += result =>
+// Method-body fragment with a configured manager.
+manager.Events.OnServerCommandResultReceived += answer =>
 {
+    if (answer.CommandType is not ("context-update" or "character-context-update")) return;
+    var result = DynamicContextUpdateResultReceived.Create(answer);
     Debug.Log($"Dynamic context {result.Status}: revision {result.ContextRevision}");
 };
 ```

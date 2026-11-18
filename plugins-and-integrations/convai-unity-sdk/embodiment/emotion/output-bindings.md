@@ -1,7 +1,7 @@
 ---
 title: Emotion output bindings
 description: Reference for the Emotion module's shader-property output binding, which drives effects such as blush, tear glisten, or sweat sheen.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Output bindings are the optional extra stage of the Emotion pipeline, for effects beyond the face itself. Facial expression is not authored through a binding — it is written automatically through the shared facial compositor. This page covers `MaterialPropertyEmotionBinding`, the one output binding a profile authors, for shader effects such as blush, tear glisten, or sweat sheen.
@@ -46,7 +46,7 @@ If none of the authored property names are found on any target material, the bin
 
 ## Shared sample taxonomy and profile assets
 
-The Emotion module ships shared sample assets under `SamplesShared/Profiles/Embodiment/Modules/Emotion/`: `ConvaiSamplesShared_EmotionTaxonomy.asset`, and four named personality profile assets — `Warm`, `Composed`, `Energetic`, `Reserved`.
+The Emotion module ships shared sample assets under `Defaults/Embodiment/Modules/Emotion/`: `ConvaiDefault_EmotionTaxonomy.asset`, and four named personality profile assets — `Warm`, `Composed`, `Energetic`, `Reserved`.
 
 1. Assign a sample or project `ConvaiEmotionProfile` to the controller's **Personality** field.
 2. On that profile, assign the sample taxonomy under **Emotion Vocabulary → Emotion Vocabulary**, or leave it empty to use the nine built-in emotions. The dropdowns still work without a taxonomy asset.

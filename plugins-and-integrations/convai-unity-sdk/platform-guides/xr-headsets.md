@@ -1,6 +1,6 @@
 ---
 title: XR headsets
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 description: >-
   Find guides for deploying the Convai Unity SDK on XR headsets, including Meta
   Quest Vision passthrough setup and custom XR frame source implementation.
@@ -37,7 +37,7 @@ Set **Push To Talk Key** to `JoystickButton0`, `JoystickButton1`, `JoystickButto
 
 For a custom XR input system, acquire `ConvaiManager.AcquirePushToTalkInput()` and drive the controller through `Press()` and `Release()`. `Press(true)` is only for an input source that can reliably observe release through focus loss. See [Use your own push-to-talk input](../getting-started/use-your-own-push-to-talk-input.md).
 
-Use this decision tree to choose a Vision source after configuring input and permissions:
+Choose a Vision source after configuring input and permissions.
 
 ```mermaid
 graph TD
@@ -63,7 +63,7 @@ For the complete setup guide, Inspector reference, and troubleshooting steps, se
 
 No built-in passthrough frame source exists for non-Meta XR headsets — OpenXR-only devices, Windows Mixed Reality, HoloLens, or Android XR platforms that do not expose a passthrough camera through the Meta XR SDK.
 
-To enable passthrough Vision on these devices, implement `IVisionFrameSource` using a camera API the device permits your application to access. The skeleton below only shows the interface; its comments must be replaced with capture, frame delivery and resource cleanup before it can publish images:
+Implement `IVisionFrameSource` using a camera API the headset makes available to your app. The example shows the interface and where to add the device-specific frame delivery and cleanup.
 
 {% code title="CustomXRVisionFrameSource.cs" %}
 ```csharp
@@ -71,6 +71,7 @@ using System;
 using Convai.Runtime.Vision.Sources;
 using UnityEngine;
 
+// Pseudocode: provide camera initialization, frame delivery, and cleanup for your headset.
 public class CustomXRVisionFrameSource : MonoBehaviour, IVisionFrameSource
 {
     [SerializeField] private float _targetFrameRate = 15f;
@@ -106,7 +107,7 @@ public class CustomXRVisionFrameSource : MonoBehaviour, IVisionFrameSource
 ```
 {% endcode %}
 
-Assign your custom source to `ConvaiVisionPublisher` via its Inspector field. See the Vision feature documentation for the full `IVisionFrameSource` contract, publishing policies, and debug preview setup.
+Assign your custom source to `ConvaiVisionPublisher`. Raise `FrameReady` every time the source delivers a new frame, including when its image content does not change. See the Vision feature documentation for the full `IVisionFrameSource` contract, publishing policies, and debug preview setup.
 
 ## Next steps
 

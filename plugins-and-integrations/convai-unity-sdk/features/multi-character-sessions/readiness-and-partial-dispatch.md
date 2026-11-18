@@ -1,7 +1,7 @@
 ---
 title: Room readiness
 description: Understand when a shared Unity room is ready to take player input, why one slow character does not block the others, and how start failures are reported.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Characters in a multi-character room start independently, so the room does not become usable all at once. Readiness is tracked per membership, while the session as a whole reports the readiness of one membership only. Understanding that split explains why a room can be ready while half its cast is still starting, and why a secondary character can fail without invalidating a successful initial-character startup.
@@ -57,7 +57,7 @@ For a specific character, await `membership.WaitUntilReadyAsync(cancellationToke
 
 The session wait also faults when its initial member leaves before readiness or the session retires (`The multi-character room session is no longer active.`). A wait that already completed is not retroactively faulted by a later departure.
 
-A creating client's `ConnectAsync` waits for initial-character readiness using that character's **Character Ready Timeout** (30 seconds by default). It fails the connection when the initial member fails or times out. `JoinMultiCharacterRoomAsync` does not perform that initial wait; inspect and await the relevant membership after joining.
+A creating client's `ConnectAsync` waits for initial-character readiness using that character's **Character Ready Timeout** (30 seconds by default). It fails the connection when the initial member fails or times out. A join with `JoinExistingMultiCharacterRoom` set skips the initial-character wait. Inspect and await the relevant membership after joining.
 
 ***
 

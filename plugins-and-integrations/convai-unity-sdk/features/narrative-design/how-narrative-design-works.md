@@ -1,7 +1,7 @@
 ---
 title: How narrative design works
 description: Understand the Narrative Design pipeline — how sections, triggers, and template keys connect at runtime to advance a story graph.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Narrative Design gives a Convai character a structured story to follow. You author a graph of sections and triggers in the Convai dashboard; at runtime, the SDK listens for section-change signals from Convai and fires the Unity Events you configured — no polling, no custom state machines. This page explains the underlying model: what the primitives are, how a trigger advances the graph, and which SDK component handles each part of the pipeline.
@@ -27,13 +27,13 @@ sequenceDiagram
     Backend-->>Handler: behavior-tree-response (sectionId, btCode)
     Handler->>Hub: publish NarrativeSectionChanged
     Hub-->>Char: section update
-    Hub-->>Manager: NarrativeSectionChanged event
+    Char-->>Manager: OnSectionChanged
     Manager->>Scene: UnitySectionEventConfig.OnSectionStart.Invoke()
 ```
 
-`ConvaiCharacter` also subscribes to `NarrativeSectionChanged` independently through the same event hub, alongside `ConvaiNarrativeDesignManager` — the diagram above shows only the path that reaches your scene's Unity Events.
+The character facade receives the domain event and the manager subscribes to that facade. The manager uses a change in section ID to invoke the matching scene events.
 
-The character API can accept a command locally and hold it until the character is ready and, in a multi-character room, selected as the conversation target. At most `16` triggers are held per character; older entries are dropped when that limit is exceeded. Group conversations refuse these narrative commands. A `true` return reports local acceptance, not server confirmation. See [Narrative design with multiple characters](narrative-design-multi-character.md).
+The character API can accept a command locally and hold it until the character is ready and, in a multi-character room, selected as the conversation target. At most `16` triggers are held per character; older entries are dropped when that limit is exceeded. Group conversations refuse these narrative commands. A `true` return reports local acceptance. The trigger component’s `OnTriggerQueued` event indicates an activation the character is holding. See [Narrative design with multiple characters](narrative-design-multi-character.md).
 
 ## Sections and triggers
 

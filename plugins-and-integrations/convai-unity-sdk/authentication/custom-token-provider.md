@@ -1,6 +1,6 @@
 ---
 title: Write a custom token provider
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 description: Register a custom credential provider so your backend issues short-lived Convai auth tokens automatically for each connection.
 ---
 
@@ -13,14 +13,7 @@ Implement `IConvaiAuthTokenProvider` when your project already has a backend or 
 
 ## Implement the interface
 
-`IConvaiAuthTokenProvider` has a single method:
-
-```csharp
-public interface IConvaiAuthTokenProvider
-{
-    Task<AuthTokenResult> GetTokenAsync(CancellationToken cancellationToken);
-}
-```
+`IConvaiAuthTokenProvider.GetTokenAsync(CancellationToken)` returns `Task<AuthTokenResult>`.
 
 The SDK calls `GetTokenAsync` once for every new room connection attempt. Return `AuthTokenResult.Succeeded(token, expiresAtUtc)` on success, or `AuthTokenResult.Failed(errorMessage)` when the token cannot be resolved. `expiresAtUtc` is optional.
 
@@ -29,7 +22,7 @@ The SDK calls `GetTokenAsync` once for every new room connection attempt. Return
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Convai.Runtime.Core.Configuration;
+using Convai.Runtime.Configuration;
 
 public sealed class MyAuthTokenProvider : IConvaiAuthTokenProvider
 {
@@ -65,11 +58,9 @@ Supply your login service's token request delegate when constructing this provid
 
 ## Register the provider before connecting
 
-Register the provider with `ConvaiAuthTokenProviderRegistry` before the first connection attempt, typically from an early `Awake`:
+Register the provider with `ConvaiAuthTokenProviderRegistry.Register(provider)` before the first connection attempt. You can register it from a scene component's `Awake` when the scene connects on startup. If registration follows login, turn off **Starts Connected** and call `ConvaiManager.ConnectAsync` when login and registration are complete. Call `ConvaiAuthTokenProviderRegistry.Unregister(provider)` when its owner is destroyed or the user signs out.
 
-The shipped `LocalServerAuthTokenProviderExample` in `SamplesShared/Scripts/Runtime` is a complete component example. It uses `[DefaultExecutionOrder(-1200)]`, registers itself in `Awake`, and unregisters in `OnDestroy`. Its matching local server is in `Documentation~/Examples/AuthTokenServer`; see [Mint auth tokens on your backend](mint-tokens-on-your-backend.md).
-
-`ConvaiAuthTokenProviderRegistry.Register` replaces whichever provider is currently registered. `Unregister(provider)` removes it only if it is still the active registration; `Unregister()` with no argument and `Clear()` both remove whichever provider is active.
+`ConvaiAuthTokenProviderRegistry.Register` replaces whichever provider is currently registered. `Unregister(provider)` removes it only if it is still the active registration; `Clear()` removes whichever provider is active.
 
 {% hint style="warning" %}
 `ConvaiAuthTokenProviderRegistry` is a static, process-local registration that resets automatically on `RuntimeInitializeLoadType.SubsystemRegistration`. This runs on every domain reload and every entry into Play mode, so a provider registered once does not survive it — register the provider again each time your bootstrap script runs, rather than assuming a one-time call is enough.

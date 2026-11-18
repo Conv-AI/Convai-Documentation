@@ -1,19 +1,19 @@
 ---
 title: Chat and subtitle modes
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 description: >-
   Add scrolling chat history, live subtitle captions, or both to a scene, and
   configure how each transcript display looks and behaves.
 ---
 
-`ConvaiManager.ActiveManager.Transcripts` (`ConvaiTranscripts`) exposes two independent views of a conversation: live speech-aligned captions and retained entry history. This page covers adding `SubtitleTranscriptUI` for captions, `ChatTranscriptUI` for history, or both — the two read from the same facade and update independently, so adding one does not remove or replace the other.
+`ConvaiManager.ActiveManager.Transcripts` (`ConvaiTranscripts`) exposes two independent views of a conversation: live speech-aligned captions and retained entry history. Use `ChatTranscriptUI` for chat history and a separate display for live captions. Both read from the same facade.
 
 ## Choose the displays you need
 
 | Display | Facade members | Component |
 | --- | --- | --- |
 | Chat history | `CurrentTimeline`, `Subscribe`, `SubscribeFinalized` | `ChatTranscriptUI` |
-| Speech captions | `CurrentCaptions`, `SubscribeCaptions` | `SubtitleTranscriptUI` sample |
+| Speech captions | `CurrentCaptions`, `SubscribeCaptions` | `ConvaiTranscriptDisplay` per character or a custom room-wide display |
 
 Both can run together. `Subscribe` receives `TranscriptChangeBatch`; `SubscribeFinalized` receives `TranscriptChange`; `SubscribeCaptions` receives `TranscriptCaption`. Subscription examples and replay options are in [Transcript history and queries](transcript-history-and-queries.md).
 
@@ -41,7 +41,7 @@ The chat input field requires an `EventSystem` in the scene. If your scene does 
 {% step %}
 ### Run your scene
 
-Connect to a character and speak. Character speech appears in one bubble column, player speech in the other, and the panel auto-scrolls to the latest message.
+Connect to a character and speak. Character speech appears in one bubble column, player speech in the other, and the panel follows new messages while scrolled to the end.
 {% endstep %}
 {% endstepper %}
 
@@ -67,9 +67,9 @@ Each message bubble prefab must contain a `ChatMessageBubble` component at its r
 | `senderUI` | `TextMeshProUGUI` displaying the speaker's name |
 | `messageUI` | `TextMeshProUGUI` displaying the transcript text |
 
-`ChatTranscriptUI` colors a character bubble's sender name using that character's configured `NameTagColor` (from `ConvaiCharacter` or its character config asset). To override this from script, call `bubble.SetSenderColor(Color)`.
+`ChatTranscriptUI` colors a character bubble's sender name using that character's configured `NameTagColor` from `ConvaiCharacter`. To override this from script, call `bubble.SetSenderColor(Color)`.
 
-Call `ChatTranscriptUI.ClearAll()` to destroy all rendered message bubbles and reset the panel. This clears the visual display only — the underlying turn history in `ConvaiManager.ActiveManager.Transcripts.CurrentTimeline` is unaffected. A later replay can rebuild those bubbles. To remove retained data, use [ClearHistory](transcript-history-and-queries.md#export-and-clear-transcript-history).
+Call `ChatTranscriptUI.ClearAll()` to clear the rendered message bubbles and reset the panel. This clears the visual display only — the underlying turn history in `ConvaiManager.ActiveManager.Transcripts.CurrentTimeline` is unaffected. A later replay can rebuild those bubbles. To remove retained data, use [ClearHistory](transcript-history-and-queries.md#export-and-clear-transcript-history).
 
 ## Gate chat input on availability
 
@@ -88,43 +88,9 @@ In a group conversation, the chat field displays `Use push-to-talk to speak`. Se
 
 ## Add subtitle captions
 
-`SubtitleTranscriptUI` keeps a small set of caption cues, prioritizing the conversation target and then the most recent speakers. It defaults to two visible cues, so simultaneous speakers do not have to overwrite one text slot.
+For one character, attach the [Per-character transcript display](per-character-transcript-display.md) and select **Captions**. For a room-wide view, use `ConvaiManager.Transcripts.SubscribeCaptions` with the speaker or participant filters needed by your UI. The development repository’s custom transcript tutorial includes `SubtitleDialogTranscriptUI` and `TranscriptUI_SubtitleDialog.prefab` under `Assets/Convai/Tutorials/CustomTranscriptUI/`. The SDK package ships the chat prefabs.
 
-{% stepper %}
-{% step %}
-### Add the sample component
-
-Copy the sample `SubtitleTranscriptUI` implementation from `SamplesShared/Scripts/UI/Transcript/Subtitle/` into your project before adapting it. Add it to a `GameObject` under a `Canvas`. Create text elements for the caption body and speaker label, plus a container to control visibility.
-{% endstep %}
-{% step %}
-### Assign the references and timing
-
-Assign `subtitleText`, `speakerLabel`, and `subtitleContainer`. Assign both `canvasFader` and `canvasGroup` if you want fades. Set the cue timing using the table below.
-{% endstep %}
-{% step %}
-### Verify the caption lifecycle
-
-Connect and speak. Confirm the caption updates, holds after completion, and disappears after the configured hold. Interrupt a reply and confirm that the old caption does not remain indefinitely. Caption updates can contain a full sentence; they are not guaranteed to arrive word by word.
-{% endstep %}
-{% endstepper %}
-
-### Subtitle fields
-
-| Field | Default | Purpose |
-| --- | --- | --- |
-| `subtitleText` / `speakerLabel` | Unassigned | Caption and speaker text |
-| `subtitleContainer` | Unassigned | Visibility container |
-| `maxVisibleCues` | `2` | Maximum simultaneous visible captions |
-| `completedCueHoldSeconds` | `1` | Hold after completion, using unscaled time |
-| `activeCueTimeoutSeconds` | `30` | Expire an unfinished caption after this interval without an update; keep above the longest spoken line |
-| `fadeDuration` | `0.3` | Transition duration when fade components are available |
-| `canvasFader` / `canvasGroup` | Unassigned | Optional fade components |
-| `finalOnly` | `false` | Skip captions while still active |
-| `filterBySpeakerType` | `false` | Enable the speaker-type filter |
-| `speakerType` | `Character` | Type to include when the filter is enabled |
-| `speakerIdFilter` / `participantIdFilter` | Empty | Optional identity filters |
-
-A `Cleared` caption disappears immediately. Hiding or expiring a cue does not remove history. `autoHideDelay` is not a field in this implementation.
+Keep captions keyed by speaker and match the turn before clearing a cue. Remove a matching `Cleared` cue immediately. The display chooses how long to hold a completed caption. Caption changes can contain a full sentence. For replay, presentation visibility, and cleanup, see [Transcript API](../../scripting-reference/transcript-api.md).
 
 ## Plain text and font coverage
 

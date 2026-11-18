@@ -1,7 +1,7 @@
 ---
 title: Gaze Editor window
 description: Inspect a character's gaze setup, tune its personality, manage scene targets, and read its current look in the dedicated editor window.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Open **Convai > Gaze Editor** to inspect gaze across characters in the scene. The window is titled **Convai Gaze** and provides **Setup**, **Feel**, **Targets**, and **Live** tabs. The component Inspector's **Advanced settings & targets →** button opens the same window.
@@ -29,9 +29,7 @@ If the list is empty, the window shows **No characters with Gaze**. Add **Convai
 
 The checkboxes establish component presence. Confirm the behavior in Play mode, especially for providers that require world-object metadata, action configuration, or suitable eye materials. See [Gaze targets and providers](targets-and-providers.md) for those dependencies.
 
-**Rig report** and **Facing direction** explain the resolved head, neck, eyes, and axis convention. Eye-backend warnings appear under **Worth knowing**; successful or informational diagnostics are not all repeated as separate rows. A custom rig can work with explicit mappings and calibrated gaze axes. Use [Character rig setup](../character-rig-setup.md) for those controls.
-
-<figure><img src="../../../../.gitbook/assets/unity-gaze-setup.png" alt="Gaze Editor Setup showing a ready character, its camera and personality, and optional gaze capabilities"><figcaption><p>This sample has a resolved head but no eye bones or eye shapes. Ready means gaze can run with head motion; it does not mean every eye channel is available.</p></figcaption></figure>
+**Open Rig Report** opens the Embodiment Editor, where the rig report shows the resolved head, neck, eyes, and facing direction. Eye-backend warnings appear under **Worth knowing**; successful or informational diagnostics are not all repeated as separate rows. A custom rig can work with explicit mappings and calibrated gaze axes. Use [Character rig setup](../character-rig-setup.md) for those controls.
 
 ## Feel tab
 

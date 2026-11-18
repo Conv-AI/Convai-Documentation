@@ -1,10 +1,10 @@
 ---
 title: Debug tools reference
 description: Reference for Convai SDK debug tools, including the Troubleshooter, per-module editor windows, logging, and client latency metrics.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-The Convai Unity SDK ships with a layered set of diagnostic tools: the Convai Troubleshooter, per-module editor windows, a configurable logging system with per-subsystem verbosity control, a live Inspector probe for action debugging, real-time session diagnostics on `ConvaiRoomManager`, session metrics emitted to the Console, and client-side latency measurements for conversation pipeline profiling. This page is the complete reference for all of them.
+Use the Convai Troubleshooter for setup findings. During Play Mode, use the feature windows, room Inspector, and Console to investigate the connection, action dispatch, and playback timing.
 
 ## Convai Troubleshooter
 
@@ -70,7 +70,7 @@ The SDK uses six log levels. Higher numeric value means more verbose.
 The default is **Info**. Switching to **Debug** during an investigation produces significantly more output — disable it before releasing to production. Set **Global Log Level** to **Off** to silence all SDK logging.
 
 {% hint style="warning" %}
-`Debug`-level calls in the SDK source are decorated with `[Conditional("UNITY_EDITOR")]`, `[Conditional("DEVELOPMENT_BUILD")]`, and `[Conditional("CONVAI_DEBUG_LOGGING")]`. This means **Debug log calls are compiled out of non-development builds** unless you add `CONVAI_DEBUG_LOGGING` to your scripting define symbols. Setting `GlobalLogLevel` to `Debug` in a release build will not produce Debug messages because the call sites do not exist in the compiled code. Debug messages remain active in the Unity Editor and in Development Builds without any additional defines. This applies to Debug-tagged `[SessionMetrics]` lines. `[ClientLatency]` summaries use Info level and have a separate room debug-mode gate.
+`Debug`-level calls in the SDK source are decorated with `[Conditional("UNITY_EDITOR")]`, `[Conditional("DEVELOPMENT_BUILD")]`, and `[Conditional("CONVAI_DEBUG_LOGGING")]`. This means **Debug log calls are compiled out of non-development builds** unless you add `CONVAI_DEBUG_LOGGING` to your scripting define symbols. Setting `GlobalLogLevel` to `Debug` in a release build will not produce Debug messages because the call sites do not exist in the compiled code. Debug messages remain active in the Unity Editor and in Development Builds without any additional defines. `[ClientLatency]` summaries use Info level and have a separate room debug-mode gate.
 {% endhint %}
 
 To enable Debug messages in a production build, add `CONVAI_DEBUG_LOGGING` to **Edit → Project Settings → Player → Scripting Define Symbols**.
@@ -171,101 +171,19 @@ ConvaiLogger.UnregisterSink(mySink);
 
 `ConvaiLogger.SinkCount` returns the number of currently registered sinks. `ClearSinks()` retires all registered sinks, including `UnityConsoleSink`. It is restored at the next subsystem-registration reset, not by merely reading a logger again. A sink that throws three consecutive delivery/filter failures stops receiving entries. Re-registering an active instance resets its failure count; an unregistered or cleared instance is retired and cannot be registered again. Create a fresh instance after retirement.
 
-## ConvaiActionDebugProbe
+## Inspect an action in Play Mode
 
-`ConvaiActionDebugProbe` is the primary diagnostic tool for the Actions feature. It subscribes to every dispatcher event and surfaces live counters and the last-seen action data directly in the Inspector — no custom logging required. The component's Add Component entry is **Convai/Actions/Diagnostics/Convai Action Monitor**; its Inspector title is **Action Monitor**.
+Open **Convai > Actions Editor > Live** to see action batches, individual step outcomes, and resolved targets. Use its test action workflow to reproduce a local dispatcher issue. Then check a real conversation when you need to verify delivery from Convai.
 
-**Add via:** Add Component → **Convai/Actions/Diagnostics/Convai Action Monitor**
+## Room connection state
 
-The component requires `ConvaiCharacter` on the same GameObject and auto-resolves `ConvaiActionDispatcher`. If `ConvaiActionDispatcher` is absent, the probe still records received action batches via `ConvaiCharacter.OnActionsReceived`, but dispatcher lifecycle events (step started, succeeded, failed) will not be tracked.
+Inspect the room manager's **Runtime** section in Play Mode. The room manager exposes `ConnectAttemptCount`, `ReconnectCount`, `LastSuccessfulConnectionUtc`, `LastSessionErrorCode`, and `LastSessionErrorMessage`. The counters belong to the current room runtime. Observe `ConvaiManager.Events.OnSessionStateChanged` for transitions and `OnSessionError` for errors.
 
-### Inspector fields and activity
-
-The authored fields are **Character**, **Action Runner**, and **Log To Console**. Character and runner references resolve from the same object when left empty. Runtime counters and last-seen payloads are hidden serialized fields, presented through the **Activity** section rather than editable Inspector fields.
-
-Activity includes **Batch Received**, **Step Started**, **Step Succeeded**, **Step Failed**, **Step Unhandled**, **Step Completed**, and **Batch Aborted**. The Inspector provides **Clear** to reset recorded state and **Copy** to copy its activity text.
-
-`InjectTestBatch()` and `ResetProbeState()` are public methods, not component context-menu entries. Invoke them from your own development UI or use the Actions Editor's test workflow. A synthetic batch tests local dispatcher/executor wiring; it does not verify that Convai generated or delivered an action.
-
-## ConvaiRoomManager runtime state
-
-`ConvaiRoomManager` exposes diagnostic state as plain properties — no event subscription required. Read them from any script, from a `[ContextMenu]` method in the Editor, or from an in-scene debug panel.
-
-### Public state properties
-
-| Property | Type | Description |
-| --- | --- | --- |
-| `CurrentState` | `SessionState` | Active session state: `Disconnected`, `Connecting`, `Connected`, `Disconnecting`, `Reconnecting`, `Error` |
-| `IsConnected` | `bool` | `true` when the room is actively connected |
-| `ConnectAttemptCount` | `int` | Total connection attempts since scene load |
-| `ReconnectCount` | `int` | Total reconnection attempts since scene load |
-| `LastSessionErrorCode` | `string` | Error code from the most recent error event |
-| `LastSessionErrorMessage` | `string` | Human-readable message from the most recent error |
-
-{% hint style="warning" %}
-`SessionState.Error` indicates an unrecoverable session failure. The room will not reconnect automatically from this state. Call `DisconnectAsync()` followed by `ConnectAsync()` to reset the session.
-{% endhint %}
-
-### IRoomDiagnostics full snapshot
-
-For a richer snapshot, call `GetDiagnostics()` on `ConvaiRoomManager.DiagnosticsCoordinator`. This returns a `RoomDiagnosticsSnapshot` with connection statistics accumulated since the diagnostics instance was created. `DiagnosticsCoordinator` is `null` until the room's internal assembly has been created, which happens on the first connection attempt — null-check before calling `GetDiagnostics()`.
-
-```csharp
-var room = FindFirstObjectByType<ConvaiRoomManager>();
-if (room?.DiagnosticsCoordinator != null)
-{
-    RoomDiagnosticsSnapshot snap = room.DiagnosticsCoordinator.GetDiagnostics();
-    Debug.Log($"State:          {snap.CurrentState}");
-    Debug.Log($"Connections:    {snap.SuccessfulConnections} / {snap.TotalConnectionAttempts} succeeded");
-    Debug.Log($"Failed:         {snap.FailedConnections}");
-    Debug.Log($"Total errors:   {snap.TotalErrors}");
-    Debug.Log($"Last connected: {snap.LastConnectedAt}");
-    Debug.Log($"Last error:     {snap.LastErrorCode} at {snap.LastErrorAt}");
-    Debug.Log($"Uptime:         {snap.SessionUptime}");
-    Debug.Log($"Characters:     {snap.RegisteredCharacterCount}");
-    Debug.Log($"Players:        {snap.RegisteredPlayerCount}");
-}
-```
-
-### RoomDiagnosticsSnapshot field reference
-
-| Field | Type | Description |
-| --- | --- | --- |
-| `CurrentState` | `string` | State name at the moment the snapshot was taken |
-| `TotalConnectionAttempts` | `int` | All connect attempts since startup or last reset |
-| `SuccessfulConnections` | `int` | Attempts that reached the Connected state |
-| `FailedConnections` | `int` | Attempts that ended in failure |
-| `TotalErrors` | `int` | Total errors recorded |
-| `LastConnectedAt` | `DateTime?` | UTC timestamp of the last successful connection; `null` if never connected |
-| `LastErrorAt` | `DateTime?` | UTC timestamp of the last recorded error; `null` if no errors |
-| `LastErrorCode` | `string` | Error code from the last error |
-| `LastErrorMessage` | `string` | Human-readable message from the last error |
-| `SessionUptime` | `TimeSpan?` | Time elapsed since the current session connected; `null` when disconnected |
-| `RegisteredCharacterCount` | `int` | `ConvaiCharacter` instances currently registered in the agent registry |
-| `RegisteredPlayerCount` | `int` | `ConvaiPlayer` instances currently registered |
-
-## Session metrics console messages
-
-`SessionMetrics` logs session lifecycle events to the Console. Messages tagged Debug follow the same conditional-compilation rule as every other Debug-level log call — see the [Log levels](#log-levels) hint above.
-
-The standard logger format is `[HH:mm:ss.fff][Level][Category][optional-correlation]: [SourceFileName] message`. Some direct native or Editor messages bypass this format. The messages below are the message body that follows that prefix — search the Console for the message text, not the full line.
-
-| Message | Level | When it appears |
-| --- | --- | --- |
-| `[SessionMetrics] Metrics reset` | Debug | Metrics were reset programmatically |
-| `[SessionMetrics] Session started` | Debug | Initial connection attempt begins (room transitions from Disconnected to Connecting) |
-| `[SessionMetrics] Connected - starting duration timer` | Debug | Initial connection reaches Connected state; starts the session uptime timer (reconnects fire "Reconnection successful" instead) |
-| `[SessionMetrics] Reconnection attempt #N` | Debug | Each reconnection attempt begins |
-| `[SessionMetrics] Reconnection successful (attempt #N, success rate: P%)` | Info | A reconnection attempt succeeded |
-| `[SessionMetrics] Reconnection failed (error: X)` | Warning | A reconnection attempt failed |
-| `[SessionMetrics] Session error: X` | Warning | A non-reconnect session error was recorded |
-| `[SessionMetrics] Session ended (reason): {snapshot}` | Info | Session terminated for any reason; snapshot includes full metrics |
+The room Inspector can copy the latest connect response without its token. Check the remaining session and room details before sharing the output. See [Connection and API issues](connection-and-api-issues.md).
 
 ## Client latency metrics
 
 `ClientLatencyMetricsCollector` records client observation timestamps while the room manager's debug mode is enabled. Its summary uses Info logging, so it is not compiled out by the Debug-log build defines. Enable the room's debug option before connection and allow Info output for the relevant category.
-
-A file writer is created at room composition when debug mode is on. It writes `ConvaiDebugMetrics_<yyyy-MM-dd>.txt` under `UnityEngine.Application.persistentDataPath`. The Console reports the selected path. Enabling collection later does not retroactively create that composition-time file writer.
 
 A summary can contain these segments; fields are omitted when their signals were not observed:
 
@@ -280,7 +198,7 @@ A summary can contain these segments; fields are omitted when their signals were
 
 The last interval is not a direct audio-buffer-fill or DAC measurement. Compare observations from the same client and investigate missing or delayed signals before attributing the difference to a particular service.
 
-The metrics file uses names such as `stopToFinalPlayer_ms`, `stopToFirstCharTranscript_ms`, `stopToTtsStarted_ms`, `stopToFirstLipSync_ms`, `stopToAudioPlaying_ms`, and `ttsNotificationToPlaybackNotification_ms`. Optional `ClientBargeIn` details describe local interruption-detector activity. `[ClientBargeIn]` debug lines still follow the Debug-log build and level filters.
+Optional `ClientBargeIn` details describe local interruption-detector activity. `[ClientBargeIn]` debug lines still follow the Debug-log build and level filters.
 
 ## LipSync drift monitor
 
@@ -302,19 +220,14 @@ Click **Export CSV** to save the current samples and events to a file. The save 
 
 ## Quick reference
 
-| Tool | What it diagnoses | How to access |
-| --- | --- | --- |
-| **Convai Troubleshooter** | Cross-module findings for one character or the whole scene, with fixes | `Convai → Troubleshooter` |
-| **Actions Editor (Live)** | Action batches, target registry, and per-action insights in Play mode | `Convai → Actions Editor` |
-| **Embodiment / Gaze / Body Animation / Emotion Editors** | Setup and tuning for each embodiment module | `Convai → Embodiment Editor`, `Convai → Gaze Editor`, `Convai → Body Animation Editor`, `Convai → Emotion Editor` |
-| **Diagnostics** | All SDK subsystems — verbosity and filtering | `Convai → Settings` or `Edit → Project Settings → Convai SDK` (Diagnostics section) |
-| **Convai Action Monitor (`ConvaiActionDebugProbe`)** | Action dispatch, executor wiring, batch failures | Add Component → Convai/Actions/Diagnostics/Convai Action Monitor |
-| **ConvaiRoomManager properties** | Session state, error codes, connect/reconnect counts | `FindFirstObjectByType<ConvaiRoomManager>()` — read properties directly |
-| **IRoomDiagnostics snapshot** | Connection attempt counts, uptime, last error, agent counts | `room.DiagnosticsCoordinator.GetDiagnostics()` |
-| **Session Metrics messages** | Reconnection success rate, session lifecycle, error timeline | Console filter `[SessionMetrics]`; requires Info or Debug level |
-| **Client Latency metrics** | End-to-end conversation pipeline latency | Room debug mode plus Info logging; Console filter `[ClientLatency]` |
-| **LipSync Drift Monitor** | Audio-vs-visual lip sync alignment, drift error, CSV export | `ConvaiLipSyncComponent` Inspector → **Open Drift Monitor** |
-| **Custom log sinks** | Route logs to files, telemetry, or overlays | `ConvaiLogger.RegisterSink(new YourSink())` |
+| Tool | What to check |
+| --- | --- |
+| **Convai > Troubleshooter** | Setup findings and available fixes for a character or the open scene. |
+| **Convai > Actions Editor > Live** | Action batches, outcomes, and targets in Play Mode. |
+| **Convai > Settings > Diagnostics** | Log filters and verbosity. |
+| **Room Manager > Runtime** | Connection state and connect response details. |
+| **LipSync Drift Monitor** | Audio and facial animation timing in Play Mode. |
+| `Convai_DiagnoseConversation` | Read-only readiness and target routing from an [AI coding assistant](../ai-coding-assistant/README.md). |
 
 ## Next steps
 

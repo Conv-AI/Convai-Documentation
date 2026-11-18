@@ -1,34 +1,39 @@
 ---
-title: Scene installer and scene config
-description: Configure explicit scene ownership with an installer and understand what the optional shared scene asset does before using it in your project.
-last_reviewed: "5.0.0-preview"
+title: Migrate scene installers and configuration assets
+description: Migrate scene installer and scene configuration assets to the current manager and configure the characters, initial target, and local player.
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Use `ConvaiSceneInstaller` when you need explicit character ownership and player references for a manager. `ConvaiSceneConfig` is a separate data asset: the shipped runtime does not consume it to instantiate prefabs or connect characters automatically.
+`ConvaiManager` discovers the scene’s Convai components. Use its roster selection to choose which characters connect, and assign a local player explicitly when automatic selection does not suit your scene.
 
-## Configure an installer
+{% hint style="warning" %}
+SDK 5.0 removes `ConvaiSceneInstaller` and `ConvaiSceneConfig`. Update scenes that used those components or assets before testing a connection.
+{% endhint %}
+
+## Move the scene configuration to the manager
 
 {% stepper %}
 {% step %}
-### Add scene references
+### Set up the scene components
 
-Add **Convai > Convai Scene Installer** to a GameObject. Populate **Characters** and **Players** with scene components. Remove null entries. Assign the installer to the manager's **Scene Installer** field.
+Keep a `ConvaiManager`, its room manager, a local `ConvaiPlayer`, and your `ConvaiCharacter` components in the scene. Set each character’s ID and version on its component.
 {% endstep %}
 {% step %}
-### Choose owned characters
+### Select the connection roster and local player
 
-Populate **Owned Characters** when only a subset belongs to this manager. The runtime uses this list when non-empty; otherwise it uses the installer's **Characters** list. An owned character should also appear in **Characters**.
+Use `SetCharactersToConnect` to replace the roster, or `UseAllCharactersForConnection` to include all eligible scene characters. Select the first character with `SetInitialCharacter`. When needed, call `SetExplicitPlayer` to specify the local player.
 {% endstep %}
 {% step %}
-### Verify ownership and player selection
+### Instantiate application-owned prefabs
 
-Enter Play mode and check the intended character registrations and conversation target. An explicit player reference on the manager wins; otherwise the installer supplies its first player. Without installer ownership lists, the runtime merges scene discovery with explicit character references. Do not assume an empty installer disables discovery.
+If your application used a scene config asset as a prefab catalog, retain that catalog in application code or an application asset. Instantiate the prefabs before connecting, then select their characters for the room.
+{% endstep %}
+{% step %}
+### Verify the scene
+
+Enter Play mode and inspect `ConvaiManager.Characters` and `Player`. Connect and confirm the intended character becomes ready. In a multi-character room, check that your roster contains the intended characters.
 {% endstep %}
 {% endstepper %}
-
-## Understand the scene config asset
-
-**Assets > Create > Convai > Scene Config** creates an asset containing `CharacterIds`, `CharacterPrefabs`, `DefaultOwnerId`, and `AutoConnect`. The Inspector validates empty IDs and prefabs without `ConvaiCharacter`, but no runtime consumer applies those fields. If your application reads this asset, your code must instantiate, assign, and connect characters explicitly. For ordinary scenes, use the installer and existing character components.
 
 {% content-ref url="../getting-started/build-a-custom-scene.md" %}
 [Build a custom scene](../getting-started/build-a-custom-scene.md)

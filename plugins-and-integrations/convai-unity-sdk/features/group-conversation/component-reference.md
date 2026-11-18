@@ -1,7 +1,7 @@
 ---
 title: Group conversation component reference
 description: Look up group scene settings, member aliases, spatial and timing overrides, events, commands, and the meaning of their returned outcomes.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Add **Convai > Group Conversation** to opt a room into the preview at connect. `ConvaiGroupConversation` lives in `Convai.Runtime.GroupConversation`. The component validates client configuration; service availability still requires confirmation from the account/service owner.
@@ -37,7 +37,7 @@ Only enabled overrides are sent. The Inspector initializes values from the SDK's
 | Lull Seconds | 30 |
 | Player Reply Wait Seconds | 8 |
 | Reply To Question Window Seconds | 8 |
-| Empty Transcript Timeout Seconds | 4; override enabled by the SDK to allow microphone drain |
+| Empty Transcript Timeout Seconds | 4 seconds. Enabled by default to allow time for capture finalization. |
 | Greeting Reentry Seconds | 60 |
 | Line Timeout Seconds | 20 |
 

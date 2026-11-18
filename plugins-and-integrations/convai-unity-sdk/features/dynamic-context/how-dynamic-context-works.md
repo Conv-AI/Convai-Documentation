@@ -1,7 +1,7 @@
 ---
 title: How dynamic context works
 description: Understand how Dynamic Context tracks scene state and events, batches updates, and reports acknowledgement and token feedback.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Dynamic Context gives characters a live, structured view of what is happening in the scene. Instead of relying only on the static system prompt configured on the Convai dashboard, a character can reference a trainee's current location, the equipment they have collected, or an alarm that recently triggered — because that information was injected directly into the session as it occurred. This page explains the underlying model: the two primitives the SDK tracks, how they assemble into a canonical context string, how updates batch and flush, and how the SDK reports back what happened to each update.
@@ -156,14 +156,15 @@ Dynamic context and dynamic vision context share one respond-mode vocabulary, `C
 
 ## Acknowledgement and token feedback
 
-Convai acknowledgements arrive through `ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived`; submission does not guarantee an acknowledgement. Match a received event using its unique `UpdateId`. Tracked batches use a scoped SDK ID such as `unity-{characterId}-{scope}-{sequence}`. Raw text/reset updates need an explicit `updateId` if you want correlation; raw action or attention mutations generate one when omitted.
+Convai acknowledgements arrive through `ConvaiManager.Events.OnServerCommandResultReceived`; submission does not guarantee an acknowledgement. Filter for `context-update` or `character-context-update` and read `DynamicContextUpdateResultReceived.Create(answer)`. Match its `UpdateId` to the operation you want to track. Tracked batches use a scoped SDK ID such as `unity-{characterId}-{scope}-{sequence}`. Raw text/reset updates need an explicit `updateId` if you want correlation; raw action or attention mutations generate one when omitted.
 
 ```csharp
 using Convai.Domain.DomainEvents.Runtime;
-using Convai.Runtime.Components;
-
-ConvaiManager.ActiveManager.Events.OnDynamicContextUpdateResultReceived += result =>
+// Method-body fragment with a configured manager.
+manager.Events.OnServerCommandResultReceived += answer =>
 {
+    if (answer.CommandType is not ("context-update" or "character-context-update")) return;
+    var result = DynamicContextUpdateResultReceived.Create(answer);
     Debug.Log($"{result.Status}: revision {result.ContextRevision}, {result.RemainingTokens} tokens remaining");
 };
 ```

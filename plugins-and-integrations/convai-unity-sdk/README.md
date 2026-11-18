@@ -3,7 +3,7 @@ title: Convai Unity SDK
 description: >-
   Add real-time AI characters to Unity training simulations, interactive
   experiences, and games — with speech, emotion, actions, and persistent memory.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The Convai Unity SDK connects Unity projects to Convai, bringing conversational AI into training simulations, interactive experiences, and games. Characters process speech in real time, respond with natural language, and synchronize lip movement, facial emotion, and body animation — all configurable per project. Each feature is a self-contained module: add only what your project needs, in the order that fits your workflow.
@@ -30,7 +30,7 @@ Each feature is a self-contained module you opt into.
 
 ## SDK 5.0 preview
 
-This documentation refresh targets SDK <code class="expression">space.vars.unity_sdk_version</code> before publication. The reviewed release branch still labels the package `4.6.1` and its changes **Unreleased**; this page does not confirm a 5.0 release on any installation channel.
+These pages describe the Unity SDK prerelease <code class="expression">space.vars.unity_sdk_version</code>. Check the installed version in Package Manager before applying this guidance.
 
 The 5.0 changes include group voice conversation, a transcript entry API, explicit microphone policy for text-only sessions, updated native audio transport, WebGL frame-source vision, and clearer memory identity and diagnostics. Review [Migrate to 5.0](overview/migrate-to-5-0.md) before updating an existing integration. [Release notes](overview/release-notes.md) separate the planned release from historical versions.
 

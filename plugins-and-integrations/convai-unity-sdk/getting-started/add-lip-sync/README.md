@@ -3,7 +3,7 @@ title: Add lip sync
 description: >-
   Connect Convai audio output to your character's facial blendshapes,
   synchronize mouth movement with speech, and tune playback latency.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The Convai SDK for Unity includes a real-time lip sync system that drives `SkinnedMeshRenderer` blendshapes in sync with the character's voice audio. It supports three industry-standard blendshape formats and handles playback buffering, smoothing, and fade-out automatically.
@@ -20,7 +20,7 @@ graph LR
     D --> E[SkinnedMeshRenderer blendshapes]
 ```
 
-If the same character also has another module that drives facial blendshapes — for example, an Emotion controller — Convai composites the lip sync output with that module's output internally before writing to the mesh, rather than letting the two write independently. The shipped balance gives the mouth almost entirely to `ConvaiLipSyncComponent` while the character is speaking. With no other facial output module on the character, `ConvaiLipSyncComponent` writes directly to the target meshes as shown above.
+Lip sync writes through the facial compositor, including on a character with no other facial module. When Emotion or Gaze also affects the face, the compositor combines their contributions before writing the final blendshape weights. See [Facial composition](../../embodiment/facial-composition.md).
 
 ## Quick setup
 
@@ -82,7 +82,7 @@ If your character was rigged with non-standard blendshape names, create a custom
 
 | Field              | Default        | Description                                                            |
 | ------------------ | -------------- | ---------------------------------------------------------------------- |
-| **Profile** (`_lockedProfileId`) | `arkit`        | Transport format the SDK streams (`arkit`, `metahuman`, `cc4_extended`) |
+| **Profile** (`_lockedProfileId`) | `arkit`        | Local profile ID. The corresponding transport formats are `arkit`, `mha`, and `cc4_extended`. |
 | **Mapping** (`_mapping`)         | _(none)_       | Optional custom mapping asset (leave empty to use bundled auto-map)    |
 | **Renderers** (`_targetMeshes`)    | _(empty list)_ | `SkinnedMeshRenderer` components to write blendshapes to               |
 
@@ -103,7 +103,6 @@ If your character was rigged with non-standard blendshape names, create a custom
 | **Latency Mode** (`_latencyMode`)              | `Balanced` | —        | Preset that controls buffer depth vs. responsiveness |
 | **Max Buffered (s)** (`_maxBufferedSeconds`)       | `3.0`      | 1–10     | Ring buffer capacity in seconds                      |
 | **Resume Headroom (s)** (`_minResumeHeadroomSeconds`) | `0.12`     | 0.05–0.3 | Buffer refill threshold after starvation             |
-| **Deliver Ahead (Preview)** (`_deliverChunksAhead`)       | `false`    | —        | Preview opt-in for indexed NeuroSync chunks          |
 
 **Latency mode options:**
 
@@ -122,13 +121,9 @@ When a response finishes normally, the mouth settles to rest over **Settle Durat
 
 If you drive `LipSyncPlaybackEngine` directly instead of going through `ConvaiLipSyncComponent`, call `SettleToRest()` to trigger the same settle from your own code, and read `IsSettling` to check whether the current fade-out is a settle rather than a timed cut.
 
-## Ahead chunk delivery preview
+## Indexed playback and missing frames
 
-**Deliver Ahead (Preview)** enables the SDK to request indexed NeuroSync chunks before their playback position. Leave it disabled for normal projects. Enable it only when you are testing the preview ahead-chunk path for a character that already uses `ConvaiLipSyncComponent`.
-
-When `_deliverChunksAhead` is enabled, the SDK sends `deliver_chunks_ahead=true` in the room connection lip sync configuration. The default request does not include this field, so existing lip sync behavior stays unchanged unless you turn on the preview option.
-
-The SDK buffers ahead chunks by their frame index and waits until frames are contiguous from the start of the response before it starts feeding them to the playback engine. Visual output still waits for the character audio playback signal, so the mouth does not start moving before audible speech begins. If Convai cancels the current NeuroSync timeline or the character turn ends because of an interruption, the SDK clears buffered mouth frames before the next response.
+Lip sync buffers indexed frames for the current response. The component aligns mouth motion with character audio. When a gap cannot be recovered, the player can advance after a bounded wait. An interrupted response releases its facial pose so the next reply can take over. Inspect the character's playback state and buffer in Play Mode when diagnosing a stalled or late mouth.
 
 ## Usage examples
 

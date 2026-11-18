@@ -1,12 +1,12 @@
 ---
 title: Profiles and mappings
 description: >-
-  Reference for the profile and map assets that control how Convai blendshape
-  data reaches your character's face mesh, and when to create custom ones.
-last_reviewed: "5.0.0-preview"
+  Choose a built-in lip sync profile for the incoming facial data and learn when
+  to create a blendshape map for your character’s mesh in Unity.
+last_reviewed: "5.0.0-pre.1"
 ---
 
-The lip sync system uses two `ScriptableObject` types to describe how blendshape data flows from Convai to your character's mesh: **profiles** and **maps**. Most setups work with the bundled assets — create custom ones only when your rig uses non-standard blendshape names or a transport format not covered by the built-in profiles.
+The lip sync system uses two kinds of data to describe how blendshape data flows from Convai to your character's mesh: **profiles** and **maps**. Choose a built-in profile for the incoming stream. Create a map if your mesh uses different blendshape names.
 
 
 <figure><img src="../../../../.gitbook/assets/unity-lip-sync-map.png" alt="Bundled ARKit lip-sync map with coverage, read-only notice, and configuration fields"><figcaption><p>The bundled ARKit map is read-only. Create a project copy before editing; the displayed values belong to this shipped map.</p></figcaption></figure>
@@ -24,7 +24,6 @@ A **profile** defines the transport format — it tells the SDK which blendshape
 
 The three bundled profiles are built into the SDK — there is no `.asset` file to find in the Project window for them, and nothing to import. Select the display name in **Profile**.
 
-Create a custom profile only if your character uses a proprietary blendshape format that Convai streams under a custom transport token. In practice, this is rare — most pipelines use one of the three bundled formats.
 
 ## What is a map?
 
@@ -47,7 +46,7 @@ Create a custom map when your character's blendshape names differ from the expec
 
 ## Registries
 
-`ConvaiLipSyncProfileRegistry` adds profiles to the catalog from `Resources/LipSync/ProfileRegistries/`. Lower priorities load first; a higher-priority registry can override the same profile ID. The three built-in profiles are available without importing a sample.
+`LipSyncProfileCatalog.GetProfiles()` lists the three built-in formats. Profile selection determines the channel names and order. A custom map changes which blendshapes those channels drive.
 
 `ConvaiLipSyncDefaultMapRegistry` supplies default maps for profiles. The resolver loads `Resources/LipSync/DefaultMaps/LipSyncDefaultMapRegistry`. An explicitly assigned compatible map takes precedence over the profile's default; if neither resolves, the SDK uses a disabled fallback map. For a single character, assign the map in **Mapping** instead of changing global default resolution.
 
@@ -58,12 +57,12 @@ Create a custom map when your character's blendshape names differ from the expec
 | Your rig uses ARKit/MetaHuman/CC4 names exactly         | Nothing — use the bundled map (leave `_mapping` empty) |
 | Your rig uses different names for standard blendshapes  | Custom **map** only                                    |
 | You receive an ARKit stream but your rig uses CC4 names | Use the bundled `ARKitToCC4Extended` map               |
-| Your character uses a completely custom blendshape set  | Custom **profile** + custom **map**                    |
+| Your character uses a completely custom blendshape set  | A custom **map** from the closest supported input format                    |
 
 ## Next steps
 
 {% content-ref url="create-a-lip-sync-profile.md" %}
-[Create a lip sync profile](create-a-lip-sync-profile.md)
+[Choose a built-in lip sync profile](create-a-lip-sync-profile.md)
 {% endcontent-ref %}
 
 {% content-ref url="create-a-custom-blendshape-map.md" %}

@@ -3,19 +3,19 @@ title: Add chat UI
 description: >-
   Add the shipped chat transcript prefab to display scrolling conversation
   history on screen during character interactions.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The Convai SDK for Unity includes a ready-made `ChatTranscriptUI` prefab that displays scrolling chat history in real time. The prefab includes its own `Canvas` — drag it into the scene, and it connects to `ConvaiManager` automatically.
 
 ## Chat history and captions
 
-`ConvaiManager.ActiveManager.Transcripts` (`ConvaiTranscripts`) exposes conversation entries and live speech-aligned caption state. Use `GetEntries()` and `Subscribe()` for history, or `SubscribeCaptions()` for Active, Completed, Interrupted and Cleared caption updates. History belongs to the current SDK runtime; export it if you need persistent storage. This page adds chat history using the shipped `ChatTranscriptUI` prefab. Captions use a separate, sample-only script with no shipped prefab — see [Chat and subtitle modes](../ui-and-presentation/transcript-ui/chat-and-subtitle-modes.md) to add captions or combine both displays in the same scene.
+`ConvaiManager.ActiveManager.Transcripts` (`ConvaiTranscripts`) exposes conversation entries and live speech-aligned caption state. Use `GetEntries()` and `Subscribe()` for history, or `SubscribeCaptions()` for Active, Completed, Interrupted and Cleared caption updates. History belongs to the current SDK runtime; export it if you need persistent storage. This page adds chat history using the shipped `ChatTranscriptUI` prefab. For a caption view, use the SDK component `ConvaiTranscriptDisplay` in **Captions** mode — see [Chat and subtitle modes](../ui-and-presentation/transcript-ui/chat-and-subtitle-modes.md) to add captions or combine both displays in the same scene.
 
 | Projection | Consumed by | Description |
 | --- | --- | --- |
 | Chat history | `ChatTranscriptUI` (shipped prefab, covered on this page) | Scrolling message bubbles — separate entries for player and character turns |
-| Captions | `SubtitleTranscriptUI` (reference script, no shipped prefab) | In Captions mode, displays current speech. History mode shows finalized entries. |
+| Captions | `ConvaiTranscriptDisplay` | In Captions mode, displays current speech. History mode shows finalized entries. |
 
 ## Add the chat UI prefab
 
@@ -43,7 +43,7 @@ The chat UI overlay appears in the Game view. The component finds `ConvaiManager
 The chat input field requires an `EventSystem` in the scene. If your scene does not already have one, add it via **GameObject > UI > Event System**.
 
 {% hint style="warning" %}
-If no `ConvaiManager` is found at startup, the Console logs: `[ChatTranscriptUI] No active ConvaiManager found.`. Check that `ConvaiManager` is in the scene.
+The chat needs an initialized `ConvaiManager` and a configured `ConvaiPlayer`. If the field shows a connecting or preparing prompt, wait for the addressed character to become ready before typing.
 {% endhint %}
 {% endstep %}
 {% endstepper %}
@@ -70,7 +70,7 @@ If you need to customize the layout, select the prefab instance and inspect the 
 | `canvasFader` | Prefab reference | Fade controller. |
 | `canvasGroup` | Prefab reference | Canvas group used to control visibility. |
 
-If `chatContainer` is not assigned, messages will not appear and the Console logs: `[ChatTranscriptUI] chatContainer is not assigned - messages will not display`. The bundled prefab has all references pre-wired.
+If `chatContainer` is not assigned, messages will not appear and the Console logs: `chatContainer is not assigned - messages will not display`. The bundled prefab has all references pre-wired.
 
 **Input Availability:**
 
@@ -100,7 +100,7 @@ If the prefab is present but no messages appear, check **Transcript System**, it
 * Drag `TranscriptUI_Chat.prefab` into the Hierarchy
 * Leave all references at prefab defaults
 
-**Expected outcome:** Each turn appears as a new bubble — player text on the right, character text on the left. The list scrolls automatically as the conversation grows.
+**Expected outcome:** Each turn appears as a new bubble — player text on the right, character text on the left. When you are at the bottom, the chat follows new messages. Scroll up to read history and the next message keeps your reading position.
 
 ## Next steps
 

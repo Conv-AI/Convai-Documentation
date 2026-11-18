@@ -1,7 +1,7 @@
 ---
 title: Actions Editor
 description: Reference for the Convai Actions Editor window — its four modes, the Add Action catalog, and one-click executor provisioning.
-last_reviewed: "5.0.0-preview"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The Convai Actions Editor authors what a Convai character can do — every action's name, description, and bound executor — without editing `ConvaiActionConfigSource` directly. Adding a built-in executor from its catalog also provisions the peer component the executor needs, such as `ConvaiGazeController` or `ConvaiBodyAnimationController`, in the same undoable step.
@@ -18,14 +18,14 @@ A mode switcher under the character picker moves between four views of the same 
 | --- | --- |
 | **Actions** | The default view: the action list and the selected action's detail. |
 | **Scene Knowledge** | **Find Targets In Your Scene**, **Add From Your Scene**, **Known Objects**, **Known Characters**, initial attention, and **Sent To Convai** payload preview. Known entries include **Scene Object** and **Extras** for aliases and interaction points. |
-| **Character Settings** | **Running Actions** (**Actions Are Run By**), **How Actions Run**, **Reactions & Interruptions**, **Action Feedback**, and **Events**. |
+| **Character Settings** | **How Actions Run**, **Reactions & Interruptions**, **Action Feedback**, and **Events**. |
 | **Live** | **Now Performing**, **Timeline**, **Scene Knowledge — Live**, **Commands That Never Ran**, **Feedback Log**, **Insights**, and separate expandable cards under **Advanced**. Automatically selected on entering Play mode only if the character has an Action Runner in its hierarchy. The prior mode is restored on leaving Play mode; the retained recording is labeled **Session Review**. |
 
 Editing is disabled, with an explanatory banner, in every mode except **Live** while the Editor is in Play mode.
 
 ## Action list and detail
 
-The left pane lists one card per action, grouped as **This Character** (actions authored directly on this character) followed by one collapsible group per assigned `ConvaiActionSet`. Selecting a card opens its detail in the right pane, in four boxes:
+The left pane lists inline actions on the selected character. Select a card to inspect its command, behavior, test controls, and advanced settings.
 
 | Box | Shows |
 | --- | --- |
@@ -36,9 +36,9 @@ The left pane lists one card per action, grouped as **This Character** (actions 
 
 ## Toolbar
 
-Use **Search actions…** to filter names. **Show** offers **All Actions**, **Needs Attention**, **Not Offered**, **This Character**, and **From Action Sets**. **Group** organizes cards by **Source**, **Category**, **Status**, or **Behavior**. Categories select Category grouping automatically only while grouping remains the uncustomized Source default.
+Use **Search actions…** to filter names. **Show** offers **All Actions**, **Needs Attention**, and **Not Offered**. **Group** organizes cards by **Source**, **Category**, **Status**, or **Behavior**. Categories select Category grouping automatically only while grouping remains the uncustomized Source default.
 
-Ctrl/Shift selection enables bulk editing. **Extract To Action Set** and **New Action Set…** create reusable definitions. **Export Actions…**, **Export Actions + Scene Knowledge…**, and **Import Actions…** exchange authored configuration as JSON.
+Ctrl/Shift selection enables bulk editing. **Export Actions…**, **Export Actions + Scene Knowledge…**, and **Import Actions…** exchange authored configuration as JSON.
 
 ## Add Action catalog
 
@@ -70,7 +70,7 @@ Adding a built-in executor — from a starter card or from the catalog — runs 
 
 1. A new `ConvaiActionDefinition` is built from the executor's `[ConvaiActionArchetype]` attribute: its action name, description, target requirement, and any parameters.
 2. The executor component is added to the configured action behaviors object (the character root unless a child is assigned), or reused if a matching component already exists on the character's hierarchy.
-3. If the executor declares a `RequiredPeerHint` — for example `ConvaiGazeController` or `ConvaiNavMeshLocomotion` — and the character has no matching component yet, that component is added on the character root; an existing child peer is reused.
+3. If the executor declares a `RequiredPeerHint` type — for example `ConvaiGazeController` or `ConvaiNavMeshLocomotion` — and the character has no matching component yet, that component is added on the character root; an existing child peer is reused.
 4. The new definition is bound to the added or reused executor and appended to the character's action list.
 
 This is what lets the **Look At Target** starter add both `ConvaiLookAtActionExecutor` and `ConvaiGazeController` in one click, and **Walk To Target** add both `ConvaiWalkToActionExecutor` and `ConvaiNavMeshLocomotion`. A component required on the *target* object rather than the character — such as `ConvaiActionTargetGroup` for Count Target Group — is not provisioned this way, since choosing which scene object owns it is an authoring decision the window cannot make on your behalf.
@@ -83,6 +83,10 @@ The selected action's **Try It** box runs the real dispatch path with no backend
 
 * **In Edit mode**, enter a phrase in **Try A Target Name** and select **Check** to inspect the target-resolution result.
 * **In Play mode**, choose **Target**, fill **Values To Send**, and select **Run Now**. This runs local dispatch and reports the result and duration. The explicit test can bypass **Offer This Action** being disabled; that does not make the action available to normal incoming commands.
+
+## Author actions with a coding assistant
+
+Use `Convai_ConfigureActions` to preview supported authoring changes, then apply the reviewed changes in Edit mode. `Convai_DiagnoseActions` checks the selected character’s action setup without changing it. See the [Actions tools reference](../../ai-coding-assistant/mcp-tools-reference.md#character-actions) for inputs and returned findings.
 
 ## Next steps
 
