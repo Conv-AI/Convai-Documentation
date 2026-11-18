@@ -72,7 +72,7 @@ The built-in endpoint client sends no body for `GET` and `{}` for `POST`. The re
 }
 ```
 
-The request timeout comes from **Advanced > Connection Timeout (s)**, which defaults to `30`. Entering an endpoint URL disables the Editor-only saved-key fallback. A registered provider still takes precedence over the endpoint.
+The request timeout comes from **Connection & Scripting Defines > Connection Timeout (s)**, which defaults to `30`. Entering an endpoint URL disables the Editor-only saved-key fallback. A registered provider still takes precedence over the endpoint.
 
 ## Verify the configuration
 

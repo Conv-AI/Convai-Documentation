@@ -27,6 +27,9 @@ Duplicate `TranscriptUI_Chat.prefab` or `TranscriptUI_Chat_WorldSpace.prefab` fr
 
 The shipped bubble templates are child objects inside the chat prefabs, not separate bubble prefab assets. Find the objects assigned to `characterMessagePrefab` and `playerMessagePrefab` on `ChatTranscriptUI`. Restyle their fonts, backgrounds, and layout, or extract your own prefab and assign it to the corresponding field.
 
+<figure><img src="../../../.gitbook/assets/unity-chat-prefab-templates.png" alt="Prefab Mode Hierarchy for a project copy of the chat prefab, with MessageBoxCharacter selected and MessageBoxPlayer beside it under Content."><figcaption><p>(1) Expand <strong>Content</strong> in your copy of the chat prefab. (2) Open <strong>MessageBoxCharacter</strong> for replies. (3) Use <strong>MessageBoxPlayer</strong> to change the player’s messages.</p></figcaption></figure>
+
+
 Retain `ChatMessageBubble` and its `senderUI` and `messageUI` references to `TextMeshProUGUI` components. Keep the fields assigned even if your design hides the sender label.
 
 <figure><img src="../../../.gitbook/assets/unity-sample-bubble-template.png" alt="The Chat Message Bubble component on the example character template has separate Sender and Message TextMesh Pro fields."><figcaption><p>(1) <strong>Sender UI</strong> points to the name label. (2) Follow <strong>Message UI</strong> to style the reply text.</p></figcaption></figure>

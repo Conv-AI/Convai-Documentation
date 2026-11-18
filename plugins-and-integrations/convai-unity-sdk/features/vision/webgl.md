@@ -30,6 +30,8 @@ A source implementing `IVisionPageCanvasSource` always publishes its own `PageCa
 
 Serve the build over HTTPS. For webcam capture, grant browser camera permission and wait for a usable frame. Check `IsPublishing`, then request vision status or a trigger and inspect the response. Confirm the content matches the intended source.
 
+<figure><img src="../../../../.gitbook/assets/unity-vision-webgl-track-comparison.png" alt="A separate browser subscriber receives two WebGL video tracks. Frame Source shows a red prop without the HUD. Game View shows the red prop and a pink Game View HUD."><figcaption><p>(1) <strong>Frame Source</strong> shows the prop from the assigned camera. (2) <strong>Game View</strong> also shows the Unity player’s HUD. A separate browser subscriber received both tracks in a local LiveKit room.</p></figcaption></figure>
+
 <figure><img src="../../../../.gitbook/assets/unity-webgl-browser-test-camera.png" alt="Unity WebGL test player showing the camera source Ready and a synthetic browser color-bar pattern."><figcaption><p>(1) The local webcam source reports <strong>Ready</strong>. (2) The player shows a synthetic browser camera frame. This verifies local capture in Chrome for Testing.</p></figcaption></figure>
 {% endstep %}
 {% endstepper %}

@@ -17,6 +17,12 @@ Open **Convai > Settings** or **Edit > Project Settings > Convai SDK** to edit p
 | Diagnostics | Control SDK logging. | Verbose, Default, Errors Only, Global Log Level, Stack Trace Levels, Colored Console Output and category overrides. |
 | Connection & Scripting Defines | Set the connection timeout and enable optional build features. | Connection Timeout (s) and Scripting Define Symbols for the active build target group. |
 
+<figure><img src="../../../.gitbook/assets/unity-project-settings-sections.png" alt="The Credentials and Runtime Defaults cards on the Convai SDK Project Settings page."><figcaption><p>(1) Choose how players authenticate in <strong>Credentials</strong>. (2) Change startup behavior in <strong>Runtime Defaults</strong>.</p></figcaption></figure>
+
+<figure><img src="../../../.gitbook/assets/unity-project-settings-diagnostics-connection.png" alt="The Diagnostics card shows logging presets. The Connection and Scripting Defines card shows the connection timeout."><figcaption><p>(1) Choose a logging preset in <strong>Diagnostics</strong>. (2) Find the timeout and scripting options under <strong>Connection &amp; Scripting Defines</strong>.</p></figcaption></figure>
+
+
+
 Open **Convai > Home > Welcome** to review **Setup Health**. It checks the local settings asset, credentials, and platform microphone configuration. After resolving any findings, validate the scene and try a connection. For an illustrated walkthrough, see [Configure microphone](configure-microphone.md#macos-and-ios). Check the displayed SDK and Unity versions under **Convai > Home > Help**.
 
 ## Credentials and service selection
