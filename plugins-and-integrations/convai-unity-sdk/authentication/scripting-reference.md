@@ -1,23 +1,19 @@
 ---
 title: Authentication scripting reference
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-pre.1"
 description: Reference for the Convai Unity SDK authentication API, including the token provider interface, registry, and settings accessors.
 ---
 
-Complete API reference for the public authentication surface in the Convai Unity SDK. Types are in the `Convai.Runtime.Core.Configuration` namespace unless noted.
+Complete API reference for the public authentication surface in the Convai Unity SDK. Types are in the `Convai.Runtime.Configuration` namespace unless noted.
 
 ## `IConvaiAuthTokenProvider`
 
-`Convai.Runtime.Core.Configuration` — Interface
+`Convai.Runtime.Configuration` — Interface
 
 Resolves a short-lived credential for a Convai runtime connection. Implement this on any class to supply tokens from your own backend.
 
-```csharp
-public interface IConvaiAuthTokenProvider
-{
-    Task<AuthTokenResult> GetTokenAsync(CancellationToken cancellationToken);
-}
-```
+`GetTokenAsync(CancellationToken cancellationToken)` returns `Task<AuthTokenResult>`.
+
 
 ### Methods
 
@@ -31,7 +27,7 @@ Implementations must not log or persist the returned token.
 
 ## `AuthTokenResult`
 
-`Convai.Runtime.Core.Configuration` — Readonly struct
+`Convai.Runtime.Configuration` — Readonly struct
 
 The result returned by `IConvaiAuthTokenProvider.GetTokenAsync`.
 
@@ -44,6 +40,10 @@ The result returned by `IConvaiAuthTokenProvider.GetTokenAsync`.
 | `ExpiresAtUtc` | `DateTimeOffset?` | Optional expiration time for the token, normalized to UTC. `null` if not supplied. |
 | `ErrorMessage` | `string` | The failure reason. Empty when `IsSuccess` is `true`. |
 
+### Construction
+
+The public constructor is `AuthTokenResult(string token, DateTimeOffset? expiresAtUtc = null, string errorMessage = null)`. A blank token without an explicit error produces `Auth token provider returned an empty token.` Expiry is informational: the SDK does not schedule refresh or mid-session rotation from this value.
+
 ### Factory methods
 
 | Method | Signature | Use when |
@@ -53,7 +53,7 @@ The result returned by `IConvaiAuthTokenProvider.GetTokenAsync`.
 
 ## `ConvaiAuthTokenProviderRegistry`
 
-`Convai.Runtime.Core.Configuration` — Static class
+`Convai.Runtime.Configuration` — Static class
 
 Process-local registration point for a developer-supplied `IConvaiAuthTokenProvider`. Register a provider before the first connection attempt.
 
@@ -78,7 +78,7 @@ The registry resets automatically on `RuntimeInitializeLoadType.SubsystemRegistr
 
 ## `DelegateAuthTokenProvider`
 
-`Convai.Runtime.Core.Configuration` — Sealed class implementing `IConvaiAuthTokenProvider`
+`Convai.Runtime.Configuration` — Sealed class implementing `IConvaiAuthTokenProvider`
 
 Adapts a developer-supplied async delegate into a provider, for cases that do not need a dedicated class.
 
@@ -88,22 +88,22 @@ Adapts a developer-supplied async delegate into a provider, for cases that do no
 | --- | --- | --- |
 | `DelegateAuthTokenProvider` | `DelegateAuthTokenProvider(Func<CancellationToken, Task<string>> getTokenAsync)` | Wraps `getTokenAsync`, which is invoked once per `GetTokenAsync` call. Throws `ArgumentNullException` if `getTokenAsync` is `null`. |
 
-`GetTokenAsync` returns `AuthTokenResult.Failed` when the delegate returns `null`, an empty task, or a `null`/whitespace-only string; otherwise it returns `AuthTokenResult.Succeeded` with the trimmed token.
+`GetTokenAsync` returns `AuthTokenResult.Failed` for a null task, a blank result, or an exception. Cancellation propagates. A non-empty result becomes `AuthTokenResult.Succeeded` with the trimmed token.
 
 ## `ConvaiAuthMode`
 
-`Convai.Runtime.Core.Configuration` — Enum
+`Convai.Runtime.Configuration` — Enum
 
 Authentication strategy used for runtime Convai room connections.
 
 | Value | Integer | Description |
 | --- | --- | --- |
 | `ApiKey` | `0` | Read the account API key from `ConvaiSettings`. Default. |
-| `AuthToken` | `1` | Resolve a short-lived auth token from a registered provider or a configured endpoint. |
+| `AuthToken` | `1` | Resolve an explicit token, a registered provider, or a configured endpoint. |
 
 ## `ConvaiAuthTokenHttpMethod`
 
-`Convai.Runtime.Core.Configuration` — Enum
+`Convai.Runtime.Configuration` — Enum
 
 HTTP method used by the configured Auth Token mode endpoint (set in **Project Settings > Convai SDK > Credentials**).
 
@@ -114,7 +114,7 @@ HTTP method used by the configured Auth Token mode endpoint (set in **Project Se
 
 ## `ConvaiAuthTokenHeader`
 
-`Convai.Runtime.Core.Configuration` — Serializable struct
+`Convai.Runtime.Configuration` — Serializable struct
 
 A single static HTTP header name/value pair sent to the Auth Token mode endpoint.
 
@@ -131,47 +131,35 @@ A single static HTTP header name/value pair sent to the Auth Token mode endpoint
 | --- | --- | --- |
 | `ConvaiAuthTokenHeader` | `ConvaiAuthTokenHeader(string name, string value)` | Creates a header pair. `null` arguments are normalized to empty strings. |
 
-## `ConvaiManager.ConnectWithAuthTokenAsync`
+## `RoomSessionConnectOptions.SetAuthToken`
 
-`Convai.Runtime.Components`
+`RoomSessionConnectOptions` is in `Convai.Runtime.Room`. Call `SetAuthToken(string authToken)` before passing those options to `ConvaiManager.ConnectAsync(options, cancellationToken)`. The connect operation returns `IConvaiOperation<RoomSession>`. It consumes the stored token and uses it before consulting a registered provider or endpoint.
 
-Connects using an explicitly supplied auth token instead of a registered provider or endpoint. See [Connect with an existing auth token](connect-with-auth-token.md) for usage.
+| Member | Contract |
+| --- | --- |
+| `SetAuthToken(authToken)` | Store one Convai `apiAuthToken` outside the serialized fields. Leading and trailing whitespace is removed |
+| `EndUserId` | Explicit account ID, sent as `end_user_id` |
+| `EndUserName` | Explicit display name, sent as `end_user_metadata.name` |
+| `EndUserMetadata` | Additional JSON-compatible metadata |
 
-```csharp
-public IConvaiOperation<RoomSession> ConnectWithAuthTokenAsync(
-    string authToken,
-    string endUserId,
-    string endUserName,
-    CancellationToken cancellationToken = default)
-```
+The resolved end-user ID and name must both be non-empty for an explicit-token connection. Values can come from the options or the configured identity and metadata sources. Explicit `EndUserName` takes precedence over metadata `name`, which takes precedence over the configured player name.
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `authToken` | `string` | Required. The Convai auth token to use for this connection only. |
-| `endUserId` | `string` | Required. Sent to Convai as `end_user_id`. |
-| `endUserName` | `string` | Required. Sent to Convai as `end_user_metadata.name`. |
-| `cancellationToken` | `CancellationToken` | Cancels the pending connection attempt. Defaults to `default`. |
+### Error codes
 
-Returns `IConvaiOperation<RoomSession>`.
+| Error code | Cause |
+| --- | --- |
+| `connection.invalid_token` | The supplied token is blank |
+| `config.auth_token_mode_required` | The project's mode is `ApiKey` |
+| `connection.bad_request` | The resolved identity is missing or invalid. The client accepts at most `512` characters for the ID and `255` for the name |
+| `connection.auth_token_fetch_failed` | The provider or endpoint failed to return a token |
+| `connection.connect_invalid_api_key` | Convai returned HTTP `401` on the connect request |
+| `connection.connect_end_user_id_required` | Convai rejected the request because it requires an end-user ID |
 
-Every failure below carries a `ConvaiOperationException`, and how you receive it depends on how you call the method. Awaiting the operation rethrows the exception, so a `try`/`catch` around the `await` handles every case. If you would rather not catch, hold the operation instead of awaiting it and read `IsSuccessful`, `HasError`, and `Error` once `IsCompleted` is true — `Error` carries the same code and message.
-
-### Errors
-
-| Error code | Message | Cause |
-| --- | --- | --- |
-| `ConnectionInvalidToken` | `A non-empty Convai auth token is required.` | `authToken` was empty or whitespace-only. |
-| `ConnectionBadRequest` | `A non-empty end-user ID is required.` | `endUserId` was empty or whitespace-only. |
-| `ConnectionBadRequest` | `A non-empty end-user name is required.` | `endUserName` was empty or whitespace-only. |
-| `ConnectionFailed` | `ConvaiRoomManager not available.` | No room manager is present on the manager object. |
-| `ConfigAuthTokenModeRequired` | `Explicit auth-token connections require Auth Token mode in Convai Project Settings.` | The project's authentication mode is `ConvaiAuthMode.ApiKey`. |
-| `ConnectionInvalidToken` | `Connection token is invalid` | Convai rejected the supplied token. |
-
-The first four are raised before any network work starts; the last two during the connection attempt. Both reach the caller the same way.
+Await the operation to receive its exception. To inspect the error without awaiting, wait until `IsCompleted` and read `Error` when `HasError` is true.
 
 ## `ConvaiSettings` authentication accessors
 
-`Convai.Runtime` — the project's saved `ConvaiSettings` asset, reached through **Edit > Project Settings > Convai SDK**.
+`Convai.Runtime.Configuration` — the project's saved `ConvaiSettings` asset, reached through **Edit > Project Settings > Convai SDK**.
 
 ### Properties
 

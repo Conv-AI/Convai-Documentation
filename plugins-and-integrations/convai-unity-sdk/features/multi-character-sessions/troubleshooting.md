@@ -1,84 +1,72 @@
 ---
 title: Troubleshoot multi-character sessions
-description: Fix roster rejections, readiness failures, misrouted audio, and command errors when running a multi-character session in Unity.
-last_reviewed: "4.6.0"
+description: Resolve roster validation, readiness, targeting, joining, and acknowledgement failures without confusing caller timeouts with final room state.
+last_reviewed: "5.0.0-preview"
 ---
 
-Most multi-character problems fall into one of three places: the roster the SDK builds at connect, the identity used to address a membership at runtime, or an `IConvaiOperation<T>` command that faults instead of completing. Find the exact message or symptom below; every entry quotes the text as it appears in the Unity Console, and says so where only the opening of a longer line is quoted.
-
-## Before you start
-
-- Confirm `IConvaiRoomConnectionService.CurrentMultiCharacterSession` is not `null` before diagnosing anything else — several symptoms below only apply once a multi-character session exists.
-- Read the Console line at the point of failure. The messages below are quoted exactly, and matching on the wrong one leads to the wrong fix.
-- Confirm the scene has two or more **active and enabled** `ConvaiCharacter` components before connecting. An inactive or disabled character is excluded from the roster silently, and a single active character never builds a roster.
-
-## Connect fails with no active character
-
-A separate check runs before any roster is built, regardless of how many characters the scene owns.
-
-| Symptom | Cause | Fix | Verify |
-| --- | --- | --- | --- |
-| `ConvaiOperationException`: `Cannot connect because no active character is available.` | No active character was resolved when `ConnectAsync` ran — for example, every owned character is inactive or disabled. Does not apply to `JoinMultiCharacterRoomAsync`, which needs no active character because it joins a room another client already created. | Activate at least one `ConvaiCharacter`, or call `ConvaiManager.SetInitialCharacter` with an active character, before connecting. | The connect attempt no longer throws this message. |
+Start with **Characters Joining the Room**, **Room Holds**, and **Room Roster** on `ConvaiManager`. Then inspect the failed operation's code and the canonical session state.
 
 ## Roster rejected at connect
 
-A scene with two or more active, enabled characters is rejected before any request reaches Convai when its roster breaks one of these rules. An inactive or disabled `ConvaiCharacter` is excluded from the roster before these rules run, so it cannot trigger any of them.
+The SDK rejects a creating roster for any of these conditions before sending it. Connect errors surface as `ConvaiOperationException` with `ConnectionFailed` and a diagnostic message.
 
-| Symptom | Cause | Fix | Verify |
-| --- | --- | --- | --- |
-| `ConvaiOperationException`: message starting `A Convai room supports at most 50 characters` | More than 50 active, enabled `ConvaiCharacter` components are registered with the manager. | Reduce the active cast to 50 or fewer, or use **Convai Manager > Characters Joining the Room** to send only the characters this conversation needs. | The connect attempt no longer throws and `CurrentMultiCharacterSession` is populated. |
-| `ConvaiOperationException`: `Multi-character roster contains null or duplicate character references.` | The same `ConvaiCharacter` component was registered twice, or a null reference reached the roster builder. | Register each component once. Use a second component instance to add a clone of the same character. | `session.Characters` holds exactly one membership per distinct `ConvaiCharacter` instance. |
-| `ConvaiOperationException`: message starting `'<name>' and '<name>' both use Character ID` | Two active, enabled characters share a Character ID — usually because one was duplicated from the other. | Give the copy its own Character ID from the Convai dashboard. See [Character identity](character-identity.md). | The connect attempt no longer throws this message. |
-| `ConvaiOperationException`: `Every character in a multi-character room requires a Character ID.` | One active, enabled `ConvaiCharacter` in the scene has an empty **Character ID** field. | Set the field on every active character in the scene, and on any inactive character before you activate and add it later with `AddCharacterAsync`. | The connect attempt no longer throws this message. |
-| `ConvaiOperationException`: `Character session IDs must be unique within a multi-character roster.` | Two characters resolve to the same character-session ID. | Give each instance a distinct character-session ID, or omit it so the SDK starts a new conversation for that instance. | The connect attempt no longer throws this message. |
+| Condition | Fix |
+| --- | --- |
+| More than 50 characters | Select a smaller cast; account capacity may be lower than the client ceiling |
+| Null or repeated character reference | Supply one valid local component per entry |
+| Duplicate Character ID | Assign each character its own ID; another copy of the component is insufficient |
+| Missing Character ID | Assign the character's ID |
+| Specific/pinned version | Set **Character Version > Live** for every roster member |
+| Duplicate character-session ID | Use the intended distinct resumable conversation IDs |
 
-{% hint style="info" %}
-The `ConvaiOperationException` thrown for any of these four conditions carries the exact message above, but its `Code` is always `ConnectionFailed` at the call site — the original session error code is not observable there. See [Connection API reference](connection-api-reference.md#connect-time-roster-validation).
-{% endhint %}
+See [Character identity](character-identity.md) for the exact ID and version rules.
 
-## Runtime and addressing issues
+## Initial or secondary character not ready
 
-| Symptom | Cause | Fix | Verify |
-| --- | --- | --- | --- |
-| A character enabled during play never joins, and no exception is thrown | The room connected with exactly one active character, so it was opened without a roster to join. The Console warns once per connection: `'<name>' cannot join this conversation: the room was opened for a single character, so it has no roster to join. It will be included the next time the room connects.` | Have every character you want active in the scene **before** the room connects, so it opens with a roster to join. See [Characters joining and leaving](update-the-roster.md#a-single-character-room-cant-grow). | The Console logs `'<name>' joined the room without reconnecting.` instead. |
-| A character I expected is missing from `session.Characters` | That character's `GameObject` or `ConvaiCharacter` component was inactive or disabled when the room connected. The SDK excludes inactive characters from the startup roster silently — no exception is raised and no validation message names the missing character. | Activate the character before connecting, or let it join automatically when enabled during play, or add it explicitly with [Characters joining and leaving](update-the-roster.md#add-a-character-to-the-roster). | The character appears in `session.Characters` with a `MembershipId`. |
-| A membership stays `Starting` and never reaches `Ready` | Convai has not reported the membership either way, or its provisioning is stuck. | Subscribe to `CharacterStatusChanged` and inspect `ProvisioningStatus` and `FailureCode` on that membership. `WaitUntilReadyAsync` only reports the initial character; see [Room readiness](readiness-and-partial-dispatch.md). | The membership's `Status` becomes `Ready` or `Failed` with a `FailureCode` you can act on. |
-| Player input reaches a character other than the one the player intended | Code cached a stale `MembershipId`, or the interaction target changed after the target was resolved but before the input was sent. | Read `MultiCharacterRoomSession.ActiveMembershipId` immediately before addressing input rather than caching a membership reference. | The membership your code addresses matches `ActiveMembershipId` at the moment input is sent. |
-| Two clones of the same character resolve to one object, or an event meant for one clone appears to affect both | A lookup or audio map is keyed on `CharacterId`, which is not unique within a roster. | Re-key the lookup on `MembershipId` for addressing and `ParticipantIdentity` for audio. See [Character identity](character-identity.md). | Each clone's `MembershipId` and `ParticipantIdentity` drive distinct behavior. |
-| `CurrentMultiCharacterSession` is `null` after connecting | The connect response did not carry both a roster and a room session ID — expected for a single-character room, for a connect that did not return multi-character data, or for a scene that owns two characters where only one was active and enabled at connect. | Confirm the scene has two or more **active and enabled** `ConvaiCharacter` components before connecting. | `CurrentMultiCharacterSession` is not `null` and `Characters` holds one membership per active character. |
+A creating connection waits for its initial character. `Initial character failed to start (<code>).` reports a dispatch/start failure; `Timed out waiting for initial character '<id>' to become ready.` reports the readiness deadline. Check that character's ID, service failure, and **Character Ready Timeout** (30 seconds by default).
 
-## Roster and target command failures
+Secondary failures do not automatically invalidate a successfully started initial character. Inspect `Status`, `FailureCode`, and `PartialDispatch`; await `membership.WaitUntilReadyAsync` before addressing a secondary member. The wait can also fail when the member leaves or the session retires. A joining client does not perform the creating client's initial wait.
 
-Every operation on `IConvaiRoomConnectionService` faults its `IConvaiOperation<T>` rather than throwing synchronously — handle the exception on the awaited task.
+## Live changes refused
 
-| Symptom | Cause | Fix | Verify |
-| --- | --- | --- | --- |
-| `CharacterRosterUpdateException` with code `roster_epoch_mismatch` | Another accepted roster command changed the roster first. | Read `session.RosterEpoch` and retry the mutation with the current value. | The retried call completes without the exception. |
-| `CharacterRosterUpdateException` with code `unauthorized_sender` | Convai did not accept this client as authorized to change the room's roster. | Confirm the command is sent from a client Convai recognizes for this room, then retry. | The retried call completes and the roster reflects the intended change. |
-| `TimeoutException`: `Timed out waiting for the character-roster-update acknowledgement.` | No acknowledgement arrived within 15 seconds of `AddCharacterAsync` or `RemoveCharacterAsync`. | Re-read `session.Characters` before retrying — Convai may already have applied the change. | `session.Characters` reflects the roster you intended. |
-| `TimeoutException`: `Timed out waiting for the interaction-target acknowledgement.` | No acknowledgement arrived within 10 seconds of `SetInteractionTargetAsync` or `ClearInteractionTargetAsync`. | Re-read `ActiveMembershipId` and `RouteEpoch` before retrying. | `ActiveMembershipId` reflects the target you intended. |
-| `ArgumentException`: `This local character instance is already a member of the current room. Use another instance when adding a clone.` | The same `ConvaiCharacter` component instance was passed to `AddCharacterAsync` twice. | Use a second `ConvaiCharacter` instance to add a clone instead of reusing the existing one. | `AddCharacterAsync` succeeds and returns a new membership in `CharacterRosterUpdateResult.Added`. |
-| `ArgumentException`: `The replacement target is not part of the current room.` | The `replacementTargetMembershipId` passed to `RemoveCharacterAsync` does not match any current membership. | Re-read `session.Characters` and pass a `MembershipId` that is currently in the roster. | The call completes and `ActiveMembershipId` reflects the replacement. |
-| `ArgumentException`: `The replacement target cannot be the membership being removed.` | `replacementTargetMembershipId` equals the membership passed to `RemoveCharacterAsync`. | Pass a different membership as the replacement, or omit it when the target should clear instead. | The call completes without the exception. |
+| Symptom or code | Action |
+| --- | --- |
+| New character cannot join a single-character room | Reconnect with at least two active selected characters. Before Play, resolve **This room will not be able to grow** using **Enable It**/**Enable Them**. |
+| Character is disabled but still in roster | Expected while it remains owned and selected; untick, destroy, or drop ownership to remove it. |
+| `No multi-character room session is active.` | Wait for a roster connection and check `CurrentMultiCharacterSession`. |
+| Duplicate instance or duplicate Character ID on add | Read current membership; assign a distinct ID for another character. |
+| Specific-version add refused | Use Live; version validation runs before the no-session check. |
+| `roster_epoch_mismatch` | Read the latest roster and reassess the edit. |
+| `unauthorized_sender` | Resolve room-management permission. |
+| `replacement_target_required` | Offer an eligible Ready replacement. |
+| `replacement_target_unavailable` | Refresh readiness/membership and choose a valid replacement. |
+| `removed_before_seated` | The member left before the add completed; check competing lifecycle or roster changes. |
 
-{% hint style="warning" %}
-Other backend roster error codes may exist beyond `roster_epoch_mismatch` and `unauthorized_sender`. Treat any code your client has not seen before as an unrecognized backend rejection, and log both `CharacterRosterUpdateException.Code` and `Message` rather than assuming a cause.
-{% endhint %}
+Refused automatic edits log `'<name>' could not join the room: <reason>` or `'<name>' could not leave the room: <reason>`. Preserve the code in the reason when reporting an issue. The automatic planner never sends a removal that would empty the roster; explicit calls still require handling service refusal.
 
-## Still blocked
+## Timeouts and lost acknowledgements
 
-Gather the following before escalating: the exact Console message, the `RoomSessionId` of the affected room, the current `RosterEpoch` and `RouteEpoch` from `MultiCharacterRoomSession`, and whether the same call succeeds on a fresh room. Cross-check the symptom against the [Live API troubleshooting table](../../../../api-reference/core-api-reference/live-apis-beta/multi-character-sessions.md#verify-and-troubleshoot) — a rejection that originates on the backend appears there too, described at the protocol level.
+A roster caller can time out after 15 seconds while its command remains pending. The gate stays held until canonical recovery resolves it. At 30 seconds from registration, lifecycle evidence can settle a proven outcome; otherwise the room is retired and disconnected before input reopens. The SDK does not automatically reconnect after this ambiguous-command retirement. Call `ConnectAsync` again after checking the cause.
 
-## Related pages
+A lost target acknowledgement triggers one probe after 3 seconds. Targeting uses `ConvaiManager.TalkToAsync` or `ClearConversationTargetAsync` in 5.0; inspect the Failed phase and final canonical target. Do not call the removed room-service target methods or assume a timed-out command never reached the service.
 
-{% content-ref url="how-multi-character-sessions-work.md" %}
-[How multi-character sessions work](how-multi-character-sessions-work.md)
-{% endcontent-ref %}
+## Target or audio appears wrong
 
-{% content-ref url="room-session-reference.md" %}
-[Room session reference](room-session-reference.md)
-{% endcontent-ref %}
+| Symptom | Check |
+| --- | --- |
+| Scripted target changes back | Set **Chosen By > Manual**; automatic modes continue evaluating otherwise. |
+| Look At does not select a character | Check **Range (Metres)**, **Look Angle (Degrees)**, local enable state, and Ready status. |
+| A target change has no Requested phase | Another player's or service-originated canonical change can produce Confirmed directly. |
+| Replacement handover flashes no target in application UI | An accepted replacement emits one handover event; inspect UI assumptions that expect two events. |
+| Character voice is silent | Check participant binding, per-character mute/subscription, and platform playback permission. Reserve the voice AudioSource for voice. |
+
+See [Route character audio](route-character-audio.md) for browser/native distinctions and [Several players in one room](several-players-in-one-room.md) for shared routing.
+
+## Next steps
 
 {% content-ref url="connection-api-reference.md" %}
 [Connection API reference](connection-api-reference.md)
+{% endcontent-ref %}
+{% content-ref url="handle-roster-events.md" %}
+[Handle room events](handle-roster-events.md)
 {% endcontent-ref %}

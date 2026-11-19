@@ -1,7 +1,7 @@
 ---
 title: Actions Editor
 description: Reference for the Convai Actions Editor window — its four modes, the Add Action catalog, and one-click executor provisioning.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The Convai Actions Editor authors what a Convai character can do — every action's name, description, and bound executor — without editing `ConvaiActionConfigSource` directly. Adding a built-in executor from its catalog also provisions the peer component the executor needs, such as `ConvaiGazeController` or `ConvaiBodyAnimationController`, in the same undoable step.
@@ -17,22 +17,28 @@ A mode switcher under the character picker moves between four views of the same 
 | Mode | Shows |
 | --- | --- |
 | **Actions** | The default view: the action list and the selected action's detail. |
-| **Scene Knowledge** | The character's Known Objects, Known Characters, and initial attention. |
-| **Character Settings** | The `ConvaiActionDispatcher` (labeled **Convai Action Runner**) and `ConvaiActionFeedbackRelay` settings. |
-| **Live** | Play-mode-only: the batch currently running, a timeline of recent batches, and per-action run counts. Selects itself automatically when Play mode starts, and relabels **Session Review** after Play mode ends while the last session's recording is still available. |
+| **Scene Knowledge** | **Find Targets In Your Scene**, **Add From Your Scene**, **Known Objects**, **Known Characters**, initial attention, and **Sent To Convai** payload preview. Known entries include **Scene Object** and **Extras** for aliases and interaction points. |
+| **Character Settings** | **How Actions Run**, **Reactions & Interruptions**, **Action Feedback**, and **Events**. |
+| **Live** | **Now Performing**, **Timeline**, **Scene Knowledge — Live**, **Commands That Never Ran**, **Feedback Log**, **Insights**, and separate expandable cards under **Advanced**. Automatically selected on entering Play mode only if the character has an Action Runner in its hierarchy. The prior mode is restored on leaving Play mode; the retained recording is labeled **Session Review**. |
 
 Editing is disabled, with an explanatory banner, in every mode except **Live** while the Editor is in Play mode.
 
 ## Action list and detail
 
-The left pane lists one card per action, grouped as **This Character** (actions authored directly on this character) followed by one collapsible group per assigned `ConvaiActionSet`. Selecting a card opens its detail in the right pane, in four boxes:
+The left pane lists inline actions on the selected character. Select a card to inspect its command, behavior, test controls, and advanced settings.
 
 | Box | Shows |
 | --- | --- |
-| **Command** | The action's name, description, and a live rendered preview in the form `This Convai Character can be asked to: "..."`. |
+| **Command** | **Name**, **Description**, **Target** (`No target`, `Object`, `Character`, `Either`), **When It Finishes**, **Offer This Action**, and **Command Preview**. |
 | **Scene Behavior** | The bound executor component and its resolved status, a dropdown of every `IConvaiActionExecutor` found on the character's hierarchy, and an object-field fallback. |
 | **Try It** | Runs the action without starting a conversation — see [Test an action without a conversation](#test-an-action-without-a-conversation) below. |
-| **Advanced** (collapsed by default) | Parameters, valid targets, timeout, failure-policy override, and the speech gate. |
+| **Advanced** (collapsed by default) | Parameter rows, **Timeout (Seconds)**, **If This Fails**, **Wait For Speech To Finish**, and **Delay After Speech (Seconds)**. |
+
+## Toolbar
+
+Use **Search actions…** to filter names. **Show** offers **All Actions**, **Needs Attention**, and **Not Offered**. **Group** organizes cards by **Source**, **Category**, **Status**, or **Behavior**. Categories select Category grouping automatically only while grouping remains the uncustomized Source default.
+
+Ctrl/Shift selection enables bulk editing. **Export Actions…**, **Export Actions + Scene Knowledge…**, and **Import Actions…** exchange authored configuration as JSON.
 
 ## Add Action catalog
 
@@ -63,8 +69,8 @@ Selecting a starter card provisions the executor exactly like picking it from **
 Adding a built-in executor — from a starter card or from the catalog — runs as a single undoable operation:
 
 1. A new `ConvaiActionDefinition` is built from the executor's `[ConvaiActionArchetype]` attribute: its action name, description, target requirement, and any parameters.
-2. The executor component is added to the character, or reused if a matching component already exists on the character's hierarchy.
-3. If the executor declares a `RequiredPeerHint` — for example `ConvaiGazeController` or `ConvaiNavMeshLocomotion` — and the character has no matching component yet, that component is added too.
+2. The executor component is added to the configured action behaviors object (the character root unless a child is assigned), or reused if a matching component already exists on the character's hierarchy.
+3. If the executor declares a `RequiredPeerHint` type — for example `ConvaiGazeController` or `ConvaiNavMeshLocomotion` — and the character has no matching component yet, that component is added on the character root; an existing child peer is reused.
 4. The new definition is bound to the added or reused executor and appended to the character's action list.
 
 This is what lets the **Look At Target** starter add both `ConvaiLookAtActionExecutor` and `ConvaiGazeController` in one click, and **Walk To Target** add both `ConvaiWalkToActionExecutor` and `ConvaiNavMeshLocomotion`. A component required on the *target* object rather than the character — such as `ConvaiActionTargetGroup` for Count Target Group — is not provisioned this way, since choosing which scene object owns it is an authoring decision the window cannot make on your behalf.
@@ -75,8 +81,16 @@ If an executor's peer component is resolvable but was not added automatically �
 
 The selected action's **Try It** box runs the real dispatch path with no backend call:
 
-* **In Edit mode**, it is a **Preview**: type a phrase into the dry-run field and it is checked against the same target-resolution ladder the runtime uses, showing which target it would match and at which step.
-* **In Play mode**, it is a **Test Run**: pick a target from **Valid Targets**, fill in any parameters, and click **Run Now**. The run goes through the exact same dispatcher path a real Convai command takes, and reports ✓ or ✗ with a duration and, on failure, a reason.
+* **In Edit mode**, enter a phrase in **Try A Target Name** and select **Check** to inspect the target-resolution result.
+* **In Play mode**, choose **Target**, fill **Values To Send**, and select **Run Now**. This runs local dispatch and reports the result and duration. The explicit test can bypass **Offer This Action** being disabled; that does not make the action available to normal incoming commands.
+
+<figure><img src="../../../../.gitbook/assets/unity-actions-try-it-completed.png" alt="The Actions Editor Try It card showing Notice Board as Target, hide as the mode, and Done after running Show Or Hide Object locally."><figcaption><p>(1) Choose the <strong>Notice Board</strong> target. (2) Set <strong>mode</strong> to <strong>hide</strong>. (3) <strong>Done</strong> reports the local result. <strong>Show In Timeline</strong> opens that run.</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-actions-try-gesture.png" alt="Actions Editor Try It card for Play Gesture showing wave entered in Values To Send, Run Now, and Done after the local run."><figcaption><p>(1) Enter the Animation Set’s <strong>wave</strong> gesture name. (2) Select <strong>Run Now</strong>. (3) <strong>Done</strong> reports completion. This local example uses the SDK’s bundled wave animation on Sofia.</p></figcaption></figure>
+
+## Author actions with a coding assistant
+
+Use `Convai_ConfigureActions` to preview supported authoring changes, then apply the reviewed changes in Edit mode. `Convai_DiagnoseActions` checks the selected character’s action setup without changing it. See the [Actions tools reference](../../ai-coding-assistant/mcp-tools-reference.md#character-actions) for inputs and returned findings.
 
 ## Next steps
 

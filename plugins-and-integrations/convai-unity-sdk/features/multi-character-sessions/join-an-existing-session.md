@@ -1,26 +1,27 @@
 ---
 title: Join an existing room
 description: Bring a second human participant into a Unity multi-character room another client already created, using exactly one room locator.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-pre.1"
 ---
 
-Bring a second human participant into a room that already exists with `JoinMultiCharacterRoomAsync`, using exactly one room locator. Use this page when a companion client needs to join a session another client already created, rather than creating a new roster.
+Bring a second human participant into a room that already exists with `ConvaiManager.ConnectAsync` and one room locator. The joining client uses the existing room’s roster.
 
 ## Prerequisites
 
 - A multi-character session already created by another client, with its `RoomSessionId` or `SharedSessionKey` available to the joining client.
-- `IConvaiRoomConnectionService`, retrieved with `ConvaiManager.TryGetRoomConnectionService`.
+- A configured `ConvaiManager` and its `ConvaiRoomManager` on the joining client.
 - A distinct `EndUserId` for the joining participant.
 
 ## Join the room
 
-Call `JoinMultiCharacterRoomAsync(MultiCharacterJoinOptions options, CancellationToken cancellationToken = default)`. Under the hood it builds a `RoomSessionConnectOptions` with `JoinExistingMultiCharacterRoom` set, so no roster is sent — the join reuses the roster the creating client already established.
+Pass `RoomSessionConnectOptions` to `ConvaiManager.ConnectAsync` with `JoinExistingMultiCharacterRoom = true`. Assign the scene manager and room manager in the Inspector before running the example.
 
-| `MultiCharacterJoinOptions` field | Use it for |
+| `RoomSessionConnectOptions` field | Use it for |
 | --- | --- |
 | `RoomSessionId` | The durable room identifier returned to the creating client's `/connect` call. |
 | `SharedSessionKey` | An alternative, developer-controlled locator for the same room. |
 | `EndUserId` | A stable identifier for the joining participant. |
+| `EndUserName` | Optional typed display name, taking precedence over metadata `name`. |
 | `EndUserMetadata` | Optional key-value metadata for the joining participant. |
 | `TurnTaking` | Turn-taking options for this participant's session; defaults to hands-free. |
 
@@ -31,34 +32,39 @@ Set `RoomSessionId` or `SharedSessionKey`, not both — the room accepts exactly
 using System;
 using System.Threading;
 using Convai.Runtime.Core.Async;
+using Convai.Runtime.Components;
 using Convai.Runtime.Room;
 using UnityEngine;
 
 public class JoinExistingSessionBootstrap : MonoBehaviour
 {
+    [SerializeField] private ConvaiManager _manager;
+    [SerializeField] private ConvaiRoomManager _roomManager;
     [SerializeField] private string _roomSessionId;
     [SerializeField] private string _endUserId;
+    [SerializeField] private string _endUserName;
 
     private readonly CancellationTokenSource _lifetime = new();
 
     private async void Start()
     {
-        ConvaiManager manager = ConvaiManager.ActiveManager;
-        if (manager == null || !manager.TryGetRoomConnectionService(out IConvaiRoomConnectionService roomService))
+        if (_manager == null || _roomManager == null)
         {
-            Debug.LogError("[MultiCharacter] Add a ConvaiManager to the scene before joining a room.");
+            Debug.LogError("[MultiCharacter] Assign the manager and room manager before joining.");
             return;
         }
 
-        var joinOptions = new MultiCharacterJoinOptions
+        var joinOptions = new RoomSessionConnectOptions
         {
+            JoinExistingMultiCharacterRoom = true,
             RoomSessionId = _roomSessionId,
-            EndUserId = _endUserId
+            EndUserId = _endUserId,
+            EndUserName = _endUserName
         };
 
         try
         {
-            await roomService.JoinMultiCharacterRoomAsync(joinOptions, _lifetime.Token);
+            await _manager.ConnectAsync(joinOptions, _lifetime.Token).AsTask();
         }
         catch (ConvaiOperationException error)
         {
@@ -75,7 +81,7 @@ public class JoinExistingSessionBootstrap : MonoBehaviour
             return;
         }
 
-        MultiCharacterRoomSession session = roomService.CurrentMultiCharacterSession;
+        MultiCharacterRoomSession session = _roomManager.CurrentMultiCharacterSession;
         if (session == null)
         {
             Debug.LogWarning("[MultiCharacter] Joined, but no multi-character session was returned.");
@@ -94,12 +100,20 @@ public class JoinExistingSessionBootstrap : MonoBehaviour
 ```
 {% endcode %}
 
+Turn off **Connect On Start** on the joining client so the script makes the first connection. A Group Conversation component must not be enabled: group mode creates its own room and cannot use this join path.
+
 ## Verify the join
 
 Confirm both of the following in the Console before routing input from the joining client.
 
 - `CurrentMultiCharacterSession` is not `null`, and `RoomSessionId` matches the room you intended to join.
 - `session.Characters` reports the same roster the creating client sees. A membership without a local `ConvaiCharacter` bound to it is normal here — the joining scene does not need to own every character in the room.
+
+## What each player sees
+
+The conversation target is room state. A target chosen by another player updates this client's canonical target too, so a Confirmed target change can arrive without a local Requested phase. Known nonlocal player transcripts use `RemotePlayerTranscriptReceived`; empty or unknown identities remain on the local transcript path.
+
+When the service reports that a room was deleted, the SDK retires it rather than rejoining that room. This client behavior does not establish when the service deletes rooms. See [Several players in one room](several-players-in-one-room.md) for ownership and verification.
 
 ## Troubleshooting
 
