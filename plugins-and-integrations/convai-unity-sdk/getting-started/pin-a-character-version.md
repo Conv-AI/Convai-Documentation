@@ -14,7 +14,7 @@ Choose a released **Character Version** to keep a scene tied to a particular cha
 {% step %}
 ### Prepare access to released versions
 
-Configure your Editor API key under **Convai > Settings > Credentials**. Set **Character Workspace ID** if the character belongs to a specific workspace, then enter its **Character ID** on the character component.
+Configure your Editor API key under **Convai > Settings > Credentials**, then enter the character's **Character ID** on the character component. The released versions list does not use **Character Workspace ID**.
 {% endstep %}
 
 {% step %}
@@ -40,7 +40,7 @@ The SDK saves the exact release reference returned by the API. Do not manufactur
 
 | State | Meaning and action |
 | --- | --- |
-| Released versions unavailable | Check credentials, workspace, environment, and the Character API URL, then Refresh. |
+| Released versions unavailable | Check the API key, **Environment**, and, for **Custom**, the **Character API Base URL**, then Refresh. |
 | No released versions yet | Publish an appropriate character release through your character-management workflow, or use Live. |
 | Saved version marked unavailable | The saved reference is absent from the fetched list. It is preserved; choose an available release or Live deliberately. |
 | Reselect required | The saved version has no API reference. Choose the release again from the API-backed list. |

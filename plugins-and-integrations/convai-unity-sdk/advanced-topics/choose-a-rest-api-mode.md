@@ -12,7 +12,7 @@ SDK 5.0 removes the **API Mode** setting. Replace code that selects `ConvaiApiMo
 
 ## Update project settings
 
-Open **Convai > Settings** or **Edit > Project Settings > Convai SDK**. In **Credentials**, use **Environment** to select the host preset, or configure your custom host settings. **Character Workspace ID** supplies workspace context for Character API reads. **Auth Mode** controls credentials for room connections.
+Open **Convai > Settings** or **Edit > Project Settings > Convai SDK**. In **Credentials**, use **Environment** to select the host preset, or configure your custom host settings. **Character Workspace ID** chooses the workspace for character and narrative reads; most projects leave it empty (see [Character Workspace ID](../getting-started/project-settings-reference.md#character-workspace-id)). **Auth Mode** controls credentials for room connections.
 
 Keep a selected Live or pinned character reference when reading a specific version. See [Pin a character version](../getting-started/pin-a-character-version.md).
 
