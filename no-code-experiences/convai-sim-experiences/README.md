@@ -2,7 +2,6 @@
 description: >-
   Create AI-powered avatars and deploy them in interactive 3D
   environments—directly from your browser.
-noIndex: true
 ---
 
 # Convai Sim Experiences

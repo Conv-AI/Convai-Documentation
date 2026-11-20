@@ -3,7 +3,6 @@ title: Convai credits
 description: >-
   Find out how Convai credits work, how your balance changes during a billing
   cycle, and how to estimate the credits a project will use.
-noIndex: true
 ---
 
 # Convai credits

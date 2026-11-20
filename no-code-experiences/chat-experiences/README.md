@@ -4,7 +4,6 @@ last_reviewed: '2026-09-10'
 description: >-
   Understand what a chat experience is, what a moderated text room does and does
   not do, and where to start in this section.
-noIndex: true
 ---
 
 # Chat Experiences

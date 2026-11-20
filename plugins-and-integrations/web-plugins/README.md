@@ -3,7 +3,6 @@ title: Web Plugins
 description: >-
   Add Convai characters to web apps with the Convai Web SDK, render them as 3D
   bodies with Convai Embody, or build in PlayCanvas.
-noIndex: true
 ---
 
 # Web Plugins

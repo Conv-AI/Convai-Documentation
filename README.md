@@ -3,7 +3,6 @@ description: >-
   Start here to create, customize, test, and share interactive AI characters
   with Convai, covering Playground, no-code experiences, plugins and
   integrations, and API reference.
-noIndex: true
 ---
 
 # Welcome

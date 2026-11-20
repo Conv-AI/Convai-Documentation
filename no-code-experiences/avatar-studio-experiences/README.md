@@ -2,7 +2,6 @@
 description: >-
   Create intelligent 3D AI avatars directly in your browser — no downloads, no
   code, fully customizable.
-noIndex: true
 ---
 
 # Avatar Studio Experiences
