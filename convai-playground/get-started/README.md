@@ -2,7 +2,6 @@
 description: >-
   A guided overview of the first steps in Convai Playground, including
   navigation, character creation, testing, and essential global controls.
-noIndex: true
 ---
 
 # Get Started

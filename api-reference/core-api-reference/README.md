@@ -2,7 +2,6 @@
 description: >-
   Explore Convai’s Core APIs, divided into Character Crafting and Interaction
   APIs, to create, customize, and interact with intelligent AI characters.
-noIndex: true
 ---
 
 # Core API Reference

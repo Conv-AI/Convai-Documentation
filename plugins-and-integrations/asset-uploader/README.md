@@ -4,7 +4,6 @@ last_reviewed: '5.8'
 description: >-
   Upload Metahumans, Reallusion characters, and scenes from Unreal Engine to
   Convai Sim and Avatar Studio using the Convai Asset Uploader tool.
-noIndex: true
 ---
 
 # Asset Uploader

@@ -2,7 +2,6 @@
 description: >-
   Convai introduces a Modding Framework, enabling easy integration of AI-driven
   NPCs into games across engines like Unreal, Unity, and more.
-noIndex: true
 ---
 
 # Modding Framework

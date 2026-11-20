@@ -4,7 +4,6 @@ last_reviewed: 4.5.0
 description: >-
   Add real-time AI characters to Unity training simulations, interactive
   experiences, and games — with speech, emotion, actions, and persistent memory.
-noIndex: true
 ---
 
 # Convai Unity SDK
