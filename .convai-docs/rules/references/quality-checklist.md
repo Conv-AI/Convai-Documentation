@@ -4,7 +4,7 @@ Run this checklist before delivering or publishing any page. The `docs-reviewer`
 pass/fail audit.
 
 **Some items apply only to certain kinds of page.** Items marked **(SDK)** apply to pages backed by an
-SDK pack; items marked **(product)** apply to pages backed by a topic pack, such as the Convai
+SDK subject; items marked **(product)** apply to pages backed by a product subject, such as the Convai
 Playground or a no-code product. Everything unmarked applies to every page.
 
 Skip the items that do not apply and say you skipped them. Reporting "required SDK version is not
@@ -13,7 +13,8 @@ to stop reading it.
 
 ## Metadata
 
-- [ ] `title` is unique, specific, sentence case, keyword-first, ≤ 60 characters, and matches the GitBook page title **(CV-33, CV-17)**
+- [ ] `title` is specific, sentence case, keyword-first, ≤ 60 characters, and matches the GitBook page title **(CV-33, CV-17)**
+- [ ] `title` is unique within its space **(CV-91)**
 - [ ] `description` is one sentence and states the page outcome **(CV-34)**
 - [ ] `description` is 120–160 characters (hard max 200) **(CV-34)**
 - [ ] Description does not start with "This page covers...", "Learn about", or "Overview of."
@@ -64,10 +65,10 @@ page that reads like Convai and a page that reads like whoever happened to write
 
 ## Writing
 
-- [ ] Tone is direct and factual, pitched at the audience the pack names — a developer for an SDK or API page, a creator or operator for a product page.
+- [ ] Tone is direct and factual, pitched at the audience the subject file names — a developer for an SDK or API page, a creator or operator for a product page.
 - [ ] No filler, marketing language, setup promises, or hedging **(CV-1, CV-2, CV-3)**
 - [ ] No "simply", "just", or "easy." **(CV-1)**
-- [ ] Product name and capitalization match the pack exactly (do not call an SDK a "plugin" unless the pack says so; match UI labels character for character) **(CV-11, CV-12)**
+- [ ] Product name and capitalization match the subject file exactly (do not call an SDK a "plugin" unless the subject file says so; match UI labels character for character) **(CV-11, CV-12)**
 - [ ] Convai backend is referred to as "Convai" (no "cloud", "servers", "cloud-powered") **(CV-10)**
 - [ ] Technical terms are explained or linked on first use **(CV-13)**
 - [ ] Classes, methods, fields, file paths, asset paths, and literal values use `inline code` **(CV-18)**
@@ -80,10 +81,11 @@ page that reads like Convai and a page that reads like whoever happened to write
 - [ ] **(SDK)** Required SDK version, engine version, permissions, or prerequisites are listed **(CV-56)**
 - [ ] **(SDK)** Public APIs, fields, enums, and behaviors were verified against SDK source **(CV-53)**
 - [ ] **(product)** Required plan tier, entitlement, or permission is listed, and a beta surface is labelled as beta in the lead paragraph **(CV-56)**
-- [ ] **(product)** Every UI label matches the pack's terminology table exactly.
-- [ ] **(product)** Every claim about a screen, default, limit, or supported format is backed by a current screenshot or by written confirmation from the pack's named owner. Anything else is listed as an open question, not stated as fact.
+- [ ] **(product)** Every UI label matches the subject file's terminology table exactly.
+- [ ] **(product)** Every claim about a screen, default, limit, or supported format is backed by a current screenshot or by written confirmation from the subject file's named owner. Anything else is listed as an open question, not stated as fact.
 - [ ] **(product)** No fact was carried over from a sibling product that merely shares a folder.
 - [ ] A repository's own README, docs folder, or changelog was treated as a lead and every fact taken from it was confirmed in code **(CV-54)**
+- [ ] Doc comments and callers were judged by that section of `writing-standards.md` **(CV-53, CV-54)**
 - [ ] No changelog or release-notes entry was written that does not trace to real source history **(CV-55)**
 - [ ] No behavior was fabricated. A claim nobody could verify is raised as a question, never written as a statement **(CV-52)**
 
@@ -159,15 +161,18 @@ For compact pages, a symptom/cause/fix/verify table is acceptable.
 - [ ] Tables have clear headers and are not used for layout.
 - [ ] Warnings and prerequisites are visible as text **(CV-59)**
 - [ ] Search terms appear naturally in title, lead, headings, and examples.
+- [ ] The lead's first sentence answers the question the title asks, and each section's first sentence answers its heading **(CV-88)**
+- [ ] The page answers one reader question, the one its title names **(CV-89)**
+- [ ] An SDK page states the SDK version it applies to, with the version variable **(CV-90)**
 - [ ] Gender-neutral language; singular "they" where gender is unknown **(CV-60)**
 - [ ] No ableist or violent idioms **(CV-61)**
 
 ## Safe publishing and review
 
-- [ ] Changes were made on the `staging` branch, not directly on `main` **(CV-62)**
+- [ ] The change goes live through a pull request against the base branch, read in its rendered preview and approved by a person, never by a direct push **(CV-62)**
 - [ ] If using GitBook's native editor: a Change Request was opened and a reviewer was assigned.
 - [ ] AI-generated pages include a description listing the source of truth and any assumptions **(CV-63)**
-- [ ] No commit, push, pull request, or merge was created without explicit human approval **(CV-64)**
+- [ ] The change was published only through `steps/publish.md`, and a person, not an agent, approves and merges the pull request **(CV-64)**
 - [ ] A moved or renamed page has a redirect and an updated sidebar label in the same change **(CV-65)**
 - [ ] Existing pages, folders, assets, and GitBook configuration were not deleted unless explicitly approved.
 - [ ] Unrelated pages were not rewritten.

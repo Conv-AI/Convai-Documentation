@@ -41,7 +41,7 @@ If you read only one section, read this one. These nine habits produce most of t
 
 **About the rule IDs:** Numbered rules (`CV-1`, `CV-2`, …) are the enforceable tier — the agent flags violations and cites the ID, so any flag traces back to an exact rule. Unnumbered guidance, like the voice description, is judgement territory: the agent writes with it and may suggest it, but never flags it. Never renumber or reuse an ID; past flags and the decision log refer to them. To add a rule, give it the next number after the current highest, wherever on the page it belongs.
 
-**Where the rules actually live:** this page is generated from the `convai-docs` tooling repository (`Conv-AI/convai-docs-tools`, `skills/convai-docs/gitbook/styleguide.md`). To change a rule, change it there and re-run `/convai-docs:styleguide-sync`. Edits made directly on this page are lost at the next sync.
+**Where the rules actually live:** this page is generated from the `convai-docs` tooling repository (`skills/convai-docs/gitbook/styleguide.md` there). To change a rule, change it there and re-run `/convai-docs:site styleguide`. Edits made directly on this page are lost at the next sync.
 
 ## Audience and scope
 
@@ -143,6 +143,10 @@ A product's own interface always wins over this table for a label the reader cli
 * **CV-33:** The title is specific, keyword-first, and at most 60 characters — wherever it lives, frontmatter or leading heading.
 * **CV-34:** `description` is one plain-English sentence stating the page outcome, 120–160 characters, hard maximum 200. It must not start with `This page covers`, `Learn about`, or `Overview of`, and must not contain class names, method names, file paths, or backtick identifiers — those belong in the body.
 * **CV-35:** Set `last_reviewed` on any page whose accuracy depends on a specific SDK, engine, or API version.
+* **CV-88:** Answer first. The first sentence of the lead paragraph answers the question the title asks, and the first sentence of each `##` section answers the question its heading asks. Readers scan, and an AI assistant quotes the first sentence of a section.
+* **CV-89:** One question per page. A page answers the one reader question its title names. A second question, however close, gets its own page or a link to the page that answers it.
+* **CV-90:** Every SDK page states which SDK version it applies to, in its prerequisites or, on a reference page, in its lead, using the GitBook variable that holds the current version (CV-24). `last_reviewed` records the version for the tools; a reader arriving from search sees only the page.
+* **CV-91:** A title is unique within its space. Two pages with one title give a search result, a sidebar and an AI answer that cannot say which page they mean.
 
 ## Content types
 
@@ -158,6 +162,8 @@ Every page has exactly one primary mode, and a page that mixes modes gets split.
 * **CV-36:** One primary mode per page. A how-to page does not become a reference page by growing a table of every field.
 * **CV-37:** Every page is reachable — from the sidebar, a hub page, or a related-page link. No orphan pages.
 * **CV-38:** A sidebar label matches that page's `title` exactly, in the same wording and case.
+* **CV-85:** Every relative link resolves to a page or file that exists. A broken link sends the reader to a not-found page at the moment they were following the documentation's own advice.
+* **CV-87:** A link to a page in another space uses that page's absolute site URL. GitBook publishes each space on its own, so a relative path into another space's directory has nothing to resolve against on the published site.
 
 ## GitBook blocks
 
@@ -220,16 +226,19 @@ Every page carries options beyond its content, and they are part of the page, so
 
 | Option | Our rule |
 |---|---|
-| Icon | Set one on hub and section index pages so cards and the sidebar read at a glance. Optional elsewhere, but consistent within a section |
+| Icon | Required on every top-level and hub page so cards and the sidebar read at a glance. Optional elsewhere, but consistent within a section. **CV-81** |
 | Cover image | Only on a section landing page, and only when the image says something. A decorative cover pushes the lead paragraph below the fold |
 | Wide layout | Only when a table, a card grid, or a code block genuinely needs the width. **CV-74** |
-| Hidden page | A page deliberately kept out of the sidebar. **CV-75** |
-| Search indexing | Turn indexing off only for a page that must not appear in search results at all |
+| Hidden page | A page deliberately kept out of the sidebar. **CV-75**, **CV-78** |
+| Search indexing | Turn indexing off only for a page that must not appear in search results at all, and never on a hub. **CV-77** |
 | Tags | Apply the section's existing tags; do not invent a new vocabulary per page |
 | Sidebar label | Matches the page title exactly. **CV-38** |
 
 * **CV-74:** Wide layout is a deliberate choice for content that needs the width, not a page default. Wide prose is harder to read than narrow prose.
 * **CV-75:** A hidden page is still a real page: it has a title, a description, and an owner. If nothing links to it and nobody owns it, delete it rather than hiding it.
+* **CV-77:** Never set `noIndex` on a hub or section index page: it takes every page reached through it out of search. On any other page, `noIndex` needs a line in `.convai-docs/noindex-allowlist.txt` giving the page and the reason.
+* **CV-78:** Every hidden page is listed on every site check. Hiding removes a page from the sidebar only; it is still served at its URL and still read by AI agents, so keeping it hidden stays a decision.
+* **CV-81:** Every top-level page and every hub page carries an icon, and the icon comes from the space's allowed list in `.convai-docs/icons.json` once that list exists. A hidden page is exempt, because it has no sidebar entry or card to show one.
 
 ## Screenshots and images
 
@@ -238,6 +247,9 @@ Every page carries options beyond its content, and they are part of the page, so
 * **CV-49:** A screenshot must not expose an API key, token, private project name, local username, internal path, email address, or another customer's content. Use a test account with test content.
 * **CV-50:** A page does not publish with a placeholder image path or an unresolved screenshot marker.
 * **CV-51:** On SDK pages a screenshot is a last resort, used where Inspector state, scene hierarchy, or visual output would otherwise be ambiguous. On product pages the default inverts: the reader is following along on screen, so show the panel they must find and the state that confirms the step worked.
+* **CV-79:** No image on a page that a change touches has empty alt text. GitBook leaves the alt text empty when an image is uploaded, so write it before the change merges; CV-48 says what it should say.
+* **CV-86:** Every image a page shows is a file inside that page's own space. A missing file, or one in another space, renders as an empty frame on the published page.
+* **CV-80:** An image a change adds is named for what it shows, in kebab-case, never with the name a tool gave it, such as `image (19).png` or `Screenshot 2025-03-04 at 10.11.12.png`.
 
 ## Technical accuracy
 
@@ -259,16 +271,19 @@ This is the section that matters most. A page that reads beautifully and states 
 
 ## Publishing
 
-* **CV-62:** Documentation changes are prepared on the `staging` branch and reviewed in the Staging space before a pull request to `main`. Nothing AI-generated goes straight to `main`.
+* **CV-62:** Every documentation change goes live through a pull request against the base branch. It is read in its rendered preview, and a person approves it before it merges. Nothing AI-generated goes live without that review.
 * **CV-63:** A change request description names the source of truth used for technical claims and any assumption made.
 * **CV-64:** A human, not an agent, gives the final approval on any change request.
 * **CV-65:** When a page moves or is renamed, add a redirect in the same change, and update its `SUMMARY.md` label in the same change.
+* **CV-82:** A path under a retired section never comes back. Retired sections are listed in `.convai-docs/retired-sections.txt`, and a section moves there in the change that deletes it.
+* **CV-83:** Every redirect in `.gitbook.yaml` points at a page that exists.
+* **CV-84:** A change that removes or moves a page carries a `.gitbook.yaml` redirect for the page's old URL, unless another page is now served at that URL. This is the check that holds a change to CV-65.
 
 ## Ownership and updates
 
 * **Owner:** Kaan Eray Akay (kaan@convai.com)
 * **Review cadence:** once per SDK release cycle, and quarterly for anything not otherwise touched
-* **How to propose a change:** open a pull request against `Conv-AI/convai-docs-tools`, editing `skills/convai-docs/gitbook/styleguide.md`, then re-pin the registry with `tools/check_rules.py --update <date>`. Say in the commit message which page the rule was going to make worse — that is the evidence a reviewer needs.
+* **How to propose a change:** open a pull request against the `convai-docs` tooling repository, editing `skills/convai-docs/gitbook/styleguide.md`, then re-pin the registry with `tools/check_rules.py --update <date>`. Say in the commit message which page the rule was going to make worse — that is the evidence a reviewer needs.
 * **When settled decisions can be revisited:** when a rule demonstrably makes a real page worse. Record the outcome in the decision log below.
 
 ## Decision log
@@ -284,3 +299,7 @@ This is the section that matters most. A page that reads beautifully and states 
 | 2026-08-18 | CV-21 applies to lists and tables inside prose, not to one that directly follows its own heading | A review flagged every reference table on this page. Demanding "Use these patterns:" under a heading that already says it produces the filler CV-3 bans, so the rule was narrowed rather than the pages padded. |
 | 2026-08-18 | A page may carry its title in the frontmatter or as a leading `#` heading, but never both (CV-25, CV-26, CV-33) | The rule demanded frontmatter and no body heading. Measured against the repository it failed 89 pages across three whole sections, because GitBook's editor writes the other shape when it round-trips a page. A rule that fails every page authored on the platform it serves is a broken rule; what it was protecting — one title, machine-findable, never two — is unchanged. |
 | 2026-08-18 | An unbalanced GitBook block blocks publication rather than warning (CV-76) | An unclosed hint or tabs block swallows the rest of the page on the published site, so the reader loses everything after it with nothing to indicate why. |
+| 2026-11-24 | Site-level checks get rules of their own, CV-77 to CV-84, and the old advice not to introduce icons into a section that has none is withdrawn (CV-81) | Between 13 and 19 November `noIndex` on section index pages took whole sections out of search and nothing noticed. Each of these is now checked by `check_site.py` in the pull-request workflow, so each needs an id a finding can cite. CV-79 and CV-84 are the merge-blocking checks behind CV-48 and CV-65, which keep saying what good alt text and a correct move look like. |
+| 2026-11-25 | Broken links, missing images and links that leave their space get rules of their own (CV-85, CV-86, CV-87), and a title unique within its space gets CV-91 | `check_site.py` reported these under CV-20 (link text), CV-48 (alt text) and CV-33 (title length), so a finding cited a rule that says something else. A finding that cites the wrong rule sends the writer to fix the wrong thing. |
+| 2026-11-25 | CV-62 is reworded in place: a change goes live through a pull request against the base branch, read in its rendered preview and approved by a person | It named a fixed branch and the Staging space. The base branch is a setting the documentation owner switches, and the rule has to be true before and after the switch without an edit. Its purpose, a rendered preview and a person's approval before anything is live, is unchanged, so the id is kept. |
+| 2026-11-25 | The SEO advice becomes numbered rules: answer first (CV-88), one question per page (CV-89), the SDK version stated on every SDK page (CV-90) | It was a table of advice the reviewer could not cite, so a page that buried its answer passed review. `references/seo-accessibility.md` now lists the rule behind each standard. |

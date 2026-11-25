@@ -28,22 +28,34 @@ Organize pages by user intent, not by internal SDK implementation.
 
 ### Page-type requirements
 
-- **Tutorial:** use "We will…" collaborative framing, not "You will learn…". Include a clear
-  destination up front. Each step must produce a visible, meaningful result the learner can observe.
-  Ruthlessly minimize explanation — if you need to explain something, link to a reference or concept
-  page instead of adding prose. Keep to one path; ignore options and alternatives.
-- **How-to guide:** assume the reader is already competent. Include outcome, prerequisites, focused
-  steps, verification, troubleshooting, and next steps. Prioritize practical usability over
-  completeness — do not cover every edge case.
-- **Reference:** be austere. Include exact names, types, syntax/signature, fields, parameters,
-  defaults, return values, events, errors, and constraints. Mirror the SDK's structure. No narrative
-  teaching, no marketing, no opinion.
-- **Explanation:** take a wide perspective. Cover background, rationale, design decisions,
-  alternatives, tradeoffs, and relationships between systems. Use reasoning statements. Do not include
-  steps, procedures, or close-up reference detail.
-- **Troubleshooting:** organize by symptom. Each item must include symptom, cause, fix, and verification.
-- **Hub/index page:** use a short section introduction plus cards for the main child pages. Do not
-  include long procedures or full reference tables.
+Each template's opening comment holds the requirements of its page type: what the page includes,
+what it avoids, and its description formula. `page-types.md` maps a reader's goal to the template.
+
+### Product-interface page types
+
+A product with a screen instead of an API (the Playground, the dashboard, Avatar Studio) gets three
+page shapes of its own. Each is a shape within one mode above, not a fifth mode.
+
+| Page type | Template | Mode | Reader question | Holds |
+|---|---|---|---|---|
+| Interface tour | `templates/interface-tour.md` | reference | "Where is everything on this screen?" | One section per region of one screen, in screen order: each label, what it holds, the page that explains it |
+| Task in the interface | `templates/interface-task.md` | how-to | "How do I do this one thing on this screen?" | Prerequisites, the path to the tab, steps that name each control, the state that shows it worked |
+| Field reference | `templates/field-reference.md` | reference | "What does each field on this panel do?" | One table per section of one panel: label, what it changes, default, limit, required; the panel's messages |
+
+Rules that hold for all three:
+
+- **A label on screen is not a page title.** Steps and tables use the label exactly as the product
+  spells it, in bold. The page's own title, and the text of a link to it, use the destination page's
+  title. The Playground tab **Description** is documented on the page "Character Description".
+- **Labels come from source, not from a screenshot.** Take labels, order, and disabled or hidden
+  states from what the subject file names as the source of truth. A label nobody can verify is a question
+  for the subject's owner, not a line on the page.
+- **One screen per tour, one task per task page, one panel per field reference.** A tour that starts
+  giving steps is a task page; a task page that lists every field is a field reference.
+- **A limit the product fetches at runtime is set by Convai.** Do not print the fallback number from
+  the code as the limit.
+- A configuration tab usually gets a task page. Add a field reference when the tab has more fields than
+  its tasks use, and link the two.
 
 ## Page nesting and hubs
 
@@ -103,12 +115,4 @@ Rules:
 
 ## Cross-linking and orphan prevention
 
-Every page must be reachable through at least one of: sidebar navigation, a parent hub page, a related
-page link, or a next steps section.
-
-- Link when reader intent changes from task to concept, task to reference, or concept to how-to.
-- Use descriptive link text. Never "click here."
-- Link to the source of truth rather than repeating large sections.
-- Keep next steps to 2-5 links. Do not create a "Related articles" dump.
-- When adding a page that should appear in the sidebar, update `SUMMARY.md` in the same change. The
-  sidebar label must match the page `title` frontmatter exactly.
+How a page links and stays reachable is in `page-structure.md`, "Links and reachability".
