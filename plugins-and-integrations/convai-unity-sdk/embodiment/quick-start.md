@@ -1,7 +1,7 @@
 ---
 title: Embodiment quick start
 description: Add the Gaze module to an existing Convai character so it makes eye contact with the player, visible immediately in Play mode.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 Add the Gaze module to an existing Convai character and confirm that the character makes eye contact with the player in Play mode. Use this page once you have a working `ConvaiCharacter` in your scene and want to see embodiment behavior for the first time before configuring the other four modules.
@@ -33,19 +33,24 @@ In the Hierarchy, select the `GameObject` that carries the `ConvaiCharacter` com
 
 In the Inspector, select **Add Component**, then **Convai > Embodiment > Gaze**. This adds `ConvaiGazeController` to the character.
 
-Convai also adds the shared infrastructure the module needs — an `EmbodimentContext` and a `StandardRigBinding` — automatically. You do not add these yourself.
+Alternatively, open **Convai > Embodiment Editor**, select **Setup**, and select **Add** beside **Gaze**.
+
+<figure><img src="../../../.gitbook/assets/unity-embodiment-before-add-gaze.png" alt="Embodiment Editor Setup with Demo Character selected and an Add button on the Gaze row."><figcaption><p>Confirm the selected character (1), then select <strong>Add</strong> on the <strong>Gaze</strong> row (2).</p></figcaption></figure>
+
+Convai also adds the shared infrastructure the module needs — an `EmbodimentContext` — automatically. The `StandardRigBinding` appears when the character starts in Play mode, or immediately when you use **Set Up This Character** or **Set Up Rig Now** in the Embodiment Editor.
 {% endstep %}
 
 {% step %}
 ### Review the rig detection
 
-Open **Convai > Embodiment Editor** and select the **Setup** tab. Select **Set Up This Character** to see which face-blendshape convention Convai detected and how confident that detection was, and which bones resolved.
+Open **Convai > Embodiment Editor** and select the **Setup** tab. Open **Rig** to check which bones Convai detected. Select **Set Up Rig Now** to see the detected face-blendshape convention and how confident Convai is in the result.
 
 This step is optional — Gaze already works without it — but it is how you see what Convai worked out before you enter Play mode.
+
+<figure><img src="../../../.gitbook/assets/unity-embodiment-rig-detection.png" alt="Embodiment Editor Setup tab showing the Rig panel, the Set Up Rig Now button, and the detected head, neck, and eye bones"><figcaption><p>(1) Open Rig to review detection. (2) Select Set Up Rig Now to add the rig component and see the resolved face rig. (3) Check which bones Convai detected.</p></figcaption></figure>
+
 {% endstep %}
 {% endstepper %}
-
-***
 
 ## Verify the setup
 

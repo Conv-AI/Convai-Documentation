@@ -1,7 +1,7 @@
 ---
 title: Choose a targeting mode
 description: Pick the conversation targeting mode that matches your camera and control scheme so the right character responds to the player.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Set `ConversationTargetingMode` on `ConvaiManager` so the SDK picks the right character in a room with more than one — the mode that fits a first-person view is not the one that fits a top-down camera or a dialogue menu. Use this page when you have two or more `ConvaiCharacter` components in a scene and need to decide how the player addresses one of them.
@@ -14,23 +14,23 @@ Set `ConversationTargetingMode` on `ConvaiManager` so the SDK picks the right ch
 
 ## Pick a mode
 
-`ConvaiManager` exposes three modes under **Convai Manager → Who The Player Talks To → Chosen By**. That section appears in the Inspector once the scene has more than one character to choose between.
+`ConvaiManager` exposes three modes under **Convai Manager → Who The Player Talks To → Chosen By**. That section appears in the Inspector when at least two characters are selected to join the room, or targeting settings differ from their defaults.
 
 {% tabs %}
 {% tab title="Look At (default)" %}
-`LookAt` addresses the character nearest the centre of the player's view. It scores every eligible character by the angle from the view direction, with distance as a tiebreak, so it works identically on mouse, gamepad, touch screen, and head-mounted display — it reads the camera, not the input device.
+`LookAt` addresses the character nearest the centre of the player's view. It scores every eligible character by the angle from the view direction, with distance as a tiebreak, so it works identically on mouse, gamepad, touch screen, and head-mounted display — it reads the view transform, not the input device. Assign **Player Camera** for an XR head camera or a specific player view. The fallback order is **Player Camera**, the camera tagged `MainCamera`, the first eligible enabled Game camera, then the `ConvaiPlayer` transform.
 
 Use `LookAt` for first-person and VR scenes, and for any scene where the camera direction is the player's gaze.
 {% endtab %}
 
 {% tab title="Proximity" %}
-`Proximity` addresses the nearest character, regardless of where the player is looking.
+`Proximity` addresses the character nearest the view transform, regardless of view direction. It uses the same **Player Camera**, `MainCamera`, then `ConvaiPlayer` fallback as `LookAt`.
 
-Use `Proximity` for top-down and third-person games where the camera is not the player's gaze — an isometric training simulation or a third-person scene with a free camera, for example, where `LookAt` would address whichever character the camera happens to be pointed at rather than the character the player is actually near.
+Use `Proximity` when distance from that view is the intended rule. A camera far from the player avatar measures from the camera, so use a [custom targeting rule](custom-targeting-rule.md) if you need avatar distance instead. **Proximity Margin (Fraction)** defaults to `0.15`; a challenger must be 15% nearer. **Look Angle** and **Switch Margin** apply only to `LookAt`.
 {% endtab %}
 
 {% tab title="Manual" %}
-`Manual` changes the target only when the game calls `ConvaiManager.TalkTo`. Nothing moves on its own.
+`Manual` uses scripted target changes. If the current room membership leaves or enters `Failed`, the SDK can recover to the first ready character. An explicitly cleared target stays clear until your code requests another target.
 
 Use `Manual` for dialogue menus, quest steps, and cutscenes where the game — not the player's view or position — decides who is being addressed. See [Script the conversation target](script-the-conversation-target.md).
 {% endtab %}
@@ -45,6 +45,9 @@ Select the `ConvaiManager` GameObject, open **Who The Player Talks To**, and cho
 
 {% tab title="C#" %}
 ```csharp
+using Convai.Runtime.Components;
+using Convai.Runtime.Conversation;
+
 ConvaiManager manager = ConvaiManager.ActiveManager;
 manager.ConversationTargeting.Mode = ConversationTargetingMode.Proximity;
 ```
@@ -58,6 +61,10 @@ Enter Play mode with two or more characters registered. Under `LookAt` or `Proxi
 {% hint style="success" %}
 The Live section reports the addressed character changing as you move between characters. If it never changes, see [Troubleshoot conversation targeting](troubleshooting.md).
 {% endhint %}
+
+<figure><img src="../../../../.gitbook/assets/unity-target-look-at.png" alt="Fixed Game view with Tuesday closer on the left and Friday in the center. The Look At mode addresses Friday."><figcaption><p>(1) <strong>Talking to</strong> shows Friday. (2) In <strong>Look At</strong> mode, Friday is the ready character in the center of the camera view.</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-target-proximity.png" alt="The same Game view in Proximity mode, with Tuesday named as the addressed character."><figcaption><p>(1) <strong>Talking to</strong> now shows Tuesday. (2) With the camera and characters in the same positions, <strong>Proximity</strong> chose the nearer character on the left.</p></figcaption></figure>
 
 ## Next steps
 

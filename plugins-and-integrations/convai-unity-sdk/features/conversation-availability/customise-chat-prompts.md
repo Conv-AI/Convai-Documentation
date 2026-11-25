@@ -1,7 +1,7 @@
 ---
 title: Customise the chat field prompts
 description: Change every prompt string the shipped chat field shows for each conversation availability state, including the character's name.
-last_reviewed: "4.6.0"
+last_reviewed: "5.0.0-preview"
 ---
 
 The shipped chat field, `ChatTranscriptUI`, shows a different placeholder for every conversation availability state and disables itself until the addressed character can actually hear the player. Every one of those strings is a serialized field on the component, so a project can reword them in the Inspector without touching code.
@@ -12,7 +12,7 @@ The shipped chat field, `ChatTranscriptUI`, shows a different placeholder for ev
 
 ## Edit the prompt fields
 
-Select the `GameObject` carrying `ChatTranscriptUI` and open the **Input Availability** section of the Inspector. Each field maps to one availability state:
+Select the `GameObject` carrying `ChatTranscriptUI` and find the **Input Availability** heading in the default Inspector. Each field maps to one availability state:
 
 | Inspector field | Default value | Shown when |
 | --- | --- | --- |
@@ -25,12 +25,13 @@ Select the `GameObject` carrying `ChatTranscriptUI` and open the **Input Availab
 | Ready Prompt | `Message {0}` | `Ready` |
 | Answering Prompt | `{0} is speaking…` | `Answering` |
 | Unavailable Prompt | `{0} is unavailable` | `Unavailable` |
+| Group Conversation Prompt | `Use push-to-talk to speak` | A group room, regardless of character availability, while Gate Input On Availability is enabled |
 
 `{0}` is replaced with the addressed character's display name. A template with `{0}` removed is shown as plain text instead of throwing.
 
 ## Tune the slow-connect hint
 
-**Slow Connect Hint Seconds** controls how long the field waits in `Connecting` before switching to the Slow Connecting Prompt — 35 seconds by default. Multi-character connects were measured at 26–34 seconds, so the default sits immediately above that: a hint that fires during a normal wait teaches the player to distrust it, and one that fires seconds before success is pure noise. Set the field to `0` to never show the slow-connect prompt.
+**Slow Connect Hint Seconds** controls how long the field waits in `Connecting` before switching to the Slow Connecting Prompt — 35 seconds by default. Connection timing depends on the deployment and network; tune this hint against your own observed waits. Set the field to `0` to never show the slow-connect prompt.
 
 ## Turn off the gate entirely
 
@@ -43,6 +44,10 @@ Select the `GameObject` carrying `ChatTranscriptUI` and open the **Input Availab
 ## Verify the change
 
 Enter Play mode and step through the states — disconnected, connecting, and connected before the character is confirmed — confirming each shows the prompt you set. Type a message before the field opens and confirm the refusal notice, if assigned, shows your expected wording.
+
+<figure><img src="../../../../.gitbook/assets/unity-availability-ready-prompt.png" alt="Tuesday is addressed and the enabled chat input displays the example prompt Ask Tuesday a question."><figcaption><p>(1) Tuesday is the addressed character. (2) The ready prompt <code>Ask {0} a question</code> inserts her name when the field accepts input.</p></figcaption></figure>
+
+<figure><img src="../../../../.gitbook/assets/unity-availability-offline-prompt.png" alt="The same demo session is offline and the disabled chat input displays the custom prompt Connect to start chatting."><figcaption><p>(1) The sample reports <strong>Offline</strong> after disconnecting. (2) The disabled field shows the configured offline prompt, <strong>Connect to start chatting</strong>.</p></figcaption></figure>
 
 ## Next steps
 

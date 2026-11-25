@@ -1,53 +1,33 @@
 ---
-title: Create a lip sync profile
-description: >-
-  Explains how to create a custom lip sync profile asset for a blendshape
-  format beyond the three profiles the SDK bundles by default.
-last_reviewed: "4.6.0"
+title: Choose a built-in lip sync profile
+description: Choose the facial data format for a character, replace an older custom profile selection, and verify the mapping against the character mesh.
+last_reviewed: "5.0.0-pre.1"
 ---
 
-A lip sync profile defines the transport format identifier — it tells the SDK which blendshape channel names to expect from Convai.
+Choose a built-in lip sync profile for the facial data Convai sends. To animate a mesh with different blendshape names, keep that profile and create a mapping asset for the mesh.
 
 {% hint style="warning" %}
-Convai currently streams blendshape data in three formats only: `arkit`, `metahuman`, and `cc4_extended`. A custom profile is only useful if Convai explicitly supports a custom format for your deployment. Creating a profile with an unsupported format ID will result in no blendshape data being received.
+Older SDK versions supported custom profile assets and registries. The 5.0 profile catalog contains the built-in profiles. Replace a custom registry selection on each affected character before testing playback.
 {% endhint %}
 
-For all standard setups, use one of the three bundled profiles and leave this page for advanced or future use.
+## Choose a profile for the character
 
 {% stepper %}
 {% step %}
-### Create the asset
+### Select the incoming format
 
-In the Project window, navigate to the folder where you want to store the profile. Right-click and select **Create > Convai > Lip Sync > Profile**. Name the asset descriptively — for example, `ConvaiLipSyncProfile_MyRig`.
+Select the character's `ConvaiLipSyncComponent` and choose the built-in **Profile** that matches the incoming stream. [Lip sync profiles and mappings](profiles-and-mappings.md) lists the formats.
 {% endstep %}
 
 {% step %}
-### Configure the fields
+### Map the channels to the face
 
-Select the new asset to open it in the Inspector.
-
-| Field                | Description                                                                              |
-| -------------------- | ---------------------------------------------------------------------------------------- |
-| **Profile ID**       | Transport format identifier. Must exactly match the format ID Convai streams for this character. |
-| **Display Name**     | Human-readable name shown in the Inspector. Does not affect runtime behavior.            |
-| **Transport Format** | Network transport format string — typically the same as Profile ID.                      |
-
-{% hint style="danger" %}
-**Profile ID** must exactly match the identifier Convai uses when streaming blendshape data. A mismatch causes the SDK to fall back to a no-op map — no blendshapes animate.
-{% endhint %}
+Assign the facial renderers. If their blendshape names differ from the built-in map, [create a custom lip sync map](create-a-custom-blendshape-map.md) for the selected profile and assign it under **Mapping**.
 {% endstep %}
 
 {% step %}
-### Assign the profile ID to the component
+### Verify the mouth moves
 
-Set `ConvaiLipSyncComponent._lockedProfileId` to the **Profile ID** string you defined. The SDK looks up this profile from the registry at runtime.
+[Validate the map](validate-a-lip-sync-map.md) to find missing targets. Enter Play Mode and check that the mouth follows an audible reply and settles at the end.
 {% endstep %}
 {% endstepper %}
-
-## Next steps
-
-After creating the profile, create a map to route its channels to your rig's blendshape names.
-
-{% content-ref url="create-a-custom-blendshape-map.md" %}
-[Create a custom lip sync map](create-a-custom-blendshape-map.md)
-{% endcontent-ref %}

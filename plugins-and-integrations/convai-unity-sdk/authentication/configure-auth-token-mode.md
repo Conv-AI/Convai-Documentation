@@ -1,7 +1,7 @@
 ---
 title: Configure Auth Token mode
 description: Switch a Convai Unity SDK project to Auth Token mode and configure the token endpoint in Project Settings for a shipped build.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 Configure Auth Token mode so a player build resolves a short-lived credential from your backend instead of shipping the Convai account API key. Use this page when you have a token endpoint ready, or when you are configuring a public token endpoint directly in Project Settings.
@@ -21,7 +21,7 @@ If your integration uses a custom `IConvaiAuthTokenProvider` instead of a Projec
 {% step %}
 ### Open the Credentials section
 
-In the Unity Editor menu bar, open **Convai > Settings** (or **Edit > Project Settings > Convai SDK**), then select the **Credentials** section.
+In the Unity Editor menu bar, open **Convai > Settings** (or **Edit > Project Settings > Convai SDK**), then open **Credentials**.
 {% endstep %}
 
 {% step %}
@@ -39,13 +39,16 @@ Enter your backend's token endpoint in **Token Endpoint URL**. The endpoint must
 {% step %}
 ### Select the HTTP method
 
-Set **HTTP Method** to **GET** or **POST** to match how your endpoint expects the request.
+Set **HTTP Method** to **Get** or **Post** to match how your endpoint expects the request.
 {% endstep %}
 
 {% step %}
 ### Confirm the Token Response Field
 
 Leave **Token Response Field** at its default, `apiAuthToken`, unless your endpoint returns the token under a different JSON field. This field supports dotted paths, so a nested field such as `data.token` resolves correctly.
+
+<figure><img src="../../../.gitbook/assets/unity-auth-token-endpoint.png" alt="Credentials in Auth Token mode showing an example HTTPS token endpoint, HTTP method, and response field."><figcaption><p>(1) Select <strong>Auth Token</strong>. (2) Enter the HTTPS URL for your own token endpoint. (3) Set <strong>Token Response Field</strong> to the JSON field your endpoint returns.</p></figcaption></figure>
+
 {% endstep %}
 
 {% step %}
@@ -59,11 +62,25 @@ Add entries to **Request Headers** only for static values that are safe to inclu
 Project Settings headers are static and ship inside the player build. Never put a player token, refresh token, server secret, or Convai API key into the Request Headers list. If your token request needs a per-player credential, use a registered `IConvaiAuthTokenProvider` instead — see [Write a custom token provider](custom-token-provider.md).
 {% endhint %}
 
+## Check the endpoint contract
+
+The built-in endpoint client sends no body for `GET` and `{}` for `POST`. The response must contain a non-empty string at **Token Response Field**. It optionally reads a top-level `expirationTime` timestamp. Expiry is informational; it does not schedule token refresh.
+
+```json
+{
+  "apiAuthToken": "<token returned by your server>"
+}
+```
+
+The request timeout comes from **Connection & Scripting Defines > Connection Timeout (s)**, which defaults to `30`. Entering an endpoint URL disables the Editor-only saved-key fallback. A registered provider still takes precedence over the endpoint.
+
 ## Verify the configuration
 
-Enter Play mode with a scene that connects a `ConvaiCharacter`. A successful connection confirms the endpoint returned a valid token under the configured response field. If the connection fails, check the Console for the exact error message and see [Troubleshoot authentication](troubleshooting.md).
+Check the **Auth Token** row under **Convai > Home > Welcome > Setup Health**. A green status means a runtime source is configured. The check does not validate a token. Resolve a blocking finding before testing.
 
-Your saved API key remains available to Editor tools after switching to Auth Token mode, but both stored key fields are cleared automatically while an Auth Token player build is produced, and restored afterward.
+Enter Play mode with a scene that connects a `ConvaiCharacter`. With no provider registered, a successful connection confirms the configured endpoint supplied a token accepted by Convai. If the connection fails, check the Console for the exact error message and see [Troubleshoot authentication](troubleshooting.md).
+
+Your saved API key remains available to Editor tools after switching to Auth Token mode, while the build processor clears the saved settings key for the duration of an Auth Token player build.
 
 ## Next steps
 

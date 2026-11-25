@@ -3,19 +3,19 @@ title: Add chat UI
 description: >-
   Add the shipped chat transcript prefab to display scrolling conversation
   history on screen during character interactions.
-last_reviewed: "4.5.0"
+last_reviewed: "5.0.0-pre.1"
 ---
 
 The Convai SDK for Unity includes a ready-made `ChatTranscriptUI` prefab that displays scrolling chat history in real time. The prefab includes its own `Canvas` — drag it into the scene, and it connects to `ConvaiManager` automatically.
 
 ## Chat history and captions
 
-`ConvaiManager.ActiveManager.Transcripts` (`ConvaiTranscripts`) exposes two independent, combinable projections of a conversation: durable chat history and live speech-aligned captions. This page adds chat history using the shipped `ChatTranscriptUI` prefab. Captions use a separate, sample-only script with no shipped prefab — see [Chat and subtitle modes](../ui-and-presentation/transcript-ui/chat-and-subtitle-modes.md) to add captions or combine both displays in the same scene.
+`ConvaiManager.ActiveManager.Transcripts` (`ConvaiTranscripts`) exposes conversation entries and live speech-aligned caption state. Use `GetEntries()` and `Subscribe()` for history, or `SubscribeCaptions()` for Active, Completed, Interrupted and Cleared caption updates. History belongs to the current SDK runtime; export it if you need persistent storage. This page adds chat history using the shipped `ChatTranscriptUI` prefab. For a caption view, use the SDK component `ConvaiTranscriptDisplay` in **Captions** mode — see [Chat and subtitle modes](../ui-and-presentation/transcript-ui/chat-and-subtitle-modes.md) to add captions or combine both displays in the same scene.
 
 | Projection | Consumed by | Description |
 | --- | --- | --- |
 | Chat history | `ChatTranscriptUI` (shipped prefab, covered on this page) | Scrolling message bubbles — separate entries for player and character turns |
-| Captions | `SubtitleTranscriptUI` (reference script, no shipped prefab) | A single caption block that updates as each turn streams, then auto-hides |
+| Captions | `ConvaiTranscriptDisplay` | In Captions mode, displays current speech. History mode shows finalized entries. |
 
 ## Add the chat UI prefab
 
@@ -28,6 +28,7 @@ In the Project window, navigate to:
 ```text
 Packages/Convai SDK for Unity/Prefabs/TranscriptUI/TranscriptUI_Chat.prefab
 ```
+For a display positioned in the scene or an XR environment, use the sibling `TranscriptUI_Chat_WorldSpace.prefab` and configure its world-space Canvas and input raycaster for your interaction system.
 {% endstep %}
 
 {% step %}
@@ -35,12 +36,16 @@ Packages/Convai SDK for Unity/Prefabs/TranscriptUI/TranscriptUI_Chat.prefab
 
 Drag `TranscriptUI_Chat.prefab` into the Hierarchy. The prefab includes its own `Canvas` — no separate `Canvas` setup is required.
 
+Keep **Convai > Settings > Runtime Defaults > Transcript System** enabled. A runtime `TranscriptEnabled` override can also disable presentation.
+
 The chat UI overlay appears in the Game view. The component finds `ConvaiManager` automatically when the scene starts — no manual wiring is needed.
+
+<figure><img src="../../../.gitbook/assets/unity-basic-sample-ready-prompt.png" alt="Game view in the Basic Sample with the enabled Message Robot field beside the Robot."><figcaption><p>(1) The chat field shows <strong>Message Robot</strong> when it can accept input. (2) The Robot is the character addressed by this field.</p></figcaption></figure>
 
 The chat input field requires an `EventSystem` in the scene. If your scene does not already have one, add it via **GameObject > UI > Event System**.
 
 {% hint style="warning" %}
-If no `ConvaiManager` is found at startup, the Console logs: `[ChatTranscriptUI] No active ConvaiManager found.`. Check that `ConvaiManager` is in the scene.
+The chat needs an initialized `ConvaiManager` and a configured `ConvaiPlayer`. If the field shows a connecting or preparing prompt, wait for the addressed character to become ready before typing.
 {% endhint %}
 {% endstep %}
 {% endstepper %}
@@ -63,11 +68,26 @@ If you need to customize the layout, select the prefab instance and inspect the 
 
 | Field          | Default | Description                         |
 | -------------- | ------- | ----------------------------------- |
-| `fadeDuration` | `0.5`   | Seconds for fade-in/out transitions |
+| `fadeDuration` | `0.5` | Seconds for fade-in/out transitions |
+| `canvasFader` | Prefab reference | Fade controller. |
+| `canvasGroup` | Prefab reference | Canvas group used to control visibility. |
 
-{% hint style="warning" %}
-If `chatContainer` is not assigned, messages will not appear and the Console logs: `[ChatTranscriptUI] chatContainer is not assigned - messages will not display`. The bundled prefab has all references pre-wired.
-{% endhint %}
+If `chatContainer` is not assigned, messages will not appear and the Console logs: `chatContainer is not assigned - messages will not display`. The bundled prefab has all references pre-wired.
+
+**Input Availability:**
+
+| Field | Default | Purpose |
+| --- | --- | --- |
+| Gate Input On Availability | On | Disable typed input until the addressed character can accept a message. |
+| Notice Text | Optional reference | Show a refusal reason. |
+| Refusal Notice Seconds | `4` | Time to display a refusal. |
+| Slow Connect Hint Seconds | `35` | When to replace the initial connecting prompt. |
+| Prompt fields | State-specific text | Customize no-character, offline, connecting, preparing, ready, responding and unavailable messages. `{0}` is the character name where supported. |
+| Group Conversation Prompt | Use push-to-talk to speak | Explain why typed input is unavailable in group conversation. |
+
+**Fonts > Use System Font Fallback** defaults to on. It uses available operating-system fonts for missing glyphs on native platforms. It does not provide complex script shaping or right-to-left layout. For WebGL, supply suitable TextMeshPro font assets and fallback fonts in your project.
+
+If the prefab is present but no messages appear, check **Transcript System**, its runtime override and the component references. If only the input is disabled, inspect the availability prompt: room connection alone does not mean the character is ready.
 
 ## Usage examples
 
@@ -80,7 +100,7 @@ If `chatContainer` is not assigned, messages will not appear and the Console log
 * Drag `TranscriptUI_Chat.prefab` into the Hierarchy
 * Leave all references at prefab defaults
 
-**Expected outcome:** Each turn appears as a new bubble — player text on the right, character text on the left. The list scrolls automatically as the conversation grows.
+**Expected outcome:** Each turn appears as a new bubble — player text on the right, character text on the left. When you are at the bottom, the chat follows new messages. Scroll up to read history and the next message keeps your reading position.
 
 ## Next steps
 
