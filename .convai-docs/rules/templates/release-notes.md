@@ -7,7 +7,7 @@ last_reviewed: "<version you verified against>"
 <!--
 RELEASE NOTES TEMPLATE. Diataxis mode: reference.
 
-EVERY ENTRY MUST BE TRACEABLE TO THE SOURCE. A release note is the single easiest page to
+Every entry must be traceable to the source. A release note is the single easiest page to
 fabricate and the most damaging when wrong, because readers act on it to plan upgrades.
 
 An entry is allowed only if you can point to one of:
@@ -22,7 +22,8 @@ Newest release first. Do not rewrite published entries — a reader may have lin
 Replace all content. No body `#`. Delete this comment before publishing.
 -->
 
-<Lead paragraph: what this page tracks and how versions are numbered. Say where the reader
+<Lead paragraph: what this page tracks, how versions are numbered, and the current release,
+stated with the version variable you are given (CV-90); the version headings stay literal. Say where the reader
 should go for upgrade instructions if a separate migration guide exists.>
 
 ## <version> — <YYYY-MM-DD>

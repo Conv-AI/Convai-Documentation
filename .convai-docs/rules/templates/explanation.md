@@ -4,7 +4,9 @@ description: Understand how a conversation moves between Unity, the Convai Unity
 ---
 
 <!--
-EXPLANATION TEMPLATE. Take a wide perspective: background, rationale, alternatives, tradeoffs.
+EXPLANATION TEMPLATE. Take a wide perspective: background, rationale, design decisions, alternatives,
+tradeoffs, and relationships between systems.
+Description formula: `Understand [system/concept], including [scope].`
 Use reasoning statements ("The reason X works this way is…"). No step-by-step instructions and no
 close-up reference detail — link those out. Concept headings are noun phrases.
 Replace all content. No body `#`. No `## Overview`. Delete this comment before publishing.

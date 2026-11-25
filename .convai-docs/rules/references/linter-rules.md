@@ -66,6 +66,11 @@ the image before publishing.
 Checked against the reader-facing text only. Inline code spans, link targets, and bare URLs are
 stripped first, so a field named `simple_mode` or a URL containing "just" is not flagged.
 
+The lines of a paragraph are joined before these checks run, so a phrase wrapped across two lines
+is caught, and the finding names the line the phrase starts on. A paragraph ends at a blank line or a
+code fence; a heading, a list item, a quote, a table row, a GitBook block tag or an HTML line starts a
+new one.
+
 | Level | Rule | Enforces |
 |---|---|---|
 | WARN | No banned word: `simply`, `just`, `easy`, `powerful`, `seamless`, `robust`, `cutting-edge`, `cloud-powered` | CV-1 |
@@ -73,6 +78,11 @@ stripped first, so a field named `simple_mode` or a URL containing "just" is not
 | WARN | No hedging: "you may want to", "you could try", "you might want to", "you might try", "you can optionally" | CV-2 |
 | WARN | No filler opener: "in this guide, we will", "we will explore", "this page will show you", and similar | CV-3 |
 | WARN | No `[click here]` link text — link text describes the destination | CV-20 |
+
+The banned words, hedging phrases and vague headings (CV-28, under "Body structure") are read from
+`tools/prose_rules.json`, so this table and that file name the same terms. With
+`check_page.py --subject <subject>`, every variant the subject's `terminology` rejects is a banned word
+on that page too (see `references/subjects.md`); a subject can add terms, never remove one.
 
 `just` is the one banned word with a legitimate sense the checker cannot separate: as a minimizer
 ("just run the installer") it is banned, but meaning "only" or "recently" ("returns just the first match",
@@ -92,14 +102,51 @@ Only checked when `--summary SUMMARY.md` is passed.
 
 These are judgement calls or need source access, so they belong to the other two gates:
 
-- Technical accuracy of any claim — `/verify-doc` (`docs-verifier`), covering CV-52 through CV-57
-- Whether the page holds to one Diataxis mode — `/review-doc` (`docs-reviewer`), covering CV-36
+- Technical accuracy of any claim — `/convai-docs:check <path> --only accuracy` (`docs-verifier`), covering CV-52 through CV-57
+- Whether the page holds to one Diataxis mode — `/convai-docs:check <path> --only quality` (`docs-reviewer`), covering CV-36
 - Whether a block choice is the right one for the content — `docs-reviewer`, covering CV-40 through CV-46 and CV-66 through CV-73
 - Whether prose is clear, correctly ordered, and complete — `docs-reviewer`
 - Whether a page's options are set deliberately — `docs-reviewer`, covering CV-74 and CV-75
 
 Cross-page checks — broken relative links, orphan pages, duplicate titles — belong to `check_site.py`,
 which sees the whole repository rather than one page at a time.
+
+## Site checks
+
+`tools/check_site.py` checks what no single page can see. The rows below are its link, page-option,
+image, retired-section and redirect checks; every one is an `ERROR`. Findings already present when a check was
+adopted live in `.convai-docs/site-baseline.json` and do not fail a run, so only new ones do.
+
+| Level | Rule | Enforces |
+|---|---|---|
+| ERROR | Every relative link resolves to a file in the repository (`broken-link`) | CV-85 |
+| ERROR | Every image is a file in the repository, inside the page's own space (`missing-image`) | CV-86 |
+| ERROR | No relative link leads into another space's directory; use the page's absolute site URL (`cross-space-link`) | CV-87 |
+| ERROR | No `noIndex: true` on a `README.md` or on a page with child pages in `SUMMARY.md` | CV-77 |
+| ERROR | `noIndex: true` on any other page has a `path: reason` line in `.convai-docs/noindex-allowlist.txt` | CV-77 |
+| INFO | Every `hidden: true` page is listed on every run, baselined or not, and in the `hidden` key of `--json` | CV-78 |
+| ERROR | Every page at the first level of `SUMMARY.md`, and every page with child pages, has an `icon` (hidden pages excepted) | CV-81 |
+| ERROR | That icon is in the space's list in `.convai-docs/icons.json` (`{"<space directory>": ["icon", …]}`, `"."` for a single-root repository). Without the file, only presence is checked | CV-81 |
+| ERROR | No file exists under a prefix listed in `.convai-docs/retired-sections.txt` | CV-82 |
+| ERROR | Every `redirects:` target in `.gitbook.yaml` exists, resolved against its `root:` | CV-83 |
+
+Three more run only with `--base <ref>`, because they are about a change rather than the site. The
+change is everything between the merge base with `<ref>` and the working tree, untracked files
+included, so the same command answers for a pull request in CI and for uncommitted work locally.
+
+| Level | Rule | Enforces |
+|---|---|---|
+| ERROR | No image on a changed page has empty or missing alt text, in Markdown or `<img>` form | CV-79 |
+| ERROR | No added image has a tool's default name: `image`, `image (19)`, `Screenshot …`, `Screen Shot …`, `untitled`, `unknown`, `capture`, `clipboard`, `download`, `pasted image`, `IMG_1234`, or digits only | CV-80 |
+| ERROR | Every removed or moved page has a `.gitbook.yaml` redirect for its old URL, unless a page is still served there. Not parked by the retiring list | CV-84 |
+
+```bash
+python "${CLAUDE_PLUGIN_ROOT}/skills/convai-docs/tools/check_site.py" . \
+  --baseline .convai-docs/site-baseline.json --base origin/main
+```
+
+`--write-baseline` refuses `--base`: a baseline records the site's standing backlog, and a
+change-only finding recorded there would excuse the next change that repeats it.
 
 ## Running it
 

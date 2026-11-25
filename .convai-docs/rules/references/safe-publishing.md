@@ -1,102 +1,85 @@
 # Safe publishing and AI-agent rules
 
-Use a staging-first workflow for AI-generated or AI-assisted documentation. The agent prepares file
-changes only and stops for human review.
+Every change to the documentation, by a person or an agent, reaches readers through one pull request
+that a person reviews and merges. The agent prepares the files, opens the pull request through
+`steps/publish.md`, and stops.
 
-## Branch and Space workflow
+## The pull-request workflow
 
-| Environment | Git branch | GitBook Space | Purpose |
-|---|---|---|---|
-| Staging | `staging` | Staging Space | Draft, review, and validate generated documentation. |
-| Production | `main` | Live Space | Publish reviewed documentation only. |
+1. The change is made on a branch of its own, `docs/<slug>`, cut from the base branch.
+2. One pull request goes from that branch to the base branch. Its body says what changed, the subject
+   and commit each claim was checked against, the result of each check, and every open question. A
+   pull request with an open question is a draft.
+3. The pull request runs the documentation checks (`.github/workflows/convai-docs.yml`: the page linter
+   on the changed pages and the site check on the whole repository) and gets GitBook's pull-request
+   preview, where the changed pages are read as they will render.
+4. A person reads the preview, approves, and merges.
 
-Required workflow:
+The base branch is `publish.base_branch` in `settings.json`, and every tool reads it from there. The
+documentation owner switches it when the open change requests have landed; nothing in this workflow
+or in any rule changes when that happens.
 
-1. Create or revise documentation only on the `staging` branch.
-2. Sync the GitBook Staging Space from the `staging` branch.
-3. Review the rendered pages in the Staging Space.
-4. Open a pull request from `staging` to `main`.
-5. Merge to `main` only after the Staging Space renders correctly.
-6. Let the live GitBook Space sync from `main`.
+Nothing AI-generated goes live without a rendered preview and a person's approval (CV-62, CV-64). The pull request names
+its source of truth and every assumption (CV-63).
 
-Do not push AI-generated documentation directly to `main`.
+`tools/publish.py` makes the git and `gh` calls for the plugin and refuses, in code, to push to `main`,
+merge, force-push, or delete a branch it did not create. Until the documentation owner sets
+`publish.enabled`, it prints those calls and makes none of them.
 
-## Change Requests and Merge Rules
+## Change requests in the GitBook editor
 
-When using GitBook's native editor (not Git Sync), use Change Requests as the quality gate equivalent
-of a pull request.
+An edit made in GitBook's own editor instead of through Git Sync goes through a change request, the
+editor's equivalent of a pull request, with the same review.
 
 | Step | Action |
 |---|---|
-| Draft | Open a Change Request for the new or revised page. |
+| Draft | Open a change request for the new or revised page. |
 | Review | Assign a reviewer. The reviewer checks against the quality checklist. |
-| Merge Rules | Require at least one reviewer approval before a Change Request can be merged. |
+| Merge rules | Require at least one reviewer approval before a change request can be merged. |
 | Merge | Merge only after the reviewer approves and the page passes the quality checklist. |
 
-Configure Merge Rules in **Space settings → Merge rules**: require reviewer approval (on); prevent
+Configure merge rules in **Space settings → Merge rules**: require reviewer approval (on); prevent
 self-merge (on); required checks: pass the quality checklist before requesting review.
 
-Change Request rules for AI-generated content:
-
-- Every AI-generated page must go through a Change Request before merging.
-- The description must list the AI tool used, the source of truth for technical claims, and any assumptions.
-- A human reviewer — not the AI agent — must perform the final approval.
+For AI-generated content, the change request description lists the AI tool used, the source of truth
+for technical claims, and any assumptions, and a person, not the agent, gives the final approval.
 
 ## Safe AI-agent editing rules
 
 The agent **must**:
 
-- Work only on the `staging` branch.
 - Preserve existing documentation unless the task explicitly asks for a specific revision.
 - Never delete pages, folders, images, or GitBook configuration files without explicit approval.
-- Avoid renaming files or moving pages unless the task is a navigation or restructuring task.
+- Avoid renaming files or moving pages unless the task is a navigation or restructuring task. A moved
+  or removed page carries a `.gitbook.yaml` redirect in the same change (CV-65, CV-84).
 - Update `SUMMARY.md` only when adding, removing, or moving a page in the sidebar.
 - Keep `SUMMARY.md` sidebar labels identical to the `title` frontmatter of each linked page. When
   renaming a page title or file, update the corresponding `SUMMARY.md` label in the same change.
 - Keep existing sidebar order unless the task explicitly asks to change navigation.
 - List every changed, added, moved, or deleted file at the end of the work.
 - Flag any missing technical context before drafting instead of inventing behavior.
-- Stop after preparing file changes and wait for explicit human approval before any commit, push,
-  pull request, or merge.
+- Publish only through `steps/publish.md`, which opens one pull request against
+  `publish.base_branch` and stops.
 
 The agent **must not**:
 
-- Commit directly to `main`.
-- Create any commit without explicit human approval.
-- Push any branch without explicit human approval.
-- Open a pull request without explicit human approval.
-- Merge a pull request without explicit human approval.
+- Commit, push, or open a pull request any other way than through `steps/publish.md`.
+- Push to `main` or to the base branch, force-push, merge a pull request, or delete a branch it did
+  not create.
 - Rewrite unrelated pages.
 - Replace existing screenshots or assets without confirming that the new asset is correct.
 - Remove frontmatter, GitBook blocks, content references, or page metadata from existing pages.
 - Create orphan pages that are unreachable from `SUMMARY.md`, a hub page, or a related-page link.
+- Name a private repository, source path, feature flag, gated route, or internal symbol in a pull
+  request, a commit message, or a page. The documentation repository is public.
 
-### Instruction block for an external agent
+### Agents that do not load this plugin
 
-When handing this work to a tool that does not load this skill — a general-purpose assistant, a
-one-off script, or a contractor's setup — paste this block verbatim as its standing instruction:
-
-```text
-You are editing the Convai documentation repository.
-
-Work only on the staging branch. Prepare file changes and stop.
-
-Do not commit, push, open a pull request, or merge. A human does all of those.
-
-Do not delete or rename pages, folders, images, or GitBook configuration.
-Do not rewrite pages unrelated to the task.
-Do not remove frontmatter, GitBook blocks, content references, or page metadata.
-Do not create a page that nothing links to.
-
-Update SUMMARY.md only when a page is added to, removed from, or moved in the sidebar,
-and keep each sidebar label identical to that page's title frontmatter.
-
-Never invent an API name, field, default value, limit, behavior, or console message.
-If a fact you need is missing, stop and ask for it.
-
-Finish by listing every file you added, changed, moved, or deleted, the source you
-verified technical claims against, and any assumption or open question.
-```
+Codex reads the generated `AGENTS.md` at the root of the documentation repository, and Cursor reads
+`.cursor/rules/convai-docs.mdc`. Both say what to read, which checks to run, and how far the agent may
+publish: neither tool has `tools/publish.py` to refuse a forbidden call, so the text states the limits
+itself, and it follows `publish.enabled`. For any other tool, give it `AGENTS.md` as its standing
+instruction.
 
 ## In-repo documentation is a lead, not a source of truth
 
@@ -132,5 +115,6 @@ At the end of any task, produce a change summary that lists:
 
 - Every changed, added, moved, or deleted file.
 - Any assumptions made.
-- The source of truth used for technical claims (SDK source path, existing page, or provided notes).
+- The source of truth used for technical claims (the subject and the commit, or the existing page or
+  notes provided).
 - Any open questions or screenshot placeholders that block publishing.

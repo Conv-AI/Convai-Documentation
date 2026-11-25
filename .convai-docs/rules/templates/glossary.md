@@ -11,8 +11,8 @@ each entry is two or three sentences with a link to the page that covers the ter
 
 Order entries alphabetically. A reader arrives knowing the word they are looking for.
 
-Every term here must match the pack's terminology table exactly, including capitalization.
-If a term is not in the pack, add it there first — the pack is what the writer and the
+Every term here must match the subject file's terminology table exactly, including capitalization.
+If a term is not in the subject file, add it there first — the subject file is what the writer and the
 verifier both check against, so a term defined only here will drift.
 
 Define the term without using the term. "A Knowledge Bank is a knowledge bank for..." helps

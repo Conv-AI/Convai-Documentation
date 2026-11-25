@@ -1,0 +1,29 @@
+{
+  "_about": "Word lists check_page.py reads for CV-1 (banned_words), CV-2 (hedging_phrases) and CV-28 (vague_headings). Edit them here, not in Python, and keep references/linter-rules.md naming the same terms. A subject adds terms of its own with a prose_rules object of the same keys in packs/contracts/<subject>.json, used with check_page.py --subject <subject>. Terms are matched lowercase; a vague heading matches the whole heading text.",
+  "banned_words": [
+    "simply",
+    "just",
+    "easy",
+    "powerful",
+    "seamless",
+    "robust",
+    "cutting-edge",
+    "cloud-powered"
+  ],
+  "hedging_phrases": [
+    "you may want to",
+    "you could try",
+    "you might want to",
+    "you might try",
+    "you can optionally"
+  ],
+  "vague_headings": [
+    "more information",
+    "miscellaneous",
+    "basics",
+    "conclusion",
+    "summary",
+    "tips",
+    "notes"
+  ]
+}
