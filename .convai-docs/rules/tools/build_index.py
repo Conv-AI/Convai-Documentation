@@ -14,14 +14,20 @@ The index records, per page:
     links                                  every relative link it makes
     images                                 every image it shows
     vars                                   every GitBook variable it reads
+    text                                   its words outside code fences, HTML tags removed
 
 and inverts the interesting ones, so `symbols["ConvaiGazeController"]` lists every page and
-line that names it. `diff_surface.py` intersects that inversion with what actually changed
+line that names it, one `page:line` entry per line. `diff_surface.py` intersects that inversion with what actually changed
 between two SDK versions, which is how a release turns into a work list instead of a guess.
 
 Two deliberate limits. It indexes what a page *says*, never whether that is true — accuracy
 is the verifier's job. And a symbol is recognised by shape, not by looking it up in a source
 tree, so the index can be built without the SDK checked out.
+
+A repository with `gitbook-docs.yaml` is indexed space by space (see `spaces.py`): only the
+mapped directories are read, each page records its `space`, and `spaces` holds every space's
+own sidebar. Page paths stay repository-relative, so symbols, titles and variables are
+inverted across all spaces at once.
 
 Usage:
     python build_index.py <docs-repo-root> [-o index.json] [--quiet]
@@ -31,8 +37,12 @@ import argparse
 import io
 import json
 import os
+import posixpath
 import re
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import spaces  # noqa: E402
 
 # A backticked token counts as a code symbol when its shape says "identifier" rather than
 # "ordinary word in code font". Being generous here would fill the index with words like
@@ -54,6 +64,7 @@ MD_IMAGE = re.compile(r"!\[[^\]]*\]\(\s*(<[^>]*>|[^)\s]+)")
 HTML_IMG_SRC = re.compile(r'<img[^>]*\bsrc\s*=\s*"([^"]+)"', re.IGNORECASE)
 GITBOOK_VAR = re.compile(r"space\.vars\.([A-Za-z0-9_]+)")
 HEADING = re.compile(r"^(#{1,6})\s+(.*\S)\s*$")
+HTML_TAG = re.compile(r"<[^<>\n]+>")
 FENCE = re.compile(r"^\s*(```|~~~)")
 
 SKIP_DIRS = {".git", ".github", "node_modules", "__pycache__", ".gitbook", ".convai-docs"}
@@ -133,12 +144,16 @@ def index_page(abs_path, rel_path):
         "description": fm.get("description", ""),
         "last_reviewed": fm.get("last_reviewed", ""),
         "headings": [],
-        "symbols": {},   # symbol -> first line it appears on
+        "symbols": {},   # symbol -> every line it appears on, in page order
         "links": [],
         "images": [],
         "vars": [],
+        "text": "",
     }
 
+    # What a reader reads, for the names that are not code symbols: a tab label, a platform,
+    # a route (check_coverage.py's match modes). Tags go, so a figure is not text.
+    prose = []
     in_code = False
     for offset, raw in enumerate(text.split("\n")[body_start:]):
         lineno = body_start + offset + 1
@@ -149,15 +164,23 @@ def index_page(abs_path, rel_path):
             # A fenced example is not evidence that a page documents a symbol; it is
             # usually illustrative. Links and images inside a fence are not real either.
             continue
+        words = HTML_TAG.sub(" ", raw).strip()
+        if words:
+            prose.append(words)
 
         h = HEADING.match(raw)
         if h:
             page["headings"].append({"level": len(h.group(1)), "text": h.group(2), "line": lineno})
 
+        # Every line, not the first one: a release report that names one line on a page
+        # where the symbol appears twice sends the reader to fix half of it.
         for m in INLINE_CODE.finditer(raw):
             token = m.group(1).strip()
-            if is_symbol(token) and token not in page["symbols"]:
-                page["symbols"][token] = lineno
+            if not is_symbol(token):
+                continue
+            lines = page["symbols"].setdefault(token, [])
+            if not lines or lines[-1] != lineno:
+                lines.append(lineno)
 
         for m in MD_IMAGE.finditer(raw):
             page["images"].append({"src": _clean_target(m.group(1)), "line": lineno})
@@ -177,18 +200,26 @@ def index_page(abs_path, rel_path):
             if m.group(1) not in page["vars"]:
                 page["vars"].append(m.group(1))
 
+    page["text"] = "\n".join(prose)
     return page
 
 
-def parse_summary(root):
-    """Return {normalised target: label} for every entry in SUMMARY.md."""
-    path = os.path.join(root, "SUMMARY.md")
+def parse_summary(root, summary_file="SUMMARY.md", base=None):
+    """Return {normalised target: label} for every entry in SUMMARY.md.
+
+    With `base` (a space's content root), targets are made repository-relative, so pages of
+    every space share one key space. Without it, targets are kept as written."""
+    path = os.path.join(root, *summary_file.split("/"))
     if not os.path.exists(path):
         return None
     entries = {}
     for m in re.finditer(r"\[([^\]]+)\]\(([^)]+)\)", read(path)):
         target = m.group(2).split("#")[0].strip()
-        entries[target.replace("\\", "/").lstrip("./")] = m.group(1).strip()
+        if base is None:
+            entries[target.replace("\\", "/").lstrip("./")] = m.group(1).strip()
+        else:
+            joined = posixpath.join(base, target.replace("\\", "/")) if base else target
+            entries[posixpath.normpath(joined)] = m.group(1).strip()
     return entries
 
 
@@ -196,27 +227,48 @@ def build(root, quiet=False):
     root = os.path.abspath(root)
     pages = {}
     unreadable = []
+    space_list = spaces.load(root)
 
-    for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in sorted(dirnames) if d not in SKIP_DIRS and not d.startswith(".")]
-        for fn in sorted(filenames):
-            if not fn.endswith(".md") or fn == "SUMMARY.md":
-                continue
-            if dirpath == root and fn in NON_PAGE_FILES:
-                continue
-            abs_path = os.path.join(dirpath, fn)
-            rel = os.path.relpath(abs_path, root).replace("\\", "/")
-            try:
-                pages[rel] = index_page(abs_path, rel)
-            except (OSError, UnicodeDecodeError) as e:
-                unreadable.append({"page": rel, "error": str(e)})
+    # A multi-space repository publishes only what its spaces map; files outside every
+    # mapped directory are not on the site and are not indexed.
+    walk_roots = [os.path.join(root, *s.content_root.split("/")) if s.content_root else root
+                  for s in space_list] or [root]
+    for walk_root in walk_roots:
+        if not os.path.isdir(walk_root):
+            continue
+        for dirpath, dirnames, filenames in os.walk(walk_root):
+            dirnames[:] = [d for d in sorted(dirnames)
+                           if d not in SKIP_DIRS and not d.startswith(".")]
+            for fn in sorted(filenames):
+                if not fn.endswith(".md") or fn == "SUMMARY.md":
+                    continue
+                if dirpath == root and fn in NON_PAGE_FILES:
+                    continue
+                abs_path = os.path.join(dirpath, fn)
+                rel = os.path.relpath(abs_path, root).replace("\\", "/")
+                if rel in pages:
+                    continue
+                try:
+                    pages[rel] = index_page(abs_path, rel)
+                except (OSError, UnicodeDecodeError) as e:
+                    unreadable.append({"page": rel, "error": str(e)})
+
+    space_data = {}
+    for space in space_list:
+        data = space.as_dict()
+        data["summary"] = parse_summary(root, space.summary_file, base=space.content_root)
+        space_data[space.key] = data
+    for rel, page in pages.items():
+        owner = spaces.space_of(space_list, rel)
+        if owner is not None:
+            page["space"] = owner.key
 
     symbols = {}
     variables = {}
     titles = {}
     for rel, page in pages.items():
-        for sym, line in page["symbols"].items():
-            symbols.setdefault(sym, []).append("%s:%d" % (rel, line))
+        for sym, lines in page["symbols"].items():
+            symbols.setdefault(sym, []).extend("%s:%d" % (rel, line) for line in lines)
         for var in page["vars"]:
             variables.setdefault(var, []).append(rel)
         if page["title"]:
@@ -232,12 +284,26 @@ def build(root, quiet=False):
         "summary": parse_summary(root),
         "unreadable": unreadable,
     }
+    if space_data:
+        # Every space's sidebar, merged: targets are repository-relative, so they cannot
+        # collide. Consumers that know about spaces read `spaces[key]["summary"]` instead.
+        merged = {}
+        for data in space_data.values():
+            merged.update(data["summary"] or {})
+        index["summary"] = merged if any(d["summary"] is not None for d in space_data.values()) else None
+        index["spaces"] = space_data
 
     if not quiet:
         print("indexed %d page(s)" % len(pages))
         print("  %d distinct code symbol(s)" % len(symbols))
         print("  %d GitBook variable(s) in use" % len(variables))
-        if index["summary"] is None:
+        if space_data:
+            for key, data in sorted(space_data.items()):
+                print("  space %s: %s, %s" % (
+                    key, data["directory"] or "./",
+                    "no %s" % data["summary_file"] if data["summary"] is None
+                    else "%d sidebar entr(y/ies)" % len(data["summary"])))
+        elif index["summary"] is None:
             print("  no SUMMARY.md at the root; navigation checks will be skipped")
         else:
             print("  %d SUMMARY.md entr(y/ies)" % len(index["summary"]))
@@ -258,7 +324,11 @@ def main():
         print("not a directory: %s" % args.root, file=sys.stderr)
         return 2
 
-    index = build(args.root, quiet=args.quiet)
+    try:
+        index = build(args.root, quiet=args.quiet)
+    except spaces.SpacesError as e:
+        print("error: %s" % e, file=sys.stderr)
+        return 2
 
     out = args.out or os.path.join(args.root, ".convai-docs", "index.json")
     out_dir = os.path.dirname(os.path.abspath(out))

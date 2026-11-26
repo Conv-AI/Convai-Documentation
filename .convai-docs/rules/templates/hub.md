@@ -6,6 +6,8 @@ description: Find the setup, configuration, and verification guides for the Conv
 <!--
 HUB / SECTION INDEX TEMPLATE. Short intro + cards routing to the main child pages.
 No long procedures and no full reference tables. This is usually a README.md in a section folder.
+A hub and every top-level page carry an icon (CV-81).
+Description formula: `Find guides for [section purpose].`
 Card label text must match the child page `title` frontmatter. No body `#`. Delete this comment before publishing.
 -->
 

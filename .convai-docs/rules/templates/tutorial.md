@@ -6,7 +6,9 @@ description: Build your first Convai character in Unity from an empty scene and 
 <!--
 TUTORIAL TEMPLATE. Teach through one safe, guided first experience.
 Use "We will…" framing, not "You will learn…". One known-good path; no options or branching.
-Each step produces a visible, meaningful result. Minimize explanation — link to concept/reference pages.
+State the destination up front. Each step produces a visible, meaningful result the learner can observe.
+Minimize explanation — link to concept/reference pages. No deep API reference.
+Description formula: `Build [result] by [main method/context].`
 Replace all content. No body `#`. No `## Overview`. Delete this comment before publishing.
 -->
 

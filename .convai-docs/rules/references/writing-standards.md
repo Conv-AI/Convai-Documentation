@@ -1,143 +1,68 @@
 # Writing standards
 
-Voice, tone, terminology, GitBook variables, version tracking, and deprecation. SDK-specific product
-names, backend phrasing, and the list of synchronized variables come from the SDK pack.
+Voice, tone, terminology, version tracking, deprecation, and examples. Product names come from the
+subject. Synchronized values (versions, package URLs) are GitBook variables, never literals (CV-24):
+how to write one is in `variables.md`.
 
 ## Voice and tone
 
-- Write directly and concretely.
-- Use second person for tasks: "Add your API key."
-- In tutorials, use collaborative first-person plural: "We will add the component" rather than "You
-  will learn how to add." This reflects that the tutorial guides the reader through a shared activity,
-  not a lesson.
-- Use active voice and present tense.
-- Prefer short sentences. Keep one claim per sentence.
-- Explain first-use terms or link to concept pages.
-- Use American English spelling.
-- Format class names, methods, fields, file paths, asset paths, package names, console messages, and
-  literal values as `inline code`.
+- Write directly and concretely, in active voice and present tense, in American English.
+- Second person for tasks: "Add your API key." In tutorials, collaborative first-person plural: "We
+  will add the component", not "You will learn how to add": the tutorial is a shared activity, not a
+  lesson.
+- Short sentences, one claim per sentence.
+- Explain a term at its first use, or link to its concept page.
+- Format class names, methods, fields, enums, file paths, asset paths, package names, console
+  messages, and literal values as `inline code` everywhere: prose, table cells, list items, and step
+  bodies (CV-18).
+- Write `##` headings the way a reader would phrase the question: `Configure the API key` answers
+  "how do I set my API key?", where `API key setup` or `Common issues` answer nothing.
+- Do not let "it" or "this" refer back across paragraphs: an assistant quoting one section cannot
+  resolve them.
 
-### Terminology
+Refer to Convai's backend as "Convai": "streams audio to Convai", "Convai responds", "sent to Convai".
+Never "Convai cloud", "cloud", "cloud AI", "cloud backend", "cloud pipeline", "cloud-powered",
+"Convai's servers", or "Convai's cloud".
 
-Product naming and backend phrasing are SDK-specific — always take them from the SDK pack. The
-cross-SDK rule: refer to Convai's backend as "Convai" (for example "streams audio to Convai", "Convai
-responds", "sent to Convai"). Do not write "Convai cloud", "cloud backend", "cloud pipeline",
-"Convai's servers", or "cloud-powered".
-
-### Avoid
+Avoid:
 
 - Marketing language: "powerful", "seamless", "robust", "cutting-edge".
 - Setup promises: "up and running in minutes", "just one API key".
 - Filler: "In this guide, we will explore...".
 - Hedging: "you may want to", "you could try".
 - Dismissive words: "simply", "just", "easy".
-- Vague labels: "Overview", "More information", "Miscellaneous".
-- "Click here" links.
-- "Cloud", "cloud AI", "cloud backend", "cloud pipeline", "cloud-powered", "Convai's servers", or
-  "Convai's cloud".
-
-### Task wording
-
-| Weak | Better |
-|---|---|
-| `API key setup` | `Configure the API key` |
-| `Using the component` | `Add the component to a character` |
-| `Step 1` | `Open Package Manager` |
-| `More information` | `Next steps` or the exact related topic |
-| `Common issues` | `Troubleshoot microphone input` |
-
-## GitBook variables
-
-Use GitBook variables for values that appear across multiple pages and must stay synchronized: SDK
-version numbers, minimum platform/engine version, package URLs, API endpoint base URLs.
-
-### How GitBook variables work (Git Sync workflow)
-
-1. **Define** in `.gitbook/vars.yaml`, committed to the repository:
-
-```yaml
-unity_sdk_version: 4.2.0
-unity_min_version: "2023.1 or later"
-sdk_package_id: com.convai.convai-sdk-for-unity
-dashboard_url: https://convai.com
-```
-
-2. **Reference** inline in Markdown using GitBook's expression syntax:
-
-```html
-<code class="expression">space.vars.unity_sdk_version</code>
-```
-
-   This is **literal HTML** that appears in your Markdown file exactly as written. GitBook renders
-   the expression as the resolved value at publish time. The Git repository stores the raw HTML;
-   readers see the value. Do **not** use `{{ unity_sdk_version }}` or
-   `{{ space.vars.unity_sdk_version }}` — those syntaxes are not rendered by GitBook and will appear
-   as raw text on the published page.
-
-3. **GitBook renders** the expression as the value from `vars.yaml` at publish time. The repository
-   stores the expression syntax; the published site shows the resolved value.
-
-**Update flow** (for example a new SDK release): change the value in `.gitbook/vars.yaml`, commit and
-push to `staging`, and GitBook syncs — every page using that expression updates automatically.
-
-### Variable scope
-
-| Scope | Definition | Reference syntax | Availability |
-|---|---|---|---|
-| Space-level | `.gitbook/vars.yaml` in the repo | `space.vars.variable_name` | Every page in the Space |
-| Page-level | `vars:` block in page frontmatter | `page.vars.variable_name` | That page only |
-
-Use `space.vars` for values shared across pages. Use `page.vars` for values specific to a single page:
-
-```yaml
----
-title: Configure lip sync
-vars:
-  component_name: ConvaiLipSync
----
-```
-
-Referenced as `<code class="expression">page.vars.component_name</code>` within that page.
-
-### Rules
-
-- Define `space.vars` in `.gitbook/vars.yaml` before referencing them in any page.
-- Name variables in `snake_case`, lowercase English.
-- Use `space.vars` only for values that must be byte-for-byte identical wherever they appear. If a
-  value varies by context, use a Conditional content block instead.
-- Do not hard-code version numbers, package URLs, or other change-prone values in page body text when
-  a space variable covers them.
-- Do not use GitBook's expression syntax for values that differ across Content Variants — variables
-  resolve the same value in every variant.
-
-The set of variables available for each SDK is listed in that SDK's pack.
+- Vague labels: "Overview", "More information", "Miscellaneous", and "click here" links.
 
 ## Version tracking
 
-For pages whose accuracy depends on a specific SDK or engine version, add a `last_reviewed` field to
-the frontmatter:
+Every SDK page states the SDK version it applies to with the version variable it is given, in its
+prerequisites or a reference page's lead; a page you revise gains it if missing (CV-90). Given none,
+state none. A version-dependent page sets `last_reviewed` to the version verified against (CV-35).
 
-```yaml
----
-title: Configure lip sync
-description: Configure blend-shape lip sync on a Convai character in Unity.
-last_reviewed: "4.2.0"
----
-```
+If the version given does not match the source files, stop and report the mismatch instead of guessing.
 
-Update `last_reviewed` whenever you verify the page against the current SDK version. Pages with a
-`last_reviewed` version more than one major release behind the current SDK must be reviewed before the
-next publish cycle.
+## Renamed names
+
+When a release renames or removes a name, a live page uses only the new name, with no "formerly" or
+"renamed from" hint. The old name appears only on a historical page (the subject's `historical_pages`:
+release notes, the changelog, migration guides), whose entry states the old and the new name once.
+
+## Doc comments and callers
+
+What a doc comment says is written only as far as the code shows it at the commit used; where the two
+disagree, the code wins (CV-53, CV-54). What a function's body does is shown by its code whether or not
+its caller was found, so a name the request covers is written with what its body shows, even while its
+trigger is open. What triggers it is stated only from code: a call site, a registration, or a message
+the code itself emits. A value or trigger that only a comment gives is not written. No caller found is
+an open question for the owner ("no caller found for `<name>`"), never a sentence on the page: no page
+says a name is unused, unreachable or never raised. A release unit says only what its diff shows,
+"unchanged" included.
 
 ## Deprecated content
 
-When an API, component, or workflow is deprecated:
-
-1. Add a `{% hint style="warning" %}` block at the top of the page stating what is deprecated, what
-   replaces it, and from which SDK version.
-2. Update all inbound links to point to the replacement page when one exists.
-3. Keep the deprecated page for at least one major SDK version after deprecation.
-4. Do not silently delete deprecated pages. Mark them first, then remove after the retention period.
+A deprecated API, component, or workflow gets a `{% hint style="warning" %}` at the top of its page:
+what is deprecated, what replaces it, and from which SDK version (CV-46). Point inbound links at the
+replacement page. Keep the page for at least one major SDK version, then remove it.
 
 ```md
 {% hint style="warning" %}
@@ -147,13 +72,12 @@ When an API, component, or workflow is deprecated:
 
 ## Examples
 
-Every feature page should include examples unless the page is purely conceptual or a short reference
-entry. Each example must include a scenario name, a one-sentence context, concrete setup (Inspector
-configuration or code), and the expected runtime outcome. Recommended order: minimal working example,
-common production-style example, optional advanced variation.
+Every feature page includes examples unless it is purely conceptual or a short reference entry. Each
+example has a scenario name, a one-sentence context, concrete setup (Inspector configuration or code),
+and the expected runtime outcome. Order: a minimal working example, a common production-style example,
+an optional advanced variation.
 
-Primary domain: learning and training simulations. Use scenarios such as industrial safety drills,
-medical training, military simulation, corporate onboarding, and procedural assessment. Secondary
-domains are allowed when they fit the feature better; use the ordering "training simulations,
-interactive experiences, and games" when describing broad applicability. Avoid "game-world"
-terminology — use "in-scene" instead.
+Primary domain: learning and training simulations, with scenarios such as industrial safety drills,
+medical training, military simulation, corporate onboarding, and procedural assessment. Other domains
+are allowed when they fit the feature better; describe broad applicability as "training simulations,
+interactive experiences, and games". Write "in-scene", never "game-world".

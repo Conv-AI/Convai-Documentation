@@ -5,6 +5,9 @@ description: Add your Convai API key to the SDK settings so the Convai Unity SDK
 
 <!--
 HOW-TO TEMPLATE. Reader is already competent; help them complete one specific task.
+Include outcome, prerequisites, focused steps, verification, troubleshooting, and next steps.
+Prioritize practical usability over completeness: do not cover every edge case or teach concepts inline.
+Description formula: `[Action] [object] so [outcome].`
 Replace all content. Keep 4-7 `##` sections. No body `#`. No `## Overview`. Sentence case headings.
 Description: one outcome sentence, 120-160 chars. Lead paragraph is headingless.
 Delete this comment before publishing.

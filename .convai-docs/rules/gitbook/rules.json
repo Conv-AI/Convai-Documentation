@@ -244,7 +244,7 @@
     "first_seen": "2026-08-18"
   },
   "CV-62": {
-    "summary": "Documentation changes are prepared on the staging branch and reviewed in the Staging space",
+    "summary": "Every documentation change goes live through a pull request against the base branch. It is",
     "first_seen": "2026-08-18"
   },
   "CV-63": {
@@ -302,5 +302,65 @@
   "CV-76": {
     "summary": "Every paired GitBook block is closed. An unclosed hint, tabs, stepper, columns, or expanda",
     "first_seen": "2026-08-18"
+  },
+  "CV-77": {
+    "summary": "Never set noIndex on a hub or section index page: it takes every page reached through it o",
+    "first_seen": "2026-11-24"
+  },
+  "CV-78": {
+    "summary": "Every hidden page is listed on every site check. Hiding removes a page from the sidebar on",
+    "first_seen": "2026-11-24"
+  },
+  "CV-79": {
+    "summary": "No image on a page that a change touches has empty alt text. GitBook leaves the alt text e",
+    "first_seen": "2026-11-24"
+  },
+  "CV-80": {
+    "summary": "An image a change adds is named for what it shows, in kebab-case, never with the name a to",
+    "first_seen": "2026-11-24"
+  },
+  "CV-81": {
+    "summary": "Every top-level page and every hub page carries an icon, and the icon comes from the space",
+    "first_seen": "2026-11-24"
+  },
+  "CV-82": {
+    "summary": "A path under a retired section never comes back. Retired sections are listed in .convai-do",
+    "first_seen": "2026-11-24"
+  },
+  "CV-83": {
+    "summary": "Every redirect in .gitbook.yaml points at a page that exists",
+    "first_seen": "2026-11-24"
+  },
+  "CV-84": {
+    "summary": "A change that removes or moves a page carries a .gitbook.yaml redirect for the page's old ",
+    "first_seen": "2026-11-24"
+  },
+  "CV-85": {
+    "summary": "Every relative link resolves to a page or file that exists. A broken link sends the reader",
+    "first_seen": "2026-11-25"
+  },
+  "CV-86": {
+    "summary": "Every image a page shows is a file inside that page's own space. A missing file, or one in",
+    "first_seen": "2026-11-25"
+  },
+  "CV-87": {
+    "summary": "A link to a page in another space uses that page's absolute site URL. GitBook publishes ea",
+    "first_seen": "2026-11-25"
+  },
+  "CV-88": {
+    "summary": "Answer first. The first sentence of the lead paragraph answers the question the title asks",
+    "first_seen": "2026-11-25"
+  },
+  "CV-89": {
+    "summary": "One question per page. A page answers the one reader question its title names. A second qu",
+    "first_seen": "2026-11-25"
+  },
+  "CV-90": {
+    "summary": "Every SDK page states which SDK version it applies to, in its prerequisites or, on a refer",
+    "first_seen": "2026-11-25"
+  },
+  "CV-91": {
+    "summary": "A title is unique within its space. Two pages with one title give a search result, a sideb",
+    "first_seen": "2026-11-25"
   }
 }
