@@ -13,35 +13,88 @@ or technical accuracy — use the docs-reviewer (quality checklist) and docs-ver
 (SDK source accuracy) for those.
 
 The human-readable rule list lives in `references/linter-rules.md`. Keep the two in sync.
+The banned-word, hedging and vague-heading lists live in `prose_rules.json` beside this file.
 
 Usage:
     python check_page.py <page.md> [more.md ...] [--summary SUMMARY.md] [--json] [--strict]
+                         [--subject <name-or-path>]
 
 Exit code 0 if no ERROR-level findings, 1 otherwise. WARN findings fail the run only
-with --strict.
+with --strict. Exit code 2 if --subject names no subject file or the file is invalid. In
+the public bundle, which carries no subject files, --subject reads the subject's entry in
+`site-rules.json` (see site_rules.py).
+`--pack` is the 2.6 name of `--subject`, kept until 3.1.
 """
 
 import argparse
+import bisect
 import json
 import os
 import re
 import sys
 
-BANNED_WORDS = [
-    "simply", "just", "easy", "powerful", "seamless", "robust", "cutting-edge",
-    "cloud-powered",
-]
+TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, TOOLS_DIR)
+import page_types  # noqa: E402
+# Banned words (CV-1), hedging phrases (CV-2) and vague headings (CV-28) live in a JSON file,
+# so adding a term the team has agreed on is not a code change, and a subject adds the
+# variants its terminology rejects. See load_prose_rules.
+PROSE_RULES_FILE = os.path.join(TOOLS_DIR, "prose_rules.json")
+PROSE_RULE_KEYS = ("banned_words", "hedging_phrases", "vague_headings")
+
 CLOUD_PHRASES = ["convai cloud", "cloud backend", "cloud pipeline", "convai's servers", "convai's cloud"]
 DESC_BAD_OPENERS = ["this page covers", "learn about", "overview of"]
 
-# Hedging phrases — passive, non-directive voice that weakens instructions
-HEDGING_PHRASES = [
-    "you may want to",
-    "you could try",
-    "you might want to",
-    "you might try",
-    "you can optionally",
-]
+
+def _term_lists(data, where):
+    """Return {key: [lowercase terms]} for the PROSE_RULE_KEYS present in `data`."""
+    unknown = sorted(set(data) - set(PROSE_RULE_KEYS))
+    if unknown:
+        raise ValueError("%s: unknown prose rule key(s) %s; expected %s"
+                         % (where, ", ".join(unknown), ", ".join(PROSE_RULE_KEYS)))
+    out = {}
+    for key in PROSE_RULE_KEYS:
+        if key not in data:
+            continue
+        terms = data[key]
+        if not isinstance(terms, list) or not all(isinstance(t, str) and t.strip() for t in terms):
+            raise ValueError("%s: %s must be a list of non-empty strings" % (where, key))
+        out[key] = [t.strip().lower() for t in terms]
+    return out
+
+
+def load_prose_rules(subject=None, defaults_path=PROSE_RULES_FILE):
+    """Return the banned words, hedging phrases and vague headings the linter checks.
+
+    The defaults come from prose_rules.json. With `subject` (a name or a path to a subject
+    file), every variant the subject's `terminology` rejects is added to the banned words for
+    that subject's pages; it can only add, so a subject cannot switch off a rule the whole
+    team agreed on. An unknown or invalid subject is an error, because an extension that
+    silently extends nothing looks exactly like one that worked."""
+    with open(defaults_path, "r", encoding="utf-8-sig") as f:
+        data = json.load(f)
+    data = {k: v for k, v in data.items() if not k.startswith("_")}
+    rules = _term_lists(data, defaults_path)
+    missing = [k for k in PROSE_RULE_KEYS if k not in rules]
+    if missing:
+        raise ValueError("%s: missing %s" % (defaults_path, ", ".join(missing)))
+    if subject:
+        sys.path.insert(0, TOOLS_DIR)
+        import site_rules  # noqa: E402  (kept local: only --subject needs it)
+        is_path = subject.endswith(".json") or "/" in subject or os.sep in subject
+        if is_path or os.path.isdir(site_rules.SUBJECTS_DIR):
+            # The plugin: validate the subject file itself.
+            import subjects  # noqa: E402
+            loaded = subjects.load(subject)  # SubjectError is a ValueError
+        else:
+            # The public bundle carries no subject files, only site-rules.json.
+            loaded = site_rules.entry(subject)
+        rules["banned_words"] += [t for t in site_rules.rejected_terms(loaded)
+                                  if t not in rules["banned_words"] and t not in CLOUD_PHRASES]
+    return rules
+
+
+DEFAULT_PROSE_RULES = load_prose_rules()
 
 # Filler openers — marketing/narrative framing that delays the actual content
 FILLER_PHRASES = [
@@ -57,17 +110,6 @@ FILLER_PHRASES = [
     "this page will show you",
     "this tutorial will show you",
     "this article will",
-]
-
-# Vague heading text — exact lowercase match after stripping hashes and whitespace
-VAGUE_HEADINGS = [
-    "more information",
-    "miscellaneous",
-    "basics",
-    "conclusion",
-    "summary",
-    "tips",
-    "notes",
 ]
 
 
@@ -118,6 +160,51 @@ def strip_code_and_urls(line):
     return line
 
 
+# Where a reader sees a new block, so prose lines are not joined across it. A list item or a
+# quote starts a block its unmarked continuation lines join; a heading, a table row, a GitBook
+# block tag or an HTML line is a block of one line.
+PROSE_BLOCK_START_RE = re.compile(r"^(?:#{1,6}\s|[-*+]\s|\d+[.)]\s|>|\||\{%|<)")
+PROSE_ONE_LINE_BLOCK_RE = re.compile(r"^(?:#{1,6}\s|\||\{%|<)")
+
+
+def prose_findings(block, rules=DEFAULT_PROSE_RULES):
+    """Run the prose rules on one paragraph, given as [(lineno, text)].
+
+    The lines are joined first, because pages wrap at 100 columns and a phrase broken after
+    "we" is the normal case. Each finding names the line its match starts on, and a rule
+    fires at most once per line, as it did when the checks ran line by line."""
+    starts, pos = [], 0
+    for _lineno, text in block:
+        starts.append(pos)
+        pos += len(text) + 1
+    joined = " ".join(text for _lineno, text in block)
+
+    out, seen = [], set()
+
+    def scan(pattern, key, msg, rule):
+        for m in re.finditer(pattern, joined):
+            lineno = block[bisect.bisect_right(starts, m.start()) - 1][0]
+            if (key, lineno) not in seen:
+                seen.add((key, lineno))
+                out.append(Finding("WARN", lineno, msg, rule))
+
+    for w in rules["banned_words"]:
+        scan(r"\b" + re.escape(w) + r"\b", ("banned", w), f'banned word "{w}"', "CV-1")
+    for ph in CLOUD_PHRASES:
+        scan(re.escape(ph), ("cloud", ph),
+             f'cloud phrasing "{ph}" (refer to the backend as "Convai")', "CV-10")
+    for ph in rules["hedging_phrases"]:
+        scan(re.escape(ph), ("hedging", ph),
+             f'hedging phrase "{ph}" (use a direct instruction: "Add...", "Configure...")', "CV-2")
+    for ph in FILLER_PHRASES:
+        scan(re.escape(ph), ("filler", ph), f'filler phrase "{ph}" (state the outcome directly)', "CV-3")
+    scan(r"\[click here\b", ("click-here",),
+         '"click here" link text; link text describes the destination, '
+         'as in "See [Configure the API key](...)"',
+         "CV-20")
+    return out
+
+
 class Finding:
     """One linter result.
 
@@ -126,11 +213,14 @@ class Finding:
     no id is a mechanical failure with no editorial rule behind it, such as a file that
     cannot be read."""
 
-    def __init__(self, level, line, msg, rule=None):
+    def __init__(self, level, line, msg, rule=None, capture=None):
         self.level = level
         self.line = line
         self.msg = msg
         self.rule = rule
+        # The subject whose screenshot capture covers the page, on a CV-50 placeholder
+        # finding: that placeholder goes back to the writer as a shot, not to a person.
+        self.capture = capture
 
 
 def split_frontmatter(text):
@@ -173,6 +263,21 @@ def split_frontmatter(text):
     return fm, body, end + 2  # 1-based line where body begins
 
 
+def frontmatter_line(text, key):
+    """The 1-based line of `key`'s value in the frontmatter: the key's own line, or for a
+    block scalar (`key: >`) its first value line. 1 when the key is absent. A release unit is
+    judged by the lines it changed, so a finding about a value must sit on that value's line."""
+    lines = text.splitlines()
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            break
+        m = re.match(r"%s:\s*(.*)$" % re.escape(key), lines[i])
+        if m:
+            value = m.group(1).strip()
+            return i + 2 if value[:1] in ("|", ">") and i + 1 < len(lines) else i + 1
+    return 1
+
+
 def iter_body_lines(body, body_start):
     """Yield (lineno, text, in_code) tracking fenced code blocks (``` and ~~~)."""
     in_code = False
@@ -209,7 +314,24 @@ def leading_h1(body, body_start):
     return ("", 0)
 
 
-def check_page(path, summary_text=None, summary_titles=None):
+def capture_cover(path, subjects_dir=None, subject=None):
+    """(subject, page path relative to its repository) when screenshot capture covers the
+    page, else (None, that path). See references/capture.md."""
+    sys.path.insert(0, TOOLS_DIR)
+    import spaces
+    import subjects
+    root = spaces._repo_root(os.path.dirname(os.path.abspath(path)))
+    rel = os.path.relpath(os.path.abspath(path), root).replace(os.sep, "/")
+    return subjects.capture_covers(rel, subjects_dir, subject), rel
+
+
+def check_page(path, summary_text=None, summary_titles=None, rules=None,
+               subjects_dir=None, subject=None):
+    """Lint one page. `rules` is what load_prose_rules returns; the default is the shipped
+    lists with no subject extension. `subjects_dir` (default: where subjects.py looks) and
+    `subject` decide whether screenshot capture covers the page, which changes what a CV-50
+    placeholder finding asks for."""
+    rules = rules or DEFAULT_PROSE_RULES
     findings = []
     try:
         # utf-8-sig strips a UTF-8 BOM, which Windows editors add and which would
@@ -224,6 +346,12 @@ def check_page(path, summary_text=None, summary_titles=None):
         return [Finding("ERROR", 0, f"file is not valid UTF-8 ({e.reason}); re-save it as UTF-8")]
 
     fm, body, body_start = split_frontmatter(text)
+    # The checklist limits hints (CV-39) and `####` headings (CV-30) on task and concept
+    # pages only. A reference, hub or FAQ page is exempt; a page of no recognised type is
+    # held to both, as every page was before the type was read.
+    ptype = page_types.page_type(text, os.path.basename(path))
+    task_or_concept = page_types.task_or_concept(ptype)
+    on_type = " on a %s page" % ptype if ptype else ""
 
     # --- Frontmatter ---
     if fm is None:
@@ -257,34 +385,35 @@ def check_page(path, summary_text=None, summary_titles=None):
         findings.append(Finding(
             "WARN", 1, f"title is {len(effective_title)} chars (keep <= 60)", "CV-33"))
     title = effective_title
+    desc_line = frontmatter_line(text, "description")
     if not desc:
-        findings.append(Finding("ERROR", 1, "frontmatter is missing `description`", "CV-34"))
+        findings.append(Finding("ERROR", desc_line, "frontmatter is missing `description`", "CV-34"))
     else:
         if len(desc) > 200:
-            findings.append(Finding("ERROR", 1, f"description is {len(desc)} chars (hard max 200)", "CV-34"))
+            findings.append(Finding("ERROR", desc_line, f"description is {len(desc)} chars (hard max 200)", "CV-34"))
         elif len(desc) < 120 or len(desc) > 160:
-            findings.append(Finding("WARN", 1, f"description is {len(desc)} chars (target 120-160)", "CV-34"))
+            findings.append(Finding("WARN", desc_line, f"description is {len(desc)} chars (target 120-160)", "CV-34"))
         low = desc.lower()
         for bad in DESC_BAD_OPENERS:
             if low.startswith(bad):
-                findings.append(Finding("WARN", 1, f'description starts with "{bad}" (forbidden opener)', "CV-34"))
-        for w in BANNED_WORDS:
+                findings.append(Finding("WARN", desc_line, f'description starts with "{bad}" (forbidden opener)', "CV-34"))
+        for w in rules["banned_words"]:
             if re.search(r"\b" + re.escape(w) + r"\b", low):
-                findings.append(Finding("WARN", 1, f'description contains banned word "{w}"', "CV-1"))
+                findings.append(Finding("WARN", desc_line, f'description contains banned word "{w}"', "CV-1"))
         for ph in CLOUD_PHRASES:
             if ph in low:
-                findings.append(Finding("WARN", 1, f'description contains cloud phrasing "{ph}" (refer to the backend as "Convai")', "CV-10"))
+                findings.append(Finding("WARN", desc_line, f'description contains cloud phrasing "{ph}" (refer to the backend as "Convai")', "CV-10"))
         # The description is plain English for search results and AI answers; identifiers
         # belong in the lead paragraph or body instead.
         if "`" in desc:
-            findings.append(Finding("WARN", 1, "description contains backtick identifiers (use plain English)", "CV-34"))
+            findings.append(Finding("WARN", desc_line, "description contains backtick identifiers (use plain English)", "CV-34"))
         else:
             tokens = [m.group(0) for m in TECH_TOKEN_RE.finditer(desc)]
             tokens += [m.group(0) for m in CAMEL_CASE_RE.finditer(desc)
                        if m.group(0) not in ALLOWED_CAMEL]
             if tokens:
                 findings.append(Finding(
-                    "WARN", 1,
+                    "WARN", desc_line,
                     f'description contains technical token(s) {", ".join(sorted(set(tokens)))}; '
                     "use plain English and move identifiers into the body", "CV-34"))
 
@@ -296,8 +425,16 @@ def check_page(path, summary_text=None, summary_titles=None):
     hint_count = 0
     saw_publish_blocker = False
     open_blocks = []
+    prose_block = []  # [(lineno, text)] of the paragraph being read
+
+    def flush_prose():
+        findings.extend(prose_findings(prose_block, rules))
+        del prose_block[:]
+
     for lineno, raw, kind in iter_body_lines(body, body_start):
         stripped = raw.strip()
+        if kind != "prose":
+            flush_prose()
         if kind == "fence-open":
             # code fence must declare a language
             lang = stripped[3:].strip()
@@ -335,13 +472,16 @@ def check_page(path, summary_text=None, summary_titles=None):
             findings.append(Finding("ERROR", lineno, f"forbidden heading: {stripped}", "CV-27"))
         if re.match(r"#{2,4}\s+Step\s+\d+\b", stripped, re.IGNORECASE):
             findings.append(Finding("WARN", lineno, f'numbered step heading: "{stripped}" (use an action title)', "CV-29"))
-        if re.match(r"####\s+\S", stripped):
-            findings.append(Finding("WARN", lineno, "`####` heading (avoid on task/concept pages; split instead)", "CV-30"))
+        if task_or_concept and re.match(r"####\s+\S", stripped):
+            findings.append(Finding(
+                "WARN", lineno,
+                "`####` heading%s (avoid on task/concept pages; split instead)" % on_type,
+                "CV-30"))
 
         # vague section headings (## level)
         if re.match(r"#{2,3}\s+\S", stripped):
             heading_text = re.sub(r"^#+\s*", "", stripped).lower().rstrip()
-            for vh in VAGUE_HEADINGS:
+            for vh in rules["vague_headings"]:
                 if heading_text == vh:
                     findings.append(Finding("WARN", lineno, f'vague heading "{stripped}" (use a specific, scannable heading)', "CV-28"))
 
@@ -391,43 +531,39 @@ def check_page(path, summary_text=None, summary_titles=None):
 
         # Prose checks run on text with inline code and link targets removed, so a field
         # literally named `simple_mode` or a URL containing "just" is not a false positive.
-        low = strip_code_and_urls(raw).lower()
-
-        # banned words / cloud phrases (prose only)
-        for w in BANNED_WORDS:
-            if re.search(r"\b" + re.escape(w) + r"\b", low):
-                findings.append(Finding("WARN", lineno, f'banned word "{w}"', "CV-1"))
-        for ph in CLOUD_PHRASES:
-            if ph in low:
-                findings.append(Finding("WARN", lineno, f'cloud phrasing "{ph}" (refer to the backend as "Convai")', "CV-10"))
-
-        # hedging phrases
-        for ph in HEDGING_PHRASES:
-            if ph in low:
-                findings.append(Finding(
-                    "WARN", lineno,
-                    f'hedging phrase "{ph}" (use a direct instruction: "Add...", "Configure...")',
-                    "CV-2"))
-
-        # filler openers
-        for ph in FILLER_PHRASES:
-            if ph in low:
-                findings.append(Finding("WARN", lineno, f'filler phrase "{ph}" (state the outcome directly)', "CV-3"))
-
-        # "click here" link text
-        if re.search(r"\[click here\b", low):
-            findings.append(Finding(
-                "WARN", lineno,
-                '"click here" link text; link text describes the destination, '
-                'as in "See [Configure the API key](...)"',
-                "CV-20"))
+        # The line joins the paragraph it belongs to; the rules run when the paragraph ends.
+        low = strip_code_and_urls(raw).lower().strip()
+        if not stripped:
+            flush_prose()
+        elif PROSE_BLOCK_START_RE.match(stripped):
+            flush_prose()
+            prose_block.append((lineno, low))
+            if PROSE_ONE_LINE_BLOCK_RE.match(stripped):
+                flush_prose()
+        else:
+            prose_block.append((lineno, low))
+    flush_prose()
 
     for name, lineno in open_blocks:
         findings.append(Finding("ERROR", lineno, f"`{{% {name} %}}` is never closed by `{{% end{name} %}}`", "CV-76"))
-    if hint_count > 2:
-        findings.append(Finding("WARN", 0, f"{hint_count} hints on the page (max 2 on task/concept pages)", "CV-39"))
+    if task_or_concept and hint_count > 2:
+        findings.append(Finding(
+            "WARN", 0,
+            f"{hint_count} hints on the page{on_type} (max 2 on task/concept pages)", "CV-39"))
     if saw_publish_blocker:
-        findings.append(Finding("ERROR", 0, "page has a TODO- image path or 'Screenshot required before publishing' (not publishable)", "CV-50"))
+        covered_by, rel = capture_cover(path, subjects_dir, subject)
+        if covered_by:
+            # Capture covers this page, so a placeholder is no longer a task for a person:
+            # the writer describes the shot in the manifest and the capturer takes it.
+            findings.append(Finding(
+                "ERROR", 0,
+                "page has a TODO- image path or 'Screenshot required before publishing', and "
+                "screenshot capture covers it (subject %s): describe the shot in "
+                ".convai-docs/shots/%s.json and run capture instead (not publishable)"
+                % (covered_by, rel[:-3] if rel.endswith(".md") else rel), "CV-50",
+                capture=covered_by))
+        else:
+            findings.append(Finding("ERROR", 0, "page has a TODO- image path or 'Screenshot required before publishing' (not publishable)", "CV-50"))
 
     # --- SUMMARY.md reachability + label match ---
     if summary_text is not None:
@@ -462,7 +598,17 @@ def main():
     ap.add_argument("--summary", help="Path to SUMMARY.md for reachability/label checks")
     ap.add_argument("--json", action="store_true", help="Emit findings as JSON (for CI)")
     ap.add_argument("--strict", action="store_true", help="Also fail the run on WARN findings")
+    ap.add_argument("--subject", "--pack", dest="subject",
+                    help="Also flag the variants this subject's terminology rejects "
+                         "(subjects/<subject>.json, or a path to a subject file). "
+                         "--pack is the 2.6 name, kept until 3.1")
     args = ap.parse_args()
+
+    try:
+        rules = load_prose_rules(subject=args.subject)
+    except (OSError, ValueError) as e:
+        print(f"check_page.py: {e}", file=sys.stderr)
+        return 2
 
     summary_text, summary_titles = (None, set())
     if args.summary:
@@ -472,7 +618,7 @@ def main():
     total_warns = 0
     report = []
     for page in args.pages:
-        findings = check_page(page, summary_text, summary_titles)
+        findings = check_page(page, summary_text, summary_titles, rules, subject=args.subject)
         # Report in reading order within each level; end-of-page findings (line 0) last.
         findings.sort(key=lambda f: (f.line == 0, f.line))
         errors = [f for f in findings if f.level == "ERROR"]
@@ -483,8 +629,8 @@ def main():
         report.append({
             "page": page,
             "status": status,
-            "findings": [{"level": f.level, "rule": f.rule, "line": f.line,
-                          "message": f.msg}
+            "findings": [dict({"level": f.level, "rule": f.rule, "line": f.line,
+                               "message": f.msg}, **({"capture": f.capture} if f.capture else {}))
                          for f in errors + warns],
         })
         if args.json:

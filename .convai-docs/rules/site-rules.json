@@ -1,0 +1,355 @@
+{
+  "generated_by": "convai-docs scripts/sync_agent_rules.py",
+  "note": "The public part of each subject, and the publishing settings. Generated; do not edit. The checks in tools/ read it when the subject files are not present.",
+  "publish": {
+    "base_branch": "main",
+    "enabled": true
+  },
+  "subjects": {
+    "api": {
+      "docs_paths": [
+        "api-reference"
+      ],
+      "historical_pages": [
+        "**/release-notes.md",
+        "**/changelog.md",
+        "**/migrate-*.md",
+        "**/deprecated/**"
+      ],
+      "must_not_exist": [],
+      "product_name": null,
+      "short_name": null,
+      "terminology": [
+        {
+          "reject": [
+            "Convai backend",
+            "cloud backend",
+            "Convai cloud",
+            "Convai's servers",
+            "cloud-powered"
+          ],
+          "use": "Convai"
+        },
+        {
+          "use": "X-API-Key"
+        },
+        {
+          "use": "CONVAI-API-KEY"
+        },
+        {
+          "use": "API-AUTH-TOKEN"
+        },
+        {
+          "use": "LiveKit"
+        }
+      ]
+    },
+    "billing": {
+      "docs_paths": [
+        "convai-credits"
+      ],
+      "historical_pages": [],
+      "must_not_exist": [],
+      "product_name": "Convai credits",
+      "short_name": null,
+      "terminology": [
+        {
+          "use": "Convai credits"
+        }
+      ]
+    },
+    "experiences": {
+      "docs_paths": [
+        "no-code-experiences"
+      ],
+      "historical_pages": [
+        "**/release-notes.md",
+        "**/changelog.md",
+        "**/convai-xr-animation-capture-app/**"
+      ],
+      "must_not_exist": [],
+      "product_name": null,
+      "short_name": null,
+      "terminology": [
+        {
+          "use": "Avatar Studio"
+        },
+        {
+          "use": "Convai Sim"
+        },
+        {
+          "use": "Chat Experiences"
+        },
+        {
+          "use": "avatar"
+        },
+        {
+          "use": "character"
+        },
+        {
+          "use": "MetaHuman"
+        },
+        {
+          "use": "Reallusion"
+        },
+        {
+          "use": "Face Filter"
+        },
+        {
+          "use": "Convai"
+        }
+      ]
+    },
+    "playground": {
+      "docs_paths": [
+        "convai-playground"
+      ],
+      "historical_pages": [
+        "**/release-notes.md",
+        "**/changelog.md",
+        "**/legacy-playground/**"
+      ],
+      "must_not_exist": [],
+      "product_name": "Convai Playground",
+      "short_name": "the Playground",
+      "terminology": [
+        {
+          "use": "Convai Playground"
+        },
+        {
+          "reject": [
+            "bot",
+            "NPC",
+            "assistant"
+          ],
+          "use": "character"
+        },
+        {
+          "use": "Legacy Playground"
+        },
+        {
+          "reject": [
+            "Convai cloud",
+            "Convai's servers",
+            "the backend"
+          ],
+          "use": "Convai"
+        }
+      ]
+    },
+    "unity": {
+      "docs_paths": [
+        "plugins-and-integrations/convai-unity-sdk"
+      ],
+      "historical_pages": [
+        "**/release-notes.md",
+        "**/migrate-*.md",
+        "**/migrate-to-*.md",
+        "**/migration-guide/**",
+        "**/convai-unity-sdk-architecture.md"
+      ],
+      "must_not_exist": [
+        "ConvaiNPC",
+        "ConvaiAudioManager",
+        "ConvaiLipSync"
+      ],
+      "product_name": "Convai Unity SDK",
+      "short_name": null,
+      "terminology": [
+        {
+          "use": "Convai Unity SDK"
+        },
+        {
+          "reject": [
+            "Unity plugin",
+            "Convai plugin"
+          ],
+          "use": "SDK"
+        },
+        {
+          "reject": [
+            "Convai cloud",
+            "cloud backend",
+            "Convai's servers",
+            "cloud-powered"
+          ],
+          "use": "Convai"
+        },
+        {
+          "use": "character"
+        },
+        {
+          "reject": [
+            "game-world"
+          ],
+          "use": "in-scene"
+        },
+        {
+          "use": "Package Manager"
+        },
+        {
+          "use": "Inspector"
+        },
+        {
+          "use": "GameObject"
+        },
+        {
+          "use": "prefab"
+        },
+        {
+          "use": "Play mode"
+        },
+        {
+          "use": "Project Settings"
+        },
+        {
+          "use": "Build Settings"
+        },
+        {
+          "reject": [
+            "ConvaiLipSync component"
+          ],
+          "use": "ConvaiLipSyncComponent"
+        }
+      ]
+    },
+    "unreal": {
+      "docs_paths": [
+        "plugins-and-integrations/convai-unreal-engine-plugin"
+      ],
+      "historical_pages": [
+        "**/release-notes.md",
+        "**/migrate-*.md",
+        "**/migration-*.md",
+        "**/migration-guide/**",
+        "**/guides-v2-under-development/**"
+      ],
+      "must_not_exist": [
+        "UConvaiNPCComponent",
+        "UConvaiCharacterComponent",
+        "EConvaiMoveTarget"
+      ],
+      "product_name": "Convai Unreal Engine plugin",
+      "short_name": null,
+      "terminology": [
+        {
+          "use": "Convai Unreal Engine plugin"
+        },
+        {
+          "reject": [
+            "Convai cloud",
+            "Convai's servers",
+            "cloud-powered"
+          ],
+          "use": "Convai"
+        },
+        {
+          "reject": [
+            "Convey"
+          ],
+          "use": "Convai"
+        },
+        {
+          "reject": [
+            "Realusion"
+          ],
+          "use": "Reallusion"
+        },
+        {
+          "reject": [
+            "Neurosync"
+          ],
+          "use": "NeuroSync"
+        },
+        {
+          "reject": [
+            "quicks bridge"
+          ],
+          "use": "Quixel Bridge"
+        },
+        {
+          "use": "in-scene"
+        },
+        {
+          "use": "Actor"
+        },
+        {
+          "use": "Component"
+        },
+        {
+          "use": "Blueprint"
+        },
+        {
+          "use": "Details panel"
+        },
+        {
+          "use": "Content Browser"
+        },
+        {
+          "use": "Subsystem"
+        },
+        {
+          "use": "Edit > Plugins"
+        }
+      ]
+    },
+    "voices": {
+      "docs_paths": [],
+      "historical_pages": [],
+      "must_not_exist": [],
+      "product_name": null,
+      "short_name": null,
+      "terminology": []
+    },
+    "web": {
+      "docs_paths": [
+        "plugins-and-integrations/web-plugins"
+      ],
+      "historical_pages": [
+        "**/release-notes.md",
+        "**/changelog.md",
+        "**/migrate-*.md",
+        "**/web-plugins/**"
+      ],
+      "must_not_exist": [
+        "ConvaiWidgetProps"
+      ],
+      "product_name": "Convai Web SDK",
+      "short_name": null,
+      "terminology": [
+        {
+          "use": "Convai Web SDK"
+        },
+        {
+          "reject": [
+            "web plugin"
+          ],
+          "use": "SDK"
+        },
+        {
+          "reject": [
+            "Convai cloud",
+            "Convai's servers",
+            "cloud-powered"
+          ],
+          "use": "Convai"
+        },
+        {
+          "use": "AudioRenderer"
+        },
+        {
+          "use": "ConvaiWidget"
+        },
+        {
+          "use": "npm"
+        },
+        {
+          "use": "ES module"
+        },
+        {
+          "use": "WebSocket"
+        }
+      ]
+    }
+  }
+}

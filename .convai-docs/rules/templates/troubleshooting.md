@@ -9,7 +9,9 @@ TROUBLESHOOTING TEMPLATE. Diataxis mode: how-to. The reader is blocked right now
 Order entries by how often they happen, not by how interesting they are.
 One entry per distinct symptom. If two symptoms share a fix, they are still two entries —
 the reader searches by what they see, not by what causes it.
-Every symptom must be the EXACT text the reader sees, in inline code.
+Every symptom must be the EXACT text the reader sees, in inline code. Each entry gives symptom,
+cause, fix, and how to verify the fix (CV-57).
+Description formula: `Fix [specific failure] in [context].`
 Never invent a message, cause, or fix. Verify each against source or the product.
 Replace all content. No body `#`. Delete this comment before publishing.
 -->
