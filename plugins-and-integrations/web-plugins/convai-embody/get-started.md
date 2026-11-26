@@ -1,7 +1,7 @@
 ---
 title: Get started with Convai Embody
 description: Create a new React app, render a Convai character as a 3D body with Convai Embody, and talk to it through the Convai chat widget over one connection.
-last_reviewed: "1.2.0"
+last_reviewed: "1.3.0"
 ---
 
 Build a page that shows a Convai character as a 3D body and lets you talk to it. Use this page for a first project: it starts from an empty folder and ends with a character that answers you by voice, with lip sync. The chat widget is part of the setup, not an extra, because a body you cannot talk to is a picture of one.

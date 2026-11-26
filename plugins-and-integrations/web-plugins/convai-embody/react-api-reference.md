@@ -1,7 +1,7 @@
 ---
 title: React API reference
 description: Reference for the Convai Embody React components and hooks, including every prop, its type and default, and what each hook returns.
-last_reviewed: "1.2.0"
+last_reviewed: "1.3.0"
 ---
 
 The React API is exported from `@convai/embody/react`. Every component and hook here also accepts the character options documented in the [createCharacter reference](createcharacter-reference.md), such as `characterId`, `token`, and `apiKey`.
@@ -21,7 +21,7 @@ A self-contained character view: a `<Canvas>`, a camera, a portrait light rig, o
 | `orbit` | `boolean \| OrbitOptions` | `true` | Drag to turn around the character and scroll to move in and out. `false` fixes the camera. An object tunes the limits. |
 | `fallback` | `React.ReactNode` | `null` | Rendered while the body loads. |
 | `onReady` | `(character: CharacterHandle) => void` | none | Called once for each character that loads, when the body is loaded and the connection is live. An inline function is fine: re-renders do not call it again. |
-| `onError` | `(error: Error) => void` | none | Called with the error that stopped loading. |
+| `onError` | `(error: EmbodyError) => void` | none | Called with an `EmbodyError` naming what stopped loading: `code`, `stage`, `retryable` and a message to show the user. |
 | `queue` | `BlendshapeQueue` | the character's own session | Overrides which turn this body lip-syncs to. Only needed when one client drives several characters. |
 
 All [createCharacter options](createcharacter-reference.md#options) are accepted as props.
@@ -33,7 +33,7 @@ The character alone, for use inside a `<Canvas>` you create. It adds no camera, 
 | Prop | Type | Default | Description |
 |---|---|---|---|
 | `onReady` | `(character: CharacterHandle) => void` | none | Called once for each character that loads, when the body is loaded and the connection is live. An inline function is fine: re-renders do not call it again. |
-| `onError` | `(error: Error) => void` | none | Called with the error that stopped loading. |
+| `onError` | `(error: EmbodyError) => void` | none | Called with an `EmbodyError` naming what stopped loading: `code`, `stage`, `retryable` and a message to show the user. |
 | `queue` | `BlendshapeQueue` | the character's own session | Overrides which turn this body lip-syncs to. |
 | `shadows` | `boolean` | `false` | Every mesh of the character casts and receives shadows. Your lights decide whether any are cast. |
 

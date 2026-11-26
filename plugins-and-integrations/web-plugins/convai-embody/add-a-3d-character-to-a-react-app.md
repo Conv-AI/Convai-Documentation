@@ -1,7 +1,7 @@
 ---
 title: Add a 3D character to a React app
 description: Install Convai Embody in a React app and render a Convai character that speaks with lip sync, gaze, and blinking from its character ID.
-last_reviewed: "1.2.0"
+last_reviewed: "1.3.0"
 ---
 
 Render a Convai character as a 3D body in a React app with one component. Use this page when adding Convai Embody to a project for the first time. At the end, the character stands on the page, follows the camera with its eyes, and moves its mouth in sync with its voice.
@@ -94,14 +94,55 @@ The character stands centered with its idle animation playing, its eyes follow t
 
 To observe loading in code, pass `onReady`, which receives the character handle once the body is loaded and the connection is live, and `onError`, which receives the error that stopped it.
 
+## Show what went wrong
+
+`onError` receives an `EmbodyError`. Its `message` is written for the person looking at the page, `code` says what failed, and `retryable` says whether trying again can help.
+
+```tsx
+import ConvaiCharacter, { type EmbodyError } from '@convai/embody/react'
+
+function Character({ token, characterId, onRetry }) {
+  const [error, setError] = useState<EmbodyError | null>(null)
+  if (error) {
+    return (
+      <div role="alert">
+        <p>{error.message}</p>
+        {error.retryable && <button onClick={onRetry}>Try again</button>}
+      </div>
+    )
+  }
+  return <ConvaiCharacter token={token} characterId={characterId} onError={(e) => setError(e as EmbodyError)} />
+}
+```
+
+When `onRetry` remounts the character, fetch a fresh token first: an expired token is one of the failures a retry fixes.
+
+| `code` | What happened | Retry helps |
+|---|---|---|
+| `missing-credential` | No `token` or `apiKey` was passed | No |
+| `unauthorized` | The credential was refused: expired, wrong, or from another deployment | Yes, with a fresh token |
+| `character-not-found` | The character id does not exist on this deployment | No |
+| `no-body` | The character has no published 3D body | No |
+| `unsupported-rig` | The body is for a rig this version cannot drive | No |
+| `capacity` | The deployment has no free character capacity right now | Yes, shortly |
+| `service-unavailable` | The deployment answered with a server error | Yes |
+| `network` | The deployment could not be reached | Yes |
+| `body-download` | The body's files failed to download | Yes |
+| `connection` | The live connection could not be established | Yes |
+| `webgl` | The browser cannot render 3D | Sometimes |
+| `configuration` | The request was rejected as invalid | No |
+| `unknown` | Anything else; the message keeps the original text | Yes |
+
+`stage` says where it failed (`credentials`, `resolve`, `download`, `connect`, `setup`, `render`), and `cause` keeps the original error for your logs.
+
 ## Troubleshooting
 
 ### The character never appears
 
-**Symptom:** `onError` receives an error whose message ends with the reason Convai gave:
+**Symptom:** `onError` receives an `EmbodyError` with code `no-body`:
 
 ```text
-embodiment resolve failed for YOUR_CHARACTER_ID: HTTP 404 — Character has no 3D embodiment configured.
+This character has no 3D body published yet. Publish one for its avatar, or choose a character that has one.
 ```
 
 **Cause:** The character's avatar has no published web body, and no default body applies to it.
@@ -112,10 +153,10 @@ embodiment resolve failed for YOUR_CHARACTER_ID: HTTP 404 — Character has no 3
 
 ### A credential error is thrown before anything loads
 
-**Symptom:** Creating the character throws:
+**Symptom:** `onError` receives an `EmbodyError` with code `missing-credential`:
 
 ```text
-@convai/embody: a credential is required — pass `token` (recommended for browsers) or `apiKey`. There is no anonymous access to Convai.
+No credential was given. Pass `token` (recommended for browsers) or `apiKey`.
 ```
 
 **Cause:** Neither `token`, `authToken`, nor `apiKey` was set, or the variable that should hold it is empty at build time.
